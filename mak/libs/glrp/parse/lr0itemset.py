@@ -4,8 +4,9 @@ from be_typing import TYPE_CHECKING
 
 
 class LR0ItemSet(object):
-    def __init__(self, core):
-        # type: (List[Tuple[LR0Item, Optional[LR0DominanceNode], int]]) -> None
+    def __init__(self, index, core):
+        # type: (int, List[Tuple[LR0Item, Optional[LR0DominanceNode], int]]) -> None
+        self._index = index
         self._core = set([])       # type: Set[LR0DominanceNode]
         self._items = {}           # type:Dict[LR0Item, LR0DominanceNode]
         self._sorted_items = []    # type: List[LR0Item]
@@ -77,6 +78,9 @@ class LR0ItemSet(object):
                 seen.add(parent)
                 node._parents.update(parent._direct_parents)
                 queue += parent._direct_parents
+            if not node._parents and not node._predecessors:
+                node._parents.add(node)
+            node._parents_core = node._parents.intersection(self._core)
 
 
 if TYPE_CHECKING:

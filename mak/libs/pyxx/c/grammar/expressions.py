@@ -162,8 +162,8 @@ def argument_expression_list(self, p):
 @glrp.rule('unary-expression : "++" unary-expression')
 @glrp.rule('unary-expression : "--" unary-expression')
 @glrp.rule('unary-expression : unary-operator cast-expression')
-@glrp.rule('unary-expression : "sizeof" unary-expression')
-@glrp.rule('unary-expression : "sizeof" "(" type-name ")"')
+@glrp.rule('unary-expression[merge:unary_expression_merge] : "sizeof" unary-expression')
+@glrp.rule('unary-expression[merge:unary_expression_merge] : "sizeof" "(" type-name ")"')
 @glrp.rule('unary-expression : "_Alignof" "(" type-name ")"')
 def unary_expression(self, p):
     # type: (CParser, glrp.Production) -> None
@@ -178,8 +178,8 @@ def unary_operator(self, p):
 
 
 @c89
-@glrp.rule('cast-expression : unary-expression')
-@glrp.rule('cast-expression : "(" type-name ")" cast-expression')
+@glrp.rule('cast-expression[merge:cast_expression_merge] : unary-expression')
+@glrp.rule('cast-expression[merge:cast_expression_merge] : "(" type-name ")" cast-expression')
 def cast_expression(self, p):
     # type: (CParser, glrp.Production) -> None
     pass

@@ -190,7 +190,7 @@ class vscode(Build.BuildContext):
                         'includePath':
                             [
                                 os.path.join('${workspaceFolder}', i.path_from(self.srcnode)) for i in include_paths
-                                if i not in seen and not seen.add(i)
+                                if i not in seen and not seen.add(i) and i.isdir()
                             ],
                         'defines': [d for d in defines if d not in seen and not seen.add(d)],
                         'compileCommands':

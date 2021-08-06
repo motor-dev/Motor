@@ -16,15 +16,15 @@ class Parser1(glrp.Parser):
         # type: (glrp.Production) -> None
         pass
 
-    @glrp.rule("A : a B ")
-    @glrp.rule("A : a a B ")
-    @glrp.rule("A : a a a B ")
+    @glrp.rule("A : a B")
+    @glrp.rule("A : a a B")
+    #@glrp.rule("A : a a a B ")
     #@glrp.rule("A : B c")
     def p_A(self, p):
         # type: (glrp.Production) -> None
         pass
 
-    @glrp.rule("B [prec:right,0][split]: a a b")
+    #@glrp.rule("B [prec:right,0][split]: a a b")
     @glrp.rule("B [prec:right,0][split]: a b")
     @glrp.rule("B [prec:right,0][split]: b")
     def p_B(self, p):
@@ -34,7 +34,7 @@ class Parser1(glrp.Parser):
     def __init__(self):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
-        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.')
+        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.', mode=1)
 
 
 class Parser2(glrp.Parser):
@@ -85,7 +85,7 @@ class Parser2(glrp.Parser):
     def __init__(self):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
-        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.')
+        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.', mode=1)
 
 
 class Parser3(glrp.Parser):
@@ -127,7 +127,7 @@ class Parser3(glrp.Parser):
     def __init__(self):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
-        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.')
+        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.', mode=1)
 
 
 class Parser4(glrp.Parser):
@@ -157,7 +157,7 @@ class Parser4(glrp.Parser):
     def __init__(self):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
-        glrp.Parser.__init__(self, self.lexer, 's', '.', '.')
+        glrp.Parser.__init__(self, self.lexer, 's', '.', '.', mode=1)
 
 
 class Parser5(glrp.Parser):
@@ -174,7 +174,7 @@ class Parser5(glrp.Parser):
             # type: (glrp.Token) -> glrp.Token
             return token
 
-    @glrp.rule("prog : prog comma_opt id_expression")
+    @glrp.rule("prog : prog id_expression")
     @glrp.rule("prog : id_expression")
     def prog(self, p):
         pass
@@ -194,7 +194,7 @@ class Parser5(glrp.Parser):
         pass
 
     @glrp.rule("qualified_id : nested_name_specifier unqualified_id")
-    @glrp.rule("qualified_id : sign '::' nested_name_specifier unqualified_id")
+    @glrp.rule("qualified_id : '::' nested_name_specifier unqualified_id")
     def qualified_id(self, p):
         pass
 
@@ -227,14 +227,14 @@ class Parser5(glrp.Parser):
     def dash_opt(self, p):
         pass
 
-    @glrp.rule("nested_name_specifier : template_opt identifier '::'")
+    @glrp.rule("nested_name_specifier : template_opt identifier [split]'::'")
     def nested_name_specifier(self, p):
         pass
 
     def __init__(self):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
-        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.')
+        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.', mode=1)
 
 
 class Parser6(glrp.Parser):
@@ -259,19 +259,19 @@ class Parser6(glrp.Parser):
         # type: (glrp.Production) -> None
         pass
 
-    @glrp.rule("expr : 'identifier'")
-    @glrp.rule("expr : 'expr' '[' expr? ']'")
+    @glrp.rule("expr : 'identifier'[split]")
+    @glrp.rule("expr : 'expr' [split]'[' expr? ']'")
+    @glrp.rule("expr : 'expr' annotation")
     def p_expr(self, p):
         # type: (glrp.Production) -> None
         pass
 
-    @glrp.rule("decl : 'identifier' ';'")
-    @glrp.rule("decl : 'identifier' annotation ';'")
+    @glrp.rule("decl : 'identifier' [split]';'")
     def p_decl(self, p):
         # type: (glrp.Production) -> None
         pass
 
-    @glrp.rule("annotation : '[' '[' 'identifier' ']' ']'")
+    @glrp.rule("annotation : [split]'[' '[' 'identifier' ']' ']'")
     def p_annotation(self, p):
         # type: (glrp.Production) -> None
         pass
@@ -279,4 +279,4 @@ class Parser6(glrp.Parser):
     def __init__(self):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
-        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.')
+        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.', mode=1)

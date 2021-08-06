@@ -9,8 +9,10 @@ import sys
 
 class Grammar(object):
     class Rule(object):
-        def __init__(self, id, prod_symbol, prod_name, production, action, annnotation_list, filename, lineno):
-            # type: (int, int, str, Tuple[int,...], Action, List[Tuple[str, List[str], int]], str, int) -> None
+        def __init__(
+            self, id, prod_symbol, prod_name, production, action, annnotation_list, filename, lineno, debug_str
+        ):
+            # type: (int, int, str, Tuple[int,...], Action, List[Tuple[str, List[str], int]], str, int, str) -> None
             self._id = id
             self._prod_symbol = prod_symbol
             self._prod_name = prod_name
@@ -30,6 +32,7 @@ class Grammar(object):
                     self._annotations[index] = {annotation: values}
             self._item = LR0Item(self, len(production), None, predecessor, [], set([-1]), {-1: 0})
             self._reduced = 0
+            self._debug_str = debug_str
 
         def to_string(self, name_map):
             # type: (List[str]) -> str
@@ -130,12 +133,15 @@ def _create_productions(rules, index, log, name_map, terminals, start_id):
         prod_symbol = index[nonterminal]
         try:
             symbols = tuple(index[s] for s in production)
-        except KeyError as error:  # unknown rule or terminal
+        except KeyError as error:                                                                        # unknown rule or terminal
             log.error('%s:%d: Symbol %s used, but not defined as a token or a rule' % (filename, lineno, str(error)))
             errors = True
         else:
             rule_table.append((prod_symbol, symbols, action))
-            rule = Grammar.Rule(rule_index, prod_symbol, nonterminal, symbols, action, attribute_list, filename, lineno)
+            rule = Grammar.Rule(
+                rule_index, prod_symbol, nonterminal, symbols, action, attribute_list, filename, lineno,
+                '%s : %s' % (nonterminal, ' '.join(production))
+            )
             rule_index += 1
             for s in symbols:
                 symbol_usage[s] += 1

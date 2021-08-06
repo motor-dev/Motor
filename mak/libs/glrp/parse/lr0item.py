@@ -17,6 +17,7 @@ class LR0Item(object):
         self._lookaheads = {}            # type: Dict[int, List[int]]
         self._precedence = None          # type: Optional[Tuple[str, int]]
         self._split = False
+        self._merge = None               # type: Optional[str]
 
         if index == rule.len:
             index = -1
@@ -60,6 +61,13 @@ class LR0Item(object):
                         (rule._filename, rule._lineno, 0, '')
                     )
                 self._split = True
+            elif annotation == "merge":
+                if len(values) != 1:
+                    raise SyntaxError(
+                        'incorrect annotation: merge requires exactly one argument',
+                        (rule._filename, rule._lineno, 0, '')
+                    )
+                self._merge = values[0]
             else:
                 raise SyntaxError('unknown annotation %s' % annotation, (rule._filename, rule._lineno, 0, ''))
 

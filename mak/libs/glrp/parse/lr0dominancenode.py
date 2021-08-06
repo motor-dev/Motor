@@ -5,10 +5,11 @@ from .lr0path import LR0Path
 
 class LR0DominanceNode(object):
     def __init__(self, item_set, item, predecessor=None, parent=None):
-        # type: (LR0ItemSet, LR0Item, Optional[Tuple[int, LR0DominanceNode]], Optional[LR0DominanceNode]) -> None
+        # type: (LR0ItemSet, LR0Item, Optional[Tuple[int, "LR0DominanceNode"]], Optional[LR0DominanceNode]) -> None
         self._item_set = item_set
         self._item = item
         self._parents = set()                            # type: Set[LR0DominanceNode]
+        self._parents_core = set()                       # type: Set[LR0DominanceNode]
         if predecessor is not None:
             self._predecessor_lookahead = predecessor[0] # type: Optional[int]
             self._predecessors = [predecessor[1]]
@@ -97,7 +98,7 @@ class LR0DominanceNode(object):
             raise ValueError()
 
     def backtrack_to_state(self, path, state, lookahead, seen):
-        # type: (LR0Path, LR0ItemSet, Optional[int], Set[Tuple[LR0DominanceNode, Optional[int]]]) -> List[Tuple[LR0Path, Optional[int]]]
+        # type: (LR0Path, LR0ItemSet, Optional[int], Set[Tuple["LR0DominanceNode", Optional[int]]]) -> List[Tuple[LR0Path, Optional[int]]]
         queue = [(path, lookahead)]
         result = []                    # type: List[Tuple[LR0Path, Optional[int]]]
                                        #if (self, lookahead) in seen:
@@ -167,7 +168,7 @@ class LR0DominanceNode(object):
         return result
 
     def backtrack_up(self, path, lookahead, seen):
-        # type: (LR0Path, Optional[int], Set[Tuple[LR0DominanceNode, Optional[int]]]) -> List[Tuple[LR0Path, Optional[int]]]
+        # type: (LR0Path, Optional[int], Set[Tuple["LR0DominanceNode", Optional[int]]]) -> List[Tuple[LR0Path, Optional[int]]]
         queue = [(path, lookahead)]
         result = []                    # type: List[Tuple[LR0Path, Optional[int]]]
                                        #if (self, lookahead) in seen:
@@ -232,6 +233,41 @@ class LR0DominanceNode(object):
                 seen.add((predecessor, lookahead))
                 assert node._predecessor_lookahead is not None
                 result.append((path.extend(predecessor, node._predecessor_lookahead), lookahead))
+        return result
+
+    def backtrack_up_nopath(self, path, lookahead, seen):
+        # type: (LR0Path, Optional[int], Set[Tuple["LR0DominanceNode", Optional[int]]]) -> List[Tuple[LR0Path, Optional[int], Optional[int]]]
+        result = []    # type: List[Tuple[LR0Path, Optional[int], Optional[int]]]
+        queue = [(path, lookahead)]
+        while queue:
+            path, lookahead = queue.pop(0)
+
+            for parent in path._node._direct_parents:
+                if (parent, lookahead) in seen:
+                    continue
+                seen.add((parent, lookahead))
+                if lookahead is None:
+                    queue.append((path.derive_from(parent), None))
+                elif lookahead in parent._item._follow:
+                    result.append((path.derive_from(parent), None, None))
+                elif -1 in parent._item._follow:
+                    queue.append((path.derive_from(parent), lookahead))
+
+            for predecessor in path._node._predecessors:
+                if (predecessor, lookahead) in seen:
+                    continue
+                seen.add((predecessor, lookahead))
+                assert path._node._predecessor_lookahead is not None
+                #if lookahead is None or lookahead in predecessor._item._follow:
+                #    result.append((predecessor, None))
+                #elif -1 in predecessor._item._follow:
+                result.append(
+                    (
+                        path.extend(predecessor,
+                                    path._node._predecessor_lookahead), lookahead, path._node._predecessor_lookahead
+                    )
+                )
+
         return result
 
 
