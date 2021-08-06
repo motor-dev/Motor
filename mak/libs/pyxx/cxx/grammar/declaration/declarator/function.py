@@ -35,13 +35,17 @@ def parameter_declaration_list(self, p):
     pass
 
 
-@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq declarator')
-@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq declarator "=" initializer-clause')
-#@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-declarator?')
-@glrp.rule('parameter-declaration[split] : attribute-specifier-seq? decl-specifier-seq')
-@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-declarator')
 @glrp.rule(
-    'parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-declarator? "=" initializer-clause'
+    'parameter-declaration[merge:parameter_declaration_merge] : '
+    'attribute-specifier-seq? decl-specifier-seq declarator\n'
+    'attribute-specifier-seq? decl-specifier-seq declarator "=" initializer-clause\n'
+    'attribute-specifier-seq? decl-specifier-seq abstract-declarator\n'
+    'attribute-specifier-seq? decl-specifier-seq abstract-declarator? "=" initializer-clause'
+)
+#@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-declarator?')
+@glrp.rule(
+    'parameter-declaration[merge:parameter_declaration_merge][split] : '\
+        'attribute-specifier-seq? decl-specifier-seq'
 )
 @cxx98
 def parameter_declaration(self, p):

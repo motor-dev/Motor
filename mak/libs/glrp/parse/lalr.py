@@ -13,6 +13,104 @@ class LALRTable(object):
         self._goto_table = goto_table
 
 
+def _find_splits(split_list, name_map):
+    # type: (List[Tuple[LR0DominanceNode, Optional[int]]], List[str]) -> Dict[Tuple[LR0ItemSet, int], Dict[LR0Item, List[LR0Path]]]
+    node_count = len(split_list)
+    lst = []       # type: List[List[Tuple[LR0Path, Optional[int], Set[Tuple[LR0DominanceNode, Optional[int]]]]]]
+    for s in split_list:
+        lst.append([(LR0Path(s[0]), s[1], set())])
+    queue = [(lst, split_list[0][0]._item_set, False, 0)]
+    result = {}    # type: Dict[Tuple[LR0ItemSet, int], Dict[LR0Item, List[LR0Path]]]
+    while queue:
+        path_list, current_state, found_lookahead, depth = queue.pop(0)
+
+        #print('------> %d (%s)' % (current_state._index, found_lookahead))
+        #for i, paths in enumerate(path_list):
+        #    print('%s' % split_list[i][0]._item.to_string(name_map))
+        #    for path, _, _ in paths:
+        #        for str in path.to_string(name_map)[0]:
+        #            print('  %s' % str)
+        #        print('')
+
+        if found_lookahead:
+            common_parents = None  # type: Optional[Set[LR0DominanceNode]]
+            for paths in path_list:
+                for path, _, _ in paths:
+                    assert path._node._item_set == current_state
+                    if common_parents is None:
+                        common_parents = set(path._node._parents)
+                    else:
+                        common_parents.intersection_update(path._node._parents)
+            if common_parents:
+                leaf_parents = set()
+                for n1 in common_parents:
+                    for n2 in common_parents:
+                        if n1 in n2._direct_parents:
+                            break
+                    else:
+                        leaf_parents.add(n1)
+                try:
+                    state_result = result[(current_state, depth)]
+                except KeyError:
+                    state_result = {}
+                    result[(current_state, depth)] = state_result
+                for paths in path_list:
+                    for path, _, _ in paths:
+                        if path._node in leaf_parents:
+                            try:
+                                state_result[path._node._item].append(path)
+                            except KeyError:
+                                state_result[path._node._item] = [path]
+                        elif not leaf_parents.isdisjoint(path._node._direct_parents):
+                            try:
+                                state_result[path._node._item].append(path)
+                            except KeyError:
+                                state_result[path._node._item] = [path]
+                        else:
+                            for parent in path._node._parents:
+                                if not leaf_parents.isdisjoint(parent._direct_parents):
+                                    try:
+                                        state_result[parent._item].append(path)
+                                    except KeyError:
+                                        state_result[parent._item] = [path]
+                continue
+
+        states = {
+        }                  # type: Dict[Tuple[LR0ItemSet, Optional[int]], List[List[Tuple[LR0Path, Optional[int], Set[Tuple[LR0DominanceNode, Optional[int]]]]]]]
+        lookaheads = {}    # type: Dict[Tuple[LR0ItemSet, Optional[int]], Tuple[Optional[int], bool]]
+        for index, paths in enumerate(path_list):
+            for path, lookahead, seen in paths:
+                node = path._node
+                for predecessor, la, consumed_token in node.backtrack_up_nopath(path, lookahead, seen):
+                    try:
+                        predecessors = states[(predecessor._node._item_set, consumed_token)]
+                        prev_la, prev_finished = lookaheads[(predecessor._node._item_set, consumed_token)]
+                    except KeyError:
+                        predecessors = [[] for _ in split_list]
+                        states[(predecessor._node._item_set, consumed_token)] = predecessors
+                        prev_la, prev_finished = (la, True)
+
+                    predecessors[index].append((predecessor, la, set(seen)))
+                    lookaheads[(predecessor._node._item_set, consumed_token)] = (
+                        la,
+                        prev_finished and (la == prev_la) and (predecessor._node._item._index == 0),
+                    )
+
+        for state, nodes_list in states.items():
+            count = 0
+            for nodes in nodes_list:
+                if state[1] is None:
+                    if len(nodes) == 0:
+                        nodes += path_list[index]
+                if len(nodes) > 0:
+                    count += 1
+            new_depth = depth + 1 if state[1] is not None else 0
+            if count > 1:
+                queue.append((nodes_list, state[0], lookaheads[state][1], new_depth))
+
+    return result
+
+
 def _log(title, conflict_paths, out, name_map):
     # type: (Text, List[LR0Path], Logger, List[str]) -> None
     seen = set([])
@@ -62,10 +160,11 @@ def _log_counterexamples(conflict_list, out, name_map):
                 for path, lookahead, seen, index in path_list:
                     if lookahead is not None:
                         for path, la in path._node.backtrack_up(path, lookahead, seen):
+                            tmp_seen = set(seen)
                             try:
-                                states[path._node._item_set].append((path, la, seen, index))
+                                states[path._node._item_set].append((path, la, tmp_seen, index))
                             except KeyError:
-                                states[path._node._item_set] = [(path, la, seen, index)]
+                                states[path._node._item_set] = [(path, la, tmp_seen, index)]
                 for state, plist in states.items():
                     for path, lookahead, seen, index in path_list:
                         if lookahead is None:
@@ -74,7 +173,7 @@ def _log_counterexamples(conflict_list, out, name_map):
                             else:
                                 for path, la in path._node.backtrack_to_state(path, state, lookahead, seen):
                                     #assert path1._node.item_set == path2._node.item_set
-                                    plist.append((path, la, seen, index))
+                                    plist.append((path, la, set(seen), index))
                 for _, plist in states.items():
                     queue.append(plist)
         else:
@@ -107,8 +206,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
     goto_cache = {}    # type: Dict[Tuple[int, int], Optional[LR0ItemSet]]
     goto_cache_2 = {}  # type: Dict[int, Any]
 
-    def goto(item_set, lookahead):
-        # type: (LR0ItemSet, int) -> Optional[LR0ItemSet]
+    def goto(item_set, index, lookahead):
+        # type: (LR0ItemSet, int, int) -> Optional[LR0ItemSet]
         # First we look for a previously cached entry
         item_set_id = id(item_set)
         result = goto_cache.get((item_set_id, lookahead), None)
@@ -137,7 +236,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         result = s.get(0, None)
         if result is None:
             if gs:
-                result = LR0ItemSet(gs)
+                result = LR0ItemSet(index, gs)
                 s[0] = result
             else:
                 s[0] = None
@@ -150,7 +249,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
     def create_item_sets():
         # type: () -> List[LR0ItemSet]
         assert len(productions[start_id]) == 1
-        states = [LR0ItemSet([(productions[start_id][0]._item, None, 2)])]
+        states = [LR0ItemSet(0, [(productions[start_id][0]._item, None, 2)])]
         cidhash[id(states[0])] = 0
 
         # Loop over the items in C and each grammar symbols
@@ -165,7 +264,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                 asyms.update(item._symbols)
 
             for x in sorted(asyms):
-                g = goto(state, x)
+                g = goto(state, len(states), x)
                 if not g or id(g) in cidhash:
                     continue
                 cidhash[id(g)] = len(states)
@@ -217,7 +316,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
             state, N = trans
             terms = []
 
-            item_set = goto(states[state], N)
+            item_set = goto(states[state], len(states), N)
             assert item_set is not None
             for item in item_set:
                 if item._index < item.len:
@@ -238,7 +337,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
             rel = []
             state, N = trans
 
-            item_set = goto(states[state], N)
+            item_set = goto(states[state], len(states), N)
             assert item_set is not None
             j = cidhash[id(item_set)]
             for item in item_set:
@@ -300,8 +399,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                                           # Appears to be a relation between (j,t) and (state,N)
                                 includes.append((j, t))
 
-                        g = goto(states[j], t) # Go to next set
-                        j = cidhash[id(g)]     # Go to next state
+                        g = goto(states[j], len(states), t) # Go to next set
+                        j = cidhash[id(g)]                  # Go to next state
 
                     # When we get here, j is the final state, now we have to locate the production
                     for r in states[j]:
@@ -386,34 +485,14 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
 
     num_missing_annotations = 0
     invalid_precedence_count = 0
+    num_missing_merge_annotations = 0
+    invalid_merge_count = 0
     num_rr = 0
     num_sr = 0
 
     dot_file.info('digraph Grammar {')
-    for item_group in states:
-        dot_file.info("  subgraph cluster_%d {", st)
-        dot_file.info('    label="State %d";', st)
-        dot_file.info('    style=filled;')
-        dot_file.info('    color=lightgray;')
-        dot_file.info('    node[style=filled;color=white];')
-        for item in item_group:
-            dot_file.info('    %d[label="%s"];', id(item_group[item]), item.to_string(name_map))
-        for item in item_group:
-            dnode = item_group[item]
-            for child in dnode._direct_children:
-                dot_file.info('    %d -> %d;', id(child), id(dnode))
-        dot_file.info("  }")
-        st += 1
 
     for st, item_group in enumerate(states):
-        for item in item_group:
-            node = item_group[item]
-            for predecessor in node._predecessors:
-                assert node._predecessor_lookahead is not None
-                dot_file.info(
-                    '  %d -> %d[label="%s"];', id(predecessor), id(node), name_map[node._predecessor_lookahead]
-                )
-
         # Loop over each production
         action_map = {}    # type: Dict[int, List[Tuple[int, LR0Item]]]
         st_action = {}     # type: Dict[int, Tuple[int,...]]
@@ -441,11 +520,12 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                 i = item._index
                 a = item.rule.production[i] # Get symbol right after the "."
                 if a < terminal_count:
-                    g = goto(item_group, a)
+                    g = goto(item_group, len(states), a)
                     j = cidhash[id(g)]
                     if j >= 0:
                         action_map[a] = action_map.get(a, []) + [(j, item)]
 
+        color = 'lightgray'
         for a in sorted(action_map):
             actions = action_map[a]
             action_dest = {}   # type: Dict[int, List[LR0Item]]
@@ -528,6 +608,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                 conflicts = []     # type: List[Tuple[LR0DominanceNode, Text, Optional[int]]]
                 num_rr += 1
                 sm_log.info('    %-30s conflict split', name_map[a])
+                color = 'orange'
                 for j in st_action[a]:
                     items = accepted_actions[j]
                     if j >= 0:
@@ -538,6 +619,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                             conflicts.append((node, 'Shift using rule %s' % item.to_string(name_map), None))
                             num_rr -= 1
                             num_sr += 1
+                            color = 'yellow'
                         else:
                             sm_log.info('        reduce using rule %s', item.to_string(name_map))
                             conflicts.append((node, 'Reduce using rule %s' % item.to_string(name_map), a))
@@ -545,18 +627,54 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                 conflict_log.info(' *** conflicts:')
                 _log_counterexamples(conflicts, conflict_log, name_map)
             elif len(accepted_actions) > 1:
-                splits = []
+                splits = []        # type: List[Tuple[LR0DominanceNode, Optional[int]]]
                 sm_log.info('    %-30s split', name_map[a])
+                color = 'lightblue'
                 for j in st_action[a]:
                     items = accepted_actions[j]
                     if j >= 0:
                         sm_log.info('        shift and go to state %d', j)
                     for item in items:
-                        splits.append(item_group[item])
                         if j < 0:
                             sm_log.info('        reduce using rule %s', item.to_string(name_map))
-                #_find_splits()
-                #conflict_log.info('')
+                            splits.append((item_group[item], a))
+                        else:
+                            splits.append((item_group[item], None))
+                split_items = _find_splits(splits, name_map)
+                conflict_log.info('')
+                merge_action = {}  # type: Dict[Tuple[int, int], str]
+
+                for (state, depth), item_list in split_items.items():
+                    state_merge = None # type: Optional[str]
+
+                    for item in item_list:
+                        merge = item._merge
+                        if merge is None:
+                            reduce_item = item
+                            while reduce_item._next is not None:
+                                reduce_item = reduce_item._next
+                            merge = reduce_item._merge
+
+                        if merge is None:
+                            paths = item_list[item]
+                            _log(
+                                'merge annotation missing: %s' % item.to_string(name_map), paths, conflict_log, name_map
+                            )
+                            conflict_log.info('')
+                            num_missing_merge_annotations += 1
+                        elif state_merge is None:
+                            state_merge = merge
+                        elif state_merge != merge:
+                            paths = item_list[item]
+                            _log(
+                                'merge annotation conflict[%d/%s]: %s' %
+                                (state._index, state_merge, item.to_string(name_map)), paths, conflict_log, name_map
+                            )
+                            conflict_log.info('')
+                            invalid_merge_count += 1
+                    if state_merge is not None:
+                        merge_action[(state._index, depth)] = state_merge
+
             else:
                 for j in st_action[a]:
                     items = accepted_actions[j]
@@ -565,21 +683,41 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     for item in items:
                         if j < 0:
                             sm_log.info('    %-30s reduce using rule %s', name_map[a], item.to_string(name_map))
+        dot_file.info("  subgraph cluster_%d {", st)
+        dot_file.info('    label="State %d";', st)
+        dot_file.info('    style=filled;')
+        dot_file.info('    color=%s;', color)
+        dot_file.info('    node[style=filled;color=white];')
+        for item in item_group:
+            dot_file.info('    %d[label="%s"];', id(item_group[item]), item.to_string(name_map))
+        dot_file.info("  }")
 
         nkeys = set([])
         for item in item_group:
             for s in item._symbols:
                 if s > terminal_count:
-                    g = goto(item_group, s)
+                    g = goto(item_group, len(states), s)
                     j = cidhash.get(id(g), -1)
                     if j >= 0:
                         if s not in nkeys:
                             st_goto[s] = j
                             nkeys.add(s)
                             sm_log.info('    %-30s shift and go to state %d', name_map[s], j)
+                            assert item._next is not None
 
         action.append(st_action)
         goto_table.append(st_goto)
+
+    for item_group in states:
+        for item in item_group:
+            node = item_group[item]
+            for predecessor in node._predecessors:
+                assert node._predecessor_lookahead is not None
+                dot_file.info(
+                    '  %d -> %d[label="%s"];', id(predecessor), id(node), name_map[node._predecessor_lookahead]
+                )
+            for parent in node._direct_parents:
+                dot_file.info('  %d -> %d;', id(parent), id(node))
 
     dot_file.info('}')
 
@@ -589,10 +727,20 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
     elif num_missing_annotations > 1:
         error_log.warning('%d missing precedence annotations', num_missing_annotations)
 
+    if num_missing_merge_annotations == 1:
+        error_log.warning('1 missing merge annotation')
+    elif num_missing_merge_annotations > 1:
+        error_log.warning('%d missing merge annotations', num_missing_merge_annotations)
+
     if invalid_precedence_count == 1:
         error_log.warning('1 invalid precedence annotation')
     elif invalid_precedence_count > 1:
-        error_log.warning('%d invalid precedence annotations', num_missing_annotations)
+        error_log.warning('%d invalid precedence annotations', invalid_precedence_count)
+
+    if invalid_merge_count == 1:
+        error_log.warning('1 invalid merge annotation')
+    elif invalid_merge_count > 1:
+        error_log.warning('%d invalid merge annotations', invalid_merge_count)
 
     if num_sr == 1:
         error_log.warning('1 shift/reduce conflict')

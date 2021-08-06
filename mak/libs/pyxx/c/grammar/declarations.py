@@ -193,7 +193,7 @@ from be_typing import TYPE_CHECKING
 
 
 @c89
-@glrp.rule('declaration : declaration-specifiers init-declarator-list? ";"')
+@glrp.rule('declaration[merge:declaration_merge] : declaration-specifiers init-declarator-list? ";"')
 @glrp.rule('declaration : attribute-specifier-sequence declaration-specifiers init-declarator-list ";"')
 @glrp.rule('declaration : static_assert-declaration attribute-declaration')
 def declaration(self, p):
@@ -306,7 +306,9 @@ def member_declaration_list(self, p):
 
 
 @c89
-@glrp.rule('member-declaration : attribute-specifier-sequence? specifier-qualifier-list member-declarator-list? ";"')
+@glrp.rule(
+    'member-declaration[merge:member_declaration_merge] : attribute-specifier-sequence? specifier-qualifier-list member-declarator-list? ";"'
+)
 @glrp.rule('member-declaration : static_assert-declaration')
 def member_declaration(self, p):
     # type: (CParser, glrp.Production) -> None
@@ -397,8 +399,12 @@ def function_specifier(self, p):
 
 
 @c89
-@glrp.rule('alignment-specifier : "_Alignas" "(" type-name ")"')
-@glrp.rule('alignment-specifier : "_Alignas" "(" constant-expression ")"')
+@glrp.rule(
+    'alignment-specifier[merge:alignment_specifier_merge] : "_Alignas" state-splitter state-splitter "(" type-name ")"'
+)
+@glrp.rule(
+    'alignment-specifier[merge:alignment_specifier_merge] : "_Alignas" state-splitter state-splitter "(" constant-expression ")"'
+)
 def alignment_specifier(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
@@ -473,23 +479,28 @@ def parameter_list(self, p):
 
 
 @c89
-@glrp.rule('parameter-declaration : attribute-specifier-sequence? declaration-specifiers declarator')
-@glrp.rule('parameter-declaration : attribute-specifier-sequence? declaration-specifiers abstract-declarator?')
+@glrp.rule(
+    'parameter-declaration[merge:parameter_declaration_merge]'
+    ': attribute-specifier-sequence? declaration-specifiers declarator'
+    '| attribute-specifier-sequence? declaration-specifiers abstract-declarator?'
+)
 def parameter_declaration(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
 
 
 @c89
-@glrp.rule('type-name : specifier-qualifier-list abstract-declarator?')
+@glrp.rule('type-name[merge:type_name_merge] : specifier-qualifier-list abstract-declarator?')
 def type_name(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
 
 
 @c89
-@glrp.rule('abstract-declarator : pointer')
-@glrp.rule('abstract-declarator : pointer? direct-abstract-declarator')
+@glrp.rule('abstract-declarator[merge:abstract_declarator_merge] : pointer')
+#@glrp.rule('abstract-declarator : pointer? direct-abstract-declarator')
+@glrp.rule('abstract-declarator : direct-abstract-declarator')
+@glrp.rule('abstract-declarator[merge:abstract_declarator_merge] : pointer direct-abstract-declarator')
 def abstract_declarator(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
