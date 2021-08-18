@@ -1,277 +1,135 @@
 from be_typing import TYPE_CHECKING
-import functools
-from .lr0path import LR0Path
+
+
+class LR0DominanceSet(object):
+    def __init__(self, node_set):
+        # type: (List[LR0Node]) -> None
+        self._dominance_nodes = {}     # type: Dict[Tuple[str, bool], LR0DominanceNode]
+        self._map = {}                 # type: Dict[LR0Node, LR0DominanceNode]
+        self._roots = []               # type: List[LR0DominanceNode]
+        for node in node_set:
+            self._add_node(node, True)
+        self._build_dominance_graph()
+        states = []
+        for node in node_set:
+            state = self._map[node]
+            if state not in states:
+                states.append(state)
+        common_dominators = set(states[0]._dominators)
+        for state in states[1:]:
+            common_dominators.intersection_update(state._dominators)
+        self._best_dominator = None    #type: Optional[LR0DominanceNode]
+        if common_dominators:
+            self._best_dominator = common_dominators.pop()
+            for dominator in common_dominators:
+                if self._best_dominator in dominator._dominators:
+                    self._best_dominator = dominator
+
+    def _add_node(self, node, is_leaf):
+        # type: (LR0Node, bool) -> None
+        if node not in self._map:
+            is_root = node._item._index == 0
+            try:
+                state = self._dominance_nodes[(node._item.rule._prod_name, is_root)]
+                state._nodes.append(node)
+                state._is_leaf |= is_leaf
+            except KeyError:
+                state = LR0DominanceNode(len(self._dominance_nodes), node, is_leaf)
+                if is_root and state not in self._roots:
+                    self._roots.append(state)
+                self._dominance_nodes[(node._item.rule._prod_name, is_root)] = state
+            self._map[node] = state
+            for parent in node._direct_parents:
+                self._add_node(parent, False)
+        else:
+            self._map[node]._is_leaf |= is_leaf
+
+    def _build_dominance_graph(self):
+        # type: () -> None
+        all_nodes = set(self._dominance_nodes.values())
+        for node, dom_node in self._map.items():
+            for parent in node._direct_parents:
+                if self._map[parent] not in dom_node._parents:
+                    dom_node._parents.append(self._map[parent])
+        for node, dom_node in self._map.items():
+            if dom_node._parents:
+                dom_node._dominators = all_nodes
+
+        changed = True
+        while changed:
+            changed = False
+            for dom_node in self._dominance_nodes.values():
+                if not dom_node._parents:
+                    continue
+                new_set = set(dom_node._parents[0]._dominators)
+                for dom_child in dom_node._parents[1:]:
+                    new_set.intersection_update(dom_child._dominators)
+                new_set.add(dom_node)
+                if new_set != dom_node._dominators:
+                    dom_node._dominators = new_set
+                    changed = True
+
+        for dom_node in self._dominance_nodes.values():
+            for dominator in dom_node._dominators:
+                if dominator == dom_node:
+                    continue
+                elif dom_node._direct_dominator is None:
+                    dom_node._direct_dominator = dominator
+                elif dom_node._direct_dominator in dominator._dominators:
+                    dom_node._direct_dominator = dominator
+
+    def print_dot(self):
+        # type: () -> None
+        print('digraph Dominance {')
+        print('    compound = True;')
+        for (name, is_root), state in self._dominance_nodes.items():
+            print('    subgraph cluster_%d {' % state._index)
+            print('        label = "%s";' % name)
+            if state == self._best_dominator:
+                print('        style="filled";')
+                print('        color="green";')
+            elif state._is_leaf:
+                print('        style="filled";')
+                print('        color="lightgrey";')
+            elif is_root:
+                print('        style="filled";')
+                print('        color="lightblue";')
+            for node in state._nodes:
+                print('        %d[label="%s"];' % (id(node), node._item.rule._debug_str))
+            print('    }')
+        for node in self._map:
+            for node_parent in node._direct_parents:
+                print('    %d->%d[style=dotted];' % (id(node_parent), id(node)))
+        for state in self._dominance_nodes.values():
+            for parent in state._parents:
+                #if parent != state._direct_dominator:
+                print(
+                    '    %d->%d[ltail=cluster_%d,lhead=cluster_%d,minlen=3];' %
+                    (id(parent._nodes[0]), id(state._nodes[0]), parent._index, state._index)
+                )
+            #if state._direct_dominator:
+            #    print(
+            #        '    %d->%d[ltail=cluster_%d,lhead=cluster_%d,color="blue",minlen=3];' % (
+            #            id(state._direct_dominator._nodes[0]),
+            #            id(state._nodes[0]),
+            #            state._direct_dominator._index,
+            #            state._index,
+            #        )
+            #    )
+        print('}')
 
 
 class LR0DominanceNode(object):
-    def __init__(self, item_set, item, predecessor=None, parent=None):
-        # type: (LR0ItemSet, LR0Item, Optional[Tuple[int, "LR0DominanceNode"]], Optional[LR0DominanceNode]) -> None
-        self._item_set = item_set
-        self._item = item
-        self._parents = set()                            # type: Set[LR0DominanceNode]
-        self._parents_core = set()                       # type: Set[LR0DominanceNode]
-        if predecessor is not None:
-            self._predecessor_lookahead = predecessor[0] # type: Optional[int]
-            self._predecessors = [predecessor[1]]
-        else:
-            self._predecessor_lookahead = None
-            self._predecessors = []
-        self._successor = None                           # type: Optional[LR0DominanceNode]
-
-        self._direct_parents = []
-        self._direct_children = []     # type: List[LR0DominanceNode]
-        if parent is not None:
-            self._direct_parents.append(parent)
-            parent._direct_children.append(self)
-
-    def expand_empty(self):
-        # type: () -> LR0Path
-        # expand the first item of the path to build empty productions
-        if self._item._index == self._item.len:
-            return LR0Path(self, use_marker=False)
-        for child in self._direct_children:
-            if -1 not in child._item._first:
-                continue
-            if child._successor is None:
-                result = LR0Path(child, use_marker=False)
-                result = result.derive_from(self)
-                return result
-            else:
-                if -1 in child._item._follow:
-                    p = child._successor.expand_empty()
-                    result = child.expand_empty()
-                    result = result.expand_next(p)
-                    result = result.derive_from(self)
-                    return result
-        raise ValueError()
-
-    def expand_lookahead(self, lookahead):
-        # type: (int) -> LR0Path
-        # expand the first item of the path until it starts with the lookahead
-        queue = [(self, [[]])]     # type: List[Tuple[LR0DominanceNode, List[List[LR0Path]]]]
-        seen = set()
-
-        while queue:
-            node, paths = queue.pop(0)
-            if node in seen:
-                continue
-            seen.add(node)
-
-            try:
-                following_symbol = node._item.rule.production[node._item._index]
-            except IndexError:
-                continue
-
-            if following_symbol == lookahead:
-                previous = None
-                paths[-1].append(LR0Path(node, use_marker=False))
-                while paths:
-                    child_paths = paths.pop(-1)
-                    if previous is not None:
-                        child_paths[-1] = child_paths[-1].expand_next(previous)
-                    merge_children = lambda x, y: x.derive_from(y._node)
-                    result = functools.reduce(merge_children, child_paths[::-1])
-                    previous = result
-                return result
-            elif lookahead in node._item._first:
-                for child in node._direct_children:
-                    queue.append((child, paths[:-1] + [paths[-1] + [LR0Path(node, use_marker=False)]]))
-            elif -1 in node._item._first and node._successor is not None:
-                empty_path = node.expand_empty()
-                queue.append((node._successor, paths[:-1] + [paths[-1] + [empty_path]] + [[]]))
-        raise ValueError()
-
-    def filter_node_by_lookahead(self, path, lookahead):
-        # type: (LR0Path, Optional[int]) -> LR0Path
-        following_symbol = self._item.rule.production[self._item._index + 1]
-        assert self._successor is not None
-        if lookahead == following_symbol:
-            return path
-        elif lookahead in self._successor._item._first:
-            successor_path = self._successor.expand_lookahead(lookahead)
-            return path.expand_next(successor_path)
-        elif -1 in self._successor._item._first:
-            successor_path = self._successor.expand_empty()
-            p = self._successor.filter_node_by_lookahead(successor_path, lookahead)
-            return path.expand_next(p)
-        else:
-            raise ValueError()
-
-    def backtrack_to_state(self, path, state, lookahead, seen):
-        # type: (LR0Path, LR0ItemSet, Optional[int], Set[Tuple["LR0DominanceNode", Optional[int]]]) -> List[Tuple[LR0Path, Optional[int]]]
-        queue = [(path, lookahead)]
-        result = []                    # type: List[Tuple[LR0Path, Optional[int]]]
-                                       #if (self, lookahead) in seen:
-                                       #    return result
-        seen.add((self, lookahead))
-        shortest_path_seen = set()     # type: Set[Tuple[Optional[int], int, Tuple[int, ...]]]
-        state_path_seen = set()
-        local_seen = set()
-
-        while queue:
-            path, lookahead = queue.pop(0)
-            node = path._node
-
-            for parent in node._direct_parents:
-                if (parent, lookahead) in local_seen:
-                    continue
-                local_seen.add((parent, lookahead))
-                item = parent._item
-                if lookahead is not None:
-                    try:
-                        offset = item._follow[lookahead]
-                    except KeyError:
-                        pass
-                    else:
-                        if (
-                            lookahead, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset]
-                        ) in shortest_path_seen:
-                            continue
-                        shortest_path_seen.add(
-                            (lookahead, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset])
-                        )
-                        p = parent.filter_node_by_lookahead(path.derive_from(parent), lookahead)
-                        queue.append((p, None))
-                    try:
-                        offset = item._follow[-1]
-                    except KeyError:
-                        pass
-                    else:
-                        if (
-                            None, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset]
-                        ) in shortest_path_seen:
-                            continue
-                        shortest_path_seen.add(
-                            (None, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset])
-                        )
-                        queue.append((path.derive_from(parent), lookahead))
-                else:
-                    if (
-                        None, parent._item._symbol, parent._item.rule.production[:parent._item._index + 1]
-                    ) in shortest_path_seen:
-                        continue
-                    shortest_path_seen.add(
-                        (None, parent._item._symbol, parent._item.rule.production[:parent._item._index + 1])
-                    )
-                    queue.append((path.derive_from(parent), lookahead))
-            for predecessor in node._predecessors:
-                if (predecessor, lookahead) in seen:
-                    continue
-                if state is None or predecessor._item_set == state:
-                    seen.add((predecessor, lookahead))
-                if lookahead is None:
-                    if predecessor._item_set in state_path_seen:
-                        continue
-                    state_path_seen.add(predecessor._item_set)
-                assert node._predecessor_lookahead is not None
-                result.append((path.extend(predecessor, node._predecessor_lookahead), lookahead))
-        return result
-
-    def backtrack_up(self, path, lookahead, seen):
-        # type: (LR0Path, Optional[int], Set[Tuple["LR0DominanceNode", Optional[int]]]) -> List[Tuple[LR0Path, Optional[int]]]
-        queue = [(path, lookahead)]
-        result = []                    # type: List[Tuple[LR0Path, Optional[int]]]
-                                       #if (self, lookahead) in seen:
-                                       #    return result
-        seen.add((self, lookahead))
-        shortest_path_seen = set()     # type: Set[Tuple[Optional[int], int, Tuple[int, ...]]]
-        state_path_seen = set()
-
-        while queue:
-            path, lookahead = queue.pop(0)
-            node = path._node
-
-            for parent in node._direct_parents:
-                if (parent, lookahead) in seen:
-                    continue
-                seen.add((parent, lookahead))
-                item = parent._item
-                if lookahead is not None:
-                    try:
-                        offset = item._follow[lookahead]
-                    except KeyError:
-                        pass
-                    else:
-                        if (
-                            lookahead, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset]
-                        ) in shortest_path_seen:
-                            continue
-                        shortest_path_seen.add(
-                            (lookahead, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset])
-                        )
-                        p = parent.filter_node_by_lookahead(path.derive_from(parent), lookahead)
-                        result.append((p, None))
-                    try:
-                        offset = item._follow[-1]
-                    except KeyError:
-                        pass
-                    else:
-                        if (
-                            None, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset]
-                        ) in shortest_path_seen:
-                            continue
-                        shortest_path_seen.add(
-                            (None, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset])
-                        )
-                        queue.append((path.derive_from(parent), lookahead))
-                else:
-                    if (
-                        None, parent._item._symbol, parent._item.rule.production[:parent._item._index + 1]
-                    ) in shortest_path_seen:
-                        continue
-                    shortest_path_seen.add(
-                        (None, parent._item._symbol, parent._item.rule.production[:parent._item._index + 1])
-                    )
-                    queue.append((path.derive_from(parent), lookahead))
-            for predecessor in node._predecessors:
-                if (predecessor, lookahead) in seen:
-                    continue
-                if lookahead is None:
-                    if predecessor._item_set in state_path_seen:
-                        continue
-                    state_path_seen.add(predecessor._item_set)
-                seen.add((predecessor, lookahead))
-                assert node._predecessor_lookahead is not None
-                result.append((path.extend(predecessor, node._predecessor_lookahead), lookahead))
-        return result
-
-    def backtrack_up_nopath(self, path, lookahead, seen):
-        # type: (LR0Path, Optional[int], Set[Tuple["LR0DominanceNode", Optional[int]]]) -> List[Tuple[LR0Path, Optional[int], Optional[int]]]
-        result = []    # type: List[Tuple[LR0Path, Optional[int], Optional[int]]]
-        queue = [(path, lookahead)]
-        while queue:
-            path, lookahead = queue.pop(0)
-
-            for parent in path._node._direct_parents:
-                if (parent, lookahead) in seen:
-                    continue
-                seen.add((parent, lookahead))
-                if lookahead is None:
-                    queue.append((path.derive_from(parent), None))
-                elif lookahead in parent._item._follow:
-                    result.append((path.derive_from(parent), None, None))
-                elif -1 in parent._item._follow:
-                    queue.append((path.derive_from(parent), lookahead))
-
-            for predecessor in path._node._predecessors:
-                if (predecessor, lookahead) in seen:
-                    continue
-                seen.add((predecessor, lookahead))
-                assert path._node._predecessor_lookahead is not None
-                #if lookahead is None or lookahead in predecessor._item._follow:
-                #    result.append((predecessor, None))
-                #elif -1 in predecessor._item._follow:
-                result.append(
-                    (
-                        path.extend(predecessor,
-                                    path._node._predecessor_lookahead), lookahead, path._node._predecessor_lookahead
-                    )
-                )
-
-        return result
+    def __init__(self, index, node, is_leaf):
+        # type: (int, LR0Node, bool) -> None
+        self._index = index
+        self._nodes = [node]
+        self._parents = []             # type: List[LR0DominanceNode]
+        self._dominators = set([self])
+        self._direct_dominator = None  # type: Optional[LR0DominanceNode]
+        self._is_leaf = is_leaf
 
 
 if TYPE_CHECKING:
-    from be_typing import List, Optional, Set, Optional, Tuple
-    from .lr0item import LR0Item
-    from .lr0itemset import LR0ItemSet
+    from be_typing import Dict, List, Optional, Tuple
+    from .lr0node import LR0Node

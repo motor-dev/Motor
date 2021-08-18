@@ -31,6 +31,10 @@ class C17Parser(C11Parser):
     Lexer = lexer.C17Lexer
 
 
+class C23Parser(C17Parser):
+    Lexer = lexer.C23Lexer
+
+
 def c89(func):
     # type: (Callable[[CParser, glrp.Production], None]) -> Callable[[glrp.Parser, glrp.Production], None]
     setattr(C89Parser, func.__name__, func)

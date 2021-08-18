@@ -1,5 +1,5 @@
 from ..log import Logger
-from be_typing import TYPE_CHECKING, overload
+from be_typing import TYPE_CHECKING
 from .lr0item import LR0Item
 from . import lalr
 import io
@@ -84,6 +84,7 @@ class Grammar(object):
         log = Logger(io.open(debug_filename, 'w', encoding='utf-8'))
         stderr = Logger(io.open(sys.stderr.fileno(), 'w', encoding='utf-8', closefd=False))
         conflict_log = Logger(io.open(conflict_filename, 'w', encoding='utf-8'))
+        stderr.note('building LALR tables for parser %s', name)
         dot_file = Logger(io.open(os.path.splitext(debug_filename)[0] + '.dot', 'w', encoding='utf-8'))
         for name, (i, _) in terminals.items():
             name_map[i] = name
@@ -260,5 +261,5 @@ def _create_lr0_items(productions):
 
 
 if TYPE_CHECKING:
-    from typing import Dict, Iterator, List, Sequence, Set, Tuple, Union
+    from typing import Dict, Iterator, List, Set, Tuple
     from .parser import Parser, Action

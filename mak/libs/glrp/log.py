@@ -71,19 +71,31 @@ class Logger:
 
     def note(self, message, *args):
         # type: (Text, *Union[Text, int]) -> None
-        self._msg('note', message % args)
+        if args:
+            self._msg('note', message % args)
+        else:
+            self._msg('note', message)
 
     def info(self, message, *args):
         # type: (Text, *Union[Text,int]) -> None
-        self._msg('info', message % args)
+        if args:
+            self._msg('info', message % args)
+        else:
+            self._msg('info', message)
 
     def warning(self, message, *args):
         # type: (Text, *Union[Text, int]) -> None
-        self._msg('warning', message % args)
+        if args:
+            self._msg('warning', message % args)
+        else:
+            self._msg('warning', message)
 
     def error(self, message, *args):
         # type: (Text, *Union[Text, int]) -> None
-        self._msg('error', message % args)
+        if args:
+            self._msg('error', message % args)
+        else:
+            self._msg('error', message)
 
 
 from be_typing import TYPE_CHECKING

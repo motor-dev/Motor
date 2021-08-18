@@ -98,8 +98,8 @@ def block_item_list(self, p):
 
 
 @c89
-@glrp.rule('block-item[merge:block_item_merge] : declaration')
-@glrp.rule('block-item[merge:block_item_merge] : unlabeled-statement')
+@glrp.rule('block-item : declaration')
+@glrp.rule('block-item : unlabeled-statement')
 @glrp.rule('block-item : label')
 def block_item(self, p):
     # type: (CParser, glrp.Production) -> None
@@ -128,12 +128,8 @@ def selection_statement(self, p):
 @glrp.rule('iteration-statement : "do" statement "while" "(" expression ")" ";"')
 #@glrp.rule('iteration-statement : "for" "(" expression? ";" expression? ";" expression? ")" statement')
 @glrp.rule('iteration-statement : "for" "(" ";" expression? ";" expression? ")" statement')
-@glrp.rule(
-    'iteration-statement[merge:iteration_statement_merge] : "for" "(" state-splitter expression ";" expression? ";" expression? ")" statement'
-)
-@glrp.rule(
-    'iteration-statement[merge:iteration_statement_merge] : "for" "(" state-splitter declaration expression? ";" expression? ")" statement'
-)
+@glrp.rule('iteration-statement : "for" "(" expression ";" expression? ";" expression? ")" statement')
+@glrp.rule('iteration-statement : "for" "(" declaration expression? ";" expression? ")" statement')
 def iteration_statement(self, p):
     # type: (CParser, glrp.Production) -> None
     pass

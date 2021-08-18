@@ -3,7 +3,7 @@ from be_typing import TYPE_CHECKING
 
 class LR0Path(object):
     def __init__(self, node, use_marker=True):
-        # type: (LR0DominanceNode, bool) -> None
+        # type: (LR0Node, bool) -> None
         self._node = node
         self._use_marker = use_marker
         self._hash_cache = (self._node._item, ) # type: Optional[Tuple[LR0Item,...]]
@@ -23,11 +23,11 @@ class LR0Path(object):
         return isinstance(other, LR0Path) and self._hash() == other._hash()
 
     def extend(self, node, lookahead):
-        # type: (LR0DominanceNode, int) -> LR0Path
+        # type: (LR0Node, int) -> LR0Path
         return _LR0Extension(node, self)
 
     def derive_from(self, node):
-        # type: (LR0DominanceNode) -> LR0Path
+        # type: (LR0Node) -> LR0Path
         return _LR0Derivation(node, self)
 
     def expand_left(self):
@@ -57,10 +57,14 @@ class LR0Path(object):
         else:
             return [sequence_str], len(sequence_str)
 
+    def collect_node_derivations(self):
+        # type: () -> List[Tuple[LR0Node, LR0Node]]
+        return []
+
 
 class _LR0BaseConstruction(LR0Path):
     def __init__(self, node, follow):
-        # type: (LR0DominanceNode, LR0Path) -> None
+        # type: (LR0Node, LR0Path) -> None
         self._node = node
         self._follow = follow
         self._hash_cache = None
@@ -77,6 +81,10 @@ class _LR0Extension(_LR0BaseConstruction):
         # type: (List[int], List[str], bool, bool) -> Tuple[List[Text], int]
         sequence.append(self._node._item.rule.production[self._node._item._index])
         return self._follow._to_string(sequence, name_map, add_derivation, complete_right)
+
+    def collect_node_derivations(self):
+        # type: () -> List[Tuple[LR0Node, LR0Node]]
+        return self._follow.collect_node_derivations()
 
 
 class _LR0Derivation(_LR0BaseConstruction):
@@ -105,6 +113,10 @@ class _LR0Derivation(_LR0BaseConstruction):
         else:
             return result, length
 
+    def collect_node_derivations(self):
+        # type: () -> List[Tuple[LR0Node, LR0Node]]
+        return [(self._node, self._follow._node)] + self._follow.collect_node_derivations()
+
 
 class _LR0LeftExpansion(_LR0BaseConstruction):
     def _to_string(self, sequence, name_map, add_derivation, complete_right):
@@ -112,10 +124,14 @@ class _LR0LeftExpansion(_LR0BaseConstruction):
         sequence += self._node._item.rule.production[:self._node._item._index]
         return self._follow._to_string(sequence, name_map, add_derivation, complete_right)
 
+    def collect_node_derivations(self):
+        # type: () -> List[Tuple[LR0Node, LR0Node]]
+        return self._follow.collect_node_derivations()
+
 
 class _LR0Expansion(_LR0BaseConstruction):
     def __init__(self, node, follow, expanded_path):
-        # type: (LR0DominanceNode, LR0Path, LR0Path) -> None
+        # type: (LR0Node, LR0Path, LR0Path) -> None
         self._node = node
         self._follow = follow
         self._next = expanded_path
@@ -139,6 +155,7 @@ class _LR0Expansion(_LR0BaseConstruction):
             max_length = max(max_length, len(result[i]))
         for final in next[i + 1:]:
             result.append(' ' * (length + 1) + final)
+            max_length = max(max_length, len(result[-1]))
 
         if add_derivation:
             extra_padding = u'\u2500' * (max_length - 2 - len(expanded_symbol))
@@ -147,8 +164,12 @@ class _LR0Expansion(_LR0BaseConstruction):
         else:
             return result, max_length
 
+    def collect_node_derivations(self):
+        # type: () -> List[Tuple[LR0Node, LR0Node]]
+        return self._follow.collect_node_derivations()
+
 
 if TYPE_CHECKING:
-    from be_typing import Any, List, Optional, Text, Tuple, Union
-    from .lr0dominancenode import LR0DominanceNode
+    from be_typing import Any, List, Optional, Text, Tuple
+    from .lr0node import LR0Node
     from .lr0item import LR0Item

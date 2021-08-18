@@ -238,5 +238,9 @@ class C17Lexer(C11Lexer):
     pass
 
 
+class C23Lexer(C17Lexer):
+    pass
+
+
 if TYPE_CHECKING:
     from typing import Optional, Set, Tuple

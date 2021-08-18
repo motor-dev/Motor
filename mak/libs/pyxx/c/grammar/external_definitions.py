@@ -26,8 +26,8 @@ def translation_unit(self, p):
 
 
 @c89
-@glrp.rule("external-declaration[merge:external_declaration] : function-definition")
-@glrp.rule("external-declaration[merge:external_declaration] : declaration")
+@glrp.rule("external-declaration : function-definition")
+@glrp.rule("external-declaration : declaration")
 def external_declaration(self, p):
     # type: (CParser, glrp.Production) -> None
     pass

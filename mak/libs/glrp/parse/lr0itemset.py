@@ -1,14 +1,14 @@
 from .lr0item import LR0Item
-from .lr0dominancenode import LR0DominanceNode
+from .lr0node import LR0Node
 from be_typing import TYPE_CHECKING
 
 
 class LR0ItemSet(object):
     def __init__(self, index, core):
-        # type: (int, List[Tuple[LR0Item, Optional[LR0DominanceNode], int]]) -> None
+        # type: (int, List[Tuple[LR0Item, Optional[LR0Node], int]]) -> None
         self._index = index
-        self._core = set([])       # type: Set[LR0DominanceNode]
-        self._items = {}           # type:Dict[LR0Item, LR0DominanceNode]
+        self._core = set([])       # type: Set[LR0Node]
+        self._items = {}           # type:Dict[LR0Item, LR0Node]
         self._sorted_items = []    # type: List[LR0Item]
         self.add_core(core)
         self._lr0_close()
@@ -18,19 +18,19 @@ class LR0ItemSet(object):
         return iter(self._sorted_items)
 
     def __getitem__(self, item):
-        # type: (LR0Item) -> LR0DominanceNode
+        # type: (LR0Item) -> LR0Node
         return self._items[item]
 
     def add_core(self, core):
-        # type: (List[Tuple[LR0Item, Optional[LR0DominanceNode], int]]) -> None
+        # type: (List[Tuple[LR0Item, Optional[LR0Node], int]]) -> None
         for item, node, lookahead in core:
             try:
                 target_node = self._items[item]
             except KeyError:
                 if node is not None:
-                    target_node = LR0DominanceNode(self, item, predecessor=(lookahead, node))
+                    target_node = LR0Node(self, item, predecessor=(lookahead, node))
                 else:
-                    target_node = LR0DominanceNode(self, item)
+                    target_node = LR0Node(self, item)
                 self._items[item] = target_node
                 self._sorted_items.append(item)
             else:
@@ -58,7 +58,7 @@ class LR0ItemSet(object):
                         try:
                             successor = new_items[item]
                         except KeyError:
-                            successor = LR0DominanceNode(self, item, parent=dn)
+                            successor = LR0Node(self, item, parent=dn)
                             new_items[item] = successor
                             self._sorted_items.append(item)
                     if successor not in dn._direct_children:
@@ -78,10 +78,7 @@ class LR0ItemSet(object):
                 seen.add(parent)
                 node._parents.update(parent._direct_parents)
                 queue += parent._direct_parents
-            if not node._parents and not node._predecessors:
-                node._parents.add(node)
-            node._parents_core = node._parents.intersection(self._core)
 
 
 if TYPE_CHECKING:
-    from typing import Dict, Iterator, List, Optional, Set, Tuple
+    from typing import Dict, Iterator, List, Optional, Set, FrozenSet, Tuple

@@ -17,5 +17,12 @@ def translation_unit(self, p):
     pass
 
 
+@cxx98
+@glrp.rule('state-splitter : ')
+def state_splitter(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 if TYPE_CHECKING:
     from ...parser import CxxParser
