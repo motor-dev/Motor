@@ -172,6 +172,6 @@ def docgen(self, node):
     else:
         out_node = self.bld.srcnode
     doc_task = self.create_task('docgen', [], [])
-    doc_task.out_dir = out_node.make_node('doc/api')
+    doc_task.out_dir = out_node.make_node('docs/api')
     doc_task.out_dir.mkdir()
     doc_task.set_inputs([node])

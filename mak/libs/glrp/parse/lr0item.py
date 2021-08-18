@@ -1,4 +1,4 @@
-from be_typing import TYPE_CHECKING, overload
+from be_typing import TYPE_CHECKING
 
 
 class LR0Item(object):
@@ -6,18 +6,20 @@ class LR0Item(object):
         # type: (Grammar.Rule, int, Optional[LR0Item], Optional[int], List[Grammar.Rule], Set[int], Dict[int, int]) -> None
         self.rule = rule
         self.len = rule.len
-        self._symbol = rule._prod_symbol # type: int
-        self._index = index              # type: int
+        self._symbol = rule._prod_symbol                      # type: int
+        self._index = index                                   # type: int
         self._next = next
+        self._last = next._last if next is not None else self # type: LR0Item
         self._before = predecessor
         self._after = successors
         self._symbols = set(rule.production)
         self._first = first
         self._follow = follow
-        self._lookaheads = {}            # type: Dict[int, List[int]]
-        self._precedence = None          # type: Optional[Tuple[str, int]]
+        self._lookaheads = {}                                 # type: Dict[int, List[int]]
+        self._precedence = None                               # type: Optional[Tuple[str, int]]
         self._split = False
-        self._merge = None               # type: Optional[str]
+        self._merge = None                                    # type: Optional[str]
+        self._merge_skip = False
 
         if index == rule.len:
             index = -1
@@ -61,6 +63,14 @@ class LR0Item(object):
                         (rule._filename, rule._lineno, 0, '')
                     )
                 self._split = True
+            elif annotation == "merge_delegate":
+                if len(values) != 0:
+                    raise SyntaxError(
+                        'incorrect annotation: merge_delegate does not accept any argument',
+                        (rule._filename, rule._lineno, 0, '')
+                    )
+                self._merge_skip = False
+                self._last._merge_skip = False
             elif annotation == "merge":
                 if len(values) != 1:
                     raise SyntaxError(
@@ -68,6 +78,7 @@ class LR0Item(object):
                         (rule._filename, rule._lineno, 0, '')
                     )
                 self._merge = values[0]
+                self._last._merge = values[0]
             else:
                 raise SyntaxError('unknown annotation %s' % annotation, (rule._filename, rule._lineno, 0, ''))
 
@@ -95,5 +106,5 @@ class LR0Item(object):
 
 
 if TYPE_CHECKING:
-    from be_typing import Dict, List, Optional, Sequence, Set, Text, Tuple, Union
+    from be_typing import Dict, List, Optional, Set, Text, Tuple
     from .grammar import Grammar
