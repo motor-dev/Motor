@@ -419,10 +419,15 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
 
     st = 0
 
-    num_missing_annotations = 0
-    invalid_precedence_count = 0
-    num_missing_merge_annotations = 0
-    invalid_merge_count = 0
+    priority_missing = {}  # type: Dict[LR0Item, List[int]]
+    split_missing = {}     # type: Dict[LR0Item, List[int]]
+    merge_missing = {}     # type: Dict[LR0Item, List[int]]
+
+    priority_conflict = {}     # type: Dict[FrozenSet[LR0Item], List[int]]
+    merge_conflict = {}        # type: Dict[FrozenSet[LR0Item], List[int]]
+    conflict_issues = {
+    }                          # type: Dict[FrozenSet[LR0Item], Dict[FrozenSet[Tuple[LR0Item, FrozenSet[LR0Path]]], List[Tuple[int, int]]]]
+
     num_rr = 0
     num_sr = 0
 
@@ -484,7 +489,9 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                 assoc_error = False
                 precedence_set = False
                 split = False
+                all_items = []
                 for j, items in action_dest.items():
+                    all_items += items
                     for item in items:
                         if item._precedence is not None:
                             precedence_set = True
@@ -495,49 +502,63 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                                 shift_actions = j >= 0
                                 reduce_actions = j < 0
                                 split = item._split
+                                item._split_use += 1
                             elif item._precedence[1] == precedence:
                                 if item._precedence[0] != associativity:
                                     assoc_error = True
                                 shift_actions |= j >= 0
                                 reduce_actions |= j < 0
                                 split |= item._split
+                                item._split_use += 1
                         elif precedence == -1:
                             shift_actions |= j >= 0
                             reduce_actions |= j < 0
                             split |= item._split
+                            item._split_use += 1
+
+                all_items_set = frozenset(all_items)
+
+                if assoc_error:
+                    try:
+                        priority_conflict[all_items_set].append(st)
+                    except KeyError:
+                        priority_conflict[all_items_set] = [st]
 
                 for j, items in action_dest.items():
                     for item in items:
                         if item._precedence is None and precedence_set:
                             if j >= 0:
-                                conflict_log.info('  ** %s has no precedence annotation', item.to_string(name_map))
-                                num_missing_annotations += 1
+                                try:
+                                    priority_missing[item].append(st)
+                                except KeyError:
+                                    priority_missing[item] = [st]
                             conflict_log.info('  [discarded] %s', item.to_string(name_map))
                             continue
                         elif item._precedence is not None:
                             if item._precedence[1] < precedence:
                                 conflict_log.info('  [discarded] %s', item.to_string(name_map))
                                 continue
-                            if assoc_error:
-                                conflict_log.info('  *** %s has no precedence annotation', item.to_string(name_map))
-                                num_missing_annotations += 1
-                            if split and not item._split:
-                                conflict_log.info('  *** %s has no split annotation', item.to_string(name_map))
-                                num_missing_annotations += 1
                             if j < 0 and shift_actions and associativity == 'left':
                                 conflict_log.info('  [discarded] %s', item.to_string(name_map))
                                 continue
                             if j >= 0 and reduce_actions and associativity == 'right':
                                 conflict_log.info('  [discarded] %s', item.to_string(name_map))
                                 continue
+                        if split and not item._split:
+                            try:
+                                split_missing[item].append(st)
+                            except KeyError:
+                                split_missing[item] = [st]
                         try:
                             accepted_actions[j].append(item)
                         except KeyError:
                             accepted_actions[j] = [item]
                         conflict_log.info('  [accepted]  %s', item.to_string(name_map))
+                conflict_log.info('')
             else:
                 accepted_actions = action_dest
 
+            split = False
             st_action[a] = tuple(sorted(accepted_actions))
             if len(accepted_actions) > 1 and not split:
                 # handle conflicts
@@ -560,15 +581,18 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                             sm_log.info('        reduce using rule %s', item.to_string(name_map))
                             conflicts.append((node, a))
 
-                conflict_log.info(' *** conflicts:')
-                for node, examples in _find_counterexamples(conflicts):
-                    item = node._item
-                    if item._last == item:
-                        action_str = 'Reduce'
-                    else:
-                        action_str = 'Shift'
-
-                    _log('%s using rule %s' % (action_str, item.to_string(name_map)), examples, conflict_log, name_map)
+                counterexamples = _find_counterexamples(conflicts)
+                conflict_items = frozenset(node._item for node, _ in counterexamples)
+                conflict_key = frozenset(((node._item, frozenset(paths)) for node, paths in counterexamples))
+                try:
+                    item_conflict_node = conflict_issues[conflict_items]
+                except KeyError:
+                    conflict_issues[conflict_items] = {conflict_key: [(st, a)]}
+                else:
+                    try:
+                        item_conflict_node[conflict_key].append((st, a))
+                    except KeyError:
+                        item_conflict_node[conflict_key] = [(st, a)]
             elif len(accepted_actions) > 1:
                 splits = []        # type: List[Tuple[LR0Node, Optional[int]]]
                 sm_log.info('    %-30s split', name_map[a])
@@ -589,34 +613,28 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
 
                 for (state, depth), item_list in split_items.items():
                     state_merge = None # type: Optional[str]
-                    show_merge = False
+                    state_merge_error = False
 
                     for item in item_list:
                         merge = item._last._merge
+                        item._last._merge_use += 1
                         if merge is None:
-                            conflict_log.info(
-                                '  [%d] merge annotation missing: %s' % (state._index, item.to_string(name_map))
-                            )
-                            num_missing_merge_annotations += 1
-                            show_merge = True
+                            try:
+                                merge_missing[item].append(st)
+                            except KeyError:
+                                merge_missing[item] = [st]
                         elif state_merge is None:
                             state_merge = merge
                         elif state_merge != merge:
-                            node = state[item]
-                            conflict_log.info(
-                                '  [%d] merge annotation conflict[%s]: %s' %
-                                (state._index, state_merge, item.to_string(name_map))
-                            )
-                            invalid_merge_count += 1
-                            show_merge = True
-
+                            state_merge_error = True
                     if state_merge is not None:
                         merge_action[(state._index, depth)] = state_merge
-
-                    if show_merge:
-                        for item in item_list:
-                            paths = item_list[item]
-                            _log(item.to_string(name_map)[0], paths, conflict_log, name_map)
+                    if state_merge_error:
+                        key = frozenset(item_list)
+                        try:
+                            merge_conflict[key].append(st)
+                        except KeyError:
+                            merge_conflict[key] = [st]
 
             else:
                 for j in st_action[a]:
@@ -665,25 +683,47 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
     dot_file.info('}')
 
     # Report errors
-    if num_missing_annotations == 1:
-        error_log.warning('1 missing precedence annotation')
-    elif num_missing_annotations > 1:
-        error_log.warning('%d missing precedence annotations', num_missing_annotations)
+    for missing, text in (
+        (priority_missing, 'precedence'),
+        (split_missing, 'split'),
+        (merge_missing, 'merge'),
+    ):
+        if len(missing) == 1:
+            error_log.warning('1 missing %s annotation', text)
+        elif len(missing) > 1:
+            error_log.warning('%d missing %s annotations', len(missing), text)
+        for item, _ in missing.items():
+            error_log.diagnostic(item.rule._filename, item.rule._lineno, item.to_string(name_map))
 
-    if num_missing_merge_annotations == 1:
-        error_log.warning('1 missing merge annotation')
-    elif num_missing_merge_annotations > 1:
-        error_log.warning('%d missing merge annotations', num_missing_merge_annotations)
+    if len(priority_conflict) == 1:
+        error_log.warning('1 conflicting precedence annotation')
+    elif len(priority_conflict) > 1:
+        error_log.warning('%d conflicting precedence annotations', len(priority_conflict))
+    for item_set, state_numbers in priority_conflict.items():
+        error_log.warning('conflicting precedence in states %s:', ', '.join([str(i) for i in state_numbers]))
+        for item in sorted(item_set):
+            error_log.diagnostic(item.rule._filename, item.rule._lineno, item.to_string(name_map))
 
-    if invalid_precedence_count == 1:
-        error_log.warning('1 invalid precedence annotation')
-    elif invalid_precedence_count > 1:
-        error_log.warning('%d invalid precedence annotations', invalid_precedence_count)
+    if len(merge_conflict) == 1:
+        error_log.warning('1 conflicting merge annotation')
+    elif len(merge_conflict) > 1:
+        error_log.warning('%d conflicting merge annotations', len(merge_conflict))
+    for item_set, state_numbers in merge_conflict.items():
+        error_log.warning('conflicting merge in states %s:', ', '.join([str(i) for i in state_numbers]))
+        for item in sorted(item_set):
+            error_log.diagnostic(item.rule._filename, item.rule._lineno, item.to_string(name_map))
 
-    if invalid_merge_count == 1:
-        error_log.warning('1 invalid merge annotation')
-    elif invalid_merge_count > 1:
-        error_log.warning('%d invalid merge annotations', invalid_merge_count)
+    for _, production in sorted(productions.items()):
+        for rule in production:
+            item_iterator = rule._item # type: Optional[LR0Item]
+            while item_iterator:
+                if item_iterator._split and item_iterator._split_use == 0:
+                    error_log.warning('unused split annotation')
+                    error_log.diagnostic(rule._filename, rule._lineno, item_iterator.to_string(name_map))
+                item_iterator = item._next
+            if rule._item._last._merge_use and rule._item._last._merge_use == 0:
+                error_log.warning('unused merge annotation')
+                error_log.diagnostic(rule._filename, rule._lineno, rule._item._last.to_string(name_map))
 
     if num_sr == 1:
         error_log.warning('1 shift/reduce conflict')

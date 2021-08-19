@@ -20,6 +20,8 @@ class LR0Item(object):
         self._split = False
         self._merge = None                                    # type: Optional[str]
         self._merge_skip = False
+        self._split_use = 0
+        self._merge_use = 0
 
         if index == rule.len:
             index = -1

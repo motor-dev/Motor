@@ -104,7 +104,7 @@ from be_typing import TYPE_CHECKING
 @glrp.rule('primary-expression : "character-constant"')
 @glrp.rule('primary-expression : "enumeration-constant"')
 @glrp.rule('primary-expression : "string-literal"')
-@glrp.rule('primary-expression : [split]"(" expression ")"')
+@glrp.rule('primary-expression : "(" expression ")"')
 @glrp.rule('primary-expression : generic-selection')
 def primary_expression(self, p):
     # type: (CParser, glrp.Production) -> None

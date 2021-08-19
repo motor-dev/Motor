@@ -204,7 +204,7 @@ def declaration(self, p):
 @c89
 #@glrp.rule('declaration-specifiers : declaration-specifier attribute-specifier-sequence?')
 @glrp.rule('declaration-specifiers[split] : declaration-specifier')
-@glrp.rule('declaration-specifiers : declaration-specifier attribute-specifier-sequence')
+@glrp.rule('declaration-specifiers[split] : declaration-specifier attribute-specifier-sequence')
 @glrp.rule('declaration-specifiers : declaration-specifier declaration-specifiers')
 def declaration_specifiers(self, p):
     # type: (CParser, glrp.Production) -> None
@@ -314,7 +314,7 @@ def member_declaration(self, p):
 
 
 @c89
-@glrp.rule('specifier-qualifier-list : type-specifier-qualifier attribute-specifier-sequence?')
+@glrp.rule('specifier-qualifier-list[split] : type-specifier-qualifier attribute-specifier-sequence?')
 @glrp.rule('specifier-qualifier-list : type-specifier-qualifier specifier-qualifier-list')
 def specifier_qualifier_list(self, p):
     # type: (CParser, glrp.Production) -> None
@@ -413,11 +413,11 @@ def declarator(self, p):
 
 @c89
 #@glrp.rule('direct-declarator : identifier attribute-specifier-sequence?')
-@glrp.rule('direct-declarator : [split]identifier')
-@glrp.rule('direct-declarator : identifier attribute-specifier-sequence')
+@glrp.rule('direct-declarator[split] : identifier')
+@glrp.rule('direct-declarator[split] : identifier attribute-specifier-sequence')
 @glrp.rule('direct-declarator : "(" declarator ")"')
-@glrp.rule('direct-declarator : array-declarator attribute-specifier-sequence?')
-@glrp.rule('direct-declarator : function-declarator attribute-specifier-sequence?')
+@glrp.rule('direct-declarator[split] : array-declarator attribute-specifier-sequence?')
+@glrp.rule('direct-declarator[split] : function-declarator attribute-specifier-sequence?')
 def direct_declarator(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
@@ -441,7 +441,7 @@ def function_declarator(self, p):
 
 
 @c89
-@glrp.rule('pointer : "*" attribute-specifier-sequence? type-qualifier-list?')
+@glrp.rule('pointer[split] : "*" attribute-specifier-sequence? type-qualifier-list?')
 @glrp.rule('pointer : "*" attribute-specifier-sequence? type-qualifier-list? pointer')
 def pointer(self, p):
     # type: (CParser, glrp.Production) -> None
@@ -502,8 +502,8 @@ def abstract_declarator(self, p):
 
 @c89
 @glrp.rule('direct-abstract-declarator : "(" abstract-declarator ")"')
-@glrp.rule('direct-abstract-declarator : array-abstract-declarator attribute-specifier-sequence?')
-@glrp.rule('direct-abstract-declarator : function-abstract-declarator attribute-specifier-sequence?')
+@glrp.rule('direct-abstract-declarator[split] : array-abstract-declarator attribute-specifier-sequence?')
+@glrp.rule('direct-abstract-declarator[split] : function-abstract-declarator attribute-specifier-sequence?')
 def direct_abstract_declarator(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
