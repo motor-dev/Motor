@@ -13,4 +13,5 @@ BugEngine.*
 .clang_complete
 **/.vscode
 **/.mypy_cache
-
+mak/libs/pyxx/tables/*.tbl
+docs/_build
