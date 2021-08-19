@@ -1,16 +1,16 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PYTHONLIB_PY_OBJECT_HH_
-#define BE_PYTHONLIB_PY_OBJECT_HH_
+#ifndef MOTOR_PYTHONLIB_PY_OBJECT_HH_
+#define MOTOR_PYTHONLIB_PY_OBJECT_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/meta/value.hh>
-#include <bugengine/plugin.scripting.pythonlib/pythontypes.hh>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/meta/value.hh>
+#include <motor/plugin.scripting.pythonlib/pythontypes.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
-struct PyBugObject : public PyObject
+struct PyMotorObject : public PyObject
 {
     PyObject*   owner;
     Meta::Value value;
@@ -35,7 +35,7 @@ struct PyBugObject : public PyObject
     static PyMethodDef  s_methods[];
 };
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python
 
 /**************************************************************************************************/
 #endif

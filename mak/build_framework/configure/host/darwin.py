@@ -5,7 +5,7 @@ import os
 import sys
 import shlex
 from waflib import Options, Utils
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def configure(conf):

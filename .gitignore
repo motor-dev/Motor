@@ -6,7 +6,7 @@ bld/*
 nbproject/*
 *.pyc
 .lock-*
-BugEngine.*
+Motor.*
 .*project
 .settings
 .tags

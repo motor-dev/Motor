@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bugengine/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
 #include <loaders/nullsurface.hh>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
 #include <nullrenderer.hh>
 
-namespace BugEngine { namespace Null {
+namespace Motor { namespace Null {
 
 void NullSurface::begin(ClearMode /*clear*/) const
 {
@@ -38,4 +38,4 @@ void NullSurface::unload()
 {
 }
 
-}}  // namespace BugEngine::Null
+}}  // namespace Motor::Null

@@ -9,7 +9,7 @@ selection-statement:
 
 import glrp
 from ...parser import cxx98
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('selection-statement[prec:left,0] : "if" "constexpr"? "(" init-statement? condition ")" statement')

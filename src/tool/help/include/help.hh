@@ -1,16 +1,16 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_HELP_HELP_HH_
-#define BE_HELP_HELP_HH_
+#ifndef MOTOR_HELP_HELP_HH_
+#define MOTOR_HELP_HELP_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
-#include <bugengine/application.hh>
-#include <bugengine/plugin.scripting.package/package.script.hh>
-#include <bugengine/plugin/plugin.hh>
-#include <bugengine/resource/loader.hh>
+#include <motor/application.hh>
+#include <motor/plugin.scripting.package/package.script.hh>
+#include <motor/plugin/plugin.hh>
+#include <motor/resource/loader.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 class Help : public Application
 {
@@ -24,7 +24,7 @@ public:
     ~Help();
 };
 
-}  // namespace BugEngine
+}  // namespace Motor
 
 /**************************************************************************************************/
 #endif

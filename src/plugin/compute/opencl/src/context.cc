@@ -1,11 +1,11 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.compute.opencl/stdafx.h>
+#include <motor/plugin.compute.opencl/stdafx.h>
 #include <context.hh>
 #include <platform.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
+namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
 static CLStringInfo getDeviceInfo(cl_device_id device, cl_device_info name)
 {
@@ -28,11 +28,11 @@ Context::Context(weak< Platform > platform, cl_device_id device, cl_context cont
     , m_context(context)
     , m_pointerSize(getDevicePointerSize(device))
 {
-    be_info("Found %s %s on %s (%s/%s)" | getDeviceInfo(m_device, CL_DEVICE_VERSION).info
-            | getDeviceInfo(m_device, CL_DEVICE_PROFILE).info
-            | getDeviceInfo(m_device, CL_DEVICE_NAME).info
-            | getDeviceInfo(m_device, CL_DEVICE_VENDOR).info
-            | getDeviceInfo(m_device, CL_DRIVER_VERSION).info);
+    motor_info("Found %s %s on %s (%s/%s)" | getDeviceInfo(m_device, CL_DEVICE_VERSION).info
+               | getDeviceInfo(m_device, CL_DEVICE_PROFILE).info
+               | getDeviceInfo(m_device, CL_DEVICE_NAME).info
+               | getDeviceInfo(m_device, CL_DEVICE_VENDOR).info
+               | getDeviceInfo(m_device, CL_DRIVER_VERSION).info);
     size_t size = 0;
     checkResult(clGetDeviceInfo(m_device, CL_DEVICE_EXTENSIONS, 0, 0, &size));
 
@@ -50,10 +50,10 @@ Context::Context(weak< Platform > platform, cl_device_id device, cl_context cont
             size++;
         }
         *nextLine = 0;
-        be_info("Extensions: %s" | deviceExtensionsIterator);
+        motor_info("Extensions: %s" | deviceExtensionsIterator);
         deviceExtensionsIterator = nextLine + 1;
     }
-    if(*deviceExtensionsIterator) be_info("Extensions: %s" | deviceExtensionsIterator);
+    if(*deviceExtensionsIterator) motor_info("Extensions: %s" | deviceExtensionsIterator);
     freea(deviceExtensions);
 }
 
@@ -64,13 +64,13 @@ Context::~Context()
 
 cl_program Context::buildProgram(const u64 size, const char* code) const
 {
-    size_t     codeSize  = be_checked_numcast< size_t >(size);
+    size_t     codeSize  = motor_checked_numcast< size_t >(size);
     cl_int     errorCode = 0;
     cl_program program   = clCreateProgramWithSource(m_context, 1, &code, &codeSize, &errorCode);
     if(errorCode != CL_SUCCESS)
     {
-        be_error("failed to load OpenCL kernel: clCreateProgramWithBinary failed with code %d"
-                 | errorCode);
+        motor_error("failed to load OpenCL kernel: clCreateProgramWithBinary failed with code %d"
+                    | errorCode);
         return program;
     }
 
@@ -84,11 +84,11 @@ cl_program Context::buildProgram(const u64 size, const char* code) const
         minitl::Allocator::Block< char > buffer(Arena::temporary(), len + 1);
         clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG, (len + 1), buffer.data(),
                               &len);
-        be_info("compilation result:\n%s" | buffer.data());
+        motor_info("compilation result:\n%s" | buffer.data());
     }
     if(errorCode != CL_SUCCESS)
     {
-        be_error("failed to load OpenCL kernel: clBuildProgram failed with code %d" | errorCode);
+        motor_error("failed to load OpenCL kernel: clBuildProgram failed with code %d" | errorCode);
         return program;
     }
 #if CL_VERSION_1_2
@@ -96,21 +96,21 @@ cl_program Context::buildProgram(const u64 size, const char* code) const
         checkResult(clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, 0, 0, &len));
         minitl::Allocator::Block< char > buffer(Arena::temporary(), len + 1);
         clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, (len + 1), buffer.data(), &len);
-        be_info("list of kernels: %s" | buffer.data());
+        motor_info("list of kernels: %s" | buffer.data());
         freea(buffer);
     }
 #endif
     /*kernel = clCreateKernel(program, "_kmain", &errorCode);
     if(errorCode != CL_SUCCESS)
     {
-        be_error("failed to load OpenCL kernel: clCreateKernel failed with code %d" | errorCode);
+        motor_error("failed to load OpenCL kernel: clCreateKernel failed with code %d" | errorCode);
         return minitl::make_tuple(kernel, program);
     }
     else
     {
-        be_info("success");
+        motor_info("success");
     }*/
     return program;
 }
 
-}}}  // namespace BugEngine::KernelScheduler::OpenCL
+}}}  // namespace Motor::KernelScheduler::OpenCL

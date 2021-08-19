@@ -44,7 +44,7 @@ def thirdparty(bld, name, feature='', path='', source_node=None, var='', use=[],
                     target=target_name,
                     features=['c', 'cxx'],
                     export_includes=env['check_%s_includes' % var],
-                    export_defines=env['check_%s_defines' % var] + ['BE_HAVE_%s' % var_id],
+                    export_defines=env['check_%s_defines' % var] + ['MOTOR_HAVE_%s' % var_id],
                     export_libpath=expand_libpath(bld, env['check_%s_libpath' % var]),
                     export_lib=env['check_%s_libs' % var],
                     export_framework=env['check_%s_frameworks' % var],
@@ -83,7 +83,7 @@ def thirdparty(bld, name, feature='', path='', source_node=None, var='', use=[],
 
         if supported:
             if internal_deps:
-                tg = bld(target=name, features=['bugengine:multiarch'], use=[d.name for d in internal_deps])
+                tg = bld(target=name, features=['motor:multiarch'], use=[d.name for d in internal_deps])
 
             if name not in bld.env.THIRDPARTIES_FIRST:
                 bin_paths = [
@@ -107,7 +107,7 @@ def thirdparty(bld, name, feature='', path='', source_node=None, var='', use=[],
                 target=target_name,
                 features=['c', 'cxx'],
                 export_includes=env['check_%s_includes' % var],
-                export_defines=env['check_%s_defines' % var] + ['BE_HAVE_%s' % var_id],
+                export_defines=env['check_%s_defines' % var] + ['MOTOR_HAVE_%s' % var_id],
                 export_libpath=expand_libpath(bld, env['check_%s_libpath' % var]),
                 export_lib=env['check_%s_libs' % var],
                 export_framework=env['check_%s_frameworks' % var],

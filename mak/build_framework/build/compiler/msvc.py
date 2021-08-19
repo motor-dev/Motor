@@ -36,7 +36,7 @@ def masm_hook(self, node):
         return self.create_compiled_task('masm', node)
 
 
-@feature('c', 'cxx', 'bugengine:kernel')
+@feature('c', 'cxx', 'motor:kernel')
 @after_method('process_source')
 @after_method('propagate_uselib_vars')
 def apply_pdb_flag(self):

@@ -1,6 +1,6 @@
 def p_tag(p):
     """
-        tag : BE_TAG LEFT_PARENTHESIS name LEFT_PARENTHESIS skip_parameters RIGHT_PARENTHESIS RIGHT_PARENTHESIS
+        tag : MOTOR_TAG LEFT_PARENTHESIS name LEFT_PARENTHESIS skip_parameters RIGHT_PARENTHESIS RIGHT_PARENTHESIS
     """
     p[0] = (p[3], p[5])
 

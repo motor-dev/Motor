@@ -1,17 +1,17 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PACKAGE_PACKAGEBUILDER_HH_
-#define BE_PACKAGE_PACKAGEBUILDER_HH_
+#ifndef MOTOR_PACKAGE_PACKAGEBUILDER_HH_
+#define MOTOR_PACKAGE_PACKAGEBUILDER_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.scripting.package/stdafx.h>
-#include <bugengine/plugin.scripting.package/nodes/package.hh>
+#include <motor/plugin.scripting.package/stdafx.h>
+#include <motor/plugin.scripting.package/nodes/package.hh>
 
-namespace BugEngine { namespace PackageBuilder {
+namespace Motor { namespace PackageBuilder {
 
 class PackageBuilder : public minitl::pointer
 {
-    BE_NOCOPY(PackageBuilder);
+    MOTOR_NOCOPY(PackageBuilder);
 
 private:
     ref< Folder > m_dataFolder;
@@ -25,7 +25,7 @@ public:
                                         const minitl::Allocator::Block< u8 >& buffer);
 };
 
-}}  // namespace BugEngine::PackageBuilder
+}}  // namespace Motor::PackageBuilder
 
 /**************************************************************************************************/
 #endif

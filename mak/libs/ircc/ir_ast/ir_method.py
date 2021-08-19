@@ -7,7 +7,7 @@ from .ir_code import IrCodeBlock
 from .ir_scope import IrScope
 from ..ir_position import IrPosition
 from ..ir_messages import IrAddressSpaceResolutionError
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 class IrMethodParameter(IrExpression):

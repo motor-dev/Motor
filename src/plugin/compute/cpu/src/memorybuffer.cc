@@ -1,11 +1,11 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.compute.cpu/stdafx.h>
-#include <bugengine/plugin.compute.cpu/memorybuffer.hh>
+#include <motor/plugin.compute.cpu/stdafx.h>
 #include <memoryhost.hh>
+#include <motor/plugin.compute.cpu/memorybuffer.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace CPU {
+namespace Motor { namespace KernelScheduler { namespace CPU {
 
 MemoryBuffer::MemoryBuffer(weak< const MemoryHost > provider) : IMemoryBuffer(provider)
 {
@@ -15,4 +15,4 @@ MemoryBuffer::~MemoryBuffer()
 {
 }
 
-}}}  // namespace BugEngine::KernelScheduler::CPU
+}}}  // namespace Motor::KernelScheduler::CPU

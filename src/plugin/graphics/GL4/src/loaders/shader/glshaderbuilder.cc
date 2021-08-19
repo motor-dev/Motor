@@ -1,10 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.GL4/stdafx.h>
+#include <motor/plugin.graphics.GL4/stdafx.h>
 #include <loaders/shader/glshaderbuilder.hh>
 
-namespace BugEngine { namespace OpenGL {
+namespace Motor { namespace OpenGL {
 
 static const char* toString(Shaders::Semantic semantic)
 {
@@ -14,7 +14,7 @@ static const char* toString(Shaders::Semantic semantic)
     case Shaders::Color: return "gl_FragColor";
     case Shaders::Depth: return "gl_FragDepth";
     default:
-        be_error("semantic %d not recognized by the GLSL shader builder" | semantic);
+        motor_error("semantic %d not recognized by the GLSL shader builder" | semantic);
         return "gl_FragColor";
     }
 }
@@ -61,14 +61,14 @@ static const char* toString(Shaders::ValueType type)
     case Shaders::Type_Bool2: return "bvec2";
     case Shaders::Type_Bool3: return "bvec3";
     case Shaders::Type_Bool4: return "bvec4";
-    default: be_error("type %d not recognized by the GLSL shader builder" | type); return "mat4";
+    default: motor_error("type %d not recognized by the GLSL shader builder" | type); return "mat4";
     }
 }
 
 GLShaderBuilder::GLShaderBuilder(GLenum shaderType) : m_shaderType(shaderType)
 {
     writeln("#version 140");
-    be_forceuse(m_shaderType);
+    motor_forceuse(m_shaderType);
 }
 
 GLShaderBuilder::~GLShaderBuilder()
@@ -103,7 +103,7 @@ void GLShaderBuilder::doAddAttributeDeclaration(const istring& name, Shaders::St
     }
     else if(stage == Shaders::FragmentStage)
     {
-        be_assert(false, "not yet");
+        motor_assert(false, "not yet");
     }
 }
 
@@ -185,4 +185,4 @@ void GLShaderBuilder::doWrite(bool value)
     write(value ? "true" : "false");
 }
 
-}}  // namespace BugEngine::OpenGL
+}}  // namespace Motor::OpenGL

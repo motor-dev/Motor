@@ -1,20 +1,20 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_GL4_LOADERS_RENDERTARGET_GLWINDOW_HH_
-#define BE_GL4_LOADERS_RENDERTARGET_GLWINDOW_HH_
+#ifndef MOTOR_GL4_LOADERS_RENDERTARGET_GLWINDOW_HH_
+#define MOTOR_GL4_LOADERS_RENDERTARGET_GLWINDOW_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.graphics.GL4/stdafx.h>
-#include <bugengine/plugin.graphics.3d/renderer/irenderer.hh>
+#include <motor/plugin.graphics.GL4/stdafx.h>
+#include <motor/plugin.graphics.3d/renderer/irenderer.hh>
 
-namespace BugEngine { namespace OpenGL {
+namespace Motor { namespace OpenGL {
 
 class GLRenderer;
 
 class GLWindow : public Windowing::Window
 {
     friend class GLRenderer;
-    BE_NOCOPY(GLWindow);
+    MOTOR_NOCOPY(GLWindow);
 
 private:
     class Context;
@@ -39,7 +39,7 @@ public:
     ~GLWindow();
 };
 
-}}  // namespace BugEngine::OpenGL
+}}  // namespace Motor::OpenGL
 
 /**************************************************************************************************/
 #endif

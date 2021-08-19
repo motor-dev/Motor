@@ -1,8 +1,8 @@
 load test.compute.unittests as unittests;
 
-config = bugengine.World.Component.StorageConfiguration();
+config = motor.World.Component.StorageConfiguration();
 
-storage_componentInt = bugengine.World.Component.LogicComponentStorage
+storage_componentInt = motor.World.Component.LogicComponentStorage
 (
     configuration = config;
     componentType = unittests.ComponentInt;
@@ -18,7 +18,7 @@ whileloop = unittests.Kernels.Statement.WhileLoop
     inout = forloop.inout;
 );
 
-world = bugengine.World.World
+world = motor.World.World
 (
     configuration = config;
     products = [whileloop.inout];

@@ -1,16 +1,16 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_DX9_STDAFX_H_
-#define BE_DX9_STDAFX_H_
+#ifndef MOTOR_DX9_STDAFX_H_
+#define MOTOR_DX9_STDAFX_H_
 /**************************************************************************************************/
 
-#include <bugengine/stdafx.h>
+#include <motor/stdafx.h>
 
-#include <bugengine/plugin.graphics.3d/stdafx.h>
-#include <bugengine/plugin.graphics.windowing/stdafx.h>
+#include <motor/plugin.graphics.3d/stdafx.h>
+#include <motor/plugin.graphics.windowing/stdafx.h>
 
-#ifdef BE_COMPILER_MSVC
+#ifdef MOTOR_COMPILER_MSVC
 #    pragma warning(disable : 4985)
 #endif
 

@@ -1,4 +1,4 @@
-Building BugEngine from source
+Building Motor from source
 ##############################
 
 Setting up a build environment
@@ -21,7 +21,7 @@ The build system will usually automatically detect compilers, Flex and Bison fro
 and/or the registry. Some of these components can be downloaded from the GitHub release page for
 certain platforms/architectures.
 
-Since BugEngine is very modular, it does not strictly require any development library to be
+Since Motor is very modular, it does not strictly require any development library to be
 installed, at the cost of seeing the plugin disabled. The core engine depends only on standard or
 operating system libraries (threading, filesystem, etc.).
 
@@ -30,7 +30,7 @@ Building from the command line
 
 .. highlight:: console
 
-The BugEngine uses `WAF <https://waf.io/>`__ as the build system. The build happens in two phases:
+The Motor uses `WAF <https://waf.io/>`__ as the build system. The build happens in two phases:
 
 #. The build environments will be created. 
    This step detects all available compilers (including cross compilers) and creates toolchain
@@ -42,12 +42,12 @@ The BugEngine uses `WAF <https://waf.io/>`__ as the build system. The build happ
 
          ::
 
-            ~/bugengine > python waf configure
+            ~/motor > python waf configure
 
       ::
 
-         Setting top to                           : ~/bugengine 
-         Setting out to                           : ~/bugengine/bld/.waf 
+         Setting top to                           : ~/motor 
+         Setting out to                           : ~/motor/bld/.waf 
          Checking for program 'flex'              : /usr/bin/flex 
          Checking for program 'bison'             : /usr/bin/bison 
          Looking for clang compilers              : done 
@@ -88,7 +88,7 @@ The BugEngine uses `WAF <https://waf.io/>`__ as the build system. The build happ
 
          ::
 
-            ~/bugengine > python waf build:linux_gnu_amd64-clang_amd64-12.0.0:debug
+            ~/motor > python waf build:linux_gnu_amd64-clang_amd64-12.0.0:debug
 
       ::
 
@@ -111,19 +111,19 @@ The BugEngine uses `WAF <https://waf.io/>`__ as the build system. The build happ
          'setup:linux_gnu_amd64-clang_amd64-12.0.0' finished successfully (1.008s)
          Generating LALR tables
          Generating LALR tables
-         [  1/618] {bison}       bugengine.reflection.pp/valueparser.cc
+         [  1/618] {bison}       motor.reflection.pp/valueparser.cc
          [  2/618] {bison}       plugin.scripting.package.pp/packageparser.cc
-         [  3/618] {master}      bugengine.minitl/master-cxx-0.cc
-         [  4/618] {master}      bugengine.core/master-c-0.c
-         [  5/618] {master}      bugengine.core/master-cxx-2.cc
-         [  6/618] {master}      bugengine.core/master-cxx-1.cc
-         [  7/618] {master}      bugengine.core/master-cxx-0.cc
-         [  8/618] {master}      bugengine.network/master-cxx-0.cc
-         [  9/618] {master}      bugengine.filesystem/master-cxx-0.cc
-         [ 10/618] {master}      bugengine.introspect/master-cxx-0.cc
-         [ 11/618] {master}      bugengine.settings/master-cxx-0.cc
-         [ 12/618] {master}      bugengine.scheduler/master-cxx-0.cc
-         [ 13/618] {master}      bugengine.plugin/master-cxx-0.cc
+         [  3/618] {master}      motor.minitl/master-cxx-0.cc
+         [  4/618] {master}      motor.core/master-c-0.c
+         [  5/618] {master}      motor.core/master-cxx-2.cc
+         [  6/618] {master}      motor.core/master-cxx-1.cc
+         [  7/618] {master}      motor.core/master-cxx-0.cc
+         [  8/618] {master}      motor.network/master-cxx-0.cc
+         [  9/618] {master}      motor.filesystem/master-cxx-0.cc
+         [ 10/618] {master}      motor.introspect/master-cxx-0.cc
+         [ 11/618] {master}      motor.settings/master-cxx-0.cc
+         [ 12/618] {master}      motor.scheduler/master-cxx-0.cc
+         [ 13/618] {master}      motor.plugin/master-cxx-0.cc
          [ 14/618] {master}      plugin.graphics.shadermodel1/master-cxx-1.cc
          [ 15/618] {master}      plugin.graphics.shadermodel1/master-cxx-0.cc
          [ 16/618] {master}      plugin.compute.cpu/master-cxx-0.cc
@@ -144,7 +144,7 @@ The BugEngine uses `WAF <https://waf.io/>`__ as the build system. The build happ
          [ 31/618] {clc32}       test.compute.unittests.statement.loop.cl/loop.32.ll
          [ 32/618] {nvcc}        test.compute.unittests.statement.if.cuda/if.fatbin
          [ 33/618] {nvcc}        test.compute.unittests.statement.loop.cuda/loop.fatbin
-         [ 34/618] {master}      bugengine.launcher/master-cxx-0.cc
+         [ 34/618] {master}      motor.launcher/master-cxx-0.cc
          [ 35/618] {master}      plugin.debug.assert/master-cxx-0.cc
          ...
          [612/618] {cxxshlib}    plugin.graphics.nullrender/libplugin.graphics.nullrender.so

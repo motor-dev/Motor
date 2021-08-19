@@ -2,7 +2,7 @@ from ..ir_code import IrInstruction
 from ..ir_type import IrTypePtr, IrTypeStruct, IrTypePtr, IrTypeArray, IrTypeVector, IrAddressSpace
 from ..ir_value import IrValueExpr
 from ..ir_expr import IrExpressionConstant
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 class IrInstAlloca(IrInstruction):

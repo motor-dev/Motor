@@ -42,8 +42,8 @@ ${SRC[0].abspath()}
 cls = Task.task_factory('rtti', cpprtti, [], 'BLUE', ext_in='.h .hh .hxx', ext_out='.cc')
 cls.scan = scan
 
-namespace_register = 'BE_REGISTER_NAMESPACE_%d_NAMED(%s, %s)\n'
-namespace_alias = 'BE_REGISTER_ROOT_NAMESPACE(%s, %s, %s)\n'
+namespace_register = 'MOTOR_REGISTER_NAMESPACE_%d_NAMED(%s, %s)\n'
+namespace_alias = 'MOTOR_REGISTER_ROOT_NAMESPACE(%s, %s, %s)\n'
 
 
 class docgen(Task.Task):
@@ -63,7 +63,7 @@ class nsdef(Task.Task):
             pch = getattr(self, 'pch', '')
             if pch:
                 namespace_file.write('#include <%s>\n' % pch)
-            namespace_file.write('#include <bugengine/meta/engine/namespace.hh>\n')
+            namespace_file.write('#include <motor/meta/engine/namespace.hh>\n')
             for input in self.inputs:
                 with open(input.abspath(), 'rb') as in_file:
                     while True:
@@ -95,11 +95,11 @@ def datagen(self, node):
     outs.append(out_node.change_ext('.namespaces'))
 
     #tsk = self.create_task('rtti', node, [])
-    #tsk.env.CPPRTTI_GENERATE = self.bld.bugenginenode.find_node('mak/tools/bin/cpprtti_generate.py').abspath()
-    #tsk.env.MACROS_IGNORE = self.bld.bugenginenode.find_node('mak/libs/cpp/macros_ignore').abspath()
+    #tsk.env.CPPRTTI_GENERATE = self.bld.motornode.find_node('mak/tools/bin/cpprtti_generate.py').abspath()
+    #tsk.env.MACROS_IGNORE = self.bld.motornode.find_node('mak/libs/cpp/macros_ignore').abspath()
     #tsk.env.TMPDIR = self.bld.bldnode.parent.parent.abspath()
-    #tsk.dep_nodes = [self.bld.bugenginenode.find_node('mak/tools/bin/cpprtti_generate.py')]
-    #tsk.dep_nodes += self.bld.bugenginenode.find_node('mak/libs/cpprtti').ant_glob('**/*.py')
+    #tsk.dep_nodes = [self.bld.motornode.find_node('mak/tools/bin/cpprtti_generate.py')]
+    #tsk.dep_nodes += self.bld.motornode.find_node('mak/libs/cpprtti').ant_glob('**/*.py')
 
     tsk = self.create_task('datagen', node, outs)
     for include_node in self.includes:
@@ -108,16 +108,16 @@ def datagen(self, node):
             break
     else:
         raise Errors.WafError('unable to find include root for node %s' % node)
-    tsk.env.DDF = self.bld.bugenginenode.find_node('mak/tools/bin/ddf.py').abspath()
-    tsk.env.MACROS_IGNORE = self.bld.bugenginenode.find_node('mak/libs/cpp/macros_ignore').abspath()
+    tsk.env.DDF = self.bld.motornode.find_node('mak/tools/bin/ddf.py').abspath()
+    tsk.env.MACROS_IGNORE = self.bld.motornode.find_node('mak/libs/cpp/macros_ignore').abspath()
     tsk.env.TMPDIR = self.bld.bldnode.parent.parent.abspath()
     tsk.path = self.bld.variant_dir
     tsk.env.PCH_HEADER = ['--pch']
     tsk.env.PCH = self.pchstop and [self.pchstop] or []
     tsk.env.ROOT_ALIAS = self.root_namespace
     out_node.parent.mkdir()
-    tsk.dep_nodes = [self.bld.bugenginenode.find_node('mak/tools/bin/ddf.py')]
-    tsk.dep_nodes += self.bld.bugenginenode.find_node('mak/libs/cpp').ant_glob('**/*.py')
+    tsk.dep_nodes = [self.bld.motornode.find_node('mak/tools/bin/ddf.py')]
+    tsk.dep_nodes += self.bld.motornode.find_node('mak/libs/cpp').ant_glob('**/*.py')
     try:
         self.out_sources += outs[:2]
     except:
@@ -167,8 +167,8 @@ def add_namespace_file(self, node):
 
 @extension('.doc')
 def docgen(self, node):
-    if self.source_nodes[0].is_child_of(self.bld.bugenginenode):
-        out_node = self.bld.bugenginenode
+    if self.source_nodes[0].is_child_of(self.bld.motornode):
+        out_node = self.bld.motornode
     else:
         out_node = self.bld.srcnode
     doc_task = self.create_task('docgen', [], [])

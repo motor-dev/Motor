@@ -1,14 +1,14 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_TEXT_TEXTPLUGIN_HH_
-#define BE_TEXT_TEXTPLUGIN_HH_
+#ifndef MOTOR_TEXT_TEXTPLUGIN_HH_
+#define MOTOR_TEXT_TEXTPLUGIN_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.graphics.text/stdafx.h>
-#include <bugengine/minitl/pointer.hh>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/plugin.graphics.text/stdafx.h>
+#include <motor/minitl/pointer.hh>
+#include <motor/plugin/plugin.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 class TextManager;
 class OutlineFontManager;
@@ -31,7 +31,7 @@ public:
     ~TextPlugin();
 };
 
-}  // namespace BugEngine
+}  // namespace Motor
 
 /**************************************************************************************************/
 #endif

@@ -1,18 +1,18 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.compute.cuda/stdafx.h>
+#include <motor/plugin.compute.cuda/stdafx.h>
 #include <codeloader.hh>
 #include <memoryhost.hh>
 #include <scheduler.hh>
 
-#include <bugengine/resource/resourcemanager.hh>
-#include <bugengine/scheduler/kernel/kernel.script.hh>
-#include <bugengine/scheduler/scheduler.hh>
-#include <bugengine/scheduler/task/itask.hh>
 #include <kernelobject.hh>
+#include <motor/resource/resourcemanager.hh>
+#include <motor/scheduler/kernel/kernel.script.hh>
+#include <motor/scheduler/scheduler.hh>
+#include <motor/scheduler/task/itask.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace Cuda {
+namespace Motor { namespace KernelScheduler { namespace Cuda {
 
 class CUDAKernelTaskItem : public IKernelTaskItem
 {
@@ -60,9 +60,9 @@ void Scheduler::deallocateItem(CUDAKernelTaskItem* item)
 
 void Scheduler::run(IKernelTaskItem* item)
 {
-    // be_notreached();
+    // motor_notreached();
     item->owner()->completed(m_scheduler);
-    deallocateItem(be_checked_cast< CUDAKernelTaskItem >(item));
+    deallocateItem(motor_checked_cast< CUDAKernelTaskItem >(item));
 }
 
 weak< IMemoryHost > Scheduler::memoryHost() const
@@ -70,4 +70,4 @@ weak< IMemoryHost > Scheduler::memoryHost() const
     return m_memoryHost;
 }
 
-}}}  // namespace BugEngine::KernelScheduler::Cuda
+}}}  // namespace Motor::KernelScheduler::Cuda

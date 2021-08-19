@@ -28,7 +28,7 @@ def path_from(path, task_gen, appname):
 def gather_includes_defines(task_gen, appname):
     def gather_includes_defines_recursive(task_gen):
         try:
-            return task_gen.bug_eclipse_cache
+            return task_gen.motor_eclipse_cache
         except AttributeError:
             includes = getattr(task_gen, 'export_includes', [])
             defines = getattr(task_gen, 'export_defines', [])
@@ -43,8 +43,8 @@ def gather_includes_defines(task_gen, appname):
                     use_includes, use_defines = gather_includes_defines_recursive(t)
                     includes = includes + use_includes
                     defines = defines + use_defines
-            task_gen.bug_eclipse_cache = (includes, defines)
-            return task_gen.bug_eclipse_cache
+            task_gen.motor_eclipse_cache = (includes, defines)
+            return task_gen.motor_eclipse_cache
 
     includes, defines = gather_includes_defines_recursive(task_gen)
     includes = includes + [path_from(i, task_gen, appname) for i in getattr(task_gen, 'includes', [])]
@@ -57,8 +57,8 @@ class eclipse(Build.BuildContext):
     cmd = 'eclipse'
     fun = 'build'
     optim = 'debug'
-    bugengine_toolchain = 'projects'
-    bugengine_variant = 'projects.setup'
+    motor_toolchain = 'projects'
+    motor_variant = 'projects.setup'
     variant = 'projects/eclipse'
 
     def execute(self):
@@ -71,7 +71,7 @@ class eclipse(Build.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.variant = self.__class__.bugengine_variant
+        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
         self.env.VARIANT = '$(Variant)'
         self.env.TOOLCHAIN = '$(Toolchain)'
@@ -92,15 +92,15 @@ class eclipse(Build.BuildContext):
         self.launch = []
         for g in self.groups:
             for tg in g:
-                if 'bugengine:launcher' in tg.features:
+                if 'motor:launcher' in tg.features:
                     self.launch.append(tg)
-                if 'bugengine:game' in tg.features:
+                if 'motor:game' in tg.features:
                     self.launch.append(tg)
 
         self.settings = self.srcnode.make_node('.settings')
         setting_files = []
         self.settings.mkdir()
-        settings = self.bugenginenode.find_node('mak/tools/eclipse')
+        settings = self.motornode.find_node('mak/tools/eclipse')
         for f in settings.listdir():
             n = settings.find_node(f)
             self.settings.make_node(f).write(n.read())
@@ -173,7 +173,7 @@ class eclipse(Build.BuildContext):
                         for tg in g:
                             if not isinstance(tg, TaskGen.task_gen):
                                 continue
-                            if not 'bugengine:kernel' in tg.features:
+                            if not 'motor:kernel' in tg.features:
                                 name = createProjectFolder(tg.name, resources, seen)
                                 for node in getattr(tg, 'source_nodes', []):
                                     self.addSourceTree(
@@ -360,7 +360,7 @@ class eclipse(Build.BuildContext):
                                         XmlNode(
                                             launchConfig, 'stringAttribute', {
                                                 'key': 'org.eclipse.cdt.launch.PROJECT_ATTR',
-                                                'value': 'BugEngine'
+                                                'value': 'Motor'
                                             }
                                         ).close()
                                         XmlNode(
@@ -379,7 +379,7 @@ class eclipse(Build.BuildContext):
                                             launchConfig, 'listAttribute',
                                             {'key': 'org.eclipse.debug.core.MAPPED_RESOURCE_PATHS'}
                                         ) as resourcePaths:
-                                            XmlNode(resourcePaths, 'listEntry', {'value': '/BugEngine'}).close()
+                                            XmlNode(resourcePaths, 'listEntry', {'value': '/Motor'}).close()
                                         with XmlNode(
                                             launchConfig, 'listAttribute',
                                             {'key': 'org.eclipse.debug.core.MAPPED_RESOURCE_TYPES'}
@@ -480,7 +480,7 @@ class eclipse(Build.BuildContext):
                                                     'id':
                                                         cdt_bld + '.prefbase.toolchain.%d' % count,
                                                     'name':
-                                                        'BugEngine',
+                                                        'Motor',
                                                     'resourceTypeBasedDiscovery':
                                                         'false',
                                                     'superClass':
@@ -571,7 +571,7 @@ class eclipse(Build.BuildContext):
                                                 for tg in g:
                                                     if not isinstance(tg, TaskGen.task_gen):
                                                         continue
-                                                    if 'bugengine:kernel' in tg.features:
+                                                    if 'motor:kernel' in tg.features:
                                                         continue
                                                     task_includes, task_defines = gather_includes_defines(tg, appname)
                                                     with XmlNode(

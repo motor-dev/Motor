@@ -1,19 +1,19 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_WINDOWING_WIN32_PLATFORMWINDOW_HH_
-#define BE_WINDOWING_WIN32_PLATFORMWINDOW_HH_
+#ifndef MOTOR_WINDOWING_WIN32_PLATFORMWINDOW_HH_
+#define MOTOR_WINDOWING_WIN32_PLATFORMWINDOW_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.graphics.windowing/stdafx.h>
+#include <motor/plugin.graphics.windowing/stdafx.h>
 #include <windows.h>
 
-namespace BugEngine { namespace Windowing {
+namespace Motor { namespace Windowing {
 class Window;
 
 class Window::PlatformWindow : public minitl::refcountable
 {
     friend class Window;
-    BE_NOCOPY(PlatformWindow);
+    MOTOR_NOCOPY(PlatformWindow);
 
 private:
     weak< const Renderer > m_renderer;
@@ -24,7 +24,7 @@ public:
     ~PlatformWindow();
 };
 
-}}  // namespace BugEngine::Windowing
+}}  // namespace Motor::Windowing
 
 /**************************************************************************************************/
 #endif

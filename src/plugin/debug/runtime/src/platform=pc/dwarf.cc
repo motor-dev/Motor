@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.debug.runtime/stdafx.h>
+#include <motor/plugin.debug.runtime/stdafx.h>
 
 #include <dwarf.hh>
 #include <dwarftypes.hh>
 
-namespace BugEngine { namespace Runtime {
+namespace Motor { namespace Runtime {
 
 static const size_t c_stringBufferSize = 2048;
 
@@ -111,17 +111,17 @@ bool DwarfModule::AddressRange::consistent(AddressRange range1, AddressRange ran
 
 bool DwarfModule::AddressRange::operator<(AddressRange other) const
 {
-    be_assert(consistent(*this, other) || consistent(other, *this),
-              "inconsistent adress comparison : range [%d-%d] versus range [%d-%d]" | other.begin
-                  | other.end | begin | end);
+    motor_assert(consistent(*this, other) || consistent(other, *this),
+                 "inconsistent adress comparison : range [%d-%d] versus range [%d-%d]" | other.begin
+                     | other.end | begin | end);
     return end < other.begin;
 }
 
 bool DwarfModule::AddressRange::operator==(AddressRange other) const
 {
-    be_assert(consistent(*this, other) || consistent(other, *this),
-              "inconsistent adress comparison : range [%d-%d] versus range [%d-%d]" | other.begin
-                  | other.end | begin | end);
+    motor_assert(consistent(*this, other) || consistent(other, *this),
+                 "inconsistent adress comparison : range [%d-%d] versus range [%d-%d]" | other.begin
+                     | other.end | begin | end);
     return (other.begin >= begin && other.begin <= end)
            || (begin >= other.begin && begin <= other.end);
 }
@@ -147,8 +147,8 @@ public:
     void seek(u64 offset)
     {
         m_position = offset;
-        be_assert(m_position < m_size,
-                  "seeking an invalid position : %d (size is %d)" | m_position | m_size);
+        motor_assert(m_position < m_size,
+                     "seeking an invalid position : %d (size is %d)" | m_position | m_size);
     }
 
 public:
@@ -267,18 +267,18 @@ DwarfModule::DwarfModule(const ifilename& moduleName, const Module& m, u64 begin
     , m_moduleName(moduleName)
     , m_units(Arena::debug())
 {
-    be_info("loading module %s | %d-%d" | moduleName | begin | size);
+    motor_info("loading module %s | %d-%d" | moduleName | begin | size);
     switch(m.endianness())
     {
     case Endianness_Little:
-        be_debug("parsing littleendian");
+        motor_debug("parsing littleendian");
         parse< Endianness_Little >(m);
         break;
     case Endianness_Big:
-        be_debug("parsing bigendian");
+        motor_debug("parsing bigendian");
         parse< Endianness_Big >(m);
         break;
-    default: be_unimplemented();
+    default: motor_unimplemented();
     }
 }
 
@@ -320,12 +320,12 @@ void DwarfModule::parse(const Module& module)
     if(debug_str)
     {
         m_strings = ref< StringBuffer >::create(
-            Arena::debug(), be_checked_numcast< size_t >(debug_str.fileSize), m_strings);
+            Arena::debug(), motor_checked_numcast< size_t >(debug_str.fileSize), m_strings);
         module.readSection(debug_str, m_strings->data());
     }
     const Module::Section& debug_info = module[".debug_info"];
-    debugInfo                         = minitl::Allocator::Block< u8 >(Arena::temporary(),
-                                               be_checked_numcast< size_t >(debug_info.fileSize));
+    debugInfo                         = minitl::Allocator::Block< u8 >(
+        Arena::temporary(), motor_checked_numcast< size_t >(debug_info.fileSize));
     if(debug_info)
     {
         debugInfoSize = debug_info.size;
@@ -333,15 +333,15 @@ void DwarfModule::parse(const Module& module)
     }
     const Module::Section& debug_abbrev = module[".debug_abbrev"];
     debugAbbrev                         = minitl::Allocator::Block< u8 >(
-        Arena::temporary(), be_checked_numcast< size_t >(debug_abbrev.fileSize));
+        Arena::temporary(), motor_checked_numcast< size_t >(debug_abbrev.fileSize));
     if(debug_abbrev)
     {
         debugAbbrevSize = debug_abbrev.size;
         module.readSection(debug_abbrev, debugAbbrev);
     }
     const Module::Section& debug_line = module[".debug_line"];
-    lineProgram                       = minitl::Allocator::Block< u8 >(Arena::temporary(),
-                                                 be_checked_numcast< size_t >(debug_line.fileSize));
+    lineProgram                       = minitl::Allocator::Block< u8 >(
+        Arena::temporary(), motor_checked_numcast< size_t >(debug_line.fileSize));
     if(debug_line)
     {
         module.readSection(debug_line, lineProgram);
@@ -372,9 +372,9 @@ const char* DwarfModule::storeString(const char* string)
 {
     size_t      size   = strlen(string);
     const char* result = 0;
-    be_assert(size < c_stringBufferSize,
-              "string is too big to fit in a pool; string size is %d, pool size is %d" | size
-                  | c_stringBufferSize);
+    motor_assert(size < c_stringBufferSize,
+                 "string is too big to fit in a pool; string size is %d, pool size is %d" | size
+                     | c_stringBufferSize);
     if(!m_strings)
     {
         m_strings = ref< StringBuffer >::create(Arena::temporary(), c_stringBufferSize,
@@ -385,7 +385,7 @@ const char* DwarfModule::storeString(const char* string)
     {
         m_strings = ref< StringBuffer >::create(Arena::temporary(), c_stringBufferSize, m_strings);
         result    = m_strings->store(string, size);
-        be_assert(result, "new empty pool could not store string");
+        motor_assert(result, "new empty pool could not store string");
     }
     return result;
 }
@@ -403,8 +403,9 @@ bool DwarfModule::readAbbreviation(Buffer< endianness >&                  buffer
     buffer >> code;
     if(code == 0) return false;
 
-    if(abbreviations.size() < code) abbreviations.resize(be_checked_numcast< size_t >(code.value));
-    Dwarf::Abbreviation& abbrev = abbreviations[be_checked_numcast< size_t >(code.value) - 1];
+    if(abbreviations.size() < code)
+        abbreviations.resize(motor_checked_numcast< size_t >(code.value));
+    Dwarf::Abbreviation& abbrev = abbreviations[motor_checked_numcast< size_t >(code.value) - 1];
 
     buffer >> abbrev.tag;
     buffer >> abbrev.children;
@@ -415,14 +416,14 @@ bool DwarfModule::readAbbreviation(Buffer< endianness >&                  buffer
         buffer >> abbrev.properties[abbrev.propertyCount].type;
         if(abbrev.properties[abbrev.propertyCount].attribute == 0)
         {
-            be_assert(abbrev.properties[abbrev.propertyCount].type == 0,
-                      "inconsistent entry with attribute %d and type %d"
-                          | abbrev.properties[abbrev.propertyCount].attribute
-                          | abbrev.properties[abbrev.propertyCount].type);
+            motor_assert(abbrev.properties[abbrev.propertyCount].type == 0,
+                         "inconsistent entry with attribute %d and type %d"
+                             | abbrev.properties[abbrev.propertyCount].attribute
+                             | abbrev.properties[abbrev.propertyCount].type);
             return true;
         }
         abbrev.propertyCount++;
-        be_assert(abbrev.propertyCount < Dwarf::Attribute_max, "too many attributes");
+        motor_assert(abbrev.propertyCount < Dwarf::Attribute_max, "too many attributes");
     } while(true);
 }
 
@@ -431,7 +432,7 @@ bool DwarfModule::fillNode(Buffer< endianness >& buffer, CompilationUnit& r,
                            const Dwarf::Abbreviation&                   abbrev,
                            const minitl::vector< Dwarf::Abbreviation >& abbreviations, u8 ptrSize)
 {
-    be_forceuse(r);
+    motor_forceuse(r);
     unsigned attributesMatched = 0;
     for(unsigned i = 0; i < abbrev.propertyCount; ++i)
     {
@@ -544,9 +545,9 @@ bool DwarfModule::fillNode(Buffer< endianness >& buffer, CompilationUnit& r,
         }
         break;
 
-        case Dwarf::Type_indirect: be_unimplemented(); break;
+        case Dwarf::Type_indirect: motor_unimplemented(); break;
 
-        default: be_unimplemented(); break;
+        default: motor_unimplemented(); break;
         };
     }
     if(abbrev.children)
@@ -566,16 +567,16 @@ bool DwarfModule::readInfos(Buffer< endianness >& buffer, UnitMap& units,
 
     buffer >> l;
     if(l == 0) return false;
-    const Dwarf::Abbreviation& abbrev = abbreviations[be_checked_numcast< size_t >(l.value) - 1];
+    const Dwarf::Abbreviation& abbrev = abbreviations[motor_checked_numcast< size_t >(l.value) - 1];
     CompilationUnit            u;
     if(fillNode(buffer, u, abbrev, abbreviations, ptrSize))
     {
         bool result = units.insert(u.range, u).second;
         (void)result;
-        be_assert(result, "could not add unit %s because range %d-%d is already covered" | u.name
-                              | u.range.begin | u.range.end);
+        motor_assert(result, "could not add unit %s because range %d-%d is already covered" | u.name
+                                 | u.range.begin | u.range.end);
     }
     return true;
 }
 
-}}  // namespace BugEngine::Runtime
+}}  // namespace Motor::Runtime

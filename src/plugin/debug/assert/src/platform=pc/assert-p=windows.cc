@@ -1,11 +1,11 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bugengine/minitl/assert.hh>
-#include <bugengine/plugin.debug.runtime/callstack.hh>
-#include <bugengine/plugin.debug.runtime/module.hh>
-#include <bugengine/plugin.debug.runtime/symbols.hh>
+#include <motor/minitl/assert.hh>
+#include <motor/plugin.debug.runtime/callstack.hh>
+#include <motor/plugin.debug.runtime/module.hh>
+#include <motor/plugin.debug.runtime/symbols.hh>
 
 #include <malloc.h>
 #include <stdio.h>
@@ -14,7 +14,7 @@
 
 #include <resource.h>
 
-namespace BugEngine { namespace Debug {
+namespace Motor { namespace Debug {
 HINSTANCE hDllInstance;
 
 static INT_PTR CALLBACK AssertionDialogProc(HWND hwndDlg, UINT message, WPARAM wParam,
@@ -115,10 +115,10 @@ minitl::AssertionResult AssertionCallback(const char* file, int line, const char
         return minitl::Ignore;
 }
 
-}}  // namespace BugEngine::Debug
+}}  // namespace Motor::Debug
 
 BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD /*reason*/, LPVOID /*reserved*/)
 {
-    BugEngine::Debug::hDllInstance = hInstance;
+    Motor::Debug::hDllInstance = hInstance;
     return TRUE;
 }

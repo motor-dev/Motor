@@ -2,7 +2,7 @@ import glrp
 from . import lexer
 from .. import tables
 import os
-from be_typing import Callable, TYPE_CHECKING, cast
+from motor_typing import Callable, TYPE_CHECKING, cast
 
 
 class CParser(glrp.Parser):
@@ -61,6 +61,6 @@ def c17(func):
 
 from . import grammar
 
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Callable

@@ -1,11 +1,11 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.text/stdafx.h>
-#include <bugengine/plugin.graphics.3d/shader/types.script.hh>
-#include <bugengine/plugin.graphics.text/bitmapfont.script.hh>
+#include <motor/plugin.graphics.text/stdafx.h>
+#include <motor/plugin.graphics.3d/shader/types.script.hh>
+#include <motor/plugin.graphics.text/bitmapfont.script.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 BitmapFont::BitmapFont(const istring& fontSystemName)
     : m_fontSystemName(fontSystemName)
@@ -21,4 +21,4 @@ BitmapFont::~BitmapFont()
 {
 }
 
-}  // namespace BugEngine
+}  // namespace Motor

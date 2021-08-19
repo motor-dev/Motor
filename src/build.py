@@ -1,5 +1,5 @@
 """
-    Use this file to declare all libraries and modules in the bugengine
+    Use this file to declare all libraries and modules in the motor
 """
 from waflib import Options
 
@@ -8,57 +8,49 @@ def build_externals(bld):
     """
         Declares all external modules
     """
-    bld.external('bugengine.3rdparty.system.zlib')
-    bld.external('bugengine.3rdparty.system.X11')
-    bld.external('bugengine.3rdparty.system.win32')
-    bld.external('bugengine.3rdparty.graphics.DirectX')
-    bld.external('bugengine.3rdparty.graphics.OpenGL')
-    bld.external('bugengine.3rdparty.graphics.OpenGLES2')
-    bld.external('bugengine.3rdparty.graphics.freetype')
-    bld.external('bugengine.3rdparty.gui.gtk3')
-    bld.external('bugengine.3rdparty.compute.OpenCL')
-    bld.external('bugengine.3rdparty.compute.CUDA')
-    bld.external('bugengine.3rdparty.physics.bullet')
-    bld.external('bugengine.3rdparty.scripting.lua')
-    bld.external('bugengine.3rdparty.scripting.python')
+    bld.external('motor.3rdparty.system.zlib')
+    bld.external('motor.3rdparty.system.X11')
+    bld.external('motor.3rdparty.system.win32')
+    bld.external('motor.3rdparty.graphics.DirectX')
+    bld.external('motor.3rdparty.graphics.OpenGL')
+    bld.external('motor.3rdparty.graphics.OpenGLES2')
+    bld.external('motor.3rdparty.graphics.freetype')
+    bld.external('motor.3rdparty.gui.gtk3')
+    bld.external('motor.3rdparty.compute.OpenCL')
+    bld.external('motor.3rdparty.compute.CUDA')
+    bld.external('motor.3rdparty.physics.bullet')
+    bld.external('motor.3rdparty.scripting.lua')
+    bld.external('motor.3rdparty.scripting.python')
 
 
-def build_bugengine(bld):
+def build_motor(bld):
     """
         Declares the main library and entry point
     """
-    bld.headers('bugengine.mak', path=bld.bugenginenode.find_node('mak'), features=['Makefile'])
-    bld.headers('bugengine.config', [])
-    bld.headers(
-        'bugengine.kernel', ['bugengine.config'],
-        extra_public_includes=[bld.path.make_node('bugengine/kernel/api.cpu')]
-    )
-    bld.library('bugengine.minitl', bld.platforms + ['bugengine.mak', 'bugengine.kernel'])
-    bld.library('bugengine.core', ['bugengine.minitl', 'bugengine.kernel'])
-    bld.library('bugengine.network', ['bugengine.core'])
-    bld.library('bugengine.meta', ['bugengine.core', 'bugengine.network'], ['bugengine.3rdparty.system.zlib'])
-    bld.library('bugengine.filesystem', ['bugengine.core', 'bugengine.meta'], ['bugengine.3rdparty.system.minizip'])
-    bld.library('bugengine.introspect', ['bugengine.core', 'bugengine.meta', 'bugengine.filesystem'])
-    bld.library(
-        'bugengine.reflection', ['bugengine.core', 'bugengine.meta', 'bugengine.filesystem', 'bugengine.introspect']
-    )
-    bld.library('bugengine.settings', ['bugengine.meta', 'bugengine.reflection'])
-    bld.library('bugengine.resource', ['bugengine.core', 'bugengine.meta', 'bugengine.filesystem'])
-    bld.library('bugengine.scheduler', ['bugengine.core', 'bugengine.meta', 'bugengine.resource', 'bugengine.settings'])
-    bld.library('bugengine.world', ['bugengine.core', 'bugengine.meta', 'bugengine.resource', 'bugengine.scheduler'])
-    bld.library(
-        'bugengine.plugin',
-        ['bugengine.core', 'bugengine.meta', 'bugengine.filesystem', 'bugengine.resource', 'bugengine.scheduler']
-    )
+    bld.headers('motor.mak', path=bld.motornode.find_node('mak'), features=['Makefile'])
+    bld.headers('motor.config', [])
+    bld.headers('motor.kernel', ['motor.config'], extra_public_includes=[bld.path.make_node('motor/kernel/api.cpu')])
+    bld.library('motor.minitl', bld.platforms + ['motor.mak', 'motor.kernel'])
+    bld.library('motor.core', ['motor.minitl', 'motor.kernel'])
+    bld.library('motor.network', ['motor.core'])
+    bld.library('motor.meta', ['motor.core', 'motor.network'], ['motor.3rdparty.system.zlib'])
+    bld.library('motor.filesystem', ['motor.core', 'motor.meta'], ['motor.3rdparty.system.minizip'])
+    bld.library('motor.introspect', ['motor.core', 'motor.meta', 'motor.filesystem'])
+    bld.library('motor.reflection', ['motor.core', 'motor.meta', 'motor.filesystem', 'motor.introspect'])
+    bld.library('motor.settings', ['motor.meta', 'motor.reflection'])
+    bld.library('motor.resource', ['motor.core', 'motor.meta', 'motor.filesystem'])
+    bld.library('motor.scheduler', ['motor.core', 'motor.meta', 'motor.resource', 'motor.settings'])
+    bld.library('motor.world', ['motor.core', 'motor.meta', 'motor.resource', 'motor.scheduler'])
+    bld.library('motor.plugin', ['motor.core', 'motor.meta', 'motor.filesystem', 'motor.resource', 'motor.scheduler'])
     bld.shared_library(
-        'bugengine', [
-            'bugengine.core', 'bugengine.meta', 'bugengine.introspect', 'bugengine.reflection', 'bugengine.settings',
-            'bugengine.scheduler', 'bugengine.filesystem', 'bugengine.world', 'bugengine.plugin'
+        'motor', [
+            'motor.core', 'motor.meta', 'motor.introspect', 'motor.reflection', 'motor.settings', 'motor.scheduler',
+            'motor.filesystem', 'motor.world', 'motor.plugin'
         ],
-        path=bld.path.find_node('bugengine/bugengine')
+        path=bld.path.find_node('motor/motor')
     )
 
-    bld.engine('bugengine.launcher', ['bugengine'])
+    bld.engine('motor.launcher', ['motor'])
 
 
 def build_plugins(bld):
@@ -66,110 +58,110 @@ def build_plugins(bld):
         Declares all plugins
     """
     bld.recurse('plugin/compute/opencl/mak/build.py')
-    bld.plugin('plugin.debug.runtime', ['bugengine'])
-    bld.plugin('plugin.debug.assert', ['bugengine', 'plugin.debug.runtime'])
+    bld.plugin('plugin.debug.runtime', ['motor'])
+    bld.plugin('plugin.debug.assert', ['motor', 'plugin.debug.runtime'])
 
-    bld.plugin('plugin.scripting.package', ['bugengine'])
+    bld.plugin('plugin.scripting.package', ['motor'])
 
-    bld.plugin('plugin.physics.bullet', ['bugengine'], ['bugengine.3rdparty.physics.bullet'])
+    bld.plugin('plugin.physics.bullet', ['motor'], ['motor.3rdparty.physics.bullet'])
 
-    bld.plugin('plugin.graphics.3d', ['bugengine'])
-    bld.plugin('plugin.graphics.shadermodel1', ['bugengine', 'plugin.graphics.3d'])
-    bld.plugin('plugin.graphics.shadermodel2', ['bugengine', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1'])
+    bld.plugin('plugin.graphics.3d', ['motor'])
+    bld.plugin('plugin.graphics.shadermodel1', ['motor', 'plugin.graphics.3d'])
+    bld.plugin('plugin.graphics.shadermodel2', ['motor', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1'])
     bld.plugin(
         'plugin.graphics.shadermodel3',
-        ['bugengine', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1', 'plugin.graphics.shadermodel2']
+        ['motor', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1', 'plugin.graphics.shadermodel2']
     )
     bld.plugin(
         'plugin.graphics.shadermodel4', [
-            'bugengine', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1', 'plugin.graphics.shadermodel2',
+            'motor', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1', 'plugin.graphics.shadermodel2',
             'plugin.graphics.shadermodel3'
         ]
     )
 
     #bld.plugin('plugin.audio.AL',
-    #           ['bugengine'],
-    #           ['bugengine.3rdparty.audio.OpenAL'])
+    #           ['motor'],
+    #           ['motor.3rdparty.audio.OpenAL'])
 
-    bld.plugin('plugin.scripting.lua', ['bugengine'], ['bugengine.3rdparty.scripting.lua'])
-    bld.plugin('plugin.input.input', ['bugengine'])
-    bld.shared_library('plugin.scripting.pythonlib', ['bugengine'], conditions=['python'])
-    bld.plugin('plugin.scripting.python', ['bugengine', 'plugin.scripting.pythonlib'], conditions=['python'])
+    bld.plugin('plugin.scripting.lua', ['motor'], ['motor.3rdparty.scripting.lua'])
+    bld.plugin('plugin.input.input', ['motor'])
+    bld.shared_library('plugin.scripting.pythonlib', ['motor'], conditions=['python'])
+    bld.plugin('plugin.scripting.python', ['motor', 'plugin.scripting.pythonlib'], conditions=['python'])
     bld.python_module(
-        'py_bugengine', ['bugengine', 'plugin.scripting.pythonlib'],
+        'py_motor', ['motor', 'plugin.scripting.pythonlib'],
         path=bld.path.find_node('plugin/scripting/pythonmodule'),
         conditions=['python']
     )
     if bld.env.PROJECTS:
         python_deps = [
-            'bugengine.3rdparty.scripting.python%s' % version.replace('.', '') for version in bld.env.PYTHON_VERSIONS
+            'motor.3rdparty.scripting.python%s' % version.replace('.', '') for version in bld.env.PYTHON_VERSIONS
         ]
-        bld.plugin('plugin.scripting.pythonbinding', ['bugengine', 'plugin.scripting.pythonlib'] + python_deps)
+        bld.plugin('plugin.scripting.pythonbinding', ['motor', 'plugin.scripting.pythonlib'] + python_deps)
     else:
         for version in bld.env.PYTHON_VERSIONS:
             short_version = version.replace('.', '')
             bld.plugin(
-                'plugin.scripting.python%s' % short_version, ['bugengine', 'plugin.scripting.python'],
-                ['bugengine.3rdparty.scripting.python%s' % short_version],
+                'plugin.scripting.python%s' % short_version, ['motor', 'plugin.scripting.python'],
+                ['motor.3rdparty.scripting.python%s' % short_version],
                 path=bld.path.find_node('plugin/scripting/pythonbinding'),
                 conditions=['python%s' % version]
             )
 
-    bld.plugin('plugin.compute.cpu', ['bugengine'], features=['bugengine:cpu:variants'])
+    bld.plugin('plugin.compute.cpu', ['motor'], features=['motor:cpu:variants'])
     bld.plugin(
-        'plugin.compute.opencl', ['bugengine', 'plugin.compute.cpu'], ['bugengine.3rdparty.compute.OpenCL'],
+        'plugin.compute.opencl', ['motor', 'plugin.compute.cpu'], ['motor.3rdparty.compute.OpenCL'],
         conditions=['OpenCL'],
         extra_defines=['CL_TARGET_OPENCL_VERSION=120'],
         extra_public_defines=['CL_TARGET_OPENCL_VERSION=120']
     )
     #bld.plugin(
     #    'plugin.compute.opencl_gl',
-    #    ['bugengine', 'plugin.graphics.GL4', 'plugin.compute.opencl', 'plugin.compute.cpu'],
-    #    ['bugengine.3rdparty.graphics.OpenGL', 'bugengine.3rdparty.compute.OpenCL'],
+    #    ['motor', 'plugin.graphics.GL4', 'plugin.compute.opencl', 'plugin.compute.cpu'],
+    #    ['motor.3rdparty.graphics.OpenGL', 'motor.3rdparty.compute.OpenCL'],
     #    features=['OpenGL', 'OpenCL', 'GUI']
     #)
-    bld.plugin('plugin.compute.cuda', ['bugengine'], ['bugengine.3rdparty.compute.CUDA'], conditions=['cuda'])
+    bld.plugin('plugin.compute.cuda', ['motor'], ['motor.3rdparty.compute.CUDA'], conditions=['cuda'])
 
     bld.plugin(
         'plugin.graphics.nullrender', [
-            'bugengine', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1', 'plugin.graphics.shadermodel2',
+            'motor', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1', 'plugin.graphics.shadermodel2',
             'plugin.graphics.shadermodel3', 'plugin.graphics.shadermodel4'
         ]
     )
     bld.plugin(
-        'plugin.graphics.windowing', ['bugengine', 'plugin.graphics.3d'],
-        ['bugengine.3rdparty.system.X11', 'bugengine.3rdparty.graphics.OpenGL'],
+        'plugin.graphics.windowing', ['motor', 'plugin.graphics.3d'],
+        ['motor.3rdparty.system.X11', 'motor.3rdparty.graphics.OpenGL'],
         conditions=['GUI']
     )
     bld.plugin(
-        'plugin.graphics.GL4', ['bugengine', 'plugin.graphics.windowing'], ['bugengine.3rdparty.graphics.OpenGL'],
+        'plugin.graphics.GL4', ['motor', 'plugin.graphics.windowing'], ['motor.3rdparty.graphics.OpenGL'],
         conditions=['OpenGL', 'GUI']
     )
     bld.plugin(
-        'plugin.graphics.Dx9', ['bugengine', 'plugin.graphics.windowing'], ['bugengine.3rdparty.graphics.DirectX9'],
+        'plugin.graphics.Dx9', ['motor', 'plugin.graphics.windowing'], ['motor.3rdparty.graphics.DirectX9'],
         conditions=['DirectX9', 'GUI']
     )
     #bld.plugin('plugin.graphics.Dx10',
-    #           ['bugengine', 'plugin.graphics.windowing'],
-    #           ['bugengine.3rdparty.graphics.DirectX10'],
+    #           ['motor', 'plugin.graphics.windowing'],
+    #           ['motor.3rdparty.graphics.DirectX10'],
     #           conditions=['DirectX10', 'GUI'])
     #bld.plugin('plugin.graphics.Dx11',
-    #           ['bugengine', 'plugin.graphics.windowing'],
-    #           ['bugengine.3rdparty.graphics.DirectX11'],
+    #           ['motor', 'plugin.graphics.windowing'],
+    #           ['motor.3rdparty.graphics.DirectX11'],
     #           conditions=['DirectX11', 'GUI'])
     bld.plugin(
-        'plugin.graphics.GLES2', ['bugengine', 'plugin.graphics.windowing'], ['bugengine.3rdparty.graphics.OpenGLES2'],
+        'plugin.graphics.GLES2', ['motor', 'plugin.graphics.windowing'], ['motor.3rdparty.graphics.OpenGLES2'],
         conditions=['OpenGLES2', 'GUI']
     )
 
     bld.plugin(
-        'plugin.graphics.text', ['bugengine', 'plugin.graphics.3d'],
-        ['bugengine.3rdparty.graphics.freetype', 'bugengine.3rdparty.system.fontconfig']
+        'plugin.graphics.text', ['motor', 'plugin.graphics.3d'],
+        ['motor.3rdparty.graphics.freetype', 'motor.3rdparty.system.fontconfig']
     )
 
     if bld.env.check_gtk3 or bld.env.PROJECTS:
-        bld.plugin('plugin.gui.gtk3', ['bugengine'], ['bugengine.3rdparty.gui.gtk3'])
-    bld.plugin('tool.bugeditor.ui', ['bugengine'])
+        bld.plugin('plugin.gui.gtk3', ['motor'], ['motor.3rdparty.gui.gtk3'])
+    bld.plugin('tool.motoreditor.ui', ['motor'])
 
 
 def build_games(bld):
@@ -177,26 +169,26 @@ def build_games(bld):
         Declares all games/samples/tools/autotests
     """
     bld.game(
-        'bugeditor', ['bugengine', 'tool.bugeditor.ui', 'plugin.scripting.package'],
-        path=bld.path.find_node('tool/bugeditor/main')
+        'motoreditor', ['motor', 'tool.motoreditor.ui', 'plugin.scripting.package'],
+        path=bld.path.find_node('tool/motoreditor/main')
     )
-    bld.game('sample.text', ['bugengine', 'plugin.scripting.package', 'plugin.graphics.3d'])
-    bld.game('sample.python', ['bugengine', 'plugin.scripting.package'])
-    bld.game('sample.lua', ['bugengine', 'plugin.scripting.package', 'plugin.scripting.lua'])
-    bld.game('help', ['bugengine', 'plugin.scripting.package'], path=bld.path.find_node('tool/help'))
+    bld.game('sample.text', ['motor', 'plugin.scripting.package', 'plugin.graphics.3d'])
+    bld.game('sample.python', ['motor', 'plugin.scripting.package'])
+    bld.game('sample.lua', ['motor', 'plugin.scripting.package', 'plugin.scripting.lua'])
+    bld.game('help', ['motor', 'plugin.scripting.package'], path=bld.path.find_node('tool/help'))
     if Options.options.tests:
-        bld.game('test.settings', ['bugengine'])
+        bld.game('test.settings', ['motor'])
         bld.game(
-            'test.compute.unittests', ['bugengine', 'plugin.scripting.package'],
-            root_namespace='BugEngine::Test::Compute::UnitTests'
+            'test.compute.unittests', ['motor', 'plugin.scripting.package'],
+            root_namespace='Motor::Test::Compute::UnitTests'
         )
 
 
 def build(bld):
     """
-        Declares each bugengine module and their dependencies
+        Declares each motor module and their dependencies
     """
     build_externals(bld)
-    build_bugengine(bld)
+    build_motor(bld)
     build_plugins(bld)
     build_games(bld)

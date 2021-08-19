@@ -1,8 +1,8 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.debug.runtime/stdafx.h>
-#include <bugengine/plugin.debug.runtime/symbols.hh>
+#include <motor/plugin.debug.runtime/stdafx.h>
+#include <motor/plugin.debug.runtime/symbols.hh>
 
 #include <dwarf.hh>
 #include <elf.hh>
@@ -10,7 +10,7 @@
 #include <pdb70.hh>
 #include <pe.hh>
 
-namespace BugEngine { namespace Runtime {
+namespace Motor { namespace Runtime {
 
 SymbolResolver::SymbolResolver()
 {
@@ -72,7 +72,7 @@ ref< const SymbolResolver > SymbolResolver::loadSymbols(const SymbolInformations
     }
         return next;
     case SymbolInformations::None: return next;
-    default: be_warning("Unknown symbol type for symbols %s" | infos.filename); return next;
+    default: motor_warning("Unknown symbol type for symbols %s" | infos.filename); return next;
     }
 }
 
@@ -87,4 +87,4 @@ bool SymbolResolver::resolve(Callstack::Address& address, Symbol& symbol) const
         return true;
 }
 
-}}  // namespace BugEngine::Runtime
+}}  // namespace Motor::Runtime

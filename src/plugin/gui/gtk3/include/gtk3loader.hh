@@ -1,15 +1,15 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_GUI_GTK3_GTK3LOADER_HH_
-#define BE_GUI_GTK3_GTK3LOADER_HH_
+#ifndef MOTOR_GUI_GTK3_GTK3LOADER_HH_
+#define MOTOR_GUI_GTK3_GTK3LOADER_HH_
 /**************************************************************************************************/
-#include <bugengine/meta/classinfo.script.hh>
-#include <bugengine/plugin/plugin.hh>
-#include <bugengine/resource/loader.hh>
 #include <gtk3plugin.hh>
+#include <motor/meta/classinfo.script.hh>
+#include <motor/plugin/plugin.hh>
+#include <motor/resource/loader.hh>
 
-namespace BugEngine { namespace Gtk3 {
+namespace Motor { namespace Gtk3 {
 
 class Gtk3Plugin;
 
@@ -31,7 +31,7 @@ public:
     virtual void unload(Resource::Resource& resource) override;
 };
 
-}}  // namespace BugEngine::Gtk3
+}}  // namespace Motor::Gtk3
 
 /**************************************************************************************************/
 #endif

@@ -1,7 +1,7 @@
 from ..ir_ast import IrReference
 from ..ir_ast.instructions import IrInstLabel
 from ..ir_ast import IrMetadataLink
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def p_ir_instruction_list(p):

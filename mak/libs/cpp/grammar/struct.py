@@ -57,7 +57,7 @@ def p_struct_type(p):
         struct_type : STRUCT
                     | CLASS
                     | UNION
-                    | BE_POD
+                    | MOTOR_POD
     """
     p[0] = p[1]
 

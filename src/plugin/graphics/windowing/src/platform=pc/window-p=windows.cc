@@ -1,14 +1,14 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.windowing/stdafx.h>
-#include <bugengine/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
-#include <bugengine/plugin.graphics.windowing/renderer.hh>
-#include <bugengine/plugin.graphics.windowing/window.hh>
+#include <motor/plugin.graphics.windowing/stdafx.h>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include <motor/plugin.graphics.windowing/renderer.hh>
+#include <motor/plugin.graphics.windowing/window.hh>
 #include <win32/platformrenderer.hh>
 #include <win32/platformwindow.hh>
 
-namespace BugEngine { namespace Windowing {
+namespace Motor { namespace Windowing {
 
 #ifdef _MSC_VER
 #    pragma warning(push)
@@ -72,9 +72,9 @@ Window::~Window()
 
 void Window::load(weak< const Resource::Description > renderWindowDescription)
 {
-    be_forceuse(renderWindowDescription);
+    motor_forceuse(renderWindowDescription);
     m_window.reset(scoped< PlatformWindow >::create(
-        m_renderer->arena(), be_checked_cast< const Renderer >(m_renderer), this));
+        m_renderer->arena(), motor_checked_cast< const Renderer >(m_renderer), this));
 }
 
 void Window::unload()
@@ -91,8 +91,8 @@ uint2 Window::getDimensions() const
 
 void* Window::getWindowHandle() const
 {
-    be_assert_recover(m_window, "no window implementation is created", return 0);
+    motor_assert_recover(m_window, "no window implementation is created", return 0);
     return (void*)&m_window->m_window;
 }
 
-}}  // namespace BugEngine::Windowing
+}}  // namespace Motor::Windowing

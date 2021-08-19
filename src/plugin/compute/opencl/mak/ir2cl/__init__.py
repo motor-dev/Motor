@@ -1,5 +1,5 @@
 from .cl_generator import ClDeclaration, ClDefinition
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def generators(file):

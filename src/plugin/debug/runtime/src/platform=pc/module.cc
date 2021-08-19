@@ -1,14 +1,14 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.debug.runtime/stdafx.h>
-#include <bugengine/plugin.debug.runtime/module.hh>
-#include <bugengine/plugin.debug.runtime/symbols.hh>
+#include <motor/plugin.debug.runtime/stdafx.h>
+#include <motor/plugin.debug.runtime/module.hh>
+#include <motor/plugin.debug.runtime/symbols.hh>
 
 #include <elf.hh>
 #include <pe.hh>
 
-namespace BugEngine { namespace Runtime {
+namespace Motor { namespace Runtime {
 
 Module::Module(const char* filename, u64 baseAddress)
     : m_filename(filename)
@@ -35,8 +35,8 @@ const Module::Section& Module::operator[](const istring& name) const
 void Module::readSection(const Section& /*section*/, void* /*data*/) const
 {
     /*FILE*f = fopen(m_filename.str().name, "rb");
-    fseek(f, be_checked_numcast<long int>(section.fileOffset), SEEK_SET);
-    fread(data, be_checked_numcast<long int>(section.fileSize), 1, f);*/
+    fseek(f, motor_checked_numcast<long int>(section.fileOffset), SEEK_SET);
+    fread(data, motor_checked_numcast<long int>(section.fileSize), 1, f);*/
 }
 
-}}  // namespace BugEngine::Runtime
+}}  // namespace Motor::Runtime

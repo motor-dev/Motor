@@ -1,10 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
 
-#include <bugengine/meta/engine/namespace.hh>
-#include <bugengine/plugin/plugin.hh>
 #include <context.hh>
+#include <motor/meta/engine/namespace.hh>
+#include <motor/plugin/plugin.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::Lua::Context);
+MOTOR_PLUGIN_REGISTER(Motor::Lua::Context);

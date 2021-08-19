@@ -1,15 +1,15 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_COMPUTE_CUDA_CUDAKERNELSCHEDULER_HH_
-#define BE_COMPUTE_CUDA_CUDAKERNELSCHEDULER_HH_
+#ifndef MOTOR_COMPUTE_CUDA_CUDAKERNELSCHEDULER_HH_
+#define MOTOR_COMPUTE_CUDA_CUDAKERNELSCHEDULER_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.compute.cuda/stdafx.h>
-#include <bugengine/plugin/plugin.hh>
-#include <bugengine/scheduler/kernel/ischeduler.hh>
-#include <bugengine/scheduler/kernel/parameters/iparameter.script.hh>
+#include <motor/plugin.compute.cuda/stdafx.h>
+#include <motor/plugin/plugin.hh>
+#include <motor/scheduler/kernel/ischeduler.hh>
+#include <motor/scheduler/kernel/parameters/iparameter.script.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace Cuda {
+namespace Motor { namespace KernelScheduler { namespace Cuda {
 
 class CodeLoader;
 class MemoryHost;
@@ -33,7 +33,7 @@ public:
     virtual weak< IMemoryHost > memoryHost() const override;
 };
 
-}}}  // namespace BugEngine::KernelScheduler::Cuda
+}}}  // namespace Motor::KernelScheduler::Cuda
 
 /**************************************************************************************************/
 #endif

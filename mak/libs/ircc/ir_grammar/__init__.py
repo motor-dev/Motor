@@ -14,7 +14,7 @@ from .ir_expr import *
 from .ir_instruction import *
 from .ir_opcodes import *
 
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def p_empty(p):

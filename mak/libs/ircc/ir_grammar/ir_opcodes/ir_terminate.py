@@ -1,5 +1,5 @@
 from ...ir_ast.instructions import IrInstBranch, IrInstConditionalBranch, IrInstRet, IrInstSwitch, IrInstUnreachable
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def p_ir_opcode_ret(p):

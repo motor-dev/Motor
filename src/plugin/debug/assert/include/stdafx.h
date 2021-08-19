@@ -1,13 +1,13 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_DEBUG_ASSERT_STDAFX_H_
-#define BE_DEBUG_ASSERT_STDAFX_H_
+#ifndef MOTOR_DEBUG_ASSERT_STDAFX_H_
+#define MOTOR_DEBUG_ASSERT_STDAFX_H_
 /**************************************************************************************************/
 
-#include <bugengine/stdafx.h>
+#include <motor/stdafx.h>
 
-#include <bugengine/plugin.debug.runtime/stdafx.h>
+#include <motor/plugin.debug.runtime/stdafx.h>
 
 /**************************************************************************************************/
 #endif

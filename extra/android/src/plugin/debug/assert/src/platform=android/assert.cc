@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bugengine/minitl/assert.hh>
+#include <motor/minitl/assert.hh>
 #include <stdarg.h>
 #include <stdio.h>
 
-namespace BugEngine { namespace Debug {
+namespace Motor { namespace Debug {
 
 minitl::AssertionResult AssertionCallback(const char* file, int line, const char* expr,
                                           const char* message)
@@ -17,4 +17,4 @@ minitl::AssertionResult AssertionCallback(const char* file, int line, const char
     return minitl::Break;
 }
 
-}}  // namespace BugEngine::Debug
+}}  // namespace Motor::Debug

@@ -1,6 +1,6 @@
 from .lr0item import LR0Item
 from .lr0node import LR0Node
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 class LR0ItemSet(object):

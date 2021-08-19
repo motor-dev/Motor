@@ -1,0 +1,42 @@
+/* Motor <motor.devel@gmail.com>
+   see LICENSE for detail */
+
+#include <motor/stdafx.h>
+#include <motor/application.hh>
+
+#include <signal.h>
+
+namespace Motor {
+
+static Application* s_application = 0;
+
+extern "C" void signalHandler(int /*signal*/)
+{
+    motor_info("interrupted");
+    if(s_application)
+    {
+        s_application->finish();
+        s_application = 0;
+    }
+}
+
+void Application::registerInterruptions()
+{
+    s_application = this;
+    struct sigaction action;
+    memset(&action, 0, sizeof(action));
+    action.sa_handler = &signalHandler;
+    sigemptyset(&action.sa_mask);
+    sigaddset(&action.sa_mask, SIGINT);
+    action.sa_flags = SA_RESTART;
+    sigaction(SIGINT, &action, 0);
+    sigaddset(&action.sa_mask, SIGTERM);
+    sigaction(SIGINT, &action, 0);
+}
+
+void Application::unregisterInterruptions()
+{
+    s_application = 0;
+}
+
+}  // namespace Motor

@@ -5,7 +5,7 @@ type-requirement:
 
 import glrp
 from .....parser import cxx98
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('type-requirement : nested-name-specifier? type-name ";"')

@@ -2,7 +2,7 @@ from .ir_declaration import IrDeclaration
 from .ir_value import IrValue
 from .ir_type import IrTypeMetadata
 from ..ir_position import IrPosition
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 import os
 
 

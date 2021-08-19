@@ -1,13 +1,13 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.debug.runtime/stdafx.h>
+#include <motor/plugin.debug.runtime/stdafx.h>
 
 #include <pe.hh>
 
-namespace BugEngine { namespace Runtime {
+namespace Motor { namespace Runtime {
 
-static inline char be_hex2char(u8 value)
+static inline char motor_hex2char(u8 value)
 {
     return (value & (char)0xf) > 9 ? (char)(value - 10 + 'A') : (char)(value + '0');
 }
@@ -34,41 +34,41 @@ struct Guid
     GuidString compactstr() const
     {
         GuidString result;
-        result[0] = be_hex2char(u8((data1 >> 28) & 0xf));
-        result[1] = be_hex2char(u8((data1 >> 24) & 0xf));
-        result[2] = be_hex2char(u8((data1 >> 20) & 0xf));
-        result[3] = be_hex2char(u8((data1 >> 16) & 0xf));
-        result[4] = be_hex2char(u8((data1 >> 12) & 0xf));
-        result[5] = be_hex2char(u8((data1 >> 8) & 0xf));
-        result[6] = be_hex2char(u8((data1 >> 4) & 0xf));
-        result[7] = be_hex2char(u8((data1 >> 0) & 0xf));
+        result[0] = motor_hex2char(u8((data1 >> 28) & 0xf));
+        result[1] = motor_hex2char(u8((data1 >> 24) & 0xf));
+        result[2] = motor_hex2char(u8((data1 >> 20) & 0xf));
+        result[3] = motor_hex2char(u8((data1 >> 16) & 0xf));
+        result[4] = motor_hex2char(u8((data1 >> 12) & 0xf));
+        result[5] = motor_hex2char(u8((data1 >> 8) & 0xf));
+        result[6] = motor_hex2char(u8((data1 >> 4) & 0xf));
+        result[7] = motor_hex2char(u8((data1 >> 0) & 0xf));
 
-        result[8]  = be_hex2char(u8((data2 >> 12) & 0xf));
-        result[9]  = be_hex2char(u8((data2 >> 8) & 0xf));
-        result[10] = be_hex2char(u8((data2 >> 4) & 0xf));
-        result[11] = be_hex2char(u8((data2 >> 0) & 0xf));
+        result[8]  = motor_hex2char(u8((data2 >> 12) & 0xf));
+        result[9]  = motor_hex2char(u8((data2 >> 8) & 0xf));
+        result[10] = motor_hex2char(u8((data2 >> 4) & 0xf));
+        result[11] = motor_hex2char(u8((data2 >> 0) & 0xf));
 
-        result[12] = be_hex2char(u8((data3 >> 12) & 0xf));
-        result[13] = be_hex2char(u8((data3 >> 8) & 0xf));
-        result[14] = be_hex2char(u8((data3 >> 4) & 0xf));
-        result[15] = be_hex2char(u8((data3 >> 0) & 0xf));
+        result[12] = motor_hex2char(u8((data3 >> 12) & 0xf));
+        result[13] = motor_hex2char(u8((data3 >> 8) & 0xf));
+        result[14] = motor_hex2char(u8((data3 >> 4) & 0xf));
+        result[15] = motor_hex2char(u8((data3 >> 0) & 0xf));
 
-        result[16] = be_hex2char(u8((data4[0] >> 4) & 0xf));
-        result[17] = be_hex2char(u8((data4[0]) & 0xf));
-        result[18] = be_hex2char(u8((data4[1] >> 4) & 0xf));
-        result[19] = be_hex2char(u8((data4[1]) & 0xf));
-        result[20] = be_hex2char(u8((data4[2] >> 4) & 0xf));
-        result[21] = be_hex2char(u8((data4[2]) & 0xf));
-        result[22] = be_hex2char(u8((data4[3] >> 4) & 0xf));
-        result[23] = be_hex2char(u8((data4[3]) & 0xf));
-        result[24] = be_hex2char(u8((data4[4] >> 4) & 0xf));
-        result[25] = be_hex2char(u8((data4[4]) & 0xf));
-        result[26] = be_hex2char(u8((data4[5] >> 4) & 0xf));
-        result[27] = be_hex2char(u8((data4[5]) & 0xf));
-        result[28] = be_hex2char(u8((data4[6] >> 4) & 0xf));
-        result[29] = be_hex2char(u8((data4[6]) & 0xf));
-        result[30] = be_hex2char(u8((data4[7] >> 4) & 0xf));
-        result[31] = be_hex2char(u8((data4[7]) & 0xf));
+        result[16] = motor_hex2char(u8((data4[0] >> 4) & 0xf));
+        result[17] = motor_hex2char(u8((data4[0]) & 0xf));
+        result[18] = motor_hex2char(u8((data4[1] >> 4) & 0xf));
+        result[19] = motor_hex2char(u8((data4[1]) & 0xf));
+        result[20] = motor_hex2char(u8((data4[2] >> 4) & 0xf));
+        result[21] = motor_hex2char(u8((data4[2]) & 0xf));
+        result[22] = motor_hex2char(u8((data4[3] >> 4) & 0xf));
+        result[23] = motor_hex2char(u8((data4[3]) & 0xf));
+        result[24] = motor_hex2char(u8((data4[4] >> 4) & 0xf));
+        result[25] = motor_hex2char(u8((data4[4]) & 0xf));
+        result[26] = motor_hex2char(u8((data4[5] >> 4) & 0xf));
+        result[27] = motor_hex2char(u8((data4[5]) & 0xf));
+        result[28] = motor_hex2char(u8((data4[6] >> 4) & 0xf));
+        result[29] = motor_hex2char(u8((data4[6]) & 0xf));
+        result[30] = motor_hex2char(u8((data4[7] >> 4) & 0xf));
+        result[31] = motor_hex2char(u8((data4[7]) & 0xf));
         result[32] = 0;
         return result;
     }
@@ -76,41 +76,41 @@ struct Guid
     {
         GuidString result;
         result[0]  = '{';
-        result[1]  = be_hex2char(u8((data1 >> 28) & 0xf));
-        result[2]  = be_hex2char(u8((data1 >> 24) & 0xf));
-        result[3]  = be_hex2char(u8((data1 >> 20) & 0xf));
-        result[4]  = be_hex2char(u8((data1 >> 16) & 0xf));
-        result[5]  = be_hex2char(u8((data1 >> 12) & 0xf));
-        result[6]  = be_hex2char(u8((data1 >> 8) & 0xf));
-        result[7]  = be_hex2char(u8((data1 >> 4) & 0xf));
-        result[8]  = be_hex2char(u8((data1 >> 0) & 0xf));
+        result[1]  = motor_hex2char(u8((data1 >> 28) & 0xf));
+        result[2]  = motor_hex2char(u8((data1 >> 24) & 0xf));
+        result[3]  = motor_hex2char(u8((data1 >> 20) & 0xf));
+        result[4]  = motor_hex2char(u8((data1 >> 16) & 0xf));
+        result[5]  = motor_hex2char(u8((data1 >> 12) & 0xf));
+        result[6]  = motor_hex2char(u8((data1 >> 8) & 0xf));
+        result[7]  = motor_hex2char(u8((data1 >> 4) & 0xf));
+        result[8]  = motor_hex2char(u8((data1 >> 0) & 0xf));
         result[9]  = '-';
-        result[10] = be_hex2char(u8((data2 >> 12) & 0xf));
-        result[11] = be_hex2char(u8((data2 >> 8) & 0xf));
-        result[12] = be_hex2char(u8((data2 >> 4) & 0xf));
-        result[13] = be_hex2char(u8((data2 >> 0) & 0xf));
+        result[10] = motor_hex2char(u8((data2 >> 12) & 0xf));
+        result[11] = motor_hex2char(u8((data2 >> 8) & 0xf));
+        result[12] = motor_hex2char(u8((data2 >> 4) & 0xf));
+        result[13] = motor_hex2char(u8((data2 >> 0) & 0xf));
         result[14] = '-';
-        result[15] = be_hex2char(u8((data3 >> 12) & 0xf));
-        result[16] = be_hex2char(u8((data3 >> 8) & 0xf));
-        result[17] = be_hex2char(u8((data3 >> 4) & 0xf));
-        result[18] = be_hex2char(u8((data3 >> 0) & 0xf));
+        result[15] = motor_hex2char(u8((data3 >> 12) & 0xf));
+        result[16] = motor_hex2char(u8((data3 >> 8) & 0xf));
+        result[17] = motor_hex2char(u8((data3 >> 4) & 0xf));
+        result[18] = motor_hex2char(u8((data3 >> 0) & 0xf));
         result[19] = '-';
-        result[20] = be_hex2char(u8((data4[0] >> 4) & 0xf));
-        result[21] = be_hex2char(u8((data4[0]) & 0xf));
-        result[22] = be_hex2char(u8((data4[1] >> 4) & 0xf));
-        result[23] = be_hex2char(u8((data4[1]) & 0xf));
-        result[24] = be_hex2char(u8((data4[2] >> 4) & 0xf));
-        result[25] = be_hex2char(u8((data4[2]) & 0xf));
-        result[26] = be_hex2char(u8((data4[3] >> 4) & 0xf));
-        result[27] = be_hex2char(u8((data4[3]) & 0xf));
-        result[28] = be_hex2char(u8((data4[4] >> 4) & 0xf));
-        result[29] = be_hex2char(u8((data4[4]) & 0xf));
-        result[30] = be_hex2char(u8((data4[5] >> 4) & 0xf));
-        result[31] = be_hex2char(u8((data4[5]) & 0xf));
-        result[32] = be_hex2char(u8((data4[6] >> 4) & 0xf));
-        result[33] = be_hex2char(u8((data4[6]) & 0xf));
-        result[34] = be_hex2char(u8((data4[7] >> 4) & 0xf));
-        result[35] = be_hex2char(u8((data4[7]) & 0xf));
+        result[20] = motor_hex2char(u8((data4[0] >> 4) & 0xf));
+        result[21] = motor_hex2char(u8((data4[0]) & 0xf));
+        result[22] = motor_hex2char(u8((data4[1] >> 4) & 0xf));
+        result[23] = motor_hex2char(u8((data4[1]) & 0xf));
+        result[24] = motor_hex2char(u8((data4[2] >> 4) & 0xf));
+        result[25] = motor_hex2char(u8((data4[2]) & 0xf));
+        result[26] = motor_hex2char(u8((data4[3] >> 4) & 0xf));
+        result[27] = motor_hex2char(u8((data4[3]) & 0xf));
+        result[28] = motor_hex2char(u8((data4[4] >> 4) & 0xf));
+        result[29] = motor_hex2char(u8((data4[4]) & 0xf));
+        result[30] = motor_hex2char(u8((data4[5] >> 4) & 0xf));
+        result[31] = motor_hex2char(u8((data4[5]) & 0xf));
+        result[32] = motor_hex2char(u8((data4[6] >> 4) & 0xf));
+        result[33] = motor_hex2char(u8((data4[6]) & 0xf));
+        result[34] = motor_hex2char(u8((data4[7] >> 4) & 0xf));
+        result[35] = motor_hex2char(u8((data4[7]) & 0xf));
         result[36] = '}';
         result[37] = 0;
         return result;
@@ -381,7 +381,7 @@ struct COFFSymbol
 
 PE::PE(const char* filename, u64 baseAddress) : Module(filename, baseAddress)
 {
-    be_info("loading file %s" | filename);
+    motor_info("loading file %s" | filename);
     /*MSDosHeader dosh;
     ImageHeader   imageHeader;
     m_file = fopen(filename, "rb");
@@ -417,7 +417,7 @@ PE::PE(const char* filename, u64 baseAddress) : Module(filename, baseAddress)
             }
             else
             {
-                be_notreached();
+                motor_notreached();
             }
         }
 
@@ -426,7 +426,7 @@ PE::PE(const char* filename, u64 baseAddress) : Module(filename, baseAddress)
 
         if (debugEntryVirtualAdress && debugEntrySize)
         {
-            be_assert(debugEntrySize % sizeof(DebugEntry) == 0, "got an unexpected size for the
+            motor_assert(debugEntrySize % sizeof(DebugEntry) == 0, "got an unexpected size for the
     debug section; expected a multiple of %d, got %d" | sizeof(DebugEntry) | debugEntrySize); size_t
     debugEntryCount = debugEntrySize / sizeof(DebugEntry); for (u16 section = 0; section <
     imageHeader.sectionCount; ++section)
@@ -434,7 +434,7 @@ PE::PE(const char* filename, u64 baseAddress) : Module(filename, baseAddress)
                 if (sections[section].offset <= debugEntryVirtualAdress && (sections[section].offset
     + sections[section].size) > debugEntryVirtualAdress)
                 {
-                    be_info("loading debug info from section %s" | sections[section].name);
+                    motor_info("loading debug info from section %s" | sections[section].name);
                     minitl::Allocator::Block<DebugEntry> entries(Arena::stack(), debugEntryCount);
                     fseek(m_file, static_cast<long>(sections[section].rawDataOffset +
     (debugEntryVirtualAdress - sections[section].offset)), SEEK_SET); fread(entries,
@@ -473,7 +473,7 @@ PE::PE(const char* filename, u64 baseAddress) : Module(filename, baseAddress)
                             // I don't really care about it though
                             break;
                         default:
-                            be_info("unsupported debug file format : %d" | entries[i].type);
+                            motor_info("unsupported debug file format : %d" | entries[i].type);
                         }
                     }
                 }
@@ -497,7 +497,7 @@ PE::PE(const char* filename, u64 baseAddress) : Module(filename, baseAddress)
                 int offset = 0;
                 for (int i = 1; i < 8 && name[i]; ++i)
                 {
-                    be_assert(name[i] >= '0' && name[i] <= '9', "unexpected character in section
+                    motor_assert(name[i] >= '0' && name[i] <= '9', "unexpected character in section
     name %s : %c" | name | name[i]); offset = offset*10 + name[i]-'0';
                 }
                 name = strings->strings+offset-4;
@@ -506,12 +506,12 @@ PE::PE(const char* filename, u64 baseAddress) : Module(filename, baseAddress)
     sections[section].rawDataOffset, sections[section].rawDataSize }; m_sections.push_back(sec);
         }
         const Section& code = (*this)[".text"];
-        be_assert(code, "No .text section in executable %s" | m_filename);
+        motor_assert(code, "No .text section in executable %s" | m_filename);
         const Section& debug_link = (*this)[".gnu_debuglink"];
         if (debug_link)
         {
             minitl::Allocator::Block<char> f(Arena::stack(),
-    be_checked_numcast<size_t>(debug_link.fileSize)); readSection(debug_link, f);
+    motor_checked_numcast<size_t>(debug_link.fileSize)); readSection(debug_link, f);
             m_symbolInformations.type = SymbolResolver::SymbolInformations::PEDwarf;
             m_symbolInformations.filename = ifilename(f);
             m_symbolInformations.offset = m_baseAddress + code.offset;
@@ -536,4 +536,4 @@ SymbolResolver::SymbolInformations PE::getSymbolInformation() const
     return m_symbolInformations;
 }
 
-}}  // namespace BugEngine::Runtime
+}}  // namespace Motor::Runtime

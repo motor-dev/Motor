@@ -1,94 +1,94 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/meta/classinfo.script.hh>
-#include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/meta/classinfo.script.hh>
+#include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <py_namespace.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
-PyMethodDef PyBugNamespace::s_methods[]
-    = {{"__dir__", &PyBugNamespace::dir, METH_NOARGS, NULL}, {NULL, NULL, 0, NULL}};
+PyMethodDef PyMotorNamespace::s_methods[]
+    = {{"__dir__", &PyMotorNamespace::dir, METH_NOARGS, NULL}, {NULL, NULL, 0, NULL}};
 
-PyTypeObject PyBugNamespace::s_pyType = {{{0, 0}, 0},
-                                         "py_bugengine.Namespace",
-                                         sizeof(PyBugNamespace),
-                                         0,
-                                         &PyBugNamespace::dealloc,
-                                         0,
-                                         &PyBugNamespace::getattr,
-                                         &PyBugNamespace::setattr,
-                                         0,
-                                         &PyBugNamespace::repr,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         Py_TPFLAGS_DEFAULT | Py_TPFLAGS_IS_ABSTRACT,
-                                         "Wrapper class for the C++ BugEngine namespaces",
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         PyBugNamespace::s_methods,
-                                         0,
-                                         0,
-                                         &PyBugObject::s_pyType,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         &PyBugNamespace::init,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0};
+PyTypeObject PyMotorNamespace::s_pyType = {{{0, 0}, 0},
+                                           "py_motor.Namespace",
+                                           sizeof(PyMotorNamespace),
+                                           0,
+                                           &PyMotorNamespace::dealloc,
+                                           0,
+                                           &PyMotorNamespace::getattr,
+                                           &PyMotorNamespace::setattr,
+                                           0,
+                                           &PyMotorNamespace::repr,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           Py_TPFLAGS_DEFAULT | Py_TPFLAGS_IS_ABSTRACT,
+                                           "Wrapper class for the C++ Motor namespaces",
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           PyMotorNamespace::s_methods,
+                                           0,
+                                           0,
+                                           &PyMotorObject::s_pyType,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           &PyMotorNamespace::init,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           0};
 
-PyObject* PyBugNamespace::stealValue(PyObject* owner, Meta::Value& value)
+PyObject* PyMotorNamespace::stealValue(PyObject* owner, Meta::Value& value)
 {
-    be_assert(value.type().metaclass->type() == Meta::ClassType_Namespace,
-              "PyBugNamespace only accepts Namespace types");
-    PyObject* result                              = s_pyType.tp_alloc(&s_pyType, 0);
-    static_cast< PyBugNamespace* >(result)->owner = owner;
+    motor_assert(value.type().metaclass->type() == Meta::ClassType_Namespace,
+                 "PyMotorNamespace only accepts Namespace types");
+    PyObject* result                                = s_pyType.tp_alloc(&s_pyType, 0);
+    static_cast< PyMotorNamespace* >(result)->owner = owner;
 
     if(owner)
     {
         Py_INCREF(owner);
     }
-    new(&(static_cast< PyBugNamespace* >(result))->value) Meta::Value();
-    (static_cast< PyBugNamespace* >(result))->value.swap(value);
+    new(&(static_cast< PyMotorNamespace* >(result))->value) Meta::Value();
+    (static_cast< PyMotorNamespace* >(result))->value.swap(value);
     return result;
 }
 
-int PyBugNamespace::init(PyObject* self, PyObject* args, PyObject* kwds)
+int PyMotorNamespace::init(PyObject* self, PyObject* args, PyObject* kwds)
 {
     /* todo */
-    be_forceuse(self);
-    be_forceuse(args);
-    be_forceuse(kwds);
+    motor_forceuse(self);
+    motor_forceuse(args);
+    motor_forceuse(kwds);
     return 0;
 }
 
-PyObject* PyBugNamespace::getattr(PyObject* self, const char* name)
+PyObject* PyMotorNamespace::getattr(PyObject* self, const char* name)
 {
-    PyBugNamespace*    self_ = static_cast< PyBugNamespace* >(self);
+    PyMotorNamespace*  self_ = static_cast< PyMotorNamespace* >(self);
     const Meta::Class& klass = self_->value.as< const Meta::Class& >();
     istring            name_(name);
     for(raw< const Meta::ObjectInfo > o = klass.objects; o; o = o->next)
@@ -96,15 +96,15 @@ PyObject* PyBugNamespace::getattr(PyObject* self, const char* name)
         if(o->name == name_)
         {
             Meta::Value v = o->value;
-            return PyBugObject::stealValue(self, v);
+            return PyMotorObject::stealValue(self, v);
         }
     }
-    return PyBugObject::getattr(self, name);
+    return PyMotorObject::getattr(self, name);
 }
 
-int PyBugNamespace::setattr(PyObject* self, const char* name, PyObject* value)
+int PyMotorNamespace::setattr(PyObject* self, const char* name, PyObject* value)
 {
-    PyBugObject*       self_ = static_cast< PyBugObject* >(self);
+    PyMotorObject*     self_ = static_cast< PyMotorObject* >(self);
     istring            name_(name);
     const Meta::Class& klass = self_->value.as< const Meta::Class& >();
     for(raw< const Meta::ObjectInfo > ob = klass.objects; ob; ob = ob->next)
@@ -144,10 +144,10 @@ int PyBugNamespace::setattr(PyObject* self, const char* name, PyObject* value)
     return -1;
 }
 
-PyObject* PyBugNamespace::dir(PyObject* self, PyObject* args)
+PyObject* PyMotorNamespace::dir(PyObject* self, PyObject* args)
 {
-    PyBugObject* self_ = static_cast< PyBugObject* >(self);
-    be_forceuse(args);
+    PyMotorObject* self_ = static_cast< PyMotorObject* >(self);
+    motor_forceuse(args);
     PyObject* result = s_library->m_PyList_New(0);
     if(!result) return NULL;
     const Meta::Class&             klass      = self_->value.as< const Meta::Class& >();
@@ -174,9 +174,9 @@ PyObject* PyBugNamespace::dir(PyObject* self, PyObject* args)
     return result;
 }
 
-PyObject* PyBugNamespace::repr(PyObject* self)
+PyObject* PyMotorNamespace::repr(PyObject* self)
 {
-    PyBugObject*       self_ = static_cast< PyBugObject* >(self);
+    PyMotorObject*     self_ = static_cast< PyMotorObject* >(self);
     const Meta::Value& v     = self_->value;
     const Meta::Class& ns    = v.as< const Meta::Class& >();
 
@@ -190,17 +190,17 @@ PyObject* PyBugNamespace::repr(PyObject* self)
     }
 }
 
-void PyBugNamespace::registerType(PyObject* module)
+void PyMotorNamespace::registerType(PyObject* module)
 {
     int result = s_library->m_PyType_Ready(&s_pyType);
-    be_assert(result >= 0, "unable to register type");
+    motor_assert(result >= 0, "unable to register type");
     Py_INCREF(&s_pyType);
     result = (*s_library->m_PyModule_AddObject)(module, "Namespace", (PyObject*)&s_pyType);
-    be_assert(result >= 0, "unable to register type");
-    Meta::Value v = Meta::Value(be_bugengine_Namespace());
-    result        = (*s_library->m_PyModule_AddObject)(module, "BugEngine", stealValue(0, v));
-    be_assert(result >= 0, "unable to register type");
-    be_forceuse(result);
+    motor_assert(result >= 0, "unable to register type");
+    Meta::Value v = Meta::Value(motor_motor_Namespace());
+    result        = (*s_library->m_PyModule_AddObject)(module, "Motor", stealValue(0, v));
+    motor_assert(result >= 0, "unable to register type");
+    motor_forceuse(result);
 }
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python

@@ -12,9 +12,9 @@
 #
 
 # -- Project information -----------------------------------------------------
-project = 'BugEngine'
-copyright = '2021, bugengine.devel@gmail.com'
-author = 'bugengine.devel@gmail.com'
+project = 'Motor'
+copyright = '2021, motor.devel@gmail.com'
+author = 'motor.devel@gmail.com'
 
 # -- General configuration ---------------------------------------------------
 extensions = []

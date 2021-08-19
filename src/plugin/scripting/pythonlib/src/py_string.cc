@@ -1,51 +1,51 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <py_string.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
 template < typename T >
-PyTypeObject::Py2NumberMethods PyBugString< T >::s_py2StringNumber
-    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, 0, &PyBugString< T >::nonZero,
+PyTypeObject::Py2NumberMethods PyMotorString< T >::s_py2StringNumber
+    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, 0, &PyMotorString< T >::nonZero,
        0,         0, 0, 0, 0, 0, 0, 0, 0,
        0,         0, 0, 0, 0, 0, 0, 0, 0,
        0,         0, 0, 0, 0, 0, 0, 0, 0,
        0};
 
 template < typename T >
-PyTypeObject::Py3NumberMethods PyBugString< T >::s_py3StringNumber
-    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, &PyBugString< T >::nonZero,
+PyTypeObject::Py3NumberMethods PyMotorString< T >::s_py3StringNumber
+    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, &PyMotorString< T >::nonZero,
        0,         0, 0, 0, 0, 0, 0, 0,
        0,         0, 0, 0, 0, 0, 0, 0,
        0,         0, 0, 0, 0, 0, 0, 0,
        0,         0};
 
 template < typename T >
-PyTypeObject PyBugString< T >::s_pyType
+PyTypeObject PyMotorString< T >::s_pyType
     = {{{0, 0}, 0},
-       istring(minitl::format< 128u >("py_bugengine.%s") | be_type< T >().metaclass->name).c_str(),
-       sizeof(PyBugString< T >),
+       istring(minitl::format< 128u >("py_motor.%s") | motor_type< T >().metaclass->name).c_str(),
+       sizeof(PyMotorString< T >),
        0,
-       &PyBugString< T >::dealloc,
+       &PyMotorString< T >::dealloc,
        0,
-       &PyBugString< T >::getattr,
-       &PyBugString< T >::setattr,
+       &PyMotorString< T >::getattr,
+       &PyMotorString< T >::setattr,
        0,
-       &PyBugString< T >::repr,
-       0,
-       0,
+       &PyMotorString< T >::repr,
        0,
        0,
        0,
-       &PyBugString< T >::str,
+       0,
+       0,
+       &PyMotorString< T >::str,
        0,
        0,
        0,
        Py_TPFLAGS_DEFAULT,
-       "Wrapper class for the C++ BugEngine string types",
+       "Wrapper class for the C++ Motor string types",
        0,
        0,
        0,
@@ -55,14 +55,14 @@ PyTypeObject PyBugString< T >::s_pyType
        0,
        0,
        0,
-       &PyBugObject::s_pyType,
+       &PyMotorObject::s_pyType,
        0,
        0,
        0,
        0,
-       &PyBugString< T >::init,
+       &PyMotorString< T >::init,
        0,
-       &PyBugString< T >::newinst,
+       &PyMotorString< T >::newinst,
        0,
        0,
        0,
@@ -76,33 +76,33 @@ PyTypeObject PyBugString< T >::s_pyType
        0};
 
 template < typename T >
-PyObject* PyBugString< T >::stealValue(PyObject* owner, Meta::Value& value)
+PyObject* PyMotorString< T >::stealValue(PyObject* owner, Meta::Value& value)
 {
     const T& t = value.as< const T& >();
-    be_forceuse(t);
-    be_assert(value.type().metaclass->type() == Meta::ClassType_String,
-              "PyBugString only accepts String types");
-    be_assert(value.type().metaclass->index() == be_type< T >().metaclass->index(),
-              "expected %s; got %s" | be_type< T >().metaclass->name
-                  | value.type().metaclass->name);
-    PyObject* result                           = s_pyType.tp_alloc(&s_pyType, 0);
-    static_cast< PyBugString* >(result)->owner = owner;
+    motor_forceuse(t);
+    motor_assert(value.type().metaclass->type() == Meta::ClassType_String,
+                 "PyMotorString only accepts String types");
+    motor_assert(value.type().metaclass->index() == motor_type< T >().metaclass->index(),
+                 "expected %s; got %s" | motor_type< T >().metaclass->name
+                     | value.type().metaclass->name);
+    PyObject* result                             = s_pyType.tp_alloc(&s_pyType, 0);
+    static_cast< PyMotorString* >(result)->owner = owner;
 
     if(owner)
     {
         Py_INCREF(owner);
     }
-    new(&(static_cast< PyBugString* >(result))->value) Meta::Value();
-    (static_cast< PyBugString* >(result))->value.swap(value);
+    new(&(static_cast< PyMotorString* >(result))->value) Meta::Value();
+    (static_cast< PyMotorString* >(result))->value.swap(value);
     return result;
 }
 
 template < typename T >
-int PyBugString< T >::init(PyObject* self, PyObject* args, PyObject* kwds)
+int PyMotorString< T >::init(PyObject* self, PyObject* args, PyObject* kwds)
 {
-    be_forceuse(kwds);
-    PyBugObject* self_    = static_cast< PyBugObject* >(self);
-    Py_ssize_t   argCount = s_library->m_PyTuple_Size(args);
+    motor_forceuse(kwds);
+    PyMotorObject* self_    = static_cast< PyMotorObject* >(self);
+    Py_ssize_t     argCount = s_library->m_PyTuple_Size(args);
     if(argCount == 0)
     {
         self_->value = Meta::Value(T(""));
@@ -112,7 +112,7 @@ int PyBugString< T >::init(PyObject* self, PyObject* args, PyObject* kwds)
         PyObject* arg = s_library->m_PyTuple_GetItem(args, 0);
         if(arg->py_type == &s_pyType)
         {
-            self_->value = static_cast< PyBugString* >(arg)->value;
+            self_->value = static_cast< PyMotorString* >(arg)->value;
         }
         else if(arg->py_type->tp_flags & Py_TPFLAGS_STRING_SUBCLASS)
         {
@@ -138,7 +138,7 @@ int PyBugString< T >::init(PyObject* self, PyObject* args, PyObject* kwds)
         {
             s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError, "Cannot convert from %s to %s",
                                       arg->py_type->tp_name,
-                                      be_type< T >().metaclass->name.c_str());
+                                      motor_type< T >().metaclass->name.c_str());
             return -1;
         }
     }
@@ -146,9 +146,9 @@ int PyBugString< T >::init(PyObject* self, PyObject* args, PyObject* kwds)
 }
 
 template < typename T >
-PyObject* PyBugString< T >::repr(PyObject* self)
+PyObject* PyMotorString< T >::repr(PyObject* self)
 {
-    PyBugObject*       self_ = static_cast< PyBugObject* >(self);
+    PyMotorObject*     self_ = static_cast< PyMotorObject* >(self);
     const Meta::Value& v     = self_->value;
     typedef PyObject* (*toStringType)(const char* format, ...);
     toStringType toString = s_library->getVersion() >= 30 ? s_library->m_PyUnicode_FromFormat
@@ -182,9 +182,9 @@ const char* toCharPtr(const text& t)
 }
 
 template < typename T >
-PyObject* PyBugString< T >::str(PyObject* self)
+PyObject* PyMotorString< T >::str(PyObject* self)
 {
-    PyBugObject*       self_ = static_cast< PyBugObject* >(self);
+    PyMotorObject*     self_ = static_cast< PyMotorObject* >(self);
     const Meta::Value& v     = self_->value;
     typedef PyObject* (*toStringType)(const char* format);
     toStringType toString = s_library->getVersion() >= 30 ? s_library->m_PyUnicode_FromString
@@ -205,11 +205,12 @@ bool nonZeroString< istring >(const istring& t)
 }
 
 template < typename T >
-int PyBugString< T >::nonZero(PyObject* self)
+int PyMotorString< T >::nonZero(PyObject* self)
 {
-    PyBugObject*     self_ = static_cast< PyBugObject* >(self);
+    PyMotorObject*   self_ = static_cast< PyMotorObject* >(self);
     const Meta::Type t     = self_->value.type();
-    be_assert(t.metaclass->type() == Meta::ClassType_String, "PyBugString expected string value");
+    motor_assert(t.metaclass->type() == Meta::ClassType_String,
+                 "PyMotorString expected string value");
     if(t.indirection == Meta::Type::Value)
     {
         return nonZeroString(self_->value.as< const T& >());
@@ -221,7 +222,7 @@ int PyBugString< T >::nonZero(PyObject* self)
 }
 
 template < typename T >
-void PyBugString< T >::registerType(PyObject* module)
+void PyMotorString< T >::registerType(PyObject* module)
 {
     if(s_library->getVersion() >= 30)
         s_pyType.tp_as_number = &s_py3StringNumber.nb_common;
@@ -229,18 +230,18 @@ void PyBugString< T >::registerType(PyObject* module)
         s_pyType.tp_as_number = &s_py2StringNumber.nb_common;
     s_pyType.tp_alloc = s_library->m_PyType_GenericAlloc;
     int result        = s_library->m_PyType_Ready(&s_pyType);
-    be_assert(result >= 0, "unable to register type");
+    motor_assert(result >= 0, "unable to register type");
     Py_INCREF(&s_pyType);
-    result = (*s_library->m_PyModule_AddObject)(module, be_type< T >().metaclass->name.c_str(),
+    result = (*s_library->m_PyModule_AddObject)(module, motor_type< T >().metaclass->name.c_str(),
                                                 (PyObject*)&s_pyType);
-    be_assert(result >= 0, "unable to register type");
-    be_forceuse(result);
+    motor_assert(result >= 0, "unable to register type");
+    motor_forceuse(result);
 }
 
-template struct PyBugString< istring >;
-template struct PyBugString< inamespace >;
-template struct PyBugString< ifilename >;
-template struct PyBugString< ipath >;
-template struct PyBugString< text >;
+template struct PyMotorString< istring >;
+template struct PyMotorString< inamespace >;
+template struct PyMotorString< ifilename >;
+template struct PyMotorString< ipath >;
+template struct PyMotorString< text >;
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python

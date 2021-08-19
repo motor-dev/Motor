@@ -1,16 +1,16 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PYTHONLIB_PY_LOG_HH_
-#define BE_PYTHONLIB_PY_LOG_HH_
+#ifndef MOTOR_PYTHONLIB_PY_LOG_HH_
+#define MOTOR_PYTHONLIB_PY_LOG_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/core/logger.hh>
-#include <bugengine/plugin.scripting.pythonlib/pythontypes.hh>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/core/logger.hh>
+#include <motor/plugin.scripting.pythonlib/pythontypes.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
-struct PyBugLog
+struct PyMotorLog
 {
     enum LogType
     {
@@ -33,7 +33,7 @@ struct PyBugLog
     static PyTypeObject s_pyType;
 };
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python
 
 /**************************************************************************************************/
 #endif

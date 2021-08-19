@@ -2,7 +2,7 @@ version: 2
 jobs:
   linux:
     docker:
-      - image: bugengine/bugengine:latest
+      - image: motor/motor:latest
     steps:
       - checkout
       - run:

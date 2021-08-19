@@ -1,15 +1,15 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PYTHONLIB_PY_BOUNDMETHOD_HH_
-#define BE_PYTHONLIB_PY_BOUNDMETHOD_HH_
+#ifndef MOTOR_PYTHONLIB_PY_BOUNDMETHOD_HH_
+#define MOTOR_PYTHONLIB_PY_BOUNDMETHOD_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/plugin.scripting.pythonlib/pythontypes.hh>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/plugin.scripting.pythonlib/pythontypes.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
-struct PyBugObject;
+struct PyMotorObject;
 
 struct PyBoundMethod
 {
@@ -19,7 +19,7 @@ struct PyBoundMethod
 
     static void registerType(PyObject* module);
 
-    static PyObject* create(raw< const Meta::Method > method, PyBugObject* value);
+    static PyObject* create(raw< const Meta::Method > method, PyMotorObject* value);
     static PyObject* repr(PyObject* self);
     static void      dealloc(PyObject* self);
     static PyObject* call(PyObject* self, PyObject* args, PyObject* kwds);
@@ -27,7 +27,7 @@ struct PyBoundMethod
     static PyTypeObject s_pyType;
 };
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python
 
 /**************************************************************************************************/
 #endif

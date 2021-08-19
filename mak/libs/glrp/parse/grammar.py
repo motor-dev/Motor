@@ -1,5 +1,5 @@
 from ..log import Logger
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 from .lr0item import LR0Item
 from . import lalr
 import io

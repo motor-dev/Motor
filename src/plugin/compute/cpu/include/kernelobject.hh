@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_COMPUTE_CPU_KERNELOBJECT_HH_
-#define BE_COMPUTE_CPU_KERNELOBJECT_HH_
+#ifndef MOTOR_COMPUTE_CPU_KERNELOBJECT_HH_
+#define MOTOR_COMPUTE_CPU_KERNELOBJECT_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.compute.cpu/stdafx.h>
+#include <motor/plugin.compute.cpu/stdafx.h>
 
-namespace BugEngine { namespace KernelScheduler { namespace CPU {
+namespace Motor { namespace KernelScheduler { namespace CPU {
 
 class CodeObject;
 class Scheduler;
@@ -30,7 +30,7 @@ public:
              const minitl::array< weak< const IMemoryBuffer > >& params);
 };
 
-}}}  // namespace BugEngine::KernelScheduler::CPU
+}}}  // namespace Motor::KernelScheduler::CPU
 
 /**************************************************************************************************/
 #endif

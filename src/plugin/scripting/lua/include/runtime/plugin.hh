@@ -1,16 +1,16 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
  see LICENSE for detail */
 
-#ifndef BE_LUA_RUNTIME_PLUGIN_HH_
-#define BE_LUA_RUNTIME_PLUGIN_HH_
+#ifndef MOTOR_LUA_RUNTIME_PLUGIN_HH_
+#define MOTOR_LUA_RUNTIME_PLUGIN_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
 
-namespace BugEngine { namespace Lua {
+namespace Motor { namespace Lua {
 
 extern const luaL_Reg s_pluginMetaTable[];
 
-}}  // namespace BugEngine::Lua
+}}  // namespace Motor::Lua
 
 /**************************************************************************************************/
 #endif

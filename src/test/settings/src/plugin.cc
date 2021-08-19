@@ -1,7 +1,7 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/plugin/plugin.hh>
 
-BE_PLUGIN_NAMESPACE_REGISTER();
+MOTOR_PLUGIN_NAMESPACE_REGISTER();

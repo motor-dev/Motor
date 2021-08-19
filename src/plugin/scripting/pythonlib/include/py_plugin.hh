@@ -1,16 +1,16 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PYTHONLIB_PY_PLUGIN_HH_
-#define BE_PYTHONLIB_PY_PLUGIN_HH_
+#ifndef MOTOR_PYTHONLIB_PY_PLUGIN_HH_
+#define MOTOR_PYTHONLIB_PY_PLUGIN_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/plugin.scripting.pythonlib/pythontypes.hh>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/plugin.scripting.pythonlib/pythontypes.hh>
+#include <motor/plugin/plugin.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
-struct PyBugPlugin
+struct PyMotorPlugin
 {
     PyObject               py_object;
     Plugin::Plugin< void > value;
@@ -25,7 +25,7 @@ struct PyBugPlugin
     static void      dealloc(PyObject* self);
 };
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python
 
 /**************************************************************************************************/
 #endif

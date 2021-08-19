@@ -1,26 +1,26 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include    <bugengine/plugin.graphics.GL4/stdafx.h>
-#include    <bugengine/plugin.graphics.GL4/glrenderer.hh>
-#include    <bugengine/plugin.graphics.GL4/glmemoryhost.hh>
+#include    <motor/plugin.graphics.GL4/stdafx.h>
+#include    <motor/plugin.graphics.GL4/glrenderer.hh>
+#include    <motor/plugin.graphics.GL4/glmemoryhost.hh>
 #include    <extensions.hh>
 
-#include    <bugengine/plugin.graphics.3d/mesh/mesh.script.hh>
-#include    <bugengine/plugin.graphics.3d/texture/texture.script.hh>
-#include    <bugengine/plugin.graphics.3d/shader/shader.script.hh>
-#include    <bugengine/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include    <motor/plugin.graphics.3d/mesh/mesh.script.hh>
+#include    <motor/plugin.graphics.3d/texture/texture.script.hh>
+#include    <motor/plugin.graphics.3d/shader/shader.script.hh>
+#include    <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
 #include    <loaders/mesh/glmesh.hh>
 #include    <loaders/texture/gltexture.hh>
 #include    <loaders/shader/glshader.hh>
 #include    <loaders/rendertarget/glwindow.hh>
-#include    <bugengine/core/threads/thread.hh>
+#include    <motor/core/threads/thread.hh>
 
 
 #include    <Cocoa/Cocoa.h>
 #include    <OpenGL/OpenGL.h>
 
-@interface BugEngineOpenGLView : NSView
+@interface MotorOpenGLView : NSView
 {
 @public
     NSOpenGLContext*                                m_context;
@@ -31,7 +31,7 @@
 
 @end
 
-@implementation BugEngineOpenGLView
+@implementation MotorOpenGLView
 
 - (id) initWithFrame:(NSRect) frame context:(NSOpenGLContext*) context
 {
@@ -46,14 +46,14 @@
 
 - (void) dealloc
 {
-    be_info("destroying OpenGL view");
+    motor_info("destroying OpenGL view");
     [m_context release];
     [super dealloc];
 }
 
 @end
 
-namespace BugEngine { namespace OpenGL
+namespace Motor { namespace OpenGL
 {
 
 class GLRenderer::Context : public minitl::refcountable
@@ -89,7 +89,7 @@ GLRenderer::Context::Context()
     GLint sync = 0;
     [m_context setValues:&sync forParameter:NSOpenGLCPSwapInterval];
     [m_context makeCurrentContext];
-    be_info("Created OpenGL context %s (%s) on %s"
+    motor_info("Created OpenGL context %s (%s) on %s"
         | (const char*)glGetString(GL_VERSION)
         | (const char *)glGetString(GL_VENDOR)
         | (const char*)glGetString(GL_RENDERER));
@@ -108,7 +108,7 @@ class GLWindow::Context : public minitl::refcountable
     friend class GLWindow;
 private:
     NSWindow*               m_window;
-    BugEngineOpenGLView*    m_view;
+    MotorOpenGLView*    m_view;
     CGLContextObj           m_context;
     u64                     m_threadId;
 public:
@@ -118,7 +118,7 @@ public:
 
 GLWindow::Context::Context(NSWindow* window, NSOpenGLContext* context, u64 threadId)
     :   m_window(window)
-    ,   m_view([[BugEngineOpenGLView alloc] initWithFrame:[m_window contentRectForFrameRect:[m_window frame]]
+    ,   m_view([[MotorOpenGLView alloc] initWithFrame:[m_window contentRectForFrameRect:[m_window frame]]
                                                   context: context])
     ,   m_context((CGLContextObj)[context CGLContextObj])
     ,   m_threadId(threadId)
@@ -155,14 +155,14 @@ void GLRenderer::attachWindow(weak<GLWindow> w) const
     NSWindow* window = (NSWindow*)w->getWindowHandle();
     NSOpenGLContext* context = [[NSOpenGLContext alloc] initWithFormat: m_context->m_pixelFormat
                                                           shareContext: m_context->m_context];
-    be_assert(window, "No native window created for BugEngine window");
+    motor_assert(window, "No native window created for Motor window");
     w->m_context.reset(scoped<GLWindow::Context>::create(Arena::general(), window, context, Thread::currentId()));
     [context release];
 }
 
 const ShaderExtensions& GLRenderer::shaderext() const
 {
-    be_assert(m_context, "extensions required before context was created");
+    motor_assert(m_context, "extensions required before context was created");
     return m_context->m_shaderext;
 }
 
@@ -186,12 +186,12 @@ GLWindow::~GLWindow()
 void GLWindow::load(weak<const Resource::Description> windowDescription)
 {
     Window::load(windowDescription);
-    be_checked_cast<const GLRenderer>(m_renderer)->attachWindow(this);
+    motor_checked_cast<const GLRenderer>(m_renderer)->attachWindow(this);
 }
 
 void GLWindow::unload()
 {
-    be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
+    motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     Window::unload();
     m_context.reset(scoped<Context>());
 }
@@ -200,7 +200,7 @@ void GLWindow::setCurrent() const
 {
     if(m_context)
     {
-        be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread: Window belongs to thread %d, current thread: %d" | m_context->m_threadId | Thread::currentId());
+        motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread: Window belongs to thread %d, current thread: %d" | m_context->m_threadId | Thread::currentId());
         [m_context->m_view->m_context makeCurrentContext];
     }
 }
@@ -209,7 +209,7 @@ void GLWindow::clearCurrent() const
 {
     if(m_context)
     {
-        be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread: Window belongs to thread %d, current thread: %d" | m_context->m_threadId | Thread::currentId());
+        motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread: Window belongs to thread %d, current thread: %d" | m_context->m_threadId | Thread::currentId());
         [NSOpenGLContext clearCurrentContext];
     }
 }
@@ -218,7 +218,7 @@ void GLWindow::present() const
 {
     if(m_context)
     {
-        be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread: Window belongs to thread %d, current thread: %d" | m_context->m_threadId | Thread::currentId());
+        motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread: Window belongs to thread %d, current thread: %d" | m_context->m_threadId | Thread::currentId());
         CGLFlushDrawable(m_context->m_context);
     }
 }

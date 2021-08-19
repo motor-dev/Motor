@@ -2,7 +2,7 @@ from .ir_object import IrObject
 from .ir_type import IrTypeMetadata, IrTypeBuiltin, IrTypeVoid
 from ..ir_position import IrPosition
 from abc import abstractmethod
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 class IrValue(IrObject):

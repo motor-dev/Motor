@@ -1,15 +1,15 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_GLES2_STDAFX_H_
-#define BE_GLES2_STDAFX_H_
+#ifndef MOTOR_GLES2_STDAFX_H_
+#define MOTOR_GLES2_STDAFX_H_
 /**************************************************************************************************/
 
-#include <bugengine/stdafx.h>
+#include <motor/stdafx.h>
 
-#include <bugengine/plugin.graphics.3d/stdafx.h>
+#include <motor/plugin.graphics.3d/stdafx.h>
 
-#ifdef BE_PLATFORM_DARWIN
+#ifdef MOTOR_PLATFORM_DARWIN
 #    include <OpenGLES/EAGL.h>
 #    include <OpenGLES/ES2/gl.h>
 #else

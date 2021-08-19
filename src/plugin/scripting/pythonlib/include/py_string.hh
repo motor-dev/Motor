@@ -1,16 +1,16 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PYTHONLIB_PY_STRING_HH_
-#define BE_PYTHONLIB_PY_STRING_HH_
+#ifndef MOTOR_PYTHONLIB_PY_STRING_HH_
+#define MOTOR_PYTHONLIB_PY_STRING_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <py_object.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
 template < typename T >
-struct PyBugString : public PyBugObject
+struct PyMotorString : public PyMotorObject
 {
     static void registerType(PyObject* module);
 
@@ -25,7 +25,7 @@ struct PyBugString : public PyBugObject
     static PyTypeObject::Py3NumberMethods s_py3StringNumber;
 };
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python
 
 /**************************************************************************************************/
 #endif

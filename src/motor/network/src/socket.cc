@@ -1,0 +1,17 @@
+/* Motor <motor.devel@gmail.com>
+   see LICENSE for detail */
+
+#include <motor/network/stdafx.h>
+#include <motor/network/socket.hh>
+
+namespace Motor { namespace Network {
+
+Socket::Socket()
+{
+}
+
+Socket::~Socket()
+{
+}
+
+}}  // namespace Motor::Network

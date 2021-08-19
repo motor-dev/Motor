@@ -15,11 +15,11 @@ class sublime3(Build.BuildContext):
     cmd = 'sublime'
     fun = 'build'
     optim = 'debug'
-    bugengine_toolchain = 'projects'
-    bugengine_variant = 'projects.setup'
+    motor_toolchain = 'projects'
+    motor_variant = 'projects.setup'
     variant = 'projects/sublime'
 
-    #bugengine_variant = '%(bugengine_variant)s'
+    #motor_variant = '%(motor_variant)s'
 
     def execute(self):
         """
@@ -32,7 +32,7 @@ class sublime3(Build.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.variant = self.__class__.bugengine_variant
+        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '${Variant}'
@@ -56,7 +56,7 @@ class sublime3(Build.BuildContext):
         appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
 
         workspace_node = self.srcnode.make_node('%s.sublime-project' % appname)
-        extra_node = self.bugenginenode.make_node('extra')
+        extra_node = self.motornode.make_node('extra')
 
         folders = []
         commands = []

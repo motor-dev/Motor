@@ -12,7 +12,7 @@ extern "C" {
 %(include_externc)s
 }
 #if defined(_WIN32) && !defined(__clang__)
-__declspec(dllexport) int be_test()
+__declspec(dllexport) int motor_test()
 {
     return 0;
 }

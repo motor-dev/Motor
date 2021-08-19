@@ -9,7 +9,7 @@ def external(bld, name):
     if os.path.isfile(os.path.join(bld.path.abspath(), script_file)):
         bld.recurse(script_file)
     else:
-        bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'src', script_file))
+        bld.recurse(os.path.join(bld.motornode.abspath(), 'src', script_file))
     return name
 
 

@@ -41,7 +41,7 @@ class CppObject(object):
         for alias in self.aliases:
             result.append(
                 (
-                    '::BugEngine::istring(%s)' % alias,
+                    '::Motor::istring(%s)' % alias,
                     alias.strip().replace('#', '_').replace('?', '_').replace('"', '_').replace(':', '_')
                 )
             )
@@ -54,7 +54,7 @@ class CppObject(object):
         return self.short_name().replace('#', '_').replace('?', '_').replace('"', '_').replace(':', '_')
 
     def engine_name(self):
-        return '::BugEngine::istring("%s")' % self.short_name()
+        return '::Motor::istring("%s")' % self.short_name()
 
     def do_typedef(self, name, definition):
         pass
@@ -64,21 +64,21 @@ class CppObject(object):
 
     def declare(self, owner, struct_owners, definition, instance, prefix):
         if self.tags and struct_owners:
-            definition.write('static const ::BugEngine::Meta::Tag s%s_tags[];\n' % prefix)
+            definition.write('static const ::Motor::Meta::Tag s%s_tags[];\n' % prefix)
             definition.write(
-                'static const ::BugEngine::Meta::staticarray< const ::BugEngine::Meta::Tag > s%s_tags_array;\n' % prefix
+                'static const ::Motor::Meta::staticarray< const ::Motor::Meta::Tag > s%s_tags_array;\n' % prefix
             )
 
     def write_tags(self, definition, struct_owners, prefix):
         if self.tags:
             definition.write(
-                '%sconst ::BugEngine::Meta::Tag %ss%s_tags[] = {\n' %
+                '%sconst ::Motor::Meta::Tag %ss%s_tags[] = {\n' %
                 (helper_static(struct_owners), helper_name(struct_owners), prefix)
             )
-            definition.write(',\n'.join(['    { ::BugEngine::Meta::Value(%s(%s)) }' % (t[0], t[1]) for t in self.tags]))
+            definition.write(',\n'.join(['    { ::Motor::Meta::Value(%s(%s)) }' % (t[0], t[1]) for t in self.tags]))
             definition.write('\n};\n')
             definition.write(
-                '%sconst ::BugEngine::Meta::staticarray< const ::BugEngine::Meta::Tag > %ss%s_tags_array =\n'
+                '%sconst ::Motor::Meta::staticarray< const ::Motor::Meta::Tag > %ss%s_tags_array =\n'
                 '{ %d, s%s_tags };\n' %
                 (helper_static(struct_owners), helper_name(struct_owners), prefix, len(self.tags), prefix)
             )
@@ -137,8 +137,8 @@ class Method(CppObject):
         CppObject.declare(self, owner, struct_owners, definition, instance, prefix)
         if self.has_trampoline():
             definition.write(
-                '    static ::BugEngine::Meta::Value %s'
-                '(::BugEngine::Meta::Value* parameters, u32 parameterCount);\n' % self.trampoline_name(owner, prefix)
+                '    static ::Motor::Meta::Value %s'
+                '(::Motor::Meta::Value* parameters, u32 parameterCount);\n' % self.trampoline_name(owner, prefix)
             )
         if struct_owners:
             param_index = 0
@@ -149,10 +149,10 @@ class Method(CppObject):
                 p.declare(owner, struct_owners, definition, instance, prefix + '_param%d' % param_index)
                 if p.default_value:
                     definition.write(
-                        '    static const ::BugEngine::Meta::Value s%s_param%d_default;\n' % (prefix, param_index)
+                        '    static const ::Motor::Meta::Value s%s_param%d_default;\n' % (prefix, param_index)
                     )
             if param_index:
-                definition.write('    static const ::BugEngine::Meta::Method::Parameter s%s_params[];\n' % prefix)
+                definition.write('    static const ::Motor::Meta::Method::Parameter s%s_params[];\n' % prefix)
 
     def call(self, owner, struct_owners):
         if struct_owners and not 'static' in self.attributes and not 'builtin' in self.attributes:
@@ -174,28 +174,25 @@ class Method(CppObject):
     def write_content(self, owner, struct_owners, prefix, namespace, definition, instance):
         if self.has_trampoline():
             definition.write(
-                '::BugEngine::Meta::Value %s%s'
-                '(::BugEngine::Meta::Value* parameters, u32 parameterCount)\n'
+                '::Motor::Meta::Value %s%s'
+                '(::Motor::Meta::Value* parameters, u32 parameterCount)\n'
                 '{\n'
-                '    be_forceuse(parameters);\n'
-                '    be_forceuse(parameterCount);\n' %
+                '    motor_forceuse(parameters);\n'
+                '    motor_forceuse(parameterCount);\n' %
                 (helper_name(struct_owners), self.trampoline_name(owner, prefix))
             )
             if self.return_type != 'void':
                 if self.return_type[-1] == '&':
                     definition.write(
-                        '    return ::BugEngine::Meta::Value(::BugEngine::Meta::Value::ByRef(%s));\n'
+                        '    return ::Motor::Meta::Value(::Motor::Meta::Value::ByRef(%s));\n'
                         '}\n' % self.call(owner, struct_owners)
                     )
                 else:
-                    definition.write(
-                        '    return ::BugEngine::Meta::Value(%s);\n'
-                        '}\n' % self.call(owner, struct_owners)
-                    )
+                    definition.write('    return ::Motor::Meta::Value(%s);\n' '}\n' % self.call(owner, struct_owners))
             else:
                 definition.write(
                     '    %s;\n'
-                    '    return ::BugEngine::Meta::Value();\n'
+                    '    return ::Motor::Meta::Value();\n'
                     '}\n' % self.call(owner, struct_owners)
                 )
 
@@ -217,13 +214,13 @@ class Method(CppObject):
                 p, t = p
                 if p.default_value:
                     definition.write(
-                        '%sconst ::BugEngine::Meta::Value %ss%s_param%d_default ((%s)%s);\n' % (
+                        '%sconst ::Motor::Meta::Value %ss%s_param%d_default ((%s)%s);\n' % (
                             helper_static(struct_owners), helper_name(struct_owners), prefix, i + 1, p.type,
                             p.default_value
                         )
                     )
             definition.write(
-                '%sconst ::BugEngine::Meta::Method::Parameter %ss%s_params[] = {\n' %
+                '%sconst ::Motor::Meta::Method::Parameter %ss%s_params[] = {\n' %
                 (helper_static(struct_owners), helper_name(struct_owners), prefix)
             )
             definition.write(
@@ -231,13 +228,13 @@ class Method(CppObject):
                     [
                         '    {\n'
                         '        %s,\n'
-                        '        ::BugEngine::istring("%s"),\n'
-                        '        ::be_type< %s >(),\n'
+                        '        ::Motor::istring("%s"),\n'
+                        '        ::motor_type< %s >(),\n'
                         '        {%s}\n'
                         '    }' % (
                             t, p[0].name, p[0].type, p[0].default_value and
                             ('&s%s_param%d_default' %
-                             (prefix, i + 1)) or '&::BugEngine::Meta::Method::Parameter::s_noDefaultValue'
+                             (prefix, i + 1)) or '&::Motor::Meta::Method::Parameter::s_noDefaultValue'
                         ) for i, p in enumerate(params)
                     ]
                 )
@@ -307,7 +304,7 @@ class Operator(Method):
             return 'operator%s' % self.operator_name
 
     def engine_name(self):
-        return '::BugEngine::Meta::Class::nameOperator%s()' % self.name
+        return '::Motor::Meta::Class::nameOperator%s()' % self.name
 
 
 class Constructor(Method):
@@ -323,11 +320,11 @@ class Constructor(Method):
             return self.name
 
     def engine_name(self):
-        return '::BugEngine::Meta::Class::nameConstructor()'
+        return '::Motor::Meta::Class::nameConstructor()'
 
     def extra_params(self, owner, struct_owners):
         if owner.type == 'class':
-            return ['::BugEngine::Arena::general()']
+            return ['::Motor::Arena::general()']
         else:
             return []
 
@@ -340,7 +337,7 @@ class PodConstructor(Constructor):
         return False
 
     def trampoline_name(self, owner, prefix):
-        return '::BugEngine::Meta::createPod< %s >' % owner.cpp_name()
+        return '::Motor::Meta::createPod< %s >' % owner.cpp_name()
 
 
 class PodConstructorCopy(Constructor):
@@ -353,7 +350,7 @@ class PodConstructorCopy(Constructor):
         return False
 
     def trampoline_name(self, owner, prefix):
-        return '::BugEngine::Meta::createPodCopy< %s >' % owner.cpp_name()
+        return '::Motor::Meta::createPodCopy< %s >' % owner.cpp_name()
 
 
 class Destructor(Method):
@@ -364,7 +361,7 @@ class Destructor(Method):
         return '~%s' % (owner.name[-1])
 
     def engine_name(self):
-        return '::BugEngine::Meta::Class::nameDestructor()'
+        return '::Motor::Meta::Class::nameDestructor()'
 
 
 class OverloadedMethod(CppObject):
@@ -383,11 +380,11 @@ class OverloadedMethod(CppObject):
         for overload_index, o in enumerate(self.overloads):
             o.declare(owner, struct_owners, definition, instance, prefix + '_overload_%d' % (overload_index))
         if struct_owners:
-            definition.write('    static const ::BugEngine::Meta::Method::Overload s%s_overloads[];\n' % prefix)
+            definition.write('    static const ::Motor::Meta::Method::Overload s%s_overloads[];\n' % prefix)
             if not member:
-                definition.write('    static const ::BugEngine::Meta::Method s%s_method;\n' % prefix)
-                definition.write('    static const raw<const ::BugEngine::Meta::Method> s%s_ptr;\n' % prefix)
-                definition.write('    static const ::BugEngine::Meta::ObjectInfo s%s_object;\n' % prefix)
+                definition.write('    static const ::Motor::Meta::Method s%s_method;\n' % prefix)
+                definition.write('    static const raw<const ::Motor::Meta::Method> s%s_ptr;\n' % prefix)
+                definition.write('    static const ::Motor::Meta::ObjectInfo s%s_object;\n' % prefix)
 
     def add_overload(self, overload):
         self.overloads.append(overload)
@@ -409,7 +406,7 @@ class OverloadedMethod(CppObject):
             )
             overload_index += 1
         definition.write(
-            '%sconst ::BugEngine::Meta::Method::Overload %ss%s_overloads[] = {\n' %
+            '%sconst ::Motor::Meta::Method::Overload %ss%s_overloads[] = {\n' %
             (helper_static(struct_owners), helper_name(struct_owners), prefix)
         )
         definition.write(
@@ -418,7 +415,7 @@ class OverloadedMethod(CppObject):
                     '    {\n'
                     '        %s,\n'
                     '        %s,\n'
-                    '        ::be_type< %s >(),\n'
+                    '        ::motor_type< %s >(),\n'
                     '        %s,\n'
                     '        {0, 0},\n'
                     '        &%s\n'
@@ -436,12 +433,12 @@ class OverloadedMethod(CppObject):
         prefix = prefix + '_method_%s' % self.name_cpp
         method_ptr = self.write_method(owner, struct_owners, prefix, definition)
         definition.write(
-            '%sconst raw<const ::BugEngine::Meta::Method> %ss%s_ptr = {&%s};\n'
-            '%sconst ::BugEngine::Meta::ObjectInfo %ss%s_object = {\n'
+            '%sconst raw<const ::Motor::Meta::Method> %ss%s_ptr = {&%s};\n'
+            '%sconst ::Motor::Meta::ObjectInfo %ss%s_object = {\n'
             '    %s,\n'
             '    {0},\n'
             '    s%s_method.name,\n'
-            '    ::BugEngine::Meta::Value(s%s_ptr)\n'
+            '    ::Motor::Meta::Value(s%s_ptr)\n'
             '};\n' % (
                 helper_static(struct_owners), helper_name(struct_owners), prefix, method_ptr,
                 helper_static(struct_owners), helper_name(struct_owners), prefix, object_name, prefix, prefix
@@ -452,7 +449,7 @@ class OverloadedMethod(CppObject):
     def write_method(self, owner, struct_owners, prefix, definition):
         overload_array = self.write_overloads(owner, struct_owners, prefix, definition)
         definition.write(
-            '%sconst ::BugEngine::Meta::Method %ss%s_method  = {\n'
+            '%sconst ::Motor::Meta::Method %ss%s_method  = {\n'
             '   %s,\n'
             '   %s,\n'
             '   {&s%s_method}\n'
@@ -474,9 +471,7 @@ class Variable(CppObject):
         CppObject.declare(self, owner, struct_owners, definition, instance, prefix)
         if struct_owners and 'static' in self.attributes:
             for alias, alias_cpp in self.all_names():
-                definition.write(
-                    '    static const ::BugEngine::Meta::ObjectInfo s%s_object_%s;\n' % (prefix, alias_cpp)
-                )
+                definition.write('    static const ::Motor::Meta::ObjectInfo s%s_object_%s;\n' % (prefix, alias_cpp))
 
     def add_attributes(self, attributes):
         self.attributes += attributes
@@ -489,12 +484,12 @@ class Variable(CppObject):
         tag = self.write_tags(definition, struct_owners, prefix)
         for alias, alias_cpp in self.all_names():
             definition.write(
-                '%sconst ::BugEngine::Meta::ObjectInfo %ss%s_object_%s = {\n'
+                '%sconst ::Motor::Meta::ObjectInfo %ss%s_object_%s = {\n'
                 '    %s,\n'
                 '    %s,\n'
-                '    ::BugEngine::istring(%s),\n'
-                '    ::BugEngine::Meta::Value(\n'
-                '        ::BugEngine::Meta::Value::ByRef(%s::%s))\n'
+                '    ::Motor::istring(%s),\n'
+                '    ::Motor::Meta::Value(\n'
+                '        ::Motor::Meta::Value::ByRef(%s::%s))\n'
                 '};\n' % (
                     hlper_static(struct_owners), helper_name(struct_owners), prefix, alias_cpp, object_name, tag, alias,
                     owner.cpp_name(), self.name
@@ -520,9 +515,7 @@ class Typedef(CppObject):
         CppObject.declare(self, owner, struct_owners, definition, instance, prefix)
         if struct_owners:
             for alias, alias_cpp in self.all_names():
-                definition.write(
-                    '    static const ::BugEngine::Meta::ObjectInfo s%s_object_%s;\n' % (prefix, alias_cpp)
-                )
+                definition.write('    static const ::Motor::Meta::ObjectInfo s%s_object_%s;\n' % (prefix, alias_cpp))
 
     def write_content(self, owner, struct_owners, prefix, namespace, definition, instance):
         pass
@@ -532,12 +525,12 @@ class Typedef(CppObject):
         tag = self.write_tags(definition, struct_owners, prefix)
         for alias, alias_cpp in self.all_names():
             definition.write(
-                '%sconst ::BugEngine::Meta::ObjectInfo %ss%s_object_%s = {\n'
+                '%sconst ::Motor::Meta::ObjectInfo %ss%s_object_%s = {\n'
                 '    %s,\n'
                 '    %s,\n'
-                '    ::BugEngine::istring(%s),\n'
-                '    ::BugEngine::Meta::Value(\n'
-                '        ::be_type< %s >())\n'
+                '    ::Motor::istring(%s),\n'
+                '    ::Motor::Meta::Value(\n'
+                '        ::motor_type< %s >())\n'
                 '};\n' % (
                     helper_static(struct_owners), helper_name(struct_owners), prefix, alias_cpp, object_name, tag,
                     alias, self.name
@@ -557,7 +550,7 @@ class EnumValue(Variable):
         prefix = prefix + '_' + self.name
         CppObject.declare(self, owner, struct_owners, definition, instance, prefix)
         for alias, alias_cpp in self.all_names():
-            definition.write('    static const ::BugEngine::Meta::ObjectInfo s%s_object_%s;\n' % (prefix, alias_cpp))
+            definition.write('    static const ::Motor::Meta::ObjectInfo s%s_object_%s;\n' % (prefix, alias_cpp))
 
     def cpp_name(self, owner):
         return '%s::%s' % ('::'.join(owner.cpp_name().split('::')[:-1]), self.name)
@@ -568,11 +561,11 @@ class EnumValue(Variable):
         tag = self.write_tags('s_object_%s' % self.id(), definition, prefix)
         for alias, alias_cpp in self.all_names():
             definition.write(
-                '%sconst ::BugEngine::Meta::ObjectInfo %ss%s_object_%s = {\n'
+                '%sconst ::Motor::Meta::ObjectInfo %ss%s_object_%s = {\n'
                 '    %s,\n'
                 '    %s,\n'
                 '    %s,\n'
-                '    ::BugEngine::Meta::Value(%s, ::BugEngine::Meta::Value::MakeConst)\n'
+                '    ::Motor::Meta::Value(%s, ::Motor::Meta::Value::MakeConst)\n'
                 '};\n' % (
                     helper_static(struct_owners), helper_name(struct_owners), prefix, alias_cpp, object_name, tag,
                     alias, n
@@ -620,7 +613,7 @@ class Class(Container):
     def __init__(self, name, type, parents):
         super(Class, self).__init__(name)
         self.type = type
-        self.published = type in ('enum', 'be_pod', 'struct', 'union')
+        self.published = type in ('enum', 'motor_pod', 'struct', 'union')
         for visibility, parent in parents:
             if visibility in ('published', 'public') or (visibility == '' and self.published):
                 self.parent = parent
@@ -633,18 +626,18 @@ class Class(Container):
         self.methods = []
         self.properties = []
         self.constructor = None
-        if self.type == 'be_pod':
+        if self.type == 'motor_pod':
             self.add_constructor(PodConstructor(self))
             self.add_constructor(PodConstructorCopy(self))
 
     def owner_name(self):
-        return '::be_class< ::%s >()' % '::'.join(self.name)
+        return '::motor_class< ::%s >()' % '::'.join(self.name)
 
     def cpp_name(self):
         return '::'.join(self.name)
 
     def helper_name(self):
-        return '%s_BugHelper' % self.name[-1]
+        return '%s_RTTIHelper' % self.name[-1]
 
     def set_visibility(self, visibility):
         self.published = visibility == 'published'
@@ -696,12 +689,10 @@ class Class(Container):
         pass
 
     def declare(self, owner, struct_owners, definition, instance, prefix):
-        instance.write('raw< const ::BugEngine::Meta::Class > klass_%s();\n' % self.name[-1])
+        instance.write('raw< const ::Motor::Meta::Class > klass_%s();\n' % self.name[-1])
         if struct_owners:
             for alias, alias_cpp in self.all_names():
-                definition.write(
-                    '    static const ::BugEngine::Meta::ObjectInfo s%s_object_%s;\n' % (prefix, alias_cpp)
-                )
+                definition.write('    static const ::Motor::Meta::ObjectInfo s%s_object_%s;\n' % (prefix, alias_cpp))
 
         definition.write('struct %s\n{\n\n' % self.helper_name())
         self.typedef(definition)
@@ -711,9 +702,9 @@ class Class(Container):
         CppObject.declare(self, self, struct_owners, definition, instance, prefix)
 
         if self.type in ('enum'):
-            definition.write('    static ::BugEngine::istring toString(%s v);\n' % self.cpp_name())
+            definition.write('    static ::Motor::istring toString(%s v);\n' % self.cpp_name())
             definition.write('    static u32 toInt(%s v);\n' % self.cpp_name())
-            m = BuiltinMethod("toString", "::BugEngine::istring", [Parameter(self.cpp_name(), "this", None)], ['const'])
+            m = BuiltinMethod("toString", "::Motor::istring", [Parameter(self.cpp_name(), "this", None)], ['const'])
             self.add_method(m)
             m = BuiltinMethod("toInt", "u32", [Parameter(self.cpp_name(), "this", None)], ['const'])
             self.add_method(m)
@@ -723,11 +714,11 @@ class Class(Container):
         for m in self.methods:
             m.declare(self, struct_owners, definition, instance, prefix, True)
         if self.methods or self.constructor:
-            definition.write('    static const ::BugEngine::Meta::Method s%s_methods[];\n' % prefix)
+            definition.write('    static const ::Motor::Meta::Method s%s_methods[];\n' % prefix)
         if self.properties:
             for p in self.properties:
                 p.declare(self, struct_owners, definition, instance, prefix)
-            definition.write('    static const ::BugEngine::Meta::Property s%s_properties[];\n' % prefix)
+            definition.write('    static const ::Motor::Meta::Property s%s_properties[];\n' % prefix)
         for object in self.objects:
             object.declare(self, struct_owners, definition, instance, prefix)
 
@@ -748,17 +739,14 @@ class Class(Container):
         }
         if self.type in ('enum'):
             definition.write(
-                '::BugEngine::istring %stoString(%s v)\n'
+                '::Motor::istring %stoString(%s v)\n'
                 '{\n'
                 '    %s\n'
                 '    %s\n'
                 '    return istring(minitl::format<64u>("Unknown(%%d)") | (u32)v);\n'
                 '}\n' % (
                     helper, self.cpp_name(), '\n    '.join(
-                        (
-                            'static const ::BugEngine::istring s_%s = "%s";' % (o.name, o.name)
-                            for o in self.objects[::-1]
-                        )
+                        ('static const ::Motor::istring s_%s = "%s";' % (o.name, o.name) for o in self.objects[::-1])
                     ), '\n    '.join(
                         ('if (v == %s) return s_%s;' % (o.cpp_name(self), o.name) for o in self.objects[::-1])
                     )
@@ -780,19 +768,19 @@ class Class(Container):
         if self.constructor:
             self.constructor.write_content(self, struct_owners, prefix, namespace, definition, instance)
 
-        if self.type in ('struct', 'be_pod', 'enum', 'union'):
-            params['COPYCONSTRUCTOR'] = '&::BugEngine::Meta::wrap< %(CPP_NAME)s >::copy' % params
-            params['DESTRUCTOR'] = '&::BugEngine::Meta::wrap< %(CPP_NAME)s >::destroy' % params
+        if self.type in ('struct', 'motor_pod', 'enum', 'union'):
+            params['COPYCONSTRUCTOR'] = '&::Motor::Meta::wrap< %(CPP_NAME)s >::copy' % params
+            params['DESTRUCTOR'] = '&::Motor::Meta::wrap< %(CPP_NAME)s >::destroy' % params
         else:
             params['COPYCONSTRUCTOR'] = '0'
             params['DESTRUCTOR'] = '0'
 
         if self.parent:
-            params['PARENT_CLASS'] = '::be_class< %(PARENT)s >()' % params
+            params['PARENT_CLASS'] = '::motor_class< %(PARENT)s >()' % params
             params['OFFSET'] = 'i32(ptrdiff_t(static_cast< %(CPP_NAME)s* >((%(PARENT)s*)4))) - 4' % params
-            params['OBJECTS'] = '{::be_class< %(PARENT)s >()->objects.m_ptr}' % params
+            params['OBJECTS'] = '{::motor_class< %(PARENT)s >()->objects.m_ptr}' % params
         else:
-            params['PARENT_CLASS'] = '::be_class< void >()'
+            params['PARENT_CLASS'] = '::motor_class< void >()'
             params['OFFSET'] = '0'
             params['OBJECTS'] = '{0}'
 
@@ -819,7 +807,7 @@ class Class(Container):
                 method_index += 1
         if methods:
             definition.write(
-                'const ::BugEngine::Meta::Method %ss%s_methods[%d] = {\n' %
+                'const ::Motor::Meta::Method %ss%s_methods[%d] = {\n' %
                 (helper_name(struct_owners), prefix, method_index)
             )
             definition.write(
@@ -849,18 +837,16 @@ class Class(Container):
             for name in p.all_names():
                 props.append((p, name[0], tags))
         if props:
-            definition.write(
-                'const ::BugEngine::Meta::Property %ss%s_properties[%d] = {\n' % (helper, prefix, len(props))
-            )
+            definition.write('const ::Motor::Meta::Property %ss%s_properties[%d] = {\n' % (helper, prefix, len(props)))
             definition.write(
                 ',\n'.join(
                     [
                         '    {\n'
                         '        %s,\n'
                         '        %s,\n'
-                        '        ::be_type< %s >(),\n'
-                        '        ::be_type< %s >(),\n'
-                        '        &::BugEngine::Meta::PropertyHelper< %s, %s, &%s::%s >::get\n'
+                        '        ::motor_type< %s >(),\n'
+                        '        ::motor_type< %s >(),\n'
+                        '        &::Motor::Meta::PropertyHelper< %s, %s, &%s::%s >::get\n'
                         '    }' % (t, name, self.cpp_name(), p.type, p.type, self.cpp_name(), self.cpp_name(), p.name)
                         for p, name, t in props
                     ]
@@ -874,21 +860,21 @@ class Class(Container):
         params['CLASSTYPE'] = self.index
         if params['CLASSTYPE'] is None:
             if self.type == 'enum':
-                params['CLASSTYPE'] = '::BugEngine::Meta::ClassType_Enum'
+                params['CLASSTYPE'] = '::Motor::Meta::ClassType_Enum'
             elif self.type == 'class':
-                params['CLASSTYPE'] = '::BugEngine::Meta::ClassType_Object'
+                params['CLASSTYPE'] = '::Motor::Meta::ClassType_Object'
             elif self.type == 'struct':
-                params['CLASSTYPE'] = '::BugEngine::Meta::ClassType_Struct'
-            elif self.type in ('be_pod', 'union'):
-                params['CLASSTYPE'] = '::BugEngine::Meta::ClassType_Pod'
+                params['CLASSTYPE'] = '::Motor::Meta::ClassType_Struct'
+            elif self.type in ('motor_pod', 'union'):
+                params['CLASSTYPE'] = '::Motor::Meta::ClassType_Pod'
             else:
                 params['CLASSTYPE'] = '0'
 
-        definition.write('raw< const ::BugEngine::Meta::Class > klass_%s()\n' '{\n' % (self.name[-1]))
+        definition.write('raw< const ::Motor::Meta::Class > klass_%s()\n' '{\n' % (self.name[-1]))
         self.typedef(definition)
         definition.write(
             '    static const\n'
-            '    ::BugEngine::Meta::Class s%(PREFIX)s_class = {\n'
+            '    ::Motor::Meta::Class s%(PREFIX)s_class = {\n'
             '        /* .name */               "%(NAME)s",\n'
             '        /* .size */               u32(sizeof(%(CPP_NAME)s)),\n'
             '        /* .offset */             %(OFFSET)s,\n'
@@ -904,14 +890,14 @@ class Class(Container):
             '        /* .copyconstructor */    %(COPYCONSTRUCTOR)s,\n'
             '        /* .destructor */         %(DESTRUCTOR)s\n'
             '    };\n\n'
-            '    raw< const ::BugEngine::Meta::Class > result = { &s%(PREFIX)s_class };\n'
+            '    raw< const ::Motor::Meta::Class > result = { &s%(PREFIX)s_class };\n'
             '    return result;\n'
             '}\n\n' % params
         )
 
         instance.write(
             'template< >\n'
-            'BE_EXPORT raw< const Meta::Class > ClassID< %(CPP_NAME)s >::klass()\n'
+            'MOTOR_EXPORT raw< const Meta::Class > ClassID< %(CPP_NAME)s >::klass()\n'
             '{\n'
             '    return %(NAMESPACE)s::klass_%(NAME)s();\n'
             '}\n'
@@ -921,11 +907,11 @@ class Class(Container):
     def write_object(self, owner, struct_owners, prefix, namespace, object_name, definition, instance):
         for alias, alias_cpp in self.all_names():
             definition.write(
-                '%sconst ::BugEngine::Meta::ObjectInfo %ss%s_object_%s = {\n'
+                '%sconst ::Motor::Meta::ObjectInfo %ss%s_object_%s = {\n'
                 '    %s,\n'
                 '    {0},\n'
-                '    ::BugEngine::istring(%s),\n'
-                '    ::BugEngine::Meta::Value(::be_class< %s >())\n'
+                '    ::Motor::istring(%s),\n'
+                '    ::Motor::Meta::Value(::motor_class< %s >())\n'
                 '};\n\n' % (
                     helper_static(struct_owners), helper_name(struct_owners), prefix, alias_cpp, object_name, alias,
                     self.cpp_name()
@@ -942,13 +928,13 @@ class Namespace(Container):
         self.root_alias = root_alias
 
     def owner_name(self):
-        return '::BugEngine::be_%s_Namespace_%s()' % (self.root_namespace, '_'.join(self.name))
+        return '::Motor::motor_%s_Namespace_%s()' % (self.root_namespace, '_'.join(self.name))
 
     def cpp_name(self):
         return '::'.join(self.name)
 
     def declare_namespace(self, definition):
-        definition.write('raw<Meta::Class> ' 'be_%s_Namespace_%s();\n' % (self.root_namespace, '_'.join(self.name)))
+        definition.write('raw<Meta::Class> ' 'motor_%s_Namespace_%s();\n' % (self.root_namespace, '_'.join(self.name)))
         for object in self.objects:
             object.declare_namespace(definition)
 
@@ -972,9 +958,9 @@ class Namespace(Container):
                 )
             if next_object != first_object:
                 definition.write(
-                    'static const raw<const ::BugEngine::Meta::ObjectInfo> s_object_ptr_%s ='
+                    'static const raw<const ::Motor::Meta::ObjectInfo> s_object_ptr_%s ='
                     ' %s;\n'
-                    'BE_EXPORT const ::BugEngine::Meta::ObjectInfo* s_object_set_%s ='
+                    'MOTOR_EXPORT const ::Motor::Meta::ObjectInfo* s_object_set_%s ='
                     ' %s->objects.set(s_object_ptr_%s.operator->());\n'
                     '\n' % (object.id(), next_object, object.id(), self.owner_name(), object.id())
                 )
@@ -1029,41 +1015,41 @@ class Root(Container):
         self.root_alias = root_alias
 
     def owner_name(self):
-        return '::BugEngine::be_%s_Namespace()' % self.root_namespace
+        return '::Motor::motor_%s_Namespace()' % self.root_namespace
 
     def cpp_name(self):
         return ''
 
     def dump(self, definition, instance, include):
-        instance.write('#include <bugengine/meta/stdafx.h>\n')
-        instance.write('#include <bugengine/meta/classinfo.script.hh>\n')
-        instance.write('#include <bugengine/meta/typeinfo.hh>\n')
+        instance.write('#include <motor/meta/stdafx.h>\n')
+        instance.write('#include <motor/meta/classinfo.script.hh>\n')
+        instance.write('#include <motor/meta/typeinfo.hh>\n')
         instance.write('#include <%s>\n' % include)
-        definition.write('#include <bugengine/meta/stdafx.h>\n')
-        definition.write('#include <bugengine/meta/engine/helper/staticarray.factory.hh>\n')
-        definition.write('#include <bugengine/meta/classinfo.script.hh>\n')
-        definition.write('#include <bugengine/meta/typeinfo.hh>\n')
-        definition.write('#include <bugengine/meta/engine/methodinfo.script.hh>\n')
-        definition.write('#include <bugengine/meta/engine/objectinfo.script.hh>\n')
-        definition.write('#include <bugengine/meta/engine/propertyinfo.script.hh>\n')
-        definition.write('#include <bugengine/meta/engine/array.factory.hh>\n')
-        definition.write('#include <bugengine/meta/engine/carray.factory.hh>\n')
-        definition.write('#include <bugengine/meta/engine/map.factory.hh>\n')
-        definition.write('#include <bugengine/meta/engine/tuple.factory.hh>\n')
-        definition.write('#include <bugengine/meta/engine/taginfo.script.hh>\n')
-        definition.write('#include <bugengine/meta/engine/helper/method.hh>\n')
-        definition.write('#include <bugengine/meta/engine/helper/get.hh>\n')
+        definition.write('#include <motor/meta/stdafx.h>\n')
+        definition.write('#include <motor/meta/engine/helper/staticarray.factory.hh>\n')
+        definition.write('#include <motor/meta/classinfo.script.hh>\n')
+        definition.write('#include <motor/meta/typeinfo.hh>\n')
+        definition.write('#include <motor/meta/engine/methodinfo.script.hh>\n')
+        definition.write('#include <motor/meta/engine/objectinfo.script.hh>\n')
+        definition.write('#include <motor/meta/engine/propertyinfo.script.hh>\n')
+        definition.write('#include <motor/meta/engine/array.factory.hh>\n')
+        definition.write('#include <motor/meta/engine/carray.factory.hh>\n')
+        definition.write('#include <motor/meta/engine/map.factory.hh>\n')
+        definition.write('#include <motor/meta/engine/tuple.factory.hh>\n')
+        definition.write('#include <motor/meta/engine/taginfo.script.hh>\n')
+        definition.write('#include <motor/meta/engine/helper/method.hh>\n')
+        definition.write('#include <motor/meta/engine/helper/get.hh>\n')
         definition.write('#include <%s>\n' % include)
 
         if self.objects:
-            definition.write('\nnamespace BugEngine\n{\n')
-            definition.write('raw<Meta::Class> ' 'be_%s_Namespace();\n' % (self.root_namespace))
+            definition.write('\nnamespace Motor\n{\n')
+            definition.write('raw<Meta::Class> ' 'motor_%s_Namespace();\n' % (self.root_namespace))
             for object in self.objects:
                 object.declare_namespace(definition)
             definition.write('}\n')
             for object in self.objects:
                 object.declare(self, [], definition, instance, '')
-            instance.write('\nnamespace BugEngine { namespace Meta\n{\n')
+            instance.write('\nnamespace Motor { namespace Meta\n{\n')
             next_object = '%s->objects' % self.owner_name()
             for object in self.objects:
                 object.write_content(self, [], '', [], definition, instance)

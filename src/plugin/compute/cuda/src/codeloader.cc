@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.compute.cuda/stdafx.h>
-#include <bugengine/scheduler/kernel/kernel.script.hh>
+#include <motor/plugin.compute.cuda/stdafx.h>
 #include <codeloader.hh>
 #include <kernelobject.hh>
+#include <motor/scheduler/kernel/kernel.script.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace Cuda {
+namespace Motor { namespace KernelScheduler { namespace Cuda {
 
 CodeLoader::CodeLoader() : ICodeLoader()
 {
@@ -19,9 +19,10 @@ CodeLoader::~CodeLoader()
 void CodeLoader::load(weak< const Resource::Description > kernelDescription,
                       Resource::Resource&                 resource)
 {
-    be_info("loading Cuda kernel %s" | be_checked_cast< const Kernel >(kernelDescription)->name());
+    motor_info("loading Cuda kernel %s"
+               | motor_checked_cast< const Kernel >(kernelDescription)->name());
     inamespace name
-        = be_checked_cast< const Kernel >(kernelDescription)->name() + inamespace("cuda");
+        = motor_checked_cast< const Kernel >(kernelDescription)->name() + inamespace("cuda");
     resource.setRefHandle(ref< KernelObject >::create(Arena::task(), name));
 }
 
@@ -38,4 +39,4 @@ void CodeLoader::unload(Resource::Resource& resource)
     resource.clearRefHandle();
 }
 
-}}}  // namespace BugEngine::KernelScheduler::Cuda
+}}}  // namespace Motor::KernelScheduler::Cuda

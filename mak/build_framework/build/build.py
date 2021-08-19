@@ -34,7 +34,7 @@ setattr(Task.Task, 'keyword', (lambda self: ''))
 def build(bld):
     # type: (Build.BuildContext) -> None
     "Loads main build file as well as the target-specific build file that can declare extra modules"
-    if getattr(bld, 'bugengine_variant', None) is None:
+    if getattr(bld, 'motor_variant', None) is None:
         raise Errors.WafError(
             'Call %s %s %s:toolchain:variant\n'
             '  (with toolchain in:\n    %s)\n  (with variant in:\n    %s)' % (
@@ -42,12 +42,12 @@ def build(bld):
                                                                     ), '\n    '.join(bld.env.ALL_VARIANTS)
             )
         )
-    bld.env = bld.all_envs[bld.bugengine_variant]
+    bld.env = bld.all_envs[bld.motor_variant]
     bld.package_env = bld.all_envs['packages']
     bld.package_node = bld.bldnode.parent.parent.make_node('packages')
     bld.platforms = []
 
-    tool_dir = os.path.join(bld.bugenginenode.abspath(), 'mak', 'tools')
+    tool_dir = os.path.join(bld.motornode.abspath(), 'mak', 'tools')
     bld.load('cpp_parser', tooldir=[tool_dir])
     bld.load('data', tooldir=[tool_dir])
     bld.load('kernel_ast', tooldir=[tool_dir])
@@ -109,9 +109,9 @@ def install_as(self, target_path, file, chmod=Utils.O644):
 @taskgen_method
 def deploy_files(self, out_dir, file_list, chmod=Utils.O644):
     try:
-        install_task = self.bug_install_task
+        install_task = self.motor_install_task
     except AttributeError:
-        install_task = self.bug_install_task = self.create_task('install', [], [])
+        install_task = self.motor_install_task = self.create_task('install', [], [])
         install_task.install_step = []
     install_task.inputs += file_list
     for f in file_list:
@@ -121,22 +121,22 @@ def deploy_files(self, out_dir, file_list, chmod=Utils.O644):
 @taskgen_method
 def deploy_as(self, target_path, file, chmod=Utils.O644):
     try:
-        install_task = self.bug_install_task
+        install_task = self.motor_install_task
     except AttributeError:
-        install_task = self.bug_install_task = self.create_task('install', [], [])
+        install_task = self.motor_install_task = self.create_task('install', [], [])
         install_task.install_step = []
     install_task.inputs.append(file)
     install_task.install_step.append((file, target_path, chmod))
 
 
-@feature('bugengine:c', 'bugengine:cxx')
+@feature('motor:c', 'motor:cxx')
 def set_optim_define(self):
     o = getattr(self.bld, 'optim', None)
     if o:
-        self.env.append_unique('DEFINES', ['BE_%s' % o.upper()])
+        self.env.append_unique('DEFINES', ['MOTOR_%s' % o.upper()])
 
 
-@feature('bugengine:cxx')
+@feature('motor:cxx')
 def set_building_name_inherits(self):
     seen = set([])
     use = getattr(self, 'use', [])[:]
@@ -155,7 +155,7 @@ def set_building_name_inherits(self):
                 self.env.append_unique('DEFINES', 'building_%s' % y.safe_target_name)
 
 
-@feature('bugengine:launcher', 'bugengine:unit_test', 'bugengine:python_module')
+@feature('motor:launcher', 'motor:unit_test', 'motor:python_module')
 @before_method('apply_link')
 @before_method('process_use')
 def static_dependencies(self):
@@ -165,14 +165,14 @@ def static_dependencies(self):
                 if not isinstance(task_gen, TaskGen.task_gen):
                     continue
                 if (
-                    'bugengine:kernel' in task_gen.features or 'bugengine:plugin' in task_gen.features
+                    'motor:kernel' in task_gen.features or 'motor:plugin' in task_gen.features
                 ) and 'cxx' in task_gen.features:
                     task_gen.post()
                     if task_gen.env.TOOLCHAIN == self.env.TOOLCHAIN:
                         self.use.append(task_gen.target)
 
 
-@feature('bugengine:launcher_static')
+@feature('motor:launcher_static')
 @before_method('apply_link')
 def rename_executable(self):
     self.target = self.real_target
@@ -188,24 +188,24 @@ def makefile_feature(task):
     pass
 
 
-@feature('bugengine:masterfiles:off', 'bugengine:masterfiles:folder')
+@feature('motor:masterfiles:off', 'motor:masterfiles:folder')
 def masterfiles_feature(task):
     pass
 
 
-@feature('bugengine:warnings:off', 'bugengine:nortc')
+@feature('motor:warnings:off', 'motor:nortc')
 def warning_feature(task):
     pass
 
 
-@feature('bugengine:export_all')
+@feature('motor:export_all')
 @before_method('process_source')
 def process_export_all_flag(self):
     self.env.append_unique('CFLAGS', self.env.CFLAGS_exportall)
     self.env.append_unique('CXXFLAGS', self.env.CXXFLAGS_exportall)
 
 
-@feature('bugengine:c', 'bugengine:cxx')
+@feature('motor:c', 'motor:cxx')
 @before_method('process_source')
 def set_extra_flags(self):
     for f in getattr(self, 'features', []):
@@ -236,16 +236,16 @@ def check_use_taskgens(self):
                     self.uselib = [name]
 
 
-@feature('bugengine:c', 'bugengine:cxx')
+@feature('motor:c', 'motor:cxx')
 def process_warning_flags(self):
-    warning_flag_name = 'warnnone' if 'bugengine:warnings:off' in self.features else 'warnall'
+    warning_flag_name = 'warnnone' if 'motor:warnings:off' in self.features else 'warnall'
     for var in self.get_uselib_vars():
         self.env.append_value(var, self.env['%s_%s' % (var, warning_flag_name)])
 
 
 @taskgen_method
 def process_use_flags(self):
-    if 'bugengine:nortc' not in self.features:
+    if 'motor:nortc' not in self.features:
         self.env.append_unique('CFLAGS', self.env.CFLAGS_rtc)
         self.env.append_unique('CFLAGS_debug', self.env.CFLAGS_debug_rtc)
         self.env.append_unique('CFLAGS_profile', self.env.CFLAGS_profile_rtc)
@@ -277,20 +277,20 @@ def process_use_flags(self):
 
 
 @feature('cxxshlib', 'cshlib')
-def be_build_dll(self):
+def motor_build_dll(self):
     try:
-        self.export_defines.append('be_dll_%s' % self.safe_target_name)
+        self.export_defines.append('motor_dll_%s' % self.safe_target_name)
     except AttributeError:
-        self.export_defines = ['be_dll_%s' % self.safe_target_name]
+        self.export_defines = ['motor_dll_%s' % self.safe_target_name]
 
 
 @feature('cxxobjects', 'cobjects')
-def be_build_objects(self):
+def motor_build_objects(self):
     if not self.env.STATIC:
         try:
-            self.export_defines.append('be_dll_%s' % self.safe_target_name)
+            self.export_defines.append('motor_dll_%s' % self.safe_target_name)
         except AttributeError:
-            self.export_defines = ['be_dll_%s' % self.safe_target_name]
+            self.export_defines = ['motor_dll_%s' % self.safe_target_name]
 
 
 @taskgen_method
@@ -347,7 +347,7 @@ def process_use(self):
                 self.uselib.append(k)
 
 
-@feature('bugengine:c', 'bugengine:cxx')
+@feature('motor:c', 'motor:cxx')
 @before_method('filter_sources')
 def gather_extra_source(self):
     preprocess = getattr(self, 'preprocess', None)
@@ -471,7 +471,7 @@ def filter_sources(self):
                 compilers = node.name[9:].split(',')
                 for c in compilers:
                     add_compiler = add_compiler or c == self.env.COMPILER_NAME
-            elif node.parent.name == 'extra' and node.parent.parent == self.bld.bugenginenode:
+            elif node.parent.name == 'extra' and node.parent.parent == self.bld.motornode:
                 add_platform = node.name in self.bld.env.VALID_PLATFORMS
             node = node.parent
         if add_platform and add_arch and add_compiler:
@@ -554,8 +554,8 @@ def rc_file(self, node):
 
 @extension('.c', '.m')
 def c_hook(self, node):
-    if 'bugengine:c' in self.features:
-        if 'bugengine:masterfiles:folder' in self.features and not Options.options.nomaster:
+    if 'motor:c' in self.features:
+        if 'motor:masterfiles:folder' in self.features and not Options.options.nomaster:
             try:
                 mastertask_c = self.mastertasks_c_folders[node.parent]
                 mastertask_c.set_inputs([node])
@@ -574,7 +574,7 @@ def c_hook(self, node):
                 mastertask_c = self.create_task('master', [node], [output])
                 self.mastertasks_c_folders[node.parent] = mastertask_c
                 self.create_compiled_task('c', output)
-        elif 'bugengine:masterfiles:off' not in self.features and not Options.options.nomaster:
+        elif 'motor:masterfiles:off' not in self.features and not Options.options.nomaster:
             try:
                 mastertask_c = self.mastertasks_c[-1]
                 if len(mastertask_c.inputs) <= 10:
@@ -599,8 +599,8 @@ def c_hook(self, node):
 
 @extension('.cc', '.cxx', '.cpp', '.mm')
 def cc_hook(self, node):
-    if 'bugengine:cxx' in self.features:
-        if 'bugengine:masterfiles:folder' in self.features and not Options.options.nomaster:
+    if 'motor:cxx' in self.features:
+        if 'motor:masterfiles:folder' in self.features and not Options.options.nomaster:
             try:
                 mastertask_cxx = self.mastertasks_cxx_folders[node.parent]
                 mastertask_cxx.set_inputs([node])
@@ -619,7 +619,7 @@ def cc_hook(self, node):
                 mastertask_cxx = self.create_task('master', [node], [output])
                 self.mastertasks_cxx_folders[node.parent] = mastertask_cxx
                 self.create_compiled_task('cxx', output)
-        elif 'bugengine:masterfiles:off' not in self.features and not Options.options.nomaster:
+        elif 'motor:masterfiles:off' not in self.features and not Options.options.nomaster:
             if node.name.endswith('-instances.cc'):
                 try:
                     self.instancetask_cxx.set_inputs([node])
@@ -650,10 +650,10 @@ def cc_hook(self, node):
         self.create_compiled_task('cxx', node)
 
 
-@feature('bugengine:c', 'bugengine:cxx')
+@feature('motor:c', 'motor:cxx')
 @after_method('apply_incpaths')
 def incpath_master(self):
-    if not Options.options.nomaster and 'bugengine:masterfiles:off' not in self.features:
+    if not Options.options.nomaster and 'motor:masterfiles:off' not in self.features:
         self.env.INCPATHS = [self.bld.srcnode.abspath()] + self.env.INCPATHS
 
 
@@ -695,7 +695,7 @@ def install_step(self):
     pass
 
 
-@feature('bugengine:c', 'bugengine:cxx')
+@feature('motor:c', 'motor:cxx')
 def set_macosx_deployment_target(self):
     pass
 
@@ -743,13 +743,13 @@ def strip_debug_info_impl(self):
             self.dbg_strip_task.cwd = out_dir.abspath()
             self.postlink_task = self.dbg_strip_task
 
-            if 'bugengine:plugin' in self.features:
+            if 'motor:plugin' in self.features:
                 out_path = self.env.DEPLOY_PLUGINDIR
-            elif 'bugengine:kernel' in self.features:
+            elif 'motor:kernel' in self.features:
                 out_path = self.env.DEPLOY_KERNELDIR
-            elif 'bugengine:shared_lib' in self.features:
+            elif 'motor:shared_lib' in self.features:
                 out_path = self.env.DEPLOY_RUNBINDIR
-            elif 'bugengine:launcher' in self.features:
+            elif 'motor:launcher' in self.features:
                 out_path = self.env.DEPLOY_BINDIR
             else:
                 return

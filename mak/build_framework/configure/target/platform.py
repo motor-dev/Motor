@@ -40,8 +40,8 @@ class Platform:
             v = conf.env
             v.ARCH_NAME = compiler.arch
             v.TOOLCHAIN = toolchain
-            v.append_unique('DEFINES', ['BE_PLATFORM=platform_%s' % v.VALID_PLATFORMS[0]])
-            v.append_unique('DEFINES_static', ['BE_STATIC=1'])
+            v.append_unique('DEFINES', ['MOTOR_PLATFORM=platform_%s' % v.VALID_PLATFORMS[0]])
+            v.append_unique('DEFINES_static', ['MOTOR_STATIC=1'])
             if not add:
                 v.ENV_PREFIX = compiler.arch + '/%s'
                 v.SUBARCH = True
@@ -59,9 +59,9 @@ class Platform:
                 conf.recurse('../unit_test.py', once=False)
             conf.end_msg('%s%s' % (conf.env.COMPILER_ABI, conf.env.RUN_UNIT_TESTS and ' {unit tests}' or ''))
             #if not sub_compilers:
-            #    conf.recurse(conf.bugenginenode.abspath(), name='setup', once=False)
+            #    conf.recurse(conf.motornode.abspath(), name='setup', once=False)
             if v.STATIC:
-                v.append_unique('DEFINES', ['BE_STATIC=1'])
+                v.append_unique('DEFINES', ['MOTOR_STATIC=1'])
             v.TMPDIR = os.path.join(conf.bldnode.abspath(), toolchain)
             v.PREFIX = os.path.join('bld', toolchain)
             conf.variant = ''
@@ -76,10 +76,10 @@ class Platform:
     def add_multiarch_toolchain(self, toolchain):
         e = self.env
         e.TOOLCHAIN = toolchain
-        e.append_unique('DEFINES', ['BE_PLATFORM=platform_%s' % e.VALID_PLATFORMS[0]])
+        e.append_unique('DEFINES', ['MOTOR_PLATFORM=platform_%s' % e.VALID_PLATFORMS[0]])
         e.PREFIX = os.path.join('bld', toolchain)
         if e.STATIC:
-            e.append_unique('DEFINES', ['BE_STATIC=1'])
+            e.append_unique('DEFINES', ['MOTOR_STATIC=1'])
         self.variant = ''
         self.env.append_unique('ALL_TOOLCHAINS', toolchain)
 

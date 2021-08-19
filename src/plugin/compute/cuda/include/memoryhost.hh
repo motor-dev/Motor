@@ -1,13 +1,13 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_COMPUTE_CUDA_MEMORYHOST_HH_
-#define BE_COMPUTE_CUDA_MEMORYHOST_HH_
+#ifndef MOTOR_COMPUTE_CUDA_MEMORYHOST_HH_
+#define MOTOR_COMPUTE_CUDA_MEMORYHOST_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.compute.cuda/stdafx.h>
-#include <bugengine/scheduler/kernel/imemoryhost.hh>
+#include <motor/plugin.compute.cuda/stdafx.h>
+#include <motor/scheduler/kernel/imemoryhost.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace Cuda {
+namespace Motor { namespace KernelScheduler { namespace Cuda {
 
 class MemoryHost : public IMemoryHost
 {
@@ -18,7 +18,7 @@ public:
     void release(weak< KernelScheduler::IMemoryBuffer > buffer);
 };
 
-}}}  // namespace BugEngine::KernelScheduler::Cuda
+}}}  // namespace Motor::KernelScheduler::Cuda
 
 /**************************************************************************************************/
 #endif

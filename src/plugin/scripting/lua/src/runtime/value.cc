@@ -1,20 +1,20 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
  see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bugengine/meta/engine/methodinfo.script.hh>
-#include <bugengine/meta/engine/objectinfo.script.hh>
-#include <bugengine/meta/engine/propertyinfo.script.hh>
-#include <bugengine/meta/engine/scriptingapi.hh>
 #include <context.hh>
+#include <motor/meta/engine/methodinfo.script.hh>
+#include <motor/meta/engine/objectinfo.script.hh>
+#include <motor/meta/engine/propertyinfo.script.hh>
+#include <motor/meta/engine/scriptingapi.hh>
 #include <runtime/value.hh>
 
-namespace BugEngine { namespace Lua {
+namespace Motor { namespace Lua {
 
 static bool convertNilToValue(lua_State* state, int index, const Meta::Type& type, void* buffer)
 {
-    be_forceuse(state);
-    be_forceuse(index);
+    motor_forceuse(state);
+    motor_forceuse(index);
     if(type.indirection >= Meta::Type::RawPtr)
     {
         Meta::Value* value = new(buffer) Meta::Value(type, Meta::Value::Reserve);
@@ -48,7 +48,7 @@ static bool convertStringToValue(lua_State* state, int index, const Meta::Type& 
         case Meta::ClassIndex_text:
             new(buffer) Meta::Value(text(lua_tostring(state, index)));
             return true;
-        default: be_notreached(); return false;
+        default: motor_notreached(); return false;
         }
     }
     else
@@ -59,15 +59,15 @@ static bool convertStringToValue(lua_State* state, int index, const Meta::Type& 
 
 static bool convertBooleanToValue(lua_State* state, int index, const Meta::Type& type, void* buffer)
 {
-    if(type.metaclass == be_type< bool >().metaclass)
+    if(type.metaclass == motor_type< bool >().metaclass)
     {
         new(buffer) Meta::Value(lua_toboolean(state, index) ? true : false);
         return true;
     }
     else if(type.metaclass->type() == Meta::ClassType_Number)
     {
-        be_warning("%s: - dubious cast: Lua bool to %s" | Context::getCallInfo(state)
-                   | type.metaclass->name);
+        motor_warning("%s: - dubious cast: Lua bool to %s" | Context::getCallInfo(state)
+                      | type.metaclass->name);
         switch(type.metaclass->index())
         {
         case Meta::ClassIndex_u8:
@@ -100,7 +100,7 @@ static bool convertBooleanToValue(lua_State* state, int index, const Meta::Type&
         case Meta::ClassIndex_double:
             new(buffer) Meta::Value(static_cast< double >(lua_toboolean(state, index)));
             return true;
-        default: be_notreached(); return false;
+        default: motor_notreached(); return false;
         }
     }
     else
@@ -152,7 +152,7 @@ static bool convertNumberToValue(lua_State* state, int index, const Meta::Type& 
         case Meta::ClassIndex_double:
             new(buffer) Meta::Value(static_cast< double >(lua_tonumber(state, index)));
             return true;
-        default: be_notreached(); return false;
+        default: motor_notreached(); return false;
         }
     }
     else
@@ -165,7 +165,7 @@ static bool convertUserdataToValue(lua_State* state, int index, const Meta::Type
                                    void* buffer)
 {
     lua_getmetatable(state, index);
-    luaL_getmetatable(state, "BugEngine.Object");
+    luaL_getmetatable(state, "Motor.Object");
     if(lua_rawequal(state, -1, -2))
     {
         lua_pop(state, 2);
@@ -193,9 +193,9 @@ static bool convertTableToValue(lua_State* state, int index, const Meta::Type& t
     if(type.metaclass->type() == Meta::ClassType_Array)
     {
         Meta::Type   arrayType  = type.metaclass->apiMethods->arrayScripting->value_type;
-        u32          count      = be_checked_numcast< u32 >(luaL_len(state, index));
+        u32          count      = motor_checked_numcast< u32 >(luaL_len(state, index));
         Meta::Value* parameters = (Meta::Value*)malloca(
-            minitl::align(count * sizeof(Meta::Value), be_alignof(Meta::Value)));
+            minitl::align(count * sizeof(Meta::Value), motor_alignof(Meta::Value)));
 
         lua_pushnil(state);
         int  i      = 0;
@@ -209,7 +209,7 @@ static bool convertTableToValue(lua_State* state, int index, const Meta::Type& t
                 count  = i;
                 break;
             }
-            be_assert(lua_tonumber(state, -2) == i + 1, "inconsistent LUA table");
+            motor_assert(lua_tonumber(state, -2) == i + 1, "inconsistent LUA table");
             result |= createValue(state, -1, arrayType, &parameters[i]);
             if(!result)
             {
@@ -238,7 +238,7 @@ static bool convertTableToValue(lua_State* state, int index, const Meta::Type& t
     }
     else if(type.metaclass->type() == Meta::ClassType_Pod)
     {
-        be_assert(type.indirection == Meta::Type::Value, "POD type can only be value");
+        motor_assert(type.indirection == Meta::Type::Value, "POD type can only be value");
         Meta::Type   valueType = Meta::Type::makeType(type.metaclass, Meta::Type::Value,
                                                     Meta::Type::Mutable, Meta::Type::Mutable);
         Meta::Value* value     = new(buffer) Meta::Value(valueType, Meta::Value::Reserve);
@@ -295,4 +295,4 @@ bool createValue(lua_State* state, int index, const Meta::Type& type, void* valu
     }
 }
 
-}}  // namespace BugEngine::Lua
+}}  // namespace Motor::Lua

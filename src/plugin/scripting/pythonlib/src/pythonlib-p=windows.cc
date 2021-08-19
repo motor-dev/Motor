@@ -1,11 +1,11 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
 see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <string.h>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
 static HMODULE getPythonModuleHandle()
 {
@@ -15,14 +15,14 @@ static HMODULE getPythonModuleHandle()
     HMODULE                h                  = LoadLibraryA("Psapi.dll");
     if(h != 0)
     {
-        EnumProcessModules
-            = be_function_cast< EnumProcessModulesFunc >(GetProcAddress(h, "EnumProcessModules"));
+        EnumProcessModules = motor_function_cast< EnumProcessModulesFunc >(
+            GetProcAddress(h, "EnumProcessModules"));
     }
     if(!EnumProcessModules)
     {
         if(h) FreeLibrary(h);
         h                  = LoadLibraryA("kernel32.dll");
-        EnumProcessModules = be_function_cast< EnumProcessModulesFunc >(
+        EnumProcessModules = motor_function_cast< EnumProcessModulesFunc >(
             GetProcAddress(h, "K32EnumProcessModules"));
     }
 
@@ -31,14 +31,14 @@ static HMODULE getPythonModuleHandle()
         DWORD needed = 0;
         if(!(*EnumProcessModules)(GetCurrentProcess(), 0, 0, &needed))
         {
-            be_error("Could not locate python: EnumProcessModules failed");
+            motor_error("Could not locate python: EnumProcessModules failed");
             return (HMODULE)NULL;
         }
         minitl::Allocator::Block< HMODULE > modules(Arena::temporary(), needed / sizeof(HMODULE));
         if(!(*EnumProcessModules)(GetCurrentProcess(), modules.data(), (DWORD)modules.byteCount(),
                                   &needed))
         {
-            be_error("Could not locate python: EnumProcessModules failed");
+            motor_error("Could not locate python: EnumProcessModules failed");
             return (HMODULE)NULL;
         }
         FreeLibrary(h);
@@ -49,18 +49,18 @@ static HMODULE getPythonModuleHandle()
             {
                 char filename[1024];
                 if(GetModuleFileNameA(modules[i - 1], filename, sizeof(filename)))
-                    be_info("using %s" | filename);
+                    motor_info("using %s" | filename);
                 return modules[i - 1];
             }
         }
-        be_error("Could not locate python: could not locate module with Py_InitializeEx");
+        motor_error("Could not locate python: could not locate module with Py_InitializeEx");
         return NULL;
     }
     else
     {
         FreeLibrary(h);
-        be_error("Could not locate python: could not locate procedure \"EnumProcessModules\" in "
-                 "Psapi.dll or Kernel32.dll");
+        motor_error("Could not locate python: could not locate procedure \"EnumProcessModules\" in "
+                    "Psapi.dll or Kernel32.dll");
         return NULL;
     }
 }
@@ -76,160 +76,160 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
 {
     if(!m_status)
     {
-        be_error("unable to load library %s" | pythonLibraryName);
+        motor_error("unable to load library %s" | pythonLibraryName);
     }
     else
     {
-#define be_get_func_name_opt(f, dest)                                                              \
+#define motor_get_func_name_opt(f, dest)                                                           \
     do                                                                                             \
     {                                                                                              \
         void* tmp = (void*)(GetProcAddress((HMODULE)m_handle, #f));                                \
         if(tmp) memcpy(&m_##dest, &tmp, sizeof(dest##Type));                                       \
     } while(0)
-#define be_get_func_opt(f) be_get_func_name_opt(f, f)
-#define be_get_func_name(f, dest)                                                                  \
+#define motor_get_func_opt(f) motor_get_func_name_opt(f, f)
+#define motor_get_func_name(f, dest)                                                               \
     do                                                                                             \
     {                                                                                              \
-        be_get_func_name_opt(f, dest);                                                             \
+        motor_get_func_name_opt(f, dest);                                                          \
         if(!m_##dest)                                                                              \
         {                                                                                          \
-            be_error("could not locate function %s in module %s" | #f                              \
-                     | (pythonLibraryName ? pythonLibraryName : "root"));                          \
+            motor_error("could not locate function %s in module %s" | #f                           \
+                        | (pythonLibraryName ? pythonLibraryName : "root"));                       \
             m_status = false;                                                                      \
         }                                                                                          \
     } while(0)
-#define be_get_func(f) be_get_func_name(f, f)
+#define motor_get_func(f) motor_get_func_name(f, f)
 
-        be_get_func(Py_InitializeEx);
-        be_get_func(Py_Finalize);
-        be_get_func(Py_NewInterpreter);
-        be_get_func(Py_EndInterpreter);
-        be_get_func(Py_GetPath);
-        be_get_func(Py_GetVersion);
+        motor_get_func(Py_InitializeEx);
+        motor_get_func(Py_Finalize);
+        motor_get_func(Py_NewInterpreter);
+        motor_get_func(Py_EndInterpreter);
+        motor_get_func(Py_GetPath);
+        motor_get_func(Py_GetVersion);
         const char* version = m_Py_GetVersion();
         m_version           = (version[0] - '0') * 10 + (version[2] - '0');
         if(m_version >= 30)
         {
-            be_get_func(PyModule_Create2);
-            be_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab3);
-            be_get_func_name(Py_SetPythonHome, Py_SetPythonHome3);
+            motor_get_func(PyModule_Create2);
+            motor_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab3);
+            motor_get_func_name(Py_SetPythonHome, Py_SetPythonHome3);
         }
         else
         {
             m_Py_InitModule4    = 0;
             m_Py_InitModule4_64 = 0;
-            be_get_func_opt(Py_InitModule4);
-            be_get_func_opt(Py_InitModule4_64);
-            be_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab2);
-            be_get_func_name(Py_SetPythonHome, Py_SetPythonHome2);
+            motor_get_func_opt(Py_InitModule4);
+            motor_get_func_opt(Py_InitModule4_64);
+            motor_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab2);
+            motor_get_func_name(Py_SetPythonHome, Py_SetPythonHome2);
         }
         if(m_version >= 32)
         {
             m_Py_CompileStringFlags = 0;
-            be_get_func(Py_CompileStringExFlags);
+            motor_get_func(Py_CompileStringExFlags);
         }
         else
         {
             m_Py_CompileStringExFlags = 0;
-            be_get_func(Py_CompileStringFlags);
+            motor_get_func(Py_CompileStringFlags);
         }
-        be_get_func(PyEval_EvalCodeEx);
+        motor_get_func(PyEval_EvalCodeEx);
 
-        be_get_func(PyModule_AddObject);
-        be_get_func(PyModule_GetDict);
-        be_get_func(PyImport_AddModule);
-        be_get_func(PyEval_InitThreads);
-        be_get_func(PyEval_SaveThread);
-        be_get_func(PyEval_AcquireThread);
-        be_get_func(PyEval_ReleaseThread);
-        be_get_func(PyEval_ReleaseLock);
-        be_get_func(PyRun_SimpleString);
-        be_get_func(PyRun_InteractiveLoopFlags);
-        be_get_func(_Py_NoneStruct);
-        be_get_func(PyObject_SetAttrString);
-        be_get_func(PyObject_GetAttrString);
-        be_get_func(_PyArg_ParseTuple_SizeT);
-        be_get_func(_PyArg_ParseTupleAndKeywords_SizeT);
-        be_get_func(PyObject_IsTrue);
-        be_get_func(PyCFunction_NewEx);
-        be_get_func(PyType_Ready);
-        be_get_func(PyType_GenericAlloc);
-        be_get_func(PyType_GenericNew);
-        be_get_func(PyList_New);
-        be_get_func(PyList_Size);
-        be_get_func(PyList_GetItem);
-        be_get_func(PyList_SetItem);
-        be_get_func(PyList_Insert);
-        be_get_func(PyList_Append);
-        be_get_func(PyList_GetSlice);
-        be_get_func(PyList_SetSlice);
-        be_get_func(PyTuple_New);
-        be_get_func(PyTuple_Size);
-        be_get_func(PyTuple_GetItem);
-        be_get_func(PyTuple_SetItem);
-        be_get_func(PyTuple_GetSlice);
-        be_get_func(PyDict_New);
-        be_get_func(PyDict_Size);
-        be_get_func(PyDict_GetItem);
-        be_get_func(PyDict_SetItem);
-        be_get_func(PyDict_DelItem);
-        be_get_func(PyDict_Next);
-        be_get_func(PyDict_GetItemString);
-        be_get_func(PyDict_SetItemString);
+        motor_get_func(PyModule_AddObject);
+        motor_get_func(PyModule_GetDict);
+        motor_get_func(PyImport_AddModule);
+        motor_get_func(PyEval_InitThreads);
+        motor_get_func(PyEval_SaveThread);
+        motor_get_func(PyEval_AcquireThread);
+        motor_get_func(PyEval_ReleaseThread);
+        motor_get_func(PyEval_ReleaseLock);
+        motor_get_func(PyRun_SimpleString);
+        motor_get_func(PyRun_InteractiveLoopFlags);
+        motor_get_func(_Py_NoneStruct);
+        motor_get_func(PyObject_SetAttrString);
+        motor_get_func(PyObject_GetAttrString);
+        motor_get_func(_PyArg_ParseTuple_SizeT);
+        motor_get_func(_PyArg_ParseTupleAndKeywords_SizeT);
+        motor_get_func(PyObject_IsTrue);
+        motor_get_func(PyCFunction_NewEx);
+        motor_get_func(PyType_Ready);
+        motor_get_func(PyType_GenericAlloc);
+        motor_get_func(PyType_GenericNew);
+        motor_get_func(PyList_New);
+        motor_get_func(PyList_Size);
+        motor_get_func(PyList_GetItem);
+        motor_get_func(PyList_SetItem);
+        motor_get_func(PyList_Insert);
+        motor_get_func(PyList_Append);
+        motor_get_func(PyList_GetSlice);
+        motor_get_func(PyList_SetSlice);
+        motor_get_func(PyTuple_New);
+        motor_get_func(PyTuple_Size);
+        motor_get_func(PyTuple_GetItem);
+        motor_get_func(PyTuple_SetItem);
+        motor_get_func(PyTuple_GetSlice);
+        motor_get_func(PyDict_New);
+        motor_get_func(PyDict_Size);
+        motor_get_func(PyDict_GetItem);
+        motor_get_func(PyDict_SetItem);
+        motor_get_func(PyDict_DelItem);
+        motor_get_func(PyDict_Next);
+        motor_get_func(PyDict_GetItemString);
+        motor_get_func(PyDict_SetItemString);
         if(m_version < 30)
         {
-            be_get_func(PyString_FromString);
-            be_get_func(PyString_FromStringAndSize);
-            be_get_func(PyString_FromFormat);
-            be_get_func(PyString_Size);
-            be_get_func(PyString_AsString);
-            be_get_func(PyString_AsStringAndSize);
+            motor_get_func(PyString_FromString);
+            motor_get_func(PyString_FromStringAndSize);
+            motor_get_func(PyString_FromFormat);
+            motor_get_func(PyString_Size);
+            motor_get_func(PyString_AsString);
+            motor_get_func(PyString_AsStringAndSize);
         }
         else
         {
-            be_get_func_name_opt(PyUnicode_FromString, PyUnicode_FromString);
-            be_get_func_name_opt(PyUnicodeUCS2_FromString, PyUnicode_FromString);
-            be_get_func_name_opt(PyUnicodeUCS4_FromString, PyUnicode_FromString);
-            be_get_func_name_opt(PyUnicode_FromStringAndSize, PyUnicode_FromStringAndSize);
-            be_get_func_name_opt(PyUnicodeUCS2_FromStringAndSize, PyUnicode_FromStringAndSize);
-            be_get_func_name_opt(PyUnicodeUCS4_FromStringAndSize, PyUnicode_FromStringAndSize);
-            be_get_func_name_opt(PyUnicode_FromFormat, PyUnicode_FromFormat);
-            be_get_func_name_opt(PyUnicodeUCS2_FromFormat, PyUnicode_FromFormat);
-            be_get_func_name_opt(PyUnicodeUCS4_FromFormat, PyUnicode_FromFormat);
-            be_get_func_name_opt(PyUnicode_AsASCIIString, PyUnicode_AsASCIIString);
-            be_get_func_name_opt(PyUnicodeUCS2_AsASCIIString, PyUnicode_AsASCIIString);
-            be_get_func_name_opt(PyUnicodeUCS4_AsASCIIString, PyUnicode_AsASCIIString);
-            be_get_func_name_opt(PyUnicode_AsUTF8String, PyUnicode_AsUTF8String);
-            be_get_func_name_opt(PyUnicodeUCS2_AsUTF8String, PyUnicode_AsUTF8String);
-            be_get_func_name_opt(PyUnicodeUCS4_AsUTF8String, PyUnicode_AsUTF8String);
-            if(m_version >= 33) be_get_func(PyUnicode_AsUTF8);
-            be_get_func(PyBytes_AsString);
+            motor_get_func_name_opt(PyUnicode_FromString, PyUnicode_FromString);
+            motor_get_func_name_opt(PyUnicodeUCS2_FromString, PyUnicode_FromString);
+            motor_get_func_name_opt(PyUnicodeUCS4_FromString, PyUnicode_FromString);
+            motor_get_func_name_opt(PyUnicode_FromStringAndSize, PyUnicode_FromStringAndSize);
+            motor_get_func_name_opt(PyUnicodeUCS2_FromStringAndSize, PyUnicode_FromStringAndSize);
+            motor_get_func_name_opt(PyUnicodeUCS4_FromStringAndSize, PyUnicode_FromStringAndSize);
+            motor_get_func_name_opt(PyUnicode_FromFormat, PyUnicode_FromFormat);
+            motor_get_func_name_opt(PyUnicodeUCS2_FromFormat, PyUnicode_FromFormat);
+            motor_get_func_name_opt(PyUnicodeUCS4_FromFormat, PyUnicode_FromFormat);
+            motor_get_func_name_opt(PyUnicode_AsASCIIString, PyUnicode_AsASCIIString);
+            motor_get_func_name_opt(PyUnicodeUCS2_AsASCIIString, PyUnicode_AsASCIIString);
+            motor_get_func_name_opt(PyUnicodeUCS4_AsASCIIString, PyUnicode_AsASCIIString);
+            motor_get_func_name_opt(PyUnicode_AsUTF8String, PyUnicode_AsUTF8String);
+            motor_get_func_name_opt(PyUnicodeUCS2_AsUTF8String, PyUnicode_AsUTF8String);
+            motor_get_func_name_opt(PyUnicodeUCS4_AsUTF8String, PyUnicode_AsUTF8String);
+            if(m_version >= 33) motor_get_func(PyUnicode_AsUTF8);
+            motor_get_func(PyBytes_AsString);
         }
-        be_get_func(PyBool_FromLong);
+        motor_get_func(PyBool_FromLong);
         if(m_version < 30)
         {
-            be_get_func(PyInt_AsUnsignedLongMask);
-            be_get_func(PyInt_FromLong);
+            motor_get_func(PyInt_AsUnsignedLongMask);
+            motor_get_func(PyInt_FromLong);
         }
-        be_get_func(PyLong_AsUnsignedLongLongMask);
-        be_get_func(PyLong_FromUnsignedLongLong);
-        be_get_func(PyFloat_FromDouble);
-        be_get_func(PyFloat_AsDouble);
-        be_get_func(PyErr_Print);
-        be_get_func(PyErr_SetString);
-        be_get_func(PyErr_Format);
-        be_get_func(PyErr_BadArgument);
-        be_get_func(PyBool_Type);
-        be_get_func(PyFloat_Type);
-        be_get_func(PyExc_Exception);
-        be_get_func(PyExc_AttributeError);
-        be_get_func(PyExc_ImportError);
-        be_get_func(PyExc_IndexError);
-        be_get_func(PyExc_TypeError);
-        be_get_func(PySys_GetObject);
-        be_get_func(PySys_SetObject);
-#undef be_get_fun
-#undef be_get_fun_opt
+        motor_get_func(PyLong_AsUnsignedLongLongMask);
+        motor_get_func(PyLong_FromUnsignedLongLong);
+        motor_get_func(PyFloat_FromDouble);
+        motor_get_func(PyFloat_AsDouble);
+        motor_get_func(PyErr_Print);
+        motor_get_func(PyErr_SetString);
+        motor_get_func(PyErr_Format);
+        motor_get_func(PyErr_BadArgument);
+        motor_get_func(PyBool_Type);
+        motor_get_func(PyFloat_Type);
+        motor_get_func(PyExc_Exception);
+        motor_get_func(PyExc_AttributeError);
+        motor_get_func(PyExc_ImportError);
+        motor_get_func(PyExc_IndexError);
+        motor_get_func(PyExc_TypeError);
+        motor_get_func(PySys_GetObject);
+        motor_get_func(PySys_SetObject);
+#undef motor_get_fun
+#undef motor_get_fun_opt
     }
 }
 
@@ -273,4 +273,4 @@ void PythonLibrary::setupPath()
                             | programPath.str().name);
 }
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python

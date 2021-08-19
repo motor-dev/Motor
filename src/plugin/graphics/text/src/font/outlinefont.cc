@@ -1,10 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.text/stdafx.h>
-#include <bugengine/plugin.graphics.text/outlinefont.script.hh>
+#include <motor/plugin.graphics.text/stdafx.h>
+#include <motor/plugin.graphics.text/outlinefont.script.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 OutlineFont::OutlineFont(const istring& fontSystemName)
     : m_fontSystemName(fontSystemName)
@@ -20,4 +20,4 @@ OutlineFont::~OutlineFont()
 {
 }
 
-}  // namespace BugEngine
+}  // namespace Motor

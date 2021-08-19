@@ -1,15 +1,15 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
  see LICENSE for detail */
 
 #include <stdafx.h>
 #include <context.hh>
 #include <runtime/error.hh>
 
-namespace BugEngine { namespace Lua {
+namespace Motor { namespace Lua {
 
 int error(lua_State* state, const minitl::format< 4096u >& message)
 {
     return luaL_error(state, "%s: %s", Context::getCallInfo(state).c_str(), message.c_str());
 }
 
-}}  // namespace BugEngine::Lua
+}}  // namespace Motor::Lua

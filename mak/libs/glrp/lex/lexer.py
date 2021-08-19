@@ -1,7 +1,7 @@
 from .token import Token
 from ..position import Position
 import re
-from be_typing import TYPE_CHECKING, TypeVar
+from motor_typing import TYPE_CHECKING, TypeVar
 
 F = TypeVar('F', bound='Lexer')
 

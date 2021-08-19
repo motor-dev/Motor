@@ -64,7 +64,7 @@ class IrParser:
         return result
 
 
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .ir_messages import Logger
     from .ir_ast import IrModule

@@ -1,8 +1,8 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.shadermodel1/stdafx.h>
-#include <bugengine/meta/engine/namespace.hh>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/plugin.graphics.shadermodel1/stdafx.h>
+#include <motor/meta/engine/namespace.hh>
+#include <motor/plugin/plugin.hh>
 
-BE_PLUGIN_NAMESPACE_REGISTER();
+MOTOR_PLUGIN_NAMESPACE_REGISTER();

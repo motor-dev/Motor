@@ -1,15 +1,15 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PYTHONLIB_PY_ENUM_HH_
-#define BE_PYTHONLIB_PY_ENUM_HH_
+#ifndef MOTOR_PYTHONLIB_PY_ENUM_HH_
+#define MOTOR_PYTHONLIB_PY_ENUM_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <py_object.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
-struct PyBugEnum : public PyBugObject
+struct PyMotorEnum : public PyMotorObject
 {
     static void registerType(PyObject* module);
 
@@ -26,7 +26,7 @@ struct PyBugEnum : public PyBugObject
     static PyTypeObject::Py3NumberMethods s_py3EnumNumber;
 };
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python
 
 /**************************************************************************************************/
 #endif

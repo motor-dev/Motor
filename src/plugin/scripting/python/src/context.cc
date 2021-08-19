@@ -1,10 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.python/stdafx.h>
-#include <bugengine/plugin.scripting.python/context.hh>
+#include <motor/plugin.scripting.python/stdafx.h>
+#include <motor/plugin.scripting.python/context.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
 Context::Context(const Plugin::Context& context, ref< PythonLibrary > library)
     : ScriptEngine< PythonScript >(Arena::python(), context.resourceManager)
@@ -71,4 +71,4 @@ void Context::runCode(const char* buffer, const ifilename& filename)
     }
 }
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python

@@ -1,14 +1,14 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PACKAGEBUILDER_BUILDCONTEXT_HH_
-#define BE_PACKAGEBUILDER_BUILDCONTEXT_HH_
+#ifndef MOTOR_PACKAGEBUILDER_BUILDCONTEXT_HH_
+#define MOTOR_PACKAGEBUILDER_BUILDCONTEXT_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.scripting.package/stdafx.h>
-#include <bugengine/plugin.scripting.package/nodes/package.hh>
+#include <motor/plugin.scripting.package/stdafx.h>
+#include <motor/plugin.scripting.package/nodes/package.hh>
 
-#include <bugengine/introspect/node/node.hh>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/introspect/node/node.hh>
+#include <motor/plugin/plugin.hh>
 
 struct FileOffset
 {
@@ -27,7 +27,7 @@ union YYSTYPE
 #define YYSTYPE_IS_DECLARED 1
 #define YYSTYPE_IS_TRIVIAL  1
 
-namespace BugEngine { namespace PackageBuilder {
+namespace Motor { namespace PackageBuilder {
 
 struct BuildContext
 {
@@ -38,7 +38,7 @@ struct BuildContext
     ~BuildContext();
 };
 
-}}  // namespace BugEngine::PackageBuilder
+}}  // namespace Motor::PackageBuilder
 
 extern int g_packageOffset;
 extern int g_packageLine;

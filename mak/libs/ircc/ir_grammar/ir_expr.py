@@ -1,5 +1,5 @@
 from ..ir_ast import IrExpressionCast, IrExpressionConstant, IrExpressionReference, IrExpressionArray, IrExpressionVector, IrExpressionAggregate, IrExpressionUndef, IrReference, IrExpressionZero, IrExpressionPoison
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def p_ir_expr(p):

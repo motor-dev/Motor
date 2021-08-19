@@ -1,6 +1,6 @@
 from ..ir_code import IrInstruction
 from ..ir_type import IrTypeBuiltin, IrTypeVector
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 class IrInstCall(IrInstruction):

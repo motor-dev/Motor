@@ -1,8 +1,8 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/plugin/plugin.hh>
 #include <nullrenderer.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::Null::NullRenderer);
+MOTOR_PLUGIN_REGISTER(Motor::Null::NullRenderer);

@@ -1,18 +1,18 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_SAMPLES_TEXT_KERNELSAMPLE_HH_
-#define BE_SAMPLES_TEXT_KERNELSAMPLE_HH_
+#ifndef MOTOR_SAMPLES_TEXT_KERNELSAMPLE_HH_
+#define MOTOR_SAMPLES_TEXT_KERNELSAMPLE_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
-#include <bugengine/application.hh>
-#include <bugengine/filesystem/folder.script.hh>
-#include <bugengine/plugin.graphics.3d/renderer/irenderer.hh>
-#include <bugengine/plugin.scripting.package/package.script.hh>
-#include <bugengine/plugin/plugin.hh>
-#include <bugengine/resource/resourcemanager.hh>
+#include <motor/application.hh>
+#include <motor/filesystem/folder.script.hh>
+#include <motor/plugin.graphics.3d/renderer/irenderer.hh>
+#include <motor/plugin.scripting.package/package.script.hh>
+#include <motor/plugin/plugin.hh>
+#include <motor/resource/resourcemanager.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 class TextSample : public Application
 {
@@ -32,7 +32,7 @@ public:
     ~TextSample();
 };
 
-}  // namespace BugEngine
+}  // namespace Motor
 
 /**************************************************************************************************/
 #endif

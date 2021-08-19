@@ -1,8 +1,8 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bugengine/plugin/plugin.hh>
 #include <glesrenderer.hh>
+#include <motor/plugin/plugin.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::OpenGLES::GLESRenderer);
+MOTOR_PLUGIN_REGISTER(Motor::OpenGLES::GLESRenderer);

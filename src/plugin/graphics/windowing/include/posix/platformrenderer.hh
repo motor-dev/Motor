@@ -1,15 +1,15 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_WINDOWING_POSIX_RENDERER_HH_
-#define BE_WINDOWING_POSIX_RENDERER_HH_
+#ifndef MOTOR_WINDOWING_POSIX_RENDERER_HH_
+#define MOTOR_WINDOWING_POSIX_RENDERER_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.graphics.windowing/stdafx.h>
-#include <bugengine/plugin.graphics.windowing/renderer.hh>
+#include <motor/plugin.graphics.windowing/stdafx.h>
 #include <GL/glx.h>
 #include <X11/Xatom.h>
+#include <motor/plugin.graphics.windowing/renderer.hh>
 
-namespace BugEngine { namespace Windowing {
+namespace Motor { namespace Windowing {
 
 struct PlatformData
 {
@@ -42,7 +42,7 @@ public:
     weak< Window > getWindowFromXWindow(::Window w);
 };
 
-}}  // namespace BugEngine::Windowing
+}}  // namespace Motor::Windowing
 
 /**************************************************************************************************/
 #endif

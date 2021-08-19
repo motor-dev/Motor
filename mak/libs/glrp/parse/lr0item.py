@@ -1,4 +1,4 @@
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 class LR0Item(object):
@@ -108,5 +108,5 @@ class LR0Item(object):
 
 
 if TYPE_CHECKING:
-    from be_typing import Dict, List, Optional, Set, Text, Tuple
+    from motor_typing import Dict, List, Optional, Set, Text, Tuple
     from .grammar import Grammar

@@ -1,10 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.GL4/stdafx.h>
+#include <motor/plugin.graphics.GL4/stdafx.h>
 #include <loaders/rendertarget/glwindow.hh>
 
-namespace BugEngine { namespace OpenGL {
+namespace Motor { namespace OpenGL {
 
 void GLWindow::begin(ClearMode clear) const
 {
@@ -17,7 +17,7 @@ void GLWindow::begin(ClearMode clear) const
             glClear(GL_COLOR_BUFFER_BIT);
         }
     }
-    be_info("blabla");
+    motor_info("blabla");
 }
 
 void GLWindow::end(PresentMode presentMode) const
@@ -31,7 +31,7 @@ void GLWindow::end(PresentMode presentMode) const
         }
         clearCurrent();
     }
-    be_info("blabla");
+    motor_info("blabla");
 }
 
-}}  // namespace BugEngine::OpenGL
+}}  // namespace Motor::OpenGL

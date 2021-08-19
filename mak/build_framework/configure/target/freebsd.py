@@ -101,9 +101,9 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
         env.DEPLOY_RUNBINDIR = 'lib'
         env.DEPLOY_LIBDIR = 'lib'
         env.DEPLOY_INCLUDEDIR = 'include'
-        env.DEPLOY_DATADIR = os.path.join('share', 'bugengine')
-        env.DEPLOY_PLUGINDIR = os.path.join(env.DEPLOY_RUNBINDIR, 'bugengine')
-        env.DEPLOY_KERNELDIR = os.path.join(env.DEPLOY_RUNBINDIR, 'bugengine')
+        env.DEPLOY_DATADIR = os.path.join('share', 'motor')
+        env.DEPLOY_PLUGINDIR = os.path.join(env.DEPLOY_RUNBINDIR, 'motor')
+        env.DEPLOY_KERNELDIR = os.path.join(env.DEPLOY_RUNBINDIR, 'motor')
         env.pymodule_PATTERN = '%s.so'
         env.STRIP_BINARY = True
 
@@ -111,16 +111,14 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
         env.append_unique('CFLAGS', ['-fPIC'])
         env.append_unique('CXXFLAGS', ['-fPIC'])
         if env.ARCH_LP64:
-            env.RPATH = [
-                ':'.join(
-                    ['$ORIGIN', '$ORIGIN/../', '$ORIGIN/../lib/', '$ORIGIN/../lib/bugengine/']
-                )
-            ]
+            env.RPATH = [':'.join(['$ORIGIN', '$ORIGIN/../', '$ORIGIN/../lib/', '$ORIGIN/../lib/motor/'])]
         else:
             env.RPATH = [
                 ':'.join(
-                    ['$ORIGIN', '$ORIGIN/../', '$ORIGIN/../lib32/', '$ORIGIN/../lib32/bugengine/',
-                     '$ORIGIN/../lib/', '$ORIGIN/../lib/bugengine/']
+                    [
+                        '$ORIGIN', '$ORIGIN/../', '$ORIGIN/../lib32/', '$ORIGIN/../lib32/motor/', '$ORIGIN/../lib/',
+                        '$ORIGIN/../lib/motor/'
+                    ]
                 )
             ]
 

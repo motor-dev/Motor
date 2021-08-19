@@ -1,5 +1,5 @@
 from .ir_declaration import IrDeclaration
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 class IrAttribute:

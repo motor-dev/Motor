@@ -1,17 +1,17 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_DEBUG_RUNTIME_PE_HH_
-#define BE_DEBUG_RUNTIME_PE_HH_
+#ifndef MOTOR_DEBUG_RUNTIME_PE_HH_
+#define MOTOR_DEBUG_RUNTIME_PE_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.debug.runtime/stdafx.h>
-#include <bugengine/plugin.debug.runtime/module.hh>
+#include <motor/plugin.debug.runtime/stdafx.h>
+#include <motor/plugin.debug.runtime/module.hh>
 
-namespace BugEngine { namespace Runtime {
+namespace Motor { namespace Runtime {
 
 class PE : public Module
 {
-    BE_NOCOPY(PE);
+    MOTOR_NOCOPY(PE);
 
 private:
     struct StringTable
@@ -43,7 +43,7 @@ public:
     virtual SymbolResolver::SymbolInformations getSymbolInformation() const override;
 };
 
-}}  // namespace BugEngine::Runtime
+}}  // namespace Motor::Runtime
 
 /**************************************************************************************************/
 #endif

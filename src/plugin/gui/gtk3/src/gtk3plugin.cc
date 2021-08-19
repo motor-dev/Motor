@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
@@ -8,12 +8,12 @@
 #include <gobject.hh>
 #include <gtk3loader.hh>
 
-#include <bugengine/meta/engine/helper/method.hh>
-#include <bugengine/meta/engine/methodinfo.script.hh>
-#include <bugengine/meta/engine/namespace.hh>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/meta/engine/helper/method.hh>
+#include <motor/meta/engine/methodinfo.script.hh>
+#include <motor/meta/engine/namespace.hh>
+#include <motor/plugin/plugin.hh>
 
-namespace BugEngine { namespace Gtk3 {
+namespace Motor { namespace Gtk3 {
 
 struct Gtk3Plugin::Page
 {
@@ -25,7 +25,7 @@ struct Gtk3Plugin::Page
 Gtk3Plugin::Gtk3Plugin()
     : m_allocator(SystemAllocator::BlockSize_64k, 1)
     , m_firstPage(static_cast< Page* >(m_allocator.allocate()))
-    , m_bugengineQuark(g_quark_from_static_string("bugengine"))
+    , m_motorQuark(g_quark_from_static_string("motor"))
 {
     gtk_init(0, 0);
     gtk_test_register_all_types();
@@ -38,6 +38,6 @@ Gtk3Plugin::~Gtk3Plugin()
 {
 }
 
-}}  // namespace BugEngine::Gtk3
+}}  // namespace Motor::Gtk3
 
-BE_PLUGIN_REGISTER(BugEngine::Gtk3::Gtk3Loader);
+MOTOR_PLUGIN_REGISTER(Motor::Gtk3::Gtk3Loader);

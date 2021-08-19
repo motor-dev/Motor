@@ -1,6 +1,6 @@
 import glrp
 import decimal
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 decimal.getcontext().prec = 24
 
@@ -355,4 +355,4 @@ class Cxx23Lexer(Cxx20Lexer):
 
 
 if TYPE_CHECKING:
-    from be_typing import Optional, Tuple
+    from motor_typing import Optional, Tuple

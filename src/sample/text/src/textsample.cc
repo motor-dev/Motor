@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bugengine/core/environment.hh>
-#include <bugengine/filesystem/diskfolder.script.hh>
+#include <motor/core/environment.hh>
+#include <motor/filesystem/diskfolder.script.hh>
 #include <textsample.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 TextSample::TextSample(const Plugin::Context& context)
     : Application(
@@ -43,4 +43,4 @@ TextSample::~TextSample()
     pluginContext().resourceManager->unload(m_mainPackage);
 }
 
-}  // namespace BugEngine
+}  // namespace Motor

@@ -1,10 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.package/stdafx.h>
-#include <bugengine/plugin.scripting.package/package.script.hh>
+#include <motor/plugin.scripting.package/stdafx.h>
+#include <motor/plugin.scripting.package/package.script.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 Package::Package(weak< const File > file) : Script(file)
 {
@@ -14,4 +14,4 @@ Package::~Package()
 {
 }
 
-}  // namespace BugEngine
+}  // namespace Motor

@@ -1,17 +1,17 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.3d/stdafx.h>
-#include <bugengine/plugin.graphics.3d/mesh/mesh.script.hh>
-#include <bugengine/plugin.graphics.3d/renderer/irenderer.hh>
-#include <bugengine/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
-#include <bugengine/plugin.graphics.3d/shader/shader.script.hh>
-#include <bugengine/plugin.graphics.3d/texture/texture.script.hh>
-#include <bugengine/scheduler/kernel/kernel.script.hh>
-#include <bugengine/scheduler/task/method.hh>
+#include <motor/plugin.graphics.3d/stdafx.h>
 #include <gpuresourceloader.hh>
+#include <motor/plugin.graphics.3d/mesh/mesh.script.hh>
+#include <motor/plugin.graphics.3d/renderer/irenderer.hh>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include <motor/plugin.graphics.3d/shader/shader.script.hh>
+#include <motor/plugin.graphics.3d/texture/texture.script.hh>
+#include <motor/scheduler/kernel/kernel.script.hh>
+#include <motor/scheduler/task/method.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 IRenderer::IRenderer(minitl::Allocator& allocator, weak< Resource::ResourceManager > manager,
                      Scheduler::Affinity affinity)
@@ -31,9 +31,9 @@ IRenderer::IRenderer(minitl::Allocator& allocator, weak< Resource::ResourceManag
 // m_kernelRender(scoped<Kernel::KernelDescription>::create(Arena::task(),
 //"graphics.3d.batchrender"))
 {
-    m_resourceManager->attach(be_class< RenderSurfaceDescription >(), m_renderSurfaceLoader);
-    m_resourceManager->attach(be_class< RenderWindowDescription >(), m_renderWindowLoader);
-    m_resourceManager->attach(be_class< ShaderProgramDescription >(), m_shaderProgramLoader);
+    m_resourceManager->attach(motor_class< RenderSurfaceDescription >(), m_renderSurfaceLoader);
+    m_resourceManager->attach(motor_class< RenderWindowDescription >(), m_renderWindowLoader);
+    m_resourceManager->attach(motor_class< ShaderProgramDescription >(), m_shaderProgramLoader);
     // m_resourceManager->load(weak<Kernel::KernelDescription>(m_kernelSort));
     // m_resourceManager->load(weak<Kernel::KernelDescription>(m_kernelRender));
 }
@@ -42,9 +42,9 @@ IRenderer::~IRenderer()
 {
     // m_resourceManager->unload(weak<Kernel::KernelDescription>(m_kernelRender));
     // m_resourceManager->unload(weak<Kernel::KernelDescription>(m_kernelSort));
-    m_resourceManager->detach(be_class< ShaderProgramDescription >(), m_shaderProgramLoader);
-    m_resourceManager->detach(be_class< RenderWindowDescription >(), m_renderWindowLoader);
-    m_resourceManager->detach(be_class< RenderSurfaceDescription >(), m_renderSurfaceLoader);
+    m_resourceManager->detach(motor_class< ShaderProgramDescription >(), m_shaderProgramLoader);
+    m_resourceManager->detach(motor_class< RenderWindowDescription >(), m_renderWindowLoader);
+    m_resourceManager->detach(motor_class< RenderSurfaceDescription >(), m_renderSurfaceLoader);
 }
 
 weak< Task::ITask > IRenderer::syncTask() const
@@ -82,4 +82,4 @@ IRenderer::getShaderProgram(weak< const Resource::Description > description) con
     return description->getResource(m_shaderProgramLoader).getRefHandle< IGPUResource >();
 }
 
-}  // namespace BugEngine
+}  // namespace Motor

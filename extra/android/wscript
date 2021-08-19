@@ -3,7 +3,7 @@
 
 import os
 from waflib import Options, Utils
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def options(option_context):

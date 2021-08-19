@@ -47,10 +47,11 @@ class clangd(Build.BuildContext):
     cmd = 'clangd'
     fun = 'build'
     optim = 'debug'
-    bugengine_toolchain = 'projects'
-    bugengine_variant = 'projects.setup'
+    motor_toolchain = 'projects'
+    motor_variant = 'projects.setup'
     variant = 'projects/clangd'
-    #bugengine_variant = '%(bugengine_variant)s'
+
+    #motor_variant = '%(motor_variant)s'
 
     def execute(self):
         """
@@ -63,7 +64,7 @@ class clangd(Build.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.variant = self.__class__.bugengine_variant
+        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '${Variant}'
@@ -110,22 +111,26 @@ class clangd(Build.BuildContext):
                                 cmd = self.expand_cmd(task, bld_env)
                                 for variant in self.env.ALL_VARIANTS:
                                     vars = {'toolchain': env_name, 'optim': variant}
-                                    commands.append('\t{\n'
-                                                    '\t\t"directory": "%s",\n'
-                                                    '\t\t"arguments": [%s],\n'
-                                                    '\t\t"file": "%s",\n'
-                                                    '\t\t"output": "%s"\n'
-                                                    '\t}' % (task.get_cwd().abspath() % vars,
-                                                             ", ".join('"%s"' % (c % vars) for c in cmd),
-                                                             task.inputs[0].abspath() % vars,
-                                                             task.outputs[0].path_from(task.get_cwd()) % vars))
+                                    commands.append(
+                                        '\t{\n'
+                                        '\t\t"directory": "%s",\n'
+                                        '\t\t"arguments": [%s],\n'
+                                        '\t\t"file": "%s",\n'
+                                        '\t\t"output": "%s"\n'
+                                        '\t}' % (
+                                            task.get_cwd().abspath() % vars,
+                                            ", ".join('"%s"' % (c % vars)
+                                                      for c in cmd), task.inputs[0].abspath() % vars,
+                                            task.outputs[0].path_from(task.get_cwd()) % vars
+                                        )
+                                    )
         with open(clangd_node.abspath(), 'w') as clangd:
             clangd.write('[\n')
             clangd.write(',\n'.join(commands))
             clangd.write('\n]')
 
-
     pattern = re.compile('\${([^}]+)}')
+
     def expand_cmd(self, task, env):
         def get_var(name):
             if name == 'SRC':
@@ -133,14 +138,15 @@ class clangd(Build.BuildContext):
             elif name == 'TGT':
                 return 'task.outputs'
             else:
-                return 'Utils.to_list(env.%s)'%name
+                return 'Utils.to_list(env.%s)' % name
+
         def expand_var(match):
-            task # publish task as a local variable in locals()
+            task   # publish task as a local variable in locals()
             expression = match.group(1)
             expansion = expression.find(':')
             if expansion != -1:
                 radix = env[expression[:expansion]]
-                expression = expression[expansion+1:]
+                expression = expression[expansion + 1:]
             else:
                 radix = '%s'
             execution = expression.find('.')
@@ -154,13 +160,14 @@ class clangd(Build.BuildContext):
             if subvalue != -1:
                 index = var[subvalue:]
                 var = get_var(var[:subvalue])
-                var = var+index
+                var = var + index
             else:
                 var = get_var(var)
-            var = eval(var+code, locals(), globals())
+            var = eval(var + code, locals(), globals())
             if var:
-                return ' '.join(radix%x for x in Utils.to_list(var))
+                return ' '.join(radix % x for x in Utils.to_list(var))
             else:
                 return None
+
         cmd = self.pattern.sub(expand_var, task.orig_run_str).split()
         return cmd

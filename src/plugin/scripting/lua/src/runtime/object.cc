@@ -1,18 +1,18 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
  see LICENSE for detail */
 
 #include <stdafx.h>
 
-#include <bugengine/meta/classinfo.script.hh>
-#include <bugengine/meta/engine/propertyinfo.script.hh>
-#include <bugengine/meta/engine/scriptingapi.hh>
 #include <context.hh>
+#include <motor/meta/classinfo.script.hh>
+#include <motor/meta/engine/propertyinfo.script.hh>
+#include <motor/meta/engine/scriptingapi.hh>
 #include <runtime/call.hh>
 #include <runtime/error.hh>
 #include <runtime/object.hh>
 #include <runtime/value.hh>
 
-namespace BugEngine { namespace Lua {
+namespace Motor { namespace Lua {
 
 static int pushUserdataString(lua_State* L, Meta::Value* userdata)
 {
@@ -53,7 +53,7 @@ static int pushUserdataString(lua_State* L, Meta::Value* userdata)
 
 extern "C" int valueGC(lua_State* state)
 {
-    Context::checkArg(state, 1, "BugEngine.Object");
+    Context::checkArg(state, 1, "Motor.Object");
 
     Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, -1);
     userdata->~Value();
@@ -62,23 +62,23 @@ extern "C" int valueGC(lua_State* state)
 
 extern "C" int valueToString(lua_State* state)
 {
-    Context::checkArg(state, 1, "BugEngine.Object");
+    Context::checkArg(state, 1, "Motor.Object");
 
     Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, -1);
     if(userdata->type().indirection == Meta::Type::Value)
     {
         raw< const Meta::Class > metaclass = userdata->type().metaclass;
-        if(metaclass == be_class< inamespace >())
+        if(metaclass == motor_class< inamespace >())
         {
             lua_pushfstring(state, "%s", userdata->as< const inamespace >().str().name);
             return 1;
         }
-        if(metaclass == be_class< istring >())
+        if(metaclass == motor_class< istring >())
         {
             lua_pushfstring(state, "%s", userdata->as< const istring >().c_str());
             return 1;
         }
-        if(metaclass == be_class< ifilename >())
+        if(metaclass == motor_class< ifilename >())
         {
             lua_pushfstring(state, "%s", userdata->as< const ifilename >().str().name);
             return 1;
@@ -89,13 +89,13 @@ extern "C" int valueToString(lua_State* state)
 
 extern "C" int valueGet(lua_State* state)
 {
-    Context::checkArg(state, 1, "BugEngine.Object");
+    Context::checkArg(state, 1, "Motor.Object");
     Meta::Value*             userdata = (Meta::Value*)lua_touserdata(state, -2);
     raw< const Meta::Class > cls      = userdata->type().metaclass;
 
     if(cls->type() == Meta::ClassType_Array && lua_type(state, 2) == LUA_TNUMBER)
     {
-        const u32 i = be_checked_numcast< u32 >(lua_tonumber(state, 2));
+        const u32 i = motor_checked_numcast< u32 >(lua_tonumber(state, 2));
         if(userdata->type().isConst())
         {
             return Context::push(
@@ -119,12 +119,12 @@ extern "C" int valueGet(lua_State* state)
 
 extern "C" int valueSet(lua_State* state)
 {
-    Context::checkArg(state, 1, "BugEngine.Object");
+    Context::checkArg(state, 1, "Motor.Object");
     Meta::Value*             userdata = (Meta::Value*)lua_touserdata(state, 1);
     raw< const Meta::Class > cls      = userdata->type().metaclass;
     if(cls->type() == Meta::ClassType_Array && lua_type(state, 2) == LUA_TNUMBER)
     {
-        const u32 i = be_checked_numcast< u32 >(lua_tonumber(state, 2));
+        const u32 i = motor_checked_numcast< u32 >(lua_tonumber(state, 2));
         if(userdata->type().isConst())
         {
             return Context::push(
@@ -183,7 +183,7 @@ extern "C" int valueSet(lua_State* state)
 
 extern "C" int valueCall(lua_State* state)
 {
-    Context::checkArg(state, 1, "BugEngine.Object");
+    Context::checkArg(state, 1, "Motor.Object");
     Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, 1);
     Meta::Value  value    = (*userdata)["?call"];
     if(!value)
@@ -207,4 +207,4 @@ const luaL_Reg s_valueMetaTable[]
     = {{"__gc", valueGC},        {"__tostring", valueToString}, {"__index", valueGet},
        {"__newindex", valueSet}, {"__call", valueCall},         {0, 0}};
 
-}}  // namespace BugEngine::Lua
+}}  // namespace Motor::Lua

@@ -2,7 +2,7 @@ from .ir_declaration import IrDeclaration
 from .ir_expr import IrExpression, IrExpressionDeclaration
 from .ir_type import IrAddressSpace, IrTypePtr
 from .ir_code import IrCodeGenContext
-from be_typing import TYPE_CHECKING, cast
+from motor_typing import TYPE_CHECKING, cast
 
 
 class IrVariableDeclaration(IrExpressionDeclaration):

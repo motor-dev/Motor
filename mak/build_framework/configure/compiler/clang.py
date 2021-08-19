@@ -222,14 +222,14 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
             env.append_value(
                 'CXXFLAGS', [
                     '-include', 'bits/c++config.h', '-include',
-                    os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/clang/no_atomic_builtin.h')
+                    os.path.join(conf.motornode.abspath(), 'mak/compiler/clang/no_atomic_builtin.h')
                 ]
             )
         # Typedef of __float128 on older clangs
         if self.version_number < (3, 9):
             env.append_value(
                 'CXXFLAGS',
-                ['-include', os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/clang/float128.h')]
+                ['-include', os.path.join(conf.motornode.abspath(), 'mak/compiler/clang/float128.h')]
             )
         # Add multiarch directories
         sysroot = env.SYSROOT or '/'

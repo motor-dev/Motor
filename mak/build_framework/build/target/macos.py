@@ -5,7 +5,7 @@ import os
 
 
 def build(bld):
-    bld.platforms.append(bld.external('bugengine.3rdparty.system.cocoa'))
+    bld.platforms.append(bld.external('motor.3rdparty.system.cocoa'))
 
     def wrap_class(cls_name):
         cls = Task.classes.get(cls_name, None)
@@ -38,25 +38,19 @@ def set_darwin_shlib_name(self):
         bin_path = os.path.join(self.env.PREFIX, self.env.DEPLOY_BINDIR)
         plugin_path = os.path.join(self.env.PREFIX, self.env.DEPLOY_PLUGINDIR)
         kernel_path = os.path.join(self.env.PREFIX, self.env.DEPLOY_KERNELDIR)
-        if 'bugengine:plugin' in self.features:
+        if 'motor:plugin' in self.features:
             rel_path = os.path.relpath(plugin_path, bin_path)
             self.env.append_unique(
-                'LINKFLAGS', [
-                    '-install_name',
-                    os.path.join(
-                        '@executable_path', rel_path, self.link_task.outputs[0].name
-                    )
-                ]
+                'LINKFLAGS',
+                ['-install_name',
+                 os.path.join('@executable_path', rel_path, self.link_task.outputs[0].name)]
             )
-        elif 'bugengine:kernel' in self.features:
+        elif 'motor:kernel' in self.features:
             rel_path = os.path.relpath(kernel_path, bin_path)
             self.env.append_unique(
-                'LINKFLAGS', [
-                    '-install_name',
-                    os.path.join(
-                        '@executable_path', rel_path, self.link_task.outputs[0].name
-                    )
-                ]
+                'LINKFLAGS',
+                ['-install_name',
+                 os.path.join('@executable_path', rel_path, self.link_task.outputs[0].name)]
             )
         else:
             self.env.append_unique(
@@ -160,7 +154,7 @@ def apply_postlink_darwin(self):
             self.darwin_postlink_task(self.link_task)
 
 
-@feature('bugengine:multiarch')
+@feature('motor:multiarch')
 @after_method('apply_link')
 @after_method('process_use')
 @after_method('apply_postlink_darwin')
@@ -175,10 +169,10 @@ def apply_multiarch_darwin(self):
             if getattr(task_gen, 'link_task', None):
                 inputs.append(task_gen.link_task.outputs[0])
                 features += task_gen.features
-        if 'bugengine:plugin' in features:
+        if 'motor:plugin' in features:
             out_name = task_gen.env.cxxshlib_PATTERN % self.target
             out_path = self.env.DEPLOY_PLUGINDIR
-        elif 'bugengine:kernel' in features:
+        elif 'motor:kernel' in features:
             out_name = task_gen.env.cxxshlib_PATTERN % self.target
             out_path = self.env.DEPLOY_KERNELDIR
         elif 'cshlib' in features or 'cxxshlib' in features:

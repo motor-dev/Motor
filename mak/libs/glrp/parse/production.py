@@ -1,5 +1,5 @@
 from ..symbol import Symbol
-from be_typing import TYPE_CHECKING, TypeVar
+from motor_typing import TYPE_CHECKING, TypeVar
 
 
 class Production(Symbol):
@@ -34,5 +34,5 @@ class Production(Symbol):
 
 
 if TYPE_CHECKING:
-    from be_typing import Any, Callable, List
+    from motor_typing import Any, Callable, List
     from ..position import Position

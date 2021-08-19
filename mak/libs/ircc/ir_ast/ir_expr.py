@@ -3,7 +3,7 @@ from .ir_type import IrTypeBuiltin, IrTypeUndef, IrTypeZero
 from .ir_declaration import IrDeclaration
 from ..ir_position import IrPosition
 from abc import abstractmethod
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 class IrExpression(IrObject):

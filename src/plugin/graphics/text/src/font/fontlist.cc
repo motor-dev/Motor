@@ -1,10 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.text/stdafx.h>
+#include <motor/plugin.graphics.text/stdafx.h>
 #include <fontlist.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 FontList::FontList()
 {
@@ -14,4 +14,4 @@ FontList::~FontList()
 {
 }
 
-}  // namespace BugEngine
+}  // namespace Motor

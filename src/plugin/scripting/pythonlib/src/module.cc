@@ -1,9 +1,9 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/plugin.scripting.pythonlib/pythonlib.hh>
+#include <motor/plugin/plugin.hh>
 #include <py_array.hh>
 #include <py_class.hh>
 #include <py_enum.hh>
@@ -14,15 +14,15 @@
 #include <py_plugin.hh>
 #include <py_string.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
 tls< PythonLibrary > s_library;
 PyObject*            s_moduleObject;
 
 static PyObject* run(PyObject* self, PyObject* args)
 {
-    be_forceuse(self);
-    be_forceuse(args);
+    motor_forceuse(self);
+    motor_forceuse(args);
     s_library->m_PyRun_InteractiveLoopFlags(stdin, "<interactive>", 0);
     Py_INCREF(s_library->m__Py_NoneStruct);
     return s_library->m__Py_NoneStruct;
@@ -31,64 +31,64 @@ static PyObject* run(PyObject* self, PyObject* args)
 static PyMethodDef s_methods[] = {{"run", &run, METH_NOARGS, NULL}, {NULL, NULL, 0, NULL}};
 
 static PyModuleDef s_module
-    = {PyModuleDef_HEAD_INIT, "py_bugengine", "", 0, s_methods, NULL, NULL, NULL, NULL};
+    = {PyModuleDef_HEAD_INIT, "py_motor", "", 0, s_methods, NULL, NULL, NULL, NULL};
 
 static void setupModule(PyObject* module, bool registerLog)
 {
     if(registerLog)
     {
-        PyBugLog::registerType(module);
+        PyMotorLog::registerType(module);
     }
-    PyBugPlugin::registerType(module);
-    PyBugObject::registerType(module);
-    PyBugEnum::registerType(module);
-    PyBugNumber< bool >::registerType(module);
-    PyBugNumber< u8 >::registerType(module);
-    PyBugNumber< u16 >::registerType(module);
-    PyBugNumber< u32 >::registerType(module);
-    PyBugNumber< u64 >::registerType(module);
-    PyBugNumber< i8 >::registerType(module);
-    PyBugNumber< i16 >::registerType(module);
-    PyBugNumber< i32 >::registerType(module);
-    PyBugNumber< i64 >::registerType(module);
-    PyBugNumber< float >::registerType(module);
-    PyBugNumber< double >::registerType(module);
-    PyBugString< istring >::registerType(module);
-    PyBugString< inamespace >::registerType(module);
-    PyBugString< ipath >::registerType(module);
-    PyBugString< ifilename >::registerType(module);
-    PyBugArray::registerType(module);
-    PyBugNamespace::registerType(module);
-    PyBugClass::registerType(module);
+    PyMotorPlugin::registerType(module);
+    PyMotorObject::registerType(module);
+    PyMotorEnum::registerType(module);
+    PyMotorNumber< bool >::registerType(module);
+    PyMotorNumber< u8 >::registerType(module);
+    PyMotorNumber< u16 >::registerType(module);
+    PyMotorNumber< u32 >::registerType(module);
+    PyMotorNumber< u64 >::registerType(module);
+    PyMotorNumber< i8 >::registerType(module);
+    PyMotorNumber< i16 >::registerType(module);
+    PyMotorNumber< i32 >::registerType(module);
+    PyMotorNumber< i64 >::registerType(module);
+    PyMotorNumber< float >::registerType(module);
+    PyMotorNumber< double >::registerType(module);
+    PyMotorString< istring >::registerType(module);
+    PyMotorString< inamespace >::registerType(module);
+    PyMotorString< ipath >::registerType(module);
+    PyMotorString< ifilename >::registerType(module);
+    PyMotorArray::registerType(module);
+    PyMotorNamespace::registerType(module);
+    PyMotorClass::registerType(module);
     s_moduleObject = module;
 }
 
-PyObject* init2_py_bugengine(bool registerLog)
+PyObject* init2_py_motor(bool registerLog)
 {
     /* python 2.x module initialisation */
     PyObject* module;
     if(s_library->m_Py_InitModule4)
     {
-        be_assert(sizeof(minitl::size_type) == 4, "Python is 32bits but BugEngine is 64bits");
-        module = (*s_library->m_Py_InitModule4)("py_bugengine", s_methods, "", NULL,
-                                                s_library->getApi());
+        motor_assert(sizeof(minitl::size_type) == 4, "Python is 32bits but Motor is 64bits");
+        module
+            = (*s_library->m_Py_InitModule4)("py_motor", s_methods, "", NULL, s_library->getApi());
     }
     else if(s_library->m_Py_InitModule4_64)
     {
-        be_assert(sizeof(minitl::size_type) == 8, "Python is 64bits but BugEngine is 32bits");
-        module = (*s_library->m_Py_InitModule4_64)("py_bugengine", s_methods, "", NULL,
+        motor_assert(sizeof(minitl::size_type) == 8, "Python is 64bits but Motor is 32bits");
+        module = (*s_library->m_Py_InitModule4_64)("py_motor", s_methods, "", NULL,
                                                    s_library->getApi());
     }
     else
     {
-        be_unimplemented();
+        motor_unimplemented();
         return 0;
     }
     setupModule(module, registerLog);
     return module;
 }
 
-PyObject* init3_py_bugengine(bool registerLog)
+PyObject* init3_py_motor(bool registerLog)
 {
     /* python 3.x module initialisation */
     PyObject* module = (*s_library->m_PyModule_Create2)(&s_module, s_library->getApi());
@@ -96,28 +96,28 @@ PyObject* init3_py_bugengine(bool registerLog)
     return module;
 }
 
-static void init2_py_bugengine_log()
+static void init2_py_motor_log()
 {
-    be_assert(s_library, "Current Python context not set; call setCurrentContext");
-    init2_py_bugengine(true);
+    motor_assert(s_library, "Current Python context not set; call setCurrentContext");
+    init2_py_motor(true);
 }
 
-static PyObject* init3_py_bugengine_log()
+static PyObject* init3_py_motor_log()
 {
-    be_assert(s_library, "Current Python context not set; call setCurrentContext");
-    return init3_py_bugengine(true);
+    motor_assert(s_library, "Current Python context not set; call setCurrentContext");
+    return init3_py_motor(true);
 }
 
 static void registerModule()
 {
-    using namespace BugEngine::Python;
+    using namespace Motor::Python;
     if(s_library->getVersion() < 30)
     {
-        s_library->m_PyImport_AppendInittab2("py_bugengine", &init2_py_bugengine_log);
+        s_library->m_PyImport_AppendInittab2("py_motor", &init2_py_motor_log);
     }
     else
     {
-        s_library->m_PyImport_AppendInittab3("py_bugengine", &init3_py_bugengine_log);
+        s_library->m_PyImport_AppendInittab3("py_motor", &init3_py_motor_log);
     }
 }
 
@@ -144,4 +144,4 @@ void clearCurrentContext()
     s_library = 0;
 }
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python

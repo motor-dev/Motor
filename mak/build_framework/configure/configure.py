@@ -1,17 +1,17 @@
 import os
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def configure(configuration_context):
     # type: (Configure.ConfigurationContext) -> None
     "Recursively calls configure on host and all targets to create all available toolchains"
     configuration_context.recurse('host/host.py')
-    extra = configuration_context.bugenginenode.make_node('extra')
+    extra = configuration_context.motornode.make_node('extra')
     for extra_platform in extra.listdir():
         directory = extra.make_node(extra_platform).abspath()
         if os.path.isdir(directory) and os.path.isfile(os.path.join(directory, 'wscript')):
             configuration_context.recurse(extra.make_node(extra_platform).abspath(), name='host_configure')
-    tool_dir = os.path.join(configuration_context.bugenginenode.abspath(), 'mak', 'tools')
+    tool_dir = os.path.join(configuration_context.motornode.abspath(), 'mak', 'tools')
 
     configuration_context.setenv('projects', configuration_context.env.derive())
     configuration_context.env.TOOLCHAIN = 'projects'

@@ -1,4 +1,4 @@
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 from waflib import Build, TaskGen, Task, Options
 
 
@@ -16,7 +16,7 @@ class unit_test(Task.Task):
             return 0
 
 
-@TaskGen.feature('bugengine:unit_test')
+@TaskGen.feature('motor:unit_test')
 @TaskGen.after_method('apply_link')
 @TaskGen.after_method('install_step')
 def check_unit_test(task_gen):

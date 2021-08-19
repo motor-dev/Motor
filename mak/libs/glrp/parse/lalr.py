@@ -2,7 +2,7 @@ from .lr0itemset import LR0ItemSet
 from .lr0node import LR0Node
 from .lr0path import LR0Path
 from .lr0dominancenode import LR0DominanceSet
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 import sys
 
 
@@ -744,7 +744,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
 
 
 if TYPE_CHECKING:
-    from be_typing import Any, Callable, Dict, FrozenSet, List, Optional, Set, Text, Tuple
+    from motor_typing import Any, Callable, Dict, FrozenSet, List, Optional, Set, Text, Tuple
     from .grammar import Grammar
     from .lr0item import LR0Item
     from ..log import Logger

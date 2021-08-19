@@ -210,7 +210,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib', '=/usr/lib/i386-linux-gnu'])
                 v.CFLAGS += ['-xtarget=opteron', '-I/usr/include/i386-linux-gnu']
                 v.CXXFLAGS += [
-                    os.path.join(conf.bugenginenode.abspath(),
+                    os.path.join(conf.motornode.abspath(),
                                  'mak/compiler/suncc/interlocked-a=x86.il'), '-xarch=sse2', '-xchip=generic',
                     '-xcache=64/64/2:1024/64/16', '-I/usr/include/i386-linux-gnu', '-include', 'math.h'
                 ]
@@ -218,7 +218,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib64', '=/usr/lib/x86_64-linux-gnu'])
                 v.CFLAGS += ['-xtarget=opteron', '-I/usr/include/x86_64-linux-gnu']
                 v.CXXFLAGS += [
-                    os.path.join(conf.bugenginenode.abspath(),
+                    os.path.join(conf.motornode.abspath(),
                                  'mak/compiler/suncc/interlocked-a=amd64.il'), '-xarch=sse2', '-xchip=generic',
                     '-xcache=64/64/2:1024/64/16', '-I/usr/include/x86_64-linux-gnu', '-include', 'math.h'
                 ]
@@ -232,12 +232,12 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
 
         if self.arch == 'x86':
             v.CXXFLAGS += [
-                os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/suncc/interlocked-a=x86.il'), '-xarch=sse2',
+                os.path.join(conf.motornode.abspath(), 'mak/compiler/suncc/interlocked-a=x86.il'), '-xarch=sse2',
                 '-xchip=generic', '-xcache=64/64/2:1024/64/16'
             ]
         elif self.arch == 'amd64':
             v.CXXFLAGS += [
-                os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/suncc/interlocked-a=amd64.il'), '-xarch=sse2',
+                os.path.join(conf.motornode.abspath(), 'mak/compiler/suncc/interlocked-a=amd64.il'), '-xarch=sse2',
                 '-xchip=generic', '-xcache=64/64/2:1024/64/16'
             ]
         v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])

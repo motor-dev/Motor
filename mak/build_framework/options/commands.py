@@ -57,13 +57,13 @@ def schedule_setup(self):
     do_setup = False
     try:
         lock = ConfigSet.ConfigSet()
-        lock.load(os.path.join(self.cache_dir, Options.lockfile + '.%s' % self.bugengine_variant))
+        lock.load(os.path.join(self.cache_dir, Options.lockfile + '.%s' % self.motor_variant))
     except (AttributeError, IOError):
         Logs.warn('setup not run; setting up the toolchain')
         do_setup = True
     else:
         env = ConfigSet.ConfigSet()
-        env.load(os.path.join(self.cache_dir, '%s_cache.py' % self.bugengine_variant))
+        env.load(os.path.join(self.cache_dir, '%s_cache.py' % self.motor_variant))
         for option_name, value in env.SETUP_OPTIONS:
             new_value = getattr(Options.options, option_name)
             if new_value != value:
@@ -83,7 +83,7 @@ def schedule_setup(self):
 
     if do_setup:
         Options.commands.insert(0, self.cmd)
-        Options.commands.insert(0, 'setup:%s' % self.bugengine_toolchain)
+        Options.commands.insert(0, 'setup:%s' % self.motor_toolchain)
     return do_setup
 
 
@@ -128,7 +128,7 @@ def tidy_build(execute_method):
             all_nodes.discard(self.bldnode.make_node(Context.DBFILE))
             for group in self.groups:
                 for task_gen in group:
-                    install_task = getattr(task_gen, 'bug_install_task', None)
+                    install_task = getattr(task_gen, 'motor_install_task', None)
                     if install_task is not None:
                         for _, dest_file, _ in install_task.install_step:
                             all_nodes.discard(self.srcnode.make_node(dest_file))
@@ -301,11 +301,11 @@ class Setup(Configure.ConfigurationContext):
             for t in env.tools:
                 self.setup(**t)
 
-        path = os.path.join(self.bldnode.abspath(), 'setup-%s.log' % self.bugengine_variant)
+        path = os.path.join(self.bldnode.abspath(), 'setup-%s.log' % self.motor_variant)
         self.logger = Logs.make_logger(path, 'cfg')
         self.run_dir = Context.run_dir
 
-        self.env = self.all_envs[self.bugengine_variant]
+        self.env = self.all_envs[self.motor_variant]
         self.recurse([Context.run_dir])
         self.store()
         env = ConfigSet.ConfigSet()
@@ -313,8 +313,7 @@ class Setup(Configure.ConfigurationContext):
         env.hash = self.hash
         env.store(
             os.path.join(
-                self.bldnode.find_node(Build.CACHE_DIR).abspath(),
-                Options.lockfile + '.%s.setup' % self.bugengine_variant
+                self.bldnode.find_node(Build.CACHE_DIR).abspath(), Options.lockfile + '.%s.setup' % self.motor_variant
             )
         )
 
@@ -325,8 +324,8 @@ Build.BuildContext.execute = autoreconfigure(autosetup(tidy_build(Build.BuildCon
 def add_setup_command(toolchain):
     class Command(Setup):
         cmd = 'setup:%s' % (toolchain)
-        bugengine_variant = toolchain
-        bugengine_toolchain = toolchain
+        motor_variant = toolchain
+        motor_toolchain = toolchain
         variant = toolchain
         fun = 'multiarch_setup'
 
@@ -339,16 +338,16 @@ def add_build_command(toolchain, optimisation):
         class Command(command):
             optim = optimisation
             cmd = name + ':' + toolchain + ':' + optimisation
-            bugengine_toolchain = toolchain
-            bugengine_variant = toolchain + '.setup'
+            motor_toolchain = toolchain
+            motor_variant = toolchain + '.setup'
             variant = os.path.join(toolchain, optimisation)
 
         c[command] = Command
 
     class Deploy(c[Build.BuildContext]):
         cmd = 'deploy:%s:%s' % (toolchain, optimisation)
-        bugengine_variant = toolchain + '.setup'
-        bugengine_toolchain = toolchain
+        motor_variant = toolchain + '.setup'
+        motor_toolchain = toolchain
         variant = os.path.join(toolchain, optimisation)
 
         def execute(self):
@@ -356,7 +355,7 @@ def add_build_command(toolchain, optimisation):
                 return "SKIP"
             else:
                 self.fun = 'deploy'
-                self.recurse(self.bugenginenode.abspath())
+                self.recurse(self.motornode.abspath())
 
     class Run(Deploy):
         cmd = 'run:%s:%s' % (toolchain, optimisation)
@@ -366,7 +365,7 @@ def add_build_command(toolchain, optimisation):
                 return "SKIP"
             else:
                 self.fun = 'run'
-                self.recurse(self.bugenginenode.abspath())
+                self.recurse(self.motornode.abspath())
 
     class Debug(Deploy):
         cmd = 'debug:%s:%s' % (toolchain, optimisation)
@@ -376,7 +375,7 @@ def add_build_command(toolchain, optimisation):
                 return "SKIP"
             else:
                 self.fun = 'debug'
-                self.recurse(self.bugenginenode.abspath())
+                self.recurse(self.motornode.abspath())
 
 
 def add_all_build_commands(env):

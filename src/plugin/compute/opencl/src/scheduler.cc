@@ -1,21 +1,21 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.compute.opencl/stdafx.h>
-#include <bugengine/plugin.compute.opencl/memoryhost.hh>
-#include <bugengine/plugin.compute.opencl/scheduler.hh>
-#include <bugengine/resource/resourcemanager.hh>
-#include <bugengine/scheduler/kernel/kernel.script.hh>
-#include <bugengine/scheduler/scheduler.hh>
-#include <bugengine/scheduler/task/itask.hh>
+#include <motor/plugin.compute.opencl/stdafx.h>
 #include <codeloader.hh>
 #include <context.hh>
 #include <kernelloader.hh>
+#include <motor/plugin.compute.opencl/memoryhost.hh>
+#include <motor/plugin.compute.opencl/scheduler.hh>
+#include <motor/resource/resourcemanager.hh>
+#include <motor/scheduler/kernel/kernel.script.hh>
+#include <motor/scheduler/scheduler.hh>
+#include <motor/scheduler/task/itask.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
+namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
 static const int s_profilingMode =
-#if BE_OPTIM_LEVEL_AT_MOST(BE_OPTIM_LVEL_PROFILE)
+#if MOTOR_OPTIM_LEVEL_AT_MOST(MOTOR_OPTIM_LVEL_PROFILE)
     CL_QUEUE_PROFILING_ENABLE
 #else
     0
@@ -82,9 +82,9 @@ void Scheduler::deallocateItem(CLKernelTaskItem* item)
 
 void Scheduler::run(IKernelTaskItem* item)
 {
-    // be_notreached();
+    // motor_notreached();
     item->owner()->completed(m_scheduler);
-    deallocateItem(be_checked_cast< CLKernelTaskItem >(item));
+    deallocateItem(motor_checked_cast< CLKernelTaskItem >(item));
 }
 
 weak< IMemoryHost > Scheduler::memoryHost() const
@@ -92,4 +92,4 @@ weak< IMemoryHost > Scheduler::memoryHost() const
     return m_memoryHost;
 }
 
-}}}  // namespace BugEngine::KernelScheduler::OpenCL
+}}}  // namespace Motor::KernelScheduler::OpenCL

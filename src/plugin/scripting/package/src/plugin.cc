@@ -1,9 +1,9 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.package/stdafx.h>
-#include <bugengine/meta/engine/namespace.hh>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/plugin.scripting.package/stdafx.h>
+#include <motor/meta/engine/namespace.hh>
+#include <motor/plugin/plugin.hh>
 #include <packageloader.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::PackageManager::PackageLoader);
+MOTOR_PLUGIN_REGISTER(Motor::PackageManager::PackageLoader);

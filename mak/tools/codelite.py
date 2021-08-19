@@ -110,8 +110,8 @@ class codelite(Build.BuildContext):
     cmd = 'codelite'
     fun = 'build'
     optim = 'debug'
-    bugengine_toolchain = 'projects'
-    bugengine_variant = 'projects.setup'
+    motor_toolchain = 'projects'
+    motor_variant = 'projects.setup'
     variant = 'projects/codelite'
 
     def execute(self):
@@ -124,7 +124,7 @@ class codelite(Build.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.variant = self.__class__.bugengine_variant
+        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
         self.recurse([self.run_dir])
 

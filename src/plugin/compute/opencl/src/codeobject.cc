@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.compute.opencl/stdafx.h>
-#include <bugengine/scheduler/kernel/ischeduler.hh>
+#include <motor/plugin.compute.opencl/stdafx.h>
 #include <codeobject.hh>
 #include <context.hh>
+#include <motor/scheduler/kernel/ischeduler.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
+namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
 CodeObject::CodeObject(weak< const Context > context, const inamespace& name)
     : m_kernel(name, ipath("kernel"))
@@ -23,4 +23,4 @@ CodeObject::~CodeObject()
     clReleaseProgram(m_program);
 }
 
-}}}  // namespace BugEngine::KernelScheduler::OpenCL
+}}}  // namespace Motor::KernelScheduler::OpenCL

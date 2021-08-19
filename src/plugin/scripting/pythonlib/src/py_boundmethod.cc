@@ -1,17 +1,17 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/meta/engine/methodinfo.script.hh>
-#include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/meta/engine/methodinfo.script.hh>
+#include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <py_boundmethod.hh>
 #include <py_call.hh>
 #include <py_object.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
 PyTypeObject PyBoundMethod::s_pyType = {{{0, 0}, 0},
-                                        "py_bugengine.BoundMethod",
+                                        "py_motor.BoundMethod",
                                         sizeof(PyBoundMethod),
                                         0,
                                         &PyBoundMethod::dealloc,
@@ -60,7 +60,7 @@ PyTypeObject PyBoundMethod::s_pyType = {{{0, 0}, 0},
                                         0,
                                         0};
 
-PyObject* PyBoundMethod::create(raw< const Meta::Method > method, PyBugObject* value)
+PyObject* PyBoundMethod::create(raw< const Meta::Method > method, PyMotorObject* value)
 {
     PyBoundMethod* result = reinterpret_cast< PyBoundMethod* >(s_pyType.tp_alloc(&s_pyType, 0));
     result->method        = method;
@@ -100,11 +100,11 @@ PyObject* PyBoundMethod::call(PyObject* self, PyObject* args, PyObject* kwds)
 void PyBoundMethod::registerType(PyObject* module)
 {
     int result = s_library->m_PyType_Ready(&s_pyType);
-    be_assert(result >= 0, "unable to register type");
+    motor_assert(result >= 0, "unable to register type");
     Py_INCREF(&s_pyType);
     result = (*s_library->m_PyModule_AddObject)(module, "BoundMethod", (PyObject*)&s_pyType);
-    be_assert(result >= 0, "unable to register type");
-    be_forceuse(result);
+    motor_assert(result >= 0, "unable to register type");
+    motor_forceuse(result);
 }
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python

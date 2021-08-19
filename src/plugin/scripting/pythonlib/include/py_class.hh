@@ -1,15 +1,15 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PYTHONLIB_PY_CLASS_HH_
-#define BE_PYTHONLIB_PY_CLASS_HH_
+#ifndef MOTOR_PYTHONLIB_PY_CLASS_HH_
+#define MOTOR_PYTHONLIB_PY_CLASS_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <py_namespace.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
-struct PyBugClass : public PyBugNamespace
+struct PyMotorClass : public PyMotorNamespace
 {
     static PyObject* stealValue(PyObject* owner, Meta::Value& value);
 
@@ -17,7 +17,7 @@ struct PyBugClass : public PyBugNamespace
     static PyTypeObject s_pyType;
 };
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python
 
 /**************************************************************************************************/
 #endif

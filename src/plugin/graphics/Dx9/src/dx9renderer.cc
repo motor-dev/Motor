@@ -1,18 +1,18 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
 #include <dx9renderer.hh>
 
-#include <bugengine/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
-#include <bugengine/plugin.graphics.3d/shader/shader.script.hh>
 #include <loaders/dx9shader.hh>
 #include <loaders/dx9window.hh>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include <motor/plugin.graphics.3d/shader/shader.script.hh>
 
-#include <bugengine/core/threads/thread.hh>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/core/threads/thread.hh>
+#include <motor/plugin/plugin.hh>
 
-namespace BugEngine { namespace DirectX9 {
+namespace Motor { namespace DirectX9 {
 
 static D3DPRESENT_PARAMETERS defaultParams(HWND hwnd)
 {
@@ -38,8 +38,8 @@ static D3DPRESENT_PARAMETERS defaultParams(HWND hwnd)
 Dx9Renderer::Dx9Renderer(const Plugin::Context& context)
     : Renderer(Arena::general(), context.resourceManager)
     , m_dummyWindow(
-          CreateWindowEx(0, (minitl::format< 128 >("__be__%p__") | (const void*)this).c_str(), "",
-                         WS_POPUP, 0, 0, 1, 1, 0, 0, (HINSTANCE)::GetModuleHandle(0), 0))
+          CreateWindowEx(0, (minitl::format< 128 >("__motor__%p__") | (const void*)this).c_str(),
+                         "", WS_POPUP, 0, 0, 1, 1, 0, 0, (HINSTANCE)::GetModuleHandle(0), 0))
     , m_dummyParams(defaultParams(m_dummyWindow))
     , m_directx(Direct3DCreate9(D3D_SDK_VERSION))
     , m_device(0)
@@ -67,15 +67,15 @@ Dx9Renderer::~Dx9Renderer()
     if(m_device)
     {
         int refCnt = m_device->Release();
-        be_forceuse(refCnt);
-        be_assert(refCnt == 0, "device refcount is not 0");
+        motor_forceuse(refCnt);
+        motor_assert(refCnt == 0, "device refcount is not 0");
         m_device = 0;
     }
     if(m_directx)
     {
         int refCnt = m_directx->Release();
-        be_forceuse(refCnt);
-        be_assert(refCnt == 0, "Dx refcount is not 0");
+        motor_forceuse(refCnt);
+        motor_assert(refCnt == 0, "Dx refcount is not 0");
     }
 }
 
@@ -104,7 +104,7 @@ void Dx9Renderer::flush()
 ref< IGPUResource >
 Dx9Renderer::create(weak< const RenderSurfaceDescription > renderSurfaceDescription) const
 {
-    be_forceuse(renderSurfaceDescription);
+    motor_forceuse(renderSurfaceDescription);
     return ref< IGPUResource >();
 }
 
@@ -120,4 +120,4 @@ Dx9Renderer::create(weak< const ShaderProgramDescription > shaderDescription) co
     return ref< Dx9ShaderProgram >::create(m_allocator, shaderDescription, this);
 }
 
-}}  // namespace BugEngine::DirectX9
+}}  // namespace Motor::DirectX9

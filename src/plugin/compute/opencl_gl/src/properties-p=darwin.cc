@@ -1,11 +1,11 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
 #include <dlfcn.h>
 #include <scheduler.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace OpenCL_GL {
+namespace Motor { namespace KernelScheduler { namespace OpenCL_GL {
 
 minitl::array< cl_context_properties > Scheduler::createPlatformSpecificContextProperties()
 {
@@ -15,7 +15,7 @@ minitl::array< cl_context_properties > Scheduler::createPlatformSpecificContextP
         = (t_CGLGetShareGroup)dlsym(RTLD_DEFAULT, "CGLGetShareGroup");
     if(!b_CGLGetShareGroup)
     {
-        be_warning("CGLGetShareGroup not found; OpenGL/OpenCL compatibility disabled");
+        motor_warning("CGLGetShareGroup not found; OpenGL/OpenCL compatibility disabled");
         minitl::array< cl_context_properties > properties(Arena::temporary(), 1);
         properties[0] = 0;
         return properties;
@@ -29,10 +29,10 @@ minitl::array< cl_context_properties > Scheduler::createPlatformSpecificContextP
         properties[2] = 0;
         return properties;
     }
-    be_info("no OpenGL context found; OpenGL/OpenCL compatibility disabled");
+    motor_info("no OpenGL context found; OpenGL/OpenCL compatibility disabled");
     minitl::array< cl_context_properties > properties(Arena::temporary(), 1);
     properties[0] = 0;
     return properties;
 }
 
-}}}  // namespace BugEngine::KernelScheduler::OpenCL_GL
+}}}  // namespace Motor::KernelScheduler::OpenCL_GL

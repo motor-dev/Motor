@@ -1,4 +1,4 @@
-from be_typing import TYPE_CHECKING, cast
+from motor_typing import TYPE_CHECKING, cast
 from .ir_type import IrAddressSpaceInference, IrTypeVoid
 from .ir_expr import IrExpression, IrExpressionDeclaration
 from abc import abstractmethod

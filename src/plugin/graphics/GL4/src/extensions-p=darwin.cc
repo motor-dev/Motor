@@ -1,11 +1,11 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.GL4/stdafx.h>
+#include <motor/plugin.graphics.GL4/stdafx.h>
 #include <dlfcn.h>
 #include <extensions.hh>
 
-namespace BugEngine { namespace OpenGL {
+namespace Motor { namespace OpenGL {
 
 Extension glGetExtension(const char* name)
 {
@@ -17,4 +17,4 @@ Extension glGetExtension(const char* name)
         return (Extension)dlsym(image, name);
 }
 
-}}  // namespace BugEngine::OpenGL
+}}  // namespace Motor::OpenGL

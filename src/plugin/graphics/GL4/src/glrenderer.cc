@@ -1,15 +1,15 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.GL4/stdafx.h>
-#include <bugengine/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
-#include <bugengine/plugin.graphics.3d/shader/shader.script.hh>
-#include <bugengine/plugin.graphics.GL4/glrenderer.hh>
+#include <motor/plugin.graphics.GL4/stdafx.h>
 #include <loaders/rendertarget/glsurface.hh>
 #include <loaders/rendertarget/glwindow.hh>
 #include <loaders/shader/glshader.hh>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include <motor/plugin.graphics.3d/shader/shader.script.hh>
+#include <motor/plugin.graphics.GL4/glrenderer.hh>
 
-namespace BugEngine { namespace OpenGL {
+namespace Motor { namespace OpenGL {
 
 void GLRenderer::flush()
 {
@@ -34,4 +34,4 @@ GLRenderer::create(weak< const ShaderProgramDescription > shaderDescription) con
     return ref< GLShaderProgram >::create(m_allocator, shaderDescription, this);
 }
 
-}}  // namespace BugEngine::OpenGL
+}}  // namespace Motor::OpenGL

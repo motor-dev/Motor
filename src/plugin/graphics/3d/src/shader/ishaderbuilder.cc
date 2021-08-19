@@ -1,10 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.3d/stdafx.h>
-#include <bugengine/plugin.graphics.3d/shader/ishaderbuilder.hh>
+#include <motor/plugin.graphics.3d/stdafx.h>
+#include <motor/plugin.graphics.3d/shader/ishaderbuilder.hh>
 
-namespace BugEngine { namespace Shaders {
+namespace Motor { namespace Shaders {
 
 IShaderBuilder::Namespace::Namespace() : names(Arena::temporary()) {};
 
@@ -77,7 +77,7 @@ istring IShaderBuilder::referenceNode(weak< const Node > node)
             return (name->second.c_str());
         }
     }
-    be_error("Undeclared object");
+    motor_error("Undeclared object");
     return istring("");
 }
 
@@ -225,4 +225,4 @@ void IShaderBuilder::write(bool value)
     doWrite(value);
 }
 
-}}  // namespace BugEngine::Shaders
+}}  // namespace Motor::Shaders

@@ -1,13 +1,13 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_NULLRENDER_STDAFX_H_
-#define BE_NULLRENDER_STDAFX_H_
+#ifndef MOTOR_NULLRENDER_STDAFX_H_
+#define MOTOR_NULLRENDER_STDAFX_H_
 /**************************************************************************************************/
 
-#include <bugengine/stdafx.h>
+#include <motor/stdafx.h>
 
-#include <bugengine/plugin.graphics.3d/stdafx.h>
+#include <motor/plugin.graphics.3d/stdafx.h>
 
 /**************************************************************************************************/
 #endif

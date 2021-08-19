@@ -1,10 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include    <bugengine/plugin.graphics.windowing/stdafx.h>
-#include    <bugengine/plugin.graphics.windowing/renderer.hh>
-#include    <bugengine/plugin.graphics.windowing/window.hh>
-#include    <bugengine/core/threads/event.hh>
+#include    <motor/plugin.graphics.windowing/stdafx.h>
+#include    <motor/plugin.graphics.windowing/renderer.hh>
+#include    <motor/plugin.graphics.windowing/window.hh>
+#include    <motor/core/threads/event.hh>
 
 #include    <darwin/platformrenderer.hh>
 
@@ -16,7 +16,7 @@
 # define NSEventMaskAny NSAnyEventMask
 #endif
 
-namespace BugEngine { namespace Windowing
+namespace Motor { namespace Windowing
 {
 
 Renderer::PlatformRenderer::PlatformRenderer()
@@ -24,7 +24,7 @@ Renderer::PlatformRenderer::PlatformRenderer()
     m_pool = [[NSAutoreleasePool alloc] init];
     m_application = [NSApplication sharedApplication];
 
-    NSMenu* menu = [[NSMenu alloc] initWithTitle:@"bugengine"];
+    NSMenu* menu = [[NSMenu alloc] initWithTitle:@"motor"];
     NSMenuItem* mi = [menu addItemWithTitle:@"Apple" action:Nil keyEquivalent:@""];
     NSMenu* m = [[NSMenu alloc] initWithTitle:@"Apple"];
     [menu setSubmenu: m forItem: mi];

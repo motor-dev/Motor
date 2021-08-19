@@ -1,16 +1,16 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.text/stdafx.h>
+#include <motor/plugin.graphics.text/stdafx.h>
 #include <freetypelib.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 FreetypeLibrary::FreetypeLibrary()
 {
     FT_Error error = FT_Init_FreeType(&library);
-    be_forceuse(error);
-    be_assert(!error, "Freetype error %d" | error);
+    motor_forceuse(error);
+    motor_assert(!error, "Freetype error %d" | error);
 }
 
 FreetypeLibrary::~FreetypeLibrary()
@@ -18,4 +18,4 @@ FreetypeLibrary::~FreetypeLibrary()
     FT_Done_FreeType(library);
 }
 
-}  // namespace BugEngine
+}  // namespace Motor

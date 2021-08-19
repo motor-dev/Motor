@@ -1,5 +1,5 @@
 import os
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def add_package_options(option_context, package_name):
@@ -56,7 +56,7 @@ def options(option_context):
         '--profile', action='store_true', default=False, dest='profile', help='run WAF in the profiler'
     )
 
-    tool_dir = os.path.join(option_context.bugenginenode.abspath(), 'mak', 'tools')
+    tool_dir = os.path.join(option_context.motornode.abspath(), 'mak', 'tools')
     option_context.load('visualstudio', tooldir=[tool_dir])
     option_context.load('xcode', tooldir=[tool_dir])
     option_context.load('netbeans', tooldir=[tool_dir])
@@ -70,9 +70,9 @@ def options(option_context):
     option_context.recurse('host/host.py')
     option_context.recurse('target/target.py')
     #device.options(opt)
-    for extra in option_context.bugenginenode.make_node('extra').listdir():
-        if os.path.isfile(os.path.join(option_context.bugenginenode.abspath(), 'extra', extra, 'wscript')):
-            option_context.recurse(os.path.join(option_context.bugenginenode.abspath(), 'extra', extra))
+    for extra in option_context.motornode.make_node('extra').listdir():
+        if os.path.isfile(os.path.join(option_context.motornode.abspath(), 'extra', extra, 'wscript')):
+            option_context.recurse(os.path.join(option_context.motornode.abspath(), 'extra', extra))
 
     option_context.recurse('commands.py')
 

@@ -13,7 +13,7 @@ nested-name-specifier:
 
 import glrp
 from .....parser import cxx98
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('qualified-id : nested-name-specifier "template"? unqualified-id')

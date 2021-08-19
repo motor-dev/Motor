@@ -1,16 +1,16 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.debug.runtime/stdafx.h>
-#include <bugengine/plugin.debug.runtime/module.hh>
-#include <bugengine/plugin.debug.runtime/symbols.hh>
+#include <motor/plugin.debug.runtime/stdafx.h>
+#include <motor/plugin.debug.runtime/module.hh>
+#include <motor/plugin.debug.runtime/symbols.hh>
 
 #include <psapi.h>
 
 #include <elf.hh>
 #include <pe.hh>
 
-namespace BugEngine { namespace Runtime {
+namespace Motor { namespace Runtime {
 
 ref< const Module > Module::self()
 {
@@ -48,4 +48,4 @@ ref< const Module > Module::self()
     return s_module;
 }
 
-}}  // namespace BugEngine::Runtime
+}}  // namespace Motor::Runtime

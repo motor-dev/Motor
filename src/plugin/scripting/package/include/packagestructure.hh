@@ -1,20 +1,20 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PACKAGE_PACKAGE_HH_
-#define BE_PACKAGE_PACKAGE_HH_
+#ifndef MOTOR_PACKAGE_PACKAGE_HH_
+#define MOTOR_PACKAGE_PACKAGE_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.scripting.package/stdafx.h>
-#include <bugengine/core/endianness.hh>
+#include <motor/plugin.scripting.package/stdafx.h>
+#include <motor/core/endianness.hh>
 
-namespace BugEngine { namespace PackageManager {
+namespace Motor { namespace PackageManager {
 
 struct PackageHeader
 {
     u32_l objectCount;
 };
 
-}}  // namespace BugEngine::PackageManager
+}}  // namespace Motor::PackageManager
 
 /**************************************************************************************************/
 #endif

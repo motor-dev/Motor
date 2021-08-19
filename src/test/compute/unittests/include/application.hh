@@ -1,15 +1,15 @@
-/* BugEngine <bugengine.devel@gmail.com> under New BSD License
+/* Motor <motor.devel@gmail.com> under New BSD License
    see LICENSE for detail */
 
-#ifndef BE_TEST_COMPUTE_UNITTESTS_APPLICATION_HH_
-#define BE_TEST_COMPUTE_UNITTESTS_APPLICATION_HH_
+#ifndef MOTOR_TEST_COMPUTE_UNITTESTS_APPLICATION_HH_
+#define MOTOR_TEST_COMPUTE_UNITTESTS_APPLICATION_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
-#include <bugengine/application.hh>
-#include <bugengine/plugin.scripting.package/package.script.hh>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/application.hh>
+#include <motor/plugin.scripting.package/package.script.hh>
+#include <motor/plugin/plugin.hh>
 
-namespace BugEngine { namespace Test { namespace Compute { namespace UnitTests {
+namespace Motor { namespace Test { namespace Compute { namespace UnitTests {
 
 class UnitTestsApplication : public Application
 {
@@ -24,7 +24,7 @@ public:
     ~UnitTestsApplication();
 };
 
-}}}}  // namespace BugEngine::Test::Compute::UnitTests
+}}}}  // namespace Motor::Test::Compute::UnitTests
 
 /**************************************************************************************************/
 #endif

@@ -1,15 +1,15 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_COMPUTE_OPENCL_KERNELOBJECT_HH_
-#define BE_COMPUTE_OPENCL_KERNELOBJECT_HH_
+#ifndef MOTOR_COMPUTE_OPENCL_KERNELOBJECT_HH_
+#define MOTOR_COMPUTE_OPENCL_KERNELOBJECT_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.compute.opencl/stdafx.h>
-#include <bugengine/plugin.compute.opencl/scheduler.hh>
-#include <bugengine/plugin/dynobject.hh>
-#include <bugengine/scheduler/task/task.hh>
+#include <motor/plugin.compute.opencl/stdafx.h>
+#include <motor/plugin.compute.opencl/scheduler.hh>
+#include <motor/plugin/dynobject.hh>
+#include <motor/scheduler/task/task.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
+namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
 class CodeObject;
 
@@ -25,7 +25,7 @@ public:
     void run(const minitl::array< weak< const IMemoryBuffer > >& params);
 };
 
-}}}  // namespace BugEngine::KernelScheduler::OpenCL
+}}}  // namespace Motor::KernelScheduler::OpenCL
 
 /**************************************************************************************************/
 #endif

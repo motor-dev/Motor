@@ -1,10 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.debug.runtime/stdafx.h>
-#include <bugengine/plugin.debug.runtime/callstack.hh>
+#include <motor/plugin.debug.runtime/stdafx.h>
+#include <motor/plugin.debug.runtime/callstack.hh>
 
-namespace BugEngine { namespace Runtime {
+namespace Motor { namespace Runtime {
 
 Callstack::Address::Address() : m_address(0)
 {
@@ -45,11 +45,11 @@ u64 Callstack::Address::address() const
     return m_address;
 }
 
-BE_NOINLINE Callstack::Address Callstack::backtrace(size_t depth)
+MOTOR_NOINLINE Callstack::Address Callstack::backtrace(size_t depth)
 {
     Address result;
     backtrace(&result, 1, depth + 1);
     return result;
 }
 
-}}  // namespace BugEngine::Runtime
+}}  // namespace Motor::Runtime

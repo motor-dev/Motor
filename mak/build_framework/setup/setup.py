@@ -1,5 +1,5 @@
 import os
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 from waflib import Options, Configure
 
 
@@ -24,7 +24,7 @@ def setup(configuration_context):
     # type: (Configure.ConfigurationContext) -> None
     "setup step before the build: recursively calls setup on every third party library"
     configuration_context.recurse('host/host.py')
-    extra = configuration_context.bugenginenode.make_node('extra')
+    extra = configuration_context.motornode.make_node('extra')
     if configuration_context.env.VALID_PLATFORMS:
         extra_dir = os.path.join(extra.abspath(), configuration_context.env.VALID_PLATFORMS[0])
         if os.path.isdir(extra_dir):
@@ -47,17 +47,17 @@ def multiarch_setup(configuration_context):
             except Exception as e:
                 raise
             else:
-                configuration_context.env.BUGENGINE_SETUP = True
+                configuration_context.env.MOTOR_SETUP = True
             finally:
-                configuration_context.variant = configuration_context.bugengine_variant
+                configuration_context.variant = configuration_context.motor_variant
         configuration_context.setenv(
-            configuration_context.bugengine_variant + '.setup',
-            configuration_context.all_envs[configuration_context.bugengine_variant]
+            configuration_context.motor_variant + '.setup',
+            configuration_context.all_envs[configuration_context.motor_variant]
         )
         configuration_context.env.SUB_TOOLCHAINS = [t + '.setup' for t in configuration_context.env.SUB_TOOLCHAINS]
-        configuration_context.env.BUGENGINE_SETUP = True
+        configuration_context.env.MOTOR_SETUP = True
     else:
-        t = configuration_context.bugengine_variant
+        t = configuration_context.motor_variant
         try:
             configuration_context.start_msg('Setting up environment')
             configuration_context.end_msg(t)
@@ -67,7 +67,7 @@ def multiarch_setup(configuration_context):
         except Exception as e:
             raise
         else:
-            configuration_context.env.BUGENGINE_SETUP = True
+            configuration_context.env.MOTOR_SETUP = True
 
 
 if TYPE_CHECKING:

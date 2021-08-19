@@ -1,17 +1,17 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.text/stdafx.h>
-#include <bugengine/plugin.graphics.3d/shader/types.script.hh>
-#include <bugengine/plugin.graphics.text/outlineshader.script.hh>
+#include <motor/plugin.graphics.text/stdafx.h>
+#include <motor/plugin.graphics.3d/shader/types.script.hh>
+#include <motor/plugin.graphics.text/outlineshader.script.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 minitl::vector< ref< Shaders::Output > >
 createOutlineShader(weak< Shaders::Float4 > textColor, weak< Shaders::Float4 > backgroundColor)
 {
-    be_forceuse(textColor);
-    be_forceuse(backgroundColor);
+    motor_forceuse(textColor);
+    motor_forceuse(backgroundColor);
     minitl::vector< ref< Shaders::Output > > result(Arena::temporary());
     result.reserve(1);
     // result.push_back();
@@ -28,4 +28,4 @@ OutlineShader::~OutlineShader()
 {
 }
 
-}  // namespace BugEngine
+}  // namespace Motor

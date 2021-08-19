@@ -3,9 +3,9 @@ from ..tree import Parameter
 
 def p_kernel_method_inout(p):
     """
-        param_type : BE_SEGMENT
-                   | BE_SEGMENTS
-                   | BE_STREAM
+        param_type : MOTOR_SEGMENT
+                   | MOTOR_SEGMENTS
+                   | MOTOR_STREAM
     """
     p[0] = p[1]
 

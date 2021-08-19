@@ -1,25 +1,25 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.GL4/stdafx.h>
-#include <bugengine/plugin.graphics.GL4/glmemoryhost.hh>
-#include <bugengine/plugin.graphics.GL4/glrenderer.hh>
+#include <motor/plugin.graphics.GL4/stdafx.h>
 #include <extensions.hh>
+#include <motor/plugin.graphics.GL4/glmemoryhost.hh>
+#include <motor/plugin.graphics.GL4/glrenderer.hh>
 
-#include <bugengine/core/threads/thread.hh>
-#include <bugengine/plugin.graphics.3d/mesh/mesh.script.hh>
-#include <bugengine/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
-#include <bugengine/plugin.graphics.3d/shader/shader.script.hh>
-#include <bugengine/plugin.graphics.3d/texture/texture.script.hh>
 #include <loaders/mesh/glmesh.hh>
 #include <loaders/rendertarget/glsurface.hh>
 #include <loaders/rendertarget/glwindow.hh>
 #include <loaders/shader/glshader.hh>
 #include <loaders/texture/gltexture.hh>
+#include <motor/core/threads/thread.hh>
+#include <motor/plugin.graphics.3d/mesh/mesh.script.hh>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include <motor/plugin.graphics.3d/shader/shader.script.hh>
+#include <motor/plugin.graphics.3d/texture/texture.script.hh>
 
 #include <GL4/wglext.h>
 
-namespace BugEngine { namespace OpenGL {
+namespace Motor { namespace OpenGL {
 
 static const PIXELFORMATDESCRIPTOR s_pfd
     = {sizeof(PIXELFORMATDESCRIPTOR),
@@ -52,7 +52,7 @@ static const PIXELFORMATDESCRIPTOR s_pfd
 class GLRenderer::Context : public minitl::refcountable
 {
     friend class GLRenderer;
-    BE_NOCOPY(Context);
+    MOTOR_NOCOPY(Context);
 
 private:
     HWND                            m_dummyHwnd;
@@ -71,7 +71,8 @@ public:
 
 static HWND createDummyWnd(weak< const GLRenderer > renderer)
 {
-    minitl::format< 128u > classname = minitl::format< 128u >("__be__%p__") | (const void*)renderer;
+    minitl::format< 128u > classname
+        = minitl::format< 128u >("__motor__%p__") | (const void*)renderer;
     HWND hWnd = CreateWindowEx(0, classname.c_str(), "", WS_POPUP, 0, 0, 1, 1, 0, 0,
                                (HINSTANCE)::GetModuleHandle(0), 0);
     if(!hWnd)
@@ -79,7 +80,7 @@ static HWND createDummyWnd(weak< const GLRenderer > renderer)
         char* errorMessage;
         ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL,
                         ::GetLastError(), 0, reinterpret_cast< LPTSTR >(&errorMessage), 0, NULL);
-        be_error(errorMessage);
+        motor_error(errorMessage);
         ::LocalFree(errorMessage);
     }
     return hWnd;
@@ -102,7 +103,7 @@ static HGLRC createGLContext(weak< const GLRenderer > renderer, HDC hdc)
         HGLRC glrc = wglCreateContext(dc);
         wglMakeCurrent(dc, glrc);
 
-        wglCreateContextAttribsARB = be_function_cast< PFNWGLCREATECONTEXTATTRIBSARBPROC >(
+        wglCreateContextAttribsARB = motor_function_cast< PFNWGLCREATECONTEXTATTRIBSARBPROC >(
             wglGetProcAddress("wglCreateContextAttribsARB"));
 
         wglMakeCurrent(0, 0);
@@ -151,12 +152,12 @@ static HGLRC createGLContext(weak< const GLRenderer > renderer, HDC hdc)
     if(rc)
     {
         wglMakeCurrent(hdc, rc);
-        be_info("Created OpenGL context %s (%s) on %s" | (const char*)glGetString(GL_VERSION)
-                | (const char*)glGetString(GL_VENDOR) | (const char*)glGetString(GL_RENDERER));
+        motor_info("Created OpenGL context %s (%s) on %s" | (const char*)glGetString(GL_VERSION)
+                   | (const char*)glGetString(GL_VENDOR) | (const char*)glGetString(GL_RENDERER));
     }
     else
     {
-        be_error("Could not create a GL context");
+        motor_error("Could not create a GL context");
     }
     return rc;
 }
@@ -166,7 +167,7 @@ GLRenderer::Context::Context(weak< const GLRenderer > renderer)
     , m_dummyDC(GetDC(m_dummyHwnd))
     , m_glContext(createGLContext(renderer, m_dummyDC))
     , m_setSwapInterval(
-          be_function_cast< PFNWGLSWAPINTERVALEXTPROC >(wglGetProcAddress("wglSwapIntervalEXT")))
+          motor_function_cast< PFNWGLSWAPINTERVALEXTPROC >(wglGetProcAddress("wglSwapIntervalEXT")))
     , m_threadId(Thread::currentId())
     , shaderext()
 {
@@ -183,7 +184,7 @@ GLRenderer::Context::~Context()
 class GLWindow::Context : public minitl::refcountable
 {
     friend class GLWindow;
-    BE_NOCOPY(Context);
+    MOTOR_NOCOPY(Context);
 
 private:
     HGLRC m_glContext;
@@ -235,7 +236,7 @@ GLRenderer::~GLRenderer()
 
 void GLRenderer::attachWindow(weak< GLWindow > w) const
 {
-    be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
+    motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     HWND wnd = *(HWND*)w->getWindowHandle();
     w->m_context.reset(scoped< GLWindow::Context >::create(Arena::general(), m_context->m_glContext,
                                                            wnd, m_context->m_dummyDC,
@@ -247,7 +248,7 @@ void GLRenderer::attachWindow(weak< GLWindow > w) const
 
 const ShaderExtensions& GLRenderer::shaderext() const
 {
-    be_assert(m_context, "extensions required before context was created");
+    motor_assert(m_context, "extensions required before context was created");
     return m_context->shaderext;
 }
 
@@ -272,46 +273,46 @@ GLWindow::~GLWindow()
 void GLWindow::load(weak< const Resource::Description > description)
 {
     Window::load(description);
-    be_checked_cast< const GLRenderer >(m_renderer)->attachWindow(this);
+    motor_checked_cast< const GLRenderer >(m_renderer)->attachWindow(this);
 }
 
 void GLWindow::unload()
 {
-    be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
+    motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     Window::unload();
     m_context.reset(scoped< Context >());
 }
 
 void GLWindow::setCurrent() const
 {
-    be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
+    motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     if(!wglMakeCurrent(m_context->m_dc, m_context->m_glContext))
     {
         char* errorMessage;
         ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL,
                         ::GetLastError(), 0, reinterpret_cast< LPTSTR >(&errorMessage), 0, NULL);
-        be_error(errorMessage);
+        motor_error(errorMessage);
         ::LocalFree(errorMessage);
     }
 }
 
 void GLWindow::clearCurrent() const
 {
-    be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
+    motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     if(!wglMakeCurrent(m_context->m_defaultDc, m_context->m_glContext))
     {
         char* errorMessage;
         ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL,
                         ::GetLastError(), 0, reinterpret_cast< LPTSTR >(&errorMessage), 0, NULL);
-        be_error(errorMessage);
+        motor_error(errorMessage);
         ::LocalFree(errorMessage);
     }
 }
 
 void GLWindow::present() const
 {
-    be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
+    motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     SwapBuffers(m_context->m_dc);
 }
 
-}}  // namespace BugEngine::OpenGL
+}}  // namespace Motor::OpenGL

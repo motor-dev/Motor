@@ -1,16 +1,16 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.windowing/stdafx.h>
-#include <bugengine/core/threads/event.hh>
-#include <bugengine/plugin.graphics.windowing/renderer.hh>
-#include <bugengine/plugin.graphics.windowing/window.hh>
+#include <motor/plugin.graphics.windowing/stdafx.h>
 #include <GL/glx.h>
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
+#include <motor/core/threads/event.hh>
+#include <motor/plugin.graphics.windowing/renderer.hh>
+#include <motor/plugin.graphics.windowing/window.hh>
 #include <posix/platformrenderer.hh>
 
-namespace BugEngine { namespace Windowing {
+namespace Motor { namespace Windowing {
 
 namespace {
 static GLXFBConfig selectGLXFbConfig(::Display* display, int screen)
@@ -28,7 +28,7 @@ static GLXFBConfig selectGLXFbConfig(::Display* display, int screen)
 
     int          configCount;
     GLXFBConfig* configs = glXChooseFBConfig(display, screen, s_glxAttributes, &configCount);
-    be_info("found %d configs" | configCount);
+    motor_info("found %d configs" | configCount);
     GLXFBConfig fbConfig = configs[0];
     XFree(configs);
     return fbConfig;
@@ -47,7 +47,7 @@ PlatformData::PlatformData(::Display* display)
 Renderer::PlatformRenderer::PlatformRenderer()
     : m_platformData(XOpenDisplay(0))
     , m_windowProperty(
-          m_platformData.display ? XInternAtom(m_platformData.display, "BE_WINDOW", False) : 0)
+          m_platformData.display ? XInternAtom(m_platformData.display, "MOTOR_WINDOW", False) : 0)
 {
     if(m_platformData.display)
     {
@@ -75,7 +75,7 @@ weak< Window > Renderer::PlatformRenderer::getWindowFromXWindow(::Window w)
     unsigned char* property = 0;
     XGetWindowProperty(m_platformData.display, w, m_windowProperty, 0, sizeof(Window*) / 4, False,
                        AnyPropertyType, &type, &format, &nbItems, &leftBytes, &property);
-    be_assert(property, "could not retrieve engine window handle from X11 window");
+    motor_assert(property, "could not retrieve engine window handle from X11 window");
     weak< Window > result(*(Window**)property);
     XFree(property);
     return result;
@@ -92,13 +92,13 @@ int Renderer::PlatformRenderer::xError(::Display* /*display*/, XErrorEvent* even
     minitl::format< 1024u > errorCode = minitl::format< 1024u >("%d") | event->error_code;
     const char*             message
         = event->error_code < size ? s_messages[event->error_code] : errorCode.c_str();
-    be_error("X11 error: %d (%s)" | event->error_code | message);
+    motor_error("X11 error: %d (%s)" | event->error_code | message);
     return 0;
 }
 
 int Renderer::PlatformRenderer::ioError(::Display* /*display*/)
 {
-    be_fatal("X11 IO error");
+    motor_fatal("X11 IO error");
     return 0;
 }
 
@@ -159,17 +159,17 @@ void Renderer::flush()
         XNextEvent(display, &event);
         switch(event.type)
         {
-        case DestroyNotify: be_info("destroy"); break;
+        case DestroyNotify: motor_info("destroy"); break;
         case Expose:
             if(event.xexpose.count != 0) break;
-            be_info("exposure");
+            motor_info("exposure");
             break;
-        case ConfigureNotify: be_info("configure"); break;
+        case ConfigureNotify: motor_info("configure"); break;
         case ButtonPress: break;
         case KeyPress:
             if(XLookupKeysym(&event.xkey, 0) == XK_Escape)
             {
-                be_info("Close request on window");
+                motor_info("Close request on window");
                 XUnmapWindow(m_platformRenderer->m_platformData.display, event.xclient.window);
 
                 XEvent   ev;
@@ -183,7 +183,7 @@ void Renderer::flush()
                                         SubstructureRedirectMask | SubstructureNotifyMask, &ev);
                 if(!result)
                 {
-                    be_error("XSendEvent return error %d" | result);
+                    motor_error("XSendEvent return error %d" | result);
                 }
             }
             break;
@@ -192,7 +192,7 @@ void Renderer::flush()
             {
                 if(event.xclient.data.l[0] == m_platformRenderer->m_platformData.wm_delete_window)
                 {
-                    be_info("Close request on window");
+                    motor_info("Close request on window");
                     XUnmapWindow(m_platformRenderer->m_platformData.display, event.xclient.window);
 
                     XEvent   ev;
@@ -206,14 +206,14 @@ void Renderer::flush()
                                             SubstructureRedirectMask | SubstructureNotifyMask, &ev);
                     if(!result)
                     {
-                        be_error("XSendEvent return error %d" | result);
+                        motor_error("XSendEvent return error %d" | result);
                     }
                 }
             }
             else
             {
                 char* atom_name = ::XGetAtomName(display, event.xclient.message_type);
-                be_info("Unhandled client message: %s" | atom_name);
+                motor_info("Unhandled client message: %s" | atom_name);
                 XFree(atom_name);
             }
             break;
@@ -227,4 +227,4 @@ void* Renderer::getPlatformData()
     return &m_platformRenderer->m_platformData;
 }
 
-}}  // namespace BugEngine::Windowing
+}}  // namespace Motor::Windowing
