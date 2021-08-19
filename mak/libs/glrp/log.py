@@ -69,6 +69,12 @@ class Logger:
 
             self._out_file.write(u'{color_message}{message}{color_off}\n'.format(**locals()))
 
+    def diagnostic(self, filename, line, message, *args):
+        # type: (Text, int, Text, *Union[Text, int]) -> None
+        if args:
+            message = message % args
+        self._out_file.write(u'%s:%d: %s\n' % (filename, line, message))
+
     def note(self, message, *args):
         # type: (Text, *Union[Text, int]) -> None
         if args:
