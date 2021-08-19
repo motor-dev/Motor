@@ -59,6 +59,6 @@ class ObjCxx23Parser(Cxx23Parser):
     Lexer = ObjCxx23Lexer
 
 
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Callable

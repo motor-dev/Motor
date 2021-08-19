@@ -24,7 +24,7 @@ new-initializer:
 
 import glrp
 from .....parser import cxx98
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('new-expression : "::"? "new" new-placement? new-type-id new-initializer?')

@@ -1,10 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.compute.opencl/stdafx.h>
-#include <bugengine/plugin.compute.opencl/memoryhost.hh>
+#include <motor/plugin.compute.opencl/stdafx.h>
+#include <motor/plugin.compute.opencl/memoryhost.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
+namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
 MemoryHost::MemoryHost() : IMemoryHost("OpenCL")
 {
@@ -16,7 +16,7 @@ MemoryHost::~MemoryHost()
 
 void MemoryHost::release(weak< KernelScheduler::IMemoryBuffer > buffer)
 {
-    be_forceuse(buffer);
+    motor_forceuse(buffer);
 }
 
-}}}  // namespace BugEngine::KernelScheduler::OpenCL
+}}}  // namespace Motor::KernelScheduler::OpenCL

@@ -2,7 +2,7 @@ from .ir_object import IrObject
 from .ir_declaration import IrDeclaration
 from ..ir_codegen import IrccType
 from ..ir_messages import IrAddressSpaceResolutionError
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 from abc import abstractmethod
 
 _ADDRESS_SPACE_NAMES = ['private', 'global', 'constant', 'local']

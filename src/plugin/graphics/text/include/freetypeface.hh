@@ -1,15 +1,15 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_TEXT_FREETYPEFACE_HH_
-#define BE_TEXT_FREETYPEFACE_HH_
+#ifndef MOTOR_TEXT_FREETYPEFACE_HH_
+#define MOTOR_TEXT_FREETYPEFACE_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.graphics.text/stdafx.h>
+#include <motor/plugin.graphics.text/stdafx.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <bugengine/minitl/allocator.hh>
+#include <motor/minitl/allocator.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 class FreetypeLibrary;
 
@@ -20,7 +20,7 @@ public:
     ~FreetypeFace();
 };
 
-}  // namespace BugEngine
+}  // namespace Motor
 
 /**************************************************************************************************/
 #endif

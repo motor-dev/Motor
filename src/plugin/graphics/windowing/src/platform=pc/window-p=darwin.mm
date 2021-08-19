@@ -1,11 +1,11 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include    <bugengine/plugin.graphics.windowing/stdafx.h>
-#include    <bugengine/plugin.graphics.windowing/window.hh>
-#include    <bugengine/plugin.graphics.windowing/renderer.hh>
+#include    <motor/plugin.graphics.windowing/stdafx.h>
+#include    <motor/plugin.graphics.windowing/window.hh>
+#include    <motor/plugin.graphics.windowing/renderer.hh>
 #include    <darwin/platformrenderer.hh>
-#include    <bugengine/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include    <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
 
 #ifndef MAC_OS_X_VERSION_10_12
 # define MAC_OS_X_VERSION_10_12 101200
@@ -16,7 +16,7 @@
 # define NSWindowStyleMaskResizable NSResizableWindowMask
 #endif
 
-namespace BugEngine { namespace Windowing
+namespace Motor { namespace Windowing
 {
 
 class Window::PlatformWindow : public minitl::refcountable
@@ -55,7 +55,7 @@ Window::~Window()
 
 void Window::load(weak<const Resource::Description> /*renderWindowDescription*/)
 {
-    uint2 dimensions = make_uint2(800, 600); //be_checked_cast<const RenderWindow>(resource)->dimensions;
+    uint2 dimensions = make_uint2(800, 600); //motor_checked_cast<const RenderWindow>(resource)->dimensions;
     m_window.reset(scoped<PlatformWindow>::create(m_renderer->arena(), dimensions[0], dimensions[1]));
 }
 
@@ -67,7 +67,7 @@ void Window::unload()
 
 void* Window::getWindowHandle() const
 {
-    be_assert_recover(m_window, "no window implementation is created", return 0);
+    motor_assert_recover(m_window, "no window implementation is created", return 0);
     return (void*)m_window->m_window;
 }
 

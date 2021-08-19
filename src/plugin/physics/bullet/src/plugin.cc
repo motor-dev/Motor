@@ -1,8 +1,8 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bugengine/plugin/plugin.hh>
 #include <bulletworld.hh>
+#include <motor/plugin/plugin.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::Physics::Bullet::BulletWorld);
+MOTOR_PLUGIN_REGISTER(Motor::Physics::Bullet::BulletWorld);

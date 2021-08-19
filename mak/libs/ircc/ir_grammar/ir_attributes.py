@@ -1,6 +1,6 @@
 from ..ir_ast import IrAttributeGroupDeclaration, IrAttributeGroupLink, IrAttributeGroupObject, IrAttribute, IrReference, IrExpressionConstant
 from ply.lex import LexToken
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def p_ir_declaration_attributes(p):

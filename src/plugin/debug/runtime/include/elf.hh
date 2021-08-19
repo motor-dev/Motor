@@ -1,13 +1,13 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_DEBUG_RUNTIME_ELF_HH_
-#define BE_DEBUG_RUNTIME_ELF_HH_
+#ifndef MOTOR_DEBUG_RUNTIME_ELF_HH_
+#define MOTOR_DEBUG_RUNTIME_ELF_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.debug.runtime/stdafx.h>
-#include <bugengine/plugin.debug.runtime/module.hh>
+#include <motor/plugin.debug.runtime/stdafx.h>
+#include <motor/plugin.debug.runtime/module.hh>
 
-namespace BugEngine { namespace Runtime {
+namespace Motor { namespace Runtime {
 
 enum ElfClass
 {
@@ -25,7 +25,7 @@ enum ElfEndianness
 
 class Elf : public Module
 {
-    BE_NOCOPY(Elf);
+    MOTOR_NOCOPY(Elf);
 
 private:
     template < ElfClass klass, ElfEndianness endianness >
@@ -56,7 +56,7 @@ private:
     virtual SymbolResolver::SymbolInformations getSymbolInformation() const override;
 };
 
-}}  // namespace BugEngine::Runtime
+}}  // namespace Motor::Runtime
 
 /**************************************************************************************************/
 #endif

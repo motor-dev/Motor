@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#ifndef BE_TEST_SETTINGS_SETTINGS_HH_
-#define BE_TEST_SETTINGS_SETTINGS_HH_
+#ifndef MOTOR_TEST_SETTINGS_SETTINGS_HH_
+#define MOTOR_TEST_SETTINGS_SETTINGS_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
-#include <bugengine/settings/settings.factory.hh>
+#include <motor/settings/settings.factory.hh>
 
-namespace BugEngine { namespace TestSettings {
+namespace Motor { namespace TestSettings {
 
 enum EnumSetting
 {
@@ -23,7 +23,7 @@ struct TestSettings : public Settings::Settings< TestSettings >
     }
 };
 
-}}  // namespace BugEngine::TestSettings
+}}  // namespace Motor::TestSettings
 
 /**************************************************************************************************/
 #endif

@@ -1,4 +1,4 @@
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def p_ir_declaration_list(p):

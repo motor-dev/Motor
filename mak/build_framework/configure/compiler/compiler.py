@@ -3,7 +3,7 @@ import os
 import sys
 import re
 from copy import deepcopy
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 class Compiler:
@@ -117,11 +117,17 @@ class Compiler:
             return (p.returncode, out, err)
 
     def run_c(self, args, input=None, env=None):
-        return self.run([self.compiler_c] + self.extra_args.get('c', []) + self.extra_args.get('link', []) + args, env or self.env, input)
+        return self.run(
+            [self.compiler_c] + self.extra_args.get('c', []) + self.extra_args.get('link', []) + args, env or self.env,
+            input
+        )
 
     def run_cxx(self, args, input=None, env=None):
         # print(' '.join([self.compiler_cxx] + self.extra_args.get('cxx', []) + args))
-        return self.run([self.compiler_cxx] + self.extra_args.get('cxx', []) + self.extra_args.get('link', []) + args, env or self.env, input)
+        return self.run(
+            [self.compiler_cxx] + self.extra_args.get('cxx', []) + self.extra_args.get('link', []) + args, env
+            or self.env, input
+        )
 
     def sort_name(self):
         compiler_name = self.NAMES[0].lower()

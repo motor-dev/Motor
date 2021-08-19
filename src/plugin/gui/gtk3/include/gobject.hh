@@ -1,18 +1,18 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_UI_GTK3_GOBJECT_HH_
-#define BE_UI_GTK3_GOBJECT_HH_
+#ifndef MOTOR_UI_GTK3_GOBJECT_HH_
+#define MOTOR_UI_GTK3_GOBJECT_HH_
 /**************************************************************************************************/
-#include <bugengine/resource/description.script.hh>
+#include <motor/resource/description.script.hh>
 
-namespace BugEngine {
+namespace Motor {
 
-BE_EXPORT raw< Meta::Class > be_plugin_ui_gtk3_Namespace();
+MOTOR_EXPORT raw< Meta::Class > motor_plugin_ui_gtk3_Namespace();
 
 }
 
-namespace BugEngine { namespace Gtk3 {
+namespace Motor { namespace Gtk3 {
 
 class GObject : public Resource::Description
 {
@@ -20,7 +20,7 @@ class GObject : public Resource::Description
     ~GObject();
 };
 
-}}  // namespace BugEngine::Gtk3
+}}  // namespace Motor::Gtk3
 
 /**************************************************************************************************/
 #endif

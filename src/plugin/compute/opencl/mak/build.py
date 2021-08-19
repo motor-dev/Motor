@@ -11,26 +11,26 @@ except ImportError:
 
 template_cc = """
 %(pch)s
-#include    <bugengine/config/config.hh>
-#include    <bugengine/kernel/simd.hh>
-#include    <bugengine/kernel/input/input.hh>
-#include    <bugengine/plugin/dynobjectlist.hh>
+#include    <motor/config/config.hh>
+#include    <motor/kernel/simd.hh>
+#include    <motor/kernel/input/input.hh>
+#include    <motor/plugin/dynobjectlist.hh>
 
 extern const unsigned char s_%(kernel_name)scldata32[];
 extern const unsigned long s_%(kernel_name)scldata32_size;
 extern const unsigned char s_%(kernel_name)scldata64[];
 extern const unsigned long s_%(kernel_name)scldata64_size;
 
-_BE_PLUGIN_EXPORT_VAR(const unsigned char* s_clKernel32, s_%(kernel_name)scldata32);
-_BE_PLUGIN_EXPORT_VAR(const u64 s_clKernel32Size, s_%(kernel_name)scldata32_size);
-_BE_PLUGIN_EXPORT_VAR(const unsigned char* s_clKernel64, s_%(kernel_name)scldata64);
-_BE_PLUGIN_EXPORT_VAR(const u64 s_clKernel64Size, s_%(kernel_name)scldata64_size);
+_MOTOR_PLUGIN_EXPORT_VAR(const unsigned char* s_clKernel32, s_%(kernel_name)scldata32);
+_MOTOR_PLUGIN_EXPORT_VAR(const u64 s_clKernel32Size, s_%(kernel_name)scldata32_size);
+_MOTOR_PLUGIN_EXPORT_VAR(const unsigned char* s_clKernel64, s_%(kernel_name)scldata64);
+_MOTOR_PLUGIN_EXPORT_VAR(const u64 s_clKernel64Size, s_%(kernel_name)scldata64_size);
 
-_BE_REGISTER_PLUGIN(BE_KERNEL_ID, BE_KERNEL_NAME);
-_BE_REGISTER_METHOD(BE_KERNEL_ID, s_clKernel32);
-_BE_REGISTER_METHOD(BE_KERNEL_ID, s_clKernel32Size);
-_BE_REGISTER_METHOD(BE_KERNEL_ID, s_clKernel64);
-_BE_REGISTER_METHOD(BE_KERNEL_ID, s_clKernel64Size);
+_MOTOR_REGISTER_PLUGIN(MOTOR_KERNEL_ID, MOTOR_KERNEL_NAME);
+_MOTOR_REGISTER_METHOD(MOTOR_KERNEL_ID, s_clKernel32);
+_MOTOR_REGISTER_METHOD(MOTOR_KERNEL_ID, s_clKernel32Size);
+_MOTOR_REGISTER_METHOD(MOTOR_KERNEL_ID, s_clKernel64);
+_MOTOR_REGISTER_METHOD(MOTOR_KERNEL_ID, s_clKernel64Size);
 """
 
 
@@ -53,7 +53,7 @@ class embed_cl(Task.Task):
             out.write(template_cc % params)
 
 
-@feature('bugengine:preprocess')
+@feature('motor:preprocess')
 def create_cl_kernels(task_gen):
     for kernel, kernel_source, kernel_path, kernel_ast in task_gen.kernels:
         kernel_gens = []
@@ -73,14 +73,14 @@ def create_cl_kernels(task_gen):
                     safe_target_name=kernel_target.replace('.', '_').replace('-', '_'),
                     kernel=kernel,
                     features=[
-                        'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'bugengine:cxx',
-                        'bugengine:kernel', 'bugengine:kernel_create', 'bugengine:cl:kernel_create'
+                        'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel',
+                        'motor:kernel_create', 'motor:cl:kernel_create'
                     ],
                     pchstop=tgen.preprocess.pchstop,
                     defines=tgen.defines + [
-                        'BE_KERNEL_ID=%s_%s' % (task_gen.parent.replace('.', '_'), kernel_target.replace('.', '_')),
-                        'BE_KERNEL_NAME=%s' % (kernel_target),
-                        'BE_KERNEL_TARGET=%s' % kernel_type,
+                        'MOTOR_KERNEL_ID=%s_%s' % (task_gen.parent.replace('.', '_'), kernel_target.replace('.', '_')),
+                        'MOTOR_KERNEL_NAME=%s' % (kernel_target),
+                        'MOTOR_KERNEL_TARGET=%s' % kernel_type,
                     ],
                     includes=tgen.includes,
                     kernel_source=kernel_source,
@@ -94,7 +94,7 @@ def create_cl_kernels(task_gen):
         task_gen.bld.multiarch(kernel_target, kernel_gens)
 
 
-@feature('bugengine:cl:kernel_create')
+@feature('motor:cl:kernel_create')
 @before_method('process_source')
 def create_cc_source(task_gen):
     source = task_gen.kernel_ast
@@ -105,7 +105,7 @@ def create_cc_source(task_gen):
 
 @extension('.32.ll', '.64.ll')
 def cl_kernel_compile(task_gen, source):
-    if 'bugengine:cl:kernel_create' in task_gen.features:
+    if 'motor:cl:kernel_create' in task_gen.features:
         ptr_size = source.name[-5:-3]
         cl_source = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.generated.cl')
         cl_cc = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.embedded.cc')

@@ -1,11 +1,11 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_TEST_SETTINGS_STDAFX_H_
-#define BE_TEST_SETTINGS_STDAFX_H_
+#ifndef MOTOR_TEST_SETTINGS_STDAFX_H_
+#define MOTOR_TEST_SETTINGS_STDAFX_H_
 /**************************************************************************************************/
 
-#include <bugengine/stdafx.h>
+#include <motor/stdafx.h>
 
 /**************************************************************************************************/
 #endif

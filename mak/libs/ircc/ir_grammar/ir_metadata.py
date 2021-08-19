@@ -1,5 +1,5 @@
 from ..ir_ast import IrTypeMetadata, IrMetadataDeclaration, IrMetadataString, IrMetadataInteger, IrMetadataLink, IrMetadataNode, IrSpecializedMetadata, IrMetadataNull, IrMetadataFlagList, IrReference
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def p_ir_metadata_list_opt(p):

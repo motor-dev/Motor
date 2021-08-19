@@ -15,11 +15,11 @@ def static_library(
     extra_public_defines=[],
     source_list=None,
     conditions=[],
-    root_namespace='BugEngine',
+    root_namespace='Motor',
     env=None
 ):
     if env is None:
-        bld.preprocess(name, path, root_namespace, 'bugengine')
+        bld.preprocess(name, path, root_namespace, 'motor')
         bld.multiarch(
             name, [
                 static_library(
@@ -29,7 +29,7 @@ def static_library(
             ]
         )
     else:
-        features = features + ['c', 'cxx', 'cxxstlib', 'bugengine:c', 'bugengine:cxx']
+        features = features + ['c', 'cxx', 'cxxstlib', 'motor:c', 'motor:cxx']
         return bld.module(**locals())
 
 

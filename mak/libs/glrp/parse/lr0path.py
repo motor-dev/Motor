@@ -1,4 +1,4 @@
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 class LR0Path(object):
@@ -170,6 +170,6 @@ class _LR0Expansion(_LR0BaseConstruction):
 
 
 if TYPE_CHECKING:
-    from be_typing import Any, List, Optional, Text, Tuple
+    from motor_typing import Any, List, Optional, Text, Tuple
     from .lr0node import LR0Node
     from .lr0item import LR0Item

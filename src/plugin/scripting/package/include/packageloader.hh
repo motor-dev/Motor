@@ -1,23 +1,23 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PACKAGE_PACKAGELOADER_HH_
-#define BE_PACKAGE_PACKAGELOADER_HH_
+#ifndef MOTOR_PACKAGE_PACKAGELOADER_HH_
+#define MOTOR_PACKAGE_PACKAGELOADER_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.scripting.package/stdafx.h>
-#include <bugengine/plugin.scripting.package/package.script.hh>
-#include <bugengine/plugin/plugin.hh>
-#include <bugengine/scriptengine.hh>
+#include <motor/plugin.scripting.package/stdafx.h>
+#include <motor/plugin.scripting.package/package.script.hh>
+#include <motor/plugin/plugin.hh>
+#include <motor/scriptengine.hh>
 
-namespace BugEngine { namespace PackageBuilder {
+namespace Motor { namespace PackageBuilder {
 class PackageBuilder;
-}}  // namespace BugEngine::PackageBuilder
+}}  // namespace Motor::PackageBuilder
 
-namespace BugEngine { namespace PackageManager {
+namespace Motor { namespace PackageManager {
 
 class PackageLoader : public ScriptEngine< Package >
 {
-    BE_NOCOPY(PackageLoader);
+    MOTOR_NOCOPY(PackageLoader);
 
 private:
     scoped< PackageBuilder::PackageBuilder > m_packageBuilder;
@@ -34,7 +34,7 @@ private:
                               const minitl::Allocator::Block< u8 >& buffer) override;
 };
 
-}}  // namespace BugEngine::PackageManager
+}}  // namespace Motor::PackageManager
 
 /**************************************************************************************************/
 #endif

@@ -1,11 +1,11 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.text/stdafx.h>
+#include <motor/plugin.graphics.text/stdafx.h>
 #include <bitmapfontmanager.hh>
 #include <fontlist.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 BitmapFontManager::BitmapFontManager(weak< Resource::ResourceManager > manager,
                                      weak< FreetypeLibrary >           freetype,
@@ -23,19 +23,19 @@ BitmapFontManager::~BitmapFontManager()
 void BitmapFontManager::load(weak< const Resource::Description > /*description*/,
                              Resource::Resource& /*resource*/)
 {
-    be_info("loading bitmap font");
+    motor_info("loading bitmap font");
 }
 
 void BitmapFontManager::reload(weak< const Resource::Description > /*oldDescription*/,
                                weak< const Resource::Description > /*newDescription*/,
                                Resource::Resource& /*resource*/)
 {
-    be_info("reloading bitmap font");
+    motor_info("reloading bitmap font");
 }
 
 void BitmapFontManager::unload(Resource::Resource& /*resource*/)
 {
-    be_info("unloading bitmap font");
+    motor_info("unloading bitmap font");
 }
 
 void BitmapFontManager::onTicketLoaded(weak< const Resource::Description > /*description*/,
@@ -43,7 +43,7 @@ void BitmapFontManager::onTicketLoaded(weak< const Resource::Description > /*des
                                        const minitl::Allocator::Block< u8 >& /*buffer*/,
                                        LoadType /*type*/)
 {
-    be_info("bitmap font file done loading");
+    motor_info("bitmap font file done loading");
 }
 
-}  // namespace BugEngine
+}  // namespace Motor

@@ -1,31 +1,31 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
 #include <bulletworld.hh>
 
-namespace BugEngine { namespace Arena {
+namespace Motor { namespace Arena {
 
 static minitl::Allocator& bullet()
 {
     return general();
 }
 
-}}  // namespace BugEngine::Arena
+}}  // namespace Motor::Arena
 
-namespace BugEngine { namespace Physics { namespace Bullet {
+namespace Motor { namespace Physics { namespace Bullet {
 
-static BE_NOINLINE void* allocate(size_t size)
+static MOTOR_NOINLINE void* allocate(size_t size)
 {
     return Arena::bullet().alloc(size, 16);
 }
 
-static BE_NOINLINE void* allocate(size_t size, int align)
+static MOTOR_NOINLINE void* allocate(size_t size, int align)
 {
     return Arena::bullet().alloc(size, align);
 }
 
-static BE_NOINLINE void free(void* block)
+static MOTOR_NOINLINE void free(void* block)
 {
     return Arena::bullet().free(block);
 }
@@ -44,4 +44,4 @@ void BulletWorld::step()
 {
 }
 
-}}}  // namespace BugEngine::Physics::Bullet
+}}}  // namespace Motor::Physics::Bullet

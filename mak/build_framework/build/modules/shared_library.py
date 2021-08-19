@@ -15,11 +15,11 @@ def shared_library(
     extra_public_defines=[],
     source_list=None,
     conditions=[],
-    root_namespace='BugEngine',
+    root_namespace='Motor',
     env=None
 ):
     if env is None:
-        bld.preprocess(name, path, root_namespace, 'bugengine')
+        bld.preprocess(name, path, root_namespace, 'motor')
         bld.multiarch(
             name, [
                 shared_library(
@@ -30,8 +30,8 @@ def shared_library(
         )
     else:
         features = features + (
-            bld.env.STATIC and ['c', 'cxx', 'cxxobjects', 'bugengine:c', 'bugengine:cxx']
-            or ['c', 'cxx', 'cxxshlib', 'bugengine:c', 'bugengine:cxx', 'bugengine:shared_lib']
+            bld.env.STATIC and ['c', 'cxx', 'cxxobjects', 'motor:c', 'motor:cxx']
+            or ['c', 'cxx', 'cxxshlib', 'motor:c', 'motor:cxx', 'motor:shared_lib']
         )
         return bld.module(**locals())
 

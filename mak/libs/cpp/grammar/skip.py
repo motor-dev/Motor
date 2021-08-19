@@ -3,7 +3,7 @@ def p_skip_keyword(p):
         skip_keyword : CLASS
                      | STRUCT
                      | ENUM
-                     | BE_POD
+                     | MOTOR_POD
                      | UNION
                      | NAMESPACE
                      | USING
@@ -40,10 +40,10 @@ def p_skip_keyword(p):
                      | __CONSTANT
                      | __HOST
                      | __DEVICE
-                     | BE_TAG
-                     | BE_SEGMENT
-                     | BE_SEGMENTS
-                     | BE_STREAM
+                     | MOTOR_TAG
+                     | MOTOR_SEGMENT
+                     | MOTOR_SEGMENTS
+                     | MOTOR_STREAM
     """
     p[0] = p[1]
 

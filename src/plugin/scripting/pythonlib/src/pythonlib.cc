@@ -1,19 +1,19 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 
-namespace BugEngine { namespace Arena {
+namespace Motor { namespace Arena {
 
 minitl::Allocator& python()
 {
     return script();
 }
 
-}}  // namespace BugEngine::Arena
+}}  // namespace Motor::Arena
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
 PythonLibrary::ThreadLock::ThreadLock(weak< PythonLibrary > library, PyThreadState* thread)
     : m_library(library)
@@ -69,4 +69,4 @@ int PythonLibrary::getApi() const
     return m_api;
 }
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python

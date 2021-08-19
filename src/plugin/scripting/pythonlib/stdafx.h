@@ -1,25 +1,25 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PYTHON_STDAFX_H_
-#define BE_PYTHON_STDAFX_H_
+#ifndef MOTOR_PYTHON_STDAFX_H_
+#define MOTOR_PYTHON_STDAFX_H_
 /**************************************************************************************************/
 
-#include <bugengine/stdafx.h>
+#include <motor/stdafx.h>
 
-#if defined(building_python) || defined(building_py_bugengine)
-#    define BE_API_PYTHON BE_EXPORT
+#if defined(building_python) || defined(building_py_motor)
+#    define MOTOR_API_PYTHON MOTOR_EXPORT
 #elif defined(python_dll)
-#    define BE_API_PYTHON BE_IMPORT
+#    define MOTOR_API_PYTHON MOTOR_IMPORT
 #else
-#    define BE_API_PYTHON
+#    define MOTOR_API_PYTHON
 #endif
 
-namespace BugEngine { namespace Arena {
+namespace Motor { namespace Arena {
 
-be_api(PYTHON) minitl::Allocator& python();
+motor_api(PYTHON) minitl::Allocator& python();
 
-}}  // namespace BugEngine::Arena
+}}  // namespace Motor::Arena
 
 /**************************************************************************************************/
 #endif

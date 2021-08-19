@@ -16,13 +16,13 @@ def engine(
     extra_public_defines=[],
     source_list=None,
     conditions=[],
-    root_namespace='BugEngine',
+    root_namespace='Motor',
     env=None
 ):
     if env is None:
         if getattr(bld, 'launcher', None) != None:
             raise Errors.WafError('Only one engine launcher can be defined')
-        p = bld.preprocess(name, path, root_namespace, 'bugengine')
+        p = bld.preprocess(name, path, root_namespace, 'motor')
         bld.launcher = bld.multiarch(
             name, [
                 engine(
@@ -32,7 +32,7 @@ def engine(
             ]
         )
         if 'windows' in bld.env.VALID_PLATFORMS:
-            bld.preprocess(name + '.console', p.source_nodes[0], root_namespace, 'bugengine')
+            bld.preprocess(name + '.console', p.source_nodes[0], root_namespace, 'motor')
             bld.multiarch(
                 name + '.console', [
                     engine(
@@ -44,7 +44,7 @@ def engine(
             )
         return bld.launcher
     else:
-        features = features + ['c', 'cxx', 'cxxprogram', 'bugengine:c', 'bugengine:cxx', 'bugengine:launcher']
+        features = features + ['c', 'cxx', 'cxxprogram', 'motor:c', 'motor:cxx', 'motor:launcher']
         return bld.module(**locals())
 
 

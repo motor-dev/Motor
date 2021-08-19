@@ -1,15 +1,14 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin/plugin.hh>
+#include <motor/plugin/plugin.hh>
 
 class PythonVersion : public minitl::refcountable
 {
-    BugEngine::Plugin::Plugin< minitl::refcountable > m_pyPlugin;
+    Motor::Plugin::Plugin< minitl::refcountable > m_pyPlugin;
 
 public:
-    PythonVersion(const BugEngine::Plugin::Plugin< minitl::refcountable >& plugin)
-        : m_pyPlugin(plugin)
+    PythonVersion(const Motor::Plugin::Plugin< minitl::refcountable >& plugin) : m_pyPlugin(plugin)
     {
     }
 
@@ -18,7 +17,7 @@ public:
     }
 };
 
-static ref< PythonVersion > create(const BugEngine::Plugin::Context& context)
+static ref< PythonVersion > create(const Motor::Plugin::Context& context)
 {
     static const char* versions[]
         = {"39", "38", "37", "36", "35", "34", "33", "32", "31", "30", "27", "26"};
@@ -26,15 +25,15 @@ static ref< PythonVersion > create(const BugEngine::Plugin::Context& context)
     {
         minitl::format< 1024u > pluginName
             = minitl::format< 1024u >("plugin.scripting.python%s") | versions[i];
-        BugEngine::Plugin::Plugin< minitl::refcountable > p
-            = BugEngine::Plugin::Plugin< minitl::refcountable >(pluginName.c_str(), context);
+        Motor::Plugin::Plugin< minitl::refcountable > p
+            = Motor::Plugin::Plugin< minitl::refcountable >(pluginName.c_str(), context);
         if(p)
         {
-            be_info("Loaded Python version %c.%c" | versions[i][0] | versions[i][1]);
-            return ref< PythonVersion >::create(BugEngine::Arena::general(), p);
+            motor_info("Loaded Python version %c.%c" | versions[i][0] | versions[i][1]);
+            return ref< PythonVersion >::create(Motor::Arena::general(), p);
         }
     }
     return ref< PythonVersion >();
 }
 
-BE_PLUGIN_REGISTER_CREATE(&create);
+MOTOR_PLUGIN_REGISTER_CREATE(&create);

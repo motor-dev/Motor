@@ -1,11 +1,11 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bugengine/filesystem/diskfolder.script.hh>
 #include <help.hh>
+#include <motor/filesystem/diskfolder.script.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 Help::Help(const Plugin::Context& context)
     : Application(
@@ -24,4 +24,4 @@ Help::~Help()
     pluginContext().resourceManager->unload(m_mainPackage);
 }
 
-}  // namespace BugEngine
+}  // namespace Motor

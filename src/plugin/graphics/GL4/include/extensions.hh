@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_GL4_EXTENSIONS_HH_
-#define BE_GL4_EXTENSIONS_HH_
+#ifndef MOTOR_GL4_EXTENSIONS_HH_
+#define MOTOR_GL4_EXTENSIONS_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.graphics.GL4/stdafx.h>
+#include <motor/plugin.graphics.GL4/stdafx.h>
 
-namespace BugEngine { namespace OpenGL {
+namespace Motor { namespace OpenGL {
 
 typedef void (*Extension)();
 Extension glGetExtension(const char* name);
@@ -45,7 +45,7 @@ private:
     ShaderExtensions& operator=(const ShaderExtensions&);
 };
 
-}}  // namespace BugEngine::OpenGL
+}}  // namespace Motor::OpenGL
 
 /**************************************************************************************************/
 #endif

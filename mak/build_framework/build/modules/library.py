@@ -15,11 +15,11 @@ def library(
     extra_public_defines=[],
     source_list=None,
     conditions=[],
-    root_namespace='BugEngine',
+    root_namespace='Motor',
     env=None
 ):
     if env is None:
-        bld.preprocess(name, path, root_namespace, 'bugengine')
+        bld.preprocess(name, path, root_namespace, 'motor')
         bld.multiarch(
             name, [
                 library(
@@ -30,8 +30,8 @@ def library(
         )
     else:
         features = features + (
-            bld.env.DYNAMIC and ['c', 'cxx', 'cxxshlib', 'bugengine:c', 'bugengine:cxx', 'bugengine:shared_lib']
-            or ['c', 'cxx', 'cxxobjects', 'bugengine:c', 'bugengine:cxx']
+            bld.env.DYNAMIC and ['c', 'cxx', 'cxxshlib', 'motor:c', 'motor:cxx', 'motor:shared_lib']
+            or ['c', 'cxx', 'cxxobjects', 'motor:c', 'motor:cxx']
         )
         return bld.module(**locals())
 

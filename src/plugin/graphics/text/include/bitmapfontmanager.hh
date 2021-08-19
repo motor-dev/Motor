@@ -1,15 +1,15 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_TEXT_BITMAPFONTMANAGER_HH_
-#define BE_TEXT_BITMAPFONTMANAGER_HH_
+#ifndef MOTOR_TEXT_BITMAPFONTMANAGER_HH_
+#define MOTOR_TEXT_BITMAPFONTMANAGER_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.graphics.text/stdafx.h>
-#include <bugengine/resource/loader.hh>
-#include <bugengine/resource/resourcemanager.hh>
+#include <motor/plugin.graphics.text/stdafx.h>
 #include <freetypelib.hh>
+#include <motor/resource/loader.hh>
+#include <motor/resource/resourcemanager.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 class FreetypeLibrary;
 class FontList;
@@ -37,7 +37,7 @@ public:
                         LoadType type) override;
 };
 
-}  // namespace BugEngine
+}  // namespace Motor
 
 /**************************************************************************************************/
 #endif

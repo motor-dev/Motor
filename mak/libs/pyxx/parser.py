@@ -55,7 +55,7 @@ def parser(lang, extension, std):
     return _parsers[lang][std]
 
 
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict, Type, Union
     import glrp

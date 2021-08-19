@@ -1,4 +1,4 @@
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 class Symbol:
@@ -19,5 +19,5 @@ class Symbol:
 
 
 if TYPE_CHECKING:
-    from be_typing import Any
+    from motor_typing import Any
     from .position import Position

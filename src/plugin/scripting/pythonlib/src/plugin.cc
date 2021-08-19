@@ -1,9 +1,9 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
 
-#include <bugengine/meta/engine/namespace.hh>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/meta/engine/namespace.hh>
+#include <motor/plugin/plugin.hh>
 
-BE_PLUGIN_NAMESPACE_REGISTER();
+MOTOR_PLUGIN_NAMESPACE_REGISTER();

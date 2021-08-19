@@ -1,13 +1,13 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_COMPUTE_CPU_KERNELLOADER_HH_
-#define BE_COMPUTE_CPU_KERNELLOADER_HH_
+#ifndef MOTOR_COMPUTE_CPU_KERNELLOADER_HH_
+#define MOTOR_COMPUTE_CPU_KERNELLOADER_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.compute.cpu/stdafx.h>
-#include <bugengine/scheduler/kernel/ikernelloader.hh>
+#include <motor/plugin.compute.cpu/stdafx.h>
+#include <motor/scheduler/kernel/ikernelloader.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace CPU {
+namespace Motor { namespace KernelScheduler { namespace CPU {
 
 class CodeLoader;
 
@@ -25,7 +25,7 @@ public:
     virtual void unload(Resource::Resource& resource) override;
 };
 
-}}}  // namespace BugEngine::KernelScheduler::CPU
+}}}  // namespace Motor::KernelScheduler::CPU
 
 /**************************************************************************************************/
 #endif

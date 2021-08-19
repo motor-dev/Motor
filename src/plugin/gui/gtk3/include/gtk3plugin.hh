@@ -1,13 +1,13 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_GUI_GTK3_GTK3PLUGIN_HH_
-#define BE_GUI_GTK3_GTK3PLUGIN_HH_
+#ifndef MOTOR_GUI_GTK3_GTK3PLUGIN_HH_
+#define MOTOR_GUI_GTK3_GTK3PLUGIN_HH_
 /**************************************************************************************************/
-#include <bugengine/core/memory/allocators/system.hh>
 #include <glib-object.h>
+#include <motor/core/memory/allocators/system.hh>
 
-namespace BugEngine { namespace Gtk3 {
+namespace Motor { namespace Gtk3 {
 
 class Gtk3Plugin
 {
@@ -17,14 +17,14 @@ private:
 private:
     SystemAllocator m_allocator;
     Page*           m_firstPage;
-    GQuark          m_bugengineQuark;
+    GQuark          m_motorQuark;
 
 public:
     Gtk3Plugin();
     ~Gtk3Plugin();
 };
 
-}}  // namespace BugEngine::Gtk3
+}}  // namespace Motor::Gtk3
 
 /**************************************************************************************************/
 #endif

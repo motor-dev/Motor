@@ -1,22 +1,22 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PHYSICSBULLET_BULLETWORLD_H_
-#define BE_PHYSICSBULLET_BULLETWORLD_H_
+#ifndef MOTOR_PHYSICSBULLET_BULLETWORLD_H_
+#define MOTOR_PHYSICSBULLET_BULLETWORLD_H_
 /**************************************************************************************************/
 #include <stdafx.h>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/plugin/plugin.hh>
 
-#ifdef BE_COMPILER_MSVC
+#ifdef MOTOR_COMPILER_MSVC
 #    pragma warning(push, 1)
 #endif
 #include <LinearMath/btAlignedAllocator.h>
 #include <btBulletDynamicsCommon.h>
-#ifdef BE_COMPILER_MSVC
+#ifdef MOTOR_COMPILER_MSVC
 #    pragma warning(pop)
 #endif
 
-namespace BugEngine { namespace Physics { namespace Bullet {
+namespace Motor { namespace Physics { namespace Bullet {
 
 class BulletWorld : public minitl::refcountable
 {
@@ -37,12 +37,12 @@ public:
     }
     void operator delete(void* memory)
     {
-        be_notreached();
+        motor_notreached();
         ::operator delete(memory);
     }
 };
 
-}}}  // namespace BugEngine::Physics::Bullet
+}}}  // namespace Motor::Physics::Bullet
 
 /**************************************************************************************************/
 #endif

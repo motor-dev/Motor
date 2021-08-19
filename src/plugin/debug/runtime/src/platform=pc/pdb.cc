@@ -1,5 +1,5 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.debug.runtime/stdafx.h>
-#include <bugengine/plugin.debug.runtime/symbols.hh>
+#include <motor/plugin.debug.runtime/stdafx.h>
+#include <motor/plugin.debug.runtime/symbols.hh>

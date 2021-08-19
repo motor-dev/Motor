@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
@@ -8,7 +8,7 @@
 #include <runtime/plugin.hh>
 #include <runtime/resource.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 namespace Arena {
 static minitl::Allocator& lua()
@@ -20,10 +20,10 @@ static minitl::Allocator& lua()
 namespace Lua {
 
 static ref< Logger >                  s_logger(Logger::instance("scripting.lua"));
-static const raw< const Meta::Class > s_voidClass = be_class< void >();
+static const raw< const Meta::Class > s_voidClass = motor_class< void >();
 
 static const char* s_metaTables[]
-    = {"BugEngine.Object", "BugEngine.Resource", "BugEngine.ResourceManager", "BugEngine.Plugin"};
+    = {"Motor.Object", "Motor.Resource", "Motor.ResourceManager", "Motor.Plugin"};
 
 static const luaL_Reg loadedlibs[] = {{"_G", luaopen_base},
                                       //{LUA_LOADLIBNAME, luaopen_package},
@@ -90,7 +90,7 @@ void Context::checkArg(lua_State* state, int narg, const Meta::Type& type)
         typeError(state, narg, type.name().c_str(), luaL_typename(state, narg));
     }
     lua_getmetatable(state, narg);
-    luaL_getmetatable(state, "BugEngine.Object");
+    luaL_getmetatable(state, "Motor.Object");
     if(!lua_rawequal(state, -1, -2))
     {
         lua_pop(state, 1);
@@ -143,7 +143,7 @@ int Context::push(lua_State* state, const Meta::Value& v)
         case Meta::ClassIndex_float: lua_pushnumber(state, v.as< float >()); return 1;
         case Meta::ClassIndex_double: lua_pushnumber(state, v.as< double >()); return 1;
         default:
-            be_notreached();
+            motor_notreached();
             lua_pushnumber(state, 0);
             return 1;
         }
@@ -152,7 +152,7 @@ int Context::push(lua_State* state, const Meta::Value& v)
     {
         void* userdata = lua_newuserdata(state, sizeof(Meta::Value));
         new(userdata) Meta::Value(v);
-        luaL_getmetatable(state, "BugEngine.Object");
+        luaL_getmetatable(state, "Motor.Object");
         lua_setmetatable(state, -2);
         return 1;
     }
@@ -172,7 +172,7 @@ minitl::format< 1024u > Context::tostring(lua_State* state, int element)
     case LUA_TUSERDATA:
     {
         lua_getmetatable(state, element);
-        luaL_getmetatable(state, "BugEngine.Object");
+        luaL_getmetatable(state, "Motor.Object");
         if(lua_rawequal(state, -1, -2))
         {
             lua_pop(state, 2);
@@ -201,7 +201,7 @@ minitl::format< 1024u > Context::tostring(lua_State* state, int element)
                 closing   = "";
                 break;
             default:
-                be_notreached();
+                motor_notreached();
                 reference = "??? <";
                 closing   = ">";
                 break;
@@ -211,27 +211,27 @@ minitl::format< 1024u > Context::tostring(lua_State* state, int element)
                    | userdata->type().metaclass->name.c_str() | closing | userdata;
         }
         lua_pop(state, 1);
-        luaL_getmetatable(state, "BugEngine.Plugin");
+        luaL_getmetatable(state, "Motor.Plugin");
         if(lua_rawequal(state, -1, -2))
         {
             lua_pop(state, 2);
             Plugin::Plugin< void >* userdata
                 = (Plugin::Plugin< void >*)lua_touserdata(state, element);
-            return minitl::format< 1024u >("BugEngine.Plugin[%s]") | userdata->name();
+            return minitl::format< 1024u >("Motor.Plugin[%s]") | userdata->name();
         }
         lua_pop(state, 1);
-        luaL_getmetatable(state, "BugEngine.ResourceManager");
+        luaL_getmetatable(state, "Motor.ResourceManager");
         if(lua_rawequal(state, -1, -2))
         {
             lua_pop(state, 2);
-            return minitl::format< 1024u >("BugEngine.ResourceManager");
+            return minitl::format< 1024u >("Motor.ResourceManager");
         }
         lua_pop(state, 1);
-        luaL_getmetatable(state, "BugEngine.Resource");
+        luaL_getmetatable(state, "Motor.Resource");
         if(lua_rawequal(state, -1, -2))
         {
             lua_pop(state, 2);
-            return minitl::format< 1024u >("BugEngine.Resource");
+            return minitl::format< 1024u >("Motor.Resource");
         }
         else
         {
@@ -248,11 +248,11 @@ void Context::printStack(lua_State* state)
     int i;
     int top = lua_gettop(state);
 
-    be_debug("total in stack %d\n" | top);
+    motor_debug("total in stack %d\n" | top);
 
     for(i = 1; i <= top; i++)
     {
-        be_debug(" %d: %s" | (top - i + 1) | tostring(state, -i).c_str());
+        motor_debug(" %d: %s" | (top - i + 1) | tostring(state, -i).c_str());
     }
 }
 
@@ -277,7 +277,7 @@ extern "C" int luaPrint(lua_State* L)
         }
         else
         {
-            s_logger->log(logInfo, BE_FILE, BE_LINE, s);
+            s_logger->log(logInfo, MOTOR_FILE, MOTOR_LINE, s);
         }
         lua_pop(L, 1); /* pop result */
     }
@@ -294,7 +294,7 @@ extern "C" int luaPlugin(lua_State* state)
     const char* pluginName = lua_tostring(state, -1);
     void*       userdata   = lua_newuserdata(state, sizeof(Plugin::Plugin< void >));
     new(userdata) Plugin::Plugin< void >(inamespace(pluginName), Plugin::Plugin< void >::Preload);
-    luaL_getmetatable(state, "BugEngine.Plugin");
+    luaL_getmetatable(state, "Motor.Plugin");
     lua_setmetatable(state, -2);
     return 1;
 }
@@ -306,7 +306,7 @@ extern "C" int luaGet(lua_State* state)
     {
         return luaL_error(state, "getattr method expects two arguments; got %d", n);
     }
-    Context::checkArg(state, 1, "BugEngine.Object");
+    Context::checkArg(state, 1, "Motor.Object");
     Context::checkArg(state, 2, LUA_TSTRING);
 
     Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, -2);
@@ -328,7 +328,7 @@ extern "C" int luaGetType(lua_State* state)
     {
         return luaL_error(state, "getattr method expects one argument; got %d", n);
     }
-    Context::checkArg(state, 1, "BugEngine.Object");
+    Context::checkArg(state, 1, "Motor.Object");
 
     Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, -2);
     Context::push(state, Meta::Value(userdata->type()));
@@ -389,25 +389,25 @@ Context::Context(const Plugin::Context& context)
         lua_pop(m_state, 1);
     }
 
-    luaL_newmetatable(m_state, "BugEngine.Object");
+    luaL_newmetatable(m_state, "Motor.Object");
     lua_pushstring(m_state, "__index");
     lua_pushvalue(m_state, -2);
     lua_settable(m_state, -3);
     luaL_setfuncs(m_state, s_valueMetaTable, 0);
 
-    luaL_newmetatable(m_state, "BugEngine.Plugin");
+    luaL_newmetatable(m_state, "Motor.Plugin");
     lua_pushstring(m_state, "__index");
     lua_pushvalue(m_state, -2);
     lua_settable(m_state, -3);
     luaL_setfuncs(m_state, s_pluginMetaTable, 0);
 
-    luaL_newmetatable(m_state, "BugEngine.Resource");
+    luaL_newmetatable(m_state, "Motor.Resource");
     lua_pushstring(m_state, "__index");
     lua_pushvalue(m_state, -2);
     lua_settable(m_state, -3);
     luaL_setfuncs(m_state, s_resourceMetaTable, 0);
 
-    luaL_newmetatable(m_state, "BugEngine.ResourceManager");
+    luaL_newmetatable(m_state, "Motor.ResourceManager");
     lua_pushstring(m_state, "__index");
     lua_pushvalue(m_state, -2);
     lua_settable(m_state, -3);
@@ -416,12 +416,12 @@ Context::Context(const Plugin::Context& context)
     void* udata = lua_newuserdata(m_state, sizeof(weak< Resource::ResourceManager >));
     weak< Resource::ResourceManager >* manager = (weak< Resource::ResourceManager >*)udata;
     new(manager) weak< Resource::ResourceManager >(context.resourceManager);
-    luaL_getmetatable(m_state, "BugEngine.ResourceManager");
+    luaL_getmetatable(m_state, "Motor.ResourceManager");
     lua_setmetatable(m_state, -2);
     lua_setglobal(m_state, "resources");
 
-    push(m_state, Meta::Value(be_bugengine_Namespace()));
-    lua_setglobal(m_state, "BugEngine");
+    push(m_state, Meta::Value(motor_motor_Namespace()));
+    lua_setglobal(m_state, "Motor");
     for(const luaL_Reg* method = base_funcs; method->func != 0; ++method)
     {
         lua_pushcfunction(m_state, method->func);
@@ -443,13 +443,14 @@ void Context::runBuffer(weak< const LuaScript > script, Resource::Resource& /*re
 {
     int       result;
     ifilename filename = script->getScriptName();
-    result             = luaL_loadbuffer(m_state, (const char*)block.data(),
-                             be_checked_numcast< size_t >(block.count() - 1), filename.str().name);
+    result
+        = luaL_loadbuffer(m_state, (const char*)block.data(),
+                          motor_checked_numcast< size_t >(block.count() - 1), filename.str().name);
     if(result == 0)
     {
         result = lua_pcall(m_state, 0, LUA_MULTRET, 0);
     }
-    be_assert(result == 0, lua_tostring(m_state, -1));
+    motor_assert(result == 0, lua_tostring(m_state, -1));
 }
 
 void Context::reloadBuffer(weak< const LuaScript > script, Resource::Resource& /*resource*/,
@@ -457,14 +458,15 @@ void Context::reloadBuffer(weak< const LuaScript > script, Resource::Resource& /
 {
     int       result;
     ifilename filename = script->getScriptName();
-    result             = luaL_loadbuffer(m_state, (const char*)block.data(),
-                             be_checked_numcast< size_t >(block.count() - 1), filename.str().name);
+    result
+        = luaL_loadbuffer(m_state, (const char*)block.data(),
+                          motor_checked_numcast< size_t >(block.count() - 1), filename.str().name);
     if(result == 0)
     {
         result = lua_pcall(m_state, 0, LUA_MULTRET, 0);
     }
-    be_assert(result == 0, lua_tostring(m_state, -1));
+    motor_assert(result == 0, lua_tostring(m_state, -1));
 }
 
 }  // namespace Lua
-}  // namespace BugEngine
+}  // namespace Motor

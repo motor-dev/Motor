@@ -1,16 +1,16 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PYTHONLIB_PY_ARRAY_HH_
-#define BE_PYTHONLIB_PY_ARRAY_HH_
+#ifndef MOTOR_PYTHONLIB_PY_ARRAY_HH_
+#define MOTOR_PYTHONLIB_PY_ARRAY_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/meta/engine/methodinfo.script.hh>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/meta/engine/methodinfo.script.hh>
 #include <py_object.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
-struct PyBugArray : public PyBugObject
+struct PyMotorArray : public PyMotorObject
 {
     static void registerType(PyObject* module);
 
@@ -23,7 +23,7 @@ struct PyBugArray : public PyBugObject
     static PyTypeObject s_pyType;
 };
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python
 
 /**************************************************************************************************/
 #endif

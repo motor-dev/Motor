@@ -17,7 +17,7 @@ decl-specifier-seq:
 
 import glrp
 from ....parser import cxx98
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 from . import storage
 from . import function
 from . import typedef

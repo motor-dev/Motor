@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_DEBUG_RUNTIME_DWARFTYPES_HH_
-#define BE_DEBUG_RUNTIME_DWARFTYPES_HH_
+#ifndef MOTOR_DEBUG_RUNTIME_DWARFTYPES_HH_
+#define MOTOR_DEBUG_RUNTIME_DWARFTYPES_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.debug.runtime/stdafx.h>
+#include <motor/plugin.debug.runtime/stdafx.h>
 
-namespace BugEngine { namespace Runtime { namespace Dwarf {
+namespace Motor { namespace Runtime { namespace Dwarf {
 
 enum Tag
 {
@@ -257,7 +257,7 @@ enum Type
     Type_indirect  = 0x16
 };
 
-}}}  // namespace BugEngine::Runtime::Dwarf
+}}}  // namespace Motor::Runtime::Dwarf
 
 /**************************************************************************************************/
 #endif

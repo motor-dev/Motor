@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_PYTHONBINDING_STDAFX_H_
-#define BE_PYTHONBINDING_STDAFX_H_
+#ifndef MOTOR_PYTHONBINDING_STDAFX_H_
+#define MOTOR_PYTHONBINDING_STDAFX_H_
 /**************************************************************************************************/
 
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/stdafx.h>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/stdafx.h>
 
 /**************************************************************************************************/
 #endif

@@ -1,14 +1,14 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.package/stdafx.h>
-#include <bugengine/plugin.scripting.package/package.script.hh>
+#include <motor/plugin.scripting.package/stdafx.h>
 #include <buildcontext.hh>
+#include <motor/plugin.scripting.package/package.script.hh>
 #include <packagebuilder.hh>
 
-int be_package_parse(void* param);
+int motor_package_parse(void* param);
 
-namespace BugEngine {
+namespace Motor {
 
 namespace Arena {
 minitl::Allocator& packageBuilder()
@@ -31,10 +31,10 @@ ref< Nodes::Package > PackageBuilder::createPackage(const ifilename&            
                                                     const minitl::Allocator::Block< u8 >& buffer)
 {
     BuildContext context(filename, buffer, m_dataFolder);
-    be_package_parse(&context);
+    motor_package_parse(&context);
     context.result->resolve();
     return context.result;
 }
 
 }  // namespace PackageBuilder
-}  // namespace BugEngine
+}  // namespace Motor

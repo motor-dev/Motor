@@ -30,11 +30,11 @@ def get_source_nodes(build_context, path, name):
             if not path:
                 raise Errors.WafError('could not find module %s in %s' % (name, build_context.path.abspath()))
     source_nodes = [path]
-    if path.is_child_of(build_context.bugenginenode):
-        relative_path = path.path_from(build_context.bugenginenode)
-        for platform in build_context.bugenginenode.find_node('extra').listdir():
+    if path.is_child_of(build_context.motornode):
+        relative_path = path.path_from(build_context.motornode)
+        for platform in build_context.motornode.find_node('extra').listdir():
             if build_context.env.PROJECTS or platform in build_context.env.VALID_PLATFORMS:
-                node = build_context.bugenginenode.find_node('extra').find_node(platform).find_node(relative_path)
+                node = build_context.motornode.find_node('extra').find_node(platform).find_node(relative_path)
                 if node:
                     source_nodes.append(node)
     return source_nodes
@@ -62,7 +62,7 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, extra_fea
         include = source_node.find_node('include')
         if include is not None:
             includes.append(include)
-    pchstop = source_nodes[0].find_node('api/bugengine/%s/stdafx.h' % name)
+    pchstop = source_nodes[0].find_node('api/motor/%s/stdafx.h' % name)
     if pchstop:
         pchstop = pchstop.path_from(source_nodes[0].find_node('api'))
     else:
@@ -78,7 +78,7 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, extra_fea
         env=pp_env,
         target=name + '.pp',
         parent=name,
-        features=['bugengine:preprocess'] + extra_features,
+        features=['motor:preprocess'] + extra_features,
         pchstop=pchstop,
         source=preprocess_sources,
         kernels=[],
@@ -145,8 +145,8 @@ def module(
             module_path = path_node.path_from(build_context.path).replace('/', '.').replace('\\', '. ')
         elif path_node.is_child_of(build_context.package_node):
             pass
-        elif path_node.is_child_of(build_context.bugenginenode):
-            module_path = path_node.path_from(build_context.bugenginenode).replace('/', '.').replace('\\', '. ')
+        elif path_node.is_child_of(build_context.motornode):
+            module_path = path_node.path_from(build_context.motornode).replace('/', '.').replace('\\', '. ')
     task_gen = build_context(
         env=env.derive(),
         target=env.ENV_PREFIX % name,
@@ -161,8 +161,8 @@ def module(
         source=source_list,
         defines=[
             'building_%s' % safe_name(name.split('.')[-1]),
-            'BE_PROJECTID=%s' % safe_name(name.replace('.', '_')),
-            'BE_PROJECTNAME=%s' % name
+            'MOTOR_PROJECTID=%s' % safe_name(name.replace('.', '_')),
+            'MOTOR_PROJECTNAME=%s' % name
         ] + extra_defines,
         export_defines=extra_public_defines[:],
         includes=extra_includes + includes + api + source_nodes + [build_context.srcnode],
@@ -185,7 +185,7 @@ def module(
                         target=env.ENV_PREFIX % target_name,
                         target_name=target_name,
                         safe_target_name=safe_name(test_name[-1]),
-                        features=['cxx', 'cxxprogram', 'bugengine:cxx', 'bugengine:unit_test'],
+                        features=['cxx', 'cxxprogram', 'motor:cxx', 'motor:unit_test'],
                         use=[task_gen.target],
                         uselib=[build_context.__class__.optim] +
                         (build_context.env.STATIC and ['static'] or ['dynamic']),
@@ -193,8 +193,8 @@ def module(
                         source_nodes=source_nodes,
                         defines=[
                             'building_%s' % safe_name(test_name[-1]),
-                            'BE_PROJECTID=%s' % safe_name('_'.join(test_name)),
-                            'BE_PROJECTNAME=%s' % target_name
+                            'MOTOR_PROJECTID=%s' % safe_name('_'.join(test_name)),
+                            'MOTOR_PROJECTNAME=%s' % target_name
                         ],
                         includes=extra_includes + includes + api + source_nodes + [build_context.srcnode],
                     )
@@ -211,7 +211,7 @@ def multiarch(build_context, name, arch_modules):
         else:
             task_gen = build_context(
                 target=name,
-                features=['bugengine:multiarch'],
+                features=['motor:multiarch'],
                 use=[arch_module.target for arch_module in arch_modules],
             )
         return task_gen

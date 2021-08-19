@@ -17,7 +17,7 @@ Some tools have been created to handle those tasks, such as
 `Qt's MOC <https://doc.qt.io/archives/qt-4.8/moc.html>`_,
 `Doxygen <https://www.doxygen.nl/index.html>`_ and
 `Clang Format <https://clang.llvm.org/docs/ClangFormat.html>`_.
-The architecture of BugEngine relies very much on type information from the code.
+The architecture of Motor relies very much on type information from the code.
 The created database is used in the editor to manipulate game objects, and in the LUA and Python
 plugins to allow the scripts to manipulate C++ objects.
 The C++ type database is so important that a parser was created in the build system to build the

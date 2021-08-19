@@ -24,7 +24,7 @@ class-key:
 
 import glrp
 from ...parser import cxx98
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 from . import member
 from . import initializer
 from . import derived

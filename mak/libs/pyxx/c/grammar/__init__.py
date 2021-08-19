@@ -5,7 +5,7 @@ from . import statements
 
 import glrp
 from ..parser import c89
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 @c89

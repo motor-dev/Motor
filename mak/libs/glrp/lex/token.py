@@ -1,5 +1,5 @@
 from ..symbol import Symbol
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 class Token(Symbol):
@@ -19,5 +19,5 @@ class Token(Symbol):
 
 
 if TYPE_CHECKING:
-    from be_typing import Any, List
+    from motor_typing import Any, List
     from ..position import Position

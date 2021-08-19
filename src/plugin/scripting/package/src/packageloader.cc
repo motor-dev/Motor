@@ -1,23 +1,23 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.package/stdafx.h>
-#include <bugengine/core/md5.hh>
-#include <bugengine/filesystem/folder.script.hh>
-#include <bugengine/plugin.scripting.package/nodes/package.hh>
+#include <motor/plugin.scripting.package/stdafx.h>
+#include <motor/core/md5.hh>
+#include <motor/filesystem/folder.script.hh>
+#include <motor/plugin.scripting.package/nodes/package.hh>
 #include <packagebuilder.hh>
 #include <packageloader.hh>
 
-namespace BugEngine { namespace Arena {
+namespace Motor { namespace Arena {
 
 minitl::Allocator& package()
 {
     return resource();
 }
 
-}}  // namespace BugEngine::Arena
+}}  // namespace Motor::Arena
 
-namespace BugEngine { namespace PackageManager {
+namespace Motor { namespace PackageManager {
 
 PackageLoader::PackageLoader(const Plugin::Context& context)
     : ScriptEngine< Package >(Arena::package(), context.resourceManager)
@@ -47,7 +47,7 @@ void PackageLoader::runBuffer(weak< const Package > script, Resource::Resource& 
                               const minitl::Allocator::Block< u8 >& buffer)
 {
     MD5 md5 = digest(buffer);
-    be_info("md5 sum of package: %s" | md5);
+    motor_info("md5 sum of package: %s" | md5);
     ref< PackageBuilder::Nodes::Package > package
         = m_packageBuilder->createPackage(script->getScriptName(), buffer);
     for(Meta::AST::MessageList::const_iterator it = package->context().messages.begin();
@@ -66,7 +66,7 @@ void PackageLoader::reloadBuffer(weak< const Package > script, Resource::Resourc
                                  const minitl::Allocator::Block< u8 >& buffer)
 {
     MD5 md5 = digest(buffer);
-    be_info("md5 sum of package: %s" | md5);
+    motor_info("md5 sum of package: %s" | md5);
     ref< PackageBuilder::Nodes::Package > newPackage
         = m_packageBuilder->createPackage(script->getScriptName(), buffer);
     weak< PackageBuilder::Nodes::Package > oldPackage
@@ -77,4 +77,4 @@ void PackageLoader::reloadBuffer(weak< const Package > script, Resource::Resourc
     resource.setRefHandle(newPackage);
 }
 
-}}  // namespace BugEngine::PackageManager
+}}  // namespace Motor::PackageManager

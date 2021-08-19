@@ -1,6 +1,6 @@
 import sys
 from .logger import Logger
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def init_arguments(argument_context):
@@ -25,6 +25,6 @@ class IrAddressSpaceResolutionError(Exception):
 
 
 if TYPE_CHECKING:
-    from be_typing import Optional
+    from motor_typing import Optional
     from argparse import ArgumentParser, Namespace
     from ..ir_position import IrPosition

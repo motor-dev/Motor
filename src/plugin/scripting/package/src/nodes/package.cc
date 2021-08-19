@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.package/stdafx.h>
-#include <bugengine/meta/engine/propertyinfo.script.hh>
-#include <bugengine/plugin.scripting.package/nodes/package.hh>
-#include <bugengine/resource/resourcemanager.hh>
+#include <motor/plugin.scripting.package/stdafx.h>
+#include <motor/meta/engine/propertyinfo.script.hh>
+#include <motor/plugin.scripting.package/nodes/package.hh>
+#include <motor/resource/resourcemanager.hh>
 
-namespace BugEngine { namespace PackageBuilder { namespace Nodes {
+namespace Motor { namespace PackageBuilder { namespace Nodes {
 
 static const istring s_name("name");
 
@@ -17,7 +17,7 @@ Package::Package(const ifilename& filename, ref< Folder > dataFolder)
     , m_nodes(Arena::packageBuilder())
     , m_values(Arena::packageBuilder())
 {
-    m_context.rootNamespace->add(inamespace("bugengine"), Meta::Value(be_bugengine_Namespace()));
+    m_context.rootNamespace->add(inamespace("motor"), Meta::Value(motor_motor_Namespace()));
 }
 
 Package::~Package()
@@ -29,7 +29,7 @@ void Package::loadPlugin(inamespace plugin, inamespace name)
     Plugin::Plugin< void* > p(plugin, Plugin::Plugin< void* >::Preload);
     if(!p)
     {
-        be_notreached();
+        motor_notreached();
     }
     else
     {
@@ -45,7 +45,7 @@ void Package::insertNode(const istring name, ref< Meta::AST::Node > object)
     {
         if(*it == object)
         {
-            be_error("Object added twice");
+            motor_error("Object added twice");
             return;
         }
     }
@@ -69,7 +69,7 @@ void Package::removeNode(ref< Meta::AST::Node > object)
         }
         ++it;
     }
-    be_error("Object does not exist");
+    motor_error("Object does not exist");
 }
 
 ref< Meta::AST::Node > Package::findByName(istring name) const
@@ -85,9 +85,9 @@ const Meta::Value& Package::getValue(weak< const Meta::AST::Node > object) const
     {
         if((*it) == object)
         {
-            be_assert_recover(index < m_values.size(), "access to a value not yet created",
-                              return m_empty);
-            be_assert(m_values[index], "access to a value not yet created");
+            motor_assert_recover(index < m_values.size(), "access to a value not yet created",
+                                 return m_empty);
+            motor_assert(m_values[index], "access to a value not yet created");
             return m_values[index];
         }
     }
@@ -99,8 +99,8 @@ void Package::createObjects(weak< Resource::ResourceManager > manager)
     m_values.resize(m_nodes.size());
     for(size_t i = 0; i < m_nodes.size(); ++i)
     {
-        m_nodes[i]->eval(be_type< void >(), m_values[i]);
-        if(m_values[i].isA(be_type< const Resource::Description >()))
+        m_nodes[i]->eval(motor_type< void >(), m_values[i]);
+        if(m_values[i].isA(motor_type< const Resource::Description >()))
         {
             manager->load(m_values[i].type().metaclass,
                           m_values[i].as< weak< const Resource::Description > >());
@@ -112,7 +112,7 @@ void Package::deleteObjects(weak< Resource::ResourceManager > manager)
 {
     for(size_t i = m_values.size(); i > 0; --i)
     {
-        if(m_values.back().isA(be_type< const Resource::Description >()))
+        if(m_values.back().isA(motor_type< const Resource::Description >()))
         {
             manager->unload(m_values.back().type().metaclass,
                             m_values.back().as< weak< const Resource::Description > >());
@@ -127,8 +127,8 @@ void Package::diffFromPackage(weak< Package > previous,
     minitl::swap(previous->m_values, m_values);
     // for(size_t i = 0; i < m_nodes.size(); ++i)
     //{
-    //    be_forceuse(manager);
-    //    be_forceuse(previous);
+    //    motor_forceuse(manager);
+    //    motor_forceuse(previous);
     //}
 }
 
@@ -151,4 +151,4 @@ void Package::resolve()
     }
 }
 
-}}}  // namespace BugEngine::PackageBuilder::Nodes
+}}}  // namespace Motor::PackageBuilder::Nodes

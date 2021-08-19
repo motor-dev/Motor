@@ -1,7 +1,7 @@
-#include <bugengine/kernel/input/segments.hh>
 #include <component.script.hh>
+#include <motor/kernel/input/segments.hh>
 
-using namespace BugEngine::Test::Compute::UnitTests;
+using namespace Motor::Test::Compute::UnitTests;
 
 __kernel void if_then(u32 index, u32 total, Kernel::segments< ComponentInt > inout)
 {

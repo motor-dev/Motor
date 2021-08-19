@@ -1,10 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.compute.cuda/stdafx.h>
+#include <motor/plugin.compute.cuda/stdafx.h>
 #include <kernelobject.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace Cuda {
+namespace Motor { namespace KernelScheduler { namespace Cuda {
 
 CudaKernelTask::CudaKernelTask(weak< KernelObject > object)
     : object(object)
@@ -30,10 +30,9 @@ public:
     }
 
 private:
-    virtual void onCompleted(weak< BugEngine::Scheduler > scheduler,
-                             weak< Task::ITask >          task) override
+    virtual void onCompleted(weak< Motor::Scheduler > scheduler, weak< Task::ITask > task) override
     {
-        be_checked_cast< Task::Task< CudaKernelTask > >(task)->body.sourceTask->completed(
+        motor_checked_cast< Task::Task< CudaKernelTask > >(task)->body.sourceTask->completed(
             scheduler);
     }
     virtual void onConnected(weak< Task::ITask > /*to*/, CallbackStatus /*status*/) override
@@ -54,7 +53,7 @@ KernelObject::KernelObject(const inamespace& name)
     , m_callback(scoped< Callback >::create(Arena::task()))
     , m_callbackConnection(m_task, m_callback)
 {
-    be_debug("kernel entry point: %p" | m_entryPoint);
+    motor_debug("kernel entry point: %p" | m_entryPoint);
 }
 
 KernelObject::~KernelObject()
@@ -67,4 +66,4 @@ void KernelObject::run(const u32 index, const u32 total,
     if(m_entryPoint) (*m_entryPoint)(index, total, params);
 }
 
-}}}  // namespace BugEngine::KernelScheduler::Cuda
+}}}  // namespace Motor::KernelScheduler::Cuda

@@ -1,6 +1,6 @@
 from .ircc_c_expressions import IrccCExpressions
 from .. import IrccType
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 class IrccCDeclaration(IrccCExpressions):

@@ -1,22 +1,22 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/meta/classinfo.script.hh>
-#include <bugengine/meta/engine/call.hh>
-#include <bugengine/meta/engine/methodinfo.script.hh>
-#include <bugengine/meta/value.hh>
-#include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/meta/classinfo.script.hh>
+#include <motor/meta/engine/call.hh>
+#include <motor/meta/engine/methodinfo.script.hh>
+#include <motor/meta/value.hh>
+#include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <py_call.hh>
 #include <py_object.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
 struct PythonTypeInfo
 {
     PyObject*     arg;
     PyTypeObject* pythonType;
-    Meta::Type    bugengineType;
+    Meta::Type    motorType;
 
     static Meta::Type    getTypeFromPyObject(PyObject* object);
     static PyTypeObject* getPyTypeFromPyObject(PyObject* object);
@@ -26,37 +26,37 @@ struct PythonTypeInfo
 
 Meta::ConversionCost calculateConversion(const PythonTypeInfo& typeInfo, const Meta::Type& other)
 {
-    return PyBugObject::distance(typeInfo.arg, other);
+    return PyMotorObject::distance(typeInfo.arg, other);
 }
 
 void convert(const PythonTypeInfo& typeInfo, void* buffer, Meta::Type type)
 {
-    PyBugObject::unpack(typeInfo.arg, type, buffer);
+    PyMotorObject::unpack(typeInfo.arg, type, buffer);
 }
 
 PythonTypeInfo::PythonTypeInfo(PyObject* object)
     : arg(object)
     , pythonType(getPyTypeFromPyObject(object))
-    , bugengineType(getTypeFromPyObject(object))
+    , motorType(getTypeFromPyObject(object))
 {
 }
 
 Meta::Type PythonTypeInfo::getTypeFromPyObject(PyObject* object)
 {
-    if(object->py_type == &PyBugObject::s_pyType)
+    if(object->py_type == &PyMotorObject::s_pyType)
     {
-        PyBugObject* o = static_cast< PyBugObject* >(object);
+        PyMotorObject* o = static_cast< PyMotorObject* >(object);
         return o->value.type();
     }
     else
     {
-        return be_type< void >();
+        return motor_type< void >();
     }
 }
 
 PyTypeObject* PythonTypeInfo::getPyTypeFromPyObject(PyObject* object)
 {
-    if(object->py_type == &PyBugObject::s_pyType)
+    if(object->py_type == &PyMotorObject::s_pyType)
     {
         return 0;
     }
@@ -72,9 +72,9 @@ PyObject* call(raw< const Meta::Method > method, PyObject* self, PyObject* args,
 {
     const u32 selfArgCount = self ? 1 : 0;
     const u32 unnamedArgCount
-        = args ? be_checked_numcast< u32 >(s_library->m_PyTuple_Size(args)) : 0;
+        = args ? motor_checked_numcast< u32 >(s_library->m_PyTuple_Size(args)) : 0;
     const u32 namedArgCount
-        = kwargs ? be_checked_numcast< u32 >(s_library->m_PyDict_Size(kwargs)) : 0;
+        = kwargs ? motor_checked_numcast< u32 >(s_library->m_PyDict_Size(kwargs)) : 0;
     const u32      argCount = selfArgCount + unnamedArgCount + namedArgCount;
     PythonArgInfo* argInfos
         = reinterpret_cast< PythonArgInfo* >(malloca(argCount * sizeof(PythonArgInfo)));
@@ -136,7 +136,7 @@ PyObject* call(raw< const Meta::Method > method, PyObject* self, PyObject* args,
             argInfos[i - 1].~PythonArgInfo();
         }
         freea(argInfos);
-        return PyBugObject::stealValue(0, result);
+        return PyMotorObject::stealValue(0, result);
     }
     else
     {
@@ -153,4 +153,4 @@ PyObject* call(raw< const Meta::Method > method, PyObject* self, PyObject* args,
     }
 }
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python

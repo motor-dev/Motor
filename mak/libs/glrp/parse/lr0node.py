@@ -1,4 +1,4 @@
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 import functools
 from .lr0path import LR0Path
 
@@ -207,6 +207,6 @@ class LR0Node(object):
 
 
 if TYPE_CHECKING:
-    from be_typing import List, Optional, Set, Optional, Tuple
+    from motor_typing import List, Optional, Set, Optional, Tuple
     from .lr0item import LR0Item
     from .lr0itemset import LR0ItemSet

@@ -20,13 +20,13 @@ def install_files(self, out_dir, file_list, chmod=Utils.O644, original_install=F
         root_path = os.path.join(self.env.PREFIX, self.bld.__class__.optim)
         if original_install or not out_dir.startswith(root_path):
             return original_install_files(self, out_dir, file_list, chmod)
-        out_dir = out_dir[len(root_path)+1:]
+        out_dir = out_dir[len(root_path) + 1:]
         for file in file_list:
             filename = file.path_from(self.bld.bldnode)
             base = os.path.dirname(filename)
             if base != out_dir:
                 dest_node = self.bld.bldnode
-                #dest_node = dest_node.make_node(self.bld.bugengine_variant)
+                #dest_node = dest_node.make_node(self.bld.motor_variant)
                 #dest_node = dest_node.make_node(self.bld.optim)
                 dest_node = dest_node.make_node('zip')
                 dest_node = dest_node.make_node(out_dir)
@@ -46,12 +46,12 @@ def install_as(self, target_path, file, chmod=Utils.O644):
         package_task = self.get_package_task()
         root_path = os.path.join(self.env.PREFIX, self.bld.__class__.optim)
         if not target_path.startswith(root_path):
-            raise Errors.WafError('Does not know how to deploy to %s'%target_path)
+            raise Errors.WafError('Does not know how to deploy to %s' % target_path)
         dest_node = self.bld.bldnode
-        #dest_node = dest_node.make_node(self.bld.bugengine_variant)
+        #dest_node = dest_node.make_node(self.bld.motor_variant)
         #dest_node = dest_node.make_node(self.bld.optim)
         dest_node = dest_node.make_node('zip')
-        dest_node = dest_node.find_or_declare(target_path[len(root_path)+1:])
+        dest_node = dest_node.find_or_declare(target_path[len(root_path) + 1:])
         package_task.generator.create_task('copy', [file], [dest_node])
         package_task.set_inputs([dest_node])
     else:

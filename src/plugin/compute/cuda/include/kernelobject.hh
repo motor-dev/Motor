@@ -1,14 +1,14 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_COMPUTE_CUDA_KERNELOBJECT_HH_
-#define BE_COMPUTE_CUDA_KERNELOBJECT_HH_
+#ifndef MOTOR_COMPUTE_CUDA_KERNELOBJECT_HH_
+#define MOTOR_COMPUTE_CUDA_KERNELOBJECT_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.compute.cuda/stdafx.h>
-#include <bugengine/plugin/dynobject.hh>
-#include <bugengine/scheduler/task/task.hh>
+#include <motor/plugin.compute.cuda/stdafx.h>
+#include <motor/plugin/dynobject.hh>
+#include <motor/scheduler/task/task.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace Cuda {
+namespace Motor { namespace KernelScheduler { namespace Cuda {
 
 class KernelObject;
 class Scheduler;
@@ -28,7 +28,7 @@ struct CudaKernelTask
         }
         Range(u32 index, u32 total) : index(index), total(total)
         {
-            be_assert(index != total, "index should not be equal to total");
+            motor_assert(index != total, "index should not be equal to total");
         }
         bool atomic() const
         {
@@ -36,7 +36,7 @@ struct CudaKernelTask
         }
         u32 partCount(u32 workerCount) const
         {
-            be_forceuse(workerCount);
+            motor_forceuse(workerCount);
             return total;
         }
         Range part(u32 i, u32 t) const
@@ -76,7 +76,7 @@ public:
              const minitl::array< weak< const IMemoryBuffer > >& params);
 };
 
-}}}  // namespace BugEngine::KernelScheduler::Cuda
+}}}  // namespace Motor::KernelScheduler::Cuda
 
 /**************************************************************************************************/
 #endif

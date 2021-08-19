@@ -1,17 +1,17 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_GUI_GTK3_STDAFX_H_
-#define BE_GUI_GTK3_STDAFX_H_
+#ifndef MOTOR_GUI_GTK3_STDAFX_H_
+#define MOTOR_GUI_GTK3_STDAFX_H_
 /**************************************************************************************************/
-#include <bugengine/stdafx.h>
+#include <motor/stdafx.h>
 
 #if defined(building_gtk3)
-#    define BE_API_GTK3 BE_EXPORT
-#elif defined(be_dll_gtk3)
-#    define BE_API_GTK3 BE_IMPORT
+#    define MOTOR_API_GTK3 MOTOR_EXPORT
+#elif defined(motor_dll_gtk3)
+#    define MOTOR_API_GTK3 MOTOR_IMPORT
 #else
-#    define BE_API_GTK3
+#    define MOTOR_API_GTK3
 #endif
 
 #ifdef __GNUC__

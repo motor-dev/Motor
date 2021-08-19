@@ -1,9 +1,9 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bugengine/application.hh>
-#include <bugengine/plugin/plugin.hh>
 #include <luasample.hh>
+#include <motor/application.hh>
+#include <motor/plugin/plugin.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::LuaSample);
+MOTOR_PLUGIN_REGISTER(Motor::LuaSample);

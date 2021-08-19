@@ -26,7 +26,7 @@ typename-specifier:
 
 import glrp
 from ...parser import cxx98
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('simple-template-id : template-name [split]"<" template-argument-list? ">"')

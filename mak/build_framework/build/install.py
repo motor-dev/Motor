@@ -52,14 +52,14 @@ class install(Task.Task):
         return 0
 
 
-@feature('bugengine:deploy:off')
+@feature('motor:deploy:off')
 def dummy_deploy_off(self):
     pass
 
 
-@feature('bugengine:preprocess')
+@feature('motor:preprocess')
 def install_module_files(self):
-    if 'bugengine:deploy:off' not in self.features:
+    if 'motor:deploy:off' not in self.features:
         env = self.env
         for source_node in self.source_nodes:
             bin_paths = [
@@ -76,7 +76,7 @@ def install_module_files(self):
                 self.install_directory(env, data_path, '', 'DEPLOY_DATADIR')
 
 
-@feature('bugengine:kernel')
+@feature('motor:kernel')
 @after_method('install_step')
 def install_kernel(self):
     if not self.env.SUBARCH and not self.bld.env.STATIC:                                          #no multiarch, no static
@@ -91,7 +91,7 @@ def install_kernel(self):
             )
 
 
-@feature('bugengine:plugin')
+@feature('motor:plugin')
 @after_method('install_step')
 def install_plugin(self):
     if ('cshlib' in self.features) or ('cxxshlib' in self.features):
@@ -107,7 +107,7 @@ def install_plugin(self):
                 )
 
 
-@feature('bugengine:shared_lib')
+@feature('motor:shared_lib')
 @after_method('install_step')
 def install_shared_lib(self):
     if ('cshlib' in self.features) or ('cxxshlib' in self.features):
@@ -123,7 +123,7 @@ def install_shared_lib(self):
                 )
 
 
-@feature('bugengine:launcher')
+@feature('motor:launcher')
 @after_method('install_step')
 def install_program(self):
     if not self.env.SUBARCH:                                                                   #no multiarch
@@ -139,7 +139,7 @@ def install_program(self):
             )
 
 
-@feature('bugengine:game')
+@feature('motor:game')
 @after_method('install_step')
 def install_game(self):
     pass   #also plugin

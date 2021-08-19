@@ -1,14 +1,14 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_TEXT_FREETYPELIB_HH_
-#define BE_TEXT_FREETYPELIB_HH_
+#ifndef MOTOR_TEXT_FREETYPELIB_HH_
+#define MOTOR_TEXT_FREETYPELIB_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.graphics.text/stdafx.h>
+#include <motor/plugin.graphics.text/stdafx.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-namespace BugEngine {
+namespace Motor {
 
 class FreetypeLibrary : public minitl::pointer
 {
@@ -20,7 +20,7 @@ public:
     ~FreetypeLibrary();
 };
 
-}  // namespace BugEngine
+}  // namespace Motor
 
 /**************************************************************************************************/
 #endif

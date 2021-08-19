@@ -1,11 +1,11 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
 #include <loaders/nullshader.hh>
 #include <nullrenderer.hh>
 
-namespace BugEngine { namespace Null {
+namespace Motor { namespace Null {
 
 NullShaderProgram::NullShaderProgram(weak< const ShaderProgramDescription > shaderDescription,
                                      weak< const NullRenderer >             renderer)
@@ -25,4 +25,4 @@ void NullShaderProgram::unload()
 {
 }
 
-}}  // namespace BugEngine::Null
+}}  // namespace Motor::Null

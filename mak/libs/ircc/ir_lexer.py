@@ -1,7 +1,7 @@
 from ply import lex
 from .ir_position import IrPosition
 from . import ir_grammar
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 from copy import copy
 
 DIGITS = set('0123456789')

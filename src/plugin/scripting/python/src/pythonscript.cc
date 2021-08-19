@@ -1,10 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.python/stdafx.h>
-#include <bugengine/plugin.scripting.python/pythonscript.script.hh>
+#include <motor/plugin.scripting.python/stdafx.h>
+#include <motor/plugin.scripting.python/pythonscript.script.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 PythonScript::PythonScript(weak< const File > file) : Script(file)
 {
@@ -14,4 +14,4 @@ PythonScript::~PythonScript()
 {
 }
 
-}  // namespace BugEngine
+}  // namespace Motor

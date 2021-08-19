@@ -1,15 +1,15 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_DX9_RENDERER_HH_
-#define BE_DX9_RENDERER_HH_
+#ifndef MOTOR_DX9_RENDERER_HH_
+#define MOTOR_DX9_RENDERER_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
-#include <bugengine/plugin.graphics.windowing/renderer.hh>
-#include <bugengine/plugin/plugin.hh>
 #include <d3d9.h>
+#include <motor/plugin.graphics.windowing/renderer.hh>
+#include <motor/plugin/plugin.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 class RenderSurfaceDescription;
 class RenderWindowDescription;
@@ -23,7 +23,7 @@ static inline HRESULT d3d_checkResult(HRESULT r)
 {
     if(FAILED(r))
     {
-        // be_error("d3d error %s: %s" | DXGetErrorDescription(r) | DXGetErrorString(r));
+        // motor_error("d3d error %s: %s" | DXGetErrorDescription(r) | DXGetErrorString(r));
     }
     return r;
 }
@@ -73,7 +73,7 @@ private:
 };
 
 }  // namespace DirectX9
-}  // namespace BugEngine
+}  // namespace Motor
 
 /**************************************************************************************************/
 #endif

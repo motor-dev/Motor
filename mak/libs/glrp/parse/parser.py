@@ -1,7 +1,7 @@
 from .production import Production
 from .grammar import Grammar
 from ..lex import Token
-from be_typing import TYPE_CHECKING, TypeVar
+from motor_typing import TYPE_CHECKING, TypeVar
 from abc import abstractmethod
 import os
 import re

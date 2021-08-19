@@ -37,7 +37,7 @@ expr-or-braced-init-list:
 
 import glrp
 from ...parser import cxx98
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('initializer : brace-or-equal-initializer')

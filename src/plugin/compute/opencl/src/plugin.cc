@@ -1,14 +1,14 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.compute.opencl/stdafx.h>
-#include <bugengine/meta/classinfo.script.hh>
-#include <bugengine/plugin.compute.opencl/scheduler.hh>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/plugin.compute.opencl/stdafx.h>
 #include <context.hh>
+#include <motor/meta/classinfo.script.hh>
+#include <motor/plugin.compute.opencl/scheduler.hh>
+#include <motor/plugin/plugin.hh>
 #include <platform.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
+namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
 class PlatformLoader : public minitl::refcountable
 {
@@ -40,6 +40,6 @@ PlatformLoader::~PlatformLoader()
 {
 }
 
-}}}  // namespace BugEngine::KernelScheduler::OpenCL
+}}}  // namespace Motor::KernelScheduler::OpenCL
 
-BE_PLUGIN_REGISTER(BugEngine::KernelScheduler::OpenCL::PlatformLoader);
+MOTOR_PLUGIN_REGISTER(Motor::KernelScheduler::OpenCL::PlatformLoader);

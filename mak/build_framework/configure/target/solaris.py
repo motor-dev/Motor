@@ -34,7 +34,6 @@ class Solaris(Configure.ConfigurationContext.Platform):
                 if line[0:2] == 'P,':
                     configuration_context.env.append_value('SYSTEM_LIBPATHS', line[2:].split(':'))
 
-
     def is_valid(self, configuration_context, compiler, options):
         node = configuration_context.bldnode.make_node('main.cxx')
         tgtnode = node.change_ext('')
@@ -75,9 +74,9 @@ class Solaris(Configure.ConfigurationContext.Platform):
         env.DEPLOY_RUNBINDIR = 'lib'
         env.DEPLOY_LIBDIR = 'lib'
         env.DEPLOY_INCLUDEDIR = 'include'
-        env.DEPLOY_DATADIR = os.path.join('share', 'bugengine')
-        env.DEPLOY_PLUGINDIR = os.path.join(env.DEPLOY_RUNBINDIR, 'bugengine')
-        env.DEPLOY_KERNELDIR = os.path.join(env.DEPLOY_RUNBINDIR, 'bugengine')
+        env.DEPLOY_DATADIR = os.path.join('share', 'motor')
+        env.DEPLOY_PLUGINDIR = os.path.join(env.DEPLOY_RUNBINDIR, 'motor')
+        env.DEPLOY_KERNELDIR = os.path.join(env.DEPLOY_RUNBINDIR, 'motor')
         env.pymodule_PATTERN = '%s.so'
         env.STRIP_BINARY = True
 
@@ -95,9 +94,9 @@ class Solaris(Configure.ConfigurationContext.Platform):
         env.append_unique('DEFINES', ['_GNU_SOURCE'])
         env.RPATH = [
             ':'.join(
-                ['$ORIGIN', '$ORIGIN/../lib/', '$ORIGIN/../lib/bugengine/'] +
-                ['$ORIGIN/../lib/%s' % target for target in compiler.targets] +
-                ['$ORIGIN/../lib/%s/bugengine' % target for target in compiler.targets]
+                ['$ORIGIN', '$ORIGIN/../lib/', '$ORIGIN/../lib/motor/'] +
+                ['$ORIGIN/../lib/%s' % target
+                 for target in compiler.targets] + ['$ORIGIN/../lib/%s/motor' % target for target in compiler.targets]
             )
         ]
         env.append_unique('LDFLAGS', ['-ldl', '-lrt', '-lpthread', '-lm', '-lc'])
@@ -109,4 +108,3 @@ class Solaris(Configure.ConfigurationContext.Platform):
 
 def configure(conf):
     conf.platforms.append(Solaris())
-

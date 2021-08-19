@@ -1,11 +1,11 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bugengine/meta/classinfo.script.hh>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/meta/classinfo.script.hh>
+#include <motor/plugin/plugin.hh>
 
-namespace BugEngine { namespace Debug {
+namespace Motor { namespace Debug {
 
 minitl::AssertionResult AssertionCallback(const char* file, int line, const char* expr,
                                           const char* message);
@@ -15,10 +15,10 @@ private:
     minitl::AssertionCallback_t m_previousAssertionCallback;
 
 public:
-    AssertSetup(const BugEngine::Plugin::Context& /*context*/)
+    AssertSetup(const Motor::Plugin::Context& /*context*/)
         : m_previousAssertionCallback(minitl::setAssertionCallback(&AssertionCallback))
     {
-        be_debug("installed assert callback");
+        motor_debug("installed assert callback");
     }
     ~AssertSetup()
     {
@@ -30,6 +30,6 @@ private:
     AssertSetup& operator=(const AssertSetup& other);
 };
 
-}}  // namespace BugEngine::Debug
+}}  // namespace Motor::Debug
 
-BE_PLUGIN_REGISTER(BugEngine::Debug::AssertSetup);
+MOTOR_PLUGIN_REGISTER(Motor::Debug::AssertSetup);

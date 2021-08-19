@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.GL4/stdafx.h>
-#include <bugengine/plugin.graphics.3d/texture/texture.script.hh>
-#include <bugengine/plugin.graphics.GL4/glrenderer.hh>
+#include <motor/plugin.graphics.GL4/stdafx.h>
 #include <loaders/texture/gltexture.hh>
+#include <motor/plugin.graphics.3d/texture/texture.script.hh>
+#include <motor/plugin.graphics.GL4/glrenderer.hh>
 
-namespace BugEngine { namespace OpenGL {
+namespace Motor { namespace OpenGL {
 
 GLTexture::GLTexture(weak< const Resource::Description > textureDescription,
                      weak< GLRenderer >                  renderer)
@@ -26,4 +26,4 @@ void GLTexture::unload()
 {
 }
 
-}}  // namespace BugEngine::OpenGL
+}}  // namespace Motor::OpenGL

@@ -14,9 +14,9 @@ class android_mft(Task.Task):
     android:versionCode="%(version_code)d"
     android:versionName="%(version)s">
     <application
-            android:label="@string/bugengine_activity"
+            android:label="@string/motor_activity"
             android:debuggable="true">
-        <activity android:name="com.bugengine.BugEngineActivity"
+        <activity android:name="com.motor.MotorActivity"
                   android:enabled="false"
                   android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
                   android:launchMode="singleTask"
@@ -31,7 +31,7 @@ class android_mft(Task.Task):
 
         ACTIVITY_SKELETON = """<activity-alias android:label="%(task_gen)s"
                 android:name=".%(task_gen)s"
-                android:targetActivity="com.bugengine.BugEngineActivity">
+                android:targetActivity="com.motor.MotorActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -49,11 +49,11 @@ class android_mft(Task.Task):
         for group in self.generator.bld.groups:
             for task_gen in group:
                 if multiarch:
-                    if 'bugengine:multiarch' in task_gen.features:
-                        if 'bugengine:game' in self.generator.bld.get_tgen_by_name(task_gen.use[0]).features:
+                    if 'motor:multiarch' in task_gen.features:
+                        if 'motor:game' in self.generator.bld.get_tgen_by_name(task_gen.use[0]).features:
                             apps.append(task_gen)
                 else:
-                    if 'bugengine:game' in task_gen.features:
+                    if 'motor:game' in task_gen.features:
                         apps.append(task_gen)
         values = {
             'app': appname.lower(),

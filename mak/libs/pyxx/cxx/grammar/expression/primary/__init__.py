@@ -11,7 +11,7 @@ primary-expression:
 
 import glrp
 from ....parser import cxx98
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 from . import id
 from . import lambda_expr
 from . import fold

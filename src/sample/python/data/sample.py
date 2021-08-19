@@ -1,9 +1,9 @@
-from py_bugengine import *
+from py_motor import *
 
 p = Plugin("sample.python")
-print(p.BugEngine.TestCases.Enum.Value1)
-print(p.BugEngine.TestCases.Enum.Value2)
-print(p.BugEngine.TestCases.Enum.Value3)
+print(p.Motor.TestCases.Enum.Value1)
+print(p.Motor.TestCases.Enum.Value2)
+print(p.Motor.TestCases.Enum.Value3)
 
 
 def name(type):
@@ -51,10 +51,10 @@ def help(klass):
 
 
 if __name__ == '__main__':
-    help(BugEngine.RTTI.Class.ClassType.metaclass)
-    help(BugEngine.RTTI.Class)
-    help(BugEngine.text)
-    help(BugEngine.DiskFolder)
+    help(Motor.RTTI.Class.ClassType.metaclass)
+    help(Motor.RTTI.Class)
+    help(Motor.text)
+    help(Motor.DiskFolder)
 
     sample = Plugin('sample.python')
     c = sample.TestCases.Class(y1=1, x1=3)

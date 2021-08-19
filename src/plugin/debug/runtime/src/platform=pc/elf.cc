@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.debug.runtime/stdafx.h>
+#include <motor/plugin.debug.runtime/stdafx.h>
 
 #include <dwarf.hh>
 #include <elf.hh>
 
-namespace BugEngine { namespace Runtime {
+namespace Motor { namespace Runtime {
 
 struct ElfIdentification
 {
@@ -248,35 +248,36 @@ Elf::Elf(const char* filename, u64 baseAddress)
     /*FILE* file = fopen(filename, "rb");
     if (file)
     {
-        be_debug("loading file %s" | filename);
+        motor_debug("loading file %s" | filename);
         ElfIdentification id;
         fread(&id, 1, sizeof(id), file);
-        be_assert(id.header[0] == 0x7f && id.header[1] == 'E' && id.header[2] == 'L' && id.header[3]
+        motor_assert(id.header[0] == 0x7f && id.header[1] == 'E' && id.header[2] == 'L' &&
+    id.header[3]
     == 'F', "not a valid elf signature in file %s" | filename); m_class = (ElfClass)id.klass;
         m_endianness = (ElfEndianness)id.msb;
         if (id.klass == klass_32 && id.msb == msb_littleendian)
         {
-            be_debug("32 bits little-endian");
+            motor_debug("32 bits little-endian");
             Elf::parse<klass_32, msb_littleendian>(file);
         }
         else if (id.klass == klass_64 && id.msb == msb_littleendian)
         {
-            be_debug("64 bits little-endian");
+            motor_debug("64 bits little-endian");
             Elf::parse<klass_64, msb_littleendian>(file);
         }
         else if (id.klass == klass_32 && id.msb == msb_bigendian)
         {
-            be_debug("32 bits big-endian");
+            motor_debug("32 bits big-endian");
             Elf::parse<klass_32, msb_bigendian>(file);
         }
         else if (id.klass == klass_64 && id.msb == msb_bigendian)
         {
-            be_debug("64 bits big-endian");
+            motor_debug("64 bits big-endian");
             Elf::parse<klass_64, msb_bigendian>(file);
         }
         else
         {
-            be_notreached();
+            motor_notreached();
         }
         fclose(file);
     }*/
@@ -292,19 +293,21 @@ void Elf::parse()
     /*
     ElfHeader<klass, e> header;
     fread(&header, sizeof(header), 1, f);
-    be_debug("elf file type: %s, for machine : %s" | s_elfFileType[header.type] |
-    s_elfMachineType[header.machine]); be_forceuse(s_elfFileType); be_forceuse(s_elfMachineType);
+    motor_debug("elf file type: %s, for machine : %s" | s_elfFileType[header.type] |
+    s_elfMachineType[header.machine]); motor_forceuse(s_elfFileType);
+    motor_forceuse(s_elfMachineType);
 
-    be_assert(header.shentsize == sizeof(ElfSectionHeader<klass, e>), "invalid or unsupported entry
-    size; expected %d, got %d" | sizeof(ElfSectionHeader<klass, e>) | header.shentsize);
+    motor_assert(header.shentsize == sizeof(ElfSectionHeader<klass, e>), "invalid or unsupported
+    entry size; expected %d, got %d" | sizeof(ElfSectionHeader<klass, e>) | header.shentsize);
     ElfSectionHeader<klass, e> *sections = (ElfSectionHeader<klass,
-    e>*)malloca(header.shentsize*header.shnum); fseek(f, be_checked_numcast<long>(header.shoffset),
-    SEEK_SET); fread(sections, header.shentsize, header.shnum, f);
+    e>*)malloca(header.shentsize*header.shnum); fseek(f,
+    motor_checked_numcast<long>(header.shoffset), SEEK_SET); fread(sections, header.shentsize,
+    header.shnum, f);
 
     minitl::Allocator::Block<char> stringPool(Arena::temporary(),
-    be_checked_numcast<size_t>(sections[header.shstrndx].size)); fseek(f,
-    be_checked_numcast<long>(sections[header.shstrndx].offset), SEEK_SET); fread(stringPool, 1,
-    be_checked_numcast<size_t>(sections[header.shstrndx].size), f);
+    motor_checked_numcast<size_t>(sections[header.shstrndx].size)); fseek(f,
+    motor_checked_numcast<long>(sections[header.shstrndx].offset), SEEK_SET); fread(stringPool, 1,
+    motor_checked_numcast<size_t>(sections[header.shstrndx].size), f);
 
     for (int i = 0; i < header.shnum; ++i)
     {
@@ -325,7 +328,7 @@ SymbolResolver::SymbolInformations Elf::getSymbolInformation() const
     if(debug_link)
     {
         minitl::Allocator::Block< char > filename(
-            Arena::temporary(), be_checked_numcast< size_t >(debug_link.fileSize));
+            Arena::temporary(), motor_checked_numcast< size_t >(debug_link.fileSize));
         readSection(debug_link, filename);
         result.filename = ifilename(filename);
     }
@@ -336,4 +339,4 @@ SymbolResolver::SymbolInformations Elf::getSymbolInformation() const
     return result;
 }
 
-}}  // namespace BugEngine::Runtime
+}}  // namespace Motor::Runtime

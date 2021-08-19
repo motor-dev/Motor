@@ -40,7 +40,7 @@ if __name__ == '__main__':
         try:
             result = parser.parse(
                 arguments[1], os.path.join(options.tmp_dir, 'cpp_grammar.pickle'), options.macro_file, options.module,
-                'BugEngine'
+                'Motor'
             )
             if not result:
                 sys.exit(1)

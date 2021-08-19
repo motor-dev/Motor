@@ -1,14 +1,14 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_NULLRENDER_LOADERS_NULLSHADER_HH_
-#define BE_NULLRENDER_LOADERS_NULLSHADER_HH_
+#ifndef MOTOR_NULLRENDER_LOADERS_NULLSHADER_HH_
+#define MOTOR_NULLRENDER_LOADERS_NULLSHADER_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
-#include <bugengine/plugin.graphics.3d/renderer/igpuresource.hh>
-#include <bugengine/plugin.graphics.3d/shader/shader.script.hh>
+#include <motor/plugin.graphics.3d/renderer/igpuresource.hh>
+#include <motor/plugin.graphics.3d/shader/shader.script.hh>
 
-namespace BugEngine { namespace Null {
+namespace Motor { namespace Null {
 
 class NullRenderer;
 
@@ -24,7 +24,7 @@ private:
     void unload() override;
 };
 
-}}  // namespace BugEngine::Null
+}}  // namespace Motor::Null
 
 /**************************************************************************************************/
 #endif

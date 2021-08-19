@@ -1,10 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.input.input/stdafx.h>
-#include <bugengine/plugin.input.input/controllers/keyboard.hh>
+#include <motor/plugin.input.input/stdafx.h>
+#include <motor/plugin.input.input/controllers/keyboard.hh>
 
-namespace BugEngine { namespace Input {
+namespace Motor { namespace Input {
 
 Keyboard::Keyboard()
 {
@@ -14,4 +14,4 @@ Keyboard::~Keyboard()
 {
 }
 
-}}  // namespace BugEngine::Input
+}}  // namespace Motor::Input

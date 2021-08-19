@@ -1,13 +1,13 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.windowing/stdafx.h>
-#include <bugengine/core/threads/event.hh>
-#include <bugengine/plugin.graphics.windowing/renderer.hh>
-#include <bugengine/plugin.graphics.windowing/window.hh>
+#include <motor/plugin.graphics.windowing/stdafx.h>
+#include <motor/core/threads/event.hh>
+#include <motor/plugin.graphics.windowing/renderer.hh>
+#include <motor/plugin.graphics.windowing/window.hh>
 #include <win32/platformrenderer.hh>
 
-namespace BugEngine { namespace Windowing {
+namespace Motor { namespace Windowing {
 
 namespace {
 static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -17,7 +17,7 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
     case WM_CLOSE:
     {
         // Window* win = (Window*)(GetWindowLongPtr(hWnd,GWLP_USERDATA));
-        // be_assert(win, "BugEngine window not associated with hWnd");
+        // motor_assert(win, "Motor window not associated with hWnd");
         // win->close();
         break;
     }
@@ -39,7 +39,7 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 
 Renderer::PlatformRenderer::PlatformRenderer(weak< Renderer > renderer)
     : m_renderer(renderer)
-    , m_windowClassName(minitl::format< 128u >("__be__%p__") | (const void*)renderer)
+    , m_windowClassName(minitl::format< 128u >("__motor__%p__") | (const void*)renderer)
 {
     memset(&m_wndClassEx, 0, sizeof(WNDCLASSEX));
     m_wndClassEx.lpszClassName = m_windowClassName.c_str();
@@ -117,4 +117,4 @@ uint2 Renderer::getScreenSize() const
     return make_uint2(rect.right - rect.left, rect.bottom - rect.top);
 }
 
-}}  // namespace BugEngine::Windowing
+}}  // namespace Motor::Windowing

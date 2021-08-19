@@ -104,7 +104,7 @@ class Windows(Configure.ConfigurationContext.Platform):
             winres = conf.find_program('windres', var='WINRC', path_list=compiler.directories, mandatory=False)
         if not winres:
             winres = conf.find_program('windres', var='WINRC', mandatory=False)
-        conf.load('winres_patch', tooldir=[os.path.join(conf.bugenginenode.abspath(), 'mak', 'tools')])
+        conf.load('winres_patch', tooldir=[os.path.join(conf.motornode.abspath(), 'mak', 'tools')])
         if compiler.arch == 'x86':
             conf.env.append_unique('WINRCFLAGS', ['--target=pe-i386'])
         elif compiler.arch == 'amd64':

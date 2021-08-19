@@ -1,13 +1,13 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
  see LICENSE for detail */
 
 #include <stdafx.h>
 
-#include <bugengine/resource/resourcemanager.hh>
 #include <context.hh>
+#include <motor/resource/resourcemanager.hh>
 #include <runtime/resource.hh>
 
-namespace BugEngine { namespace Lua {
+namespace Motor { namespace Lua {
 
 struct ResourceToken
 {
@@ -18,7 +18,7 @@ struct ResourceToken
 
 extern "C" int resourceLoaderGC(lua_State* state)
 {
-    Context::checkArg(state, 1, "BugEngine.ResourceManager");
+    Context::checkArg(state, 1, "Motor.ResourceManager");
     weak< Resource::ResourceManager >* userdata
         = (weak< Resource::ResourceManager >*)lua_touserdata(state, 1);
     userdata->~weak();
@@ -27,7 +27,7 @@ extern "C" int resourceLoaderGC(lua_State* state)
 
 extern "C" int resourceLoaderToString(lua_State* state)
 {
-    Context::checkArg(state, 1, "BugEngine.ResourceManager");
+    Context::checkArg(state, 1, "Motor.ResourceManager");
     weak< Resource::ResourceManager >* userdata
         = (weak< Resource::ResourceManager >*)lua_touserdata(state, 1);
     lua_pushfstring(state, "resourcemanager[%p]", userdata->operator->());
@@ -36,8 +36,8 @@ extern "C" int resourceLoaderToString(lua_State* state)
 
 extern "C" int resourceLoaderLoad(lua_State* state)
 {
-    Context::checkArg(state, 1, "BugEngine.ResourceManager");
-    Context::checkArg(state, 2, "BugEngine.Object");
+    Context::checkArg(state, 1, "Motor.ResourceManager");
+    Context::checkArg(state, 2, "Motor.Object");
 
     weak< Resource::ResourceManager > userdata
         = *(weak< Resource::ResourceManager >*)lua_touserdata(state, 1);
@@ -50,7 +50,7 @@ extern "C" int resourceLoaderLoad(lua_State* state)
     resourceToken->manager     = userdata;
     resourceToken->type        = v->type().metaclass;
     userdata->load(resourceToken->type, description);
-    luaL_getmetatable(state, "BugEngine.Resource");
+    luaL_getmetatable(state, "Motor.Resource");
     lua_setmetatable(state, -2);
     return 1;
 }
@@ -62,7 +62,7 @@ const luaL_Reg s_resourceLoaderMetaTable[] = {{"__gc", resourceLoaderGC},
 
 extern "C" int resourceGC(lua_State* state)
 {
-    Context::checkArg(state, 1, "BugEngine.Resource");
+    Context::checkArg(state, 1, "Motor.Resource");
     ResourceToken* userdata = (ResourceToken*)lua_touserdata(state, 1);
     userdata->manager->unload(userdata->type, userdata->description);
     userdata->~ResourceToken();
@@ -71,7 +71,7 @@ extern "C" int resourceGC(lua_State* state)
 
 extern "C" int resourceToString(lua_State* state)
 {
-    Context::checkArg(state, 1, "BugEngine.Resource");
+    Context::checkArg(state, 1, "Motor.Resource");
     ResourceToken* userdata = (ResourceToken*)lua_touserdata(state, 1);
     lua_pushfstring(state, "Resource<%s>[%p]", userdata->type->fullname().str().name,
                     userdata->description.operator->());
@@ -81,4 +81,4 @@ extern "C" int resourceToString(lua_State* state)
 const luaL_Reg s_resourceMetaTable[]
     = {{"__gc", resourceGC}, {"__tostring", resourceToString}, {0, 0}};
 
-}}  // namespace BugEngine::Lua
+}}  // namespace Motor::Lua

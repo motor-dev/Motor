@@ -1,8 +1,8 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bugengine/plugin/plugin.hh>
 #include <dx9renderer.hh>
+#include <motor/plugin/plugin.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::DirectX9::Dx9Renderer);
+MOTOR_PLUGIN_REGISTER(Motor::DirectX9::Dx9Renderer);

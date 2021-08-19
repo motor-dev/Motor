@@ -1,15 +1,15 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.3d/stdafx.h>
-#include <bugengine/plugin.graphics.3d/renderer/irenderer.hh>
-#include <bugengine/plugin.graphics.3d/renderer/irendertarget.hh>
-#include <bugengine/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include <motor/plugin.graphics.3d/stdafx.h>
+#include <motor/plugin.graphics.3d/renderer/irenderer.hh>
+#include <motor/plugin.graphics.3d/renderer/irendertarget.hh>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
 
-#include <bugengine/scheduler/range/onestep.hh>
-#include <bugengine/scheduler/task/task.hh>
+#include <motor/scheduler/range/onestep.hh>
+#include <motor/scheduler/task/task.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 IRenderTarget::IRenderTarget(weak< const RenderTargetDescription > rendertarget,
                              weak< const IRenderer >               renderer)
@@ -33,4 +33,4 @@ void IRenderTarget::drawBatches(const Batch* /*batches*/, size_t /*count*/) cons
     end(IRenderTarget::Present);
 }
 
-}  // namespace BugEngine
+}  // namespace Motor

@@ -1,4 +1,4 @@
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 class LR0DominanceSet(object):
@@ -131,5 +131,5 @@ class LR0DominanceNode(object):
 
 
 if TYPE_CHECKING:
-    from be_typing import Dict, List, Optional, Tuple
+    from motor_typing import Dict, List, Optional, Tuple
     from .lr0node import LR0Node

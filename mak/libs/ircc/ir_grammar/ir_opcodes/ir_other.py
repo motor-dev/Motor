@@ -1,6 +1,6 @@
 from ...ir_ast.instructions import IrInstCall, IrInstIntegerCompare, IrInstFloatCompare, IrInstPhi, IrInstSelect
 from ...ir_ast import IrReference, IrMethodLink
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def p_ir_opcode_call(p):

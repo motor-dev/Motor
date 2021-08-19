@@ -1,6 +1,6 @@
 import sys
 from .logger import Logger
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def init_arguments(argument_context):

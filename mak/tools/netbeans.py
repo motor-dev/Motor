@@ -57,8 +57,8 @@ class Netbeans(Build.BuildContext):
     cmd = 'netbeans'
     fun = 'build'
     optim = 'debug'
-    bugengine_toolchain = 'projects'
-    bugengine_variant = 'projects.setup'
+    motor_toolchain = 'projects'
+    motor_variant = 'projects.setup'
     variant = 'projects/netbeans'
     version = 79
 
@@ -208,7 +208,7 @@ class Netbeans(Build.BuildContext):
                 add(doc, mtype, 'requiredProjects')
                 includes = set([])
                 defines = set([])
-                for d in ['be_api(x)=', 'BE_EXPORT='] + env.DEFINES:
+                for d in ['motor_api(x)=', 'MOTOR_EXPORT='] + env.DEFINES:
                     add(doc, cdefines, 'Elem', d)
                     add(doc, ccdefines, 'Elem', d)
                 for tg_includes, tg_defines in options:
@@ -236,7 +236,7 @@ class Netbeans(Build.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.variant = self.__class__.bugengine_variant
+        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
         self.env.TOOLCHAIN = '$(TOOLCHAIN)'
         self.env.VARIANT = '$(CONFIG)'
@@ -265,7 +265,7 @@ class Netbeans(Build.BuildContext):
                 if not isinstance(tg, TaskGen.task_gen):
                     continue
                 tg.post()
-                if not 'bugengine:kernel' in tg.features:
+                if not 'motor:kernel' in tg.features:
                     deps.append(tg)
 
         p = self.generateProjectXml(appname, self)

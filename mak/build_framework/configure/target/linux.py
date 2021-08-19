@@ -50,9 +50,9 @@ class Linux(Configure.ConfigurationContext.Platform):
         env.DEPLOY_RUNBINDIR = 'lib'
         env.DEPLOY_LIBDIR = 'lib'
         env.DEPLOY_INCLUDEDIR = 'include'
-        env.DEPLOY_DATADIR = os.path.join('share', 'bugengine')
-        env.DEPLOY_PLUGINDIR = os.path.join(env.DEPLOY_RUNBINDIR, 'bugengine')
-        env.DEPLOY_KERNELDIR = os.path.join(env.DEPLOY_RUNBINDIR, 'bugengine')
+        env.DEPLOY_DATADIR = os.path.join('share', 'motor')
+        env.DEPLOY_PLUGINDIR = os.path.join(env.DEPLOY_RUNBINDIR, 'motor')
+        env.DEPLOY_KERNELDIR = os.path.join(env.DEPLOY_RUNBINDIR, 'motor')
         env.pymodule_PATTERN = '%s.so'
         env.STRIP_BINARY = True
 

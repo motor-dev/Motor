@@ -1,13 +1,13 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_GL4_LOADERS_RENDERTARGET_GLSURFACE_HH_
-#define BE_GL4_LOADERS_RENDERTARGET_GLSURFACE_HH_
+#ifndef MOTOR_GL4_LOADERS_RENDERTARGET_GLSURFACE_HH_
+#define MOTOR_GL4_LOADERS_RENDERTARGET_GLSURFACE_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.graphics.GL4/stdafx.h>
-#include <bugengine/plugin.graphics.3d/renderer/igpuresource.hh>
+#include <motor/plugin.graphics.GL4/stdafx.h>
+#include <motor/plugin.graphics.3d/renderer/igpuresource.hh>
 
-namespace BugEngine { namespace OpenGL {
+namespace Motor { namespace OpenGL {
 
 class GLRenderer;
 
@@ -31,7 +31,7 @@ public:
     void present() const;
 };
 
-}}  // namespace BugEngine::OpenGL
+}}  // namespace Motor::OpenGL
 
 /**************************************************************************************************/
 #endif

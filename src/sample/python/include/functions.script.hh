@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_SAMPLES_PYTHON_FUNCTIONS_SCRIPT_HH_
-#define BE_SAMPLES_PYTHON_FUNCTIONS_SCRIPT_HH_
+#ifndef MOTOR_SAMPLES_PYTHON_FUNCTIONS_SCRIPT_HH_
+#define MOTOR_SAMPLES_PYTHON_FUNCTIONS_SCRIPT_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
 
-namespace BugEngine { namespace TestCases {
+namespace Motor { namespace TestCases {
 
 class Class : public minitl::refcountable
 {
@@ -36,7 +36,7 @@ enum Enum
     Value3 = 5
 };
 
-}}  // namespace BugEngine::TestCases
+}}  // namespace Motor::TestCases
 
 /**************************************************************************************************/
 #endif

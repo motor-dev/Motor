@@ -1,6 +1,6 @@
 from ..ir_ast import IrTypeBuiltin, IrTypePtr, IrTypeVoid, IrTypeArray, IrTypeVector, IrTypeStruct, IrTypeReference, IrTypeOpaque, IrTypeMethod, IrReference, IrTypeDeclaration
 from ply.lex import LexToken
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def p_ir_typedecl(p):

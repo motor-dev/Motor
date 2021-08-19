@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.compute.cpu/stdafx.h>
-#include <bugengine/scheduler/kernel/code.script.hh>
+#include <motor/plugin.compute.cpu/stdafx.h>
 #include <codeloader.hh>
 #include <codeobject.hh>
+#include <motor/scheduler/kernel/code.script.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace CPU {
+namespace Motor { namespace KernelScheduler { namespace CPU {
 
 CodeLoader::CodeLoader(const inamespace& cpuVariant)
     : ICodeLoader()
@@ -21,8 +21,8 @@ CodeLoader::~CodeLoader()
 void CodeLoader::load(weak< const Resource::Description > codeDescription,
                       Resource::Resource&                 resource)
 {
-    be_info("loading CPU kernel %s" | be_checked_cast< const Code >(codeDescription)->name());
-    inamespace name = be_checked_cast< const Code >(codeDescription)->name();
+    motor_info("loading CPU kernel %s" | motor_checked_cast< const Code >(codeDescription)->name());
+    inamespace name = motor_checked_cast< const Code >(codeDescription)->name();
     name += m_cpuVariant;
     resource.setRefHandle(ref< CodeObject >::create(Arena::task(), name));
 }
@@ -40,4 +40,4 @@ void CodeLoader::unload(Resource::Resource& resource)
     resource.clearRefHandle();
 }
 
-}}}  // namespace BugEngine::KernelScheduler::CPU
+}}}  // namespace Motor::KernelScheduler::CPU

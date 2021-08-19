@@ -7,17 +7,17 @@ def build(bld):
     root = bld.path.parent
     tg = task_gen(bld=bld, target='package')
 
-    source_node = root.find_node('src/bugengine/launcher/src')
-    resource_node = root.find_node('src/bugengine/launcher/res')
+    source_node = root.find_node('src/motor/launcher/src')
+    resource_node = root.find_node('src/motor/launcher/res')
     resources = bld(
-        target='bugengine.android.resource',
-        features=['bugengine:android:aapt_resource'],
+        target='motor.android.resource',
+        features=['motor:android:aapt_resource'],
         resource=resource_node,
         destfile=tg.make_bld_node('apk', '', 'resources.apk')
     )
     out_dir = tg.make_bld_node('jar', '', '')
     launcher = bld(
-        target='bugengine.android.launcher',
+        target='motor.android.launcher',
         features=['cxx', 'javac', 'dex'],
         source_nodes=[source_node, resource_node],
         destfile='classes.dex'
@@ -38,8 +38,8 @@ def build(bld):
     bld.add_to_group(tg)
     tg.install_files(os.path.join(bld.env.PREFIX, bld.optim), package_final, original_install=True)
 
-    bld.platforms.append(bld.external('bugengine.3rdparty.android.libc++'))
-    bld.platforms.append(bld.external('bugengine.3rdparty.android.libklcompat'))
+    bld.platforms.append(bld.external('motor.3rdparty.android.libc++'))
+    bld.platforms.append(bld.external('motor.3rdparty.android.libklcompat'))
 
 
 def plugin(bld):

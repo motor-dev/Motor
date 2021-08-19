@@ -486,7 +486,7 @@ class PBXProject(XCodeNode):
 
         names = p.target.split('.')
         sources = []
-        if 'bugengine:kernel' not in p.features:
+        if 'motor:kernel' not in p.features:
             group = self._mainGroup
             for name in names:
                 try:
@@ -553,8 +553,8 @@ class xcode(Build.BuildContext):
     fun = 'build'
     optim = 'debug'
     version = ('Xcode 3.1', 45)
-    bugengine_toolchain = 'projects'
-    bugengine_variant = 'projects.setup'
+    motor_toolchain = 'projects'
+    motor_variant = 'projects.setup'
     variant = 'projects/xcode'
 
     def execute(self):
@@ -567,7 +567,7 @@ class xcode(Build.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.variant = self.__class__.bugengine_variant
+        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
         self.env.TOOLCHAIN = '$(TOOLCHAIN)'
         self.env.VARIANT = '$(CONFIG)'

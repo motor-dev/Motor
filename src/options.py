@@ -20,7 +20,7 @@ def options(option_context):
         help='Don\'t fail the build if unit tests detect errors'
     )
 
-    third_party_node = option_context.path.make_node('bugengine/3rdparty')
+    third_party_node = option_context.path.make_node('motor/3rdparty')
     for category in third_party_node.listdir():
         if category[0] != '.':
             category_node = third_party_node.make_node(category)

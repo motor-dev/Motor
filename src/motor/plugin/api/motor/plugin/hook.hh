@@ -1,0 +1,61 @@
+/* Motor <motor.devel@gmail.com>
+   see LICENSE for detail */
+
+#ifndef MOTOR_PLUGIN_HOOK_HH_
+#define MOTOR_PLUGIN_HOOK_HH_
+/**************************************************************************************************/
+#include <motor/plugin/stdafx.h>
+#include <motor/core/preproc.hh>
+#include <motor/resource/resourcemanager.hh>
+
+namespace Motor { namespace Plugin {
+struct Context;
+class IPluginHook;
+}}  // namespace Motor::Plugin
+
+extern minitl::intrusive_list< Motor::Plugin::IPluginHook > MOTOR_CONCAT(g_pluginHooks_,
+                                                                         MOTOR_PROJECTID);
+
+namespace Motor { namespace Plugin {
+
+class motor_api(PLUGIN) IPluginHook : public minitl::intrusive_list< IPluginHook >::item
+{
+protected:
+    IPluginHook(minitl::intrusive_list< IPluginHook > & owner)
+    {
+        owner.push_back(*this);
+    }
+    virtual ~IPluginHook();
+
+public:
+    virtual void onload(const Context& context)                      = 0;
+    virtual void onunload(weak< Resource::ResourceManager > manager) = 0;
+};
+
+template < typename T >
+class PluginHook : public IPluginHook
+{
+private:
+    T m_hook;
+
+public:
+    PluginHook(const T& t) : IPluginHook(::MOTOR_CONCAT(g_pluginHooks_, MOTOR_PROJECTID)), m_hook(t)
+    {
+    }
+    ~PluginHook()
+    {
+    }
+    virtual void onload(const Context& context) override
+    {
+        m_hook.onload(context);
+    }
+    virtual void onunload(weak< Resource::ResourceManager > manager) override
+    {
+        m_hook.onunload(manager);
+    }
+};
+
+}}  // namespace Motor::Plugin
+
+/**************************************************************************************************/
+#endif

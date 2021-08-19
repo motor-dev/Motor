@@ -308,12 +308,12 @@ class QtToolchain(QtObject):
                 self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
                 if platform == 'android':
                     toolchain_id = 'Qt4ProjectManager.ToolChain.Android:%s' % generateGUID(
-                        'BugEngine:toolchain:%s:%d' % (env_name, language)
+                        'Motor:toolchain:%s:%d' % (env_name, language)
                     )
                     self.Qt4ProjectManager_Android_NDK_TC_VERION = env_name.split('-')[-1]
                 else:
                     toolchain_id = 'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID(
-                        'BugEngine:toolchain:%s:%d' % (env_name, language)
+                        'Motor:toolchain:%s:%d' % (env_name, language)
                     )
             elif env.COMPILER_NAME in ('clang', 'llvm'):
                 self.ProjectExplorer_GccToolChain_Path = compiler
@@ -322,18 +322,18 @@ class QtToolchain(QtObject):
                 self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
                 if platform == 'android':
                     toolchain_id = 'Qt4ProjectManager.ToolChain.Android:%s' % generateGUID(
-                        'BugEngine:toolchain:%s:%d' % (env_name, language)
+                        'Motor:toolchain:%s:%d' % (env_name, language)
                     )
                     self.Qt4ProjectManager_Android_NDK_TC_VERION = env_name.split('-')[-1]
                 else:
                     toolchain_id = 'ProjectExplorer.ToolChain.Clang:%s' % generateGUID(
-                        'BugEngine:toolchain:%s:%d' % (env_name, language)
+                        'Motor:toolchain:%s:%d' % (env_name, language)
                     )
             elif env.COMPILER_NAME == 'icc':
                 self.ProjectExplorer_GccToolChain_Path = compiler
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
                 toolchain_id = 'ProjectExplorer.ToolChain.LinuxIcc:%s' % generateGUID(
-                    'BugEngine:toolchain:%s:%d' % (env_name, language)
+                    'Motor:toolchain:%s:%d' % (env_name, language)
                 )
             elif env.COMPILER_NAME == 'suncc':
                 self.ProjectExplorer_GccToolChain_Path = compiler
@@ -341,14 +341,14 @@ class QtToolchain(QtObject):
                 self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
                 self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
                 toolchain_id = 'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID(
-                    'BugEngine:toolchain:%s:%d' % (env_name, language)
+                    'Motor:toolchain:%s:%d' % (env_name, language)
                 )
             elif env.COMPILER_NAME == 'msvc' and env.MSVC_COMPILER != 'intel':
                 self.ProjectExplorer_MsvcToolChain_VarsBat = env.MSVC_BATFILE[0].replace('\\', '/')
                 self.ProjectExplorer_MsvcToolChain_VarsBatArg = env.MSVC_BATFILE[1] or ''
                 self.ProjectExplorer_MsvcToolChain_SupportedAbi = abi
                 toolchain_id = 'ProjectExplorer.ToolChain.Msvc:%s' % generateGUID(
-                    'BugEngine:toolchain:%s:%d' % (env_name, language)
+                    'Motor:toolchain:%s:%d' % (env_name, language)
                 )
             else:
                 self.ProjectExplorer_CustomToolChain_CompilerPath = compiler
@@ -364,13 +364,13 @@ class QtToolchain(QtObject):
                 self.ProjectExplorer_CustomToolChain_Mkspecs = ''
                 self.ProjectExplorer_CustomToolChain_OutputParser = 0
                 toolchain_id = 'ProjectExplorer.ToolChain.Custom:%s' % generateGUID(
-                    'BugEngine:toolchain:%s:%d' % (env_name, language)
+                    'Motor:toolchain:%s:%d' % (env_name, language)
                 )
                 self.ProjectExplorer_CustomToolChain_PredefinedMacros = tuple(env.DEFINES + env.SYSTEM_DEFINES)
                 self.ProjectExplorer_CustomToolChain_TargetAbi = abi
             self.ProjectExplorer_ToolChain_Language = language
             self.ProjectExplorer_ToolChain_Autodetect = False
-            self.ProjectExplorer_ToolChain_DisplayName = 'BugEngine:toolchain:' + env_name
+            self.ProjectExplorer_ToolChain_DisplayName = 'Motor:toolchain:' + env_name
             self.ProjectExplorer_ToolChain_Id = toolchain_id
 
 
@@ -405,8 +405,8 @@ class QtDebugger(QtObject):
             abi = abi or getattr(toolchain, 'ProjectExplorer_GccToolChain_TargetAbi', None)
             abi = abi or getattr(toolchain, 'ProjectExplorer_MsvcToolChain_TargetAbi', None)
             self.AutoDetected = False
-            self.DisplayName = 'BugEngine:debugger:' + env_name
-            self.Id = generateGUID('BugEngine:debugger:%s' % env_name)
+            self.DisplayName = 'Motor:debugger:' + env_name
+            self.Id = generateGUID('Motor:debugger:%s' % env_name)
 
 
 class QtDevice(QtObject):
@@ -447,17 +447,17 @@ class QtPlatform(QtObject):
                 ('QtPM4.mkSPecInformation', ''),
                 ('QtSupport.QtInformation', -1),
             ]
-            icon_path = os.path.join(bld.bugenginenode.abspath(), 'mak', 'res', '%s.png' % env.VALID_PLATFORMS[0])
-            icon_extra = os.path.join(bld.bugenginenode.abspath(), 'extra', env.VALID_PLATFORMS[0], 'icon.png')
+            icon_path = os.path.join(bld.motornode.abspath(), 'mak', 'res', '%s.png' % env.VALID_PLATFORMS[0])
+            icon_extra = os.path.join(bld.motornode.abspath(), 'extra', env.VALID_PLATFORMS[0], 'icon.png')
             if os.path.isfile(icon_path):
                 self.PE_Profile_Icon = icon_path
             elif os.path.isfile(icon_extra):
                 self.PE_Profile_Icon = icon_extra
             else:
                 self.PE_Profile_Icon = ':///Desktop///'
-            self.PE_Profile_Id = self.guid = generateGUID('BugEngine:profile:' + env_name)
+            self.PE_Profile_Id = self.guid = generateGUID('Motor:profile:' + env_name)
             self.PE_Profile_MutableInfo = ()
-            self.PE_Profile_Name = 'BugEngine:profile:' + env_name
+            self.PE_Profile_Name = 'Motor:profile:' + env_name
             self.PE_Profile_SDK = False
 
 
@@ -476,7 +476,7 @@ class QtCreator(Build.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.variant = self.__class__.bugengine_variant
+        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
         self.env.VARIANT = to_var('Variant')
         self.env.TOOLCHAIN = to_var('Toolchain')
@@ -501,7 +501,7 @@ class QtCreator(Build.BuildContext):
             os.makedirs(os.path.join(HOME_DIRECTORY, 'codestyles', 'Cpp'))
         except OSError:
             pass
-        with open(os.path.join(HOME_DIRECTORY, 'codestyles', 'Cpp', 'bugengine.xml'), 'w') as codestyle:
+        with open(os.path.join(HOME_DIRECTORY, 'codestyles', 'Cpp', 'motor.xml'), 'w') as codestyle:
             self.write_codestyle(codestyle)
 
         projects = []
@@ -536,7 +536,7 @@ class QtCreator(Build.BuildContext):
             return bytearray(b'{9807fb0e-3785-4641-a197-bb1a10ccc985}')
 
     def get_platform_guid(self, env_name):
-        guid = generateGUID('BugEngine:profile:' + env_name)
+        guid = generateGUID('Motor:profile:' + env_name)
         for platform_name, platform in self.platforms:
             if platform_name == guid:
                 return guid
@@ -561,7 +561,7 @@ class QtCreator(Build.BuildContext):
                         debugger = QtDebugger()
                         debugger.load_from_node(data.getElementsByTagName('valuemap')[0])
                         self.debuggers.append((debugger.Id, debugger))
-                        if debugger.DisplayName.startswith('BugEngine:'):
+                        if debugger.DisplayName.startswith('Motor:'):
                             self.debuggers_to_remove.append(debugger)
 
     def load_toolchain_list(self):
@@ -584,7 +584,7 @@ class QtCreator(Build.BuildContext):
                         toolchain = QtToolchain()
                         toolchain.load_from_node(data.getElementsByTagName('valuemap')[0])
                         self.toolchains.append((toolchain.ProjectExplorer_ToolChain_Id, toolchain))
-                        if toolchain.ProjectExplorer_ToolChain_DisplayName.startswith('BugEngine:'):
+                        if toolchain.ProjectExplorer_ToolChain_DisplayName.startswith('Motor:'):
                             self.toolchains_to_remove.append(toolchain)
 
     def load_device_list(self):
@@ -621,7 +621,7 @@ class QtCreator(Build.BuildContext):
                             pass
                         else:
                             self.platforms.append((platform.PE_Profile_Id, platform))
-                            if platform.PE_Profile_Name.startswith('BugEngine:'):
+                            if platform.PE_Profile_Name.startswith('Motor:'):
                                 self.platforms_to_remove.append(platform)
 
     def build_platform_list(self):
@@ -811,7 +811,7 @@ class QtCreator(Build.BuildContext):
                     )
                 with XmlNode(qtcreator, 'data') as data:
                     XmlNode(data, 'variable', 'DisplayName').close()
-                    write_value(data, 'BugEngine')
+                    write_value(data, 'Motor')
 
     def write_project(self, task_gen):
         node = self.base_node.make_node('%s.creator' % task_gen.target)
@@ -852,7 +852,7 @@ class QtCreator(Build.BuildContext):
                             (
                                 'EditorConfiguration.CodeStyle.0', [
                                     ('language', 'Cpp'),
-                                    ('value', [('CurrentPreferences', bytearray(b'bugengine'))]),
+                                    ('value', [('CurrentPreferences', bytearray(b'motor'))]),
                                 ]
                             ),
                             (
@@ -1028,10 +1028,10 @@ class QtCreator(Build.BuildContext):
                         run_configurations = []
                         index = 0
                         for task_gen in task_gens:
-                            if 'bugengine:game' in task_gen.features:
+                            if 'motor:game' in task_gen.features:
                                 if 'android' in env.VALID_PLATFORMS:
                                     executable = env.ADB[0]
-                                    arguments = 'shell am start com.bugengine/.BugEngineActivity --es %s' % task_gen.target
+                                    arguments = 'shell am start com.motor/.MotorActivity --es %s' % task_gen.target
                                 else:
                                     arguments = task_gen.target
                                     executable = to_var('OUT_NAME')
@@ -1090,7 +1090,7 @@ class QtCreator(Build.BuildContext):
                                     )
                                 )
                                 index += 1
-                            elif 'bugengine:python_module' in task_gen.features:
+                            elif 'motor:python_module' in task_gen.features:
                                 run_configurations.append(
                                     (
                                         'ProjectExplorer.Target.RunConfiguration.%d' % index, [
@@ -1280,7 +1280,7 @@ class Qbs(QtCreator):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.variant = self.__class__.bugengine_variant
+        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
         self.env.VARIANT = to_var('Variant')
         self.env.TOOLCHAIN = to_var('Toolchain')
@@ -1306,7 +1306,7 @@ class Qbs(QtCreator):
             os.makedirs(os.path.join(HOME_DIRECTORY, 'codestyles', 'Cpp'))
         except OSError:
             pass
-        with open(os.path.join(HOME_DIRECTORY, 'codestyles', 'Cpp', 'bugengine.xml'), 'w') as codestyle:
+        with open(os.path.join(HOME_DIRECTORY, 'codestyles', 'Cpp', 'motor.xml'), 'w') as codestyle:
             self.write_codestyle(codestyle)
         projects = {}
         project_list = []
@@ -1395,8 +1395,8 @@ class QtCreator2(QtCreator):
     cmd = 'qtcreator2'
     fun = 'build'
     optim = 'debug'
-    bugengine_toolchain = 'projects'
-    bugengine_variant = 'projects.setup'
+    motor_toolchain = 'projects'
+    motor_variant = 'projects.setup'
     variant = 'projects/qtcreator2'
     version = (2, 12)
 
@@ -1406,8 +1406,8 @@ class QtCreator3(QtCreator):
     cmd = 'qtcreator3'
     fun = 'build'
     optim = 'debug'
-    bugengine_toolchain = 'projects'
-    bugengine_variant = 'projects.setup'
+    motor_toolchain = 'projects'
+    motor_variant = 'projects.setup'
     variant = 'projects/qtcreator3'
     version = (3, 15)
 
@@ -1417,8 +1417,8 @@ class QtCreator4(QtCreator):
     cmd = 'qtcreator4'
     fun = 'build'
     optim = 'debug'
-    bugengine_toolchain = 'projects'
-    bugengine_variant = 'projects.setup'
+    motor_toolchain = 'projects'
+    motor_variant = 'projects.setup'
     variant = 'projects/qtcreator4'
     version = (4, 18)
 
@@ -1428,8 +1428,8 @@ class Qbs2(Qbs):
     cmd = 'qbs2'
     fun = 'build'
     optim = 'debug'
-    bugengine_toolchain = 'projects'
-    bugengine_variant = 'projects.setup'
+    motor_toolchain = 'projects'
+    motor_variant = 'projects.setup'
     variant = 'projects/qbs2'
     version = (2, 12)
 
@@ -1439,8 +1439,8 @@ class Qbs3(Qbs):
     cmd = 'qbs3'
     fun = 'build'
     optim = 'debug'
-    bugengine_toolchain = 'projects'
-    bugengine_variant = 'projects.setup'
+    motor_toolchain = 'projects'
+    motor_variant = 'projects.setup'
     variant = 'projects/qbs3'
     version = (3, 15)
 
@@ -1450,7 +1450,7 @@ class Qbs4(Qbs):
     cmd = 'qbs4'
     fun = 'build'
     optim = 'debug'
-    bugengine_toolchain = 'projects'
-    bugengine_variant = 'projects.setup'
+    motor_toolchain = 'projects'
+    motor_variant = 'projects.setup'
     variant = 'projects/qbs4'
     version = (4, 18)

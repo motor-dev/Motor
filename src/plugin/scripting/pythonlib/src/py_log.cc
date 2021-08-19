@@ -1,88 +1,88 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <py_log.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
-static PyMethodDef s_logMethods[] = {{"write", &PyBugLog::write, METH_VARARGS, "sys.std*.write"},
-                                     {"flush", &PyBugLog::flush, METH_VARARGS, "sys.std*.flush"},
+static PyMethodDef s_logMethods[] = {{"write", &PyMotorLog::write, METH_VARARGS, "sys.std*.write"},
+                                     {"flush", &PyMotorLog::flush, METH_VARARGS, "sys.std*.flush"},
                                      {0, 0, 0, 0}};
 
-PyTypeObject PyBugLog::s_pyType = {{{0, 0}, 0},
-                                   "py_bugengine.Log",
-                                   sizeof(PyBugLog),
-                                   0,
-                                   &PyBugLog::dealloc,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   Py_TPFLAGS_DEFAULT | Py_TPFLAGS_IS_ABSTRACT,
-                                   "BugEngine logging",
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   s_logMethods,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   &PyBugLog::init,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   0};
+PyTypeObject PyMotorLog::s_pyType = {{{0, 0}, 0},
+                                     "py_motor.Log",
+                                     sizeof(PyMotorLog),
+                                     0,
+                                     &PyMotorLog::dealloc,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_IS_ABSTRACT,
+                                     "Motor logging",
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     s_logMethods,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     &PyMotorLog::init,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     0};
 
-int PyBugLog::init(PyObject* self, PyObject* args, PyObject* kwds)
+int PyMotorLog::init(PyObject* self, PyObject* args, PyObject* kwds)
 {
-    be_forceuse(self);
-    be_forceuse(args);
-    be_forceuse(kwds);
+    motor_forceuse(self);
+    motor_forceuse(args);
+    motor_forceuse(kwds);
     return 0;
 }
 
-void PyBugLog::dealloc(PyObject* self)
+void PyMotorLog::dealloc(PyObject* self)
 {
-    PyBugLog* self_ = reinterpret_cast< PyBugLog* >(self);
+    PyMotorLog* self_ = reinterpret_cast< PyMotorLog* >(self);
     self_->logger.~ref();
     self->py_type->tp_free(self);
 }
 
 static char  logBuffer[65535];
 static char* logCurrent = logBuffer;
-PyObject*    PyBugLog::write(PyObject* self, PyObject* args)
+PyObject*    PyMotorLog::write(PyObject* self, PyObject* args)
 {
-    PyBugLog* log = reinterpret_cast< PyBugLog* >(self);
-    char*     str;
-    LogLevel  level = log->type == logTypeStdOut ? logInfo : logError;
+    PyMotorLog* log = reinterpret_cast< PyMotorLog* >(self);
+    char*       str;
+    LogLevel    level = log->type == logTypeStdOut ? logInfo : logError;
     if(s_library->m__PyArg_ParseTuple_SizeT(args, "s", &str))
     {
         u32 written = 0;
@@ -117,35 +117,35 @@ PyObject*    PyBugLog::write(PyObject* self, PyObject* args)
     }
 }
 
-PyObject* PyBugLog::flush(PyObject* self, PyObject* args)
+PyObject* PyMotorLog::flush(PyObject* self, PyObject* args)
 {
-    be_forceuse(self);
-    be_forceuse(args);
+    motor_forceuse(self);
+    motor_forceuse(args);
     Py_INCREF(s_library->m__Py_NoneStruct);
     return s_library->m__Py_NoneStruct;
 }
 
-void PyBugLog::registerType(PyObject* module)
+void PyMotorLog::registerType(PyObject* module)
 {
     int result = s_library->m_PyType_Ready(&s_pyType);
-    be_assert(result >= 0, "unable to register type");
+    motor_assert(result >= 0, "unable to register type");
     Py_INCREF(&s_pyType);
 
-    PyBugLog* ob = reinterpret_cast< PyBugLog* >(s_pyType.tp_alloc(&s_pyType, 0));
+    PyMotorLog* ob = reinterpret_cast< PyMotorLog* >(s_pyType.tp_alloc(&s_pyType, 0));
     new(&ob->logger) ref< Logger >(Logger::instance("scripting.python"));
     ob->type = logTypeStdOut;
     result   = s_library->m_PySys_SetObject("stdout", (PyObject*)ob);
-    be_assert(result >= 0, "unable to register stdout");
+    motor_assert(result >= 0, "unable to register stdout");
     Py_DECREF(ob);
 
-    ob = reinterpret_cast< PyBugLog* >(s_pyType.tp_alloc(&s_pyType, 0));
+    ob = reinterpret_cast< PyMotorLog* >(s_pyType.tp_alloc(&s_pyType, 0));
     new(&ob->logger) ref< Logger >(Logger::instance("scripting.python"));
     ob->type = logTypeStdErr;
     result   = s_library->m_PySys_SetObject("stderr", (PyObject*)ob);
-    be_assert(result >= 0, "unable to register stderr");
+    motor_assert(result >= 0, "unable to register stderr");
     Py_DECREF(ob);
-    be_forceuse(result);
-    be_forceuse(module);
+    motor_forceuse(result);
+    motor_forceuse(module);
 }
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python

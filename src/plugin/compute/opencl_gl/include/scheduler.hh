@@ -1,14 +1,14 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_COMPUTE_OPENCL_OPENGL_SCHEDULER_HH_
-#define BE_COMPUTE_OPENCL_OPENGL_SCHEDULER_HH_
+#ifndef MOTOR_COMPUTE_OPENCL_OPENGL_SCHEDULER_HH_
+#define MOTOR_COMPUTE_OPENCL_OPENGL_SCHEDULER_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
-#include <bugengine/plugin.compute.opencl/scheduler.hh>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/plugin.compute.opencl/scheduler.hh>
+#include <motor/plugin/plugin.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace OpenCL_GL {
+namespace Motor { namespace KernelScheduler { namespace OpenCL_GL {
 
 class Scheduler : public OpenCL::Scheduler
 {
@@ -30,12 +30,12 @@ public:
     }
     void operator delete(void* memory)
     {
-        be_notreached();
+        motor_notreached();
         ::operator delete(memory);
     }
 };
 
-}}}  // namespace BugEngine::KernelScheduler::OpenCL_GL
+}}}  // namespace Motor::KernelScheduler::OpenCL_GL
 
 /**************************************************************************************************/
 #endif

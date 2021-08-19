@@ -1,10 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.3d/stdafx.h>
-#include <bugengine/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include <motor/plugin.graphics.3d/stdafx.h>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 RenderTargetDescription::RenderTargetDescription()
 {
@@ -31,4 +31,4 @@ RenderWindowDescription::~RenderWindowDescription()
 {
 }
 
-}  // namespace BugEngine
+}  // namespace Motor

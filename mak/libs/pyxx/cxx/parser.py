@@ -2,7 +2,7 @@ import glrp
 from . import lexer
 from .. import tables
 import os
-from be_typing import Callable, TYPE_CHECKING, cast
+from motor_typing import Callable, TYPE_CHECKING, cast
 
 
 class CxxParser(glrp.Parser):

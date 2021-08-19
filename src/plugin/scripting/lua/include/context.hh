@@ -1,18 +1,18 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_LUA_CONTEXT_H_
-#define BE_LUA_CONTEXT_H_
+#ifndef MOTOR_LUA_CONTEXT_H_
+#define MOTOR_LUA_CONTEXT_H_
 /**************************************************************************************************/
 #include <stdafx.h>
-#include <bugengine/filesystem/file.script.hh>
-#include <bugengine/meta/classinfo.script.hh>
-#include <bugengine/meta/value.hh>
-#include <bugengine/plugin/plugin.hh>
-#include <bugengine/scriptengine.hh>
 #include <lua.script.hh>
+#include <motor/filesystem/file.script.hh>
+#include <motor/meta/classinfo.script.hh>
+#include <motor/meta/value.hh>
+#include <motor/plugin/plugin.hh>
+#include <motor/scriptengine.hh>
 
-namespace BugEngine { namespace Lua {
+namespace Motor { namespace Lua {
 
 class Context : public ScriptEngine< LuaScript >
 {
@@ -42,7 +42,7 @@ private:
     static void* luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize);
 };
 
-}}  // namespace BugEngine::Lua
+}}  // namespace Motor::Lua
 
 /**************************************************************************************************/
 #endif

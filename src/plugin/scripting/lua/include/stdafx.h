@@ -1,11 +1,11 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_LUA_STDAFX_H_
-#define BE_LUA_STDAFX_H_
+#ifndef MOTOR_LUA_STDAFX_H_
+#define MOTOR_LUA_STDAFX_H_
 /**************************************************************************************************/
 
-#include <bugengine/stdafx.h>
+#include <motor/stdafx.h>
 
 extern "C"
 {

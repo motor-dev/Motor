@@ -1,4 +1,4 @@
-from be_typing import TYPE_CHECKING, TypeVar
+from motor_typing import TYPE_CHECKING, TypeVar
 from .ir_scope import IrScope
 
 DeclType = TypeVar('DeclType', bound='IrDeclaration')

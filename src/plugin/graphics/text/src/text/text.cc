@@ -1,10 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.graphics.text/stdafx.h>
-#include <bugengine/plugin.graphics.text/text.script.hh>
+#include <motor/plugin.graphics.text/stdafx.h>
+#include <motor/plugin.graphics.text/text.script.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 Text::Text()
 {
@@ -14,4 +14,4 @@ Text::~Text()
 {
 }
 
-}  // namespace BugEngine
+}  // namespace Motor

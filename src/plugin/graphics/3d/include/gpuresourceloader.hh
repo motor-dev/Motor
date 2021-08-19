@@ -1,13 +1,13 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_3D_RENDERER_GPURESOURCELOADER_HH_
-#define BE_3D_RENDERER_GPURESOURCELOADER_HH_
+#ifndef MOTOR_3D_RENDERER_GPURESOURCELOADER_HH_
+#define MOTOR_3D_RENDERER_GPURESOURCELOADER_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.graphics.3d/stdafx.h>
-#include <bugengine/resource/loader.hh>
+#include <motor/plugin.graphics.3d/stdafx.h>
+#include <motor/resource/loader.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 class IRenderer;
 class IGPUResource;
@@ -16,7 +16,7 @@ template < typename R >
 class GPUResourceLoader : public Resource::ILoader
 {
     friend class IRenderer;
-    BE_NOCOPY(GPUResourceLoader);
+    MOTOR_NOCOPY(GPUResourceLoader);
 
 private:
     weak< const IRenderer >                m_renderer;
@@ -38,7 +38,7 @@ protected:
     void         flush();
 };
 
-}  // namespace BugEngine
+}  // namespace Motor
 
 #include <gpuresourceloader.inl>
 

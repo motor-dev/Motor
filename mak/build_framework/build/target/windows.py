@@ -37,7 +37,7 @@ class symbols(Task.Task):
                                     export_file.write('#pragma comment(linker, "/export:%s")\n' % (symbol.name))
 
 
-@feature('bugengine:export_all')
+@feature('motor:export_all')
 @after_method('process_source')
 @before_method('apply_link')
 def generate_export_file(self):
@@ -71,5 +71,5 @@ def apply_implib(self):
 
 
 def build(bld):
-    bld.platforms.append(bld.external('bugengine.3rdparty.system.win32'))
-    bld.platforms.append(bld.external('bugengine.3rdparty.system.dbghelp'))
+    bld.platforms.append(bld.external('motor.3rdparty.system.win32'))
+    bld.platforms.append(bld.external('motor.3rdparty.system.dbghelp'))

@@ -1,10 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.debug.runtime/stdafx.h>
-#include <bugengine/plugin.debug.runtime/callstack.hh>
+#include <motor/plugin.debug.runtime/stdafx.h>
+#include <motor/plugin.debug.runtime/callstack.hh>
 
-namespace BugEngine { namespace Runtime {
+namespace Motor { namespace Runtime {
 
 static inline void** st_next(void** stack_pointer)
 {
@@ -21,10 +21,10 @@ static inline void** st_next(void** stack_pointer)
     return nextStackPointer;
 }
 
-BE_NOINLINE size_t Callstack::backtrace(Address* buffer, size_t count, size_t skip)
+MOTOR_NOINLINE size_t Callstack::backtrace(Address* buffer, size_t count, size_t skip)
 {
     void** stackPointer;
-#ifdef BE_COMPILER_MSVC
+#ifdef MOTOR_COMPILER_MSVC
     stackPointer = 0;
 #elif defined(_ARM64) && defined(_ILP32)
     __asm__ volatile("mov %w0,w29" : "=r"(stackPointer));
@@ -50,4 +50,4 @@ BE_NOINLINE size_t Callstack::backtrace(Address* buffer, size_t count, size_t sk
     return result;
 }
 
-}}  // namespace BugEngine::Runtime
+}}  // namespace Motor::Runtime

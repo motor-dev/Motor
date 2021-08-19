@@ -1,6 +1,6 @@
 import sys
 import argparse
-from be_typing import TypeVar, cast
+from motor_typing import TypeVar, cast
 
 T = TypeVar('T', bound='Callable[..., Dict[str, Any]]')
 
@@ -269,7 +269,7 @@ class Logger:
 
 logger = None
 
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict, Callable, TypeVar, Union, Any, List, Tuple
     from ..ir_position import IrPosition

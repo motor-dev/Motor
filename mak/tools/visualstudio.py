@@ -298,7 +298,7 @@ class VCproj:
                                 tool['Output'] = '$(OutDir)\\%s\\%s' % (
                                     env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % task_gen.target
                                 )
-                            elif 'bugengine:game' in task_gen.features:
+                            elif 'motor:game' in task_gen.features:
                                 deps = task_gen.use[:]
                                 seen = set([])
                                 program = None
@@ -515,14 +515,14 @@ class VCxproj:
                             properties, 'NMakeOutput',
                             '$(OutDir)\\%s\\%s' % (env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % task_gen.target)
                         )
-                    elif 'bugengine:game' in task_gen.features:
+                    elif 'motor:game' in task_gen.features:
                         self.vcxproj._add(
                             properties, 'NMakeOutput', '$(OutDir)\\%s\\%s' %
                             (env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % task_gen.bld.launcher.target)
                         )
                         self.vcxproj._add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
                         self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
-                    elif 'bugengine:python_module' in task_gen.features:
+                    elif 'motor:python_module' in task_gen.features:
                         self.vcxproj._add(properties, 'LocalDebuggerCommand', sys.executable)
                         self.vcxproj._add(
                             properties, 'LocalDebuggerCommandArguments',
@@ -611,14 +611,11 @@ class PyProj:
             }
         )
         propgroup = self.pyproj._add(project, 'PropertyGroup')
-        paths = sys.path + [task_gen.bld.bugenginenode.make_node('mak').make_node('libs').abspath().replace('/', '\\')]
+        paths = sys.path + [task_gen.bld.motornode.make_node('mak').make_node('libs').abspath().replace('/', '\\')]
         self.pyproj._add(propgroup, 'SchemaVersion', '2.0')
         self.pyproj._add(propgroup, 'ProjectGuid', self.guid[1:-1])
         self.pyproj._add(propgroup, 'ProjectHome', '..\..')
-        self.pyproj._add(
-            propgroup, 'StartupFile',
-            task_gen.bld.bugenginenode.make_node('waf').abspath().replace('/', '\\')
-        )
+        self.pyproj._add(propgroup, 'StartupFile', task_gen.bld.motornode.make_node('waf').abspath().replace('/', '\\'))
         self.pyproj._add(propgroup, 'SearchPath', ';'.join(paths))
         self.pyproj._add(propgroup, 'WorkingDirectory', task_gen.bld.srcnode.abspath().replace('/', '\\'))
         self.pyproj._add(propgroup, 'OutputPath', '.')
@@ -681,8 +678,8 @@ class vs2003(Build.BuildContext):
     optim = 'debug'
     version = (('Visual Studio .NET 2003', '8.00', False, None), (VCproj, '7.10'))
     platforms = ['Win32']
-    bugengine_toolchain = 'projects'
-    bugengine_variant = 'projects.setup'
+    motor_toolchain = 'projects'
+    motor_variant = 'projects.setup'
     variant = 'projects/vs'
 
     def get_platform(self, platform_name):
@@ -697,7 +694,7 @@ class vs2003(Build.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.variant = self.__class__.bugengine_variant
+        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '$(Variant)'
@@ -757,7 +754,7 @@ class vs2003(Build.BuildContext):
             for tg in g:
                 if not isinstance(tg, TaskGen.task_gen):
                     continue
-                if not 'bugengine:kernel' in tg.features:
+                if not 'motor:kernel' in tg.features:
                     tg.post()
 
                     nodes = [projects.make_node("%s.%s" % (tg.target, ext)) for ext in klass.extensions]

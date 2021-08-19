@@ -1,13 +1,13 @@
-/* BugEngine <bugengine.devel@gmail.com> under New BSD License
+/* Motor <motor.devel@gmail.com> under New BSD License
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bugengine/filesystem/diskfolder.script.hh>
-#include <bugengine/meta/engine/namespace.hh>
-#include <bugengine/plugin/plugin.hh>
 #include <application.hh>
+#include <motor/filesystem/diskfolder.script.hh>
+#include <motor/meta/engine/namespace.hh>
+#include <motor/plugin/plugin.hh>
 
-namespace BugEngine { namespace Test { namespace Compute { namespace UnitTests {
+namespace Motor { namespace Test { namespace Compute { namespace UnitTests {
 
 UnitTestsApplication::UnitTestsApplication(const Plugin::Context& context)
     : Application(
@@ -28,6 +28,6 @@ UnitTestsApplication::~UnitTestsApplication()
     pluginContext().resourceManager->unload(m_mainPackage);
 }
 
-}}}}  // namespace BugEngine::Test::Compute::UnitTests
+}}}}  // namespace Motor::Test::Compute::UnitTests
 
-BE_PLUGIN_REGISTER(BugEngine::Test::Compute::UnitTests::UnitTestsApplication)
+MOTOR_PLUGIN_REGISTER(Motor::Test::Compute::UnitTests::UnitTestsApplication)

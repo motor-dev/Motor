@@ -11,7 +11,7 @@ unqualified-id:
 
 import glrp
 from .....parser import cxx98
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('unqualified-id[split] : "identifier"')

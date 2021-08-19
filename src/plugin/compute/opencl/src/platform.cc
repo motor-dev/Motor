@@ -1,11 +1,11 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.compute.opencl/stdafx.h>
+#include <motor/plugin.compute.opencl/stdafx.h>
 #include <context.hh>
 #include <platform.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
+namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
 static CLStringInfo getPlatformInfo(cl_platform_id platform, cl_platform_info name)
 {
@@ -39,10 +39,10 @@ minitl::vector< ref< Platform > > Platform::loadPlatforms()
 
 Platform::Platform(cl_platform_id platformId) : m_platformId(platformId), m_contexts(Arena::task())
 {
-    be_info("Found OpenCL platform %s (%s/%s)"
-            | getPlatformInfo(m_platformId, CL_PLATFORM_NAME).info
-            | getPlatformInfo(m_platformId, CL_PLATFORM_VENDOR).info
-            | getPlatformInfo(m_platformId, CL_PLATFORM_VERSION).info);
+    motor_info("Found OpenCL platform %s (%s/%s)"
+               | getPlatformInfo(m_platformId, CL_PLATFORM_NAME).info
+               | getPlatformInfo(m_platformId, CL_PLATFORM_VENDOR).info
+               | getPlatformInfo(m_platformId, CL_PLATFORM_VERSION).info);
 
     cl_uint deviceCount = 0;
     cl_uint deviceType  = CL_DEVICE_TYPE_ACCELERATOR | CL_DEVICE_TYPE_GPU;
@@ -51,7 +51,7 @@ Platform::Platform(cl_platform_id platformId) : m_platformId(platformId), m_cont
     {
         if(error != CL_SUCCESS)
         {
-            be_error("clGetDevice returned error code %d" | error);
+            motor_error("clGetDevice returned error code %d" | error);
         }
         else if(deviceCount > 0)
         {
@@ -70,7 +70,7 @@ Platform::Platform(cl_platform_id platformId) : m_platformId(platformId), m_cont
                     clGetDeviceInfo(device, CL_DEVICE_NAME, sizeof(deviceName), deviceName,
                                     &result);
                     if(result >= sizeof(deviceName)) deviceName[sizeof(deviceName) - 1] = 0;
-                    be_error("unable to create context for device %s" | deviceName);
+                    motor_error("unable to create context for device %s" | deviceName);
                 }
                 else
                 {
@@ -87,4 +87,4 @@ Platform::~Platform()
 {
 }
 
-}}}  // namespace BugEngine::KernelScheduler::OpenCL
+}}}  // namespace Motor::KernelScheduler::OpenCL

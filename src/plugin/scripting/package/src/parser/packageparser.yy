@@ -1,18 +1,18 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 %{
-#include    <bugengine/plugin.scripting.package/stdafx.h>
+#include    <motor/plugin.scripting.package/stdafx.h>
 #include    <buildcontext.hh>
 
-#include    <bugengine/reflection/valueparse.hh>
+#include    <motor/reflection/valueparse.hh>
 
-#define yyparse be_package_parse
-#define yylex   be_package_lex
-#define yyerror be_package_error
-#define yylval  be_package_lval
-#define yychar  be_package_char
-#define yydebug be_package_debug
-#define yynerrs be_package_nerrs
+#define yyparse motor_package_parse
+#define yylex   motor_package_lex
+#define yyerror motor_package_error
+#define yylval  motor_package_lval
+#define yychar  motor_package_char
+#define yydebug motor_package_debug
+#define yynerrs motor_package_nerrs
 
 
 
@@ -31,8 +31,8 @@ extern int yylex();
 
 static int yyerror(void* context, const char *msg)
 {
-    using namespace BugEngine::Meta::AST;
-    BugEngine::PackageBuilder::BuildContext* buildContext = static_cast<BugEngine::PackageBuilder::BuildContext*>(context);
+    using namespace Motor::Meta::AST;
+    Motor::PackageBuilder::BuildContext* buildContext = static_cast<Motor::PackageBuilder::BuildContext*>(context);
     buildContext->result->context().error(weak<const Node>(),
                                           Message::MessageType("%s at line %d (%d:%d)") | msg | (g_packageLine+1)
                                                                                         | (g_packageColumnBefore)
@@ -53,12 +53,12 @@ static int yyerror(void* context, const char *msg)
 #ifdef free
 # undef free
 #endif
-#define malloc(x)    BugEngine::Arena::temporary().alloc(x, 4)
-#define realloc(x,s) BugEngine::Arena::temporary().realloc(x, s, 4)
-#define free(x)      BugEngine::Arena::temporary().free(x)
+#define malloc(x)    Motor::Arena::temporary().alloc(x, 4)
+#define realloc(x,s) Motor::Arena::temporary().realloc(x, s, 4)
+#define free(x)      Motor::Arena::temporary().free(x)
 
-using namespace BugEngine::PackageBuilder;
-using namespace BugEngine::Meta;
+using namespace Motor::PackageBuilder;
+using namespace Motor::Meta;
 
 %}
 
@@ -129,7 +129,7 @@ decl_object:
         {
             //(*$4)->setName($2);
             BuildContext* context = ((BuildContext*)param);
-            ref<AST::Node> node = parseValue(BugEngine::Arena::package(), context->result->context().messages,
+            ref<AST::Node> node = parseValue(Motor::Arena::package(), context->result->context().messages,
                                              (const char*)g_buffer->data()+$4.start, (const char*)g_buffer->data()+$4.end,
                                              $4.line, $4.column);
             if (node)
@@ -151,10 +151,10 @@ attribute:
         TOK_ID '=' TOK_value
         {
             BuildContext* context = ((BuildContext*)param);
-            ref<AST::Node> node = parseValue(BugEngine::Arena::package(), context->result->context().messages,
+            ref<AST::Node> node = parseValue(Motor::Arena::package(), context->result->context().messages,
                                              (const char*)g_buffer->data()+$3.start, (const char*)g_buffer->data()+$3.end,
                                              $3.line, $3.column);
-            be_forceuse(node);
+            motor_forceuse(node);
             free($1);
         }
     ;

@@ -1,13 +1,13 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.compute.opencl/stdafx.h>
-#include <bugengine/scheduler/kernel/kernel.script.hh>
+#include <motor/plugin.compute.opencl/stdafx.h>
 #include <codeloader.hh>
 #include <codeobject.hh>
 #include <context.hh>
+#include <motor/scheduler/kernel/kernel.script.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
+namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
 CodeLoader::CodeLoader(weak< const Context > context) : ICodeLoader(), m_context(context)
 {
@@ -20,9 +20,10 @@ CodeLoader::~CodeLoader()
 void CodeLoader::load(weak< const Resource::Description > kernelDescription,
                       Resource::Resource&                 resource)
 {
-    be_info("loading OpenCL kernel code %s"
-            | be_checked_cast< const Code >(kernelDescription)->name());
-    inamespace name = be_checked_cast< const Code >(kernelDescription)->name() + inamespace("cl");
+    motor_info("loading OpenCL kernel code %s"
+               | motor_checked_cast< const Code >(kernelDescription)->name());
+    inamespace name
+        = motor_checked_cast< const Code >(kernelDescription)->name() + inamespace("cl");
     resource.setRefHandle(ref< CodeObject >::create(Arena::task(), m_context, name));
 }
 
@@ -39,4 +40,4 @@ void CodeLoader::unload(Resource::Resource& resource)
     resource.clearRefHandle();
 }
 
-}}}  // namespace BugEngine::KernelScheduler::OpenCL
+}}}  // namespace Motor::KernelScheduler::OpenCL

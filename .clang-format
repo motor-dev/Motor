@@ -67,7 +67,7 @@ IncludeBlocks:   Preserve
 IncludeCategories:
   - Regex:           'stdafx\.h>$'
     Priority:        -1
-  - Regex:           '^<bugengine/'
+  - Regex:           '^<motor/'
     Priority:        1
   - Regex:           '^"()/'
     Priority:        10

@@ -1,16 +1,16 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_DEBUG_RUNTIME_DWARF_HH_
-#define BE_DEBUG_RUNTIME_DWARF_HH_
+#ifndef MOTOR_DEBUG_RUNTIME_DWARF_HH_
+#define MOTOR_DEBUG_RUNTIME_DWARF_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.debug.runtime/stdafx.h>
-#include <bugengine/minitl/hash.hh>
-#include <bugengine/minitl/hash_map.hh>
-#include <bugengine/plugin.debug.runtime/symbols.hh>
+#include <motor/plugin.debug.runtime/stdafx.h>
 #include <elf.hh>
+#include <motor/minitl/hash.hh>
+#include <motor/minitl/hash_map.hh>
+#include <motor/plugin.debug.runtime/symbols.hh>
 
-namespace BugEngine { namespace Runtime {
+namespace Motor { namespace Runtime {
 
 namespace Dwarf {
 class CompilationUnit;
@@ -19,12 +19,12 @@ struct Abbreviation;
 
 class DwarfModule : public SymbolResolver
 {
-    BE_NOCOPY(DwarfModule);
+    MOTOR_NOCOPY(DwarfModule);
 
 private:
     class StringBuffer : public refcountable
     {
-        BE_NOCOPY(StringBuffer);
+        MOTOR_NOCOPY(StringBuffer);
 
     private:
         const ref< const StringBuffer >  m_next;
@@ -102,19 +102,19 @@ public:
     const char* indexedString(u64 offset) const;
 };
 
-}}  // namespace BugEngine::Runtime
+}}  // namespace Motor::Runtime
 
 namespace minitl {
 
 template <>
-struct hash< BugEngine::Runtime::DwarfModule::AddressRange >
+struct hash< Motor::Runtime::DwarfModule::AddressRange >
 {
-    bool operator()(const BugEngine::Runtime::DwarfModule::AddressRange& range1,
-                    const BugEngine::Runtime::DwarfModule::AddressRange& range2)
+    bool operator()(const Motor::Runtime::DwarfModule::AddressRange& range1,
+                    const Motor::Runtime::DwarfModule::AddressRange& range2)
     {
         return range1 == range2;
     }
-    u32 operator()(const BugEngine::Runtime::DwarfModule::AddressRange& range)
+    u32 operator()(const Motor::Runtime::DwarfModule::AddressRange& range)
     {
         return u32(range.begin ^ range.end);
     }

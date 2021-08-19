@@ -1,0 +1,22 @@
+plugin graphics.3d;
+plugin scripting.lua;
+
+window = graphics.3d.RenderWindowDescription
+(
+    title = "Motor editor v0.1";
+)
+
+world = game.World.World
+(
+)
+
+node = graphics.3d.RenderScene
+(
+    rendertarget = window;
+    world = world;
+)
+
+luascript = scripting.lua.LuaScript
+(
+	script = <main.lua>;
+)

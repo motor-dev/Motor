@@ -1,16 +1,16 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
 #include <nullrenderer.hh>
 
-#include <bugengine/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
-#include <bugengine/plugin.graphics.3d/shader/shader.script.hh>
 #include <loaders/nullshader.hh>
 #include <loaders/nullsurface.hh>
 #include <loaders/nullwindow.hh>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include <motor/plugin.graphics.3d/shader/shader.script.hh>
 
-namespace BugEngine { namespace Null {
+namespace Motor { namespace Null {
 
 void NullRenderer::flush()
 {
@@ -45,4 +45,4 @@ NullRenderer::create(weak< const ShaderProgramDescription > shaderDescription) c
     return ref< NullShaderProgram >::create(m_allocator, shaderDescription, this);
 }
 
-}}  // namespace BugEngine::Null
+}}  // namespace Motor::Null

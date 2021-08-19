@@ -1,18 +1,18 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
  see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bugengine/meta/conversion.script.hh>
-#include <bugengine/meta/engine/call.hh>
-#include <bugengine/meta/engine/methodinfo.script.hh>
-#include <bugengine/meta/engine/propertyinfo.script.hh>
-#include <bugengine/meta/engine/scriptingapi.hh>
 #include <context.hh>
+#include <motor/meta/conversion.script.hh>
+#include <motor/meta/engine/call.hh>
+#include <motor/meta/engine/methodinfo.script.hh>
+#include <motor/meta/engine/propertyinfo.script.hh>
+#include <motor/meta/engine/scriptingapi.hh>
 #include <runtime/call.hh>
 #include <runtime/error.hh>
 #include <runtime/value.hh>
 
-namespace BugEngine { namespace Lua {
+namespace Motor { namespace Lua {
 
 struct LuaParameterType
 {
@@ -100,7 +100,7 @@ Meta::ConversionCost calculateConversion(const LuaParameterType& type, const Met
         case LUA_TNUMBER: return Meta::ConversionCalculator< LUA_NUMBER >::calculate(target);
         case LUA_TUSERDATA:
             lua_getmetatable(type.state, index);
-            luaL_getmetatable(type.state, "BugEngine.Object");
+            luaL_getmetatable(type.state, "Motor.Object");
             if(lua_rawequal(type.state, -1, -2))
             {
                 lua_pop(type.state, 2);
@@ -201,9 +201,9 @@ void convert(const LuaParameterType& type, void* buffer, const Meta::Type& targe
     }
     LuaPop p(type.state, index, type.key != -1);
     bool   result = createValue(type.state, index, target, buffer);
-    be_assert(result, "could not convert lua value %s to %s" | Context::tostring(type.state, index)
-                          | target.name());
-    be_forceuse(result);
+    motor_assert(result, "could not convert lua value %s to %s"
+                             | Context::tostring(type.state, index) | target.name());
+    motor_forceuse(result);
 }
 
 typedef Meta::ArgInfo< LuaParameterType > LuaParameterInfo;
@@ -311,4 +311,4 @@ int call(lua_State* state, raw< const Meta::Method > method)
     }
 }
 
-}}  // namespace BugEngine::Lua
+}}  // namespace Motor::Lua

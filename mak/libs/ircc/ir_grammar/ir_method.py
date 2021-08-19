@@ -8,7 +8,7 @@ define [linkage] [PreemptionSpecifier] [visibility] [DLLStorageClass]
 """
 
 from ..ir_ast import IrTypeVoid, IrReference, IrMethodObject, IrMethodParameter, IrMethodMetadataParameter, IrMethodDeclaration, IrTypeMetadata
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def p_ir_method(p):

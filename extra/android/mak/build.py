@@ -3,7 +3,7 @@ from waflib import Options, Context, Node, Utils, Errors, Build, TaskGen
 import os
 
 
-@feature('bugengine:android:aapt_resource')
+@feature('motor:android:aapt_resource')
 def aapt_resource(self):
     if 'android' in self.env.VALID_PLATFORMS:
         self.manifest = self.make_bld_node('src', '', 'AndroidManifest.xml')
@@ -62,7 +62,7 @@ def build(bld):
     bld.recurse('install.py')
 
 
-@feature('bugengine:multiarch')
+@feature('motor:multiarch')
 def apply_multiarch_android(self):
     pass
 
@@ -75,7 +75,7 @@ def strip_debug_info(self):
         self.strip_debug_info_impl()
 
 
-@feature('bugengine:launcher')
+@feature('motor:launcher')
 @after_method('install_step')
 def install_program_android(self):
     if 'android' in self.env.VALID_PLATFORMS:

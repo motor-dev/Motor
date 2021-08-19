@@ -1,75 +1,74 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <py_object.hh>
 #include <py_plugin.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
-static PyTypeObject s_bugenginePluginType
-    = {{{0, 0}, 0},
-       "py_bugengine.Plugin",
-       sizeof(PyBugPlugin),
-       0,
-       &PyBugPlugin::dealloc,
-       0,
-       &PyBugPlugin::getattr,
-       &PyBugPlugin::setattr,
-       0,
-       &PyBugPlugin::repr,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       Py_TPFLAGS_DEFAULT,
-       "Wrapper class for the C++ class BugEngine::Plugin::Plugin",
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       &PyBugPlugin::init,
-       0,
-       &PyBugPlugin::create,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0};
+static PyTypeObject s_motorPluginType = {{{0, 0}, 0},
+                                         "py_motor.Plugin",
+                                         sizeof(PyMotorPlugin),
+                                         0,
+                                         &PyMotorPlugin::dealloc,
+                                         0,
+                                         &PyMotorPlugin::getattr,
+                                         &PyMotorPlugin::setattr,
+                                         0,
+                                         &PyMotorPlugin::repr,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         Py_TPFLAGS_DEFAULT,
+                                         "Wrapper class for the C++ class Motor::Plugin::Plugin",
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         &PyMotorPlugin::init,
+                                         0,
+                                         &PyMotorPlugin::create,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         0};
 
-PyObject* PyBugPlugin::create(PyTypeObject* type, PyObject* /*args*/, PyObject* /*kwds*/)
+PyObject* PyMotorPlugin::create(PyTypeObject* type, PyObject* /*args*/, PyObject* /*kwds*/)
 {
-    PyBugPlugin* self = reinterpret_cast< PyBugPlugin* >(type->tp_alloc(type, 0));
+    PyMotorPlugin* self = reinterpret_cast< PyMotorPlugin* >(type->tp_alloc(type, 0));
     new(&self->value) Plugin::Plugin< void >();
     return reinterpret_cast< PyObject* >(self);
 }
 
-int PyBugPlugin::init(PyObject* self, PyObject* args, PyObject* /*kwds*/)
+int PyMotorPlugin::init(PyObject* self, PyObject* args, PyObject* /*kwds*/)
 {
-    PyBugPlugin* self_ = reinterpret_cast< PyBugPlugin* >(self);
-    const char*  name  = 0;
+    PyMotorPlugin* self_ = reinterpret_cast< PyMotorPlugin* >(self);
+    const char*    name  = 0;
     if(s_library->m__PyArg_ParseTuple_SizeT(args, "s", &name))
     {
         self_->value = Plugin::Plugin< void >(name, Plugin::Plugin< void >::Preload);
@@ -81,14 +80,14 @@ int PyBugPlugin::init(PyObject* self, PyObject* args, PyObject* /*kwds*/)
     }
 }
 
-PyObject* PyBugPlugin::getattr(PyObject* self, const char* name)
+PyObject* PyMotorPlugin::getattr(PyObject* self, const char* name)
 {
-    PyBugPlugin* self_ = reinterpret_cast< PyBugPlugin* >(self);
+    PyMotorPlugin* self_ = reinterpret_cast< PyMotorPlugin* >(self);
     if(self_->value)
     {
         Meta::Value v(self_->value.pluginNamespace());
         Meta::Value result = v[name];
-        return PyBugObject::stealValue(self, result);
+        return PyMotorObject::stealValue(self, result);
     }
     else
     {
@@ -99,17 +98,17 @@ PyObject* PyBugPlugin::getattr(PyObject* self, const char* name)
     }
 }
 
-int PyBugPlugin::setattr(PyObject* self, const char* name, PyObject* value)
+int PyMotorPlugin::setattr(PyObject* self, const char* name, PyObject* value)
 {
-    be_forceuse(self);
-    be_forceuse(name);
-    be_forceuse(value);
+    motor_forceuse(self);
+    motor_forceuse(name);
+    motor_forceuse(value);
     return 0;
 }
 
-PyObject* PyBugPlugin::repr(PyObject* self)
+PyObject* PyMotorPlugin::repr(PyObject* self)
 {
-    PyBugPlugin* self_ = reinterpret_cast< PyBugPlugin* >(self);
+    PyMotorPlugin* self_ = reinterpret_cast< PyMotorPlugin* >(self);
     if(s_library->getVersion() >= 30)
     {
         PyUnicode_FromFormatType f = s_library->m_PyUnicode_FromFormat;
@@ -121,22 +120,21 @@ PyObject* PyBugPlugin::repr(PyObject* self)
     }
 }
 
-void PyBugPlugin::dealloc(PyObject* self)
+void PyMotorPlugin::dealloc(PyObject* self)
 {
-    PyBugPlugin* self_ = reinterpret_cast< PyBugPlugin* >(self);
+    PyMotorPlugin* self_ = reinterpret_cast< PyMotorPlugin* >(self);
     self_->value.~Plugin();
     self->py_type->tp_free(self);
 }
 
-void PyBugPlugin::registerType(PyObject* module)
+void PyMotorPlugin::registerType(PyObject* module)
 {
-    int result = s_library->m_PyType_Ready(&s_bugenginePluginType);
-    be_assert(result >= 0, "unable to register type");
-    Py_INCREF(&s_bugenginePluginType);
-    result
-        = (*s_library->m_PyModule_AddObject)(module, "Plugin", (PyObject*)&s_bugenginePluginType);
-    be_assert(result >= 0, "unable to register type");
-    be_forceuse(result);
+    int result = s_library->m_PyType_Ready(&s_motorPluginType);
+    motor_assert(result >= 0, "unable to register type");
+    Py_INCREF(&s_motorPluginType);
+    result = (*s_library->m_PyModule_AddObject)(module, "Plugin", (PyObject*)&s_motorPluginType);
+    motor_assert(result >= 0, "unable to register type");
+    motor_forceuse(result);
 }
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python

@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 #define IDD_ASSERTDIALOG 100
 

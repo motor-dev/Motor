@@ -1,7 +1,7 @@
 from ircc.generators import IrccCDeclaration, IrccCDefinition, IrccCExpression
 from ircc.generators.ircc_c_expressions import IrccCExpressionCast
 from ircc import IrccType
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 class IrccClExpressionVectorValue(IrccCExpression):

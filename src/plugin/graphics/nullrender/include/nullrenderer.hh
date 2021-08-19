@@ -1,19 +1,19 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_NULLRENDER_RENDERER_HH_
-#define BE_NULLRENDER_RENDERER_HH_
+#ifndef MOTOR_NULLRENDER_RENDERER_HH_
+#define MOTOR_NULLRENDER_RENDERER_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
-#include <bugengine/filesystem/folder.script.hh>
-#include <bugengine/plugin.graphics.3d/renderer/irenderer.hh>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/filesystem/folder.script.hh>
+#include <motor/plugin.graphics.3d/renderer/irenderer.hh>
+#include <motor/plugin/plugin.hh>
 
-namespace BugEngine { namespace Null {
+namespace Motor { namespace Null {
 
 class NullRenderer : public IRenderer
 {
-    BE_NOCOPY(NullRenderer);
+    MOTOR_NOCOPY(NullRenderer);
 
 public:
     NullRenderer(const Plugin::Context& context);
@@ -39,7 +39,7 @@ private:
     create(weak< const ShaderProgramDescription > shaderDescription) const override;
 };
 
-}}  // namespace BugEngine::Null
+}}  // namespace Motor::Null
 
 /**************************************************************************************************/
 #endif

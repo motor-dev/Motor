@@ -1,5 +1,5 @@
 import os
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def configure(configuration_context):

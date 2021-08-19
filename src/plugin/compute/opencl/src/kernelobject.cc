@@ -1,17 +1,17 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.compute.opencl/stdafx.h>
-#include <bugengine/scheduler/kernel/ischeduler.hh>
+#include <motor/plugin.compute.opencl/stdafx.h>
 #include <codeobject.hh>
 #include <kernelobject.hh>
+#include <motor/scheduler/kernel/ischeduler.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
+namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
 KernelObject::KernelObject(weak< const CodeObject > code, const istring name)
     : m_kernel(clCreateKernel(code->m_program, (minitl::format< 128u >("%s_spir") | name), 0))
 {
-    be_info("OpenCL kernel entry point: %p" | m_kernel);
+    motor_info("OpenCL kernel entry point: %p" | m_kernel);
 }
 
 KernelObject::~KernelObject()
@@ -19,4 +19,4 @@ KernelObject::~KernelObject()
     clReleaseKernel(m_kernel);
 }
 
-}}}  // namespace BugEngine::KernelScheduler::OpenCL
+}}}  // namespace Motor::KernelScheduler::OpenCL

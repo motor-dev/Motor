@@ -1,87 +1,87 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/meta/engine/call.hh>
-#include <bugengine/meta/engine/scriptingapi.hh>
-#include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/meta/engine/call.hh>
+#include <motor/meta/engine/scriptingapi.hh>
+#include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <py_array.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
 static PyTypeObject::Py2NumberMethods s_py2ArrayNumber
-    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, 0, &PyBugArray::nonZero,
+    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, 0, &PyMotorArray::nonZero,
        0,         0, 0, 0, 0, 0, 0, 0, 0,
        0,         0, 0, 0, 0, 0, 0, 0, 0,
        0,         0, 0, 0, 0, 0, 0, 0, 0,
        0};
 
 static PyTypeObject::Py3NumberMethods s_py3ArrayNumber
-    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, &PyBugArray::nonZero,
+    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, &PyMotorArray::nonZero,
        0,         0, 0, 0, 0, 0, 0, 0,
        0,         0, 0, 0, 0, 0, 0, 0,
        0,         0, 0, 0, 0, 0, 0, 0,
        0,         0};
 
 static PyTypeObject::PySequenceMethods s_pyArraySequence
-    = {&PyBugArray::length, 0, 0, &PyBugArray::item, 0, &PyBugArray::setItem, 0, 0, 0, 0};
+    = {&PyMotorArray::length, 0, 0, &PyMotorArray::item, 0, &PyMotorArray::setItem, 0, 0, 0, 0};
 
-PyTypeObject PyBugArray::s_pyType = {{{0, 0}, 0},
-                                     "py_bugengine.Array",
-                                     sizeof(PyBugArray),
-                                     0,
-                                     &PyBugArray::dealloc,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     &PyBugArray::repr,
-                                     0,
-                                     &s_pyArraySequence,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_IS_ABSTRACT,
-                                     "Wrapper class for the C++ BugEngine array types",
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     PyBugObject::s_methods,
-                                     0,
-                                     0,
-                                     &PyBugObject::s_pyType,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0};
+PyTypeObject PyMotorArray::s_pyType = {{{0, 0}, 0},
+                                       "py_motor.Array",
+                                       sizeof(PyMotorArray),
+                                       0,
+                                       &PyMotorArray::dealloc,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       &PyMotorArray::repr,
+                                       0,
+                                       &s_pyArraySequence,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       Py_TPFLAGS_DEFAULT | Py_TPFLAGS_IS_ABSTRACT,
+                                       "Wrapper class for the C++ Motor array types",
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       PyMotorObject::s_methods,
+                                       0,
+                                       0,
+                                       &PyMotorObject::s_pyType,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0,
+                                       0};
 
-PyObject* PyBugArray::stealValue(PyObject* owner, Meta::Value& value)
+PyObject* PyMotorArray::stealValue(PyObject* owner, Meta::Value& value)
 {
-    be_assert(value.type().metaclass->type() == Meta::ClassType_Array,
-              "PyBugArray only accepts Array types");
-    PyBugArray* result = static_cast< PyBugArray* >(s_pyType.tp_alloc(&s_pyType, 0));
-    (result)->owner    = owner;
+    motor_assert(value.type().metaclass->type() == Meta::ClassType_Array,
+                 "PyMotorArray only accepts Array types");
+    PyMotorArray* result = static_cast< PyMotorArray* >(s_pyType.tp_alloc(&s_pyType, 0));
+    (result)->owner      = owner;
 
     if(owner)
     {
@@ -89,19 +89,19 @@ PyObject* PyBugArray::stealValue(PyObject* owner, Meta::Value& value)
     }
 
     raw< const Meta::Class > arrayClass = value.type().metaclass;
-    new(&(static_cast< PyBugArray* >(result))->value) Meta::Value();
-    (static_cast< PyBugArray* >(result))->value.swap(value);
-    be_assert(arrayClass->apiMethods,
-              "Array type %s does not implement API methods" | arrayClass->fullname());
-    be_assert(arrayClass->apiMethods->arrayScripting,
-              "Array type %s does not implement Array API methods" | arrayClass->fullname());
-    be_forceuse(arrayClass);
+    new(&(static_cast< PyMotorArray* >(result))->value) Meta::Value();
+    (static_cast< PyMotorArray* >(result))->value.swap(value);
+    motor_assert(arrayClass->apiMethods,
+                 "Array type %s does not implement API methods" | arrayClass->fullname());
+    motor_assert(arrayClass->apiMethods->arrayScripting,
+                 "Array type %s does not implement Array API methods" | arrayClass->fullname());
+    motor_forceuse(arrayClass);
     return result;
 }
 
-PyObject* PyBugArray::repr(PyObject* self)
+PyObject* PyMotorArray::repr(PyObject* self)
 {
-    PyBugObject*       self_ = static_cast< PyBugObject* >(self);
+    PyMotorObject*     self_ = static_cast< PyMotorObject* >(self);
     const Meta::Value& v     = self_->value;
 
     const char* constness = (v.type().constness == Meta::Type::Const) ? "const " : "mutable ";
@@ -146,31 +146,31 @@ PyObject* PyBugArray::repr(PyObject* self)
     }
 }
 
-int PyBugArray::nonZero(PyObject* self)
+int PyMotorArray::nonZero(PyObject* self)
 {
     return length(self) > 0;
 }
 
-Py_ssize_t PyBugArray::length(PyObject* self)
+Py_ssize_t PyMotorArray::length(PyObject* self)
 {
-    PyBugArray*      self_ = static_cast< PyBugArray* >(self);
+    PyMotorArray*    self_ = static_cast< PyMotorArray* >(self);
     const Meta::Type t     = self_->value.type();
-    be_assert(t.metaclass->type() == Meta::ClassType_Array, "PyBugArray expected array value");
+    motor_assert(t.metaclass->type() == Meta::ClassType_Array, "PyMotorArray expected array value");
     return Py_ssize_t(t.metaclass->apiMethods->arrayScripting->size(self_->value));
 }
 
-PyObject* PyBugArray::item(PyObject* self, Py_ssize_t index)
+PyObject* PyMotorArray::item(PyObject* self, Py_ssize_t index)
 {
-    PyBugArray* self_ = static_cast< PyBugArray* >(self);
+    PyMotorArray* self_ = static_cast< PyMotorArray* >(self);
     if(index >= 0 && index < length(self))
     {
-        u32              index_ = be_checked_numcast< u32 >(index);
+        u32              index_ = motor_checked_numcast< u32 >(index);
         const Meta::Type t      = self_->value.type();
         Meta::Value      v
             = t.isConst()
                   ? t.metaclass->apiMethods->arrayScripting->indexConst(self_->value, index_)
                   : t.metaclass->apiMethods->arrayScripting->index(self_->value, index_);
-        return PyBugObject::stealValue(0, v);
+        return PyMotorObject::stealValue(0, v);
     }
     else
     {
@@ -179,9 +179,9 @@ PyObject* PyBugArray::item(PyObject* self, Py_ssize_t index)
     }
 }
 
-int PyBugArray::setItem(PyObject* self, Py_ssize_t index, PyObject* value)
+int PyMotorArray::setItem(PyObject* self, Py_ssize_t index, PyObject* value)
 {
-    PyBugArray*                          self_    = static_cast< PyBugArray* >(self);
+    PyMotorArray*                        self_    = static_cast< PyMotorArray* >(self);
     const Meta::Type                     t        = self_->value.type();
     raw< const Meta::ScriptingArrayAPI > arrayApi = t.metaclass->apiMethods->arrayScripting;
     if(t.isConst())
@@ -199,9 +199,9 @@ int PyBugArray::setItem(PyObject* self, Py_ssize_t index, PyObject* value)
     }
     else
     {
-        u32          index_ = be_checked_numcast< u32 >(index);
+        u32          index_ = motor_checked_numcast< u32 >(index);
         Meta::Value* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
-        PyBugObject::unpack(value, arrayApi->value_type, v);
+        PyMotorObject::unpack(value, arrayApi->value_type, v);
         arrayApi->index(self_->value, index_) = *v;
         v->~Value();
         freea(v);
@@ -209,18 +209,18 @@ int PyBugArray::setItem(PyObject* self, Py_ssize_t index, PyObject* value)
     }
 }
 
-void PyBugArray::registerType(PyObject* module)
+void PyMotorArray::registerType(PyObject* module)
 {
     if(s_library->getVersion() >= 30)
         s_pyType.tp_as_number = &s_py3ArrayNumber.nb_common;
     else
         s_pyType.tp_as_number = &s_py2ArrayNumber.nb_common;
     int result = s_library->m_PyType_Ready(&s_pyType);
-    be_assert(result >= 0, "unable to register type");
+    motor_assert(result >= 0, "unable to register type");
     Py_INCREF(&s_pyType);
     result = (*s_library->m_PyModule_AddObject)(module, "Array", (PyObject*)&s_pyType);
-    be_assert(result >= 0, "unable to register type");
-    be_forceuse(result);
+    motor_assert(result >= 0, "unable to register type");
+    motor_forceuse(result);
 }
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python

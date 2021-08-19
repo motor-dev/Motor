@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/meta/classinfo.script.hh>
-#include <bugengine/meta/engine/methodinfo.script.hh>
-#include <bugengine/meta/engine/propertyinfo.script.hh>
-#include <bugengine/meta/engine/scriptingapi.hh>
-#include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/meta/classinfo.script.hh>
+#include <motor/meta/engine/methodinfo.script.hh>
+#include <motor/meta/engine/propertyinfo.script.hh>
+#include <motor/meta/engine/scriptingapi.hh>
+#include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <py_array.hh>
 #include <py_boundmethod.hh>
 #include <py_call.hh>
@@ -17,81 +17,81 @@
 #include <py_object.hh>
 #include <py_string.hh>
 
-namespace BugEngine { namespace Python {
+namespace Motor { namespace Python {
 
-PyMethodDef PyBugObject::s_methods[]
-    = {{"__dir__", &PyBugObject::dir, METH_NOARGS, NULL}, {NULL, NULL, 0, NULL}};
+PyMethodDef PyMotorObject::s_methods[]
+    = {{"__dir__", &PyMotorObject::dir, METH_NOARGS, NULL}, {NULL, NULL, 0, NULL}};
 
 static PyTypeObject::Py2NumberMethods s_py2ObjectNumber
-    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, 0, &PyBugObject::nonZero,
+    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, 0, &PyMotorObject::nonZero,
        0,         0, 0, 0, 0, 0, 0, 0, 0,
        0,         0, 0, 0, 0, 0, 0, 0, 0,
        0,         0, 0, 0, 0, 0, 0, 0, 0,
        0};
 
 static PyTypeObject::Py3NumberMethods s_py3ObjectNumber
-    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, &PyBugObject::nonZero,
+    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, &PyMotorObject::nonZero,
        0,         0, 0, 0, 0, 0, 0, 0,
        0,         0, 0, 0, 0, 0, 0, 0,
        0,         0, 0, 0, 0, 0, 0, 0,
        0,         0};
 
-PyTypeObject PyBugObject::s_pyType = {{{0, 0}, 0},
-                                      "py_bugengine.Value",
-                                      sizeof(PyBugObject),
-                                      0,
-                                      &PyBugObject::dealloc,
-                                      0,
-                                      &PyBugObject::getattr,
-                                      &PyBugObject::setattr,
-                                      0,
-                                      &PyBugObject::repr,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      &PyBugObject::call,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      Py_TPFLAGS_DEFAULT | Py_TPFLAGS_IS_ABSTRACT,
-                                      "Wrapper class for the C++ class BugEngine::Meta::Value",
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      PyBugObject::s_methods,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      &PyBugObject::newinst,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0};
+PyTypeObject PyMotorObject::s_pyType = {{{0, 0}, 0},
+                                        "py_motor.Value",
+                                        sizeof(PyMotorObject),
+                                        0,
+                                        &PyMotorObject::dealloc,
+                                        0,
+                                        &PyMotorObject::getattr,
+                                        &PyMotorObject::setattr,
+                                        0,
+                                        &PyMotorObject::repr,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        &PyMotorObject::call,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        Py_TPFLAGS_DEFAULT | Py_TPFLAGS_IS_ABSTRACT,
+                                        "Wrapper class for the C++ class Motor::Meta::Value",
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        PyMotorObject::s_methods,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        &PyMotorObject::newinst,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        0};
 
 typedef PyObject* (*CreateMethod)(PyObject* owner, Meta::Value& value);
 
 template < typename T >
 PyObject* createPyNumeric(PyObject* owner, Meta::Value& value)
 {
-    be_forceuse(owner);
+    motor_forceuse(owner);
     unsigned long long v = static_cast< unsigned long long >(value.as< T >());
     return s_library->m_PyLong_FromUnsignedLongLong(v);
 }
@@ -99,7 +99,7 @@ PyObject* createPyNumeric(PyObject* owner, Meta::Value& value)
 template <>
 PyObject* createPyNumeric< bool >(PyObject* owner, Meta::Value& value)
 {
-    be_forceuse(owner);
+    motor_forceuse(owner);
     long v = static_cast< long >(value.as< bool >());
     return s_library->m_PyBool_FromLong(v);
 }
@@ -107,7 +107,7 @@ PyObject* createPyNumeric< bool >(PyObject* owner, Meta::Value& value)
 template <>
 PyObject* createPyNumeric< float >(PyObject* owner, Meta::Value& value)
 {
-    be_forceuse(owner);
+    motor_forceuse(owner);
     double v = static_cast< double >(value.as< float >());
     return s_library->m_PyFloat_FromDouble(v);
 }
@@ -115,14 +115,14 @@ PyObject* createPyNumeric< float >(PyObject* owner, Meta::Value& value)
 template <>
 PyObject* createPyNumeric< double >(PyObject* owner, Meta::Value& value)
 {
-    be_forceuse(owner);
+    motor_forceuse(owner);
     double v = value.as< double >();
     return s_library->m_PyFloat_FromDouble(v);
 }
 
 PyObject* createPyString(PyObject* owner, Meta::Value& value)
 {
-    be_forceuse(owner);
+    motor_forceuse(owner);
     const text& t = static_cast< const text& >(value.as< const text& >());
     typedef PyObject* (*toStringType)(const char* format);
     toStringType toString = s_library->getVersion() >= 30 ? s_library->m_PyUnicode_FromString
@@ -137,19 +137,19 @@ static CreateMethod s_createPyNumber[]
        &createPyNumeric< float >, &createPyNumeric< double >};
 
 static CreateMethod s_createNumber[]
-    = {&PyBugNumber< bool >::stealValue,  &PyBugNumber< u8 >::stealValue,
-       &PyBugNumber< u16 >::stealValue,   &PyBugNumber< u32 >::stealValue,
-       &PyBugNumber< u64 >::stealValue,   &PyBugNumber< i8 >::stealValue,
-       &PyBugNumber< i16 >::stealValue,   &PyBugNumber< i32 >::stealValue,
-       &PyBugNumber< i64 >::stealValue,   &PyBugNumber< float >::stealValue,
-       &PyBugNumber< double >::stealValue};
+    = {&PyMotorNumber< bool >::stealValue,  &PyMotorNumber< u8 >::stealValue,
+       &PyMotorNumber< u16 >::stealValue,   &PyMotorNumber< u32 >::stealValue,
+       &PyMotorNumber< u64 >::stealValue,   &PyMotorNumber< i8 >::stealValue,
+       &PyMotorNumber< i16 >::stealValue,   &PyMotorNumber< i32 >::stealValue,
+       &PyMotorNumber< i64 >::stealValue,   &PyMotorNumber< float >::stealValue,
+       &PyMotorNumber< double >::stealValue};
 
 static CreateMethod s_createString[]
-    = {&PyBugString< istring >::stealValue, &PyBugString< inamespace >::stealValue,
-       &PyBugString< ifilename >::stealValue, &PyBugString< ipath >::stealValue,
-       &PyBugString< text >::stealValue};
+    = {&PyMotorString< istring >::stealValue, &PyMotorString< inamespace >::stealValue,
+       &PyMotorString< ifilename >::stealValue, &PyMotorString< ipath >::stealValue,
+       &PyMotorString< text >::stealValue};
 
-PyObject* PyBugObject::stealValue(PyObject* owner, Meta::Value& value)
+PyObject* PyMotorObject::stealValue(PyObject* owner, Meta::Value& value)
 {
     const Meta::Type& t = value.type();
     if(!value)
@@ -177,27 +177,27 @@ PyObject* PyBugObject::stealValue(PyObject* owner, Meta::Value& value)
         switch(t.metaclass->type())
         {
         case Meta::ClassType_Number: return s_createNumber[t.metaclass->index()](owner, value);
-        case Meta::ClassType_Enum: return PyBugEnum::stealValue(owner, value);
+        case Meta::ClassType_Enum: return PyMotorEnum::stealValue(owner, value);
         case Meta::ClassType_String: return s_createString[t.metaclass->index()](owner, value);
-        case Meta::ClassType_Array: return PyBugArray::stealValue(owner, value);
+        case Meta::ClassType_Array: return PyMotorArray::stealValue(owner, value);
         case Meta::ClassType_Namespace:
         {
             const Meta::Class& cls = value.as< const Meta::Class& >();
             if(cls.constructor)
             {
-                return PyBugClass::stealValue(owner, value);
+                return PyMotorClass::stealValue(owner, value);
             }
             else
             {
-                return PyBugNamespace::stealValue(owner, value);
+                return PyMotorNamespace::stealValue(owner, value);
             }
         }
         default:
         {
-            PyObject* result              = s_pyType.tp_alloc(&s_pyType, 0);
-            ((PyBugObject*)result)->owner = owner;
-            new(&(static_cast< PyBugObject* >(result))->value) Meta::Value();
-            (static_cast< PyBugObject* >(result))->value.swap(value);
+            PyObject* result                = s_pyType.tp_alloc(&s_pyType, 0);
+            ((PyMotorObject*)result)->owner = owner;
+            new(&(static_cast< PyMotorObject* >(result))->value) Meta::Value();
+            (static_cast< PyMotorObject* >(result))->value.swap(value);
             if(owner)
             {
                 Py_INCREF(owner);
@@ -207,19 +207,19 @@ PyObject* PyBugObject::stealValue(PyObject* owner, Meta::Value& value)
         }
 }
 
-PyObject* PyBugObject::newinst(PyTypeObject* type, PyObject* args, PyObject* kwds)
+PyObject* PyMotorObject::newinst(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
-    be_forceuse(args);
-    be_forceuse(kwds);
-    PyBugObject* inst = static_cast< PyBugObject* >(type->tp_alloc(type, 0));
-    inst->owner       = 0;
+    motor_forceuse(args);
+    motor_forceuse(kwds);
+    PyMotorObject* inst = static_cast< PyMotorObject* >(type->tp_alloc(type, 0));
+    inst->owner         = 0;
     new(&inst->value) Meta::Value();
     return inst;
 }
 
-PyObject* PyBugObject::getattr(PyObject* self, const char* name)
+PyObject* PyMotorObject::getattr(PyObject* self, const char* name)
 {
-    PyBugObject*                self_     = static_cast< PyBugObject* >(self);
+    PyMotorObject*              self_     = static_cast< PyMotorObject* >(self);
     raw< const Meta::Class >    metaclass = self_->value.type().metaclass;
     istring                     name_(name);
     raw< const Meta::Property > p = metaclass->getProperty(name_);
@@ -239,9 +239,9 @@ PyObject* PyBugObject::getattr(PyObject* self, const char* name)
     return NULL;
 }
 
-int PyBugObject::setattr(PyObject* self, const char* name, PyObject* value)
+int PyMotorObject::setattr(PyObject* self, const char* name, PyObject* value)
 {
-    PyBugObject* self_ = static_cast< PyBugObject* >(self);
+    PyMotorObject* self_ = static_cast< PyMotorObject* >(self);
     if(self_->value.type().access == Meta::Type::Const)
     {
         s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError, "instance of %s is const",
@@ -278,9 +278,9 @@ int PyBugObject::setattr(PyObject* self, const char* name, PyObject* value)
     return 0;
 }
 
-PyObject* PyBugObject::repr(PyObject* self)
+PyObject* PyMotorObject::repr(PyObject* self)
 {
-    PyBugObject*       self_ = static_cast< PyBugObject* >(self);
+    PyMotorObject*     self_ = static_cast< PyMotorObject* >(self);
     const Meta::Value& v     = self_->value;
     if(s_library->getVersion() >= 30)
     {
@@ -292,9 +292,9 @@ PyObject* PyBugObject::repr(PyObject* self)
     }
 }
 
-void PyBugObject::dealloc(PyObject* self)
+void PyMotorObject::dealloc(PyObject* self)
 {
-    PyBugObject* self_ = static_cast< PyBugObject* >(self);
+    PyMotorObject* self_ = static_cast< PyMotorObject* >(self);
     if(self_->owner)
     {
         Py_DECREF(self_->owner);
@@ -303,9 +303,9 @@ void PyBugObject::dealloc(PyObject* self)
     self->py_type->tp_free(self);
 }
 
-PyObject* PyBugObject::call(PyObject* self, PyObject* args, PyObject* kwds)
+PyObject* PyMotorObject::call(PyObject* self, PyObject* args, PyObject* kwds)
 {
-    PyBugObject*         self_ = static_cast< PyBugObject* >(self);
+    PyMotorObject*       self_ = static_cast< PyMotorObject* >(self);
     static const istring callName("?call");
     Meta::Value          v(self_->value[callName]);
     if(!v)
@@ -327,9 +327,9 @@ PyObject* PyBugObject::call(PyObject* self, PyObject* args, PyObject* kwds)
     }
 }
 
-int PyBugObject::nonZero(PyObject* self)
+int PyMotorObject::nonZero(PyObject* self)
 {
-    PyBugObject*     self_ = static_cast< PyBugObject* >(self);
+    PyMotorObject*   self_ = static_cast< PyMotorObject* >(self);
     const Meta::Type t     = self_->value.type();
     if(t.indirection == Meta::Type::Value)
     {
@@ -341,39 +341,39 @@ int PyBugObject::nonZero(PyObject* self)
     }
 }
 
-void PyBugObject::registerType(PyObject* module)
+void PyMotorObject::registerType(PyObject* module)
 {
     if(s_library->getVersion() >= 30)
         s_pyType.tp_as_number = &s_py3ObjectNumber.nb_common;
     else
         s_pyType.tp_as_number = &s_py2ObjectNumber.nb_common;
     int result = s_library->m_PyType_Ready(&s_pyType);
-    be_assert(result >= 0, "unable to register type");
+    motor_assert(result >= 0, "unable to register type");
     Py_INCREF(&s_pyType);
     result = (*s_library->m_PyModule_AddObject)(module, "Value", (PyObject*)&s_pyType);
-    be_assert(result >= 0, "unable to register type");
-    be_forceuse(result);
+    motor_assert(result >= 0, "unable to register type");
+    motor_forceuse(result);
 
     PyBoundMethod::registerType(module);
 }
 
 static inline void unpackArray(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    be_assert(type.metaclass->type() == Meta::ClassType_Array
-                  || type.metaclass->type() == Meta::ClassType_Variant,
-              "expected to unpack Python Array into Meta::ClassType_Array, got %s"
-                  | type.metaclass->name);
-    be_unimplemented();
-    be_forceuse(arg);
-    be_forceuse(buffer);
+    motor_assert(type.metaclass->type() == Meta::ClassType_Array
+                     || type.metaclass->type() == Meta::ClassType_Variant,
+                 "expected to unpack Python Array into Meta::ClassType_Array, got %s"
+                     | type.metaclass->name);
+    motor_unimplemented();
+    motor_forceuse(arg);
+    motor_forceuse(buffer);
 }
 
 static inline void unpackNumber(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    be_assert(type.metaclass->type() == Meta::ClassType_Number
-                  || type.metaclass->type() == Meta::ClassType_Variant,
-              "expected to unpack Python Number into Meta::ClassType_Number, got %s"
-                  | type.metaclass->name);
+    motor_assert(type.metaclass->type() == Meta::ClassType_Number
+                     || type.metaclass->type() == Meta::ClassType_Variant,
+                 "expected to unpack Python Number into Meta::ClassType_Number, got %s"
+                     | type.metaclass->name);
     unsigned long long value
         = arg->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS
               ? (unsigned long long)s_library->m_PyInt_AsUnsignedLongMask(arg)
@@ -446,16 +446,16 @@ static inline void unpackNumber(PyObject* arg, const Meta::Type& type, void* buf
         new(buffer) Meta::Value(v);
         break;
     }
-    default: be_notreached(); new(buffer) Meta::Value(0);
+    default: motor_notreached(); new(buffer) Meta::Value(0);
     }
 }
 
 static inline void unpackFloat(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    be_assert(type.metaclass->type() == Meta::ClassType_Number
-                  || type.metaclass->type() == Meta::ClassType_Variant,
-              "expected to unpack Python Float into Meta::ClassType_Number, got %s"
-                  | type.metaclass->name);
+    motor_assert(type.metaclass->type() == Meta::ClassType_Number
+                     || type.metaclass->type() == Meta::ClassType_Variant,
+                 "expected to unpack Python Float into Meta::ClassType_Number, got %s"
+                     | type.metaclass->name);
     double value = s_library->m_PyFloat_AsDouble(arg);
     switch(type.metaclass->index())
     {
@@ -525,16 +525,16 @@ static inline void unpackFloat(PyObject* arg, const Meta::Type& type, void* buff
         new(buffer) Meta::Value(v);
         break;
     }
-    default: be_notreached(); new(buffer) Meta::Value(0);
+    default: motor_notreached(); new(buffer) Meta::Value(0);
     }
 }
 
 static inline void unpackString(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    be_assert(type.metaclass->type() == Meta::ClassType_String
-                  || type.metaclass->type() == Meta::ClassType_Variant,
-              "expected to unpack Python String into Meta::ClassType_String, got %s"
-                  | type.metaclass->name);
+    motor_assert(type.metaclass->type() == Meta::ClassType_String
+                     || type.metaclass->type() == Meta::ClassType_Variant,
+                 "expected to unpack Python String into Meta::ClassType_String, got %s"
+                     | type.metaclass->name);
     char*     string;
     PyObject* decodedUnicode = 0;
     if(arg->py_type->tp_flags & Py_TPFLAGS_UNICODE_SUBCLASS)
@@ -559,7 +559,7 @@ static inline void unpackString(PyObject* arg, const Meta::Type& type, void* buf
     case 1: new(buffer) Meta::Value(inamespace(string)); break;
     case 2: new(buffer) Meta::Value(ifilename(string)); break;
     case 3: new(buffer) Meta::Value(ipath(string)); break;
-    default: be_notreached(); new(buffer) Meta::Value();
+    default: motor_notreached(); new(buffer) Meta::Value();
     }
 
     if(decodedUnicode)
@@ -570,9 +570,9 @@ static inline void unpackString(PyObject* arg, const Meta::Type& type, void* buf
 
 static inline void unpackPod(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    be_assert(type.metaclass->type() == Meta::ClassType_Pod,
-              "expected to unpack Python Dict into Meta::ClassType_Pod, got %s"
-                  | type.metaclass->name);
+    motor_assert(type.metaclass->type() == Meta::ClassType_Pod,
+                 "expected to unpack Python Dict into Meta::ClassType_Pod, got %s"
+                     | type.metaclass->name);
 
     Meta::Value* result = new(buffer) Meta::Value(type, Meta::Value::Reserve);
     Meta::Value* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
@@ -582,7 +582,7 @@ static inline void unpackPod(PyObject* arg, const Meta::Type& type, void* buffer
         {
             PyObject* value = s_library->m_PyDict_GetItemString(arg, p->name.c_str());
 
-            PyBugObject::unpack(value, p->type, v);
+            PyMotorObject::unpack(value, p->type, v);
             p->set(*result, *v);
             v->~Value();
         }
@@ -590,12 +590,12 @@ static inline void unpackPod(PyObject* arg, const Meta::Type& type, void* buffer
     freea(v);
 }
 
-Meta::ConversionCost PyBugObject::distance(PyObject* object, const Meta::Type& desiredType)
+Meta::ConversionCost PyMotorObject::distance(PyObject* object, const Meta::Type& desiredType)
 {
     if(desiredType.metaclass->type() == Meta::ClassType_Variant)
     {
-        if(object->py_type == &PyBugObject::s_pyType
-           || object->py_type->tp_base == &PyBugObject::s_pyType
+        if(object->py_type == &PyMotorObject::s_pyType
+           || object->py_type->tp_base == &PyMotorObject::s_pyType
            || object->py_type->tp_flags & (Py_TPFLAGS_INT_SUBCLASS | Py_TPFLAGS_LONG_SUBCLASS)
            || object->py_type == s_library->m_PyFloat_Type)
         {
@@ -606,11 +606,11 @@ Meta::ConversionCost PyBugObject::distance(PyObject* object, const Meta::Type& d
             return Meta::ConversionCost::s_incompatible;
         }
     }
-    else if(object->py_type == &PyBugObject::s_pyType
-            || object->py_type->tp_base == &PyBugObject::s_pyType
-            || object->py_type->tp_base->tp_base == &PyBugObject::s_pyType)
+    else if(object->py_type == &PyMotorObject::s_pyType
+            || object->py_type->tp_base == &PyMotorObject::s_pyType
+            || object->py_type->tp_base->tp_base == &PyMotorObject::s_pyType)
     {
-        PyBugObject* object_ = static_cast< PyBugObject* >(object);
+        PyMotorObject* object_ = static_cast< PyMotorObject* >(object);
         return object_->value.type().calculateConversion(desiredType);
     }
     else if(object->py_type == s_library->m_PyBool_Type)
@@ -685,7 +685,7 @@ Meta::ConversionCost PyBugObject::distance(PyObject* object, const Meta::Type& d
         }
         else
         {
-            be_unimplemented();
+            motor_unimplemented();
             return Meta::ConversionCost::s_incompatible;
         }
     }
@@ -704,19 +704,19 @@ Meta::ConversionCost PyBugObject::distance(PyObject* object, const Meta::Type& d
     }
 }
 
-void PyBugObject::unpack(PyObject* object, const Meta::Type& desiredType, void* buffer)
+void PyMotorObject::unpack(PyObject* object, const Meta::Type& desiredType, void* buffer)
 {
     if(desiredType.metaclass->type() == Meta::ClassType_Variant)
     {
         unpackAny(object, buffer);
     }
-    else if(object->py_type == &PyBugObject::s_pyType
-            || object->py_type->tp_base == &PyBugObject::s_pyType)
+    else if(object->py_type == &PyMotorObject::s_pyType
+            || object->py_type->tp_base == &PyMotorObject::s_pyType)
     {
-        PyBugObject* object_ = static_cast< PyBugObject* >(object);
-        be_assert(desiredType <= object_->value.type(),
-                  "incompatible types: %s is not compatible with %s"
-                      | object_->value.type().name().c_str() | desiredType.name().c_str());
+        PyMotorObject* object_ = static_cast< PyMotorObject* >(object);
+        motor_assert(desiredType <= object_->value.type(),
+                     "incompatible types: %s is not compatible with %s"
+                         | object_->value.type().name().c_str() | desiredType.name().c_str());
         new(buffer) Meta::Value(Meta::Value::ByRef(object_->value));
     }
     else if(object->py_type->tp_flags & (Py_TPFLAGS_INT_SUBCLASS | Py_TPFLAGS_LONG_SUBCLASS))
@@ -749,12 +749,12 @@ void PyBugObject::unpack(PyObject* object, const Meta::Type& desiredType, void* 
     }
     else
     {
-        be_notreached();
+        motor_notreached();
         new(buffer) Meta::Value();
     }
 }
 
-PyObject* PyBugObject::dir(raw< const Meta::Class > metaclass)
+PyObject* PyMotorObject::dir(raw< const Meta::Class > metaclass)
 {
     PyObject* result = s_library->m_PyList_New(0);
     if(!result) return NULL;
@@ -816,31 +816,31 @@ PyObject* PyBugObject::dir(raw< const Meta::Class > metaclass)
     return result;
 }
 
-PyObject* PyBugObject::dir(PyObject* self, PyObject* args)
+PyObject* PyMotorObject::dir(PyObject* self, PyObject* args)
 {
-    be_forceuse(args);
-    return dir(static_cast< PyBugObject* >(self)->value.type().metaclass);
+    motor_forceuse(args);
+    return dir(static_cast< PyMotorObject* >(self)->value.type().metaclass);
 }
 
-void PyBugObject::unpackAny(PyObject* object, void* buffer)
+void PyMotorObject::unpackAny(PyObject* object, void* buffer)
 {
-    if(object->py_type == &PyBugObject::s_pyType
-       || object->py_type->tp_base == &PyBugObject::s_pyType)
+    if(object->py_type == &PyMotorObject::s_pyType
+       || object->py_type->tp_base == &PyMotorObject::s_pyType)
     {
-        PyBugObject* object_ = static_cast< PyBugObject* >(object);
+        PyMotorObject* object_ = static_cast< PyMotorObject* >(object);
         new(buffer) Meta::Value(object_->value);
     }
     else if(object->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS)
     {
-        unpackNumber(object, be_type< i32 >(), buffer);
+        unpackNumber(object, motor_type< i32 >(), buffer);
     }
     else if(object->py_type->tp_flags & Py_TPFLAGS_LONG_SUBCLASS)
     {
-        unpackNumber(object, be_type< i64 >(), buffer);
+        unpackNumber(object, motor_type< i64 >(), buffer);
     }
     else if(object->py_type == s_library->m_PyFloat_Type)
     {
-        unpackFloat(object, be_type< double >(), buffer);
+        unpackFloat(object, motor_type< double >(), buffer);
     }
     else if(object == s_library->m__Py_NoneStruct)
     {
@@ -848,9 +848,9 @@ void PyBugObject::unpackAny(PyObject* object, void* buffer)
     }
     else
     {
-        be_notreached();
+        motor_notreached();
         new(buffer) Meta::Value();
     }
 }
 
-}}  // namespace BugEngine::Python
+}}  // namespace Motor::Python

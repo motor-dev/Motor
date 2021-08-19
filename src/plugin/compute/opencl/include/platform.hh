@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_COMPUTE_OPENCL_PLATFORM_HH_
-#define BE_COMPUTE_OPENCL_PLATFORM_HH_
+#ifndef MOTOR_COMPUTE_OPENCL_PLATFORM_HH_
+#define MOTOR_COMPUTE_OPENCL_PLATFORM_HH_
 /**************************************************************************************************/
-#include <bugengine/plugin.compute.opencl/stdafx.h>
+#include <motor/plugin.compute.opencl/stdafx.h>
 
-namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
+namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
 class Context;
 
@@ -33,7 +33,7 @@ public:
         return m_contexts.end();
     }
 };
-}}}  // namespace BugEngine::KernelScheduler::OpenCL
+}}}  // namespace Motor::KernelScheduler::OpenCL
 
 /**************************************************************************************************/
 #endif

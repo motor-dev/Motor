@@ -6,7 +6,7 @@ inclusive-or-expression:
 
 import glrp
 from ....parser import cxx98
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('inclusive-or-expression : exclusive-or-expression')

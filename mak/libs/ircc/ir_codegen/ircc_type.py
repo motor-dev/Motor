@@ -1,4 +1,4 @@
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 try:
     from itertools import izip_longest as zip_longest
 except ImportError:

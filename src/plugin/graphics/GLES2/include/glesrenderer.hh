@@ -1,14 +1,14 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_GLES2_RENDERER_HH_
-#define BE_GLES2_RENDERER_HH_
+#ifndef MOTOR_GLES2_RENDERER_HH_
+#define MOTOR_GLES2_RENDERER_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
-#include <bugengine/plugin.graphics.3d/renderer/irenderer.hh>
-#include <bugengine/plugin/plugin.hh>
+#include <motor/plugin.graphics.3d/renderer/irenderer.hh>
+#include <motor/plugin/plugin.hh>
 
-namespace BugEngine { namespace OpenGLES {
+namespace Motor { namespace OpenGLES {
 
 class GLESWindow;
 
@@ -39,7 +39,7 @@ private:
     uint2 getScreenSize() const override;
 };
 
-}}  // namespace BugEngine::OpenGLES
+}}  // namespace Motor::OpenGLES
 
 /**************************************************************************************************/
 #endif

@@ -1,8 +1,8 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
 #include <loaders/dx9mesh.hh>
 
-namespace BugEngine { namespace DirectX9 {
+namespace Motor { namespace DirectX9 {
 }}

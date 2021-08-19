@@ -15,7 +15,7 @@ def plugin(
     extra_public_defines=[],
     source_list=None,
     conditions=[],
-    root_namespace='BugEngine',
+    root_namespace='Motor',
     env=None
 ):
     if env is None:
@@ -30,8 +30,7 @@ def plugin(
         )
     else:
         features = features + [
-            'c', 'cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'bugengine:c', 'bugengine:cxx',
-            'bugengine:plugin'
+            'c', 'cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:c', 'motor:cxx', 'motor:plugin'
         ]
         return bld.module(**locals())
 

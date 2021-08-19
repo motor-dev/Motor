@@ -1,6 +1,6 @@
 import os
 import shlex
-from be_typing import TYPE_CHECKING
+from motor_typing import TYPE_CHECKING
 
 
 def get_jail_sysroots():

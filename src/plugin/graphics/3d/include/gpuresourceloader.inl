@@ -1,14 +1,14 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_3D_RENDERER_GPURESOURCELOADER_INL_
-#define BE_3D_RENDERER_GPURESOURCELOADER_INL_
+#ifndef MOTOR_3D_RENDERER_GPURESOURCELOADER_INL_
+#define MOTOR_3D_RENDERER_GPURESOURCELOADER_INL_
 /**************************************************************************************************/
-#include <bugengine/plugin.graphics.3d/stdafx.h>
-#include <bugengine/plugin.graphics.3d/renderer/igpuresource.hh>
+#include <motor/plugin.graphics.3d/stdafx.h>
 #include <gpuresourceloader.hh>
+#include <motor/plugin.graphics.3d/renderer/igpuresource.hh>
 
-namespace BugEngine {
+namespace Motor {
 
 template < typename R >
 GPUResourceLoader< R >::GPUResourceLoader(weak< const IRenderer > renderer)
@@ -26,7 +26,7 @@ template < typename R >
 void GPUResourceLoader< R >::load(weak< const Resource::Description > description,
                                   Resource::Resource&                 resource)
 {
-    ref< IGPUResource > handle = m_renderer->create(be_checked_cast< const R >(description));
+    ref< IGPUResource > handle = m_renderer->create(motor_checked_cast< const R >(description));
     resource.setRefHandle(handle);
     m_pending.push_back(*handle.operator->());
 }
@@ -70,7 +70,7 @@ void GPUResourceLoader< R >::flush()
     }
 }
 
-}  // namespace BugEngine
+}  // namespace Motor
 
 /**************************************************************************************************/
 #endif
