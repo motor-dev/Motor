@@ -44,7 +44,7 @@ def mem_initializer(self, p):
 
 
 @glrp.rule('mem-initializer-id : class-or-decltype')
-@glrp.rule('mem-initializer-id : "identifier"')
+@glrp.rule('mem-initializer-id[split] : "identifier"')
 @cxx98
 def mem_initializer_id(self, p):
     # type: (CxxParser, glrp.Production) -> None

@@ -9,7 +9,7 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule(
-    'deduction-guide : explicit-specifier? template-name "(" parameter-declaration-clause ")" "->" simple-template-id ";"'
+    'deduction-guide : explicit-specifier? template-name [split]"(" parameter-declaration-clause ")" "->" simple-template-id ";"'
 )
 @cxx98
 def deduction_guide(self, p):

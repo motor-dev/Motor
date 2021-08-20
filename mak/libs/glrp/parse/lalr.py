@@ -692,7 +692,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
             error_log.warning('1 missing %s annotation', text)
         elif len(missing) > 1:
             error_log.warning('%d missing %s annotations', len(missing), text)
-        for item, _ in missing.items():
+        for item, _ in sorted(missing.items(), key=lambda x: (x[0].rule._filename, x[0].rule._lineno)):
             error_log.diagnostic(item.rule._filename, item.rule._lineno, item.to_string(name_map))
 
     if len(priority_conflict) == 1:

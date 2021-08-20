@@ -56,7 +56,7 @@ def brace_or_equal_initializer(self, p):
     pass
 
 
-@glrp.rule('initializer-clause :[split] assignment-expression')
+@glrp.rule('initializer-clause[split] : assignment-expression')
 @glrp.rule('initializer-clause : braced-init-list')
 @cxx98
 def initializer_clause(self, p):

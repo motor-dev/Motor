@@ -36,7 +36,7 @@ def simple_template_id(self, p):
     pass
 
 
-@glrp.rule('template-id[split] : [split]simple-template-id')
+@glrp.rule('template-id[split] : simple-template-id')
 @glrp.rule('template-id : operator-function-id [split]"<" template-argument-list? ">"')
 @glrp.rule('template-id : literal-operator-id [split]"<" template-argument-list? ">"')
 @cxx98
@@ -69,7 +69,7 @@ def template_argument(self, p):
     pass
 
 
-@glrp.rule('typename-specifier : [split]typename nested-name-specifier "identifier"')
+@glrp.rule('typename-specifier[split] : [split]typename nested-name-specifier "identifier"')
 @glrp.rule('typename-specifier : [split]typename nested-name-specifier "template"? simple-template-id')
 @cxx98
 def typename_specifier(self, p):

@@ -11,7 +11,7 @@ from motor_typing import TYPE_CHECKING
 
 #@glrp.rule('placeholder-type-specifier : type-constraint? "auto"')
 @glrp.rule('placeholder-type-specifier : [split]"auto"')
-@glrp.rule('placeholder-type-specifier : "decltype" "(" "auto" ")"')
+@glrp.rule('placeholder-type-specifier : [split]"decltype" "(" "auto" ")"')
 @glrp.rule('placeholder-type-specifier[merge_delegate] : type-constraint "auto"')
 @glrp.rule('placeholder-type-specifier[merge_delegate] : type-constraint "decltype" "(" "auto" ")"')
 @cxx98

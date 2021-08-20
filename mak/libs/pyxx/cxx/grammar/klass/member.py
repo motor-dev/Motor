@@ -84,7 +84,7 @@ def member_declarator_list(self, p):
 #    'member-declarator : identifier? attribute-specifier-seq? ":" constant-expression brace-or-equal-initializer?'
 #)
 @glrp.rule(
-    'member-declarator : identifier attribute-specifier-seq? ":" constant-expression brace-or-equal-initializer?'
+    'member-declarator : identifier [split]attribute-specifier-seq? ":" constant-expression brace-or-equal-initializer?'
 )
 @glrp.rule(
     'member-declarator[prec:right,1] : attribute-specifier-seq ":" constant-expression brace-or-equal-initializer?'

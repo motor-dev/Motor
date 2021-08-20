@@ -46,7 +46,7 @@ def type_parameter(self, p):
 
 
 @glrp.rule('type-parameter-key[split] : "class"')
-@glrp.rule('type-parameter-key : "typename"')
+@glrp.rule('type-parameter-key[split] : "typename"')
 @cxx98
 def type_parameter_key(self, p):
     # type: (CxxParser, glrp.Production) -> None

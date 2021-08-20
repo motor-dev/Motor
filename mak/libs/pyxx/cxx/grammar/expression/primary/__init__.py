@@ -27,7 +27,7 @@ from . import requires
 @glrp.rule('primary-expression : "user-defined-floating-literal"')
 @glrp.rule('primary-expression : "user-defined-string-literal"')
 @glrp.rule('primary-expression : "this"')
-@glrp.rule('primary-expression : "(" expression ")"')
+@glrp.rule('primary-expression : [split]"(" expression ")"')
 @glrp.rule('primary-expression[split] : id-expression')
 @glrp.rule('primary-expression : lambda-expression')
 @glrp.rule('primary-expression : fold-expression')
