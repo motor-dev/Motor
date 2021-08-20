@@ -8,7 +8,7 @@ if sys.version_info < (3, ):
 else:
     from urllib import request
 
-HOST_WIN32_TOOLS = 'https://github.com/motor/Motor/releases/download/v0.0/host-win32.tgz'
+HOST_WIN32_TOOLS = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/host-win32.tgz'
 
 
 def configure(conf):

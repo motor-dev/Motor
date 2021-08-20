@@ -2,7 +2,7 @@ from waflib import Errors
 from waflib.TaskGen import feature
 import os
 
-LIBCPP_BINARY = 'https://github.com/motor/Motor/releases/download/prebuilt-libc++/libc++-%(platform)s-%(arch)s-%(abi)s.tgz'
+LIBCPP_BINARY = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/libc++-%(platform)s-%(arch)s-%(abi)s.tgz'
 
 
 @feature('cxxtest')

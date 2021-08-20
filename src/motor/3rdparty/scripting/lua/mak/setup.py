@@ -3,7 +3,7 @@ from waflib import Options
 import os
 
 LUA_SOURCES = 'https://www.lua.org/ftp/lua-5.3.5.tar.gz'
-LUA_BINARIES = 'https://github.com/motor/Motor/releases/download/prebuilt-%(platform)s-%(abi)s/lua-5.3.5-%(platform)s-%(arch)s-%(abi)s.tgz'
+LUA_BINARIES = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/lua-5.3.5-%(platform)s-%(arch)s-%(abi)s.tgz'
 
 
 def setup_pkgconfig(conf):
