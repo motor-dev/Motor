@@ -2,7 +2,7 @@ version: 2
 jobs:
   linux:
     docker:
-      - image: motor/motor:latest
+      - image: motordev/motor:latest
     steps:
       - checkout
       - run:
