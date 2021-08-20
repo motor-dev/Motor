@@ -21,7 +21,8 @@ def conversion_function_id(self, p):
     pass
 
 
-@glrp.rule('conversion-type-id : type-specifier-seq conversion-declarator?')
+@glrp.rule('conversion-type-id[split] : type-specifier-seq')
+@glrp.rule('conversion-type-id : type-specifier-seq conversion-declarator')
 @cxx98
 def conversion_type_id(self, p):
     # type: (CxxParser, glrp.Production) -> None

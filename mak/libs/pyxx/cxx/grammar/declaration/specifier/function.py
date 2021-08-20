@@ -14,7 +14,7 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('function-specifier : "virtual"')
-@glrp.rule('function-specifier : explicit-specifier')
+@glrp.rule('function-specifier[split] : explicit-specifier')
 @cxx98
 def function_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None

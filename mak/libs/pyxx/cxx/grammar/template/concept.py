@@ -18,7 +18,7 @@ def concept_definition(self, p):
     pass
 
 
-@glrp.rule('concept-name : [split]"identifier"')
+@glrp.rule('concept-name[split] : [split]"identifier"')
 @cxx98
 def concept_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
