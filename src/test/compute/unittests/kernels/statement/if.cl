@@ -1,5 +1,5 @@
-#include <component.script.hh>
 #include <motor/kernel/input/segments.hh>
+#include <component.meta.hh>
 
 using namespace Motor::Test::Compute::UnitTests;
 

@@ -4,10 +4,10 @@
 #include <motor/plugin.compute.cpu/stdafx.h>
 #include <codeobject.hh>
 
+#include <motor/scheduler/kernel/kernel.meta.hh>
 #include <codeloader.hh>
 #include <kernelloader.hh>
 #include <kernelobject.hh>
-#include <motor/scheduler/kernel/kernel.script.hh>
 
 namespace Motor { namespace KernelScheduler { namespace CPU {
 

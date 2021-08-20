@@ -2,11 +2,11 @@
  see LICENSE for detail */
 
 #include <stdafx.h>
-#include <context.hh>
-#include <motor/meta/engine/methodinfo.script.hh>
-#include <motor/meta/engine/objectinfo.script.hh>
-#include <motor/meta/engine/propertyinfo.script.hh>
+#include <motor/meta/engine/methodinfo.meta.hh>
+#include <motor/meta/engine/objectinfo.meta.hh>
+#include <motor/meta/engine/propertyinfo.meta.hh>
 #include <motor/meta/engine/scriptingapi.hh>
+#include <context.hh>
 #include <runtime/value.hh>
 
 namespace Motor { namespace Lua {

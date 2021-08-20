@@ -2,9 +2,9 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
+#include <motor/filesystem/diskfolder.meta.hh>
+#include <motor/plugin.scripting.package/package.meta.hh>
 #include <editor.hh>
-#include <motor/filesystem/diskfolder.script.hh>
-#include <motor/plugin.scripting.package/package.script.hh>
 
 namespace Motor { namespace Editor {
 

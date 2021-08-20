@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
-#include <motor/meta/engine/methodinfo.script.hh>
+#include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <py_enum.hh>
 

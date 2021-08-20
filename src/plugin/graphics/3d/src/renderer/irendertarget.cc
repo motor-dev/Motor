@@ -4,7 +4,7 @@
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/plugin.graphics.3d/renderer/irenderer.hh>
 #include <motor/plugin.graphics.3d/renderer/irendertarget.hh>
-#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.hh>
 
 #include <motor/scheduler/range/onestep.hh>
 #include <motor/scheduler/task/task.hh>

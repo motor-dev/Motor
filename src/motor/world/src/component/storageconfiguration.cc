@@ -3,7 +3,7 @@
    see LICENSE for detail */
 
 #include <motor/world/stdafx.h>
-#include <motor/world/component/storageconfiguration.script.hh>
+#include <motor/world/component/storageconfiguration.meta.hh>
 
 #include <motor/scheduler/task/method.hh>
 

@@ -6,7 +6,7 @@
 
 #include <motor/introspect/dbcontext.hh>
 #include <motor/introspect/node/object.hh>
-#include <motor/meta/engine/objectinfo.script.hh>
+#include <motor/meta/engine/objectinfo.meta.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 

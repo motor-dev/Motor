@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/scheduler/stdafx.h>
-#include <motor/scheduler/kernel/kernel.script.hh>
+#include <motor/scheduler/kernel/kernel.meta.hh>
 
 namespace Motor { namespace KernelScheduler {
 

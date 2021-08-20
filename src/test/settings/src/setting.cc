@@ -2,4 +2,4 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <setting.script.hh>
+#include <setting.meta.hh>

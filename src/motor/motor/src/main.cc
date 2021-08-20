@@ -4,10 +4,10 @@
 #include <motor/stdafx.h>
 #include <motor/application.hh>
 #include <motor/main.hh>
-#include <settings.script.hh>
+#include <settings.meta.hh>
 
 #include <motor/core/environment.hh>
-#include <motor/filesystem/diskfolder.script.hh>
+#include <motor/filesystem/diskfolder.meta.hh>
 #include <motor/meta/engine/namespace.hh>
 #include <motor/plugin/plugin.hh>
 #include <motor/resource/resourcemanager.hh>

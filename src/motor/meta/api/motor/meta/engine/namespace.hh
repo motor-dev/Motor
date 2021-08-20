@@ -5,9 +5,9 @@
 #define MOTOR_META_ENGINE_NAMESPACE_HH_
 /**************************************************************************************************/
 #include <motor/meta/stdafx.h>
-#include <motor/meta/classinfo.script.hh>
+#include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/helper/staticarray.hh>
-#include <motor/meta/engine/objectinfo.script.hh>
+#include <motor/meta/engine/objectinfo.meta.hh>
 
 #define MOTOR_REGISTER_NAMESPACE_1_NAMED(plugin, n)                                                \
     namespace Motor {                                                                              \

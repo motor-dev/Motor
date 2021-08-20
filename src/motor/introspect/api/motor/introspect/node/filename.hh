@@ -5,7 +5,7 @@
 #define MOTOR_INTROSPECT_NODE_FILENAME_HH_
 /**************************************************************************************************/
 #include <motor/introspect/stdafx.h>
-#include <motor/filesystem/file.script.hh>
+#include <motor/filesystem/file.meta.hh>
 #include <motor/introspect/node/node.hh>
 
 namespace Motor { namespace Meta { namespace AST {

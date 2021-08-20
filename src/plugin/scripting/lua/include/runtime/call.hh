@@ -5,7 +5,7 @@
 #define MOTOR_LUA_RUNTIME_CALL_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
-#include <motor/meta/engine/methodinfo.script.hh>
+#include <motor/meta/engine/methodinfo.meta.hh>
 
 namespace Motor { namespace Lua {
 

@@ -2,15 +2,15 @@
    see LICENSE for detail */
 
 #include <motor/plugin.compute.opencl/stdafx.h>
-#include <codeloader.hh>
-#include <context.hh>
-#include <kernelloader.hh>
 #include <motor/plugin.compute.opencl/memoryhost.hh>
 #include <motor/plugin.compute.opencl/scheduler.hh>
 #include <motor/resource/resourcemanager.hh>
-#include <motor/scheduler/kernel/kernel.script.hh>
+#include <motor/scheduler/kernel/kernel.meta.hh>
 #include <motor/scheduler/scheduler.hh>
 #include <motor/scheduler/task/itask.hh>
+#include <codeloader.hh>
+#include <context.hh>
+#include <kernelloader.hh>
 
 namespace Motor { namespace KernelScheduler { namespace OpenCL {
 

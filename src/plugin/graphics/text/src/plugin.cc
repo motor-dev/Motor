@@ -2,14 +2,14 @@
    see LICENSE for detail */
 
 #include <motor/plugin.graphics.text/stdafx.h>
+#include <motor/plugin.graphics.text/bitmapfont.meta.hh>
+#include <motor/plugin.graphics.text/outlinefont.meta.hh>
+#include <motor/plugin.graphics.text/text.meta.hh>
+#include <motor/plugin/plugin.hh>
+#include <motor/resource/resourcemanager.hh>
 #include <bitmapfontmanager.hh>
 #include <fontlist.hh>
 #include <freetypelib.hh>
-#include <motor/plugin.graphics.text/bitmapfont.script.hh>
-#include <motor/plugin.graphics.text/outlinefont.script.hh>
-#include <motor/plugin.graphics.text/text.script.hh>
-#include <motor/plugin/plugin.hh>
-#include <motor/resource/resourcemanager.hh>
 #include <outlinefontmanager.hh>
 #include <plugin.hh>
 #include <textmanager.hh>

@@ -6,7 +6,7 @@
 /**************************************************************************************************/
 #include <motor/filesystem/stdafx.h>
 #include <motor/core/threads/thread.hh>
-#include <motor/filesystem/diskfolder.script.hh>
+#include <motor/filesystem/diskfolder.meta.hh>
 #include <motor/kernel/interlocked.hh>
 #include <watchpoint.hh>
 

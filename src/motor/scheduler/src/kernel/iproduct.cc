@@ -3,7 +3,7 @@
 
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/kernel/imemoryhost.hh>
-#include <motor/scheduler/kernel/iproduct.script.hh>
+#include <motor/scheduler/kernel/iproduct.meta.hh>
 
 namespace Motor {
 

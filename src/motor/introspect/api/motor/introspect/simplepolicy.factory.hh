@@ -5,10 +5,10 @@
 #define MOTOR_INTROSPECT_SIMPLEPOLICY_FACTORY_HH_
 /**************************************************************************************************/
 #include <motor/introspect/stdafx.h>
-#include <motor/introspect/policy.script.hh>
+#include <motor/introspect/policy.meta.hh>
 
 #include <motor/introspect/node/object.hh>
-#include <motor/meta/classinfo.script.hh>
+#include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/helper/method.hh>
 #include <motor/meta/typeinfo.hh>
 

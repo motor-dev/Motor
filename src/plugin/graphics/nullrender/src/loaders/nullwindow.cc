@@ -2,8 +2,8 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.hh>
 #include <loaders/nullwindow.hh>
-#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
 #include <nullrenderer.hh>
 
 namespace Motor { namespace Null {

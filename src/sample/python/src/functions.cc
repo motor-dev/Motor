@@ -2,8 +2,8 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <functions.script.hh>
 #include <motor/meta/engine/namespace.hh>
+#include <functions.meta.hh>
 
 namespace Motor { namespace TestCases {
 

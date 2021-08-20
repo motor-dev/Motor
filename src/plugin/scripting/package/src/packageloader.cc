@@ -3,7 +3,7 @@
 
 #include <motor/plugin.scripting.package/stdafx.h>
 #include <motor/core/md5.hh>
-#include <motor/filesystem/folder.script.hh>
+#include <motor/filesystem/folder.meta.hh>
 #include <motor/plugin.scripting.package/nodes/package.hh>
 #include <packagebuilder.hh>
 #include <packageloader.hh>

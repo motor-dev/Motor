@@ -6,7 +6,7 @@
 /**************************************************************************************************/
 #include <stdafx.h>
 #include <motor/application.hh>
-#include <motor/filesystem/folder.script.hh>
+#include <motor/filesystem/folder.meta.hh>
 #include <motor/plugin/plugin.hh>
 #include <motor/resource/resourcemanager.hh>
 

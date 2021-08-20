@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/plugin.graphics.text/stdafx.h>
-#include <motor/plugin.graphics.text/text.script.hh>
+#include <motor/plugin.graphics.text/text.meta.hh>
 
 namespace Motor {
 

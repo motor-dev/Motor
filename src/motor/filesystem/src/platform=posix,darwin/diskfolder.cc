@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/filesystem/stdafx.h>
-#include <motor/filesystem/diskfolder.script.hh>
+#include <motor/filesystem/diskfolder.meta.hh>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <watchpoint.hh>

@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/introspect/stdafx.h>
-#include <motor/introspect/policy.script.hh>
+#include <motor/introspect/policy.meta.hh>
 
 #include <motor/introspect/introspectionhint.hh>
 #include <motor/introspect/node/object.hh>

@@ -5,7 +5,7 @@
 #define MOTOR_META_VALUE_INL_
 /**************************************************************************************************/
 #include <motor/meta/stdafx.h>
-#include <motor/meta/classinfo.script.hh>
+#include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/minitl/typemanipulation.hh>
 

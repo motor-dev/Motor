@@ -3,12 +3,12 @@
    see LICENSE for detail */
 
 #include <motor/world/stdafx.h>
-#include <motor/world/component/logiccomponentstorage.script.hh>
+#include <motor/world/component/logiccomponentstorage.meta.hh>
 
 #include <motor/introspect/node/object.hh>
 #include <motor/introspect/node/parameter.hh>
-#include <motor/meta/engine/objectinfo.script.hh>
-#include <motor/scheduler/kernel/parameters/iparameter.script.hh>
+#include <motor/meta/engine/objectinfo.meta.hh>
+#include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
 
 namespace Motor { namespace World { namespace Component {
 

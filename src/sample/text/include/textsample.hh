@@ -6,9 +6,9 @@
 /**************************************************************************************************/
 #include <stdafx.h>
 #include <motor/application.hh>
-#include <motor/filesystem/folder.script.hh>
+#include <motor/filesystem/folder.meta.hh>
 #include <motor/plugin.graphics.3d/renderer/irenderer.hh>
-#include <motor/plugin.scripting.package/package.script.hh>
+#include <motor/plugin.scripting.package/package.meta.hh>
 #include <motor/plugin/plugin.hh>
 #include <motor/resource/resourcemanager.hh>
 

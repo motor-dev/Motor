@@ -2,8 +2,8 @@
    see LICENSE for detail */
 
 #include <motor/filesystem/stdafx.h>
-#include <motor/filesystem/diskfolder.script.hh>
-#include <motor/filesystem/zipfolder.script.hh>
+#include <motor/filesystem/diskfolder.meta.hh>
+#include <motor/filesystem/zipfolder.meta.hh>
 #include <posix/file.hh>
 #include <watchpoint.hh>
 #include <zipfile.hh>

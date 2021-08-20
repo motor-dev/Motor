@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/meta/stdafx.h>
-#include <motor/meta/classinfo.script.hh>
+#include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/array.factory.hh>
 #include <motor/meta/engine/helper/method.hh>
 #include <motor/meta/engine/namespace.hh>

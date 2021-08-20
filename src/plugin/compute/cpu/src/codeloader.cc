@@ -2,9 +2,9 @@
    see LICENSE for detail */
 
 #include <motor/plugin.compute.cpu/stdafx.h>
+#include <motor/scheduler/kernel/code.meta.hh>
 #include <codeloader.hh>
 #include <codeobject.hh>
-#include <motor/scheduler/kernel/code.script.hh>
 
 namespace Motor { namespace KernelScheduler { namespace CPU {
 

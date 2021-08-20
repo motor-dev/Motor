@@ -2,10 +2,10 @@
    see LICENSE for detail */
 
 #include <motor/plugin.compute.opencl/stdafx.h>
+#include <motor/scheduler/kernel/kernel.meta.hh>
 #include <codeloader.hh>
 #include <codeobject.hh>
 #include <context.hh>
-#include <motor/scheduler/kernel/kernel.script.hh>
 
 namespace Motor { namespace KernelScheduler { namespace OpenCL {
 

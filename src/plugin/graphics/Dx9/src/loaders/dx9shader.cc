@@ -4,7 +4,7 @@
 #include <stdafx.h>
 #include <loaders/dx9shader.hh>
 //#include    <loaders/dx9shaderbuilder.hh>
-#include <motor/plugin.graphics.3d/shader/shader.script.hh>
+#include <motor/plugin.graphics.3d/shader/shader.meta.hh>
 
 namespace Motor { namespace DirectX9 {
 

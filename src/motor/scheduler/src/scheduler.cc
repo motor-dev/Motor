@@ -5,7 +5,7 @@
 #include <motor/meta/engine/namespace.hh>
 #include <motor/scheduler/kernel/imemorybuffer.hh>
 #include <motor/scheduler/kernel/ischeduler.hh>
-#include <motor/scheduler/kernel/kernel.script.hh>
+#include <motor/scheduler/kernel/kernel.meta.hh>
 #include <motor/scheduler/scheduler.hh>
 #include <motor/scheduler/task/kerneltask.hh>
 #include <taskscheduler.hh>

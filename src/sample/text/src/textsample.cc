@@ -3,7 +3,7 @@
 
 #include <stdafx.h>
 #include <motor/core/environment.hh>
-#include <motor/filesystem/diskfolder.script.hh>
+#include <motor/filesystem/diskfolder.meta.hh>
 #include <textsample.hh>
 
 namespace Motor {

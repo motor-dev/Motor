@@ -2,8 +2,8 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
+#include <motor/filesystem/diskfolder.meta.hh>
 #include <help.hh>
-#include <motor/filesystem/diskfolder.script.hh>
 
 namespace Motor {
 

@@ -5,12 +5,12 @@
 #define MOTOR_LUA_CONTEXT_H_
 /**************************************************************************************************/
 #include <stdafx.h>
-#include <lua.script.hh>
-#include <motor/filesystem/file.script.hh>
-#include <motor/meta/classinfo.script.hh>
+#include <motor/filesystem/file.meta.hh>
+#include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/value.hh>
 #include <motor/plugin/plugin.hh>
 #include <motor/scriptengine.hh>
+#include <lua.meta.hh>
 
 namespace Motor { namespace Lua {
 

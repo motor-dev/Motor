@@ -2,14 +2,14 @@
    see LICENSE for detail */
 
 #include <motor/plugin.graphics.3d/stdafx.h>
-#include <gpuresourceloader.hh>
-#include <motor/plugin.graphics.3d/mesh/mesh.script.hh>
+#include <motor/plugin.graphics.3d/mesh/mesh.meta.hh>
 #include <motor/plugin.graphics.3d/renderer/irenderer.hh>
-#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
-#include <motor/plugin.graphics.3d/shader/shader.script.hh>
-#include <motor/plugin.graphics.3d/texture/texture.script.hh>
-#include <motor/scheduler/kernel/kernel.script.hh>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.hh>
+#include <motor/plugin.graphics.3d/shader/shader.meta.hh>
+#include <motor/plugin.graphics.3d/texture/texture.meta.hh>
+#include <motor/scheduler/kernel/kernel.meta.hh>
 #include <motor/scheduler/task/method.hh>
+#include <gpuresourceloader.hh>
 
 namespace Motor {
 

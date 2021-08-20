@@ -5,7 +5,7 @@
 #define MOTOR_NULLRENDER_RENDERER_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
-#include <motor/filesystem/folder.script.hh>
+#include <motor/filesystem/folder.meta.hh>
 #include <motor/plugin.graphics.3d/renderer/irenderer.hh>
 #include <motor/plugin/plugin.hh>
 

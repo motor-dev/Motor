@@ -5,7 +5,7 @@
 #define MOTOR_META_BUILTIN_HH_
 /**************************************************************************************************/
 #include <motor/meta/stdafx.h>
-#include <motor/meta/classinfo.script.hh>
+#include <motor/meta/classinfo.meta.hh>
 
 namespace Motor { namespace Meta {
 

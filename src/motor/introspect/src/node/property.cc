@@ -5,7 +5,7 @@
 #include <motor/introspect/node/property.hh>
 
 #include <motor/introspect/dbcontext.hh>
-#include <motor/meta/engine/propertyinfo.script.hh>
+#include <motor/meta/engine/propertyinfo.meta.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 

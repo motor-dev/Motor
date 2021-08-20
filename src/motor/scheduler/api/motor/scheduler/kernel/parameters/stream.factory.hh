@@ -5,11 +5,11 @@
 #define MOTOR_SCHEDULER_KERNEL_PARAMETER_STREAM_FACTORY_HH_
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
-#include <motor/scheduler/kernel/parameters/iparameter.script.hh>
+#include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
 
-#include <motor/meta/classinfo.script.hh>
-#include <motor/meta/engine/methodinfo.script.hh>
-#include <motor/meta/engine/objectinfo.script.hh>
+#include <motor/meta/classinfo.meta.hh>
+#include <motor/meta/engine/methodinfo.meta.hh>
+#include <motor/meta/engine/objectinfo.meta.hh>
 #include <motor/meta/typeinfo.hh>
 
 namespace Motor {

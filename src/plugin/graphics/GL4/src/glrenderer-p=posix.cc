@@ -2,19 +2,19 @@
    see LICENSE for detail */
 
 #include <motor/plugin.graphics.GL4/stdafx.h>
-#include <extensions.hh>
 #include <motor/plugin.graphics.GL4/glmemoryhost.hh>
 #include <motor/plugin.graphics.GL4/glrenderer.hh>
+#include <extensions.hh>
 
+#include <motor/core/threads/thread.hh>
+#include <motor/plugin.graphics.3d/mesh/mesh.meta.hh>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.hh>
+#include <motor/plugin.graphics.3d/shader/shader.meta.hh>
+#include <motor/plugin.graphics.3d/texture/texture.meta.hh>
 #include <loaders/mesh/glmesh.hh>
 #include <loaders/rendertarget/glwindow.hh>
 #include <loaders/shader/glshader.hh>
 #include <loaders/texture/gltexture.hh>
-#include <motor/core/threads/thread.hh>
-#include <motor/plugin.graphics.3d/mesh/mesh.script.hh>
-#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
-#include <motor/plugin.graphics.3d/shader/shader.script.hh>
-#include <motor/plugin.graphics.3d/texture/texture.script.hh>
 
 #include <GL/glx.h>
 #include <GL/glxext.h>

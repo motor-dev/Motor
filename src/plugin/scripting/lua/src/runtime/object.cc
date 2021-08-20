@@ -3,10 +3,10 @@
 
 #include <stdafx.h>
 
-#include <context.hh>
-#include <motor/meta/classinfo.script.hh>
-#include <motor/meta/engine/propertyinfo.script.hh>
+#include <motor/meta/classinfo.meta.hh>
+#include <motor/meta/engine/propertyinfo.meta.hh>
 #include <motor/meta/engine/scriptingapi.hh>
+#include <context.hh>
 #include <runtime/call.hh>
 #include <runtime/error.hh>
 #include <runtime/object.hh>

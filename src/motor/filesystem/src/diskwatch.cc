@@ -2,8 +2,8 @@
    see LICENSE for detail */
 
 #include <motor/filesystem/stdafx.h>
+#include <motor/filesystem/diskfolder.meta.hh>
 #include <diskwatch.hh>
-#include <motor/filesystem/diskfolder.script.hh>
 #include <watchpoint.hh>
 
 namespace Motor {

@@ -5,7 +5,7 @@
 #define MOTOR_SCHEDULER_KERNEL_PARAMETER_IMAGE2D_HH_
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
-#include <motor/scheduler/kernel/parameters/iparameter.script.hh>
+#include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
 
 #include <motor/scheduler/kernel/product.hh>
 

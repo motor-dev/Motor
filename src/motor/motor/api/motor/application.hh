@@ -5,7 +5,7 @@
 #define MOTOR_MOTOR_APPLICATION_HH_
 /**************************************************************************************************/
 #include <motor/stdafx.h>
-#include <motor/filesystem/folder.script.hh>
+#include <motor/filesystem/folder.meta.hh>
 #include <motor/plugin/plugin.hh>
 #include <motor/resource/loader.hh>
 #include <motor/scheduler/task/group.hh>

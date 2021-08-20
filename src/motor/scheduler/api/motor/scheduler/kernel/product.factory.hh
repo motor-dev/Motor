@@ -5,10 +5,10 @@
 #define MOTOR_SCHEDULER_KERNEL_PRODUCT_FACTORY_HH_
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
-#include <motor/scheduler/kernel/iproduct.script.hh>
+#include <motor/scheduler/kernel/iproduct.meta.hh>
 
-#include <motor/meta/classinfo.script.hh>
-#include <motor/meta/engine/objectinfo.script.hh>
+#include <motor/meta/classinfo.meta.hh>
+#include <motor/meta/engine/objectinfo.meta.hh>
 #include <motor/meta/typeinfo.hh>
 
 namespace Motor {

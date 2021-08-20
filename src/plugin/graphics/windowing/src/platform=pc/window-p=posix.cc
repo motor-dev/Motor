@@ -2,12 +2,12 @@
    see LICENSE for detail */
 
 #include <motor/plugin.graphics.windowing/stdafx.h>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.hh>
+#include <motor/plugin.graphics.windowing/renderer.hh>
+#include <motor/plugin.graphics.windowing/window.hh>
 #include <X11/X.h>
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
-#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
-#include <motor/plugin.graphics.windowing/renderer.hh>
-#include <motor/plugin.graphics.windowing/window.hh>
 #include <posix/platformrenderer.hh>
 
 namespace Motor { namespace Windowing {

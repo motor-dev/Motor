@@ -2,8 +2,8 @@
    see LICENSE for detail */
 
 #include <motor/plugin.scripting.package/stdafx.h>
+#include <motor/plugin.scripting.package/package.meta.hh>
 #include <buildcontext.hh>
-#include <motor/plugin.scripting.package/package.script.hh>
 #include <packagebuilder.hh>
 
 int motor_package_parse(void* param);

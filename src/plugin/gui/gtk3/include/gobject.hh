@@ -4,7 +4,7 @@
 #ifndef MOTOR_UI_GTK3_GOBJECT_HH_
 #define MOTOR_UI_GTK3_GOBJECT_HH_
 /**************************************************************************************************/
-#include <motor/resource/description.script.hh>
+#include <motor/resource/description.meta.hh>
 
 namespace Motor {
 

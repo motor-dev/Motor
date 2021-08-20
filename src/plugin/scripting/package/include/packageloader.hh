@@ -5,7 +5,7 @@
 #define MOTOR_PACKAGE_PACKAGELOADER_HH_
 /**************************************************************************************************/
 #include <motor/plugin.scripting.package/stdafx.h>
-#include <motor/plugin.scripting.package/package.script.hh>
+#include <motor/plugin.scripting.package/package.meta.hh>
 #include <motor/plugin/plugin.hh>
 #include <motor/scriptengine.hh>
 

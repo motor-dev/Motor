@@ -5,7 +5,7 @@
 #include    <motor/plugin.graphics.windowing/window.hh>
 #include    <motor/plugin.graphics.windowing/renderer.hh>
 #include    <darwin/platformrenderer.hh>
-#include    <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include    <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.hh>
 
 #ifndef MAC_OS_X_VERSION_10_12
 # define MAC_OS_X_VERSION_10_12 101200

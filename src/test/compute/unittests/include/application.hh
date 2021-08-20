@@ -6,7 +6,7 @@
 /**************************************************************************************************/
 #include <stdafx.h>
 #include <motor/application.hh>
-#include <motor/plugin.scripting.package/package.script.hh>
+#include <motor/plugin.scripting.package/package.meta.hh>
 #include <motor/plugin/plugin.hh>
 
 namespace Motor { namespace Test { namespace Compute { namespace UnitTests {

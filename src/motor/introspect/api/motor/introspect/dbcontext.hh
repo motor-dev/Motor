@@ -5,7 +5,7 @@
 #define MOTOR_INTROSPECT_DBCONTEXT_HH_
 /**************************************************************************************************/
 #include <motor/introspect/stdafx.h>
-#include <motor/filesystem/folder.script.hh>
+#include <motor/filesystem/folder.meta.hh>
 #include <motor/introspect/dbnamespace.hh>
 #include <motor/introspect/node/node.hh>
 #include <motor/meta/value.hh>

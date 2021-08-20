@@ -5,12 +5,12 @@
 #define MOTOR_META_ENGINE_HELPER_TUPLE2_HH_
 /**************************************************************************************************/
 #include <motor/meta/stdafx.h>
-#include <motor/meta/classinfo.script.hh>
+#include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/helper/get.hh>
 #include <motor/meta/engine/helper/method.hh>
-#include <motor/meta/engine/methodinfo.script.hh>
-#include <motor/meta/engine/objectinfo.script.hh>
-#include <motor/meta/engine/propertyinfo.script.hh>
+#include <motor/meta/engine/methodinfo.meta.hh>
+#include <motor/meta/engine/objectinfo.meta.hh>
+#include <motor/meta/engine/propertyinfo.meta.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/minitl/tuple.hh>
 

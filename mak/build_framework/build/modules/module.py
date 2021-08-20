@@ -52,7 +52,7 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, extra_fea
     if build_context.env.PROJECTS:
         globs = ['nothing']
     else:
-        globs = ['src/**/*.yy', 'src/**/*.ll', 'src/**/*.plist', 'api/**/*.script.hh', 'include/**/*.script.hh']
+        globs = ['src/**/*.yy', 'src/**/*.ll', 'src/**/*.plist', 'api/**/*.meta.hh', 'include/**/*.meta.hh']
     for source_node in source_nodes:
         preprocess_sources += source_node.ant_glob(globs)
 

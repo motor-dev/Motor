@@ -7,7 +7,7 @@
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/core/memory/streams.hh>
 #include <motor/minitl/hash_map.hh>
-#include <motor/plugin.graphics.3d/shader/node.script.hh>
+#include <motor/plugin.graphics.3d/shader/node.meta.hh>
 
 namespace Motor { namespace Shaders {
 

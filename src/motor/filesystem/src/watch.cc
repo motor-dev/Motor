@@ -3,7 +3,7 @@
  see LICENSE for detail */
 
 #include <motor/filesystem/stdafx.h>
-#include <motor/filesystem/folder.script.hh>
+#include <motor/filesystem/folder.meta.hh>
 
 namespace Motor {
 

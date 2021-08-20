@@ -7,8 +7,8 @@
 #include <motor/introspect/dbcontext.hh>
 #include <motor/introspect/node/node.hh>
 #include <motor/introspect/node/object.hh>
-#include <motor/meta/engine/objectinfo.script.hh>
-#include <motor/meta/engine/propertyinfo.script.hh>
+#include <motor/meta/engine/objectinfo.meta.hh>
+#include <motor/meta/engine/propertyinfo.meta.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 

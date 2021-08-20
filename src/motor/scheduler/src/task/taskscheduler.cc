@@ -9,7 +9,7 @@
 #include <motor/scheduler/private/taskitem.hh>
 #include <motor/scheduler/range/sequence.hh>
 #include <motor/scheduler/task/task.hh>
-#include <settings.script.hh>
+#include <settings.meta.hh>
 
 namespace Motor { namespace Task {
 

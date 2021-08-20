@@ -4,11 +4,11 @@
 #include <stdafx.h>
 #include <nullrenderer.hh>
 
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.hh>
+#include <motor/plugin.graphics.3d/shader/shader.meta.hh>
 #include <loaders/nullshader.hh>
 #include <loaders/nullsurface.hh>
 #include <loaders/nullwindow.hh>
-#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
-#include <motor/plugin.graphics.3d/shader/shader.script.hh>
 
 namespace Motor { namespace Null {
 

@@ -7,7 +7,7 @@
 #include <motor/scheduler/stdafx.h>
 #include <motor/minitl/array.hh>
 #include <motor/minitl/pool.hh>
-#include <motor/scheduler/kernel/parameters/iparameter.script.hh>
+#include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
 
 namespace Motor {
 

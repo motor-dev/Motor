@@ -2,9 +2,9 @@
    see LICENSE for detail */
 
 #include <motor/filesystem/stdafx.h>
+#include <motor/filesystem/file.meta.hh>
+#include <motor/filesystem/folder.meta.hh>
 #include <ioprocess.hh>
-#include <motor/filesystem/file.script.hh>
-#include <motor/filesystem/folder.script.hh>
 
 #include <motor/core/threads/thread.hh>
 

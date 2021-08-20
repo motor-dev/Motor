@@ -5,7 +5,7 @@
 #include <motor/meta/engine/namespace.hh>
 #include <motor/scheduler/task/group.hh>
 #include <motor/scheduler/task/method.hh>
-#include <motor/world/world.script.hh>
+#include <motor/world/world.meta.hh>
 
 namespace Motor { namespace World {
 

@@ -2,10 +2,10 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
+#include <motor/core/threads/thread.hh>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.hh>
 #include <dx9renderer.hh>
 #include <loaders/dx9window.hh>
-#include <motor/core/threads/thread.hh>
-#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
 
 namespace Motor { namespace DirectX9 {
 

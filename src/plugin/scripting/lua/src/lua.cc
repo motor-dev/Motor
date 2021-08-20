@@ -3,7 +3,7 @@
 
 #include <stdafx.h>
 
-#include <lua.script.hh>
+#include <lua.meta.hh>
 
 namespace Motor {
 
