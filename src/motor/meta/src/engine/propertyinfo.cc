@@ -2,9 +2,9 @@
    see LICENSE for detail */
 
 #include <motor/meta/stdafx.h>
-#include <motor/meta/engine/methodinfo.script.hh>
-#include <motor/meta/engine/propertyinfo.script.hh>
-#include <motor/meta/engine/taginfo.script.hh>
+#include <motor/meta/engine/methodinfo.meta.hh>
+#include <motor/meta/engine/propertyinfo.meta.hh>
+#include <motor/meta/engine/taginfo.meta.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/meta/value.hh>
 

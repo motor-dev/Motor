@@ -2,10 +2,10 @@
    see LICENSE for detail */
 
 #include <motor/meta/stdafx.h>
-#include <motor/meta/classinfo.script.hh>
-#include <motor/meta/engine/methodinfo.script.hh>
-#include <motor/meta/engine/propertyinfo.script.hh>
-#include <motor/meta/tags/documentation.script.hh>
+#include <motor/meta/classinfo.meta.hh>
+#include <motor/meta/engine/methodinfo.meta.hh>
+#include <motor/meta/engine/propertyinfo.meta.hh>
+#include <motor/meta/tags/documentation.meta.hh>
 #include <motor/meta/value.hh>
 #include <zlib.h>
 

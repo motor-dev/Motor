@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/plugin.graphics.windowing/stdafx.h>
-#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.hh>
 #include <motor/plugin.graphics.windowing/renderer.hh>
 #include <motor/plugin.graphics.windowing/window.hh>
 #include <win32/platformrenderer.hh>

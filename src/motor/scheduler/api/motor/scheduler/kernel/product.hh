@@ -5,7 +5,7 @@
 #define MOTOR_SCHEDULER_KERNEL_PRODUCT_HH_
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
-#include <motor/scheduler/kernel/iproduct.script.hh>
+#include <motor/scheduler/kernel/iproduct.meta.hh>
 
 namespace Motor { namespace KernelScheduler {
 

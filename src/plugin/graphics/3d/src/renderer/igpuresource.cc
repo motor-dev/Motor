@@ -4,7 +4,7 @@
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/plugin.graphics.3d/renderer/igpuresource.hh>
 #include <motor/plugin.graphics.3d/renderer/irenderer.hh>
-#include <motor/resource/description.script.hh>
+#include <motor/resource/description.meta.hh>
 
 namespace Motor {
 

@@ -2,10 +2,10 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <application.hh>
-#include <motor/filesystem/diskfolder.script.hh>
+#include <motor/filesystem/diskfolder.meta.hh>
 #include <motor/meta/engine/namespace.hh>
 #include <motor/plugin/plugin.hh>
+#include <application.hh>
 
 namespace Motor { namespace Test { namespace Compute { namespace UnitTests {
 

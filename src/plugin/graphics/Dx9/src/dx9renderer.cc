@@ -4,10 +4,10 @@
 #include <stdafx.h>
 #include <dx9renderer.hh>
 
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.hh>
+#include <motor/plugin.graphics.3d/shader/shader.meta.hh>
 #include <loaders/dx9shader.hh>
 #include <loaders/dx9window.hh>
-#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
-#include <motor/plugin.graphics.3d/shader/shader.script.hh>
 
 #include <motor/core/threads/thread.hh>
 #include <motor/plugin/plugin.hh>

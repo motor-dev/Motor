@@ -5,8 +5,8 @@
 #define MOTOR_SCHEDULER_TASK_KERNELTASK_HH_
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
-#include <motor/scheduler/kernel/kernel.script.hh>
-#include <motor/scheduler/kernel/parameters/iparameter.script.hh>
+#include <motor/scheduler/kernel/kernel.meta.hh>
+#include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
 #include <motor/scheduler/task/itask.hh>
 
 namespace Motor { namespace KernelScheduler {

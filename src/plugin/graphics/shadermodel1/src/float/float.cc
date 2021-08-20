@@ -3,7 +3,7 @@
 
 #include <motor/plugin.graphics.shadermodel1/stdafx.h>
 #include <motor/plugin.graphics.3d/shader/ishaderbuilder.hh>
-#include <motor/plugin.graphics.shadermodel1/float/float.script.hh>
+#include <motor/plugin.graphics.shadermodel1/float/float.meta.hh>
 
 namespace Motor { namespace Float { namespace Float {
 

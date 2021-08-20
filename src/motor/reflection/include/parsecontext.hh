@@ -8,7 +8,7 @@
 #include <motor/introspect/dbcontext.hh>
 #include <motor/introspect/node/node.hh>
 #include <motor/introspect/node/object.hh>
-#include <motor/reflection/location.script.hh>
+#include <motor/reflection/location.meta.hh>
 
 template < typename T >
 struct ParseResult

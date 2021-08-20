@@ -9,9 +9,9 @@
 #include <motor/introspect/node/parameter.hh>
 #include <motor/introspect/node/property.hh>
 #include <motor/introspect/node/reference.hh>
-#include <motor/introspect/policy.script.hh>
+#include <motor/introspect/policy.meta.hh>
 
-#include <motor/meta/classinfo.script.hh>
+#include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/call.hh>
 #include <motor/meta/value.hh>
 

@@ -8,7 +8,7 @@
 #include <motor/plugin/dynobject.hh>
 #include <motor/plugin/hook.hh>
 
-#include <motor/filesystem/folder.script.hh>
+#include <motor/filesystem/folder.meta.hh>
 #include <motor/resource/resourcemanager.hh>
 #include <motor/scheduler/scheduler.hh>
 

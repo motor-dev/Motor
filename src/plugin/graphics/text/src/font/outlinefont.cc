@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/plugin.graphics.text/stdafx.h>
-#include <motor/plugin.graphics.text/outlinefont.script.hh>
+#include <motor/plugin.graphics.text/outlinefont.meta.hh>
 
 namespace Motor {
 

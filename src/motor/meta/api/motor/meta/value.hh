@@ -5,7 +5,7 @@
 #define MOTOR_META_VALUE_HH_
 /**************************************************************************************************/
 #include <motor/meta/stdafx.h>
-#include <motor/meta/typeinfo.script.hh>
+#include <motor/meta/typeinfo.meta.hh>
 #include <motor/minitl/typemanipulation.hh>
 
 namespace Motor { namespace Meta {

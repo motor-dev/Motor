@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <motor/meta/classinfo.script.hh>
+#include <motor/meta/classinfo.meta.hh>
 #include <motor/plugin/plugin.hh>
 #include <scheduler.hh>
 

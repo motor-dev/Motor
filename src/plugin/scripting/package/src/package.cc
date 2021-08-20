@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/plugin.scripting.package/stdafx.h>
-#include <motor/plugin.scripting.package/package.script.hh>
+#include <motor/plugin.scripting.package/package.meta.hh>
 
 namespace Motor {
 

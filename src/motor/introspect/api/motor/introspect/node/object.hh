@@ -8,7 +8,7 @@
 #include <motor/introspect/node/node.hh>
 
 #include <motor/introspect/introspectionhint.hh>
-#include <motor/meta/engine/methodinfo.script.hh>
+#include <motor/meta/engine/methodinfo.meta.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 

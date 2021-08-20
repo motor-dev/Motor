@@ -5,13 +5,13 @@
 #define MOTOR_RESOURCE_RESOURCEMANAGER_HH_
 /**************************************************************************************************/
 #include <motor/resource/stdafx.h>
-#include <motor/filesystem/file.script.hh>
-#include <motor/meta/classinfo.script.hh>
+#include <motor/filesystem/file.meta.hh>
+#include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/minitl/array.hh>
 #include <motor/minitl/intrusive_list.hh>
 #include <motor/minitl/refcountable.hh>
-#include <motor/resource/description.script.hh>
+#include <motor/resource/description.meta.hh>
 #include <motor/resource/loader.hh>
 
 namespace Motor { namespace Resource {

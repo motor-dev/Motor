@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/filesystem/stdafx.h>
-#include <motor/filesystem/zipfolder.script.hh>
+#include <motor/filesystem/zipfolder.meta.hh>
 #include <zipfile.hh>
 
 #include <unzip.h>

@@ -3,11 +3,11 @@
    see LICENSE for detail */
 
 #include <motor/plugin.graphics.text/stdafx.h>
+#include <motor/plugin.graphics.text/outlinefont.meta.hh>
+#include <motor/resource/resourcemanager.hh>
 #include <fontlist.hh>
 #include <freetypeface.hh>
 #include <freetypelib.hh>
-#include <motor/plugin.graphics.text/outlinefont.script.hh>
-#include <motor/resource/resourcemanager.hh>
 #include <outlinefontmanager.hh>
 
 namespace Motor {

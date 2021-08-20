@@ -5,9 +5,9 @@
 #define MOTOR_SETTINGS_SETTINGS_FACTORY_HH_
 /**************************************************************************************************/
 #include <motor/settings/stdafx.h>
-#include <motor/meta/engine/methodinfo.script.hh>
-#include <motor/meta/engine/objectinfo.script.hh>
-#include <motor/meta/engine/propertyinfo.script.hh>
+#include <motor/meta/engine/methodinfo.meta.hh>
+#include <motor/meta/engine/objectinfo.meta.hh>
+#include <motor/meta/engine/propertyinfo.meta.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/meta/value.hh>
 #include <motor/settings/settingsprovider.hh>

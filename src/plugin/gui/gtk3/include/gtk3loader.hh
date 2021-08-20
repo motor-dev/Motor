@@ -4,10 +4,10 @@
 #ifndef MOTOR_GUI_GTK3_GTK3LOADER_HH_
 #define MOTOR_GUI_GTK3_GTK3LOADER_HH_
 /**************************************************************************************************/
-#include <gtk3plugin.hh>
-#include <motor/meta/classinfo.script.hh>
+#include <motor/meta/classinfo.meta.hh>
 #include <motor/plugin/plugin.hh>
 #include <motor/resource/loader.hh>
+#include <gtk3plugin.hh>
 
 namespace Motor { namespace Gtk3 {
 

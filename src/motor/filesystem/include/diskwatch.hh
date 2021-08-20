@@ -5,7 +5,7 @@
 #define MOTOR_FILESYSTEM_DISKWATCH_HH_
 /**************************************************************************************************/
 #include <motor/filesystem/stdafx.h>
-#include <motor/filesystem/diskfolder.script.hh>
+#include <motor/filesystem/diskfolder.meta.hh>
 
 namespace Motor {
 

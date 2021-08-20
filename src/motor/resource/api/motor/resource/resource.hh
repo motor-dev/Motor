@@ -5,7 +5,7 @@
 #define MOTOR_RESOURCE_RESOURCE_HH_
 /**************************************************************************************************/
 #include <motor/resource/stdafx.h>
-#include <motor/resource/handle.script.hh>
+#include <motor/resource/handle.meta.hh>
 
 namespace Motor { namespace Resource {
 

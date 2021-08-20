@@ -3,9 +3,9 @@
 
 #include <motor/plugin/stdafx.h>
 #include <motor/core/environment.hh>
-#include <motor/meta/classinfo.script.hh>
+#include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/helper/staticarray.hh>
-#include <motor/meta/engine/objectinfo.script.hh>
+#include <motor/meta/engine/objectinfo.meta.hh>
 #include <motor/meta/value.hh>
 #include <motor/plugin/dynobjectlist.hh>
 #include <motor/plugin/hook.hh>

@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/plugin.graphics.3d/stdafx.h>
-#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.hh>
 
 namespace Motor {
 

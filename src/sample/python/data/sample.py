@@ -51,8 +51,8 @@ def help(klass):
 
 
 if __name__ == '__main__':
-    help(Motor.RTTI.Class.ClassType.metaclass)
-    help(Motor.RTTI.Class)
+    help(Motor.Meta.Class.ClassType.metaclass)
+    help(Motor.Meta.Class)
     help(Motor.text)
     help(Motor.DiskFolder)
 

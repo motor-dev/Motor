@@ -4,7 +4,7 @@
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/kernel/imemorybuffer.hh>
 #include <motor/scheduler/kernel/imemoryhost.hh>
-#include <motor/scheduler/kernel/parameters/iparameter.script.hh>
+#include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
 
 namespace Motor { namespace KernelScheduler {
 

@@ -9,7 +9,7 @@
 #include <gtk3loader.hh>
 
 #include <motor/meta/engine/helper/method.hh>
-#include <motor/meta/engine/methodinfo.script.hh>
+#include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/meta/engine/namespace.hh>
 #include <motor/plugin/plugin.hh>
 

@@ -4,7 +4,7 @@
 #include <motor/introspect/stdafx.h>
 #include <motor/introspect/node/filename.hh>
 
-#include <motor/filesystem/file.script.hh>
+#include <motor/filesystem/file.meta.hh>
 #include <motor/introspect/dbcontext.hh>
 
 namespace Motor { namespace Meta { namespace AST {

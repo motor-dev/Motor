@@ -5,10 +5,10 @@
 #define MOTOR_PYTHON_CONTEXT_HH_
 /**************************************************************************************************/
 #include <motor/plugin.scripting.python/stdafx.h>
-#include <motor/filesystem/file.script.hh>
-#include <motor/meta/classinfo.script.hh>
+#include <motor/filesystem/file.meta.hh>
+#include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/value.hh>
-#include <motor/plugin.scripting.python/pythonscript.script.hh>
+#include <motor/plugin.scripting.python/pythonscript.meta.hh>
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <motor/plugin/plugin.hh>
 #include <motor/scriptengine.hh>

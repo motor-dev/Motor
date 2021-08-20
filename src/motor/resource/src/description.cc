@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/resource/stdafx.h>
-#include <motor/resource/description.script.hh>
+#include <motor/resource/description.meta.hh>
 #include <motor/resource/loader.hh>
 
 namespace Motor { namespace Resource {

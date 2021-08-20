@@ -6,7 +6,7 @@
 /**************************************************************************************************/
 #include <motor/plugin.graphics.GL4/stdafx.h>
 #include <motor/plugin.graphics.3d/renderer/igpuresource.hh>
-#include <motor/plugin.graphics.3d/shader/shader.script.hh>
+#include <motor/plugin.graphics.3d/shader/shader.meta.hh>
 
 namespace Motor { namespace OpenGL {
 

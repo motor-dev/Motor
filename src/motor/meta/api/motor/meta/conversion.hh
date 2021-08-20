@@ -5,9 +5,9 @@
 #define MOTOR_META_CONVERSION_HH_
 /**************************************************************************************************/
 #include <motor/meta/stdafx.h>
-#include <motor/meta/conversion.script.hh>
+#include <motor/meta/conversion.meta.hh>
 #include <motor/meta/typeinfo.hh>
-#include <motor/meta/typeinfo.script.hh>
+#include <motor/meta/typeinfo.meta.hh>
 
 namespace Motor { namespace Meta {
 

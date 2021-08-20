@@ -5,7 +5,7 @@
 #define MOTOR_FILESYSTEM_WIN32_FILE_HH_
 /**************************************************************************************************/
 #include <motor/filesystem/stdafx.h>
-#include <motor/filesystem/file.script.hh>
+#include <motor/filesystem/file.meta.hh>
 
 namespace Motor {
 

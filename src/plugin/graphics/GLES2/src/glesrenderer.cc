@@ -2,9 +2,9 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <glesrenderer.hh>
-#include <motor/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.hh>
 #include <motor/scheduler/scheduler.hh>
+#include <glesrenderer.hh>
 
 namespace Motor { namespace OpenGLES {
 

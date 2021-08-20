@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/plugin.scripting.python/stdafx.h>
-#include <motor/plugin.scripting.python/pythonscript.script.hh>
+#include <motor/plugin.scripting.python/pythonscript.meta.hh>
 
 namespace Motor {
 

@@ -3,7 +3,7 @@
 
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/kernel/ischeduler.hh>
-#include <motor/scheduler/kernel/kernel.script.hh>
+#include <motor/scheduler/kernel/kernel.meta.hh>
 #include <motor/scheduler/task/kerneltask.hh>
 
 namespace Motor { namespace Task {

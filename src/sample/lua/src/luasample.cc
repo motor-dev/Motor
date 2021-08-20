@@ -2,9 +2,9 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <luasample.hh>
 #include <motor/core/environment.hh>
-#include <motor/filesystem/diskfolder.script.hh>
+#include <motor/filesystem/diskfolder.meta.hh>
+#include <luasample.hh>
 
 namespace Motor {
 

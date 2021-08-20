@@ -2,12 +2,12 @@
    see LICENSE for detail */
 
 #include <motor/plugin.graphics.GL4/stdafx.h>
+#include <motor/plugin.graphics.3d/shader/node.meta.hh>
+#include <motor/plugin.graphics.3d/shader/shader.meta.hh>
+#include <motor/plugin.graphics.GL4/glrenderer.hh>
 #include <extensions.hh>
 #include <loaders/shader/glshader.hh>
 #include <loaders/shader/glshaderbuilder.hh>
-#include <motor/plugin.graphics.3d/shader/node.script.hh>
-#include <motor/plugin.graphics.3d/shader/shader.script.hh>
-#include <motor/plugin.graphics.GL4/glrenderer.hh>
 
 namespace Motor { namespace OpenGL {
 

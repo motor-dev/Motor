@@ -7,7 +7,7 @@
 #include <motor/plugin.compute.cpu/stdafx.h>
 #include <motor/plugin/plugin.hh>
 #include <motor/scheduler/kernel/ischeduler.hh>
-#include <motor/scheduler/kernel/parameters/iparameter.script.hh>
+#include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
 
 namespace Motor { namespace KernelScheduler { namespace CPU {
 

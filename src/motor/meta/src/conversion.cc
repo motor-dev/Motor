@@ -3,7 +3,7 @@
 
 #include <motor/meta/stdafx.h>
 #include <motor/meta/conversion.hh>
-#include <motor/meta/typeinfo.script.hh>
+#include <motor/meta/typeinfo.meta.hh>
 
 namespace Motor { namespace Meta {
 

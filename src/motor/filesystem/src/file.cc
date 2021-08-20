@@ -2,8 +2,8 @@
    see LICENSE for detail */
 
 #include <motor/filesystem/stdafx.h>
+#include <motor/filesystem/file.meta.hh>
 #include <ioprocess.hh>
-#include <motor/filesystem/file.script.hh>
 
 namespace Motor {
 

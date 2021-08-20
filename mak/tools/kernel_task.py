@@ -34,7 +34,7 @@ TEMPLATE_H = """
 #define MOTOR_%(PLUGIN)s_%(NAME)s_SCRIPT_HH_
 /**************************************************************************************************/
 %(pch)s
-#include    <motor/scheduler/kernel/kernel.script.hh>
+#include    <motor/scheduler/kernel/kernel.meta.hh>
 #include    <motor/scheduler/task/itask.hh>
 #include    <motor/scheduler/kernel/product.hh>
 #include    <motor/scheduler/kernel/parameters/parameters.hh>
@@ -222,7 +222,7 @@ class kernel_task(Task.Task):
 
 @extension('.ast')
 def kernel_generate(task_gen, ast_node):
-    outs = [ast_node.change_ext('task.cc'), ast_node.change_ext('task.script.hh')]
+    outs = [ast_node.change_ext('task.cc'), ast_node.change_ext('task.meta.hh')]
     task = task_gen.create_task('kernel_task', [ast_node], outs)
     try:
         task_gen.out_sources.append(outs[0])

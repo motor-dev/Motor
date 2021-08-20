@@ -5,7 +5,7 @@
 #define MOTOR_RESOURCE_ILOADER_HH_
 /**************************************************************************************************/
 #include <motor/resource/stdafx.h>
-#include <motor/resource/description.script.hh>
+#include <motor/resource/description.meta.hh>
 #include <motor/resource/resource.hh>
 
 namespace Motor { namespace Resource {

@@ -2,9 +2,9 @@
    see LICENSE for detail */
 
 #include <motor/plugin.compute.cuda/stdafx.h>
+#include <motor/scheduler/kernel/kernel.meta.hh>
 #include <codeloader.hh>
 #include <kernelobject.hh>
-#include <motor/scheduler/kernel/kernel.script.hh>
 
 namespace Motor { namespace KernelScheduler { namespace Cuda {
 

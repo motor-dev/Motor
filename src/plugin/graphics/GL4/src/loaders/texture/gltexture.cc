@@ -2,9 +2,9 @@
    see LICENSE for detail */
 
 #include <motor/plugin.graphics.GL4/stdafx.h>
-#include <loaders/texture/gltexture.hh>
-#include <motor/plugin.graphics.3d/texture/texture.script.hh>
+#include <motor/plugin.graphics.3d/texture/texture.meta.hh>
 #include <motor/plugin.graphics.GL4/glrenderer.hh>
+#include <loaders/texture/gltexture.hh>
 
 namespace Motor { namespace OpenGL {
 

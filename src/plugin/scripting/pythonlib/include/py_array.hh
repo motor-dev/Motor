@@ -5,7 +5,7 @@
 #define MOTOR_PYTHONLIB_PY_ARRAY_HH_
 /**************************************************************************************************/
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
-#include <motor/meta/engine/methodinfo.script.hh>
+#include <motor/meta/engine/methodinfo.meta.hh>
 #include <py_object.hh>
 
 namespace Motor { namespace Python {

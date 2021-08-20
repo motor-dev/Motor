@@ -63,6 +63,6 @@ p = plugin('sample.python')
 c = p.Motor.TestCases.Class(1.0, 2.0)
 c:doStuff{4.0, v2=8.0, v3=false}
 
-help(Motor.RTTI.Class.ClassType.metaclass)
+help(Motor.Meta.Class.ClassType.metaclass)
 help(Motor.text)
 help(Motor.DiskFolder)

@@ -7,7 +7,7 @@
 #include <motor/scheduler/stdafx.h>
 #include <motor/kernel/input/segments.hh>
 #include <motor/minitl/typemanipulation.hh>
-#include <motor/scheduler/kernel/parameters/iparameter.script.hh>
+#include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
 #include <motor/scheduler/kernel/product.hh>
 
 namespace Motor { namespace KernelScheduler {

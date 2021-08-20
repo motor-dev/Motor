@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
-#include <motor/meta/classinfo.script.hh>
+#include <motor/meta/classinfo.meta.hh>
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <py_namespace.hh>
 

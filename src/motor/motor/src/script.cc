@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/stdafx.h>
-#include <motor/script.script.hh>
+#include <motor/script.meta.hh>
 
 namespace Motor {
 

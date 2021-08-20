@@ -1,4 +1,4 @@
-#include <motor/world/component/logiccomponentstorage.script.hh>
+#include <motor/world/component/logiccomponentstorage.meta.hh>
 
 int main()
 {

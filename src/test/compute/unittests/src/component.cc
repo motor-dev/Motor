@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <component.script.hh>
+#include <component.meta.hh>
 
 namespace Motor { namespace Test { namespace Compute { namespace UnitTests {
 

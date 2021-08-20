@@ -7,7 +7,7 @@
 #include <motor/filesystem/stdafx.h>
 #include <motor/core/threads/semaphore.hh>
 #include <motor/core/threads/thread.hh>
-#include <motor/filesystem/file.script.hh>
+#include <motor/filesystem/file.meta.hh>
 
 namespace Motor { namespace IOProcess {
 

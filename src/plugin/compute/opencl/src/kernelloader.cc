@@ -4,10 +4,10 @@
 #include <motor/plugin.compute.opencl/stdafx.h>
 #include <kernelloader.hh>
 
+#include <motor/scheduler/kernel/kernel.meta.hh>
 #include <codeloader.hh>
 #include <codeobject.hh>
 #include <kernelobject.hh>
-#include <motor/scheduler/kernel/kernel.script.hh>
 
 namespace Motor { namespace KernelScheduler { namespace OpenCL {
 

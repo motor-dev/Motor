@@ -5,8 +5,8 @@
 #include <motor/introspect/node/array.hh>
 
 #include <motor/introspect/dbcontext.hh>
-#include <motor/meta/engine/methodinfo.script.hh>
-#include <motor/meta/engine/objectinfo.script.hh>
+#include <motor/meta/engine/methodinfo.meta.hh>
+#include <motor/meta/engine/objectinfo.meta.hh>
 #include <motor/meta/engine/scriptingapi.hh>
 #include <motor/minitl/array.hh>
 
