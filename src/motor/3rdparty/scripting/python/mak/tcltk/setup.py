@@ -1,4 +1,4 @@
-TCLTK_PACKAGE = 'https://github.com/motor/Motor/releases/download/prebuilt-python/tcltk-%(platform)s.tgz'
+TCLTK_PACKAGE = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/tcltk-%(platform)s.tgz'
 
 
 def setup(configuration_context):

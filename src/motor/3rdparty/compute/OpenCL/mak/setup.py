@@ -2,7 +2,7 @@ from waflib.Errors import WafError
 from waflib import Options
 import os
 
-CL_ICD_BINARIES = 'https://github.com/motor/Motor/releases/download/prebuilt-opencl/OpenCL-icd-2.2-%(platform)s.tgz'
+CL_ICD_BINARIES = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/OpenCL-icd-2.2-%(platform)s.tgz'
 
 
 def setup(conf):

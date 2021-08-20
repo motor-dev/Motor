@@ -2,7 +2,7 @@ from waflib.Errors import WafError
 from waflib import Options
 import os
 
-GTK3_BINARIES = 'https://github.com/motor/Motor/releases/download/prebuilt-gtk3/gtk+-3.0-%(platform)s-%(arch)s.tgz'
+GTK3_BINARIES = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/gtk+-3.0-%(platform)s-%(arch)s.tgz'
 
 
 def setup_pkgconfig(conf):

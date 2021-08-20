@@ -2,7 +2,7 @@ from waflib import Errors, Options, Logs
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method
 
-PYTHON_PACKAGE = 'https://github.com/motor/Motor/releases/download/prebuilt-python/python{version}-%(platform)s.tgz'
+PYTHON_PACKAGE = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/python{version}-%(platform)s.tgz'
 
 
 @conf
