@@ -23,7 +23,7 @@ constraint-logical-and-expression:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx98, cxx11, cxx20
 from motor_typing import TYPE_CHECKING
 from . import parameter
 from . import name
@@ -34,16 +34,29 @@ from . import guide
 
 
 @glrp.rule('template-declaration : template-head declaration')
-@glrp.rule('template-declaration : template-head concept-definition')
 @cxx98
 def template_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('template-head : "template" "<" template-parameter-list ">" requires-clause?')
+@glrp.rule('template-declaration : template-head concept-definition')
+@cxx20
+def template_declaration_cxx20(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('template-head : "template" "<" template-parameter-list ">"')
 @cxx98
 def template_head(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('template-head : "template" "<" template-parameter-list ">" requires-clause')
+@cxx20
+def template_head_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -57,24 +70,24 @@ def template_parameter_list(self, p):
 
 
 @glrp.rule('requires-clause : "requires" constraint-logical-or-expression')
-@cxx98
-def requires_clause(self, p):
+@cxx20
+def requires_clause_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('constraint-logical-or-expression : constraint-logical-and-expression')
 @glrp.rule('constraint-logical-or-expression : constraint-logical-or-expression "||" constraint-logical-and-expression')
-@cxx98
-def constraint_logical_or_expression(self, p):
+@cxx20
+def constraint_logical_or_expression_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('constraint-logical-and-expression : primary-expression')
 @glrp.rule('constraint-logical-and-expression : constraint-logical-and-expression [prec:left,0]"&&" primary-expression')
-@cxx98
-def constraint_logical_and_expression(self, p):
+@cxx20
+def constraint_logical_and_expression_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

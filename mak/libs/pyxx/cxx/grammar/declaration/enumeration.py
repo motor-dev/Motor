@@ -36,7 +36,7 @@ enumerator:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
@@ -55,9 +55,16 @@ def enum_specifier(self, p):
     pass
 
 
-@glrp.rule('enum-head : enum-key attribute-specifier-seq? enum-head-name? enum-base?')
+@glrp.rule('enum-head : enum-key attribute-specifier-seq? enum-head-name?')
 @cxx98
 def enum_head(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('enum-head : enum-key attribute-specifier-seq? enum-head-name? enum-base')
+@cxx11
+def enum_head_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -70,24 +77,30 @@ def enum_head_name(self, p):
 
 
 @glrp.rule('opaque-enum-declaration : enum-key attribute-specifier-seq? enum-head-name enum-base? ";"')
-@cxx98
-def opaque_enum_declaration(self, p):
+@cxx11
+def opaque_enum_declaration_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('enum-key[split] : "enum"')
-@glrp.rule('enum-key : "enum" "class"')
-@glrp.rule('enum-key : "enum" "struct"')
 @cxx98
 def enum_key(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
+@glrp.rule('enum-key : "enum" "class"')
+@glrp.rule('enum-key : "enum" "struct"')
+@cxx11
+def enum_key_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule('enum-base : ":" type-specifier-seq')
-@cxx98
-def enum_base(self, p):
+@cxx11
+def enum_base_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

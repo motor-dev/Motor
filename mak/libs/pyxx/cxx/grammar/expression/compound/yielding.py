@@ -5,14 +5,14 @@ yield-expression:
 """
 
 import glrp
-from ....parser import cxx98
+from ....parser import cxx20
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('yield-expression : "co_yield" assignment-expression')
 @glrp.rule('yield-expression : "co_yield" braced-init-list')
-@cxx98
-def yield_expression(self, p):
+@cxx20
+def yield_expression_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

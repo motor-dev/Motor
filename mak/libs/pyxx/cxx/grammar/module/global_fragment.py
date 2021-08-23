@@ -4,15 +4,15 @@ global-module-fragment:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx20
 from motor_typing import TYPE_CHECKING
 
 
 #@glrp.rule('global-module-fragment : "module" ";" declaration-seq?')
 @glrp.rule('global-module-fragment[split] : "module" ";"')
 @glrp.rule('global-module-fragment[split] : "module" ";" declaration-seq')
-@cxx98
-def global_module_fragment(self, p):
+@cxx20
+def global_module_fragment_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

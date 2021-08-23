@@ -5,14 +5,14 @@ literal-operator-id:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx11
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('literal-operator-id : "operator" "string-literal" "identifier"')
 @glrp.rule('literal-operator-id : "operator" user-defined-string-literal')
-@cxx98
-def literal_operator_id(self, p):
+@cxx11
+def literal_operator_id_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

@@ -11,7 +11,7 @@ operator: one of
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx98, cxx20
 from motor_typing import TYPE_CHECKING
 
 
@@ -26,7 +26,6 @@ def operator_function_id(self, p):
 @glrp.rule('overloadable-operator : "delete" [split]')
 @glrp.rule('overloadable-operator : "new"    [split]"[" "]"')
 @glrp.rule('overloadable-operator : "delete" [split]"[" "]"')
-@glrp.rule('overloadable-operator : "co_await"')
 @glrp.rule('overloadable-operator : "(" ")"')
 @glrp.rule('overloadable-operator : "[" "]"')
 @glrp.rule('overloadable-operator : "->"')
@@ -56,7 +55,6 @@ def operator_function_id(self, p):
 @glrp.rule('overloadable-operator : ">"')
 @glrp.rule('overloadable-operator : "<="')
 @glrp.rule('overloadable-operator : ">="')
-@glrp.rule('overloadable-operator : "<=>"')
 @glrp.rule('overloadable-operator : "&&"')
 @glrp.rule('overloadable-operator : "||"')
 @glrp.rule('overloadable-operator : "<<"')
@@ -68,6 +66,14 @@ def operator_function_id(self, p):
 @glrp.rule('overloadable-operator : ","')
 @cxx98
 def overloadable_operator(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('overloadable-operator : "co_await"')
+@glrp.rule('overloadable-operator : "<=>"')
+@cxx20
+def overloadable_operator_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

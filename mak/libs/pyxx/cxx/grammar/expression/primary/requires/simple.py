@@ -4,13 +4,13 @@ simple-requirement:
 """
 
 import glrp
-from .....parser import cxx98
+from .....parser import cxx20
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('simple-requirement : expression ";"')
-@cxx98
-def simple_requirement(self, p):
+@cxx20
+def simple_requirement_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

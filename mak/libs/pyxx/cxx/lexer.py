@@ -184,8 +184,13 @@ _keywords_cxx23 = _keywords_transactional + _keywords_reflection
 
 
 class Cxx98Lexer(glrp.Lexer):
-    keywords = _keywords + _keywords_cxx11 + _keywords_cxx20 + _keywords_cxx23
-    tokens = _keywords + _keywords_cxx11 + _keywords_cxx20 + _keywords_cxx23
+    keywords = _keywords
+    tokens = _keywords + (
+        'virt-specifier-macro',
+        'access-specifier-macro',
+        'decl-specifier-macro',
+        'attribute-specifier-macro',
+    )
 
     # arithmetic operators
     @glrp.token(r'\+', '+')
@@ -209,7 +214,6 @@ class Cxx98Lexer(glrp.Lexer):
     @glrp.token(r'>=')
     @glrp.token(r'==')
     @glrp.token(r'!=')
-    @glrp.token(r'<=>')
     # assignment operators
     @glrp.token(r'=')
     @glrp.token(r'\*=', '*=')
@@ -244,8 +248,8 @@ class Cxx98Lexer(glrp.Lexer):
     @glrp.token(r'\]', ']')
     @glrp.token(r'\}', '}')
     @glrp.token(r'\)', ')')
-    @glrp.token(r'/\*[\!\*](.|\n)*?\*/', 'doxycomment-block', warn=False)
-    @glrp.token(r'//[/\!](?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'doxycomment-line', warn=False)
+    @glrp.token(r'/\*[\!\*](.|\n)*?\*/', 'doxycomment-block')
+    @glrp.token(r'//[/\!](?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'doxycomment-line')
     def tok(self, token):
         # type: (glrp.Token) -> glrp.Token
         return token
@@ -302,6 +306,20 @@ class Cxx98Lexer(glrp.Lexer):
         t.value = t.text()[1:-1]
         return t
 
+
+class Cxx03Lexer(Cxx98Lexer):
+    pass
+
+
+class Cxx11Lexer(Cxx03Lexer):
+    tokens = Cxx03Lexer.tokens + _keywords_cxx11
+    keywords = Cxx03Lexer.keywords + _keywords_cxx11
+
+    @glrp.token(r'\[[ \t\n]*\[', '[[')
+    def tok_attribute_start(self, token):
+        # type: (glrp.Token) -> glrp.Token
+        return token
+
     @glrp.token(_user_defined_integer_literal, 'user-defined-integer-literal')
     def user_integer_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
@@ -327,15 +345,6 @@ class Cxx98Lexer(glrp.Lexer):
         return t
 
 
-class Cxx03Lexer(Cxx98Lexer):
-    pass
-
-
-class Cxx11Lexer(Cxx03Lexer):
-    tokens = Cxx03Lexer.tokens + _keywords_cxx11
-    keywords = Cxx03Lexer.keywords + _keywords_cxx11
-
-
 class Cxx14Lexer(Cxx11Lexer):
     pass
 
@@ -348,10 +357,15 @@ class Cxx20Lexer(Cxx17Lexer):
     tokens = Cxx17Lexer.tokens + _keywords_cxx20
     keywords = Cxx17Lexer.keywords + _keywords_cxx20
 
+    @glrp.token(r'<=>')
+    def tok_spaceship(self, token):
+        # type: (glrp.Token) -> glrp.Token
+        return token
+
 
 class Cxx23Lexer(Cxx20Lexer):
-    tokens = Cxx17Lexer.tokens + _keywords_cxx23
-    keywords = Cxx17Lexer.keywords + _keywords_cxx23
+    tokens = Cxx20Lexer.tokens + _keywords_cxx23
+    keywords = Cxx20Lexer.keywords + _keywords_cxx23
 
 
 if TYPE_CHECKING:

@@ -4,13 +4,13 @@ private-module-fragment:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx20
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('private-module-fragment : "module" ":" "private" ";" declaration-seq?')
-@cxx98
-def private_module_fragment(self, p):
+@cxx20
+def private_module_fragment_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

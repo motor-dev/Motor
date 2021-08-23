@@ -4,13 +4,13 @@ decltype-specifier:
 """
 
 import glrp
-from .....parser import cxx98
+from .....parser import cxx11
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('decltype-specifier : [split]"decltype" "(" expression ")"')
-@cxx98
-def decltype_specifier(self, p):
+@cxx11
+def decltype_specifier_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

@@ -18,7 +18,7 @@ unary-operator: one of
 """
 
 import glrp
-from .....parser import cxx98
+from .....parser import cxx98, cxx11, cxx20
 from motor_typing import TYPE_CHECKING
 
 
@@ -26,16 +26,28 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('unary-expression : unary-operator cast-expression')
 @glrp.rule('unary-expression : "++" cast-expression')
 @glrp.rule('unary-expression : "--" cast-expression')
-@glrp.rule('unary-expression : await-expression')
 @glrp.rule('unary-expression : "sizeof" unary-expression')
 @glrp.rule('unary-expression : "sizeof" "(" type-id ")"')
-@glrp.rule('unary-expression : "sizeof" "..." "(" identifier ")"')
-@glrp.rule('unary-expression : "alignof" "(" type-id ")"')
-@glrp.rule('unary-expression : noexcept-expression')
 @glrp.rule('unary-expression : new-expression')
 @glrp.rule('unary-expression : delete-expression')
 @cxx98
 def unary_expression(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('unary-expression : "sizeof" "..." "(" identifier ")"')
+@glrp.rule('unary-expression : "alignof" "(" type-id ")"')
+@glrp.rule('unary-expression : noexcept-expression')
+@cxx11
+def unary_expression_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('unary-expression : await-expression')
+@cxx20
+def unary_expression_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

@@ -4,13 +4,13 @@ nested-requirement:
 """
 
 import glrp
-from .....parser import cxx98
+from .....parser import cxx20
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('nested-requirement : "requires" constraint-expression ";"')
-@cxx98
-def nested_requirement(self, p):
+@cxx20
+def nested_requirement_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

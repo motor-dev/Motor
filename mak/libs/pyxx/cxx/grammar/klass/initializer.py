@@ -16,7 +16,7 @@ mem-initializer-id:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
@@ -27,18 +27,32 @@ def ctor_initializer(self, p):
     pass
 
 
-@glrp.rule('mem-initializer-list : mem-initializer "..."?')
-@glrp.rule('mem-initializer-list : mem-initializer-list "," mem-initializer "..."?')
+@glrp.rule('mem-initializer-list : mem-initializer')
+@glrp.rule('mem-initializer-list : mem-initializer-list "," mem-initializer')
 @cxx98
 def mem_initializer_list(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
+@glrp.rule('mem-initializer-list : mem-initializer "..."')
+@glrp.rule('mem-initializer-list : mem-initializer-list "," mem-initializer "..."')
+@cxx11
+def mem_initializer_list_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule('mem-initializer : mem-initializer-id "(" expression-list? ")"')
-@glrp.rule('mem-initializer : mem-initializer-id braced-init-list')
 @cxx98
 def mem_initializer(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('mem-initializer : mem-initializer-id braced-init-list')
+@cxx11
+def mem_initializer_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

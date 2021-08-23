@@ -9,7 +9,7 @@ explicit-specifier:
 """
 
 import glrp
-from ....parser import cxx98
+from ....parser import cxx98, cxx20
 from motor_typing import TYPE_CHECKING
 
 
@@ -21,10 +21,16 @@ def function_specifier(self, p):
     pass
 
 
-@glrp.rule('explicit-specifier : "explicit"[split] "(" constant-expression ")"')
 @glrp.rule('explicit-specifier : "explicit"[split]')
 @cxx98
 def explicit_specifier(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('explicit-specifier : "explicit"[split] "(" constant-expression ")"')
+@cxx20
+def explicit_specifier_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

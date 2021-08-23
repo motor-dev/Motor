@@ -27,21 +27,16 @@ type-name:
 """
 
 import glrp
-from .....parser import cxx98
+from .....parser import cxx98, cxx11, cxx20
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('simple-type-specifier : type-name')
 @glrp.rule('simple-type-specifier : nested-name-specifier type-name')
 @glrp.rule('simple-type-specifier[split] : nested-name-specifier "template" simple-template-id')
-@glrp.rule('simple-type-specifier : decltype-specifier')
-@glrp.rule('simple-type-specifier : placeholder-type-specifier')
 @glrp.rule('simple-type-specifier[split] : template-name')
 @glrp.rule('simple-type-specifier[split] : nested-name-specifier template-name')
 @glrp.rule('simple-type-specifier : [split]"char"')
-@glrp.rule('simple-type-specifier : [split]"char8_t"')
-@glrp.rule('simple-type-specifier : [split]"char16_t"')
-@glrp.rule('simple-type-specifier : [split]"char32_t"')
 @glrp.rule('simple-type-specifier : [split]"wchar_t"')
 @glrp.rule('simple-type-specifier : [split]"bool"')
 @glrp.rule('simple-type-specifier : [split]"short"')
@@ -54,6 +49,23 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('simple-type-specifier : [split]"void"')
 @cxx98
 def simple_type_specifier(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('simple-type-specifier : decltype-specifier')
+@glrp.rule('simple-type-specifier : placeholder-type-specifier')
+@glrp.rule('simple-type-specifier : [split]"char16_t"')
+@glrp.rule('simple-type-specifier : [split]"char32_t"')
+@cxx11
+def simple_type_specifier_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('simple-type-specifier : [split]"char8_t"')
+@cxx20
+def simple_type_specifier_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

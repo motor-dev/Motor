@@ -4,13 +4,13 @@ using-enum-declaration:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx20
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('using-enum-declaration : "using" elaborated-enum-specifier ";"')
-@cxx98
-def using_enum_declaration(self, p):
+@cxx20
+def using_enum_declaration_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

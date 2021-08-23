@@ -39,7 +39,7 @@ pure-specifier:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx98, cxx11, cxx17, cxx20
 from motor_typing import TYPE_CHECKING
 
 
@@ -54,16 +54,34 @@ def member_specification(self, p):
 @glrp.rule('member-declaration : attribute-specifier-seq? decl-specifier-seq? member-declarator-list? ";"')
 @glrp.rule('member-declaration : function-definition')
 @glrp.rule('member-declaration : using-declaration')
-@glrp.rule('member-declaration : using-enum-declaration')
-@glrp.rule('member-declaration : static_assert-declaration')
 @glrp.rule('member-declaration : template-declaration')
 @glrp.rule('member-declaration : explicit-specialization')
-@glrp.rule('member-declaration : deduction-guide')
 @glrp.rule('member-declaration : alias-declaration')
-@glrp.rule('member-declaration : opaque-enum-declaration')
 @glrp.rule('member-declaration : empty-declaration')
 @cxx98
 def member_declaration(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('member-declaration : static_assert-declaration')
+@glrp.rule('member-declaration : opaque-enum-declaration')
+@cxx11
+def member_declaration_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('member-declaration : deduction-guide')
+@cxx17
+def member_declaration_cxx17(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('member-declaration : using-enum-declaration')
+@cxx20
+def member_declaration_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -77,7 +95,6 @@ def member_declarator_list(self, p):
 
 
 @glrp.rule('member-declarator : declarator virt-specifier-seq? pure-specifier?')
-@glrp.rule('member-declarator : declarator requires-clause')
 #@glrp.rule('member-declarator : declarator brace-or-equal-initializer?')
 @glrp.rule('member-declarator : declarator brace-or-equal-initializer')
 #@glrp.rule(
@@ -96,6 +113,13 @@ def member_declarator(self, p):
     pass
 
 
+@glrp.rule('member-declarator : declarator requires-clause')
+@cxx20
+def member_declarator_cxx20(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule('virt-specifier-seq : virt-specifier')
 @glrp.rule('virt-specifier-seq : virt-specifier-seq virt-specifier')
 @cxx98
@@ -104,11 +128,19 @@ def virt_specifier_seq(self, p):
     pass
 
 
-@glrp.rule('virt-specifier : "override"')
-@glrp.rule('virt-specifier : "final"')
+@glrp.rule('virt-specifier : "virt-specifier-macro"')
 @cxx98
 def virt_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('virt-specifier : "override"')
+@glrp.rule('virt-specifier : "final"')
+@cxx11
+def virt_specifier_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    # TODO: accept macro_virt_specifier
     pass
 
 

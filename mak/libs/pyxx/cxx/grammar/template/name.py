@@ -25,7 +25,7 @@ typename-specifier:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
@@ -38,9 +38,15 @@ def simple_template_id(self, p):
 
 @glrp.rule('template-id[split] : simple-template-id')
 @glrp.rule('template-id : operator-function-id [split]"<" template-argument-list? ">"')
-@glrp.rule('template-id : literal-operator-id [split]"<" template-argument-list? ">"')
 @cxx98
 def template_id(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('template-id : literal-operator-id [split]"<" template-argument-list? ">"')
+@cxx11
+def template_id_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -52,10 +58,18 @@ def template_name(self, p):
     pass
 
 
-@glrp.rule('template-argument-list : template-argument "..."?')
-@glrp.rule('template-argument-list : template-argument-list "," template-argument "..."?')
+@glrp.rule('template-argument-list : template-argument')
+@glrp.rule('template-argument-list : template-argument-list "," template-argument')
 @cxx98
 def template_argument_list(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('template-argument-list : template-argument "..."')
+@glrp.rule('template-argument-list : template-argument-list "," template-argument "..."')
+@cxx11
+def template_argument_list_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

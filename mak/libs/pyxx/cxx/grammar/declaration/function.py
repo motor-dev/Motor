@@ -11,18 +11,24 @@ function-body:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx98, cxx11, cxx20
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule(
     'function-definition : attribute-specifier-seq? decl-specifier-seq? declarator virt-specifier-seq? function-body'
 )
+@cxx98
+def function_definition(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule(
     'function-definition : attribute-specifier-seq? decl-specifier-seq? declarator requires-clause function-body'
 )
-@cxx98
-def function_definition(self, p):
+@cxx20
+def function_definition_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -33,6 +39,14 @@ def function_definition(self, p):
 @glrp.rule('function-body : "=" "delete" ";"')
 @cxx98
 def function_body(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('function-body : "=" "default" ";"')
+@glrp.rule('function-body : "=" "delete" ";"')
+@cxx11
+def function_body_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

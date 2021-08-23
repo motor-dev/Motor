@@ -225,6 +225,11 @@ class C89Lexer(glrp.Lexer):
         t.value = t.text()[1:-1]
         return t
 
+    @glrp.token(r'\[[ \t\n]*\[', '[[')
+    def tok_attribute_start(self, token):
+        # type: (glrp.Token) -> glrp.Token
+        return token
+
 
 class C99Lexer(C89Lexer):
     pass

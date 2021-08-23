@@ -6,20 +6,20 @@ return-type-requirement:
 """
 
 import glrp
-from .....parser import cxx98
+from .....parser import cxx20
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('compound-requirement : "{" expression "}" "noexcept"? return-type-requirement? ";"')
-@cxx98
-def compound_requirement(self, p):
+@cxx20
+def compound_requirement_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('return-type-requirement : "->" type-constraint')
-@cxx98
-def return_type_requirement(self, p):
+@cxx20
+def return_type_requirement_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

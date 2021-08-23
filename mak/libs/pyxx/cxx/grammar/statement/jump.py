@@ -11,14 +11,13 @@ coroutine-return-statement:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx98, cxx20
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('jump-statement : "break" ";"')
 @glrp.rule('jump-statement : "continue" ";"')
 @glrp.rule('jump-statement : "return" expr-or-braced-init-list? ";"')
-@glrp.rule('jump-statement : coroutine-return-statement')
 @glrp.rule('jump-statement : "goto" "identifier" ";"')
 @cxx98
 def jump_statement(self, p):
@@ -26,9 +25,16 @@ def jump_statement(self, p):
     pass
 
 
+@glrp.rule('jump-statement : coroutine-return-statement')
+@cxx20
+def jump_statement_cxx20(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule('coroutine-return-statement : "co_return" expr-or-braced-init-list? ";"')
-@cxx98
-def coroutine_return_statement(self, p):
+@cxx20
+def coroutine_return_statement_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

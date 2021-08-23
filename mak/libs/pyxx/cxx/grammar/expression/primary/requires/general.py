@@ -20,35 +20,35 @@ requirement:
 """
 
 import glrp
-from .....parser import cxx98
+from .....parser import cxx20
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('requires-expression : requires requirement-parameter-list? requirement-body')
-@cxx98
-def requires_expression(self, p):
+@cxx20
+def requires_expression_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('requirement-parameter-list : "(" parameter-declaration-clause ")"')
-@cxx98
-def requires_parameter_list(self, p):
+@cxx20
+def requires_parameter_list_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('requirement-body : "{" requirement-seq "}"')
-@cxx98
-def requirement_body(self, p):
+@cxx20
+def requirement_body_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('requirement-seq : requirement')
 @glrp.rule('requirement-seq : requirement-seq requirement')
-@cxx98
-def requirement_seq(self, p):
+@cxx20
+def requirement_seq_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -57,8 +57,8 @@ def requirement_seq(self, p):
 @glrp.rule('requirement : type-requirement')
 @glrp.rule('requirement : compound-requirement')
 @glrp.rule('requirement : nested-requirement')
-@cxx98
-def requirement(self, p):
+@cxx20
+def requirement_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

@@ -56,7 +56,7 @@ identifier-list:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx98, cxx11, cxx17, cxx20
 from motor_typing import TYPE_CHECKING
 from . import specifier
 from . import declarator
@@ -83,17 +83,35 @@ def declaration_seq(self, p):
 @glrp.rule('declaration : nodeclspec-function-declaration')
 @glrp.rule('declaration : function-definition')
 @glrp.rule('declaration : template-declaration')
-@glrp.rule('declaration : deduction-guide')
 @glrp.rule('declaration : explicit-instantiation')
 @glrp.rule('declaration : explicit-specialization')
-@glrp.rule('declaration : export-declaration')
 @glrp.rule('declaration : linkage-specification')
 @glrp.rule('declaration : namespace-definition')
 @glrp.rule('declaration : empty-declaration')
-@glrp.rule('declaration : attribute-declaration')
-@glrp.rule('declaration[prec:right,0] : module-import-declaration')
 @cxx98
 def declaration(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('declaration : attribute-declaration')
+@cxx11
+def declaration_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('declaration : deduction-guide')
+@cxx17
+def declaration_cxx17(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('declaration : export-declaration')
+@glrp.rule('declaration[prec:right,0] : module-import-declaration')
+@cxx20
+def declaration_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -102,13 +120,25 @@ def declaration(self, p):
 @glrp.rule('block-declaration : asm-declaration')
 @glrp.rule('block-declaration : namespace-alias-definition')
 @glrp.rule('block-declaration : using-declaration')
-@glrp.rule('block-declaration : using-enum-declaration')
 @glrp.rule('block-declaration : using-directive')
-@glrp.rule('block-declaration : static_assert-declaration')
 @glrp.rule('block-declaration : alias-declaration')
-@glrp.rule('block-declaration : opaque-enum-declaration')
 @cxx98
 def block_declaration(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('block-declaration : static_assert-declaration')
+@glrp.rule('block-declaration : opaque-enum-declaration')
+@cxx11
+def block_declaration_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('block-declaration : using-enum-declaration')
+@cxx20
+def block_declaration_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -138,10 +168,16 @@ def simple_declaration(self, p):
     pass
 
 
-@glrp.rule('static_assert-declaration : "static_assert" "(" constant-expression ")" ";"')
 @glrp.rule('static_assert-declaration : "static_assert" "(" constant-expression "," "string-literal" ")" ";"')
-@cxx98
-def static_assert_declaration(self, p):
+@cxx11
+def static_assert_declaration_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('static_assert-declaration : "static_assert" "(" constant-expression ")" ";"')
+@cxx17
+def static_assert_declaration_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -154,7 +190,7 @@ def empty_declaration(self, p):
 
 
 @glrp.rule('attribute-declaration : attribute-specifier-seq ";"')
-@cxx98
+@cxx11
 def attribute_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass

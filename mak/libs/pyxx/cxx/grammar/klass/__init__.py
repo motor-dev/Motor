@@ -23,7 +23,7 @@ class-key:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 from . import member
 from . import initializer
@@ -46,10 +46,17 @@ def class_specifier(self, p):
     pass
 
 
-@glrp.rule('class-head : class-key attribute-specifier-seq? class-head-name class-virt-specifier? base-clause?')
+@glrp.rule('class-head : class-key attribute-specifier-seq? class-head-name base-clause?')
 @glrp.rule('class-head : class-key attribute-specifier-seq? base-clause?')
 @cxx98
 def class_head(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('class-head : class-key attribute-specifier-seq? class-head-name class-virt-specifier base-clause?')
+@cxx11
+def class_head_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -62,8 +69,8 @@ def class_head_name(self, p):
 
 
 @glrp.rule('class-virt-specifier : "final"')
-@cxx98
-def class_virt_specifier(self, p):
+@cxx11
+def class_virt_specifier_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
