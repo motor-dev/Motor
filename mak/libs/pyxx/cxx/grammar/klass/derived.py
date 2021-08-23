@@ -23,7 +23,7 @@ access-specifier:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
@@ -53,9 +53,15 @@ def base_specifier(self, p):
 
 @glrp.rule('class-or-decltype : nested-name-specifier? type-name')
 @glrp.rule('class-or-decltype : nested-name-specifier template simple-template-id')
-@glrp.rule('class-or-decltype : decltype-specifier')
 @cxx98
 def class_or_decltype(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('class-or-decltype : decltype-specifier')
+@cxx11
+def class_or_decltype_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -63,6 +69,7 @@ def class_or_decltype(self, p):
 @glrp.rule('access-specifier : "private"')
 @glrp.rule('access-specifier : "protected"')
 @glrp.rule('access-specifier : "public"')
+@glrp.rule('access-specifier : "access-specifier-macro"')
 @cxx98
 def access_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None

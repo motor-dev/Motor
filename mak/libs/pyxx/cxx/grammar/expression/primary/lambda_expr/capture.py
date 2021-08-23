@@ -28,39 +28,39 @@ init-capture:
 """
 
 import glrp
-from .....parser import cxx98
+from .....parser import cxx11
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('lambda-capture : capture-default')
 @glrp.rule('lambda-capture : capture-list')
 @glrp.rule('lambda-capture : capture-default "," capture-list')
-@cxx98
-def lambda_capture(self, p):
+@cxx11
+def lambda_capture_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('capture-default : "&"')
 @glrp.rule('capture-default : "="')
-@cxx98
-def capture_default(self, p):
+@cxx11
+def capture_default_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('capture-list : capture')
 @glrp.rule('capture-list : capture-list "," capture')
-@cxx98
-def capture_list(self, p):
+@cxx11
+def capture_list_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('capture : simple-capture')
 @glrp.rule('capture : init-capture')
-@cxx98
-def capture(self, p):
+@cxx11
+def capture_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -69,16 +69,16 @@ def capture(self, p):
 @glrp.rule('simple-capture : "&" "identifier" "..."?')
 @glrp.rule('simple-capture :"this"')
 @glrp.rule('simple-capture :"*" "this"')
-@cxx98
-def simple_capture(self, p):
+@cxx11
+def simple_capture_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('init-capture : "..."? "identifier" initializer')
 @glrp.rule('init-capture : "&" "..."? "identifier" initializer')
-@cxx98
-def init_capture(self, p):
+@cxx11
+def init_capture_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

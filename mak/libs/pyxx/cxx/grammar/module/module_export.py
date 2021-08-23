@@ -6,15 +6,15 @@ export-declaration:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx20
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('export-declaration : [split]"export" declaration')
 @glrp.rule('export-declaration : [split]"export" "{" declaration-seq? "}"')
 @glrp.rule('export-declaration[prec:right,1] : [split]"export" module-import-declaration')
-@cxx98
-def export_declaration(self, p):
+@cxx20
+def export_declaration_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

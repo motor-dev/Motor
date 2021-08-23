@@ -23,7 +23,7 @@ new-initializer:
 """
 
 import glrp
-from .....parser import cxx98
+from .....parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
@@ -70,9 +70,15 @@ def noptr_new_declarator(self, p):
 
 
 @glrp.rule('new-initializer : "(" expression-list? ")"')
-@glrp.rule('new-initializer : braced-init-list')
 @cxx98
 def new_initializer(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('new-initializer : braced-init-list')
+@cxx11
+def new_initializer_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

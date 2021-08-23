@@ -5,21 +5,20 @@ translation-unit:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx98, cxx20
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('translation-unit : declaration-seq?')
-@glrp.rule('translation-unit : global-module-fragment? module-declaration declaration-seq? private-module-fragment?')
 @cxx98
 def translation_unit(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@cxx98
-@glrp.rule('state-splitter : ')
-def state_splitter(self, p):
+@glrp.rule('translation-unit : global-module-fragment? module-declaration declaration-seq? private-module-fragment?')
+@cxx20
+def translation_unit_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

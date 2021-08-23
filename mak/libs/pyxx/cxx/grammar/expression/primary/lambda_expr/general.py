@@ -15,16 +15,23 @@ lambda-specifiers:
 """
 
 import glrp
-from .....parser import cxx98
+from .....parser import cxx11, cxx20
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('lambda-expression : lambda-introducer lambda-declarator compound-statement')
+@glrp.rule('lambda-expression : lambda-introducer "<" template-parameter-list ">" lambda-declarator compound-statement')
+@cxx11
+def lambda_expression_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule(
-    'lambda-expression : lambda-introducer "<" template-parameter-list ">" requires-clause? lambda-declarator compound-statement'
+    'lambda-expression : lambda-introducer "<" template-parameter-list ">" requires-clause lambda-declarator compound-statement'
 )
-@cxx98
-def lambda_expression(self, p):
+@cxx20
+def lambda_expression_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -32,23 +39,32 @@ def lambda_expression(self, p):
 #@glrp.rule('lambda-introducer : "[" lambda-capture? "]"')
 @glrp.rule('lambda-introducer : [split] "[" lambda-capture "]"')
 @glrp.rule('lambda-introducer[split] : [split] "[" [split] "]"')
-@cxx98
-def lambda_introducer(self, p):
+@cxx11
+def lambda_introducer_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('lambda-declarator : lambda-specifiers')
-@glrp.rule('lambda-declarator : "(" parameter-declaration-clause ")" lambda-specifiers requires-clause?')
-@cxx98
-def lambda_declarator(self, p):
+@glrp.rule('lambda-declarator : "(" parameter-declaration-clause ")" lambda-specifiers')
+@cxx11
+def lambda_declarator_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('lambda-specifiers : decl-specifier-seq? noexcept-specifier? attribute-specifier-seq? trailing-return-type?')
-@cxx98
-def lambda_specifiers(self, p):
+@glrp.rule('lambda-declarator : "(" parameter-declaration-clause ")" lambda-specifiers requires-clause')
+@cxx20
+def lambda_declarator_cxx20(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule(
+    'lambda-specifiers : decl-specifier-seq? exception-specification? attribute-specifier-seq? trailing-return-type?'
+)
+@cxx11
+def lambda_specifiers_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

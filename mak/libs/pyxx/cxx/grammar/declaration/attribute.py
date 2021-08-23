@@ -47,7 +47,7 @@ balanced-token:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx98, cxx11, cxx20, cxx23
 from motor_typing import TYPE_CHECKING
 
 
@@ -60,25 +60,34 @@ def attribute_specifier_seq(self, p):
     pass
 
 
-@glrp.rule('attribute-specifier : [prec:nonassoc,0][split]"[" "[" attribute-using-prefix? attribute-list "]" "]"')
-@glrp.rule('attribute-specifier : alignment-specifier')
+@glrp.rule('attribute-specifier : [prec:nonassoc,0]"doxycomment-line"')
+@glrp.rule('attribute-specifier : [prec:nonassoc,0]"doxycomment-block"')
+@glrp.rule('attribute-specifier : [prec:nonassoc,0]"attribute-specifier-macro"')
 @cxx98
 def attribute_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
+@glrp.rule('attribute-specifier : [prec:nonassoc,0]"[[" attribute-using-prefix? attribute-list "]" "]"')
+@glrp.rule('attribute-specifier : alignment-specifier')
+@cxx11
+def attribute_specifier_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule('alignment-specifier : [prec:nonassoc,1]"alignas" "(" type-id "..."? ")"')
 @glrp.rule('alignment-specifier : [prec:nonassoc,1]"alignas" "(" constant-expression "..."? ")"')
-@cxx98
-def alignment_specifier(self, p):
+@cxx11
+def alignment_specifier_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('attribute-using-prefix : "using" attribute-namespace ":"')
-@cxx98
-def attribute_using_prefix(self, p):
+@cxx11
+def attribute_using_prefix_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -89,52 +98,52 @@ def attribute_using_prefix(self, p):
 @glrp.rule('attribute-list : attribute-list "," attribute?')
 @glrp.rule('attribute-list : attribute "..."')
 @glrp.rule('attribute-list : attribute-list "," attribute "..."')
-@cxx98
-def attribute_list(self, p):
+@cxx11
+def attribute_list_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('attribute : attribute-token attribute-argument-clause?')
-@cxx98
-def attribute(self, p):
+@cxx11
+def attribute_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('attribute-token[split] : "identifier"')
 @glrp.rule('attribute-token : attribute-scoped-token')
-@cxx98
-def attribute_token(self, p):
+@cxx11
+def attribute_token_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('attribute-scoped-token : attribute-namespace "::" "identifier"')
-@cxx98
-def attribute_scoped_token(self, p):
+@cxx11
+def attribute_scoped_token_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('attribute-namespace : "identifier"')
-@cxx98
-def attribute_namespace(self, p):
+@cxx11
+def attribute_namespace_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('attribute-argument-clause : "(" balanced-token-seq? ")"')
-@cxx98
-def attribute_argument_clause(self, p):
+@cxx11
+def attribute_argument_clause_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('balanced-token-seq : balanced-token')
 @glrp.rule('balanced-token-seq : balanced-token-seq balanced-token')
-@cxx98
-def balanced_token_seq(self, p):
+@cxx11
+def balanced_token_seq_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -216,22 +225,6 @@ def balanced_token_seq(self, p):
 @glrp.rule('balanced-token : "override"')
 @glrp.rule('balanced-token : "static_assert"')
 @glrp.rule('balanced-token : "thread_local"')
-@glrp.rule('balanced-token : "char8_t"')
-@glrp.rule('balanced-token : "concept"')
-@glrp.rule('balanced-token : "consteval"')
-@glrp.rule('balanced-token : "constinit"')
-@glrp.rule('balanced-token : "co_await"')
-@glrp.rule('balanced-token : "co_return"')
-@glrp.rule('balanced-token : "co_yield"')
-@glrp.rule('balanced-token : "export"')
-@glrp.rule('balanced-token : "import"')
-@glrp.rule('balanced-token : "module"')
-@glrp.rule('balanced-token : "requires"')
-@glrp.rule('balanced-token : "atomic_cancel"')
-@glrp.rule('balanced-token : "atomic_commit"')
-@glrp.rule('balanced-token : "atomic_noexcept"')
-@glrp.rule('balanced-token : "synchronized"')
-@glrp.rule('balanced-token : "reflexpr"')
 @glrp.rule('balanced-token : "+"')
 @glrp.rule('balanced-token : "-"')
 @glrp.rule('balanced-token : "*"')
@@ -252,7 +245,6 @@ def balanced_token_seq(self, p):
 @glrp.rule('balanced-token : ">="')
 @glrp.rule('balanced-token : "=="')
 @glrp.rule('balanced-token : "!="')
-@glrp.rule('balanced-token : "<=>"')
 @glrp.rule('balanced-token : "="')
 @glrp.rule('balanced-token : "*="')
 @glrp.rule('balanced-token : "/="')
@@ -285,8 +277,37 @@ def balanced_token_seq(self, p):
 @glrp.rule('balanced-token : "user-defined-integer-literal"')
 @glrp.rule('balanced-token : "user-defined-string-literal"')
 @glrp.rule('balanced-token : "user-defined-character-literal"')
-@cxx98
-def balanced_token(self, p):
+@cxx11
+def balanced_token_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('balanced-token : "char8_t"')
+@glrp.rule('balanced-token : "concept"')
+@glrp.rule('balanced-token : "consteval"')
+@glrp.rule('balanced-token : "constinit"')
+@glrp.rule('balanced-token : "co_await"')
+@glrp.rule('balanced-token : "co_return"')
+@glrp.rule('balanced-token : "co_yield"')
+@glrp.rule('balanced-token : "export"')
+@glrp.rule('balanced-token : "import"')
+@glrp.rule('balanced-token : "module"')
+@glrp.rule('balanced-token : "requires"')
+@glrp.rule('balanced-token : "<=>"')
+@cxx20
+def balanced_token_cxx20(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('balanced-token : "atomic_cancel"')
+@glrp.rule('balanced-token : "atomic_commit"')
+@glrp.rule('balanced-token : "atomic_noexcept"')
+@glrp.rule('balanced-token : "synchronized"')
+@glrp.rule('balanced-token : "reflexpr"')
+@cxx23
+def balanced_token_cxx23(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

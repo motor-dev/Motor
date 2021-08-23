@@ -7,16 +7,38 @@ storage-class-specifier:
 """
 
 import glrp
-from ....parser import cxx98
+from ....parser import cxx98, cxx11, until_cxx11, until_cxx17
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('storage-class-specifier : "static"')
-@glrp.rule('storage-class-specifier : "thread_local"')
 @glrp.rule('storage-class-specifier : "extern"')
 @glrp.rule('storage-class-specifier : "mutable"')
 @cxx98
 def storage_class_specifier(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('storage-class-specifier : "thread_local"')
+@cxx11
+def storage_class_specifier_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('storage-class-specifier : "auto"')
+@cxx98
+@until_cxx11
+def storage_class_specifier_until_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('storage-class-specifier : "register"')
+@cxx98
+@until_cxx17
+def storage_class_specifier_until_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

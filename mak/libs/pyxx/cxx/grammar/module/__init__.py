@@ -14,7 +14,7 @@ module-name-qualifier:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx20
 from motor_typing import TYPE_CHECKING
 from . import module_export
 from . import module_import
@@ -23,30 +23,30 @@ from . import private_fragment
 
 
 @glrp.rule('module-declaration : "export"? "module" module-name module-partition? attribute-specifier-seq? ";"')
-@cxx98
-def module_declaration(self, p):
+@cxx20
+def module_declaration_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('module-name : module-name-qualifier? "identifier"')
-@cxx98
-def module_name(self, p):
+@cxx20
+def module_name_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('module-partition : ":" module-name-qualifier? "identifier"')
-@cxx98
-def module_partition(self, p):
+@cxx20
+def module_partition_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('module-name-qualifier : "identifier" "."')
 @glrp.rule('module-name-qualifier : module-name-qualifier "identifier" "."')
-@cxx98
-def module_name_qualifier(self, p):
+@cxx20
+def module_name_qualifier_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

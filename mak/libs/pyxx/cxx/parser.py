@@ -90,4 +90,40 @@ def cxx23(func):
     return cast(Callable[[glrp.Parser, glrp.Production], None], func)
 
 
+def until_cxx03(func):
+    # type: (Callable[[CxxParser, glrp.Production], None]) -> Callable[[glrp.Parser, glrp.Production], None]
+    setattr(Cxx03Parser, func.__name__, _empty_rule)
+    return cast(Callable[[glrp.Parser, glrp.Production], None], func)
+
+
+def until_cxx11(func):
+    # type: (Callable[[CxxParser, glrp.Production], None]) -> Callable[[glrp.Parser, glrp.Production], None]
+    setattr(Cxx11Parser, func.__name__, _empty_rule)
+    return cast(Callable[[glrp.Parser, glrp.Production], None], func)
+
+
+def until_cxx14(func):
+    # type: (Callable[[CxxParser, glrp.Production], None]) -> Callable[[glrp.Parser, glrp.Production], None]
+    setattr(Cxx14Parser, func.__name__, _empty_rule)
+    return cast(Callable[[glrp.Parser, glrp.Production], None], func)
+
+
+def until_cxx17(func):
+    # type: (Callable[[CxxParser, glrp.Production], None]) -> Callable[[glrp.Parser, glrp.Production], None]
+    setattr(Cxx17Parser, func.__name__, _empty_rule)
+    return cast(Callable[[glrp.Parser, glrp.Production], None], func)
+
+
+def until_cxx20(func):
+    # type: (Callable[[CxxParser, glrp.Production], None]) -> Callable[[glrp.Parser, glrp.Production], None]
+    setattr(Cxx20Parser, func.__name__, _empty_rule)
+    return cast(Callable[[glrp.Parser, glrp.Production], None], func)
+
+
+def until_cxx23(func):
+    # type: (Callable[[CxxParser, glrp.Production], None]) -> Callable[[glrp.Parser, glrp.Production], None]
+    setattr(Cxx23Parser, func.__name__, _empty_rule)
+    return cast(Callable[[glrp.Parser, glrp.Production], None], func)
+
+
 from . import grammar

@@ -9,7 +9,7 @@ init-declarator:
 """
 
 import glrp
-from ....parser import cxx98
+from ....parser import cxx98, cxx20
 from motor_typing import TYPE_CHECKING
 from . import declarator
 from . import name
@@ -25,9 +25,15 @@ def init_declarator_list(self, p):
 
 
 @glrp.rule('init-declarator : declarator initializer?')
-@glrp.rule('init-declarator : declarator requires-clause')
 @cxx98
 def init_declarator(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('init-declarator : declarator requires-clause')
+@cxx20
+def init_declarator_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

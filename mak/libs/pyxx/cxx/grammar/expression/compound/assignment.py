@@ -10,16 +10,22 @@ assignment-operator: one of
 """
 
 import glrp
-from ....parser import cxx98
+from ....parser import cxx98, cxx20
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('assignment-expression : conditional-expression')
-@glrp.rule('assignment-expression : yield-expression')
 @glrp.rule('assignment-expression : throw-expression')
 @glrp.rule('assignment-expression : logical-or-expression assignment-operator initializer-clause')
 @cxx98
 def assignment_expression(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('assignment-expression : yield-expression')
+@cxx20
+def assignment_expression_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

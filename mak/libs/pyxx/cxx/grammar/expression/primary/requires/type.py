@@ -4,13 +4,13 @@ type-requirement:
 """
 
 import glrp
-from .....parser import cxx98
+from .....parser import cxx20
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('type-requirement : nested-name-specifier? type-name ";"')
-@cxx98
-def type_requirement(self, p):
+@cxx20
+def type_requirement_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

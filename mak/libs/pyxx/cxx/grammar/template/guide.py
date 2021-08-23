@@ -4,15 +4,15 @@ deduction-guide:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx17
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule(
     'deduction-guide : explicit-specifier? template-name [split]"(" parameter-declaration-clause ")" "->" simple-template-id ";"'
 )
-@cxx98
-def deduction_guide(self, p):
+@cxx17
+def deduction_guide_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

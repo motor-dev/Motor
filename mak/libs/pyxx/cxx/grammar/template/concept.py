@@ -7,20 +7,20 @@ concept-name:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx20
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('concept-definition : "concept" concept-name "=" constraint-expression ";"')
-@cxx98
-def concept_definition(self, p):
+@cxx20
+def concept_definition_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('concept-name[split] : [split]"identifier"')
-@cxx98
-def concept_name(self, p):
+@cxx20
+def concept_name_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

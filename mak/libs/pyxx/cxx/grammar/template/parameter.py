@@ -21,7 +21,7 @@ type-constraint:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx98, cxx11, cxx20
 from motor_typing import TYPE_CHECKING
 
 
@@ -33,14 +33,28 @@ def template_parameter(self, p):
     pass
 
 
-@glrp.rule('type-parameter : type-parameter-key "..."? "identifier"?')
+@glrp.rule('type-parameter : type-parameter-key "identifier"?')
 @glrp.rule('type-parameter : type-parameter-key "identifier"? "=" type-id')
-@glrp.rule('type-parameter : type-constraint "..."? "identifier"?')
-@glrp.rule('type-parameter : type-constraint "identifier"? "=" type-id')
-@glrp.rule('type-parameter : template-head type-parameter-key "..."? "identifier"?')
+@glrp.rule('type-parameter : template-head type-parameter-key "identifier"?')
 @glrp.rule('type-parameter : template-head type-parameter-key "identifier"? "=" id-expression')
 @cxx98
 def type_parameter(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('type-parameter : type-parameter-key "..." "identifier"?')
+@glrp.rule('type-parameter : template-head type-parameter-key "..." "identifier"?')
+@cxx11
+def type_parameter_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('type-parameter : type-constraint "..."? "identifier"?')
+@glrp.rule('type-parameter : type-constraint "identifier"? "=" type-id')
+@cxx20
+def type_parameter_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -55,8 +69,8 @@ def type_parameter_key(self, p):
 
 @glrp.rule('type-constraint : nested-name-specifier? concept-name')
 @glrp.rule('type-constraint : nested-name-specifier? concept-name "<" template-argument-list? ">"')
-@cxx98
-def type_constraint(self, p):
+@cxx20
+def type_constraint_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

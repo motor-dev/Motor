@@ -30,7 +30,7 @@ noptr-abstract-pack-declarator:
 """
 
 import glrp
-from ....parser import cxx98
+from ....parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
@@ -51,10 +51,16 @@ def defining_type_id(self, p):
 
 
 @glrp.rule('abstract-declarator : ptr-abstract-declarator')
-@glrp.rule('abstract-declarator : noptr-abstract-declarator? parameters-and-qualifiers trailing-return-type')
-@glrp.rule('abstract-declarator : abstract-pack-declarator')
 @cxx98
 def abstract_declarator(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('abstract-declarator : noptr-abstract-declarator? parameters-and-qualifiers trailing-return-type')
+@glrp.rule('abstract-declarator : abstract-pack-declarator')
+@cxx11
+def abstract_declarator_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -81,8 +87,8 @@ def noptr_abstract_declarator(self, p):
 
 @glrp.rule('abstract-pack-declarator[split] : noptr-abstract-pack-declarator')
 @glrp.rule('abstract-pack-declarator : ptr-operator abstract-pack-declarator')
-@cxx98
-def abstract_pack_declarato(self, p):
+@cxx11
+def abstract_pack_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -92,7 +98,7 @@ def abstract_pack_declarato(self, p):
     'noptr-abstract-pack-declarator : noptr-abstract-pack-declarator "[" constant-expression? "]" attribute-specifier-seq?'
 )
 @glrp.rule('noptr-abstract-pack-declarator : [split]"..."')
-@cxx98
+@cxx11
 def noptr_abstract_pack_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
