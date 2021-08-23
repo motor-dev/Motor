@@ -312,13 +312,39 @@ class Cxx03Lexer(Cxx98Lexer):
 
 
 class Cxx11Lexer(Cxx03Lexer):
-    tokens = Cxx03Lexer.tokens + _keywords_cxx11
+    tokens = Cxx03Lexer.tokens + ('[[', ) + _keywords_cxx11
     keywords = Cxx03Lexer.keywords + _keywords_cxx11
 
-    @glrp.token(r'\[[ \t\n]*\[', '[[')
-    def tok_attribute_start(self, token):
-        # type: (glrp.Token) -> glrp.Token
-        return token
+    def token(self):
+        # type: () -> Generator[glrp.Token, None, None]
+        # override token to concatenate [ [ into [[
+        # preserving comments and other items between the [ symbols
+        queue = []     # type: List[glrp.Token]
+        generator = Cxx03Lexer.token(self)
+        while True:
+            if queue:
+                       # cannot have [ in the queue
+                yield queue.pop(0)
+            try:
+                token = next(generator)
+            except StopIteration:
+                break
+            else:
+                if token._name == '[':
+                    try:
+                        next_token = next(generator)
+                    except StopIteration:
+                        yield token
+                    else:
+                        if next_token._name == '[':
+                            next_token._skipped_tokens = token._skipped_tokens + [token] + next_token._skipped_tokens
+                            self.set_token_type(next_token, '[[')
+                            yield next_token
+                        else:
+                            queue.append(next_token)
+                            yield token
+                else:
+                    yield token
 
     @glrp.token(_user_defined_integer_literal, 'user-defined-integer-literal')
     def user_integer_literal(self, t):
@@ -369,4 +395,4 @@ class Cxx23Lexer(Cxx20Lexer):
 
 
 if TYPE_CHECKING:
-    from motor_typing import Optional, Tuple
+    from motor_typing import List, Optional, Tuple, Generator
