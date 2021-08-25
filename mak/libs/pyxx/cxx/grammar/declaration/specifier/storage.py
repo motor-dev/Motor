@@ -14,6 +14,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('storage-class-specifier : "static"')
 @glrp.rule('storage-class-specifier : "extern"')
 @glrp.rule('storage-class-specifier : "mutable"')
+@glrp.rule('storage-class-specifier : "storage-class-specifier-macro"')
 @cxx98
 def storage_class_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
