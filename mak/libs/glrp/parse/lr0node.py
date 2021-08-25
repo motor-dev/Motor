@@ -10,6 +10,8 @@ class LR0Node(object):
         self._item = item
         self._parents = set()                            # type: Set[LR0Node]
         self._parents_core = set()                       # type: Set[LR0Node]
+        self._path_cache = {
+        }                                                # type: Dict[Optional[int], Tuple[LR0Path, Set[Tuple[LR0Node, Optional[int]]], List[Tuple[LR0Path, Optional[int], Optional[int]]]]]
         if predecessor is not None:
             self._predecessor_lookahead = predecessor[0] # type: Optional[int]
             self._predecessors = [predecessor[1]]
@@ -99,91 +101,60 @@ class LR0Node(object):
 
     def backtrack_up(self, path, lookahead, seen):
         # type: (LR0Path, Optional[int], Set[Tuple["LR0Node", Optional[int]]]) -> List[Tuple[LR0Path, Optional[int], Optional[int]]]
-        queue = [(path, lookahead)]
-        result = []                    # type: List[Tuple[LR0Path, Optional[int], Optional[int]]]
-        seen.add((self, lookahead))
-        shortest_path_seen = set()     # type: Set[Tuple[Optional[int], int, Tuple[int, ...]]]
-        state_path_seen = set()
+        try:
+            original_path, original_visited, result = self._path_cache[lookahead]
+            seen.update(original_visited)
+            return [(p.patch(original_path, path), la, consumed) for p, la, consumed in result]
+        except KeyError:
+            queue = [(path, lookahead)]
+            result = []
+            seen.add((self, lookahead))
+            state_seen = set()     # type: Set[Tuple["LR0Node", Optional[int]]]
+            state_path_seen = set()
+            self._path_cache[lookahead] = (path, state_seen, result)
 
-        while queue:
-            path, lookahead = queue.pop(0)
-            node = path._node
+            while queue:
+                path, lookahead = queue.pop(0)
+                node = path._node
 
-            for parent in node._direct_parents:
-                if (parent, lookahead) in seen:
-                    continue
-                seen.add((parent, lookahead))
-                item = parent._item
-                if lookahead is not None:
-                    try:
-                        offset = item._follow[lookahead]
-                    except KeyError:
-                        pass
+                for parent in node._direct_parents:
+                    if (parent, lookahead) in seen:
+                        continue
+                    seen.add((parent, lookahead))
+                    state_seen.add((parent, lookahead))
+                    item = parent._item
+                    if lookahead is not None:
+                        try:
+                            item._follow[lookahead]
+                        except KeyError:
+                            pass
+                        else:
+                            p = parent.filter_node_by_lookahead(path.derive_from(parent), lookahead)
+                            result.append((p, None, None))
+                            queue.append((p, None))
+                        try:
+                            item._follow[-1]
+                        except KeyError:
+                            pass
+                        else:
+                            queue.append((path.derive_from(parent), lookahead))
                     else:
-                        if (
-                            lookahead, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset]
-                        ) in shortest_path_seen:
-                            continue
-                        shortest_path_seen.add(
-                            (lookahead, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset])
-                        )
-                        p = parent.filter_node_by_lookahead(path.derive_from(parent), lookahead)
-                        result.append((p, None, None))
-                    try:
-                        offset = item._follow[-1]
-                    except KeyError:
-                        pass
-                    else:
-                        if (
-                            None, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset]
-                        ) in shortest_path_seen:
-                            continue
-                        shortest_path_seen.add(
-                            (None, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset])
-                        )
                         queue.append((path.derive_from(parent), lookahead))
-                else:
-                    if (
-                        None, parent._item._symbol, parent._item.rule.production[:parent._item._index + 1]
-                    ) in shortest_path_seen:
+                for predecessor in node._predecessors:
+                    if (predecessor, lookahead) in seen:
                         continue
-                    shortest_path_seen.add(
-                        (None, parent._item._symbol, parent._item.rule.production[:parent._item._index + 1])
+                    if lookahead is None:
+                        if predecessor._item_set in state_path_seen:
+                            continue
+                        state_path_seen.add(predecessor._item_set)
+                    seen.add((predecessor, lookahead))
+                    state_seen.add((predecessor, lookahead))
+                    assert node._predecessor_lookahead is not None
+                    result.append(
+                        (path.extend(predecessor, node._predecessor_lookahead), lookahead, node._predecessor_lookahead)
                     )
-                    queue.append((path.derive_from(parent), lookahead))
-            for predecessor in node._predecessors:
-                if (predecessor, lookahead) in seen:
-                    continue
-                if lookahead is None:
-                    if predecessor._item_set in state_path_seen:
-                        continue
-                    state_path_seen.add(predecessor._item_set)
-                seen.add((predecessor, lookahead))
-                assert node._predecessor_lookahead is not None
-                result.append(
-                    (path.extend(predecessor, node._predecessor_lookahead), lookahead, node._predecessor_lookahead)
-                )
-        return result
 
-    def backtrack_to_parent(self, path):
-        # type: (LR0Path) -> LR0Path
-        if path._node == self:
-            return path
-        queue = [path]
-        seen = set()
-        while queue:
-            path = queue.pop(0)
-
-            for parent in path._node._direct_parents:
-                if parent in seen:
-                    continue
-                seen.add(parent)
-                if parent == self:
-                    return path
-                else:
-                    queue.append(path.derive_from(parent))
-
-        raise ValueError()
+            return result
 
     def backtrack_to_any(self, path, nodes):
         # type: (LR0Path, List["LR0Node"]) -> LR0Path
@@ -207,6 +178,6 @@ class LR0Node(object):
 
 
 if TYPE_CHECKING:
-    from motor_typing import List, Optional, Set, Optional, Tuple
+    from motor_typing import List, Optional, Set, Optional, Tuple, Dict
     from .lr0item import LR0Item
     from .lr0itemset import LR0ItemSet
