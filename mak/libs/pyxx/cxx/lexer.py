@@ -190,6 +190,7 @@ class Cxx98Lexer(glrp.Lexer):
         'access-specifier-macro',
         'decl-specifier-macro',
         'attribute-specifier-macro',
+        'storage-class-specifier-macro',
     )
 
     # arithmetic operators
