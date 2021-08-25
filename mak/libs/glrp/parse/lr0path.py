@@ -61,6 +61,11 @@ class LR0Path(object):
         # type: () -> List[Tuple[LR0Node, LR0Node]]
         return []
 
+    def patch(self, original_path, new_path):
+        # type: (LR0Path, LR0Path) -> LR0Path
+        assert id(self) == id(original_path)
+        return new_path
+
 
 class _LR0BaseConstruction(LR0Path):
     def __init__(self, node, follow):
@@ -85,6 +90,13 @@ class _LR0Extension(_LR0BaseConstruction):
     def collect_node_derivations(self):
         # type: () -> List[Tuple[LR0Node, LR0Node]]
         return self._follow.collect_node_derivations()
+
+    def patch(self, original_path, new_path):
+        # type: (LR0Path, LR0Path) -> LR0Path
+        if id(self) == id(original_path):
+            return new_path
+        else:
+            return _LR0Extension(self._node, self._follow.patch(original_path, new_path))
 
 
 class _LR0Derivation(_LR0BaseConstruction):
@@ -117,6 +129,13 @@ class _LR0Derivation(_LR0BaseConstruction):
         # type: () -> List[Tuple[LR0Node, LR0Node]]
         return [(self._node, self._follow._node)] + self._follow.collect_node_derivations()
 
+    def patch(self, original_path, new_path):
+        # type: (LR0Path, LR0Path) -> LR0Path
+        if id(self) == id(original_path):
+            return new_path
+        else:
+            return _LR0Derivation(self._node, self._follow.patch(original_path, new_path))
+
 
 class _LR0LeftExpansion(_LR0BaseConstruction):
     def _to_string(self, sequence, name_map, add_derivation, complete_right):
@@ -127,6 +146,13 @@ class _LR0LeftExpansion(_LR0BaseConstruction):
     def collect_node_derivations(self):
         # type: () -> List[Tuple[LR0Node, LR0Node]]
         return self._follow.collect_node_derivations()
+
+    def patch(self, original_path, new_path):
+        # type: (LR0Path, LR0Path) -> LR0Path
+        if id(self) == id(original_path):
+            return new_path
+        else:
+            return _LR0LeftExpansion(self._node, self._follow.patch(original_path, new_path))
 
 
 class _LR0Expansion(_LR0BaseConstruction):
@@ -167,6 +193,13 @@ class _LR0Expansion(_LR0BaseConstruction):
     def collect_node_derivations(self):
         # type: () -> List[Tuple[LR0Node, LR0Node]]
         return self._follow.collect_node_derivations()
+
+    def patch(self, original_path, new_path):
+        # type: (LR0Path, LR0Path) -> LR0Path
+        if id(self) == id(original_path):
+            return new_path
+        else:
+            return _LR0Expansion(self._node, self._follow.patch(original_path, new_path), self._next)
 
 
 if TYPE_CHECKING:
