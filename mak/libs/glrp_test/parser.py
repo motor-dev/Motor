@@ -174,7 +174,7 @@ class Parser5(glrp.Parser):
             # type: (glrp.Token) -> glrp.Token
             return token
 
-    @glrp.rule("prog : prog id_expression")
+    @glrp.rule("prog : prog comma_opt pound_opt dollar_opt id_expression")
     @glrp.rule("prog : id_expression")
     def prog(self, p):
         pass

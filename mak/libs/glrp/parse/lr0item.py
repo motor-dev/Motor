@@ -6,19 +6,24 @@ class LR0Item(object):
         # type: (Grammar.Rule, int, Optional[LR0Item], Optional[int], List[Grammar.Rule], Set[int], Dict[int, int]) -> None
         self.rule = rule
         self.len = rule.len
-        self._symbol = rule._prod_symbol                      # type: int
-        self._index = index                                   # type: int
+        self._symbol = rule._prod_symbol # type: int
+        self._index = index              # type: int
+        self._previous = None            # type: Optional[LR0Item]
         self._next = next
-        self._last = next._last if next is not None else self # type: LR0Item
+        if next is not None:
+            next._previous = self
+            self._last = next._last      # type: LR0Item
+        else:
+            self._last = self
         self._before = predecessor
         self._after = successors
         self._symbols = set(rule.production)
         self._first = first
         self._follow = follow
-        self._lookaheads = {}                                 # type: Dict[int, List[int]]
-        self._precedence = None                               # type: Optional[Tuple[str, int]]
+        self._lookaheads = {}            # type: Dict[int, List[int]]
+        self._precedence = None          # type: Optional[Tuple[str, int]]
         self._split = False
-        self._merge = None                                    # type: Optional[str]
+        self._merge = None               # type: Optional[str]
         self._merge_skip = False
         self._split_use = 0
         self._merge_use = 0

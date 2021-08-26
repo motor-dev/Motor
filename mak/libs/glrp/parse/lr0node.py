@@ -1,6 +1,6 @@
 from motor_typing import TYPE_CHECKING
 import functools
-from .lr0path import LR0Path
+from .lr0path import LR0PathItem
 
 
 class LR0Node(object):
@@ -11,7 +11,7 @@ class LR0Node(object):
         self._parents = set()                            # type: Set[LR0Node]
         self._parents_core = set()                       # type: Set[LR0Node]
         self._path_cache = {
-        }                                                # type: Dict[Optional[int], Tuple[LR0Path, Set[Tuple[LR0Node, Optional[int]]], List[Tuple[LR0Path, Optional[int], Optional[int]]]]]
+        }                                                # type: Dict[Optional[int], Tuple[LR0Path, Set[Tuple[LR0Node, Optional[int]]], List[Tuple[LR0Node, LR0Path, Optional[int], Optional[int]]]]]
         if predecessor is not None:
             self._predecessor_lookahead = predecessor[0] # type: Optional[int]
             self._predecessors = [predecessor[1]]
@@ -30,20 +30,20 @@ class LR0Node(object):
         # type: () -> LR0Path
         # expand the first item of the path to build empty productions
         if self._item._index == self._item.len:
-            return LR0Path(self, use_marker=False)
+            return LR0PathItem(self._item)
         for child in self._direct_children:
             if -1 not in child._item._first:
                 continue
             if child._successor is None:
-                result = LR0Path(child, use_marker=False)
-                result = result.derive_from(self)
+                result = LR0PathItem(child._item) # type: LR0Path
+                result = result.derive_from(self._item)
                 return result
             else:
                 if -1 in child._item._follow:
                     p = child._successor.expand_empty()
                     result = child.expand_empty()
                     result = result.expand_next(p)
-                    result = result.derive_from(self)
+                    result = result.derive_from(self._item)
                     return result
         raise ValueError()
 
@@ -66,18 +66,18 @@ class LR0Node(object):
 
             if following_symbol == lookahead:
                 previous = None
-                paths[-1].append(LR0Path(node, use_marker=False))
+                paths[-1].append(LR0PathItem(node._item))
                 while paths:
                     child_paths = paths.pop(-1)
                     if previous is not None:
                         child_paths[-1] = child_paths[-1].expand_next(previous)
-                    merge_children = lambda x, y: x.derive_from(y._node)
+                    merge_children = lambda x, y: x.derive_from(y._items[0][1])
                     result = functools.reduce(merge_children, child_paths[::-1])
                     previous = result
                 return result
             elif lookahead in node._item._first:
                 for child in node._direct_children:
-                    queue.append((child, paths[:-1] + [paths[-1] + [LR0Path(node, use_marker=False)]]))
+                    queue.append((child, paths[:-1] + [paths[-1] + [LR0PathItem(node._item)]]))
             elif -1 in node._item._first and node._successor is not None:
                 empty_path = node.expand_empty()
                 queue.append((node._successor, paths[:-1] + [paths[-1] + [empty_path]] + [[]]))
@@ -100,13 +100,13 @@ class LR0Node(object):
             raise ValueError()
 
     def backtrack_up(self, path, lookahead, seen):
-        # type: (LR0Path, Optional[int], Set[Tuple["LR0Node", Optional[int]]]) -> List[Tuple[LR0Path, Optional[int], Optional[int]]]
+        # type: (LR0Path, Optional[int], Set[Tuple["LR0Node", Optional[int]]]) -> List[Tuple[LR0Node, LR0Path, Optional[int], Optional[int]]]
         try:
             original_path, original_visited, result = self._path_cache[lookahead]
             seen.update(original_visited)
-            return [(p.patch(original_path, path), la, consumed) for p, la, consumed in result]
+            return [(node, p.patch(original_path, path), la, consumed) for node, p, la, consumed in result]
         except KeyError:
-            queue = [(path, lookahead)]
+            queue = [(self, path, lookahead)]
             result = []
             seen.add((self, lookahead))
             state_seen = set()     # type: Set[Tuple["LR0Node", Optional[int]]]
@@ -114,8 +114,7 @@ class LR0Node(object):
             self._path_cache[lookahead] = (path, state_seen, result)
 
             while queue:
-                path, lookahead = queue.pop(0)
-                node = path._node
+                node, path, lookahead = queue.pop(0)
 
                 for parent in node._direct_parents:
                     if (parent, lookahead) in seen:
@@ -129,17 +128,17 @@ class LR0Node(object):
                         except KeyError:
                             pass
                         else:
-                            p = parent.filter_node_by_lookahead(path.derive_from(parent), lookahead)
-                            result.append((p, None, None))
-                            queue.append((p, None))
+                            p = parent.filter_node_by_lookahead(path.derive_from(parent._item), lookahead)
+                            result.append((parent, p, None, None))
+                            queue.append((parent, p, None))
                         try:
                             item._follow[-1]
                         except KeyError:
                             pass
                         else:
-                            queue.append((path.derive_from(parent), lookahead))
+                            queue.append((parent, path.derive_from(parent._item), lookahead))
                     else:
-                        queue.append((path.derive_from(parent), lookahead))
+                        queue.append((parent, path.derive_from(parent._item), lookahead))
                 for predecessor in node._predecessors:
                     if (predecessor, lookahead) in seen:
                         continue
@@ -150,29 +149,27 @@ class LR0Node(object):
                     seen.add((predecessor, lookahead))
                     state_seen.add((predecessor, lookahead))
                     assert node._predecessor_lookahead is not None
-                    result.append(
-                        (path.extend(predecessor, node._predecessor_lookahead), lookahead, node._predecessor_lookahead)
-                    )
+                    result.append((predecessor, path.extend(predecessor._item), lookahead, node._predecessor_lookahead))
 
             return result
 
     def backtrack_to_any(self, path, nodes):
         # type: (LR0Path, List["LR0Node"]) -> LR0Path
-        if path._node in nodes:
+        if self in nodes:
             return path
-        queue = [path]
+        queue = [(self, path)]
         seen = set()
         while queue:
-            path = queue.pop(0)
+            node, path = queue.pop(0)
 
-            for parent in path._node._direct_parents:
+            for parent in node._direct_parents:
                 if parent in seen:
                     continue
                 seen.add(parent)
                 if parent in nodes:
-                    return path.derive_from(parent)
+                    return path.derive_from(parent._item)
                 else:
-                    queue.append(path.derive_from(parent))
+                    queue.append((parent, path.derive_from(parent._item)))
 
         raise ValueError()
 
@@ -180,4 +177,5 @@ class LR0Node(object):
 if TYPE_CHECKING:
     from motor_typing import List, Optional, Set, Optional, Tuple, Dict
     from .lr0item import LR0Item
+    from .lr0path import LR0Path
     from .lr0itemset import LR0ItemSet
