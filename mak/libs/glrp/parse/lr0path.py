@@ -1,205 +1,138 @@
 from motor_typing import TYPE_CHECKING
+from .lr0item import LR0Item
 
 
 class LR0Path(object):
-    def __init__(self, node, use_marker=True):
-        # type: (LR0Node, bool) -> None
-        self._node = node
-        self._use_marker = use_marker
-        self._hash_cache = (self._node._item, ) # type: Optional[Tuple[LR0Item,...]]
-
-    def _hash(self):
-        # type: () -> Tuple[LR0Item,...]
-        return (self._node._item, )
+    def __init__(self, items=tuple()):
+        # type: (Tuple[Tuple[int, LR0Item],...]) -> None
+        self._items = items
 
     def __hash__(self):
         # type: () -> int
-        if self._hash_cache is None:
-            self._hash_cache = self._hash()
-        return hash(self._hash_cache)
+        return hash(self._items)
 
     def __eq__(self, other):
         # type: (Any) -> bool
-        return isinstance(other, LR0Path) and self._hash() == other._hash()
+        return isinstance(other, LR0Path) and self._items == other._items
 
-    def extend(self, node, lookahead):
-        # type: (LR0Node, int) -> LR0Path
-        return _LR0Extension(node, self)
+    def extend(self, item):
+        # type: (LR0Item) -> LR0Path
+        return LR0Path(((0, item), ) + self._items)
 
-    def derive_from(self, node):
-        # type: (LR0Node) -> LR0Path
-        return _LR0Derivation(node, self)
-
-    def expand_left(self):
-        # type: () -> LR0Path
-        return _LR0LeftExpansion(self._node, self)
+    def derive_from(self, item):
+        # type: (LR0Item) -> LR0Path
+        assert isinstance(item, LR0Item)
+        return LR0Path(((3, item), ) + self._items)
 
     def expand_next(self, path):
         # type: (LR0Path) -> LR0Path
-        return _LR0Expansion(self._node, self, path)
+        return LR0Path(((1, path._items[0][1]), ) + path._items + ((2, path._items[0][1]), ) + self._items)
+
+    def patch(self, original_path, new_path):
+        # type: (LR0Path, LR0Path) -> LR0Path
+        return LR0Path(self._items[:-len(original_path._items)] + new_path._items)
+
+    def _to_string(self, items, end_mark, name_map, expand_right, add_marker):
+        # type: (Tuple[Tuple[int, LR0Item], ...], Optional[Tuple[int, LR0Item]], List[str], bool, bool) -> Tuple[List[Text], int, int]
+        index = 0
+        last_item = None
+        left_sequence = tuple()    # type: Tuple[int,...]
+        result = []                # type: List[Text]
+        length = 0
+
+        def merge(new_sequence, max_new_len, max_length):
+            # type: (List[Text], int, int) -> int
+            i = -1
+            for i, (n1, n2) in enumerate(zip(new_sequence, result)):
+                result[i] = '%s%s%s' % (n1, ' ' * (max_new_len - len(n1) + 1), n2)
+                max_length = max(max_length, len(result[i]))
+            for add, extra in enumerate(result[i + 1:]):
+                result[i + 1 + add] = ' ' * (max_new_len + 1) + extra
+                max_length = max(max_length, len(result[-1]))
+            for extra in new_sequence[i + 1:]:
+                result.append(extra)
+                max_length = max(max_length, len(extra))
+            return max_length
+
+        while index < len(items):
+            op, item = items[index]
+            if op == 0:
+                last_item = item
+                left_sequence = item.rule.production[:item._index + 1]
+                index += 1
+            elif op == 1:
+                if last_item is None:
+                    last_item = item
+                strings, max_len, consumed_count = self._to_string(items[index + 1:], (2, item), name_map, False, False)
+                length = merge(strings, max_len, length)
+                index += consumed_count + 1
+            elif op == 2:
+                if end_mark is not None:
+                    assert (op, item) == end_mark
+                    index += 1
+                break
+            elif op == 3:
+                if last_item is None:
+                    last_item = item
+                elif item._index > last_item._index:
+                    last_item = item
+                strings, max_len, consumed_count = self._to_string(items[index + 1:], None, name_map, True, add_marker)
+                derivation = name_map[item.rule.production[item._index]]
+                max_len = max(max_len, len(derivation) + 2)
+                extra_padding = u'\u2500' * (max_len - 2 - len(derivation))
+                strings.append(u'\u2570%s%s\u256f' % (derivation, extra_padding))
+                length = merge(strings, max_len, length)
+                index += consumed_count + 1
+                add_marker = False
+            else:
+                assert False
+        else:
+            if add_marker:
+                if item._index == len(item.rule.production):
+                    left_sequence = left_sequence + (1, )
+                else:
+                    left_sequence = left_sequence[:-1] + (1, ) + left_sequence[-1:]
+
+        assert last_item is not None
+
+        sequence_str = u' '.join(name_map[i] if i != 1 else '\u2666' for i in left_sequence)
+        if sequence_str:
+            padding = ' ' * (len(sequence_str) + 1)
+            if result:
+                result = [u'%s %s' % (sequence_str, result[0])] + [u'%s%s' % (padding, s) for s in result[1:]]
+                length += len(sequence_str) + 1
+            else:
+                result = [sequence_str]
+                length += len(sequence_str)
+        if expand_right:
+            right_sequence = last_item.rule.production[last_item._index + 1:]
+            if right_sequence:
+                right_sequence_str = u' '.join(name_map[i] if i != 1 else '\u2666' for i in right_sequence)
+                if result:
+                    result[0] += ' ' * (length - len(result[0]) + 1) + right_sequence_str
+                    length += len(right_sequence_str) + 1
+                else:
+                    result = [right_sequence_str]
+                    length += len(right_sequence_str)
+        if not result:
+            result = ['']
+            length = 0
+
+        return result, length, index
 
     def to_string(self, name_map):
-        # type: (List[str]) -> Tuple[List[Text], int]
-        return self._to_string([], name_map, True, True)
-
-    def _to_string(self, sequence, name_map, add_derivation, complete_right):
-        # type: (List[int], List[str], bool, bool) -> Tuple[List[Text], int]
-        expanded_symbol = name_map[self._node._item._symbol]
-        if self._use_marker:
-            sequence.append(1)
-        if complete_right:
-            sequence += self._node._item.rule.production[self._node._item._index:]
-        sequence_str = u' '.join(name_map[i] if i != 1 else '\u2666' for i in sequence)
-        if add_derivation:
-            extra_padding = u'\u2500' * (len(sequence_str) - 2 - len(expanded_symbol))
-            derivation_str = u'\u2570%s%s\u256f' % (expanded_symbol, extra_padding)
-            return [sequence_str, derivation_str], max(len(sequence_str), len(derivation_str))
-        else:
-            return [sequence_str], len(sequence_str)
-
-    def collect_node_derivations(self):
-        # type: () -> List[Tuple[LR0Node, LR0Node]]
-        return []
-
-    def patch(self, original_path, new_path):
-        # type: (LR0Path, LR0Path) -> LR0Path
-        assert id(self) == id(original_path)
-        return new_path
+        # type: (List[str]) -> List[Text]
+        result, length, _ = self._to_string(self._items, None, name_map, True, True)
+        derivation = name_map[self._items[0][1]._symbol]
+        extra_padding = u'\u2500' * (length - 2 - len(derivation))
+        result.append(u'\u2570%s%s\u256f' % (derivation, extra_padding))
+        return result
 
 
-class _LR0BaseConstruction(LR0Path):
-    def __init__(self, node, follow):
-        # type: (LR0Node, LR0Path) -> None
-        self._node = node
-        self._follow = follow
-        self._hash_cache = None
-
-    def _hash(self):
-        # type: () -> Tuple[LR0Item,...]
-        if self._hash_cache is None:
-            self._hash_cache = (self._node._item, ) + self._follow._hash()
-        return self._hash_cache
-
-
-class _LR0Extension(_LR0BaseConstruction):
-    def _to_string(self, sequence, name_map, add_derivation, complete_right):
-        # type: (List[int], List[str], bool, bool) -> Tuple[List[Text], int]
-        sequence.append(self._node._item.rule.production[self._node._item._index])
-        return self._follow._to_string(sequence, name_map, add_derivation, complete_right)
-
-    def collect_node_derivations(self):
-        # type: () -> List[Tuple[LR0Node, LR0Node]]
-        return self._follow.collect_node_derivations()
-
-    def patch(self, original_path, new_path):
-        # type: (LR0Path, LR0Path) -> LR0Path
-        if id(self) == id(original_path):
-            return new_path
-        else:
-            return _LR0Extension(self._node, self._follow.patch(original_path, new_path))
-
-
-class _LR0Derivation(_LR0BaseConstruction):
-    def _to_string(self, sequence, name_map, add_derivation, complete_right):
-        # type: (List[int], List[str], bool, bool) -> Tuple[List[Text], int]
-        expanded_symbol = name_map[self._node._item._symbol]
-        sequence_str = u' '.join(name_map[i] for i in sequence)
-        if complete_right:
-            post_sequence_str = u' '.join(
-                name_map[i] for i in self._node._item.rule.production[self._node._item._index + 1:]
-            )
-        else:
-            post_sequence_str = u''
-        result, length = self._follow.to_string(name_map)
-        if sequence_str:
-            padding = ' ' * (len(sequence_str) + 1)
-            result = [u'%s %s' % (sequence_str, result[0])] + [u'%s%s' % (padding, s) for s in result[1:]]
-            length += len(sequence_str) + 1
-        if post_sequence_str:
-            result[0] += ' ' * (length - len(result[0]) + 1) + post_sequence_str
-            length += len(post_sequence_str) + 1
-        if add_derivation:
-            extra_padding = u'\u2500' * (length - 2 - len(expanded_symbol))
-            derivation_str = u'\u2570%s%s\u256f' % (expanded_symbol, extra_padding)
-            return result + [derivation_str], max(length, len(derivation_str))
-        else:
-            return result, length
-
-    def collect_node_derivations(self):
-        # type: () -> List[Tuple[LR0Node, LR0Node]]
-        return [(self._node, self._follow._node)] + self._follow.collect_node_derivations()
-
-    def patch(self, original_path, new_path):
-        # type: (LR0Path, LR0Path) -> LR0Path
-        if id(self) == id(original_path):
-            return new_path
-        else:
-            return _LR0Derivation(self._node, self._follow.patch(original_path, new_path))
-
-
-class _LR0LeftExpansion(_LR0BaseConstruction):
-    def _to_string(self, sequence, name_map, add_derivation, complete_right):
-        # type: (List[int], List[str], bool, bool) -> Tuple[List[Text], int]
-        sequence += self._node._item.rule.production[:self._node._item._index]
-        return self._follow._to_string(sequence, name_map, add_derivation, complete_right)
-
-    def collect_node_derivations(self):
-        # type: () -> List[Tuple[LR0Node, LR0Node]]
-        return self._follow.collect_node_derivations()
-
-    def patch(self, original_path, new_path):
-        # type: (LR0Path, LR0Path) -> LR0Path
-        if id(self) == id(original_path):
-            return new_path
-        else:
-            return _LR0LeftExpansion(self._node, self._follow.patch(original_path, new_path))
-
-
-class _LR0Expansion(_LR0BaseConstruction):
-    def __init__(self, node, follow, expanded_path):
-        # type: (LR0Node, LR0Path, LR0Path) -> None
-        self._node = node
-        self._follow = follow
-        self._next = expanded_path
-        self._hash_cache = None
-
-    def _to_string(self, sequence, name_map, add_derivation, complete_right):
-        # type: (List[int], List[str], bool, bool) -> Tuple[List[Text], int]
-        expanded_symbol = name_map[self._node._item._symbol]
-        sequence_str = u' '.join(name_map[i] for i in sequence)
-        result, length = self._follow._to_string([], name_map, False, False)
-        next, next_len = self._next._to_string([], name_map, False, complete_right)
-
-        if sequence_str:
-            padding = ' ' * (len(sequence_str) + 1)
-            result = [u'%s %s' % (sequence_str, result[0])] + [u'%s%s' % (padding, s) for s in result[1:]]
-            length += len(sequence_str) + 1
-        max_length = length
-
-        for i, (n1, n2) in enumerate(zip(result, next)):
-            result[i] = '%s%s%s' % (n1, ' ' * (length - len(n1) + 1), n2)
-            max_length = max(max_length, len(result[i]))
-        for final in next[i + 1:]:
-            result.append(' ' * (length + 1) + final)
-            max_length = max(max_length, len(result[-1]))
-
-        if add_derivation:
-            extra_padding = u'\u2500' * (max_length - 2 - len(expanded_symbol))
-            derivation_str = u'\u2570%s%s\u256f' % (expanded_symbol, extra_padding)
-            return result + [derivation_str], max(max_length, len(derivation_str))
-        else:
-            return result, max_length
-
-    def collect_node_derivations(self):
-        # type: () -> List[Tuple[LR0Node, LR0Node]]
-        return self._follow.collect_node_derivations()
-
-    def patch(self, original_path, new_path):
-        # type: (LR0Path, LR0Path) -> LR0Path
-        if id(self) == id(original_path):
-            return new_path
-        else:
-            return _LR0Expansion(self._node, self._follow.patch(original_path, new_path), self._next)
+class LR0PathItem(LR0Path):
+    def __init__(self, item):
+        # type: (LR0Item) -> None
+        LR0Path.__init__(self, ((0, item), ))
 
 
 if TYPE_CHECKING:

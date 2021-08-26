@@ -1,6 +1,6 @@
 from .lr0itemset import LR0ItemSet
 from .lr0node import LR0Node
-from .lr0path import LR0Path
+from .lr0path import LR0PathItem
 from .lr0dominancenode import LR0DominanceSet
 from motor_typing import TYPE_CHECKING
 import sys
@@ -25,7 +25,7 @@ def _log(title, conflict_paths, out, name_map):
                 continue
             count -= 1
             seen.add(path)
-            strings = path.expand_left().to_string(name_map)[0]
+            strings = path.to_string(name_map)
             for s in strings:
                 out.info(u'   \u2502 %s', s)
             if count == 0:
@@ -37,9 +37,8 @@ def _log(title, conflict_paths, out, name_map):
 _dominance_set_cache = {}  # type: Dict[FrozenSet[LR0Node], LR0DominanceSet]
 
 
-def _find_common_parent(path_list):
-    # type: (List[LR0Path]) -> List[LR0Node]
-    node_list = [p._node for p in path_list]
+def _find_common_parent(node_list):
+    # type: (List[LR0Node]) -> List[LR0Node]
     node_set = frozenset(node_list)
     try:
         dominance_set = _dominance_set_cache[node_set]
@@ -53,13 +52,16 @@ def _find_common_parent(path_list):
 
 
 def _find_counterexamples(conflict_list):
-    # type: (List[Tuple[LR0Node, Optional[int]]]) -> List[Tuple[LR0Node, List[LR0Path]]]
-    conflict_paths = [(node, []) for node, _ in conflict_list] # type: List[Tuple[LR0Node, List[LR0Path]]]
+    # type: (List[Tuple[LR0Node, Optional[int]]]) -> List[Tuple[LR0Node, List[Tuple[LR0Node, LR0Path]]]]
+    conflict_paths = [
+        (node, []) for node, _ in conflict_list
+    ]                                           # type: List[Tuple[LR0Node, List[Tuple[LR0Node, LR0Path]]]]
 
-    lst = []       # type: List[List[Tuple[LR0Path, Optional[int], Set[Tuple[LR0Node, Optional[int]]]]]]
-    states = {}    # type: Dict[LR0ItemSet, List[List[Tuple[LR0Path, Optional[int], Set[Tuple[LR0Node, Optional[int]]]]]]]
+    lst = []       # type: List[List[Tuple[LR0Node, LR0Path, Optional[int], Set[Tuple[LR0Node, Optional[int]]]]]]
+    states = {
+    }              # type: Dict[LR0ItemSet, List[List[Tuple[LR0Node, LR0Path, Optional[int], Set[Tuple[LR0Node, Optional[int]]]]]]]
     for s in conflict_list:
-        lst.append([(LR0Path(s[0]), s[1], set())])
+        lst.append([(s[0], LR0PathItem(s[0]._item), s[1], set())])
     queue = [(lst, states)]
 
     while queue:
@@ -67,22 +69,22 @@ def _find_counterexamples(conflict_list):
         path_len = 0
         found_lookaheads = True
         for paths in path_list:
-            for path, lookahead, _ in paths:
-                path_len = max(path_len, path._node._item._index)
+            for node, _, lookahead, _ in paths:
+                path_len = max(path_len, node._item._index)
                 found_lookaheads &= lookahead is None
 
         if path_len == 0:
             if found_lookaheads:
-                all_paths = []     # type: List[LR0Path]
+                all_nodes = []     # type: List[LR0Node]
                 for paths in path_list:
-                    for path, _, _ in paths:
-                        all_paths.append(path)
-                common_parents = _find_common_parent(all_paths)
+                    for node, _, _, _ in paths:
+                        all_nodes.append(node)
+                common_parents = _find_common_parent(all_nodes)
                 if common_parents:
                     for index, paths in enumerate(path_list):
-                        for path, _, _ in paths:
-                            path = path._node.backtrack_to_any(path, common_parents)
-                            conflict_paths[index][1].append(path)
+                        for node, path, _, _ in paths:
+                            path = node.backtrack_to_any(path, common_parents)
+                            conflict_paths[index][1].append((node, path))
                     continue
 
         check_current_state = False
@@ -90,19 +92,18 @@ def _find_counterexamples(conflict_list):
             current_state = []
             for index, paths in enumerate(path_list):
                 current_state_paths = []
-                for path, lookahead, seen in paths:
-                    node = path._node
+                for node, path, lookahead, seen in paths:
                     predecessor_list = node.backtrack_up(path, lookahead, seen)
-                    for predecessor, la, consumed_token in predecessor_list:
+                    for predecessor, predecessor_path, la, consumed_token in predecessor_list:
                         if consumed_token is not None:
                             try:
-                                predecessors = states[predecessor._node._item_set]
+                                predecessors = states[predecessor._item_set]
                             except KeyError:
                                 predecessors = [[] for _ in path_list]
-                                states[predecessor._node._item_set] = predecessors
-                            predecessors[index].append((predecessor, la, seen))
+                                states[predecessor._item_set] = predecessors
+                            predecessors[index].append((predecessor, predecessor_path, la, seen))
                         else:
-                            current_state_paths.append((predecessor, la, seen))
+                            current_state_paths.append((predecessor, predecessor_path, la, seen))
                 if current_state_paths:
                     check_current_state = True
                     current_state.append(current_state_paths)
@@ -127,25 +128,25 @@ def _find_splits(conflict_list):
     # type: (List[Tuple[LR0Node, Optional[int]]]) -> Dict[Tuple[LR0ItemSet, int], Dict[Grammar.Rule, List[LR0Path]]]
     result = {}    # type: Dict[Tuple[LR0ItemSet, int], Dict[Grammar.Rule, List[LR0Path]]]
     for _, paths in _find_counterexamples(conflict_list):
-        for path in paths:
+        for node, path in paths:
             try:
-                set_result = result[(path._node._item_set, 0)]
+                set_result = result[(node._item_set, 0)]
             except KeyError:
-                result[(path._node._item_set, 0)] = {path._node._item.rule: [path]}
+                result[(node._item_set, 0)] = {node._item.rule: [path]}
             else:
                 try:
-                    set_result[path._node._item.rule].append(path)
+                    set_result[node._item.rule].append(path)
                 except KeyError:
-                    set_result[path._node._item.rule] = [path]
+                    set_result[node._item.rule] = [path]
     return result
 
 
 def create_parser_table(productions, start_id, name_map, terminal_count, sm_log, conflict_log, error_log, dot_file):
     # type: (Dict[int, Grammar.Production], int, List[str], int, Logger, Logger, Logger, Logger) -> LALRTable
-    cidhash = {}       # type: Dict[int, int]
-    goto_cache = {}    # type: Dict[Tuple[int, int], Optional[LR0ItemSet]]
-    goto_cache_2 = {}  # type: Dict[int, Any]
-    debug_states = []  # type: List[int]
+    cidhash = {}           # type: Dict[int, int]
+    goto_cache = {}        # type: Dict[Tuple[int, int], Optional[LR0ItemSet]]
+    goto_cache_2 = {}      # type: Dict[int, Any]
+    debug_states = [1]     # type: List[int]
 
     def goto(item_set, index, lookahead):
         # type: (LR0ItemSet, int, int) -> Optional[LR0ItemSet]
@@ -430,7 +431,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
 
     priority_conflict = {}     # type: Dict[FrozenSet[LR0Item], List[int]]
     merge_conflict = {}        # type: Dict[FrozenSet[Grammar.Rule], List[int]]
-    conflict_issues = {}       # type: Dict[FrozenSet[LR0Item], Dict[LR0Item, List[LR0Path]]]
+    conflict_issues = {}       # type: Dict[FrozenSet[LR0Item], Dict[LR0Item, List[Tuple[LR0Node, LR0Path]]]]
 
     num_rr = 0
     num_sr = 0
@@ -585,9 +586,13 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                             sm_log.info('        reduce using rule %s', item.to_string(name_map))
                             conflicts.append((node, a))
 
-                if a == 59:
-                    print(name_map[a])
                 counterexamples = _find_counterexamples(conflicts)
+                #result_count = 0
+                #for node, conflict_list in counterexamples:
+                #    if conflict_list:
+                #        result_count += 1
+                #if result_count == 0:
+                #    counterexamples = _find_counterexamples(conflicts)
                 conflict_items = frozenset(node._item for node, _ in counterexamples)
                 try:
                     item_conflict_node = conflict_issues[conflict_items]
@@ -770,11 +775,11 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
             _log(
                 '%s using rule %s' % ('reduce' if item == item._last else 'shift', item.to_string(name_map)),
                 sorted(
-                    paths,
-                    key=lambda x: (
-                        x._node._item.rule._prod_name,
-                        x._node._item.rule._filename,
-                        x._node._item.rule._lineno,
+                    [p for _, p in paths],
+                    key=lambda p: (
+                        p._items[0][1].rule._prod_name,
+                        p._items[0][1].rule._filename,
+                        p._items[0][1].rule._lineno,
                     )
                 ), conflict_log, name_map
             )
@@ -786,4 +791,5 @@ if TYPE_CHECKING:
     from motor_typing import Any, Callable, Dict, FrozenSet, List, Optional, Set, Text, Tuple
     from .grammar import Grammar
     from .lr0item import LR0Item
+    from .lr0path import LR0Path
     from ..log import Logger
