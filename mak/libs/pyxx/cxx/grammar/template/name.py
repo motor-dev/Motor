@@ -29,29 +29,29 @@ from ...parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('simple-template-id : template-name [split]"<" template-argument-list? ">"')
+@glrp.rule('simple-template-id : template-name "<" template-argument-list? ">"')
 @cxx98
 def simple_template_id(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('template-id[split] : simple-template-id')
-@glrp.rule('template-id : operator-function-id [split]"<" template-argument-list? ">"')
+@glrp.rule('template-id : simple-template-id')
+@glrp.rule('template-id : operator-function-id "<" template-argument-list? ">"')
 @cxx98
 def template_id(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('template-id : literal-operator-id [split]"<" template-argument-list? ">"')
+@glrp.rule('template-id : literal-operator-id "<" template-argument-list? ">"')
 @cxx11
 def template_id_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('template-name[split] : [split]"identifier"')
+@glrp.rule('template-name : "identifier"')
 @cxx98
 def template_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -76,15 +76,15 @@ def template_argument_list_cxx11(self, p):
 
 @glrp.rule('template-argument : constant-expression')
 @glrp.rule('template-argument : type-id')
-@glrp.rule('template-argument[split] : id-expression')
+@glrp.rule('template-argument : id-expression')
 @cxx98
 def template_argument(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('typename-specifier[split] : [split]typename nested-name-specifier "identifier"')
-@glrp.rule('typename-specifier : [split]typename nested-name-specifier "template"? simple-template-id')
+@glrp.rule('typename-specifier : typename nested-name-specifier "identifier"')
+@glrp.rule('typename-specifier : typename nested-name-specifier "template"? simple-template-id')
 @cxx98
 def typename_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None

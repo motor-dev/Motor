@@ -167,7 +167,7 @@ _double_quote = r'(?:"([^"]*)")'
 _rule_id = re.compile(r'\s*%s' % _id, re.MULTILINE)
 _rule_annotation = re.compile(r'\s*(:)\s*|\s*\[\s*%s\s*(\:\s*%s\s*)?\]' % (_id, _value), re.MULTILINE)
 _production = re.compile(
-    r'%s(\??)\s*|%s(\??)\s*|%s(\??)\s*|(\|)\s*|(;)\s*|($)|\[\s*%s\s*(\:\s*%s\s*)?\]\s*' %
+    r'%s(\??)\s*|%s(\??)\s*|%s(\??)\s*|(\|)\s*|(\$)\s*|($)|\[\s*%s\s*(\:\s*%s\s*)?\]\s*' %
     (_id, _single_quote, _double_quote, _id, _value), re.MULTILINE
 )
 

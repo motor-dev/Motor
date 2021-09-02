@@ -107,7 +107,7 @@ _keywords = (
 
 
 class C89Lexer(glrp.Lexer):
-    tokens = ('enumeration-constant', ) + _keywords
+    tokens = ('enumeration-constant', '[[') + _keywords
     keywords = _keywords
 
     def __init__(self):
@@ -225,10 +225,35 @@ class C89Lexer(glrp.Lexer):
         t.value = t.text()[1:-1]
         return t
 
-    @glrp.token(r'\[[ \t\n]*\[', '[[')
-    def tok_attribute_start(self, token):
-        # type: (glrp.Token) -> glrp.Token
-        return token
+    def token(self):
+        # type: () -> Generator[glrp.Token, None, None]
+        # override token to concatenate [ [ into [[
+        # preserving comments and other items between the [ symbols
+        queue = []     # type: List[glrp.Token]
+        generator = glrp.Lexer.token(self)
+        while True:
+            if queue:
+                yield queue.pop(0)
+            try:
+                token = next(generator)
+            except StopIteration:
+                break
+            else:
+                if token._name == '[':
+                    try:
+                        next_token = next(generator)
+                    except StopIteration:
+                        yield token
+                    else:
+                        if next_token._name == '[':
+                            next_token._skipped_tokens = token._skipped_tokens + [token] + next_token._skipped_tokens
+                            self.set_token_type(next_token, '[[')
+                            yield next_token
+                        else:
+                            queue.append(next_token)
+                            yield token
+                else:
+                    yield token
 
 
 class C99Lexer(C89Lexer):
@@ -248,4 +273,4 @@ class C23Lexer(C17Lexer):
 
 
 if TYPE_CHECKING:
-    from typing import Optional, Set, Tuple
+    from typing import Optional, Set, List, Tuple, Generator

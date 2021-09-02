@@ -13,6 +13,28 @@ class LALRTable(object):
         self._goto_table = goto_table
 
 
+def _consume_lookahead(node, lookahead, name_map):
+    # type: (LR0Node, int, List[str]) -> List[Tuple[LR0ItemSet, LR0Path]]
+    queue = [(node, LR0PathItem(node._item))] # type: List[Tuple[LR0Node, LR0Path]]
+    result = []                               # type: List[Tuple[LR0ItemSet, LR0Path]]
+    seen = set()
+
+    while queue:
+        node, path = queue.pop()
+        for parent in node._direct_parents:
+            if parent in seen:
+                continue
+            seen.add(parent)
+            if lookahead in parent._item._follow:
+                result.append((node._item_set, path.derive_from(parent._item)))
+            elif -1 in parent._item._follow:
+                queue.append((parent, path.derive_from(parent._item)))
+        for predecessor in node._predecessors:
+            queue.append((predecessor, path.extend(predecessor._item)))
+
+    return result
+
+
 def _log(title, conflict_paths, out, name_map):
     # type: (Text, List[LR0Path], Logger, List[str]) -> None
     seen = set([])
@@ -53,73 +75,104 @@ def _find_common_parent(node_list):
 
 def _find_counterexamples(conflict_list):
     # type: (List[Tuple[LR0Node, Optional[int]]]) -> List[Tuple[LR0Node, List[Tuple[LR0Node, LR0Path]]]]
+    class IntermediateResult(object):
+        def __init__(self, path_list):
+            # type: (List[List[Tuple[LR0Node, LR0Path]]]) -> None
+            self._paths = path_list
+            self._refcount = 1
+
     conflict_paths = [
         (node, []) for node, _ in conflict_list
     ]                                           # type: List[Tuple[LR0Node, List[Tuple[LR0Node, LR0Path]]]]
 
-    lst = []       # type: List[List[Tuple[LR0Node, LR0Path, Optional[int], Set[Tuple[LR0Node, Optional[int]]]]]]
+    lst = [
+    ]                              # type: List[List[Tuple[LR0Node, LR0Path, Optional[int], Set[Union[Tuple[LR0Node, Optional[int]], LR0ItemSet]]]]]
     states = {
-    }              # type: Dict[LR0ItemSet, List[List[Tuple[LR0Node, LR0Path, Optional[int], Set[Tuple[LR0Node, Optional[int]]]]]]]
+    }                              # type: Dict[Tuple[LR0ItemSet, int], List[List[Tuple[LR0Node, LR0Path, Optional[int], Set[Union[Tuple[LR0Node, Optional[int]], LR0ItemSet]]]]]]
     for s in conflict_list:
         lst.append([(s[0], LR0PathItem(s[0]._item), s[1], set())])
-    queue = [(lst, states)]
+    intermediate_result = None     # type: Optional[IntermediateResult]
+    queue = [(lst, conflict_list[0][0]._item_set._index, intermediate_result, states)]
 
     while queue:
-        path_list, states = queue.pop(0)
-        path_len = 0
-        found_lookaheads = True
+        path_list, state, intermediate_result, states = queue.pop(0)
+        temp_result = []   # type: List[List[Tuple[LR0Node, LR0Path]]]
+        recurse = False
+        report = True
+        all_nodes = []     # type: List[LR0Node]
+
         for paths in path_list:
-            for node, _, lookahead, _ in paths:
-                path_len = max(path_len, node._item._index)
-                found_lookaheads &= lookahead is None
-
-        if path_len == 0:
-            if found_lookaheads:
-                all_nodes = []     # type: List[LR0Node]
-                for paths in path_list:
-                    for node, _, _, _ in paths:
-                        all_nodes.append(node)
-                common_parents = _find_common_parent(all_nodes)
-                if common_parents:
-                    for index, paths in enumerate(path_list):
-                        for node, path, _, _ in paths:
-                            path = node.backtrack_to_any(path, common_parents)
-                            conflict_paths[index][1].append((node, path))
-                    continue
-
-        check_current_state = False
-        if len(states) == 0:
-            current_state = []
-            for index, paths in enumerate(path_list):
-                current_state_paths = []
-                for node, path, lookahead, seen in paths:
-                    predecessor_list = node.backtrack_up(path, lookahead, seen)
-                    for predecessor, predecessor_path, la, consumed_token in predecessor_list:
-                        if consumed_token is not None:
-                            try:
-                                predecessors = states[predecessor._item_set]
-                            except KeyError:
-                                predecessors = [[] for _ in path_list]
-                                states[predecessor._item_set] = predecessors
-                            predecessors[index].append((predecessor, predecessor_path, la, seen))
-                        else:
-                            current_state_paths.append((predecessor, predecessor_path, la, seen))
-                if current_state_paths:
-                    check_current_state = True
-                    current_state.append(current_state_paths)
+            temp_result.append([])
+            for node, path, lookahead, _ in paths:
+                if node._item._index == 0 and lookahead is None:
+                    all_nodes.append(node)
+                    temp_result[-1].append((node, path))
                 else:
-                    current_state.append(paths)
+                    recurse = True
+            if len(paths) > 0 and len(temp_result[-1]) == 0:
+                report = False
 
-        if check_current_state:
-            queue.insert(0, (current_state, states))
-        else:
-            for _, nodes_list in states.items():
-                count = 0
-                for nodes in nodes_list:
-                    if len(nodes) > 0:
-                        count += 1
-                if count > 1:
-                    queue.append((nodes_list, {}))
+        if report:
+            common_parents = _find_common_parent(all_nodes)
+            if common_parents:
+                if recurse:
+                    if intermediate_result is not None:
+                        intermediate_result._refcount -= 1
+                    intermediate_result = IntermediateResult([])
+                    for index, tmp_paths in enumerate(temp_result):
+                        intermediate_result._paths.append([])
+                        for node, path in tmp_paths:
+                            node, path = node.backtrack_to_any(path, common_parents)
+                            intermediate_result._paths[index].append((node, path))
+                else:
+                    for index, tmp_paths in enumerate(temp_result):
+                        for node, path in tmp_paths:
+                            node, path = node.backtrack_to_any(path, common_parents)
+                            conflict_paths[index][1].append((node, path))
+            else:
+                recurse = True
+
+        if recurse:
+            check_current_state = False
+            if len(states) == 0:
+                current_state = []
+                for index, paths in enumerate(path_list):
+                    current_state_paths = []
+                    for node, path, lookahead, seen in paths:
+                        predecessor_list = node.backtrack_up(path, lookahead, seen)
+                        for predecessor, predecessor_path, la, consumed_token in predecessor_list:
+                            if consumed_token is not None:
+                                try:
+                                    predecessors = states[(predecessor._item_set, consumed_token)]
+                                except KeyError:
+                                    predecessors = [[] for _ in path_list]
+                                    states[(predecessor._item_set, consumed_token)] = predecessors
+                                predecessors[index].append((predecessor, predecessor_path, la, seen))
+                            else:
+                                current_state_paths.append((predecessor, predecessor_path, la, set(seen)))
+                    if current_state_paths:
+                        check_current_state = True
+                        current_state.append(current_state_paths)
+                    else:
+                        current_state.append(paths)
+
+            if check_current_state:
+                queue.insert(0, (current_state, state, intermediate_result, states))
+            else:
+                for (item_set, _), nodes_list in states.items():
+                    count = 0
+                    for nodes in nodes_list:
+                        if len(nodes) > 0:
+                            count += 1
+                    if count > 1:
+                        if intermediate_result is not None:
+                            intermediate_result._refcount += 1
+                        queue.append((nodes_list, item_set._index, intermediate_result, {}))
+            if intermediate_result is not None:
+                intermediate_result._refcount -= 1
+                if intermediate_result._refcount == 0:
+                    for index, tmp_paths in enumerate(intermediate_result._paths):
+                        conflict_paths[index][1].extend(tmp_paths)
 
     return conflict_paths
 
@@ -141,12 +194,11 @@ def _find_splits(conflict_list):
     return result
 
 
-def create_parser_table(productions, start_id, name_map, terminal_count, sm_log, conflict_log, error_log, dot_file):
-    # type: (Dict[int, Grammar.Production], int, List[str], int, Logger, Logger, Logger, Logger) -> LALRTable
-    cidhash = {}           # type: Dict[int, int]
-    goto_cache = {}        # type: Dict[Tuple[int, int], Optional[LR0ItemSet]]
-    goto_cache_2 = {}      # type: Dict[int, Any]
-    debug_states = [1]     # type: List[int]
+def create_parser_table(productions, start_id, name_map, terminal_count, sm_log, conflict_log, error_log):
+    # type: (Dict[int, Grammar.Production], int, List[str], int, Logger, Logger, Logger) -> LALRTable
+    cidhash = {}       # type: Dict[int, int]
+    goto_cache = {}    # type: Dict[Tuple[int, int], Optional[LR0ItemSet]]
+    goto_cache_2 = {}  # type: Dict[int, Any]
 
     def goto(item_set, index, lookahead):
         # type: (LR0ItemSet, int, int) -> Optional[LR0ItemSet]
@@ -436,9 +488,6 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
     num_rr = 0
     num_sr = 0
 
-    dot_file.info('digraph Grammar {')
-    dot_file.info('  node[style=filled;color=lightgray];')
-
     for st, item_group in enumerate(states):
         # Loop over each production
         action_map = {}    # type: Dict[int, List[Tuple[int, LR0Item]]]
@@ -453,7 +502,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         sm_log.info('')
 
         for item in item_group:
-            if item.len == item._index:
+            if item._last == item:
                 if item.rule._prod_symbol == start_id:
                     # Start symbol. Accept!
                     action_map[0] = action_map.get(0, []) + [(0, item)]
@@ -472,7 +521,6 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     if j >= 0:
                         action_map[a] = action_map.get(a, []) + [(j, item)]
 
-        color = 'white'
         for a in sorted(action_map):
             actions = action_map[a]
             action_dest = {}   # type: Dict[int, List[LR0Item]]
@@ -564,13 +612,13 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
             else:
                 accepted_actions = action_dest
 
+            split = False
             st_action[a] = tuple(sorted(accepted_actions))
             if len(accepted_actions) > 1 and not split:
                 # handle conflicts
                 conflicts = []     # type: List[Tuple[LR0Node, Optional[int]]]
                 num_rr += 1
                 sm_log.info('    %-30s conflict split', name_map[a])
-                color = 'orange'
                 for j in st_action[a]:
                     items = accepted_actions[j]
                     if j >= 0:
@@ -581,18 +629,30 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                             conflicts.append((node, None))
                             num_rr -= 1
                             num_sr += 1
-                            color = 'yellow'
                         else:
                             sm_log.info('        reduce using rule %s', item.to_string(name_map))
                             conflicts.append((node, a))
 
                 counterexamples = _find_counterexamples(conflicts)
-                #result_count = 0
-                #for node, conflict_list in counterexamples:
-                #    if conflict_list:
-                #        result_count += 1
-                #if result_count == 0:
-                #    counterexamples = _find_counterexamples(conflicts)
+                result_count = 0
+                for node, conflict_list in counterexamples:
+                    if conflict_list:
+                        result_count += 1
+                if result_count == 0:
+                    error_log.warning('unable to find counterexamples (la: %s' % name_map[a])
+                    for node, _ in counterexamples:
+                        print(node._item.to_string(name_map))
+                    #for node, _ in counterexamples:
+                    #    print(node._item.to_string(name_map))
+                    #    if node._item == node._item._last:
+                    #        for item_set, path in _consume_lookahead(node, a, name_map):
+                    #            print(' state %d:' % item_set._index)
+                    #            for line in path.to_string(name_map):
+                    #                print('    %s' % line)
+                    #            print('')
+                    #print('')
+                    #counterexamples = _find_counterexamples(conflicts)
+
                 conflict_items = frozenset(node._item for node, _ in counterexamples)
                 try:
                     item_conflict_node = conflict_issues[conflict_items]
@@ -607,7 +667,6 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
             elif len(accepted_actions) > 1:
                 splits = []        # type: List[Tuple[LR0Node, Optional[int]]]
                 sm_log.info('    %-30s split', name_map[a])
-                color = 'lightblue'
                 for j in st_action[a]:
                     items = accepted_actions[j]
                     if j >= 0:
@@ -656,14 +715,6 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     for item in items:
                         if j < 0:
                             sm_log.info('    %-30s reduce using rule %s', name_map[a], item.to_string(name_map))
-        if st in debug_states:
-            dot_file.info("  subgraph cluster_%d {", st)
-            dot_file.info('    label="State %d";', st)
-            dot_file.info('    style=filled;')
-            dot_file.info('    color=%s;', color)
-            for item in item_group:
-                dot_file.info('    %d[label="%s"];', id(item_group[item]), item.to_string(name_map))
-            dot_file.info("  };")
 
         nkeys = set([])
         for item in item_group:
@@ -680,32 +731,6 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
 
         action.append(st_action)
         goto_table.append(st_goto)
-
-    for item_group in states:
-        for item in item_group:
-            node = item_group[item]
-            for predecessor in node._predecessors:
-                assert node._predecessor_lookahead is not None
-                if predecessor._item_set._index in debug_states:
-                    if item_group._index in debug_states:
-                        dot_file.info(
-                            '  %d -> %d[label="%s"];', id(predecessor), id(node), name_map[node._predecessor_lookahead]
-                        )
-                    else:
-                        dot_file.info(
-                            '  %d -> %d[label="%s"];', id(predecessor), item_group._index,
-                            name_map[node._predecessor_lookahead]
-                        )
-                elif item_group._index in debug_states:
-                    dot_file.info(
-                        '  %d -> %d[label="%s"];', predecessor._item_set._index, id(node),
-                        name_map[node._predecessor_lookahead]
-                    )
-            if item_group._index in debug_states:
-                for parent in node._direct_parents:
-                    dot_file.info('  %d -> %d;', id(parent), id(node))
-
-    dot_file.info('}')
 
     # Report errors
     for _, production in productions.items():
@@ -788,7 +813,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
 
 
 if TYPE_CHECKING:
-    from motor_typing import Any, Callable, Dict, FrozenSet, List, Optional, Set, Text, Tuple
+    from motor_typing import Any, Callable, Dict, FrozenSet, List, Optional, Set, Text, Tuple, Union
     from .grammar import Grammar
     from .lr0item import LR0Item
     from .lr0path import LR0Path

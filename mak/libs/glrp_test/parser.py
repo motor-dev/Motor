@@ -64,8 +64,8 @@ class Parser2(glrp.Parser):
 
     @glrp.rule("expr : 'identifier'")
     @glrp.rule("expr : 'typename' '(' expr ')'")
-    @glrp.rule("expr[prec:left,0] : expr [prec:left,0]'+' expr")
-    @glrp.rule("expr[prec:right,1] : expr [prec:right,1]'=' expr")
+    @glrp.rule("expr : expr '+' expr")
+    @glrp.rule("expr : expr '=' expr")
     def p_expr(self, p):
         # type: (glrp.Production) -> None
         pass

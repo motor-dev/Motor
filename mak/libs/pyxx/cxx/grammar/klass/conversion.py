@@ -21,7 +21,7 @@ def conversion_function_id(self, p):
     pass
 
 
-@glrp.rule('conversion-type-id[split] : type-specifier-seq')
+@glrp.rule('conversion-type-id : type-specifier-seq')
 @glrp.rule('conversion-type-id : type-specifier-seq conversion-declarator')
 @cxx98
 def conversion_type_id(self, p):
@@ -30,7 +30,7 @@ def conversion_type_id(self, p):
 
 
 #@glrp.rule('conversion-declarator : ptr-operator conversion-declarator?')
-@glrp.rule('conversion-declarator[split] : ptr-operator')
+@glrp.rule('conversion-declarator : ptr-operator')
 @glrp.rule('conversion-declarator : ptr-operator conversion-declarator')
 @cxx98
 def conversion_declarator(self, p):
