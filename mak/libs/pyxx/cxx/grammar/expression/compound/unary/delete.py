@@ -11,8 +11,8 @@ from motor_typing import TYPE_CHECKING
 
 @glrp.rule('delete-expression : "delete" cast-expression')
 @glrp.rule('delete-expression : "delete" "[" "]" cast-expression')
-@glrp.rule('delete-expression : [split]"::" "delete" cast-expression')
-@glrp.rule('delete-expression : [split]"::" "delete" "[" "]" cast-expression')
+@glrp.rule('delete-expression : "::" "delete" cast-expression')
+@glrp.rule('delete-expression : "::" "delete" "[" "]" cast-expression')
 @cxx98
 def delete_expression(self, p):
     # type: (CxxParser, glrp.Production) -> None

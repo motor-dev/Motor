@@ -40,7 +40,7 @@ from ...parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('enum-name[split] : [split]"identifier"')
+@glrp.rule('enum-name : "identifier"')
 @cxx98
 def enum_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -83,7 +83,7 @@ def opaque_enum_declaration_cxx11(self, p):
     pass
 
 
-@glrp.rule('enum-key[split] : "enum"')
+@glrp.rule('enum-key : "enum"')
 @cxx98
 def enum_key(self, p):
     # type: (CxxParser, glrp.Production) -> None

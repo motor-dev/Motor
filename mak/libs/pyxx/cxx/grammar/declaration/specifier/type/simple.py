@@ -33,20 +33,20 @@ from motor_typing import TYPE_CHECKING
 
 @glrp.rule('simple-type-specifier : type-name')
 @glrp.rule('simple-type-specifier : nested-name-specifier type-name')
-@glrp.rule('simple-type-specifier[split] : nested-name-specifier "template" simple-template-id')
-@glrp.rule('simple-type-specifier[split] : template-name')
-@glrp.rule('simple-type-specifier[split] : nested-name-specifier template-name')
-@glrp.rule('simple-type-specifier : [split]"char"')
-@glrp.rule('simple-type-specifier : [split]"wchar_t"')
-@glrp.rule('simple-type-specifier : [split]"bool"')
-@glrp.rule('simple-type-specifier : [split]"short"')
-@glrp.rule('simple-type-specifier : [split]"int"')
-@glrp.rule('simple-type-specifier : [split]"long"')
-@glrp.rule('simple-type-specifier : [split]"signed"')
-@glrp.rule('simple-type-specifier : [split]"unsigned"')
-@glrp.rule('simple-type-specifier : [split]"float"')
-@glrp.rule('simple-type-specifier : [split]"double"')
-@glrp.rule('simple-type-specifier : [split]"void"')
+@glrp.rule('simple-type-specifier : nested-name-specifier "template" state-splitter simple-template-id')
+@glrp.rule('simple-type-specifier : template-name')
+@glrp.rule('simple-type-specifier : nested-name-specifier template-name')
+@glrp.rule('simple-type-specifier : "char"')
+@glrp.rule('simple-type-specifier : "wchar_t"')
+@glrp.rule('simple-type-specifier : "bool"')
+@glrp.rule('simple-type-specifier : "short"')
+@glrp.rule('simple-type-specifier : "int"')
+@glrp.rule('simple-type-specifier : "long"')
+@glrp.rule('simple-type-specifier : "signed"')
+@glrp.rule('simple-type-specifier : "unsigned"')
+@glrp.rule('simple-type-specifier : "float"')
+@glrp.rule('simple-type-specifier : "double"')
+@glrp.rule('simple-type-specifier : "void"')
 @cxx98
 def simple_type_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -55,15 +55,15 @@ def simple_type_specifier(self, p):
 
 @glrp.rule('simple-type-specifier : decltype-specifier')
 @glrp.rule('simple-type-specifier : placeholder-type-specifier')
-@glrp.rule('simple-type-specifier : [split]"char16_t"')
-@glrp.rule('simple-type-specifier : [split]"char32_t"')
+@glrp.rule('simple-type-specifier : "char16_t"')
+@glrp.rule('simple-type-specifier : "char32_t"')
 @cxx11
 def simple_type_specifier_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('simple-type-specifier : [split]"char8_t"')
+@glrp.rule('simple-type-specifier : "char8_t"')
 @cxx20
 def simple_type_specifier_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None

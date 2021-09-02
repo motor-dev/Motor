@@ -85,7 +85,6 @@ class Grammar(object):
         stderr = Logger(io.open(sys.stderr.fileno(), 'w', encoding='utf-8', closefd=False))
         conflict_log = Logger(io.open(conflict_filename, 'w', encoding='utf-8'))
         stderr.note('building LALR tables for parser %s', name)
-        dot_file = Logger(io.open(os.path.splitext(debug_filename)[0] + '.dot', 'w', encoding='utf-8'))
         for name, (i, _) in terminals.items():
             name_map[i] = name
 
@@ -111,9 +110,7 @@ class Grammar(object):
                 log.info('  %s', rule.to_string(name_map))
 
         _create_lr0_items(productions)
-        tables = lalr.create_parser_table(
-            productions, start_id, name_map, len(terminals), log, conflict_log, stderr, dot_file
-        )
+        tables = lalr.create_parser_table(productions, start_id, name_map, len(terminals), log, conflict_log, stderr)
         self._action_table = tables._action_table
         self._goto_table = tables._goto_table
         self._rules = rule_table
@@ -191,38 +188,38 @@ def _create_productions(rules, index, log, name_map, terminals, start_id):
                         changed = True
                         break
 
-    queue = list(productions.keys())
-    while queue:
-        prod_symbol = queue.pop(0)
-        prod = productions[prod_symbol]
-        len_set_before = len(prod._first)
-        if prod._empty:
-            prod._first.add(-1)
-        for rule in prod:
-            i = 0
-            found_epsilon = True
-            while found_epsilon:
-                found_epsilon = False
-                try:
-                    t = rule.production[i]
-                except IndexError:
-                    break
-                else:
-                    i += 1
+    run = True
+    while run:
+        run = False
+        for prod_symbol, prod in productions.items():
+            len_set_before = len(prod._first)
+            if prod._empty:
+                prod._first.add(-1)
+            for rule in prod:
+                i = 0
+                found_epsilon = True
+                while found_epsilon:
+                    found_epsilon = False
                     try:
-                        p = productions[t]
-                    except KeyError:
-                        prod._first.add(t)
+                        t = rule.production[i]
+                    except IndexError:
+                        break
                     else:
-                        for t in p._first:
-                            if t != -1:
-                                prod._first.add(t)
-                            else:
-                                found_epsilon = True
-        len_set_after = len(prod._first)
-        if len_set_before != len_set_after or len_set_after == 0:
-            prod._first_list = sorted(prod._first)
-            queue.append(prod_symbol)
+                        i += 1
+                        try:
+                            p = productions[t]
+                        except KeyError:
+                            prod._first.add(t)
+                        else:
+                            for t in p._first:
+                                if t != -1:
+                                    prod._first.add(t)
+                                else:
+                                    found_epsilon = True
+            len_set_after = len(prod._first)
+            if len_set_before != len_set_after or len_set_after == 0:
+                prod._first_list = sorted(prod._first)
+                run = True
 
     return productions, rule_table
 

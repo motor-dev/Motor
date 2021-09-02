@@ -324,7 +324,6 @@ class Cxx11Lexer(Cxx03Lexer):
         generator = Cxx03Lexer.token(self)
         while True:
             if queue:
-                       # cannot have [ in the queue
                 yield queue.pop(0)
             try:
                 token = next(generator)

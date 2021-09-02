@@ -37,8 +37,8 @@ def lambda_expression_cxx20(self, p):
 
 
 #@glrp.rule('lambda-introducer : "[" lambda-capture? "]"')
-@glrp.rule('lambda-introducer : [split] "[" lambda-capture "]"')
-@glrp.rule('lambda-introducer[split] : [split] "[" [split] "]"')
+@glrp.rule('lambda-introducer :  "[" lambda-capture "]"')
+@glrp.rule('lambda-introducer :  "["  "]"')
 @cxx11
 def lambda_introducer_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None

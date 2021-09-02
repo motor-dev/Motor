@@ -65,8 +65,8 @@ def type_id_list_until_cxx17(self, p):
     pass
 
 
-@glrp.rule('noexcept-specification : "noexcept" [split] "(" constant-expression ")"')
-@glrp.rule('noexcept-specification : "noexcept" [split]')
+@glrp.rule('noexcept-specification : "noexcept"  "(" constant-expression ")"')
+@glrp.rule('noexcept-specification : "noexcept" ')
 @cxx11
 def noexcept_specifier_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None

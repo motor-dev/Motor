@@ -29,8 +29,8 @@ from motor_typing import TYPE_CHECKING
 
 @glrp.rule('new-expression : "new" new-placement? new-type-id new-initializer?')
 @glrp.rule('new-expression : "new" new-placement? "(" type-id ")" new-initializer?')
-@glrp.rule('new-expression : [split]"::" "new" new-placement? new-type-id new-initializer?')
-@glrp.rule('new-expression : [split]"::" "new" new-placement? "(" type-id ")" new-initializer?')
+@glrp.rule('new-expression : "::" "new" new-placement? new-type-id new-initializer?')
+@glrp.rule('new-expression : "::" "new" new-placement? "(" type-id ")" new-initializer?')
 @cxx98
 def new_expression(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -44,7 +44,7 @@ def new_placement(self, p):
     pass
 
 
-@glrp.rule('new-type-id[split] : type-specifier-seq')
+@glrp.rule('new-type-id : type-specifier-seq')
 @glrp.rule('new-type-id : type-specifier-seq new-declarator')
 @cxx98
 def new_type_id(self, p):
@@ -52,7 +52,7 @@ def new_type_id(self, p):
     pass
 
 
-@glrp.rule('new-declarator[split] : ptr-operator')
+@glrp.rule('new-declarator : ptr-operator')
 @glrp.rule('new-declarator : ptr-operator new-declarator')
 @glrp.rule('new-declarator : noptr-new-declarator')
 @cxx98

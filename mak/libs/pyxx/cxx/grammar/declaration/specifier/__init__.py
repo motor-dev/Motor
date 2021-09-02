@@ -53,7 +53,7 @@ def decl_specifier_cxx20(self, p):
 
 
 #@glrp.rule('decl-specifier-seq : decl-specifier attribute-specifier-seq?')
-@glrp.rule('decl-specifier-seq[split] : decl-specifier')
+@glrp.rule('decl-specifier-seq : decl-specifier')
 @glrp.rule('decl-specifier-seq : decl-specifier attribute-specifier-seq')
 @glrp.rule('decl-specifier-seq : decl-specifier decl-specifier-seq')
 @cxx98

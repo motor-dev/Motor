@@ -14,9 +14,11 @@ from .....parser import cxx98
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('elaborated-type-specifier[split] : class-key attribute-specifier-seq? nested-name-specifier? "identifier"')
-@glrp.rule('elaborated-type-specifier[split] : class-key simple-template-id')
-@glrp.rule('elaborated-type-specifier[split] : class-key nested-name-specifier "template"? simple-template-id')
+@glrp.rule(
+    'elaborated-type-specifier : class-key-elaborated attribute-specifier-seq? nested-name-specifier? "identifier"'
+)
+@glrp.rule('elaborated-type-specifier : class-key-elaborated simple-template-id')
+@glrp.rule('elaborated-type-specifier : class-key-elaborated nested-name-specifier "template"?  simple-template-id')
 @glrp.rule('elaborated-type-specifier : elaborated-enum-specifier')
 @cxx98
 def elaborated_type_specifier(self, p):
@@ -24,7 +26,7 @@ def elaborated_type_specifier(self, p):
     pass
 
 
-@glrp.rule('elaborated-enum-specifier[split] : [split]enum nested-name-specifier? [split]"identifier"')
+@glrp.rule('elaborated-enum-specifier : enum nested-name-specifier? "identifier"')
 @cxx98
 def elaborated_enum_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None

@@ -18,15 +18,15 @@ from . import fold
 from . import requires
 
 
-@glrp.rule('primary-expression[split] : "integer-literal"')
+@glrp.rule('primary-expression : "integer-literal"')
 @glrp.rule('primary-expression : "character-literal"')
 @glrp.rule('primary-expression : "floating-literal"')
 @glrp.rule('primary-expression : "string-literal"')
 @glrp.rule('primary-expression : "this"')
 @glrp.rule('primary-expression : "true"')
 @glrp.rule('primary-expression : "false"')
-@glrp.rule('primary-expression : [split]"(" expression ")"')
-@glrp.rule('primary-expression[split] : id-expression')
+@glrp.rule('primary-expression : "(" expression ")"')
+@glrp.rule('primary-expression : id-expression')
 @cxx98
 def primary_expression(self, p):
     # type: (CxxParser, glrp.Production) -> None

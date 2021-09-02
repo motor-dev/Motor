@@ -30,7 +30,7 @@ from ....parser import cxx98, cxx11, cxx17, cxx20
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('namespace-name[split] : [split]"identifier"')
+@glrp.rule('namespace-name : "identifier"')
 @glrp.rule('namespace-name : namespace-alias')
 @cxx98
 def namespace_name(self, p):

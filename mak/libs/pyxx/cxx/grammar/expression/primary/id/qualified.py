@@ -23,18 +23,18 @@ def qualified_id(self, p):
     pass
 
 
-@glrp.rule('nested-name-specifier : [split]"::"')
-@glrp.rule('nested-name-specifier : type-name [prec:left,1]"::"')
+@glrp.rule('nested-name-specifier : "::"')
+@glrp.rule('nested-name-specifier : type-name "::"')
 @glrp.rule('nested-name-specifier : namespace-name "::"')
-@glrp.rule('nested-name-specifier : nested-name-specifier [split]"identifier" [prec:left,1]"::"')
-@glrp.rule('nested-name-specifier : nested-name-specifier "template"? simple-template-id [prec:left,1]"::"')
+@glrp.rule('nested-name-specifier : nested-name-specifier "identifier" "::"')
+@glrp.rule('nested-name-specifier : nested-name-specifier "template"? simple-template-id "::"')
 @cxx98
 def nested_name_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('nested-name-specifier : decltype-specifier [prec:left,1]"::"')
+@glrp.rule('nested-name-specifier : decltype-specifier "::"')
 @cxx11
 def nested_name_specifier_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None

@@ -14,21 +14,21 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('function-specifier : "virtual"')
-@glrp.rule('function-specifier[split] : explicit-specifier')
+@glrp.rule('function-specifier : explicit-specifier')
 @cxx98
 def function_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('explicit-specifier : "explicit"[split]')
+@glrp.rule('explicit-specifier : "explicit"')
 @cxx98
 def explicit_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('explicit-specifier : "explicit"[split] "(" constant-expression ")"')
+@glrp.rule('explicit-specifier : "explicit" "(" constant-expression ")"')
 @cxx20
 def explicit_specifier_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None

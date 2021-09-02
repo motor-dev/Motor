@@ -30,7 +30,7 @@ def assignment_expression_cxx20(self, p):
     pass
 
 
-@glrp.rule('assignment-operator : [split]"="')
+@glrp.rule('assignment-operator : "="')
 @glrp.rule('assignment-operator : "*="')
 @glrp.rule('assignment-operator : "/="')
 @glrp.rule('assignment-operator : "%="')

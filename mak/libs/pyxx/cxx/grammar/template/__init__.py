@@ -85,7 +85,7 @@ def constraint_logical_or_expression_cxx20(self, p):
 
 
 @glrp.rule('constraint-logical-and-expression : primary-expression')
-@glrp.rule('constraint-logical-and-expression : constraint-logical-and-expression [prec:left,0]"&&" primary-expression')
+@glrp.rule('constraint-logical-and-expression : constraint-logical-and-expression "&&" primary-expression')
 @cxx20
 def constraint_logical_and_expression_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None

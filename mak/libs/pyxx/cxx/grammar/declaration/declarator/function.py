@@ -44,7 +44,7 @@ def parameter_declaration_list(self, p):
 )
 #@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-declarator?')
 @glrp.rule(
-    'parameter-declaration[split] : '\
+    'parameter-declaration : '\
         'attribute-specifier-seq? decl-specifier-seq'
 )
 @cxx98

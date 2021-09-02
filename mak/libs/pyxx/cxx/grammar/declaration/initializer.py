@@ -41,7 +41,7 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('initializer : brace-or-equal-initializer')
-@glrp.rule('initializer : [split]"(" expression-list ")"')
+@glrp.rule('initializer : "(" expression-list ")"')
 @cxx98
 def initializer(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -62,7 +62,7 @@ def brace_or_equal_initializer_cxx11(self, p):
     pass
 
 
-@glrp.rule('initializer-clause[split] : assignment-expression')
+@glrp.rule('initializer-clause : assignment-expression')
 @glrp.rule('initializer-clause : braced-init-list')
 @cxx98
 def initializer_clause(self, p):
@@ -70,15 +70,15 @@ def initializer_clause(self, p):
     pass
 
 
-@glrp.rule('braced-init-list : [prec:left,0]"{" initializer-list ","? "}"')
-@glrp.rule('braced-init-list[split] : [prec:left,0]"{" "}"')
+@glrp.rule('braced-init-list : "{" initializer-list ","? "}"')
+@glrp.rule('braced-init-list : "{" "}"')
 @cxx98
 def braced_init_list(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('braced-init-list : [prec:left,0]"{" designated-initializer-list ","? "}"')
+@glrp.rule('braced-init-list : "{" designated-initializer-list ","? "}"')
 @cxx20
 def braced_init_list_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None

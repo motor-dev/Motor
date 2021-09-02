@@ -109,7 +109,7 @@ def declaration_cxx17(self, p):
 
 
 @glrp.rule('declaration : export-declaration')
-@glrp.rule('declaration[prec:right,0] : module-import-declaration')
+@glrp.rule('declaration : module-import-declaration')
 @cxx20
 def declaration_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -182,7 +182,7 @@ def static_assert_declaration_cxx17(self, p):
     pass
 
 
-@glrp.rule('empty-declaration[prec:right,1] : ";"')
+@glrp.rule('empty-declaration : ";"')
 @cxx98
 def empty_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None
