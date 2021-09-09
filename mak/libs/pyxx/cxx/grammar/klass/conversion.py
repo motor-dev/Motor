@@ -21,19 +21,17 @@ def conversion_function_id(self, p):
     pass
 
 
-@glrp.rule('conversion-type-id : type-specifier-seq')
-@glrp.rule('conversion-type-id : type-specifier-seq conversion-declarator')
+@glrp.rule('conversion-type-id : type-specifier-seq conversion-declarator?')
 @cxx98
 def conversion_type_id(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-#@glrp.rule('conversion-declarator : ptr-operator conversion-declarator?')
-@glrp.rule('conversion-declarator : ptr-operator')
-@glrp.rule('conversion-declarator : ptr-operator conversion-declarator')
+@glrp.rule('conversion-declarator? : ptr-operator conversion-declarator?')
+@glrp.rule('conversion-declarator? : ')
 @cxx98
-def conversion_declarator(self, p):
+def conversion_declarator_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

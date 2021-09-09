@@ -40,7 +40,7 @@ from ...parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('enum-name : "identifier"')
+@glrp.rule('enum-name[split] : [split]"identifier"')
 @cxx98
 def enum_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -55,22 +55,25 @@ def enum_specifier(self, p):
     pass
 
 
-@glrp.rule('enum-head : enum-key attribute-specifier-seq? enum-head-name?')
+@glrp.rule('enum-head : enum-key attribute-specifier-seq? enum-head-name? enum-base?')
 @cxx98
 def enum_head(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('enum-head : enum-key attribute-specifier-seq? enum-head-name? enum-base')
-@cxx11
-def enum_head_cxx11(self, p):
+@glrp.rule('enum-head-name? : "identifier"')
+@glrp.rule('enum-head-name? : nested-name-specifier template? "identifier"')
+@glrp.rule('enum-head-name? :')
+@cxx98
+def enum_head_name_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('enum-head-name : nested-name-specifier? "identifier"')
-@cxx98
+@glrp.rule('enum-head-name : "identifier"')
+@glrp.rule('enum-head-name : nested-name-specifier template? "identifier"')
+@cxx11
 def enum_head_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
@@ -98,9 +101,16 @@ def enum_key_cxx11(self, p):
     pass
 
 
-@glrp.rule('enum-base : ":" type-specifier-seq')
+@glrp.rule('enum-base? : ')
+@cxx98
+def enum_base_opt(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('enum-base? : ":" type-specifier-seq')
 @cxx11
-def enum_base_cxx11(self, p):
+def enum_base_opt_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -109,6 +119,15 @@ def enum_base_cxx11(self, p):
 @glrp.rule('enumerator-list : enumerator-list "," enumerator-definition')
 @cxx98
 def enumerator_list(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('enumerator-list? : enumerator-definition')
+@glrp.rule('enumerator-list? : enumerator-list "," enumerator-definition')
+@glrp.rule('enumerator-list? : ')
+@cxx98
+def enumerator_list_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

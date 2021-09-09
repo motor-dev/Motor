@@ -52,12 +52,19 @@ def decl_specifier_cxx20(self, p):
     pass
 
 
-#@glrp.rule('decl-specifier-seq : decl-specifier attribute-specifier-seq?')
-@glrp.rule('decl-specifier-seq : decl-specifier')
-@glrp.rule('decl-specifier-seq : decl-specifier attribute-specifier-seq')
-@glrp.rule('decl-specifier-seq : decl-specifier decl-specifier-seq')
+# TODO: attribute-specifier-seq? not allowed here
+@glrp.rule('decl-specifier-seq[split] : decl-specifier attribute-specifier-seq?')
+@glrp.rule('decl-specifier-seq : decl-specifier attribute-specifier-seq? decl-specifier-seq')
 @cxx98
 def decl_specifier_seq(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('decl-specifier-seq? : decl-specifier-seq')
+@glrp.rule('decl-specifier-seq? :')
+@cxx11
+def decl_specifier_seq_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

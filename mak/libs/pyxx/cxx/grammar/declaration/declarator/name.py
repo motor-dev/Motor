@@ -34,9 +34,7 @@ from ....parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
-#@glrp.rule('type-id : type-specifier-seq abstract-declarator?')
-@glrp.rule('type-id : type-specifier-seq')
-@glrp.rule('type-id : type-specifier-seq abstract-declarator')
+@glrp.rule('type-id : type-specifier-seq abstract-declarator?')
 @cxx98
 def type_id(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -50,17 +48,18 @@ def defining_type_id(self, p):
     pass
 
 
-@glrp.rule('abstract-declarator : ptr-abstract-declarator')
+@glrp.rule('abstract-declarator? : ptr-abstract-declarator')
+@glrp.rule('abstract-declarator? :')
 @cxx98
-def abstract_declarator(self, p):
+def abstract_declarator_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('abstract-declarator : noptr-abstract-declarator? parameters-and-qualifiers trailing-return-type')
-@glrp.rule('abstract-declarator : abstract-pack-declarator')
+@glrp.rule('abstract-declarator? : noptr-abstract-declarator? parameters-and-qualifiers trailing-return-type')
+@glrp.rule('abstract-declarator? : abstract-pack-declarator')
 @cxx11
-def abstract_declarator_cxx11(self, p):
+def abstract_declarator_opt_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -74,11 +73,19 @@ def ptr_abstract_declarator(self, p):
     pass
 
 
+@glrp.rule('noptr-abstract-declarator? : noptr-abstract-declarator')
+@glrp.rule('noptr-abstract-declarator?[split] : ')
+@cxx98
+def noptr_abstract_declarator_opt(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule('noptr-abstract-declarator : noptr-abstract-declarator? parameters-and-qualifiers')
 @glrp.rule(
     'noptr-abstract-declarator : noptr-abstract-declarator? "[" constant-expression? "]" attribute-specifier-seq?'
 )
-@glrp.rule('noptr-abstract-declarator : "(" ptr-abstract-declarator ")"')
+@glrp.rule('noptr-abstract-declarator :  [split]"(" ptr-abstract-declarator ")"')
 @cxx98
 def noptr_abstract_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> None

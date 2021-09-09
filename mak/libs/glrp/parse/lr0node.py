@@ -72,12 +72,13 @@ class LR0Node(object):
                         result = functools.reduce(merge_children, child_paths[::-1])
                         previous = result
                     return result
-                elif lookahead in node._item._first:
-                    for child in node._direct_children:
-                        queue.append((child, paths[:-1] + [paths[-1] + [LR0PathItem(node._item)]]))
-                elif -1 in node._item._first and node._successor is not None:
-                    empty_path = node.expand_empty()
-                    queue.append((node._successor, paths[:-1] + [paths[-1] + [empty_path]] + [[]]))
+                else:
+                    if lookahead in node._item._first:
+                        for child in node._direct_children:
+                            queue.append((child, paths[:-1] + [paths[-1] + [LR0PathItem(node._item)]]))
+                    if -1 in node._item._first and node._successor is not None:
+                        empty_path = node.expand_empty()
+                        queue.append((node._successor, paths[:-1] + [paths[-1] + [empty_path]] + [[]]))
         raise ValueError()
 
     def filter_node_by_lookahead(self, path, lookahead):
@@ -87,7 +88,10 @@ class LR0Node(object):
         if lookahead == following_symbol:
             return path
         elif lookahead in self._successor._item._first:
-            successor_path = self._successor.expand_lookahead(lookahead)
+            try:
+                successor_path = self._successor.expand_lookahead(lookahead)
+            except ValueError:
+                successor_path = self._successor.expand_lookahead(lookahead)
             return path.expand_next(successor_path)
         elif -1 in self._successor._item._first:
             successor_path = self._successor.expand_empty()

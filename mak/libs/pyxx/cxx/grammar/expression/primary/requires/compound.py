@@ -17,9 +17,18 @@ def compound_requirement_cxx20(self, p):
     pass
 
 
-@glrp.rule('return-type-requirement : "->" type-constraint')
+@glrp.rule('"noexcept"? : "noexcept"')
+@glrp.rule('"noexcept"? : ')
 @cxx20
-def return_type_requirement_cxx20(self, p):
+def noexcept_opt_cxx20(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('return-type-requirement? : "->" type-constraint')
+@glrp.rule('return-type-requirement? : ')
+@cxx20
+def return_type_requirement_opt_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

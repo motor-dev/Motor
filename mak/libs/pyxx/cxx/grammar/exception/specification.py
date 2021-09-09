@@ -21,28 +21,30 @@ noexcept-specification:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, until_cxx17, until_cxx20
+from ...parser import cxx98, cxx11, deprecated_cxx17, deprecated_cxx20
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('exception-specification : dynamic-exception-specification')
+@glrp.rule('exception-specification? : dynamic-exception-specification')
+@glrp.rule('exception-specification? : ')
 @cxx98
-@until_cxx20
-def exception_specification_until_cxx20(self, p):
+@deprecated_cxx20
+def exception_specification_opt_until_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('exception-specification : noexcept-specification')
+@glrp.rule('exception-specification? : noexcept-specification')
+@glrp.rule('exception-specification? : ')
 @cxx11
-def exception_specification_cxx11(self, p):
+def exception_specification_opt_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.rule('dynamic-exception-specification : "throw" "(" type-id-list ")"')
 @cxx98
-@until_cxx17
+@deprecated_cxx17
 def dynamic_exception_specification_until_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
@@ -50,7 +52,7 @@ def dynamic_exception_specification_until_cxx17(self, p):
 
 @glrp.rule('dynamic-exception-specification : "throw" "(" ")"')
 @cxx98
-@until_cxx20
+@deprecated_cxx20
 def dynamic_exception_specification_until_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
@@ -59,7 +61,7 @@ def dynamic_exception_specification_until_cxx20(self, p):
 @glrp.rule('type-id-list : type-id "..."?')
 @glrp.rule('type-id-list : type-id-list "," type-id "..."?')
 @cxx98
-@until_cxx17
+@deprecated_cxx17
 def type_id_list_until_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass

@@ -98,7 +98,7 @@ from motor_typing import TYPE_CHECKING
 
 
 @c89
-@glrp.rule('primary-expression[split] : "identifier"')
+@glrp.rule('primary-expression : "identifier"')
 @glrp.rule('primary-expression : "integer-constant"')
 @glrp.rule('primary-expression : "floating-constant"')
 @glrp.rule('primary-expression : "character-constant"')

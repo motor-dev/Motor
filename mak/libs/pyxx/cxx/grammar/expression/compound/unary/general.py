@@ -52,7 +52,7 @@ def unary_expression_cxx20(self, p):
     pass
 
 
-@glrp.rule('unary-operator : "*" | "&" | "+" | "-" | "!" | "~"')
+@glrp.rule('unary-operator : "*" | "&" | "+" | "-" | "!" | "~"[split]')
 @cxx98
 def unary_operator(self, p):
     # type: (CxxParser, glrp.Production) -> None

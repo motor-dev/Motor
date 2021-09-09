@@ -31,7 +31,8 @@ def requires_expression_cxx20(self, p):
     pass
 
 
-@glrp.rule('requirement-parameter-list : "(" parameter-declaration-clause ")"')
+@glrp.rule('requirement-parameter-list? : "(" parameter-declaration-clause ")"')
+@glrp.rule('requirement-parameter-list? : ')
 @cxx20
 def requires_parameter_list_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None

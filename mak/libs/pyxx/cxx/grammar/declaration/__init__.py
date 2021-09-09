@@ -71,6 +71,15 @@ from . import linkage
 from . import attribute
 
 
+@glrp.rule('declaration-seq? : declaration-seq declaration')
+@glrp.rule('declaration-seq? : declaration')
+@glrp.rule('declaration-seq? : ')
+@cxx98
+def declaration_seq_opt(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule('declaration-seq : declaration')
 @glrp.rule('declaration-seq : declaration-seq declaration')
 @cxx98
@@ -79,31 +88,9 @@ def declaration_seq(self, p):
     pass
 
 
-@glrp.rule('declaration : block-declaration')
-@glrp.rule('declaration : nodeclspec-function-declaration')
-@glrp.rule('declaration : function-definition')
-@glrp.rule('declaration : template-declaration')
-@glrp.rule('declaration : explicit-instantiation')
-@glrp.rule('declaration : explicit-specialization')
-@glrp.rule('declaration : linkage-specification')
-@glrp.rule('declaration : namespace-definition')
-@glrp.rule('declaration : empty-declaration')
+@glrp.rule('declaration : noexport-declaration')
 @cxx98
 def declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('declaration : attribute-declaration')
-@cxx11
-def declaration_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('declaration : deduction-guide')
-@cxx17
-def declaration_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -112,6 +99,43 @@ def declaration_cxx17(self, p):
 @glrp.rule('declaration : module-import-declaration')
 @cxx20
 def declaration_cxx20(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('noexport-declaration-seq? : noexport-declaration-seq? noexport-declaration')
+@glrp.rule('noexport-declaration-seq? :')
+@cxx20
+def noexport_declaration_seq_opt(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('noexport-declaration : block-declaration')
+@glrp.rule('noexport-declaration : nodeclspec-function-declaration')
+@glrp.rule('noexport-declaration : function-definition')
+@glrp.rule('noexport-declaration : template-declaration')
+@glrp.rule('noexport-declaration : explicit-instantiation')
+@glrp.rule('noexport-declaration : explicit-specialization')
+@glrp.rule('noexport-declaration : linkage-specification')
+@glrp.rule('noexport-declaration : namespace-definition')
+@glrp.rule('noexport-declaration : empty-declaration')
+@cxx98
+def noexport_declaration(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('noexport-declaration : attribute-declaration')
+@cxx11
+def noexport_declaration_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('noexport-declaration : deduction-guide')
+@cxx17
+def noexport_declaration_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -150,15 +174,17 @@ def nodeclspec_function_declaration(self, p):
     pass
 
 
-@glrp.rule('alias-declaration : "using" "identifier" attribute-specifier-seq? "=" defining-type-id ";"')
+# todo: attribute-specifier-seq?, typename? not allowed
+@glrp.rule(
+    'alias-declaration : attribute-specifier-seq? "using" "typename"? "identifier" attribute-specifier-seq? "=" defining-type-id ";"'
+)
 @cxx98
 def alias_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('simple-declaration : decl-specifier-seq init-declarator-list? ";"')
-@glrp.rule('simple-declaration : attribute-specifier-seq decl-specifier-seq init-declarator-list ";"')
+@glrp.rule('simple-declaration : attribute-specifier-seq? decl-specifier-seq init-declarator-list? ";"')
 @glrp.rule(
     'simple-declaration : attribute-specifier-seq? decl-specifier-seq ref-qualifier? "[" identifier-list "]" initializer ";"'
 )
@@ -182,7 +208,7 @@ def static_assert_declaration_cxx17(self, p):
     pass
 
 
-@glrp.rule('empty-declaration : ";"')
+@glrp.rule('empty-declaration : [prec:left,1]";"')
 @cxx98
 def empty_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None

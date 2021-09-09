@@ -126,9 +126,7 @@ def selection_statement(self, p):
 @c89
 @glrp.rule('iteration-statement : "while" "(" expression ")" statement')
 @glrp.rule('iteration-statement : "do" statement "while" "(" expression ")" ";"')
-#@glrp.rule('iteration-statement : "for" "(" expression? ";" expression? ";" expression? ")" statement')
-@glrp.rule('iteration-statement : "for" "(" ";" expression? ";" expression? ")" statement')
-@glrp.rule('iteration-statement : "for" "(" expression ";" expression? ";" expression? ")" statement')
+@glrp.rule('iteration-statement : "for" "(" expression? ";" expression? ";" expression? ")" statement')
 @glrp.rule('iteration-statement : "for" "(" declaration expression? ";" expression? ")" statement')
 def iteration_statement(self, p):
     # type: (CParser, glrp.Production) -> None

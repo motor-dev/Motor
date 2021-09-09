@@ -44,19 +44,31 @@ def statement(self, p):
     pass
 
 
-@glrp.rule('init-statement : expression-statement')
+@glrp.rule('init-statement : attribute-specifier-seq? expression-statement')
 @glrp.rule('init-statement : simple-declaration')
 @cxx98
 def init_statement(self, p):
     # type: (CxxParser, glrp.Production) -> None
+    # TODO: attribute-specifier-seq? not allowed here
     pass
 
 
-@glrp.rule('condition : expression')
+@glrp.rule('condition : attribute-specifier-seq? expression')
 @glrp.rule('condition : attribute-specifier-seq? decl-specifier-seq declarator brace-or-equal-initializer')
 @cxx98
 def condition(self, p):
     # type: (CxxParser, glrp.Production) -> None
+    # TODO: attribute-specifier-seq? expression attribute-specifier-seq should be empty
+    pass
+
+
+@glrp.rule('condition? : attribute-specifier-seq? expression')
+@glrp.rule('condition? : attribute-specifier-seq? decl-specifier-seq declarator brace-or-equal-initializer')
+@glrp.rule('condition? :')
+@cxx98
+def condition_opt(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    # TODO: attribute-specifier-seq? expression attribute-specifier-seq should be empty
     pass
 
 

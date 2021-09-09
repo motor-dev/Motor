@@ -43,10 +43,26 @@ def module_partition_cxx20(self, p):
     pass
 
 
-@glrp.rule('module-name-qualifier : "identifier" "."')
-@glrp.rule('module-name-qualifier : module-name-qualifier "identifier" "."')
+@glrp.rule('module-partition? : ":" module-name-qualifier? "identifier"')
+@glrp.rule('module-partition? : ')
 @cxx20
-def module_name_qualifier_cxx20(self, p):
+def module_partition_opt_cxx20(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('module-name-qualifier? : module-name-qualifier? "identifier" "."')
+@glrp.rule('module-name-qualifier? : ')
+@cxx20
+def module_name_qualifier_opt_cxx20(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('"export"? : "export"')
+@glrp.rule('"export"? : ')
+@cxx20
+def export_opt_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

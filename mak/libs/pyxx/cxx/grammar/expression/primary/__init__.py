@@ -18,7 +18,7 @@ from . import fold
 from . import requires
 
 
-@glrp.rule('primary-expression : "integer-literal"')
+@glrp.rule('primary-expression[split] : "integer-literal"')
 @glrp.rule('primary-expression : "character-literal"')
 @glrp.rule('primary-expression : "floating-literal"')
 @glrp.rule('primary-expression : "string-literal"')

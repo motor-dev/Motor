@@ -32,10 +32,13 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('simple-type-specifier : type-name')
-@glrp.rule('simple-type-specifier : nested-name-specifier type-name')
-@glrp.rule('simple-type-specifier : nested-name-specifier "template" state-splitter simple-template-id')
-@glrp.rule('simple-type-specifier : template-name')
-@glrp.rule('simple-type-specifier : nested-name-specifier template-name')
+# TODO: template? not allowed
+@glrp.rule('simple-type-specifier : nested-name-specifier "template"? type-name')
+# TODO: already covered
+#@glrp.rule('simple-type-specifier : nested-name-specifier "template"? simple-template-id')
+@glrp.rule('simple-type-specifier[split] : template-name')
+# TODO: template? not allowed
+@glrp.rule('simple-type-specifier[split] : nested-name-specifier "template"? template-name')
 @glrp.rule('simple-type-specifier : "char"')
 @glrp.rule('simple-type-specifier : "wchar_t"')
 @glrp.rule('simple-type-specifier : "bool"')

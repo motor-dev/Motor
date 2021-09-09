@@ -33,14 +33,14 @@ from . import constraint
 from . import guide
 
 
-@glrp.rule('template-declaration : template-head declaration')
+@glrp.rule('template-declaration : attribute-specifier-seq? "extern"? template-head declaration')
 @cxx98
 def template_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('template-declaration : template-head concept-definition')
+@glrp.rule('template-declaration : attribute-specifier-seq? "extern"? template-head concept-definition')
 @cxx20
 def template_declaration_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -84,10 +84,60 @@ def constraint_logical_or_expression_cxx20(self, p):
     pass
 
 
-@glrp.rule('constraint-logical-and-expression : primary-expression')
-@glrp.rule('constraint-logical-and-expression : constraint-logical-and-expression "&&" primary-expression')
+@glrp.rule('constraint-logical-and-expression : constraint-primary-expression')
+@glrp.rule('constraint-logical-and-expression : constraint-logical-and-expression "&&" constraint-primary-expression')
 @cxx20
 def constraint_logical_and_expression_cxx20(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('constraint-primary-expression : "integer-literal"')
+@glrp.rule('constraint-primary-expression : "character-literal"')
+@glrp.rule('constraint-primary-expression : "floating-literal"')
+@glrp.rule('constraint-primary-expression : "string-literal"')
+@glrp.rule('constraint-primary-expression : "this"')
+@glrp.rule('constraint-primary-expression : "true"')
+@glrp.rule('constraint-primary-expression : "false"')
+@glrp.rule('constraint-primary-expression : "(" expression ")"')
+@glrp.rule('constraint-primary-expression : constraint-id-expression')
+@glrp.rule('constraint-primary-expression : "user-defined-integer-literal"')
+@glrp.rule('constraint-primary-expression : "user-defined-character-literal"')
+@glrp.rule('constraint-primary-expression : "user-defined-floating-literal"')
+@glrp.rule('constraint-primary-expression : "user-defined-string-literal"')
+@cxx20
+def constraint_primary_expression_cxx20(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('constraint-id-expression : constraint-unqualified-id')
+@glrp.rule('constraint-id-expression : constraint-qualified-id')
+@cxx20
+def constraint_id_expression_cxx20(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('constraint-unqualified-id : "identifier"')
+@glrp.rule('constraint-unqualified-id : template-id')
+@cxx20
+def constraint_unqualified_id_cxx20(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('constraint-qualified-id : nested-name-specifier "template"? constraint-unqualified-id')
+@cxx20
+def constraint_qualified_id_cxx20(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('identifier? : identifier')
+@glrp.rule('identifier? : ')
+@cxx98
+def identifier_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

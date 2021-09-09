@@ -11,19 +11,17 @@ from ...parser import cxx98
 from motor_typing import TYPE_CHECKING
 
 
-#@glrp.rule('compound-statement : "{" statement-seq? "}"')
-@glrp.rule('compound-statement : "{" state-splitter "}"')
-@glrp.rule('compound-statement : "{" statement-seq "}"')
+@glrp.rule('compound-statement : "{" statement-seq? "}"')
 @cxx98
 def compound_statement(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('statement-seq : statement')
-@glrp.rule('statement-seq : statement-seq statement')
+@glrp.rule('statement-seq? : statement-seq? statement')
+@glrp.rule('statement-seq? :')
 @cxx98
-def statement_seq(self, p):
+def statement_seq_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

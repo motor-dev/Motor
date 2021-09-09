@@ -7,7 +7,7 @@ storage-class-specifier:
 """
 
 import glrp
-from ....parser import cxx98, cxx11, until_cxx11, until_cxx17
+from ....parser import cxx98, cxx11, deprecated_cxx11, deprecated_cxx17
 from motor_typing import TYPE_CHECKING
 
 
@@ -30,7 +30,7 @@ def storage_class_specifier_cxx11(self, p):
 
 @glrp.rule('storage-class-specifier : "auto"')
 @cxx98
-@until_cxx11
+@deprecated_cxx11
 def storage_class_specifier_until_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
@@ -38,7 +38,7 @@ def storage_class_specifier_until_cxx11(self, p):
 
 @glrp.rule('storage-class-specifier : "register"')
 @cxx98
-@until_cxx17
+@deprecated_cxx17
 def storage_class_specifier_until_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass

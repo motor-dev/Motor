@@ -32,11 +32,12 @@ from .....parser import cxx11
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('lambda-capture : capture-default')
-@glrp.rule('lambda-capture : capture-list')
-@glrp.rule('lambda-capture : capture-default "," capture-list')
+@glrp.rule('lambda-capture? : capture-default')
+@glrp.rule('lambda-capture? : capture-list')
+@glrp.rule('lambda-capture? : capture-default "," capture-list')
+@glrp.rule('lambda-capture? : ')
 @cxx11
-def lambda_capture_cxx11(self, p):
+def lambda_capture_opt_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

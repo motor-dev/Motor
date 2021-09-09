@@ -48,6 +48,15 @@ def initializer(self, p):
     pass
 
 
+@glrp.rule('initializer? : brace-or-equal-initializer')
+@glrp.rule('initializer? : "(" expression-list ")"')
+@glrp.rule('initializer? : ')
+@cxx98
+def initializer_opt(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule('brace-or-equal-initializer : "=" initializer-clause')
 @cxx98
 def brace_or_equal_initializer(self, p):
@@ -62,6 +71,21 @@ def brace_or_equal_initializer_cxx11(self, p):
     pass
 
 
+@glrp.rule('brace-or-equal-initializer? : "=" initializer-clause')
+@glrp.rule('brace-or-equal-initializer? : ')
+@cxx98
+def brace_or_equal_initializer_opt(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('brace-or-equal-initializer? : braced-init-list')
+@cxx11
+def brace_or_equal_initializer_opt_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule('initializer-clause : assignment-expression')
 @glrp.rule('initializer-clause : braced-init-list')
 @cxx98
@@ -71,7 +95,7 @@ def initializer_clause(self, p):
 
 
 @glrp.rule('braced-init-list : "{" initializer-list ","? "}"')
-@glrp.rule('braced-init-list : "{" "}"')
+@glrp.rule('braced-init-list : "{"  "}"')
 @cxx98
 def braced_init_list(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -125,6 +149,29 @@ def expr_or_braced_init_list(self, p):
 @glrp.rule('expr-or-braced-init-list : braced-init-list')
 @cxx11
 def expr_or_braced_init_list_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('expr-or-braced-init-list? : expression')
+@glrp.rule('expr-or-braced-init-list? : ')
+@cxx98
+def expr_or_braced_init_list_opt(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('expr-or-braced-init-list? : braced-init-list')
+@cxx11
+def expr_or_braced_init_list_opt_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('","? : ","')
+@glrp.rule('","? : ')
+@cxx98
+def comma_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

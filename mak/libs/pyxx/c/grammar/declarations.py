@@ -203,7 +203,7 @@ def declaration(self, p):
 
 @c89
 #@glrp.rule('declaration-specifiers : declaration-specifier attribute-specifier-sequence?')
-@glrp.rule('declaration-specifiers[split] : declaration-specifier')
+@glrp.rule('declaration-specifiers : declaration-specifier')
 @glrp.rule('declaration-specifiers : declaration-specifier attribute-specifier-sequence')
 @glrp.rule('declaration-specifiers : declaration-specifier declaration-specifiers')
 def declaration_specifiers(self, p):
@@ -314,7 +314,7 @@ def member_declaration(self, p):
 
 
 @c89
-@glrp.rule('specifier-qualifier-list[split] : type-specifier-qualifier')
+@glrp.rule('specifier-qualifier-list : type-specifier-qualifier')
 @glrp.rule('specifier-qualifier-list : type-specifier-qualifier attribute-specifier-sequence')
 @glrp.rule('specifier-qualifier-list : type-specifier-qualifier specifier-qualifier-list')
 def specifier_qualifier_list(self, p):
@@ -414,7 +414,7 @@ def declarator(self, p):
 
 @c89
 #@glrp.rule('direct-declarator : identifier attribute-specifier-sequence?')
-@glrp.rule('direct-declarator[split] : identifier')
+@glrp.rule('direct-declarator : identifier')
 @glrp.rule('direct-declarator : identifier attribute-specifier-sequence')
 @glrp.rule('direct-declarator : "(" declarator ")"')
 @glrp.rule('direct-declarator : array-declarator attribute-specifier-sequence?')
@@ -534,7 +534,7 @@ def function_abstract_declarator(self, p):
 
 
 @c89
-@glrp.rule('typedef-name[split] : [split]"identifier"')
+@glrp.rule('typedef-name : "identifier"')
 def typedef_name(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
@@ -596,7 +596,7 @@ def attribute_specifier_sequence(self, p):
 
 
 @c89
-@glrp.rule('attribute-specifier : [split]"[[" attribute-list "]" "]"')
+@glrp.rule('attribute-specifier : "[[" attribute-list "]" "]"')
 def attribute_specifier(self, p):
     # type: (CParser, glrp.Production) -> None
     pass

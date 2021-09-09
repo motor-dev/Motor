@@ -63,6 +63,8 @@ class LR0Path(object):
             elif op == 1:
                 if last_item is None:
                     last_item = item
+                elif item._index > last_item._index:
+                    last_item = item
                 strings, max_len, consumed_count = self._to_string(items[index + 1:], (2, item), name_map, False, False)
                 length = merge(strings, max_len, length)
                 index += consumed_count + 1

@@ -59,7 +59,7 @@ def declarator_cxx11(self, p):
     pass
 
 
-@glrp.rule('ptr-declarator : noptr-declarator')
+@glrp.rule('ptr-declarator : noptr-declarator [prec:nonassoc,4][split]')
 @glrp.rule('ptr-declarator : ptr-operator ptr-declarator')
 @cxx98
 def ptr_declarator(self, p):
@@ -70,7 +70,7 @@ def ptr_declarator(self, p):
 @glrp.rule('noptr-declarator : declarator-id attribute-specifier-seq?')
 @glrp.rule('noptr-declarator : noptr-declarator parameters-and-qualifiers')
 @glrp.rule('noptr-declarator : noptr-declarator "[" constant-expression? "]" attribute-specifier-seq?')
-@glrp.rule('noptr-declarator : "(" ptr-declarator ")"')
+@glrp.rule('noptr-declarator : [split]"(" ptr-declarator ")"')
 @cxx98
 def noptr_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -78,7 +78,7 @@ def noptr_declarator(self, p):
 
 
 @glrp.rule(
-    'parameters-and-qualifiers : "(" parameter-declaration-clause ")" cv-qualifier-seq? ref-qualifier? exception-specification? attribute-specifier-seq?'
+    'parameters-and-qualifiers : [prec:nonassoc,4][split]"(" parameter-declaration-clause ")" cv-qualifier-seq? ref-qualifier? exception-specification? attribute-specifier-seq?'
 )
 @cxx98
 def parameters_and_qualifiers(self, p):
@@ -93,36 +93,34 @@ def trailing_return_type(self, p):
     pass
 
 
-#@glrp.rule('ptr-operator : "*" attribute-specifier-seq? cv-qualifier-seq?')
-@glrp.rule('ptr-operator : "*"')
-@glrp.rule('ptr-operator : "*" cv-qualifier-seq')
-@glrp.rule('ptr-operator : "*" attribute-specifier-seq')
-@glrp.rule('ptr-operator : "*" attribute-specifier-seq cv-qualifier-seq')
-#@glrp.rule('ptr-operator : "&" attribute-specifier-seq?')
-@glrp.rule('ptr-operator : "&"')
-@glrp.rule('ptr-operator : "&" attribute-specifier-seq')
-@glrp.rule('ptr-operator : nested-name-specifier "*"')
-@glrp.rule('ptr-operator : nested-name-specifier "*" cv-qualifier-seq')
-@glrp.rule('ptr-operator : nested-name-specifier "*" attribute-specifier-seq')
-@glrp.rule('ptr-operator : nested-name-specifier "*" attribute-specifier-seq cv-qualifier-seq')
+@glrp.rule('trailing-return-type? : "->" type-id')
+@glrp.rule('trailing-return-type? : ')
+@cxx11
+def trailing_return_type_opt(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('ptr-operator : [prec:left,1]"*" attribute-specifier-seq? cv-qualifier-seq?')
+@glrp.rule('ptr-operator : nested-name-specifier "*" attribute-specifier-seq? cv-qualifier-seq?')
+@glrp.rule('ptr-operator : [prec:left,1]"&" attribute-specifier-seq?')
 @cxx98
 def ptr_operator(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-#@glrp.rule('ptr-operator : "&&" attribute-specifier-seq?')
-@glrp.rule('ptr-operator : "&&"')
-@glrp.rule('ptr-operator : "&&" attribute-specifier-seq')
+@glrp.rule('ptr-operator : [prec:left,1]"&&" attribute-specifier-seq?')
 @cxx11
 def ptr_operator_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('cv-qualifier-seq : cv-qualifier cv-qualifier-seq?')
+@glrp.rule('cv-qualifier-seq? : cv-qualifier cv-qualifier-seq?')
+@glrp.rule('cv-qualifier-seq? :')
 @cxx98
-def cv_qualifier_seq(self, p):
+def cv_qualifier_seq_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -135,16 +133,17 @@ def cv_qualifier(self, p):
     pass
 
 
-@glrp.rule('ref-qualifier : "&&"')
+@glrp.rule('ref-qualifier? : "&"')
+@glrp.rule('ref-qualifier? :')
 @cxx98
-def ref_qualifier(self, p):
+def ref_qualifier_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('ref-qualifier : "&&"')
+@glrp.rule('ref-qualifier? : "&&"')
 @cxx11
-def ref_qualifier_cxx11(self, p):
+def ref_qualifier_opt_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

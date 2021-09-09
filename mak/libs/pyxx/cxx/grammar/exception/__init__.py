@@ -44,6 +44,14 @@ def handler_seq(self, p):
     pass
 
 
+@glrp.rule('handler-seq? : handler handler-seq?')
+@glrp.rule('handler-seq? : ')
+@cxx98
+def handler_seq_opt(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule('handler : "catch" "(" exception-declaration ")" compound-statement')
 @cxx98
 def handler(self, p):
