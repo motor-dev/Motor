@@ -15,5 +15,13 @@ def constant_expression(self, p):
     pass
 
 
+@glrp.rule('constant-expression? : constant-expression')
+@glrp.rule('constant-expression? :')
+@cxx98
+def constant_expression_opt(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 if TYPE_CHECKING:
     from ...parser import CxxParser

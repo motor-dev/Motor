@@ -35,20 +35,32 @@ def parameter_declaration_list(self, p):
     pass
 
 
+@glrp.rule('parameter-declaration-list? : parameter-declaration')
+@glrp.rule('parameter-declaration-list? : parameter-declaration-list "," parameter-declaration')
+@glrp.rule('parameter-declaration-list? : ')
+@cxx98
+def parameter_declaration_list_opt(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule(
     'parameter-declaration'
     ': attribute-specifier-seq? decl-specifier-seq declarator\n'
     '| attribute-specifier-seq? decl-specifier-seq declarator "=" initializer-clause\n'
-    '| attribute-specifier-seq? decl-specifier-seq abstract-declarator\n'
+    '| attribute-specifier-seq? decl-specifier-seq abstract-declarator?\n'
     '| attribute-specifier-seq? decl-specifier-seq abstract-declarator? "=" initializer-clause'
-)
-#@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-declarator?')
-@glrp.rule(
-    'parameter-declaration : '\
-        'attribute-specifier-seq? decl-specifier-seq'
 )
 @cxx98
 def parameter_declaration(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('"..."? : "..."')
+@glrp.rule('"..."? : ')
+@cxx98
+def ellipsis_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

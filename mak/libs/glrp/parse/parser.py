@@ -159,12 +159,12 @@ class Parser(object):
         p[0] = p[1]
 
 
-_id = r'([a-zA-Z_\-][a-zA-Z_\-0-9]*)'
+_id = r'(?:([a-zA-Z_\-][a-zA-Z_\-0-9]*))'
 _value = r'[a-zA-Z_\-0-9]+(:?\s*,\s*[a-zA-Z_\-0-9]+)*'
 _single_quote = r"(?:'([^']*)')"
 _double_quote = r'(?:"([^"]*)")'
 
-_rule_id = re.compile(r'\s*%s' % _id, re.MULTILINE)
+_rule_id = re.compile(r'\s*(?:%s(\??)|%s(\??)|%s(\??))' % (_id, _single_quote, _double_quote), re.MULTILINE)
 _rule_annotation = re.compile(r'\s*(:)\s*|\s*\[\s*%s\s*(\:\s*%s\s*)?\]' % (_id, _value), re.MULTILINE)
 _production = re.compile(
     r'%s(\??)\s*|%s(\??)\s*|%s(\??)\s*|(\|)\s*|(\$)\s*|($)|\[\s*%s\s*(\:\s*%s\s*)?\]\s*' %
@@ -180,7 +180,8 @@ def _parse_rule(rule_string, action, filename, lineno):
         m = _rule_id.match(rule_string)
         if m is None:
             raise SyntaxError('unable to parse rule', (filename, lineno, 0, rule_string))
-        id = m.group(1)
+        assert m.lastindex is not None
+        id = m.group(m.lastindex - 1) + m.group(m.lastindex)
 
         annotations = []               # type: List[Tuple[str, List[str], int]]
         while m is not None:
@@ -199,9 +200,9 @@ def _parse_rule(rule_string, action, filename, lineno):
                 annotations.append((annotation, values, -1))
 
         while True:
-            productions = [
+            production = (
                 (_DirectAction(action), [], annotations[:])
-            ]                                               # type: List[Tuple[Action, List[str], List[Tuple[str, List[str], int]]]]
+            )                                               # type: Tuple[Action, List[str], List[Tuple[str, List[str], int]]]
 
             while m is not None:
                 parse_start = m.end()
@@ -210,24 +211,21 @@ def _parse_rule(rule_string, action, filename, lineno):
                     raise SyntaxError('unable to parse rule', (filename, lineno, parse_start, rule_string))
                 assert m.lastindex is not None
                 if m.lastindex < 7:
-                    for p in productions:
-                        p[1].append(m.group(m.lastindex - 1))
-                    if m.group(m.lastindex) == '?':
-                        productions += [(_OptionalAction(p[0], len(p[1]) - 1), p[1][:-1], p[2][:]) for p in productions]
+                    token = m.group(m.lastindex - 1) + m.group(m.lastindex)
+                    production[1].append(token)
                     continue
                 elif m.lastindex == 7: # |
-                    for p in productions:
-                        result.append((id, p[0], p[1], p[2], filename, lineno))
+                    result.append((id, production[0], production[1], production[2], filename, lineno))
                     break
                 elif m.lastindex == 8: # ;
-                    for p in productions:
-                        result.append((id, p[0], p[1], p[2], filename, lineno))
+                    result.append((id, production[0], production[1], production[2], filename, lineno))
                     rule_string = rule_string[m.end():]
                     if rule_string:
                         m = _rule_id.match(rule_string)
                         if m is None:
                             raise SyntaxError('unable to parse rule', (filename, lineno, 0, rule_string))
-                        id = m.group(1)
+                        assert m.lastindex is not None
+                        id = m.group(m.lastindex - 1) + m.group(m.lastindex)
 
                         annotations = []
                         while m is not None:
@@ -248,18 +246,15 @@ def _parse_rule(rule_string, action, filename, lineno):
                     else:
                         return result
                 elif m.lastindex == 9:             # $
-                    for p in productions:
-                        result.append((id, p[0], p[1], p[2], filename, lineno))
+                    result.append((id, production[0], production[1], production[2], filename, lineno))
                     return result
                 elif m.lastindex == 10:            # annotation
                     annotation = m.group(10)
-                    for p in productions:
-                        p[2].append((annotation, [], len(p[1])))
+                    production[2].append((annotation, [], len(production[1])))
                 elif m.lastindex == 11:            # annotation=value
                     annotation = m.group(10)
                     values = [v.strip() for v in m.group(11)[1:].split(',')]
-                    for p in productions:
-                        p[2].append((annotation, values, len(p[1])))
+                    production[2].append((annotation, values, len(production[1])))
 
     return result
 

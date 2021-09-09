@@ -10,9 +10,9 @@ from ....parser import cxx98
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('equality-expression : relational-expression')
-@glrp.rule('equality-expression : equality-expression "==" relational-expression')
-@glrp.rule('equality-expression : equality-expression "!=" relational-expression')
+@glrp.rule('equality-expression : relational-expression[split]')
+@glrp.rule('equality-expression : equality-expression "==" relational-expression[split]')
+@glrp.rule('equality-expression : equality-expression "!=" relational-expression[split]')
 @cxx98
 def equality_expression(self, p):
     # type: (CxxParser, glrp.Production) -> None

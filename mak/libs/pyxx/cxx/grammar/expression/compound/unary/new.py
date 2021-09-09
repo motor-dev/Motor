@@ -27,10 +27,10 @@ from .....parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('new-expression : "new" new-placement? new-type-id new-initializer?')
-@glrp.rule('new-expression : "new" new-placement? "(" type-id ")" new-initializer?')
-@glrp.rule('new-expression : "::" "new" new-placement? new-type-id new-initializer?')
-@glrp.rule('new-expression : "::" "new" new-placement? "(" type-id ")" new-initializer?')
+@glrp.rule('new-expression : "::"? "new" new-type-id new-initializer?')
+@glrp.rule('new-expression : "::"? "new" "(" type-id ")" new-initializer?')
+@glrp.rule('new-expression : "::"? "new" new-placement new-type-id new-initializer?')
+@glrp.rule('new-expression : "::"? "new" new-placement "(" type-id ")" new-initializer?')
 @cxx98
 def new_expression(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -69,16 +69,17 @@ def noptr_new_declarator(self, p):
     pass
 
 
-@glrp.rule('new-initializer : "(" expression-list? ")"')
+@glrp.rule('new-initializer? : "(" expression-list? ")"')
+@glrp.rule('new-initializer? : ')
 @cxx98
-def new_initializer(self, p):
+def new_initializer_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('new-initializer : braced-init-list')
+@glrp.rule('new-initializer? : braced-init-list')
 @cxx11
-def new_initializer_cxx11(self, p):
+def new_initializer_opt_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

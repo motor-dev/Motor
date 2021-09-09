@@ -24,6 +24,15 @@ def init_declarator_list(self, p):
     pass
 
 
+@glrp.rule('init-declarator-list? : init-declarator')
+@glrp.rule('init-declarator-list? : init-declarator-list "," init-declarator')
+@glrp.rule('init-declarator-list? : ')
+@cxx98
+def init_declarator_list_opt(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule('init-declarator : declarator initializer?')
 @cxx98
 def init_declarator(self, p):

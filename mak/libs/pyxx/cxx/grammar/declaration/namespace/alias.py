@@ -14,21 +14,25 @@ from ....parser import cxx98
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('namespace-alias : "identifier"')
+@glrp.rule('namespace-alias[split] : [split]"identifier"')
 @cxx98
 def namespace_alias(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('namespace-alias-definition : "namespace" "identifier" "=" qualified-namespace-specifier ";"')
+# TODO: attribute-specifier-seq? ->  ♦
+@glrp.rule(
+    'namespace-alias-definition : "namespace" attribute-specifier-seq? "identifier" "=" qualified-namespace-specifier ";"'
+)
 @cxx98
 def namespace_alias_definition(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('qualified-namespace-specifier : nested-name-specifier? namespace-name')
+@glrp.rule('qualified-namespace-specifier : namespace-name')
+@glrp.rule('qualified-namespace-specifier : nested-name-specifier template? namespace-name')
 @cxx98
 def qualified_namespace_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None

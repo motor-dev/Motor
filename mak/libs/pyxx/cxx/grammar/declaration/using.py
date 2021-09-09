@@ -17,19 +17,23 @@ using-declarator:
 """
 
 import glrp
-from ...parser import cxx98, until_cxx17, cxx17
+from ...parser import cxx98, deprecated_cxx17, cxx17
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('using-declaration : "using" "typename"? nested-name-specifier unqualified-id ";"')
-@glrp.rule('using-declaration : "using" "::" unqualified-id ";"')
+# TODO:attribute-specifier-seq? empty, template?
+@glrp.rule(
+    'using-declaration : attribute-specifier-seq? "using" "typename"? nested-name-specifier template? unqualified-id ";"'
+)
+#@glrp.rule('using-declaration : attribute-specifier-seq? "using" "::" unqualified-id ";"')
 @cxx98
-@until_cxx17
+@deprecated_cxx17
 def using_declaration_until_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
+# TODO:attribute-specifier-seq? empty
 @glrp.rule('using-declaration : "using" using-declarator-list ";"')
 @cxx17
 def using_declaration_cxx17(self, p):
@@ -48,6 +52,14 @@ def using_declarator_list_cxx17(self, p):
 @glrp.rule('using-declarator : "typename"? nested-name-specifier unqualified-id')
 @cxx17
 def using_declarator_cxx17(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('"typename"? : "typename"')
+@glrp.rule('"typename"? :')
+@cxx98
+def typename_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

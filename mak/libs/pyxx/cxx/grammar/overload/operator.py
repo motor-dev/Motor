@@ -24,8 +24,8 @@ def operator_function_id(self, p):
 
 @glrp.rule('overloadable-operator : "new"    ')
 @glrp.rule('overloadable-operator : "delete" ')
-@glrp.rule('overloadable-operator : "new"    "[" "]"')
-@glrp.rule('overloadable-operator : "delete" "[" "]"')
+@glrp.rule('overloadable-operator : "new"    [prec:left,1]"[" "]"')
+@glrp.rule('overloadable-operator : "delete" [prec:left,1]"[" "]"')
 @glrp.rule('overloadable-operator : "(" ")"')
 @glrp.rule('overloadable-operator : "[" "]"')
 @glrp.rule('overloadable-operator : "->"')

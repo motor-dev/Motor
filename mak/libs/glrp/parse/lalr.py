@@ -84,6 +84,7 @@ def _find_counterexamples(conflict_list):
     conflict_paths = [
         (node, []) for node, _ in conflict_list
     ]                                           # type: List[Tuple[LR0Node, List[Tuple[LR0Node, LR0Path]]]]
+    reduce_node = [1 if node._item == node._item._last else 0 for node, _ in conflict_list]
 
     lst = [
     ]                              # type: List[List[Tuple[LR0Node, LR0Path, Optional[int], Set[Union[Tuple[LR0Node, Optional[int]], LR0ItemSet]]]]]
@@ -161,10 +162,12 @@ def _find_counterexamples(conflict_list):
             else:
                 for (item_set, _), nodes_list in states.items():
                     count = 0
-                    for nodes in nodes_list:
+                    reduce_count = 0
+                    for nodes, reduce in zip(nodes_list, reduce_node):
                         if len(nodes) > 0:
                             count += 1
-                    if count > 1:
+                            reduce_count += reduce
+                    if count > 1 and reduce_count > 0:
                         if intermediate_result is not None:
                             intermediate_result._refcount += 1
                         queue.append((nodes_list, item_set._index, intermediate_result, {}))
@@ -180,17 +183,18 @@ def _find_counterexamples(conflict_list):
 def _find_splits(conflict_list):
     # type: (List[Tuple[LR0Node, Optional[int]]]) -> Dict[Tuple[LR0ItemSet, int], Dict[Grammar.Rule, List[LR0Path]]]
     result = {}    # type: Dict[Tuple[LR0ItemSet, int], Dict[Grammar.Rule, List[LR0Path]]]
-    for _, paths in _find_counterexamples(conflict_list):
-        for node, path in paths:
-            try:
-                set_result = result[(node._item_set, 0)]
-            except KeyError:
-                result[(node._item_set, 0)] = {node._item.rule: [path]}
-            else:
-                try:
-                    set_result[node._item.rule].append(path)
-                except KeyError:
-                    set_result[node._item.rule] = [path]
+
+    #for _, paths in _find_counterexamples(conflict_list):
+    #    for node, path in paths:
+    #        try:
+    #            set_result = result[(node._item_set, 0)]
+    #        except KeyError:
+    #            result[(node._item_set, 0)] = {node._item.rule: [path]}
+    #        else:
+    #            try:
+    #                set_result[node._item.rule].append(path)
+    #            except KeyError:
+    #                set_result[node._item.rule] = [path]
     return result
 
 
@@ -542,7 +546,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                 reduce_actions = False
                 assoc_error = False
                 precedence_set = False
-                split = False
+                split = True
                 all_items = []
                 for j, items in action_dest.items():
                     all_items += items
@@ -562,12 +566,12 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                                     assoc_error = True
                                 shift_actions |= j >= 0
                                 reduce_actions |= j < 0
-                                split |= item._split
+                                split &= item._split
                                 item._split_use += 1
                         elif precedence == -1:
                             shift_actions |= j >= 0
                             reduce_actions |= j < 0
-                            split |= item._split
+                            split &= item._split
                             item._split_use += 1
 
                 all_items_set = frozenset(all_items)
@@ -586,7 +590,9 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                                     priority_missing[item].append(st)
                                 except KeyError:
                                     priority_missing[item] = [st]
-                            conflict_log.info('  [discarded] %s', item.to_string(name_map))
+                                conflict_log.info('  [no precedence] %s', item.to_string(name_map))
+                            else:
+                                conflict_log.info('  [discarded] %s', item.to_string(name_map))
                             continue
                         elif item._precedence is not None:
                             if item._precedence[1] < precedence:
@@ -612,7 +618,6 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
             else:
                 accepted_actions = action_dest
 
-            split = False
             st_action[a] = tuple(sorted(accepted_actions))
             if len(accepted_actions) > 1 and not split:
                 # handle conflicts
@@ -623,12 +628,12 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     items = accepted_actions[j]
                     if j >= 0:
                         sm_log.info('        shift and go to state %d', j)
+                        num_rr -= 1
+                        num_sr += 1
                     for item in items:
                         node = item_group[item]
                         if j >= 0:
                             conflicts.append((node, None))
-                            num_rr -= 1
-                            num_sr += 1
                         else:
                             sm_log.info('        reduce using rule %s', item.to_string(name_map))
                             conflicts.append((node, a))
@@ -756,7 +761,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         error_log.warning('%d conflicting precedence annotations', len(priority_conflict))
     for item_set, state_numbers in priority_conflict.items():
         error_log.warning('conflicting precedence in states %s:', ', '.join([str(i) for i in state_numbers]))
-        for item in sorted(item_set):
+        for item in sorted(item_set, key=lambda x: (x.rule._filename, x.rule._lineno)):
             error_log.diagnostic(item.rule._filename, item.rule._lineno, item.to_string(name_map))
 
     if len(merge_conflict) == 1:

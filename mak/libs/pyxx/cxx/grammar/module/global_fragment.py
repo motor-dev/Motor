@@ -8,11 +8,10 @@ from ...parser import cxx20
 from motor_typing import TYPE_CHECKING
 
 
-#@glrp.rule('global-module-fragment : "module" ";" declaration-seq?')
-@glrp.rule('global-module-fragment : "module" ";"')
-@glrp.rule('global-module-fragment : "module" ";" declaration-seq')
+@glrp.rule('global-module-fragment? : "module" ";" declaration-seq?')
+@glrp.rule('global-module-fragment? : ')
 @cxx20
-def global_module_fragment_cxx20(self, p):
+def global_module_fragment_opt_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

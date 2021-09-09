@@ -51,25 +51,32 @@ from ...parser import cxx98, cxx11, cxx20, cxx23
 from motor_typing import TYPE_CHECKING
 
 
-#@glrp.rule('attribute-specifier-seq§ : attribute-specifier-seq? attribute-specifier')
-@glrp.rule('attribute-specifier-seq : attribute-specifier')
 @glrp.rule('attribute-specifier-seq : attribute-specifier-seq attribute-specifier')
+@glrp.rule('attribute-specifier-seq : attribute-specifier')
 @cxx98
 def attribute_specifier_seq(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('attribute-specifier : "doxycomment-line"')
-@glrp.rule('attribute-specifier : "doxycomment-block"')
-@glrp.rule('attribute-specifier : "attribute-specifier-macro"')
+@glrp.rule('attribute-specifier-seq? : attribute-specifier-seq')
+@glrp.rule('attribute-specifier-seq?[split] : ')
+@cxx98
+def attribute_specifier_seq_opt(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('attribute-specifier : [prec:left,0]"doxycomment-line"')
+@glrp.rule('attribute-specifier : [prec:left,0]"doxycomment-block"')
+@glrp.rule('attribute-specifier : [prec:left,0]"attribute-specifier-macro"')
 @cxx98
 def attribute_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('attribute-specifier : "[[" attribute-using-prefix? attribute-list "]" "]"')
+@glrp.rule('attribute-specifier : [prec:left,0]"[[" attribute-using-prefix? attribute-list "]" "]"')
 @glrp.rule('attribute-specifier : alignment-specifier')
 @cxx11
 def attribute_specifier_cxx11(self, p):
@@ -77,29 +84,36 @@ def attribute_specifier_cxx11(self, p):
     pass
 
 
-@glrp.rule('alignment-specifier : "alignas" "(" type-id "..."? ")"')
-@glrp.rule('alignment-specifier : "alignas" "(" constant-expression "..."? ")"')
+@glrp.rule('alignment-specifier : [prec:left,0]"alignas" "(" type-id "..."? ")"')
+@glrp.rule('alignment-specifier : [prec:left,0]"alignas" "(" constant-expression "..."? ")"')
 @cxx11
 def alignment_specifier_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('attribute-using-prefix : "using" attribute-namespace ":"')
+@glrp.rule('attribute-using-prefix? : "using" attribute-namespace ":"')
+@glrp.rule('attribute-using-prefix? : ')
 @cxx11
-def attribute_using_prefix_cxx11(self, p):
+def attribute_using_prefix_opt_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-#@glrp.rule('attribute-list : attribute?')
-@glrp.rule('attribute-list :')
-@glrp.rule('attribute-list : attribute')
+@glrp.rule('attribute-list : attribute?')
 @glrp.rule('attribute-list : attribute-list "," attribute?')
 @glrp.rule('attribute-list : attribute "..."')
 @glrp.rule('attribute-list : attribute-list "," attribute "..."')
 @cxx11
 def attribute_list_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('attribute? : attribute-token attribute-argument-clause?')
+@glrp.rule('attribute? : ')
+@cxx11
+def attribute_opt_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -133,17 +147,18 @@ def attribute_namespace_cxx11(self, p):
     pass
 
 
-@glrp.rule('attribute-argument-clause : "(" balanced-token-seq? ")"')
+@glrp.rule('attribute-argument-clause? : "(" balanced-token-seq? ")"')
+@glrp.rule('attribute-argument-clause? : ')
 @cxx11
-def attribute_argument_clause_cxx11(self, p):
+def attribute_argument_clause_opt_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('balanced-token-seq : balanced-token')
-@glrp.rule('balanced-token-seq : balanced-token-seq balanced-token')
+@glrp.rule('balanced-token-seq? : balanced-token-seq? balanced-token')
+@glrp.rule('balanced-token-seq? :')
 @cxx11
-def balanced_token_seq_cxx11(self, p):
+def balanced_token_seq_opt_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

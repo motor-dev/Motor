@@ -33,34 +33,39 @@ def template_parameter(self, p):
     pass
 
 
-@glrp.rule('type-parameter : type-parameter-key "identifier"?')
-@glrp.rule('type-parameter : type-parameter-key "identifier"? "=" type-id')
-@glrp.rule('type-parameter : template-head type-parameter-key "identifier"?')
-@glrp.rule('type-parameter : template-head type-parameter-key "identifier"? "=" id-expression')
+# TODO: attribute-specifier-seq? not allowed
+@glrp.rule('type-parameter : attribute-specifier-seq? type-parameter-key "identifier"?')
+@glrp.rule('type-parameter : attribute-specifier-seq? type-parameter-key "identifier"? "=" type-id')
+@glrp.rule('type-parameter : attribute-specifier-seq? template-head type-parameter-key "identifier"?')
+@glrp.rule('type-parameter : attribute-specifier-seq? template-head type-parameter-key "identifier"? "=" id-expression')
 @cxx98
 def type_parameter(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('type-parameter : type-parameter-key "..." "identifier"?')
-@glrp.rule('type-parameter : template-head type-parameter-key "..." "identifier"?')
+# TODO: attribute-specifier-seq? not allowed
+@glrp.rule('type-parameter : attribute-specifier-seq? type-parameter-key "..." "identifier"?')
+@glrp.rule('type-parameter : attribute-specifier-seq? template-head type-parameter-key "..." "identifier"?')
 @cxx11
 def type_parameter_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('type-parameter : type-constraint "..."? "identifier"?')
-@glrp.rule('type-parameter : type-constraint "identifier"? "=" type-id')
+# TODO: attribute-specifier-seq? not allowed
+@glrp.rule('type-parameter : attribute-specifier-seq? type-constraint "..."? "identifier"?')
+@glrp.rule('type-parameter : attribute-specifier-seq? type-constraint "identifier"? "=" type-id')
 @cxx20
 def type_parameter_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('type-parameter-key : "class"')
-@glrp.rule('type-parameter-key : "typename"')
+#@glrp.rule('type-parameter-key[split] : "class"')
+# TODO: only class allowed
+@glrp.rule('type-parameter-key[split] : class-key')
+@glrp.rule('type-parameter-key[split] : "typename"')
 @cxx98
 def type_parameter_key(self, p):
     # type: (CxxParser, glrp.Production) -> None

@@ -27,8 +27,9 @@ def iteration_statement(self, p):
     pass
 
 
+@glrp.rule('iteration-statement : "for" "(" for-range-declaration ":" for-range-initializer ")" statement')
 @glrp.rule(
-    'iteration-statement : "for" "(" init-statement? for-range-declaration ":" for-range-initializer ")" statement'
+    'iteration-statement : "for" "(" init-statement for-range-declaration ":" for-range-initializer ")" statement'
 )
 @cxx11
 def iteration_statement_cxx11(self, p):

@@ -31,8 +31,8 @@ from . import derived
 from . import conversion
 
 
-@glrp.rule('class-name : "identifier"')
-@glrp.rule('class-name : simple-template-id')
+@glrp.rule('class-name[split] : [split]"identifier"')
+@glrp.rule('class-name[split] : simple-template-id')
 @cxx98
 def class_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -54,14 +54,18 @@ def class_head(self, p):
     pass
 
 
-@glrp.rule('class-head : class-key attribute-specifier-seq? class-head-name class-virt-specifier base-clause?')
+@glrp.rule(
+    'class-head : attribute-specifier-seq? class-key attribute-specifier-seq? class-head-name class-virt-specifier base-clause?'
+)
 @cxx11
 def class_head_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('class-head-name : nested-name-specifier? class-name')
+# TODO: template? not allowed
+@glrp.rule('class-head-name : class-name')
+@glrp.rule('class-head-name : nested-name-specifier template? class-name')
 @cxx98
 def class_head_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -80,15 +84,6 @@ def class_virt_specifier_cxx11(self, p):
 @glrp.rule('class-key : "union"')
 @cxx98
 def class_key(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('class-key-elaborated : "class"')
-@glrp.rule('class-key-elaborated : "struct"')
-@glrp.rule('class-key-elaborated : "union"')
-@cxx98
-def class_key_elaborated(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
