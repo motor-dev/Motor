@@ -55,46 +55,41 @@ def enum_specifier(self, p):
     pass
 
 
-@glrp.rule('enum-head : enum-key attribute-specifier-seq? enum-head-name? enum-base?')
+@glrp.rule('enum-head : enum-key attribute-specifier-seq? enum-base?')
+@glrp.rule('enum-head : enum-key attribute-specifier-seq? enum-head-name enum-base?')
 @cxx98
 def enum_head(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('enum-head-name? : "identifier"')
-@glrp.rule('enum-head-name? : nested-name-specifier template? "identifier"')
-@glrp.rule('enum-head-name? :')
+@glrp.rule('enum-head-name[split] : "identifier"')
+@glrp.rule('enum-head-name : nested-name-specifier template? "identifier"[split]')
 @cxx98
-def enum_head_name_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('enum-head-name : "identifier"')
-@glrp.rule('enum-head-name : nested-name-specifier template? "identifier"')
-@cxx11
 def enum_head_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('opaque-enum-declaration : enum-key attribute-specifier-seq? enum-head-name enum-base? ";"')
+# TODO: attribute-specifier-seq? empty
+@glrp.rule(
+    'opaque-enum-declaration : attribute-specifier-seq? enum-key attribute-specifier-seq? enum-head-name enum-base? ";"'
+)
 @cxx11
 def opaque_enum_declaration_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('enum-key : "enum"')
+@glrp.rule('enum-key : [prec:left,1]"enum"')
 @cxx98
 def enum_key(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('enum-key : "enum" "class"')
-@glrp.rule('enum-key : "enum" "struct"')
+@glrp.rule('enum-key : [prec:left,1]"enum" "class"')
+@glrp.rule('enum-key : [prec:left,1]"enum" "struct"')
 @cxx11
 def enum_key_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None

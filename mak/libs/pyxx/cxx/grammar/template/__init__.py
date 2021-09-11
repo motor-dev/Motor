@@ -85,7 +85,9 @@ def constraint_logical_or_expression_cxx20(self, p):
 
 
 @glrp.rule('constraint-logical-and-expression : constraint-primary-expression')
-@glrp.rule('constraint-logical-and-expression : constraint-logical-and-expression "&&" constraint-primary-expression')
+@glrp.rule(
+    'constraint-logical-and-expression : constraint-logical-and-expression [prec:left,1]"&&" constraint-primary-expression'
+)
 @cxx20
 def constraint_logical_and_expression_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -119,7 +121,7 @@ def constraint_id_expression_cxx20(self, p):
     pass
 
 
-@glrp.rule('constraint-unqualified-id : "identifier"')
+@glrp.rule('constraint-unqualified-id[split] : "identifier"')
 @glrp.rule('constraint-unqualified-id : template-id')
 @cxx20
 def constraint_unqualified_id_cxx20(self, p):

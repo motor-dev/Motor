@@ -20,6 +20,13 @@ from ...parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
+@glrp.rule('ctor-initializer : ":" mem-initializer-list')
+@cxx98
+def ctor_initializer(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule('ctor-initializer? : ":" mem-initializer-list')
 @glrp.rule('ctor-initializer? : ')
 @cxx98

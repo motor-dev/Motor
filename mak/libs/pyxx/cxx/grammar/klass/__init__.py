@@ -46,8 +46,8 @@ def class_specifier(self, p):
     pass
 
 
-@glrp.rule('class-head : class-key attribute-specifier-seq? class-head-name base-clause?')
-@glrp.rule('class-head : class-key attribute-specifier-seq? base-clause?')
+@glrp.rule('class-head : attribute-specifier-seq? class-key attribute-specifier-seq? class-head-name base-clause?')
+@glrp.rule('class-head : attribute-specifier-seq? class-key attribute-specifier-seq? base-clause?')
 @cxx98
 def class_head(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -79,9 +79,9 @@ def class_virt_specifier_cxx11(self, p):
     pass
 
 
-@glrp.rule('class-key : "class"')
-@glrp.rule('class-key : "struct"')
-@glrp.rule('class-key : "union"')
+@glrp.rule('class-key : [prec:left,1]"class"')
+@glrp.rule('class-key : [prec:left,1]"struct"')
+@glrp.rule('class-key : [prec:left,1]"union"')
 @cxx98
 def class_key(self, p):
     # type: (CxxParser, glrp.Production) -> None

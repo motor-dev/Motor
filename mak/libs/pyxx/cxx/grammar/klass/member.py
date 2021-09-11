@@ -105,9 +105,9 @@ def member_declarator_list_opt(self, p):
     pass
 
 
-@glrp.rule('member-declarator : declarator virt-specifier-seq? pure-specifier')
-# TODO virt-specifier-seq? not allowed
-@glrp.rule('member-declarator : declarator virt-specifier-seq? brace-or-equal-initializer')
+@glrp.rule('member-declarator : declarator pure-specifier')
+@glrp.rule('member-declarator : declarator virt-specifier-seq pure-specifier')
+@glrp.rule('member-declarator : declarator brace-or-equal-initializer')
 @glrp.rule('member-declarator : attribute-specifier-seq? ":" constant-expression brace-or-equal-initializer?')
 @glrp.rule(
     'member-declarator : identifier attribute-specifier-seq? ":" constant-expression brace-or-equal-initializer?'
@@ -125,10 +125,10 @@ def member_declarator_cxx20(self, p):
     pass
 
 
-@glrp.rule('virt-specifier-seq? : virt-specifier-seq? virt-specifier')
-@glrp.rule('virt-specifier-seq? : ')
+@glrp.rule('virt-specifier-seq : virt-specifier-seq virt-specifier')
+@glrp.rule('virt-specifier-seq : virt-specifier')
 @cxx98
-def virt_specifier_seq_opt(self, p):
+def virt_specifier_seq(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

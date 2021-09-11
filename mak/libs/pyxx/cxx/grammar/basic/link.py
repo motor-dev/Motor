@@ -16,7 +16,8 @@ def translation_unit(self, p):
     pass
 
 
-@glrp.rule('translation-unit : global-module-fragment? module-declaration declaration-seq? private-module-fragment?')
+@glrp.rule('translation-unit : module-declaration declaration-seq? private-module-fragment?')
+@glrp.rule('translation-unit : global-module-fragment module-declaration declaration-seq? private-module-fragment?')
 @cxx20
 def translation_unit_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None

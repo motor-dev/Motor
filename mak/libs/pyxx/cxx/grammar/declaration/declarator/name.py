@@ -49,23 +49,24 @@ def defining_type_id(self, p):
 
 
 @glrp.rule('abstract-declarator? : ptr-abstract-declarator')
-@glrp.rule('abstract-declarator? :')
+@glrp.rule('abstract-declarator?[split] :')
 @cxx98
 def abstract_declarator_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('abstract-declarator? : noptr-abstract-declarator? parameters-and-qualifiers trailing-return-type')
-@glrp.rule('abstract-declarator? : abstract-pack-declarator')
+@glrp.rule('abstract-declarator? : parameters-and-qualifiers trailing-return-type')
+@glrp.rule('abstract-declarator? : noptr-abstract-declarator parameters-and-qualifiers trailing-return-type')
+#@glrp.rule('abstract-declarator? : abstract-pack-declarator')
 @cxx11
 def abstract_declarator_opt_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('ptr-abstract-declarator : noptr-abstract-declarator')
-@glrp.rule('ptr-abstract-declarator : ptr-operator')
+@glrp.rule('ptr-abstract-declarator[split] : noptr-abstract-declarator')
+@glrp.rule('ptr-abstract-declarator[split] : ptr-operator')
 @glrp.rule('ptr-abstract-declarator : ptr-operator ptr-abstract-declarator')
 @cxx98
 def ptr_abstract_declarator(self, p):
@@ -73,17 +74,11 @@ def ptr_abstract_declarator(self, p):
     pass
 
 
-@glrp.rule('noptr-abstract-declarator? : noptr-abstract-declarator')
-@glrp.rule('noptr-abstract-declarator?[split] : ')
-@cxx98
-def noptr_abstract_declarator_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('noptr-abstract-declarator : noptr-abstract-declarator? parameters-and-qualifiers')
+@glrp.rule('noptr-abstract-declarator : parameters-and-qualifiers')
+@glrp.rule('noptr-abstract-declarator : "[" constant-expression? "]" attribute-specifier-seq?')
+@glrp.rule('noptr-abstract-declarator : noptr-abstract-declarator parameters-and-qualifiers')
 @glrp.rule(
-    'noptr-abstract-declarator : noptr-abstract-declarator? "[" constant-expression? "]" attribute-specifier-seq?'
+    'noptr-abstract-declarator : noptr-abstract-declarator "[" constant-expression? "]" attribute-specifier-seq?'
 )
 @glrp.rule('noptr-abstract-declarator :  [split]"(" ptr-abstract-declarator ")"')
 @cxx98
@@ -104,7 +99,7 @@ def abstract_pack_declarator(self, p):
 @glrp.rule(
     'noptr-abstract-pack-declarator : noptr-abstract-pack-declarator "[" constant-expression? "]" attribute-specifier-seq?'
 )
-@glrp.rule('noptr-abstract-pack-declarator : "..."')
+@glrp.rule('noptr-abstract-pack-declarator : [split]"..."')
 @cxx11
 def noptr_abstract_pack_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> None
