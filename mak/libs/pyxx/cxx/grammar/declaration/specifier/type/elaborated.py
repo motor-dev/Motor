@@ -15,13 +15,17 @@ from motor_typing import TYPE_CHECKING
 
 
 # TODO: attribute-specifier-seq? ->  ♦
-@glrp.rule('elaborated-type-specifier[split] : class-key attribute-specifier-seq? "identifier"')
 @glrp.rule(
-    'elaborated-type-specifier[split] : class-key attribute-specifier-seq? nested-name-specifier "template"? "identifier"'
+    'elaborated-type-specifier[split] : attribute-specifier-seq? class-key attribute-specifier-seq? "identifier"'
 )
-@glrp.rule('elaborated-type-specifier[split] : class-key attribute-specifier-seq? simple-template-id')
 @glrp.rule(
-    'elaborated-type-specifier[split] : class-key attribute-specifier-seq? nested-name-specifier "template"?  simple-template-id'
+    'elaborated-type-specifier[split] : attribute-specifier-seq? class-key attribute-specifier-seq? nested-name-specifier "template"? "identifier"'
+)
+@glrp.rule(
+    'elaborated-type-specifier[split] : attribute-specifier-seq? class-key attribute-specifier-seq? simple-template-id'
+)
+@glrp.rule(
+    'elaborated-type-specifier[split] : attribute-specifier-seq? class-key attribute-specifier-seq? nested-name-specifier "template"?  simple-template-id'
 )
 @glrp.rule('elaborated-type-specifier : elaborated-enum-specifier')
 @cxx98

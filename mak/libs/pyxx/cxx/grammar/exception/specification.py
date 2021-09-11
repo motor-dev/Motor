@@ -35,7 +35,6 @@ def exception_specification_opt_until_cxx20(self, p):
 
 
 @glrp.rule('exception-specification? : noexcept-specification')
-@glrp.rule('exception-specification? : ')
 @cxx11
 def exception_specification_opt_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -67,7 +66,7 @@ def type_id_list_until_cxx17(self, p):
     pass
 
 
-@glrp.rule('noexcept-specification : "noexcept"  "(" constant-expression ")"')
+@glrp.rule('noexcept-specification : "noexcept"  [prec:left,0]"(" constant-expression ")"')
 @glrp.rule('noexcept-specification : "noexcept" ')
 @cxx11
 def noexcept_specifier_cxx11(self, p):

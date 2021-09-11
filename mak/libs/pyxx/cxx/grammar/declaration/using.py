@@ -34,7 +34,7 @@ def using_declaration_until_cxx17(self, p):
 
 
 # TODO:attribute-specifier-seq? empty
-@glrp.rule('using-declaration : "using" using-declarator-list ";"')
+@glrp.rule('using-declaration : attribute-specifier-seq? "using" using-declarator-list ";"')
 @cxx17
 def using_declaration_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -49,7 +49,7 @@ def using_declarator_list_cxx17(self, p):
     pass
 
 
-@glrp.rule('using-declarator : "typename"? nested-name-specifier unqualified-id')
+@glrp.rule('using-declarator : "typename"? nested-name-specifier template? unqualified-id')
 @cxx17
 def using_declarator_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> None

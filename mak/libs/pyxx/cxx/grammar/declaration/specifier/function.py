@@ -28,7 +28,7 @@ def explicit_specifier(self, p):
     pass
 
 
-@glrp.rule('explicit-specifier : "explicit" "(" constant-expression ")"')
+@glrp.rule('explicit-specifier : "explicit" [prec:left,1]"(" constant-expression ")"')
 @cxx20
 def explicit_specifier_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None

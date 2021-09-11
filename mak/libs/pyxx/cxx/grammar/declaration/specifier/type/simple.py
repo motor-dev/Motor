@@ -39,17 +39,17 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('simple-type-specifier[split] : template-name')
 # TODO: template? not allowed
 @glrp.rule('simple-type-specifier[split] : nested-name-specifier "template"? template-name')
-@glrp.rule('simple-type-specifier : "char"')
-@glrp.rule('simple-type-specifier : "wchar_t"')
-@glrp.rule('simple-type-specifier : "bool"')
-@glrp.rule('simple-type-specifier : "short"')
-@glrp.rule('simple-type-specifier : "int"')
-@glrp.rule('simple-type-specifier : "long"')
-@glrp.rule('simple-type-specifier : "signed"')
-@glrp.rule('simple-type-specifier : "unsigned"')
-@glrp.rule('simple-type-specifier : "float"')
-@glrp.rule('simple-type-specifier : "double"')
-@glrp.rule('simple-type-specifier : "void"')
+@glrp.rule('simple-type-specifier : [prec:left,1]"char"')
+@glrp.rule('simple-type-specifier : [prec:left,1]"wchar_t"')
+@glrp.rule('simple-type-specifier : [prec:left,1]"bool"')
+@glrp.rule('simple-type-specifier : [prec:left,1]"short"')
+@glrp.rule('simple-type-specifier : [prec:left,1]"int"')
+@glrp.rule('simple-type-specifier : [prec:left,1]"long"')
+@glrp.rule('simple-type-specifier : [prec:left,1]"signed"')
+@glrp.rule('simple-type-specifier : [prec:left,1]"unsigned"')
+@glrp.rule('simple-type-specifier : [prec:left,1]"float"')
+@glrp.rule('simple-type-specifier : [prec:left,1]"double"')
+@glrp.rule('simple-type-specifier : [prec:left,1]"void"')
 @cxx98
 def simple_type_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -58,15 +58,15 @@ def simple_type_specifier(self, p):
 
 @glrp.rule('simple-type-specifier : decltype-specifier')
 @glrp.rule('simple-type-specifier : placeholder-type-specifier')
-@glrp.rule('simple-type-specifier : "char16_t"')
-@glrp.rule('simple-type-specifier : "char32_t"')
+@glrp.rule('simple-type-specifier : [prec:left,1]"char16_t"')
+@glrp.rule('simple-type-specifier : [prec:left,1]"char32_t"')
 @cxx11
 def simple_type_specifier_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('simple-type-specifier : "char8_t"')
+@glrp.rule('simple-type-specifier : [prec:left,1]"char8_t"')
 @cxx20
 def simple_type_specifier_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None

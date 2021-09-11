@@ -94,15 +94,22 @@ def initializer_clause(self, p):
     pass
 
 
-@glrp.rule('braced-init-list : "{" initializer-list ","? "}"')
-@glrp.rule('braced-init-list : "{"  "}"')
+@glrp.rule('braced-init-list : braced-init-list-begin "{" initializer-list ","? "}"')
+@glrp.rule('braced-init-list : braced-init-list-begin "{"  "}"')
 @cxx98
 def braced_init_list(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('braced-init-list : "{" designated-initializer-list ","? "}"')
+@glrp.rule('braced-init-list-begin : [split]')
+@cxx98
+def braced_init_list_begin(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('braced-init-list : braced-init-list-begin "{" designated-initializer-list ","? "}"')
 @cxx20
 def braced_init_list_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None

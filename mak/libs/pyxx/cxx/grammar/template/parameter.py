@@ -54,7 +54,8 @@ def type_parameter_cxx11(self, p):
 
 
 # TODO: attribute-specifier-seq? not allowed
-@glrp.rule('type-parameter : attribute-specifier-seq? type-constraint "..."? "identifier"?')
+@glrp.rule('type-parameter : attribute-specifier-seq? type-constraint "identifier"?')
+@glrp.rule('type-parameter : attribute-specifier-seq? type-constraint "..." "identifier"?')
 @glrp.rule('type-parameter : attribute-specifier-seq? type-constraint "identifier"? "=" type-id')
 @cxx20
 def type_parameter_cxx20(self, p):
@@ -64,7 +65,7 @@ def type_parameter_cxx20(self, p):
 
 #@glrp.rule('type-parameter-key[split] : "class"')
 # TODO: only class allowed
-@glrp.rule('type-parameter-key[split] : class-key')
+@glrp.rule('type-parameter-key[split] : attribute-specifier-seq? class-key')
 @glrp.rule('type-parameter-key[split] : "typename"')
 @cxx98
 def type_parameter_key(self, p):
@@ -72,8 +73,11 @@ def type_parameter_key(self, p):
     pass
 
 
-@glrp.rule('type-constraint : nested-name-specifier? concept-name')
-@glrp.rule('type-constraint : nested-name-specifier? concept-name "<" template-argument-list? ">"')
+@glrp.rule('type-constraint : concept-name')
+@glrp.rule('type-constraint : concept-name "<" template-argument-list? ">"')
+# TODO: template not allowed
+@glrp.rule('type-constraint : nested-name-specifier template? concept-name')
+@glrp.rule('type-constraint : nested-name-specifier template? concept-name "<" template-argument-list? ">"')
 @cxx20
 def type_constraint_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None

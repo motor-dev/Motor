@@ -552,8 +552,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     all_items += items
                     for item in items:
                         if item._precedence is not None:
-                            precedence_set = True
                             if item._precedence[1] > precedence:
+                                precedence_set = True
                                 precedence = item._precedence[1]
                                 associativity = item._precedence[0]
                                 assoc_error = False
@@ -562,6 +562,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                                 split = item._split
                                 item._split_use += 1
                             elif item._precedence[1] == precedence:
+                                precedence_set = True
                                 if item._precedence[0] != associativity:
                                     assoc_error = True
                                 shift_actions |= j >= 0

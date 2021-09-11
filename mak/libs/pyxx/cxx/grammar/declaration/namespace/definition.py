@@ -53,7 +53,9 @@ def namespace_definition_cxx17(self, p):
     pass
 
 
-@glrp.rule('named-namespace-definition : "namespace" attribute-specifier-seq? "identifier" "{" namespace-body "}"')
+@glrp.rule(
+    'named-namespace-definition : attribute-specifier-seq? "namespace" attribute-specifier-seq? "identifier" "{" namespace-body "}"'
+)
 @cxx98
 def named_namespace_definition(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -61,7 +63,7 @@ def named_namespace_definition(self, p):
 
 
 @glrp.rule(
-    'named-namespace-definition : "inline" "namespace" attribute-specifier-seq? "identifier" "{" namespace-body "}"'
+    'named-namespace-definition : attribute-specifier-seq? "inline" "namespace" attribute-specifier-seq? "identifier" "{" namespace-body "}"'
 )
 @cxx11
 def named_namespace_definition_cxx11(self, p):
@@ -69,22 +71,27 @@ def named_namespace_definition_cxx11(self, p):
     pass
 
 
-@glrp.rule('unnamed-namespace-definition : "namespace" attribute-specifier-seq? "{" namespace-body "}"')
+@glrp.rule(
+    'unnamed-namespace-definition : attribute-specifier-seq? "namespace" attribute-specifier-seq? "{" namespace-body "}"'
+)
 @cxx98
 def unnamed_namespace_definition(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('unnamed-namespace-definition : "inline" "namespace" attribute-specifier-seq? "{" namespace-body "}"')
+@glrp.rule(
+    'unnamed-namespace-definition : attribute-specifier-seq? "inline" "namespace" attribute-specifier-seq? "{" namespace-body "}"'
+)
 @cxx11
 def unnamed_namespace_definition_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
+# TODO: attribute-specifier-seq? not allowed (x2)
 @glrp.rule(
-    'nested-namespace-definition : "namespace" enclosing-namespace-specifier "::" "identifier" "{" namespace-body "}"'
+    'nested-namespace-definition : attribute-specifier-seq? "namespace" attribute-specifier-seq? enclosing-namespace-specifier "::" "identifier" "{" namespace-body "}"'
 )
 @cxx17
 def nested_namespace_definition_cxx17(self, p):
@@ -92,8 +99,9 @@ def nested_namespace_definition_cxx17(self, p):
     pass
 
 
+# TODO: attribute-specifier-seq? not allowed (x2)
 @glrp.rule(
-    'nested-namespace-definition : "namespace" enclosing-namespace-specifier "::" "inline" "identifier" "{" namespace-body "}"'
+    'nested-namespace-definition : attribute-specifier-seq? "namespace" attribute-specifier-seq? enclosing-namespace-specifier "::" "inline" "identifier" "{" namespace-body "}"'
 )
 @cxx20
 def nested_namespace_definition_cxx20(self, p):

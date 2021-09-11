@@ -76,8 +76,10 @@ def simple_capture_cxx11(self, p):
     pass
 
 
-@glrp.rule('init-capture : "..."? "identifier" initializer')
-@glrp.rule('init-capture : "&" "..."? "identifier" initializer')
+@glrp.rule('init-capture : "identifier" initializer')
+@glrp.rule('init-capture : "..." "identifier" initializer')
+@glrp.rule('init-capture : "&" "identifier" initializer')
+@glrp.rule('init-capture : "&" "..." "identifier" initializer')
 @cxx11
 def init_capture_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
