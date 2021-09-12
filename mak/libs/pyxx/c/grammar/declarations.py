@@ -193,8 +193,9 @@ from motor_typing import TYPE_CHECKING
 
 
 @c89
-@glrp.rule('declaration : declaration-specifiers init-declarator-list? ";"')
-@glrp.rule('declaration : attribute-specifier-sequence declaration-specifiers init-declarator-list ";"')
+#@glrp.rule('declaration : declaration-specifiers init-declarator-list? ";"')
+#@glrp.rule('declaration : attribute-specifier-sequence declaration-specifiers init-declarator-list ";"')
+@glrp.rule('declaration : attribute-specifier-sequence? declaration-specifiers init-declarator-list? ";"')
 @glrp.rule('declaration : static_assert-declaration attribute-declaration')
 def declaration(self, p):
     # type: (CParser, glrp.Production) -> None
@@ -202,9 +203,7 @@ def declaration(self, p):
 
 
 @c89
-#@glrp.rule('declaration-specifiers : declaration-specifier attribute-specifier-sequence?')
-@glrp.rule('declaration-specifiers : declaration-specifier')
-@glrp.rule('declaration-specifiers : declaration-specifier attribute-specifier-sequence')
+@glrp.rule('declaration-specifiers : declaration-specifier attribute-specifier-sequence?')
 @glrp.rule('declaration-specifiers : declaration-specifier declaration-specifiers')
 def declaration_specifiers(self, p):
     # type: (CParser, glrp.Production) -> None
@@ -229,6 +228,15 @@ def init_declarator_list(self, p):
 
 
 @c89
+@glrp.rule('init-declarator-list? : init-declarator')
+@glrp.rule('init-declarator-list? : init-declarator-list "," init-declarator')
+@glrp.rule('init-declarator-list? : ')
+def init_declarator_list_opt(self, p):
+    # type: (CParser, glrp.Production) -> None
+    pass
+
+
+@c89
 @glrp.rule('init-declarator : declarator')
 @glrp.rule('init-declarator : declarator "=" initializer')
 def init_declarator(self, p):
@@ -237,7 +245,7 @@ def init_declarator(self, p):
 
 
 @c89
-@glrp.rule('attribute-declaration : attribute-specifier-sequence ";"')
+@glrp.rule('attribute-declaration : attribute-specifier-sequence? ";"')
 def attribute_declaration(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
@@ -314,8 +322,7 @@ def member_declaration(self, p):
 
 
 @c89
-@glrp.rule('specifier-qualifier-list : type-specifier-qualifier')
-@glrp.rule('specifier-qualifier-list : type-specifier-qualifier attribute-specifier-sequence')
+@glrp.rule('specifier-qualifier-list : type-specifier-qualifier attribute-specifier-sequence?')
 @glrp.rule('specifier-qualifier-list : type-specifier-qualifier specifier-qualifier-list')
 def specifier_qualifier_list(self, p):
     # type: (CParser, glrp.Production) -> None
@@ -340,6 +347,15 @@ def member_declarator_list(self, p):
 
 
 @c89
+@glrp.rule('member-declarator-list? : member-declarator')
+@glrp.rule('member-declarator-list? : member-declarator-list "," member-declarator')
+@glrp.rule('member-declarator-list? : ')
+def member_declarator_list_opt(self, p):
+    # type: (CParser, glrp.Production) -> None
+    pass
+
+
+@c89
 @glrp.rule('member-declarator : declarator')
 @glrp.rule('member-declarator : declarator? ":" constant-expression')
 def member_declarator(self, p):
@@ -350,7 +366,8 @@ def member_declarator(self, p):
 @c89
 @glrp.rule('enum-specifier : "enum" attribute-specifier-sequence? "identifier"? "{" enumerator-list "}"')
 @glrp.rule('enum-specifier : "enum" attribute-specifier-sequence? "identifier"? "{" enumerator-list "," "}"')
-@glrp.rule('enum-specifier : "enum" "identifier"')
+# TODO: attribute-specifier-sequence? not allowed
+@glrp.rule('enum-specifier : "enum" attribute-specifier-sequence? "identifier"')
 def enum_specifier(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
@@ -413,10 +430,16 @@ def declarator(self, p):
 
 
 @c89
-#@glrp.rule('direct-declarator : identifier attribute-specifier-sequence?')
-@glrp.rule('direct-declarator : identifier')
-@glrp.rule('direct-declarator : identifier attribute-specifier-sequence')
-@glrp.rule('direct-declarator : "(" declarator ")"')
+@glrp.rule('declarator? : pointer? direct-declarator')
+@glrp.rule('declarator? :')
+def declarator_opt(self, p):
+    # type: (CParser, glrp.Production) -> None
+    pass
+
+
+@c89
+@glrp.rule('direct-declarator : identifier attribute-specifier-sequence?')
+@glrp.rule('direct-declarator : [split]"(" declarator ")"')
 @glrp.rule('direct-declarator : array-declarator attribute-specifier-sequence?')
 @glrp.rule('direct-declarator : function-declarator attribute-specifier-sequence?')
 def direct_declarator(self, p):
@@ -425,10 +448,13 @@ def direct_declarator(self, p):
 
 
 @c89
-@glrp.rule('array-declarator : direct-declarator "[" type-qualifier-list? assignment-expression? "]"')
-@glrp.rule('array-declarator : direct-declarator "[" static type-qualifier-list? assignment-expression "]"')
+@glrp.rule('array-declarator : direct-declarator "[" assignment-expression? "]"')
+@glrp.rule('array-declarator : direct-declarator "[" static assignment-expression "]"')
+@glrp.rule('array-declarator : direct-declarator "[" type-qualifier-list assignment-expression? "]"')
+@glrp.rule('array-declarator : direct-declarator "[" static type-qualifier-list assignment-expression "]"')
 @glrp.rule('array-declarator : direct-declarator "[" type-qualifier-list static assignment-expression "]"')
-@glrp.rule('array-declarator : direct-declarator "[" type-qualifier-list? "*" "]"')
+@glrp.rule('array-declarator : direct-declarator "[" "*" "]"')
+@glrp.rule('array-declarator : direct-declarator "[" type-qualifier-list "*" "]"')
 def array_declarator(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
@@ -442,9 +468,22 @@ def function_declarator(self, p):
 
 
 @c89
-@glrp.rule('pointer : "*" attribute-specifier-sequence? type-qualifier-list?')
-@glrp.rule('pointer : "*" attribute-specifier-sequence? type-qualifier-list? pointer')
+@glrp.rule('pointer : "*" attribute-specifier-sequence?')
+@glrp.rule('pointer : "*" attribute-specifier-sequence? pointer')
+@glrp.rule('pointer : "*" attribute-specifier-sequence? type-qualifier-list')
+@glrp.rule('pointer : "*" attribute-specifier-sequence? type-qualifier-list pointer')
 def pointer(self, p):
+    # type: (CParser, glrp.Production) -> None
+    pass
+
+
+@c89
+@glrp.rule('pointer? : "*" attribute-specifier-sequence?')
+@glrp.rule('pointer? : "*" attribute-specifier-sequence? pointer')
+@glrp.rule('pointer? : "*" attribute-specifier-sequence? type-qualifier-list')
+@glrp.rule('pointer? : "*" attribute-specifier-sequence? type-qualifier-list pointer')
+@glrp.rule('pointer? : ')
+def pointer_opt(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
 
@@ -458,8 +497,9 @@ def type_qualifier_list(self, p):
 
 
 @c89
-@glrp.rule('parameter-type-list : parameter-list')
-@glrp.rule('parameter-type-list : parameter-list "," "..."')
+@glrp.rule('parameter-type-list? : parameter-list')
+@glrp.rule('parameter-type-list? : parameter-list "," "..."')
+@glrp.rule('parameter-type-list? : ')
 def parameter_type_list(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
@@ -493,16 +533,23 @@ def type_name(self, p):
 
 @c89
 @glrp.rule('abstract-declarator : pointer')
-#@glrp.rule('abstract-declarator : pointer? direct-abstract-declarator')
-@glrp.rule('abstract-declarator : direct-abstract-declarator')
-@glrp.rule('abstract-declarator : pointer direct-abstract-declarator')
+@glrp.rule('abstract-declarator : pointer? direct-abstract-declarator')
 def abstract_declarator(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
 
 
 @c89
-@glrp.rule('direct-abstract-declarator : "(" abstract-declarator ")"')
+@glrp.rule('abstract-declarator? : pointer')
+@glrp.rule('abstract-declarator? : pointer? direct-abstract-declarator')
+@glrp.rule('abstract-declarator? : ')
+def abstract_declarator_opt(self, p):
+    # type: (CParser, glrp.Production) -> None
+    pass
+
+
+@c89
+@glrp.rule('direct-abstract-declarator : [split]"(" abstract-declarator ")"')
 @glrp.rule('direct-abstract-declarator : array-abstract-declarator attribute-specifier-sequence?')
 @glrp.rule('direct-abstract-declarator : function-abstract-declarator attribute-specifier-sequence?')
 def direct_abstract_declarator(self, p):
@@ -511,11 +558,21 @@ def direct_abstract_declarator(self, p):
 
 
 @c89
+@glrp.rule('direct-abstract-declarator? : [split]"(" abstract-declarator ")"')
+@glrp.rule('direct-abstract-declarator? : array-abstract-declarator attribute-specifier-sequence?')
+@glrp.rule('direct-abstract-declarator? : function-abstract-declarator attribute-specifier-sequence?')
+@glrp.rule('direct-abstract-declarator? : [split]')
+def direct_abstract_declarator_opt(self, p):
+    # type: (CParser, glrp.Production) -> None
+    pass
+
+
+@c89
+@glrp.rule('array-abstract-declarator : direct-abstract-declarator? "[" assignment-expression? "]"')
+@glrp.rule('array-abstract-declarator : direct-abstract-declarator? "[" "static" assignment-expression "]"')
+@glrp.rule('array-abstract-declarator : direct-abstract-declarator? "[" type-qualifier-list assignment-expression? "]"')
 @glrp.rule(
-    'array-abstract-declarator : direct-abstract-declarator? "[" type-qualifier-list? assignment-expression? "]"'
-)
-@glrp.rule(
-    'array-abstract-declarator : direct-abstract-declarator? "[" "static" type-qualifier-list? assignment-expression "]"'
+    'array-abstract-declarator : direct-abstract-declarator? "[" "static" type-qualifier-list assignment-expression "]"'
 )
 @glrp.rule(
     'array-abstract-declarator : direct-abstract-declarator? "[" type-qualifier-list "static" assignment-expression "]"'
@@ -534,7 +591,7 @@ def function_abstract_declarator(self, p):
 
 
 @c89
-@glrp.rule('typedef-name : "identifier"')
+@glrp.rule('typedef-name[split] : [split]"identifier"')
 def typedef_name(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
@@ -558,8 +615,9 @@ def initializer_list(self, p):
 
 
 @c89
-@glrp.rule('designation : designator-list "="')
-def designation(self, p):
+@glrp.rule('designation? : designator-list "="')
+@glrp.rule('designation? : ')
+def designation_opt(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
 
@@ -589,7 +647,8 @@ def static_assert_declaration(self, p):
 
 
 @c89
-@glrp.rule('attribute-specifier-sequence : attribute-specifier-sequence? attribute-specifier')
+@glrp.rule('attribute-specifier-sequence? : attribute-specifier-sequence? attribute-specifier')
+@glrp.rule('attribute-specifier-sequence?[split] : ')
 def attribute_specifier_sequence(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
@@ -611,8 +670,9 @@ def attribute_list(self, p):
 
 
 @c89
-@glrp.rule('attribute : attribute-token attribute-argument-clause?')
-def attribute(self, p):
+@glrp.rule('attribute? : attribute-token attribute-argument-clause?')
+@glrp.rule('attribute? : ')
+def attribute_opt(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
 
@@ -647,15 +707,16 @@ def attribute_prefix(self, p):
 
 
 @c89
-@glrp.rule('attribute-argument-clause : "(" balanced-token-sequence? ")"')
-def attribute_argument_clause(self, p):
+@glrp.rule('attribute-argument-clause? : "(" balanced-token-sequence? ")"')
+@glrp.rule('attribute-argument-clause? : ')
+def attribute_argument_clause_opt(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
 
 
 @c89
-@glrp.rule('balanced-token-sequence : balanced-token')
-@glrp.rule('balanced-token-sequence : balanced-token-sequence balanced-token')
+@glrp.rule('balanced-token-sequence? : balanced-token-sequence? balanced-token')
+@glrp.rule('balanced-token-sequence? : ')
 def balanced_token_sequence(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
@@ -760,6 +821,14 @@ def balanced_token_sequence(self, p):
 @glrp.rule('balanced-token : "enumeration-constant"')
 @glrp.rule('balanced-token : "string-literal"')
 def balanced_token(self, p):
+    # type: (CParser, glrp.Production) -> None
+    pass
+
+
+@c89
+@glrp.rule('identifier? : "identifier"')
+@glrp.rule('identifier? : ')
+def identifier_opt(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
 

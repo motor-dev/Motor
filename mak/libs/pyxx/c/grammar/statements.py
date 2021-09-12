@@ -90,9 +90,9 @@ def compound_statement(self, p):
 
 
 @c89
-@glrp.rule('block-item-list : block-item')
-@glrp.rule('block-item-list : block-item-list block-item')
-def block_item_list(self, p):
+@glrp.rule('block-item-list? : block-item-list? block-item')
+@glrp.rule('block-item-list? : ')
+def block_item_list_opt(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
 
@@ -107,8 +107,9 @@ def block_item(self, p):
 
 
 @c89
-@glrp.rule('expression-statement : expression? ";"')
-@glrp.rule('expression-statement : attribute-specifier-sequence expression ";"')
+#@glrp.rule('expression-statement : expression? ";"')
+#@glrp.rule('expression-statement : attribute-specifier-sequence expression ";"')
+@glrp.rule('expression-statement : attribute-specifier-sequence? expression? ";"')
 def expression_statement(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
@@ -126,7 +127,9 @@ def selection_statement(self, p):
 @c89
 @glrp.rule('iteration-statement : "while" "(" expression ")" statement')
 @glrp.rule('iteration-statement : "do" statement "while" "(" expression ")" ";"')
-@glrp.rule('iteration-statement : "for" "(" expression? ";" expression? ";" expression? ")" statement')
+@glrp.rule(
+    'iteration-statement : "for" "(" attribute-specifier-sequence? expression? ";" expression? ";" expression? ")" statement'
+)
 @glrp.rule('iteration-statement : "for" "(" declaration expression? ";" expression? ")" statement')
 def iteration_statement(self, p):
     # type: (CParser, glrp.Production) -> None
