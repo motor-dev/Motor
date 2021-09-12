@@ -98,7 +98,7 @@ from motor_typing import TYPE_CHECKING
 
 
 @c89
-@glrp.rule('primary-expression : "identifier"')
+@glrp.rule('primary-expression[split] : "identifier"')
 @glrp.rule('primary-expression : "integer-constant"')
 @glrp.rule('primary-expression : "floating-constant"')
 @glrp.rule('primary-expression : "character-constant"')
@@ -153,6 +153,15 @@ def postfix_expression(self, p):
 @glrp.rule('argument-expression-list : assignment-expression')
 @glrp.rule('argument-expression-list : argument-expression-list "," assignment-expression')
 def argument_expression_list(self, p):
+    # type: (CParser, glrp.Production) -> None
+    pass
+
+
+@c89
+@glrp.rule('argument-expression-list? : assignment-expression')
+@glrp.rule('argument-expression-list? : argument-expression-list "," assignment-expression')
+@glrp.rule('argument-expression-list? : ')
+def argument_expression_list_opt(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
 
@@ -284,6 +293,15 @@ def assignment_expression(self, p):
 
 
 @c89
+@glrp.rule('assignment-expression? : conditional-expression')
+@glrp.rule('assignment-expression? : unary-expression assignment-operator assignment-expression')
+@glrp.rule('assignment-expression? : ')
+def assignment_expression_opt(self, p):
+    # type: (CParser, glrp.Production) -> None
+    pass
+
+
+@c89
 @glrp.rule('assignment-operator : "=" | "*=" | "/=" | "%=" | "+=" | "-=" | "<<=" | ">>=" | "&=" | "^=" | "|="')
 def assignment_operator(self, p):
     # type: (CParser, glrp.Production) -> None
@@ -294,6 +312,15 @@ def assignment_operator(self, p):
 @glrp.rule('expression : assignment-expression')
 @glrp.rule('expression : expression "," assignment-expression')
 def expression(self, p):
+    # type: (CParser, glrp.Production) -> None
+    pass
+
+
+@c89
+@glrp.rule('expression? : assignment-expression')
+@glrp.rule('expression? : expression "," assignment-expression')
+@glrp.rule('expression? : ')
+def expression_opt(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
 
