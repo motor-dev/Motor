@@ -65,7 +65,7 @@ def _find_common_parent(node_list):
     try:
         dominance_set = _dominance_set_cache[node_set]
     except KeyError:
-        dominance_set = LR0DominanceSet(node_list)
+        dominance_set = LR0DominanceSet(node_list, False)
         #dominance_set.print_dot()
         _dominance_set_cache[node_set] = dominance_set
     if dominance_set._best_dominator:
@@ -180,21 +180,12 @@ def _find_counterexamples(conflict_list):
     return conflict_paths
 
 
-def _find_splits(conflict_list):
-    # type: (List[Tuple[LR0Node, Optional[int]]]) -> Dict[Tuple[LR0ItemSet, int], Dict[Grammar.Rule, List[LR0Path]]]
+def _find_splits(conflict_list, name_map):
+    # type: (List[Tuple[LR0Node, Optional[int]]], List[str]) -> Dict[Tuple[LR0ItemSet, int], Dict[Grammar.Rule, List[LR0Path]]]
     result = {}    # type: Dict[Tuple[LR0ItemSet, int], Dict[Grammar.Rule, List[LR0Path]]]
-
-    #for _, paths in _find_counterexamples(conflict_list):
-    #    for node, path in paths:
-    #        try:
-    #            set_result = result[(node._item_set, 0)]
-    #        except KeyError:
-    #            result[(node._item_set, 0)] = {node._item.rule: [path]}
-    #        else:
-    #            try:
-    #                set_result[node._item.rule].append(path)
-    #            except KeyError:
-    #                set_result[node._item.rule] = [path]
+    dominance_set = LR0DominanceSet([n for n, _ in conflict_list], True)
+                   #dominance_set.print_dot(name_map)
+                   #dominance_set.print_merge_tree(name_map)
     return result
 
 
@@ -646,18 +637,6 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                         result_count += 1
                 if result_count == 0:
                     error_log.warning('unable to find counterexamples (la: %s' % name_map[a])
-                    for node, _ in counterexamples:
-                        print(node._item.to_string(name_map))
-                    #for node, _ in counterexamples:
-                    #    print(node._item.to_string(name_map))
-                    #    if node._item == node._item._last:
-                    #        for item_set, path in _consume_lookahead(node, a, name_map):
-                    #            print(' state %d:' % item_set._index)
-                    #            for line in path.to_string(name_map):
-                    #                print('    %s' % line)
-                    #            print('')
-                    #print('')
-                    #counterexamples = _find_counterexamples(conflicts)
 
                 conflict_items = frozenset(node._item for node, _ in counterexamples)
                 try:
@@ -683,7 +662,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                             splits.append((item_group[item], a))
                         else:
                             splits.append((item_group[item], None))
-                split_items = _find_splits(splits)
+                split_items = _find_splits(splits, name_map)
                 conflict_log.info('')
                 merge_action = {}  # type: Dict[Tuple[int, int], str]
 
