@@ -1,56 +1,66 @@
+from .merge_tree import MergeTree
 from motor_typing import TYPE_CHECKING
 
 
 class LR0DominanceSet(object):
-    def __init__(self, node_set):
-        # type: (List[LR0Node]) -> None
-        self._dominance_nodes = {}     # type: Dict[Tuple[str, bool], LR0DominanceNode]
+    def __init__(self, node_set, recursive):
+        # type: (List[LR0Node], bool) -> None
+        self._dominance_nodes = {}     # type: Dict[Tuple[str, Tuple[int,...]], LR0DominanceNode]
         self._map = {}                 # type: Dict[LR0Node, LR0DominanceNode]
         self._roots = []               # type: List[LR0DominanceNode]
+        self._dominators = []          # type: List[LR0DominanceNode]
         for node in node_set:
-            self._add_node(node, True)
-        self._build_dominance_graph()
+            self._add_node(node, True, recursive)
+        self._build_dominance_graph(recursive)
         states = []
         for node in node_set:
             state = self._map[node]
             if state not in states:
                 states.append(state)
-        common_dominators = set(states[0]._dominators)
-        for state in states[1:]:
-            common_dominators.intersection_update(state._dominators)
-        self._best_dominator = None    #type: Optional[LR0DominanceNode]
-        if common_dominators:
-            self._best_dominator = common_dominators.pop()
-            for dominator in common_dominators:
-                if self._best_dominator in dominator._dominators:
-                    self._best_dominator = dominator
 
-    def _add_node(self, node, is_leaf):
-        # type: (LR0Node, bool) -> None
+        self._merge_tree = MergeTree(sorted(states[0]._dominators, key=lambda x: len(x._dominators)))
+        for state in states[1:]:
+            self._merge_tree.add_branch(sorted(state._dominators, key=lambda x: len(x._dominators)))
+
+        self._best_dominator = None    #type: Optional[LR0DominanceNode]
+        tree = self._merge_tree
+        while len(tree._children) == 1:
+            tree = tree._children[0]
+        self._best_dominator = tree._node
+
+    def _add_node(self, node, is_leaf, recursive):
+        # type: (LR0Node, bool, bool) -> None
         if node not in self._map:
-            is_root = node._item._index == 0
+            head = node._item.rule.production[:node._item._index]
             try:
-                state = self._dominance_nodes[(node._item.rule._prod_name, is_root)]
+                state = self._dominance_nodes[(node._item.rule._prod_name, head)]
                 state._nodes.append(node)
                 state._is_leaf |= is_leaf
             except KeyError:
-                state = LR0DominanceNode(len(self._dominance_nodes), node, is_leaf)
-                if is_root and state not in self._roots:
+                state = LR0DominanceNode(len(self._dominance_nodes), head, node, is_leaf)
+                if len(head) == 0 and state not in self._roots:
                     self._roots.append(state)
-                self._dominance_nodes[(node._item.rule._prod_name, is_root)] = state
+                self._dominance_nodes[(node._item.rule._prod_name, head)] = state
             self._map[node] = state
             for parent in node._direct_parents:
-                self._add_node(parent, False)
+                self._add_node(parent, False, recursive)
+            if recursive:
+                for predecessor in node._predecessors:
+                    self._add_node(predecessor, False, recursive)
         else:
             self._map[node]._is_leaf |= is_leaf
 
-    def _build_dominance_graph(self):
-        # type: () -> None
+    def _build_dominance_graph(self, recursive):
+        # type: (bool) -> None
         all_nodes = set(self._dominance_nodes.values())
         for node, dom_node in self._map.items():
             for parent in node._direct_parents:
                 if self._map[parent] not in dom_node._parents:
                     dom_node._parents.append(self._map[parent])
+            if recursive:
+                for predecessor in node._predecessors:
+                    if self._map[predecessor] not in dom_node._parents:
+                        dom_node._parents.append(self._map[predecessor])
         for node, dom_node in self._map.items():
             if dom_node._parents:
                 dom_node._dominators = all_nodes
@@ -78,35 +88,14 @@ class LR0DominanceSet(object):
                 elif dom_node._direct_dominator in dominator._dominators:
                     dom_node._direct_dominator = dominator
 
-    def print_dot(self):
-        # type: () -> None
+    def print_dot(self, name_map):
+        # type: (List[str]) -> None
         print('digraph Dominance {')
-        print('    compound = True;')
-        for (name, is_root), state in self._dominance_nodes.items():
-            print('    subgraph cluster_%d {' % state._index)
-            print('        label = "%s";' % name)
-            if state == self._best_dominator:
-                print('        style="filled";')
-                print('        color="green";')
-            elif state._is_leaf:
-                print('        style="filled";')
-                print('        color="lightgrey";')
-            elif is_root:
-                print('        style="filled";')
-                print('        color="lightblue";')
-            for node in state._nodes:
-                print('        %d[label="%s"];' % (id(node), node._item.rule._debug_str))
-            print('    }')
-        for node in self._map:
-            for node_parent in node._direct_parents:
-                print('    %d->%d[style=dotted];' % (id(node_parent), id(node)))
+        for (name, head), state in self._dominance_nodes.items():
+            print('    %d[label="%s : %s"];' % (id(state), name, ' '.join((name_map[i] for i in head))))
         for state in self._dominance_nodes.values():
             for parent in state._parents:
-                #if parent != state._direct_dominator:
-                print(
-                    '    %d->%d[ltail=cluster_%d,lhead=cluster_%d,minlen=3];' %
-                    (id(parent._nodes[0]), id(state._nodes[0]), parent._index, state._index)
-                )
+                print('    %d->%d;' % (id(parent), id(state)))
             #if state._direct_dominator:
             #    print(
             #        '    %d->%d[ltail=cluster_%d,lhead=cluster_%d,color="blue",minlen=3];' % (
@@ -118,18 +107,36 @@ class LR0DominanceSet(object):
             #    )
         print('}')
 
+    def print_merge_tree(self, name_map):
+        # type: (List[str]) -> None
+        def do_print(tree):
+            # type: (MergeTree) -> None
+            print(
+                '    %d[label="%s : %s"];' %
+                (id(tree), name_map[tree._node._symbol], ' '.join((name_map[i] for i in tree._node._head)))
+            )
+            for child in tree._children:
+                do_print(child)
+                print('    %d->%d;' % (id(tree), id(child)))
+
+        print('digraph Dominance {')
+        do_print(self._merge_tree)
+        print('}')
+
 
 class LR0DominanceNode(object):
-    def __init__(self, index, node, is_leaf):
-        # type: (int, LR0Node, bool) -> None
+    def __init__(self, index, head, node, is_leaf):
+        # type: (int, Tuple[int, ...], LR0Node, bool) -> None
         self._index = index
+        self._head = head
         self._nodes = [node]
-        self._parents = []             # type: List[LR0DominanceNode]
+        self._parents = []                          # type: List[LR0DominanceNode]
         self._dominators = set([self])
-        self._direct_dominator = None  # type: Optional[LR0DominanceNode]
+        self._direct_dominator = None               # type: Optional[LR0DominanceNode]
         self._is_leaf = is_leaf
+        self._symbol = node._item.rule._prod_symbol #type: int
 
 
 if TYPE_CHECKING:
-    from motor_typing import Dict, List, Optional, Tuple
+    from motor_typing import Any, Dict, List, Optional, Tuple
     from .lr0node import LR0Node
