@@ -24,9 +24,9 @@ class Parser1(glrp.Parser):
         # type: (glrp.Production) -> None
         pass
 
-    #@glrp.rule("B [prec:right,0][split]: a a b")
-    @glrp.rule("B [prec:right,0][split]: a b")
-    @glrp.rule("B [prec:right,0][split]: b")
+    #@glrp.rule("B [prec:right,0][split:aab]: a a b")
+    @glrp.rule("B [prec:right,0][split:ab]: a b")
+    @glrp.rule("B [prec:right,0][split:b]: b")
     def p_B(self, p):
         # type: (glrp.Production) -> None
         pass
@@ -227,7 +227,7 @@ class Parser5(glrp.Parser):
     def dash_opt(self, p):
         pass
 
-    @glrp.rule("nested_name_specifier : template_opt identifier [split]'::'")
+    @glrp.rule("nested_name_specifier : template_opt identifier [split:scope]'::'")
     def nested_name_specifier(self, p):
         pass
 
@@ -259,19 +259,19 @@ class Parser6(glrp.Parser):
         # type: (glrp.Production) -> None
         pass
 
-    @glrp.rule("expr : 'identifier'[split]")
-    @glrp.rule("expr : 'expr' [split]'[' expr? ']'")
+    @glrp.rule("expr : 'identifier'[split:expr]")
+    @glrp.rule("expr : 'expr' [split:array]'[' expr? ']'")
     @glrp.rule("expr : 'expr' annotation")
     def p_expr(self, p):
         # type: (glrp.Production) -> None
         pass
 
-    @glrp.rule("decl : 'identifier' [split]';'")
+    @glrp.rule("decl : 'identifier' [split:decl]';'")
     def p_decl(self, p):
         # type: (glrp.Production) -> None
         pass
 
-    @glrp.rule("annotation : [split]'[' '[' 'identifier' ']' ']'")
+    @glrp.rule("annotation : [split:annotation]'[' '[' 'identifier' ']' ']'")
     def p_annotation(self, p):
         # type: (glrp.Production) -> None
         pass

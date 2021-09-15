@@ -8,7 +8,7 @@ from ...parser import cxx17
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('deduction-guide : template-name "(" parameter-declaration-clause ")" "->" simple-template-id ";"')
+#@glrp.rule('deduction-guide : template-name "(" parameter-declaration-clause ")" "->" simple-template-id ";"')
 @glrp.rule(
     'deduction-guide : attribute-specifier-seq? template-name [split]"(" parameter-declaration-clause ")" "->" simple-template-id ";"'
 )

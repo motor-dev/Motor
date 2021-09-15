@@ -13,28 +13,6 @@ class LALRTable(object):
         self._goto_table = goto_table
 
 
-def _consume_lookahead(node, lookahead, name_map):
-    # type: (LR0Node, int, List[str]) -> List[Tuple[LR0ItemSet, LR0Path]]
-    queue = [(node, LR0PathItem(node._item))] # type: List[Tuple[LR0Node, LR0Path]]
-    result = []                               # type: List[Tuple[LR0ItemSet, LR0Path]]
-    seen = set()
-
-    while queue:
-        node, path = queue.pop()
-        for parent in node._direct_parents:
-            if parent in seen:
-                continue
-            seen.add(parent)
-            if lookahead in parent._item._follow:
-                result.append((node._item_set, path.derive_from(parent._item)))
-            elif -1 in parent._item._follow:
-                queue.append((parent, path.derive_from(parent._item)))
-        for predecessor in node._predecessors:
-            queue.append((predecessor, path.extend(predecessor._item)))
-
-    return result
-
-
 def _log(title, conflict_paths, out, name_map):
     # type: (Text, List[LR0Path], Logger, List[str]) -> None
     seen = set([])
@@ -180,13 +158,11 @@ def _find_counterexamples(conflict_list):
     return conflict_paths
 
 
-def _find_splits(conflict_list, name_map):
-    # type: (List[Tuple[LR0Node, Optional[int]]], List[str]) -> Dict[Tuple[LR0ItemSet, int], Dict[Grammar.Rule, List[LR0Path]]]
-    result = {}    # type: Dict[Tuple[LR0ItemSet, int], Dict[Grammar.Rule, List[LR0Path]]]
+def _find_merge_points(conflict_list, name_map):
+    # type: (List[Tuple[LR0Node, str]], List[str]) -> None
     dominance_set = LR0DominanceSet([n for n, _ in conflict_list], True)
-                   #dominance_set.print_dot(name_map)
-                   #dominance_set.print_merge_tree(name_map)
-    return result
+    #dominance_set.print_dot(name_map)
+    #dominance_set.print_merge_tree(name_map)
 
 
 def create_parser_table(productions, start_id, name_map, terminal_count, sm_log, conflict_log, error_log):
@@ -480,6 +456,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
     merge_conflict = {}        # type: Dict[FrozenSet[Grammar.Rule], List[int]]
     conflict_issues = {}       # type: Dict[FrozenSet[LR0Item], Dict[LR0Item, List[Tuple[LR0Node, LR0Path]]]]
 
+    split_seen = set() # type: FrozenSet[Tuple[LR0Item, str]]
+
     num_rr = 0
     num_sr = 0
 
@@ -550,7 +528,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                                 assoc_error = False
                                 shift_actions = j >= 0
                                 reduce_actions = j < 0
-                                split = item._split
+                                split = item._split is not None
                                 item._split_use += 1
                             elif item._precedence[1] == precedence:
                                 precedence_set = True
@@ -558,12 +536,12 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                                     assoc_error = True
                                 shift_actions |= j >= 0
                                 reduce_actions |= j < 0
-                                split &= item._split
+                                split &= item._split is not None
                                 item._split_use += 1
                         elif precedence == -1:
                             shift_actions |= j >= 0
                             reduce_actions |= j < 0
-                            split &= item._split
+                            split &= item._split is not None
                             item._split_use += 1
 
                 all_items_set = frozenset(all_items)
@@ -596,7 +574,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                             if j >= 0 and reduce_actions and associativity == 'right':
                                 conflict_log.info('  [discarded] %s', item.to_string(name_map))
                                 continue
-                        if split and not item._split:
+                        if split and item._split is None:
                             try:
                                 split_missing[item].append(st)
                             except KeyError:
@@ -650,7 +628,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     except KeyError:
                         item_conflict_node[node._item] = paths
             elif len(accepted_actions) > 1:
-                splits = []        # type: List[Tuple[LR0Node, Optional[int]]]
+                splits = []        # type: List[Tuple[LR0Node, str]]
                 sm_log.info('    %-30s split', name_map[a])
                 for j in st_action[a]:
                     items = accepted_actions[j]
@@ -659,38 +637,14 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     for item in items:
                         if j < 0:
                             sm_log.info('        reduce using rule %s', item.to_string(name_map))
-                            splits.append((item_group[item], a))
+                            splits.append((item_group[item], item._last._split))
                         else:
-                            splits.append((item_group[item], None))
-                split_items = _find_splits(splits, name_map)
+                            splits.append((item_group[item], item._last._split))
+                key = frozenset(splits)
+                if key not in split_seen:
+                    _find_merge_points(splits, name_map)
+                    split_seen.add(key)
                 conflict_log.info('')
-                merge_action = {}  # type: Dict[Tuple[int, int], str]
-
-                for (state, depth), rule_map in split_items.items():
-                    state_merge = None # type: Optional[str]
-                    state_merge_error = False
-
-                    for rule in rule_map:
-                        item = rule._item
-                        merge = item._last._merge
-                        item._last._merge_use += 1
-                        if merge is None:
-                            try:
-                                merge_missing[item].append(st)
-                            except KeyError:
-                                merge_missing[item] = [st]
-                        elif state_merge is None:
-                            state_merge = merge
-                        elif state_merge != merge:
-                            state_merge_error = True
-                    if state_merge is not None:
-                        merge_action[(state._index, depth)] = state_merge
-                    if state_merge_error:
-                        key = frozenset(rule_map)
-                        try:
-                            merge_conflict[key].append(st)
-                        except KeyError:
-                            merge_conflict[key] = [st]
 
             else:
                 for j in st_action[a]:
@@ -757,7 +711,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         for rule in production:
             item_iterator = rule._item # type: Optional[LR0Item]
             while item_iterator:
-                if item_iterator._split and item_iterator._split_use == 0:
+                if item_iterator._split is not None and item_iterator._split_use == 0:
                     error_log.warning('unused split annotation')
                     error_log.diagnostic(rule._filename, rule._lineno, item_iterator.to_string(name_map))
                 item_iterator = item_iterator._next

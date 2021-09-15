@@ -59,7 +59,7 @@ def template_id_cxx11(self, p):
     pass
 
 
-@glrp.rule('template-name[split] : [split]"identifier"')
+@glrp.rule('template-name[split:template_identifier] : [split]"identifier"')
 @cxx98
 def template_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
