@@ -40,7 +40,7 @@ from ...parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('enum-name[split] : [split]"identifier"')
+@glrp.rule('enum-name[split:enum_identifier] : [split]"identifier"')
 @cxx98
 def enum_name(self, p):
     # type: (CxxParser, glrp.Production) -> None

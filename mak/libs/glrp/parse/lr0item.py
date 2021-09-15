@@ -22,7 +22,7 @@ class LR0Item(object):
         self._follow = follow
         self._lookaheads = {}            # type: Dict[int, List[int]]
         self._precedence = None          # type: Optional[Tuple[str, int]]
-        self._split = False
+        self._split = None               # type: Optional[str]
         self._merge = None               # type: Optional[str]
         self._merge_skip = False
         self._split_use = 0
@@ -64,12 +64,13 @@ class LR0Item(object):
                         ', '.join(values), (rule._filename, rule._lineno, 0, '')
                     )
             elif annotation == "split":
-                if len(values) != 0:
+                if len(values) > 1:
                     raise SyntaxError(
-                        'incorrect annotation: split does not take any argument, got %s' % ','.join(values),
+                        'incorrect annotation: split requires one argument, got %s' % (','.join(values) if values else 'none'),
                         (rule._filename, rule._lineno, 0, '')
                     )
-                self._split = True
+                if len(values) == 1:
+                    self._split = values[0]
             elif annotation == "merge_delegate":
                 if len(values) != 0:
                     raise SyntaxError(
@@ -94,8 +95,8 @@ class LR0Item(object):
         result = ''
         if self._precedence is not None:
             result += '[prec:%s,%d]' % self._precedence
-        if self._split:
-            result += '[split]'
+        if self._split is not None:
+            result += '[split:%s]' % self._split
         return result
 
     def to_string(self, name_map):

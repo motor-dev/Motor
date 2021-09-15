@@ -18,15 +18,22 @@ class LR0DominanceSet(object):
             if state not in states:
                 states.append(state)
 
-        self._merge_tree = MergeTree(sorted(states[0]._dominators, key=lambda x: len(x._dominators)))
-        for state in states[1:]:
-            self._merge_tree.add_branch(sorted(state._dominators, key=lambda x: len(x._dominators)))
-
         self._best_dominator = None    #type: Optional[LR0DominanceNode]
-        tree = self._merge_tree
-        while len(tree._children) == 1:
-            tree = tree._children[0]
-        self._best_dominator = tree._node
+        if recursive:
+            self._merge_tree = MergeTree(sorted(states[0]._dominators, key=lambda x: len(x._dominators)))
+            for state in states[1:]:
+                self._merge_tree.add_branch(sorted(state._dominators, key=lambda x: len(x._dominators)))
+
+            tree = self._merge_tree
+            while len(tree._children) == 1:
+                tree = tree._children[0]
+            self._best_dominator = tree._node
+        else:
+            common_parents = set(states[0]._dominators)
+            for state in states[1:]:
+                common_parents.intersection_update(state._dominators)
+            if common_parents:
+                self._best_dominator = sorted(common_parents, key=lambda x: len(x._dominators))[-1]
 
     def _add_node(self, node, is_leaf, recursive):
         # type: (LR0Node, bool, bool) -> None
