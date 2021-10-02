@@ -4,9 +4,9 @@
 }
 
 .toggle .header:after {
-    content: " ▶ show result";
+    content: " + show";
 }
 
 .toggle .header.open:after {
-    content: " ▼";
+    content: " - hide";
 }
