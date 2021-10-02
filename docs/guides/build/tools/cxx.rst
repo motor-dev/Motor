@@ -894,54 +894,73 @@ In the context of a trailing return type, there are ambiguities when encounterin
 ``type`` template parameter, ``non-type`` class template parameter
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-  class-key -> class ♦ 
-  type-parameter-key -> class ♦ 
+   .. container:: toggle
 
-   reduce using rule class-key -> class ♦ 
-   ╭╴
-   │ class ♦                        identifier identifier
-   │ ╰class-key╯
-   │ ╰elaborated-type-specifier──────────────╯
-   │ ╰type-specifier─────────────────────────╯
-   │ ╰defining-type-specifier────────────────╯
-   │ ╰decl-specifier─────────────────────────╯
-   │ ╰decl-specifier-seq─────────────────────╯
-   │ ╰parameter-declaration─────────────────────────────╯
-   │ ╰template-parameter────────────────────────────────╯
-   ╰╴
-   reduce using rule type-parameter-key -> class ♦ 
-   ╭╴
-   │ class ♦              identifier
-   │ ╰type-parameter-key╯
-   │ ╰type-parameter───────────────╯
-   │ ╰template-parameter───────────╯
-   ╰╴
+      .. container:: header
+
+         ::
+
+              class-key -> class ♦ 
+              type-parameter-key -> class ♦ 
+
+      ::
+
+           reduce using rule class-key -> class ♦ 
+           ╭╴
+           │ class ♦                        identifier identifier
+           │ ╰class-key╯
+           │ ╰elaborated-type-specifier──────────────╯
+           │ ╰type-specifier─────────────────────────╯
+           │ ╰defining-type-specifier────────────────╯
+           │ ╰decl-specifier─────────────────────────╯
+           │ ╰decl-specifier-seq─────────────────────╯
+           │ ╰parameter-declaration─────────────────────────────╯
+           │ ╰template-parameter────────────────────────────────╯
+           ╰╴
+           reduce using rule type-parameter-key -> class ♦ 
+           ╭╴
+           │ class ♦              identifier
+           │ ╰type-parameter-key╯
+           │ ╰type-parameter───────────────╯
+           │ ╰template-parameter───────────╯
+           ╰╴
 
 *elaborated-enum-specifier* / *opaque-enum-declaration*
 """""""""""""""""""""""""""""""""""""""""""""""""""""""
-  enum-head-name -> identifier ♦ 
-  elaborated-enum-specifier -> enum-key identifier ♦ 
 
-    reduce using rule enum-head-name -> identifier ♦ 
-   ╭╴
-   │ enum-key identifier ♦     ;
-   │          ╰enum-head-name╯
-   │ ╰opaque-enum-declaration──╯
-   │ ╰block-declaration────────╯
-   │ ╰declaration-statement────╯
-   │ ╰statement────────────────╯
-   ╰╴
-    reduce using rule elaborated-enum-specifier -> enum-key identifier ♦ 
-   ╭╴
-   │ enum-key identifier ♦       ;
-   │ ╰elaborated-enum-specifier╯
-   │ ╰elaborated-type-specifier╯
-   │ ╰type-specifier───────────╯
-   │ ╰defining-type-specifier──╯
-   │ ╰decl-specifier───────────╯
-   │ ╰decl-specifier-seq───────╯
-   │ ╰simple-declaration─────────╯
-   │ ╰block-declaration──────────╯
-   │ ╰declaration-statement──────╯
-   │ ╰statement──────────────────╯
-   ╰╴
+
+   .. container:: toggle
+
+      .. container:: header
+
+         ::
+
+
+            enum-head-name -> identifier ♦ 
+            elaborated-enum-specifier -> enum-key identifier ♦ 
+
+      ::
+
+           reduce using rule enum-head-name -> identifier ♦ 
+           ╭╴
+           │ enum-key identifier ♦     ;
+           │          ╰enum-head-name╯
+           │ ╰opaque-enum-declaration──╯
+           │ ╰block-declaration────────╯
+           │ ╰declaration-statement────╯
+           │ ╰statement────────────────╯
+           ╰╴
+           reduce using rule elaborated-enum-specifier -> enum-key identifier ♦ 
+           ╭╴
+           │ enum-key identifier ♦       ;
+           │ ╰elaborated-enum-specifier╯
+           │ ╰elaborated-type-specifier╯
+           │ ╰type-specifier───────────╯
+           │ ╰defining-type-specifier──╯
+           │ ╰decl-specifier───────────╯
+           │ ╰decl-specifier-seq───────╯
+           │ ╰simple-declaration─────────╯
+           │ ╰block-declaration──────────╯
+           │ ╰declaration-statement──────╯
+           │ ╰statement──────────────────╯
+           ╰╴
