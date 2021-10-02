@@ -2,8 +2,8 @@ from motor_typing import TYPE_CHECKING
 
 
 class LR0Item(object):
-    def __init__(self, rule, index, next, predecessor, successors, first, follow):
-        # type: (Grammar.Rule, int, Optional[LR0Item], Optional[int], List[Grammar.Rule], Set[int], Dict[int, int]) -> None
+    def __init__(self, rule, index, next, predecessor, successors, first, follow, merge_list=[]):
+        # type: (Grammar.Rule, int, Optional[LR0Item], Optional[int], List[Grammar.Rule], Set[int], Dict[int, int], List[Tuple[str, Dict[str, None]]]) -> None
         self.rule = rule
         self.len = rule.len
         self._symbol = rule._prod_symbol # type: int
@@ -23,8 +23,7 @@ class LR0Item(object):
         self._lookaheads = {}            # type: Dict[int, List[int]]
         self._precedence = None          # type: Optional[Tuple[str, int]]
         self._split = None               # type: Optional[str]
-        self._merge = None               # type: Optional[str]
-        self._merge_skip = False
+        self._merge = merge_list
         self._split_use = 0
         self._merge_use = 0
 
@@ -66,11 +65,13 @@ class LR0Item(object):
             elif annotation == "split":
                 if len(values) > 1:
                     raise SyntaxError(
-                        'incorrect annotation: split requires one argument, got %s' % (','.join(values) if values else 'none'),
-                        (rule._filename, rule._lineno, 0, '')
+                        'incorrect annotation: split requires one argument, got %s' %
+                        (','.join(values) if values else 'none'), (rule._filename, rule._lineno, 0, '')
                     )
                 if len(values) == 1:
                     self._split = values[0]
+                else:
+                    self._split = ''
             elif annotation == "merge_delegate":
                 if len(values) != 0:
                     raise SyntaxError(
@@ -79,14 +80,6 @@ class LR0Item(object):
                     )
                 self._merge_skip = False
                 self._last._merge_skip = False
-            elif annotation == "merge":
-                if len(values) != 1:
-                    raise SyntaxError(
-                        'incorrect annotation: merge requires exactly one argument',
-                        (rule._filename, rule._lineno, 0, '')
-                    )
-                self._merge = values[0]
-                self._last._merge = values[0]
             else:
                 raise SyntaxError('unknown annotation %s' % annotation, (rule._filename, rule._lineno, 0, ''))
 

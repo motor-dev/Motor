@@ -2,6 +2,7 @@ from .lr0itemset import LR0ItemSet
 from .lr0node import LR0Node
 from .lr0path import LR0PathItem
 from .lr0dominancenode import LR0DominanceSet
+from .merge_tree import MergeTree
 from motor_typing import TYPE_CHECKING
 import sys
 
@@ -11,6 +12,14 @@ class LALRTable(object):
         # type: (List[Dict[int, Tuple[int,...]]], List[Dict[int, int]]) -> None
         self._action_table = action_table
         self._goto_table = goto_table
+
+
+def _find_merge_points(conflict_list, name_map):
+    # type: (List[Tuple[LR0Node, str]], List[str]) -> None
+    #dominance_set = MergeTree(conflict_list)
+    #dominance_set.print_dot(name_map)
+    #dominance_set.print_merge_tree(name_map)
+    pass
 
 
 def _log(title, conflict_paths, out, name_map):
@@ -43,7 +52,7 @@ def _find_common_parent(node_list):
     try:
         dominance_set = _dominance_set_cache[node_set]
     except KeyError:
-        dominance_set = LR0DominanceSet(node_list, False)
+        dominance_set = LR0DominanceSet(node_list)
         #dominance_set.print_dot()
         _dominance_set_cache[node_set] = dominance_set
     if dominance_set._best_dominator:
@@ -156,13 +165,6 @@ def _find_counterexamples(conflict_list):
                         conflict_paths[index][1].extend(tmp_paths)
 
     return conflict_paths
-
-
-def _find_merge_points(conflict_list, name_map):
-    # type: (List[Tuple[LR0Node, str]], List[str]) -> None
-    dominance_set = LR0DominanceSet([n for n, _ in conflict_list], True)
-    #dominance_set.print_dot(name_map)
-    #dominance_set.print_merge_tree(name_map)
 
 
 def create_parser_table(productions, start_id, name_map, terminal_count, sm_log, conflict_log, error_log):
@@ -456,7 +458,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
     merge_conflict = {}        # type: Dict[FrozenSet[Grammar.Rule], List[int]]
     conflict_issues = {}       # type: Dict[FrozenSet[LR0Item], Dict[LR0Item, List[Tuple[LR0Node, LR0Path]]]]
 
-    split_seen = set() # type: FrozenSet[Tuple[LR0Item, str]]
+    split_seen = set()     # type: Set[FrozenSet[Tuple[LR0Node, str]]]
 
     num_rr = 0
     num_sr = 0
@@ -628,18 +630,19 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     except KeyError:
                         item_conflict_node[node._item] = paths
             elif len(accepted_actions) > 1:
-                splits = []        # type: List[Tuple[LR0Node, str]]
+                splits = []    # type: List[Tuple[LR0Node, str]]
                 sm_log.info('    %-30s split', name_map[a])
                 for j in st_action[a]:
                     items = accepted_actions[j]
                     if j >= 0:
                         sm_log.info('        shift and go to state %d', j)
                     for item in items:
+                        assert item._split is not None
                         if j < 0:
                             sm_log.info('        reduce using rule %s', item.to_string(name_map))
-                            splits.append((item_group[item], item._last._split))
+                            splits.append((item_group[item], item._split))
                         else:
-                            splits.append((item_group[item], item._last._split))
+                            splits.append((item_group[item], item._split))
                 key = frozenset(splits)
                 if key not in split_seen:
                     _find_merge_points(splits, name_map)

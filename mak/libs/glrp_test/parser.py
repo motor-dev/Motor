@@ -1,5 +1,5 @@
-import os
 import glrp
+from motor_typing import TYPE_CHECKING
 
 
 class Parser1(glrp.Parser):
@@ -15,6 +15,11 @@ class Parser1(glrp.Parser):
     def p_prog(self, p):
         # type: (glrp.Production) -> None
         pass
+
+    @glrp.merge('A')
+    def merged_A(self, ab, b):
+        # type: (Optional[int], Optional[int]) -> Optional[int]
+        return ab
 
     @glrp.rule("A : a B")
     @glrp.rule("A : a a B")
@@ -280,3 +285,61 @@ class Parser6(glrp.Parser):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
         glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.', mode=1)
+
+
+class Parser7(glrp.Parser):
+    class Lexer(glrp.Lexer):
+        @glrp.token(r'identifier', 'identifier')
+        @glrp.token(r'\(', '(')
+        @glrp.token(r'\)', ')')
+        def tok(self, token):
+            # type: (glrp.Token) -> glrp.Token
+            return token
+
+    @glrp.rule("prog : type-id declarator")
+    @glrp.rule("prog : type-id abstract-declarator")
+    def p_prog(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    @glrp.merge('type-id')
+    def merge_type_id(self, end_type_id, continue_type_id):
+        print('merge')
+        return end_type_id
+
+    @glrp.rule('type-id : type-specifier-seq [split:end_type_id]')
+    def p_type_id(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    @glrp.rule("type-specifier-seq : type-specifier-seq type-specifier")
+    @glrp.rule("type-specifier-seq : type-specifier")
+    def p_type_specifier_seq(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    @glrp.rule("type-specifier : [split:continue_type_id] identifier")
+    def p_type_specifier(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    @glrp.rule("declarator: identifier")
+    @glrp.rule("declarator: '(' declarator ')'")
+    def p_declarator(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    @glrp.rule("abstract-declarator : ")
+    @glrp.rule("abstract-declarator : '(' ')'")
+    def p_abstract_declarator(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    def __init__(self):
+        # type: ()->None
+        self.lexer = self.__class__.Lexer()
+        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.', mode=1)
+
+
+if TYPE_CHECKING:
+    from typing import Optional
