@@ -486,11 +486,13 @@ The grammar conflict is resolved by prioritizing the shift.
             │ ╰postfix-expression─────────────────────────────────────────╯
             ╰╴
 
+
    .. container:: toggle
 
       .. container:: header
 
          ::
+
             overloadable-operator -> delete ♦ [ ]
             overloadable-operator -> delete ♦ 
 
