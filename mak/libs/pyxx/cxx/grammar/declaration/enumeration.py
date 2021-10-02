@@ -81,15 +81,15 @@ def opaque_enum_declaration_cxx11(self, p):
     pass
 
 
-@glrp.rule('enum-key : [prec:left,1]"enum"')
+@glrp.rule('enum-key : "enum"')
 @cxx98
 def enum_key(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('enum-key : [prec:left,1]"enum" "class"')
-@glrp.rule('enum-key : [prec:left,1]"enum" "struct"')
+@glrp.rule('enum-key : "enum" "class"')
+@glrp.rule('enum-key : "enum" "struct"')
 @cxx11
 def enum_key_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None

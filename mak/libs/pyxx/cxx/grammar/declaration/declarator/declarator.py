@@ -125,8 +125,8 @@ def cv_qualifier_seq_opt(self, p):
     pass
 
 
-@glrp.rule('cv-qualifier : [prec:left,1]"const"')
-@glrp.rule('cv-qualifier : [prec:left,1]"volatile"')
+@glrp.rule('cv-qualifier : "const"')
+@glrp.rule('cv-qualifier : "volatile"')
 @cxx98
 def cv_qualifier(self, p):
     # type: (CxxParser, glrp.Production) -> None

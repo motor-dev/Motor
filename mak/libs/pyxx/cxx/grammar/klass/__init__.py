@@ -79,9 +79,9 @@ def class_virt_specifier_cxx11(self, p):
     pass
 
 
-@glrp.rule('class-key : [prec:left,1]"class"')
-@glrp.rule('class-key : [prec:left,1]"struct"')
-@glrp.rule('class-key : [prec:left,1]"union"')
+@glrp.rule('class-key : "class"')
+@glrp.rule('class-key : "struct"')
+@glrp.rule('class-key : "union"')
 @cxx98
 def class_key(self, p):
     # type: (CxxParser, glrp.Production) -> None
