@@ -41,7 +41,7 @@ def nested_name_specifier_cxx11(self, p):
     pass
 
 
-@glrp.rule('"::"? : [split]"::"')
+@glrp.rule('"::"? : "::"')
 @glrp.rule('"::"? : ')
 @cxx98
 def scope_opt(self, p):

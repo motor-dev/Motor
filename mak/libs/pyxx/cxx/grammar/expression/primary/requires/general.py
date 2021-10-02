@@ -24,9 +24,16 @@ from .....parser import cxx20
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('requires-expression : requires requirement-parameter-list? requirement-body')
+@glrp.rule('requires-expression : requires-disambiguation requires requirement-parameter-list? requirement-body')
 @cxx20
 def requires_expression_cxx20(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('requires-disambiguation : ')
+@cxx20
+def requires_disambiguation_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

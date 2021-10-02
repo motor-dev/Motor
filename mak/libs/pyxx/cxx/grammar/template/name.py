@@ -109,8 +109,8 @@ def template_argument(self, p):
 
 
 # TODO: template not allowed
-@glrp.rule('typename-specifier[split] : [prec:left,1]"typename" nested-name-specifier "template"? "identifier"')
-@glrp.rule('typename-specifier : [prec:left,1]"typename" nested-name-specifier "template"? simple-template-id')
+@glrp.rule('typename-specifier[split] : "typename" nested-name-specifier "template"? "identifier"')
+@glrp.rule('typename-specifier : "typename" nested-name-specifier "template"? simple-template-id')
 @cxx98
 def typename_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
