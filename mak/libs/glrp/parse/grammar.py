@@ -10,9 +10,10 @@ import sys
 class Grammar(object):
     class Rule(object):
         def __init__(
-            self, id, prod_symbol, prod_name, production, action, annnotation_list, filename, lineno, debug_str
+            self, id, prod_symbol, prod_name, production, action, annnotation_list, filename, lineno, debug_str,
+            merge_list
         ):
-            # type: (int, int, str, Tuple[int,...], Action, List[Tuple[str, List[str], int]], str, int, str) -> None
+            # type: (int, int, str, Tuple[int,...], Action, List[Tuple[str, List[str], int]], str, int, str, List[Tuple[str, Dict[str, None]]]) -> None
             self._id = id
             self._prod_symbol = prod_symbol
             self._prod_name = prod_name
@@ -30,7 +31,7 @@ class Grammar(object):
                     self._annotations[index][annotation] = values
                 except KeyError:
                     self._annotations[index] = {annotation: values}
-            self._item = LR0Item(self, len(production), None, predecessor, [], set([-1]), {-1: 0})
+            self._item = LR0Item(self, len(production), None, predecessor, [], set([-1]), {-1: 0}, merge_list)
             self._reduced = 0
             self._debug_str = debug_str
 
@@ -73,8 +74,8 @@ class Grammar(object):
             # type: () -> int
             return len(self._rule_list)
 
-    def __init__(self, name, rule_hash, terminals, rules, start_symbol, parser, temp_dir):
-        # type: (str, str, Dict[str, Tuple[int, bool]], List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]], str, Parser, str) -> None
+    def __init__(self, name, rule_hash, terminals, rules, merges, start_symbol, parser, temp_dir):
+        # type: (str, str, Dict[str, Tuple[int, bool]], List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, List[Tuple[str, Dict[str, None]]]], str, Parser, str) -> None
         debug_filename = os.path.join(temp_dir, name + '.txt')
         conflict_filename = os.path.join(temp_dir, name + '-Conflicts.txt')
         index = {}
@@ -101,7 +102,7 @@ class Grammar(object):
         name_map.append('<epsilon>')
 
         start_id = len(index) - 1
-        productions, rule_table = _create_productions(rules, index, stderr, name_map, terminals, start_id)
+        productions, rule_table = _create_productions(rules, merges, index, stderr, name_map, terminals, start_id)
         for prod_symbol, prod in productions.items():
             log.info(
                 '%d %s {%s}', prod_symbol, name_map[prod_symbol], ', '.join([name_map[t] for t in prod._first_list])
@@ -117,8 +118,8 @@ class Grammar(object):
         self._hash = rule_hash
 
 
-def _create_productions(rules, index, log, name_map, terminals, start_id):
-    # type: (List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, int], Logger, List[str], Dict[str, Tuple[int, bool]], int) -> Tuple[Dict[int, Grammar.Production], List[Tuple[int, Tuple[int,...], Action]]]
+def _create_productions(rules, merges, index, log, name_map, terminals, start_id):
+    # type: (List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, List[Tuple[str, Dict[str, None]]]], Dict[str, int], Logger, List[str], Dict[str, Tuple[int, bool]], int) -> Tuple[Dict[int, Grammar.Production], List[Tuple[int, Tuple[int,...], Action]]]
     rule_index = 1
     productions = {}   # type: Dict[int, Grammar.Production]
     rule_table = []
@@ -138,7 +139,7 @@ def _create_productions(rules, index, log, name_map, terminals, start_id):
             rule_table.append((prod_symbol, symbols, action))
             rule = Grammar.Rule(
                 rule_index, prod_symbol, nonterminal, symbols, action, attribute_list, filename, lineno,
-                '%s : %s' % (nonterminal, ' '.join(production))
+                '%s : %s' % (nonterminal, ' '.join(production)), merges.get(nonterminal, [])
             )
             rule_index += 1
             for s in symbols:

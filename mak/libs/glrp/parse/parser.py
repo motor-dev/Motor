@@ -4,6 +4,7 @@ from ..lex import Token
 from motor_typing import TYPE_CHECKING, TypeVar
 from abc import abstractmethod
 import os
+import sys
 import re
 import hashlib
 import zlib
@@ -114,6 +115,8 @@ class Parser(object):
                 action = getattr(self, rule_action)
                 for rule_string, _, _ in getattr(action, 'rules', []):
                     h.update(rule_string.encode())
+                for merge_string in getattr(action, 'merge', []):
+                    h.update(merge_string.encode())
             if mode == LOAD_CACHE:
                 try:
                     self._grammar = self._load_table(output_directory)
@@ -133,14 +136,23 @@ class Parser(object):
 
     def _generate_table(self, rule_hash, start_symbol, temp_directory, output_directory):
         # type: (str, str, str, str) -> Grammar
-        rules = []     # type: List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]]
+        rules = []                                               # type: List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]]
+        merges = {}                                              # type: Dict[str, List[Tuple[str, Dict[str, None]]]]
         for rule_action in dir(self):
             action = getattr(self, rule_action)
             for rule_string, filename, lineno in getattr(action, 'rules', []):
                 rules += _parse_rule(rule_string, rule_action, filename, lineno)
+            signature = getattr(action, 'merge_signature', None) # type: Optional[Dict[str, None]]
+            if signature is not None:
+                for symbol in getattr(action, 'merge', []):
+                    try:
+                        merges[symbol].append((rule_action, signature))
+                    except KeyError:
+                        merges[symbol] = [(rule_action, signature)]
 
         grammar = Grammar(
-            self.__class__.__name__, rule_hash, self._lexer._terminals, rules, start_symbol, self, temp_directory
+            self.__class__.__name__, rule_hash, self._lexer._terminals, rules, merges, start_symbol, self,
+            temp_directory
         )
         with open(os.path.join(output_directory, self.__class__.__name__ + '.tbl'), 'wb') as table_file:
             table_file.write(base64.b64encode(zlib.compress(pickle.dumps(grammar, protocol=0), 9)))
@@ -152,7 +164,8 @@ class Parser(object):
 
         s = Parser.Stack([])
         for token in self._lexer.token():
-            s.shift(token)
+            pass
+            #s.p(token)
 
     def accept(self, p):
         # type: (Production) -> None
@@ -262,6 +275,33 @@ def _parse_rule(rule_string, action, filename, lineno):
 T = TypeVar('T', bound=Parser)
 
 
+def merge(rule_name):
+    # type: (str) -> Callable[[Callable[..., int]], Callable[..., int]]
+    def attach(method):
+        # type: (Callable[..., int]) -> Callable[..., int]
+        if not hasattr(method, 'merge'):
+            setattr(method, 'merge', [])
+
+        code = method.__code__
+
+        if sys.version_info >= (3, 0):
+            if code.co_posonlyargcount > 0:
+                raise SyntaxError('Invalid merge signature', (code.co_filename, code.co_firstlineno, 0, ''))
+            if code.co_kwonlyargcount > 0:
+                raise SyntaxError('Invalid merge signature', (code.co_filename, code.co_firstlineno, 0, ''))
+        if getattr(method, '__defaults__') is not None:
+            raise SyntaxError(
+                'Merge method should not have default arguments', (code.co_filename, code.co_firstlineno, 0, '')
+            )
+        argument_count = code.co_argcount
+        argument_names = code.co_varnames[1:argument_count]
+        setattr(method, 'merge_signature', dict([(a, None) for a in argument_names]))
+        getattr(method, 'merge').append(rule_name)
+        return method
+
+    return attach
+
+
 def rule(rule_string):
     # type: (str) -> Callable[[Callable[[T, Production], None]], Callable[[T, Production], None]]
     def attach(method):
@@ -276,6 +316,6 @@ def rule(rule_string):
 
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, List, Optional, Tuple, Type
+    from typing import Any, Dict, Callable, List, Optional, Tuple, Type
     from ..lex import Lexer
     from ..symbol import Symbol
