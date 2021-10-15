@@ -17,7 +17,6 @@ class Gtk3Loader : public Resource::ILoader
 {
 private:
     weak< Resource::ResourceManager > m_resourceManager;
-    Gtk3Plugin                        m_gtk3Plugin;
 
 public:
     Gtk3Loader(const Plugin::Context& pluginContext);

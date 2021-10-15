@@ -44,8 +44,9 @@ Gtk3Plugin::~Gtk3Plugin()
 
     while(m_firstPage)
     {
+        Page* next = m_firstPage->next;
         m_allocator.free(m_firstPage);
-        m_firstPage = m_firstPage->next;
+        m_firstPage = next;
     }
 }
 
@@ -79,6 +80,7 @@ void Gtk3Plugin::registerType(GType type, raw< const Meta::Class > parent)
                                                                    {0},
                                                                    0,
                                                                    0};
+    motor_info("registering GObject class %s" | cls->name);
     g_type_set_qdata(type, m_motorQuark, cls);
     raw< const Meta::Class > classPtr {cls};
     Meta::ObjectInfo*        object = new(allocate< Meta::ObjectInfo >())
@@ -122,6 +124,8 @@ void Gtk3Plugin::unregisterType(GType type)
     }
     g_free(parents);
 }
+
+static MOTOR_EXPORT Gtk3Plugin s_gtk3Plugin;
 
 }}  // namespace Motor::Gtk3
 

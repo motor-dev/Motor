@@ -11,7 +11,6 @@ namespace Motor { namespace Gtk3 {
 Gtk3Loader::Gtk3Loader(const Plugin::Context& pluginContext)
     : ILoader()
     , m_resourceManager(pluginContext.resourceManager)
-    , m_gtk3Plugin()
 {
     // m_resourceManager->attach(GObject::gObjectClass(), this);
 }
