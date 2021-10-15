@@ -1,11 +1,24 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_UI_GTK3_GPARAM_HH_
-#define MOTOR_UI_GTK3_GPARAM_HH_
+#ifndef MOTOR_UI_GTK3_GOBJECT_HH_
+#define MOTOR_UI_GTK3_GOBJECT_HH_
 /**************************************************************************************************/
+#include <motor/resource/description.meta.hh>
+
+namespace Motor {
+
+MOTOR_EXPORT raw< Meta::Class > motor_plugin_gui_gtk3_Namespace();
+
+}
 
 namespace Motor { namespace Gtk3 {
+
+class GenericObject : public Resource::Description
+{
+    published : GenericObject();
+    ~GenericObject();
+};
 
 }}  // namespace Motor::Gtk3
 

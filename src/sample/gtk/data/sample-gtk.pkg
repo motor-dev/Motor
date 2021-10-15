@@ -1,0 +1,6 @@
+load plugin.gui.gtk3 as gtk;
+
+
+application = gtk.GtkApplication
+(
+);

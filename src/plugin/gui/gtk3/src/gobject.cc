@@ -6,12 +6,4 @@
 
 namespace Motor { namespace Gtk3 {
 
-GObject::GObject() : Description()
-{
-}
-
-GObject::~GObject()
-{
-}
-
 }}  // namespace Motor::Gtk3
