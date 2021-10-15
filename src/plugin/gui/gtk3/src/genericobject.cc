@@ -2,8 +2,16 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <genum.hh>
+#include <genericobject.meta.hh>
 
 namespace Motor { namespace Gtk3 {
+
+GenericObject::GenericObject() : Description()
+{
+}
+
+GenericObject::~GenericObject()
+{
+}
 
 }}  // namespace Motor::Gtk3

@@ -175,6 +175,8 @@ def build_games(bld):
     bld.game('sample.text', ['motor', 'plugin.scripting.package', 'plugin.graphics.3d'])
     bld.game('sample.python', ['motor', 'plugin.scripting.package'])
     bld.game('sample.lua', ['motor', 'plugin.scripting.package', 'plugin.scripting.lua'])
+    if bld.env.check_gtk3 or bld.env.PROJECTS:
+        bld.game('sample.gtk', ['motor', 'plugin.scripting.package', 'plugin.gui.gtk3'])
     bld.game('help', ['motor', 'plugin.scripting.package'], path=bld.path.find_node('tool/help'))
     if Options.options.tests:
         bld.game('test.settings', ['motor'])
