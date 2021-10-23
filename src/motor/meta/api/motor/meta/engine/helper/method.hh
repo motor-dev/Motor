@@ -9,10 +9,12 @@
 namespace Motor { namespace Meta {
 
 class Value;
+struct Method;
 
 template < typename T >
-static inline Value call(Value& _this, Value* params, u32 paramCount)
+static inline Value call(raw< const Method > method, Value& _this, Value* params, u32 paramCount)
 {
+    motor_forceuse(method);
     return _this.as< const T& >()(params, paramCount);
 }
 
@@ -65,8 +67,9 @@ static inline void nulldestructor(void*)
 }
 
 template < typename T >
-static Value createPod(Value* params, u32 paramCount)
+static Value createPod(raw< const Method > method, Value* params, u32 paramCount)
 {
+    motor_forceuse(method);
     motor_forceuse(params);
     motor_forceuse(paramCount);
     motor_assert(paramCount == 0, "too many parameters to POD construction");
@@ -74,8 +77,9 @@ static Value createPod(Value* params, u32 paramCount)
 }
 
 template < typename T >
-static Value createPodCopy(Value* params, u32 paramCount)
+static Value createPodCopy(raw< const Method > method, Value* params, u32 paramCount)
 {
+    motor_forceuse(method);
     motor_forceuse(paramCount);
     motor_assert(paramCount == 1, "invalid parameter count to POD copy");
     return params[0];

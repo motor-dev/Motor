@@ -9,7 +9,7 @@
 #include <motor/meta/engine/helper/method.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
-#include <motor/meta/engine/scriptingapi.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/minitl/array.hh>
 

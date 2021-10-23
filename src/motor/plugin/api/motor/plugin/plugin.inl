@@ -6,6 +6,7 @@
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/helper/staticarray.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/value.hh>
 #include <motor/plugin/dynobjectlist.hh>
 #include <motor/plugin/hook.hh>
@@ -29,7 +30,7 @@ namespace Motor { namespace Plugin {
                                  {0, 0},                                      \
                                  {0, 0},                                      \
                                  {0},                                         \
-                                 {0},                                         \
+                                 Meta::OperatorTable::s_emptyTable,           \
                                  0,                                           \
                                  0};                                          \
         static raw< const Meta::ObjectInfo > obptr = {((ob.value = Meta::Value(&ci)), &ob)};       \

@@ -114,13 +114,14 @@ bool Object::resolveInternal(DbContext& context)
                 {
                     const Policy& policy     = policyTag.as< const Policy& >();
                     u32           errorCount = context.errorCount;
-                    m_introspectionHint      = policy.verify(context, this, callInfo, argumentThis);
-                    result                   = errorCount == context.errorCount;
+                    m_introspectionHint
+                        = policy.verify(context, this, method.first, callInfo, argumentThis);
+                    result = errorCount == context.errorCount;
                 }
                 else
                 {
-                    m_introspectionHint = ref< IntrospectionHint >::create(Arena::meta(), this,
-                                                                           callInfo, argumentThis);
+                    m_introspectionHint = ref< IntrospectionHint >::create(
+                        Arena::meta(), this, method.first, callInfo, argumentThis);
                 }
             }
             else

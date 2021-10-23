@@ -16,7 +16,7 @@ struct ObjectInfo;
 struct Property;
 struct Method;
 struct Tag;
-struct ScriptingAPI;
+struct OperatorTable;
 template < typename T >
 struct staticarray;
 struct Type;
@@ -96,7 +96,7 @@ published:
     motor_tag(Alias("?call")) raw< const Method > constructor;
 
 public:
-    raw< const ScriptingAPI > apiMethods;
+    raw< const OperatorTable > operators;
     typedef void (*CopyConstructor)(const void* source, void* destination);
     typedef void (*Destructor)(void* object);
     const CopyConstructor copyconstructor;

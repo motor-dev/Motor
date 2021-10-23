@@ -5,8 +5,8 @@
 #include <motor/meta/conversion.meta.hh>
 #include <motor/meta/engine/call.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/engine/propertyinfo.meta.hh>
-#include <motor/meta/engine/scriptingapi.hh>
 #include <context.hh>
 #include <runtime/call.hh>
 #include <runtime/error.hh>
@@ -115,8 +115,14 @@ Meta::ConversionCost calculateConversion(const LuaParameterType& type, const Met
         case LUA_TTABLE:
             if(target.metaclass->type() == Meta::ClassType_Array)
             {
+                motor_assert(target.metaclass->operators,
+                             "Array class %s does not have an operator table"
+                                 | target.metaclass->name);
+                motor_assert(target.metaclass->operators->arrayOperators,
+                             "Array class %s does not have an array operator table"
+                                 | target.metaclass->name);
                 const Meta::Type& valueType
-                    = target.metaclass->apiMethods->arrayScripting->value_type;
+                    = target.metaclass->operators->arrayOperators->value_type;
                 Meta::ConversionCost c;
                 lua_pushnil(type.state);
                 while(lua_next(type.state, index < 0 ? index - 1 : index))
@@ -270,7 +276,7 @@ int call(lua_State* state, raw< const Meta::Method > method)
             if(result.conversion < Meta::ConversionCost::s_incompatible)
             {
                 Meta::Value v
-                    = Meta::call(result, parameters, positionParameterCount,
+                    = Meta::call(method, result, parameters, positionParameterCount,
                                  parameters + positionParameterCount, keywordParameterCount);
                 freea(parameters);
                 return Context::push(state, v);
@@ -294,7 +300,7 @@ int call(lua_State* state, raw< const Meta::Method > method)
     Meta::CallInfo result = Meta::resolve(method, parameters, nargs);
     if(result.conversion < Meta::ConversionCost::s_incompatible)
     {
-        Meta::Value v = Meta::call(result, parameters, nargs);
+        Meta::Value v = Meta::call(method, result, parameters, nargs);
         freea(parameters);
         return Context::push(state, v);
     }

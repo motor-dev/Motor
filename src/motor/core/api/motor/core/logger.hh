@@ -56,6 +56,7 @@ public:
     Logger(minitl::ref< Logger > parent, const istring& name);
     ~Logger();
 
+    minitl::ref< Logger >        getChild(const istring& name);
     static minitl::ref< Logger > instance(const inamespace& name);
     static bool log(const inamespace& name, LogLevel level, const char* filename, int line,
                     const char* msg);

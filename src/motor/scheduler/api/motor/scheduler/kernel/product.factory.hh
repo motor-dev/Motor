@@ -9,6 +9,7 @@
 
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/typeinfo.hh>
 
 namespace Motor {
@@ -38,7 +39,7 @@ struct ClassID< KernelScheduler::Product< T > >
                {0, 0},
                {0, 0},
                {0},
-               {0},
+               Meta::OperatorTable::s_emptyTable,
                0,
                0};
         raw< const Meta::Class > result = {&s_class};

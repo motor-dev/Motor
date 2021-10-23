@@ -4,8 +4,8 @@
 #include <stdafx.h>
 #include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/engine/propertyinfo.meta.hh>
-#include <motor/meta/engine/scriptingapi.hh>
 #include <context.hh>
 #include <runtime/value.hh>
 
@@ -192,7 +192,12 @@ static bool convertTableToValue(lua_State* state, int index, const Meta::Type& t
 {
     if(type.metaclass->type() == Meta::ClassType_Array)
     {
-        Meta::Type   arrayType  = type.metaclass->apiMethods->arrayScripting->value_type;
+        motor_assert(type.metaclass->operators, "Array type %s does not implement operator methods"
+                                                    | type.metaclass->fullname());
+        motor_assert(type.metaclass->operators->arrayOperators,
+                     "Array type %s does not implement Array API methods"
+                         | type.metaclass->fullname());
+        Meta::Type   arrayType  = type.metaclass->operators->arrayOperators->value_type;
         u32          count      = motor_checked_numcast< u32 >(luaL_len(state, index));
         Meta::Value* parameters = (Meta::Value*)malloca(
             minitl::align(count * sizeof(Meta::Value), motor_alignof(Meta::Value)));

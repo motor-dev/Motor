@@ -3,7 +3,7 @@
 
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <motor/meta/engine/call.hh>
-#include <motor/meta/engine/scriptingapi.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <py_array.hh>
 
@@ -91,9 +91,9 @@ PyObject* PyMotorArray::stealValue(PyObject* owner, Meta::Value& value)
     raw< const Meta::Class > arrayClass = value.type().metaclass;
     new(&(static_cast< PyMotorArray* >(result))->value) Meta::Value();
     (static_cast< PyMotorArray* >(result))->value.swap(value);
-    motor_assert(arrayClass->apiMethods,
-                 "Array type %s does not implement API methods" | arrayClass->fullname());
-    motor_assert(arrayClass->apiMethods->arrayScripting,
+    motor_assert(arrayClass->operators,
+                 "Array type %s does not implement operator methods" | arrayClass->fullname());
+    motor_assert(arrayClass->operators->arrayOperators,
                  "Array type %s does not implement Array API methods" | arrayClass->fullname());
     motor_forceuse(arrayClass);
     return result;
@@ -156,7 +156,7 @@ Py_ssize_t PyMotorArray::length(PyObject* self)
     PyMotorArray*    self_ = static_cast< PyMotorArray* >(self);
     const Meta::Type t     = self_->value.type();
     motor_assert(t.metaclass->type() == Meta::ClassType_Array, "PyMotorArray expected array value");
-    return Py_ssize_t(t.metaclass->apiMethods->arrayScripting->size(self_->value));
+    return Py_ssize_t(t.metaclass->operators->arrayOperators->size(self_->value));
 }
 
 PyObject* PyMotorArray::item(PyObject* self, Py_ssize_t index)
@@ -167,9 +167,8 @@ PyObject* PyMotorArray::item(PyObject* self, Py_ssize_t index)
         u32              index_ = motor_checked_numcast< u32 >(index);
         const Meta::Type t      = self_->value.type();
         Meta::Value      v
-            = t.isConst()
-                  ? t.metaclass->apiMethods->arrayScripting->indexConst(self_->value, index_)
-                  : t.metaclass->apiMethods->arrayScripting->index(self_->value, index_);
+            = t.isConst() ? t.metaclass->operators->arrayOperators->indexConst(self_->value, index_)
+                          : t.metaclass->operators->arrayOperators->index(self_->value, index_);
         return PyMotorObject::stealValue(0, v);
     }
     else
@@ -181,9 +180,9 @@ PyObject* PyMotorArray::item(PyObject* self, Py_ssize_t index)
 
 int PyMotorArray::setItem(PyObject* self, Py_ssize_t index, PyObject* value)
 {
-    PyMotorArray*                        self_    = static_cast< PyMotorArray* >(self);
-    const Meta::Type                     t        = self_->value.type();
-    raw< const Meta::ScriptingArrayAPI > arrayApi = t.metaclass->apiMethods->arrayScripting;
+    PyMotorArray*                         self_    = static_cast< PyMotorArray* >(self);
+    const Meta::Type                      t        = self_->value.type();
+    raw< const Meta::ArrayOperatorTable > arrayApi = t.metaclass->operators->arrayOperators;
     if(t.isConst())
     {
         s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError, "instance of %s is const",

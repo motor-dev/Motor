@@ -6,10 +6,11 @@
 /**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/meta/classinfo.meta.hh>
-#include <motor/meta/engine/helper/get.hh>
+#include <motor/meta/engine/helper/getset.hh>
 #include <motor/meta/engine/helper/method.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/engine/propertyinfo.meta.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/minitl/tuple.hh>
@@ -115,13 +116,11 @@ const Meta::Method::Overload
         {0, 0},
         motor_type< minitl::tuple< T1, T2, T3, T4, T5 > >(),
         false,
-        {0, 0},
         &trampoline_method_tuple_overload_0},
        {{0},
         {5, s_method_tuple_overload_1_params},
         motor_type< minitl::tuple< T1, T2, T3, T4, T5 > >(),
         false,
-        {0, 0},
         &trampoline_method_tuple_overload_1}};
 
 template < typename T1, typename T2, typename T3, typename T4, typename T5 >
@@ -180,7 +179,7 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< minitl::tuple< T1, T2, T3, T4, T5
            /* .properties */ {5, ClassID< minitl::tuple< T1, T2, T3, T4, T5 > >::s_properties},
            /* .methods */ {1, ClassID< minitl::tuple< T1, T2, T3, T4, T5 > >::s_methods},
            /* .constructor */ {ClassID< minitl::tuple< T1, T2, T3, T4, T5 > >::s_methods},
-           /* .apiMethods */ {0},
+           /* .operators */ Meta::OperatorTable::s_emptyTable,
            /* .copyconstructor */ &Meta::wrap< minitl::tuple< T1, T2, T3, T4, T5 > >::copy,
            /* .destructor */ &Meta::wrap< minitl::tuple< T1, T2, T3, T4, T5 > >::destroy};
 

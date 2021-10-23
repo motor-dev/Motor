@@ -4,8 +4,8 @@
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/engine/propertyinfo.meta.hh>
-#include <motor/meta/engine/scriptingapi.hh>
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <py_array.hh>
 #include <py_boundmethod.hh>
@@ -629,6 +629,12 @@ Meta::ConversionCost PyMotorObject::distance(PyObject* object, const Meta::Type&
     {
         if(desiredType.metaclass->type() == Meta::ClassType_Array)
         {
+            motor_assert(desiredType.metaclass->operators,
+                         "Array type %s does not implement operator methods"
+                             | desiredType.metaclass->fullname());
+            motor_assert(desiredType.metaclass->operators->arrayOperators,
+                         "Array type %s does not implement Array API methods"
+                             | desiredType.metaclass->fullname());
             PyTuple_SizeType    size = object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS)
                                            ? s_library->m_PyList_Size
                                            : s_library->m_PyTuple_Size;
@@ -637,8 +643,8 @@ Meta::ConversionCost PyMotorObject::distance(PyObject* object, const Meta::Type&
                                            : s_library->m_PyTuple_GetItem;
             if(size(object) != 0)
             {
-                raw< const Meta::ScriptingArrayAPI > api
-                    = desiredType.metaclass->apiMethods->arrayScripting;
+                raw< const Meta::ArrayOperatorTable > api
+                    = desiredType.metaclass->operators->arrayOperators;
                 const Meta::Type& subType     = api->value_type;
                 PyObject*         firstObject = get(object, 0);
                 return distance(firstObject, subType);

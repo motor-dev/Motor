@@ -129,7 +129,7 @@ PyObject* call(raw< const Meta::Method > method, PyObject* self, PyObject* args,
                                         argInfos + selfArgCount + unnamedArgCount, namedArgCount);
     if(info.conversion < Meta::ConversionCost::s_incompatible)
     {
-        Meta::Value result = Meta::call(info, argInfos, selfArgCount + unnamedArgCount,
+        Meta::Value result = Meta::call(method, info, argInfos, selfArgCount + unnamedArgCount,
                                         argInfos + selfArgCount + unnamedArgCount, namedArgCount);
         for(u32 i = argCount; i > 0; --i)
         {

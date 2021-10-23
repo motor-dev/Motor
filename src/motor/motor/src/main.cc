@@ -51,8 +51,11 @@ protected:
 
 class ConsoleLogListener : public Motor::ILogListener
 {
+private:
+    Motor::LogLevel m_minimumLogLevel;
+
 public:
-    ConsoleLogListener()
+    ConsoleLogListener(Motor::LogLevel miniminLogLevel) : m_minimumLogLevel(miniminLogLevel)
     {
     }
     ~ConsoleLogListener()
@@ -63,45 +66,49 @@ protected:
     virtual bool log(const Motor::istring& logname, Motor::LogLevel level, const char* filename,
                      int line, const char* thread, const char* msg) const
     {
-        if(Motor::MainSettings::Log::get().enableConsoleLog)
+        if(level >= m_minimumLogLevel)
         {
-            using namespace Motor;
+            if(Motor::MainSettings::Log::get().enableConsoleLog)
+            {
+                using namespace Motor;
 #ifdef MOTOR_PLATFORM_WIN32
-            minitl::format< 1024u > message = minitl::format< 1024u >("%s(%d): %s\t(%s) %s%s")
-                                              | filename | line | logname.c_str()
-                                              | getLogLevelName(level) | msg
-                                              | (msg[strlen(msg) - 1] == '\n' ? "" : "\n");
-            OutputDebugString(message);
+                minitl::format< 1024u > message = minitl::format< 1024u >("%s(%d): %s\t(%s) %s%s")
+                                                  | filename | line | logname.c_str()
+                                                  | getLogLevelName(level) | msg
+                                                  | (msg[strlen(msg) - 1] == '\n' ? "" : "\n");
+                OutputDebugString(message);
 #    define isatty(x) 1
 #endif
-            static const char* term = Environment::getEnvironment().getEnvironmentVariable("TERM");
-            static const char* colors[]
-                = {isatty(1) && term ? "\x1b[0m" : "",   isatty(1) && term ? "\x1b[01;1m" : "",
-                   isatty(1) && term ? "\x1b[36m" : "",  isatty(1) && term ? "\x1b[32m" : "",
-                   isatty(1) && term ? "\x1b[33m" : "",  isatty(1) && term ? "\x1b[31m" : "",
-                   isatty(1) && term ? "\x1b[1;31m" : ""};
+                static const char* term
+                    = Environment::getEnvironment().getEnvironmentVariable("TERM");
+                static const char* colors[]
+                    = {isatty(1) && term ? "\x1b[0m" : "",   isatty(1) && term ? "\x1b[01;1m" : "",
+                       isatty(1) && term ? "\x1b[36m" : "",  isatty(1) && term ? "\x1b[32m" : "",
+                       isatty(1) && term ? "\x1b[33m" : "",  isatty(1) && term ? "\x1b[31m" : "",
+                       isatty(1) && term ? "\x1b[1;31m" : ""};
 #ifdef MOTOR_PLATFORM_WIN32
 #    undef isatty
 #endif
-            const char* color = colors[0];
-            switch(level)
-            {
-            case logDebug: color = colors[2]; break;
-            case logInfo: color = colors[3]; break;
-            case logWarning: color = colors[4]; break;
-            case logError: color = colors[5]; break;
-            case logFatal: color = colors[6]; break;
-            case logSpam:
-            default: break;
-            }
+                const char* color = colors[0];
+                switch(level)
+                {
+                case logDebug: color = colors[2]; break;
+                case logInfo: color = colors[3]; break;
+                case logWarning: color = colors[4]; break;
+                case logError: color = colors[5]; break;
+                case logFatal: color = colors[6]; break;
+                case logSpam:
+                default: break;
+                }
 
-            const char* normal = colors[0];
-            fprintf(stdout, "[%s%s%s] %s%s(%s)%s %s(%d): %s", color, getLogLevelName(level), normal,
-                    colors[1], logname.c_str(), thread, normal, filename, line, msg);
-            fflush(stdout);
-            motor_forceuse(filename);
-            motor_forceuse(line);
-            if(msg[strlen(msg) - 1] != '\n') fprintf(stdout, "\n");
+                const char* normal = colors[0];
+                fprintf(stdout, "[%s%s%s] %s%s(%s)%s %s(%d): %s", color, getLogLevelName(level),
+                        normal, colors[1], logname.c_str(), thread, normal, filename, line, msg);
+                fflush(stdout);
+                motor_forceuse(filename);
+                motor_forceuse(line);
+                if(msg[strlen(msg) - 1] != '\n') fprintf(stdout, "\n");
+            }
         }
         return true;
     }
@@ -119,7 +126,8 @@ int beMain(int argc, const char* argv[])
         ref< DiskFolder > root = ref< DiskFolder >::create(
             Arena::general(), Environment::getEnvironment().getHomeDirectory(),
             DiskFolder::ScanRecursive, DiskFolder::CreateOne);
-        ScopedLogListener console(scoped< ConsoleLogListener >::create(Arena::debug()));
+        ScopedLogListener console(
+            scoped< ConsoleLogListener >::create(Arena::debug(), Motor::logInfo));
         ref< DiskFolder > home = ref< DiskFolder >::create(
             Arena::general(), Environment::getEnvironment().getGameHomeDirectory(),
             DiskFolder::ScanRecursive, DiskFolder::CreateOne);

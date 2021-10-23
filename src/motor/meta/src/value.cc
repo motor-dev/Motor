@@ -2,10 +2,11 @@
    see LICENSE for detail */
 
 #include <motor/meta/stdafx.h>
+#include <motor/meta/value.hh>
+
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/meta/typeinfo.inl>
-#include <motor/meta/value.hh>
 
 namespace Motor { namespace Meta {
 
@@ -23,6 +24,13 @@ Value::Value(const Value& other) : m_type(other.m_type), m_reference(other.m_ref
         m_ref.m_deallocate = (m_ref.m_pointer != 0);
         m_type.copy(other.memory(), memory());
     }
+}
+
+Value::Value(Type type, const void* location, MakeCopyType) : m_type(type), m_reference(false)
+{
+    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
+    m_ref.m_deallocate = m_ref.m_pointer != 0;
+    m_type.copy(location, memory());
 }
 
 Value::Value(Type type, void* location) : m_type(type), m_reference(true)

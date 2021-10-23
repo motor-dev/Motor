@@ -8,16 +8,17 @@
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/helper/staticarray.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 
 #define MOTOR_REGISTER_NAMESPACE_1_NAMED(plugin, n)                                                \
     namespace Motor {                                                                              \
-    raw< Motor::Meta::Class > motor_##plugin##_Namespace();                                        \
-    raw< Motor::Meta::Class > motor_##plugin##_Namespace_##n()                                     \
+    raw< Meta::Class > motor_##plugin##_Namespace();                                               \
+    raw< Meta::Class > motor_##plugin##_Namespace_##n()                                            \
     {                                                                                              \
         static Meta::Class ci                                                                      \
-            = {#n,  0, 0, Meta::ClassType_Namespace, {0}, {0}, {0}, {0}, {0, 0}, {0, 0}, {0},      \
-               {0}, 0, 0};                                                                         \
-        raw< Motor::Meta::Class > ptr = {&ci};                                                     \
+            = {#n,     0,      0,   Meta::ClassType_Namespace,         {0}, {0}, {0}, {0},         \
+               {0, 0}, {0, 0}, {0}, Meta::OperatorTable::s_emptyTable, 0,   0};                    \
+        raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
     static Meta::ObjectInfo s_##plugin##_Namespace_##n##_ob                                        \
@@ -31,24 +32,24 @@
 
 #define MOTOR_REGISTER_NAMESPACE_2_NAMED(plugin, n1, n2)                                           \
     namespace Motor {                                                                              \
-    raw< Motor::Meta::Class > motor_##plugin##_Namespace_##n1();                                   \
-    raw< Motor::Meta::Class > motor_##plugin##_Namespace_##n1##_##n2()                             \
+    raw< Meta::Class > motor_##plugin##_Namespace_##n1();                                          \
+    raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2()                                    \
     {                                                                                              \
-        static Meta::Class        ci  = {#n2,                                                      \
-                                 0,                                                        \
-                                 0,                                                        \
-                                 Meta::ClassType_Namespace,                                \
-                                 {motor_##plugin##_Namespace_##n1().m_ptr},                \
-                                 {0},                                                      \
-                                 {0},                                                      \
-                                 {0},                                                      \
-                                 {0, 0},                                                   \
-                                 {0, 0},                                                   \
-                                 {0},                                                      \
-                                 {0},                                                      \
-                                 0,                                                        \
-                                 0};                                                       \
-        raw< Motor::Meta::Class > ptr = {&ci};                                                     \
+        static Meta::Class ci  = {#n2,                                                             \
+                                 0,                                                               \
+                                 0,                                                               \
+                                 Meta::ClassType_Namespace,                                       \
+                                 {motor_##plugin##_Namespace_##n1().m_ptr},                       \
+                                 {0},                                                             \
+                                 {0},                                                             \
+                                 {0},                                                             \
+                                 {0, 0},                                                          \
+                                 {0, 0},                                                          \
+                                 {0},                                                             \
+                                 Meta::OperatorTable::s_emptyTable,                               \
+                                 0,                                                               \
+                                 0};                                                              \
+        raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
     static Meta::ObjectInfo s_##plugin##_Namespace_##n1##_##n2##_ob                                \
@@ -63,24 +64,24 @@
 
 #define MOTOR_REGISTER_NAMESPACE_3_NAMED(plugin, n1, n2, n3)                                       \
     namespace Motor {                                                                              \
-    raw< Motor::Meta::Class > motor_##plugin##_Namespace_##n1##_##n2();                            \
-    raw< Motor::Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3()                      \
+    raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2();                                   \
+    raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3()                             \
     {                                                                                              \
-        static Meta::Class        ci  = {#n3,                                                      \
-                                 0,                                                        \
-                                 0,                                                        \
-                                 Meta::ClassType_Namespace,                                \
-                                 {motor_##plugin##_Namespace_##n1##_##n2().m_ptr},         \
-                                 {0},                                                      \
-                                 {0},                                                      \
-                                 {0},                                                      \
-                                 {0, 0},                                                   \
-                                 {0, 0},                                                   \
-                                 {0},                                                      \
-                                 {0},                                                      \
-                                 0,                                                        \
-                                 0};                                                       \
-        raw< Motor::Meta::Class > ptr = {&ci};                                                     \
+        static Meta::Class ci  = {#n3,                                                             \
+                                 0,                                                               \
+                                 0,                                                               \
+                                 Meta::ClassType_Namespace,                                       \
+                                 {motor_##plugin##_Namespace_##n1##_##n2().m_ptr},                \
+                                 {0},                                                             \
+                                 {0},                                                             \
+                                 {0},                                                             \
+                                 {0, 0},                                                          \
+                                 {0, 0},                                                          \
+                                 {0},                                                             \
+                                 Meta::OperatorTable::s_emptyTable,                               \
+                                 0,                                                               \
+                                 0};                                                              \
+        raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
     static Meta::ObjectInfo s_##plugin##_Namespace_##n1##_##n2##_##n3##_ob                         \
@@ -95,24 +96,24 @@
 
 #define MOTOR_REGISTER_NAMESPACE_4_NAMED(plugin, n1, n2, n3, n4)                                   \
     namespace Motor {                                                                              \
-    raw< Motor::Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3();                     \
-    raw< Motor::Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()               \
+    raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3();                            \
+    raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()                      \
     {                                                                                              \
-        static Meta::Class        ci  = {#n4,                                                      \
-                                 0,                                                        \
-                                 0,                                                        \
-                                 Meta::ClassType_Namespace,                                \
-                                 {motor_##plugin##_Namespace_##n1##_##n2##_##n3().m_ptr},  \
-                                 {0},                                                      \
-                                 {0},                                                      \
-                                 {0},                                                      \
-                                 {0, 0},                                                   \
-                                 {0, 0},                                                   \
-                                 {0},                                                      \
-                                 {0},                                                      \
-                                 0,                                                        \
-                                 0};                                                       \
-        raw< Motor::Meta::Class > ptr = {&ci};                                                     \
+        static Meta::Class ci  = {#n4,                                                             \
+                                 0,                                                               \
+                                 0,                                                               \
+                                 Meta::ClassType_Namespace,                                       \
+                                 {motor_##plugin##_Namespace_##n1##_##n2##_##n3().m_ptr},         \
+                                 {0},                                                             \
+                                 {0},                                                             \
+                                 {0},                                                             \
+                                 {0, 0},                                                          \
+                                 {0, 0},                                                          \
+                                 {0},                                                             \
+                                 Meta::OperatorTable::s_emptyTable,                               \
+                                 0,                                                               \
+                                 0};                                                              \
+        raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
     static Meta::ObjectInfo s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_ob                  \
@@ -125,37 +126,37 @@
             &s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_ob);                               \
     }
 
-#define MOTOR_REGISTER_NAMESPACE_5_NAMED(plugin, n1, n2, n3, n4, n5)                                     \
-    namespace Motor {                                                                                    \
-    raw< Motor::Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4();                    \
-    raw< Motor::Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5()              \
-    {                                                                                                    \
-        static Meta::Class        ci  = {#n5,                                                            \
-                                 0,                                                              \
-                                 0,                                                              \
-                                 Meta::ClassType_Namespace,                                      \
-                                 {motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4().m_ptr}, \
-                                 {0},                                                            \
-                                 {0},                                                            \
-                                 {0},                                                            \
-                                 {0, 0},                                                         \
-                                 {0, 0},                                                         \
-                                 {0},                                                            \
-                                 {0},                                                            \
-                                 0,                                                              \
-                                 0};                                                             \
-        raw< Motor::Meta::Class > ptr = {&ci};                                                           \
-        return ptr;                                                                                      \
-    }                                                                                                    \
-    static Meta::ObjectInfo s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_ob                 \
-        = {motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()->objects,                              \
-           {0},                                                                                          \
-           #n5,                                                                                          \
-           Meta::Value(motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5())};                  \
-    MOTOR_EXPORT const Meta::ObjectInfo*                                                                 \
-                       s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_r                       \
-        = motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()->objects.set(                           \
-            &s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_ob);                              \
+#define MOTOR_REGISTER_NAMESPACE_5_NAMED(plugin, n1, n2, n3, n4, n5)                               \
+    namespace Motor {                                                                              \
+    raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4();                     \
+    raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5()               \
+    {                                                                                              \
+        static Meta::Class ci  = {#n5,                                                             \
+                                 0,                                                               \
+                                 0,                                                               \
+                                 Meta::ClassType_Namespace,                                       \
+                                 {motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4().m_ptr},  \
+                                 {0},                                                             \
+                                 {0},                                                             \
+                                 {0},                                                             \
+                                 {0, 0},                                                          \
+                                 {0, 0},                                                          \
+                                 {0},                                                             \
+                                 Meta::OperatorTable::s_emptyTable,                               \
+                                 0,                                                               \
+                                 0};                                                              \
+        raw< Meta::Class > ptr = {&ci};                                                            \
+        return ptr;                                                                                \
+    }                                                                                              \
+    static Meta::ObjectInfo s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_ob           \
+        = {motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()->objects,                        \
+           {0},                                                                                    \
+           #n5,                                                                                    \
+           Meta::Value(motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5())};            \
+    MOTOR_EXPORT const Meta::ObjectInfo*                                                           \
+                       s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_r                 \
+        = motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()->objects.set(                     \
+            &s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_ob);                        \
     }
 
 #define MOTOR_REGISTER_NAMESPACE_1_(plugin, n1)     MOTOR_REGISTER_NAMESPACE_1_NAMED(plugin, n1)

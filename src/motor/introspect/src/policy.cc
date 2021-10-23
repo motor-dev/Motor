@@ -15,11 +15,12 @@ Policy::~Policy()
 
 ref< IntrospectionHint > Policy::verify(Meta::AST::DbContext&           context,
                                         weak< const Meta::AST::Object > object,
-                                        const CallInfo& callInfo, u32 argumentThis) const
+                                        raw< const Method > method, const CallInfo& callInfo,
+                                        u32 argumentThis) const
 {
     motor_forceuse(context);
     motor_forceuse(object);
-    return ref< IntrospectionHint >::create(Arena::meta(), object, callInfo, argumentThis);
+    return ref< IntrospectionHint >::create(Arena::meta(), object, method, callInfo, argumentThis);
 }
 
 }}}  // namespace Motor::Meta::AST

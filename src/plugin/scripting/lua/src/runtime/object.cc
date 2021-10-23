@@ -4,8 +4,8 @@
 #include <stdafx.h>
 
 #include <motor/meta/classinfo.meta.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/engine/propertyinfo.meta.hh>
-#include <motor/meta/engine/scriptingapi.hh>
 #include <context.hh>
 #include <runtime/call.hh>
 #include <runtime/error.hh>
@@ -95,16 +95,20 @@ extern "C" int valueGet(lua_State* state)
 
     if(cls->type() == Meta::ClassType_Array && lua_type(state, 2) == LUA_TNUMBER)
     {
+        motor_assert(cls->operators,
+                     "Array type %s does not implement operator methods" | cls->fullname());
+        motor_assert(cls->operators->arrayOperators,
+                     "Array type %s does not implement Array API methods" | cls->fullname());
         const u32 i = motor_checked_numcast< u32 >(lua_tonumber(state, 2));
         if(userdata->type().isConst())
         {
-            return Context::push(
-                state, cls->apiMethods->arrayScripting->indexConst(*userdata, u32(i - 1)));
+            return Context::push(state,
+                                 cls->operators->arrayOperators->indexConst(*userdata, u32(i - 1)));
         }
         else
         {
             return Context::push(state,
-                                 cls->apiMethods->arrayScripting->index(*userdata, u32(i - 1)));
+                                 cls->operators->arrayOperators->index(*userdata, u32(i - 1)));
         }
     }
     else
@@ -124,16 +128,20 @@ extern "C" int valueSet(lua_State* state)
     raw< const Meta::Class > cls      = userdata->type().metaclass;
     if(cls->type() == Meta::ClassType_Array && lua_type(state, 2) == LUA_TNUMBER)
     {
+        motor_assert(cls->operators,
+                     "Array type %s does not implement operator methods" | cls->fullname());
+        motor_assert(cls->operators->arrayOperators,
+                     "Array type %s does not implement Array API methods" | cls->fullname());
         const u32 i = motor_checked_numcast< u32 >(lua_tonumber(state, 2));
         if(userdata->type().isConst())
         {
-            return Context::push(
-                state, cls->apiMethods->arrayScripting->indexConst(*userdata, u32(i - 1)));
+            return Context::push(state,
+                                 cls->operators->arrayOperators->indexConst(*userdata, u32(i - 1)));
         }
         else
         {
             return Context::push(state,
-                                 cls->apiMethods->arrayScripting->index(*userdata, u32(i - 1)));
+                                 cls->operators->arrayOperators->index(*userdata, u32(i - 1)));
         }
     }
     else

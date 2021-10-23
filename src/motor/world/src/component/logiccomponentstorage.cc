@@ -63,9 +63,10 @@ struct Visitor : public Meta::AST::Node::Visitor
 };
 
 LogicComponentStorage::IntrospectionHint::IntrospectionHint(weak< const Meta::AST::Object > owner,
+                                                            raw< const Meta::Method >       method,
                                                             const Meta::CallInfo& callInfo,
                                                             u32                   argumentThis)
-    : Meta::AST::IntrospectionHint(owner, callInfo, argumentThis)
+    : Meta::AST::IntrospectionHint(owner, method, callInfo, argumentThis)
 {
 }
 

@@ -23,7 +23,7 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< void >::klass()
                                  {0, 0},
                                  {0, 0},
                                  {0},
-                                 {0},
+                                 Meta::OperatorTable::s_emptyTable,
                                  &Meta::nullconstructor< 0 >,
                                  &Meta::nulldestructor};
     raw< Meta::Class > ci     = {&s_void};
@@ -33,10 +33,21 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< void >::klass()
 template <>
 MOTOR_EXPORT raw< const Meta::Class > ClassID< minitl::pointer >::klass()
 {
-    static Meta::Class s_pointer = {
-        "pointer", 0,      0,      0,   {0}, {motor_class< void >().m_ptr}, {0},
-        {0},       {0, 0}, {0, 0}, {0}, {0}, &Meta::nullconstructor< 0 >,   &Meta::nulldestructor};
-    raw< Meta::Class > ci = {&s_pointer};
+    static Meta::Class s_pointer = {"pointer",
+                                    0,
+                                    0,
+                                    0,
+                                    {0},
+                                    {motor_class< void >().m_ptr},
+                                    {0},
+                                    {0},
+                                    {0, 0},
+                                    {0, 0},
+                                    {0},
+                                    Meta::OperatorTable::s_emptyTable,
+                                    &Meta::nullconstructor< 0 >,
+                                    &Meta::nulldestructor};
+    raw< Meta::Class > ci        = {&s_pointer};
     return ci;
 }
 
@@ -54,7 +65,7 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< minitl::refcountable >::klass()
                                          {0, 0},
                                          {0, 0},
                                          {0},
-                                         {0},
+                                         Meta::OperatorTable::s_emptyTable,
                                          &Meta::nullconstructor< 0 >,
                                          &Meta::nulldestructor};
     raw< Meta::Class > ci             = {&s_refcountable};

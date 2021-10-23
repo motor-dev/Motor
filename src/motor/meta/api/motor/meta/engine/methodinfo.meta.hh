@@ -42,11 +42,8 @@ published:
         Value getTag(raw< const Class > tagType) const;
 
     public:
-        staticarray< const Value > extraParameters;
-
-    public:
         minitl::format< 1024u > signature() const;
-        Value (*call)(Value * params, u32 nparams);
+        Value (*call)(raw< const Method > method, Value * params, u32 nparams);
     };
 
 published:

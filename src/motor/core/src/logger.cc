@@ -36,21 +36,26 @@ Logger::~Logger()
 {
 }
 
+ref< Logger > Logger::getChild(const istring& name)
+{
+    minitl::hashmap< istring, ref< Logger > >::iterator it = m_children.find(name);
+    if(it == m_children.end())
+    {
+        ref< Logger > next = ref< Logger >::create(Arena::debug(), this, name);
+        m_children.insert(name, next);
+        return next;
+    }
+    else
+        return it->second;
+}
+
 ref< Logger > Logger::instance(const inamespace& name)
 {
     ref< Logger > result = root();
 
     for(u32 i = 0; i < name.size(); ++i)
     {
-        minitl::hashmap< istring, ref< Logger > >::iterator it = result->m_children.find(name[i]);
-        if(it == result->m_children.end())
-        {
-            ref< Logger > next = ref< Logger >::create(Arena::debug(), result, name[i]);
-            result->m_children.insert(name[i], next);
-            result = next;
-        }
-        else
-            result = it->second;
+        result = result->getChild(name[i]);
     }
     return result;
 }

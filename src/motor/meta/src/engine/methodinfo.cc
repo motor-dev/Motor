@@ -89,28 +89,8 @@ Value Method::doCall(Value* params, u32 nparams) const
     CallInfo            c       = resolve(thisPtr, args, nparams);
     if(c.conversion < ConversionCost::s_incompatible)
     {
-        if(c.overload->extraParameters.count == 0)
-            return c.overload->call(params, nparams);
-        else
-        {
-            Value* values = static_cast< Value* >(
-                malloca(sizeof(Value) * (nparams + c.overload->extraParameters.count)));
-            for(u32 i = 0; i < c.overload->extraParameters.count; ++i)
-            {
-                new(values + i) Value(c.overload->extraParameters[i]);
-            }
-            for(u32 i = 0; i < nparams; ++i)
-            {
-                new(values + c.overload->extraParameters.count + i) Value(params[i]);
-            }
-            Value v = c.overload->call(values, c.overload->extraParameters.count + nparams);
-            for(u32 i = c.overload->extraParameters.count + nparams; i > 0; --i)
-            {
-                values[i - 1].~Value();
-            }
-            freea(values);
-            return v;
-        }
+        raw< const Method > this_ = {this};
+        return c.overload->call(this_, params, nparams);
     }
     else
     {
