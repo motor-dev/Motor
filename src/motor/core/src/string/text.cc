@@ -9,8 +9,8 @@
 namespace Motor {
 
 text::text(const char* str)
-    : m_text(Arena::general().strdup(str))
-    , m_length(motor_checked_numcast< u32 >(strlen(str)))
+    : m_text(str ? Arena::general().strdup(str) : 0)
+    , m_length(str ? motor_checked_numcast< u32 >(strlen(str)) : 0)
 {
 }
 

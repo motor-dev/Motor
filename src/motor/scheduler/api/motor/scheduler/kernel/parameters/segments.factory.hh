@@ -10,6 +10,7 @@
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/typeinfo.hh>
 
 namespace Motor {
@@ -25,8 +26,9 @@ namespace Meta {
 template < typename T >
 struct ClassID< KernelScheduler::Segments< T > >
 {
-    static Value construct(Value* parameters, u32 parameterCount)
+    static Value construct(raw< const Meta::Method > method, Value* parameters, u32 parameterCount)
     {
+        motor_forceuse(method);
         motor_assert(parameterCount == 0, "too many parameters");
         motor_forceuse(parameters);
         return Value(ref< KernelScheduler::Segments< T > >::create(Arena::task()));
@@ -50,7 +52,7 @@ struct ClassID< KernelScheduler::Segments< T > >
                {0, 0},
                {1, &s_ctr},
                {&s_ctr},
-               {0},
+               Meta::OperatorTable::s_emptyTable,
                0,
                0};
         raw< const Meta::Class > result = {&s_class};
@@ -60,8 +62,8 @@ struct ClassID< KernelScheduler::Segments< T > >
 };
 
 template < typename T >
-const Meta::Method::Overload ClassID< KernelScheduler::Segments< T > >::s_ctrOverload = {
-    {0}, {0, 0}, motor_type< ref< KernelScheduler::Segments< T > > >(), false, {0, 0}, &construct};
+const Meta::Method::Overload ClassID< KernelScheduler::Segments< T > >::s_ctrOverload
+    = {{0}, {0, 0}, motor_type< ref< KernelScheduler::Segments< T > > >(), false, &construct};
 
 template < typename T >
 const Meta::Method ClassID< KernelScheduler::Segments< T > >::s_ctr

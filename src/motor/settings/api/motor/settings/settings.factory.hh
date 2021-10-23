@@ -7,6 +7,7 @@
 #include <motor/settings/stdafx.h>
 #include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/engine/propertyinfo.meta.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/meta/value.hh>
@@ -84,16 +85,19 @@ namespace Settings {
 template < typename T >
 struct MOTOR_EXPORT Settings_RTTIHelper
 {
-    static Meta::Value                  trampoline_method_get_overload_0(Meta::Value* parameters,
-                                                                         u32          parameterCount);
+    static Meta::Value trampoline_method_get_overload_0(raw< const Meta::Method > method,
+                                                        Meta::Value*              parameters,
+                                                        u32                       parameterCount);
     static const Meta::Method::Overload s_method_get_overloads[];
     static const Meta::Method           s_methods[];
 };
 
 template < typename T >
-Meta::Value Settings_RTTIHelper< T >::trampoline_method_get_overload_0(Meta::Value* params,
-                                                                       u32          paramCount)
+Meta::Value
+Settings_RTTIHelper< T >::trampoline_method_get_overload_0(raw< const Meta::Method > method,
+                                                           Meta::Value* params, u32 paramCount)
 {
+    motor_forceuse(method);
     motor_assert(paramCount == 0, "expected no parameter; received %d" | paramCount);
     motor_forceuse(params);
     return Meta::Value(Meta::Value::ByRef(Settings< T >::get()));
@@ -101,7 +105,7 @@ Meta::Value Settings_RTTIHelper< T >::trampoline_method_get_overload_0(Meta::Val
 
 template < typename T >
 const Meta::Method::Overload Settings_RTTIHelper< T >::s_method_get_overloads[]
-    = {{{0}, {0, 0}, motor_type< T& >(), false, {0, 0}, &trampoline_method_get_overload_0}};
+    = {{{0}, {0, 0}, motor_type< T& >(), false, &trampoline_method_get_overload_0}};
 
 template < typename T >
 const Meta::Method Settings_RTTIHelper< T >::s_methods[1]
@@ -123,7 +127,7 @@ MOTOR_EXPORT raw< const Meta::Class > Meta::ClassID< Settings::Settings< T > >::
                                   {0, 0},
                                   {1, Settings::Settings_RTTIHelper< T >::s_methods},
                                   {0},
-                                  {0},
+                                  Meta::OperatorTable::s_emptyTable,
                                   0,
                                   0};
     raw< const Meta::Class > result  = {&s_class};

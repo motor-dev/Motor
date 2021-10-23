@@ -138,7 +138,8 @@ class Method(CppObject):
         if self.has_trampoline():
             definition.write(
                 '    static ::Motor::Meta::Value %s'
-                '(::Motor::Meta::Value* parameters, u32 parameterCount);\n' % self.trampoline_name(owner, prefix)
+                '(::minitl::raw<const ::Motor::Meta::Method> method, ::Motor::Meta::Value* parameters, u32 parameterCount);\n'
+                % self.trampoline_name(owner, prefix)
             )
         if struct_owners:
             param_index = 0
@@ -175,8 +176,9 @@ class Method(CppObject):
         if self.has_trampoline():
             definition.write(
                 '::Motor::Meta::Value %s%s'
-                '(::Motor::Meta::Value* parameters, u32 parameterCount)\n'
+                '(::minitl::raw<const ::Motor::Meta::Method> method, ::Motor::Meta::Value* parameters, u32 parameterCount)\n'
                 '{\n'
+                '    motor_forceuse(method);\n'
                 '    motor_forceuse(parameters);\n'
                 '    motor_forceuse(parameterCount);\n' %
                 (helper_name(struct_owners), self.trampoline_name(owner, prefix))
@@ -417,7 +419,6 @@ class OverloadedMethod(CppObject):
                     '        %s,\n'
                     '        ::motor_type< %s >(),\n'
                     '        %s,\n'
-                    '        {0, 0},\n'
                     '        &%s\n'
                     '    }' % (
                         o[1], o[2], o[0].return_type, o[0].vararg and "true"
@@ -491,8 +492,8 @@ class Variable(CppObject):
                 '    ::Motor::Meta::Value(\n'
                 '        ::Motor::Meta::Value::ByRef(%s::%s))\n'
                 '};\n' % (
-                    hlper_static(struct_owners), helper_name(struct_owners), prefix, alias_cpp, object_name, tag, alias,
-                    owner.cpp_name(), self.name
+                    helper_static(struct_owners), helper_name(struct_owners), prefix, alias_cpp, object_name, tag,
+                    alias, owner.cpp_name(), self.name
                 )
             )
             object_name = '{&%ss%s_object_%s}' % (helper_name(struct_owners), prefix, alias_cpp)
@@ -846,9 +847,12 @@ class Class(Container):
                         '        %s,\n'
                         '        ::motor_type< %s >(),\n'
                         '        ::motor_type< %s >(),\n'
-                        '        &::Motor::Meta::PropertyHelper< %s, %s, &%s::%s >::get\n'
-                        '    }' % (t, name, self.cpp_name(), p.type, p.type, self.cpp_name(), self.cpp_name(), p.name)
-                        for p, name, t in props
+                        '        &::Motor::Meta::PropertyHelper< %s, %s, &%s::%s >::get,\n'
+                        '        &::Motor::Meta::PropertyHelper< %s, %s, &%s::%s >::set\n'
+                        '    }' % (
+                            t, name, self.cpp_name(), p.type, p.type, self.cpp_name(), self.cpp_name(), p.name, p.type,
+                            self.cpp_name(), self.cpp_name(), p.name
+                        ) for p, name, t in props
                     ]
                 )
             )
@@ -856,6 +860,7 @@ class Class(Container):
             params['PROPERTIES'] = '{ %d, %ss%s_properties }' % (len(props), helper_name(struct_owners), prefix)
         else:
             params['PROPERTIES'] = '{ 0, 0 }'
+        params['CAST_METHODS'] = '{ 0 }'
 
         params['CLASSTYPE'] = self.index
         if params['CLASSTYPE'] is None:
@@ -886,7 +891,7 @@ class Class(Container):
             '        /* .properties */         %(PROPERTIES)s,\n'
             '        /* .methods */            %(METHODS)s,\n'
             '        /* .constructor */        %(CONSTRUCTOR)s,\n'
-            '        /* .apiMethods */         {0},\n'
+            '        /* .operators */          ::Motor::Meta::OperatorTable::s_emptyTable,\n'
             '        /* .copyconstructor */    %(COPYCONSTRUCTOR)s,\n'
             '        /* .destructor */         %(DESTRUCTOR)s\n'
             '    };\n\n'
@@ -1029,6 +1034,7 @@ class Root(Container):
         definition.write('#include <motor/meta/engine/helper/staticarray.factory.hh>\n')
         definition.write('#include <motor/meta/classinfo.meta.hh>\n')
         definition.write('#include <motor/meta/typeinfo.hh>\n')
+        definition.write('#include <motor/meta/engine/operatortable.meta.hh>\n')
         definition.write('#include <motor/meta/engine/methodinfo.meta.hh>\n')
         definition.write('#include <motor/meta/engine/objectinfo.meta.hh>\n')
         definition.write('#include <motor/meta/engine/propertyinfo.meta.hh>\n')
@@ -1038,7 +1044,7 @@ class Root(Container):
         definition.write('#include <motor/meta/engine/tuple.factory.hh>\n')
         definition.write('#include <motor/meta/engine/taginfo.meta.hh>\n')
         definition.write('#include <motor/meta/engine/helper/method.hh>\n')
-        definition.write('#include <motor/meta/engine/helper/get.hh>\n')
+        definition.write('#include <motor/meta/engine/helper/getset.hh>\n')
         definition.write('#include <%s>\n' % include)
 
         if self.objects:

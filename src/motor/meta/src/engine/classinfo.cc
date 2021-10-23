@@ -5,6 +5,7 @@
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/engine/propertyinfo.meta.hh>
 #include <motor/meta/engine/taginfo.meta.hh>
 #include <motor/meta/value.hh>
@@ -463,8 +464,8 @@ Value Class::findClass(inamespace name)
 raw< Meta::Class > motor_motor_Namespace()
 {
     static Meta::Class ci
-        = {"Motor", 0, 0, Meta::ClassType_Namespace, {0}, {0}, {0}, {0}, {0, 0}, {0, 0}, {0},
-           {0},     0, 0};
+        = {"Motor", 0,      0,   Meta::ClassType_Namespace,         {0}, {0}, {0}, {0},
+           {0, 0},  {0, 0}, {0}, Meta::OperatorTable::s_emptyTable, 0,   0};
     raw< Meta::Class > result = {&ci};
     return result;
 }

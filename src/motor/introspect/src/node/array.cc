@@ -7,7 +7,7 @@
 #include <motor/introspect/dbcontext.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
-#include <motor/meta/engine/scriptingapi.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/minitl/array.hh>
 
 namespace Motor { namespace Meta { namespace AST {
@@ -26,8 +26,8 @@ ConversionCost Array::distance(const Type& type) const
 {
     if(type.metaclass->type() == Meta::ClassType_Array)
     {
-        ConversionCost                 result = ConversionCost();
-        raw< const ScriptingArrayAPI > api    = type.metaclass->apiMethods->arrayScripting;
+        ConversionCost                  result = ConversionCost();
+        raw< const ArrayOperatorTable > api    = type.metaclass->operators->arrayOperators;
         for(minitl::vector< ref< Node > >::const_iterator it = m_value.begin(); it != m_value.end();
             ++it)
         {
@@ -54,7 +54,7 @@ bool Array::doResolve(DbContext& context)
 
 void Array::doEval(const Meta::Type& expectedType, Value& result) const
 {
-    Meta::Type valueType = expectedType.metaclass->apiMethods->arrayScripting->value_type;
+    Meta::Type valueType = expectedType.metaclass->operators->arrayOperators->value_type;
 
     minitl::array< Meta::Value > v(Arena::temporary(),
                                    motor_checked_numcast< u32 >(m_value.size()));

@@ -19,12 +19,21 @@ private:
     Page*                         m_firstPage;
     GQuark                        m_motorQuark;
     raw< const Meta::ObjectInfo > m_objectPtr;
+    ref< Logger >                 m_logger;
+    guint                         m_logHandlerDefault;
+    guint                         m_logHandlerGLib;
+    guint                         m_logHandlerGtk;
 
 private:
     void* allocate(u32 size);
-    void  registerType(GType type, raw< const Meta::Class > parent);
-    void  registerTypeContent(GType type);
-    void  unregisterType(GType type);
+
+    void registerBoxed(GType type);
+    void registerEnum(GType type);
+    void registerFlags(GType type);
+    void registerInterface(GType type);
+    void registerClass(GType type);
+    void unregisterClass(GType type);
+    void unregisterInterface(GType type);
 
 public:
     Gtk3Plugin();
@@ -35,6 +44,19 @@ public:
     {
         return static_cast< T* >(allocate(sizeof(T)));
     }
+    template < typename T >
+    T* allocateArray(u32 count)
+    {
+        return static_cast< T* >(allocate(count * sizeof(T)));
+    }
+    GQuark quark() const
+    {
+        return m_motorQuark;
+    }
+
+    void        registerValue(const istring& name, const Meta::Value& value);
+    Meta::Type  fromGType(GType type);
+    Meta::Value fromGValue(const GValue* value);
 };
 
 }}  // namespace Motor::Gtk3

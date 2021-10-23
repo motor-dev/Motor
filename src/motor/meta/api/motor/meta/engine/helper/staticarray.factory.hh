@@ -10,8 +10,8 @@ see LICENSE for detail */
 #include <motor/meta/engine/helper/staticarray.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/engine/propertyinfo.meta.hh>
-#include <motor/meta/engine/scriptingapi.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/meta/typeinfo.meta.hh>
 #include <motor/meta/value.hh>
@@ -26,17 +26,20 @@ struct ClassID< Meta::staticarray< T > >
     static Meta::Value      index(Meta::Value& v, u32 i);
     static Meta::Value      indexConst(const Meta::Value& v, u32 i);
 
-    static Meta::Value callStaticArrayOperatorIndex(Meta::Value* params, u32 paramCount);
-    static Meta::Value callStaticArraySize(Meta::Value* params, u32 paramCount);
-    static Meta::Value callStaticArrayOperatorIndexConst(Meta::Value* params, u32 paramCount);
+    static Meta::Value callStaticArrayOperatorIndex(raw< const Meta::Method > method,
+                                                    Meta::Value* params, u32 paramCount);
+    static Meta::Value callStaticArraySize(raw< const Meta::Method > method, Meta::Value* params,
+                                           u32 paramCount);
+    static Meta::Value callStaticArrayOperatorIndexConst(raw< const Meta::Method > method,
+                                                         Meta::Value* params, u32 paramCount);
 
-    static const Meta::Method::Parameter s_index_0_params[2];
-    static const Meta::Method::Parameter s_index_1_params[2];
-    static const Meta::Method::Overload  s_method_index_overloads[2];
-    static const Meta::Method::Parameter s_size_params[1];
-    static const Meta::Method::Overload  s_method_size_overloads[1];
-    static const Meta::ScriptingArrayAPI scriptingArrayAPI;
-    static const Meta::ScriptingAPI      scriptingAPI;
+    static const Meta::Method::Parameter  s_index_0_params[2];
+    static const Meta::Method::Parameter  s_index_1_params[2];
+    static const Meta::Method::Overload   s_method_index_overloads[2];
+    static const Meta::Method::Parameter  s_size_params[1];
+    static const Meta::Method::Overload   s_method_size_overloads[1];
+    static const Meta::ArrayOperatorTable scriptingArrayAPI;
+    static const Meta::OperatorTable      scriptingAPI;
 
     static MOTOR_EXPORT raw< const Meta::Class > klass();
 };
@@ -63,26 +66,30 @@ Meta::Value ClassID< Meta::staticarray< T > >::indexConst(const Meta::Value& v, 
 }
 
 template < typename T >
-Meta::Value ClassID< Meta::staticarray< T > >::callStaticArrayOperatorIndex(Meta::Value* params,
-                                                                            u32          paramCount)
+Meta::Value
+ClassID< Meta::staticarray< T > >::callStaticArrayOperatorIndex(raw< const Meta::Method > method,
+                                                                Meta::Value* params, u32 paramCount)
 {
+    motor_forceuse(method);
     motor_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
     return Meta::Value(params[0].as< Meta::staticarray< T >& >().operator[](params[1].as< u32 >()));
 }
 
 template < typename T >
-Meta::Value ClassID< Meta::staticarray< T > >::callStaticArraySize(Meta::Value* params,
-                                                                   u32          paramCount)
+Meta::Value ClassID< Meta::staticarray< T > >::callStaticArraySize(raw< const Meta::Method > method,
+                                                                   Meta::Value*              params,
+                                                                   u32 paramCount)
 {
+    motor_forceuse(method);
     motor_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
     return Meta::Value(params[0].as< const Meta::staticarray< T >& >().count);
 }
 
 template < typename T >
-Meta::Value
-ClassID< Meta::staticarray< T > >::callStaticArrayOperatorIndexConst(Meta::Value* params,
-                                                                     u32          paramCount)
+Meta::Value ClassID< Meta::staticarray< T > >::callStaticArrayOperatorIndexConst(
+    raw< const Meta::Method > method, Meta::Value* params, u32 paramCount)
 {
+    motor_forceuse(method);
     motor_assert(paramCount == 2, "expected 2 parameter; received %d" | paramCount);
     return Meta::Value(
         params[0].as< const Meta::staticarray< T >& >().operator[](params[1].as< u32 >()));
@@ -111,14 +118,13 @@ const Meta::Method::Parameter ClassID< Meta::staticarray< T > >::s_index_1_param
         {&::Motor::Meta::Method::Parameter::s_noDefaultValue}}};
 
 template < typename T >
-const Meta::Method::Overload ClassID< Meta::staticarray< T > >::s_method_index_overloads[2] = {
-    {{0},
-     {2, s_index_0_params},
-     motor_type< const T& >(),
-     false,
-     {0, 0},
-     &callStaticArrayOperatorIndexConst},
-    {{0}, {2, s_index_1_params}, motor_type< T& >(), false, {0, 0}, &callStaticArrayOperatorIndex}};
+const Meta::Method::Overload ClassID< Meta::staticarray< T > >::s_method_index_overloads[2]
+    = {{{0},
+        {2, s_index_0_params},
+        motor_type< const T& >(),
+        false,
+        &callStaticArrayOperatorIndexConst},
+       {{0}, {2, s_index_1_params}, motor_type< T& >(), false, &callStaticArrayOperatorIndex}};
 
 template < typename T >
 const Meta::Method::Parameter ClassID< Meta::staticarray< T > >::s_size_params[1]
@@ -129,14 +135,15 @@ const Meta::Method::Parameter ClassID< Meta::staticarray< T > >::s_size_params[1
 
 template < typename T >
 const Meta::Method::Overload ClassID< Meta::staticarray< T > >::s_method_size_overloads[1]
-    = {{{0}, {1, s_size_params}, motor_type< u32 >(), false, {0, 0}, &callStaticArraySize}};
+    = {{{0}, {1, s_size_params}, motor_type< u32 >(), false, &callStaticArraySize}};
 
 template < typename T >
-const Meta::ScriptingArrayAPI ClassID< Meta::staticarray< T > >::scriptingArrayAPI
+const Meta::ArrayOperatorTable ClassID< Meta::staticarray< T > >::scriptingArrayAPI
     = {value_type, &array_size, &index, &indexConst};
 
 template < typename T >
-const Meta::ScriptingAPI ClassID< Meta::staticarray< T > >::scriptingAPI = {{&scriptingArrayAPI}};
+const Meta::OperatorTable ClassID< Meta::staticarray< T > >::scriptingAPI
+    = {{&scriptingArrayAPI}, {0, 0}};
 
 template < typename T >
 MOTOR_EXPORT raw< const Meta::Class > ClassID< Meta::staticarray< T > >::klass()

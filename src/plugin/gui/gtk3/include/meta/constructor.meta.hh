@@ -1,23 +1,21 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_UI_GTK3_GOBJECT_HH_
-#define MOTOR_UI_GTK3_GOBJECT_HH_
+#ifndef MOTOR_UI_GTK3_META_CONSTRUCTOR_META_HH_
+#define MOTOR_UI_GTK3_META_CONSTRUCTOR_META_HH_
 /**************************************************************************************************/
-#include <motor/resource/description.meta.hh>
-
-namespace Motor {
-
-MOTOR_EXPORT raw< Meta::Class > motor_plugin_gui_gtk3_Namespace();
-
-}
+#include <motor/meta/engine/methodinfo.meta.hh>
 
 namespace Motor { namespace Gtk3 {
 
-class GenericObject : public Resource::Description
+struct Constructor
 {
-    published : GenericObject();
-    ~GenericObject();
+    Meta::Method metaMethod;
+
+public:
+    const GType type;
+
+    static Meta::Value call(raw< const Meta::Method > method, Meta::Value* params, u32 nparams);
 };
 
 }}  // namespace Motor::Gtk3

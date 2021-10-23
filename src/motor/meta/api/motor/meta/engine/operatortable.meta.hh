@@ -9,17 +9,21 @@
 
 namespace Motor { namespace Meta {
 
-struct ScriptingArrayAPI
+struct ArrayOperatorTable
 {
+public:
     Type value_type;
     u32 (*size)(const Value& owner);
     Value (*index)(Value& owner, u32 index);
     Value (*indexConst)(const Value& owner, u32 index);
 };
 
-struct ScriptingAPI
+struct OperatorTable
 {
-    raw< const ScriptingArrayAPI > arrayScripting;
+    raw< const ArrayOperatorTable > arrayOperators;
+    staticarray< const Method >     casts;
+
+    static motor_api(META) raw< const OperatorTable > s_emptyTable;
 };
 
 }}  // namespace Motor::Meta

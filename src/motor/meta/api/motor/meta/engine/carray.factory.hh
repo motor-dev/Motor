@@ -9,7 +9,7 @@
 #include <motor/meta/engine/helper/method.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
-#include <motor/meta/engine/scriptingapi.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/typeinfo.hh>
 
 namespace Motor { namespace Meta {
@@ -48,8 +48,8 @@ struct carray_RTTIHelper
     static const Meta::Method::Parameter s_method_Index_overload_1_params[];
     static const Meta::Method::Overload  s_method_Index_overloads[];
     static const Meta::ObjectInfo        s_prop_value_type_object_value_type;
-    static const Meta::ScriptingArrayAPI scriptingArrayAPI;
-    static const Meta::ScriptingAPI      scriptingAPI;
+    static const Meta::ArrayOperatorTable scriptingArrayAPI;
+    static const Meta::OperatorTable      scriptingAPI;
 };
 
 template < typename T, u32 Count >
@@ -160,11 +160,12 @@ const Meta::Method::Overload carray_RTTIHelper< T, Count >::s_method_Index_overl
         &trampoline_method_Index_overload_1}};
 
 template < typename T, u32 Count >
-const Meta::ScriptingArrayAPI carray_RTTIHelper< T, Count >::scriptingArrayAPI
+const Meta::ArrayOperatorTable carray_RTTIHelper< T, Count >::scriptingArrayAPI
     = {motor_type< T >(), &array_size, &index, &indexConst};
 
 template < typename T, u32 Count >
-const Meta::ScriptingAPI carray_RTTIHelper< T, Count >::scriptingAPI = {{&scriptingArrayAPI}};
+const Meta::OperatorTable carray_RTTIHelper< T, Count >::scriptingAPI
+    = {{&scriptingArrayAPI}, {0, 0}};
 
 template < typename T, u32 Count >
 MOTOR_EXPORT raw< const Meta::Class > ClassID< T[Count] >::klass()

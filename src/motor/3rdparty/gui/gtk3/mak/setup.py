@@ -2,6 +2,7 @@ from waflib.Errors import WafError
 from waflib import Options
 import os
 
+GTK3_API = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/gtk+-3.0-api.tgz'
 GTK3_BINARIES = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/gtk+-3.0-%(platform)s-%(arch)s.tgz'
 
 
@@ -48,6 +49,18 @@ def setup_system(conf):
     return False
 
 
+def setup_api(conf):
+    try:
+        gtk3_node = conf.pkg_unpack('gtk3_api', GTK3_API)
+    except WafError as e:
+        conf.end_msg('disabled - code completion for GTK will not work')
+        return False
+    else:
+        conf.env.GTK3_SOURCE = gtk3_node.path_from(conf.package_node)
+        conf.end_msg('from API')
+        return True
+
+
 def setup_prebuilt(conf):
     try:
         gtk3_node = conf.pkg_unpack('gtk3_bin_%(platform)s-%(arch)s', GTK3_BINARIES)
@@ -73,10 +86,11 @@ def setup_source(conf):
 
 def setup(conf):
     conf.register_setup_option('gtk3_package')
-    if conf.env.PROJECTS:
-        return
     found = False
-    if 'pc' in conf.env.VALID_PLATFORMS:
+    if conf.env.PROJECTS:
+        conf.start_msg_setup()
+        found = setup_api(conf)
+    elif 'pc' in conf.env.VALID_PLATFORMS:
         conf.start_msg_setup()
         if not found and Options.options.gtk3_package in ('best', 'pkgconfig'):
             found = setup_pkgconfig(conf)

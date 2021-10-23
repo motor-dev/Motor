@@ -6,6 +6,13 @@ import json
 from json_minify import json_minify
 
 
+def vscode_path_from(path, node):
+    if isinstance(path, str):
+        return path.replace('/', '\\')
+    else:
+        return os.path.join('${workspaceFolder}', path.path_from(node).replace('/', '\\'))
+
+
 class vscode(Build.BuildContext):
     "creates projects for Visual Studio Code"
     cmd = 'vscode'
@@ -189,8 +196,8 @@ class vscode(Build.BuildContext):
                             '%s - %s' % (env_name, variant),
                         'includePath':
                             [
-                                os.path.join('${workspaceFolder}', i.path_from(self.srcnode)) for i in include_paths
-                                if i not in seen and not seen.add(i) and i.isdir()
+                                vscode_path_from(i, self.srcnode) for i in include_paths
+                                if i not in seen and not seen.add(i) and (isinstance(i, str) or i.isdir())
                             ],
                         'defines': [d for d in defines if d not in seen and not seen.add(d)],
                         'compileCommands':

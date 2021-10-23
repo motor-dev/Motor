@@ -4,7 +4,6 @@
 #include <stdafx.h>
 #include <gobject.hh>
 #include <gtk3loader.hh>
-#include <gtk3plugin.hh>
 
 namespace Motor { namespace Gtk3 {
 
@@ -41,3 +40,5 @@ void Gtk3Loader::unload(Resource::Resource& resource)
 }
 
 }}  // namespace Motor::Gtk3
+
+MOTOR_PLUGIN_REGISTER(Motor::Gtk3::Gtk3Loader);

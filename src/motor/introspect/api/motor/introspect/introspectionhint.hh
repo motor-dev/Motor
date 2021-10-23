@@ -30,11 +30,13 @@ class motor_api(INTROSPECT) IntrospectionHint : public minitl::refcountable
 {
 protected:
     weak< const Object > m_owner;
+    raw< const Method >  m_method;
     CallInfo             m_callInfo;
     u32                  m_argumentThis;
 
 public:
-    IntrospectionHint(weak< const Object > owner, const CallInfo& callInfo, u32 argumentThis);
+    IntrospectionHint(weak< const Object > owner, raw< const Method > method,
+                      const CallInfo& callInfo, u32 argumentThis);
     virtual ~IntrospectionHint();
 
     virtual ConversionCost calculateConversion(const Type& targetType) const;

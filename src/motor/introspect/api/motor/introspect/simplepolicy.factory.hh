@@ -10,6 +10,7 @@
 #include <motor/introspect/node/object.hh>
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/helper/method.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/typeinfo.hh>
 
 namespace Motor { namespace Meta {
@@ -22,10 +23,12 @@ struct SimplePolicy : public Policy
 public:
     virtual ref< IntrospectionHint > verify(Meta::AST::DbContext&           context,
                                             weak< const Meta::AST::Object > object,
-                                            const CallInfo& callInfo, u32 argumentThis) const
+                                            raw< const Method > method, const CallInfo& callInfo,
+                                            u32 argumentThis) const
     {
         motor_forceuse(context);
-        return ref< INTROSPECTION_HINT >::create(Arena::meta(), object, callInfo, argumentThis);
+        return ref< INTROSPECTION_HINT >::create(Arena::meta(), object, method, callInfo,
+                                                 argumentThis);
     }
 };
 
@@ -48,7 +51,7 @@ struct ClassID< AST::SimplePolicy< INTROSPECTION_HINT > >
                {0, 0},
                {0, 0},
                {0},
-               {0},
+               Meta::OperatorTable::s_emptyTable,
                &wrap< AST::SimplePolicy< INTROSPECTION_HINT > >::copy,
                &wrap< AST::SimplePolicy< INTROSPECTION_HINT > >::destroy};
         raw< const Meta::Class > result = {&s_class};

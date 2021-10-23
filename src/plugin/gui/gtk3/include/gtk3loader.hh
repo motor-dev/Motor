@@ -7,11 +7,8 @@
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/plugin/plugin.hh>
 #include <motor/resource/loader.hh>
-#include <gtk3plugin.hh>
 
 namespace Motor { namespace Gtk3 {
-
-class Gtk3Plugin;
 
 class Gtk3Loader : public Resource::ILoader
 {

@@ -63,6 +63,10 @@ public:
     {
         MakeConst
     };
+    enum MakeCopyType
+    {
+        MakeCopy
+    };
 
     inline Value();
     template < typename T >
@@ -73,6 +77,7 @@ public:
     template < typename T >
     Value(ByRefType< T > t);
     Value(Type typeinfo, void* location);
+    Value(Type typeinfo, const void* location, MakeCopyType);
     Value(Type typeinfo, const Value& castedFrom);
     ~Value();
 

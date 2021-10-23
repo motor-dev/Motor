@@ -15,13 +15,15 @@ struct functionhelper< T, Value, Value*, u32 >
         VarArg = 1
     };
     template < Value (*method)(Value*, u32) >
-    static Value callStatic(Value* params, u32 paramCount)
+    static Value callStatic(raw< const Method > m, Value* params, u32 paramCount)
     {
+        motor_forceuse(m);
         return (*method)(params, paramCount);
     }
     template < Value (T::*method)(Value*, u32) >
-    static Value call(Value* params, u32 paramCount)
+    static Value call(raw< const Method > m, Value* params, u32 paramCount)
     {
+        motor_forceuse(m);
         motor_assert_recover(motor_type< T* >() <= params[0].type(),
                              "expected parameter of type %s; got %s" | motor_type< T* >().name()
                                  | params[0].type().name(),
@@ -29,8 +31,9 @@ struct functionhelper< T, Value, Value*, u32 >
         return (params[0].as< T& >().*method)(params + 1, paramCount - 1);
     }
     template < Value (T::*method)(Value*, u32) const >
-    static Value callConst(Value* params, u32 paramCount)
+    static Value callConst(raw< const Method > m, Value* params, u32 paramCount)
     {
+        motor_forceuse(m);
         motor_assert_recover(motor_type< const T* >() <= params[0].type(),
                              "expected parameter of type %s; got %s"
                                  | motor_type< const T* >().name() | params[0].type().name(),

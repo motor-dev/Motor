@@ -9,7 +9,7 @@
 #include <motor/meta/engine/helper/method.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
-#include <motor/meta/engine/scriptingapi.hh>
+#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/minitl/array.hh>
 
@@ -23,24 +23,28 @@ struct ClassID< minitl::array< T > >
     static Meta::Value      index(Meta::Value& v, u32 i);
     static Meta::Value      indexConst(const Meta::Value& v, u32 i);
 
-    static Meta::Value                   trampoline_method_array_overload_0(Meta::Value* parameters,
-                                                                            u32          parameterCount);
+    static Meta::Value trampoline_method_array_overload_0(raw< const Meta::Method > method,
+                                                          Meta::Value*              parameters,
+                                                          u32                       parameterCount);
     static const Meta::Method::Parameter s_method_array_overload_0_params[];
     static const Meta::Method::Overload  s_method_array_overloads[];
-    static Meta::Value                   trampoline_method_size_overload_0(Meta::Value* parameters,
-                                                                           u32          parameterCount);
+    static Meta::Value trampoline_method_size_overload_0(raw< const Meta::Method > method,
+                                                         Meta::Value*              parameters,
+                                                         u32                       parameterCount);
     static const Meta::Method::Parameter s_method_size_overload_0_params[];
     static const Meta::Method::Overload  s_method_size_overloads[];
-    static Meta::Value                   trampoline_method_Index_overload_0(Meta::Value* parameters,
-                                                                            u32          parameterCount);
+    static Meta::Value trampoline_method_Index_overload_0(raw< const Meta::Method > method,
+                                                          Meta::Value*              parameters,
+                                                          u32                       parameterCount);
     static const Meta::Method::Parameter s_method_Index_overload_0_params[];
-    static Meta::Value                   trampoline_method_Index_overload_1(Meta::Value* parameters,
-                                                                            u32          parameterCount);
-    static const Meta::Method::Parameter s_method_Index_overload_1_params[];
-    static const Meta::Method::Overload  s_method_Index_overloads[];
-    static const Meta::ObjectInfo        s_prop_value_type_object_value_type;
-    static const Meta::ScriptingArrayAPI scriptingArrayAPI;
-    static const Meta::ScriptingAPI      scriptingAPI;
+    static Meta::Value trampoline_method_Index_overload_1(raw< const Meta::Method > method,
+                                                          Meta::Value*              parameters,
+                                                          u32                       parameterCount);
+    static const Meta::Method::Parameter  s_method_Index_overload_1_params[];
+    static const Meta::Method::Overload   s_method_Index_overloads[];
+    static const Meta::ObjectInfo         s_prop_value_type_object_value_type;
+    static const Meta::ArrayOperatorTable scriptingArrayAPI;
+    static const Meta::OperatorTable      scriptingAPI;
 
     static MOTOR_EXPORT raw< const Meta::Class > klass();
 };
@@ -67,42 +71,39 @@ Meta::Value ClassID< minitl::array< T > >::indexConst(const Meta::Value& v, u32 
 }
 
 template < typename T >
-Meta::Value
-ClassID< minitl::array< T > >::trampoline_method_size_overload_0(Meta::Value* parameters,
-                                                                 u32          parameterCount)
+Meta::Value ClassID< minitl::array< T > >::trampoline_method_size_overload_0(
+    raw< const Meta::Method > method, Meta::Value* parameters, u32 parameterCount)
 {
-    motor_forceuse(parameters);
+    motor_forceuse(method);
     motor_forceuse(parameterCount);
     return Meta::Value(parameters[0].as< const minitl::array< T >& >().size());
 }
 
 template < typename T >
-Meta::Value
-ClassID< minitl::array< T > >::trampoline_method_Index_overload_0(Meta::Value* parameters,
-                                                                  u32          parameterCount)
+Meta::Value ClassID< minitl::array< T > >::trampoline_method_Index_overload_0(
+    raw< const Meta::Method > method, Meta::Value* parameters, u32 parameterCount)
 {
-    motor_forceuse(parameters);
+    motor_forceuse(method);
     motor_forceuse(parameterCount);
     return Meta::Value(Meta::Value::ByRef(
         parameters[0].as< const minitl::array< T >& >().operator[](parameters[1].as< u32 >())));
 }
 
 template < typename T >
-Meta::Value
-ClassID< minitl::array< T > >::trampoline_method_Index_overload_1(Meta::Value* parameters,
-                                                                  u32          parameterCount)
+Meta::Value ClassID< minitl::array< T > >::trampoline_method_Index_overload_1(
+    raw< const Meta::Method > method, Meta::Value* parameters, u32 parameterCount)
 {
-    motor_forceuse(parameters);
+    motor_forceuse(method);
     motor_forceuse(parameterCount);
     return Meta::Value(Meta::Value::ByRef(
         parameters[0].as< minitl::array< T >& >().operator[](parameters[1].as< u32 >())));
 }
 
 template < typename T >
-Meta::Value
-ClassID< minitl::array< T > >::trampoline_method_array_overload_0(Meta::Value* parameters,
-                                                                  u32          parameterCount)
+Meta::Value ClassID< minitl::array< T > >::trampoline_method_array_overload_0(
+    raw< const Meta::Method > method, Meta::Value* parameters, u32 parameterCount)
 {
+    motor_forceuse(method);
     T* t = (T*)malloca(sizeof(T) * parameterCount);
     for(u32 i = 0; i < parameterCount; ++i)
         new((void*)&t[i]) T(parameters[i].as< T >());
@@ -118,13 +119,8 @@ const Meta::ObjectInfo ClassID< minitl::array< T > >::s_prop_value_type_object_v
     = {{0}, {0}, istring(istring("value_type")), Meta::Value(value_type)};
 
 template < typename T >
-const Meta::Method::Overload ClassID< minitl::array< T > >::s_method_array_overloads[]
-    = {{{0},
-        {0, 0},
-        motor_type< minitl::array< T > >(),
-        true,
-        {0, 0},
-        &trampoline_method_array_overload_0}};
+const Meta::Method::Overload ClassID< minitl::array< T > >::s_method_array_overloads[] = {
+    {{0}, {0, 0}, motor_type< minitl::array< T > >(), true, &trampoline_method_array_overload_0}};
 
 template < typename T >
 const Meta::Method::Parameter ClassID< minitl::array< T > >::s_method_size_overload_0_params[]
@@ -139,7 +135,6 @@ const Meta::Method::Overload ClassID< minitl::array< T > >::s_method_size_overlo
         {1, s_method_size_overload_0_params},
         motor_type< u32 >(),
         false,
-        {0, 0},
         &trampoline_method_size_overload_0}};
 
 template < typename T >
@@ -164,21 +159,20 @@ const Meta::Method::Overload ClassID< minitl::array< T > >::s_method_Index_overl
         {2, s_method_Index_overload_0_params},
         motor_type< const T& >(),
         false,
-        {0, 0},
         &trampoline_method_Index_overload_0},
        {{0},
         {2, s_method_Index_overload_1_params},
         motor_type< T& >(),
         false,
-        {0, 0},
         &trampoline_method_Index_overload_1}};
 
 template < typename T >
-const Meta::ScriptingArrayAPI ClassID< minitl::array< T > >::scriptingArrayAPI
+const Meta::ArrayOperatorTable ClassID< minitl::array< T > >::scriptingArrayAPI
     = {motor_type< T >(), &array_size, &index, &indexConst};
 
 template < typename T >
-const Meta::ScriptingAPI ClassID< minitl::array< T > >::scriptingAPI = {{&scriptingArrayAPI}};
+const Meta::OperatorTable ClassID< minitl::array< T > >::scriptingAPI
+    = {{&scriptingArrayAPI}, {0, 0}};
 
 template < typename T >
 MOTOR_EXPORT raw< const Meta::Class > ClassID< minitl::array< T > >::klass()

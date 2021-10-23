@@ -97,15 +97,19 @@ CallInfo getCost(raw< const Method::Overload > overload, u32 argumentIndices[],
         if(!found)
         {
             // named param not in list
-            return result;
+            cost = ConversionCost::s_incompatible;
+            break;
         }
     }
     result.defaultValuesCount = overload->params.count - placedArgumentCount - namedArgumentCount;
     for(u32 i = 0; i < remainingParamCount - namedArgumentCount; ++i)
     {
         if(!namedParams[namedArgumentCount + i]->defaultValue.operator*())
+        {
             /* named param not in list */
-            return result;
+            cost = ConversionCost::s_incompatible;
+            break;
+        }
     }
     freea(namedParams);
     result.conversion = cost;
@@ -153,8 +157,8 @@ CallInfo resolve(raw< const Method > method, ArgInfo< T > arguments[], u32 argum
 }
 
 template < typename T >
-Value call(CallInfo callInfo, const ArgInfo< T > arguments[], u32 argumentCount,
-           const ArgInfo< T > namedArguments[] = 0, u32 namedArgumentCount = 0)
+Value call(raw< const Method > method, CallInfo callInfo, const ArgInfo< T > arguments[],
+           u32 argumentCount, const ArgInfo< T > namedArguments[] = 0, u32 namedArgumentCount = 0)
 {
     Value*                         v     = (Value*)malloca(sizeof(Value)
                                * (callInfo.overload->params.count + callInfo.variadicCount));
@@ -189,7 +193,7 @@ Value call(CallInfo callInfo, const ArgInfo< T > arguments[], u32 argumentCount,
     {
         convert(namedArguments[i].type, static_cast< void* >(&v[index]), p->type);
     }
-    Value result = callInfo.overload->call(v, argumentCount);
+    Value result = callInfo.overload->call(method, v, argumentCount);
     for(u32 i = callInfo.overload->params.count + callInfo.variadicCount; i > 0; --i)
     {
         v[i - 1].~Value();
@@ -197,7 +201,6 @@ Value call(CallInfo callInfo, const ArgInfo< T > arguments[], u32 argumentCount,
     freea(v);
     return result;
 }
-
 }}  // namespace Motor::Meta
 
 /**************************************************************************************************/

@@ -24,8 +24,8 @@ public:
                                      Meta::Type& propertyType) const override;
 
     public:
-        IntrospectionHint(weak< const Meta::AST::Object > owner, const Meta::CallInfo& callInfo,
-                          u32 argumentThis);
+        IntrospectionHint(weak< const Meta::AST::Object > owner, raw< const Meta::Method > method,
+                          const Meta::CallInfo& callInfo, u32 argumentThis);
         ~IntrospectionHint();
     };
 

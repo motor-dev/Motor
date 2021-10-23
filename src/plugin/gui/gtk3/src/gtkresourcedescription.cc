@@ -2,15 +2,15 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <genericobject.meta.hh>
+#include <gtkresourcedescription.meta.hh>
 
 namespace Motor { namespace Gtk3 {
 
-GenericObject::GenericObject() : Description()
+GtkResourceDescription::GtkResourceDescription() : Description()
 {
 }
 
-GenericObject::~GenericObject()
+GtkResourceDescription::~GtkResourceDescription()
 {
 }
 

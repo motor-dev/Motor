@@ -12,9 +12,10 @@
 
 namespace Motor { namespace Meta { namespace AST {
 
-IntrospectionHint::IntrospectionHint(weak< const Object > owner, const CallInfo& callInfo,
-                                     u32 argumentThis)
+IntrospectionHint::IntrospectionHint(weak< const Object > owner, raw< const Method > method,
+                                     const CallInfo& callInfo, u32 argumentThis)
     : m_owner(owner)
+    , m_method(method)
     , m_callInfo(callInfo)
     , m_argumentThis(argumentThis)
 {
@@ -31,7 +32,7 @@ ConversionCost IntrospectionHint::calculateConversion(const Type& targetType) co
 
 Value IntrospectionHint::call(const ArgInfo parameters[], u32 argumentCount) const
 {
-    return Meta::call(m_callInfo, parameters, m_argumentThis, parameters + m_argumentThis,
+    return Meta::call(m_method, m_callInfo, parameters, m_argumentThis, parameters + m_argumentThis,
                       argumentCount - m_argumentThis);
 }
 
