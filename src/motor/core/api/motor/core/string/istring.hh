@@ -124,7 +124,8 @@ public:
     struct Filename
     {
         char name[MaxFilenameLength];
-             operator const char*() const
+
+        operator const char*() const
         {
             return name;
         }
@@ -151,7 +152,8 @@ public:
     struct Filename
     {
         char name[MaxFilenameLength];
-             operator const char*() const
+
+        operator const char*() const
         {
             return name;
         }

@@ -18,6 +18,7 @@ private:
 public:
     text(const char* str);
     text(const char* begin, const char* end);
+    text(const text& other);
     ~text();
 
     const char* begin() const;
@@ -27,6 +28,7 @@ public:
     u32 size() const;
 
 private:
+    text& operator=(const text& other);
     text();
 };
 
