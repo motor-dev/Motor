@@ -10,6 +10,7 @@
 #include <gflags.hh>
 #include <ginterface.hh>
 #include <gobject.hh>
+#include <gtkresourcedescription.meta.hh>
 
 #include <motor/meta/engine/helper/method.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
@@ -279,7 +280,6 @@ Meta::Type Gtk3Plugin::fromGType(GType type)
 
 Meta::Value Gtk3Plugin::fromGValue(const GValue* value)
 {
-    motor_forceuse(value);
     motor_assert(value != 0, "NULL value");
     GType type = G_VALUE_TYPE(value);
     if(G_TYPE_FUNDAMENTAL(type) == G_TYPE_GTYPE)
@@ -294,7 +294,8 @@ Meta::Value Gtk3Plugin::fromGValue(const GValue* value)
     case G_TYPE_INTERFACE:
     {
         raw< const Meta::Class > cls    = getGInterfaceClass(*this, type);
-        GObject*                 object = reinterpret_cast< GObject* >(g_value_get_object(value));
+        GObjectWrapper           object = {reinterpret_cast< GObject* >(g_value_get_object(value))};
+
         return Meta::Value(
             Meta::Type::makeType(cls, Meta::Type::Value, Meta::Type::Mutable, Meta::Type::Mutable),
             &object, Meta::Value::MakeCopy);
@@ -311,7 +312,7 @@ Meta::Value Gtk3Plugin::fromGValue(const GValue* value)
     case G_TYPE_ENUM:
     {
         raw< const Meta::Class > cls       = getGEnumClass(*this, type);
-        const gint               enumValue = g_value_get_enum(value);
+        GEnumWrapper             enumValue = {g_value_get_enum(value)};
         return Meta::Value(
             Meta::Type::makeType(cls, Meta::Type::Value, Meta::Type::Mutable, Meta::Type::Mutable),
             &enumValue, Meta::Value::MakeCopy);
@@ -319,7 +320,7 @@ Meta::Value Gtk3Plugin::fromGValue(const GValue* value)
     case G_TYPE_FLAGS:
     {
         raw< const Meta::Class > cls        = getGFlagsClass(*this, type);
-        const guint              flagsValue = g_value_get_flags(value);
+        GFlagsWrapper            flagsValue = {g_value_get_flags(value)};
         return Meta::Value(
             Meta::Type::makeType(cls, Meta::Type::Value, Meta::Type::Mutable, Meta::Type::Mutable),
             &flagsValue, Meta::Value::MakeCopy);
@@ -331,7 +332,7 @@ Meta::Value Gtk3Plugin::fromGValue(const GValue* value)
     {
         // raw< const Meta::Class > cls = getGBoxedClass(*this, type);
         raw< const Meta::Class > cls        = getGBoxedClass(*this, type);
-        const gpointer           boxedValue = g_value_get_boxed(value);
+        GBoxedWrapper            boxedValue = {g_value_get_boxed(value)};
         return Meta::Value(
             Meta::Type::makeType(cls, Meta::Type::Value, Meta::Type::Mutable, Meta::Type::Mutable),
             &boxedValue, Meta::Value::MakeCopy);
@@ -339,7 +340,7 @@ Meta::Value Gtk3Plugin::fromGValue(const GValue* value)
     case G_TYPE_OBJECT:
     {
         raw< const Meta::Class > cls    = getGObjectClass(*this, type);
-        GObject*                 object = reinterpret_cast< GObject* >(g_value_get_object(value));
+        GObjectWrapper           object = {reinterpret_cast< GObject* >(g_value_get_object(value))};
         return Meta::Value(
             Meta::Type::makeType(cls, Meta::Type::Value, Meta::Type::Mutable, Meta::Type::Mutable),
             &object, Meta::Value::MakeCopy);

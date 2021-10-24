@@ -38,11 +38,12 @@ static void completeGObjectClass(Gtk3Plugin& plugin, Meta::Class* cls, GType typ
                        | g_param_spec_get_name(paramSpecs[i]));
             continue;
         }
-        if(paramSpecs[i]->flags & (G_PARAM_READWRITE | G_PARAM_CONSTRUCT))
+        if(((paramSpecs[i]->flags & G_PARAM_READWRITE) == G_PARAM_READWRITE)
+           || (paramSpecs[i]->flags & G_PARAM_CONSTRUCT))
         {
             constructorParameterCount++;
         }
-        if((paramSpecs[i]->flags & G_PARAM_READABLE)
+        if((paramSpecs[i]->flags & G_PARAM_READWRITE)
            && !(paramSpecs[i]->flags & G_PARAM_CONSTRUCT_ONLY))
         {
             propertyCount++;
@@ -74,7 +75,8 @@ static void completeGObjectClass(Gtk3Plugin& plugin, Meta::Class* cls, GType typ
                 {
                     continue;
                 }
-                if(paramSpecs[i]->flags & (G_PARAM_READWRITE | G_PARAM_CONSTRUCT))
+                if(((paramSpecs[i]->flags & G_PARAM_READWRITE) == G_PARAM_READWRITE)
+                   || (paramSpecs[i]->flags & G_PARAM_CONSTRUCT))
                 {
                     Meta::Value* defaultValue = plugin.allocate< Meta::Value >();
                     new(defaultValue) Meta::Value(
@@ -93,7 +95,7 @@ static void completeGObjectClass(Gtk3Plugin& plugin, Meta::Class* cls, GType typ
         Meta::Method::Overload overloadTemplate
             = {{0},
                {constructorParameterCount, parameters},
-               Meta::Type::makeType(metaclass, Meta::Type::RefPtr, Meta::Type::Mutable,
+               Meta::Type::makeType(metaclass, Meta::Type::Value, Meta::Type::Mutable,
                                     Meta::Type::Mutable),
                false,
                &Constructor::call};

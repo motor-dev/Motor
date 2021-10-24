@@ -37,7 +37,7 @@ raw< const Meta::Class > getGBoxedClass(Gtk3Plugin& plugin, GType type)
                                    0,
                                    Meta::ClassType_Pod,
                                    {0},
-                                   parent ? getGBoxedClass(plugin, parent) : motor_class< void >(),
+                                   parentClass,
                                    {0},
                                    {0},
                                    {0, 0},
