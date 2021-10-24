@@ -20,6 +20,12 @@ text::text(const char* begin, const char* end)
 {
 }
 
+text::text(const text& other)
+    : m_text(other.m_text ? Arena::general().strdup(other.begin(), other.end()) : 0)
+    , m_length(other.m_length)
+{
+}
+
 text::~text()
 {
     Arena::general().free(m_text);
