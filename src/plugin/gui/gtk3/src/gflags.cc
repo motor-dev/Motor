@@ -37,7 +37,7 @@ raw< const Meta::Class > getGFlagsClass(Gtk3Plugin& plugin, GType type)
                                    0,
                                    Meta::ClassType_Number,
                                    {0},
-                                   parent ? getGFlagsClass(plugin, parent) : motor_class< void >(),
+                                   parentClass,
                                    {0},
                                    {0},
                                    {0, 0},

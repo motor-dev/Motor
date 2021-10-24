@@ -4,3 +4,9 @@ load plugin.gui.gtk3 as gtk;
 application = gtk.GtkApplication
 (
 );
+
+window = gtk.GtkWindow
+(
+    application = application;
+    title = "GTK Sample Window";
+);

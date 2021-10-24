@@ -11,25 +11,25 @@ namespace Motor { namespace Gtk3 {
 struct GBoxedWrapper
 {
 public:
-    gpointer gobject;
+    gpointer value;
 };
 
 struct GEnumWrapper
 {
 public:
-    gint gobject;
+    gint value;
 };
 
 struct GFlagsWrapper
 {
 public:
-    guint gobject;
+    guint value;
 };
 
 struct GObjectWrapper
 {
 public:
-    GObject* gobject;
+    GObject* value;
 };
 
 class GtkResourceDescription : public Resource::Description
