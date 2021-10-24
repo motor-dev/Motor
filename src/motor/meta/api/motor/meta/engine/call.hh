@@ -106,7 +106,7 @@ CallInfo getCost(raw< const Method::Overload > overload, u32 argumentIndices[],
     {
         if(!namedParams[namedArgumentCount + i]->defaultValue.operator*())
         {
-            /* named param not in list */
+            /* no default value */
             cost = ConversionCost::s_incompatible;
             break;
         }
@@ -160,8 +160,8 @@ template < typename T >
 Value call(raw< const Method > method, CallInfo callInfo, const ArgInfo< T > arguments[],
            u32 argumentCount, const ArgInfo< T > namedArguments[] = 0, u32 namedArgumentCount = 0)
 {
-    Value*                         v     = (Value*)malloca(sizeof(Value)
-                               * (callInfo.overload->params.count + callInfo.variadicCount));
+    const u32 totalParameterCount        = callInfo.overload->params.count + callInfo.variadicCount;
+    Value*    v                          = (Value*)malloca(sizeof(Value) * totalParameterCount);
     const Method::Parameter* const begin = callInfo.overload->params.begin();
     const Method::Parameter*       p     = begin;
     for(u32 i = 0; i < argumentCount - callInfo.variadicCount; ++i, ++p)
@@ -193,14 +193,15 @@ Value call(raw< const Method > method, CallInfo callInfo, const ArgInfo< T > arg
     {
         convert(namedArguments[i].type, static_cast< void* >(&v[index]), p->type);
     }
-    Value result = callInfo.overload->call(method, v, argumentCount);
-    for(u32 i = callInfo.overload->params.count + callInfo.variadicCount; i > 0; --i)
+    Value result = callInfo.overload->call(method, v, totalParameterCount);
+    for(u32 i = totalParameterCount; i > 0; --i)
     {
         v[i - 1].~Value();
     }
     freea(v);
     return result;
 }
+
 }}  // namespace Motor::Meta
 
 /**************************************************************************************************/
