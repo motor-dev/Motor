@@ -19,23 +19,35 @@ class Application::WorldResource : public minitl::refcountable
     MOTOR_NOCOPY(WorldResource);
 
 private:
-    Task::TaskGroup::TaskStartConnection m_startSceneUpdate;
-    Task::TaskGroup::TaskEndConnection   m_endSceneUpdate;
+    ref< const World::WorldRuntime > m_worldRuntime;
+    Task::ITask::CallbackConnection  m_startSceneUpdate;
+    Task::ITask::CallbackConnection  m_endSceneUpdate;
 
 public:
-    WorldResource(weak< const World::World > world, weak< Task::TaskGroup > task);
+    WorldResource(const Plugin::Context& context, weak< const World::World > world,
+                  weak< Task::TaskGroup > task);
     ~WorldResource();
+
+    void disconnect();
 };
 
-Application::WorldResource::WorldResource(weak< const World::World > world,
+Application::WorldResource::WorldResource(const Plugin::Context&     context,
+                                          weak< const World::World > world,
                                           weak< Task::TaskGroup >    task)
-    : m_startSceneUpdate(task, world->updateWorldTask())
-    , m_endSceneUpdate(task, world->updateWorldTask())
+    : m_worldRuntime(world->createRuntime(context))
+    , m_startSceneUpdate(task, m_worldRuntime->startUpdateTask()->startCallback())
+    , m_endSceneUpdate(m_worldRuntime->startUpdateTask(), task->startCallback())
 {
 }
 
 Application::WorldResource::~WorldResource()
 {
+}
+
+void Application::WorldResource::disconnect()
+{
+    m_startSceneUpdate = Task::ITask::CallbackConnection();
+    m_endSceneUpdate   = Task::ITask::CallbackConnection();
 }
 
 Application::Application(ref< Folder >                     dataFolder,
@@ -47,25 +59,22 @@ Application::Application(ref< Folder >                     dataFolder,
     , m_resourceManager(resourceManager)
     , m_pluginContext(resourceManager, m_dataFolder, m_scheduler)
     , m_cpuKernelScheduler("plugin.compute.cpu", m_pluginContext)
-    , m_updateTask(ref< Task::TaskGroup >::create(Arena::task(), "applicationUpdate",
+    , m_updateTask(ref< Task::TaskGroup >::create(Arena::task(), "application:update",
                                                   Colors::Yellow::Yellow))
-    , m_worldTask(
-          ref< Task::TaskGroup >::create(Arena::task(), "worldUpdate", Colors::Yellow::Yellow))
     , m_tasks(Arena::task())
-    , m_updateLoop(m_updateTask, m_worldTask->startCallback())
+    , m_worlds(Arena::task())
     , m_forceContinue()
-    , m_worldLoop(m_worldTask, m_updateTask->startCallback())
     , m_resourceLoadingCount(0)
     , m_worldCount(0)
     , m_runLoop(true)
 {
     m_resourceManager->attach< World::World >(this);
     addTask(ref< Task::Task< Task::MethodCaller< Application, &Application::updateResources > > >::
-                create(Arena::task(), "resource", Colors::Green::Green,
+                create(Arena::task(), "application:update_resource", Colors::Green::Green,
                        Task::MethodCaller< Application, &Application::updateResources >(this)));
     addTask(
         ref< Task::Task< Task::MethodCaller< Application, &Application::frameUpdate > > >::create(
-            Arena::task(), "update", Colors::Green::Green,
+            Arena::task(), "application:update_sync", Colors::Green::Green,
             Task::MethodCaller< Application, &Application::frameUpdate >(this)));
     registerInterruptions();
 }
@@ -104,31 +113,36 @@ int Application::run()
     return 0;
 }
 
-void Application::load(weak< const Resource::Description > world, Resource::Resource& resource)
+void Application::load(weak< const Resource::Description > desc, Resource::Resource& resource)
 {
-    if(m_worldCount == 0)
-    {
-        m_updateLoop = Task::ITask::CallbackConnection(m_updateTask, m_worldTask->startCallback());
-    }
     m_worldCount++;
-    resource.setRefHandle(ref< WorldResource >::create(
-        Arena::resource(), motor_checked_cast< const World::World >(world), m_worldTask));
+    weak< const World::World > world = motor_checked_cast< const World::World >(desc);
+    ref< WorldResource >       runtime
+        = ref< WorldResource >::create(Arena::resource(), m_pluginContext, world, m_updateTask);
+    m_worlds.push_back(runtime);
+    resource.setRefHandle(runtime);
 }
 
-void Application::reload(weak< const Resource::Description > /*oldWorld*/,
-                         weak< const Resource::Description > newWorld, Resource::Resource& resource)
+void Application::unload(weak< const Resource::Description > desc, Resource::Resource& resource)
 {
-    unload(resource);
-    load(newWorld, resource);
-}
-
-void Application::unload(Resource::Resource& resource)
-{
+    motor_forceuse(desc);
     m_worldCount--;
     if(m_worldCount == 0)
     {
         motor_info("Last World destroyed - stopping application");
-        m_worldLoop = Task::ITask::CallbackConnection();
+    }
+    {
+        weak< WorldResource > runtime = resource.getRefHandle< WorldResource >();
+        for(minitl::vector< ref< WorldResource > >::iterator it = m_worlds.begin();
+            it != m_worlds.end(); ++it)
+        {
+            if(*it == runtime)
+            {
+                minitl::swap(*it, m_worlds.back());
+                m_worlds.pop_back();
+                break;
+            }
+        }
     }
     resource.clearRefHandle();
 }
@@ -143,12 +157,16 @@ void Application::updateResources()
     else if(resourceCount != 0 && m_resourceLoadingCount == 0)
     {
         m_forceContinue
-            = Task::ITask::CallbackConnection(m_worldTask, m_updateTask->startCallback());
+            = Task::ITask::CallbackConnection(m_updateTask, m_updateTask->startCallback());
     }
     m_resourceLoadingCount = resourceCount;
     if(!m_runLoop)
     {
-        m_worldLoop = Task::ITask::CallbackConnection();
+        motor_info("interrupt - stopping application (%d resource loading)"
+                   | m_resourceLoadingCount);
+        for(minitl::vector< ref< WorldResource > >::iterator it = m_worlds.begin();
+            it != m_worlds.end(); ++it)
+            (*it)->disconnect();
     }
 }
 

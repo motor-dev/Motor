@@ -28,6 +28,29 @@ global_macro_map = {
     "PASCAL": False,
 }
 
+
+def find_kernels(namespace, kernel_list):
+    for m in namespace.objects:
+        if isinstance(m, tree.Namespace):
+            find_kernels(m, kernel_list)
+        elif isinstance(m, tree.OverloadedMethod):
+            for overload in m.overloads:
+                if '__kernel' in overload.attributes:
+                    if len(m.overloads) > 1:
+                        raise Exception("cannot overload a kernel method")
+                    m = m.overloads[0]
+                    args = []
+                    arg0 = m.parameters[0]
+                    if arg0.type.strip() != 'u32' and arg0.type.strip() != 'const u32':
+                        raise Exception("invalid signature for method kmain")
+                    arg1 = m.parameters[1]
+                    if arg1.type.strip() != 'u32' and arg1.type.strip() != 'const u32':
+                        raise Exception("invalid signature for method kmain")
+                    for arg in m.parameters[2:]:
+                        args.append((arg.name, arg.type))
+                    kernel_list.append((m, namespace.name, args))
+
+
 if __name__ == '__main__':
     (options, arguments) = option_decl.parse_args()
     if not arguments:
@@ -45,23 +68,7 @@ if __name__ == '__main__':
             if not result:
                 sys.exit(1)
             kernels = []
-            for m in result.objects:
-                if isinstance(m, tree.OverloadedMethod):
-                    for overload in m.overloads:
-                        if '__kernel' in overload.attributes:
-                            if len(m.overloads) > 1:
-                                raise Exception("cannot overload a kernel method")
-                            m = m.overloads[0]
-                            args = []
-                            arg0 = m.parameters[0]
-                            if arg0.type.strip() != 'u32' and arg0.type.strip() != 'const u32':
-                                raise Exception("invalid signature for method kmain")
-                            arg1 = m.parameters[1]
-                            if arg1.type.strip() != 'u32' and arg1.type.strip() != 'const u32':
-                                raise Exception("invalid signature for method kmain")
-                            for arg in m.parameters[2:]:
-                                args.append((arg.name, arg.type))
-                            kernels.append((m, args))
+            find_kernels(result, kernels)
 
             if len(kernels) == 0:
                 raise Exception("could not locate any kernel method in kernel")

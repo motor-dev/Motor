@@ -33,7 +33,8 @@ void BitmapFontManager::reload(weak< const Resource::Description > /*oldDescript
     motor_info("reloading bitmap font");
 }
 
-void BitmapFontManager::unload(Resource::Resource& /*resource*/)
+void BitmapFontManager::unload(weak< const Resource::Description > /*description*/,
+                               Resource::Resource& /*resource*/)
 {
     motor_info("unloading bitmap font");
 }

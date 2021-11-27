@@ -82,6 +82,7 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, extra_fea
         pchstop=pchstop,
         source=preprocess_sources,
         kernels=[],
+        kernels_cpu=[],
         includes=includes,
         source_nodes=source_nodes,
         root_namespace=root_namespace
@@ -91,14 +92,30 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, extra_fea
         if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
             kernelspath = source_node.make_node('kernels')
             for kernel in kernelspath.ant_glob('**'):
-                kernel_name = os.path.splitext(kernel.path_from(kernelspath))[0]
+                kernel_name, kernel_ext = os.path.splitext(kernel.path_from(kernelspath))
                 kernel_name = re.split('[\\\\/]', kernel_name)
-                preprocess.kernels.append(
-                    (
-                        kernel_name, kernel, kernelspath,
-                        preprocess.make_bld_node('src/kernels', None, '%s.ast' % (os.path.join(*kernel_name)))
+                if kernel_ext in ('.cl', ):
+                    preprocess.kernels.append(
+                        (
+                            kernel_name, kernel, kernelspath,
+                            preprocess.make_bld_node('src/kernels', None, '%s.ast' % (os.path.join(*kernel_name)))
+                        )
                     )
-                )
+                elif kernel_ext in (
+                    '.cc',
+                    '.cpp',
+                ):
+                    preprocess.kernels_cpu.append(
+                        (
+                            kernel_name, kernel, kernelspath,
+                            preprocess.make_bld_node('src/kernels', None, '%s.ast' % (os.path.join(*kernel_name)))
+                        )
+                    )
+                else:
+                    raise Errors.WafError(
+                        '%s: unknown kernel type. SUpported kernels are written in C++ (.cc, .cpp) or OpenCL-C++ (.cl)'
+                        % kernel
+                    )
 
     return preprocess
 

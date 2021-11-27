@@ -20,10 +20,8 @@ public:
 
     virtual void load(weak< const Resource::Description > codeDescription,
                       Resource::Resource&                 resource) override;
-    virtual void reload(weak< const Resource::Description > codeOldDescription,
-                        weak< const Resource::Description > codeNewDescription,
+    virtual void unload(weak< const Resource::Description > scodeDescription,
                         Resource::Resource&                 resource) override;
-    virtual void unload(Resource::Resource& resource) override;
 };
 
 }}}  // namespace Motor::KernelScheduler::CPU

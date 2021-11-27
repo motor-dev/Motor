@@ -65,7 +65,8 @@ void Scheduler::queueKernel(weak< Task::KernelTask >                            
         = scheduler->allocateItem(task, task->m_kernel, paramCount);
     for(u32 i = 0; i < paramCount; ++i)
     {
-        item->m_parameters[i] = parameters[i]->getBank(memHost);
+        // TODO: retrieve buffer from the parameter
+        // item->m_parameters[i] = ...;
     }
     scheduler->run(item);
 }

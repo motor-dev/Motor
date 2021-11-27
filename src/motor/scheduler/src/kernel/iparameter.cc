@@ -67,10 +67,4 @@ minitl::vector< raw< const Meta::Class > >& IParameter::parameterClasses()
     return s_classes;
 }
 
-const istring IParameter::getProductTypePropertyName()
-{
-    static istring s_producTypePropertyName("productType");
-    return s_producTypePropertyName;
-}
-
 }}  // namespace Motor::KernelScheduler

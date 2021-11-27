@@ -34,7 +34,8 @@ void Gtk3Loader::reload(weak< const Resource::Description > oldDescription,
     motor_forceuse(resource);
 }
 
-void Gtk3Loader::unload(Resource::Resource& resource)
+void Gtk3Loader::unload(weak< const Resource::Description > /*description*/,
+                        Resource::Resource& resource)
 {
     resource.clearRefHandle();
 }

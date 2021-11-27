@@ -22,7 +22,8 @@ public:
     ~Context();
 
 private:
-    virtual void unload(Resource::Resource & handle) override;
+    virtual void unload(weak< const Resource::Description > description,
+                        Resource::Resource & handle) override;
     virtual void runBuffer(weak< const PythonScript > script, Resource::Resource & resource,
                            const minitl::Allocator::Block< u8 >& buffer) override;
     virtual void reloadBuffer(weak< const PythonScript > script, Resource::Resource & resource,

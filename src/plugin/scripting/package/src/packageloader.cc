@@ -30,7 +30,8 @@ PackageLoader::~PackageLoader()
 {
 }
 
-void PackageLoader::unload(Resource::Resource& handle)
+void PackageLoader::unload(weak< const Resource::Description > /*description*/,
+                           Resource::Resource& handle)
 {
     {
         weak< PackageBuilder::Nodes::Package > package

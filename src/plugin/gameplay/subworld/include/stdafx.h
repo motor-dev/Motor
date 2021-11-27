@@ -1,17 +1,11 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_WORLD_COMPONENT_COMPONENTOPERATION_HH_
-#define MOTOR_WORLD_COMPONENT_COMPONENTOPERATION_HH_
+#ifndef MOTOR_GAMEPLAY_SUBWORLD_STDAFX_H_
+#define MOTOR_GAMEPLAY_SUBWORLD_STDAFX_H_
 /**************************************************************************************************/
 
-namespace Motor { namespace World { namespace Component {
-
-struct ComponentOperation
-{
-};
-
-}}}  // namespace Motor::World::Component
+#include <motor/stdafx.h>
 
 /**************************************************************************************************/
 #endif

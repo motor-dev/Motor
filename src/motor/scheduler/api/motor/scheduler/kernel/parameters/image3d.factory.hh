@@ -35,7 +35,6 @@ struct ClassID< KernelScheduler::Image3D< T > >
     }
     static const Meta::Method::Overload s_ctrOverload;
     static const Meta::Method           s_ctr;
-    static Meta::ObjectInfo             s_productClass;
     static MOTOR_EXPORT KernelScheduler::IParameter::ParameterRegistration s_registration;
 
     static MOTOR_EXPORT raw< const Meta::Class > klass()
@@ -47,7 +46,7 @@ struct ClassID< KernelScheduler::Image3D< T > >
                Meta::ClassType_Object,
                {0},
                motor_class< KernelScheduler::IParameter >(),
-               {&s_productClass},
+               {0},
                {0},
                {0, 0},
                {1, &s_ctr},
@@ -70,13 +69,6 @@ const Meta::Method ClassID< KernelScheduler::Image3D< T > >::s_ctr
     = {Meta::Class::nameConstructor(),
        {1, &s_ctrOverload},
        {&ClassID< KernelScheduler::Image3D< T > >::s_ctr}};
-
-template < typename T >
-Meta::ObjectInfo ClassID< KernelScheduler::Image3D< T > >::s_productClass
-    = {{0},
-       {0},
-       KernelScheduler::IParameter::getProductTypePropertyName(),
-       Value(motor_type< ref< KernelScheduler::Product< KernelScheduler::Image3D< T > > > >())};
 
 template < typename T >
 KernelScheduler::IParameter::ParameterRegistration

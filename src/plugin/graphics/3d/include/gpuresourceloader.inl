@@ -5,8 +5,8 @@
 #define MOTOR_3D_RENDERER_GPURESOURCELOADER_INL_
 /**************************************************************************************************/
 #include <motor/plugin.graphics.3d/stdafx.h>
-#include <gpuresourceloader.hh>
 #include <motor/plugin.graphics.3d/renderer/igpuresource.hh>
+#include <gpuresourceloader.hh>
 
 namespace Motor {
 
@@ -32,16 +32,8 @@ void GPUResourceLoader< R >::load(weak< const Resource::Description > descriptio
 }
 
 template < typename R >
-void GPUResourceLoader< R >::reload(weak< const Resource::Description > /*oldDescription*/,
-                                    weak< const Resource::Description > newDescription,
-                                    Resource::Resource&                 resource)
-{
-    unload(resource);
-    load(newDescription, resource);
-}
-
-template < typename R >
-void GPUResourceLoader< R >::unload(Resource::Resource& resource)
+void GPUResourceLoader< R >::unload(weak< const Resource::Description > /*description*/,
+                                    Resource::Resource& resource)
 {
     weak< IGPUResource > gpuResource = resource.getRefHandle< IGPUResource >();
     gpuResource->m_resource.clear();

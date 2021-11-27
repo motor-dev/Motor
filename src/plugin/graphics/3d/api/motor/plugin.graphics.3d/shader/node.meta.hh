@@ -1,8 +1,8 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_3D_SHADER_NODE_SCRIPT_HH_
-#define MOTOR_3D_SHADER_NODE_SCRIPT_HH_
+#ifndef MOTOR_3D_SHADER_NODE_META_HH_
+#define MOTOR_3D_SHADER_NODE_META_HH_
 /**************************************************************************************************/
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/core/memory/streams.hh>

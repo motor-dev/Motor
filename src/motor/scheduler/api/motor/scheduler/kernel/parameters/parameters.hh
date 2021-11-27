@@ -6,28 +6,6 @@
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 
-namespace Motor { namespace KernelScheduler {
-
-template < typename T >
-struct ParamTypeToKernelType
-{
-    // typedef TODO Type;
-};
-
-template < typename T >
-struct ParamTypeToKernelType< T* >
-{
-    // typedef TODO Type;
-};
-
-template < typename T >
-struct ParamTypeToKernelType< T& >
-{
-    // typedef TODO Type;
-};
-
-}}  // namespace Motor::KernelScheduler
-
 #include <motor/scheduler/kernel/parameters/image1d.hh>
 #include <motor/scheduler/kernel/parameters/image2d.hh>
 #include <motor/scheduler/kernel/parameters/image3d.hh>

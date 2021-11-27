@@ -11,8 +11,9 @@ ResourceManager::LoaderInfo::LoaderInfo() : classinfo(), loaders(Arena::resource
 {
 }
 
-ResourceManager::ResourceManager()
-    : m_loaders(Arena::resource(), 1024)
+ResourceManager::ResourceManager(weak< ResourceManager > parent)
+    : m_parent(parent)
+    , m_loaders(Arena::resource(), 1024)
     , m_tickets(Arena::resource())
     , m_pendingTickets(Arena::resource())
     , m_watches(Arena::resource())
@@ -23,7 +24,8 @@ ResourceManager::~ResourceManager()
 {
 }
 
-ResourceManager::LoaderInfo& ResourceManager::getLoaderInfo(raw< const Meta::Class > classinfo)
+ResourceManager::LoaderInfo& ResourceManager::getLoaderInfo(raw< const Meta::Class > classinfo,
+                                                            bool                     recursive)
 {
     for(minitl::array< LoaderInfo >::iterator it = m_loaders.begin(); it != m_loaders.end(); ++it)
     {
@@ -34,8 +36,15 @@ ResourceManager::LoaderInfo& ResourceManager::getLoaderInfo(raw< const Meta::Cla
             return *it;
         }
     }
-    motor_notreached();
-    return m_loaders[0];
+    if(recursive && m_parent)
+    {
+        return m_parent->getLoaderInfo(classinfo);
+    }
+    else
+    {
+        motor_notreached();
+        return m_loaders[0];
+    }
 }
 
 void ResourceManager::attach(raw< const Meta::Class > classinfo, weak< ILoader > loader)
@@ -63,13 +72,13 @@ void ResourceManager::detach(raw< const Meta::Class > classinfo, weak< const ILo
     {
         if(it->loader == loader)
         {
-            it->outdated = true;
+            it->expired  = true;
             it->file     = weak< const File >();
             it->resource = weak< const Description >();
             it->loader   = weak< ILoader >();
         }
     }
-    LoaderInfo& info = getLoaderInfo(classinfo);
+    LoaderInfo& info = getLoaderInfo(classinfo, false);
     for(minitl::vector< weak< ILoader > >::iterator it = info.loaders.begin();
         it != info.loaders.end();)
     {
@@ -120,7 +129,7 @@ void ResourceManager::unload(raw< const Meta::Class >  classinfo,
     {
         if(it->resource == description)
         {
-            it->outdated = true;
+            it->expired  = true;
             it->file     = weak< const File >();
             it->resource = weak< const Description >();
             it->loader   = weak< ILoader >();
@@ -141,7 +150,7 @@ void ResourceManager::addTicket(weak< ILoader > loader, weak< const Description 
     ticket.progress  = 0;
     ticket.fileType  = fileType;
     ticket.loadType  = loadType;
-    ticket.outdated  = false;
+    ticket.expired   = false;
     m_pendingTickets.push_back(ticket);
 }
 
@@ -190,7 +199,7 @@ size_t ResourceManager::updateTickets()
     for(minitl::vector< Ticket >::iterator it = m_watches.begin(); it != m_watches.end();
         /*nothing*/)
     {
-        if(it->outdated)
+        if(it->expired)
         {
             it = m_watches.erase(it);
         }

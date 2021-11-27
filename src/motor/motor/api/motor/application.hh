@@ -42,11 +42,9 @@ private:
     Plugin::Context const                               m_pluginContext;
     Plugin::Plugin< KernelScheduler::IKernelScheduler > m_cpuKernelScheduler;
     ref< Task::TaskGroup >                              m_updateTask;
-    ref< Task::TaskGroup >                              m_worldTask;
     minitl::vector< UpdateTask >                        m_tasks;
-    Task::ITask::CallbackConnection                     m_updateLoop;
+    minitl::vector< ref< WorldResource > >              m_worlds;
     Task::ITask::CallbackConnection                     m_forceContinue;
-    Task::ITask::CallbackConnection                     m_worldLoop;
     size_t                                              m_resourceLoadingCount;
     u32                                                 m_worldCount;
     bool                                                m_runLoop;
@@ -56,12 +54,10 @@ private:
     void updateResources();
 
 private:
-    virtual void load(weak< const Resource::Description > scene, Resource::Resource & resource)
+    virtual void load(weak< const Resource::Description > world, Resource::Resource & resource)
         override;
-    virtual void reload(weak< const Resource::Description > oldScene,
-                        weak< const Resource::Description > newScene, Resource::Resource & resource)
-        override;
-    virtual void unload(Resource::Resource & resource) override;
+    virtual void unload(weak< const Resource::Description > /*world*/,
+                        Resource::Resource & resource) override;
 
 private:
     void registerInterruptions();
@@ -80,10 +76,6 @@ protected:
     weak< Task::ITask > applicationUpdateTask() const
     {
         return m_updateTask;
-    }
-    weak< Task::ITask > worlUpdateTask() const
-    {
-        return m_worldTask;
     }
 
 public:

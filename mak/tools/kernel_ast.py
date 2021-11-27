@@ -18,7 +18,7 @@ class kernel_ast(Task.Task):
 @feature('motor:preprocess')
 @before_method('process_source')
 def kernel_generate_ast(self):
-    for kernel, source, path, out in getattr(self, 'kernels', []):
+    for kernel, source, path, out in getattr(self, 'kernels', []) + getattr(self, 'kernels_cpu', []):
         out.parent.mkdir()
         self.source.append(out)
 

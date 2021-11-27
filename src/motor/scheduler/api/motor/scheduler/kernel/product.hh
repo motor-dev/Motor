@@ -13,23 +13,12 @@ template < typename T >
 class Product : public IProduct
 {
 public:
-    Product(ref< T > parameter, weak< Task::ITask > producer) : IProduct(parameter, producer)
-    {
-    }
-
-    Product(weak< const Product > other, weak< Task::ITask > producer)
-        : IProduct(other->m_parameter, producer)
+    Product(weak< const Producer > producer) : IProduct(producer)
     {
     }
 
     ~Product()
     {
-    }
-
-public:
-    weak< T > parameter() const
-    {
-        return motor_checked_cast< T >(m_parameter);
     }
 };
 

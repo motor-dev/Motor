@@ -29,15 +29,8 @@ void KernelLoader::load(weak< const Resource::Description > kernelDescription,
     resource.setRefHandle(ref< KernelObject >::create(Arena::task(), code, kernel->name()));
 }
 
-void KernelLoader::reload(weak< const Resource::Description > /*oldKernelDescription*/,
-                          weak< const Resource::Description > newKernelDescription,
-                          Resource::Resource&                 resource)
-{
-    unload(resource);
-    load(newKernelDescription, resource);
-}
-
-void KernelLoader::unload(Resource::Resource& resource)
+void KernelLoader::unload(weak< const Resource::Description > /*kernelDescription*/,
+                          Resource::Resource& resource)
 {
     resource.clearRefHandle();
 }

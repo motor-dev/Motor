@@ -1,8 +1,8 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_META_CONVERSION_SCRIPT_HH_
-#define MOTOR_META_CONVERSION_SCRIPT_HH_
+#ifndef MOTOR_META_CONVERSION_META_HH_
+#define MOTOR_META_CONVERSION_META_HH_
 /**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 

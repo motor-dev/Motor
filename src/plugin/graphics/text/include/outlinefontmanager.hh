@@ -29,7 +29,8 @@ public:
     void reload(weak< const Resource::Description > oldDescription,
                 weak< const Resource::Description > newDescription,
                 Resource::Resource&                 resource) override;
-    void unload(Resource::Resource& resource) override;
+    void unload(weak< const Resource::Description > description,
+                Resource::Resource&                 resource) override;
     void onTicketLoaded(weak< const Resource::Description > description,
                         Resource::Resource& resource, const minitl::Allocator::Block< u8 >& buffer,
                         LoadType type) override;

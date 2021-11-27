@@ -5,9 +5,9 @@
 #define MOTOR_TEXT_BITMAPFONTMANAGER_HH_
 /**************************************************************************************************/
 #include <motor/plugin.graphics.text/stdafx.h>
-#include <freetypelib.hh>
 #include <motor/resource/loader.hh>
 #include <motor/resource/resourcemanager.hh>
+#include <freetypelib.hh>
 
 namespace Motor {
 
@@ -31,7 +31,8 @@ public:
     void reload(weak< const Resource::Description > oldDescription,
                 weak< const Resource::Description > newDescription,
                 Resource::Resource&                 resource) override;
-    void unload(Resource::Resource& resource) override;
+    void unload(weak< const Resource::Description > description,
+                Resource::Resource&                 resource) override;
     void onTicketLoaded(weak< const Resource::Description > description,
                         Resource::Resource& resource, const minitl::Allocator::Block< u8 >& buffer,
                         LoadType type) override;

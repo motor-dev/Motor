@@ -14,13 +14,6 @@ namespace Motor { namespace KernelScheduler {
 template < typename T >
 class Stream : public IParameter
 {
-protected:
-    ref< IProduct > makeProduct(ref< IParameter > parameter, weak< Task::ITask > task)
-    {
-        return ref< Product< Stream< T > > >::create(
-            Arena::task(), motor_checked_cast< Stream< T > >(parameter), task);
-    }
-
 public:
     Stream()
     {

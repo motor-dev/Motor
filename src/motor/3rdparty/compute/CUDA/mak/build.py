@@ -74,13 +74,14 @@ class cudac(Task.Task):
             kernel_name, includes, source, kernel_methods = pickle.load(input_file)
 
         kernels = []
-        for method, args in kernel_methods:
+        for method, namespace, args in kernel_methods:
             args = []
             for arg in method.parameters[2:]:
                 args.append((arg.name, arg.type))
             kernel_params = {
                 'args': ',\n          '.join('%s(0, 0, 0)' % arg[1] for i, arg in enumerate(args)),
-                'kernel': method.name
+                'kernel': method.name,
+                'kernelnamespace': '::'.join(namespace)
             }
             kernels.append(template_kernel % kernel_params)
         params = {

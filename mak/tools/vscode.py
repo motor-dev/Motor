@@ -187,6 +187,20 @@ class vscode(Build.BuildContext):
                                             task.outputs[0].path_from(task.get_cwd())
                                     }
                                 )
+                            elif task.__class__.__name__ in ('cpuc'):
+                                commands.append(
+                                    {
+                                        'directory':
+                                            task.get_cwd().path_from(self.path),
+                                        'arguments':
+                                            env.CXX + ['-I"%s"' % i for i in env.INCLUDES + task.env.INCPATHS] +
+                                            ['-D%s' % d for d in task.env.DEFINES + env.DEFINES],
+                                        'file':
+                                            task.generator.source[0].path_from(self.path),
+                                        'output':
+                                            task.outputs[0].path_from(task.get_cwd())
+                                    }
+                                )
                 with open(variant_node.make_node('compile_commands.json').abspath(), 'w') as compile_commands:
                     json.dump(commands, compile_commands, indent=2)
                 seen = set([self.srcnode, self.bldnode])
@@ -413,6 +427,7 @@ def create_vscode_kernels(task_gen):
                 target_name=env.ENV_PREFIX % task_gen.parent,
                 safe_target_name=kernel_target.replace('.', '_').replace('-', '_'),
                 kernel=kernel,
+                kernel_source_node=kernel_source,
                 features=[
                     'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel',
                     'motor:cpu:kernel_create'

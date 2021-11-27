@@ -1,8 +1,8 @@
 /* Motor <motor.devel@gmail.com> under New BSD License
    see LICENSE for detail */
 
-#ifndef MOTOR_SCHEDULER_SETTINGS_SCRIPT_HH_
-#define MOTOR_SCHEDULER_SETTINGS_SCRIPT_HH_
+#ifndef MOTOR_SCHEDULER_SETTINGS_META_HH_
+#define MOTOR_SCHEDULER_SETTINGS_META_HH_
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 #include <motor/settings/settings.factory.hh>

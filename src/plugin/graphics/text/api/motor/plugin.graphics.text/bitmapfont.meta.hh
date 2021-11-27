@@ -1,8 +1,8 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_TEXT_BITMAPFONT_SCRIPT_HH_
-#define MOTOR_TEXT_BITMAPFONT_SCRIPT_HH_
+#ifndef MOTOR_TEXT_BITMAPFONT_META_HH_
+#define MOTOR_TEXT_BITMAPFONT_META_HH_
 /**************************************************************************************************/
 #include <motor/plugin.graphics.text/stdafx.h>
 #include <motor/filesystem/file.meta.hh>
