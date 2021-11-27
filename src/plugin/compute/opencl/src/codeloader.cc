@@ -27,15 +27,8 @@ void CodeLoader::load(weak< const Resource::Description > kernelDescription,
     resource.setRefHandle(ref< CodeObject >::create(Arena::task(), m_context, name));
 }
 
-void CodeLoader::reload(weak< const Resource::Description > /*oldKernelDescription*/,
-                        weak< const Resource::Description > newKernelDescription,
-                        Resource::Resource&                 resource)
-{
-    unload(resource);
-    load(newKernelDescription, resource);
-}
-
-void CodeLoader::unload(Resource::Resource& resource)
+void CodeLoader::unload(weak< const Resource::Description > /*codeDescription*/,
+                        Resource::Resource& resource)
 {
     resource.clearRefHandle();
 }

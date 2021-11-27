@@ -24,7 +24,8 @@ public:
     virtual void reload(weak< const Resource::Description > oldScript,
                         weak< const Resource::Description > newScript,
                         Resource::Resource&                 resource) override;
-    virtual void unload(Resource::Resource& resource) override;
+    virtual void unload(weak< const Resource::Description > description,
+                        Resource::Resource&                 resource) override;
 };
 
 }}  // namespace Motor::Gtk3

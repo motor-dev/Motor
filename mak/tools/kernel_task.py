@@ -9,34 +9,41 @@ except ImportError:
     import pickle
 
 TEMPLATE_CLASS_H = """
-class %(KernelName)s : public minitl::refcountable
+%(Namespace)s
+
+class %(KernelName)sKernel : public ::Motor::KernelScheduler::Producer
 {
 private:
     %(argument_field)s
-    ref<Motor::Task::KernelTask> m_task;
-    %(callbacks)s
+
 private:
     typedef ::Motor::Plugin::ResourceHook< ::Motor::KernelScheduler::Kernel > ResourceHook;
     typedef ::Motor::Plugin::PluginHook< ResourceHook > PluginHook;
     static MOTOR_EXPORT PluginHook g_kernelHook;
-    minitl::array< weak<Motor::KernelScheduler::IParameter> > makeParameters() const;
+
+    virtual ref< ::Motor::KernelScheduler::Producer::Runtime > createRuntime() const override;
+
 published:
     %(argument_outs)s
-    %(KernelName)s(%(argument_params)s);
-    ~%(KernelName)s();
+    %(KernelName)sKernel(%(argument_params)s);
+    ~%(KernelName)sKernel();
 };
+
+%(end_Namespace)s
+
 """
 
 TEMPLATE_H = """
 /* Motor <motor.devel@gmail.com> / 2008-2015
    see LICENSE for detail */
-#ifndef MOTOR_%(PLUGIN)s_%(NAME)s_SCRIPT_HH_
-#define MOTOR_%(PLUGIN)s_%(NAME)s_SCRIPT_HH_
+#ifndef MOTOR_%(PLUGIN)s_%(NAME)s_META_HH_
+#define MOTOR_%(PLUGIN)s_%(NAME)s_META_HH_
 /**************************************************************************************************/
 %(pch)s
 #include    <motor/scheduler/kernel/kernel.meta.hh>
 #include    <motor/scheduler/task/itask.hh>
 #include    <motor/scheduler/kernel/product.hh>
+#include    <motor/scheduler/kernel/producer.meta.hh>
 #include    <motor/scheduler/kernel/parameters/parameters.hh>
 #include    <motor/scheduler/task/kerneltask.hh>
 #include    <motor/kernel/colors.hh>
@@ -44,65 +51,46 @@ TEMPLATE_H = """
 %(includes)s
 %(usings)s
 
-%(Namespace)s
-
 %(Tasks_H)s
 
-%(end_Namespace)s
 
 /**************************************************************************************************/
 #endif
 """
 
 TEMPLATE_CLASS_CC = """
-static ref< ::Motor::KernelScheduler::Kernel > s_%(Name)sKernel%(KernelName)s = ref< ::Motor::KernelScheduler::Kernel >::create(::Motor::Arena::task(), s_%(Name)sKernelCode, ::Motor::istring("%(kernelName)s"));
-
-%(end_Namespace)s
-// this is important for visual studio 2003
 %(Namespace)s
 
-%(KernelName)s::PluginHook %(KernelName)s::g_kernelHook = %(KernelName)s::PluginHook(%(KernelName)s::ResourceHook(s_%(Name)sKernel%(KernelName)s));
+static ref< ::Motor::KernelScheduler::Kernel > s_%(Name)sKernel%(KernelName)s = ref< ::Motor::KernelScheduler::Kernel >::create(::Motor::Arena::task(), s_%(Name)sKernelCode, ::Motor::istring("%(kernelName)s"));
 
-%(KernelName)s::%(KernelName)s(%(argument_params)s)
-    :   %(argument_assign)sm_task(ref<Motor::Task::KernelTask>::create(Motor::Arena::task(),
-                                                        "%(kernel_full_name)s.%(KernelName)s",
-                                                        Motor::KernelScheduler::GPUType,
-                                                        Motor::Colors::Red::Red,
-                                                        Motor::Scheduler::High,
-                                                        s_%(Name)sKernel%(KernelName)s,
-                                                        makeParameters()))%(callback_assign)s%(argument_out_assign)s
+%(KernelName)sKernel::PluginHook %(KernelName)sKernel::g_kernelHook = %(KernelName)sKernel::PluginHook(%(KernelName)sKernel::ResourceHook(s_%(Name)sKernel%(KernelName)s));
+
+%(KernelName)sKernel::%(KernelName)sKernel(%(argument_params)s)
+    :   %(argument_assign)s
 {
 }
 
-%(KernelName)s::~%(KernelName)s()
+%(KernelName)sKernel::~%(KernelName)sKernel()
 {
 }
 
-minitl::array< weak<Motor::KernelScheduler::IParameter> > %(KernelName)s::makeParameters() const
+ref< ::Motor::KernelScheduler::Producer::Runtime > %(KernelName)sKernel::createRuntime() const
 {
-    minitl::array< weak<Motor::KernelScheduler::IParameter> > result(Motor::Arena::task(), %(argument_count)d);
-    %(argument_result_assign)s
-    return result;
+    return ref< ::Motor::KernelScheduler::Producer::Runtime >();
 }
 
+%(end_Namespace)s
 """
 
 TEMPLATE_CC = """
 %(pch)s
 #include "%(header)s"
 
-%(Namespace)s
-
 static ref< ::Motor::KernelScheduler::Code > s_%(Name)sKernelCode = ref< ::Motor::KernelScheduler::Code >::create(::Motor::Arena::task(), ::Motor::inamespace("%(plugin)s.%(kernel_full_name)s"));
 MOTOR_EXPORT ::Motor::Plugin::PluginHook< Motor::Plugin::ResourceHook< ::Motor::KernelScheduler::Code > > g_%(Name)sKernelHook = ::Motor::Plugin::PluginHook< ::Motor::Plugin::ResourceHook< ::Motor::KernelScheduler::Code > >(::Motor::Plugin::ResourceHook< ::Motor::KernelScheduler::Code >(s_%(Name)sKernelCode));
 
-%(end_Namespace)s
-// this is important for visual studio 2003
-%(Namespace)s
-
 %(Tasks_CC)s
 
-%(end_Namespace)s
 """
 
 
@@ -147,24 +135,19 @@ class kernel_task(Task.Task):
         }
         tasks_cc = []
         tasks_h = []
-        for method, args in kernel_methods:
-            argument_assign = '\n    ,   '.join(('m_%s(%s)' % (arg[0], arg[0]) for arg in args))
-            callback_assign = '\n    ,   '.join(
-                ('m_%sChain(%s->producer(), m_task->startCallback())' % (arg[0], arg[0]) for arg in args)
-            )
-
-            argument_out_assign = '\n    ,   '.join(
-                (
-                    '%s(ref< const Motor::KernelScheduler::Product< Motor::KernelScheduler::ParamTypeToKernelType< %s >::Type > >::create(Motor::Arena::task(), %s, m_task))'
-                    % (arg[0], arg[1], arg[0]) for arg in args
+        for method, namespace, args in kernel_methods:
+            argument_assign = '\n    ,   '.join(
+                tuple('m_%s(%s)' % (arg[0], arg[0]) for arg in args) + tuple(
+                    '%s(ref< const Motor::KernelScheduler::Product< Motor::KernelScheduler::ParamTypeToKernelType< %s >::Type > >::create(Motor::Arena::task(), this))'
+                    % (arg[0], arg[1]) for arg in args
                 )
             )
 
             task_params = {
                 'Namespace':
-                    ' { '.join('namespace %s' % n.capitalize() for n in kernel_namespace[:-1]) + '\n{\n',
+                    ' '.join('namespace %s {' % n for n in namespace),
                 'end_Namespace':
-                    '}' * (len(kernel_namespace) - 1),
+                    '}' * len(namespace),
                 'Name':
                     kernel_name.capitalize(),
                 'kernel_full_name':
@@ -178,36 +161,28 @@ class kernel_task(Task.Task):
                 'argument_field':
                     '\n    '.join(
                         (
-                            'weak< const Motor::KernelScheduler::Product< Motor::KernelScheduler::ParamTypeToKernelType< %s >::Type > > const m_%s;'
+                            'weak< const ::Motor::KernelScheduler::Product< ::Motor::KernelScheduler::ParamTypeToKernelType< %s >::Type > > const m_%s;'
                             % (arg[1], arg[0]) for arg in args
                         )
-                    ),
-                'callbacks':
-                    '\n    '.join(
-                        ('Motor::Task::ITask::CallbackConnection const m_%sChain;' % (arg[0]) for arg in args)
                     ),
                 'argument_result_assign':
                     '\n    '.join(('result[%d] = m_%s->parameter();' % (i, arg[0]) for i, arg in enumerate(args))),
                 'argument_outs':
                     '\n    '.join(
                         (
-                            'ref< const Motor::KernelScheduler::Product< Motor::KernelScheduler::ParamTypeToKernelType< %s >::Type > > const %s;'
+                            'ref< const ::Motor::KernelScheduler::Product< ::Motor::KernelScheduler::ParamTypeToKernelType< %s >::Type > > const %s;'
                             % (arg[1], arg[0]) for arg in args
                         )
                     ),
                 'argument_params':
                     ', '.join(
                         (
-                            'weak< const Motor::KernelScheduler::Product< Motor::KernelScheduler::ParamTypeToKernelType< %s >::Type > > %s'
+                            'weak< const ::Motor::KernelScheduler::Product< ::Motor::KernelScheduler::ParamTypeToKernelType< %s >::Type > > %s'
                             % (arg[1], arg[0]) for arg in args
                         )
                     ),
                 'argument_assign':
-                    argument_assign and (argument_assign + '\n    ,   ') or '/* no arguments */\n        ',
-                'callback_assign':
-                    callback_assign and ('\n    ,   ' + callback_assign) or '\n        /* no callbacks */',
-                'argument_out_assign':
-                    argument_out_assign and ('\n    ,   ' + argument_out_assign) or '\n        /* no arguments out */',
+                    argument_assign,
             }
             tasks_cc.append(TEMPLATE_CLASS_CC % task_params)
             tasks_h.append(TEMPLATE_CLASS_H % task_params)

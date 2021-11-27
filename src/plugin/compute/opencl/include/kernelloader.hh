@@ -19,10 +19,8 @@ public:
 
     virtual void load(weak< const Resource::Description > kernelDescription,
                       Resource::Resource&                 resource) override;
-    virtual void reload(weak< const Resource::Description > oldKernelDescription,
-                        weak< const Resource::Description > newKernelDescription,
+    virtual void unload(weak< const Resource::Description > kernelDescription,
                         Resource::Resource&                 resource) override;
-    virtual void unload(Resource::Resource& resource) override;
 };
 
 }}}  // namespace Motor::KernelScheduler::OpenCL

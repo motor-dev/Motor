@@ -1,8 +1,8 @@
 /* Motor <motor.devel@gmail.com> under New BSD License
    see LICENSE for detail */
 
-#ifndef MOTOR_TEST_COMPUTE_UNITTESTS_COMPONENT_SCRIPT_HH_
-#define MOTOR_TEST_COMPUTE_UNITTESTS_COMPONENT_SCRIPT_HH_
+#ifndef MOTOR_TEST_COMPUTE_UNITTESTS_COMPONENT_META_HH_
+#define MOTOR_TEST_COMPUTE_UNITTESTS_COMPONENT_META_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
 #include <motor/world/component/component.meta.hh>

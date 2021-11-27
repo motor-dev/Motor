@@ -1,8 +1,8 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_RESOURCE_DESCRIPTION_SCRIPT_HH_
-#define MOTOR_RESOURCE_DESCRIPTION_SCRIPT_HH_
+#ifndef MOTOR_RESOURCE_DESCRIPTION_META_HH_
+#define MOTOR_RESOURCE_DESCRIPTION_META_HH_
 /**************************************************************************************************/
 #include <motor/resource/stdafx.h>
 #include <motor/minitl/intrusive_list.hh>

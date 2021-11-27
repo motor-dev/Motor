@@ -35,7 +35,6 @@ struct ClassID< KernelScheduler::Segments< T > >
     }
     static const Meta::Method::Overload s_ctrOverload;
     static MOTOR_EXPORT const Meta::Method s_ctr;
-    static Meta::ObjectInfo                s_productClass;
     static MOTOR_EXPORT KernelScheduler::IParameter::ParameterRegistration s_registration;
 
     static MOTOR_EXPORT raw< const Meta::Class > klass()
@@ -47,7 +46,7 @@ struct ClassID< KernelScheduler::Segments< T > >
                Meta::ClassType_Object,
                {0},
                motor_class< KernelScheduler::IParameter >(),
-               {&s_productClass},
+               {0},
                {0},
                {0, 0},
                {1, &s_ctr},
@@ -70,13 +69,6 @@ const Meta::Method ClassID< KernelScheduler::Segments< T > >::s_ctr
     = {Meta::Class::nameConstructor(),
        {1, &s_ctrOverload},
        {&ClassID< KernelScheduler::Segments< T > >::s_ctr}};
-
-template < typename T >
-Meta::ObjectInfo ClassID< KernelScheduler::Segments< T > >::s_productClass
-    = {{0},
-       {0},
-       KernelScheduler::IParameter::getProductTypePropertyName(),
-       Value(motor_type< ref< KernelScheduler::Product< KernelScheduler::Segments< T > > > >())};
 
 template < typename T >
 KernelScheduler::IParameter::ParameterRegistration

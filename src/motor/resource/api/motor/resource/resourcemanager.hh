@@ -38,20 +38,21 @@ private:
         u32                       progress;
         ILoader::FileType         fileType;
         ILoader::LoadType         loadType;
-        bool                      outdated;
+        bool                      expired;
     };
 
 private:
-    minitl::array< LoaderInfo > m_loaders;
-    minitl::vector< Ticket >    m_tickets;
-    minitl::vector< Ticket >    m_pendingTickets;
-    minitl::vector< Ticket >    m_watches;
+    weak< ResourceManager > const m_parent;
+    minitl::array< LoaderInfo >   m_loaders;
+    minitl::vector< Ticket >      m_tickets;
+    minitl::vector< Ticket >      m_pendingTickets;
+    minitl::vector< Ticket >      m_watches;
 
 private:
-    LoaderInfo& getLoaderInfo(raw< const Meta::Class > classinfo);
+    LoaderInfo& getLoaderInfo(raw< const Meta::Class > classinfo, bool recursive = true);
 
 public:
-    ResourceManager();
+    ResourceManager(weak< ResourceManager > parent = weak< ResourceManager >());
     ~ResourceManager();
 
     void attach(raw< const Meta::Class > classinfo, weak< ILoader > loader);

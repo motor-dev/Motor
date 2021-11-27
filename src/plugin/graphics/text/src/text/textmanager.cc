@@ -27,7 +27,8 @@ void TextManager::reload(weak< const Resource::Description > /*oldDescription*/,
     motor_info("reloading text");
 }
 
-void TextManager::unload(Resource::Resource& /*resource*/)
+void TextManager::unload(weak< const Resource::Description > /*description*/,
+                         Resource::Resource& /*resource*/)
 {
     motor_info("unloading text");
 }

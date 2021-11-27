@@ -40,8 +40,8 @@ def build_motor(bld):
     bld.library('motor.settings', ['motor.meta', 'motor.reflection'])
     bld.library('motor.resource', ['motor.core', 'motor.meta', 'motor.filesystem'])
     bld.library('motor.scheduler', ['motor.core', 'motor.meta', 'motor.resource', 'motor.settings'])
-    bld.library('motor.world', ['motor.core', 'motor.meta', 'motor.resource', 'motor.scheduler'])
     bld.library('motor.plugin', ['motor.core', 'motor.meta', 'motor.filesystem', 'motor.resource', 'motor.scheduler'])
+    bld.library('motor.world', ['motor.core', 'motor.meta', 'motor.resource', 'motor.scheduler', 'motor.plugin'])
     bld.shared_library(
         'motor', [
             'motor.core', 'motor.meta', 'motor.introspect', 'motor.reflection', 'motor.settings', 'motor.scheduler',
@@ -159,6 +159,10 @@ def build_plugins(bld):
         ['motor.3rdparty.graphics.freetype', 'motor.3rdparty.system.fontconfig']
     )
 
+    bld.plugin('plugin.gameplay.subworld', ['motor'])
+    bld.plugin('plugin.gameplay.logic', ['motor'])
+    bld.plugin('plugin.gameplay.time', ['motor'])
+
     if bld.env.check_gtk3 or bld.env.PROJECTS:
         bld.plugin('plugin.gui.gtk3', ['motor'], ['motor.3rdparty.gui.gtk3'])
     bld.plugin('tool.motoreditor.ui', ['motor'])
@@ -179,6 +183,7 @@ def build_games(bld):
         bld.game('sample.gtk', ['motor', 'plugin.scripting.package', 'plugin.gui.gtk3'])
     bld.game('help', ['motor', 'plugin.scripting.package'], path=bld.path.find_node('tool/help'))
     if Options.options.tests:
+        bld.game('test.world', ['motor', 'plugin.scripting.package'])
         bld.game('test.settings', ['motor'])
         bld.game(
             'test.compute.unittests', ['motor', 'plugin.scripting.package'],

@@ -60,7 +60,8 @@ void OutlineFontManager::reload(weak< const Resource::Description > /*oldDescrip
     }
 }
 
-void OutlineFontManager::unload(Resource::Resource& resource)
+void OutlineFontManager::unload(weak< const Resource::Description > /*description*/,
+                                Resource::Resource& resource)
 {
     motor_info("unloading outline font");
     resource.clearRefHandle();

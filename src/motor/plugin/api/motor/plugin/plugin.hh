@@ -31,8 +31,9 @@ struct motor_api(PLUGIN) Context
     weak< Resource::ResourceManager > resourceManager;
     ref< Folder >                     dataFolder;
     weak< Scheduler >                 scheduler;
-    Context(weak< Resource::ResourceManager > manager, ref< Folder > dataFolder,
-            weak< Scheduler > scheduler);
+    Context(weak< Resource::ResourceManager > manager    = weak< Resource::ResourceManager >(),
+            ref< Folder >                     dataFolder = ref< Folder >(),
+            weak< Scheduler >                 scheduler  = weak< Scheduler >());
 };
 
 template < typename Interface >

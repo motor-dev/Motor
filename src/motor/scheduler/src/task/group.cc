@@ -89,7 +89,7 @@ bool TaskGroup::Callback::onDisconnected(weak< ITask > /*from*/)
     return true;
 }
 
-/*----------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------------------*/
 
 TaskGroup::TaskStartConnection::TaskStartConnection() : m_group(), m_task()
 {

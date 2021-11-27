@@ -1,18 +1,19 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_WORLD_COMPONENT_ICOMPONENTSTORAGE_SCRIPT_HH_
-#define MOTOR_WORLD_COMPONENT_ICOMPONENTSTORAGE_SCRIPT_HH_
+#ifndef MOTOR_WORLD_RUNTIME_ARCHETYPESTORAGE_HH_
+#define MOTOR_WORLD_RUNTIME_ARCHETYPESTORAGE_HH_
 /**************************************************************************************************/
 #include <motor/world/stdafx.h>
+#include <motor/scheduler/kernel/producer.meta.hh>
 
-namespace Motor { namespace World { namespace Component {
+namespace Motor { namespace World {
 
-class IComponentStorage : public minitl::refcountable
+class ArchetypeStorage : published KernelScheduler::Producer
 {
 };
 
-}}}  // namespace Motor::World::Component
+}}  // namespace Motor::World
 
 /**************************************************************************************************/
 #endif

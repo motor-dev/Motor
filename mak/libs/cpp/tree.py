@@ -82,7 +82,7 @@ class CppObject(object):
                 '{ %d, s%s_tags };\n' %
                 (helper_static(struct_owners), helper_name(struct_owners), prefix, len(self.tags), prefix)
             )
-            return '{&s%s_tags_array }' % (prefix)
+            return '{&%ss%s_tags_array }' % (helper_name(struct_owners), prefix)
         else:
             return '{ 0 }'
 
@@ -559,7 +559,7 @@ class EnumValue(Variable):
     def write_object(self, owner, struct_owners, prefix, namespace, object_name, definition, instance):
         prefix = prefix + '_' + self.name
         n = self.cpp_name(owner)
-        tag = self.write_tags('s_object_%s' % self.id(), definition, prefix)
+        tag = self.write_tags(definition, 's_object_%s' % self.id(), prefix)
         for alias, alias_cpp in self.all_names():
             definition.write(
                 '%sconst ::Motor::Meta::ObjectInfo %ss%s_object_%s = {\n'
@@ -738,7 +738,7 @@ class Class(Container):
             'NAMESPACE': '::'.join(namespace),
             'PARENT': self.parent,
         }
-        if self.type in ('enum'):
+        if self.type in ('enum', ):
             definition.write(
                 '::Motor::istring %stoString(%s v)\n'
                 '{\n'
@@ -790,7 +790,7 @@ class Class(Container):
                 self, struct_owners, prefix, namespace, params['OBJECTS'], definition, instance
             )
 
-        params['TAGS'] = self.write_tags(self.name[-1], definition, struct_owners)
+        params['TAGS'] = self.write_tags(definition, struct_owners, prefix)
 
         method_index = 0
         methods = []

@@ -1,20 +1,18 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_SCHEDULER_KERNEL_PARAMETER_IPARAMETER_SCRIPT_HH_
-#define MOTOR_SCHEDULER_KERNEL_PARAMETER_IPARAMETER_SCRIPT_HH_
+#ifndef MOTOR_SCHEDULER_KERNEL_PARAMETER_IPARAMETER_META_HH_
+#define MOTOR_SCHEDULER_KERNEL_PARAMETER_IPARAMETER_META_HH_
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 
-namespace Motor {
-
-namespace Task {
+namespace Motor { namespace Task {
 
 class ITask;
 
-}
+}}  // namespace Motor::Task
 
-namespace KernelScheduler {
+namespace Motor { namespace KernelScheduler {
 
 class IMemoryBuffer;
 class IMemoryHost;
@@ -41,10 +39,7 @@ public:
     weak< const IMemoryBuffer > getCurrentBank() const;
     weak< const IMemoryBuffer > getBank(weak< const IMemoryHost > host) const;
 
-    virtual ref< IProduct > makeProduct(ref< IParameter > parameter, weak< Task::ITask > task) = 0;
-
     static raw< const Meta::Class > getParameterClass(const istring parameterTypeName);
-    static const istring            getProductTypePropertyName();
 
     struct motor_api(SCHEDULER) ParameterRegistration
     {
@@ -58,8 +53,7 @@ public:
     friend struct ParameterRegistration;
 };
 
-}  // namespace KernelScheduler
-}  // namespace Motor
+}}  // namespace Motor::KernelScheduler
 
 /**************************************************************************************************/
 #endif

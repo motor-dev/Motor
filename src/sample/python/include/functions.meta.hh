@@ -1,8 +1,8 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_SAMPLES_PYTHON_FUNCTIONS_SCRIPT_HH_
-#define MOTOR_SAMPLES_PYTHON_FUNCTIONS_SCRIPT_HH_
+#ifndef MOTOR_SAMPLES_PYTHON_FUNCTIONS_META_HH_
+#define MOTOR_SAMPLES_PYTHON_FUNCTIONS_META_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
 

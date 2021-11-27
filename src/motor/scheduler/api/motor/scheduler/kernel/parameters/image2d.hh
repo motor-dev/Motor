@@ -6,6 +6,7 @@
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
+#include <motor/scheduler/kernel/parameters/parametertype.hh>
 
 #include <motor/scheduler/kernel/product.hh>
 
@@ -14,13 +15,6 @@ namespace Motor { namespace KernelScheduler {
 template < typename T >
 class Image2D : public IParameter
 {
-protected:
-    ref< IProduct > makeProduct(ref< IParameter > parameter, weak< Task::ITask > task)
-    {
-        return ref< Product< Image2D< T > > >::create(
-            Arena::task(), motor_checked_cast< Image2D< T > >(parameter), task);
-    }
-
 public:
     Image2D()
     {

@@ -1,8 +1,8 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_FILESYSTEM_ZIPFOLDER_SCRIPT_HH_
-#define MOTOR_FILESYSTEM_ZIPFOLDER_SCRIPT_HH_
+#ifndef MOTOR_FILESYSTEM_ZIPFOLDER_META_HH_
+#define MOTOR_FILESYSTEM_ZIPFOLDER_META_HH_
 /**************************************************************************************************/
 #include <motor/filesystem/stdafx.h>
 #include <motor/filesystem/folder.meta.hh>

@@ -1,8 +1,8 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_SCHEDULER_KERNEL_CODE_SCRIPT_HH_
-#define MOTOR_SCHEDULER_KERNEL_CODE_SCRIPT_HH_
+#ifndef MOTOR_SCHEDULER_KERNEL_CODE_META_HH_
+#define MOTOR_SCHEDULER_KERNEL_CODE_META_HH_
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 #include <motor/resource/description.meta.hh>

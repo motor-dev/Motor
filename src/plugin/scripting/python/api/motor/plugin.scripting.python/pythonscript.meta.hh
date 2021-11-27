@@ -1,8 +1,8 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_PYTHONLIB_PYTHONSCRIPT_SCRIPT_HH_
-#define MOTOR_PYTHONLIB_PYTHONSCRIPT_SCRIPT_HH_
+#ifndef MOTOR_PYTHONLIB_PYTHONSCRIPT_META_HH_
+#define MOTOR_PYTHONLIB_PYTHONSCRIPT_META_HH_
 /**************************************************************************************************/
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <motor/meta/tags/editor.meta.hh>

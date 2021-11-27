@@ -1,8 +1,8 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_META_BUILTIN_SCRIPT_HH_
-#define MOTOR_META_BUILTIN_SCRIPT_HH_
+#ifndef MOTOR_META_BUILTIN_META_HH_
+#define MOTOR_META_BUILTIN_META_HH_
 /**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/meta/builtin.hh>

@@ -56,7 +56,7 @@ void Description::unload(weak< ILoader > loader) const
     {
         if(resources[i].m_handle.owner == loader->m_id)
         {
-            loader->unload(resources[i]);
+            loader->unload(this, resources[i]);
             resources[i]                                     = resources[m_resourceCount - 1];
             resources[m_resourceCount - 1].m_handle.id.ptrId = 0;
             resources[m_resourceCount - 1].m_handle.owner    = 0;
