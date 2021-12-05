@@ -18,23 +18,9 @@ namespace Motor { namespace Plugin {
     namespace Motor {                                                                              \
     raw< Meta::Class > motor_##name##_Namespace()                                                  \
     {                                                                                              \
-        static Meta::ObjectInfo              ob    = {{0}, {0}, "Motor", Meta::Value()};           \
-        static Meta::Class                   ci    = {istring("Motor"),                            \
-                                 0,                                           \
-                                 0,                                           \
-                                 Meta::ClassType_Namespace,                   \
-                                 {0},                                         \
-                                 {0},                                         \
-                                 {&ob},                                       \
-                                 {0},                                         \
-                                 {0, 0},                                      \
-                                 {0, 0},                                      \
-                                 {0},                                         \
-                                 Meta::OperatorTable::s_emptyTable,           \
-                                 0,                                           \
-                                 0};                                          \
-        static raw< const Meta::ObjectInfo > obptr = {((ob.value = Meta::Value(&ci)), &ob)};       \
-        motor_forceuse(obptr);                                                                     \
+        static Meta::Class ci                                                                      \
+            = {istring(#name), 0,      0,   Meta::ClassType_Namespace,         {0}, {0}, {0}, {0}, \
+               {0, 0},         {0, 0}, {0}, Meta::OperatorTable::s_emptyTable, 0,   0};            \
         raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
