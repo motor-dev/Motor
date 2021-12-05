@@ -12,16 +12,24 @@
 namespace Motor { namespace KernelScheduler {
 
 template < typename T >
-class Stream : public IParameter
+class Stream : public IStream
 {
+private:
+    static MOTOR_EXPORT IStream::ParameterRegistration s_registration;
+
 public:
     Stream()
     {
+        (void)s_registration;
     }
     ~Stream()
     {
     }
 };
+
+template < typename T >
+IStream::ParameterRegistration Stream< T >::s_registration(motor_class< T >(),
+                                                           motor_class< Stream< T > >());
 
 }}  // namespace Motor::KernelScheduler
 

@@ -14,6 +14,7 @@
 
 namespace Motor { namespace KernelScheduler {
 
+class IProduct;
 class ProducerLoader;
 
 class motor_api(SCHEDULER) Producer : public Resource::Description

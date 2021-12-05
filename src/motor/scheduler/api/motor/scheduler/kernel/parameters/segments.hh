@@ -15,16 +15,24 @@
 namespace Motor { namespace KernelScheduler {
 
 template < typename T >
-class Segments : public IParameter
+class Segments : public ISegments
 {
+private:
+    static MOTOR_EXPORT ISegments::ParameterRegistration s_registration;
+
 public:
     Segments()
     {
+        (void)s_registration;
     }
     ~Segments()
     {
     }
 };
+
+template < typename T >
+ISegments::ParameterRegistration Segments< T >::s_registration(motor_class< T >(),
+                                                               motor_class< Segments< T > >());
 
 template < typename T >
 struct ParamTypeToKernelType< ::Kernel::segments< T > >

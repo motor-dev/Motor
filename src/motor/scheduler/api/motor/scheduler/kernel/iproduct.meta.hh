@@ -6,6 +6,8 @@
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
+
+#include <motor/meta/typeinfo.hh>
 #include <motor/scheduler/kernel/producer.meta.hh>
 #include <motor/scheduler/task/itask.hh>
 
@@ -30,6 +32,8 @@ public:
     {
         return m_producer;
     }
+
+    virtual ref< IParameter > createParameter() const = 0;
 };
 
 }}  // namespace Motor::KernelScheduler

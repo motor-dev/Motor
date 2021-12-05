@@ -8,23 +8,35 @@
 #include <motor/scheduler/kernel/iproduct.meta.hh>
 
 #include <motor/meta/classinfo.meta.hh>
+#include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
 #include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/typeinfo.hh>
 
-namespace Motor {
-
-namespace KernelScheduler {
+namespace Motor { namespace KernelScheduler {
 
 template < typename T >
 class Product;
-}  // namespace KernelScheduler
 
-namespace Meta {
+}}  // namespace Motor::KernelScheduler
+
+namespace Motor { namespace Meta {
 
 template < typename T >
 struct ClassID< KernelScheduler::Product< T > >
 {
+    static Value construct(raw< const Meta::Method > method, Value* parameters, u32 parameterCount)
+    {
+        motor_forceuse(method);
+        motor_assert(parameterCount == 1, "expected 1 parameter; got %d" | parameterCount);
+        motor_forceuse(parameters);
+        return Value(ref< KernelScheduler::Product< T > >::create(
+            Arena::task(), parameters[0].as< weak< const KernelScheduler::Producer > >()));
+    }
+
+    static const Meta::Method::Overload s_ctrOverload;
+    static const Meta::Method           s_ctr;
+
     static MOTOR_EXPORT raw< const Meta::Class > klass()
     {
         static const Meta::Class s_class
@@ -37,8 +49,8 @@ struct ClassID< KernelScheduler::Product< T > >
                {0},
                {0},
                {0, 0},
-               {0, 0},
-               {0},
+               {1, &s_ctr},
+               {&s_ctr},
                Meta::OperatorTable::s_emptyTable,
                0,
                0};
@@ -56,8 +68,17 @@ struct ClassID< KernelScheduler::Product< T > >
     }
 };
 
-}  // namespace Meta
-}  // namespace Motor
+template < typename T >
+const Meta::Method::Overload ClassID< KernelScheduler::Product< T > >::s_ctrOverload
+    = {{0}, {0, 0}, motor_type< ref< KernelScheduler::Product< T > > >(), false, &construct};
+
+template < typename T >
+const Meta::Method ClassID< KernelScheduler::Product< T > >::s_ctr
+    = {Meta::Class::nameConstructor(),
+       {1, &s_ctrOverload},
+       {&ClassID< KernelScheduler::Product< T > >::s_ctr}};
+
+}}  // namespace Motor::Meta
 
 /**************************************************************************************************/
 #endif

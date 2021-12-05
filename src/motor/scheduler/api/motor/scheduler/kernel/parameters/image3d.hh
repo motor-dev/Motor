@@ -13,16 +13,24 @@
 namespace Motor { namespace KernelScheduler {
 
 template < typename T >
-class Image3D : public IParameter
+class Image3D : public IImage3D
 {
+private:
+    static MOTOR_EXPORT IImage3D::ParameterRegistration s_registration;
+
 public:
     Image3D()
     {
+        (void)s_registration;
     }
     ~Image3D()
     {
     }
 };
+
+template < typename T >
+IImage3D::ParameterRegistration Image3D< T >::s_registration(motor_class< T >(),
+                                                             motor_class< Image3D< T > >());
 
 }}  // namespace Motor::KernelScheduler
 
