@@ -1,4 +1,16 @@
+load test.world as worldtest;
+
+storage = motor.World.ArchetypeStorage
+(
+    componentClass = worldtest.Component;
+);
+
+job = worldtest.UpdateKernel
+(
+    inout = storage.component;
+);
+
 world = motor.World.World
 (
-    products = [];
+    products = [job.inout];
 );

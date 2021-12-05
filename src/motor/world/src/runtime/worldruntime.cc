@@ -7,9 +7,9 @@
 #include <motor/meta/engine/namespace.hh>
 #include <motor/scheduler/task/group.hh>
 #include <motor/scheduler/task/method.hh>
-#include <motor/world/subworld.meta.hh>
 
 #include <runtime/componentstorage.hh>
+#include <subworld.meta.hh>
 
 namespace Motor { namespace World {
 

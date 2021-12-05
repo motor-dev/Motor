@@ -13,69 +13,42 @@
 #include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/typeinfo.hh>
 
-namespace Motor {
+namespace Motor { namespace KernelScheduler {
 
-namespace KernelScheduler {
 class IParameter;
 template < typename T >
 class Image3D;
-}  // namespace KernelScheduler
 
-namespace Meta {
+}}  // namespace Motor::KernelScheduler
+
+namespace Motor { namespace Meta {
 
 template < typename T >
 struct ClassID< KernelScheduler::Image3D< T > >
 {
-    static Value construct(raw< const Meta::Method > method, Value* parameters, u32 parameterCount)
-    {
-        motor_forceuse(method);
-        motor_assert(parameterCount == 0, "too many parameters");
-        motor_forceuse(parameters);
-        return Value(ref< KernelScheduler::Image3D< T > >::create(Arena::task()));
-    }
-    static const Meta::Method::Overload s_ctrOverload;
-    static const Meta::Method           s_ctr;
-    static MOTOR_EXPORT KernelScheduler::IParameter::ParameterRegistration s_registration;
-
     static MOTOR_EXPORT raw< const Meta::Class > klass()
     {
         static const Meta::Class s_class
             = {istring(minitl::format< 256u >("Image3D<%s>") | motor_class< T >()->name),
-               u32(sizeof(KernelScheduler::Image1D< T >)),
+               u32(sizeof(KernelScheduler::Image3D< T >)),
                0,
                Meta::ClassType_Object,
                {0},
-               motor_class< KernelScheduler::IParameter >(),
+               motor_class< KernelScheduler::IImage3D >(),
                {0},
                {0},
                {0, 0},
-               {1, &s_ctr},
-               {&s_ctr},
+               {0, 0},
+               {0},
                Meta::OperatorTable::s_emptyTable,
                0,
                0};
         raw< const Meta::Class > result = {&s_class};
-        (void)s_registration;
         return result;
     }
 };
 
-template < typename T >
-const Meta::Method::Overload ClassID< KernelScheduler::Image3D< T > >::s_ctrOverload
-    = {{0}, {0, 0}, motor_type< ref< KernelScheduler::Image3D< T > > >(), false, &construct};
-
-template < typename T >
-const Meta::Method ClassID< KernelScheduler::Image3D< T > >::s_ctr
-    = {Meta::Class::nameConstructor(),
-       {1, &s_ctrOverload},
-       {&ClassID< KernelScheduler::Image3D< T > >::s_ctr}};
-
-template < typename T >
-KernelScheduler::IParameter::ParameterRegistration
-    ClassID< KernelScheduler::Image3D< T > >::s_registration(klass());
-
-}  // namespace Meta
-}  // namespace Motor
+}}  // namespace Motor::Meta
 
 /**************************************************************************************************/
 #endif

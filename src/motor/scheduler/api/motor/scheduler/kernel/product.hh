@@ -20,6 +20,11 @@ public:
     ~Product()
     {
     }
+
+    ref< IParameter > createParameter() const override
+    {
+        return ref< T >::create(Arena::task());
+    }
 };
 
 }}  // namespace Motor::KernelScheduler

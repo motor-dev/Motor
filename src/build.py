@@ -183,7 +183,7 @@ def build_games(bld):
         bld.game('sample.gtk', ['motor', 'plugin.scripting.package', 'plugin.gui.gtk3'])
     bld.game('help', ['motor', 'plugin.scripting.package'], path=bld.path.find_node('tool/help'))
     if Options.options.tests:
-        bld.game('test.world', ['motor', 'plugin.scripting.package'])
+        bld.game('test.world', ['motor', 'plugin.scripting.package'], root_namespace='Motor::Test::World')
         bld.game('test.settings', ['motor'])
         bld.game(
             'test.compute.unittests', ['motor', 'plugin.scripting.package'],

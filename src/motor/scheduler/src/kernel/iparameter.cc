@@ -8,26 +8,6 @@
 
 namespace Motor { namespace KernelScheduler {
 
-IParameter::ParameterRegistration::ParameterRegistration(raw< const Meta::Class > klass)
-    : m_class(klass)
-{
-    IParameter::parameterClasses().push_back(klass);
-}
-
-IParameter::ParameterRegistration::~ParameterRegistration()
-{
-    minitl::vector< raw< const Meta::Class > >& classes = IParameter::parameterClasses();
-    for(minitl::vector< raw< const Meta::Class > >::iterator it = classes.begin();
-        it != classes.end(); ++it)
-    {
-        if(*it == m_class)
-        {
-            classes.erase(it);
-            break;
-        }
-    }
-}
-
 IParameter::IParameter()
 {
 }
@@ -50,21 +30,191 @@ weak< const IMemoryBuffer > IParameter::getBank(weak< const IMemoryHost > host) 
     return weak< const IMemoryBuffer >();
 }
 
-raw< const Meta::Class > IParameter::getParameterClass(istring parameterClassName)
+istring IParameter::getProductTypePropertyName()
 {
-    minitl::vector< raw< const Meta::Class > > classes = IParameter::parameterClasses();
-    for(minitl::vector< raw< const Meta::Class > >::iterator it = classes.begin();
-        it != classes.end(); ++it)
+    static const istring s_productClassName("ProductClass");
+    return s_productClassName;
+}
+
+IParameter::ParameterRegistry IImage1D::ParameterRegistration::s_registry(Arena::task());
+IParameter::ParameterRegistry IImage2D::ParameterRegistration::s_registry(Arena::task());
+IParameter::ParameterRegistry IImage3D::ParameterRegistration::s_registry(Arena::task());
+IParameter::ParameterRegistry ISegment::ParameterRegistration::s_registry(Arena::task());
+IParameter::ParameterRegistry ISegments::ParameterRegistration::s_registry(Arena::task());
+IParameter::ParameterRegistry IStream::ParameterRegistration::s_registry(Arena::task());
+
+IImage1D::ParameterRegistration::ParameterRegistration(raw< const Meta::Class > key,
+                                                       raw< const Meta::Class > parameter)
+    : m_key(key)
+{
+    s_registry.push_back(minitl::make_tuple(key, parameter));
+}
+
+IImage2D::ParameterRegistration::ParameterRegistration(raw< const Meta::Class > key,
+                                                       raw< const Meta::Class > parameter)
+    : m_key(key)
+{
+    s_registry.push_back(minitl::make_tuple(key, parameter));
+}
+
+IImage3D::ParameterRegistration::ParameterRegistration(raw< const Meta::Class > key,
+                                                       raw< const Meta::Class > parameter)
+    : m_key(key)
+{
+    s_registry.push_back(minitl::make_tuple(key, parameter));
+}
+
+ISegment::ParameterRegistration::ParameterRegistration(raw< const Meta::Class > key,
+                                                       raw< const Meta::Class > parameter)
+    : m_key(key)
+{
+    s_registry.push_back(minitl::make_tuple(key, parameter));
+}
+
+ISegments::ParameterRegistration::ParameterRegistration(raw< const Meta::Class > key,
+                                                        raw< const Meta::Class > parameter)
+    : m_key(key)
+{
+    s_registry.push_back(minitl::make_tuple(key, parameter));
+}
+
+IStream::ParameterRegistration::ParameterRegistration(raw< const Meta::Class > key,
+                                                      raw< const Meta::Class > parameter)
+    : m_key(key)
+{
+    s_registry.push_back(minitl::make_tuple(key, parameter));
+}
+
+IImage1D::ParameterRegistration::~ParameterRegistration()
+{
+    for(IParameter::ParameterRegistry::iterator it = s_registry.begin(); it != s_registry.end();
+        ++it)
     {
-        if((*it)->name == parameterClassName) return *it;
+        if(it->first == m_key)
+        {
+            s_registry.erase(it);
+            return;
+        }
     }
+    motor_notreached();
+}
+
+IImage2D::ParameterRegistration::~ParameterRegistration()
+{
+    for(IParameter::ParameterRegistry::iterator it = s_registry.begin(); it != s_registry.end();
+        ++it)
+    {
+        if(it->first == m_key)
+        {
+            s_registry.erase(it);
+            return;
+        }
+    }
+    motor_notreached();
+}
+
+IImage3D::ParameterRegistration::~ParameterRegistration()
+{
+    for(IParameter::ParameterRegistry::iterator it = s_registry.begin(); it != s_registry.end();
+        ++it)
+    {
+        if(it->first == m_key)
+        {
+            s_registry.erase(it);
+            return;
+        }
+    }
+    motor_notreached();
+}
+
+ISegment::ParameterRegistration::~ParameterRegistration()
+{
+    for(IParameter::ParameterRegistry::iterator it = s_registry.begin(); it != s_registry.end();
+        ++it)
+    {
+        if(it->first == m_key)
+        {
+            s_registry.erase(it);
+            return;
+        }
+    }
+    motor_notreached();
+}
+
+ISegments::ParameterRegistration::~ParameterRegistration()
+{
+    for(IParameter::ParameterRegistry::iterator it = s_registry.begin(); it != s_registry.end();
+        ++it)
+    {
+        if(it->first == m_key)
+        {
+            s_registry.erase(it);
+            return;
+        }
+    }
+    motor_notreached();
+}
+
+IStream::ParameterRegistration::~ParameterRegistration()
+{
+    for(IParameter::ParameterRegistry::iterator it = s_registry.begin(); it != s_registry.end();
+        ++it)
+    {
+        if(it->first == m_key)
+        {
+            s_registry.erase(it);
+            return;
+        }
+    }
+    motor_notreached();
+}
+
+raw< const Meta::Class >
+IImage1D::ParameterRegistration::getParameter(raw< const Meta::Class > objectClass)
+{
+    for(ParameterRegistry::const_iterator it = s_registry.begin(); it != s_registry.end(); ++it)
+        if(it->first == objectClass) return it->second;
     return raw< const Meta::Class >();
 }
 
-minitl::vector< raw< const Meta::Class > >& IParameter::parameterClasses()
+raw< const Meta::Class >
+IImage2D::ParameterRegistration::getParameter(raw< const Meta::Class > objectClass)
 {
-    static minitl::vector< raw< const Meta::Class > > s_classes(Arena::meta());
-    return s_classes;
+    for(ParameterRegistry::const_iterator it = s_registry.begin(); it != s_registry.end(); ++it)
+        if(it->first == objectClass) return it->second;
+    return raw< const Meta::Class >();
+}
+
+raw< const Meta::Class >
+IImage3D::ParameterRegistration::getParameter(raw< const Meta::Class > objectClass)
+{
+    for(ParameterRegistry::const_iterator it = s_registry.begin(); it != s_registry.end(); ++it)
+        if(it->first == objectClass) return it->second;
+    return raw< const Meta::Class >();
+}
+
+raw< const Meta::Class >
+ISegment::ParameterRegistration::getParameter(raw< const Meta::Class > objectClass)
+{
+    for(ParameterRegistry::const_iterator it = s_registry.begin(); it != s_registry.end(); ++it)
+        if(it->first == objectClass) return it->second;
+    return raw< const Meta::Class >();
+}
+
+raw< const Meta::Class >
+ISegments::ParameterRegistration::getParameter(raw< const Meta::Class > objectClass)
+{
+    for(ParameterRegistry::const_iterator it = s_registry.begin(); it != s_registry.end(); ++it)
+        if(it->first == objectClass) return it->second;
+    return raw< const Meta::Class >();
+}
+
+raw< const Meta::Class >
+IStream::ParameterRegistration::getParameter(raw< const Meta::Class > objectClass)
+{
+    for(ParameterRegistry::const_iterator it = s_registry.begin(); it != s_registry.end(); ++it)
+        if(it->first == objectClass) return it->second;
+    return raw< const Meta::Class >();
 }
 
 }}  // namespace Motor::KernelScheduler
