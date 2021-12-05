@@ -87,6 +87,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         motor_get_func(PyEval_AcquireThread);
         motor_get_func(PyEval_ReleaseThread);
         motor_get_func(PyEval_ReleaseLock);
+        motor_get_func(PyThreadState_Swap);
         motor_get_func(PyRun_SimpleString);
         motor_get_func(PyRun_InteractiveLoopFlags);
         motor_get_func(_Py_NoneStruct);

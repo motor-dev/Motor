@@ -50,6 +50,7 @@ typedef PyThreadState* (*PyEval_SaveThreadType)();
 typedef void (*PyEval_AcquireThreadType)(PyThreadState* tstate);
 typedef void (*PyEval_ReleaseThreadType)(PyThreadState* tstate);
 typedef void (*PyEval_ReleaseLockType)();
+typedef PyThreadState* (*PyThreadState_SwapType)(PyThreadState* tstate);
 
 typedef int (*PyRun_SimpleStringType)(const char* command);
 typedef int (*PyRun_InteractiveLoopFlagsType)(FILE* fp, const char* filename,

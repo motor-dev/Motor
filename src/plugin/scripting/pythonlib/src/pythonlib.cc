@@ -56,7 +56,8 @@ void PythonLibrary::destroyThread(PyThreadState* threadState)
 {
     (*m_PyEval_AcquireThread)(threadState);
     (*m_Py_EndInterpreter)(threadState);
-    (*m_PyEval_ReleaseLock)();
+    (*m_PyThreadState_Swap)(m_mainThread);
+    (*m_PyEval_ReleaseThread)(m_mainThread);
 }
 
 int PythonLibrary::getVersion() const
