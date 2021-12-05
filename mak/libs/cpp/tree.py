@@ -834,7 +834,7 @@ class Class(Container):
 
         props = []
         for p in self.properties:
-            tags = p.write_tags(struct_owners, definition, prefix + '_prop_' + p.name)
+            tags = p.write_tags(definition, struct_owners, prefix + '_prop_' + p.name)
             for name in p.all_names():
                 props.append((p, name[0], tags))
         if props:
@@ -1056,11 +1056,19 @@ class Root(Container):
             for object in self.objects:
                 object.declare(self, [], definition, instance, '')
             instance.write('\nnamespace Motor { namespace Meta\n{\n')
-            next_object = '%s->objects' % self.owner_name()
+            next_object = first_object = '%s->objects' % self.owner_name()
             for object in self.objects:
                 object.write_content(self, [], '', [], definition, instance)
                 next_object = object.write_object(self, [], '', [], next_object, definition, instance)
             instance.write('}}\n\n')
+            if next_object != first_object:
+                definition.write(
+                    'static const raw<const ::Motor::Meta::ObjectInfo> s_object_ptr_%s ='
+                    ' %s;\n'
+                    'MOTOR_EXPORT const ::Motor::Meta::ObjectInfo* s_object_set_%s ='
+                    ' %s->objects.set(s_object_ptr_%s.operator->());\n'
+                    '\n' % (object.id(), next_object, object.id(), self.owner_name(), object.id())
+                )
         definition.write('\n\n')
 
     def write_namespaces(self, namespace_buffer):
