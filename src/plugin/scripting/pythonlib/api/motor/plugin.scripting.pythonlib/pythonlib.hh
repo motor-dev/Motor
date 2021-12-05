@@ -75,6 +75,7 @@ private:  // friend ThreadLock
     PyEval_AcquireThreadType m_PyEval_AcquireThread;
     PyEval_ReleaseThreadType m_PyEval_ReleaseThread;
     PyEval_ReleaseLockType   m_PyEval_ReleaseLock;
+    PyThreadState_SwapType   m_PyThreadState_Swap;
 
 public:
     PyRun_SimpleStringType         m_PyRun_SimpleString;
