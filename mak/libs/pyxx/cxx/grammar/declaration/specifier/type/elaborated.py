@@ -14,7 +14,7 @@ from .....parser import cxx98
 from motor_typing import TYPE_CHECKING
 
 
-# TODO: attribute-specifier-seq? ->  ♦
+# TODO: attribute-specifier-seq? -> empty
 @glrp.rule(
     'elaborated-type-specifier[split] : attribute-specifier-seq? class-key attribute-specifier-seq? "identifier"'
 )
