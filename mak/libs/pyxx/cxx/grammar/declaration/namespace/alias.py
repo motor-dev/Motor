@@ -21,7 +21,7 @@ def namespace_alias(self, p):
     pass
 
 
-# TODO: attribute-specifier-seq? ->  ♦
+# TODO: attribute-specifier-seq? -> empty
 @glrp.rule(
     'namespace-alias-definition : attribute-specifier-seq? "namespace" attribute-specifier-seq? "identifier" "=" qualified-namespace-specifier ";"'
 )
