@@ -40,16 +40,16 @@ struct InterlockedType;
 template <>
 struct InterlockedType< 4 >
 {
-    typedef long          value_t;
+    typedef int           value_t;
     static inline value_t fetch_and_add(value_t* p, value_t incr)
     {
         value_t old = 0;
         value_t temp, flag;
         __asm__ __volatile__(AO_THUMB_GO_ARM "       dmb sy\n"
-                                             "1:     ldaxr   %0, [%5]\n"
-                                             "       add     %2, %0, %4\n"
+                                             "1:     ldaxr   %w0, [%5]\n"
+                                             "       add     %w2, %w0, %w4\n"
                                              "       stxr    %w1, %w2, [%5]\n"
-                                             "       cmp             %1, #0\n"
+                                             "       cmp             %w1, #0\n"
                                              "       b.ne            1b\n"
                                              "       dmb st\n" AO_THUMB_RESTORE_MODE
                              : "=&r"(old), "=&r"(flag), "=&r"(temp), "+m"(*p)
@@ -65,9 +65,9 @@ struct InterlockedType< 4 >
     {
         value_t prev, flag;
         __asm__ __volatile__(AO_THUMB_GO_ARM "       dmb sy\n"
-                                             "1:     ldaxr   %0, [%3]\n"
+                                             "1:     ldaxr   %w0, [%3]\n"
                                              "       stxr    %w1, %w4, [%3]\n"
-                                             "       cmp             %1, #0\n"
+                                             "       cmp             %w1, #0\n"
                                              "       b.ne            1b\n"
                                              "       dmb st\n" AO_THUMB_RESTORE_MODE
                              : "=&r"(prev), "=&r"(flag), "+m"(*p)
@@ -80,13 +80,13 @@ struct InterlockedType< 4 >
         value_t result, old;
         __asm__ __volatile__(AO_THUMB_GO_ARM
                              "       dmb sy\n"
-                             "1:     mov             %0, #2\n" /* store a flag */
-                             "       ldaxr   %1, [%3]\n"       /* get original */
-                             "       teq             %1, %4\n" /* see if match */
-                             "       stxr.eq %w0, %w5, [%3]\n" /* store new one if matched */
-                             "       teq             %0, #1\n"
-                             "       beq             1b\n" /* if update failed, repeat */
-                             "       dmb st\n" AO_THUMB_RESTORE_MODE
+                             "1:     mov             %w0, #2\n"  /* store a flag */
+                             "       ldaxr   %w1, [%3]\n"        /* get original */
+                             "       cmp             %w1, %w4\n" /* see if match */
+                             "       b.ne     2f\n"
+                             "       stxr  %w0, %w5, [%3]\n"    /* store new one if matched */
+                             "       cbnz            %w0, 1b\n" /* if update failed, repeat */
+                             "2:     dmb st\n" AO_THUMB_RESTORE_MODE
                              : "=&r"(result), "=&r"(old), "+m"(*p)
                              : "r"(p), "r"(condition), "r"(v)
                              : AO_THUMB_SWITCH_CLOBBERS "cc");
