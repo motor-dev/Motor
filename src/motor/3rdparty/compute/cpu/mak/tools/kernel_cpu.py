@@ -126,7 +126,7 @@ def build_cpu_kernels(task_gen):
 
 @feature('motor:preprocess')
 def create_cpu_kernels(task_gen):
-    for kernel, kernel_source, kernel_path, kernel_ast in task_gen.kernels:
+    for kernel, kernel_source, kernel_path, kernel_ast in task_gen.kernels + task_gen.kernels_cpu:
         kernel_gens = {}
         for env in task_gen.bld.multiarch_envs:
             for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
@@ -172,47 +172,6 @@ def create_cpu_kernels(task_gen):
         for kernel_target, kernel_gen_list in kernel_gens.items():
             task_gen.bld.multiarch(kernel_target, kernel_gen_list)
 
-    for kernel, kernel_source, kernel_path, kernel_ast in task_gen.kernels_cpu:
-        kernel_gens = {}
-        for env in task_gen.bld.multiarch_envs:
-            for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
-                if kernel_type != 'cpu':
-                    continue
-                kernel_env = task_gen.bld.all_envs[toolchain]
-                for variant in [''] + kernel_env.VECTOR_OPTIM_VARIANTS:
-                    tgen = task_gen.bld.get_tgen_by_name(env.ENV_PREFIX % task_gen.parent)
-                    target_suffix = '.'.join([kernel_type] + ([variant[1:]] if variant else []))
-                    kernel_target = task_gen.parent + '.' + '.'.join(kernel) + '.' + target_suffix
-                    kernel_task_gen = task_gen.bld(
-                        env=kernel_env.derive(),
-                        bld_env=env,
-                        target=env.ENV_PREFIX % kernel_target,
-                        target_name=env.ENV_PREFIX % task_gen.parent,
-                        safe_target_name=kernel_target.replace('.', '_').replace('-', '_'),
-                        variant_name=variant,
-                        kernel=kernel,
-                        kernel_source_path=kernel_source.path_from(kernel_path),
-                        features=[
-                            'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel'
-                        ],
-                        pchstop=tgen.preprocess.pchstop,
-                        defines=tgen.defines + [
-                            'MOTOR_KERNEL_ID=%s_%s' %
-                            (task_gen.parent.replace('.', '_'), kernel_target.replace('.', '_')),
-                            'MOTOR_KERNEL_NAME=%s' % (kernel_target),
-                            'MOTOR_KERNEL_TARGET=%s' % kernel_type,
-                            'MOTOR_KERNEL_ARCH=%s' % variant
-                        ],
-                        includes=tgen.includes + [kernel_path],
-                        source=[kernel_source],
-                        source_nodes=tgen.source_nodes,
-                        use=tgen.use + [env.ENV_PREFIX % 'plugin.compute.cpu'] + ([variant] if variant else []),
-                        uselib=tgen.uselib,
-                    )
-                    kernel_task_gen.env.PLUGIN = task_gen.env.plugin_name
-                    try:
-                        kernel_gens[kernel_target].append(kernel_task_gen)
-                    except KeyError:
-                        kernel_gens[kernel_target] = [kernel_task_gen]
-        for kernel_target, kernel_gen_list in kernel_gens.items():
-            task_gen.bld.multiarch(kernel_target, kernel_gen_list)
+
+def build(build_context):
+    pass

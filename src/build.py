@@ -8,6 +8,7 @@ def build_externals(bld):
     """
         Declares all external modules
     """
+    bld.external('motor.3rdparty.compute.cpu')
     bld.external('motor.3rdparty.system.zlib')
     bld.external('motor.3rdparty.system.X11')
     bld.external('motor.3rdparty.system.win32')
