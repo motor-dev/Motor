@@ -13,13 +13,12 @@
 
 namespace Motor { namespace World {
 
-WorldRuntime::WorldRuntime(const Plugin::Context&                                   context,
+WorldRuntime::WorldRuntime(weak< const KernelScheduler::ProducerLoader >            producerLoader,
+                           const Plugin::Context&                                   context,
                            minitl::array< weak< const KernelScheduler::IProduct > > products)
-    : m_resourceManager(
-        scoped< Resource::ResourceManager >::create(Arena::game(), context.resourceManager))
+    : m_resourceManager(scoped< Resource::ResourceManager >::create(Arena::game()))
     , m_context(m_resourceManager, context.dataFolder, context.scheduler)
     , m_logicComponentStorage(Arena::game())
-    , m_producerLoader(ref< KernelScheduler::ProducerLoader >::create(Arena::game()))
     , m_updateTask(
           ref< Task::Task< Task::MethodCaller< WorldRuntime, &WorldRuntime::update > > >::create(
               Arena::task(), "world:update", Colors::make(89, 89, 180),
@@ -31,22 +30,22 @@ WorldRuntime::WorldRuntime(const Plugin::Context&                               
     , m_productEnds(Arena::task(), products.size() + 1)
 {
     m_resourceManager->attach< SubWorld >(this);
-    m_resourceManager->attach< KernelScheduler::Producer >(m_producerLoader);
+    m_productEnds.push_back(Task::ITask::CallbackConnection(
+        m_updateTask, producerLoader->startTask()->startCallback()));
     m_productEnds.push_back(
-        Task::ITask::CallbackConnection(m_updateTask, m_eventTask->startCallback()));
+        Task::ITask::CallbackConnection(producerLoader->startTask(), m_eventTask->startCallback()));
 
     for(minitl::array< weak< const KernelScheduler::IProduct > >::const_iterator product
         = products.begin();
         product != products.end(); ++product)
     {
         m_productEnds.push_back(Task::ITask::CallbackConnection(
-            (*product)->producer()->getTask(m_producerLoader), m_eventTask->startCallback()));
+            (*product)->producer()->getTask(producerLoader), m_eventTask->startCallback()));
     }
 }
 
 WorldRuntime::~WorldRuntime()
 {
-    m_resourceManager->detach< KernelScheduler::Producer >(m_producerLoader);
     m_resourceManager->detach< SubWorld >(this);
 }
 
@@ -68,14 +67,14 @@ void WorldRuntime::processEvents()
 {
 }
 
-void WorldRuntime::load(weak< const Resource::Description > subworld, Resource::Resource& resource)
+void WorldRuntime::load(weak< const Resource::IDescription > subworld, Resource::Resource& resource)
 {
     motor_forceuse(subworld);
     motor_forceuse(resource);
 }
 
-void WorldRuntime::unload(weak< const Resource::Description > subworld,
-                          Resource::Resource&                 resource)
+void WorldRuntime::unload(weak< const Resource::IDescription > subworld,
+                          Resource::Resource&                  resource)
 {
     motor_forceuse(subworld);
     motor_forceuse(resource);

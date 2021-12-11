@@ -30,7 +30,7 @@ void NullWindow::present() const
 {
 }
 
-void NullWindow::load(weak< const Resource::Description > /*windowDescription*/)
+void NullWindow::load(weak< const Resource::IDescription > /*windowDescription*/)
 {
 }
 

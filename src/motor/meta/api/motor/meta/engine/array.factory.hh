@@ -47,6 +47,11 @@ struct ClassID< minitl::array< T > >
     static const Meta::OperatorTable      scriptingAPI;
 
     static MOTOR_EXPORT raw< const Meta::Class > klass();
+    static MOTOR_EXPORT istring                  name()
+    {
+        static const istring s_name(minitl::format< 2048u >("array<%s>") | TypeID< T >::name());
+        return s_name;
+    }
 };
 
 template < typename T >
@@ -172,7 +177,7 @@ const Meta::ArrayOperatorTable ClassID< minitl::array< T > >::scriptingArrayAPI
 
 template < typename T >
 const Meta::OperatorTable ClassID< minitl::array< T > >::scriptingAPI
-    = {{&scriptingArrayAPI}, {0, 0}};
+    = {{&scriptingArrayAPI}, {0, 0}, {0}};
 
 template < typename T >
 MOTOR_EXPORT raw< const Meta::Class > ClassID< minitl::array< T > >::klass()
@@ -191,7 +196,7 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< minitl::array< T > >::klass()
            {istring("Index"),
             {2, ClassID< minitl::array< T > >::s_method_Index_overloads},
             {&s_methods[2]}}};
-    static const Meta::Class s_class = {"array",
+    static const Meta::Class s_class = {name(),
                                         u32(sizeof(minitl::array< T >)),
                                         0,
                                         Meta::ClassType_Array,

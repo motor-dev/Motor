@@ -17,13 +17,13 @@ public:
     TextManager();
     ~TextManager();
 
-    void load(weak< const Resource::Description > description,
-              Resource::Resource&                 resource) override;
-    void reload(weak< const Resource::Description > oldDescription,
-                weak< const Resource::Description > newDescription,
-                Resource::Resource&                 resource) override;
-    void unload(weak< const Resource::Description > description,
-                Resource::Resource&                 resource) override;
+    void load(weak< const Resource::IDescription > description,
+              Resource::Resource&                  resource) override;
+    void reload(weak< const Resource::IDescription > oldDescription,
+                weak< const Resource::IDescription > newDescription,
+                Resource::Resource&                  resource) override;
+    void unload(weak< const Resource::IDescription > description,
+                Resource::Resource&                  resource) override;
 };
 
 }  // namespace Motor

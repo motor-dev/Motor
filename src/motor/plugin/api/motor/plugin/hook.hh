@@ -13,15 +13,14 @@ struct Context;
 class IPluginHook;
 }}  // namespace Motor::Plugin
 
-extern minitl::intrusive_list< Motor::Plugin::IPluginHook > MOTOR_CONCAT(g_pluginHooks_,
-                                                                         MOTOR_PROJECTID);
-
 namespace Motor { namespace Plugin {
+
+typedef minitl::intrusive_list< Motor::Plugin::IPluginHook > HookList;
 
 class motor_api(PLUGIN) IPluginHook : public minitl::intrusive_list< IPluginHook >::item
 {
 protected:
-    IPluginHook(minitl::intrusive_list< IPluginHook > & owner)
+    IPluginHook(HookList & owner)
     {
         owner.push_back(*this);
     }
@@ -39,7 +38,7 @@ private:
     T m_hook;
 
 public:
-    PluginHook(const T& t) : IPluginHook(::MOTOR_CONCAT(g_pluginHooks_, MOTOR_PROJECTID)), m_hook(t)
+    PluginHook(HookList& list, const T& t) : IPluginHook(list), m_hook(t)
     {
     }
     ~PluginHook()

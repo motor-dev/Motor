@@ -39,22 +39,21 @@ struct ClassID< KernelScheduler::Product< T > >
 
     static MOTOR_EXPORT raw< const Meta::Class > klass()
     {
-        static const Meta::Class s_class
-            = {istring(minitl::format< 256u >("Product<%s>") | motor_class< T >()->name),
-               u32(sizeof(KernelScheduler::Product< T >)),
-               0,
-               Meta::ClassType_Object,
-               {KernelScheduler::IProduct::getNamespace().m_ptr},
-               {motor_class< KernelScheduler::IProduct >().m_ptr},
-               {0},
-               {0},
-               {0, 0},
-               {1, &s_ctr},
-               {&s_ctr},
-               Meta::OperatorTable::s_emptyTable,
-               0,
-               0};
-        raw< const Meta::Class > result = {&s_class};
+        static const Meta::Class s_class = {name(),
+                                            u32(sizeof(KernelScheduler::Product< T >)),
+                                            0,
+                                            Meta::ClassType_Object,
+                                            {KernelScheduler::IProduct::getNamespace().m_ptr},
+                                            {motor_class< KernelScheduler::IProduct >().m_ptr},
+                                            {0},
+                                            {0},
+                                            {0, 0},
+                                            {1, &s_ctr},
+                                            {&s_ctr},
+                                            Meta::OperatorTable::s_emptyTable,
+                                            0,
+                                            0};
+        raw< const Meta::Class > result  = {&s_class};
 
         static Meta::ObjectInfo registry = {KernelScheduler::IProduct::getNamespace()->objects,
                                             {0},
@@ -65,6 +64,11 @@ struct ClassID< KernelScheduler::Product< T > >
         motor_forceuse(ptr);
 
         return result;
+    }
+    static MOTOR_EXPORT istring name()
+    {
+        static const istring s_name(minitl::format< 2048u >("Product<%s>") | TypeID< T >::name());
+        return s_name;
     }
 };
 

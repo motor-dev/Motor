@@ -23,8 +23,6 @@ private:
     Meta::AST::DbContext                      m_context;
     minitl::vector< Plugin::Plugin< void* > > m_plugins;
     minitl::vector< ref< Meta::AST::Node > >  m_nodes;
-    minitl::vector< Meta::Value >             m_values;
-    Meta::Value                               m_empty;
 
 public:
     Package(const ifilename& filename, ref< Folder > dataFolder);
@@ -33,12 +31,11 @@ public:
     void                   insertNode(const istring name, ref< Meta::AST::Node > object);
     void                   removeNode(ref< Meta::AST::Node > object);
     ref< Meta::AST::Node > findByName(istring name) const;
-    const Meta::Value&     getValue(weak< const Meta::AST::Node > object) const;
 
     void loadPlugin(inamespace plugin, inamespace name);
 
-    void createObjects(weak< Resource::ResourceManager > manager);
-    void deleteObjects(weak< Resource::ResourceManager > manager);
+    void createObjects(weak< Resource::ResourceManager > manager,
+                       minitl::vector< Meta::Value >&    values);
     void diffFromPackage(weak< Package > previous, weak< Resource::ResourceManager > manager);
 
     void resolve();

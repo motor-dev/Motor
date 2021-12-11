@@ -19,8 +19,8 @@ KernelLoader::~KernelLoader()
 {
 }
 
-void KernelLoader::load(weak< const Resource::Description > kernelDescription,
-                        Resource::Resource&                 resource)
+void KernelLoader::load(weak< const Resource::IDescription > kernelDescription,
+                        Resource::Resource&                  resource)
 {
     weak< const Kernel > kernel = motor_checked_cast< const Kernel >(kernelDescription);
     motor_info("loading OpenCL kernel %s" | kernel->name());
@@ -29,7 +29,7 @@ void KernelLoader::load(weak< const Resource::Description > kernelDescription,
     resource.setRefHandle(ref< KernelObject >::create(Arena::task(), code, kernel->name()));
 }
 
-void KernelLoader::unload(weak< const Resource::Description > /*kernelDescription*/,
+void KernelLoader::unload(weak< const Resource::IDescription > /*kernelDescription*/,
                           Resource::Resource& resource)
 {
     resource.clearRefHandle();

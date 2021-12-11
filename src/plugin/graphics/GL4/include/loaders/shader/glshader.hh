@@ -25,11 +25,11 @@ private:
     void        attach();
 
 public:
-    GLShaderProgram(weak< const Resource::Description > shaderDescription,
-                    weak< const GLRenderer >            renderer);
+    GLShaderProgram(weak< const Resource::IDescription > shaderDescription,
+                    weak< const GLRenderer >             renderer);
     ~GLShaderProgram();
 
-    virtual void load(weak< const Resource::Description > shaderDescription) override;
+    virtual void load(weak< const Resource::IDescription > shaderDescription) override;
     virtual void unload() override;
 };
 

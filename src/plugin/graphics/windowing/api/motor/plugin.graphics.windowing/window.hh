@@ -28,7 +28,7 @@ public:
            weak< const Renderer >                renderer);
     ~Window();
 
-    void load(weak< const Resource::Description > renderWindowDescription) override;
+    void load(weak< const Resource::IDescription > renderWindowDescription) override;
     void unload() override;
 
     uint2 getDimensions() const;

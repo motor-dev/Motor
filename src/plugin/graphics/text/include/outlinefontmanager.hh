@@ -24,14 +24,14 @@ public:
                        weak< const FontList > fontList);
     ~OutlineFontManager();
 
-    void load(weak< const Resource::Description > description,
-              Resource::Resource&                 resource) override;
-    void reload(weak< const Resource::Description > oldDescription,
-                weak< const Resource::Description > newDescription,
-                Resource::Resource&                 resource) override;
-    void unload(weak< const Resource::Description > description,
-                Resource::Resource&                 resource) override;
-    void onTicketLoaded(weak< const Resource::Description > description,
+    void load(weak< const Resource::IDescription > description,
+              Resource::Resource&                  resource) override;
+    void reload(weak< const Resource::IDescription > oldDescription,
+                weak< const Resource::IDescription > newDescription,
+                Resource::Resource&                  resource) override;
+    void unload(weak< const Resource::IDescription > description,
+                Resource::Resource&                  resource) override;
+    void onTicketLoaded(weak< const Resource::IDescription > description,
                         Resource::Resource& resource, const minitl::Allocator::Block< u8 >& buffer,
                         LoadType type) override;
 };

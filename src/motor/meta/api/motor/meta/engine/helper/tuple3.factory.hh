@@ -33,6 +33,13 @@ struct ClassID< minitl::tuple< T1, T2, T3 > >
     static const Meta::ObjectInfo        s_third_type_object_third_type;
 
     static MOTOR_EXPORT raw< const Meta::Class > klass();
+    static MOTOR_EXPORT istring                  name()
+    {
+        static const istring s_name(minitl::format< 4096u >("tuple<%s,%s,%s>")
+                                    | TypeID< T1 >::name() | TypeID< T2 >::name()
+                                    | TypeID< T3 >::name());
+        return s_name;
+    }
 };
 
 template < typename T1, typename T2, typename T3 >
@@ -123,22 +130,21 @@ const Meta::Property ClassID< minitl::tuple< T1, T2, T3 > >::s_properties[3]
 template < typename T1, typename T2, typename T3 >
 MOTOR_EXPORT raw< const Meta::Class > ClassID< minitl::tuple< T1, T2, T3 > >::klass()
 {
-    static const Meta::Class s_class = {
-        /* .name */ istring(minitl::format< 1024u >("tuple<%s,%s,%s>") | motor_type< T1 >().name()
-                            | motor_type< T2 >().name() | motor_type< T3 >().name()),
-        /* .size */ u32(sizeof(minitl::tuple< T1, T2, T3 >)),
-        /* .offset */ 0,
-        /* .id */ Meta::ClassType_Struct,
-        /* .owner */ {motor_motor_Namespace().m_ptr},
-        /* .parent */ {motor_class< void >().m_ptr},
-        /* .objects */ {&ClassID< minitl::tuple< T1, T2, T3 > >::s_first_type_object_first_type},
-        /* .tags */ {0},
-        /* .properties */ {3, ClassID< minitl::tuple< T1, T2, T3 > >::s_properties},
-        /* .methods */ {1, ClassID< minitl::tuple< T1, T2, T3 > >::s_methods},
-        /* .constructor */ {ClassID< minitl::tuple< T1, T2, T3 > >::s_methods},
-        /* .operators */ Meta::OperatorTable::s_emptyTable,
-        /* .copyconstructor */ &Meta::wrap< minitl::tuple< T1, T2, T3 > >::copy,
-        /* .destructor */ &Meta::wrap< minitl::tuple< T1, T2, T3 > >::destroy};
+    static const Meta::Class s_class
+        = {/* .name */ name(),
+           /* .size */ u32(sizeof(minitl::tuple< T1, T2, T3 >)),
+           /* .offset */ 0,
+           /* .id */ Meta::ClassType_Struct,
+           /* .owner */ {motor_motor_Namespace().m_ptr},
+           /* .parent */ {motor_class< void >().m_ptr},
+           /* .objects */ {&ClassID< minitl::tuple< T1, T2, T3 > >::s_first_type_object_first_type},
+           /* .tags */ {0},
+           /* .properties */ {3, ClassID< minitl::tuple< T1, T2, T3 > >::s_properties},
+           /* .methods */ {1, ClassID< minitl::tuple< T1, T2, T3 > >::s_methods},
+           /* .constructor */ {ClassID< minitl::tuple< T1, T2, T3 > >::s_methods},
+           /* .operators */ Meta::OperatorTable::s_emptyTable,
+           /* .copyconstructor */ &Meta::wrap< minitl::tuple< T1, T2, T3 > >::copy,
+           /* .destructor */ &Meta::wrap< minitl::tuple< T1, T2, T3 > >::destroy};
 
     raw< const Meta::Class > result = {&s_class};
     return result;

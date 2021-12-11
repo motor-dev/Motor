@@ -40,7 +40,7 @@ struct ClassID< AST::SimplePolicy< INTROSPECTION_HINT > >
     static MOTOR_EXPORT raw< const Meta::Class > klass()
     {
         static const Meta::Class s_class
-            = {istring("SimplePolicy"),
+            = {name(),
                u32(sizeof(AST::SimplePolicy< INTROSPECTION_HINT >)),
                0,
                Meta::ClassType_Object,
@@ -56,6 +56,12 @@ struct ClassID< AST::SimplePolicy< INTROSPECTION_HINT > >
                &wrap< AST::SimplePolicy< INTROSPECTION_HINT > >::destroy};
         raw< const Meta::Class > result = {&s_class};
         return result;
+    }
+    static MOTOR_EXPORT istring name()
+    {
+        static const istring s_name(minitl::format< 4096u >("SimplePolicy<%s>")
+                                    | TypeID< INTROSPECTION_HINT >::name());
+        return s_name;
     }
 };
 

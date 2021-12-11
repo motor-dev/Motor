@@ -16,8 +16,8 @@ CodeLoader::~CodeLoader()
 {
 }
 
-void CodeLoader::load(weak< const Resource::Description > kernelDescription,
-                      Resource::Resource&                 resource)
+void CodeLoader::load(weak< const Resource::IDescription > kernelDescription,
+                      Resource::Resource&                  resource)
 {
     motor_info("loading Cuda kernel %s"
                | motor_checked_cast< const Kernel >(kernelDescription)->name());
@@ -26,7 +26,7 @@ void CodeLoader::load(weak< const Resource::Description > kernelDescription,
     resource.setRefHandle(ref< KernelObject >::create(Arena::task(), name));
 }
 
-void CodeLoader::unload(weak< const Resource::Description > /*codeDescription*/,
+void CodeLoader::unload(weak< const Resource::IDescription > /*codeDescription*/,
                         Resource::Resource& resource)
 {
     resource.clearRefHandle();

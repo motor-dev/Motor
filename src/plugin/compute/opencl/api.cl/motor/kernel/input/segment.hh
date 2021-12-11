@@ -11,14 +11,8 @@ namespace Kernel {
 template < typename T >
 struct segment
 {
-private:
     T* const  m_begin;
     u32 const m_count;
-
-public:
-    __device segment(T* begin, T* end) : m_begin(begin), m_count(static_cast< u32 >(end - begin))
-    {
-    }
 
     typedef T* iterator;
 

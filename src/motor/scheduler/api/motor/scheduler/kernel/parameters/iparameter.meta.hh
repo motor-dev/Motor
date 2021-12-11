@@ -48,9 +48,10 @@ protected:
     struct motor_api(SCHEDULER) ParameterRegistration
     {
     private:
-        static motor_api(SCHEDULER) ParameterRegistry s_registry;
-
         raw< const Meta::Class > m_key;
+
+    private:
+        static ParameterRegistry& registry();
 
     public:
         ParameterRegistration(raw< const Meta::Class > key, raw< const Meta::Class > parameter);
@@ -72,9 +73,10 @@ protected:
     struct motor_api(SCHEDULER) ParameterRegistration
     {
     private:
-        static motor_api(SCHEDULER) ParameterRegistry s_registry;
-
         raw< const Meta::Class > m_key;
+
+    private:
+        static ParameterRegistry& registry();
 
     public:
         ParameterRegistration(raw< const Meta::Class > key, raw< const Meta::Class > parameter);
@@ -96,9 +98,10 @@ protected:
     struct motor_api(SCHEDULER) ParameterRegistration
     {
     private:
-        static motor_api(SCHEDULER) ParameterRegistry s_registry;
-
         raw< const Meta::Class > m_key;
+
+    private:
+        static ParameterRegistry& registry();
 
     public:
         ParameterRegistration(raw< const Meta::Class > key, raw< const Meta::Class > parameter);
@@ -120,9 +123,10 @@ protected:
     struct motor_api(SCHEDULER) ParameterRegistration
     {
     private:
-        static motor_api(SCHEDULER) ParameterRegistry s_registry;
-
         raw< const Meta::Class > m_key;
+
+    private:
+        static ParameterRegistry& registry();
 
     public:
         ParameterRegistration(raw< const Meta::Class > key, raw< const Meta::Class > parameter);
@@ -144,9 +148,10 @@ protected:
     struct motor_api(SCHEDULER) ParameterRegistration
     {
     private:
-        static motor_api(SCHEDULER) ParameterRegistry s_registry;
-
         raw< const Meta::Class > m_key;
+
+    private:
+        static ParameterRegistry& registry();
 
     public:
         ParameterRegistration(raw< const Meta::Class > key, raw< const Meta::Class > parameter);
@@ -168,9 +173,10 @@ protected:
     struct motor_api(SCHEDULER) ParameterRegistration
     {
     private:
-        static motor_api(SCHEDULER) ParameterRegistry s_registry;
-
         raw< const Meta::Class > m_key;
+
+    private:
+        static ParameterRegistry& registry();
 
     public:
         ParameterRegistration(raw< const Meta::Class > key, raw< const Meta::Class > parameter);

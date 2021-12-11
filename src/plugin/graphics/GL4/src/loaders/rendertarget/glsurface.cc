@@ -19,7 +19,7 @@ GLSurface::~GLSurface()
 {
 }
 
-void GLSurface::load(weak< const Resource::Description > /*surfaceDescription*/)
+void GLSurface::load(weak< const Resource::IDescription > /*surfaceDescription*/)
 {
 }
 

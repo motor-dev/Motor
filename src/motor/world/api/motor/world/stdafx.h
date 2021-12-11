@@ -19,11 +19,13 @@
 #    define MOTOR_API_WORLD
 #endif
 
-#ifndef MOTOR_COMPUTE
 namespace Motor { namespace Arena {
+
+#ifndef MOTOR_COMPUTE
 motor_api(WORLD) minitl::Allocator& game();
-}}  // namespace Motor::Arena
 #endif
+
+}}  // namespace Motor::Arena
 
 /**************************************************************************************************/
 #endif

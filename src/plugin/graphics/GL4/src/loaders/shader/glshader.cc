@@ -11,8 +11,8 @@
 
 namespace Motor { namespace OpenGL {
 
-GLShaderProgram::GLShaderProgram(weak< const Resource::Description > shaderDescription,
-                                 weak< const GLRenderer >            renderer)
+GLShaderProgram::GLShaderProgram(weak< const Resource::IDescription > shaderDescription,
+                                 weak< const GLRenderer >             renderer)
     : IGPUResource(shaderDescription, renderer)
     , m_shaderProgram(0)
     , m_vertexShader(0)
@@ -94,7 +94,7 @@ GLhandleARB GLShaderProgram::build(weak< const ShaderProgramDescription > progra
 #endif
 }
 
-void GLShaderProgram::load(weak< const Resource::Description > shaderDescription)
+void GLShaderProgram::load(weak< const Resource::IDescription > shaderDescription)
 {
     weak< const ShaderProgramDescription > program
         = motor_checked_cast< const ShaderProgramDescription >(shaderDescription);

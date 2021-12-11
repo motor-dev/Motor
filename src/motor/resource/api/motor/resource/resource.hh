@@ -11,7 +11,7 @@ namespace Motor { namespace Resource {
 
 struct motor_api(RESOURCE) Resource
 {
-    friend class Description;
+    friend class IDescription;
 
 private:
     Handle m_handle;

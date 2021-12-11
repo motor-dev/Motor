@@ -59,9 +59,9 @@ protected:
     virtual ref< IGPUResource > create(weak< const ShaderProgramDescription > shader) const = 0;
     // virtual ref<IGPUResource>   create(weak<const Texture> texture) = 0;
 public:
-    weak< IGPUResource > getRenderSurface(weak< const Resource::Description > description) const;
-    weak< IGPUResource > getRenderWindow(weak< const Resource::Description > description) const;
-    weak< IGPUResource > getShaderProgram(weak< const Resource::Description > description) const;
+    weak< IGPUResource > getRenderSurface(weak< const Resource::IDescription > description) const;
+    weak< IGPUResource > getRenderWindow(weak< const Resource::IDescription > description) const;
+    weak< IGPUResource > getShaderProgram(weak< const Resource::IDescription > description) const;
 
     minitl::Allocator&  arena() const;
     weak< Task::ITask > syncTask() const;

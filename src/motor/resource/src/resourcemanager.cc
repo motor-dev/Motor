@@ -7,13 +7,15 @@
 
 namespace Motor { namespace Resource {
 
-ResourceManager::LoaderInfo::LoaderInfo() : classinfo(), loaders(Arena::resource()), resources()
+ResourceManager::LoaderInfo::LoaderInfo(raw< const Meta::Class > classinfo)
+    : classinfo(classinfo)
+    , loaders(Arena::resource())
+    , resources()
 {
 }
 
-ResourceManager::ResourceManager(weak< ResourceManager > parent)
-    : m_parent(parent)
-    , m_loaders(Arena::resource(), 1024)
+ResourceManager::ResourceManager()
+    : m_loaders(Arena::resource())
     , m_tickets(Arena::resource())
     , m_pendingTickets(Arena::resource())
     , m_watches(Arena::resource())
@@ -24,43 +26,38 @@ ResourceManager::~ResourceManager()
 {
 }
 
-ResourceManager::LoaderInfo& ResourceManager::getLoaderInfo(raw< const Meta::Class > classinfo,
-                                                            bool                     recursive)
+weak< ResourceManager::LoaderInfo >
+ResourceManager::getLoaderInfo(raw< const Meta::Class > classinfo)
 {
-    for(minitl::array< LoaderInfo >::iterator it = m_loaders.begin(); it != m_loaders.end(); ++it)
+    motor_assert(classinfo->operators,
+                 "Resource class %s does not have an operator table" | classinfo->fullname());
+    raw< const Meta::Class > resourceType = classinfo->operators->templatedClass;
+    motor_assert(resourceType,
+                 "Resource class %s does not have a resource class" | classinfo->fullname());
+    for(minitl::vector< ref< LoaderInfo > >::iterator it = m_loaders.begin(); it != m_loaders.end();
+        ++it)
     {
-        if(classinfo == it->classinfo) return *it;
-        if(!it->classinfo)
-        {
-            it->classinfo = classinfo;
-            return *it;
-        }
+        if(resourceType == (*it)->classinfo) return *it;
     }
-    if(recursive && m_parent)
-    {
-        return m_parent->getLoaderInfo(classinfo);
-    }
-    else
-    {
-        motor_notreached();
-        return m_loaders[0];
-    }
+    m_loaders.push_back(ref< LoaderInfo >::create(Arena::resource(), resourceType));
+    return m_loaders.back();
 }
 
 void ResourceManager::attach(raw< const Meta::Class > classinfo, weak< ILoader > loader)
 {
-    LoaderInfo& info = getLoaderInfo(classinfo);
-    for(minitl::vector< weak< ILoader > >::iterator it = info.loaders.begin();
-        it != info.loaders.end(); ++it)
+    weak< LoaderInfo > info = getLoaderInfo(classinfo);
+    for(minitl::vector< weak< ILoader > >::iterator it = info->loaders.begin();
+        it != info->loaders.end(); ++it)
     {
         motor_assert_recover(*it != loader,
                              "registering twice the same loader for class %s" | classinfo->name,
                              return );
     }
     motor_info("registering loader for type %s" | classinfo->name);
-    info.loaders.push_back(loader);
-    for(minitl::intrusive_list< const Description, 2 >::iterator resource = info.resources.begin();
-        resource != info.resources.end(); ++resource)
+    info->loaders.push_back(loader);
+    for(minitl::intrusive_list< const IDescription, 2 >::iterator resource
+        = info->resources.begin();
+        resource != info->resources.end(); ++resource)
     {
         resource->load(loader);
     }
@@ -74,24 +71,24 @@ void ResourceManager::detach(raw< const Meta::Class > classinfo, weak< const ILo
         {
             it->expired  = true;
             it->file     = weak< const File >();
-            it->resource = weak< const Description >();
+            it->resource = weak< const IDescription >();
             it->loader   = weak< ILoader >();
         }
     }
-    LoaderInfo& info = getLoaderInfo(classinfo, false);
-    for(minitl::vector< weak< ILoader > >::iterator it = info.loaders.begin();
-        it != info.loaders.end();)
+    weak< LoaderInfo > info = getLoaderInfo(classinfo);
+    for(minitl::vector< weak< ILoader > >::iterator it = info->loaders.begin();
+        it != info->loaders.end();)
     {
         if(*it == loader)
         {
             motor_info("unregistering loader for type %s" | classinfo->name);
-            for(minitl::intrusive_list< const Description, 2 >::iterator resource
-                = info.resources.begin();
-                resource != info.resources.end(); ++resource)
+            for(minitl::intrusive_list< const IDescription, 2 >::iterator resource
+                = info->resources.begin();
+                resource != info->resources.end(); ++resource)
             {
                 resource->unload(*it);
             }
-            it = info.loaders.erase(it);
+            it = info->loaders.erase(it);
             return;
         }
         else
@@ -102,25 +99,25 @@ void ResourceManager::detach(raw< const Meta::Class > classinfo, weak< const ILo
     motor_error("loader was not in the list of loaders for type %s" | classinfo->name);
 }
 
-void ResourceManager::load(raw< const Meta::Class >  classinfo,
-                           weak< const Description > description)
+void ResourceManager::load(raw< const Meta::Class >   classinfo,
+                           weak< const IDescription > description)
 {
-    LoaderInfo& info = getLoaderInfo(classinfo);
-    for(minitl::vector< weak< ILoader > >::const_iterator it = info.loaders.begin();
-        it != info.loaders.end(); ++it)
+    weak< LoaderInfo > info = getLoaderInfo(classinfo);
+    for(minitl::vector< weak< ILoader > >::const_iterator it = info->loaders.begin();
+        it != info->loaders.end(); ++it)
     {
         description->load(*it);
     }
-    info.resources.push_back(*description.operator->());
+    info->resources.push_back(*description.operator->());
 }
 
-void ResourceManager::unload(raw< const Meta::Class >  classinfo,
-                             weak< const Description > description)
+void ResourceManager::unload(raw< const Meta::Class >   classinfo,
+                             weak< const IDescription > description)
 {
     description->unhook();
-    LoaderInfo& info = getLoaderInfo(classinfo);
-    for(minitl::vector< weak< ILoader > >::const_iterator it = info.loaders.begin();
-        it != info.loaders.end(); ++it)
+    weak< LoaderInfo > info = getLoaderInfo(classinfo);
+    for(minitl::vector< weak< ILoader > >::const_iterator it = info->loaders.begin();
+        it != info->loaders.end(); ++it)
     {
         description->unload(*it);
     }
@@ -131,13 +128,13 @@ void ResourceManager::unload(raw< const Meta::Class >  classinfo,
         {
             it->expired  = true;
             it->file     = weak< const File >();
-            it->resource = weak< const Description >();
+            it->resource = weak< const IDescription >();
             it->loader   = weak< ILoader >();
         }
     }
 }
 
-void ResourceManager::addTicket(weak< ILoader > loader, weak< const Description > description,
+void ResourceManager::addTicket(weak< ILoader > loader, weak< const IDescription > description,
                                 weak< const File > file, ILoader::FileType fileType,
                                 ILoader::LoadType loadType)
 {

@@ -7,11 +7,18 @@
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/kernel/imemorybuffer.hh>
 #include <motor/scheduler/kernel/kernel.meta.hh>
-#include <motor/scheduler/task/kerneltask.hh>
+
+#include <motor/minitl/array.hh>
 
 namespace Motor {
 class Scheduler;
 }
+
+namespace Motor { namespace Task {
+
+class KernelTask;
+
+}}  // namespace Motor::Task
 
 namespace Motor { namespace KernelScheduler {
 
@@ -68,6 +75,8 @@ public:
 };
 
 }}  // namespace Motor::KernelScheduler
+
+#include <motor/scheduler/task/kerneltask.hh>
 
 /**************************************************************************************************/
 #endif

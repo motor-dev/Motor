@@ -6,11 +6,11 @@
 /**************************************************************************************************/
 #include <stdafx.h>
 #include <motor/meta/tags/editor.meta.hh>
-#include <motor/script.meta.hh>
+#include <motor/script.hh>
 
 namespace Motor {
 
-class LuaScript : public Script
+class LuaScript : public Script< LuaScript >
 {
     friend class PackageLoader;
     published : LuaScript(motor_tag(EditHint::Extension(".lua")) weak< const File > script);

@@ -14,20 +14,20 @@ TextManager::~TextManager()
 {
 }
 
-void TextManager::load(weak< const Resource::Description > /*description*/,
+void TextManager::load(weak< const Resource::IDescription > /*description*/,
                        Resource::Resource& /*resource*/)
 {
     motor_info("loading text");
 }
 
-void TextManager::reload(weak< const Resource::Description > /*oldDescription*/,
-                         weak< const Resource::Description > /*newDescription*/,
+void TextManager::reload(weak< const Resource::IDescription > /*oldDescription*/,
+                         weak< const Resource::IDescription > /*newDescription*/,
                          Resource::Resource& /*resource*/)
 {
     motor_info("reloading text");
 }
 
-void TextManager::unload(weak< const Resource::Description > /*description*/,
+void TextManager::unload(weak< const Resource::IDescription > /*description*/,
                          Resource::Resource& /*resource*/)
 {
     motor_info("unloading text");

@@ -26,145 +26,184 @@ namespace Motor { namespace Meta {
 template < typename T >
 struct ClassID
 {
-    static MOTOR_EXPORT raw< const Meta::Class > klass();
+    static MOTOR_EXPORT raw< const Class > klass();
+    static MOTOR_EXPORT istring            name();
 };
 
 template < typename T >
 struct TypeID
 {
-    static inline Meta::Type type()
+    static inline Type type()
     {
-        return Meta::Type::makeType(ClassID< T >::klass(), Meta::Type::Value, Meta::Type::Mutable,
-                                    Meta::Type::Mutable);
+        return Type::makeType(ClassID< T >::klass(), Type::Value, Type::Mutable, Type::Mutable);
+    }
+    static inline istring name()
+    {
+        return ClassID< T >::name();
     }
 };
 
 template < typename T >
 struct TypeID< const T > : public TypeID< T >
 {
-    static inline Meta::Type type()
+    static inline Type type()
     {
-        return Meta::Type::makeType(TypeID< T >::type().metaclass, Meta::Type::Value,
-                                    Meta::Type::Const, Meta::Type::Const);
+        return Type::makeType(TypeID< T >::type().metaclass, Type::Value, Type::Const, Type::Const);
+    }
+    static inline istring name()
+    {
+        return istring(minitl::format< 1024u >("%s const") | TypeID< T >::name());
     }
 };
 
 template < typename T >
 struct TypeID< T& >
 {
-    static inline Meta::Type type()
+    static inline Type type()
     {
-        Meta::Type t = TypeID< T >::type();
-        t.access     = Meta::Type::Mutable;
-        t.constness  = Meta::Type::Const;
+        Type t      = TypeID< T >::type();
+        t.access    = Type::Mutable;
+        t.constness = Type::Const;
         return t;
+    }
+    static inline istring name()
+    {
+        return istring(minitl::format< 1024u >("%s&") | TypeID< T >::name());
     }
 };
 
 template < typename T >
 struct TypeID< const T& >
 {
-    static inline Meta::Type type()
+    static inline Type type()
     {
-        Meta::Type t = TypeID< T >::type();
-        t.access     = Meta::Type::Const;
+        Type t   = TypeID< T >::type();
+        t.access = Type::Const;
         return t;
+    }
+    static inline istring name()
+    {
+        return istring(minitl::format< 1024u >("%s const&") | TypeID< T >::name());
     }
 };
 
 template < typename T >
 struct TypeID< ref< T > >
 {
-    static inline Meta::Type type()
+    static inline Type type()
     {
-        return Meta::Type::makeType(TypeID< T >::type().metaclass, Meta::Type::RefPtr,
-                                    minitl::is_const< T >::Value ? Meta::Type::Const
-                                                                 : Meta::Type::Mutable,
-                                    Meta::Type::Mutable);
+        return Type::makeType(TypeID< T >::type().metaclass, Type::RefPtr,
+                              minitl::is_const< T >::Value ? Type::Const : Type::Mutable,
+                              Type::Mutable);
+    }
+    static inline istring name()
+    {
+        return istring(minitl::format< 1024u >("ref<%s>") | TypeID< T >::name());
     }
 };
 
 template < typename T >
 struct TypeID< weak< T > >
 {
-    static inline Meta::Type type()
+    static inline Type type()
     {
-        return Meta::Type::makeType(TypeID< T >::type().metaclass, Meta::Type::WeakPtr,
-                                    minitl::is_const< T >::Value ? Meta::Type::Const
-                                                                 : Meta::Type::Mutable,
-                                    Meta::Type::Mutable);
+        return Type::makeType(TypeID< T >::type().metaclass, Type::WeakPtr,
+                              minitl::is_const< T >::Value ? Type::Const : Type::Mutable,
+                              Type::Mutable);
+    }
+    static inline istring name()
+    {
+        return istring(minitl::format< 1024u >("weak<%s>") | TypeID< T >::name());
     }
 };
 
 template < typename T >
 struct TypeID< raw< T > >
 {
-    static inline Meta::Type type()
+    static inline Type type()
     {
-        return Meta::Type::makeType(TypeID< T >::type().metaclass, Meta::Type::RawPtr,
-                                    minitl::is_const< T >::Value ? Meta::Type::Const
-                                                                 : Meta::Type::Mutable,
-                                    Meta::Type::Mutable);
+        return Type::makeType(TypeID< T >::type().metaclass, Type::RawPtr,
+                              minitl::is_const< T >::Value ? Type::Const : Type::Mutable,
+                              Type::Mutable);
+    }
+    static inline istring name()
+    {
+        return istring(minitl::format< 1024u >("raw<%s>") | TypeID< T >::name());
     }
 };
 
 template < typename T >
 struct TypeID< T* >
 {
-    static inline Meta::Type type()
+    static inline Type type()
     {
-        return Meta::Type::makeType(TypeID< T >::type().metaclass, Meta::Type::RawPtr,
-                                    minitl::is_const< T >::Value ? Meta::Type::Const
-                                                                 : Meta::Type::Mutable,
-                                    Meta::Type::Mutable);
+        return Type::makeType(TypeID< T >::type().metaclass, Type::RawPtr,
+                              minitl::is_const< T >::Value ? Type::Const : Type::Mutable,
+                              Type::Mutable);
+    }
+    static inline istring name()
+    {
+        return istring(minitl::format< 1024u >("%s*") | TypeID< T >::name());
     }
 };
 
 template < typename T >
 struct TypeID< ref< T > const >
 {
-    static inline Meta::Type type()
+    static inline Type type()
     {
-        return Meta::Type::makeType(TypeID< T >::type().metaclass, Meta::Type::RefPtr,
-                                    minitl::is_const< T >::Value ? Meta::Type::Const
-                                                                 : Meta::Type::Mutable,
-                                    Meta::Type::Const);
+        return Type::makeType(TypeID< T >::type().metaclass, Type::RefPtr,
+                              minitl::is_const< T >::Value ? Type::Const : Type::Mutable,
+                              Type::Const);
+    }
+    static inline istring name()
+    {
+        return istring(minitl::format< 1024u >("ref<%s> const") | TypeID< T >::name());
     }
 };
 
 template < typename T >
 struct TypeID< weak< T > const >
 {
-    static inline Meta::Type type()
+    static inline Type type()
     {
-        return Meta::Type::makeType(TypeID< T >::type().metaclass, Meta::Type::WeakPtr,
-                                    minitl::is_const< T >::Value ? Meta::Type::Const
-                                                                 : Meta::Type::Mutable,
-                                    Meta::Type::Const);
+        return Type::makeType(TypeID< T >::type().metaclass, Type::WeakPtr,
+                              minitl::is_const< T >::Value ? Type::Const : Type::Mutable,
+                              Type::Const);
+    }
+    static inline istring name()
+    {
+        return istring(minitl::format< 1024u >("weak<%s> const") | TypeID< T >::name());
     }
 };
 
 template < typename T >
 struct TypeID< raw< T > const >
 {
-    static inline Meta::Type type()
+    static inline Type type()
     {
-        return Meta::Type::makeType(TypeID< T >::type().metaclass, Meta::Type::RawPtr,
-                                    minitl::is_const< T >::Value ? Meta::Type::Const
-                                                                 : Meta::Type::Mutable,
-                                    Meta::Type::Const);
+        return Type::makeType(TypeID< T >::type().metaclass, Type::RawPtr,
+                              minitl::is_const< T >::Value ? Type::Const : Type::Mutable,
+                              Type::Const);
+    }
+    static inline istring name()
+    {
+        return istring(minitl::format< 1024u >("raw<%s> const") | TypeID< T >::name());
     }
 };
 
 template < typename T >
 struct TypeID< T* const >
 {
-    static inline Meta::Type type()
+    static inline Type type()
     {
-        return Meta::Type::makeType(TypeID< T >::type().metaclass, Meta::Type::RawPtr,
-                                    minitl::is_const< T >::Value ? Meta::Type::Const
-                                                                 : Meta::Type::Mutable,
-                                    Meta::Type::Const);
+        return Type::makeType(TypeID< T >::type().metaclass, Type::RawPtr,
+                              minitl::is_const< T >::Value ? Type::Const : Type::Mutable,
+                              Type::Const);
+    }
+    static inline istring name()
+    {
+        return istring(minitl::format< 1024u >("%s* const") | TypeID< T >::name());
     }
 };
 

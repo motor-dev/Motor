@@ -5,7 +5,7 @@
 #include <motor/introspect/node/object.hh>
 
 #include <motor/introspect/dbcontext.hh>
-#include <motor/introspect/introspectionhint.hh>
+#include <motor/introspect/introspectionhint.meta.hh>
 #include <motor/introspect/node/parameter.hh>
 #include <motor/introspect/node/property.hh>
 #include <motor/introspect/node/reference.hh>
@@ -95,16 +95,16 @@ bool Object::resolveInternal(DbContext& context)
             m_arguments.resize(argumentCount);
             if(method.second)
             {
-                m_arguments[0] = ArgInfo(this);
+                m_arguments[0] = IntrospectionHint::ArgInfo(this);
             }
             for(u32 currentArg = 0; currentArg < m_parameters.size(); ++currentArg)
             {
-                m_arguments[currentArg + argumentThis]
-                    = ArgInfo(m_parameters[currentArg]->name(), m_parameters[currentArg]);
+                m_arguments[currentArg + argumentThis] = IntrospectionHint::ArgInfo(
+                    m_parameters[currentArg]->name(), m_parameters[currentArg]);
             }
 
-            ArgInfo* arguments = m_arguments.empty() ? 0 : &m_arguments.front();
-            CallInfo callInfo
+            IntrospectionHint::ArgInfo* arguments = m_arguments.empty() ? 0 : &m_arguments.front();
+            CallInfo                    callInfo
                 = Meta::resolve(method.first, arguments, argumentThis, arguments + argumentThis,
                                 motor_checked_numcast< u32 >(m_parameters.size()));
             if(callInfo.overload)
@@ -140,7 +140,7 @@ bool Object::resolveInternal(DbContext& context)
 void Object::doEval(const Type& expectedType, Value& result) const
 {
     motor_forceuse(expectedType);
-    const ArgInfo* arguments = m_arguments.empty() ? 0 : &m_arguments.front();
+    const IntrospectionHint::ArgInfo* arguments = m_arguments.empty() ? 0 : &m_arguments.front();
     result = m_introspectionHint->call(arguments, motor_checked_numcast< u32 >(m_arguments.size()));
 }
 

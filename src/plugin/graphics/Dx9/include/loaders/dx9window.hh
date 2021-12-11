@@ -5,9 +5,9 @@
 #define MOTOR_DX9_LOADERS_DX9WINDOW_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
+#include <motor/plugin.graphics.windowing/window.hh>
 #include <d3d9.h>
 #include <dx9renderer.hh>
-#include <motor/plugin.graphics.windowing/window.hh>
 
 namespace Motor { namespace DirectX9 {
 
@@ -21,7 +21,7 @@ private:
 private:
     void setCurrent() const;
 
-    void load(weak< const Resource::Description > windowDescription) override;
+    void load(weak< const Resource::IDescription > windowDescription) override;
     void unload() override;
 
     void begin(ClearMode clear) const override;

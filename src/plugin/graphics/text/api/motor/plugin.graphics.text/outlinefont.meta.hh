@@ -6,13 +6,13 @@
 /**************************************************************************************************/
 #include <motor/plugin.graphics.text/stdafx.h>
 #include <motor/filesystem/file.meta.hh>
-#include <motor/resource/description.meta.hh>
+#include <motor/resource/description.hh>
 
 namespace Motor {
 
 class OutlineFontManager;
 
-class motor_api(TEXT) OutlineFont : public Resource::Description
+class motor_api(TEXT) OutlineFont : public Resource::Description< OutlineFont >
 {
     friend class OutlineFontManager;
 

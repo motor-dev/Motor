@@ -5,7 +5,7 @@
 #define MOTOR_SCHEDULER_KERNEL_KERNEL_META_HH_
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
-#include <motor/resource/description.meta.hh>
+#include <motor/resource/description.hh>
 #include <motor/scheduler/kernel/code.meta.hh>
 
 namespace Motor { namespace KernelScheduler {
@@ -16,7 +16,7 @@ enum SchedulerType
     GPUType
 };
 
-class motor_api(SCHEDULER) Kernel : public Resource::Description
+class motor_api(SCHEDULER) Kernel : public Resource::Description< Kernel >
 {
 private:
     ref< const Code > m_kernelCode;

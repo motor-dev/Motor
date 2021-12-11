@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/introspect/stdafx.h>
-#include <motor/introspect/introspectionhint.hh>
+#include <motor/introspect/introspectionhint.meta.hh>
 
 #include <motor/introspect/dbcontext.hh>
 #include <motor/introspect/node/node.hh>

@@ -21,7 +21,9 @@ private:
     typedef ::Motor::Plugin::PluginHook< ResourceHook > PluginHook;
     static MOTOR_EXPORT PluginHook g_kernelHook;
 
-    virtual ref< ::Motor::KernelScheduler::Producer::Runtime > createRuntime() const override;
+    virtual ref< ::Motor::KernelScheduler::Producer::Runtime > createRuntime(
+        weak< const ::Motor::KernelScheduler::ProducerLoader > loader
+    ) const override;
 
 published:
     %(argument_outs)s
@@ -44,6 +46,7 @@ TEMPLATE_H = """
 #include    <motor/scheduler/task/itask.hh>
 #include    <motor/scheduler/kernel/product.hh>
 #include    <motor/scheduler/kernel/producer.meta.hh>
+#include    <motor/scheduler/kernel/producerloader.hh>
 #include    <motor/scheduler/kernel/parameters/parameters.hh>
 #include    <motor/scheduler/task/kerneltask.hh>
 #include    <motor/kernel/colors.hh>
@@ -63,7 +66,7 @@ TEMPLATE_CLASS_CC = """
 
 static ref< ::Motor::KernelScheduler::Kernel > s_%(Name)sKernel%(KernelName)s = ref< ::Motor::KernelScheduler::Kernel >::create(::Motor::Arena::task(), s_%(Name)sKernelCode, ::Motor::istring("%(kernelName)s"));
 
-%(KernelName)sKernel::PluginHook %(KernelName)sKernel::g_kernelHook = %(KernelName)sKernel::PluginHook(%(KernelName)sKernel::ResourceHook(s_%(Name)sKernel%(KernelName)s));
+%(KernelName)sKernel::PluginHook %(KernelName)sKernel::g_kernelHook = %(KernelName)sKernel::PluginHook(::Motor::MOTOR_CONCAT(g_pluginHooks_, MOTOR_PROJECTID), %(KernelName)sKernel::ResourceHook(s_%(Name)sKernel%(KernelName)s));
 
 %(KernelName)sKernel::%(KernelName)sKernel(%(argument_params)s)
     :   %(argument_assign)s
@@ -74,9 +77,30 @@ static ref< ::Motor::KernelScheduler::Kernel > s_%(Name)sKernel%(KernelName)s = 
 {
 }
 
-ref< ::Motor::KernelScheduler::Producer::Runtime > %(KernelName)sKernel::createRuntime() const
+ref< ::Motor::KernelScheduler::Producer::Runtime > %(KernelName)sKernel::createRuntime(
+    weak< const ::Motor::KernelScheduler::ProducerLoader > loader
+) const
 {
-    return ref< ::Motor::KernelScheduler::Producer::Runtime >();
+    motor_forceuse(loader);
+    void* memory = malloca(sizeof(ref< ::Motor::KernelScheduler::IParameter >) * %(argument_count)s);
+    ref< ::Motor::KernelScheduler::IParameter >* parameters = reinterpret_cast<ref< ::Motor::KernelScheduler::IParameter >*>(memory);
+    for (u32 i = 0; i < %(argument_count)s; ++i)
+        new(&parameters[i]) ref< ::Motor::KernelScheduler::IParameter >();
+    ref< ::Motor::Task::KernelTask > task = ref< ::Motor::Task::KernelTask >::create(
+            ::Motor::Arena::task(),
+            "%(kernel_full_name)s.%(KernelName)s",
+            Motor::KernelScheduler::GPUType,
+            Motor::Colors::Red::Red,
+            Motor::Scheduler::High,
+            s_%(Name)sKernel%(KernelName)s,
+            parameters, parameters + %(argument_count)s
+        );
+    ref< ::Motor::KernelScheduler::Producer::Runtime > result = ref< ::Motor::KernelScheduler::Producer::Runtime >::create(::Motor::Arena::task(), task, %(argument_count)s);
+    %(product_chain)s
+    for (u32 i = 0; i < %(argument_count)s; ++i)
+        parameters[i].~ref();
+    freea(memory);
+    return result;
 }
 
 %(end_Namespace)s
@@ -86,8 +110,17 @@ TEMPLATE_CC = """
 %(pch)s
 #include "%(header)s"
 
+
+namespace Motor
+{
+
+extern Plugin::HookList MOTOR_CONCAT(g_pluginHooks_, MOTOR_PROJECTID);
+
+}
+
+
 static ref< ::Motor::KernelScheduler::Code > s_%(Name)sKernelCode = ref< ::Motor::KernelScheduler::Code >::create(::Motor::Arena::task(), ::Motor::inamespace("%(plugin)s.%(kernel_full_name)s"));
-MOTOR_EXPORT ::Motor::Plugin::PluginHook< Motor::Plugin::ResourceHook< ::Motor::KernelScheduler::Code > > g_%(Name)sKernelHook = ::Motor::Plugin::PluginHook< ::Motor::Plugin::ResourceHook< ::Motor::KernelScheduler::Code > >(::Motor::Plugin::ResourceHook< ::Motor::KernelScheduler::Code >(s_%(Name)sKernelCode));
+MOTOR_EXPORT ::Motor::Plugin::PluginHook< Motor::Plugin::ResourceHook< ::Motor::KernelScheduler::Code > > g_%(Name)sKernelHook = ::Motor::Plugin::PluginHook< ::Motor::Plugin::ResourceHook< ::Motor::KernelScheduler::Code > >(::Motor::MOTOR_CONCAT(g_pluginHooks_, MOTOR_PROJECTID), ::Motor::Plugin::ResourceHook< ::Motor::KernelScheduler::Code >(s_%(Name)sKernelCode));
 
 %(Tasks_CC)s
 
@@ -183,6 +216,15 @@ class kernel_task(Task.Task):
                     ),
                 'argument_assign':
                     argument_assign,
+                'product_chain':
+                    '    \n'.join(
+                        [
+                            'result->chain.push_back(::Motor::Task::ITask::CallbackConnection(\n'
+                            '        m_%s->producer()->getTask(loader),\n'
+                            '        task->startCallback())\n'
+                            '    );' % arg[0] for arg in args
+                        ]
+                    )
             }
             tasks_cc.append(TEMPLATE_CLASS_CC % task_params)
             tasks_h.append(TEMPLATE_CLASS_H % task_params)

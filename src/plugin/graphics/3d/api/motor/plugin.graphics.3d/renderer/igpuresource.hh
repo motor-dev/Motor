@@ -11,7 +11,9 @@
 namespace Motor {
 
 namespace Resource {
-class Description;
+
+class IDescription;
+
 }
 
 template < typename R >
@@ -27,20 +29,21 @@ class motor_api(3D) IGPUResource
     MOTOR_NOCOPY(IGPUResource);
 
 protected:
-    const weak< const IRenderer >       m_renderer;
-    weak< const Resource::Description > m_resource;
+    const weak< const IRenderer >        m_renderer;
+    weak< const Resource::IDescription > m_resource;
 
 private:
     i32 m_index;
 
 public:
-    IGPUResource(weak< const Resource::Description > description, weak< const IRenderer > renderer);
+    IGPUResource(weak< const Resource::IDescription > description,
+                 weak< const IRenderer >              renderer);
     virtual ~IGPUResource();
 
-    virtual void load(weak< const Resource::Description > description) = 0;
-    virtual void unload()                                              = 0;
+    virtual void load(weak< const Resource::IDescription > description) = 0;
+    virtual void unload()                                               = 0;
 
-    weak< const Resource::Description > resource() const
+    weak< const Resource::IDescription > resource() const
     {
         return m_resource;
     }

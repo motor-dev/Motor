@@ -70,7 +70,7 @@ Window::~Window()
 {
 }
 
-void Window::load(weak< const Resource::Description > renderWindowDescription)
+void Window::load(weak< const Resource::IDescription > renderWindowDescription)
 {
     motor_forceuse(renderWindowDescription);
     m_window.reset(scoped< PlatformWindow >::create(

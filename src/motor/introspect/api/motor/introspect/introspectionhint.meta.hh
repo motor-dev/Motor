@@ -1,8 +1,8 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_INTROSPECT_INTROSPECTIONHINT_HH_
-#define MOTOR_INTROSPECT_INTROSPECTIONHINT_HH_
+#ifndef MOTOR_INTROSPECT_INTROSPECTIONHINT_META_HH_
+#define MOTOR_INTROSPECT_INTROSPECTIONHINT_META_HH_
 /**************************************************************************************************/
 #include <motor/introspect/stdafx.h>
 
@@ -13,21 +13,11 @@ namespace Motor { namespace Meta { namespace AST {
 
 class Object;
 
-static inline Meta::ConversionCost calculateConversion(weak< const Node > node,
-                                                       const Meta::Type&  other)
-{
-    return node->distance(other);
-}
-
-static inline void convert(weak< const Node > node, void* buffer, Meta::Type type)
-{
-    new(buffer) Value(node->eval(type));
-}
-
-typedef Meta::ArgInfo< weak< const Node > > ArgInfo;
-
 class motor_api(INTROSPECT) IntrospectionHint : public minitl::refcountable
 {
+public:
+    typedef Meta::ArgInfo< weak< const Node > > ArgInfo;
+
 protected:
     weak< const Object > m_owner;
     raw< const Method >  m_method;
@@ -48,6 +38,8 @@ public:
 };
 
 }}}  // namespace Motor::Meta::AST
+
+#include <motor/introspect/introspectionhint.inl>
 
 /**************************************************************************************************/
 #endif

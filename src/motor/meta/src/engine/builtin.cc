@@ -10,9 +10,16 @@
 namespace Motor { namespace Meta {
 
 template <>
+MOTOR_EXPORT istring ClassID< void >::name()
+{
+    static const istring s_name("void");
+    return s_name;
+}
+
+template <>
 MOTOR_EXPORT raw< const Meta::Class > ClassID< void >::klass()
 {
-    static Meta::Class s_void = {"void",
+    static Meta::Class s_void = {name(),
                                  0,
                                  0,
                                  0,
@@ -31,9 +38,16 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< void >::klass()
 }
 
 template <>
+MOTOR_EXPORT istring ClassID< minitl::pointer >::name()
+{
+    static const istring s_name("pointer");
+    return s_name;
+}
+
+template <>
 MOTOR_EXPORT raw< const Meta::Class > ClassID< minitl::pointer >::klass()
 {
-    static Meta::Class s_pointer = {"pointer",
+    static Meta::Class s_pointer = {name(),
                                     0,
                                     0,
                                     0,
@@ -52,9 +66,16 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< minitl::pointer >::klass()
 }
 
 template <>
+MOTOR_EXPORT istring ClassID< minitl::refcountable >::name()
+{
+    static const istring s_name("refcountable");
+    return s_name;
+}
+
+template <>
 MOTOR_EXPORT raw< const Meta::Class > ClassID< minitl::refcountable >::klass()
 {
-    static Meta::Class s_refcountable = {"refcountable",
+    static Meta::Class s_refcountable = {name(),
                                          0,
                                          0,
                                          0,

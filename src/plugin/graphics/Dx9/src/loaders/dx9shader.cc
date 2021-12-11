@@ -18,7 +18,7 @@ Dx9ShaderProgram::~Dx9ShaderProgram()
 {
 }
 
-void Dx9ShaderProgram::load(weak< const Resource::Description > shaderDescription)
+void Dx9ShaderProgram::load(weak< const Resource::IDescription > shaderDescription)
 {
     motor_forceuse(shaderDescription);
 }

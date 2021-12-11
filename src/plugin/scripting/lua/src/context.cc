@@ -434,7 +434,7 @@ Context::~Context()
     lua_close(m_state);
 }
 
-void Context::unload(weak< const Resource::Description > /*description*/,
+void Context::unload(weak< const Resource::IDescription > /*description*/,
                      Resource::Resource& /*handle*/)
 {
 }

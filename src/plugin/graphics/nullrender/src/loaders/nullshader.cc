@@ -17,7 +17,7 @@ NullShaderProgram::~NullShaderProgram()
 {
 }
 
-void NullShaderProgram::load(weak< const Resource::Description > /*shaderDescription*/)
+void NullShaderProgram::load(weak< const Resource::IDescription > /*shaderDescription*/)
 {
 }
 

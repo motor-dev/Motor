@@ -20,7 +20,7 @@ public:
     ~NullWindow();
 
 private:
-    void load(weak< const Resource::Description > windowDescription) override;
+    void load(weak< const Resource::IDescription > windowDescription) override;
     void unload() override;
 
     void begin(ClearMode clear) const override;

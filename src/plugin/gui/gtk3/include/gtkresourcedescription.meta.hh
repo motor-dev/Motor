@@ -4,7 +4,7 @@
 #ifndef MOTOR_UI_GTK3_GTKRESOURCEDESCRIPTION_HH_
 #define MOTOR_UI_GTK3_GTKRESOURCEDESCRIPTION_HH_
 /**************************************************************************************************/
-#include <motor/resource/description.meta.hh>
+#include <motor/resource/description.hh>
 
 namespace Motor { namespace Gtk3 {
 
@@ -32,7 +32,7 @@ public:
     GObject* value;
 };
 
-class GtkResourceDescription : public Resource::Description
+class GtkResourceDescription : public Resource::Description< GtkResourceDescription >
 {
 protected:
     GtkResourceDescription();

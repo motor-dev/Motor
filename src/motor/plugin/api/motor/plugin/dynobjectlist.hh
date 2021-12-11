@@ -40,6 +40,7 @@ private:
     DynamicObjectList* m_next;
     const char* const  m_name;
     Symbol             m_symbols[16];
+    u32                m_symbolCount;
 
 private:
     bool                 registerSymbolInternal(const char* name, SymbolPointer value);

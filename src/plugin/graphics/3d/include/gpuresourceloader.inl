@@ -23,8 +23,8 @@ GPUResourceLoader< R >::~GPUResourceLoader()
 }
 
 template < typename R >
-void GPUResourceLoader< R >::load(weak< const Resource::Description > description,
-                                  Resource::Resource&                 resource)
+void GPUResourceLoader< R >::load(weak< const Resource::IDescription > description,
+                                  Resource::Resource&                  resource)
 {
     ref< IGPUResource > handle = m_renderer->create(motor_checked_cast< const R >(description));
     resource.setRefHandle(handle);
@@ -32,7 +32,7 @@ void GPUResourceLoader< R >::load(weak< const Resource::Description > descriptio
 }
 
 template < typename R >
-void GPUResourceLoader< R >::unload(weak< const Resource::Description > /*description*/,
+void GPUResourceLoader< R >::unload(weak< const Resource::IDescription > /*description*/,
                                     Resource::Resource& resource)
 {
     weak< IGPUResource > gpuResource = resource.getRefHandle< IGPUResource >();

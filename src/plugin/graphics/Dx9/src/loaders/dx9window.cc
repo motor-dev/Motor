@@ -74,7 +74,7 @@ void Dx9Window::end(PresentMode present) const
     }
 }
 
-void Dx9Window::load(weak< const Resource::Description > windowDescription)
+void Dx9Window::load(weak< const Resource::IDescription > windowDescription)
 {
     motor_assert(Thread::currentId()
                      == motor_checked_cast< const Dx9Renderer >(m_renderer)->m_threadId,

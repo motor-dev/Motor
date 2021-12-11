@@ -9,13 +9,15 @@
 #include <motor/plugin/plugin.hh>
 #include <motor/resource/loader.hh>
 #include <motor/scheduler/task/group.hh>
-#include <motor/scriptengine.hh>
 
 namespace Motor {
 
 namespace KernelScheduler {
+
 class IKernelScheduler;
-}
+class ProducerLoader;
+
+}  // namespace KernelScheduler
 
 namespace World {
 class World;
@@ -40,6 +42,7 @@ private:
     weak< Scheduler >                                   m_scheduler;
     weak< Resource::ResourceManager >                   m_resourceManager;
     Plugin::Context const                               m_pluginContext;
+    scoped< KernelScheduler::ProducerLoader > const     m_producerLoader;
     Plugin::Plugin< KernelScheduler::IKernelScheduler > m_cpuKernelScheduler;
     ref< Task::TaskGroup >                              m_updateTask;
     minitl::vector< UpdateTask >                        m_tasks;
@@ -54,9 +57,9 @@ private:
     void updateResources();
 
 private:
-    virtual void load(weak< const Resource::Description > world, Resource::Resource & resource)
+    virtual void load(weak< const Resource::IDescription > world, Resource::Resource & resource)
         override;
-    virtual void unload(weak< const Resource::Description > /*world*/,
+    virtual void unload(weak< const Resource::IDescription > /*world*/,
                         Resource::Resource & resource) override;
 
 private:

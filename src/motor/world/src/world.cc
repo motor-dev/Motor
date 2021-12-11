@@ -15,9 +15,11 @@ World::~World()
 {
 }
 
-ref< WorldRuntime > World::createRuntime(const Plugin::Context& context) const
+ref< WorldRuntime >
+World::createRuntime(weak< const KernelScheduler::ProducerLoader > producerLoader,
+                     const Plugin::Context&                        context) const
 {
-    return ref< WorldRuntime >::create(Arena::game(), context, m_products);
+    return ref< WorldRuntime >::create(Arena::game(), producerLoader, context, m_products);
 }
 
 }}  // namespace Motor::World

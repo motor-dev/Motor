@@ -36,63 +36,92 @@ istring IParameter::getProductTypePropertyName()
     return s_productClassName;
 }
 
-IParameter::ParameterRegistry IImage1D::ParameterRegistration::s_registry(Arena::task());
-IParameter::ParameterRegistry IImage2D::ParameterRegistration::s_registry(Arena::task());
-IParameter::ParameterRegistry IImage3D::ParameterRegistration::s_registry(Arena::task());
-IParameter::ParameterRegistry ISegment::ParameterRegistration::s_registry(Arena::task());
-IParameter::ParameterRegistry ISegments::ParameterRegistration::s_registry(Arena::task());
-IParameter::ParameterRegistry IStream::ParameterRegistration::s_registry(Arena::task());
+IParameter::ParameterRegistry& IImage1D::ParameterRegistration::registry()
+{
+    static IParameter::ParameterRegistry s_registry(Arena::task());
+    return s_registry;
+}
+
+IParameter::ParameterRegistry& IImage2D::ParameterRegistration::registry()
+{
+    static IParameter::ParameterRegistry s_registry(Arena::task());
+    return s_registry;
+}
+
+IParameter::ParameterRegistry& IImage3D::ParameterRegistration::registry()
+{
+    static IParameter::ParameterRegistry s_registry(Arena::task());
+    return s_registry;
+}
+
+IParameter::ParameterRegistry& ISegment::ParameterRegistration::registry()
+{
+    static IParameter::ParameterRegistry s_registry(Arena::task());
+    return s_registry;
+}
+
+IParameter::ParameterRegistry& ISegments::ParameterRegistration::registry()
+{
+    static IParameter::ParameterRegistry s_registry(Arena::task());
+    return s_registry;
+}
+
+IParameter::ParameterRegistry& IStream::ParameterRegistration::registry()
+{
+    static IParameter::ParameterRegistry s_registry(Arena::task());
+    return s_registry;
+}
 
 IImage1D::ParameterRegistration::ParameterRegistration(raw< const Meta::Class > key,
                                                        raw< const Meta::Class > parameter)
     : m_key(key)
 {
-    s_registry.push_back(minitl::make_tuple(key, parameter));
+    registry().push_back(minitl::make_tuple(key, parameter));
 }
 
 IImage2D::ParameterRegistration::ParameterRegistration(raw< const Meta::Class > key,
                                                        raw< const Meta::Class > parameter)
     : m_key(key)
 {
-    s_registry.push_back(minitl::make_tuple(key, parameter));
+    registry().push_back(minitl::make_tuple(key, parameter));
 }
 
 IImage3D::ParameterRegistration::ParameterRegistration(raw< const Meta::Class > key,
                                                        raw< const Meta::Class > parameter)
     : m_key(key)
 {
-    s_registry.push_back(minitl::make_tuple(key, parameter));
+    registry().push_back(minitl::make_tuple(key, parameter));
 }
 
 ISegment::ParameterRegistration::ParameterRegistration(raw< const Meta::Class > key,
                                                        raw< const Meta::Class > parameter)
     : m_key(key)
 {
-    s_registry.push_back(minitl::make_tuple(key, parameter));
+    registry().push_back(minitl::make_tuple(key, parameter));
 }
 
 ISegments::ParameterRegistration::ParameterRegistration(raw< const Meta::Class > key,
                                                         raw< const Meta::Class > parameter)
     : m_key(key)
 {
-    s_registry.push_back(minitl::make_tuple(key, parameter));
+    registry().push_back(minitl::make_tuple(key, parameter));
 }
 
 IStream::ParameterRegistration::ParameterRegistration(raw< const Meta::Class > key,
                                                       raw< const Meta::Class > parameter)
     : m_key(key)
 {
-    s_registry.push_back(minitl::make_tuple(key, parameter));
+    registry().push_back(minitl::make_tuple(key, parameter));
 }
 
 IImage1D::ParameterRegistration::~ParameterRegistration()
 {
-    for(IParameter::ParameterRegistry::iterator it = s_registry.begin(); it != s_registry.end();
-        ++it)
+    ParameterRegistry& reg = registry();
+    for(ParameterRegistry::iterator it = reg.begin(); it != reg.end(); ++it)
     {
         if(it->first == m_key)
         {
-            s_registry.erase(it);
+            reg.erase(it);
             return;
         }
     }
@@ -101,12 +130,12 @@ IImage1D::ParameterRegistration::~ParameterRegistration()
 
 IImage2D::ParameterRegistration::~ParameterRegistration()
 {
-    for(IParameter::ParameterRegistry::iterator it = s_registry.begin(); it != s_registry.end();
-        ++it)
+    ParameterRegistry& reg = registry();
+    for(ParameterRegistry::iterator it = reg.begin(); it != reg.end(); ++it)
     {
         if(it->first == m_key)
         {
-            s_registry.erase(it);
+            reg.erase(it);
             return;
         }
     }
@@ -115,12 +144,12 @@ IImage2D::ParameterRegistration::~ParameterRegistration()
 
 IImage3D::ParameterRegistration::~ParameterRegistration()
 {
-    for(IParameter::ParameterRegistry::iterator it = s_registry.begin(); it != s_registry.end();
-        ++it)
+    ParameterRegistry& reg = registry();
+    for(ParameterRegistry::iterator it = reg.begin(); it != reg.end(); ++it)
     {
         if(it->first == m_key)
         {
-            s_registry.erase(it);
+            reg.erase(it);
             return;
         }
     }
@@ -129,12 +158,12 @@ IImage3D::ParameterRegistration::~ParameterRegistration()
 
 ISegment::ParameterRegistration::~ParameterRegistration()
 {
-    for(IParameter::ParameterRegistry::iterator it = s_registry.begin(); it != s_registry.end();
-        ++it)
+    ParameterRegistry& reg = registry();
+    for(ParameterRegistry::iterator it = reg.begin(); it != reg.end(); ++it)
     {
         if(it->first == m_key)
         {
-            s_registry.erase(it);
+            reg.erase(it);
             return;
         }
     }
@@ -143,12 +172,12 @@ ISegment::ParameterRegistration::~ParameterRegistration()
 
 ISegments::ParameterRegistration::~ParameterRegistration()
 {
-    for(IParameter::ParameterRegistry::iterator it = s_registry.begin(); it != s_registry.end();
-        ++it)
+    ParameterRegistry& reg = registry();
+    for(ParameterRegistry::iterator it = reg.begin(); it != reg.end(); ++it)
     {
         if(it->first == m_key)
         {
-            s_registry.erase(it);
+            reg.erase(it);
             return;
         }
     }
@@ -157,12 +186,12 @@ ISegments::ParameterRegistration::~ParameterRegistration()
 
 IStream::ParameterRegistration::~ParameterRegistration()
 {
-    for(IParameter::ParameterRegistry::iterator it = s_registry.begin(); it != s_registry.end();
-        ++it)
+    ParameterRegistry& reg = registry();
+    for(ParameterRegistry::iterator it = reg.begin(); it != reg.end(); ++it)
     {
         if(it->first == m_key)
         {
-            s_registry.erase(it);
+            reg.erase(it);
             return;
         }
     }
@@ -172,7 +201,8 @@ IStream::ParameterRegistration::~ParameterRegistration()
 raw< const Meta::Class >
 IImage1D::ParameterRegistration::getParameter(raw< const Meta::Class > objectClass)
 {
-    for(ParameterRegistry::const_iterator it = s_registry.begin(); it != s_registry.end(); ++it)
+    ParameterRegistry& reg = registry();
+    for(ParameterRegistry::const_iterator it = reg.begin(); it != reg.end(); ++it)
         if(it->first == objectClass) return it->second;
     return raw< const Meta::Class >();
 }
@@ -180,7 +210,8 @@ IImage1D::ParameterRegistration::getParameter(raw< const Meta::Class > objectCla
 raw< const Meta::Class >
 IImage2D::ParameterRegistration::getParameter(raw< const Meta::Class > objectClass)
 {
-    for(ParameterRegistry::const_iterator it = s_registry.begin(); it != s_registry.end(); ++it)
+    ParameterRegistry& reg = registry();
+    for(ParameterRegistry::const_iterator it = reg.begin(); it != reg.end(); ++it)
         if(it->first == objectClass) return it->second;
     return raw< const Meta::Class >();
 }
@@ -188,7 +219,8 @@ IImage2D::ParameterRegistration::getParameter(raw< const Meta::Class > objectCla
 raw< const Meta::Class >
 IImage3D::ParameterRegistration::getParameter(raw< const Meta::Class > objectClass)
 {
-    for(ParameterRegistry::const_iterator it = s_registry.begin(); it != s_registry.end(); ++it)
+    ParameterRegistry& reg = registry();
+    for(ParameterRegistry::const_iterator it = reg.begin(); it != reg.end(); ++it)
         if(it->first == objectClass) return it->second;
     return raw< const Meta::Class >();
 }
@@ -196,7 +228,8 @@ IImage3D::ParameterRegistration::getParameter(raw< const Meta::Class > objectCla
 raw< const Meta::Class >
 ISegment::ParameterRegistration::getParameter(raw< const Meta::Class > objectClass)
 {
-    for(ParameterRegistry::const_iterator it = s_registry.begin(); it != s_registry.end(); ++it)
+    ParameterRegistry& reg = registry();
+    for(ParameterRegistry::const_iterator it = reg.begin(); it != reg.end(); ++it)
         if(it->first == objectClass) return it->second;
     return raw< const Meta::Class >();
 }
@@ -204,7 +237,8 @@ ISegment::ParameterRegistration::getParameter(raw< const Meta::Class > objectCla
 raw< const Meta::Class >
 ISegments::ParameterRegistration::getParameter(raw< const Meta::Class > objectClass)
 {
-    for(ParameterRegistry::const_iterator it = s_registry.begin(); it != s_registry.end(); ++it)
+    ParameterRegistry& reg = registry();
+    for(ParameterRegistry::const_iterator it = reg.begin(); it != reg.end(); ++it)
         if(it->first == objectClass) return it->second;
     return raw< const Meta::Class >();
 }
@@ -212,7 +246,8 @@ ISegments::ParameterRegistration::getParameter(raw< const Meta::Class > objectCl
 raw< const Meta::Class >
 IStream::ParameterRegistration::getParameter(raw< const Meta::Class > objectClass)
 {
-    for(ParameterRegistry::const_iterator it = s_registry.begin(); it != s_registry.end(); ++it)
+    ParameterRegistry& reg = registry();
+    for(ParameterRegistry::const_iterator it = reg.begin(); it != reg.end(); ++it)
         if(it->first == objectClass) return it->second;
     return raw< const Meta::Class >();
 }
