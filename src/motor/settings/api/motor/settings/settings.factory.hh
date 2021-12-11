@@ -73,11 +73,18 @@ namespace Motor {
 MOTOR_EXPORT raw< Meta::Class > motor_motor_Namespace_Motor_Settings();
 
 namespace Meta {
+
 template < typename T >
 struct ClassID< Settings::Settings< T > >
 {
     static MOTOR_EXPORT raw< const Meta::Class > klass();
+    static MOTOR_EXPORT istring                  name()
+    {
+        static const istring s_name(minitl::format< 2048u >("Settings<%s>") | TypeID< T >::name());
+        return s_name;
+    }
 };
+
 }  // namespace Meta
 
 namespace Settings {
@@ -116,7 +123,7 @@ const Meta::Method Settings_RTTIHelper< T >::s_methods[1]
 template < typename T >
 MOTOR_EXPORT raw< const Meta::Class > Meta::ClassID< Settings::Settings< T > >::klass()
 {
-    static Meta::Class       s_class = {"Settings",
+    static Meta::Class       s_class = {name(),
                                   0,
                                   0,
                                   Meta::ClassType_Struct,

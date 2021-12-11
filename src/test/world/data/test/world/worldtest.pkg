@@ -1,16 +1,107 @@
 load test.world as worldtest;
 
-storage = motor.World.ArchetypeStorage
+storage1 = motor.World.ArchetypeStorage
 (
     componentClass = worldtest.Component;
 );
 
-job = worldtest.UpdateKernel
+job1 = worldtest.UpdateKernel
 (
-    inout = storage.component;
+    inout = storage1.component;
+);
+
+storage2 = motor.World.ArchetypeStorage
+(
+    componentClass = worldtest.Component;
+);
+
+job2 = worldtest.UpdateKernel
+(
+    inout = storage2.component;
+);
+
+storage3 = motor.World.ArchetypeStorage
+(
+    componentClass = worldtest.Component;
+);
+
+job3 = worldtest.UpdateKernel
+(
+    inout = storage3.component;
+);
+
+storage4 = motor.World.ArchetypeStorage
+(
+    componentClass = worldtest.Component;
+);
+
+job4 = worldtest.UpdateKernel
+(
+    inout = storage4.component;
+);
+
+storage5 = motor.World.ArchetypeStorage
+(
+    componentClass = worldtest.Component;
+);
+
+job5 = worldtest.UpdateKernel
+(
+    inout = storage5.component;
+);
+
+storage6 = motor.World.ArchetypeStorage
+(
+    componentClass = worldtest.Component;
+);
+
+job6 = worldtest.UpdateKernel
+(
+    inout = storage6.component;
+);
+
+storage7 = motor.World.ArchetypeStorage
+(
+    componentClass = worldtest.Component;
+);
+
+job7 = worldtest.UpdateKernel
+(
+    inout = storage7.component;
+);
+
+storage8 = motor.World.ArchetypeStorage
+(
+    componentClass = worldtest.Component;
+);
+
+job8 = worldtest.UpdateKernel
+(
+    inout = storage8.component;
+);
+
+storage9 = motor.World.ArchetypeStorage
+(
+    componentClass = worldtest.Component;
+);
+
+job9 = worldtest.UpdateKernel
+(
+    inout = storage9.component;
+);
+
+storage10 = motor.World.ArchetypeStorage
+(
+    componentClass = worldtest.Component;
+);
+
+job10 = worldtest.UpdateKernel
+(
+    inout = storage10.component;
 );
 
 world = motor.World.World
 (
-    products = [job.inout];
+    products = [job1.inout, job2.inout, job3.inout, job4.inout, job5.inout,
+                job6.inout, job7.inout, job8.inout, job9.inout, job10.inout];
 );

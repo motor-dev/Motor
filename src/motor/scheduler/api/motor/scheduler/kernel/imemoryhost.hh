@@ -5,7 +5,6 @@
 #define MOTOR_SCHEDULER_KERNEL_IMEMORYHOST_HH_
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
-#include <motor/resource/description.meta.hh>
 
 namespace Motor { namespace KernelScheduler {
 

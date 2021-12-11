@@ -8,7 +8,7 @@
 
 namespace Motor { namespace OpenGL {
 
-GLMesh::GLMesh(weak< const Resource::Description > meshDescription, weak< GLRenderer > renderer)
+GLMesh::GLMesh(weak< const Resource::IDescription > meshDescription, weak< GLRenderer > renderer)
     : IGPUResource(meshDescription, renderer)
 {
 }
@@ -17,7 +17,7 @@ GLMesh::~GLMesh()
 {
 }
 
-void GLMesh::load(weak< const Resource::Description > /*meshDescription*/)
+void GLMesh::load(weak< const Resource::IDescription > /*meshDescription*/)
 {
 }
 

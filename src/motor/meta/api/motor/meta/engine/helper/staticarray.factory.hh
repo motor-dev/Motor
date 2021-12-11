@@ -42,6 +42,12 @@ struct ClassID< Meta::staticarray< T > >
     static const Meta::OperatorTable      scriptingAPI;
 
     static MOTOR_EXPORT raw< const Meta::Class > klass();
+    static MOTOR_EXPORT istring                  name()
+    {
+        static const istring s_name(minitl::format< 2048u >("staticarray<%s>")
+                                    | TypeID< T >::name());
+        return s_name;
+    }
 };
 
 template < typename T >
@@ -143,7 +149,7 @@ const Meta::ArrayOperatorTable ClassID< Meta::staticarray< T > >::scriptingArray
 
 template < typename T >
 const Meta::OperatorTable ClassID< Meta::staticarray< T > >::scriptingAPI
-    = {{&scriptingArrayAPI}, {0, 0}};
+    = {{&scriptingArrayAPI}, {0, 0}, {0}};
 
 template < typename T >
 MOTOR_EXPORT raw< const Meta::Class > ClassID< Meta::staticarray< T > >::klass()
@@ -159,22 +165,21 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< Meta::staticarray< T > >::klass()
            {istring("size"),
             {1, ClassID< Meta::staticarray< T > >::s_method_size_overloads},
             {&s_methods[1]}}};
-    static const ::Motor::Meta::Class s_class
-        = {istring(minitl::format< 1024u >("staticarray<%s>") | motor_type< T >().name()),
-           u32(sizeof(Meta::staticarray< T >)),
-           0,
-           Meta::ClassType_Array,
-           {motor_motor_Namespace().m_ptr},
-           {motor_class< void >().m_ptr},
-           {0},
-           {0},
-           {0, 0},
-           {2, s_methods},
-           {0},
-           {&ClassID< Meta::staticarray< T > >::scriptingAPI},
-           &Meta::wrap< Meta::staticarray< T > >::copy,
-           &Meta::wrap< Meta::staticarray< T > >::destroy};
-    raw< const Meta::Class > result = {&s_class};
+    static const ::Motor::Meta::Class s_class = {name(),
+                                                 u32(sizeof(Meta::staticarray< T >)),
+                                                 0,
+                                                 Meta::ClassType_Array,
+                                                 {motor_motor_Namespace().m_ptr},
+                                                 {motor_class< void >().m_ptr},
+                                                 {0},
+                                                 {0},
+                                                 {0, 0},
+                                                 {2, s_methods},
+                                                 {0},
+                                                 {&ClassID< Meta::staticarray< T > >::scriptingAPI},
+                                                 &Meta::wrap< Meta::staticarray< T > >::copy,
+                                                 &Meta::wrap< Meta::staticarray< T > >::destroy};
+    raw< const Meta::Class >          result  = {&s_class};
     return result;
 }
 

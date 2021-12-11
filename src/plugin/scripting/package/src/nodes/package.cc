@@ -15,7 +15,6 @@ Package::Package(const ifilename& filename, ref< Folder > dataFolder)
     , m_context(Arena::packageBuilder(), dataFolder)
     , m_plugins(Arena::packageBuilder())
     , m_nodes(Arena::packageBuilder())
-    , m_values(Arena::packageBuilder())
 {
     m_context.rootNamespace->add(inamespace("motor"), Meta::Value(motor_motor_Namespace()));
 }
@@ -77,54 +76,26 @@ ref< Meta::AST::Node > Package::findByName(istring name) const
     return m_context.rootNamespace->getNode(name);
 }
 
-const Meta::Value& Package::getValue(weak< const Meta::AST::Node > object) const
+void Package::createObjects(weak< Resource::ResourceManager > manager,
+                            minitl::vector< Meta::Value >&    values)
 {
-    size_t index = 0;
-    for(minitl::vector< ref< Meta::AST::Node > >::const_iterator it = m_nodes.begin();
-        it != m_nodes.end(); ++it, ++index)
-    {
-        if((*it) == object)
-        {
-            motor_assert_recover(index < m_values.size(), "access to a value not yet created",
-                                 return m_empty);
-            motor_assert(m_values[index], "access to a value not yet created");
-            return m_values[index];
-        }
-    }
-    return m_empty;
-}
-
-void Package::createObjects(weak< Resource::ResourceManager > manager)
-{
-    m_values.resize(m_nodes.size());
+    values.resize(m_nodes.size());
     for(size_t i = 0; i < m_nodes.size(); ++i)
     {
-        m_nodes[i]->eval(motor_type< void >(), m_values[i]);
-        if(m_values[i].isA(motor_type< const Resource::Description >()))
+        m_nodes[i]->eval(motor_type< void >(), values[i]);
+        if(values[i].isA(motor_type< const Resource::IDescription >()))
         {
-            manager->load(m_values[i].type().metaclass,
-                          m_values[i].as< weak< const Resource::Description > >());
+            manager->load(values[i].type().metaclass,
+                          values[i].as< weak< const Resource::IDescription > >());
         }
     }
 }
 
-void Package::deleteObjects(weak< Resource::ResourceManager > manager)
-{
-    for(size_t i = m_values.size(); i > 0; --i)
-    {
-        if(m_values.back().isA(motor_type< const Resource::Description >()))
-        {
-            manager->unload(m_values.back().type().metaclass,
-                            m_values.back().as< weak< const Resource::Description > >());
-        }
-        m_values.pop_back();
-    }
-}
-
-void Package::diffFromPackage(weak< Package > previous,
+void Package::diffFromPackage(weak< Package > /*previous*/,
                               weak< Resource::ResourceManager > /*manager*/)
 {
-    minitl::swap(previous->m_values, m_values);
+    motor_unimplemented();
+    // minitl::swap(previous->m_values, m_values);
     // for(size_t i = 0; i < m_nodes.size(); ++i)
     //{
     //    motor_forceuse(manager);

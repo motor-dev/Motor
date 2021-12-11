@@ -4,7 +4,7 @@
 #include <motor/introspect/stdafx.h>
 #include <motor/introspect/policy.meta.hh>
 
-#include <motor/introspect/introspectionhint.hh>
+#include <motor/introspect/introspectionhint.meta.hh>
 #include <motor/introspect/node/object.hh>
 
 namespace Motor { namespace Meta { namespace AST {

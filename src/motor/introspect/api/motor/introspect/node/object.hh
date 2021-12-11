@@ -7,22 +7,21 @@
 #include <motor/introspect/stdafx.h>
 #include <motor/introspect/node/node.hh>
 
-#include <motor/introspect/introspectionhint.hh>
+#include <motor/introspect/introspectionhint.meta.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 
 class Reference;
 class Parameter;
-class IntrospectionHint;
 
 class motor_api(INTROSPECT) Object : public Node
 {
 private:
-    const ref< Reference >                   m_className;
-    const minitl::vector< ref< Parameter > > m_parameters;
-    minitl::vector< ArgInfo >                m_arguments;
-    ref< IntrospectionHint >                 m_introspectionHint;
+    const ref< Reference >                       m_className;
+    const minitl::vector< ref< Parameter > >     m_parameters;
+    minitl::vector< IntrospectionHint::ArgInfo > m_arguments;
+    ref< IntrospectionHint >                     m_introspectionHint;
 
 private:
     bool resolveInternal(DbContext & context);

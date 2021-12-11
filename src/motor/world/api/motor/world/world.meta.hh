@@ -7,19 +7,20 @@
 #include <motor/world/stdafx.h>
 
 #include <motor/plugin/plugin.hh>
-#include <motor/resource/description.meta.hh>
+#include <motor/resource/description.hh>
 #include <motor/scheduler/kernel/iproduct.meta.hh>
 #include <motor/world/runtime/worldruntime.hh>
 
 namespace Motor { namespace World {
 
-class motor_api(WORLD) World : public Resource::Description
+class motor_api(WORLD) World : public Resource::Description< World >
 {
 private:
     minitl::array< weak< const KernelScheduler::IProduct > > m_products;
 
 public:
-    ref< WorldRuntime > createRuntime(const Plugin::Context& context) const;
+    ref< WorldRuntime > createRuntime(weak< const KernelScheduler::ProducerLoader > producerLoader,
+                                      const Plugin::Context&                        context) const;
 
 published:
     World(minitl::array< weak< const KernelScheduler::IProduct > > products);

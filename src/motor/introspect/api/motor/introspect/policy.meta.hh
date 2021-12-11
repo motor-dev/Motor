@@ -6,7 +6,7 @@
 /**************************************************************************************************/
 #include <motor/introspect/stdafx.h>
 #include <motor/introspect/dbcontext.hh>
-#include <motor/introspect/introspectionhint.hh>
+#include <motor/introspect/introspectionhint.meta.hh>
 
 namespace Motor { namespace Meta {
 

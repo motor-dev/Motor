@@ -22,6 +22,7 @@ struct OperatorTable
 {
     raw< const ArrayOperatorTable > arrayOperators;
     staticarray< const Method >     casts;
+    raw< const Meta::Class >        templatedClass;
 
     static motor_api(META) raw< const OperatorTable > s_emptyTable;
 };

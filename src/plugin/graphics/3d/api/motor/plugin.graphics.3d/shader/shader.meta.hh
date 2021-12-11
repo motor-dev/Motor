@@ -5,7 +5,7 @@
 #define MOTOR_3D_SHADER_SHADER_META_HH_
 /**************************************************************************************************/
 #include <motor/plugin.graphics.3d/stdafx.h>
-#include <motor/resource/description.meta.hh>
+#include <motor/resource/description.hh>
 
 namespace Motor {
 namespace Shaders {
@@ -25,7 +25,8 @@ enum Stage
 
 }  // namespace Shaders
 
-class motor_api(3D) ShaderProgramDescription : public Resource::Description
+class motor_api(3D) ShaderProgramDescription
+    : public Resource::Description< ShaderProgramDescription >
 {
     MOTOR_NOCOPY(ShaderProgramDescription);
 

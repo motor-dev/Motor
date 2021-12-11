@@ -111,6 +111,14 @@ public:
         void* mem = allocator.alloc(sizeof(T), motor_alignof(T));
         return ref< T >(new(mem) T(a1, a2, a3, a4, a5, a6), allocator);
     }
+
+    template < class A1, class A2, class A3, class A4, class A5, class A6, class A7 >
+    static inline ref< T > create(Allocator& allocator, const A1& a1, const A2& a2, const A3& a3,
+                                  const A4& a4, const A5& a5, const A6& a6, const A7& a7)
+    {
+        void* mem = allocator.alloc(sizeof(T), motor_alignof(T));
+        return ref< T >(new(mem) T(a1, a2, a3, a4, a5, a6, a7), allocator);
+    }
 };
 
 template < u16 SIZE >

@@ -32,6 +32,12 @@ struct ClassID< minitl::tuple< T1, T2 > >
     static const Meta::ObjectInfo        s_second_type_object_second_type;
 
     static MOTOR_EXPORT raw< const Meta::Class > klass();
+    static MOTOR_EXPORT istring                  name()
+    {
+        static const istring s_name(minitl::format< 4096u >("tuple<%s,%s>") | TypeID< T1 >::name()
+                                    | TypeID< T2 >::name());
+        return s_name;
+    }
 };
 
 template < typename T1, typename T2 >
@@ -105,8 +111,7 @@ template < typename T1, typename T2 >
 MOTOR_EXPORT raw< const Meta::Class > ClassID< minitl::tuple< T1, T2 > >::klass()
 {
     static const Meta::Class s_class
-        = {/* .name */ istring(minitl::format< 1024u >("tuple<%s,%s>") | motor_type< T1 >().name()
-                               | motor_type< T2 >().name()),
+        = {/* .name */ name(),
            /* .size */ u32(sizeof(minitl::tuple< T1, T2 >)),
            /* .offset */ 0,
            /* .id */ Meta::ClassType_Struct,

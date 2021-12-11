@@ -20,7 +20,7 @@ public:
     ~NullShaderProgram();
 
 private:
-    void load(weak< const Resource::Description > shaderDescription) override;
+    void load(weak< const Resource::IDescription > shaderDescription) override;
     void unload() override;
 };
 

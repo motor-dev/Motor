@@ -11,6 +11,7 @@ namespace Motor { namespace KernelScheduler {
 Producer::Runtime::Runtime(ref< Task::ITask > task, u32 parameterCount)
     : task(task)
     , parameters(Arena::task(), parameterCount)
+    , chain(Arena::task(), parameterCount)
 {
 }
 

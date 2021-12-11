@@ -473,8 +473,10 @@ void vector< T >::resize(size_type size)
 template < typename T >
 void vector< T >::clear()
 {
-    for(pointer t = m_memory.data(); t != m_end; ++t)
-        t->~T();
+    for(const_pointer t = m_end; t > m_memory; t = advance(t, -1))
+    {
+        advance(t, -1)->~T();
+    }
     m_end = m_memory.data();
 }
 

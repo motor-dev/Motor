@@ -1,8 +1,8 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_RESOURCE_DESCRIPTION_META_HH_
-#define MOTOR_RESOURCE_DESCRIPTION_META_HH_
+#ifndef MOTOR_RESOURCE_IDESCRIPTION_META_HH_
+#define MOTOR_RESOURCE_IDESCRIPTION_META_HH_
 /**************************************************************************************************/
 #include <motor/resource/stdafx.h>
 #include <motor/minitl/intrusive_list.hh>
@@ -14,12 +14,12 @@ namespace Motor { namespace Resource {
 class ILoader;
 class ResourceManager;
 
-class motor_api(RESOURCE) Description
+class motor_api(RESOURCE) IDescription
     : public minitl::refcountable
-    , public minitl::intrusive_list< const Description, 2 >::item
+    , public minitl::intrusive_list< const IDescription, 2 >::item
 {
     friend class ResourceManager;
-    MOTOR_NOCOPY(Description);
+    MOTOR_NOCOPY(IDescription);
 
 private:
     enum
@@ -41,8 +41,8 @@ private:
     void      unload(weak< ILoader > loader) const;
 
 protected:
-    Description();
-    ~Description();
+    IDescription();
+    ~IDescription();
 
 public:
     const Resource& getResource(weak< const ILoader > owner) const;

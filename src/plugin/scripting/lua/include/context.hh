@@ -33,8 +33,8 @@ public:
     static minitl::format< 1024u > getCallInfo(lua_State* state);
 
 private:
-    virtual void unload(weak< const Resource::Description > description,
-                        Resource::Resource&                 handle) override;
+    virtual void unload(weak< const Resource::IDescription > description,
+                        Resource::Resource&                  handle) override;
     virtual void runBuffer(weak< const LuaScript > script, Resource::Resource& resource,
                            const minitl::Allocator::Block< u8 >& buffer) override;
     virtual void reloadBuffer(weak< const LuaScript > script, Resource::Resource& resource,

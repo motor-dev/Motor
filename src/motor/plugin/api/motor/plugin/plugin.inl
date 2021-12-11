@@ -28,11 +28,34 @@ namespace Motor { namespace Plugin {
 
 #define MOTOR_PLUGIN_NAMESPACE_REGISTER_NAMED__(name, id)                                          \
     MOTOR_PLUGIN_NAMESPACE_CREATE_(id)                                                             \
+    namespace Motor {                                                                              \
+    minitl::intrusive_list< Motor::Plugin::IPluginHook > g_pluginHooks_##id;                       \
+    }                                                                                              \
+    _MOTOR_PLUGIN_EXPORT                                                                           \
+    minitl::refcountable* motor_createPlugin(const ::Motor::Plugin::Context& context)              \
+    {                                                                                              \
+        for(minitl::intrusive_list< Motor::Plugin::IPluginHook >::iterator it                      \
+            = Motor::g_pluginHooks_##id.begin();                                                   \
+            it != Motor::g_pluginHooks_##id.end(); ++it)                                           \
+            it->onload(context);                                                                   \
+        return 0;                                                                                  \
+    }                                                                                              \
+    _MOTOR_PLUGIN_EXPORT void motor_destroyPlugin(                                                 \
+        minitl::refcountable* cls, weak< Motor::Resource::ResourceManager > manager)               \
+    {                                                                                              \
+        motor_forceuse(cls);                                                                       \
+        for(minitl::intrusive_list< Motor::Plugin::IPluginHook >::iterator it                      \
+            = Motor::g_pluginHooks_##id.begin();                                                   \
+            it != Motor::g_pluginHooks_##id.end(); ++it)                                           \
+            it->onunload(manager);                                                                 \
+    }                                                                                              \
     _MOTOR_PLUGIN_EXPORT const Motor::Meta::Class* motor_pluginNamespace()                         \
     {                                                                                              \
         return Motor::motor_##id##_Namespace().operator->();                                       \
     }                                                                                              \
     _MOTOR_REGISTER_PLUGIN(id, name);                                                              \
+    _MOTOR_REGISTER_METHOD(id, motor_createPlugin);                                                \
+    _MOTOR_REGISTER_METHOD(id, motor_destroyPlugin);                                               \
     _MOTOR_REGISTER_METHOD(id, motor_pluginNamespace);
 
 #define MOTOR_PLUGIN_NAMESPACE_REGISTER_NAMED_(name, id)                                           \
@@ -46,13 +69,15 @@ namespace Motor { namespace Plugin {
 
 #define MOTOR_PLUGIN_REGISTER_NAMED__(name, id, create)                                            \
     MOTOR_PLUGIN_NAMESPACE_CREATE_(id);                                                            \
+    namespace Motor {                                                                              \
     minitl::intrusive_list< Motor::Plugin::IPluginHook > g_pluginHooks_##id;                       \
+    }                                                                                              \
     _MOTOR_PLUGIN_EXPORT                                                                           \
     minitl::refcountable* motor_createPlugin(const ::Motor::Plugin::Context& context)              \
     {                                                                                              \
         for(minitl::intrusive_list< Motor::Plugin::IPluginHook >::iterator it                      \
-            = g_pluginHooks_##id.begin();                                                          \
-            it != g_pluginHooks_##id.end(); ++it)                                                  \
+            = Motor::g_pluginHooks_##id.begin();                                                   \
+            it != Motor::g_pluginHooks_##id.end(); ++it)                                           \
             it->onload(context);                                                                   \
         ref< minitl::refcountable > r = (*create)(context);                                        \
         if(r) r->addref();                                                                         \
@@ -63,8 +88,8 @@ namespace Motor { namespace Plugin {
     {                                                                                              \
         if(cls) cls->decref();                                                                     \
         for(minitl::intrusive_list< Motor::Plugin::IPluginHook >::iterator it                      \
-            = g_pluginHooks_##id.begin();                                                          \
-            it != g_pluginHooks_##id.end(); ++it)                                                  \
+            = Motor::g_pluginHooks_##id.begin();                                                   \
+            it != Motor::g_pluginHooks_##id.end(); ++it)                                           \
             it->onunload(manager);                                                                 \
     }                                                                                              \
     _MOTOR_PLUGIN_EXPORT const Motor::Meta::Class* motor_pluginNamespace()                         \

@@ -33,7 +33,6 @@ private:
     scoped< Resource::ResourceManager >               m_resourceManager;
     Plugin::Context                                   m_context;
     minitl::vector< ref< ComponentStorage > >         m_logicComponentStorage;
-    ref< KernelScheduler::ProducerLoader >            m_producerLoader;
     ref< Task::ITask >                                m_updateTask;
     ref< Task::ITask >                                m_eventTask;
     Task::ITask::CallbackConnection                   m_startEvent;
@@ -44,8 +43,8 @@ private:
     void processEvents();
 
 private:
-    void load(weak< const Resource::Description > subworld, Resource::Resource & resource);
-    void unload(weak< const Resource::Description > subWorld, Resource::Resource & resource);
+    void load(weak< const Resource::IDescription > subworld, Resource::Resource & resource);
+    void unload(weak< const Resource::IDescription > subWorld, Resource::Resource & resource);
 
 public:
     weak< Task::ITask > startUpdateTask() const;
@@ -53,7 +52,8 @@ public:
     void                addLogicComponentType(raw< const Meta::Class > type);
 
 public:
-    WorldRuntime(const Plugin::Context&                                   context,
+    WorldRuntime(weak< const KernelScheduler::ProducerLoader >            producerLoader,
+                 const Plugin::Context&                                   context,
                  minitl::array< weak< const KernelScheduler::IProduct > > products);
     ~WorldRuntime();
 };

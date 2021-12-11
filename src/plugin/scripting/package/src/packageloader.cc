@@ -19,6 +19,16 @@ minitl::Allocator& package()
 
 namespace Motor { namespace PackageManager {
 
+class PackageInstance : public minitl::refcountable
+{
+public:
+    minitl::vector< Meta::Value > values;
+
+    PackageInstance() : values(Arena::package())
+    {
+    }
+};
+
 PackageLoader::PackageLoader(const Plugin::Context& context)
     : ScriptEngine< Package >(Arena::package(), context.resourceManager)
     , m_packageBuilder(
@@ -30,15 +40,23 @@ PackageLoader::~PackageLoader()
 {
 }
 
-void PackageLoader::unload(weak< const Resource::Description > /*description*/,
+void PackageLoader::unload(weak< const Resource::IDescription > /*description*/,
                            Resource::Resource& handle)
 {
     {
-        weak< PackageBuilder::Nodes::Package > package
-            = handle.getRefHandle< PackageBuilder::Nodes::Package >();
-        if(package)
+        weak< PackageInstance > instance = handle.getRefHandle< PackageInstance >();
+        if(instance)
         {
-            package->deleteObjects(m_manager);
+            for(minitl::vector< Meta::Value >::reverse_iterator it = instance->values.rbegin();
+                it != instance->values.rend(); ++it)
+            {
+                if(it->isA(motor_type< const Resource::IDescription >()))
+                {
+                    m_manager->unload(it->type().metaclass,
+                                      it->as< weak< const Resource::IDescription > >());
+                }
+            }
+            instance->values.clear();
         }
     }
     handle.clearRefHandle();
@@ -58,8 +76,9 @@ void PackageLoader::runBuffer(weak< const Package > script, Resource::Resource& 
     }
     if(package->success())
     {
-        resource.setRefHandle(package);
-        package->createObjects(m_manager);
+        ref< PackageInstance > instance = ref< PackageInstance >::create(Arena::package());
+        resource.setRefHandle(instance);
+        package->createObjects(m_manager, instance->values);
     }
 }
 

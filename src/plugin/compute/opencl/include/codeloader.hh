@@ -21,10 +21,10 @@ public:
     CodeLoader(weak< const Context > context);
     ~CodeLoader();
 
-    virtual void load(weak< const Resource::Description > codeDescription,
-                      Resource::Resource&                 resource) override;
-    virtual void unload(weak< const Resource::Description > codeDescription,
-                        Resource::Resource&                 resource) override;
+    virtual void load(weak< const Resource::IDescription > codeDescription,
+                      Resource::Resource&                  resource) override;
+    virtual void unload(weak< const Resource::IDescription > codeDescription,
+                        Resource::Resource&                  resource) override;
 };
 
 }}}  // namespace Motor::KernelScheduler::OpenCL

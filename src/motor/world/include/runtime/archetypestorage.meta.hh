@@ -7,7 +7,7 @@
 #include <motor/world/stdafx.h>
 #include <motor/scheduler/kernel/producer.meta.hh>
 
-#include <motor/introspect/introspectionhint.hh>
+#include <motor/introspect/introspectionhint.meta.hh>
 #include <motor/introspect/simplepolicy.factory.hh>
 #include <motor/scheduler/kernel/iproduct.meta.hh>
 
@@ -15,8 +15,7 @@ namespace Motor { namespace World {
 
 class ArchetypeStorage : published KernelScheduler::Producer
 {
-public:
-    class IntrospectionHint : public Meta::AST::IntrospectionHint
+    published : class IntrospectionHint : public Meta::AST::IntrospectionHint
     {
     public:
         IntrospectionHint(weak< const Meta::AST::Object > owner, raw< const Meta::Method > method,
@@ -32,7 +31,8 @@ private:
     published : ref< KernelScheduler::IProduct > component;
 
 private:
-    ref< Runtime > createRuntime() const override;
+    ref< Runtime >
+    createRuntime(weak< const KernelScheduler::ProducerLoader > loader) const override;
 
     published
         : motor_tag(Meta::AST::SimplePolicy< ArchetypeStorage::IntrospectionHint >())

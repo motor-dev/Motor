@@ -12,6 +12,7 @@
 #include <motor/meta/typeinfo.hh>
 #include <motor/meta/value.hh>
 #include <motor/scheduler/kernel/parameters/segments.hh>
+#include <motor/scheduler/kernel/producerloader.hh>
 
 namespace Motor { namespace World {
 
@@ -123,9 +124,10 @@ ArchetypeStorage::~ArchetypeStorage()
 {
 }
 
-ref< ArchetypeStorage::Runtime > ArchetypeStorage::createRuntime() const
+ref< ArchetypeStorage::Runtime >
+ArchetypeStorage::createRuntime(weak< const KernelScheduler::ProducerLoader > loader) const
 {
-    return ref< Runtime >();
+    return ref< Runtime >::create(Arena::game(), loader->startTask(), 1);
 }
 
 }}  // namespace Motor::World

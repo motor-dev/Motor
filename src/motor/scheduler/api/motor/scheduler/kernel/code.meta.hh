@@ -5,11 +5,11 @@
 #define MOTOR_SCHEDULER_KERNEL_CODE_META_HH_
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
-#include <motor/resource/description.meta.hh>
+#include <motor/resource/description.hh>
 
 namespace Motor { namespace KernelScheduler {
 
-class motor_api(SCHEDULER) Code : public Resource::Description
+class motor_api(SCHEDULER) Code : public Resource::Description< Code >
 {
 protected:
     const inamespace m_name;

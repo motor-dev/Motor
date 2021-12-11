@@ -30,7 +30,7 @@ void NullSurface::present() const
 {
 }
 
-void NullSurface::load(weak< const Resource::Description > /*surfaceDescription*/)
+void NullSurface::load(weak< const Resource::IDescription > /*surfaceDescription*/)
 {
 }
 

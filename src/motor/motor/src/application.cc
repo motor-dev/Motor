@@ -8,6 +8,7 @@
 #include <motor/filesystem/folder.meta.hh>
 #include <motor/plugin/plugin.hh>
 #include <motor/resource/loader.hh>
+#include <motor/scheduler/kernel/producerloader.hh>
 #include <motor/scheduler/task/group.hh>
 #include <motor/scheduler/task/method.hh>
 #include <motor/world/world.meta.hh>
@@ -24,19 +25,20 @@ private:
     Task::ITask::CallbackConnection  m_endSceneUpdate;
 
 public:
-    WorldResource(const Plugin::Context& context, weak< const World::World > world,
+    WorldResource(weak< const KernelScheduler::ProducerLoader > producerLoader,
+                  const Plugin::Context& context, weak< const World::World > world,
                   weak< Task::TaskGroup > task);
     ~WorldResource();
 
     void disconnect();
 };
 
-Application::WorldResource::WorldResource(const Plugin::Context&     context,
-                                          weak< const World::World > world,
-                                          weak< Task::TaskGroup >    task)
-    : m_worldRuntime(world->createRuntime(context))
+Application::WorldResource::WorldResource(
+    weak< const KernelScheduler::ProducerLoader > producerLoader, const Plugin::Context& context,
+    weak< const World::World > world, weak< Task::TaskGroup > task)
+    : m_worldRuntime(world->createRuntime(producerLoader, context))
     , m_startSceneUpdate(task, m_worldRuntime->startUpdateTask()->startCallback())
-    , m_endSceneUpdate(m_worldRuntime->startUpdateTask(), task->startCallback())
+    , m_endSceneUpdate(m_worldRuntime->endUpdateTask(), task->startCallback())
 {
 }
 
@@ -58,6 +60,7 @@ Application::Application(ref< Folder >                     dataFolder,
     , m_scheduler(scheduler)
     , m_resourceManager(resourceManager)
     , m_pluginContext(resourceManager, m_dataFolder, m_scheduler)
+    , m_producerLoader(scoped< KernelScheduler::ProducerLoader >::create(Arena::game()))
     , m_cpuKernelScheduler("plugin.compute.cpu", m_pluginContext)
     , m_updateTask(ref< Task::TaskGroup >::create(Arena::task(), "application:update",
                                                   Colors::Yellow::Yellow))
@@ -68,7 +71,9 @@ Application::Application(ref< Folder >                     dataFolder,
     , m_worldCount(0)
     , m_runLoop(true)
 {
+    m_resourceManager->attach< KernelScheduler::Producer >(m_producerLoader);
     m_resourceManager->attach< World::World >(this);
+
     addTask(ref< Task::Task< Task::MethodCaller< Application, &Application::updateResources > > >::
                 create(Arena::task(), "application:update_resource", Colors::Green::Green,
                        Task::MethodCaller< Application, &Application::updateResources >(this)));
@@ -83,6 +88,7 @@ Application::~Application(void)
 {
     unregisterInterruptions();
     m_resourceManager->detach< World::World >(this);
+    m_resourceManager->detach< KernelScheduler::Producer >(m_producerLoader);
 }
 
 void Application::addTask(ref< Task::ITask > task)
@@ -113,17 +119,17 @@ int Application::run()
     return 0;
 }
 
-void Application::load(weak< const Resource::Description > desc, Resource::Resource& resource)
+void Application::load(weak< const Resource::IDescription > desc, Resource::Resource& resource)
 {
     m_worldCount++;
-    weak< const World::World > world = motor_checked_cast< const World::World >(desc);
-    ref< WorldResource >       runtime
-        = ref< WorldResource >::create(Arena::resource(), m_pluginContext, world, m_updateTask);
+    weak< const World::World > world   = motor_checked_cast< const World::World >(desc);
+    ref< WorldResource >       runtime = ref< WorldResource >::create(
+        Arena::resource(), m_producerLoader, m_pluginContext, world, m_updateTask);
     m_worlds.push_back(runtime);
     resource.setRefHandle(runtime);
 }
 
-void Application::unload(weak< const Resource::Description > desc, Resource::Resource& resource)
+void Application::unload(weak< const Resource::IDescription > desc, Resource::Resource& resource)
 {
     motor_forceuse(desc);
     m_worldCount--;

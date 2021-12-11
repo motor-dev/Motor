@@ -47,7 +47,7 @@ Window::~Window()
 {
 }
 
-void Window::load(weak< const Resource::Description > /*renderWindowDescription*/)
+void Window::load(weak< const Resource::IDescription > /*renderWindowDescription*/)
 {
     m_window.reset(
         scoped< PlatformWindow >::create(m_renderer->arena(),

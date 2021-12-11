@@ -2,6 +2,8 @@
 #include <motor/world/update/context.hh>
 #include <subworldcomponent.meta.hh>
 
+namespace Motor { namespace World {
+
 __kernel void update(u32 index, u32 total,
                      Kernel::segments< Motor::World::SubWorldComponent > subworlds)
 {
@@ -16,3 +18,5 @@ __kernel void update(u32 index, u32 total,
         first++;
     }
 }
+
+}}

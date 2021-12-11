@@ -6,7 +6,7 @@
 /**************************************************************************************************/
 #include <motor/stdafx.h>
 #include <motor/resource/loader.hh>
-#include <motor/script.meta.hh>
+#include <motor/script.hh>
 
 namespace Motor {
 
@@ -30,12 +30,12 @@ protected:
         = 0;
 
 private:
-    virtual void load(weak< const Resource::Description > script,
-                      Resource::Resource&                 resource) override;
-    virtual void reload(weak< const Resource::Description > oldScript,
-                        weak< const Resource::Description > newScript,
-                        Resource::Resource&                 resource) override;
-    virtual void onTicketLoaded(weak< const Resource::Description >   script,
+    virtual void load(weak< const Resource::IDescription > script,
+                      Resource::Resource&                  resource) override;
+    virtual void reload(weak< const Resource::IDescription > oldScript,
+                        weak< const Resource::IDescription > newScript,
+                        Resource::Resource&                  resource) override;
+    virtual void onTicketLoaded(weak< const Resource::IDescription >  script,
                                 Resource::Resource&                   resource,
                                 const minitl::Allocator::Block< u8 >& buffer,
                                 ILoader::LoadType                     type) override;

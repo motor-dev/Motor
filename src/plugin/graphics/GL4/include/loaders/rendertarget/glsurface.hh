@@ -22,7 +22,7 @@ public:
               weak< GLRenderer >                     renderer);
     ~GLSurface();
 
-    virtual void load(weak< const Resource::Description > surfaceDescription) override;
+    virtual void load(weak< const Resource::IDescription > surfaceDescription) override;
     virtual void unload() override;
 
     void begin(ClearMode clear) const override;

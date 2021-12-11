@@ -16,10 +16,10 @@ motor_tag(World::LogicComponent(motor_class< Motor::Gameplay::DelayKernel >())) 
 {
     float delay;
 
-    void begin();
-    void reset(float newDelay);
+    // void begin();
+    // void reset(float newDelay);
 
-    static World::Event<> startAction;
+    // static World::Event<> startAction;
 };
 
 }}  // namespace Motor::Gameplay

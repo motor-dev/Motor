@@ -6,13 +6,13 @@
 /**************************************************************************************************/
 #include <motor/plugin.graphics.text/stdafx.h>
 #include <motor/filesystem/file.meta.hh>
-#include <motor/resource/description.meta.hh>
+#include <motor/resource/description.hh>
 
 namespace Motor {
 
 class BitmapFontManager;
 
-class motor_api(TEXT) BitmapFont : public Resource::Description
+class motor_api(TEXT) BitmapFont : public Resource::Description< BitmapFont >
 {
     friend class BitmapFontManager;
 

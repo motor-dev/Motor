@@ -18,12 +18,24 @@ template < typename T, u32 Count >
 struct ClassID< T[Count] >
 {
     static MOTOR_EXPORT raw< const Meta::Class > klass();
+    static MOTOR_EXPORT istring                  name()
+    {
+        static const istring s_name(minitl::format< 2048u >("%s[%d]") | TypeID< T >::name()
+                                    | Count);
+        return s_name;
+    }
 };
 
 template < typename T, u32 Count >
 struct ClassID< const T[Count] >
 {
     static MOTOR_EXPORT raw< const Meta::Class > klass();
+    static MOTOR_EXPORT istring                  name()
+    {
+        static const istring s_name(minitl::format< 2048u >("%s[%d]") | TypeID< T >::name()
+                                    | Count);
+        return s_name;
+    }
 };
 
 template < typename T, u32 Count >
@@ -165,7 +177,7 @@ const Meta::ArrayOperatorTable carray_RTTIHelper< T, Count >::scriptingArrayAPI
 
 template < typename T, u32 Count >
 const Meta::OperatorTable carray_RTTIHelper< T, Count >::scriptingAPI
-    = {{&scriptingArrayAPI}, {0, 0}};
+    = {{&scriptingArrayAPI}, {0, 0}, {0}};
 
 template < typename T, u32 Count >
 MOTOR_EXPORT raw< const Meta::Class > ClassID< T[Count] >::klass()
@@ -181,7 +193,7 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< T[Count] >::klass()
            {istring("Index"),
             {2, carray_RTTIHelper< T, Count >::s_method_Index_overloads},
             {&s_methods[2]}}};
-    static const Meta::Class s_class = {"array",
+    static const Meta::Class s_class = {name(),
                                         u32(sizeof(T[Count])),
                                         0,
                                         Meta::ClassType_Array,
@@ -213,7 +225,7 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< const T[Count] >::klass()
            {istring("Index"),
             {2, carray_RTTIHelper< const T, Count >::s_method_Index_overloads},
             {&s_methods[2]}}};
-    static const Meta::Class s_class = {"array",
+    static const Meta::Class s_class = {name(),
                                         u32(sizeof(const T[Count])),
                                         0,
                                         Meta::ClassType_Array,

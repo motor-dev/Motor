@@ -17,10 +17,10 @@ public:
     KernelLoader(ref< CodeLoader > codeLoader);
     ~KernelLoader();
 
-    virtual void load(weak< const Resource::Description > kernelDescription,
-                      Resource::Resource&                 resource) override;
-    virtual void unload(weak< const Resource::Description > kernelDescription,
-                        Resource::Resource&                 resource) override;
+    virtual void load(weak< const Resource::IDescription > kernelDescription,
+                      Resource::Resource&                  resource) override;
+    virtual void unload(weak< const Resource::IDescription > kernelDescription,
+                        Resource::Resource&                  resource) override;
 };
 
 }}}  // namespace Motor::KernelScheduler::CPU

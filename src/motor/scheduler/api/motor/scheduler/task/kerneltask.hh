@@ -32,13 +32,48 @@ private:
     u32                                                        m_subTaskCount;
 
 public:
+    template < typename Container >
     KernelTask(istring name, KernelScheduler::SchedulerType type, color32 color,
                Scheduler::Priority priority, weak< const Motor::KernelScheduler::Kernel > kernel,
-               minitl::array< weak< KernelScheduler::IParameter > > parameters);
+               const Container& parameters);
+    template < typename Iterator >
+    KernelTask(istring name, KernelScheduler::SchedulerType type, color32 color,
+               Scheduler::Priority priority, weak< const Motor::KernelScheduler::Kernel > kernel,
+               const Iterator& begin, const Iterator& end);
     ~KernelTask();
 
     virtual void schedule(weak< Scheduler > scheduler) override;
 };
+
+}}  // namespace Motor::Task
+
+#include <motor/scheduler/kernel/ischeduler.hh>
+
+namespace Motor { namespace Task {
+
+template < typename Container >
+KernelTask::KernelTask(istring name, KernelScheduler::SchedulerType type, color32 color,
+                       Scheduler::Priority                          priority,
+                       weak< const Motor::KernelScheduler::Kernel > kernel,
+                       const Container&                             parameters)
+    : ITask(name, color, priority, Scheduler::WorkerThread)
+    , m_kernel(kernel)
+    , m_targetScheduler(KernelScheduler::IScheduler::findScheduler(type))
+    , m_parameters(Arena::task(), minitl::begin(parameters), minitl::end(parameters))
+{
+}
+
+template < typename Iterator >
+KernelTask::KernelTask(istring name, KernelScheduler::SchedulerType type, color32 color,
+                       Scheduler::Priority                          priority,
+                       weak< const Motor::KernelScheduler::Kernel > kernel, const Iterator& begin,
+                       const Iterator& end)
+    : ITask(name, color, priority, Scheduler::WorkerThread)
+    , m_kernel(kernel)
+    , m_targetScheduler(KernelScheduler::IScheduler::findScheduler(type))
+    , m_parameters(Arena::task(), begin, end)
+{
+}
 
 }}  // namespace Motor::Task
 

@@ -10,8 +10,24 @@
 namespace Kernel {
 
 template < typename T >
-struct segments : public segment< T >
+struct segments
 {
+    int        x;
+    typedef T* iterator;
+
+    __device u32 size() const
+    {
+        return 0;
+    }
+
+    __device iterator begin() const
+    {
+        return 0;
+    }
+    __device iterator end() const
+    {
+        return 0;
+    }
 };
 
 }  // namespace Kernel

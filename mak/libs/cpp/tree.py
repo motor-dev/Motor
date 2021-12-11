@@ -880,7 +880,7 @@ class Class(Container):
         definition.write(
             '    static const\n'
             '    ::Motor::Meta::Class s%(PREFIX)s_class = {\n'
-            '        /* .name */               "%(NAME)s",\n'
+            '        /* .name */               ::Motor::Meta::ClassID<%(CPP_NAME)s>::name(),\n'
             '        /* .size */               u32(sizeof(%(CPP_NAME)s)),\n'
             '        /* .offset */             %(OFFSET)s,\n'
             '        /* .id */                 %(CLASSTYPE)s,\n'
@@ -891,7 +891,7 @@ class Class(Container):
             '        /* .properties */         %(PROPERTIES)s,\n'
             '        /* .methods */            %(METHODS)s,\n'
             '        /* .constructor */        %(CONSTRUCTOR)s,\n'
-            '        /* .operators */          ::Motor::Meta::OperatorTable::s_emptyTable,\n'
+            '        /* .operators */          %(PARENT_CLASS)s->operators,\n'
             '        /* .copyconstructor */    %(COPYCONSTRUCTOR)s,\n'
             '        /* .destructor */         %(DESTRUCTOR)s\n'
             '    };\n\n'
@@ -905,6 +905,12 @@ class Class(Container):
             'MOTOR_EXPORT raw< const Meta::Class > ClassID< %(CPP_NAME)s >::klass()\n'
             '{\n'
             '    return %(NAMESPACE)s::klass_%(NAME)s();\n'
+            '}\n'
+            'template< >\n'
+            'MOTOR_EXPORT istring ClassID< %(CPP_NAME)s >::name()\n'
+            '{\n'
+            '    static const istring s_name("%(NAME)s");\n'
+            '    return s_name;\n'
             '}\n'
             '\n' % params
         )

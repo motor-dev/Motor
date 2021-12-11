@@ -11,7 +11,7 @@
 #include <motor/minitl/array.hh>
 #include <motor/minitl/intrusive_list.hh>
 #include <motor/minitl/refcountable.hh>
-#include <motor/resource/description.meta.hh>
+#include <motor/resource/idescription.meta.hh>
 #include <motor/resource/loader.hh>
 
 namespace Motor { namespace Resource {
@@ -21,44 +21,45 @@ class motor_api(RESOURCE) ResourceManager : public minitl::pointer
     MOTOR_NOCOPY(ResourceManager);
 
 private:
-    struct LoaderInfo
+    class LoaderInfo : public minitl::refcountable
     {
-        LoaderInfo();
-        raw< const Meta::Class >                       classinfo;
-        minitl::vector< weak< ILoader > >              loaders;
-        minitl::intrusive_list< const Description, 2 > resources;
+    public:
+        LoaderInfo(raw< const Meta::Class > classinfo);
+
+        raw< const Meta::Class > const                  classinfo;
+        minitl::vector< weak< ILoader > >               loaders;
+        minitl::intrusive_list< const IDescription, 2 > resources;
     };
     struct Ticket
     {
-        weak< ILoader >           loader;
-        weak< const Description > resource;
-        weak< const File >        file;
-        ref< const File::Ticket > ticket;
-        u64                       fileState;
-        u32                       progress;
-        ILoader::FileType         fileType;
-        ILoader::LoadType         loadType;
-        bool                      expired;
+        weak< ILoader >            loader;
+        weak< const IDescription > resource;
+        weak< const File >         file;
+        ref< const File::Ticket >  ticket;
+        u64                        fileState;
+        u32                        progress;
+        ILoader::FileType          fileType;
+        ILoader::LoadType          loadType;
+        bool                       expired;
     };
 
 private:
-    weak< ResourceManager > const m_parent;
-    minitl::array< LoaderInfo >   m_loaders;
-    minitl::vector< Ticket >      m_tickets;
-    minitl::vector< Ticket >      m_pendingTickets;
-    minitl::vector< Ticket >      m_watches;
+    minitl::vector< ref< LoaderInfo > > m_loaders;
+    minitl::vector< Ticket >            m_tickets;
+    minitl::vector< Ticket >            m_pendingTickets;
+    minitl::vector< Ticket >            m_watches;
 
 private:
-    LoaderInfo& getLoaderInfo(raw< const Meta::Class > classinfo, bool recursive = true);
+    weak< LoaderInfo > getLoaderInfo(raw< const Meta::Class > classinfo);
 
 public:
-    ResourceManager(weak< ResourceManager > parent = weak< ResourceManager >());
+    ResourceManager();
     ~ResourceManager();
 
     void attach(raw< const Meta::Class > classinfo, weak< ILoader > loader);
     void detach(raw< const Meta::Class > classinfo, weak< const ILoader > loader);
-    void load(raw< const Meta::Class > classinfo, weak< const Description > resource);
-    void unload(raw< const Meta::Class > classinfo, weak< const Description > resource);
+    void load(raw< const Meta::Class > classinfo, weak< const IDescription > resource);
+    void unload(raw< const Meta::Class > classinfo, weak< const IDescription > resource);
 
     template < typename T >
     void attach(weak< ILoader > loader)
@@ -91,7 +92,7 @@ public:
         unload(motor_class< T >(), resource);
     }
 
-    void   addTicket(weak< ILoader > loader, weak< const Description > description,
+    void   addTicket(weak< ILoader > loader, weak< const IDescription > description,
                      weak< const File > file, ILoader::FileType fileType, ILoader::LoadType loadType);
     size_t updateTickets();
 };

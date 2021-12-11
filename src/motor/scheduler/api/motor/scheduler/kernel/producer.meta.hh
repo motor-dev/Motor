@@ -5,7 +5,7 @@
 #define MOTOR_SCHEDULER_KERNEL_PRODUCER_HH_
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
-#include <motor/resource/description.meta.hh>
+#include <motor/resource/description.hh>
 
 #include <motor/minitl/array.hh>
 #include <motor/minitl/tuple.hh>
@@ -17,7 +17,7 @@ namespace Motor { namespace KernelScheduler {
 class IProduct;
 class ProducerLoader;
 
-class motor_api(SCHEDULER) Producer : public Resource::Description
+class motor_api(SCHEDULER) Producer : public Resource::Description< Producer >
 {
 protected:
     class motor_api(SCHEDULER) Runtime : public minitl::refcountable
@@ -27,8 +27,9 @@ protected:
             ParameterArray;
 
     public:
-        ref< Task::ITask > const task;
-        ParameterArray           parameters;
+        ref< Task::ITask > const                          task;
+        ParameterArray                                    parameters;
+        minitl::vector< Task::ITask::CallbackConnection > chain;
 
     public:
         Runtime(ref< Task::ITask > task, u32 parameterCount);
@@ -39,7 +40,7 @@ protected:
     virtual ~Producer();
 
 public:
-    virtual ref< Runtime > createRuntime() const = 0;
+    virtual ref< Runtime > createRuntime(weak< const ProducerLoader > loader) const = 0;
     ref< Task::ITask >     getTask(weak< const ProducerLoader > loader) const;
     ref< IParameter >      getParameter(weak< const ProducerLoader > loader,
                                         weak< const IProduct >       product) const;

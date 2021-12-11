@@ -2,9 +2,9 @@
    see LICENSE for detail */
 
 #include <motor/plugin/stdafx.h>
-#include <cstring>
 #include <motor/plugin/dynobject.hh>
 #include <motor/plugin/dynobjectlist.hh>
+#include <cstring>
 
 namespace Motor { namespace Plugin {
 
@@ -16,7 +16,10 @@ DynamicObjectList::Symbol::Symbol() : name(0), symbol()
 {
 }
 
-DynamicObjectList::DynamicObjectList(const char* name) : m_next(s_dynamicObjectRoot), m_name(name)
+DynamicObjectList::DynamicObjectList(const char* name)
+    : m_next(s_dynamicObjectRoot)
+    , m_name(name)
+    , m_symbolCount(0)
 {
     motor_info("Registering built-in dynamic object %s" | name);
     s_dynamicObjectRoot = this;
@@ -46,14 +49,12 @@ DynamicObjectList* DynamicObjectList::findDynamicObject(const char* name)
 
 bool DynamicObjectList::registerSymbolInternal(const char* name, SymbolPointer value)
 {
-    for(u32 i = 0; i < sizeof(m_symbols) / sizeof(m_symbols[0]); ++i)
+    if(m_symbolCount < sizeof(m_symbols) / sizeof(m_symbols[0]))
     {
-        if(m_symbols[i].name == 0)
-        {
-            m_symbols[i].name   = name;
-            m_symbols[i].symbol = value;
-            return true;
-        }
+        m_symbols[m_symbolCount].name   = name;
+        m_symbols[m_symbolCount].symbol = value;
+        m_symbolCount++;
+        return true;
     }
     motor_notreached();
     return false;
@@ -62,7 +63,7 @@ bool DynamicObjectList::registerSymbolInternal(const char* name, SymbolPointer v
 const DynamicObjectList::SymbolPointer*
 DynamicObjectList::findSymbolInternal(const char* name) const
 {
-    for(u32 i = 0; i < sizeof(m_symbols) / sizeof(m_symbols[0]); ++i)
+    for(u32 i = 0; i < m_symbolCount; ++i)
     {
         if(strcmp(m_symbols[i].name, name) == 0)
         {

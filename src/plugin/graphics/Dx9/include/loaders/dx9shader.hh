@@ -5,16 +5,16 @@
 #define MOTOR_DX9_LOADERS_DX9SHADER_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
+#include <motor/plugin.graphics.3d/renderer/igpuresource.hh>
 #include <d3d9.h>
 #include <dx9renderer.hh>
-#include <motor/plugin.graphics.3d/renderer/igpuresource.hh>
 
 namespace Motor { namespace DirectX9 {
 
 class Dx9ShaderProgram : public IGPUResource
 {
 private:
-    void load(weak< const Resource::Description > resource) override;
+    void load(weak< const Resource::IDescription > resource) override;
     void unload() override;
 
 public:

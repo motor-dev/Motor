@@ -3,17 +3,17 @@
 
 #include <stdafx.h>
 
-#include <context.hh>
 #include <motor/resource/resourcemanager.hh>
+#include <context.hh>
 #include <runtime/resource.hh>
 
 namespace Motor { namespace Lua {
 
 struct ResourceToken
 {
-    weak< Resource::ResourceManager >   manager;
-    raw< const Meta::Class >            type;
-    weak< const Resource::Description > description;
+    weak< Resource::ResourceManager >    manager;
+    raw< const Meta::Class >             type;
+    weak< const Resource::IDescription > description;
 };
 
 extern "C" int resourceLoaderGC(lua_State* state)
@@ -41,9 +41,9 @@ extern "C" int resourceLoaderLoad(lua_State* state)
 
     weak< Resource::ResourceManager > userdata
         = *(weak< Resource::ResourceManager >*)lua_touserdata(state, 1);
-    Meta::Value*                        v = (Meta::Value*)lua_touserdata(state, 2);
-    weak< const Resource::Description > description
-        = v->as< weak< const Resource::Description > >();
+    Meta::Value*                         v = (Meta::Value*)lua_touserdata(state, 2);
+    weak< const Resource::IDescription > description
+        = v->as< weak< const Resource::IDescription > >();
     ResourceToken* resourceToken = (ResourceToken*)lua_newuserdata(state, sizeof(ResourceToken));
     new((void*)resourceToken) ResourceToken;
     resourceToken->description = description;

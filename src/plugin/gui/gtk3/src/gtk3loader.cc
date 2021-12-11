@@ -19,22 +19,23 @@ Gtk3Loader::~Gtk3Loader()
     // m_resourceManager->detach(GObject::gObjectClass(), this);
 }
 
-void Gtk3Loader::load(weak< const Resource::Description > description, Resource::Resource& resource)
+void Gtk3Loader::load(weak< const Resource::IDescription > description,
+                      Resource::Resource&                  resource)
 {
     motor_forceuse(description);
     motor_forceuse(resource);
 }
 
-void Gtk3Loader::reload(weak< const Resource::Description > oldDescription,
-                        weak< const Resource::Description > newDescription,
-                        Resource::Resource&                 resource)
+void Gtk3Loader::reload(weak< const Resource::IDescription > oldDescription,
+                        weak< const Resource::IDescription > newDescription,
+                        Resource::Resource&                  resource)
 {
     motor_forceuse(oldDescription);
     motor_forceuse(newDescription);
     motor_forceuse(resource);
 }
 
-void Gtk3Loader::unload(weak< const Resource::Description > /*description*/,
+void Gtk3Loader::unload(weak< const Resource::IDescription > /*description*/,
                         Resource::Resource& resource)
 {
     resource.clearRefHandle();

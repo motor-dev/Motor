@@ -29,10 +29,10 @@ public:
     ~GPUResourceLoader();
 
 protected:
-    virtual void load(weak< const Resource::Description > description,
-                      Resource::Resource&                 resource) override;
-    virtual void unload(weak< const Resource::Description > description,
-                        Resource::Resource&                 handle) override;
+    virtual void load(weak< const Resource::IDescription > description,
+                      Resource::Resource&                  resource) override;
+    virtual void unload(weak< const Resource::IDescription > description,
+                        Resource::Resource&                  handle) override;
     void         flush();
 };
 

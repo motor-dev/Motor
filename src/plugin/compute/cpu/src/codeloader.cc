@@ -18,8 +18,8 @@ CodeLoader::~CodeLoader()
 {
 }
 
-void CodeLoader::load(weak< const Resource::Description > codeDescription,
-                      Resource::Resource&                 resource)
+void CodeLoader::load(weak< const Resource::IDescription > codeDescription,
+                      Resource::Resource&                  resource)
 {
     motor_info("loading CPU kernel %s" | motor_checked_cast< const Code >(codeDescription)->name());
     inamespace name = motor_checked_cast< const Code >(codeDescription)->name();
@@ -27,7 +27,7 @@ void CodeLoader::load(weak< const Resource::Description > codeDescription,
     resource.setRefHandle(ref< CodeObject >::create(Arena::task(), name));
 }
 
-void CodeLoader::unload(weak< const Resource::Description > /*codeDescription*/,
+void CodeLoader::unload(weak< const Resource::IDescription > /*codeDescription*/,
                         Resource::Resource& resource)
 {
     resource.clearRefHandle();

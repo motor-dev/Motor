@@ -98,6 +98,42 @@ template < typename ITERATOR >
 static ITERATOR advance(const ITERATOR&                                       it,
                         typename iterator_traits< ITERATOR >::difference_type offset);
 
+template < typename Container >
+typename Container::iterator begin(Container& c)
+{
+    return c.begin();
+}
+
+template < typename Container >
+typename Container::const_iterator begin(const Container& c)
+{
+    return c.begin();
+}
+
+template < typename Container >
+typename Container::iterator end(Container& c)
+{
+    return c.end();
+}
+
+template < typename Container >
+typename Container::const_iterator end(const Container& c)
+{
+    return c.end();
+}
+
+template < typename T, size_t SIZE >
+T* begin(T (&c)[SIZE])
+{
+    return &c[0];
+}
+
+template < typename T, size_t SIZE >
+T* end(T (&c)[SIZE])
+{
+    return &c[SIZE];
+}
+
 }  // namespace minitl
 //! @}
 

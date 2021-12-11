@@ -20,26 +20,26 @@ BitmapFontManager::~BitmapFontManager()
 {
 }
 
-void BitmapFontManager::load(weak< const Resource::Description > /*description*/,
+void BitmapFontManager::load(weak< const Resource::IDescription > /*description*/,
                              Resource::Resource& /*resource*/)
 {
     motor_info("loading bitmap font");
 }
 
-void BitmapFontManager::reload(weak< const Resource::Description > /*oldDescription*/,
-                               weak< const Resource::Description > /*newDescription*/,
+void BitmapFontManager::reload(weak< const Resource::IDescription > /*oldDescription*/,
+                               weak< const Resource::IDescription > /*newDescription*/,
                                Resource::Resource& /*resource*/)
 {
     motor_info("reloading bitmap font");
 }
 
-void BitmapFontManager::unload(weak< const Resource::Description > /*description*/,
+void BitmapFontManager::unload(weak< const Resource::IDescription > /*description*/,
                                Resource::Resource& /*resource*/)
 {
     motor_info("unloading bitmap font");
 }
 
-void BitmapFontManager::onTicketLoaded(weak< const Resource::Description > /*description*/,
+void BitmapFontManager::onTicketLoaded(weak< const Resource::IDescription > /*description*/,
                                        Resource::Resource& /*resource*/,
                                        const minitl::Allocator::Block< u8 >& /*buffer*/,
                                        LoadType /*type*/)

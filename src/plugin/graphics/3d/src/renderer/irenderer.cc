@@ -65,19 +65,19 @@ void IRenderer::flush()
 }
 
 weak< IGPUResource >
-IRenderer::getRenderSurface(weak< const Resource::Description > description) const
+IRenderer::getRenderSurface(weak< const Resource::IDescription > description) const
 {
     return description->getResource(m_renderSurfaceLoader).getRefHandle< IGPUResource >();
 }
 
 weak< IGPUResource >
-IRenderer::getRenderWindow(weak< const Resource::Description > description) const
+IRenderer::getRenderWindow(weak< const Resource::IDescription > description) const
 {
     return description->getResource(m_renderWindowLoader).getRefHandle< IGPUResource >();
 }
 
 weak< IGPUResource >
-IRenderer::getShaderProgram(weak< const Resource::Description > description) const
+IRenderer::getShaderProgram(weak< const Resource::IDescription > description) const
 {
     return description->getResource(m_shaderProgramLoader).getRefHandle< IGPUResource >();
 }

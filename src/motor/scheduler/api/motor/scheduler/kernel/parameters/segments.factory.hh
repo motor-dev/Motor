@@ -34,23 +34,27 @@ struct ClassID< KernelScheduler::Segments< T > >
                {0},
                "ParameterClass",
                Meta::Value(motor_class< typename minitl::remove_const< T >::type >())};
-        static const Meta::Class s_class
-            = {istring(minitl::format< 256u >("Segments<%s>") | motor_class< T >()->name),
-               u32(sizeof(KernelScheduler::Segments< T >)),
-               0,
-               Meta::ClassType_Object,
-               {0},
-               motor_class< KernelScheduler::ISegments >(),
-               {&s_parameterClassProperty},
-               {0},
-               {0, 0},
-               {0, 0},
-               {0},
-               Meta::OperatorTable::s_emptyTable,
-               0,
-               0};
-        raw< const Meta::Class > result = {&s_class};
+        static const Meta::Class s_class = {name(),
+                                            u32(sizeof(KernelScheduler::Segments< T >)),
+                                            0,
+                                            Meta::ClassType_Object,
+                                            {0},
+                                            motor_class< KernelScheduler::ISegments >(),
+                                            {&s_parameterClassProperty},
+                                            {0},
+                                            {0, 0},
+                                            {0, 0},
+                                            {0},
+                                            Meta::OperatorTable::s_emptyTable,
+                                            0,
+                                            0};
+        raw< const Meta::Class > result  = {&s_class};
         return result;
+    }
+    static MOTOR_EXPORT istring name()
+    {
+        static const istring s_name(minitl::format< 2048u >("Segments<%s>") | TypeID< T >::name());
+        return s_name;
     }
 };
 

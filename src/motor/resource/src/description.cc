@@ -2,16 +2,16 @@
    see LICENSE for detail */
 
 #include <motor/resource/stdafx.h>
-#include <motor/resource/description.meta.hh>
+#include <motor/resource/idescription.meta.hh>
 #include <motor/resource/loader.hh>
 
 namespace Motor { namespace Resource {
 
-Description::Description() : m_resourceCount(0), m_resourceCache()
+IDescription::IDescription() : m_resourceCount(0), m_resourceCache()
 {
 }
 
-Description::~Description()
+IDescription::~IDescription()
 {
     Resource* resources = getResourceBuffer();
     for(u32 i = 0; i < m_resourceCount; ++i)
@@ -24,7 +24,7 @@ Description::~Description()
     }
 }
 
-void Description::load(weak< ILoader > loader) const
+void IDescription::load(weak< ILoader > loader) const
 {
     Resource* resources = getResourceBuffer();
     if(++m_resourceCount > MaxResourceCount)
@@ -49,7 +49,7 @@ void Description::load(weak< ILoader > loader) const
     loader->load(this, resources[m_resourceCount - 1]);
 }
 
-void Description::unload(weak< ILoader > loader) const
+void IDescription::unload(weak< ILoader > loader) const
 {
     Resource* resources = getResourceBuffer();
     for(u32 i = 0; i < m_resourceCount; ++i)
@@ -80,7 +80,7 @@ void Description::unload(weak< ILoader > loader) const
     motor_notreached();
 }
 
-Resource& Description::getResourceForWriting(weak< const ILoader > owner) const
+Resource& IDescription::getResourceForWriting(weak< const ILoader > owner) const
 {
     Resource* resources = getResourceBuffer();
     for(u32 i = 0; i < m_resourceCount; ++i)
@@ -93,7 +93,7 @@ Resource& Description::getResourceForWriting(weak< const ILoader > owner) const
     return Resource::null();
 }
 
-const Resource& Description::getResource(weak< const ILoader > owner) const
+const Resource& IDescription::getResource(weak< const ILoader > owner) const
 {
     Resource* resources = getResourceBuffer();
     for(u32 i = 0; i < m_resourceCount; ++i)
@@ -106,7 +106,7 @@ const Resource& Description::getResource(weak< const ILoader > owner) const
     return Resource::null();
 }
 
-Resource* Description::getResourceBuffer() const
+Resource* IDescription::getResourceBuffer() const
 {
     if(m_resourceCount <= MaxResourceCount)
     {

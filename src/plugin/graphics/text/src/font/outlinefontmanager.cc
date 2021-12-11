@@ -25,7 +25,7 @@ OutlineFontManager::~OutlineFontManager()
 {
 }
 
-void OutlineFontManager::load(weak< const Resource::Description > description,
+void OutlineFontManager::load(weak< const Resource::IDescription > description,
                               Resource::Resource& /*resource*/)
 {
     motor_info("loading outline font");
@@ -42,8 +42,8 @@ void OutlineFontManager::load(weak< const Resource::Description > description,
     }
 }
 
-void OutlineFontManager::reload(weak< const Resource::Description > /*oldDescription*/,
-                                weak< const Resource::Description > newDescription,
+void OutlineFontManager::reload(weak< const Resource::IDescription > /*oldDescription*/,
+                                weak< const Resource::IDescription > newDescription,
                                 Resource::Resource& /*resource*/)
 {
     motor_info("reloading outline font");
@@ -60,14 +60,14 @@ void OutlineFontManager::reload(weak< const Resource::Description > /*oldDescrip
     }
 }
 
-void OutlineFontManager::unload(weak< const Resource::Description > /*description*/,
+void OutlineFontManager::unload(weak< const Resource::IDescription > /*description*/,
                                 Resource::Resource& resource)
 {
     motor_info("unloading outline font");
     resource.clearRefHandle();
 }
 
-void OutlineFontManager::onTicketLoaded(weak< const Resource::Description > /*description*/,
+void OutlineFontManager::onTicketLoaded(weak< const Resource::IDescription > /*description*/,
                                         Resource::Resource&                   resource,
                                         const minitl::Allocator::Block< u8 >& buffer,
                                         LoadType /*type*/)

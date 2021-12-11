@@ -28,23 +28,20 @@ struct ClassID< KernelScheduler::Image3D< T > >
 {
     static MOTOR_EXPORT raw< const Meta::Class > klass()
     {
-        static const Meta::Class s_class
-            = {istring(minitl::format< 256u >("Image3D<%s>") | motor_class< T >()->name),
-               u32(sizeof(KernelScheduler::Image3D< T >)),
-               0,
-               Meta::ClassType_Object,
-               {0},
-               motor_class< KernelScheduler::IImage3D >(),
-               {0},
-               {0},
-               {0, 0},
-               {0, 0},
-               {0},
-               Meta::OperatorTable::s_emptyTable,
-               0,
-               0};
-        raw< const Meta::Class > result = {&s_class};
+        static const Meta::Class s_class = {name(), u32(sizeof(KernelScheduler::Image3D< T >)),
+                                            0,      Meta::ClassType_Object,
+                                            {0},    motor_class< KernelScheduler::IImage3D >(),
+                                            {0},    {0},
+                                            {0, 0}, {0, 0},
+                                            {0},    Meta::OperatorTable::s_emptyTable,
+                                            0,      0};
+        raw< const Meta::Class > result  = {&s_class};
         return result;
+    }
+    static MOTOR_EXPORT istring name()
+    {
+        static const istring s_name(minitl::format< 2048u >("Image3D<%s>") | TypeID< T >::name());
+        return s_name;
     }
 };
 

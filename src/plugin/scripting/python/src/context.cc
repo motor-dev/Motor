@@ -18,7 +18,7 @@ Context::~Context()
     m_library->destroyThread(m_pythonState);
 }
 
-void Context::unload(weak< const Resource::Description > /*description*/,
+void Context::unload(weak< const Resource::IDescription > /*description*/,
                      Resource::Resource& /*handle*/)
 {
     PythonLibrary::ThreadLock lock(m_library, m_pythonState);

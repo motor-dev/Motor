@@ -32,6 +32,9 @@ typedef u8             byte;
 #define kernel_global   __global
 #define kernel_generic  __generic
 
+#define kernel
+#define __kernel
+
 #define motor_alignof(t) __alignof__(t)
 
 #pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
