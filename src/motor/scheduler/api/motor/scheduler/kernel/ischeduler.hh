@@ -29,9 +29,8 @@ class motor_api(SCHEDULER) IKernelTaskItem
     friend class Motor::Scheduler;
 
 protected:
-    weak< Task::KernelTask >                     m_owner;
-    weak< const Kernel >                         m_kernel;
-    minitl::array< weak< const IMemoryBuffer > > m_parameters;
+    weak< Task::KernelTask > m_owner;
+    weak< const Kernel >     m_kernel;
 
 protected:
     IKernelTaskItem(weak< Task::KernelTask > ownerTask, weak< const Kernel > kernel,
@@ -46,10 +45,6 @@ public:
     weak< const Kernel > kernel() const
     {
         return m_kernel;
-    }
-    const minitl::array< weak< const IMemoryBuffer > >& parameters() const
-    {
-        return m_parameters;
     }
 };
 

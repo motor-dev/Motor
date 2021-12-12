@@ -91,7 +91,7 @@ CPUTaskItem::CPUTaskItem(CPUKernelTaskItem* item, u32 index, u32 total)
 
 void CPUTaskItem::run(weak< Motor::Scheduler > sc)
 {
-    m_kernelItem->object()->run(m_index, m_total, m_kernelItem->parameters());
+    m_kernelItem->object()->run(m_index, m_total);
     m_kernelItem->onJobCompleted(sc);
     this->release< CPUTaskItem >(sc);
 }

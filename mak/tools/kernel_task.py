@@ -84,8 +84,7 @@ ref< ::Motor::KernelScheduler::Producer::Runtime > %(KernelName)sKernel::createR
     motor_forceuse(loader);
     void* memory = malloca(sizeof(ref< ::Motor::KernelScheduler::IParameter >) * %(argument_count)s);
     ref< ::Motor::KernelScheduler::IParameter >* parameters = reinterpret_cast<ref< ::Motor::KernelScheduler::IParameter >*>(memory);
-    for (u32 i = 0; i < %(argument_count)s; ++i)
-        new(&parameters[i]) ref< ::Motor::KernelScheduler::IParameter >();
+    %(parameter_assign)s
     ref< ::Motor::Task::KernelTask > task = ref< ::Motor::Task::KernelTask >::create(
             ::Motor::Arena::task(),
             "%(kernel_full_name)s.%(KernelName)s",
@@ -96,6 +95,7 @@ ref< ::Motor::KernelScheduler::Producer::Runtime > %(KernelName)sKernel::createR
             parameters, parameters + %(argument_count)s
         );
     ref< ::Motor::KernelScheduler::Producer::Runtime > result = ref< ::Motor::KernelScheduler::Producer::Runtime >::create(::Motor::Arena::task(), task, %(argument_count)s);
+    %(parameter_save)s
     %(product_chain)s
     for (u32 i = 0; i < %(argument_count)s; ++i)
         parameters[i].~ref();
@@ -216,6 +216,20 @@ class kernel_task(Task.Task):
                     ),
                 'argument_assign':
                     argument_assign,
+                'parameter_assign':
+                    '    \n'.join(
+                        [
+                            'new(&parameters[%d]) ref< ::Motor::KernelScheduler::IParameter >(m_%s->producer()->getParameter(loader, m_%s));'
+                            % (i, arg[0], arg[0]) for i, arg in enumerate(args)
+                        ]
+                    ),
+                'parameter_save':
+                    '    \n'.join(
+                        [
+                            'result->parameters[%d] = minitl::make_tuple(%s, parameters[%d]);' % (i, arg[0], i)
+                            for i, arg in enumerate(args)
+                        ]
+                    ),
                 'product_chain':
                     '    \n'.join(
                         [

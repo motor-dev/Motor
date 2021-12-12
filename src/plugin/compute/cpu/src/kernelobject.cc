@@ -2,9 +2,9 @@
    see LICENSE for detail */
 
 #include <motor/plugin.compute.cpu/stdafx.h>
+#include <motor/scheduler/kernel/ischeduler.hh>
 #include <codeobject.hh>
 #include <kernelobject.hh>
-#include <motor/scheduler/kernel/ischeduler.hh>
 
 namespace Motor { namespace KernelScheduler { namespace CPU {
 
@@ -19,10 +19,9 @@ KernelObject::~KernelObject()
 {
 }
 
-void KernelObject::run(const u32 index, const u32 total,
-                       const minitl::array< weak< const IMemoryBuffer > >& params)
+void KernelObject::run(const u32 index, const u32 total)
 {
-    if(m_entryPoint) (*m_entryPoint)(index, total, params);
+    if(m_entryPoint) (*m_entryPoint)(index, total);
 }
 
 }}}  // namespace Motor::KernelScheduler::CPU
