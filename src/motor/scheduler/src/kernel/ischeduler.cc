@@ -13,8 +13,9 @@ IKernelTaskItem::IKernelTaskItem(weak< Task::KernelTask > owner, weak< const Ker
                                  u32 parameterCount)
     : m_owner(owner)
     , m_kernel(kernel)
-    , m_parameters(Arena::temporary(), parameterCount)
+//, m_parameters(Arena::temporary(), parameterCount)
 {
+    motor_forceuse(parameterCount);
 }
 
 IKernelTaskItem::~IKernelTaskItem()

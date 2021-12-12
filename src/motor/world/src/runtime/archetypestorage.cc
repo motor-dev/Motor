@@ -127,7 +127,10 @@ ArchetypeStorage::~ArchetypeStorage()
 ref< ArchetypeStorage::Runtime >
 ArchetypeStorage::createRuntime(weak< const KernelScheduler::ProducerLoader > loader) const
 {
-    return ref< Runtime >::create(Arena::game(), loader->startTask(), 1);
+    ref< Runtime > result        = ref< Runtime >::create(Arena::game(), loader->startTask(), 1);
+    result->parameters[0].first  = component;
+    result->parameters[0].second = component->createParameter();
+    return result;
 }
 
 }}  // namespace Motor::World
