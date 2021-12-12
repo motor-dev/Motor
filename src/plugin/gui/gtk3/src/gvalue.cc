@@ -198,7 +198,11 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
         case Meta::ClassIndex_istring:
         {
             g_value_init(target, type);
+#ifdef GLIB_VERSION_2_66
             g_value_set_interned_string(target, value.as< const istring& >().c_str());
+#else
+            g_value_set_static_string(target, value.as< const istring& >().c_str());
+#endif
             return true;
         }
         case Meta::ClassIndex_inamespace:
