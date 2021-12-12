@@ -10,12 +10,6 @@
 #include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/typeinfo.hh>
 
-namespace Motor {
-
-MOTOR_EXPORT raw< Meta::Class > motor_motor_Namespace_Motor_World();
-
-}
-
 namespace Motor { namespace Meta {
 
 template < typename T1, typename T2, typename T3, typename T4 >
@@ -38,7 +32,7 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< World::Event< T1, T2, T3, T4 > >:
                                         /* .size */ u32(sizeof(World::Event< T1, T2, T3, T4 >)),
                                         /* .offset */ 0,
                                         /* .id */ Meta::ClassType_Struct,
-                                        /* .owner */ {motor_motor_Namespace_Motor_World().m_ptr},
+                                        /* .owner */ {0},
                                         /* .parent */ {motor_class< void >().m_ptr},
                                         /* .objects */ {0},
                                         /* .tags */ {0},
