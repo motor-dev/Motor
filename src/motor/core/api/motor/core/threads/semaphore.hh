@@ -12,7 +12,12 @@ namespace Motor {
 class motor_api(CORE) Semaphore : public Threads::Waitable
 {
 private:
-    void* m_data;
+    union Data
+    {
+        int   value;
+        void* ptr;
+    };
+    Data m_data;
 
 public:
     Semaphore(int initialCount);

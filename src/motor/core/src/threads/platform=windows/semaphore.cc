@@ -6,23 +6,24 @@
 
 namespace Motor {
 
-Semaphore::Semaphore(int initialCount) : m_data(CreateSemaphore(NULL, initialCount, 65535, NULL))
+Semaphore::Semaphore(int initialCount) : m_data()
 {
+    m_data.ptr = CreateSemaphore(NULL, initialCount, 65535, NULL);
 }
 
 Semaphore::~Semaphore()
 {
-    CloseHandle((HANDLE)m_data);
+    CloseHandle((HANDLE)m_data.ptr);
 }
 
 void Semaphore::release(int count)
 {
-    ReleaseSemaphore((HANDLE)m_data, count, NULL);
+    ReleaseSemaphore((HANDLE)m_data.ptr, count, NULL);
 }
 
 Threads::Waitable::WaitResult Semaphore::wait()
 {
-    DWORD rcode = WaitForSingleObject((HANDLE)m_data, INFINITE);
+    DWORD rcode = WaitForSingleObject((HANDLE)m_data.ptr, INFINITE);
     switch(rcode)
     {
     case WAIT_OBJECT_0: return Finished;
