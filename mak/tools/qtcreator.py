@@ -507,6 +507,10 @@ class QtCreator(Build.BuildContext):
         projects = []
         for group in self.groups:
             for task_gen in group:
+                if 'motor:kernel' in task_gen.features:
+                    continue
+                if 'motor:preprocess' in task_gen.features:
+                    continue
                 project_file = self.write_project(task_gen)
                 projects.append(project_file)
                 if task_gen == self.launcher:
@@ -1312,6 +1316,10 @@ class Qbs(QtCreator):
         project_list = []
         for group in self.groups:
             for task_gen in group:
+                if 'motor:kernel' in task_gen.features:
+                    continue
+                if 'motor:preprocess' in task_gen.features:
+                    continue
                 task_gen.post()
                 try:
                     name = task_gen.module_path.split('.')
@@ -1352,14 +1360,13 @@ class Qbs(QtCreator):
                     if env.SUB_TOOLCHAINS:
                         env = self.all_envs[env.SUB_TOOLCHAINS[0]]
                     if 'android' in env.VALID_PLATFORMS:
-                        ndk_root = os.path.dirname(os.path.dirname(env.ANDROID_NDK_PATH))
+                        ndk_root = env.ANDROID_NDK_PATH
                         host_name = os.path.split(os.path.dirname(os.path.dirname(env.CC[0])))[1]
-                        version = env_name.split('-')[-1]
                         project_file.write('%s    Depends { name: "Android.ndk" }\n' % indent)
+                        project_file.write('%s    Depends { name: "codesign" }\n' % indent)
                         project_file.write('%s    Android.ndk.hostArch: "%s"\n' % (indent, host_name))
-                        project_file.write('%s    Android.ndk.toolchainVersion: "%s"\n' % (indent, version))
                         project_file.write('%s    Android.ndk.ndkDir: "%s"\n' % (indent, ndk_root))
-                        project_file.write('%s    Android.ndk.toolchainVersionNumber: "4.9.x"\n' % indent)
+                        project_file.write('%s    codesign.debugKeystorePath: "%s"\n' % (indent, env.ANDROID_DEBUGKEY))
                         break
 
                 project_file.write('%s    name: "%s"\n' % (indent, p.name))
