@@ -2,11 +2,13 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
+#include <motor/main.hh>
 #include <fcntl.h>
 #include <io.h>
-#include <motor/main.hh>
 #include <stdio.h>
 #include <windows.h>
+
+MOTOR_EXPORT int forceExport;
 
 #ifdef _CONSOLE
 extern "C" int main(int argc, const char* argv[])
