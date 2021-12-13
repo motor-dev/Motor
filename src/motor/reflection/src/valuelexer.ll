@@ -149,6 +149,7 @@ false                                           { update(motor_value_leng);
 int motor_value_lex_destroy()
 {
     yy_delete_buffer(yy_current_buffer);
+    yy_init = 1;
     return 0;
 }
 #endif
