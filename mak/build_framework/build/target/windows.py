@@ -58,7 +58,7 @@ def apply_def_flag(self):
             self.link_task.dep_nodes.append(f)
 
 
-@feature('cshlib', 'cxxshlib')
+@feature('cshlib', 'cxxshlib', 'cprogram', 'cxxprogram')
 @after_method('apply_link')
 @after_method('apply_flags_msvc')
 def apply_implib(self):
@@ -67,6 +67,7 @@ def apply_implib(self):
         target_file = self.env.implib_PATTERN % target_name
         implib_node = self.link_task.outputs[0].parent.make_node(target_file)
         self.link_task.outputs.append(implib_node)
+        self.link_task.outputs.append(implib_node.change_ext('.exp'))
         self.link_task.env.append_value('LINKFLAGS', [self.env.IMPLIB_ST % implib_node.abspath()])
 
 
