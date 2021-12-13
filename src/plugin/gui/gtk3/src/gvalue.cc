@@ -128,7 +128,7 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
     case G_TYPE_LONG:
     {
         g_value_init(target, type);
-        g_value_set_long(target, convertNumberToInteger< i64 >(value));
+        g_value_set_long(target, convertNumberToInteger< long >(value));
         return true;
     }
     case G_TYPE_INT64:
@@ -140,7 +140,7 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
     case G_TYPE_ULONG:
     {
         g_value_init(target, type);
-        g_value_set_ulong(target, convertNumberToInteger< u64 >(value));
+        g_value_set_ulong(target, convertNumberToInteger< unsigned long >(value));
         return true;
     }
     case G_TYPE_UINT64:

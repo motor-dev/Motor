@@ -24,6 +24,7 @@ Meta::Value Constructor::call(raw< const Meta::Method > method, Meta::Value* par
     GParamSpec**  paramSpecs = g_object_class_list_properties(objectClass, &paramSpecCount);
 
     u32 actualParamCount = 0;
+    GValue zeroValue = G_VALUE_INIT;
 
 #ifdef GLIB_VERSION_2_54
     const char** names  = static_cast< const char** >(malloca(nparams * sizeof(char*)));
@@ -45,7 +46,7 @@ Meta::Value Constructor::call(raw< const Meta::Method > method, Meta::Value* par
         {
             motor_assert(actualParamCount < nparams, "invalid parameter count");
 #ifdef GLIB_VERSION_2_54
-            values[actualParamCount] = G_VALUE_INIT;
+            values[actualParamCount] = zeroValue;
             if(convertMetaValueToGValue(params[j], paramSpecs[i]->value_type,
                                         &values[actualParamCount]))
             {
@@ -53,7 +54,7 @@ Meta::Value Constructor::call(raw< const Meta::Method > method, Meta::Value* par
                 ++actualParamCount;
             }
 #else
-            gparams[actualParamCount].value = G_VALUE_INIT;
+            gparams[actualParamCount].value = zeroValue;
             if(convertMetaValueToGValue(params[j], paramSpecs[i]->value_type,
                                         &gparams[actualParamCount].value))
             {
