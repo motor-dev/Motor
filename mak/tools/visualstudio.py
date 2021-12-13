@@ -140,7 +140,7 @@ class Solution:
             try:
                 folder = self.folders_made[folder_name]
             except KeyError:
-                folder = generateGUID(folder_name)
+                folder = generateGUID('folder:'+folder_name)
                 self.folders_made[folder_name] = folder
                 self.projects.append(
                     'Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "%s", "%s", "%s"\r\nEndProject' %
@@ -241,7 +241,7 @@ class VCproj:
             self.name = task_gen.target.split('.')[-1]
         else:
             self.name = task_gen.target
-        self.guid = generateGUID(task_gen.target)
+        self.guid = generateGUID('target:'+task_gen.target)
         self.vcproj = XmlDocument(StringIO.StringIO(), 'UTF-8')
         with XmlNode(
             self.vcproj, 'VisualStudioProject', {
@@ -282,6 +282,15 @@ class VCproj:
                                 tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s %s %s' % (
                                     sys.executable, sys.argv[0], command, ' '.join(options)
                                 )
+                                clean_command = getattr(task_gen, 'clean_command', '')
+                                if clean_command:
+                                    clean_command = clean_command % {'toolchain': toolchain, 'variant': variant}
+                                    tool['CleanCommandLine'] = 'cd $(SolutionDir) && %s %s %s %s' % (
+                                        sys.executable, sys.argv[0], clean_command, ' '.join(options)
+                                    )
+                                    tool['ReBuildCommandLine'] = 'cd $(SolutionDir) && %s %s %s %s %s' % (
+                                        sys.executable, sys.argv[0], clean_command, command, ' '.join(options)
+                                    )
                             else:
                                 tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s build:%s:%s %s --targets=%s' % (
                                     sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target
@@ -290,7 +299,7 @@ class VCproj:
                                     sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target
                                 )
                                 tool['ReBuildCommandLine'
-                                     ] = 'cd $(SolutionDir) && %s %s clean:%s:%s instal:%s:%s %s --targets=%s' % (
+                                     ] = 'cd $(SolutionDir) && %s %s clean:%s:%s build:%s:%s %s --targets=%s' % (
                                          sys.executable, sys.argv[0], toolchain, variant, toolchain, variant,
                                          ' '.join(options), task_gen.target
                                      )
@@ -379,7 +388,7 @@ class VCxproj:
         self.filter_nodes = self.vcxfilters._add(project, 'ItemGroup')
         self.file_nodes = self.vcxfilters._add(project, 'ItemGroup')
 
-        self.guid = generateGUID(task_gen.target)
+        self.guid = generateGUID('target:'+task_gen.target)
         project = self.vcxproj._add(
             self.vcxproj.document, 'Project', {
                 'DefaultTargets': 'Build',
@@ -437,10 +446,11 @@ class VCxproj:
                     {'Condition': "'$(Configuration)|$(Platform)'=='%s-%s|%s'" % (toolchain, variant, platform)}
                 )
                 for var in [
-                    'Prefix', 'TmpDir', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
+                    'Prefix', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
                     'Deploy_IncludeDir', 'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir', 'Deploy_RootDir'
                 ]:
                     self.vcxproj._add(properties, var, env[var.upper()].replace('/', '\\'))
+                self.vcxproj._add(properties, 'TmpDir', os.path.join(env['TMPDIR'], '..', version).replace('/', '\\'))
                 self.vcxproj._add(properties, 'Variant', variant)
 
         for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
@@ -494,6 +504,17 @@ class VCxproj:
                         properties, 'NMakeBuildCommandLine',
                         'cd $(SolutionDir) && %s %s %s %s' % (sys.executable, sys.argv[0], command, ' '.join(options))
                     )
+                    clean_command = getattr(task_gen, 'clean_command', '')
+                    if clean_command:
+                        clean_command = clean_command % {'toolchain': toolchain, 'variant': variant}
+                        self.vcxproj._add(
+                            properties, 'NMakeCleanCommandLine',
+                            'cd $(SolutionDir) && %s %s %s %s' % (sys.executable, sys.argv[0], clean_command, ' '.join(options))
+                        )
+                        self.vcxproj._add(
+                            properties, 'NMakeReBuildCommandLine',
+                            'cd $(SolutionDir) && %s %s %s %s %s' % (sys.executable, sys.argv[0], clean_command, command, ' '.join(options))
+                        )
                 else:
                     self.vcxproj._add(
                         properties, 'NMakeBuildCommandLine', 'cd $(SolutionDir) && %s %s build:%s:%s %s --targets=%s' %
@@ -597,7 +618,7 @@ class PyProj:
 
     def __init__(self, task_gen, version, version_project, use_folders):
         self.pyproj = XmlFile()
-        self.guid = generateGUID(task_gen.target)
+        self.guid = generateGUID('target:'+task_gen.target)
         if use_folders:
             self.name = task_gen.target.split('.')[-1]
         else:
@@ -671,13 +692,9 @@ class PyProj:
         self.pyproj.write(node, '  ')
 
 
-class vs2003(Build.BuildContext):
-    "creates projects for Visual Studio 2003"
-    cmd = 'vs2003'
-    fun = 'build'
+class VisualStudio(Build.BuildContext):
+    "creates projects for Visual Studio"
     optim = 'debug'
-    version = (('Visual Studio .NET 2003', '8.00', False, None), (VCproj, '7.10'))
-    platforms = ['Win32']
     motor_toolchain = 'projects'
     motor_variant = 'projects.setup'
     variant = 'projects/vs'
@@ -725,13 +742,14 @@ class vs2003(Build.BuildContext):
 
         solution = Solution(self, appname, version_number, version_name, folders, ide_version)
 
-        for target, command, do_build in [
-            ('build.reconfigure', 'reconfigure', False), ('build.%s' % version, version, False),
-            ('build.all', 'build:%(toolchain)s:%(variant)s', True)
+        for target, command, clean_command, do_build in [
+            ('build.reconfigure', 'reconfigure', None, False), ('build.%s' % version, version, None, False),
+            ('build.all', 'build:%(toolchain)s:%(variant)s', 'clean:%(toolchain)s:%(variant)s', True)
         ]:
             task_gen = lambda: None
             task_gen.target = target
             task_gen.command = command
+            task_gen.clean_command = clean_command
             task_gen.bld = self
             task_gen.all_sources = []
             task_gen.features = []
@@ -740,32 +758,42 @@ class vs2003(Build.BuildContext):
             project.write(nodes)
             solution.add(task_gen, project, nodes[0].path_from(self.srcnode).replace('/', '\\'), do_build)
 
-        pydbg_task_gen = lambda: None
-        pydbg_task_gen.target = 'build.debug'
-        pydbg_task_gen.command = command
-        pydbg_task_gen.bld = self
-        pydbg_task_gen.all_sources = []
-        project = PyProj(pydbg_task_gen, version, version_project, folders)
-        pydbg_node = projects.make_node('build.debug.pyproj')
-        project.write(pydbg_node)
-        solution.add(pydbg_task_gen, project, pydbg_node.path_from(self.srcnode).replace('/', '\\'), False)
+        if False:
+            pydbg_task_gen = lambda: None
+            pydbg_task_gen.target = 'build.debug'
+            pydbg_task_gen.command = command
+            pydbg_task_gen.bld = self
+            pydbg_task_gen.all_sources = []
+            project = PyProj(pydbg_task_gen, version, version_project, folders)
+            pydbg_node = projects.make_node('build.debug.pyproj')
+            project.write(pydbg_node)
+            solution.add(pydbg_task_gen, project, pydbg_node.path_from(self.srcnode).replace('/', '\\'), False)
 
         for g in self.groups:
             for tg in g:
                 if not isinstance(tg, TaskGen.task_gen):
                     continue
-                if not 'motor:kernel' in tg.features:
-                    tg.post()
+                if 'motor:kernel' in tg.features:
+                    continue
+                if 'motor:preprocess' in tg.features:
+                    continue
+                tg.post()
 
-                    nodes = [projects.make_node("%s.%s" % (tg.target, ext)) for ext in klass.extensions]
-                    project = klass(tg, version, version_project, folders)
-                    project.write(nodes)
-                    solution.add(tg, project, nodes[0].path_from(self.srcnode).replace('/', '\\'))
+                nodes = [projects.make_node("%s.%s" % (tg.target, ext)) for ext in klass.extensions]
+                project = klass(tg, version, version_project, folders)
+                project.write(nodes)
+                solution.add(tg, project, nodes[0].path_from(self.srcnode).replace('/', '\\'))
 
         solution.write(solution_node)
 
+class vs2003(VisualStudio):
+    "creates projects for Visual Studio 2003"
+    cmd = 'vs2003'
+    fun = 'build'
+    version = (('Visual Studio .NET 2003', '8.00', False, None), (VCproj, '7.10'))
+    platforms = ['Win32']
 
-class vs2005(vs2003):
+class vs2005(VisualStudio):
     "creates projects for Visual Studio 2005"
     cmd = 'vs2005'
     fun = 'build'
@@ -773,7 +801,7 @@ class vs2005(vs2003):
     platforms = ['Win32', 'x64']
 
 
-class vs2005e(vs2003):
+class vs2005e(VisualStudio):
     "creates projects for Visual Studio 2005 Express"
     cmd = 'vs2005e'
     fun = 'build'
@@ -781,7 +809,7 @@ class vs2005e(vs2003):
     platforms = ['Win32', 'x64']
 
 
-class vs2008(vs2003):
+class vs2008(VisualStudio):
     "creates projects for Visual Studio 2008"
     cmd = 'vs2008'
     fun = 'build'
@@ -789,7 +817,7 @@ class vs2008(vs2003):
     platforms = ['Win32', 'x64', 'Itanium']
 
 
-class vs2008e(vs2003):
+class vs2008e(VisualStudio):
     "creates projects for Visual Studio 2008 Express"
     cmd = 'vs2008e'
     fun = 'build'
@@ -797,7 +825,7 @@ class vs2008e(vs2003):
     platforms = ['Win32', 'x64', 'Itanium']
 
 
-class vs2010(vs2003):
+class vs2010(VisualStudio):
     "creates projects for Visual Studio 2010"
     cmd = 'vs2010'
     fun = 'build'
@@ -805,7 +833,7 @@ class vs2010(vs2003):
     platforms = ['Win32', 'x64', 'Itanium']
 
 
-class vs2010e(vs2003):
+class vs2010e(VisualStudio):
     "creates projects for Visual Studio 2010 Express"
     cmd = 'vs2010e'
     fun = 'build'
@@ -813,7 +841,7 @@ class vs2010e(vs2003):
     platforms = ['Win32', 'x64', 'Itanium']
 
 
-class vs11(vs2003):
+class vs11(VisualStudio):
     "creates projects for Visual Studio 2012"
     cmd = 'vs11'
     fun = 'build'
@@ -828,7 +856,7 @@ class vs2012(vs11):
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
 
-class vs11e(vs2003):
+class vs11e(VisualStudio):
     "creates projects for Visual Studio 2012 Express"
     cmd = 'vs11e'
     fun = 'build'
@@ -843,7 +871,7 @@ class vs2012e(vs11e):
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
 
-class vs2013e(vs2003):
+class vs2013e(VisualStudio):
     "creates projects for Visual Studio 2013 Express"
     cmd = 'vs2013e'
     fun = 'build'
@@ -851,7 +879,7 @@ class vs2013e(vs2003):
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
 
-class vs2013(vs2003):
+class vs2013(VisualStudio):
     "creates projects for Visual Studio 2013"
     cmd = 'vs2013'
     fun = 'build'
@@ -859,7 +887,7 @@ class vs2013(vs2003):
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
 
-class vs2015(vs2003):
+class vs2015(VisualStudio):
     "creates projects for Visual Studio 2015"
     cmd = 'vs2015'
     fun = 'build'
@@ -867,7 +895,7 @@ class vs2015(vs2003):
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
 
-class vs2017(vs2003):
+class vs2017(VisualStudio):
     "creates projects for Visual Studio 2017"
     cmd = 'vs2017'
     fun = 'build'
@@ -875,7 +903,7 @@ class vs2017(vs2003):
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
 
-class vs2019(vs2003):
+class vs2019(VisualStudio):
     "creates projects for Visual Studio 2019"
     cmd = 'vs2019'
     fun = 'build'
