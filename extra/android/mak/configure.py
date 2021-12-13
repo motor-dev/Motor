@@ -297,14 +297,14 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
             conf.find_program('javadoc', path_list=paths)
         conf.load('javaw')
         conf.env.append_value('JAVACFLAGS', ['-source', '1.6', '-target', '1.6'])
-        key_debug = conf.path.parent.make_node('debug.keystore')
+        conf.env.ANDROID_DEBUGKEY = conf.path.parent.make_node('debug.keystore').abspath()
         conf.env.JARSIGNER_FLAGS = [
-            '-sigalg', 'MD5withRSA', '-digestalg', 'SHA1', '-keystore',
-            key_debug.abspath(), '-storepass', 'android', '-keypass', 'android'
+            '-sigalg', 'MD5withRSA', '-digestalg', 'SHA1', '-keystore', conf.env.ANDROID_DEBUGKEY, '-storepass',
+            'android', '-keypass', 'android'
         ]
         conf.env.JARSIGNER_KEY = 'androiddebugkey'
         conf.env.APKSIGNER_FLAGS = [
-            '--ks', key_debug.abspath(), '--ks-pass', 'pass:android', '--key-pass', 'pass:android'
+            '--ks', conf.env.ANDROID_DEBUGKEY, '--ks-pass', 'pass:android', '--key-pass', 'pass:android'
         ]
 
         sdk_build_tool_path = self.get_build_tool_path(Options.options.android_sdk_path)
