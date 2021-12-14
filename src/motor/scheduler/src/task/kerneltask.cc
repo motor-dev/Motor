@@ -9,11 +9,12 @@ namespace Motor { namespace Task {
 
 KernelTask::~KernelTask()
 {
+    m_targetScheduler->disposeData(m_schedulerData);
 }
 
 void KernelTask::schedule(weak< Scheduler > scheduler)
 {
-    scheduler->queueKernel(this, m_parameters);
+    scheduler->queueKernel(this);
 }
 
 }}  // namespace Motor::Task

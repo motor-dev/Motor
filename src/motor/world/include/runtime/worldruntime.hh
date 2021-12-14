@@ -17,7 +17,7 @@ namespace Motor { namespace World {
 
 class ComponentStorage;
 
-class motor_api(WORLD) WorldRuntime : public Resource::ILoader
+class WorldRuntime : public Resource::ILoader
 {
 private:
     struct SubWorldData
@@ -43,8 +43,8 @@ private:
     void processEvents();
 
 private:
-    void load(weak< const Resource::IDescription > subworld, Resource::Resource & resource);
-    void unload(weak< const Resource::IDescription > subWorld, Resource::Resource & resource);
+    void load(weak< const Resource::IDescription > subworld, Resource::Resource& resource);
+    void unload(weak< const Resource::IDescription > subWorld, Resource::Resource& resource);
 
 public:
     weak< Task::ITask > startUpdateTask() const;

@@ -22,14 +22,15 @@ namespace Motor { namespace Task {
 
 class motor_api(SCHEDULER) KernelTask : public ITask
 {
-    friend class ::Motor::Scheduler;
     MOTOR_NOCOPY(KernelTask);
+
+    friend class ::Motor::Scheduler;
 
 private:
     weak< const KernelScheduler::Kernel > const                m_kernel;
     weak< KernelScheduler::IScheduler >                        m_targetScheduler;
     minitl::array< weak< KernelScheduler::IParameter > > const m_parameters;
-    u32                                                        m_subTaskCount;
+    void*                                                      m_schedulerData;
 
 public:
     template < typename Container >
@@ -43,6 +44,16 @@ public:
     ~KernelTask();
 
     virtual void schedule(weak< Scheduler > scheduler) override;
+
+    weak< const KernelScheduler::Kernel > kernel() const
+    {
+        return m_kernel;
+    };
+    void* schedulerData(const weak< KernelScheduler::IScheduler >& scheduler) const
+    {
+        motor_assert(scheduler == m_targetScheduler, "scheduler mismatch");
+        return m_schedulerData;
+    }
 };
 
 }}  // namespace Motor::Task
@@ -60,6 +71,7 @@ KernelTask::KernelTask(istring name, KernelScheduler::SchedulerType type, color3
     , m_kernel(kernel)
     , m_targetScheduler(KernelScheduler::IScheduler::findScheduler(type))
     , m_parameters(Arena::task(), minitl::begin(parameters), minitl::end(parameters))
+    , m_schedulerData(m_targetScheduler->createData(this, m_parameters.size()))
 {
 }
 
@@ -72,6 +84,7 @@ KernelTask::KernelTask(istring name, KernelScheduler::SchedulerType type, color3
     , m_kernel(kernel)
     , m_targetScheduler(KernelScheduler::IScheduler::findScheduler(type))
     , m_parameters(Arena::task(), begin, end)
+    , m_schedulerData(m_targetScheduler->createData(this, m_parameters.size()))
 {
 }
 

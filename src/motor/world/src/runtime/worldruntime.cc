@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/world/stdafx.h>
-#include <motor/world/runtime/worldruntime.hh>
+#include <runtime/worldruntime.hh>
 
 #include <motor/meta/engine/namespace.hh>
 #include <motor/scheduler/task/group.hh>

@@ -10,26 +10,28 @@
 #include <motor/resource/loader.hh>
 #include <motor/scheduler/task/group.hh>
 
-namespace Motor {
-
-namespace KernelScheduler {
+namespace Motor { namespace KernelScheduler {
 
 class IKernelScheduler;
 class ProducerLoader;
 
-}  // namespace KernelScheduler
+}}  // namespace Motor::KernelScheduler
 
-namespace World {
-class World;
-}
+namespace Motor { namespace World {
+
+class WorldLoader;
+
+}}  // namespace Motor::World
+
+namespace Motor {
+
 class Folder;
 
-class motor_api(MOTOR) Application : public Resource::ILoader
+class motor_api(MOTOR) Application : public minitl::refcountable
 {
     MOTOR_NOCOPY(Application);
 
 private:
-    class WorldResource;
     struct UpdateTask
     {
         ref< Task::ITask >                   task;
@@ -42,25 +44,18 @@ private:
     weak< Scheduler >                                   m_scheduler;
     weak< Resource::ResourceManager >                   m_resourceManager;
     Plugin::Context const                               m_pluginContext;
-    scoped< KernelScheduler::ProducerLoader > const     m_producerLoader;
-    Plugin::Plugin< KernelScheduler::IKernelScheduler > m_cpuKernelScheduler;
     ref< Task::TaskGroup >                              m_updateTask;
+    scoped< KernelScheduler::ProducerLoader > const     m_producerLoader;
+    scoped< World::WorldLoader > const                  m_worldLoader;
+    Plugin::Plugin< KernelScheduler::IKernelScheduler > m_cpuKernelScheduler;
     minitl::vector< UpdateTask >                        m_tasks;
-    minitl::vector< ref< WorldResource > >              m_worlds;
     Task::ITask::CallbackConnection                     m_forceContinue;
     size_t                                              m_resourceLoadingCount;
-    u32                                                 m_worldCount;
     bool                                                m_runLoop;
 
 private:
     void frameUpdate();
     void updateResources();
-
-private:
-    virtual void load(weak< const Resource::IDescription > world, Resource::Resource & resource)
-        override;
-    virtual void unload(weak< const Resource::IDescription > /*world*/,
-                        Resource::Resource & resource) override;
 
 private:
     void registerInterruptions();

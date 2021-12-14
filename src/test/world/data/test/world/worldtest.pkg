@@ -100,8 +100,58 @@ job10 = worldtest.UpdateKernel
     inout = storage10.component;
 );
 
+job11 = worldtest.UpdateKernel
+(
+    inout = job1.inout;
+);
+
+job12 = worldtest.UpdateKernel
+(
+    inout = job2.inout;
+);
+
+job13 = worldtest.UpdateKernel
+(
+    inout = job3.inout;
+);
+
+job14 = worldtest.UpdateKernel
+(
+    inout = job4.inout;
+);
+
+job15 = worldtest.UpdateKernel
+(
+    inout = job5.inout;
+);
+
+job16 = worldtest.UpdateKernel
+(
+    inout = job6.inout;
+);
+
+job17 = worldtest.UpdateKernel
+(
+    inout = job7.inout;
+);
+
+job18 = worldtest.UpdateKernel
+(
+    inout = job8.inout;
+);
+
+job19 = worldtest.UpdateKernel
+(
+    inout = job9.inout;
+);
+
+job20 = worldtest.UpdateKernel
+(
+    inout = job10.inout;
+);
+
 world = motor.World.World
 (
-    products = [job1.inout, job2.inout, job3.inout, job4.inout, job5.inout,
-                job6.inout, job7.inout, job8.inout, job9.inout, job10.inout];
+    products = [job11.inout, job12.inout, job13.inout, job14.inout, job15.inout,
+                job16.inout, job17.inout, job18.inout, job19.inout, job20.inout];
 );

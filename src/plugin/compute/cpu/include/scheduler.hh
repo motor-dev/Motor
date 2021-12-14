@@ -27,11 +27,9 @@ public:
     Scheduler(const Plugin::Context& context);
     ~Scheduler();
 
-    virtual IKernelTaskItem*    allocateItem(weak< Task::KernelTask > owner,
-                                             weak< const Kernel > kernel, u32 parameterCount) override;
-    void                        deallocateItem(CPUKernelTaskItem* item);
-    virtual void                run(IKernelTaskItem* item) override;
-    virtual weak< IMemoryHost > memoryHost() const override;
+    virtual void* createData(weak< Task::KernelTask > task, u32 parameterCount) override;
+    virtual void  disposeData(void* data) override;
+    virtual void  run(weak< Task::KernelTask > task) override;
 };
 
 }}}  // namespace Motor::KernelScheduler::CPU

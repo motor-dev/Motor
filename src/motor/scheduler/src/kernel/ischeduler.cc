@@ -9,19 +9,6 @@ namespace Motor { namespace KernelScheduler {
 
 static minitl::vector< weak< IScheduler > > s_schedulers(Arena::task());
 
-IKernelTaskItem::IKernelTaskItem(weak< Task::KernelTask > owner, weak< const Kernel > kernel,
-                                 u32 parameterCount)
-    : m_owner(owner)
-    , m_kernel(kernel)
-//, m_parameters(Arena::temporary(), parameterCount)
-{
-    motor_forceuse(parameterCount);
-}
-
-IKernelTaskItem::~IKernelTaskItem()
-{
-}
-
 IScheduler::IScheduler(istring name, weak< Scheduler > scheduler, SchedulerType type)
     : m_scheduler(scheduler)
     , m_name(name)

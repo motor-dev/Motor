@@ -75,8 +75,7 @@ private:
 public:
     void  queueTasks(Task::ITaskItem * head, Task::ITaskItem * tail, u32 count, Priority priority);
     void  queueTasks(Task::ITaskItem * head, Task::ITaskItem * tail, u32 count);
-    void  queueKernel(weak< Task::KernelTask >                                    task,
-                      const minitl::array< weak< KernelScheduler::IParameter > >& parameters);
+    void  queueKernel(weak< Task::KernelTask > task);
     void* allocate(size_t size);
     void  release(void* t, size_t size);
     template < typename T >

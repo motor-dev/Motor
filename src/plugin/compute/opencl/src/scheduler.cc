@@ -22,24 +22,6 @@ static const int s_profilingMode =
 #endif
     ;
 
-class CLKernelTaskItem : public IKernelTaskItem
-{
-public:
-    CLKernelTaskItem(weak< Task::KernelTask > owner, weak< const Kernel > kernel,
-                     u32 parmaeterCount);
-    ~CLKernelTaskItem();
-};
-
-CLKernelTaskItem::CLKernelTaskItem(weak< Task::KernelTask > owner, weak< const Kernel > kernel,
-                                   u32 parameterCount)
-    : IKernelTaskItem(owner, kernel, parameterCount)
-{
-}
-
-CLKernelTaskItem::~CLKernelTaskItem()
-{
-}
-
 Scheduler::Scheduler(const Plugin::Context& pluginContext, ref< Context > clContext)
     : IScheduler("OpenCL", pluginContext.scheduler, GPUType)
     , m_context(clContext)
@@ -68,28 +50,22 @@ Scheduler::~Scheduler()
     }
 }
 
-IKernelTaskItem* Scheduler::allocateItem(weak< Task::KernelTask > owner,
-                                         weak< const Kernel > kernel, u32 parameterCount)
-{
-    return new(Arena::temporary()) CLKernelTaskItem(owner, kernel, parameterCount);
-}
-
-void Scheduler::deallocateItem(CLKernelTaskItem* item)
-{
-    item->~CLKernelTaskItem();
-    Arena::temporary().free(item);
-}
-
-void Scheduler::run(IKernelTaskItem* item)
+void Scheduler::run(weak< Task::KernelTask > task)
 {
     // motor_notreached();
-    item->owner()->completed(m_scheduler);
-    deallocateItem(motor_checked_cast< CLKernelTaskItem >(item));
+    task->completed(m_scheduler);
 }
 
-weak< IMemoryHost > Scheduler::memoryHost() const
+void* Scheduler::createData(weak< Task::KernelTask > task, u32 parameterCount)
 {
-    return m_memoryHost;
+    motor_forceuse(task);
+    motor_forceuse(parameterCount);
+    return 0;
+}
+
+void Scheduler::disposeData(void* data)
+{
+    motor_forceuse(data);
 }
 
 }}}  // namespace Motor::KernelScheduler::OpenCL

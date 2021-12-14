@@ -22,31 +22,7 @@ class KernelTask;
 
 namespace Motor { namespace KernelScheduler {
 
-class IMemoryHost;
-
-class motor_api(SCHEDULER) IKernelTaskItem
-{
-    friend class Motor::Scheduler;
-
-protected:
-    weak< Task::KernelTask > m_owner;
-    weak< const Kernel >     m_kernel;
-
-protected:
-    IKernelTaskItem(weak< Task::KernelTask > ownerTask, weak< const Kernel > kernel,
-                    u32 parameterCount);
-    virtual ~IKernelTaskItem();
-
-public:
-    weak< Task::KernelTask > owner() const
-    {
-        return m_owner;
-    }
-    weak< const Kernel > kernel() const
-    {
-        return m_kernel;
-    }
-};
+class IParameter;
 
 class motor_api(SCHEDULER) IScheduler : public minitl::refcountable
 {
@@ -60,11 +36,9 @@ protected:
     virtual ~IScheduler();
 
 public:
-    virtual IKernelTaskItem* allocateItem(weak< Task::KernelTask > task,
-                                          weak< const Kernel > kernel, u32 parametercount)
-        = 0;
-    virtual void                run(IKernelTaskItem * item) = 0;
-    virtual weak< IMemoryHost > memoryHost() const          = 0;
+    virtual void* createData(weak< Task::KernelTask > task, u32 parameterCount) = 0;
+    virtual void  disposeData(void* data)                                       = 0;
+    virtual void  run(weak< Task::KernelTask > task)                            = 0;
 
     static weak< IScheduler > findScheduler(SchedulerType preferredType);
 };

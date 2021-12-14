@@ -9,9 +9,17 @@
 #include <motor/plugin/plugin.hh>
 #include <motor/resource/description.hh>
 #include <motor/scheduler/kernel/iproduct.meta.hh>
-#include <motor/world/runtime/worldruntime.hh>
+
+namespace Motor { namespace KernelScheduler {
+
+class IProduct;
+class ProducerLoader;
+
+}}  // namespace Motor::KernelScheduler
 
 namespace Motor { namespace World {
+
+class WorldRuntime;
 
 class motor_api(WORLD) World : public Resource::Description< World >
 {
