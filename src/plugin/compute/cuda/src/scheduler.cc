@@ -14,24 +14,6 @@
 
 namespace Motor { namespace KernelScheduler { namespace Cuda {
 
-class CUDAKernelTaskItem : public IKernelTaskItem
-{
-public:
-    CUDAKernelTaskItem(weak< Task::KernelTask > owner, weak< const Kernel > kernel,
-                       u32 parmaeterCount);
-    ~CUDAKernelTaskItem();
-};
-
-CUDAKernelTaskItem::CUDAKernelTaskItem(weak< Task::KernelTask > owner, weak< const Kernel > kernel,
-                                       u32 parameterCount)
-    : IKernelTaskItem(owner, kernel, parameterCount)
-{
-}
-
-CUDAKernelTaskItem::~CUDAKernelTaskItem()
-{
-}
-
 Scheduler::Scheduler(const Plugin::Context& context)
     : IScheduler("Cuda", context.scheduler, GPUType)
     , m_resourceManager(context.resourceManager)
@@ -46,28 +28,22 @@ Scheduler::~Scheduler()
     m_resourceManager->detach< Kernel >(m_cudaLoader);
 }
 
-IKernelTaskItem* Scheduler::allocateItem(weak< Task::KernelTask > owner,
-                                         weak< const Kernel > kernel, u32 parameterCount)
-{
-    return new(Arena::temporary()) CUDAKernelTaskItem(owner, kernel, parameterCount);
-}
-
-void Scheduler::deallocateItem(CUDAKernelTaskItem* item)
-{
-    item->~CUDAKernelTaskItem();
-    Arena::temporary().free(item);
-}
-
-void Scheduler::run(IKernelTaskItem* item)
+void Scheduler::run(weak< Task::KernelTask > task)
 {
     // motor_notreached();
-    item->owner()->completed(m_scheduler);
-    deallocateItem(motor_checked_cast< CUDAKernelTaskItem >(item));
+    task->completed(m_scheduler);
 }
 
-weak< IMemoryHost > Scheduler::memoryHost() const
+void* Scheduler::createData(weak< Task::KernelTask > task, u32 parameterCount)
 {
-    return m_memoryHost;
+    motor_forceuse(task);
+    motor_forceuse(parameterCount);
+    return 0;
+}
+
+void Scheduler::disposeData(void* data)
+{
+    motor_forceuse(data);
 }
 
 }}}  // namespace Motor::KernelScheduler::Cuda

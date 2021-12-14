@@ -44,6 +44,9 @@ private:  // friend Worker
 
 private:  // friend class ITaskItem, Worker
     ITaskItem* pop(Scheduler::Affinity affinity);
+    bool       taskDone();
+    bool       hasTasks();
+    bool       isRunning();
 
 public:
     TaskScheduler(weak< Scheduler > scheduler);
@@ -54,10 +57,6 @@ public:
 
     void mainThreadJoin();
     void notifyEnd();
-
-    bool taskDone();
-    bool hasTasks();
-    bool isRunning();
 
     u32 workerCount() const
     {

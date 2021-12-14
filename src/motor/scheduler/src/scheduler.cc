@@ -14,7 +14,7 @@ namespace Motor {
 
 void* Scheduler::allocate(size_t size)
 {
-    if(size > 128)
+    if(size > sizeof(Buffer))
         return Arena::task().alloc(size, 1);
     else
         return (void*)m_taskPool.allocate();
@@ -22,7 +22,7 @@ void* Scheduler::allocate(size_t size)
 
 void Scheduler::release(void* task, size_t size)
 {
-    if(size > 128)
+    if(size > sizeof(Buffer))
         Arena::task().free(task);
     else
         m_taskPool.release((Buffer*)task);
@@ -53,22 +53,9 @@ void Scheduler::queueTasks(Task::ITaskItem* head, Task::ITaskItem* tail, u32 cou
     m_taskScheduler->queue(head, tail, count);
 }
 
-void Scheduler::queueKernel(weak< Task::KernelTask >                                    task,
-                            const minitl::array< weak< KernelScheduler::IParameter > >& parameters)
+void Scheduler::queueKernel(weak< Task::KernelTask > task)
 {
-    u32                                                           paramCount = parameters.size();
-    minitl::array< weak< const KernelScheduler::IMemoryBuffer > > kernelParams(Arena::temporary(),
-                                                                               paramCount);
-    weak< KernelScheduler::IScheduler >  scheduler = task->m_targetScheduler;
-    weak< KernelScheduler::IMemoryHost > memHost   = scheduler->memoryHost();
-    KernelScheduler::IKernelTaskItem*    item
-        = scheduler->allocateItem(task, task->m_kernel, paramCount);
-    for(u32 i = 0; i < paramCount; ++i)
-    {
-        // TODO: retrieve buffer from the parameter
-        // item->m_parameters[i] = ...;
-    }
-    scheduler->run(item);
+    task->m_targetScheduler->run(task);
 }
 
 void Scheduler::mainThreadJoin()

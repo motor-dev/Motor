@@ -4,6 +4,8 @@
 #include <motor/world/stdafx.h>
 #include <motor/world/world.meta.hh>
 
+#include <runtime/worldruntime.hh>
+
 namespace Motor { namespace World {
 
 World::World(minitl::array< weak< const KernelScheduler::IProduct > > products)

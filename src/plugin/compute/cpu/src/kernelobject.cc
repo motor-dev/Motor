@@ -21,7 +21,7 @@ KernelObject::~KernelObject()
 
 void KernelObject::run(const u32 index, const u32 total)
 {
-    if(m_entryPoint) (*m_entryPoint)(index, total);
+    (*m_entryPoint)(index, total);
 }
 
 }}}  // namespace Motor::KernelScheduler::CPU

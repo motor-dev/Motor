@@ -18,55 +18,7 @@
 
 namespace Motor { namespace KernelScheduler { namespace CPU {
 
-class CPUTaskItem;
-
-class CPUKernelTaskItem : public IKernelTaskItem
-{
-    friend class Scheduler;
-
-private:
-    weak< Scheduler >    m_cpuScheduler;
-    weak< KernelObject > m_object;
-    const u32            m_jobCount;
-    i_u32                m_doneCount;
-
-public:
-    CPUKernelTaskItem(weak< Task::KernelTask > owner, weak< const Kernel > kernel,
-                      weak< Scheduler > scheduler, weak< KernelObject > object, u32 parameterCount,
-                      u32 jobCount);
-    ~CPUKernelTaskItem();
-
-    void onJobCompleted(weak< Motor::Scheduler > sc);
-
-    weak< KernelObject > object() const
-    {
-        return m_object;
-    }
-};
-
-CPUKernelTaskItem::CPUKernelTaskItem(weak< Task::KernelTask > owner, weak< const Kernel > kernel,
-                                     weak< Scheduler > scheduler, weak< KernelObject > object,
-                                     u32 parameterCount, u32 jobCount)
-    : IKernelTaskItem(owner, kernel, parameterCount)
-    , m_cpuScheduler(scheduler)
-    , m_object(object)
-    , m_jobCount(jobCount)
-    , m_doneCount(i_u32::create(0))
-{
-}
-
-CPUKernelTaskItem::~CPUKernelTaskItem()
-{
-}
-
-void CPUKernelTaskItem::onJobCompleted(weak< Motor::Scheduler > sc)
-{
-    if(++m_doneCount == m_jobCount)
-    {
-        m_owner->completed(sc);
-        m_cpuScheduler->deallocateItem(this);
-    }
-}
+class CPUKernelTaskItem;
 
 class CPUTaskItem : public Task::ITaskItem
 {
@@ -81,6 +33,40 @@ public:
     CPUTaskItem(CPUKernelTaskItem* item, u32 index, u32 total);
 };
 
+class CPUKernelTaskItem
+{
+    friend class Scheduler;
+
+private:
+    weak< Task::KernelTask > m_owner;
+    weak< Scheduler >        m_cpuScheduler;
+    weak< KernelObject >     m_object;
+    const u32                m_jobCount;
+    i_u32                    m_doneCount;
+
+public:
+    CPUKernelTaskItem(weak< Task::KernelTask > owner, weak< Scheduler > scheduler,
+                      weak< KernelObject > object, u32 parameterCount, u32 jobCount);
+    ~CPUKernelTaskItem();
+
+    void onJobCompleted(weak< Motor::Scheduler > sc);
+
+    weak< Task::KernelTask > owner() const
+    {
+        return m_owner;
+    }
+    weak< KernelObject > object() const
+    {
+        return m_object;
+    }
+
+    CPUTaskItem* items()
+    {
+        u8* buffer = reinterpret_cast< u8* >(this);
+        return reinterpret_cast< CPUTaskItem* >(buffer + sizeof(*this));
+    }
+};
+
 CPUTaskItem::CPUTaskItem(CPUKernelTaskItem* item, u32 index, u32 total)
     : ITaskItem(item->owner())
     , m_kernelItem(item)
@@ -89,11 +75,56 @@ CPUTaskItem::CPUTaskItem(CPUKernelTaskItem* item, u32 index, u32 total)
 {
 }
 
+CPUKernelTaskItem::CPUKernelTaskItem(weak< Task::KernelTask > owner, weak< Scheduler > scheduler,
+                                     weak< KernelObject > object, u32 parameterCount, u32 jobCount)
+    : m_owner(owner)
+    , m_cpuScheduler(scheduler)
+    , m_object(object)
+    , m_jobCount(jobCount)
+    , m_doneCount(i_u32::create(0))
+{
+    motor_forceuse(parameterCount);
+    CPUTaskItem* item       = 0;
+    CPUTaskItem* itemBuffer = items();
+    for(u32 i = 0; i < m_jobCount; ++i)
+    {
+        CPUTaskItem* newItem = &itemBuffer[i];
+        new(newItem) CPUTaskItem(this, i, jobCount);
+        newItem->next = item;
+        item          = newItem;
+    }
+}
+
+CPUKernelTaskItem::~CPUKernelTaskItem()
+{
+    CPUTaskItem* itemBuffer = items();
+    for(u32 i = 0; i < m_jobCount; ++i)
+    {
+        itemBuffer[m_jobCount - i - 1].~CPUTaskItem();
+    }
+}
+
+void CPUKernelTaskItem::onJobCompleted(weak< Motor::Scheduler > sc)
+{
+    if(++m_doneCount == m_jobCount)
+    {
+        CPUTaskItem* item       = 0;
+        CPUTaskItem* itemBuffer = items();
+        for(u32 i = 0; i < m_jobCount; ++i)
+        {
+            CPUTaskItem* newItem = &itemBuffer[i];
+            newItem->next        = item;
+            item                 = newItem;
+        }
+        m_doneCount = 0;
+        m_owner->completed(sc);
+    }
+}
+
 void CPUTaskItem::run(weak< Motor::Scheduler > sc)
 {
     m_kernelItem->object()->run(m_index, m_total);
     m_kernelItem->onJobCompleted(sc);
-    this->release< CPUTaskItem >(sc);
 }
 
 Scheduler::Scheduler(const Plugin::Context& context)
@@ -126,42 +157,31 @@ Scheduler::~Scheduler()
     }
 }
 
-IKernelTaskItem* Scheduler::allocateItem(weak< Task::KernelTask > owner,
-                                         weak< const Kernel > kernel, u32 parameterCount)
-{
-    u32                  jobCount = m_scheduler->workerCount() * /* TODO: settings */ 4;
-    weak< KernelObject > object
-        = kernel->getResource(m_cpuLoaders[0]).getRefHandle< KernelObject >();
-    motor_assert(object, "kernel is not loaded");
-    return new(Arena::temporary()) /* TODO: pool */
-        CPUKernelTaskItem(owner, kernel, this, object, parameterCount, jobCount);
-}
-
-void Scheduler::deallocateItem(CPUKernelTaskItem* item)
-{
-    item->~CPUKernelTaskItem();
-    Arena::temporary().free(item);
-}
-
-void Scheduler::run(IKernelTaskItem* item)
+void Scheduler::run(weak< Task::KernelTask > task)
 {
     /* TODO: set option to use Neon/AVX/SSE */
-    CPUKernelTaskItem* cpuItem = motor_checked_cast< CPUKernelTaskItem >(item);
-    CPUTaskItem *      head = 0, *tail = 0;
-    for(u32 i = 0, jobCount = cpuItem->m_jobCount; i < jobCount; ++i)
-    {
-        CPUTaskItem* taskItem
-            = new(m_scheduler->allocateTask< CPUTaskItem >()) CPUTaskItem(cpuItem, i, jobCount);
-        if(!tail) tail = taskItem;
-        taskItem->next = head;
-        head           = taskItem;
-    }
-    m_scheduler->queueTasks(head, tail, cpuItem->m_jobCount);
+    const u32          jobCount = m_scheduler->workerCount() * 4;
+    CPUKernelTaskItem* item     = reinterpret_cast< CPUKernelTaskItem* >(task->schedulerData(this));
+    CPUTaskItem*       items    = item->items();
+    m_scheduler->queueTasks(&items[jobCount - 1], &items[0], jobCount);
 }
 
-weak< IMemoryHost > Scheduler::memoryHost() const
+void* Scheduler::createData(weak< Task::KernelTask > task, u32 parameterCount)
 {
-    return m_memoryHost;
+    weak< const Kernel > kernel = task->kernel();
+    weak< KernelObject > object
+        = kernel->getResource(m_cpuLoaders[0]).getRefHandle< KernelObject >();
+    const u32          jobCount = m_scheduler->workerCount() * 4;
+    CPUKernelTaskItem* item
+        = new(Arena::task().alloc(sizeof(CPUKernelTaskItem) + jobCount * sizeof(CPUTaskItem)))
+            CPUKernelTaskItem(task, this, object, parameterCount, jobCount);
+    return item;
+}
+
+void Scheduler::disposeData(void* data)
+{
+    reinterpret_cast< CPUKernelTaskItem* >(data)->~CPUKernelTaskItem();
+    Arena::task().free(data);
 }
 
 }}}  // namespace Motor::KernelScheduler::CPU
