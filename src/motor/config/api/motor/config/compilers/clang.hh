@@ -46,7 +46,11 @@ typedef u8       byte;
 #endif
 
 #ifndef _MSC_VER
-#    define override
+#    if(__clang_major__ < 4) || (__clang_major__ == 3 && __clang_minor < 8)
+#        define override
+#    else
+#        pragma clang diagnostic ignored "-Wc++11-extensions"
+#    endif
 #endif
 #define MOTOR_NOINLINE     __attribute__((noinline))
 #define MOTOR_ALWAYSINLINE __attribute__((always_inline))

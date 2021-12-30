@@ -137,7 +137,7 @@ public:
     }
 
     virtual bool getPropertyValue(Meta::Value& value, const istring& propertyName,
-                                  Meta::Value& result) const
+                                  Meta::Value& result) const override
     {
         bool found = Meta::AST::IntrospectionHint::getPropertyValue(value, propertyName, result);
 
