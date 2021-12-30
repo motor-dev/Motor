@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/world/stdafx.h>
-#include <runtime/componentregistry.meta.hh>
+#include <motor/world/componentregistry.meta.hh>
 
 #include <motor/scheduler/kernel/producerloader.hh>
 
