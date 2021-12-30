@@ -11,6 +11,8 @@ namespace Motor { namespace Test { namespace World {
 
 motor_tag(Motor::World::LogicComponent()) motor_pod Component {};
 
+motor_tag(Motor::World::LogicComponent()) motor_pod Component2 {};
+
 }}}  // namespace Motor::Test::World
 
 /**************************************************************************************************/

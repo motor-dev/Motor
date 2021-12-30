@@ -59,7 +59,8 @@ protected:
 public:
     struct motor_api(INTROSPECT) Visitor
     {
-        virtual void accept(weak< const Array > arrayValue);
+        virtual void accept(weak< const Array >                         arrayNode,
+                            const minitl::vector< weak< const Node > >& arrayValue);
         virtual void accept(weak< const Bool > boolValue);
         virtual void accept(weak< const FileName > filenameValue);
         virtual void accept(weak< const Float > floatValue);

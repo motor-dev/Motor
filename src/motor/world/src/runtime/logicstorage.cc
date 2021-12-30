@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/world/stdafx.h>
-#include <runtime/componentstorage.hh>
+#include <runtime/logicstorage.hh>
 
 #include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/meta/typeinfo.hh>
@@ -49,14 +49,16 @@ createProducer(raw< const Meta::Class >                componentClass,
     }
 }
 
-ComponentStorage::ComponentStorage(raw< const Meta::Class > componentClass)
+LogicStorage::LogicStorage(raw< const Meta::Class >           componentClass,
+                           weak< ComponentRegistry::Runtime > registryRuntime)
     : m_componentClass(componentClass)
     , m_componentProduct()
     , m_updateProducer(createProducer(m_componentClass, m_componentProduct))
+    , m_registryRuntime(registryRuntime)
 {
 }
 
-ComponentStorage::~ComponentStorage()
+LogicStorage::~LogicStorage()
 {
 }
 

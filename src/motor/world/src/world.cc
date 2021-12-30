@@ -4,12 +4,15 @@
 #include <motor/world/stdafx.h>
 #include <motor/world/world.meta.hh>
 
+#include <runtime/componentregistry.meta.hh>
 #include <runtime/worldruntime.hh>
 
 namespace Motor { namespace World {
 
-World::World(minitl::array< weak< const KernelScheduler::IProduct > > products)
-    : m_products(products)
+World::World(ref< ComponentRegistry >                                 registry,
+             minitl::array< weak< const KernelScheduler::IProduct > > products)
+    : m_registry(registry)
+    , m_products(products)
 {
 }
 
@@ -21,7 +24,9 @@ ref< WorldRuntime >
 World::createRuntime(weak< const KernelScheduler::ProducerLoader > producerLoader,
                      const Plugin::Context&                        context) const
 {
-    return ref< WorldRuntime >::create(Arena::game(), producerLoader, context, m_products);
+    return ref< WorldRuntime >::create(
+        Arena::game(), producerLoader, context, m_products,
+        m_registry->getResource(producerLoader).getRefHandle< ComponentRegistry::Runtime >());
 }
 
 }}  // namespace Motor::World

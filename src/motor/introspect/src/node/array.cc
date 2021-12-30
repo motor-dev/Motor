@@ -68,7 +68,8 @@ void Array::doEval(const Meta::Type& expectedType, Value& result) const
 
 void Array::doVisit(Node::Visitor& visitor) const
 {
-    visitor.accept(this);
+    minitl::vector< weak< const Node > > value(Arena::temporary(), m_value.begin(), m_value.end());
+    visitor.accept(this, value);
 }
 
 }}}  // namespace Motor::Meta::AST

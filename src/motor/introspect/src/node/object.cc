@@ -149,6 +149,11 @@ Type Object::getType() const
     return m_introspectionHint->getType();
 }
 
+bool Object::getPropertyValue(Value& value, const istring propertyName, Value& result) const
+{
+    return m_introspectionHint->getPropertyValue(value, propertyName, result);
+}
+
 bool Object::getPropertyType(DbContext& context, const istring propertyName,
                              Type& propertyType) const
 {

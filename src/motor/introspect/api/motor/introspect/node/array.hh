@@ -23,6 +23,8 @@ protected:
 public:
     Array(const minitl::vector< ref< Node > >& value);
     ~Array();
+
+    void visitChildren(Node::Visitor & visitor) const;
 };
 
 }}}  // namespace Motor::Meta::AST

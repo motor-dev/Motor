@@ -59,6 +59,13 @@ Type IntrospectionHint::getType() const
     return m_callInfo.overload->returnType;
 }
 
+bool IntrospectionHint::getPropertyValue(Value& value, const istring& propertyName,
+                                         Value& result) const
+{
+    bool found;
+    result = value.type().metaclass->get(value, propertyName, found);
+    return found;
+}
 bool IntrospectionHint::getPropertyType(DbContext& context, const istring name,
                                         Type& propertyType) const
 {
