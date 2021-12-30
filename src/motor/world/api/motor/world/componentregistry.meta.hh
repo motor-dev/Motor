@@ -1,8 +1,8 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_WORLD_RUNTIME_COMPONENTREGISTRY_META_HH_
-#define MOTOR_WORLD_RUNTIME_COMPONENTREGISTRY_META_HH_
+#ifndef MOTOR_WORLD_COMPONENTREGISTRY_META_HH_
+#define MOTOR_WORLD_COMPONENTREGISTRY_META_HH_
 /**************************************************************************************************/
 #include <motor/world/stdafx.h>
 #include <motor/scheduler/kernel/producer.meta.hh>
@@ -11,11 +11,11 @@
 
 namespace Motor { namespace World {
 
-class ComponentRegistry : published KernelScheduler::Producer
+class motor_api(WORLD) ComponentRegistry : published KernelScheduler::Producer
 {
 private:
-    ref< KernelScheduler::Producer::Runtime >
-    createRuntime(weak< const KernelScheduler::ProducerLoader > loader) const override;
+    ref< KernelScheduler::Producer::Runtime > createRuntime(
+        weak< const KernelScheduler::ProducerLoader > loader) const override;
 
 public:
     class Runtime : public KernelScheduler::Producer::Runtime
@@ -34,7 +34,8 @@ public:
 public:
     void addComponentStorage();
 
-    published : ComponentRegistry();
+published:
+    ComponentRegistry();
     ~ComponentRegistry();
 };
 

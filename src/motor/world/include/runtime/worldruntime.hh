@@ -13,7 +13,7 @@
 #include <motor/scheduler/kernel/producerloader.hh>
 #include <motor/scheduler/task/group.hh>
 
-#include <runtime/componentregistry.meta.hh>
+#include <motor/world/componentregistry.meta.hh>
 
 namespace Motor { namespace World {
 

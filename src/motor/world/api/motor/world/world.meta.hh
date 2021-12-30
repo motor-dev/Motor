@@ -5,6 +5,7 @@
 #define MOTOR_WORLD_WORLD_META_HH_
 /**************************************************************************************************/
 #include <motor/world/stdafx.h>
+#include <motor/world/componentregistry.meta.hh>
 
 #include <motor/plugin/plugin.hh>
 #include <motor/resource/description.hh>
@@ -20,7 +21,6 @@ class ProducerLoader;
 namespace Motor { namespace World {
 
 class WorldRuntime;
-class ComponentRegistry;
 
 class motor_api(WORLD) World : public Resource::Description< World >
 {

@@ -9,7 +9,7 @@
 #include <motor/scheduler/kernel/iproduct.meta.hh>
 #include <motor/scheduler/kernel/producer.meta.hh>
 
-#include <runtime/componentregistry.meta.hh>
+#include <motor/world/componentregistry.meta.hh>
 
 namespace Motor { namespace World {
 

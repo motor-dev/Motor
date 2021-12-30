@@ -5,7 +5,7 @@
 #include <runtime/archetypestorage.meta.hh>
 
 #include <motor/world/component/component.meta.hh>
-#include <runtime/componentregistry.meta.hh>
+#include <motor/world/componentregistry.meta.hh>
 
 #include <motor/introspect/node/array.hh>
 #include <motor/introspect/node/object.hh>

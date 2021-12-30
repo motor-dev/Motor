@@ -11,9 +11,9 @@
 #include <motor/introspect/policy.meta.hh>
 #include <motor/scheduler/kernel/iproduct.meta.hh>
 
-namespace Motor { namespace World {
+#include <motor/world/componentregistry.meta.hh>
 
-class ComponentRegistry;
+namespace Motor { namespace World {
 
 class ArchetypeStorage : published KernelScheduler::Producer
 {

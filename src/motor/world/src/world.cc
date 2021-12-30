@@ -4,7 +4,7 @@
 #include <motor/world/stdafx.h>
 #include <motor/world/world.meta.hh>
 
-#include <runtime/componentregistry.meta.hh>
+#include <motor/world/componentregistry.meta.hh>
 #include <runtime/worldruntime.hh>
 
 namespace Motor { namespace World {
