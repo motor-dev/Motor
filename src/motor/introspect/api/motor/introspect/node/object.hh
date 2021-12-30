@@ -41,6 +41,7 @@ public:
     ~Object();
 
     Type getType() const;
+    bool getPropertyValue(Value & value, const istring propertyName, Value& result) const;
     bool getPropertyType(DbContext & context, const istring propertyName, Type& propertyType) const;
 
     weak< const Parameter > getParameter(const istring name) const;

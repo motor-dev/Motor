@@ -60,9 +60,13 @@ void Property::doEval(const Type& expectedType, Value& result) const
 {
     motor_forceuse(expectedType);
     result = m_owner->eval(expectedType);
-    for(u32 i = 0; i < m_propertyName.size(); ++i)
+    Value temp;
+    bool  found = m_owner->getPropertyValue(result, m_propertyName[0], temp);
+    motor_assert(found,
+                 "type %s does not have a property %s" | result.type().name() | m_propertyName[0]);
+    result.swap(temp);
+    for(u32 i = 1; i < m_propertyName.size(); ++i)
     {
-        bool  found;
         Value v = result.type().metaclass->get(result, m_propertyName[i], found);
         motor_assert(found, "type %s does not have a property %s" | result.type().name()
                                 | m_propertyName[i]);

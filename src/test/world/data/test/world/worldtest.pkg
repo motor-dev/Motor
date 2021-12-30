@@ -1,157 +1,20 @@
 load test.world as worldtest;
 
+registry = motor.World.ComponentRegistry
+(
+);
+
 storage1 = motor.World.ArchetypeStorage
 (
-    componentClass = worldtest.Component;
+    registry = registry;
+    componentClasses = [worldtest.Component];
+    archetypes = [[worldtest.Component]];
 );
 
-job1 = worldtest.UpdateKernel
-(
-    inout = storage1.component;
-);
 
-storage2 = motor.World.ArchetypeStorage
-(
-    componentClass = worldtest.Component;
-);
-
-job2 = worldtest.UpdateKernel
-(
-    inout = storage2.component;
-);
-
-storage3 = motor.World.ArchetypeStorage
-(
-    componentClass = worldtest.Component;
-);
-
-job3 = worldtest.UpdateKernel
-(
-    inout = storage3.component;
-);
-
-storage4 = motor.World.ArchetypeStorage
-(
-    componentClass = worldtest.Component;
-);
-
-job4 = worldtest.UpdateKernel
-(
-    inout = storage4.component;
-);
-
-storage5 = motor.World.ArchetypeStorage
-(
-    componentClass = worldtest.Component;
-);
-
-job5 = worldtest.UpdateKernel
-(
-    inout = storage5.component;
-);
-
-storage6 = motor.World.ArchetypeStorage
-(
-    componentClass = worldtest.Component;
-);
-
-job6 = worldtest.UpdateKernel
-(
-    inout = storage6.component;
-);
-
-storage7 = motor.World.ArchetypeStorage
-(
-    componentClass = worldtest.Component;
-);
-
-job7 = worldtest.UpdateKernel
-(
-    inout = storage7.component;
-);
-
-storage8 = motor.World.ArchetypeStorage
-(
-    componentClass = worldtest.Component;
-);
-
-job8 = worldtest.UpdateKernel
-(
-    inout = storage8.component;
-);
-
-storage9 = motor.World.ArchetypeStorage
-(
-    componentClass = worldtest.Component;
-);
-
-job9 = worldtest.UpdateKernel
-(
-    inout = storage9.component;
-);
-
-storage10 = motor.World.ArchetypeStorage
-(
-    componentClass = worldtest.Component;
-);
-
-job10 = worldtest.UpdateKernel
-(
-    inout = storage10.component;
-);
-
-job11 = worldtest.UpdateKernel
-(
-    inout = job1.inout;
-);
-
-job12 = worldtest.UpdateKernel
-(
-    inout = job2.inout;
-);
-
-job13 = worldtest.UpdateKernel
-(
-    inout = job3.inout;
-);
-
-job14 = worldtest.UpdateKernel
-(
-    inout = job4.inout;
-);
-
-job15 = worldtest.UpdateKernel
-(
-    inout = job5.inout;
-);
-
-job16 = worldtest.UpdateKernel
-(
-    inout = job6.inout;
-);
-
-job17 = worldtest.UpdateKernel
-(
-    inout = job7.inout;
-);
-
-job18 = worldtest.UpdateKernel
-(
-    inout = job8.inout;
-);
-
-job19 = worldtest.UpdateKernel
-(
-    inout = job9.inout;
-);
-
-job20 = worldtest.UpdateKernel
-(
-    inout = job10.inout;
-);
 
 world = motor.World.World
 (
-    products = [job11.inout, job12.inout, job13.inout, job14.inout, job15.inout,
-                job16.inout, job17.inout, job18.inout, job19.inout, job20.inout];
+    registry = registry;
+    products = [storage1.Component];
 );

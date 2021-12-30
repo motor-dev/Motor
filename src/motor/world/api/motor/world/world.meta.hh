@@ -20,10 +20,12 @@ class ProducerLoader;
 namespace Motor { namespace World {
 
 class WorldRuntime;
+class ComponentRegistry;
 
 class motor_api(WORLD) World : public Resource::Description< World >
 {
 private:
+    ref< ComponentRegistry >                                 m_registry;
     minitl::array< weak< const KernelScheduler::IProduct > > m_products;
 
 public:
@@ -31,7 +33,8 @@ public:
                                       const Plugin::Context&                        context) const;
 
 published:
-    World(minitl::array< weak< const KernelScheduler::IProduct > > products);
+    World(ref< ComponentRegistry >                                 registry,
+          minitl::array< weak< const KernelScheduler::IProduct > > products);
     ~World();
 };
 

@@ -10,8 +10,10 @@ namespace Motor { namespace Meta { namespace AST {
 
 static const Value s_notFound = Value();
 
-void Node::Visitor::accept(weak< const Array > arrayValue)
+void Node::Visitor::accept(weak< const Array >                         arrayNode,
+                           const minitl::vector< weak< const Node > >& arrayValue)
 {
+    motor_forceuse(arrayNode);
     motor_forceuse(arrayValue);
 }
 
