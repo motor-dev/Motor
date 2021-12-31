@@ -15,7 +15,7 @@ template < typename T >
 class array
 {
 private:
-    mutable minitl::Allocator::Block< T > m_array;
+    minitl::Allocator::Block< T > m_array;
 
 private:
     array& operator=(const array& other);

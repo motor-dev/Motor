@@ -32,9 +32,12 @@ array< T >::array(Allocator& allocator, ITERATOR begin, ITERATOR end)
 }
 
 template < typename T >
-array< T >::array(const array< T >& other) : m_array(other.m_array.arena(), 0)
+array< T >::array(const array< T >& other) : m_array(other.m_array.arena(), other.size())
 {
-    m_array.swap(other.m_array);
+    for(int i = 0; i < size(); ++i)
+    {
+        new((void*)&m_array[i]) T(other[i]);
+    }
 }
 
 template < typename T >

@@ -114,7 +114,7 @@ Meta::Value ClassID< minitl::array< T > >::trampoline_method_array_overload_0(
         new((void*)&t[i]) T(parameters[i].as< T >());
     minitl::array< T > result(Arena::script(), t, t + parameterCount);
     for(u32 i = 0; i < parameterCount; ++i)
-        result[parameterCount - i - 1].~T();
+        t[parameterCount - i - 1].~T();
     freea(t);
     return Meta::Value(result);
 }
