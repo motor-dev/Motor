@@ -46,9 +46,7 @@ typedef u8       byte;
 #endif
 
 #ifndef _MSC_VER
-#    if(__clang_major__ < 4) || (__clang_major__ == 3 && __clang_minor < 8)
-#        define override
-#    else
+#    if(__clang_major__ >= 3)
 #        pragma clang diagnostic ignored "-Wc++11-extensions"
 #    endif
 #endif
