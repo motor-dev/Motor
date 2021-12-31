@@ -273,8 +273,8 @@ ArchetypeStorage::createRuntime(weak< const KernelScheduler::ProducerLoader > lo
     for(minitl::array< ref< KernelScheduler::IProduct > >::const_iterator it = m_components.begin();
         it != m_components.end(); ++it, ++i)
     {
-        result->parameters[i].first  = *it;
-        result->parameters[i].second = (*it)->createParameter();
+        result->parameters[i].first = *it;
+        if(*it) result->parameters[i].second = (*it)->createParameter();
     }
     return result;
 }
