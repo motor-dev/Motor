@@ -48,11 +48,20 @@ static raw< const Meta::Class > findProductType(raw< const Meta::Class > compone
 
 struct Visitor : public Meta::AST::Node::Visitor
 {
+    weak< const Meta::AST::Node >              owner;
+    Meta::AST::DbContext&                      context;
     minitl::vector< raw< const Meta::Class > > classes;
-    minitl::vector< raw< const Meta::Class > > errors;
+    u32                                        index;
+    u32                                        errorCount;
     bool                                       verify;
 
-    Visitor() : classes(Arena::meta()), errors(Arena::meta()), verify(false)
+    Visitor(weak< const Meta::AST::Node > owner, Meta::AST::DbContext& context)
+        : owner(owner)
+        , context(context)
+        , classes(Arena::meta())
+        , index(0)
+        , errorCount(0)
+        , verify(false)
     {
     }
 
@@ -69,9 +78,13 @@ struct Visitor : public Meta::AST::Node::Visitor
                 const minitl::vector< weak< const Meta::AST::Node > >& arrayValue) override
     {
         motor_forceuse(arrayNode);
+        classes.resize(arrayValue.size());
+        index = 0;
         for(minitl::vector< weak< const Meta::AST::Node > >::const_iterator it = arrayValue.begin();
-            it != arrayValue.end(); ++it)
+            it != arrayValue.end(); ++it, ++index)
+        {
             (*it)->visit(*this);
+        }
     }
 
     void accept(weak< const Meta::AST::Reference > reference,
@@ -80,7 +93,20 @@ struct Visitor : public Meta::AST::Node::Visitor
         motor_forceuse(reference);
         raw< const Meta::Class > cls = referencedValue.as< raw< const Meta::Class > >();
         if(!verify)
-            classes.push_back(cls);
+        {
+            for(u32 i = 0; i < index; ++i)
+            {
+                if(classes[i] == cls)
+                {
+                    context.error(owner,
+                                  Meta::AST::Message::MessageType(
+                                      "Component %s specified at index %d, duplicate at index %d")
+                                      | cls->name | i | index);
+                    errorCount++;
+                }
+            }
+            classes[index] = cls;
+        }
         else
         {
             bool found = false;
@@ -93,7 +119,14 @@ struct Visitor : public Meta::AST::Node::Visitor
                     break;
                 }
             }
-            if(!found) errors.push_back(cls);
+            if(!found)
+            {
+                context.error(owner,
+                              Meta::AST::Message::MessageType(
+                                  "Archetype member %s is not part of the input component types")
+                                  | cls->name);
+                errorCount++;
+            }
         }
     }
 };
@@ -196,24 +229,15 @@ ref< Meta::AST::IntrospectionHint > ArchetypeStorage::Policy::verify(
     Meta::AST::DbContext& context, weak< const Meta::AST::Object > object,
     raw< const Meta::Method > method, const Meta::CallInfo& callInfo, u32 argumentThis) const
 {
-    Visitor visitor;
+    Visitor visitor(object, context);
     object->getParameter("componentClasses")->visit(visitor);
     visitor.verify = true;
     object->getParameter("archetypes")->visit(visitor);
-    if(!visitor.errors.empty())
-    {
-        for(minitl::vector< raw< const Meta::Class > >::const_iterator it = visitor.errors.begin();
-            it != visitor.errors.end(); ++it)
-        {
-            context.error(object,
-                          Meta::AST::Message::MessageType(
-                              "Archetype member %s is not part of the input component types")
-                              | (*it)->name);
-        }
+    if(visitor.errorCount)
         return ref< IntrospectionHint >();
-    }
-    return ref< IntrospectionHint >::create(Arena::meta(), object, method, callInfo, argumentThis,
-                                            visitor.classes);
+    else
+        return ref< IntrospectionHint >::create(Arena::meta(), object, method, callInfo,
+                                                argumentThis, visitor.classes);
 }
 
 ArchetypeStorage::ArchetypeStorage(
