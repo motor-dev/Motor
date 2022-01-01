@@ -92,13 +92,6 @@ class Solaris(Configure.ConfigurationContext.Platform):
             env.append_value('DEFINES', ['__unix__=1'])
             self.get_suncc_system_libpath(conf, compiler)
         env.append_unique('DEFINES', ['_GNU_SOURCE'])
-        env.RPATH = [
-            ':'.join(
-                ['$ORIGIN', '$ORIGIN/../lib/', '$ORIGIN/../lib/motor/'] +
-                ['$ORIGIN/../lib/%s' % target
-                 for target in compiler.targets] + ['$ORIGIN/../lib/%s/motor' % target for target in compiler.targets]
-            )
-        ]
         env.append_unique('LDFLAGS', ['-ldl', '-lrt', '-lpthread', '-lm', '-lc'])
         #env.append_unique('LINKFLAGS', ['-rdynamic'])
 
