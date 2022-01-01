@@ -194,7 +194,7 @@ struct hash< Motor::istring >
 };
 
 template < u16 SIZE >
-static inline const format< SIZE >& operator|(const format< SIZE >& f, const Motor::istring& value)
+const format< SIZE >& operator|(const format< SIZE >& f, const Motor::istring& value)
 {
     return f | value.c_str();
 }

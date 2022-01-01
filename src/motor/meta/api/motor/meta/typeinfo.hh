@@ -14,15 +14,6 @@ struct Class;
 struct Property;
 struct Method;
 
-}}  // namespace Motor::Meta
-
-template < typename T >
-static inline Motor::Meta::Type motor_type();
-template < typename T >
-static inline raw< const Motor::Meta::Class > motor_class();
-
-namespace Motor { namespace Meta {
-
 template < typename T >
 struct ClassID
 {
@@ -215,13 +206,13 @@ struct TypeID< scoped< T > >
 }}  // namespace Motor::Meta
 
 template < typename T >
-static inline Motor::Meta::Type motor_type()
+Motor::Meta::Type motor_type()
 {
     return Motor::Meta::TypeID< T >::type();
 }
 
 template < typename T >
-static inline raw< const Motor::Meta::Class > motor_class()
+raw< const Motor::Meta::Class > motor_class()
 {
     return Motor::Meta::ClassID< T >::klass();
 }

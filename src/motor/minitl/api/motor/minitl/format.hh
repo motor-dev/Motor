@@ -24,16 +24,16 @@ public:
     format(const char* formatstr);
     ~format();
 
-    inline operator const char*() const
+    operator const char*() const
     {
         return m_buffer;
     }
-    inline const char* c_str() const
+    const char* c_str() const
     {
         return m_buffer;
     }
 
-    inline const char* token() const
+    const char* token() const
     {
         return m_firstFormat;
     }
