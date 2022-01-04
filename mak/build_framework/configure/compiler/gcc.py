@@ -32,20 +32,18 @@ class GCC(Configure.ConfigurationContext.GnuCompiler):
 
     def set_warning_options(self, conf):
         Configure.ConfigurationContext.GnuCompiler.set_warning_options(self, conf)
+        v = conf.env
+        if self.version_number >= (9,):
+            v.CXXFLAGS_warnall.append('-Wno-deprecated-copy')
         if self.version_number >= (4, 8):
-            v = conf.env
             v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
     def load_in_env(self, conf, platform):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         v = conf.env
-        if self.version_number < (
-            4,
-            3,
-        ):
-            v.append_unique('CFLAGS', ['-static-libgcc'])
-            v.append_unique('CXXFLAGS', ['-static-libgcc'])
-            v.append_unique('LINKFLAGS', ['-static-libgcc'])
+        v.append_unique('CFLAGS', ['-static-libgcc'])
+        v.append_unique('CXXFLAGS', ['-static-libgcc'])
+        v.append_unique('LINKFLAGS', ['-static-libgcc'])
         if self.version_number >= (4, ):
             if platform.NAME != 'windows':
                 v.append_unique('CFLAGS', ['-fvisibility=hidden'])
