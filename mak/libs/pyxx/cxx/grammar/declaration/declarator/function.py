@@ -52,7 +52,7 @@ def parameter_declaration_list(self, p):
 
 @glrp.rule('parameter-declaration-list? : parameter-declaration')
 @glrp.rule('parameter-declaration-list? : parameter-declaration-list "," parameter-declaration')
-@glrp.rule('parameter-declaration-list? : [split]')
+@glrp.rule('parameter-declaration-list? : ')
 @cxx98
 def parameter_declaration_list_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None

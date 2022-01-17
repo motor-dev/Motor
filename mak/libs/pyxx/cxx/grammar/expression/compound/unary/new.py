@@ -70,7 +70,7 @@ def noptr_new_declarator(self, p):
 
 
 @glrp.rule('new-initializer? : "(" expression-list? ")"')
-@glrp.rule('new-initializer? : [prec:right,-2]')
+@glrp.rule('new-initializer? : ')
 @cxx98
 def new_initializer_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None

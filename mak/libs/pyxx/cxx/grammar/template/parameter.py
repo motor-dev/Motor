@@ -63,12 +63,17 @@ def type_parameter_cxx20(self, p):
     pass
 
 
-#@glrp.rule('type-parameter-key[split] : "class"')
-# TODO: only class allowed
-@glrp.rule('type-parameter-key[split] : attribute-specifier-seq? class-key')
-@glrp.rule('type-parameter-key[split] : "typename"')
+@glrp.rule('type-parameter-key : type-parameter-disambiguation "class"')
+@glrp.rule('type-parameter-key[split:typename_parameter] : "typename"')
 @cxx98
 def type_parameter_key(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('type-parameter-disambiguation[split:type_parameter] :')
+@cxx98
+def type_parameter_disambiguation(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

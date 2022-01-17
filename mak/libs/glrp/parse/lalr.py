@@ -531,20 +531,24 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                                 shift_actions = j >= 0
                                 reduce_actions = j < 0
                                 split = item._split is not None
-                                item._split_use += 1
                             elif item._precedence[1] == precedence:
-                                precedence_set = True
-                                if item._precedence[0] != associativity:
-                                    assoc_error = True
-                                shift_actions |= j >= 0
-                                reduce_actions |= j < 0
-                                split &= item._split is not None
-                                item._split_use += 1
+                                if precedence_set:
+                                    if item._precedence[0] != associativity:
+                                        assoc_error = True
+                                    shift_actions |= j >= 0
+                                    reduce_actions |= j < 0
+                                    split &= item._split is not None
+                                else:
+                                    associativity = item._precedence[0]
+                                    precedence_set = True
+                                    assoc_error = False
+                                    shift_actions = j >= 0
+                                    reduce_actions = j < 0
+                                    split = item._split is not None
                         elif precedence == -1:
                             shift_actions |= j >= 0
                             reduce_actions |= j < 0
                             split &= item._split is not None
-                            item._split_use += 1
 
                 all_items_set = frozenset(all_items)
 
@@ -616,7 +620,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     if conflict_list:
                         result_count += 1
                 if result_count == 0:
-                    error_log.warning('unable to find counterexamples (la: %s' % name_map[a])
+                    conflict_log.info('  unable to find counterexamples - lookahead: %s\n' % name_map[a])
+                    error_log.warning('unable to find counterexamples - lookahead: %s' % name_map[a])
 
                 conflict_items = frozenset(node._item for node, _ in counterexamples)
                 try:
@@ -630,6 +635,12 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     except KeyError:
                         item_conflict_node[node._item] = paths
             elif len(accepted_actions) > 1:
+                for j, items in accepted_actions.items():
+                    for item in items:
+                        assert item._split is not None
+                        item._split_use += 1
+                conflict_log.info('')
+
                 splits = []    # type: List[Tuple[LR0Node, str]]
                 sm_log.info('    %-30s split', name_map[a])
                 for j in st_action[a]:

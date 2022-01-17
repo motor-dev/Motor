@@ -31,8 +31,8 @@ from . import derived
 from . import conversion
 
 
-@glrp.rule('class-name[split:class_identifier] : [split]"identifier"')
-@glrp.rule('class-name[split] : simple-template-id')
+@glrp.rule('class-name[prec:right,1][split:class_name] : "identifier"')
+@glrp.rule('class-name[prec:right,1][split:class_template_id] : simple-template-id')
 @cxx98
 def class_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -46,17 +46,15 @@ def class_specifier(self, p):
     pass
 
 
-@glrp.rule('class-head : attribute-specifier-seq? class-key attribute-specifier-seq? class-head-name base-clause?')
-@glrp.rule('class-head : attribute-specifier-seq? class-key attribute-specifier-seq? base-clause?')
+@glrp.rule('class-head : class-key attribute-specifier-seq? class-head-name base-clause?')
+@glrp.rule('class-head : class-key attribute-specifier-seq? base-clause?')
 @cxx98
 def class_head(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule(
-    'class-head : attribute-specifier-seq? class-key attribute-specifier-seq? class-head-name class-virt-specifier base-clause?'
-)
+@glrp.rule('class-head : class-key attribute-specifier-seq? class-head-name class-virt-specifier base-clause?')
 @cxx11
 def class_head_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -79,7 +77,7 @@ def class_virt_specifier_cxx11(self, p):
     pass
 
 
-@glrp.rule('class-key : "class"')
+@glrp.rule('class-key : [split:defining_type_specifier]"class"')
 @glrp.rule('class-key : "struct"')
 @glrp.rule('class-key : "union"')
 @cxx98

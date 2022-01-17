@@ -116,6 +116,7 @@ class Grammar(object):
         self._goto_table = tables._goto_table
         self._rules = rule_table
         self._hash = rule_hash
+        self._name_map = name_map
 
 
 def _create_productions(rules, merges, index, log, name_map, terminals, start_id):

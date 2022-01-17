@@ -121,7 +121,7 @@ def constraint_id_expression_cxx20(self, p):
     pass
 
 
-@glrp.rule('constraint-unqualified-id[split] : "identifier"')
+@glrp.rule('constraint-unqualified-id : "identifier"')
 @glrp.rule('constraint-unqualified-id : template-id')
 @cxx20
 def constraint_unqualified_id_cxx20(self, p):

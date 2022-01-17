@@ -30,7 +30,7 @@ from ....parser import cxx98, cxx11, cxx17, cxx20
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('namespace-name[split] : [split]"identifier"')
+@glrp.rule('namespace-name[prec:right,1][split:namespace_name] : "identifier"')
 @glrp.rule('namespace-name : namespace-alias')
 @cxx98
 def namespace_name(self, p):
@@ -53,6 +53,7 @@ def namespace_definition_cxx17(self, p):
     pass
 
 
+# amendment: attribute-specifier-seq? to simplify grammar.
 @glrp.rule(
     'named-namespace-definition : attribute-specifier-seq? "namespace" attribute-specifier-seq? "identifier" "{" namespace-body "}"'
 )
@@ -62,6 +63,7 @@ def named_namespace_definition(self, p):
     pass
 
 
+# amendment: attribute-specifier-seq? to simplify grammar.
 @glrp.rule(
     'named-namespace-definition : attribute-specifier-seq? "inline" "namespace" attribute-specifier-seq? "identifier" "{" namespace-body "}"'
 )
@@ -71,6 +73,7 @@ def named_namespace_definition_cxx11(self, p):
     pass
 
 
+# amendment: attribute-specifier-seq? to simplify grammar.
 @glrp.rule(
     'unnamed-namespace-definition : attribute-specifier-seq? "namespace" attribute-specifier-seq? "{" namespace-body "}"'
 )
@@ -80,6 +83,7 @@ def unnamed_namespace_definition(self, p):
     pass
 
 
+# amendment: attribute-specifier-seq? to simplify grammar.
 @glrp.rule(
     'unnamed-namespace-definition : attribute-specifier-seq? "inline" "namespace" attribute-specifier-seq? "{" namespace-body "}"'
 )
@@ -89,7 +93,7 @@ def unnamed_namespace_definition_cxx11(self, p):
     pass
 
 
-# TODO: attribute-specifier-seq? not allowed (x2)
+# amendment: attribute-specifier-seq? to simplify grammar.
 @glrp.rule(
     'nested-namespace-definition : attribute-specifier-seq? "namespace" attribute-specifier-seq? enclosing-namespace-specifier "::" "identifier" "{" namespace-body "}"'
 )
@@ -99,7 +103,7 @@ def nested_namespace_definition_cxx17(self, p):
     pass
 
 
-# TODO: attribute-specifier-seq? not allowed (x2)
+# amendment: attribute-specifier-seq? to simplify grammar.
 @glrp.rule(
     'nested-namespace-definition : attribute-specifier-seq? "namespace" attribute-specifier-seq? enclosing-namespace-specifier "::" "inline" "identifier" "{" namespace-body "}"'
 )

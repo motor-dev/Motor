@@ -49,7 +49,7 @@ def defining_type_id(self, p):
 
 
 @glrp.rule('abstract-declarator? : ptr-abstract-declarator')
-@glrp.rule('abstract-declarator?[split] :')
+@glrp.rule('abstract-declarator? : [split:declarator_end]')
 @cxx98
 def abstract_declarator_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -65,8 +65,8 @@ def abstract_declarator_opt_cxx11(self, p):
     pass
 
 
-@glrp.rule('ptr-abstract-declarator[split] : noptr-abstract-declarator')
-@glrp.rule('ptr-abstract-declarator[split] : ptr-operator')
+@glrp.rule('ptr-abstract-declarator : noptr-abstract-declarator[split:declarator_end]')
+@glrp.rule('ptr-abstract-declarator : ptr-operator[split:declarator_end]')
 @glrp.rule('ptr-abstract-declarator : ptr-operator ptr-abstract-declarator')
 @cxx98
 def ptr_abstract_declarator(self, p):
@@ -80,9 +80,18 @@ def ptr_abstract_declarator(self, p):
 @glrp.rule(
     'noptr-abstract-declarator : noptr-abstract-declarator "[" constant-expression? "]" attribute-specifier-seq?'
 )
-@glrp.rule('noptr-abstract-declarator :  [split]"(" ptr-abstract-declarator ")"')
+@glrp.rule(
+    'noptr-abstract-declarator :  [split:declarator_continue]"(" noptr-abstract-declarator-disambiguation ptr-abstract-declarator ")"'
+)
 @cxx98
 def noptr_abstract_declarator(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('noptr-abstract-declarator-disambiguation[split:noptr_abstract_declarator] :')
+@cxx98
+def noptr_abstract_declarator_disambiguation(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -99,7 +108,7 @@ def abstract_pack_declarator(self, p):
 @glrp.rule(
     'noptr-abstract-pack-declarator : noptr-abstract-pack-declarator "[" constant-expression? "]" attribute-specifier-seq?'
 )
-@glrp.rule('noptr-abstract-pack-declarator : [split]"..."')
+@glrp.rule('noptr-abstract-pack-declarator : [split:pack_declarator]"..."')
 @cxx11
 def noptr_abstract_pack_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> None

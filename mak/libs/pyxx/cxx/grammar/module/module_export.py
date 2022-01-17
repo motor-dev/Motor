@@ -10,9 +10,9 @@ from ...parser import cxx20
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('export-declaration : [prec:left,0]"export" noexport-declaration')
-@glrp.rule('export-declaration : [prec:left,0]"export" "{" noexport-declaration-seq? "}"')
-@glrp.rule('export-declaration : [prec:left,0]"export" module-import-declaration')
+@glrp.rule('export-declaration : [prec:right,1]"export" noexport-declaration')
+@glrp.rule('export-declaration : [prec:right,1]"export" "{" noexport-declaration-seq? "}"')
+@glrp.rule('export-declaration : [prec:right,1]"export" module-import-declaration')
 @cxx20
 def export_declaration_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
