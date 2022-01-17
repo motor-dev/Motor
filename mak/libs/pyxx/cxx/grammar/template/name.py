@@ -37,29 +37,29 @@ def template_opt(self, p):
     pass
 
 
-@glrp.rule('simple-template-id : template-name [split]"<" template-argument-list? ">"')
+@glrp.rule('simple-template-id : template-name [prec:left,1]"<" template-argument-list? ">"')
 @cxx98
 def simple_template_id(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('template-id[split] : simple-template-id')
-@glrp.rule('template-id : operator-function-id[split] "<" template-argument-list? ">"')
+@glrp.rule('template-id[prec:right,1][split:template_id] : simple-template-id')
+@glrp.rule('template-id : operator-function-id [split:template_operator]"<" template-argument-list? ">"')
 @cxx98
 def template_id(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('template-id : literal-operator-id[split] "<" template-argument-list? ">"')
+@glrp.rule('template-id : literal-operator-id [split:template_literal]"<" template-argument-list? ">"')
 @cxx11
 def template_id_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('template-name[split:template_identifier] : [split]"identifier"')
+@glrp.rule('template-name[prec:right,1][split:template_name] : "identifier"')
 @cxx98
 def template_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -101,7 +101,7 @@ def template_argument_list_cxx11(self, p):
 
 @glrp.rule('template-argument : constant-expression')
 @glrp.rule('template-argument : type-id')
-@glrp.rule('template-argument : id-expression[prec:right,0]')
+@glrp.rule('template-argument : id-expression')
 @cxx98
 def template_argument(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -109,10 +109,19 @@ def template_argument(self, p):
 
 
 # TODO: template not allowed
-@glrp.rule('typename-specifier[split] : "typename" nested-name-specifier "template"? "identifier"')
-@glrp.rule('typename-specifier : "typename" nested-name-specifier "template"? simple-template-id')
+@glrp.rule('typename-specifier : "typename" typename-disambiguation nested-name-specifier "template"? "identifier"')
+@glrp.rule(
+    'typename-specifier : "typename" typename-disambiguation nested-name-specifier "template"? simple-template-id'
+)
 @cxx98
 def typename_specifier(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('typename-disambiguation[split:typename_specifier] :')
+@cxx98
+def typename_disambiguation(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

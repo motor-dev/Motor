@@ -36,9 +36,9 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('simple-type-specifier : nested-name-specifier "template"? type-name')
 # TODO: already covered
 #@glrp.rule('simple-type-specifier : nested-name-specifier "template"? simple-template-id')
-@glrp.rule('simple-type-specifier[split] : template-name')
+@glrp.rule('simple-type-specifier[split:template_decl] : template-name')
 # TODO: template? not allowed
-@glrp.rule('simple-type-specifier[split] : nested-name-specifier "template"? template-name')
+@glrp.rule('simple-type-specifier : nested-name-specifier "template"? template-name')
 @glrp.rule('simple-type-specifier : "char"')
 @glrp.rule('simple-type-specifier : "wchar_t"')
 @glrp.rule('simple-type-specifier : "bool"')
@@ -73,7 +73,7 @@ def simple_type_specifier_cxx20(self, p):
     pass
 
 
-@glrp.rule('type-name : class-name')
+@glrp.rule('type-name : class-name[prec:right,1]')
 @glrp.rule('type-name : enum-name')
 @glrp.rule('type-name : typedef-name')
 @cxx98

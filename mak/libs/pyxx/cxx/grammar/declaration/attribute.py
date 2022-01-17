@@ -60,23 +60,23 @@ def attribute_specifier_seq(self, p):
 
 
 @glrp.rule('attribute-specifier-seq? : attribute-specifier-seq')
-@glrp.rule('attribute-specifier-seq?[split] : ')
+@glrp.rule('attribute-specifier-seq? : ')
 @cxx98
 def attribute_specifier_seq_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('attribute-specifier : [prec:left,0]"doxycomment-line"')
-@glrp.rule('attribute-specifier : [prec:left,0]"doxycomment-block"')
-@glrp.rule('attribute-specifier : [prec:left,0]"attribute-specifier-macro"')
+@glrp.rule('attribute-specifier : [prec:left,1]"doxycomment-line"')
+@glrp.rule('attribute-specifier : [prec:left,1]"doxycomment-block"')
+@glrp.rule('attribute-specifier : [prec:left,1]"attribute-specifier-macro"')
 @cxx98
 def attribute_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('attribute-specifier : [prec:left,0]"[[" attribute-using-prefix? attribute-list "]" "]"')
+@glrp.rule('attribute-specifier : [prec:left,1]"[[" attribute-using-prefix? attribute-list "]" "]"')
 @glrp.rule('attribute-specifier : alignment-specifier')
 @cxx11
 def attribute_specifier_cxx11(self, p):
@@ -84,8 +84,8 @@ def attribute_specifier_cxx11(self, p):
     pass
 
 
-@glrp.rule('alignment-specifier : [prec:left,0]"alignas" "(" type-id "..."? ")"')
-@glrp.rule('alignment-specifier : [prec:left,0]"alignas" "(" constant-expression "..."? ")"')
+@glrp.rule('alignment-specifier : [prec:left,1]"alignas" "(" type-id "..."? ")"')
+@glrp.rule('alignment-specifier : [prec:left,1]"alignas" "(" constant-expression "..."? ")"')
 @cxx11
 def alignment_specifier_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None

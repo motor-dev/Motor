@@ -88,7 +88,7 @@ def run(argument_context):
         ExceptionType = SyntaxError
     try:
         mode = glrp.LOAD_OPTIMIZED if arguments.optimized else glrp.LOAD_CACHE
-        p = parser.parser(arguments.lang, os.path.splitext(arguments.input)[1], arguments.std)(arguments.tmp_dir, mode)
+        p = parser.parser(arguments.lang, os.path.splitext(arguments.input)[1], arguments.std)(arguments.tmp_dir, 1)
         result = p.parse(arguments.input)
         if not result:
             sys.exit(0)

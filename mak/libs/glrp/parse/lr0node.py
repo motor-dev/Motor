@@ -26,6 +26,30 @@ class LR0Node(object):
             self._direct_parents.append(parent)
             parent._direct_children.append(self)
 
+    def expand_empty_recursive(self):
+        # type: () -> LR0Path
+        # expand the first item of the path to build empty productions
+        if self._item._index == self._item.len:
+            return LR0PathItem(self._item)
+        assert self._successor is not None
+        for child in self._direct_children:
+            if -1 not in child._item._first:
+                continue
+            if child._successor is None:
+                result = LR0PathItem(child._item) # type: LR0Path
+                result = result.derive_from(self._item)
+                queue = self._successor.expand_empty_recursive()
+                return result.expand_next(queue)
+            else:
+                if -1 in child._item._follow:
+                    p = child._successor.expand_empty()
+                    result = child.expand_empty()
+                    result = result.expand_next(p)
+                    result = result.derive_from(self._item)
+                    queue = self._successor.expand_empty_recursive()
+                    return result.expand_next(queue)
+        raise ValueError()
+
     def expand_empty(self):
         # type: () -> LR0Path
         # expand the first item of the path to build empty productions
@@ -96,30 +120,18 @@ class LR0Node(object):
         elif -1 in self._successor._item._first:
             successor_path = self._successor.expand_empty()
             p = self._successor.filter_node_by_lookahead(successor_path, lookahead)
-            return path.expand_next(p)
+            result = path.expand_next(p)
+            return result
         else:
             raise ValueError()
 
     def backtrack_up(self, path, lookahead, seen):
         # type: (LR0Path, Optional[int], Set[Union[Tuple["LR0Node", Optional[int]], LR0ItemSet]]) -> List[Tuple["LR0Node", LR0Path, Optional[int], Optional[int]]]
-        if self._item_set not in seen:
-            try:
-                original_path, original_visited, result = self._path_cache[lookahead]
-            except KeyError:
-                pass
-            else:
-                seen.update(original_visited)
-                return [(node, p.patch(original_path, path), la, consumed) for node, p, la, consumed in result]
-
         queue = [(self, path, lookahead)]
-        result = []
-        state_seen = set()     # type: Set[Union[Tuple["LR0Node", Optional[int]], LR0ItemSet]]
+        result = []    # type: List[Tuple["LR0Node", LR0Path, Optional[int], Optional[int]]]
         state_path_seen = set()
 
         seen.add(self._item_set)
-        state_seen.add(self._item_set)
-
-        #self._path_cache[lookahead] = (path, state_seen, result)
 
         while queue:
             node, path, lookahead = queue.pop(0)
@@ -128,7 +140,6 @@ class LR0Node(object):
                 if (parent, lookahead) in seen:
                     continue
                 seen.add((parent, lookahead))
-                state_seen.add((parent, lookahead))
                 item = parent._item
                 if lookahead is not None:
                     if lookahead in item._follow:
@@ -136,7 +147,13 @@ class LR0Node(object):
                         result.append((parent, p, None, None))
                         queue.append((parent, p, None))
                     if -1 in item._follow:
-                        queue.append((parent, path.derive_from(parent._item), lookahead))
+                        if item != item._last:
+                            assert parent._successor is not None
+                            empty_path = parent._successor.expand_empty_recursive()
+                            p = path.derive_from(parent._item).expand_next(empty_path)
+                            queue.append((parent, p, lookahead))
+                        else:
+                            queue.append((parent, path.derive_from(parent._item), lookahead))
                 else:
                     queue.append((parent, path.derive_from(parent._item), lookahead))
             for predecessor in node._predecessors:

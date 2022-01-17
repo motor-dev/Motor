@@ -27,7 +27,7 @@ from ...parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('base-clause? : ":" base-specifier-list')
+@glrp.rule('base-clause? : [prec:left,1]":" base-specifier-list')
 @glrp.rule('base-clause? : ')
 @cxx98
 def base_clause_opt(self, p):

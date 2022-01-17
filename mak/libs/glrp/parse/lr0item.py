@@ -82,6 +82,8 @@ class LR0Item(object):
                 self._last._merge_skip = False
             else:
                 raise SyntaxError('unknown annotation %s' % annotation, (rule._filename, rule._lineno, 0, ''))
+        #self._precedence = None
+        #self._split = None
 
     def _annotations(self):
         # type: () -> str

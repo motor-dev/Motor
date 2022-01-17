@@ -102,7 +102,7 @@ def braced_init_list(self, p):
     pass
 
 
-@glrp.rule('braced-init-list-begin : [split]')
+@glrp.rule('braced-init-list-begin : [prec:nonassoc,1][split:braced_init_list]')
 @cxx98
 def braced_init_list_begin(self, p):
     # type: (CxxParser, glrp.Production) -> None

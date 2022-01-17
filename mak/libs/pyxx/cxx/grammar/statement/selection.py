@@ -21,7 +21,7 @@ def selection_statement(self, p):
 
 
 @glrp.rule('selection-statement : "if" "(" condition ")" statement')
-@glrp.rule('selection-statement : "if" "(" condition ")" statement [prec:left,0]"else" statement')
+@glrp.rule('selection-statement : "if" "(" condition ")" statement [prec:left,1]"else" statement')
 @cxx98
 @deprecated_cxx17
 def selection_statement_if(self, p):
@@ -30,10 +30,10 @@ def selection_statement_if(self, p):
 
 
 @glrp.rule('selection-statement : "if" "constexpr"? "(" condition ")" statement')
-@glrp.rule('selection-statement : "if" "constexpr"? "(" condition ")" statement [prec:left,0]"else" statement')
+@glrp.rule('selection-statement : "if" "constexpr"? "(" condition ")" statement [prec:left,1]"else" statement')
 @glrp.rule('selection-statement : "if" "constexpr"? "(" init-statement condition ")" statement')
 @glrp.rule(
-    'selection-statement : "if" "constexpr"? "(" init-statement condition ")" statement [prec:left,0]"else" statement'
+    'selection-statement : "if" "constexpr"? "(" init-statement condition ")" statement [prec:left,1]"else" statement'
 )
 @cxx17
 def selection_statement_cxx17(self, p):
@@ -50,7 +50,7 @@ def constexpr_opt_cxx17(self, p):
 
 
 @glrp.rule('selection-statement : "if" "!"? "consteval" compound-statement')
-@glrp.rule('selection-statement : "if" "!"? "consteval" compound-statement [prec:left,0]"else" statement')
+@glrp.rule('selection-statement : "if" "!"? "consteval" compound-statement [prec:left,1]"else" statement')
 @cxx23
 def selection_statement_cxx23(self, p):
     # type: (CxxParser, glrp.Production) -> None

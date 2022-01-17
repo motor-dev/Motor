@@ -110,10 +110,17 @@ def member_declarator_list_opt(self, p):
 @glrp.rule('member-declarator : declarator brace-or-equal-initializer')
 @glrp.rule('member-declarator : attribute-specifier-seq? ":" constant-expression brace-or-equal-initializer?')
 @glrp.rule(
-    'member-declarator : identifier attribute-specifier-seq? ":" constant-expression brace-or-equal-initializer?'
+    'member-declarator : bitfield-name attribute-specifier-seq? ":" constant-expression brace-or-equal-initializer?'
 )
 @cxx98
 def member_declarator(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('bitfield-name : identifier')
+@cxx98
+def bitfield_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -149,7 +156,7 @@ def virt_specifier_cxx11(self, p):
     pass
 
 
-@glrp.rule('pure-specifier[split] : "=" "integer-literal"')
+@glrp.rule('pure-specifier : "=" "integer-literal"[split:pure_specifier]')
 @cxx98
 def pure_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None

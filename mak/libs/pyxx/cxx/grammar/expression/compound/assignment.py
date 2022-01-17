@@ -47,7 +47,7 @@ def assignment_expression_opt_cxx20(self, p):
     pass
 
 
-@glrp.rule('assignment-operator : [prec:left,0]"="')
+@glrp.rule('assignment-operator : [prec:left,1]"="')
 @glrp.rule('assignment-operator : "*="')
 @glrp.rule('assignment-operator : "/="')
 @glrp.rule('assignment-operator : "%="')

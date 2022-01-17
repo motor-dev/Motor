@@ -14,19 +14,11 @@ from .....parser import cxx98
 from motor_typing import TYPE_CHECKING
 
 
-# TODO: attribute-specifier-seq? -> empty
-@glrp.rule(
-    'elaborated-type-specifier[split] : attribute-specifier-seq? class-key attribute-specifier-seq? "identifier"'
-)
-@glrp.rule(
-    'elaborated-type-specifier[split] : attribute-specifier-seq? class-key attribute-specifier-seq? nested-name-specifier "template"? "identifier"'
-)
-@glrp.rule(
-    'elaborated-type-specifier[split] : attribute-specifier-seq? class-key attribute-specifier-seq? simple-template-id'
-)
-@glrp.rule(
-    'elaborated-type-specifier[split] : attribute-specifier-seq? class-key attribute-specifier-seq? nested-name-specifier "template"?  simple-template-id'
-)
+# amendment: make elaborated-type-specifier look like class-head
+#@glrp.rule('elaborated-type-specifier : class-key attribute-specifier-seq? nested-name-specifier? identifier')
+#@glrp.rule('elaborated-type-specifier : class-key simple-template-id')
+#@glrp.rule('elaborated-type-specifier : class-key nested-name-specifier template? simple-template-id')
+@glrp.rule('elaborated-type-specifier : class-key attribute-specifier-seq? class-head-name')
 @glrp.rule('elaborated-type-specifier : elaborated-enum-specifier')
 @cxx98
 def elaborated_type_specifier(self, p):
@@ -35,10 +27,10 @@ def elaborated_type_specifier(self, p):
 
 
 # TODO: enum-key & attribute not allowed
-@glrp.rule('elaborated-enum-specifier[split] : enum-key attribute-specifier-seq? "identifier"')
-@glrp.rule(
-    'elaborated-enum-specifier[split] : enum-key attribute-specifier-seq? nested-name-specifier template? "identifier"'
-)
+@glrp.rule('elaborated-enum-specifier : enum-key attribute-specifier-seq? enum-head-name')
+#@glrp.rule(
+#    'elaborated-enum-specifier : enum-key attribute-specifier-seq? nested-name-specifier template? enum-head-name'
+#)
 @cxx98
 def elaborated_enum_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None

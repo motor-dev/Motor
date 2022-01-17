@@ -40,7 +40,7 @@ from ...parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('enum-name[split:enum_identifier] : [split]"identifier"')
+@glrp.rule('enum-name[prec:right,1][split:enum_name] : "identifier"')
 @cxx98
 def enum_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -63,8 +63,8 @@ def enum_head(self, p):
     pass
 
 
-@glrp.rule('enum-head-name[split] : "identifier"')
-@glrp.rule('enum-head-name : nested-name-specifier template? "identifier"[split]')
+@glrp.rule('enum-head-name : "identifier"')
+@glrp.rule('enum-head-name : nested-name-specifier template? "identifier"')
 @cxx98
 def enum_head_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -96,14 +96,14 @@ def enum_key_cxx11(self, p):
     pass
 
 
-@glrp.rule('enum-base? : ')
+@glrp.rule('enum-base? : [prec:right,1]')
 @cxx98
 def enum_base_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('enum-base? : ":" type-specifier-seq')
+@glrp.rule('enum-base? : [prec:left,1]":" type-specifier-seq')
 @cxx11
 def enum_base_opt_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None

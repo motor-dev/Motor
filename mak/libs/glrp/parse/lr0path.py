@@ -17,23 +17,26 @@ class LR0Path(object):
 
     def extend(self, item):
         # type: (LR0Item) -> LR0Path
-        return LR0Path(((0, item), ) + self._items)
+        result = LR0Path(((0, item), ) + self._items)
+        return result
 
     def derive_from(self, item):
         # type: (LR0Item) -> LR0Path
-        assert isinstance(item, LR0Item)
-        return LR0Path(((3, item), ) + self._items)
+        result = LR0Path(((3, item), ) + self._items)
+        return result
 
     def expand_next(self, path):
         # type: (LR0Path) -> LR0Path
-        return LR0Path(((1, path._items[0][1]), ) + path._items + ((2, path._items[0][1]), ) + self._items)
+        result = LR0Path(((1, path._items[0][1]), ) + path._items + ((2, path._items[0][1]), ) + self._items)
+        return result
 
     def patch(self, original_path, new_path):
         # type: (LR0Path, LR0Path) -> LR0Path
-        return LR0Path(self._items[:-len(original_path._items)] + new_path._items)
+        result = LR0Path(self._items[:-len(original_path._items)] + new_path._items)
+        return result
 
-    def _to_string(self, items, end_mark, name_map, expand_right, add_marker):
-        # type: (Tuple[Tuple[int, LR0Item], ...], Optional[Tuple[int, LR0Item]], List[str], bool, bool) -> Tuple[List[Text], int, int]
+    def _to_string(self, items, end_mark, name_map, expand_left, expand_right, add_marker):
+        # type: (Tuple[Tuple[int, LR0Item], ...], Optional[Tuple[int, LR0Item]], List[str], bool, bool, bool) -> Tuple[List[Text], int, int]
         index = 0
         last_item = None
         left_sequence = tuple()    # type: Tuple[int,...]
@@ -44,7 +47,10 @@ class LR0Path(object):
             # type: (List[Text], int, int) -> int
             i = -1
             for i, (n1, n2) in enumerate(zip(new_sequence, result)):
-                result[i] = '%s%s%s' % (n1, ' ' * (max_new_len - len(n1) + 1), n2)
+                if n2:
+                    result[i] = '%s%s%s' % (n1, ' ' * (max_new_len - len(n1) + 1), n2)
+                else:
+                    result[i] = n1
                 max_length = max(max_length, len(result[i]))
             for add, extra in enumerate(result[i + 1:]):
                 result[i + 1 + add] = ' ' * (max_new_len + 1) + extra
@@ -58,14 +64,19 @@ class LR0Path(object):
             op, item = items[index]
             if op == 0:
                 last_item = item
-                left_sequence = item.rule.production[:item._index + 1]
+                if expand_left:
+                    left_sequence = item.rule.production[:item._index + 1]
+                else:
+                    left_sequence = item.rule.production[item._index:item._index + 1]
                 index += 1
             elif op == 1:
                 if last_item is None:
                     last_item = item
                 elif item._index > last_item._index:
                     last_item = item
-                strings, max_len, consumed_count = self._to_string(items[index + 1:], (2, item), name_map, False, False)
+                strings, max_len, consumed_count = self._to_string(
+                    items[index + 1:], (2, item), name_map, False, False, False
+                )
                 length = merge(strings, max_len, length)
                 index += consumed_count + 1
             elif op == 2:
@@ -78,7 +89,9 @@ class LR0Path(object):
                     last_item = item
                 elif item._index > last_item._index:
                     last_item = item
-                strings, max_len, consumed_count = self._to_string(items[index + 1:], None, name_map, True, add_marker)
+                strings, max_len, consumed_count = self._to_string(
+                    items[index + 1:], None, name_map, expand_left, True, add_marker
+                )
                 derivation = name_map[item.rule.production[item._index]]
                 max_len = max(max_len, len(derivation) + 2)
                 extra_padding = u'\u2500' * (max_len - 2 - len(derivation))
@@ -124,7 +137,7 @@ class LR0Path(object):
 
     def to_string(self, name_map):
         # type: (List[str]) -> List[Text]
-        result, length, _ = self._to_string(self._items, None, name_map, True, True)
+        result, length, _ = self._to_string(self._items, None, name_map, True, True, True)
         derivation = name_map[self._items[0][1]._symbol]
         extra_padding = u'\u2500' * (length - 2 - len(derivation))
         result.append(u'\u2570%s%s\u256f' % (derivation, extra_padding))
