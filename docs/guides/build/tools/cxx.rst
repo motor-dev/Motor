@@ -1472,10 +1472,7 @@ Operators ``delete``, ``delete[]`` and *lambda-expression*
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 In a delete expression, an array subscript token ``[`` could introduce either the array form of the
-*delete-expression* or open a new *lambda-expression*. The conflict occurs only after the closing
-subscript token ``]`` has been parsed, which indicates the parser will succeed parsing a
-*delete-expression* of the result of a *lambda-expression* provided that the *lambda-introducer* is
-not an empty capture.
+*delete-expression* or open a new *lambda-expression*. 
 
 .. container:: toggle
 
@@ -1536,6 +1533,40 @@ There does not seem to be any priority defined in the C++ standard, but just as 
           delete []() { return (int*) 0; }();
          ^~~~~~~~~
                  (                        )
+
+
+The conflict occurs only at the closing subscript token ``]``, which indicates the parser will
+succeed parsing a *delete-expression* of the result of a *lambda-expression* provided that the
+*lambda-introducer* is not an empty capture. Interestingly, G++ and Clang disagree on this case.
+
+
+.. container:: toggle
+
+   .. container:: header
+
+      .. code-block:: C++
+
+         int main()
+         {
+             delete [&]() { return (int*) 0; }();
+         }
+
+   Using GCC:
+
+   .. code-block::
+
+      main.cc: In function ‘int main()’:
+      main.cc:3:13: error: expected ‘]’ before ‘&’ token
+          3 |     delete [&]() { return (int*) 0; }();
+            |             ^
+            |             ]
+      main.cc:3:14: error: expected primary-expression before ‘]’ token
+          3 |     delete [&]() { return (int*) 0; }();
+            |              ^
+      main.cc:3:39: error: expected primary-expression before ‘)’ token
+          3 |     delete [&]() { return (int*) 0; }();
+
+   Using Clang successfully compiles.
 
 
 .. _conversion_declarator:
