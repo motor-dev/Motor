@@ -45,7 +45,6 @@ def function_body(self, p):
 
 
 @glrp.rule('function-body : "=" "default" ";"')
-# TODO: "::" not allowed
 @glrp.rule('function-body : "=" "delete" ";"')
 @cxx11
 def function_body_cxx11(self, p):
