@@ -33,7 +33,10 @@ def template_parameter(self, p):
     pass
 
 
-# TODO: attribute-specifier-seq? not allowed
+# amendment: @glrp.rule('type-parameter : type-parameter-key "identifier"?')
+# amendment: @glrp.rule('type-parameter : type-parameter-key "identifier"? "=" type-id')
+# amendment: @glrp.rule('type-parameter : template-head type-parameter-key "identifier"?')
+# amendment: @glrp.rule('type-parameter : template-head type-parameter-key "identifier"? "=" id-expression')
 @glrp.rule('type-parameter : attribute-specifier-seq? type-parameter-key "identifier"?')
 @glrp.rule('type-parameter : attribute-specifier-seq? type-parameter-key "identifier"? "=" type-id')
 @glrp.rule('type-parameter : attribute-specifier-seq? template-head type-parameter-key "identifier"?')
@@ -41,25 +44,31 @@ def template_parameter(self, p):
 @cxx98
 def type_parameter(self, p):
     # type: (CxxParser, glrp.Production) -> None
+    # TODO: attribute-specifier-seq? not allowed
     pass
 
 
-# TODO: attribute-specifier-seq? not allowed
+# amendment: @glrp.rule('type-parameter : type-parameter-key "..." "identifier"?')
+# amendment: @glrp.rule('type-parameter : template-head type-parameter-key "..." "identifier"?')
 @glrp.rule('type-parameter : attribute-specifier-seq? type-parameter-key "..." "identifier"?')
 @glrp.rule('type-parameter : attribute-specifier-seq? template-head type-parameter-key "..." "identifier"?')
 @cxx11
 def type_parameter_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
+    # TODO: attribute-specifier-seq? not allowed
     pass
 
 
-# TODO: attribute-specifier-seq? not allowed
+# amendment: @glrp.rule('type-parameter : type-constraint "identifier"?')
+# amendment: @glrp.rule('type-parameter : type-constraint "..." "identifier"?')
+# amendment: @glrp.rule('type-parameter : type-constraint "identifier"? "=" type-id')
 @glrp.rule('type-parameter : attribute-specifier-seq? type-constraint "identifier"?')
 @glrp.rule('type-parameter : attribute-specifier-seq? type-constraint "..." "identifier"?')
 @glrp.rule('type-parameter : attribute-specifier-seq? type-constraint "identifier"? "=" type-id')
 @cxx20
 def type_parameter_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
+    # TODO: attribute-specifier-seq? not allowed
     pass
 
 

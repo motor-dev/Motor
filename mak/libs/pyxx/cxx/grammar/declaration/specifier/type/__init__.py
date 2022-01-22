@@ -70,7 +70,6 @@ def defining_type_specifier(self, p):
 
 
 @glrp.rule('defining-type-specifier-seq : defining-type-specifier end-type-specifier-seq attribute-specifier-seq?')
-# TODO: attribute-specifier-seq? not allowed
 @glrp.rule(
     'defining-type-specifier-seq : defining-type-specifier continue-type-specifier-seq defining-type-specifier-seq'
 )

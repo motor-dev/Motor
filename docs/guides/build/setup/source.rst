@@ -41,11 +41,11 @@ The Motor uses `WAF <https://waf.io/>`__ as the build system. The build happens 
 
       .. container:: header
 
-         ::
+         .. code-block::
 
             ~/motor > python waf configure
 
-      ::
+      .. code-block::
 
          Setting top to                           : ~/motor 
          Setting out to                           : ~/motor/bld/.waf 
@@ -87,11 +87,11 @@ The Motor uses `WAF <https://waf.io/>`__ as the build system. The build happens 
 
       .. container:: header
 
-         ::
+         .. code-block::
 
             ~/motor > python waf build:linux_gnu_amd64-clang_amd64-12.0.0:debug
 
-      ::
+      .. code-block::
 
          setup not run; setting up the toolchain
          'build:linux_gnu_amd64-clang_amd64-12.0.0:debug' finished successfully (0.004s)
