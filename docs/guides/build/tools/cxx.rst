@@ -169,7 +169,7 @@ encountering a token. There are several causes as to why conflicts happen, for i
    rules that allow invalid code to be parsed successfully. It is however easy to add a verification
    during semantic analysis to reject the constructions that were accepted by the extended rule.
    This often allows for clearer error messages. In the original grammar, the following C++ code
-   generates very different error messages in the GNU compiler G++ and in Clang:
+   generates very different error messages in the GNU compiler GCC and in Clang:
 
    .. code-block:: C++
 
@@ -190,7 +190,7 @@ encountering a token. There are several causes as to why conflicts happen, for i
       [[a::b]] inline namespace A
       ^~~~~~~~
 
-   Notice that Clang's error message was clearer than the one of G++.
+   Notice that Clang's error message was clearer than the one of GCC.
 
    .. tip::
 
@@ -558,7 +558,7 @@ The semantic analyzer is responsible for raising warnings in a later stage.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 *elaborated-type-specifier*\ s and *defining-type-specifier*\ s are sometimes both accepted as
-*type-specifier*± s. This leads to problems as the rules are very similar and the parsers needs many
+*type-specifier*\ s. This leads to problems as the rules are very similar and the parsers needs many
 tokens to disambiguate the two.
 
 The following rules have a lot of overlap but optional symbols force the parser generator to make an
@@ -1537,7 +1537,7 @@ There does not seem to be any priority defined in the C++ standard, but just as 
 
 The conflict occurs only at the closing subscript token ``]``, which indicates the parser will
 succeed parsing a *delete-expression* of the result of a *lambda-expression* provided that the
-*lambda-introducer* is not an empty capture. Interestingly, G++ and Clang disagree on this case.
+*lambda-introducer* is not an empty capture. Interestingly, GCC and Clang disagree on this case.
 
 
 .. container:: toggle
