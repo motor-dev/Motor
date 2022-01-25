@@ -89,7 +89,7 @@ class Lexer:
                     column_end = column + lexpos_end - lexpos
 
                 tok = Token(
-                    rule[2], rule[1], Position(self, (lineno, column), (lineno_end, column_end), (lexpos, lexpos_end)),
+                    rule[3], rule[1], Position(self, (lineno, column), (lineno_end, column_end), (lexpos, lexpos_end)),
                     None, skipped_tokens
                 )
                 lineno = lineno_end

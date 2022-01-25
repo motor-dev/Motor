@@ -15,14 +15,16 @@ class LR0Item(object):
             self._last = next._last      # type: LR0Item
         else:
             self._last = self
+
         self._before = predecessor
         self._after = successors
         self._symbols = set(rule.production)
         self._first = first
         self._follow = follow
-        self._lookaheads = {}            # type: Dict[int, List[int]]
-        self._precedence = None          # type: Optional[Tuple[str, int]]
-        self._split = None               # type: Optional[str]
+        self._lookaheads = {}      # type: Dict[int, List[int]]
+        self._precedence = None    # type: Optional[Tuple[str, int]]
+        self._split = None         # type: Optional[str]
+        self._action = None        # type: Optional[str]
         self._merge = merge_list
         self._split_use = 0
         self._merge_use = 0
@@ -65,25 +67,22 @@ class LR0Item(object):
             elif annotation == "split":
                 if len(values) > 1:
                     raise SyntaxError(
-                        'incorrect annotation: split requires one argument, got %s' %
+                        'incorrect annotation: "split" requires one argument, got %s' %
                         (','.join(values) if values else 'none'), (rule._filename, rule._lineno, 0, '')
                     )
                 if len(values) == 1:
                     self._split = values[0]
                 else:
                     self._split = ''
-            elif annotation == "merge_delegate":
-                if len(values) != 0:
+            elif annotation == "action":
+                if len(values) != 1:
                     raise SyntaxError(
-                        'incorrect annotation: merge_delegate does not accept any argument',
-                        (rule._filename, rule._lineno, 0, '')
+                        'incorrect annotation: "action" expects one argument, got %s',
+                        (','.join(values) if values else 'none'), (rule._filename, rule._lineno, 0, '')
                     )
-                self._merge_skip = False
-                self._last._merge_skip = False
+                self._action = values[0]
             else:
                 raise SyntaxError('unknown annotation %s' % annotation, (rule._filename, rule._lineno, 0, ''))
-        #self._precedence = None
-        #self._split = None
 
     def _annotations(self):
         # type: () -> str
@@ -92,6 +91,8 @@ class LR0Item(object):
             result += '[prec:%s,%d]' % self._precedence
         if self._split is not None:
             result += '[split:%s]' % self._split
+        if self._action is not None:
+            result += '[action:%s]' % self._action
         return result
 
     def to_string(self, name_map):
@@ -102,6 +103,10 @@ class LR0Item(object):
             ' '.join([name_map[p] for p in self.rule.production[:self._index]]),
             ' '.join([name_map[p] for p in self.rule.production[self._index:]]),
         )
+
+    def symbol(self):
+        # type: () -> int
+        return self.rule.production[self._index]
 
     def is_reduction_item(self):
         # type: () -> bool

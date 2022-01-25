@@ -1,11 +1,12 @@
 from ..symbol import Symbol
+from ..position import Position
 from motor_typing import TYPE_CHECKING, TypeVar
 
 
 class Production(Symbol):
-    def __init__(self, id, name, production_values, action):
-        # type: (int, str, List[Symbol], Callable[[Production], None]) -> None
-        Symbol.__init__(self, id, name, production_values[0]._position.extend(production_values[-1]._position))
+    def __init__(self, id, name, position, production_values, action):
+        # type: (int, str, Position, List[Symbol], Callable[[Production], None]) -> None
+        Symbol.__init__(self, id, name, position)
         self._production = production_values
         self._action = action
 
@@ -23,7 +24,7 @@ class Production(Symbol):
         if index == 0:
             return self.value
         elif index > 0:
-            return self._production[index].value
+            return self._production[index - 1].value
 
     def __setitem__(self, index, value):
         # type: (int, Any) -> None
@@ -35,4 +36,3 @@ class Production(Symbol):
 
 if TYPE_CHECKING:
     from motor_typing import Any, Callable, List
-    from ..position import Position

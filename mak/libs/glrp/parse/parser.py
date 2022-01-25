@@ -1,6 +1,7 @@
 from .production import Production
 from .grammar import Grammar
 from .context import Context
+from ..position import Position
 from ..lex import Token
 from motor_typing import TYPE_CHECKING, TypeVar
 import os
@@ -17,6 +18,8 @@ except ImportError:
 LOAD_OPTIMIZED = 0
 GENERATE = 1
 LOAD_CACHE = 2
+
+VERSION = '0.1'
 
 
 class Action(object):
@@ -41,25 +44,6 @@ class _DirectAction(Action):
         return getattr(parser, self._action_name)
 
 
-class _OptionalAction(Action):
-    def __init__(self, action, optional_index):
-        # type: (Action, int) -> None
-        Action.__init__(self)
-        self._action = action
-        self._index = optional_index
-
-    def __call__(self, parser):
-        # type: (Parser) -> Callable[[Production], None]
-        action = self._action(parser)
-
-        def call(production):
-            # type: (Production) -> Any
-            production._insert(self._index, Token(1, '<empty>', production._position, None, []))
-            action(production)
-
-        return call
-
-
 class _AcceptAction(Action):
     def __init__(self):
         # type: () -> None
@@ -81,6 +65,7 @@ class Parser(object):
             self._grammar = self._load_table(output_directory)
         else:
             h = hashlib.md5()
+            h.update(VERSION.encode())
             for rule_action in dir(self):
                 action = getattr(self, rule_action)
                 for rule_string, _, _ in getattr(action, 'rules', []):
@@ -136,240 +121,53 @@ class Parser(object):
 
         action_table = self._grammar._action_table
         goto_table = self._grammar._goto_table
-        rules = self._grammar._rules
+        rules = [(r[0], r[1], r[2](self)) for r in self._grammar._rules]
+        prev_position = Position(self._lexer, (0, 0), (0, 0), (0, 0))
 
         for token in self._lexer.token():
             for context in contexts:
-                action = action_table[context._state_stack[-1]].get(token._id, None)
-                if len(actions) == 0:
-                    pass   # TODO
+                actions = action_table[context._state_stack[-1]].get(token._id, tuple())
+                if len(actions) != 1:
+                    # TODO
+                    pass
                 else:
-                    for action in actions:
-                        actions
-                        if action < 0:
-                            rule = rules[-action]
-                            action_list.append()
-                        else:
-                            action_list.append((context, action))
-
-            if t is not None:
-                if t > 0:
-                    # shift a symbol on the stack
-                    statestack.append(t)
-                    state = t
-
-                    symstack.append(lookahead)
-                    lookahead = None
-
-                    # Decrease error count on successful shift
-                    if errorcount:
-                        errorcount -= 1
-                    continue
-
-                if t < 0:
-                    # reduce a symbol on the stack, emit a production
-                    p = prod[-t]
-                    pname = p.name
-                    plen = p.len
-
-                    # Get production function
-                    sym = YaccSymbol()
-                    sym.type = pname   # Production name
-                    sym.value = None
-
-                    if plen:
-                        targ = symstack[-plen - 1:]
-                        targ[0] = sym
-
-                        #--! TRACKING
-                        if tracking:
-                            t1 = targ[1]
-                            sym.lineno = t1.lineno
-                            sym.lexpos = t1.lexpos
-                            t1 = targ[-1]
-                            sym.endlineno = getattr(t1, 'endlineno', t1.lineno)
-                            sym.endlexpos = getattr(t1, 'endlexpos', t1.lexpos)
-                        #--! TRACKING
-
-                        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        # The code enclosed in this section is duplicated
-                        # below as a performance optimization.  Make sure
-                        # changes get made in both locations.
-
-                        pslice.slice = targ
-
-                        try:
-                            # Call the grammar rule with our special slice object
-                            del symstack[-plen:]
-                            self.state = state
-                            p.callable(pslice)
-                            del statestack[-plen:]
-                            symstack.append(sym)
-                            state = goto[statestack[-1]][pname]
-                            statestack.append(state)
-                        except SyntaxError:
-                            # If an error was set. Enter error recovery state
-                            lookaheadstack.append(lookahead) # Save the current lookahead token
-                            symstack.extend(targ[1:-1])      # Put the production slice back on the stack
-                            statestack.pop()                 # Pop back one state (before the reduce)
-                            state = statestack[-1]
-                            sym.type = 'error'
-                            sym.value = 'error'
-                            lookahead = sym
-                            errorcount = error_count
-                            self.errorok = False
-
-                        continue
-                        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-                    else:
-
-                        #--! TRACKING
-                        if tracking:
-                            sym.lineno = lexer.lineno
-                            sym.lexpos = lexer.lexpos
-                        #--! TRACKING
-
-                        targ = [sym]
-
-                        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        # The code enclosed in this section is duplicated
-                        # above as a performance optimization.  Make sure
-                        # changes get made in both locations.
-
-                        pslice.slice = targ
-
-                        try:
-                            # Call the grammar rule with our special slice object
-                            self.state = state
-                            p.callable(pslice)
-                            symstack.append(sym)
-                            state = goto[statestack[-1]][pname]
-                            statestack.append(state)
-                        except SyntaxError:
-                            # If an error was set. Enter error recovery state
-                            lookaheadstack.append(lookahead) # Save the current lookahead token
-                            statestack.pop()                 # Pop back one state (before the reduce)
-                            state = statestack[-1]
-                            sym.type = 'error'
-                            sym.value = 'error'
-                            lookahead = sym
-                            errorcount = error_count
-                            self.errorok = False
-
-                        continue
-                        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-                if t == 0:
-                    n = symstack[-1]
-                    result = getattr(n, 'value', None)
-                    return result
-
-            if t is None:
-
-                # We have some kind of parsing error here.  To handle
-                # this, we are going to push the current token onto
-                # the tokenstack and replace it with an 'error' token.
-                # If there are any synchronization rules, they may
-                # catch it.
-                #
-                # In addition to pushing the error token, we call call
-                # the user defined p_error() function if this is the
-                # first syntax error.  This function is only called if
-                # errorcount == 0.
-                if errorcount == 0 or self.errorok:
-                    errorcount = error_count
-                    self.errorok = False
-                    errtoken = lookahead
-                    if errtoken.type == '$end':
-                        errtoken = None # End of file!
-                    if self.errorfunc:
-                        if errtoken and not hasattr(errtoken, 'lexer'):
-                            errtoken.lexer = lexer
-                        self.state = state
-                        tok = call_errorfunc(self.errorfunc, errtoken, self)
-                        if self.errorok:
-                                        # User must have done some kind of panic
-                                        # mode recovery on their own.  The
-                                        # returned token is the next lookahead
-                            lookahead = tok
-                            errtoken = None
-                            continue
-                    else:
-                        if errtoken:
-                            if hasattr(errtoken, 'lineno'):
-                                lineno = lookahead.lineno
+                    for action, token_action in actions[:1]:
+                        while action < 0:
+                            rule = rules[-action - 1]
+                            symbol = rule[0]
+                            symbol_count = len(rule[1])
+                            if symbol_count:
+                                position = context._sym_stack[-symbol_count]._position.extend(
+                                    context._sym_stack[-1]._position
+                                )
                             else:
-                                lineno = 0
-                            if lineno:
-                                sys.stderr.write('yacc: Syntax error at line %d, token=%s\n' % (lineno, errtoken.type))
-                            else:
-                                sys.stderr.write('yacc: Syntax error, token=%s' % errtoken.type)
-                        else:
-                            sys.stderr.write('yacc: Parse error in input. EOF\n')
-                            return
+                                position = prev_position.gap(token._position)
+                            production = Production(symbol, '', position, context._sym_stack[-symbol_count:], rule[2])
+                            production.run()
+                            if symbol_count:
+                                del context._sym_stack[-symbol_count:]
+                                del context._state_stack[-symbol_count:]
+                            context._sym_stack.append(production)
+                            context._state_stack.append(goto_table[context._state_stack[-1]][symbol])
+                            actions = action_table[context._state_stack[-1]].get(token._id, tuple())
+                            action, token_action = actions[0]
 
-                else:
-                    errorcount = error_count
-
-                # case 1:  the statestack only has 1 entry on it.  If we're in this state, the
-                # entire parse has been rolled back and we're completely hosed.   The token is
-                # discarded and we just keep going.
-
-                if len(statestack) <= 1 and lookahead.type != '$end':
-                    lookahead = None
-                    errtoken = None
-                    state = 0
-                    # Nuke the pushback stack
-                    del lookaheadstack[:]
-                    continue
-
-                # case 2: the statestack has a couple of entries on it, but we're
-                # at the end of the file. nuke the top entry and generate an error token
-
-                # Start nuking entries on the stack
-                if lookahead.type == '$end':
-                    # Whoa. We're really hosed here. Bail out
-                    return
-
-                if lookahead.type != 'error':
-                    sym = symstack[-1]
-                    if sym.type == 'error':
-                        # Hmmm. Error is on top of stack, we'll just nuke input
-                        # symbol and continue
-                        #--! TRACKING
-                        if tracking:
-                            sym.endlineno = getattr(lookahead, 'lineno', sym.lineno)
-                            sym.endlexpos = getattr(lookahead, 'lexpos', sym.lexpos)
-                        #--! TRACKING
-                        lookahead = None
-                        continue
-
-                    # Create the error symbol for the first time and make it the new lookahead symbol
-                    t = YaccSymbol()
-                    t.type = 'error'
-
-                    if hasattr(lookahead, 'lineno'):
-                        t.lineno = t.endlineno = lookahead.lineno
-                    if hasattr(lookahead, 'lexpos'):
-                        t.lexpos = t.endlexpos = lookahead.lexpos
-                    t.value = lookahead
-                    lookaheadstack.append(lookahead)
-                    lookahead = t
-                else:
-                    sym = symstack.pop()
-                    #--! TRACKING
-                    if tracking:
-                        lookahead.lineno = sym.lineno
-                        lookahead.lexpos = sym.lexpos
-                    #--! TRACKING
-                    statestack.pop()
-                    state = statestack[-1]
-
-                continue
-
-            # Call an error function here
-            raise RuntimeError('yacc: internal parser error!!!\n')
+                        if action > 0:
+                            context._sym_stack.append(token)
+                            context._state_stack.append(action)
+            prev_position = token._position
+        for context in contexts:
+            actions = action_table[context._state_stack[-1]].get(-1, tuple())
+            if len(actions) == 1:
+                for action, token_action in actions:
+                    rule = rules[-action - 1]
+                    symbol = rule[0]
+                    position = context._sym_stack[0]._position.extend(context._sym_stack[-1]._position)
+                    production = Production(symbol, '', position, context._sym_stack, rule[2])
+                    production.run()
+                return production.value
+        else:
+            raise SyntaxError('unexpected end of file')
 
     def accept(self, p):
         # type: (Production) -> None
