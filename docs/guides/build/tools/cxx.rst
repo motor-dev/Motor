@@ -596,7 +596,7 @@ syntax as the *class-head*.
 .. parsed-literal::
 
    elaborated-type-specifier:
-      elaborated-type-specifier : class-key *attribute-specifier-seq?* *class-head-name*
+      elaborated-type-specifier : class-key **attribute-specifier-seq?** **class-head-name**
 
    class-head:
       class-key attribute-specifier-seq? class-head-name class-virt-specifier? base-clause?
@@ -611,10 +611,11 @@ Similarly, the *elaborated-enum-specifier* rule can be amended to accept the sam
 .. parsed-literal::
 
    elaborated-enum-specifier:
-      *enum-key* *attribute-specifier-seq?* *enum-head-name*
+      **enum-key** **attribute-specifier-seq?** **enum-head-name**
 
    enum-head:
       enum-key attribute-specifier-seq? enum-head-name? enum-base?
+
 
 Static conflict resolution
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
