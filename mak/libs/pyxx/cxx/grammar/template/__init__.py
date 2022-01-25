@@ -47,14 +47,14 @@ def template_declaration_cxx20(self, p):
     pass
 
 
-@glrp.rule('template-head : "template" "<" template-parameter-list ">"')
+@glrp.rule('template-head : "template" [action:split_rightshift]"<" template-parameter-list ">"')
 @cxx98
 def template_head(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('template-head : "template" "<" template-parameter-list ">" requires-clause')
+@glrp.rule('template-head : "template" [action:split_rightshift]"<" template-parameter-list ">" requires-clause')
 @cxx20
 def template_head_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None

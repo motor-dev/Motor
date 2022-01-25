@@ -20,7 +20,9 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('lambda-expression : lambda-introducer lambda-declarator compound-statement')
-@glrp.rule('lambda-expression : lambda-introducer "<" template-parameter-list ">" lambda-declarator compound-statement')
+@glrp.rule(
+    'lambda-expression : lambda-introducer [action:split_rightshift]"<" template-parameter-list ">" lambda-declarator compound-statement'
+)
 @cxx11
 def lambda_expression_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -28,7 +30,7 @@ def lambda_expression_cxx11(self, p):
 
 
 @glrp.rule(
-    'lambda-expression : lambda-introducer "<" template-parameter-list ">" requires-clause lambda-declarator compound-statement'
+    'lambda-expression : lambda-introducer [action:split_rightshift]"<" template-parameter-list ">" requires-clause lambda-declarator compound-statement'
 )
 @cxx20
 def lambda_expression_cxx20(self, p):

@@ -13,7 +13,14 @@ class Position:
         # type: (Position) -> Position
         start = min(self.start, other.start)
         end = max(self.end, other.end)
-        absolute = (min(self._absolute[0], other._absolute[0]), max(self._absolute[0], other._absolute[0]))
+        absolute = (min(self._absolute[0], other._absolute[0]), max(self._absolute[1], other._absolute[1]))
+        return Position(self._lexer, start, end, absolute)
+
+    def gap(self, other):
+        # type: (Position) -> Position
+        start = self.end
+        end = other.start
+        absolute = (self._absolute[1], other._absolute[1])
         return Position(self._lexer, start, end, absolute)
 
     def filename(self):

@@ -9,7 +9,7 @@ import sys
 
 class LALRTable(object):
     def __init__(self, action_table, goto_table):
-        # type: (List[Dict[int, Tuple[int,...]]], List[Dict[int, int]]) -> None
+        # type: (List[Dict[int, Tuple[Tuple[int, Optional[str]],...]]], List[Dict[int, int]]) -> None
         self._action_table = action_table
         self._goto_table = goto_table
 
@@ -466,7 +466,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
     for st, item_group in enumerate(states):
         # Loop over each production
         action_map = {}    # type: Dict[int, List[Tuple[int, LR0Item]]]
-        st_action = {}     # type: Dict[int, Tuple[int,...]]
+        st_action = {}     # type: Dict[int, Tuple[Tuple[int, Optional[str]],...]]
         st_goto = {}       # type: Dict[int, int]
         sm_log.info('')
         sm_log.info('')
@@ -480,7 +480,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
             if item._last == item:
                 if item.rule._prod_symbol == start_id:
                     # Start symbol. Accept!
-                    action_map[0] = action_map.get(0, []) + [(0, item)]
+                    action_map[-1] = [(-item.rule._id, item)]
                     item.rule._reduced += 1
                 else:
                     # We are at the end of a production.  Reduce!
@@ -594,13 +594,13 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
             else:
                 accepted_actions = action_dest
 
-            st_action[a] = tuple(sorted(accepted_actions))
+            st_action[a] = tuple(sorted([(j, items[0]._action) for j, items in accepted_actions.items()]))
             if len(accepted_actions) > 1 and not split:
                 # handle conflicts
                 conflicts = []     # type: List[Tuple[LR0Node, Optional[int]]]
                 num_rr += 1
                 sm_log.info('    %-30s conflict split', name_map[a])
-                for j in st_action[a]:
+                for j, token_action in st_action[a]:
                     items = accepted_actions[j]
                     if j >= 0:
                         sm_log.info('        shift and go to state %d', j)
@@ -643,17 +643,25 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
 
                 splits = []    # type: List[Tuple[LR0Node, str]]
                 sm_log.info('    %-30s split', name_map[a])
-                for j in st_action[a]:
+                for j, token_action in st_action[a]:
+                    action_error = False
                     items = accepted_actions[j]
                     if j >= 0:
                         sm_log.info('        shift and go to state %d', j)
                     for item in items:
                         assert item._split is not None
+                        if item._action != token_action:
+                            action_error = True
                         if j < 0:
                             sm_log.info('        reduce using rule %s', item.to_string(name_map))
                             splits.append((item_group[item], item._split))
                         else:
                             splits.append((item_group[item], item._split))
+                    if action_error:
+                        error_log.error('action mismatch in state %d for token \'%s\':' % (st, name_map[a]))
+                        for item in items:
+                            error_log.note('    %s' % item.to_string(name_map))
+
                 key = frozenset(splits)
                 if key not in split_seen:
                     _find_merge_points(splits, name_map)
@@ -661,13 +669,20 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                 conflict_log.info('')
 
             else:
-                for j in st_action[a]:
+                for j, token_action in st_action[a]:
+                    action_error = False
                     items = accepted_actions[j]
                     if j >= 0:
                         sm_log.info('    %-30s shift and go to state %d', name_map[a], j)
                     for item in items:
+                        if item._action != token_action:
+                            action_error = True
                         if j < 0:
                             sm_log.info('    %-30s reduce using rule %s', name_map[a], item.to_string(name_map))
+                    if action_error:
+                        error_log.error('action mismatch in state %d for token \'%s\':' % (st, name_map[a]))
+                        for item in items:
+                            error_log.note('    %s' % item.to_string(name_map))
 
         nkeys = set([])
         for item in item_group:
