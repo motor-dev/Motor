@@ -622,7 +622,7 @@ Static conflict resolution
 
 This section lists the conflicts that are resolved through making explicit choices in the grammar at
 the point the token is encountered (i.e. without additional lookahead). The choice is specified by
-annotating the grammar with priority attributes. In most parser generators, priority 
+annotating the grammar with priority attributes.
 
 
 *template-parameter-list*\ /\ *template-argument-list*, ``>``
