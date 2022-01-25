@@ -8,9 +8,9 @@ from json_minify import json_minify
 
 def vscode_path_from(path, node):
     if isinstance(path, str):
-        return path.replace('/', '\\')
+        return path
     else:
-        return os.path.join('${workspaceFolder}', path.path_from(node).replace('/', '\\'))
+        return os.path.join('${workspaceFolder}', path.path_from(node))
 
 
 class vscode(Build.BuildContext):
