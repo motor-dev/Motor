@@ -1,12 +1,11 @@
 from ..symbol import Symbol
-from ..position import Position
 from motor_typing import TYPE_CHECKING, TypeVar
 
 
 class Production(Symbol):
-    def __init__(self, id, name, position, production_values, action):
-        # type: (int, str, Position, List[Symbol], Callable[[Production], None]) -> None
-        Symbol.__init__(self, id, name, position)
+    def __init__(self, id, start_position, end_position, production_values, action):
+        # type: (int, int, int, List[Symbol], Callable[[Production], None]) -> None
+        Symbol.__init__(self, id, start_position, end_position)
         self._production = production_values
         self._action = action
 

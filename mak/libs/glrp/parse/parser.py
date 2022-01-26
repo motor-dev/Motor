@@ -1,8 +1,6 @@
 from .production import Production
 from .grammar import Grammar
 from .context import Context
-from ..position import Position
-from ..lex import Token
 from motor_typing import TYPE_CHECKING, TypeVar
 import os
 import sys
@@ -122,7 +120,7 @@ class Parser(object):
         action_table = self._grammar._action_table
         goto_table = self._grammar._goto_table
         rules = [(r[0], r[1], r[2](self)) for r in self._grammar._rules]
-        prev_position = Position(self._lexer, (0, 0), (0, 0), (0, 0))
+        prev_position = 0
 
         for token in self._lexer.token():
             for context in contexts:
@@ -137,12 +135,12 @@ class Parser(object):
                             symbol = rule[0]
                             symbol_count = len(rule[1])
                             if symbol_count:
-                                position = context._sym_stack[-symbol_count]._position.extend(
-                                    context._sym_stack[-1]._position
+                                production = Production(
+                                    symbol, context._sym_stack[-symbol_count]._start_position,
+                                    context._sym_stack[-1]._end_position, context._sym_stack[-symbol_count:], rule[2]
                                 )
                             else:
-                                position = prev_position.gap(token._position)
-                            production = Production(symbol, '', position, context._sym_stack[-symbol_count:], rule[2])
+                                production = Production(symbol, prev_position, token._start_position, [], rule[2])
                             production.run()
                             if symbol_count:
                                 del context._sym_stack[-symbol_count:]
@@ -155,15 +153,17 @@ class Parser(object):
                         if action > 0:
                             context._sym_stack.append(token)
                             context._state_stack.append(action)
-            prev_position = token._position
+            prev_position = token._end_position
         for context in contexts:
             actions = action_table[context._state_stack[-1]].get(-1, tuple())
             if len(actions) == 1:
                 for action, token_action in actions:
                     rule = rules[-action - 1]
                     symbol = rule[0]
-                    position = context._sym_stack[0]._position.extend(context._sym_stack[-1]._position)
-                    production = Production(symbol, '', position, context._sym_stack, rule[2])
+                    production = Production(
+                        symbol, context._sym_stack[0]._start_position, context._sym_stack[-1]._end_position,
+                        context._sym_stack, rule[2]
+                    )
                     production.run()
                 return production.value
         else:

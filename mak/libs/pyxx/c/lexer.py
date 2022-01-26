@@ -182,7 +182,7 @@ class C89Lexer(glrp.Lexer):
     @glrp.token(r'\//(?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'line-comment', warn=False)
     def comment(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        comment = t.text()
+        comment = self.text(t)
         return None
         #if comment[1] == '/' and comment[2] in ('/', '!') or comment[1] == '*' and comment[2] in ('*', '!'):
         #    self.set_token_type(t, 'doxycomment')
@@ -193,7 +193,7 @@ class C89Lexer(glrp.Lexer):
     @glrp.token(_identifier, 'identifier')
     def identifier(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        t.value = t.text()
+        t.value = self.text(t)
         if t.value in self.keywords:
             self.set_token_type(t, t.value)
         if t.value in self._enum_constants:
@@ -203,10 +203,11 @@ class C89Lexer(glrp.Lexer):
     @glrp.token(_floating_constant, 'floating-constant')
     def floating_constant(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        if t.text()[-1] in 'fFdD':
-            t.value = decimal.Decimal(t.text()[:-1])
+        text = self.text(t)
+        if text[-1] in 'fFdD':
+            t.value = decimal.Decimal(text[:-1])
         else:
-            t.value = decimal.Decimal(t.text())
+            t.value = decimal.Decimal(text)
         return t
 
     @glrp.token(_integer_constant, 'integer-constant')
@@ -222,15 +223,16 @@ class C89Lexer(glrp.Lexer):
     @glrp.token(_string_literal, 'string-literal')
     def string_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        t.value = t.text()[1:-1]
+        t.value = self.text(t)[1:-1]
         return t
 
-    def token(self):
-        # type: () -> Generator[glrp.Token, None, None]
+    def token(self, track_blanks=False):
+        # type: (bool) -> Generator[glrp.Token, None, None]
         # override token to concatenate [ [ into [[
         # preserving comments and other items between the [ symbols
         queue = []     # type: List[glrp.Token]
-        generator = glrp.Lexer.token(self)
+        generator = glrp.Lexer.token(self, track_blanks)
+        bracket_id = self.get_token_id('[')
         while True:
             if queue:
                 yield queue.pop(0)
@@ -239,13 +241,13 @@ class C89Lexer(glrp.Lexer):
             except StopIteration:
                 break
             else:
-                if token._name == '[':
+                if token._id == bracket_id:
                     try:
                         next_token = next(generator)
                     except StopIteration:
                         yield token
                     else:
-                        if next_token._name == '[':
+                        if next_token._id == bracket_id:
                             next_token._skipped_tokens = token._skipped_tokens + [token] + next_token._skipped_tokens
                             self.set_token_type(next_token, '[[')
                             yield next_token
