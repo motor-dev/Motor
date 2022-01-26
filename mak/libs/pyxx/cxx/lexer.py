@@ -276,7 +276,7 @@ class Cxx98Lexer(glrp.Lexer):
     @glrp.token(_identifier, 'identifier')
     def identifier(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        t.value = t.text()
+        t.value = self.text(t)
         if t.value in self.keywords:
             self.set_token_type(t, t.value)
         return t
@@ -284,10 +284,11 @@ class Cxx98Lexer(glrp.Lexer):
     @glrp.token(_floating_literal, 'floating-literal')
     def floating_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        if t.text()[-1] in 'fFdD':
-            t.value = decimal.Decimal(t.text()[:-1])
+        text = self.text(t)
+        if text[-1] in 'fFdD':
+            t.value = decimal.Decimal(text[:-1])
         else:
-            t.value = decimal.Decimal(t.text())
+            t.value = decimal.Decimal(text)
         return t
 
     @glrp.token(_integer_literal, 'integer-literal')
@@ -298,13 +299,15 @@ class Cxx98Lexer(glrp.Lexer):
     @glrp.token(_string_literal, 'string-literal')
     def string_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        t.value = t.text()[1:-1]
+        text = self.text(t)
+        t.value = text[1:-1]
         return t
 
     @glrp.token(_character_literal, 'character-literal')
     def character_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        t.value = t.text()[1:-1]
+        text = self.text(t)
+        t.value = text[1:-1]
         return t
 
 
@@ -316,12 +319,13 @@ class Cxx11Lexer(Cxx03Lexer):
     tokens = Cxx03Lexer.tokens + ('[[', ) + _keywords_cxx11
     keywords = Cxx03Lexer.keywords + _keywords_cxx11
 
-    def token(self):
-        # type: () -> Generator[glrp.Token, None, None]
+    def token(self, track_blanks=False):
+        # type: (bool) -> Generator[glrp.Token, None, None]
         # override token to concatenate [ [ into [[
         # preserving comments and other items between the [ symbols
         queue = []     # type: List[glrp.Token]
-        generator = Cxx03Lexer.token(self)
+        bracket_id = self.get_token_id('[')
+        generator = Cxx03Lexer.token(self, track_blanks)
         while True:
             if queue:
                 yield queue.pop(0)
@@ -330,13 +334,13 @@ class Cxx11Lexer(Cxx03Lexer):
             except StopIteration:
                 break
             else:
-                if token._name == '[':
+                if token._id == bracket_id:
                     try:
                         next_token = next(generator)
                     except StopIteration:
                         yield token
                     else:
-                        if next_token._name == '[':
+                        if next_token._id == bracket_id:
                             next_token._skipped_tokens = token._skipped_tokens + [token] + next_token._skipped_tokens
                             self.set_token_type(next_token, '[[')
                             yield next_token
@@ -349,25 +353,25 @@ class Cxx11Lexer(Cxx03Lexer):
     @glrp.token(_user_defined_integer_literal, 'user-defined-integer-literal')
     def user_integer_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        t.value = t.text()
+        t.value = self.text(t)
         return t
 
     @glrp.token(_user_defined_floating_literal, 'user-defined-floating-literal')
     def user_floating_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        t.value = t.text()
+        t.value = self.text(t)
         return t
 
     @glrp.token(_user_defined_character_literal, 'user-defined-character-literal')
     def user_defined_character_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        t.value = t.text()
+        t.value = self.text(t)
         return t
 
     @glrp.token(_user_defined_string_literal, 'user-defined-string-literal')
     def user_defined_string_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        t.value = t.text()
+        t.value = self.text(t)
         return t
 
 

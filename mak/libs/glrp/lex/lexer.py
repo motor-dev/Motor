@@ -1,5 +1,5 @@
 from .token import Token
-from ..position import Position
+from ..symbol import Symbol
 import re
 from motor_typing import TYPE_CHECKING, TypeVar
 
@@ -47,7 +47,6 @@ class Lexer:
     def set_token_type(self, token, type):
         # type: (Token, str) -> Token
         token._id = self.get_token_id(type)
-        token._name = type
         return token
 
     def push_state(self, state):
@@ -58,16 +57,52 @@ class Lexer:
         # type: () -> None
         self._state_stack.pop(-1)
 
-    def token(self):
-        # type: () -> Generator[Token, None, None]
-        lineno = 1
-        column = 1
+    def text(self, symbol):
+        # type: (Symbol) -> str
+        return self._lexdata[symbol._start_position:symbol._end_position]
+
+    def text_position(self, symbol):
+        # type: (Symbol) -> Tuple[Tuple[int, int], Tuple[int, int]]
+        lexdata = self._lexdata
+        start_lineno = lexdata.count('\n', 0, symbol._start_position) + 1
+        line_count = lexdata.count('\n', symbol._start_position, symbol._end_position)
+        end_lineno = start_lineno + line_count
+
+        if start_lineno:
+            start_column = symbol._start_position - lexdata.rfind('\n', 0, symbol._start_position)
+        else:
+            start_column = symbol._start_position
+
+        if line_count:
+            end_column = symbol._end_position - lexdata.rfind('\n', symbol._start_position, symbol._end_position)
+        else:
+            end_column = start_column + symbol._end_position - symbol._start_position
+
+        return ((start_lineno, start_column), (end_lineno, end_column))
+
+    def context(self, symbol):
+        # type: (Symbol) -> List[str]
+        index_start = symbol._start_position
+        index_end = symbol._end_position
+        while index_start > 0:
+            if self._lexdata[index_start - 1] == '\n':
+                break
+            index_start -= 1
+
+        while index_end < len(self._lexdata) - 1:
+            if self._lexdata[index_end + 1] == '\n':
+                break
+            index_end += 1
+        return self._lexdata[index_start:index_end + 1].split('\n')
+
+    def token(self, track_blanks=False):
+        # type: (bool) -> Generator[Token, None, None]
         lexpos = 0
         lexdata = self._lexdata
         lexlen = self._lexlen
         self._state_stack.append(self._states['INITIAL'])
         state = self._state_stack[-1]
-        skipped_tokens = []    # type: List[Token   ]
+        skipped_tokens = []    # type: List[Token]
 
         while lexpos < lexlen:
             # Look for a regular expression match
@@ -81,25 +116,15 @@ class Lexer:
                 rule = lexindexfunc[i]
                 assert rule is not None
                 lexpos_end = m.end()
-                linebreak_count = lexdata.count('\n', lexpos, lexpos_end)
-                lineno_end = lineno + linebreak_count
-                if linebreak_count:
-                    column_end = lexpos_end - lexdata.rfind('\n', lexpos, lexpos_end)
-                else:
-                    column_end = column + lexpos_end - lexpos
 
-                tok = Token(
-                    rule[3], rule[1], Position(self, (lineno, column), (lineno_end, column_end), (lexpos, lexpos_end)),
-                    None, skipped_tokens
-                )
-                lineno = lineno_end
-                column = column_end
+                tok = Token(rule[3], lexpos, lexpos_end, None, skipped_tokens)
                 lexpos = lexpos_end
 
                 new_token = rule[0](self, tok) # type: ignore
                 state = self._state_stack[-1]
                 if new_token is None:
-                    skipped_tokens.append(tok)
+                    if track_blanks:
+                        skipped_tokens.append(tok)
                     break
 
                 skipped_tokens = []
@@ -108,9 +133,7 @@ class Lexer:
             else:
                 raise SyntaxError("Illegal character '%s' at index %d" % (lexdata[lexpos], lexpos), lexdata[lexpos:])
 
-        tok = Token(
-            0, '<eof>', Position(self, (lineno, column), (lineno, column), (lexpos, lexpos)), None, skipped_tokens
-        )
+        tok = Token(0, lexpos, lexpos, None, skipped_tokens)
         self._lexpos = lexpos
         yield tok
 
@@ -174,4 +197,4 @@ def _build_states(owner):
 
 
 if TYPE_CHECKING:
-    from typing import Callable, Dict, Generator, List, Optional, Pattern, Set, Tuple, Type
+    from typing import Callable, Dict, Generator, List, Optional, Pattern, Tuple, Type
