@@ -17,7 +17,7 @@ copyright = '2021, motor.devel@gmail.com'
 author = 'motor.devel@gmail.com'
 
 # -- General configuration ---------------------------------------------------
-extensions = []
+extensions = ['sphinx.ext.graphviz']
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 

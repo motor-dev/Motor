@@ -104,6 +104,13 @@ class LR0Item(object):
             ' '.join([name_map[p] for p in self.rule.production[self._index:]]),
         )
 
+    def to_short_string(self, name_map):
+        # type: (List[str]) -> Text
+        return u'%s \u2666 %s' % (
+            ' '.join([name_map[p] for p in self.rule.production[:self._index]]),
+            ' '.join([name_map[p] for p in self.rule.production[self._index:]]),
+        )
+
     def symbol(self):
         # type: () -> int
         return self.rule.production[self._index]

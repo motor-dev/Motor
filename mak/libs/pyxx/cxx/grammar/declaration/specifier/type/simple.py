@@ -82,5 +82,27 @@ def type_name(self, p):
     pass
 
 
+@cxx98
+@glrp.merge('type-name')
+def generic_type_name(self, template_name, class_name, enum_name, typedef_name):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@cxx98
+@glrp.merge('simple-type-specifier')
+def generic_simple_type_specifier(self, generic_type_name, template_name, concept_name):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production, Optional[glrp.Production]]) -> None
+    pass
+
+
+@cxx98
+@glrp.merge('simple-type-specifier')
+def template_simple_type_specifier(self, class_template_id, typedef_template_id):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production, Optional[glrp.Production]]) -> None
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Optional
     from .....parser import CxxParser

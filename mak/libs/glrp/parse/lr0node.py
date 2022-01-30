@@ -8,10 +8,7 @@ class LR0Node(object):
         # type: (LR0ItemSet, LR0Item, Optional[Tuple[int, "LR0Node"]], Optional[LR0Node]) -> None
         self._item_set = item_set
         self._item = item
-        self._parents = set()                            # type: Set[LR0Node]
-        self._parents_core = set()                       # type: Set[LR0Node]
-        self._path_cache = {
-        }                                                # type: Dict[Optional[int], Tuple[LR0Path, Set[Union[Tuple[LR0Node, Optional[int]], LR0ItemSet]], List[Tuple[LR0Node, LR0Path, Optional[int], Optional[int]]]]]
+
         if predecessor is not None:
             self._predecessor_lookahead = predecessor[0] # type: Optional[int]
             self._predecessors = [predecessor[1]]

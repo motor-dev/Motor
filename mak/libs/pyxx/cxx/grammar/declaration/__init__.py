@@ -230,5 +230,12 @@ def identifier_list(self, p):
     pass
 
 
+@glrp.merge('noexport-declaration')
+@cxx98
+def explicit_noexport_declaration(self, explicit_deduction, explicit_declaration):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 if TYPE_CHECKING:
     from ...parser import CxxParser

@@ -68,16 +68,6 @@ class LR0ItemSet(object):
         for node in self._items.values():
             node._direct_parents.sort(key=lambda n: n._item.len - n._item._index)
             node._direct_children.sort(key=lambda n: n._item.len)
-            node._parents = set(node._direct_parents)
-            queue = node._direct_parents[:]
-            seen = set([node])
-            while queue:
-                parent = queue.pop()
-                if parent in seen:
-                    continue
-                seen.add(parent)
-                node._parents.update(parent._direct_parents)
-                queue += parent._direct_parents
 
 
 if TYPE_CHECKING:

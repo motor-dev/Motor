@@ -14,12 +14,10 @@ class LALRTable(object):
         self._goto_table = goto_table
 
 
-def _find_merge_points(conflict_list, name_map):
-    # type: (List[Tuple[LR0Node, str]], List[str]) -> None
-    #dominance_set = MergeTree(conflict_list)
-    #dominance_set.print_dot(name_map)
-    #dominance_set.print_merge_tree(name_map)
-    pass
+def _find_merge_points(conflict_list, name_map, root_node, logger):
+    # type: (List[Tuple[LR0Node, Set[int], str]], List[str], LR0Node, Logger) -> None
+    merge_tree = MergeTree(conflict_list)
+    merge_tree.check_resolved(root_node, name_map, logger)
 
 
 def _log(title, conflict_paths, out, name_map):
@@ -80,10 +78,10 @@ def _find_counterexamples(conflict_list):
     for s in conflict_list:
         lst.append([(s[0], LR0PathItem(s[0]._item), s[1], set())])
     intermediate_result = None     # type: Optional[IntermediateResult]
-    queue = [(lst, conflict_list[0][0]._item_set._index, intermediate_result, states)]
+    queue = [(lst, intermediate_result, states)]
 
     while queue:
-        path_list, state, intermediate_result, states = queue.pop(0)
+        path_list, intermediate_result, states = queue.pop(0)
         temp_result = []   # type: List[List[Tuple[LR0Node, LR0Path]]]
         recurse = False
         report = True
@@ -145,7 +143,7 @@ def _find_counterexamples(conflict_list):
                         current_state.append(paths)
 
             if check_current_state:
-                queue.insert(0, (current_state, state, intermediate_result, states))
+                queue.insert(0, (current_state, intermediate_result, states))
             else:
                 for (item_set, _), nodes_list in states.items():
                     count = 0
@@ -157,7 +155,7 @@ def _find_counterexamples(conflict_list):
                     if count > 1 and reduce_count > 0:
                         if intermediate_result is not None:
                             intermediate_result._refcount += 1
-                        queue.append((nodes_list, item_set._index, intermediate_result, {}))
+                        queue.append((nodes_list, intermediate_result, {}))
             if intermediate_result is not None:
                 intermediate_result._refcount -= 1
                 if intermediate_result._refcount == 0:
@@ -458,8 +456,6 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
     merge_conflict = {}        # type: Dict[FrozenSet[Grammar.Rule], List[int]]
     conflict_issues = {}       # type: Dict[FrozenSet[LR0Item], Dict[LR0Item, List[Tuple[LR0Node, LR0Path]]]]
 
-    split_seen = set()     # type: Set[FrozenSet[Tuple[LR0Node, str]]]
-
     num_rr = 0
     num_sr = 0
 
@@ -495,6 +491,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     j = cidhash[id(g)]
                     if j >= 0:
                         action_map[a] = action_map.get(a, []) + [(j, item)]
+
+        merges = {}    # type: Dict[LR0Node, Tuple[Set[int], str]]
 
         for a in sorted(action_map):
             actions = action_map[a]
@@ -641,7 +639,6 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                         item._split_use += 1
                 conflict_log.info('')
 
-                splits = []    # type: List[Tuple[LR0Node, str]]
                 sm_log.info('    %-30s split', name_map[a])
                 for j, token_action in st_action[a]:
                     action_error = False
@@ -654,19 +651,17 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                             action_error = True
                         if j < 0:
                             sm_log.info('        reduce using rule %s', item.to_string(name_map))
-                            splits.append((item_group[item], item._split))
+                            try:
+                                merges[item_group[item]][0].add(a)
+                            except KeyError:
+                                merges[item_group[item]] = (set([a]), item._split)
                         else:
-                            splits.append((item_group[item], item._split))
+                            if item_group[item] not in merges:
+                                merges[item_group[item]] = (set(), item._split)
                     if action_error:
                         error_log.error('action mismatch in state %d for token \'%s\':' % (st, name_map[a]))
                         for item in items:
                             error_log.note('    %s' % item.to_string(name_map))
-
-                key = frozenset(splits)
-                if key not in split_seen:
-                    _find_merge_points(splits, name_map)
-                    split_seen.add(key)
-                conflict_log.info('')
 
             else:
                 for j, token_action in st_action[a]:
@@ -683,6 +678,11 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                         error_log.error('action mismatch in state %d for token \'%s\':' % (st, name_map[a]))
                         for item in items:
                             error_log.note('    %s' % item.to_string(name_map))
+
+        if merges:
+            assert len(states[0]._core) == 1
+            splits = [(item, lookaheads, split_name) for item, (lookaheads, split_name) in merges.items()]
+            _find_merge_points(splits, name_map, list(states[0]._core)[0], conflict_log)
 
         nkeys = set([])
         for item in item_group:
