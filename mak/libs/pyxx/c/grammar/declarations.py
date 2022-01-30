@@ -439,7 +439,7 @@ def declarator_opt(self, p):
 
 @c89
 @glrp.rule('direct-declarator : identifier attribute-specifier-sequence?')
-@glrp.rule('direct-declarator : [split]"(" declarator ")"')
+@glrp.rule('direct-declarator : [split:declarator]"(" declarator ")"')
 @glrp.rule('direct-declarator : array-declarator attribute-specifier-sequence?')
 @glrp.rule('direct-declarator : function-declarator attribute-specifier-sequence?')
 def direct_declarator(self, p):
@@ -549,7 +549,7 @@ def abstract_declarator_opt(self, p):
 
 
 @c89
-@glrp.rule('direct-abstract-declarator : [split]"(" abstract-declarator ")"')
+@glrp.rule('direct-abstract-declarator : [split:abstract_declarator]"(" abstract-declarator ")"')
 @glrp.rule('direct-abstract-declarator : array-abstract-declarator attribute-specifier-sequence?')
 @glrp.rule('direct-abstract-declarator : function-abstract-declarator attribute-specifier-sequence?')
 def direct_abstract_declarator(self, p):
@@ -558,10 +558,10 @@ def direct_abstract_declarator(self, p):
 
 
 @c89
-@glrp.rule('direct-abstract-declarator? : [split]"(" abstract-declarator ")"')
+@glrp.rule('direct-abstract-declarator? : [split:abstract_declarator]"(" abstract-declarator ")"')
 @glrp.rule('direct-abstract-declarator? : array-abstract-declarator attribute-specifier-sequence?')
 @glrp.rule('direct-abstract-declarator? : function-abstract-declarator attribute-specifier-sequence?')
-@glrp.rule('direct-abstract-declarator? : [split]')
+@glrp.rule('direct-abstract-declarator? : [split:parameter_declaration]')
 def direct_abstract_declarator_opt(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
@@ -591,7 +591,7 @@ def function_abstract_declarator(self, p):
 
 
 @c89
-@glrp.rule('typedef-name[split] : [split]"identifier"')
+@glrp.rule('typedef-name[split:typedef_name] : [split:typedef_name]"identifier"')
 def typedef_name(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
@@ -648,7 +648,7 @@ def static_assert_declaration(self, p):
 
 @c89
 @glrp.rule('attribute-specifier-sequence? : attribute-specifier-sequence? attribute-specifier')
-@glrp.rule('attribute-specifier-sequence?[split] : ')
+@glrp.rule('attribute-specifier-sequence?[split:declarator_name] : ')
 def attribute_specifier_sequence(self, p):
     # type: (CParser, glrp.Production) -> None
     pass

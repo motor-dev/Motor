@@ -7,10 +7,12 @@ class Parser1(glrp.Parser):
         @glrp.token(r'a', 'a')
         @glrp.token(r'b', 'b')
         @glrp.token(r'c', 'c')
+        @glrp.token(r'd', 'd')
         def tok(self, token):
             # type: (glrp.Token) -> glrp.Token
             return token
 
+    @glrp.rule("prog : A prog")
     @glrp.rule("prog : A")
     def p_prog(self, p):
         # type: (glrp.Production) -> None
@@ -21,8 +23,10 @@ class Parser1(glrp.Parser):
         # type: (Optional[int], Optional[int]) -> Optional[int]
         return ab
 
-    @glrp.rule("A : a B")
-    @glrp.rule("A : a a B")
+    @glrp.rule("A : a B c")
+    @glrp.rule("A : a a B c")
+    @glrp.rule("A : a B d")
+    @glrp.rule("A : a a B d")
     #@glrp.rule("A : a a a B ")
     #@glrp.rule("A : B c")
     def p_A(self, p):

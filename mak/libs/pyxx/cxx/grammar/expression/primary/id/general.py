@@ -17,5 +17,14 @@ def id_expression(self, p):
     pass
 
 
+@glrp.merge('id-expression')
+@cxx98
+def ambiguous_id_expression(self, template_name, generic_type_name):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    # template_name corresponds to an unqualified-id
+    # generic-type-name to a qualified-id
+    pass
+
+
 if TYPE_CHECKING:
     from .....parser import CxxParser
