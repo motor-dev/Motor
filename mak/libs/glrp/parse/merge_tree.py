@@ -2,6 +2,7 @@ from motor_typing import TYPE_CHECKING
 
 
 class MergeTree(object):
+
     def __init__(self, node_set):
         # type: (List[Tuple[LR0Node, Set[int], str]]) -> None
         self._map = {}     # type: Dict[LR0Node, MergeNode]
@@ -118,7 +119,6 @@ class MergeTree(object):
 
     def _build_tree(self, paths):
         # type: (List[Tuple[LR0Node, Set[int], List[List[Tuple[LR0Node, bool]]]]]) -> None
-        seen = set()   # type: Set[Tuple[LR0Node, Optional[int]]]
         states = {}    # type: Dict[int, Tuple[Set[int], List[Tuple[LR0Node, bool]], List[Tuple[LR0Node, bool]]]]
         for _, lookaheads, path_list in paths:
             for path in path_list:
@@ -135,57 +135,75 @@ class MergeTree(object):
 
         for _, (lookaheads, heads, dest) in states.items():
             targets = set(dest)
-            queue = [
-                (head, la, [(head, la)]) for head, la in heads
-            ]                                                  # type: List[Tuple[LR0Node, bool, List[Tuple[LR0Node, bool]]]]
             for node, _ in heads + dest:
                 if node not in self._map:
                     self._map[node] = MergeNode(node._item)
-            while queue:
-                node, la, path = queue.pop(-1)
-                if (node, la) in targets:
-                    child = self._map[path[0][0]]
-                    for node, la in path[1:]:
-                        targets.add((node, la))
-                        try:
-                            parent = self._map[node]
-                        except KeyError:
-                            parent = MergeNode(node._item)
-                            self._map[node] = parent
-                        child._parents.add(parent)
-                        child = parent
-                else:
-                    found = False
-                    if node._direct_parents:
-                        for parent_node in node._direct_parents:
-                            item = parent_node._item
-                            if la:
-                                if not lookaheads.isdisjoint(item._follow):
-                                    if (parent_node, False) in seen:
-                                        continue
-                                    found = True
-                                    if (parent_node, False) not in path:
-                                        queue.append((parent_node, False, path + [(parent_node, False)]))
-                                if -1 in item._follow:
-                                    if (parent_node, la) in seen:
-                                        continue
-                                    found = True
-                                    if (parent_node, la) not in path:
-                                        queue.append((parent_node, la, path + [(parent_node, la)]))
-                            else:
-                                if (parent_node, la) in seen:
-                                    continue
-                                found = True
-                                if (parent_node, la) not in path:
-                                    queue.append((parent_node, la, path + [(parent_node, la)]))
-                    else:
-                        for predecessor in node._predecessors:
-                            if (predecessor, la) in targets:
-                                found = True
-                                queue.append((predecessor, la, path + [(predecessor, la)]))
+            item_set = heads[0][0]._item_set
 
-                    if not found:
-                        seen.add((node, la))
+            queue = list(targets)
+            seen = set()
+            while queue:
+                node, la = queue.pop(0)
+                if (node, la) in seen:
+                    continue
+                seen.add((node, la))
+                if node._item_set != item_set:
+                    assert node._successor is not None
+                    targets.add((node._successor, la))
+                    queue.append((node._successor, la))
+                else:
+                    item = node._item
+                    if la:
+                        if -1 in item._follow:
+                            for child in node._direct_children:
+                                targets.add((child, True))
+                                queue.append((child, True))
+                    else:
+                        if not lookaheads.isdisjoint(item._follow):
+                            for child in node._direct_children:
+                                targets.add((child, True))
+                                queue.append((child, True))
+                        for child in node._direct_children:
+                            targets.add((child, False))
+                            queue.append((child, False))
+
+            seen = set()
+            queue = list(heads)
+            while queue:
+                node, la = queue.pop(0)
+                merge_node = self._map[node]
+                assert ((node, la)) in targets
+                if (node, la) in seen:
+                    continue
+                seen.add((node, la))
+
+                for parent_node in node._direct_parents:
+                    item = parent_node._item
+                    if (parent_node, la) in targets:
+                        try:
+                            parent_merge_node = self._map[parent_node]
+                        except KeyError:
+                            parent_merge_node = MergeNode(item)
+                            self._map[parent_node] = parent_merge_node
+                        merge_node._parents.add(parent_merge_node)
+                        queue.append((parent_node, la))
+                    if la:
+                        if (parent_node, False) in targets:
+                            try:
+                                parent_merge_node = self._map[parent_node]
+                            except KeyError:
+                                parent_merge_node = MergeNode(item)
+                                self._map[parent_node] = parent_merge_node
+                            merge_node._parents.add(parent_merge_node)
+                            queue.append((parent_node, False))
+                for predecessor in node._predecessors:
+                    if (predecessor, la) in targets:
+                        try:
+                            parent_merge_node = self._map[predecessor]
+                        except KeyError:
+                            parent_merge_node = MergeNode(predecessor._item)
+                            self._map[predecessor] = parent_merge_node
+                        merge_node._parents.add(parent_merge_node)
 
     def print_dot(self, name_map, out_stream):
         # type: (List[str], Logger) -> None
@@ -225,6 +243,7 @@ class MergeTree(object):
 
 
 class MergeNode(object):
+
     def __init__(self, item):
         # type: (LR0Item) -> None
         self._item = item

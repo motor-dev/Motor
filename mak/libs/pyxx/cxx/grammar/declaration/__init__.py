@@ -237,5 +237,12 @@ def explicit_noexport_declaration(self, explicit_deduction, explicit_declaration
     pass
 
 
+@glrp.merge('noexport-declaration')
+@cxx98
+def ambiguous_declaration(self, generic_declarator, generic_simple_type_specifier):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 if TYPE_CHECKING:
     from ...parser import CxxParser
