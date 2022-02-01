@@ -8,6 +8,7 @@ import sys
 
 
 class LALRTable(object):
+
     def __init__(self, action_table, goto_table):
         # type: (List[Dict[int, Tuple[Tuple[int, Optional[str]],...]]], List[Dict[int, int]]) -> None
         self._action_table = action_table
@@ -61,6 +62,7 @@ def _find_common_parent(node_list):
 def _find_counterexamples(conflict_list):
     # type: (List[Tuple[LR0Node, Optional[int]]]) -> List[Tuple[LR0Node, List[Tuple[LR0Node, LR0Path]]]]
     class IntermediateResult(object):
+
         def __init__(self, path_list):
             # type: (List[List[Tuple[LR0Node, LR0Path]]]) -> None
             self._paths = path_list
@@ -492,7 +494,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     if j >= 0:
                         action_map[a] = action_map.get(a, []) + [(j, item)]
 
-        merges = {}    # type: Dict[LR0Node, Tuple[Set[int], str]]
+        merges = {}    # type: Dict[FrozenSet[LR0Node], Dict[LR0Node, Tuple[Set[int], str]]]
 
         for a in sorted(action_map):
             actions = action_map[a]
@@ -633,11 +635,19 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     except KeyError:
                         item_conflict_node[node._item] = paths
             elif len(accepted_actions) > 1:
+                key = set()
                 for j, items in accepted_actions.items():
                     for item in items:
                         assert item._split is not None
                         item._split_use += 1
+                        key.add(item_group[item])
                 conflict_log.info('')
+
+                try:
+                    merge_set = merges[frozenset(key)]
+                except KeyError:
+                    merge_set = {}
+                    merges[frozenset(key)] = merge_set
 
                 sm_log.info('    %-30s split', name_map[a])
                 for j, token_action in st_action[a]:
@@ -652,12 +662,12 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                         if j < 0:
                             sm_log.info('        reduce using rule %s', item.to_string(name_map))
                             try:
-                                merges[item_group[item]][0].add(a)
+                                merge_set[item_group[item]][0].add(a)
                             except KeyError:
-                                merges[item_group[item]] = (set([a]), item._split)
+                                merge_set[item_group[item]] = (set([a]), item._split)
                         else:
                             if item_group[item] not in merges:
-                                merges[item_group[item]] = (set(), item._split)
+                                merge_set[item_group[item]] = (set(), item._split)
                     if action_error:
                         error_log.error('action mismatch in state %d for token \'%s\':' % (st, name_map[a]))
                         for item in items:
@@ -681,8 +691,17 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
 
         if merges:
             assert len(states[0]._core) == 1
-            splits = [(item, lookaheads, split_name) for item, (lookaheads, split_name) in merges.items()]
-            _find_merge_points(splits, name_map, list(states[0]._core)[0], conflict_log)
+            for _, merge_set in merges.items():
+                splits = [(node, lookaheads, split_name) for node, (lookaheads, split_name) in merge_set.items()]
+                conflict_log.info('   Merge graph for rules:')
+                for node, lookaheads, split_name in splits:
+                    conflict_log.info(
+                        '      [%s][%s] %s' %
+                        (split_name, ','.join([name_map[x] for x in lookaheads]), node._item.to_string(name_map))
+                    )
+                _find_merge_points(splits, name_map, list(states[0]._core)[0], conflict_log)
+                conflict_log.info('')
+            conflict_log.info('')
 
         nkeys = set([])
         for item in item_group:

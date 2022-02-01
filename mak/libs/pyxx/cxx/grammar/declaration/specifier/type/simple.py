@@ -91,8 +91,8 @@ def generic_type_name(self, template_name, class_name, enum_name, typedef_name):
 
 @cxx98
 @glrp.merge('simple-type-specifier')
-def generic_simple_type_specifier(self, generic_type_name, template_name, concept_name):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production, Optional[glrp.Production]]) -> None
+def generic_simple_type_specifier(self, generic_nested_name_specifier, generic_type_name, template_name, concept_name):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production, Optional[glrp.Production]], Optional[glrp.Production]]) -> None
     pass
 
 

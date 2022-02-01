@@ -49,5 +49,12 @@ def scope_opt(self, p):
     pass
 
 
+@glrp.merge('nested-name-specifier')
+@cxx98
+def generic_nested_name_specifier(self, generic_type_name, namespace_name, namespace_alias):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 if TYPE_CHECKING:
     from .....parser import CxxParser

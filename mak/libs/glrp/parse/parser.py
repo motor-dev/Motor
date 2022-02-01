@@ -17,10 +17,11 @@ LOAD_OPTIMIZED = 0
 GENERATE = 1
 LOAD_CACHE = 2
 
-VERSION = '0.22'
+VERSION = '0.24'
 
 
 class Action(object):
+
     def __init__(self):
         # type: () -> None
         pass
@@ -32,6 +33,7 @@ class Action(object):
 
 
 class _DirectAction(Action):
+
     def __init__(self, action_name):
         # type: (str) -> None
         Action.__init__(self)
@@ -43,6 +45,7 @@ class _DirectAction(Action):
 
 
 class _AcceptAction(Action):
+
     def __init__(self):
         # type: () -> None
         Action.__init__(self)
@@ -70,6 +73,8 @@ class Parser(object):
                     h.update(rule_string.encode())
                 for merge_string in getattr(action, 'merge', []):
                     h.update(merge_string.encode())
+                for signature in getattr(action, 'merge_signature', []):
+                    h.update(signature.encode())
             if mode == LOAD_CACHE:
                 try:
                     self._grammar = self._load_table(output_directory)
