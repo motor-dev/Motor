@@ -41,7 +41,7 @@ declarator-id:
 """
 
 import glrp
-from ....parser import cxx98, cxx11
+from ....parser import cxx98, cxx11, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -176,19 +176,18 @@ def declarator_id_cxx11(self, p):
     pass
 
 
-@glrp.merge('declarator-id')
-@cxx98
-def generic_declarator_id(self, generic_nested_name_specifier, generic_id_expression):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
+#@glrp.merge('declarator-id')
+#@cxx98_merge
+#def generic_declarator_id(self, generic_nested_name_specifier, generic_id_expression):
+#    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+#    pass
 
-
-@glrp.merge('declarator')
-@cxx98
-def generic_declarator(self, generic_nested_name_specifier, generic_declarator_id):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
+#@glrp.merge('declarator')
+#@cxx98_merge
+#def generic_declarator(self, generic_nested_name_specifier, generic_declarator_id):
+#    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+#    pass
 
 if TYPE_CHECKING:
+    from motor_typing import Optional
     from ....parser import CxxParser

@@ -14,10 +14,9 @@ def diagnostic(func):
         if call in self._expected_diagnostics:
             self._expected_diagnostics.remove(cast(T, call))
         format_values = func(self, symbol, *args, **kw_args)
-        self._msg_position(
-            'note', lexer, symbol,
-            getattr(self.LANG, func.__name__, func.__doc__).format(**format_values)
-        )
+        message = getattr(self.LANG, func.__name__, func.__doc__)
+        assert isinstance(message, str)
+        self._msg_position('note', lexer, symbol, message.format(**format_values))
 
     return cast(T, call)
 
@@ -34,10 +33,9 @@ def warning(flag_name, enabled=False, enabled_in=[]):
             self._warning_count += 1
             if self._warning_count == 1 and self._arguments.warn_error:
                 self.C0002(lexer, symbol)
-            self._msg_position(
-                'warning', lexer, symbol,
-                getattr(self.LANG, func.__name__, func.__doc__).format(**format_values) + ' [-W{}]'.format(flag_name)
-            )
+            message = getattr(self.LANG, func.__name__, func.__doc__)
+            assert isinstance(message, str)
+            self._msg_position('warning', lexer, symbol, message.format(**format_values) + ' [-W{}]'.format(flag_name))
 
         setattr(call, 'flag_name', flag_name)
         setattr(call, 'enabled_in', enabled_in)
@@ -53,10 +51,9 @@ def error(func):
         # type: (Logger, glrp.Lexer, glrp.Symbol, *Union[str, int], **Union[str, int]) -> None
         self._error_count += 1
         format_values = func(self, symbol, *args, **kw_args)
-        self._msg_position(
-            'error', lexer, symbol,
-            getattr(self.LANG, func.__name__, func.__doc__).format(**format_values)
-        )
+        message = getattr(self.LANG, func.__name__, func.__doc__)
+        assert isinstance(message, str)
+        self._msg_position('error', lexer, symbol, message.format(**format_values))
 
     call.__name__ = func.__name__
     return cast(T, call)

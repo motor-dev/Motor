@@ -2,6 +2,7 @@ from motor_typing import TYPE_CHECKING
 
 
 class LR0Item(object):
+
     def __init__(self, rule, index, next, predecessor, successors, first, follow, merge_list=[]):
         # type: (Grammar.Rule, int, Optional[LR0Item], Optional[int], List[Grammar.Rule], Set[int], Dict[int, int], List[Tuple[str, Dict[str, None]]]) -> None
         self.rule = rule
@@ -20,12 +21,12 @@ class LR0Item(object):
         self._after = successors
         self._symbols = set(rule.production)
         self._first = first
-        self._follow = follow
+        self._follow = follow      # type: Dict[int, int]
         self._lookaheads = {}      # type: Dict[int, List[int]]
         self._precedence = None    # type: Optional[Tuple[str, int]]
         self._split = None         # type: Optional[str]
         self._action = None        # type: Optional[str]
-        self._merge = merge_list
+        self._merge = merge_list   # type: List[Tuple[str, Dict[str, None]]]
         self._split_use = 0
         self._merge_use = 0
 

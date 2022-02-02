@@ -5,7 +5,7 @@ id-expression:
 """
 
 import glrp
-from .....parser import cxx98
+from .....parser import cxx98, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -17,14 +17,14 @@ def id_expression(self, p):
     pass
 
 
-@glrp.merge('id-expression')
-@cxx98
-def generic_id_expression(self, template_name, generic_type_name):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    # template_name corresponds to an unqualified-id
-    # generic-type-name to a qualified-id
-    pass
-
+#@glrp.merge('id-expression')
+#@cxx98_merge
+#def generic_id_expression(self, template_name, generic_type_name):
+#    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+#    # template_name corresponds to an unqualified-id
+#    # generic-type-name to a qualified-id
+#    pass
 
 if TYPE_CHECKING:
+    from motor_typing import Optional
     from .....parser import CxxParser
