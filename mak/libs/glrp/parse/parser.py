@@ -17,7 +17,7 @@ LOAD_OPTIMIZED = 0
 GENERATE = 1
 LOAD_CACHE = 2
 
-VERSION = '0.24'
+VERSION = '0.27'
 
 
 class Action(object):
@@ -283,9 +283,9 @@ T = TypeVar('T', bound=Parser)
 
 
 def merge(rule_name):
-    # type: (str) -> Callable[[Callable[..., int]], Callable[..., int]]
+    # type: (str) -> Callable[[Callable[..., None]], Callable[..., None]]
     def attach(method):
-        # type: (Callable[..., int]) -> Callable[..., int]
+        # type: (Callable[..., None]) -> Callable[..., None]
         if not hasattr(method, 'merge'):
             setattr(method, 'merge', [])
 

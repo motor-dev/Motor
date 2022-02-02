@@ -48,6 +48,12 @@ def _empty_rule(parser, production):
     pass
 
 
+def cxx98_merge(func):
+    # type: (Callable[..., None]) -> Callable[..., None]
+    setattr(Cxx98Parser, func.__name__, func)
+    return func
+
+
 def cxx98(func):
     # type: (Callable[[CxxParser, glrp.Production], None]) -> Callable[[glrp.Parser, glrp.Production], None]
     setattr(Cxx98Parser, func.__name__, func)
@@ -127,3 +133,5 @@ def deprecated_cxx23(func):
 
 
 from . import grammar
+if TYPE_CHECKING:
+    from motor_typing import Optional

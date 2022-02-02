@@ -5,11 +5,12 @@ class MergeTree(object):
 
     def __init__(self, node_set):
         # type: (List[Tuple[LR0Node, Set[int], str]]) -> None
-        self._map = {}     # type: Dict[LR0Node, MergeNode]
+        self._map = {}     # type: Dict[Tuple[LR0Node, int], MergeNode]
+        self._state_index = 0
 
         self._add_nodes(node_set)
         for node, _, tag in node_set:
-            self._map[node].add_tag(tag)
+            self._map[(node, 0)].add_tag(tag)
 
     def check_resolved(self, root_node, name_map, logger):
         # type: (LR0Node, List[str], Logger) -> None
@@ -19,10 +20,10 @@ class MergeTree(object):
         self.print_dot(name_map, logger)
         pass
 
-    def backtrack_up(self, node, path, lookaheads, seen):
-        # type: (LR0Node, List[Tuple[LR0Node, bool]], Set[int], Set[Tuple[LR0Node, bool]]) -> List[Tuple[LR0Node, List[Tuple[LR0Node, bool]], Set[int], int]]
+    def backtrack_up(self, node, path, lookaheads, seen, new_states):
+        # type: (LR0Node, List[Tuple[LR0Node, int, bool]], Set[int], Set[Tuple[LR0Node, bool]], Dict[Tuple[int, int], int]) -> List[Tuple[LR0Node, List[Tuple[LR0Node, int, bool]], Set[int], int]]
         queue = [(node, path, lookaheads)]
-        result = []    # type: List[Tuple[LR0Node, List[Tuple[LR0Node, bool]], Set[int], int]]
+        result = []    # type: List[Tuple[LR0Node, List[Tuple[LR0Node, int, bool]], Set[int], int]]
 
         while queue:
             node, path, lookaheads = queue.pop(0)
@@ -41,23 +42,32 @@ class MergeTree(object):
                     queue.append((parent, path, lookaheads))
             for predecessor in node._predecessors:
                 assert node._predecessor_lookahead is not None
+                try:
+                    state_index = new_states[(predecessor._item_set._index, node._predecessor_lookahead)]
+                except KeyError:
+                    self._state_index += 1
+                    state_index = self._state_index
+                    new_states[(predecessor._item_set._index, node._predecessor_lookahead)] = state_index
                 result.append(
-                    (predecessor, path + [(predecessor, len(lookaheads) > 0)], lookaheads, node._predecessor_lookahead)
+                    (
+                        predecessor, path + [(predecessor, state_index, len(lookaheads) > 0)], lookaheads,
+                        node._predecessor_lookahead
+                    )
                 )
 
         return result
 
     def backtrack_to_target(self, node, path, lookaheads, seen, target):
-        # type: (LR0Node, List[Tuple[LR0Node, bool]], Set[int], Set[Tuple[LR0Node, bool]], LR0Node) -> List[List[Tuple[LR0Node, bool]]]
+        # type: (LR0Node, List[Tuple[LR0Node, int, bool]], Set[int], Set[Tuple[LR0Node, bool]], LR0Node) -> List[List[Tuple[LR0Node, int, bool]]]
         queue = [(node, path, lookaheads)]
-        result = []    # type: List[List[Tuple[LR0Node, bool]]]
+        result = []    # type: List[List[Tuple[LR0Node, int, bool]]]
 
         while queue:
             node, path, lookaheads = queue.pop(0)
 
             for parent in node._direct_parents:
                 if parent == target:
-                    result.append(path + [(parent, False)])
+                    result.append(path + [(parent, path[-1][1], False)])
                 if (parent, False) in seen:
                     continue
                 seen.add((parent, False))
@@ -74,19 +84,19 @@ class MergeTree(object):
     def _add_nodes(self, node_set):
         # type: (List[Tuple[LR0Node, Set[int], str]]) -> None
         for node, _, _ in node_set:
-            self._map[node] = MergeNode(node._item)
-
+            self._map[(node, 0)] = MergeNode(node._item)
         all_paths = [
             (node, lookaheads, []) for node, lookaheads, _ in node_set
-        ]                                                              # type: List[Tuple[LR0Node, Set[int], List[List[Tuple[LR0Node, bool]]]]]
+        ]                                                              # type: List[Tuple[LR0Node, Set[int], List[List[Tuple[LR0Node, int, bool]]]]]
 
-        lst = []   # type: List[List[Tuple[LR0Node, List[Tuple[LR0Node, bool]], Set[int], Set[Tuple[LR0Node, bool]]]]]
+        lst = []   # type: List[List[Tuple[LR0Node, List[Tuple[LR0Node, int, bool]], Set[int], Set[Tuple[LR0Node, bool]]]]]
         for node, lookaheads, _ in node_set:
-            lst.append([(node, [(node, len(lookaheads) > 0)], lookaheads, set())])
+            lst.append([(node, [(node, 0, len(lookaheads) > 0)], lookaheads, set())])
         queue = [(lst, node_set[0][0]._item_set._index)]
 
         while queue:
             path_list, state = queue.pop(0)
+            new_states = {}    # type: Dict[Tuple[int, int], int]
 
             if state == 0:
                 for index, paths in enumerate(path_list):
@@ -95,10 +105,10 @@ class MergeTree(object):
                         all_paths[index][2].extend(self.backtrack_to_target(node, path, lookahead, seen, root_node))
 
             states = {
-            }              # type: Dict[Tuple[int, int], List[List[Tuple[LR0Node, List[Tuple[LR0Node, bool]], Set[int], Set[Tuple[LR0Node, bool]]]]]]
+            }              # type: Dict[Tuple[int, int], List[List[Tuple[LR0Node, List[Tuple[LR0Node, int, bool]], Set[int], Set[Tuple[LR0Node, bool]]]]]]
             for index, paths in enumerate(path_list):
                 for node, path, lookahead, seen in paths:
-                    predecessor_list = self.backtrack_up(node, path, lookahead, seen)
+                    predecessor_list = self.backtrack_up(node, path, lookahead, seen, new_states)
                     for predecessor, predecessor_path, lookaheads, consumed_token in predecessor_list:
                         try:
                             predecessors = states[(predecessor._item_set._index, consumed_token)]
@@ -118,27 +128,32 @@ class MergeTree(object):
         self._build_tree(all_paths)
 
     def _build_tree(self, paths):
-        # type: (List[Tuple[LR0Node, Set[int], List[List[Tuple[LR0Node, bool]]]]]) -> None
-        states = {}    # type: Dict[int, Tuple[Set[int], List[Tuple[LR0Node, bool]], List[Tuple[LR0Node, bool]]]]
+        # type: (List[Tuple[LR0Node, Set[int], List[List[Tuple[LR0Node, int, bool]]]]]) -> None
+        states = {}                                                                                   # type: Dict[int, Tuple[Set[int], List[Tuple[LR0Node, int, bool]], List[Tuple[LR0Node, int, bool]]]]
         for _, lookaheads, path_list in paths:
             for path in path_list:
-                head, la = path[0]
-                for tail, la_tail in path[1:]:
-                    state = head._item_set._index
+                head, state_index, la = path[0]
+                for tail, new_state_index, la_tail in path[1:]:
                     try:
-                        states[state][1].append((head, la))
-                        states[state][2].append((tail, la_tail))
+                        states[state_index][1].append((head, state_index, la))
+                        states[state_index][2].append((tail, new_state_index, la_tail))
                     except KeyError:
-                        states[state] = (lookaheads, [(head, la)], [(tail, la_tail)])
+                        states[state_index] = (
+                            lookaheads, [(head, state_index, la)], [(tail, new_state_index, la_tail)]
+                        )
                     head = tail
                     la = la_tail
+                    state_index = new_state_index
 
         for _, (lookaheads, heads, dest) in states.items():
-            targets = set(dest)
-            for node, _ in heads + dest:
-                if node not in self._map:
-                    self._map[node] = MergeNode(node._item)
+            targets = {}
+            for t in dest:
+                targets[(t[0], t[2])] = t[1]
+            for node, state_index, _ in heads + dest:
+                if (node, state_index) not in self._map:
+                    self._map[(node, state_index)] = MergeNode(node._item)
             item_set = heads[0][0]._item_set
+            state_index = heads[0][1]
 
             queue = list(targets)
             seen = set()
@@ -149,66 +164,85 @@ class MergeTree(object):
                 seen.add((node, la))
                 if node._item_set != item_set:
                     assert node._successor is not None
-                    targets.add((node._successor, la))
+                    targets[(node._successor, la)] = state_index
                     queue.append((node._successor, la))
                 else:
                     item = node._item
                     if la:
                         if -1 in item._follow:
                             for child in node._direct_children:
-                                targets.add((child, True))
+                                targets[(child, True)] = state_index
                                 queue.append((child, True))
                     else:
                         if not lookaheads.isdisjoint(item._follow):
                             for child in node._direct_children:
-                                targets.add((child, True))
+                                targets[(child, True)] = state_index
                                 queue.append((child, True))
                         for child in node._direct_children:
-                            targets.add((child, False))
+                            targets[(child, False)] = state_index
                             queue.append((child, False))
 
-            seen = set()
-            queue = list(heads)
-            while queue:
-                node, la = queue.pop(0)
-                merge_node = self._map[node]
+            seen2 = set()
+            queue2 = []
+            for head, state_index, la in heads:
+                try:
+                    merge_node = self._map[(head, state_index)]
+                except KeyError:
+                    merge_node = MergeNode(head._item)
+                    self._map[(head, state_index)] = merge_node
+                queue2.append((head, la, merge_node))
+
+            while queue2:
+                node, la, merge_node = queue2.pop(0)
                 assert ((node, la)) in targets
-                if (node, la) in seen:
+                if (node, la, merge_node) in seen2:
                     continue
-                seen.add((node, la))
+                seen2.add((node, la, merge_node))
 
                 for parent_node in node._direct_parents:
                     item = parent_node._item
-                    if (parent_node, la) in targets:
+                    try:
+                        state_index = targets[(parent_node, la)]
+                    except KeyError:
+                        pass
+                    else:
                         try:
-                            parent_merge_node = self._map[parent_node]
+                            parent_merge_node = self._map[(parent_node, state_index)]
                         except KeyError:
                             parent_merge_node = MergeNode(item)
-                            self._map[parent_node] = parent_merge_node
+                            self._map[(parent_node, state_index)] = parent_merge_node
                         merge_node._parents.add(parent_merge_node)
-                        queue.append((parent_node, la))
+                        queue2.append((parent_node, la, parent_merge_node))
                     if la:
-                        if (parent_node, False) in targets:
+                        try:
+                            state_index = targets[(parent_node, False)]
+                        except KeyError:
+                            pass
+                        else:
                             try:
-                                parent_merge_node = self._map[parent_node]
+                                parent_merge_node = self._map[(parent_node, state_index)]
                             except KeyError:
                                 parent_merge_node = MergeNode(item)
-                                self._map[parent_node] = parent_merge_node
+                                self._map[(parent_node, state_index)] = parent_merge_node
                             merge_node._parents.add(parent_merge_node)
-                            queue.append((parent_node, False))
+                            queue2.append((parent_node, False, parent_merge_node))
                 for predecessor in node._predecessors:
-                    if (predecessor, la) in targets:
+                    try:
+                        state_index = targets[(predecessor, la)]
+                    except KeyError:
+                        pass
+                    else:
                         try:
-                            parent_merge_node = self._map[predecessor]
+                            parent_merge_node = self._map[(predecessor, state_index)]
                         except KeyError:
                             parent_merge_node = MergeNode(predecessor._item)
-                            self._map[predecessor] = parent_merge_node
+                            self._map[(predecessor, state_index)] = parent_merge_node
                         merge_node._parents.add(parent_merge_node)
 
     def print_dot(self, name_map, out_stream):
         # type: (List[str], Logger) -> None
         out_stream.info('   digraph MergeTree {')
-        out_stream.info('      node[style=filled][shape=box];')
+        out_stream.info('     node[style=filled][shape=box];')
         colors = [
             'aliceblue', 'aquamarine', 'burlywood', 'cadetblue1', 'coral', 'darkgoldenrod1', 'darkolivegreen1',
             'darkslategray2', 'deepskyblue', 'gray', 'khaki1', 'lightpink1', 'mistyrose', 'palegreen1', 'rosybrown2',
@@ -225,20 +259,39 @@ class MergeTree(object):
                 tags[tag] = result
                 return result
 
-        for node, merge_node in self._map.items():
-            color = ':'.join([get_color(tag) for tag in merge_node._tags])
-            out_stream.info(
-                '      %d[label="%s[%s]\\n%s"][fillcolor="%s"];' % (
-                    id(merge_node), name_map[node._item._symbol
-                                             ], ', '.join(merge_node._tags), node._item.to_short_string(name_map), color
+        node_index = {}    # type: Dict[Tuple[int, str], List[MergeNode]]
+        for (node, index), merge_node in self._map.items():
+            if merge_node._merge_result:
+                try:
+                    node_index[(index, merge_node._merge_result)].append(merge_node)
+                except KeyError:
+                    node_index[(index, merge_node._merge_result)] = [merge_node]
+
+        for (index, merge_result), merge_nodes in node_index.items():
+            out_stream.info('     subgraph cluster_%s_%d {' % (merge_result, index))
+            for merge_node in merge_nodes:
+                color = ':'.join([get_color(tag) for tag in merge_node._tags])
+                out_stream.info(
+                    '       %d[label="%s[%s]\\n%s"][fillcolor="%s"];' % (
+                        id(merge_node), name_map[merge_node._item._symbol], ', '.join(merge_node._tags),
+                        merge_node._item.to_short_string(name_map), color
+                    )
                 )
-            )
+            out_stream.info('     }')
+
+        for _, merge_node in self._map.items():
+            if not merge_node._merge_result:
+                color = ':'.join([get_color(tag) for tag in merge_node._tags])
+                out_stream.info(
+                    '     %d[label="%s[%s]\\n%s"][fillcolor="%s"];' % (
+                        id(merge_node), name_map[merge_node._item._symbol], ', '.join(merge_node._tags),
+                        merge_node._item.to_short_string(name_map), color
+                    )
+                )
+
         for item, merge_node in self._map.items():
             for parent in merge_node._parents:
-                if merge_node._tags.difference(parent._tags):
-                    out_stream.info('      %d->%d[color=red];' % (id(parent), id(merge_node)))
-                else:
-                    out_stream.info('      %d->%d;' % (id(parent), id(merge_node)))
+                out_stream.info('     %d->%d;' % (id(parent), id(merge_node)))
         out_stream.info('   }')
 
 
@@ -249,6 +302,7 @@ class MergeNode(object):
         self._item = item
         self._tags = set()     # type: Set[str]
         self._parents = set()  # type: Set[MergeNode]
+        self._merge_result = ''
 
     def add_tag(self, tag):
         # type: (str) -> None
@@ -258,12 +312,13 @@ class MergeNode(object):
                 for result, merged_tags in self._item._last._merge:
                     if tag in merged_tags:
                         tag = result
+                        self._merge_result = tag
             for parent in self._parents:
                 parent.add_tag(tag)
 
 
 if TYPE_CHECKING:
-    from motor_typing import Dict, List, Optional, Set, Tuple
+    from motor_typing import Dict, List, Set, Tuple
     from .lr0node import LR0Node
     from .lr0item import LR0Item
     from ..log import Logger

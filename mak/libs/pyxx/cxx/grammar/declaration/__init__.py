@@ -56,7 +56,7 @@ identifier-list:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx17, cxx20
+from ...parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge
 from motor_typing import TYPE_CHECKING
 from . import specifier
 from . import declarator
@@ -230,19 +230,18 @@ def identifier_list(self, p):
     pass
 
 
-@glrp.merge('noexport-declaration')
-@cxx98
-def explicit_noexport_declaration(self, explicit_deduction, explicit_declaration):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
+#@glrp.merge('noexport-declaration')
+#@cxx98_merge
+#def explicit_noexport_declaration(self, explicit_deduction, explicit_declaration):
+#    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+#    pass
 
-
-@glrp.merge('noexport-declaration')
-@cxx98
-def ambiguous_declaration(self, generic_declarator, generic_simple_type_specifier):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
+#@glrp.merge('noexport-declaration')
+#@cxx98_merge
+#def ambiguous_declaration(self, generic_declarator, generic_simple_type_specifier):
+#    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+#    pass
 
 if TYPE_CHECKING:
+    from motor_typing import Optional
     from ...parser import CxxParser

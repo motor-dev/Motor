@@ -27,7 +27,7 @@ type-name:
 """
 
 import glrp
-from .....parser import cxx98, cxx11, cxx20
+from .....parser import cxx98, cxx11, cxx20, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -82,26 +82,25 @@ def type_name(self, p):
     pass
 
 
-@cxx98
-@glrp.merge('type-name')
-def generic_type_name(self, template_name, class_name, enum_name, typedef_name):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@cxx98
-@glrp.merge('simple-type-specifier')
-def generic_simple_type_specifier(self, generic_nested_name_specifier, generic_type_name, template_name, concept_name):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production, Optional[glrp.Production]], Optional[glrp.Production]]) -> None
-    pass
-
-
-@cxx98
-@glrp.merge('simple-type-specifier')
-def template_simple_type_specifier(self, class_template_id, typedef_template_id):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production, Optional[glrp.Production]]) -> None
-    pass
-
+#@glrp.merge('type-name')
+#@cxx98_merge
+#def generic_type_name(self, template_name, class_name, enum_name, typedef_name):
+#    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+#    pass
+#
+#
+#@glrp.merge('simple-type-specifier')
+#@cxx98_merge
+#def generic_simple_type_specifier(self, generic_nested_name_specifier, generic_type_name, template_name, concept_name):
+#    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+#    pass
+#
+#
+#@glrp.merge('simple-type-specifier')
+#@cxx98_merge
+#def template_simple_type_specifier(self, class_template_id, typedef_template_id):
+#    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+#    pass
 
 if TYPE_CHECKING:
     from typing import Optional
