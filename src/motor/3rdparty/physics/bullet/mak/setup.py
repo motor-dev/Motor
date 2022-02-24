@@ -25,7 +25,7 @@ def setup_system(conf):
         ['BulletSoftBody', 'BulletDynamics', 'BulletCollision', 'LinearMath'],
         var='bullet',
         includepath=['=/usr/include/bullet', '=/usr/local/include/bullet'],
-        includes=['LinearMath/btAlignedAllocator.h'],
+        includes=['LinearMath/btAlignedAllocator.h', 'btBulletDynamicsCommon.h'],
         functions=['btAlignedAllocSetCustom']
     ):
         conf.env.BULLET_BINARY = True

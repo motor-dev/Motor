@@ -2,6 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/plugin.compute.cuda/stdafx.h>
+#include <motor/scheduler/kernel/imemorybuffer.hh>
 #include <kernelobject.hh>
 
 namespace Motor { namespace KernelScheduler { namespace Cuda {

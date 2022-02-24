@@ -1,2 +1,2 @@
 def build(bld):
-    bld.thirdparty('motor.3rdparty.graphics.OpenGLES2', feature='OpenGLES2')
+    bld.thirdparty('motor.3rdparty.graphics.OpenGLES2', feature_list=['OpenGLES2'])

@@ -26,10 +26,6 @@ def wrap_class(cls_name):
     derived.exec_command = exec_command_filter
 
 
-for task in 'c', 'cxx', 'cshlib', 'cxxshlib', 'cstlib', 'cxxstlib', 'cprogram', 'cxxprogram', 'masm', 'winrc':
-    wrap_class(task)
-
-
 @extension('.masm')
 def masm_hook(self, node):
     if self.env.ML:
@@ -49,4 +45,5 @@ def masm_hook(self, node):
 
 
 def build(bld):
-    pass
+    for task in 'c', 'cxx', 'cshlib', 'cxxshlib', 'cstlib', 'cxxstlib', 'cprogram', 'cxxprogram', 'masm', 'winrc':
+        wrap_class(task)

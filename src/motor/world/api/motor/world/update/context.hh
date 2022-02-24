@@ -11,8 +11,8 @@ namespace Motor { namespace World {
 
 struct UpdateContext
 {
-    float               deltaTime;
-    const EventContext& eventContext;
+    /*float               deltaTime;
+    const EventContext& eventContext;*/
 };
 
 }}  // namespace Motor::World

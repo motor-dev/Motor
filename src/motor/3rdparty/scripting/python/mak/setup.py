@@ -25,6 +25,7 @@ def python_package(configuration_context, version, version_number):
 @feature("check_python")
 @before_method("process_source")
 def check_python_test(self):
+
     def write_test_file(task):
         task.outputs[0].write(task.generator.code)
 
