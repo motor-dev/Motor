@@ -86,6 +86,7 @@ class cpuc(Task.Task):
 
 class cpu_header(Task.Task):
     color = 'BLUE'
+    ext_out = ['.h']
 
     def scan(self):
         return ([], [])
@@ -93,15 +94,14 @@ class cpu_header(Task.Task):
     vars = ['VECTOR_OPTIM_VARIANTS']
 
     def run(self):
-        with open(self.outputs[0].abspath(), 'w') as out:
-            out.write(
-                "static const char* s_cpuVariants[] = { %s };\n"
-                "static const i32 s_cpuVariantCount = %d;\n"
-                "" % (
-                    ', '.join('"%s"' % o for o in [''] + [v[1:] for v in self.env.VECTOR_OPTIM_VARIANTS]
-                              ), 1 + len(self.env.VECTOR_OPTIM_VARIANTS)
-                )
+        self.outputs[0].write(
+            "static const char* s_cpuVariants[] = { %s };\n"
+            "static const i32 s_cpuVariantCount = %d;\n"
+            "" % (
+                ', '.join('"%s"' % o for o in [''] + [v[1:] for v in self.env.VECTOR_OPTIM_VARIANTS]
+                          ), 1 + len(self.env.VECTOR_OPTIM_VARIANTS)
             )
+        )
 
 
 @feature('motor:cpu:variants')
@@ -112,8 +112,7 @@ def generate_cpu_variant_header(self):
             env = self.bld.all_envs[toolchain]
             out_header = self.make_bld_node('include', None, 'kernel_optims.hh')
             task = self.create_task('cpu_header', [], [out_header])
-            task.env = env
-            self.env.append_unique('INCLUDES', [out_header.parent.abspath()])
+            self.includes.append(out_header.parent)
 
 
 @feature('motor:cpu:kernel_create')

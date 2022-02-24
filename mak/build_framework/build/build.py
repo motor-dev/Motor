@@ -294,6 +294,17 @@ def motor_build_objects(self):
 
 
 @taskgen_method
+def add_objects_from_tgen(self, tg):
+    try:
+        link_task = self.link_task
+    except AttributeError:
+        pass
+    else:
+        for tsk in getattr(tg, 'compiled_tasks', []):
+            link_task.inputs.append(tsk.outputs[0])
+
+
+@taskgen_method
 def process_use_link(self):
     link_task = getattr(self, 'link_task', None)
     if link_task:

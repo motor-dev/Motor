@@ -23,7 +23,7 @@ def expand_nodepath(bld, nodepath):
 
 
 @conf
-def thirdparty(bld, name, feature='', path='', source_node=None, var='', use=[], private_use=[], env=None):
+def thirdparty(bld, name, feature_list=[], path='', source_node=None, var='', use=[], private_use=[], env=None):
     if not var:
         var = bld.path.parent.name
     platforms = bld.env.VALID_PLATFORMS
@@ -36,7 +36,7 @@ def thirdparty(bld, name, feature='', path='', source_node=None, var='', use=[],
         for env in bld.multiarch_envs:
             target_name = env.ENV_PREFIX % name
             if env['check_%s' % var] or env.PROJECTS:
-                if feature:
+                for feature in feature_list:
                     bld.add_feature(feature, env)
                 supported = True
                 var_id = var.upper().replace('+', 'P').replace('-', '_')
@@ -100,7 +100,7 @@ def thirdparty(bld, name, feature='', path='', source_node=None, var='', use=[],
     else:
         target_name = env.ENV_PREFIX % name
         if env['check_%s' % var] or env.PROJECTS:
-            if feature:
+            for feature in feature_list:
                 bld.add_feature(feature, env)
             var_id = var.upper().replace('+', 'P').replace('-', '_')
             tg = bld(

@@ -7,7 +7,7 @@ def build_binary(bld, name, env, path):
     tg = bld.thirdparty(
         name,
         source_node=path,
-        feature='OpenCL',
+        feature_list=['OpenCL'],
         use=['motor.3rdparty.graphics.OpenGL'],
         env=env,
     )

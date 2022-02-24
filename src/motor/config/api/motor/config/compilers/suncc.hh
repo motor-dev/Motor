@@ -55,6 +55,7 @@ extern "C" void* __builtin_alloca(size_t);
 #define MOTOR_EXPORT __global
 #define MOTOR_IMPORT
 
+#pragma error_messages(off, noexthrow)
 #if __SUNPRO_CC < 0x5130
 #    pragma error_messages(off, wbadinit)
 #    pragma error_messages(off, wbadasg)

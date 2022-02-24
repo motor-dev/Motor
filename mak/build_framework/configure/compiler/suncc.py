@@ -149,18 +149,18 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
         v['LINKFLAGS_debug'] = ['-g']
 
         v['CPPFLAGS_profile'] = ['-DNDEBUG']
-        v['CFLAGS_profile'] = ['-g', '-DNDEBUG', '-fast']
+        v['CFLAGS_profile'] = ['-g', '-DNDEBUG', '-fast', '-xcache=64/64/2:1024/64/16']
         v['CXXFLAGS_profile'] = [
             '-g', '-DNDEBUG', '-fast', '-features=mutable', '-features=localfor', '-features=bool',
-            '-features=no%split_init'
+            '-features=no%split_init', '-xcache=64/64/2:1024/64/16'
         ]
         v['LINKFLAGS_profile'] = ['-g']
 
         v['CPPFLAGS_final'] = ['-DNDEBUG']
-        v['CFLAGS_final'] = ['-g', '-DNDEBUG', '-fast']
+        v['CFLAGS_final'] = ['-g', '-DNDEBUG', '-fast', '-xcache=64/64/2:1024/64/16']
         v['CXXFLAGS_final'] = [
             '-g', '-DNDEBUG', '-fast', '-features=mutable', '-features=localfor', '-features=bool',
-            '-features=no%split_init'
+            '-features=no%split_init', '-xcache=64/64/2:1024/64/16'
         ]
         if self.version_number[0:2] != (5, 13):
             v['CXXFLAGS_profile'] += ['-features=no%except']
@@ -208,7 +208,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
         if platform.NAME == 'Linux':
             if self.arch == 'x86':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib', '=/usr/lib/i386-linux-gnu'])
-                v.CFLAGS += ['-xtarget=opteron', '-I/usr/include/i386-linux-gnu']
+                v.CFLAGS += ['-I/usr/include/i386-linux-gnu']
                 v.CXXFLAGS += [
                     os.path.join(conf.motornode.abspath(),
                                  'mak/compiler/suncc/interlocked-a=x86.il'), '-xarch=sse2', '-xchip=generic',
@@ -216,7 +216,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
                 ]
             elif self.arch == 'amd64':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib64', '=/usr/lib/x86_64-linux-gnu'])
-                v.CFLAGS += ['-xtarget=opteron', '-I/usr/include/x86_64-linux-gnu']
+                v.CFLAGS += ['-I/usr/include/x86_64-linux-gnu']
                 v.CXXFLAGS += [
                     os.path.join(conf.motornode.abspath(),
                                  'mak/compiler/suncc/interlocked-a=amd64.il'), '-xarch=sse2', '-xchip=generic',

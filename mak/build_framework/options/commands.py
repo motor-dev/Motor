@@ -14,6 +14,7 @@ def autoreconfigure(execute_method):
     """
         Decorator used to set the commands that can be reconfigured automatically
     """
+
     def execute(self):
         """
             First check if reconfiguration is needed, then triggers the
@@ -91,6 +92,7 @@ def autosetup(execute_method):
     """
         Decorator used to set the commands that can be setup automatically
     """
+
     def execute(self):
         if self.schedule_setup():
             return "SKIP"
@@ -116,6 +118,7 @@ def tidy_build(execute_method):
     """
         Decorator used to set the commands that tidy up the build folders
     """
+
     def execute(self):
         result = execute_method(self)
         if Options.options.tidy == 'force' or (
@@ -123,7 +126,8 @@ def tidy_build(execute_method):
             and Options.options.dynamic == False and Options.options.targets == '' and Options.options.tests
         ):
             all_nodes = set(
-                self.bldnode.ant_glob('**') + self.srcnode.ant_glob(os.path.join(self.env.PREFIX, self.optim, '**'))
+                self.bldnode.ant_glob('**', remove=False) +
+                self.srcnode.ant_glob(os.path.join(self.env.PREFIX, self.optim, '**'))
             )
             all_nodes.discard(self.bldnode.make_node(Context.DBFILE))
             for group in self.groups:
@@ -322,6 +326,7 @@ Build.BuildContext.execute = autoreconfigure(autosetup(tidy_build(Build.BuildCon
 
 
 def add_setup_command(toolchain):
+
     class Command(Setup):
         cmd = 'setup:%s' % (toolchain)
         motor_variant = toolchain
