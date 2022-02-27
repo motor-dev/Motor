@@ -30,7 +30,7 @@ jobs:
 
   macos:
     macos:
-      xcode: 10.3.0
+      xcode: 12.5.1
     steps:
       - checkout
       - run:

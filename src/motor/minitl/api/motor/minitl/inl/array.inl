@@ -34,7 +34,7 @@ array< T >::array(Allocator& allocator, ITERATOR begin, ITERATOR end)
 template < typename T >
 array< T >::array(const array< T >& other) : m_array(other.m_array.arena(), other.size())
 {
-    for(int i = 0; i < size(); ++i)
+    for(u32 i = 0; i < size(); ++i)
     {
         new((void*)&m_array[i]) T(other[i]);
     }
