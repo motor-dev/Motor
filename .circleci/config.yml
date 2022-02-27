@@ -12,15 +12,31 @@ jobs:
       - run:
           name: Configure
           command: python waf configure
-     
+      - run:
+          name: Build Windows MSVC 14.0 x64
+          command: python waf build:windows_amd64-msvc_x64-14.0:debug --tests
+      - run:
+          name: Build Windows MSVC 14.0 x86
+          command: python waf build:windows_x86-msvc_amd64_x86-14.0:debug
+      - run:
+          name: Build Windows MSVC 14.0 ARM
+          command: python waf build:windows_armv7a-msvc_amd64_arm-14.0:debug
+      - run:
+          name: Build Android Nougat GCC
+          command: python waf build:android_nougat_7.1-gcc-4.9.x:debug
+      - run:
+          name: Build Android Nougat Clang
+          command: python waf build:android_nougat_7.1-clang-5.0.300080:debug
+
   macos:
     macos:
-      xcode: 12.5.1
+      xcode: 10.3.0
     steps:
       - checkout
       - run:
           name: Configure
           command: python waf configure
+
   linux:
     docker:
       - image: motordev/motor:latest
