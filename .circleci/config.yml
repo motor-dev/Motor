@@ -1,8 +1,21 @@
 version: 2.1
 
+orbs:
+  win: circleci/windows@2.2.0
+
 jobs:
+  windows:
+    executor:
+      name: win/default
+    steps:
+      - checkout
+      - run:
+          name: Configure
+          command: python waf configure
+     
   macos:
-    xcode: 12.5.1
+    macos:
+      xcode: 12.5.1
     steps:
       - checkout
       - run:
@@ -95,3 +108,4 @@ workflows:
     jobs:
       - linux
       - macos
+      - windows
