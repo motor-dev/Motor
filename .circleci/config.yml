@@ -4,6 +4,21 @@ orbs:
   win: circleci/windows@2.2.0
 
 jobs:
+  android:
+    executor:
+      name: win/default
+    steps:
+      - checkout
+      - run:
+          name: Configure
+          command: python waf configure
+      - run:
+          name: Build Android Nougat GCC
+          command: python waf build:android_nougat_7.1-gcc-4.9.x:debug
+      - run:
+          name: Build Android Nougat Clang
+          command: python waf build:android_nougat_7.1-clang-5.0.300080:debug
+
   windows:
     executor:
       name: win/default
@@ -21,14 +36,8 @@ jobs:
       - run:
           name: Build Windows MSVC 14.0 ARM
           command: python waf build:windows_armv7a-msvc_amd64_arm-14.0:debug
-      - run:
-          name: Build Android Nougat GCC
-          command: python waf build:android_nougat_7.1-gcc-4.9.x:debug
-      - run:
-          name: Build Android Nougat Clang
-          command: python waf build:android_nougat_7.1-clang-5.0.300080:debug
 
-  macos:
+  macOS:
     macos:
       xcode: 12.5.1
     steps:
@@ -36,6 +45,27 @@ jobs:
       - run:
           name: Configure
           command: python waf configure
+      - run:
+          name: Build macOS
+          command: python waf build:macos11.3-appleclang-12.0.5:debug
+
+  iOS:
+    macos:
+      xcode: 12.5.1
+    steps:
+      - checkout
+      - run:
+          name: Configure
+          command: python waf configure
+      - run:
+          name: Build iOS
+          command: python waf build:iphone14.5-appleclang-12.0.5:debug
+      - run:
+          name: Build iOS Simulator
+          command: python waf build:iphonesimulator14.5-appleclang-12.0.5:debug
+      - run:
+          name: Build watchOS
+          command: python waf build:watchos7.4-appleclang-12.0.5:debug
 
   linux:
     docker:
@@ -123,5 +153,7 @@ workflows:
   build:
     jobs:
       - linux
-      - macos
+      - macOS
       - windows
+      - android
+      - iOS
