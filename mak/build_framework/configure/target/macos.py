@@ -130,6 +130,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
     old_sdk_re = re.compile('.*/SDKs/[\.\w]*\.sdk')
 
     def match(self, compiler, sdk_path, all_sdks):
+
         def get_paths(sdk_path):
             if self.platform_sdk_re.match(sdk_path):
                 platform_path = os.path.normpath(os.path.dirname(os.path.dirname(os.path.dirname(sdk_path))))
@@ -184,7 +185,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
             '@end\n'
             'int main(int argc, char* argv[])\n'
             '{\n'
-            '    [[Motorbject alloc] init];\n'
+            '    [[MotorObject alloc] init];\n'
             '    switch(argc) {\n'
             '    case 6:\n'
             '        return printf("%s\\n", argv[5]);\n'
