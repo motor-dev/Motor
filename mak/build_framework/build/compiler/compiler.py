@@ -51,7 +51,7 @@ def compiler_deps_post_run(original_post_run):
             except EnvironmentError:
                 Logs.error('Could not find a .d dependency file, are cflags/cxxflags overwritten?')
                 raise
-            lines = txt.replace('\\\n', ' ').split('\n')
+            lines = txt.replace('\\\n', ' ').replace('\\\r\n', ' ').split('\n')
             dependencies = []
             for line in lines:
                 if not line:
