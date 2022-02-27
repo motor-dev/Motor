@@ -1,5 +1,13 @@
-version: 2
+version: 2.1
+
 jobs:
+  macos:
+    xcode: 12.5.1
+    steps:
+      - checkout
+      - run:
+          name: Configure
+          command: python waf configure
   linux:
     docker:
       - image: motordev/motor:latest
@@ -86,3 +94,4 @@ workflows:
   build:
     jobs:
       - linux
+      - macos
