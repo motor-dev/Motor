@@ -182,7 +182,7 @@ def module(
             'MOTOR_PROJECTNAME=%s' % name
         ] + extra_defines,
         export_defines=extra_public_defines[:],
-        includes=extra_includes + includes + api + source_nodes + [build_context.srcnode],
+        includes=extra_includes + includes + api + [build_context.srcnode],
         export_includes=extra_public_includes + api,
     )
     if module_path is not None:
