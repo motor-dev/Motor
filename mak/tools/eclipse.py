@@ -26,11 +26,13 @@ def path_from(path, task_gen, appname):
 
 
 def gather_includes_defines(task_gen, appname):
+
     def gather_includes_defines_recursive(task_gen):
         try:
             return task_gen.motor_eclipse_cache
         except AttributeError:
             includes = getattr(task_gen, 'export_includes', [])
+            includes += getattr(task_gen, 'export_system_includes', [])
             defines = getattr(task_gen, 'export_defines', [])
             includes = [path_from(i, task_gen, appname) for i in includes]
             use = getattr(task_gen, 'use', [])

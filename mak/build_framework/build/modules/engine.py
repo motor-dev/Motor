@@ -13,6 +13,7 @@ def engine(
     extra_includes=[],
     extra_defines=[],
     extra_public_includes=[],
+    extra_system_includes=[],
     extra_public_defines=[],
     source_list=None,
     conditions=[],
@@ -27,7 +28,8 @@ def engine(
             name, [
                 engine(
                     bld, name, depends, private_depends, path, features, extra_includes, extra_defines,
-                    extra_public_includes, extra_public_defines, source_list, conditions, root_namespace, env
+                    extra_public_includes, extra_system_includes, extra_public_defines, source_list, conditions,
+                    root_namespace, env
                 ) for env in bld.multiarch_envs
             ]
         )
@@ -37,8 +39,8 @@ def engine(
                 name + '.console', [
                     engine(
                         bld, name + '.console', depends, private_depends + ['console'], p.source_nodes[0], features,
-                        extra_includes, extra_defines, extra_public_includes, extra_public_defines, source_list,
-                        conditions, root_namespace, env
+                        extra_includes, extra_defines, extra_public_includes, extra_system_includes,
+                        extra_public_defines, source_list, conditions, root_namespace, env
                     ) for env in bld.multiarch_envs
                 ]
             )

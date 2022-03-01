@@ -168,6 +168,7 @@ class vscode(Build.BuildContext):
                         tg.post()
                         include_paths += getattr(tg, 'includes', [])
                         include_paths += getattr(tg, 'export_includes', [])
+                        include_paths += getattr(tg, 'export_system_includes', [])
                         include_paths += getattr(tg, 'extra_includes', [])
                         defines += getattr(tg, 'defines', [])
                         defines += getattr(tg, 'export_defines', [])
