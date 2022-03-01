@@ -275,7 +275,7 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
             conf.find_program('jar', path_list=paths)
             conf.find_program('javadoc', path_list=paths)
         conf.load('javaw')
-        conf.env.append_value('JAVACFLAGS', ['-source', '1.6', '-target', '1.6'])
+        conf.env.append_value('JAVACFLAGS', ['-source', '1.7', '-target', '1.7'])
         conf.env.ANDROID_DEBUGKEY = conf.path.parent.make_node('debug.keystore').abspath()
         conf.env.JARSIGNER_FLAGS = [
             '-sigalg', 'MD5withRSA', '-digestalg', 'SHA1', '-keystore', conf.env.ANDROID_DEBUGKEY, '-storepass',
