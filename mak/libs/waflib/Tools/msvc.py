@@ -183,7 +183,6 @@ echo LIB=%%LIB%%;%%LIBPATH%%
 """ % (vcvars,target))
 	sout = conf.cmd_and_log(['cmd.exe', '/E:on', '/V:on', '/C', batfile.abspath()])
 	lines = sout.splitlines()
-	print(lines)
 
 	if not lines[0]:
 		lines.pop(0)
