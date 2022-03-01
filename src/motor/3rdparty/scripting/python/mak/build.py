@@ -9,7 +9,7 @@ def python_module(bld, name, depends, path, conditions):
 
     def python_lib(env):
         features = (['c', 'cxx', 'cxxshlib', 'motor:c', 'motor:cxx', 'motor:shared_lib', 'motor:python_module'])
-        result = bld.module(name, env, path, depends, [], features, None, [], [], [], [], [], conditions)
+        result = bld.module(name, env, path, depends, [], features, None, [], [], [], [], [], conditions, None)
         if result is not None:
             result.env.cxxshlib_PATTERN = result.env.pymodule_PATTERN
 

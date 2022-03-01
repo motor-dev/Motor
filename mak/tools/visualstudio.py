@@ -188,7 +188,7 @@ class Solution:
                 ]
         self.project_configs += project_config
         if self.use_folders:
-            parent = self.addFolder(task_gen.target)
+            parent = self.addFolder(task_gen.project_name)
             if parent:
                 self.folders.append((project.guid, parent))
 
@@ -760,6 +760,7 @@ class VisualStudio(Build.BuildContext):
             task_gen.bld = self
             task_gen.all_sources = []
             task_gen.features = []
+            task_gen.project_name = target
             nodes = [projects.make_node("%s.%s" % (target, ext)) for ext in klass.extensions]
             project = klass(task_gen, version, version_project, folders)
             project.write(nodes)

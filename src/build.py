@@ -48,6 +48,7 @@ def build_motor(bld):
             'motor.core', 'motor.meta', 'motor.introspect', 'motor.reflection', 'motor.settings', 'motor.scheduler',
             'motor.filesystem', 'motor.world', 'motor.plugin'
         ],
+        project_name='motor.motor',
         path=bld.path.find_node('motor/motor')
     )
 

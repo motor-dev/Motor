@@ -17,6 +17,7 @@ def plugin(
     source_list=None,
     conditions=[],
     root_namespace='Motor',
+    project_name=None,
     env=None
 ):
     if env is None:
@@ -26,7 +27,7 @@ def plugin(
                 plugin(
                     bld, name, depends, private_depends, path, features, extra_includes, extra_defines,
                     extra_public_includes, extra_system_includes, extra_public_defines, source_list, conditions,
-                    root_namespace, env
+                    root_namespace, project_name, env
                 ) for env in bld.multiarch_envs
             ]
         )
