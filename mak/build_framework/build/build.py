@@ -10,6 +10,7 @@ Build.PROTOCOL = 2
 old_log_display = Task.Task.log_display
 
 ccroot.USELIB_VARS['cxx'].add('CLC_CXXFLAGS')
+ccroot.USELIB_VARS['cxx'].add('SYSTEM_INCLUDES')
 
 
 def to_string(self):
@@ -795,3 +796,7 @@ def apply_incpaths(self):
     lst = self.to_incnodes(self.to_list(getattr(self, 'includes', [])) + self.env.INCLUDES)
     self.includes_nodes = lst
     self.env.INCPATHS = [x.abspath() for x in lst]
+    lst = self.to_incnodes(self.env.SYSTEM_INCLUDES)
+    for system_include in [x.abspath() for x in lst]:
+        self.env.append_value('CFLAGS', [self.env.IDIRAFTER, system_include])
+        self.env.append_value('CXXFLAGS', [self.env.IDIRAFTER, system_include])

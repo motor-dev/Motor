@@ -14,8 +14,6 @@
 #    endif
 #elif defined(_POWERPC)
 #    define motor_break() __asm("trap")
-#elif defined(_MIPS)
-#    define motor_break() __asm("break")
 #elif defined(_ARM64)
 #    define motor_break() __asm__ volatile(".word 0xd4200000");
 #elif defined(_ARM) && !defined(__thumb__)

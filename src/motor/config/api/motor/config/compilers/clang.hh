@@ -10,8 +10,6 @@
 #    define motor_break() __asm("int3")
 #elif defined(_POWERPC)
 #    define motor_break() __asm("trap")
-#elif defined(_MIPS)
-#    define motor_break() __asm("break")
 #elif defined(_ARM64)
 #    define motor_break() __asm__ volatile("brk 0x0")
 #elif defined(__APPLE_CC__) && defined(_ARM)

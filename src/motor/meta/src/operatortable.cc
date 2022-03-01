@@ -6,6 +6,7 @@
 
 namespace Motor { namespace Meta {
 
-raw< const OperatorTable > OperatorTable::s_emptyTable = {};
+static const OperatorTable s_table                     = {{0}, {0, 0}, {0}};
+raw< const OperatorTable > OperatorTable::s_emptyTable = {&s_table};
 
 }}  // namespace Motor::Meta

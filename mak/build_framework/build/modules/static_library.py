@@ -12,6 +12,7 @@ def static_library(
     extra_includes=[],
     extra_defines=[],
     extra_public_includes=[],
+    extra_system_includes=[],
     extra_public_defines=[],
     source_list=None,
     conditions=[],
@@ -24,7 +25,8 @@ def static_library(
             name, [
                 static_library(
                     bld, name, depends, private_depends, path, features, extra_includes, extra_defines,
-                    extra_public_includes, extra_public_defines, source_list, conditions, root_namespace, env
+                    extra_public_includes, extra_system_includes, extra_public_defines, source_list, conditions,
+                    root_namespace, env
                 ) for env in bld.multiarch_envs
             ]
         )
