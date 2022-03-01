@@ -36,6 +36,18 @@ jobs:
       - run:
           name: Build Windows MSVC 14.0 ARM
           command: python waf build:windows_armv7a-msvc_amd64_arm-14.0:debug
+      - run:
+          name: Build Windows MSVC 16.11 x64
+          command: python waf build:windows_amd64-community_x64-16.11:debug --tests
+      - run:
+          name: Build Windows MSVC 16.11 x86
+          command: python waf build:windows_x86-community_x86-16.11:debug
+      - run:
+          name: Build Windows MSVC 16.11 ARM
+          command: python waf build:windows_armv7a-community_amd64_arm-16.11:debug
+      - run:
+          name: Build Windows MSVC 16.11 ARM64
+          command: python waf build:windows_arm64-community_amd64_arm64-16.11:debug
 
   macOS:
     macos:
