@@ -123,7 +123,8 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, extra_fea
 @conf
 def module(
     build_context, name, env, path, depends, private_depends, features, source_list, extra_includes,
-    extra_public_includes, extra_defines, extra_public_defines, conditions, **kw_args
+    extra_public_includes, extra_system_includes, extra_defines, extra_public_defines, conditions, project_name,
+    **kw_args
 ):
     for condition in conditions:
         if condition not in env.FEATURES:
@@ -184,6 +185,8 @@ def module(
         export_defines=extra_public_defines[:],
         includes=extra_includes + includes + api + [build_context.srcnode],
         export_includes=extra_public_includes + api,
+        export_system_includes=extra_system_includes,
+        project_name=project_name or name,
     )
     if module_path is not None:
         task_gen.module_path = module_path

@@ -8,18 +8,12 @@ from waflib import Context, Errors, Logs, Options, Configure
 
 
 def _get_android_arch(arch):
-    archs = {
-        'armv7a': 'arm',
-        'amd64': 'x86_64',
-        'mipsel': 'mips',
-        'mips64el': 'mips64',
-        'i686': 'x86',
-        'aarch64': 'arm64'
-    }
+    archs = {'armv7a': 'arm', 'amd64': 'x86_64', 'i686': 'x86', 'aarch64': 'arm64'}
     return archs.get(arch, arch)
 
 
 class NdkConfig:
+
     def __init__(self, ndkroot, sysroot, ldsysroot, libpath, defines):
         self._ndkroot = ndkroot
         self._sysroot = sysroot
@@ -44,6 +38,7 @@ class NdkConfig:
 
 
 class NdkArchConfig:
+
     def __init__(self, archs):
         self._archs = archs
 
@@ -59,6 +54,7 @@ class NdkArchConfig:
 
 
 class NdkVersionConfig:
+
     def __init__(self, ndkroot):
         self._versions = {}
         platforms_directory = os.path.join(ndkroot, 'platforms')
@@ -161,14 +157,7 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         return versions.get(sdk_version, 'api' + sdk_version)
 
     def get_target_folder(self, arch):
-        archs = {
-            'mipsel': 'mips',
-            'x86': 'x86',
-            'armv7a': 'armeabi-v7a',
-            'arm64': 'arm64-v8a',
-            'mips64el': 'mips64',
-            'amd64': 'x86_64'
-        }
+        archs = {'x86': 'x86', 'armv7a': 'armeabi-v7a', 'arm64': 'arm64-v8a', 'amd64': 'x86_64'}
         return archs[arch]
 
     def get_android_c_flags(self, compiler):
@@ -179,8 +168,6 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
                     'amd64': [],
                     'armv7a': ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'],
                     'arm64': [],
-                    'mipsel': [],
-                    'mips64el': [],
                 },
             'clang':
                 {
@@ -188,32 +175,24 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
                     'amd64': [],
                     'armv7a': ['-fno-integrated-as', '-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'],
                     'arm64': [],
-                    'mipsel': ['-fintegrated-as'],
-                    'mips64el': ['-fintegrated-as'],
                 }
         }
         return arch_flags[compiler.NAMES[0].lower()][compiler.arch]
 
     def get_android_ld_flags(self, compiler):
         arch_flags = {
-            'gcc':
-                {
-                    'x86': [],
-                    'amd64': [],
-                    'armv7a': ['-Wl,--fix-cortex-a8', ],
-                    'arm64': [],
-                    'mipsel': [],
-                    'mips64el': [],
-                },
-            'clang':
-                {
-                    'x86': [],
-                    'amd64': [],
-                    'armv7a': ['-Wl,--fix-cortex-a8', ],
-                    'arm64': [],
-                    'mipsel': [],
-                    'mips64el': [],
-                }
+            'gcc': {
+                'x86': [],
+                'amd64': [],
+                'armv7a': ['-Wl,--fix-cortex-a8', ],
+                'arm64': [],
+            },
+            'clang': {
+                'x86': [],
+                'amd64': [],
+                'armv7a': ['-Wl,--fix-cortex-a8', ],
+                'arm64': [],
+            }
         }
         return arch_flags[compiler.NAMES[0].lower()][compiler.arch]
 
@@ -296,7 +275,7 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
             conf.find_program('jar', path_list=paths)
             conf.find_program('javadoc', path_list=paths)
         conf.load('javaw')
-        conf.env.append_value('JAVACFLAGS', ['-source', '1.6', '-target', '1.6'])
+        conf.env.append_value('JAVACFLAGS', ['-source', '1.7', '-target', '1.7'])
         conf.env.ANDROID_DEBUGKEY = conf.path.parent.make_node('debug.keystore').abspath()
         conf.env.JARSIGNER_FLAGS = [
             '-sigalg', 'MD5withRSA', '-digestalg', 'SHA1', '-keystore', conf.env.ANDROID_DEBUGKEY, '-storepass',
@@ -336,7 +315,9 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
         raise Errors.WafError('Android build-tools not installed')
 
     def find_android_sdk(self, ndk_path, sdk_path, archs):
+
         def alphanum_key(s):
+
             def tryint(s):
                 try:
                     return int(s)

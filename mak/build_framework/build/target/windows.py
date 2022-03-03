@@ -67,7 +67,8 @@ def apply_implib(self):
         target_file = self.env.implib_PATTERN % target_name
         implib_node = self.link_task.outputs[0].parent.make_node(target_file)
         self.link_task.outputs.append(implib_node)
-        self.link_task.outputs.append(implib_node.change_ext('.exp'))
+        if self.env.COMPILER_NAME == 'msvc':
+            self.link_task.outputs.append(implib_node.change_ext('.exp'))
         self.link_task.env.append_value('LINKFLAGS', [self.env.IMPLIB_ST % implib_node.abspath()])
 
 

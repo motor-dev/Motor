@@ -27,9 +27,10 @@ def gather_includes_defines(task_gen):
                 pass
             else:
                 use = use + getattr(t, 'use', [])
-                includes = includes + getattr(t, 'includes',
-                                              []) + getattr(t, 'export_includes',
-                                                            []) + getattr(task_gen, 'extra_includes', [])
+                includes += getattr(t, 'includes', [])
+                includes += getattr(t, 'export_includes', [])
+                includes += getattr(t, 'export_system_includes', [])
+                includes += getattr(task_gen, 'extra_includes', [])
                 defines = defines + getattr(t, 'defines', []) + getattr(t, 'export_defines',
                                                                         []) + getattr(task_gen, 'extra_defines', [])
     return unique(includes), unique(defines)
@@ -132,6 +133,7 @@ class clangd(Build.BuildContext):
     pattern = re.compile('\${([^}]+)}')
 
     def expand_cmd(self, task, env):
+
         def get_var(name):
             if name == 'SRC':
                 return 'task.inputs'

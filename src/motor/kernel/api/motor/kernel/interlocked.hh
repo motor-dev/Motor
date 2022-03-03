@@ -31,8 +31,6 @@
 #        include <motor/kernel/gcc/arm64/interlocked.inl>
 #    elif defined(_ARM)
 #        include <motor/kernel/gcc/arm/interlocked.inl>
-#    elif defined(_MIPS)
-#        include <motor/kernel/gcc/mips/interlocked.inl>
 #    else
 #        error Architecture not implemented on GCC
 #    endif

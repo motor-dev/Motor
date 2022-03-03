@@ -758,6 +758,7 @@ class QtCreator(Build.BuildContext):
                 return task_gen.bug_qtcreator_cache
             except AttributeError:
                 includes = getattr(task_gen, 'export_includes', [])
+                includes += getattr(task_gen, 'export_system_includes', [])
                 defines = getattr(task_gen, 'export_defines', [])
                 includes = [path_from(i, self.base_node) for i in includes]
                 use = getattr(task_gen, 'use', [])

@@ -36,17 +36,13 @@ class Compiler:
         'ppc64le': 'ppc64le',
         'powerpc64le': 'ppc64le',
         'spu': 'spu',
-        'mips': 'mips',
-        'mipsel': 'mipsel',
-        'mips64': 'mips64',
-        'mips64el': 'mips64el',
-        'mipsel64': 'mips64el',
         'ia64': 'ia64',
         'itanium': 'ia64',
     }
     VECTORIZED_FLAGS = {}
 
     def __init__(self, compiler_c, compiler_cxx, version, platform, arch, extra_args={}, extra_env={}):
+
         def to_number(version_string):
             v = version_string.split('-')[0].split('.')
             result = [0, 0, 0]

@@ -7,11 +7,7 @@ class Windows(Configure.ConfigurationContext.Platform):
     NAME = 'windows'
     SUPPORTED_TARGETS = (
         re.compile('.*mingw32.*'),
-        re.compile('.*windows-gnu'),
-        re.compile('.*windows-msvc'),
-        re.compile('.*windows-intel'),
-        re.compile('.*windows-wsdk'),
-        re.compile('.*windows-buildtools'),
+        re.compile('.*windows-.*'),
     )
 
     def is_valid(self, compiler):
@@ -115,6 +111,7 @@ class Windows(Configure.ConfigurationContext.Platform):
 
 
 class Windows_Clang(Windows):
+
     def platform_name(self, compiler):
         if not compiler.target.endswith('-msvc'):
             return 'mingw'
@@ -168,6 +165,7 @@ class Windows_Clang(Windows):
 
 
 class Windows_GCC(Windows):
+
     def platform_name(self, compiler):
         return 'mingw'
 
@@ -200,6 +198,7 @@ class Windows_GCC(Windows):
 
 
 class Windows_MSVC(Windows):
+
     def load_in_env(self, conf, compiler):
         Windows.load_in_env(self, conf, compiler)
         if compiler.arch == 'arm':
