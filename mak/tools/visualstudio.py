@@ -56,8 +56,10 @@ def unique(seq):
 def gather_includes_defines(task_gen):
     defines = getattr(task_gen, 'defines', []) + getattr(task_gen, 'export_defines',
                                                          []) + getattr(task_gen, 'extra_defines', [])
-    includes = getattr(task_gen, 'includes', []) + getattr(task_gen, 'export_includes',
-                                                           []) + getattr(task_gen, 'extra_includes', [])
+    includes = getattr(task_gen, 'includes', [])
+    includes += getattr(task_gen, 'export_includes', [])
+    includes += getattr(task_gen, 'export_system_includes', [])
+    includes += getattr(task_gen, 'extra_includes', [])
     seen = set([])
     use = getattr(task_gen, 'use', []) + getattr(task_gen, 'private_use', [])
     while use:
@@ -70,9 +72,10 @@ def gather_includes_defines(task_gen):
                 pass
             else:
                 use = use + getattr(t, 'use', [])
-                includes = includes + getattr(t, 'includes',
-                                              []) + getattr(t, 'export_includes',
-                                                            []) + getattr(task_gen, 'extra_includes', [])
+                includes = includes + getattr(t, 'includes', [])
+                includes = includes + getattr(t, 'export_includes', [])
+                includes = includes + getattr(t, 'export_system_includes', [])
+                includes = includes + getattr(task_gen, 'extra_includes', [])
                 defines = defines + getattr(t, 'defines', []) + getattr(t, 'export_defines',
                                                                         []) + getattr(task_gen, 'extra_defines', [])
     return unique(includes), unique(defines)
@@ -86,10 +89,12 @@ def path_from(path, bld):
 
 
 class XmlFile:
+
     def __init__(self):
         self.document = Document()
 
     def _add(self, node, child_node, value=None):
+
         def setAttributes(node, attrs):
             for k, v in attrs.items():
                 node.setAttribute(k, v)
@@ -115,6 +120,7 @@ class XmlFile:
 
 
 class Solution:
+
     def __init__(self, bld, appname, version_number, version_name, use_folders, vstudio_ide_version):
         self.header = '\xef\xbb\xbf\r\nMicrosoft Visual Studio Solution File, Format Version %s\r\n# %s' % (
             version_number, version_name
@@ -140,7 +146,7 @@ class Solution:
             try:
                 folder = self.folders_made[folder_name]
             except KeyError:
-                folder = generateGUID('folder:'+folder_name)
+                folder = generateGUID('folder:' + folder_name)
                 self.folders_made[folder_name] = folder
                 self.projects.append(
                     'Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "%s", "%s", "%s"\r\nEndProject' %
@@ -182,7 +188,7 @@ class Solution:
                 ]
         self.project_configs += project_config
         if self.use_folders:
-            parent = self.addFolder(task_gen.target)
+            parent = self.addFolder(task_gen.project_name)
             if parent:
                 self.folders.append((project.guid, parent))
 
@@ -206,6 +212,7 @@ class Solution:
 
 
 class VcprojNode:
+
     def __init__(self, name):
         self.subs = {}
         self.files = []
@@ -241,7 +248,7 @@ class VCproj:
             self.name = task_gen.target.split('.')[-1]
         else:
             self.name = task_gen.target
-        self.guid = generateGUID('target:'+task_gen.target)
+        self.guid = generateGUID('target:' + task_gen.target)
         self.vcproj = XmlDocument(StringIO.StringIO(), 'UTF-8')
         with XmlNode(
             self.vcproj, 'VisualStudioProject', {
@@ -388,7 +395,7 @@ class VCxproj:
         self.filter_nodes = self.vcxfilters._add(project, 'ItemGroup')
         self.file_nodes = self.vcxfilters._add(project, 'ItemGroup')
 
-        self.guid = generateGUID('target:'+task_gen.target)
+        self.guid = generateGUID('target:' + task_gen.target)
         project = self.vcxproj._add(
             self.vcxproj.document, 'Project', {
                 'DefaultTargets': 'Build',
@@ -446,8 +453,8 @@ class VCxproj:
                     {'Condition': "'$(Configuration)|$(Platform)'=='%s-%s|%s'" % (toolchain, variant, platform)}
                 )
                 for var in [
-                    'Prefix', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
-                    'Deploy_IncludeDir', 'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir', 'Deploy_RootDir'
+                    'Prefix', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir', 'Deploy_IncludeDir',
+                    'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir', 'Deploy_RootDir'
                 ]:
                     self.vcxproj._add(properties, var, env[var.upper()].replace('/', '\\'))
                 self.vcxproj._add(properties, 'TmpDir', os.path.join(env['TMPDIR'], '..', version).replace('/', '\\'))
@@ -508,12 +515,12 @@ class VCxproj:
                     if clean_command:
                         clean_command = clean_command % {'toolchain': toolchain, 'variant': variant}
                         self.vcxproj._add(
-                            properties, 'NMakeCleanCommandLine',
-                            'cd $(SolutionDir) && %s %s %s %s' % (sys.executable, sys.argv[0], clean_command, ' '.join(options))
+                            properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s %s %s %s' %
+                            (sys.executable, sys.argv[0], clean_command, ' '.join(options))
                         )
                         self.vcxproj._add(
-                            properties, 'NMakeReBuildCommandLine',
-                            'cd $(SolutionDir) && %s %s %s %s %s' % (sys.executable, sys.argv[0], clean_command, command, ' '.join(options))
+                            properties, 'NMakeReBuildCommandLine', 'cd $(SolutionDir) && %s %s %s %s %s' %
+                            (sys.executable, sys.argv[0], clean_command, command, ' '.join(options))
                         )
                 else:
                     self.vcxproj._add(
@@ -618,7 +625,7 @@ class PyProj:
 
     def __init__(self, task_gen, version, version_project, use_folders):
         self.pyproj = XmlFile()
-        self.guid = generateGUID('target:'+task_gen.target)
+        self.guid = generateGUID('target:' + task_gen.target)
         if use_folders:
             self.name = task_gen.target.split('.')[-1]
         else:
@@ -753,6 +760,7 @@ class VisualStudio(Build.BuildContext):
             task_gen.bld = self
             task_gen.all_sources = []
             task_gen.features = []
+            task_gen.project_name = target
             nodes = [projects.make_node("%s.%s" % (target, ext)) for ext in klass.extensions]
             project = klass(task_gen, version, version_project, folders)
             project.write(nodes)
@@ -786,12 +794,14 @@ class VisualStudio(Build.BuildContext):
 
         solution.write(solution_node)
 
+
 class vs2003(VisualStudio):
     "creates projects for Visual Studio 2003"
     cmd = 'vs2003'
     fun = 'build'
     version = (('Visual Studio .NET 2003', '8.00', False, None), (VCproj, '7.10'))
     platforms = ['Win32']
+
 
 class vs2005(VisualStudio):
     "creates projects for Visual Studio 2005"
@@ -908,4 +918,12 @@ class vs2019(VisualStudio):
     cmd = 'vs2019'
     fun = 'build'
     version = (('Visual Studio 16', '12.00', True, '16.0.00000.0'), (VCxproj, ('6.0', '14.2', '16.0')))
+    platforms = ['Win32', 'x64', 'ARM', 'Itanium']
+
+
+class vs2022(VisualStudio):
+    "creates projects for Visual Studio 2022"
+    cmd = 'vs2022'
+    fun = 'build'
+    version = (('Visual Studio 17', '12.00', True, '17.0.00000.0'), (VCxproj, ('6.0', '14.3', '17.0')))
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']

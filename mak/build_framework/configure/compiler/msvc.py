@@ -1,11 +1,13 @@
-from waflib import Configure, Utils, Errors
+from waflib import Configure, Utils, Errors, Logs
 from waflib.Configure import conf
 from waflib.Tools import msvc
 import os
 import re
+import sys
 
 
 class MSVC(Configure.ConfigurationContext.Compiler):
+
     def __init__(self, cl, name, version, target_arch, arch, bat, args, path, includes, libdirs):
         self.NAMES = [name, 'msvc']
         flags = ['/I%s' % i for i in includes] + ['/LIBPATH:%i' for l in libdirs]
@@ -35,8 +37,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
 
         conf.env.append_unique('CFLAGS_profile', ['/DNDEBUG', '/MD', '/O2', '/Oy-', '/GT', '/GF', '/Gy', '/GR-'])
         conf.env.append_unique(
-            'CXXFLAGS_profile',
-            ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MD', '/O2', '/Oy-', '/GT', '/GF', '/Gy', '/GR-']
+            'CXXFLAGS_profile', ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MD', '/O2', '/Oy-', '/GT', '/GF', '/Gy', '/GR-']
         )
         conf.env.append_unique('LINKFLAGS_profile', ['/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_profile', [])
@@ -116,6 +117,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         if self.arch == 'x86':
             conf.find_program('ml', var='ML', path_list=conf.env.PATH, mandatory=False)
         env = conf.env
+        env.SYSTEM_INCLUDE_PATTERN = '/I'
         env.IDIRAFTER = '/I'
         if os_platform().endswith('64'):
             conf.find_program('cdb64', var='CDB', mandatory=False)
@@ -132,6 +134,38 @@ all_icl_platforms = (
     ('itanium', 'itanium', 'ia64'),
     ('ia64', 'ia64', 'ia64'),
 )
+
+
+@conf
+def gather_vswhere_versions(conf, versions):
+    import json
+    prg_path = os.environ.get('ProgramFiles(x86)', os.environ.get('ProgramFiles', 'C:\\Program Files (x86)'))
+
+    vswhere = os.path.join(prg_path, 'Microsoft Visual Studio', 'Installer', 'vswhere.exe')
+    args = [
+        vswhere, '-prerelease', '-products', '*', '-requires', 'Microsoft.VisualStudio.Workload.NativeDesktop',
+        '-requires', 'Microsoft.VisualStudio.Workload.VCTools', '-requiresAny', '-format', 'json'
+    ]
+    try:
+        txt = conf.cmd_and_log(args)
+    except Errors.WafError as e:
+        Logs.debug('msvc: vswhere.exe failed %s', e)
+        return
+
+    if sys.version_info[0] < 3:
+        try:
+            txt = txt.decode(sys.stdout.encoding or 'cp1252')
+        except UnicodeError:
+            txt = txt.decode('utf-8', 'replace')
+    arr = json.loads(txt)
+    arr.sort(key=lambda x: x['installationVersion'])
+    for entry in arr:
+        product = entry['productId'].split('.')[-1].lower()
+        ver = entry['installationVersion']
+        ver = str('.'.join(ver.split('.')[:2]))
+        path = str(os.path.abspath(entry['installationPath']))
+        if os.path.exists(path) and ('%s %s' % (product, ver)) not in versions:
+            conf.gather_msvc_targets(versions, ver, path, product)
 
 
 @conf
@@ -227,6 +261,22 @@ def gather_intel_composer_versions(conf, versions):
                                 conf, 'intel', arch, version_str, target_arg, batch_file
                             )
                 versions['intel ' + version_str] = targets
+
+
+@conf
+def get_msvc_versions(self):
+    """
+	:return: platform to compiler configurations
+	:rtype: dict
+	"""
+    dct = Utils.ordered_iter_dict()
+    self.gather_icl_versions(dct)
+    self.gather_intel_composer_versions(dct)
+    self.gather_wsdk_versions(dct)
+    self.gather_msvc_versions(dct)
+    self.gather_vswhere_versions(dct)
+    Logs.debug('msvc: detected versions %r', list(dct.keys()))
+    return dct
 
 
 def os_platform():

@@ -40,20 +40,6 @@
 #    define MOTOR_64
 #    define MOTOR_LITTLEENDIAN
 
-#elif defined(_MIPS)
-
-/* MIPS Big and little endian */
-#    if defined(_MIPSEL)
-#        define MOTOR_LITTLEENDIAN
-#    else
-#        define MOTOR_BIGENDIAN
-#    endif
-#    if defined(_MIPS64)
-#        define MOTOR_64
-#    else
-#        define MOTOR_32
-#    endif
-
 /* ARM 64bits *****************/
 #elif defined(_ARM64)
 #    define MOTOR_64

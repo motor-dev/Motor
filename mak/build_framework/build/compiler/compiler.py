@@ -8,7 +8,7 @@ from waflib import Task, TaskGen, Options, Utils, Logs, Errors
 def add_dependency_file(task_gen):
     if task_gen.env.ENABLE_COMPILER_DEPS:
         for task in getattr(task_gen, 'compiled_tasks', []):
-            if task:
+            if task and task.__class__.__name__ in ('cxx', 'c'):
                 task.outputs.append(task.outputs[0].change_ext('.d'))
 
 
@@ -19,12 +19,21 @@ def paths_to_nodes(src_node, bld_node, paths):
     for path in paths:
         if os.path.isabs(path):
             path = os.path.normcase(os.path.normpath(path))
+
             if path[:len(bld_path)] == bld_path:
-                result.append(bld_node.find_node(os.path.relpath(path, bld_path)))
+                node = bld_node.find_node(os.path.relpath(path, bld_path))
             elif path[:len(src_path)] == src_path:
-                result.append(src_node.find_node(os.path.relpath(path, src_path)))
+                node = src_node.find_node(os.path.relpath(path, src_path))
+            else:
+                continue
+            assert node
+            result.append(node)
         else:
-            result.append(bld_node.find_node(path))
+            node = bld_node.find_node(path)
+            if not node:
+                print(path)
+            assert node, path
+            result.append(node)
     return result
 
 
@@ -49,9 +58,9 @@ def compiler_deps_post_run(original_post_run):
             try:
                 txt = deps_node.read()
             except EnvironmentError:
-                Logs.error('Could not find a .d dependency file, are cflags/cxxflags overwritten?')
+                Logs.error('Could not find a .d dependency file, are cflags/cxxflags properly installed?')
                 raise
-            lines = txt.replace('\\\n', ' ').replace('\\\r\n', ' ').split('\n')
+            lines = txt.replace('\\\n', ' ').replace('\\\r\n', ' ').replace('\\', '\\\\').split('\n')
             dependencies = []
             for line in lines:
                 if not line:

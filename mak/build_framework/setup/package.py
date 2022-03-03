@@ -76,6 +76,7 @@ def pkg_unpack(configuration_context, package_id_template, package_url, patch_li
                     return pkg_node
             pkg = request.urlopen(package_url % args)
     except Exception as e:
+        print(e)
         raise Errors.WafError('failed to download package "%s": %s' % (package_url, e))
 
     try:

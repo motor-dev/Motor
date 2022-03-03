@@ -203,6 +203,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
     def load_in_env(self, conf, platform):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         v = conf.env
+        v.SYSTEM_INCLUDE_PATTERN = '-I'
         v['RPATH_ST'] = '-R%s'
         v.IDIRAFTER = '-I'
         if platform.NAME == 'Linux':

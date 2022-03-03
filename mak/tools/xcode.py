@@ -15,11 +15,13 @@ def new_xcode_id():
 
 
 class XmlNode:
+
     def __init__(self):
         self.document = Document()
         self.document.encoding = 'UTF-8'
 
     def _add(self, node, child_node, value=None):
+
         def setAttributes(node, attrs):
             for k, v in attrs.items():
                 node.setAttribute(k, v)
@@ -38,6 +40,7 @@ class XmlNode:
 
 
 class XCodeScheme(XmlNode):
+
     def __init__(self, id, name, product, project, dummy):
         XmlNode.__init__(self)
         self.id = id
@@ -134,6 +137,7 @@ class XCodeScheme(XmlNode):
 
 
 class XCodeSchemeList(XmlNode):
+
     def __init__(self):
         XmlNode.__init__(self)
         plist = self._add(self.document, 'plist', {'version': '1.0'})
@@ -162,6 +166,7 @@ class XCodeSchemeList(XmlNode):
 
 
 class XCodeNode:
+
     def __init__(self):
         self._id = new_xcode_id()
 
@@ -211,6 +216,7 @@ class XCodeNode:
 
 # Configurations
 class XCBuildConfiguration(XCodeNode):
+
     def __init__(self, name, settings={}):
         XCodeNode.__init__(self)
         self.baseConfigurationReference = ""
@@ -219,6 +225,7 @@ class XCBuildConfiguration(XCodeNode):
 
 
 class XCConfigurationList(XCodeNode):
+
     def __init__(self, settings):
         XCodeNode.__init__(self)
         self.buildConfigurations = settings
@@ -319,6 +326,7 @@ class PBXGroup(XCodeNode):
 
 
 class PBXBuildFile(XCodeNode):
+
     def __init__(self, file):
         XCodeNode.__init__(self)
         self.fileRef = file
@@ -326,6 +334,7 @@ class PBXBuildFile(XCodeNode):
 
 # Targets
 class PBXLegacyTarget(XCodeNode):
+
     def __init__(self, action, target=''):
         XCodeNode.__init__(self)
         self.buildConfigurationList = XCConfigurationList(
@@ -346,6 +355,7 @@ class PBXLegacyTarget(XCodeNode):
 
 
 class PBXShellScriptBuildPhase(XCodeNode):
+
     def __init__(self, action):
         XCodeNode.__init__(self)
         self.buildActionMask = 2147483647
@@ -358,6 +368,7 @@ class PBXShellScriptBuildPhase(XCodeNode):
 
 
 class PBXSourcesBuildPhase(XCodeNode):
+
     def __init__(self, files):
         XCodeNode.__init__(self)
         self.buildActionMask = 2147483647
@@ -366,11 +377,13 @@ class PBXSourcesBuildPhase(XCodeNode):
 
 
 class PBXFrameworksBuildPhase(PBXSourcesBuildPhase):
+
     def __init__(self, frameworks):
         PBXSourcesBuildPhase.__init__(self, frameworks)
 
 
 class PBXNativeTarget(XCodeNode):
+
     def __init__(self, name, product, productType, build, configs):
         XCodeNode.__init__(self)
         self.buildConfigurationList = XCConfigurationList(configs)
@@ -405,6 +418,7 @@ def macarch(arch):
 
 
 class PBXProject(XCodeNode):
+
     def __init__(self, name, version, builder):
         XCodeNode.__init__(self)
         self.buildConfigurationList = XCConfigurationList(
@@ -478,6 +492,7 @@ class PBXProject(XCodeNode):
         w("}\n")
 
     def add(self, bld, p, schemes, schememanagement):
+
         def get_include_path(i):
             if isinstance(i, str):
                 return '$(SOURCE_ROOT)/' + i
@@ -512,6 +527,7 @@ class PBXProject(XCodeNode):
                 seen.add(name)
                 task_gens += getattr(task_gen, 'use', [])
                 includes.union(getattr(task_gen, 'export_includes', []))
+                includes.union(getattr(task_gen, 'export_system_includes', []))
                 defines.union(getattr(task_gen, 'export_defines', []))
 
         for toolchain in bld.env.ALL_TOOLCHAINS:

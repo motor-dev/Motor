@@ -53,7 +53,8 @@ def thirdparty(bld, name, feature_list=[], path='', source_node=None, var='', us
                     export_linkflags=env['check_%s_ldflags' % var],
                     source_nodes=[source_node],
                     use=[env.ENV_PREFIX % u for u in use],
-                    private_use=[env.ENV_PREFIX % u for u in private_use]
+                    private_use=[env.ENV_PREFIX % u for u in private_use],
+                    project_name=name
                 )
                 if env.SUBARCH:
                     internal_deps.append(tg)
@@ -116,7 +117,8 @@ def thirdparty(bld, name, feature_list=[], path='', source_node=None, var='', us
                 export_linkflags=env['check_%s_ldflags' % var],
                 source_nodes=[source_node],
                 use=[env.ENV_PREFIX % u for u in use],
-                private_use=[env.ENV_PREFIX % u for u in private_use]
+                private_use=[env.ENV_PREFIX % u for u in private_use],
+                project_name=None
             )
             archs = env.VALID_ARCHITECTURES
             arch_specific = archs + ['%s.%s' % (p, a) for p in platforms for a in archs]

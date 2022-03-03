@@ -47,10 +47,6 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         'ppc': ((['-m64'], 'ppc64'), ),
         'ppc64': ((['-m32'], 'ppc'), ),
         'ppc64le': ((['-m32'], 'ppc'), ),
-        'mips': ((['-m64'], 'mips64'), ),
-        'mipsel': ((['-m64'], 'mips64el'), ),
-        'mips64': ((['-m32'], 'mips'), ),
-        'mips64el': ((['-m32'], 'mipsel'), ),
         'arm': [(['-march=%s' % a], a) for a in ALL_ARM_ARCHS],
                                                                             #'armv4':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
                                                                             #'armv5':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
@@ -78,13 +74,9 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         (('__POWERPC__', '__ppc64__', '__BIG_ENDIAN__'), 'ppc64'),
         (('__powerpc__', '__powerpc64__', '__LITTLE_ENDIAN__'), 'ppc64le'),
         (('__POWERPC__', '__ppc64__', '__LITTLE_ENDIAN__'), 'ppc64le'),
-        (('__mips64', '__mips', '_MIPSEL'), 'mips64el'),
-        (('__mips', '_MIPSEL'), 'mipsel'),
-        (('__mips64', '__mips'), 'mips64'),
-        (('__mips__',), 'mips'),
-        (('__arm64e__',), 'arm64e'),
+        (('__arm64e__', ), 'arm64e'),
         (('__aarch64__', '__ILP32__'), 'arm64_32'),
-        (('__aarch64__',), 'aarch64'),
+        (('__aarch64__', ), 'aarch64'),
         (('__aarch64', ), 'aarch64'),
         (('__aarch32__', ), 'aarch32'),
         (('__arm__', ), 'armv4'),
@@ -178,7 +170,9 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
                 extra_args['link'] += self.ARCH_FLAGS.get(arch, [])
             except KeyError:
                 extra_args['link'] = self.ARCH_FLAGS.get(arch, [])
-        result, out, err = self.run([compiler_c] + extra_args.get('c', []) + ['-v', '-dM', '-E', '-'], input='\n', env=env)
+        result, out, err = self.run(
+            [compiler_c] + extra_args.get('c', []) + ['-v', '-dM', '-E', '-'], input='\n', env=env
+        )
         macros = set([])
         if result != 0:
             raise Exception('Error running %s:\nresult: %d\nstdout: %s\nstderr: %s\n' % (compiler_c, result, out, err))
@@ -353,6 +347,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
     def load_in_env(self, conf, platform):
         env = conf.env
         env.IDIRAFTER = '-idirafter'
+        env.SYSTEM_INCLUDE_PATTERN = '-isystem'
         Configure.ConfigurationContext.Compiler.load_in_env(self, conf, platform)
         env.SYSROOT = env.SYSROOT or self.sysroot
         env.PATH = self.directories + platform.directories + os.environ['PATH'].split(os.pathsep)
