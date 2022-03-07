@@ -6,7 +6,7 @@
 
 namespace Motor {
 
-Package::Package(weak< const File > file) : Script(file)
+Package::Package(weak< const File > file) : Script<Package>(file)
 {
 }
 

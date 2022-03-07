@@ -14,16 +14,6 @@ namespace Motor {
 
 MOTOR_EXPORT void* s_dummyData = 0;
 
-Environment::Environment()
-    : m_homeDirectory(getenv("HOME"))
-    , m_dataDirectory(ipath("share/motor"))
-    , m_game("")
-    , m_user(getenv("USER"))
-    , m_programPath()
-{
-    m_homeDirectory.push_back(".motor");
-}
-
 Environment::~Environment()
 {
 }

@@ -110,7 +110,7 @@ def cl_kernel_compile(task_gen, source):
         cl_source = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.generated.cl')
         cl_cc = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.embedded.cc')
 
-        task_gen.create_task('ircc', [source], [cl_source], ircc_target=task_gen.env.IRCC_CL_TARGET)
+        task_gen.create_task('ircc', [source], [cl_source], ircc_target=task_gen.bld.env.IRCC_CL_TARGET)
         task_gen.create_task(
             'bin2c', [cl_source], [cl_cc],
             var='%scldata%s' % ('_'.join(task_gen.kernel), ptr_size),

@@ -341,6 +341,8 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         if not conf.env.LLDB:
             conf.find_program('lldb', var='LLDB', mandatory=False)
         Configure.ConfigurationContext.Compiler.load_tools(self, conf, platform)
+        conf.env.CC_TGT_F = ['-c', '-o', '']
+        conf.env.CXX_TGT_F = ['-c', '-o', '']
         conf.env.CCLNK_TGT_F = ['-o', '']
         conf.env.CXXLNK_TGT_F = ['-o', '']
 
