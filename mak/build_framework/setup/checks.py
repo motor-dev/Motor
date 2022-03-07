@@ -59,6 +59,7 @@ def mm_hook(self, node):
 @feature("link_library")
 @before_method("process_source")
 def link_library_test(self):
+
     def write_test_file(task):
         task.outputs[0].write(task.generator.code)
 
@@ -78,6 +79,7 @@ def link_library_test(self):
 @feature("link_framework")
 @before_method("process_source")
 def link_framework_test(self):
+
     def write_test_file(task):
         task.outputs[0].write(task.generator.code)
 
@@ -145,6 +147,7 @@ def check_lib(
     defines=[],
     code=USE_LIBRARY_CODE
 ):
+
     def cut(string):
         if len(string) > 19:
             return string[0:17] + '...'
@@ -191,6 +194,7 @@ def check_lib(
 
 @conf
 def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_LIBRARY_CODE):
+
     def cut(string):
         if len(string) > 19:
             return string[0:17] + '...'
@@ -233,6 +237,7 @@ def check_framework(
     functions=[],
     code=USE_LIBRARY_CODE
 ):
+
     def cut(string):
         if len(string) > 19:
             return string[0:17] + '...'
@@ -283,7 +288,7 @@ def check_sdk(self, compiler, flags, sdk, version, frameworks=[], libpath=[], in
     env.LINK_CXX = compiler
     env.CXXFLAGS = flags
     env.LINKFLAGS = flags
-    env.CXX_TGT_F = ['-c', '-o']
+    env.CXX_TGT_F = ['-c', '-o', '']
     env.CXXLNK_TGT_F = ['-o']
 
     code = '\n'.join(['#include <%s/%s.h>' % (f, f) for f in frameworks]) + '\n' + code

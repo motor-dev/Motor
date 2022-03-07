@@ -1,6 +1,12 @@
 import os
 import sys
-from waflib import Utils
+from waflib import Utils, TaskGen
+from waflib.Tools import c_osx
+
+
+@TaskGen.feature('c', 'cxx')
+def set_macosx_deployment_target(self):
+    pass
 
 
 def options(opt):
@@ -12,10 +18,12 @@ def options(opt):
     if os.path.isdir('/Library/Developer/CommandLineTools'):
         sdks += ['/Library/Developer/CommandLineTools']
     try:
-        p = Utils.subprocess.Popen(['xcode-select', '--print-path'],
-                                   stdin=Utils.subprocess.PIPE,
-                                   stdout=Utils.subprocess.PIPE,
-                                   stderr=Utils.subprocess.PIPE)
+        p = Utils.subprocess.Popen(
+            ['xcode-select', '--print-path'],
+            stdin=Utils.subprocess.PIPE,
+            stdout=Utils.subprocess.PIPE,
+            stderr=Utils.subprocess.PIPE
+        )
         out = p.communicate()[0]
     except Exception:
         pass
@@ -25,9 +33,10 @@ def options(opt):
         out = out.split('\n')[0]
         if out not in sdks:
             sdks.append(out)
-    opt.add_option('--xcode-sdks',
-                   action='store',
-                   default=','.join(sdks),
-                   dest='xcode_sdks',
-                   help='Paths of the different XCode SDKs')
-
+    opt.add_option(
+        '--xcode-sdks',
+        action='store',
+        default=','.join(sdks),
+        dest='xcode_sdks',
+        help='Paths of the different XCode SDKs'
+    )
