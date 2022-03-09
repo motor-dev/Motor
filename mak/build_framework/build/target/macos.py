@@ -84,6 +84,7 @@ def set_osx_rpath(self):
         plugin_path = os.path.join(self.env.PREFIX, self.env.DEPLOY_PLUGINDIR)
         kernel_path = os.path.join(self.env.PREFIX, self.env.DEPLOY_KERNELDIR)
         rel_plugin_path = os.path.relpath(plugin_path, bin_path)
+        self.env.append_unique('RPATH', '@executable_path')
         self.env.append_unique('RPATH', [os.path.join('@executable_path', rel_plugin_path)])
         rel_kernel_path = os.path.relpath(kernel_path, bin_path)
         if rel_kernel_path != rel_plugin_path:
@@ -99,6 +100,7 @@ Task.task_factory('lipo', lipo, color='BLUE')
 
 
 class codesign(Task.Task):
+
     def run(self):
         with open(self.outputs[0].abspath(), 'wb') as out:
             out.write(self.inputs[0].read('rb'))
