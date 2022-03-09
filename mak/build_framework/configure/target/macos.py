@@ -476,9 +476,12 @@ def configure(conf):
                             line = line.split()
                             for t in line[2:-1]:
                                 try:
-                                    sdk_archs.append(archs[t.split('-')[0]])
+                                    arch = archs[t.split('-')[0]]
                                 except KeyError:
                                     print('Unknown %s target: %s in %s' % (sdk_os, t, dylib))
+                                else:
+                                    if arch not in sdk_archs:
+                                        sdk_archs.append(arch)
                             break
         try:
             conf.darwin_sdks[sdk_os].append((sdk_version, sdk_archs, sdk_path))

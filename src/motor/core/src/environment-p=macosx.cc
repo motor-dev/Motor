@@ -11,6 +11,16 @@
 
 namespace Motor {
 
+Environment::Environment()
+    : m_homeDirectory(getenv("HOME"))
+    , m_dataDirectory(ipath("data"))
+    , m_game("")
+    , m_user(getenv("USER"))
+    , m_programPath()
+{
+    m_homeDirectory.push_back(".motor");
+}
+
 size_t Environment::getProcessorCount() const
 {
     int    cpuCount = 0;

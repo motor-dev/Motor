@@ -8,7 +8,7 @@ class ircc(Task.Task):
     def run(self):
         return self.exec_command(
             [
-                sys.executable, self.generator.env.KERNEL_CLT, '--tmp',
+                sys.executable, self.generator.bld.env.KERNEL_CLT, '--tmp',
                 self.generator.bld.bldnode.parent.parent.abspath(), self.inputs[0].abspath(), self.outputs[0].abspath(),
                 self.ircc_target.abspath()
             ]
