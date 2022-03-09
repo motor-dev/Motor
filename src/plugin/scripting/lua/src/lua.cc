@@ -7,7 +7,7 @@
 
 namespace Motor {
 
-LuaScript::LuaScript(weak< const File > file) : Script(file)
+LuaScript::LuaScript(weak< const File > file) : Script< LuaScript >(file)
 {
 }
 

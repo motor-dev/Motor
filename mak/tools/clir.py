@@ -61,9 +61,8 @@ def configure(configuration_context):
         if 'Clang' in c.NAMES:
             if 'AppleClang' not in c.NAMES and c.version_number >= (10, ):
                 v.CLC_CXX = c.compiler_cxx
-            elif 'AppleClang' in c.NAMES:
-                # Apple still has to release a clang10-based AppleClang compiler
-                pass
+            elif 'AppleClang' in c.NAMES and c.version_number >= (12, ):
+                v.CLC_CXX = c.compiler_cxx
     if v.CLC_CXX:
         v.CLC_CXXFLAGS = ['-std=clc++', '-g', '-fno-rtti', '-fno-exceptions', '-fno-discard-value-names']
         v.CLC_CXXFLAGS_debug = ['-D_DEBUG', '-O0']
