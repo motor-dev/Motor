@@ -1,6 +1,7 @@
 from waflib import Errors, Options, Logs
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method
+import os
 
 PYTHON_PACKAGE = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/python{version}-%(platform)s.tgz'
 
@@ -18,7 +19,15 @@ def python_package(configuration_context, version, version_number):
         configuration_context.env['PYTHON%s_BINARY' % version_number
                                   ] = node.path_from(configuration_context.package_node)
         configuration_context.env['check_python%s' % version_number] = True
-        configuration_context.env['check_python%s_defines' % version_number] = ['PYTHON_LIBRARY=python%s' % version]
+        python_library = 'python%s' % version
+        for n in node.ant_glob('**'):
+            index = n.name.find(python_library)
+            if index != -1:
+                python_library = os.path.splitext(n.name[index:])[0]
+                break
+        else:
+            raise Errors.WafError('could not locate Python DLL in package')
+        configuration_context.env['check_python%s_defines' % version_number] = ['PYTHON_LIBRARY=%s' % python_library]
         return True
 
 
