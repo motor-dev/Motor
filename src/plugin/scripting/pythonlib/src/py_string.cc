@@ -44,7 +44,7 @@ PyTypeObject PyMotorString< T >::s_pyType
        0,
        0,
        0,
-       Py_TPFLAGS_DEFAULT,
+       Py_TPFLAGS_MOTOR_DEFAULT,
        "Wrapper class for the C++ Motor string types",
        0,
        0,

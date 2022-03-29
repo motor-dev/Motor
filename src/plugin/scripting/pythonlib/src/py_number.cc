@@ -105,7 +105,7 @@ PyTypeObject PyMotorNumber< T >::s_pyType
        0,
        0,
        0,
-       Py_TPFLAGS_DEFAULT,
+       Py_TPFLAGS_MOTOR_DEFAULT,
        "Wrapper class for the C++ Motor number types",
        0,
        0,

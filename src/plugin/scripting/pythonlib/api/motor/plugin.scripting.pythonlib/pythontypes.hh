@@ -230,10 +230,7 @@ struct PyVarObject
 #define Py_TPFLAGS_BASE_EXC_SUBCLASS (1L << 30)
 #define Py_TPFLAGS_TYPE_SUBCLASS     (1L << 31)
 
-#define Py_TPFLAGS_DEFAULT                                                                         \
-    (Py_TPFLAGS_HAVE_GETCHARBUFFER | Py_TPFLAGS_HAVE_SEQUENCE_IN | Py_TPFLAGS_HAVE_INPLACEOPS      \
-     | Py_TPFLAGS_HAVE_RICHCOMPARE | Py_TPFLAGS_HAVE_WEAKREFS | Py_TPFLAGS_HAVE_ITER               \
-     | Py_TPFLAGS_HAVE_CLASS | Py_TPFLAGS_HAVE_INDEX | 0)
+#define Py_TPFLAGS_MOTOR_DEFAULT 0
 
 struct PyTypeObject
 {
