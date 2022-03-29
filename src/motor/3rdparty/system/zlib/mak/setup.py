@@ -2,7 +2,7 @@ from waflib.Errors import WafError
 from waflib import Options
 import os
 
-ZLIB_SOURCES = 'https://zlib.net/zlib-1.2.11.tar.gz'
+ZLIB_SOURCES = 'https://zlib.net/zlib-1.2.12.tar.gz'
 ZLIB_BINARIES = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/zlib-1.2.11-%(platform)s-%(arch)s-%(abi)s.tgz'
 MINIZIP_BINARIES = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/minizip-1.2.11-%(platform)s-%(arch)s-%(abi)s.tgz'
 
