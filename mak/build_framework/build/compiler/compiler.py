@@ -5,6 +5,7 @@ from waflib import Task, TaskGen, Options, Utils, Logs, Errors
 
 @TaskGen.feature('c', 'cxx')
 @TaskGen.after_method('process_source')
+@TaskGen.after_method('generate_export_file')
 def add_dependency_file(task_gen):
     if task_gen.env.ENABLE_COMPILER_DEPS:
         for task in getattr(task_gen, 'compiled_tasks', []):
