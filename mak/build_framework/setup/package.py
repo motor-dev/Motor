@@ -6,12 +6,15 @@ import sys
 import stat
 import os
 import tempfile
+import time
 from patch import fromfile
 from waflib.Logs import pprint
 if sys.version_info < (3, ):
     import urllib2 as request
+    HTTPError = request.HTTPError
 else:
     from urllib import request
+    from urllib.error import HTTPError
 
 
 def remove_readonly(func, path, excinfo):
@@ -50,12 +53,17 @@ def pkg_unpack(configuration_context, package_id_template, package_url, patch_li
     if configuration_context.env.VALID_PLATFORMS:
         args['platform'] = configuration_context.env.VALID_PLATFORMS[0]
     if configuration_context.env.VALID_ARCHITECTURES:
-        args['arch'] = configuration_context.env.VALID_ARCHITECTURES[0]
+        archs = (configuration_context.env.VALID_ARCHITECTURES[0], 'multiarch')
+    else:
+        archs = ('multiarch', )
     if configuration_context.env.COMPILER_NAME:
         args['compiler'] = configuration_context.env.COMPILER_NAME
     if configuration_context.env.COMPILER_ABI:
         args['abi'] = configuration_context.env.COMPILER_ABI
-    try:
+    found = False
+    for arch in archs:
+        args['arch'] = arch
+
         package_id = package_id_template % args
         if package_id in configuration_context.package_env.PACKAGE_REPOS:
             pkg_node = configuration_context.package_node.make_node(
@@ -63,21 +71,26 @@ def pkg_unpack(configuration_context, package_id_template, package_url, patch_li
             )
             if pkg_node.isdir():
                 return pkg_node
-        try:
-            pkg = request.urlopen(package_url % args)
-        except Exception as e:
-            args['arch'] = 'multiarch'
-            package_id = package_id_template % args
-            if package_id in configuration_context.package_env.PACKAGE_REPOS:
-                pkg_node = configuration_context.package_node.make_node(
-                    configuration_context.package_env.PACKAGE_REPOS[package_id]
-                )
-                if pkg_node.isdir():
-                    return pkg_node
-            pkg = request.urlopen(package_url % args)
-    except Exception as e:
-        print(e)
-        raise Errors.WafError('failed to download package "%s": %s' % (package_url, e))
+
+        for i in range(0, 3):
+            try:
+                pkg = request.urlopen(package_url % args)
+            except HTTPError as e:
+                error = e
+                if e.code == 404:
+                    break
+                time.sleep(2)
+            except Exception as e:
+                error = e
+            else:
+                found = True
+                break
+        else:
+            raise Errors.WafError('failed to download package "%s": %s' % (package_url, error))
+        if found:
+            break
+    else:
+        raise Errors.WafError('failed to download package "%s": %s' % (package_url, error))
 
     try:
         shutil.rmtree(os.path.join(configuration_context.package_node.abspath(), package_id), onerror=remove_readonly)

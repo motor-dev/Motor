@@ -39,21 +39,24 @@ def build(bld):
     for version in bld.env.PYTHON_VERSIONS:
         bld.recurse('tcltk/build.py')
         version_number = version.replace('.', '')
-        path = bld.env['PYTHON%s_BINARY' % version_number]
-        if path:
-            path = bld.package_node.make_node(path)
-            bld.thirdparty(
-                'motor.3rdparty.scripting.python%s' % version_number,
-                var='python%s' % version_number,
-                source_node=path,
-                private_use=['motor.3rdparty.scripting.tcltk'],
-                feature_list=['python', 'python' + version]
-            )
-            bld.add_feature('python')
-        else:
-            bld.thirdparty(
-                'motor.3rdparty.scripting.python%s' % version_number,
-                var='python%s' % version_number,
-                private_use=['motor.3rdparty.scripting.tcltk'],
-                feature_list=['python', 'python' + version]
-            )
+        for env in bld.multiarch_envs:
+            path = env['PYTHON%s_BINARY' % version_number]
+            if path:
+                path = bld.package_node.make_node(path)
+                bld.thirdparty(
+                    'motor.3rdparty.scripting.python%s' % version_number,
+                    var='python%s' % version_number,
+                    source_node=path,
+                    private_use=['motor.3rdparty.scripting.tcltk'],
+                    feature_list=['python', 'python' + version],
+                    env=env
+                )
+                bld.add_feature('python', env)
+            else:
+                bld.thirdparty(
+                    'motor.3rdparty.scripting.python%s' % version_number,
+                    var='python%s' % version_number,
+                    private_use=['motor.3rdparty.scripting.tcltk'],
+                    feature_list=['python', 'python' + version],
+                    env=env
+                )
