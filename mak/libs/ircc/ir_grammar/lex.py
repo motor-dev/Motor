@@ -182,6 +182,7 @@ keywords = (
     'align',
     'noalias',
     'nocapture',
+    'noundef',
     'nest',
     'returned',
     'nonnull',

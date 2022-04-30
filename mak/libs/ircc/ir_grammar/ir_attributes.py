@@ -61,6 +61,7 @@ def p_ir_attribute_parameter(p):
                                | SRET
                                | NOALIAS
                                | NOCAPTURE
+                               | NOUNDEF
                                | NEST
                                | RETURNED
                                | NONNULL
