@@ -51,7 +51,7 @@ private:
     minitl::vector< UpdateTask >                        m_tasks;
     Task::ITask::CallbackConnection                     m_forceContinue;
     size_t                                              m_resourceLoadingCount;
-    bool                                                m_runLoop;
+    i_bool                                              m_runLoop;
 
 private:
     void frameUpdate();

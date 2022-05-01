@@ -8,23 +8,31 @@
 #define motor_alignof(t) __alignof__(t)
 #if defined(_X86) || defined(_AMD64)
 #    define motor_break() __asm("int3")
+#    include <emmintrin.h>
+#    define motor_pause() _mm_pause()
 #elif defined(_POWERPC)
 #    define motor_break() __asm("trap")
+#    define motor_pause() __asm("or 27, 27, 27")
 #elif defined(_ARM64)
 #    define motor_break() __asm__ volatile("brk 0x0")
+#    define motor_pause()
 #elif defined(__APPLE_CC__) && defined(_ARM)
 #    if !defined(__thumb__)
 #        define motor_break() __asm__ volatile(".word 0xe7f001f0");
 #    else
 #        define motor_break() __asm__ volatile(".short 0xde01");
 #    endif
+#    define motor_pause()
 #elif defined(_ARM) && !defined(__thumb__)
 #    define motor_break() __asm__ volatile(".inst 0xe7f001f0")
+#    define motor_pause()
 #elif defined(_ARM)
 #    define motor_break() __asm__ volatile(".inst 0xde01");
+#    define motor_pause()
 #else
 #    error "Breakpoint not supported on this platform"
 #    define motor_break()
+#    define motor_pause()
 #endif
 
 #include <stdint.h>

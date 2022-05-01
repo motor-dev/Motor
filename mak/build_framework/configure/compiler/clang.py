@@ -215,6 +215,20 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                             result.append(c)
         return result
 
+    def set_optimisation_options(self, conf):
+        Configure.ConfigurationContext.GnuCompiler.set_optimisation_options(self, conf)
+        # Thread sanitizer
+        v = conf.env
+        if self.arch in ('amd64', 'arm64', 'ppc64'):
+            if self.version_number >= (3, 2):
+                v.append_unique('CLAGS_tsan', ['-fsanitize=thread', '-DBE_THREAD_SANITIZER=1'])
+                v.append_unique('CXXFLAGS_tsan', ['-fsanitize=thread', '-DBE_THREAD_SANITIZER=1'])
+                v.append_unique('LINKFLAGS_tsan', ['-fsanitize=thread', '-static-libsan'])
+            if self.version_number >= (3, 2):
+                v.append_unique('CLAGS_asan', ['-fsanitize=address'])
+                v.append_unique('CXXFLAGS_asan', ['-fsanitize=address'])
+                v.append_unique('LINKFLAGS_asan', ['-fsanitize=address', '-static-libsan'])
+
     def load_in_env(self, conf, platform):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         env = conf.env

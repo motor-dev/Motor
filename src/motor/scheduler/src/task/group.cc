@@ -7,7 +7,7 @@
 namespace Motor { namespace Task {
 
 TaskGroup::TaskGroup(istring name, color32 color)
-    : ITask(name, color, Scheduler::High, Scheduler::WorkerThread)
+    : ITask(name, color, Scheduler::WorkerThread)
     , m_startTasks(Arena::task())
     , m_endTaskCount(i_u32::create(0))
     , m_completionCallback(ref< Callback >::create(Arena::task(), this))
@@ -18,7 +18,7 @@ TaskGroup::~TaskGroup()
 {
 }
 
-void TaskGroup::schedule(weak< Scheduler > scheduler)
+void TaskGroup::schedule(weak< Scheduler > scheduler) const
 {
     Scheduler::WorkItem item(scheduler);
     if(!m_startTasks.empty())
@@ -70,7 +70,7 @@ TaskGroup::Callback::~Callback()
 {
 }
 
-void TaskGroup::Callback::onCompleted(weak< Scheduler > scheduler, weak< ITask > /*task*/)
+void TaskGroup::Callback::onCompleted(weak< Scheduler > scheduler, weak< const ITask > /*task*/)
 {
     if(++m_completed == m_owner->m_endTaskCount)
     {

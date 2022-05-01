@@ -11,10 +11,69 @@ storage1 = motor.World.ArchetypeStorage
     archetypes = [[worldtest.Component]];
 );
 
+result1 = worldtest.UpdateKernel
+(
+    inout = storage1.Component;
+);
+
+result2 = worldtest.UpdateKernel
+(
+    inout = storage1.Component;
+);
+
+
+result3 = worldtest.UpdateKernel
+(
+    inout = storage1.Component;
+);
+
+
+result4 = worldtest.UpdateKernel
+(
+    inout = storage1.Component;
+);
+
+
+result5 = worldtest.UpdateKernel
+(
+    inout = storage1.Component;
+);
+
+
+result6 = worldtest.UpdateKernel
+(
+    inout = storage1.Component;
+);
+
+result7 = worldtest.UpdateKernel
+(
+    inout = storage1.Component;
+);
+
+
+result8 = worldtest.UpdateKernel
+(
+    inout = storage1.Component;
+);
+
+
+result9 = worldtest.UpdateKernel
+(
+    inout = storage1.Component;
+);
+
+
+result10 = worldtest.UpdateKernel
+(
+    inout = storage1.Component;
+);
+
+
 
 
 world = motor.World.World
 (
     registry = registry;
-    products = [storage1.Component];
+    products = [storage1.Component, result1.inout, result2.inout, result3.inout, result4.inout, result5.inout,
+                result6.inout, result7.inout, result8.inout, result9.inout, result10.inout];
 );

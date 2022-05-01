@@ -121,8 +121,11 @@ typedef u8               byte;
 #  include <xmmintrin.h>
 # endif*/
 #    define motor_break() __debugbreak()
+#    define motor_pause() asm { or 27, 27, 27;}
 #else
 #    define motor_break() asm { int 3;}
+#    include <emmintrin.h>
+#    define motor_pause() _mm_pause()
 #endif
 
 #if _MSC_VER >= 1400

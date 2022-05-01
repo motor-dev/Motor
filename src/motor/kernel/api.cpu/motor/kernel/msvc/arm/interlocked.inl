@@ -31,6 +31,10 @@ template <>
 struct InterlockedType< 4 >
 {
     typedef __declspec(align(4)) long value_t;
+    static inline value_t fetch(const volatile value_t* p)
+    {
+        return *p;
+    }
     static inline value_t fetch_and_add(volatile value_t* p, value_t incr)
     {
         return _InterlockedExchangeAdd(p, incr);

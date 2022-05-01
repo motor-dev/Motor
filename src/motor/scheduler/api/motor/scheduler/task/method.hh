@@ -5,14 +5,13 @@
 #define MOTOR_SCHEDULER_TASK_METHOD_HH_
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
-#include <motor/scheduler/range/onestep.hh>
 #include <motor/scheduler/task/task.hh>
 
 namespace Motor { namespace Task {
 
 template < typename Owner, void (Owner::*Method)(),
            template < typename > class Ptr = ::minitl::weak >
-struct MethodCaller
+struct MethodCaller : public IExecutor
 {
 private:
     Ptr< Owner > const m_owner;
@@ -21,7 +20,6 @@ private:
     MethodCaller& operator=(const MethodCaller& other);
 
 public:
-    typedef range_onestep Range;
     MethodCaller(Ptr< Owner > owner) : m_owner(owner)
     {
     }
@@ -32,27 +30,27 @@ public:
     {
     }
 
-    Range prepare()
+    u32 partCount(u32 threadCount) const
     {
-        return Range();
+        motor_forceuse(threadCount);
+        return 1;
     }
-    void operator()(const Range& /*r*/) const
+
+    virtual void run(u32 partIndex, u32 partCount) const override
     {
+        motor_assert(partIndex == 0, "MethodCaller called with invalid part index %d" | partIndex);
+        motor_assert(partCount == 1, "MethodCaller called with invalid part count %d" | partCount);
         (m_owner.operator->()->*Method)();
-    }
-    void operator()(Range& /*myRange*/, MethodCaller& /*with*/, Range& /*withRange*/)
-    {
     }
 };
 
 template < void (*Procedure)() >
-struct ProcedureCaller
+struct ProcedureCaller : public IExecutor
 {
 private:
     ProcedureCaller& operator=(const ProcedureCaller& other);
 
 public:
-    typedef range_onestep Range;
     ProcedureCaller()
     {
     }
@@ -64,17 +62,17 @@ public:
         motor_forceuse(other);
     }
 
-    range_onestep prepare()
+    u32 partCount(u32 threadCount) const
     {
-        return range_onestep();
+        motor_forceuse(threadCount);
+        return 1;
     }
-    void operator()(const range_onestep& /*r*/) const
+
+    virtual void run(u32 partIndex, u32 partCount) const override
     {
+        motor_assert(partIndex == 0, "MethodCaller called with invalid part index %d" | partIndex);
+        motor_assert(partCount == 1, "MethodCaller called with invalid part count %d" | partCount);
         (*Procedure)();
-    }
-    void operator()(range_onestep& /*myRange*/, ProcedureCaller& /*with*/,
-                    range_onestep& /*withRange*/)
-    {
     }
 };
 

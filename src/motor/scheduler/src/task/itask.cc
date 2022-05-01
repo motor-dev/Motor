@@ -6,11 +6,9 @@
 
 namespace Motor { namespace Task {
 
-ITask::ITask(istring name, color32 color, Scheduler::Priority priority,
-             Scheduler::Affinity affinity)
+ITask::ITask(istring name, color32 color, Scheduler::Affinity affinity)
     : name(name)
     , color(color)
-    , priority(priority)
     , affinity(affinity)
     , m_callbacks(Arena::task())
     , m_start(ref< ChainCallback >::create(Arena::task(), this))
@@ -29,10 +27,10 @@ ITask::~ITask()
     }
 }
 
-void ITask::completed(weak< Scheduler > sc)
+void ITask::completed(weak< Scheduler > sc) const
 {
     ScopedCriticalSection scope(m_cs);
-    for(minitl::vector< weak< ICallback > >::iterator it = m_callbacks.begin();
+    for(minitl::vector< weak< ICallback > >::const_iterator it = m_callbacks.begin();
         it != m_callbacks.end(); ++it)
     {
         (*it)->onCompleted(sc, this);
@@ -100,7 +98,7 @@ ITask::ChainCallback::~ChainCallback()
     }
 }
 
-void ITask::ChainCallback::onCompleted(weak< Scheduler > scheduler, weak< ITask > /*task*/)
+void ITask::ChainCallback::onCompleted(weak< Scheduler > scheduler, weak< const ITask > /*task*/)
 {
     if(++m_completed == m_startedBy.size())
     {

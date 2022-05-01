@@ -1,10 +1,11 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_KERNEL_GCC_X86_INTERLOCKED_INL_
-#define MOTOR_KERNEL_GCC_X86_INTERLOCKED_INL_
+#ifndef MOTOR_KERNEL_GCC_TSAN_INTERLOCKED_INL_
+#define MOTOR_KERNEL_GCC_TSAN_INTERLOCKED_INL_
 /**************************************************************************************************/
 #include <motor/kernel/stdafx.h>
+#include <sanitizer/tsan_interface_atomic.h>
 
 namespace _Kernel {
 
@@ -58,7 +59,6 @@ struct InterlockedType< 2 > : public InterlockedType< 4 >
 {
 };
 
-#ifdef _AMD64
 template <>
 struct InterlockedType< 8 >
 {
@@ -95,7 +95,6 @@ struct InterlockedType< 8 >
     static inline bool            set_conditional(tagged_t* p, tagged_t::value_t v,
                                                   const tagged_t::tag_t& condition);
 };
-#endif
 
 }  // namespace _Kernel
 
@@ -103,36 +102,29 @@ namespace _Kernel {
 
 InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch(const value_t* p)
 {
-    return *p;
+    return __tsan_atomic32_load(p, __tsan_memory_order_acquire);
 }
 
 InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_add(value_t* p, value_t incr)
 {
-    value_t old;
-    __asm__ __volatile__("lock; xadd %0,%1" : "=r"(old), "+m"(*p) : "0"(incr) : "memory");
-    return old;
+    return __tsan_atomic32_fetch_add(p, incr, __tsan_memory_order_acq_rel);
 }
 
 InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_sub(value_t* p, value_t incr)
 {
-    return fetch_and_add(p, -incr);
+    return __tsan_atomic32_fetch_add(p, -incr, __tsan_memory_order_acq_rel);
 }
 
 InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_set(value_t* p, value_t v)
 {
-    __asm__ __volatile__("lock; xchg %0, %1" : "+r"(v), "+m"(*p) : : "memory");
-    return v;
+    return __tsan_atomic32_exchange(p, v, __tsan_memory_order_acq_rel);
 }
 
 InterlockedType< 4 >::value_t InterlockedType< 4 >::set_conditional(value_t* p, value_t v,
                                                                     value_t condition)
 {
-    value_t old;
-    __asm__ __volatile__("lock; cmpxchg %2, %1"
-                         : "=a"(old), "+m"(*p)
-                         : "r"(v), "a"(condition)
-                         : "memory", "cc");
-    return old;
+    return __tsan_atomic32_compare_exchange_val(p, condition, v, __tsan_memory_order_acq_rel,
+                                                __tsan_memory_order_relaxed);
 }
 
 InterlockedType< 4 >::value_t InterlockedType< 4 >::set_and_fetch(value_t* p, value_t v)
@@ -149,20 +141,10 @@ InterlockedType< 4 >::tagged_t::tag_t InterlockedType< 4 >::get_ticket(const tag
 bool InterlockedType< 4 >::set_conditional(tagged_t* p, tagged_t::value_t v,
                                            const tagged_t::tag_t& condition)
 {
-    unsigned char     result;
-    tagged_t::value_t unused;
-    __asm__ __volatile__("       push %%ebx\n\t"
-                         "       mov %%eax,%%ebx\n\t"
-                         "       inc %%ebx\n\t"
-                         "lock;  cmpxchg8b (%3)\n\t"
-                         "       setz %1\n\t"
-                         "       pop %%ebx\n\t"
-                         : "=m"(*p), "=a"(result), "=d"(unused)
-                         : "S"(p), "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value),
-                           "c"(v)
-                         : "memory", "cc");
-    motor_forceuse(unused);
-    return result;
+    tagged_t::tag_t value(condition.taggedvalue.tag + 1, v);
+    return __tsan_atomic64_compare_exchange_strong(
+        (__tsan_atomic64*)p, (__tsan_atomic64*)&condition, *(__tsan_atomic64*)&value,
+        __tsan_memory_order_acq_rel, __tsan_memory_order_relaxed);
 }
 
 InterlockedType< 4 >::tagged_t::tagged_t(value_t value)
@@ -201,8 +183,6 @@ bool InterlockedType< 4 >::tagged_t::operator==(tagged_t& other)
            && (taggedvalue.value == other.taggedvalue.value);
 }
 
-#ifdef _AMD64
-
 InterlockedType< 8 >::tagged_t::tagged_t(value_t value)
 {
     taggedvalue.tag   = 0;
@@ -230,7 +210,8 @@ InterlockedType< 8 >::tagged_t& InterlockedType< 8 >::tagged_t::operator=(const 
 
 InterlockedType< 8 >::tagged_t::value_t InterlockedType< 8 >::tagged_t::value()
 {
-    return taggedvalue.value;
+    return (value_t)__tsan_atomic64_load((__tsan_atomic64*)&taggedvalue.value,
+                                         __tsan_memory_order_acquire);
 }
 
 bool InterlockedType< 8 >::tagged_t::operator==(tagged_t& other)
@@ -241,14 +222,12 @@ bool InterlockedType< 8 >::tagged_t::operator==(tagged_t& other)
 
 InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch(const value_t* p)
 {
-    return *p;
+    return __tsan_atomic64_load(p, __tsan_memory_order_acquire);
 }
 
 InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_add(value_t* p, value_t incr)
 {
-    value_t old;
-    __asm__ __volatile__("lock; xaddq %0,%1" : "=r"(old), "=m"(*p) : "0"(incr), "m"(*p) : "memory");
-    return old;
+    return __tsan_atomic64_fetch_add(p, incr, __tsan_memory_order_acq_rel);
 }
 
 InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_sub(value_t* p, value_t incr)
@@ -258,32 +237,15 @@ InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_sub(value_t* p, va
 
 InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_set(value_t* p, value_t v)
 {
-    __asm__ __volatile__("lock; xchgq %2, %1" : "=r"(v), "+m"(*p) : "0"(v) : "memory");
-    return v;
+    return __tsan_atomic64_exchange(p, v, __tsan_memory_order_acq_rel);
 }
 
 InterlockedType< 8 >::value_t InterlockedType< 8 >::set_conditional(value_t* p, value_t v,
                                                                     value_t condition)
 {
-    union split
-    {
-        i64 asI64;
-        i32 asI32[2];
-    };
-    split dst;
-    split result;
-    dst.asI64 = v;
-    split src;
-    src.asI64 = condition;
-
-    __asm__ __volatile__("lock;  cmpxchg8b %2\n\t"
-                         : "=a"(result.asI32[0]), "=d"(result.asI32[1]), "=m"(*p)
-                         : "m"(*p), "a"(src.asI32[0]), "d"(src.asI32[1]), "b"(dst.asI32[0]),
-                           "c"(dst.asI32[1])
-                         : "memory", "cc"
-
-    );
-    return result.asI64;
+    return __tsan_atomic64_compare_exchange_val((__tsan_atomic64*)p, condition, v,
+                                                __tsan_memory_order_acq_rel,
+                                                __tsan_memory_order_relaxed);
 }
 
 InterlockedType< 8 >::value_t InterlockedType< 8 >::set_and_fetch(value_t* p, value_t v)
@@ -294,26 +256,20 @@ InterlockedType< 8 >::value_t InterlockedType< 8 >::set_and_fetch(value_t* p, va
 
 InterlockedType< 8 >::tagged_t::tag_t InterlockedType< 8 >::get_ticket(const tagged_t& p)
 {
-    return p;
+    tagged_t::tag_t result;
+    *(__tsan_atomic128*)&result
+        = __tsan_atomic128_load((__tsan_atomic128*)&p, __tsan_memory_order_acquire);
+    return result;
 }
 
 bool InterlockedType< 8 >::set_conditional(tagged_t* p, tagged_t::value_t v,
                                            const tagged_t::tag_t& condition)
 {
-    unsigned char   result;
-    tagged_t::tag_t dummy;
-    __asm__ __volatile__("\tmov %4,%%r8\n"
-                         "\t.byte 0xF0,0x49,0x0F,0xC7,0x08\n"
-                         "\tsetz %0\n"
-                         : "=r"(result), "=m"(*p), "=d"(dummy.taggedvalue.value),
-                           "=a"(dummy.taggedvalue.tag)
-                         : "r"(p), "c"(v), "b"(condition.taggedvalue.tag + 1),
-                           "d"(condition.taggedvalue.value), "a"(condition.taggedvalue.tag)
-                         : "memory", "cc", "r8");
-    return result;
+    tagged_t::tag_t value(condition.taggedvalue.tag + 1, v);
+    return __tsan_atomic128_compare_exchange_strong(
+        (__tsan_atomic128*)p, (__tsan_atomic128*)&condition, *(__tsan_atomic128*)&value,
+        __tsan_memory_order_acq_rel, __tsan_memory_order_relaxed);
 }
-
-#endif
 
 }  // namespace _Kernel
 

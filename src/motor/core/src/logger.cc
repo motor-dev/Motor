@@ -38,6 +38,7 @@ Logger::~Logger()
 
 ref< Logger > Logger::getChild(const istring& name)
 {
+    ScopedCriticalSection                               _(m_cs);
     minitl::hashmap< istring, ref< Logger > >::iterator it = m_children.find(name);
     if(it == m_children.end())
     {
@@ -74,11 +75,13 @@ bool Logger::log(const inamespace& name, LogLevel level, const char* filename, i
 
 void Logger::addListener(weak< ILogListener > listener)
 {
+    ScopedCriticalSection _(m_cs);
     m_listeners.push_back(listener);
 }
 
 void Logger::removeListener(weak< ILogListener > listener)
 {
+    ScopedCriticalSection _(m_cs);
     for(minitl::vector< weak< ILogListener > >::iterator it = m_listeners.begin();
         it != m_listeners.end(); ++it)
     {
@@ -99,7 +102,8 @@ bool Logger::log(LogLevel level, const char* filename, int line, const char* msg
 bool Logger::doLog(LogLevel level, istring logName, const char* filename, int line,
                    const char* msg) const
 {
-    bool result = false;
+    ScopedCriticalSection _(m_cs);
+    bool                  result = false;
     for(minitl::vector< weak< ILogListener > >::const_iterator it = m_listeners.begin();
         it != m_listeners.end(); ++it)
     {

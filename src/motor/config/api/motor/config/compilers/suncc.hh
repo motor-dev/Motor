@@ -8,6 +8,8 @@
 #define motor_alignof(t) __alignof__(t)
 #if defined(_X86) || defined(_AMD64)
 #    define motor_break() asm("int $3")
+#    include <emmintrin.h>
+#    define motor_pause() _mm_pause()
 #else
 #    error Platform not supported
 #endif

@@ -50,22 +50,10 @@ Scheduler::~Scheduler()
     }
 }
 
-void Scheduler::run(weak< Task::KernelTask > task)
+void Scheduler::run(weak< const Task::KernelTask > task)
 {
     // motor_notreached();
     task->completed(m_scheduler);
-}
-
-void* Scheduler::createData(weak< Task::KernelTask > task, u32 parameterCount)
-{
-    motor_forceuse(task);
-    motor_forceuse(parameterCount);
-    return 0;
-}
-
-void Scheduler::disposeData(void* data)
-{
-    motor_forceuse(data);
 }
 
 }}}  // namespace Motor::KernelScheduler::OpenCL

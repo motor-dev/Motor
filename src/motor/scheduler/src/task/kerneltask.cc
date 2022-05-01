@@ -9,10 +9,9 @@ namespace Motor { namespace Task {
 
 KernelTask::~KernelTask()
 {
-    m_targetScheduler->disposeData(m_schedulerData);
 }
 
-void KernelTask::schedule(weak< Scheduler > scheduler)
+void KernelTask::schedule(weak< Scheduler > scheduler) const
 {
     scheduler->queueKernel(this);
 }

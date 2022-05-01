@@ -36,9 +36,7 @@ protected:
     virtual ~IScheduler();
 
 public:
-    virtual void* createData(weak< Task::KernelTask > task, u32 parameterCount) = 0;
-    virtual void  disposeData(void* data)                                       = 0;
-    virtual void  run(weak< Task::KernelTask > task)                            = 0;
+    virtual void run(weak< const Task::KernelTask > task) = 0;
 
     static weak< IScheduler > findScheduler(SchedulerType preferredType);
 };

@@ -39,11 +39,11 @@ protected:
     {
         if(Motor::MainSettings::Log::get().enableFileLog)
         {
-            const minitl::format< 1024u >& message
+            const minitl::format< 1024u > message
                 = minitl::format< 1024u >("%s:%d (%s)\t(%s:%s) %s\n") | filename | line
                   | logname.c_str() | getLogLevelName(level) | thread | msg;
-            m_logFile->beginWrite(message.c_str(),
-                                  motor_checked_numcast< u32 >(strlen(message.c_str())));
+            const char* msg = message.c_str();
+            m_logFile->beginWrite(msg, motor_checked_numcast< u32 >(strlen(msg)));
         }
         return true;
     }
@@ -133,9 +133,9 @@ int beMain(int argc, const char* argv[])
             DiskFolder::ScanRecursive, DiskFolder::CreateOne);
         Settings::CommandLineSettingsProvider settings(argc, argv, home);
         Plugin::Plugin< minitl::pointer >     platformAssert(
-            inamespace("plugin.debug.assert"),
-            Plugin::Context(weak< Resource::ResourceManager >(), ref< Folder >(),
-                            weak< Scheduler >()));
+                inamespace("plugin.debug.assert"),
+                Plugin::Context(weak< Resource::ResourceManager >(), ref< Folder >(),
+                                weak< Scheduler >()));
         ScopedLogListener file(
             scoped< FileLogListener >::create(Arena::debug(), home->createFile("log")));
         scoped< Scheduler >                 scheduler = scoped< Scheduler >::create(Arena::task());

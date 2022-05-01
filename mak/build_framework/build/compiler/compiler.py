@@ -1,6 +1,6 @@
 import os
 import shlex
-from waflib import Task, TaskGen, Options, Utils, Logs, Errors
+from waflib import Task, TaskGen, Options, Utils, Logs
 
 
 @TaskGen.feature('c', 'cxx')
@@ -97,7 +97,7 @@ def compiler_deps_sig_implicit_deps(original_sig_implicit_deps):
             return original_sig_implicit_deps(self)
         try:
             return Task.Task.sig_implicit_deps(self)
-        except Errors.WafError:
+        except Exception:
             return Utils.SIG_NIL
 
     return sig_implicit_deps
