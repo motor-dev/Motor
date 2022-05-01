@@ -7,6 +7,7 @@
 
 #define motor_alignof(t) __alignof(t)
 #define motor_break()    /*__asm("int $3")*/
+#define motor_pause()    _mm_pause()
 
 #pragma warning disable 111  // statement is unreachable
 #pragma warning disable 161  // unknown pragma

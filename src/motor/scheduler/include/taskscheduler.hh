@@ -10,7 +10,10 @@
 #include <motor/core/threads/thread.hh>
 #include <motor/kernel/interlocked_stack.hh>
 #include <motor/kernel/simd.hh>
+#include <motor/minitl/pool.hh>
 #include <motor/scheduler/scheduler.hh>
+#include <motor/scheduler/task/iexecutor.hh>
+#include <taskitem.hh>
 
 namespace Motor {
 
@@ -18,49 +21,59 @@ class Scheduler;
 
 namespace Task {
 
-template < typename Body >
-class Task;
-class TaskGroup;
-class ITaskItem;
-
 class TaskScheduler : public minitl::pointer
 {
     MOTOR_NOCOPY(TaskScheduler);
 
-private:
+public:
     class Worker;
+
+private:
     friend class Worker;
-    friend class ITaskItem;
+    friend class TaskItem;
+
+    struct TaskPool
+    {
+        TaskPool(u32 workerCount);
+        ~TaskPool();
+
+        void      push(TaskItem* item, u32 count);
+        TaskItem* pop();
+        void      resize(u32 workerCount);
+
+        u32        m_workerCount;
+        Semaphore  m_poolSignal;
+        Semaphore  m_poolLock;
+        TaskItem** m_taskPool;
+        i_u32      m_firstQueued;
+        i_u32      m_lastQueued;
+        i_u32      m_firstFree;
+        u32        m_poolMask;
+    };
 
 private:
     minitl::vector< Worker* > m_workers;
-    Semaphore                 m_synchro;
-    Semaphore                 m_mainThreadSynchro;
     weak< Scheduler >         m_scheduler;
-
-private:  // friend Worker
-    minitl::istack< ITaskItem > m_tasks[Scheduler::PriorityCount];
-    minitl::istack< ITaskItem > m_mainThreadTasks[Scheduler::PriorityCount];
-
-private:  // friend class ITaskItem, Worker
-    ITaskItem* pop(Scheduler::Affinity affinity);
-    bool       taskDone();
-    bool       hasTasks();
-    bool       isRunning();
+    i_u32                     m_workerCount;
+    TaskPool                  m_mainThreadPool;
+    TaskPool                  m_workerTaskPool;
+    minitl::pool< TaskItem >  m_taskItemPool;
+    Semaphore                 m_taskItemAvailable;
 
 public:
     TaskScheduler(weak< Scheduler > scheduler);
     ~TaskScheduler();
 
-    void queue(ITaskItem* head, ITaskItem* tail, u32 count);
-    void queue(ITaskItem* head, ITaskItem* tail, u32 count, int priority);
+    void queue(weak< const ITask > task, weak< const IExecutor > executor, u32 breakdownCount);
 
     void mainThreadJoin();
     void notifyEnd();
+    bool isRunning() const;
+    bool taskDone();
 
     u32 workerCount() const
     {
-        return motor_checked_numcast< u32 >(m_workers.size());
+        return m_workerCount;
     }
 };
 

@@ -49,6 +49,16 @@ template <>
 struct InterlockedType< 4 >
 {
     typedef long          value_t;
+    static inline value_t fetch(const value_t* p)
+    {
+        value_t result;
+        __asm__ __volatile__(AO_THUMB_GO_ARM "       ldr     %0, [%1]\n" DMB(2)
+                                 AO_THUMB_RESTORE_MODE
+                             : "=&r"(result)
+                             : "r"(p), "r"(0)
+                             : AO_THUMB_SWITCH_CLOBBERS "cc");
+        return result;
+    }
     static inline value_t fetch_and_add(value_t* p, value_t incr)
     {
         value_t old = 0;
@@ -107,8 +117,8 @@ struct InterlockedType< 4 >
 
     struct tagged_t
     {
-        typedef void* value_t;
-        typedef void* tag_t;
+        typedef void*    value_t;
+        typedef tagged_t tag_t;
 
         __attribute__((aligned(4))) value_t m_value;
 

@@ -30,30 +30,23 @@ private:
     weak< const KernelScheduler::Kernel > const                m_kernel;
     weak< KernelScheduler::IScheduler >                        m_targetScheduler;
     minitl::array< weak< KernelScheduler::IParameter > > const m_parameters;
-    void*                                                      m_schedulerData;
 
 public:
     template < typename Container >
     KernelTask(istring name, KernelScheduler::SchedulerType type, color32 color,
-               Scheduler::Priority priority, weak< const Motor::KernelScheduler::Kernel > kernel,
-               const Container& parameters);
+               weak< const Motor::KernelScheduler::Kernel > kernel, const Container& parameters);
     template < typename Iterator >
     KernelTask(istring name, KernelScheduler::SchedulerType type, color32 color,
-               Scheduler::Priority priority, weak< const Motor::KernelScheduler::Kernel > kernel,
-               const Iterator& begin, const Iterator& end);
+               weak< const Motor::KernelScheduler::Kernel > kernel, const Iterator& begin,
+               const Iterator& end);
     ~KernelTask();
 
-    virtual void schedule(weak< Scheduler > scheduler) override;
+    virtual void schedule(weak< Scheduler > scheduler) const override;
 
     weak< const KernelScheduler::Kernel > kernel() const
     {
         return m_kernel;
     };
-    void* schedulerData(const weak< KernelScheduler::IScheduler >& scheduler) const
-    {
-        motor_assert(scheduler == m_targetScheduler, "scheduler mismatch");
-        return m_schedulerData;
-    }
 };
 
 }}  // namespace Motor::Task
@@ -64,27 +57,23 @@ namespace Motor { namespace Task {
 
 template < typename Container >
 KernelTask::KernelTask(istring name, KernelScheduler::SchedulerType type, color32 color,
-                       Scheduler::Priority                          priority,
                        weak< const Motor::KernelScheduler::Kernel > kernel,
                        const Container&                             parameters)
-    : ITask(name, color, priority, Scheduler::WorkerThread)
+    : ITask(name, color, Scheduler::WorkerThread)
     , m_kernel(kernel)
     , m_targetScheduler(KernelScheduler::IScheduler::findScheduler(type))
     , m_parameters(Arena::task(), minitl::begin(parameters), minitl::end(parameters))
-    , m_schedulerData(m_targetScheduler->createData(this, m_parameters.size()))
 {
 }
 
 template < typename Iterator >
 KernelTask::KernelTask(istring name, KernelScheduler::SchedulerType type, color32 color,
-                       Scheduler::Priority                          priority,
                        weak< const Motor::KernelScheduler::Kernel > kernel, const Iterator& begin,
                        const Iterator& end)
-    : ITask(name, color, priority, Scheduler::WorkerThread)
+    : ITask(name, color, Scheduler::WorkerThread)
     , m_kernel(kernel)
     , m_targetScheduler(KernelScheduler::IScheduler::findScheduler(type))
     , m_parameters(Arena::task(), begin, end)
-    , m_schedulerData(m_targetScheduler->createData(this, m_parameters.size()))
 {
 }
 

@@ -28,7 +28,7 @@ private:
         Callback(weak< TaskGroup > owner);
         virtual ~Callback();
 
-        virtual void onCompleted(weak< Scheduler > scheduler, weak< ITask > task) override;
+        virtual void onCompleted(weak< Scheduler > scheduler, weak< const ITask > task) override;
         virtual void onConnected(weak< ITask > to, CallbackStatus status) override;
         virtual bool onDisconnected(weak< ITask > to) override;
     };
@@ -39,7 +39,7 @@ public:
     ~TaskGroup();
 
 public:  // ITask
-    virtual void schedule(weak< Scheduler > scheduler) override;
+    virtual void schedule(weak< Scheduler > scheduler) const override;
 
 public:
     void addStartTask(weak< ITask > task);

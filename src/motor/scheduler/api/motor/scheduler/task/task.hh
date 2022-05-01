@@ -5,30 +5,24 @@
 #define MOTOR_SCHEDULER_TASK_TASK_HH_
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
-#include <motor/scheduler/private/taskitem.hh>
+#include <motor/scheduler/task/iexecutor.hh>
 #include <motor/scheduler/task/itask.hh>
 
 namespace Motor { namespace Task {
 
-template < typename Body >
+template < typename Executor >
 class Task : public ITask
 {
-    template < class B, class R >
-    friend class TaskItem;
     MOTOR_NOCOPY(Task);
 
 public:
-    Body body;
-
-private:
-    i_u32 m_taskCount;
-    i_u32 m_taskCompleted;
+    ref< Executor > const executor;
 
 public:
-    Task(istring name, color32 color, const Body& body,
-         Scheduler::Priority priority = Scheduler::Default,
+    /* todo: perfect forwarding of arguments to executor */
+    Task(istring name, color32 color, ref< Executor > executor,
          Scheduler::Affinity affinity = Scheduler::WorkerThread);
-    virtual void schedule(weak< Scheduler > sc) override;
+    virtual void schedule(weak< Scheduler > sc) const override;
 };
 
 }}  // namespace Motor::Task

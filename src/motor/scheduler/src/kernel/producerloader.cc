@@ -13,7 +13,8 @@ ProducerLoader::ProducerLoader()
     : m_startTask(
         ref< Task::Task< Task::MethodCaller< ProducerLoader, &ProducerLoader::start > > >::create(
             Arena::task(), "loader:start", Colors::make(89, 89, 180),
-            Task::MethodCaller< ProducerLoader, &ProducerLoader::start >(this)))
+            ref< Task::MethodCaller< ProducerLoader, &ProducerLoader::start > >::create(
+                Arena::task(), this)))
 {
 }
 

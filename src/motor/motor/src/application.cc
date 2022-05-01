@@ -32,18 +32,21 @@ Application::Application(ref< Folder >                     dataFolder,
     , m_tasks(Arena::task())
     , m_forceContinue()
     , m_resourceLoadingCount(0)
-    , m_runLoop(true)
+    , m_runLoop(i_bool::create(true))
 {
     m_resourceManager->attach< KernelScheduler::Producer >(m_producerLoader);
     m_resourceManager->attach< World::World >(m_worldLoader);
 
-    addTask(ref< Task::Task< Task::MethodCaller< Application, &Application::updateResources > > >::
-                create(Arena::task(), "application:update_resource", Colors::Green::Green,
-                       Task::MethodCaller< Application, &Application::updateResources >(this)));
+    addTask(
+        ref< Task::Task< Task::MethodCaller< Application, &Application::updateResources > > >::
+            create(Arena::task(), "application:update_resource", Colors::Green::Green,
+                   ref< Task::MethodCaller< Application, &Application::updateResources > >::create(
+                       Arena::task(), this)));
     addTask(
         ref< Task::Task< Task::MethodCaller< Application, &Application::frameUpdate > > >::create(
             Arena::task(), "application:update_sync", Colors::Green::Green,
-            Task::MethodCaller< Application, &Application::frameUpdate >(this)));
+            ref< Task::MethodCaller< Application, &Application::frameUpdate > >::create(
+                Arena::task(), this)));
     registerInterruptions();
 }
 

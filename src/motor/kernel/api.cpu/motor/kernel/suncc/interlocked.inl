@@ -25,6 +25,10 @@ template <>
 struct InterlockedType< 4 >
 {
     typedef i32           value_t;
+    static inline value_t fetch(const value_t* p)
+    {
+        return *p;
+    }
     static inline value_t fetch_and_add(value_t* p, value_t incr)
     {
         return fetch_and_add_32(p, incr);
@@ -120,6 +124,10 @@ template <>
 struct InterlockedType< 8 >
 {
     typedef i64           value_t;
+    static inline value_t fetch(const value_t* p)
+    {
+        return *p;
+    }
     static inline value_t fetch_and_add(value_t* p, value_t incr)
     {
         return fetch_and_add_64(p, incr);

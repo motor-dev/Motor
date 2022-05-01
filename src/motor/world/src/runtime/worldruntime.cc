@@ -32,11 +32,14 @@ WorldRuntime::WorldRuntime(weak< const KernelScheduler::ProducerLoader >        
     , m_updateTask(
           ref< Task::Task< Task::MethodCaller< WorldRuntime, &WorldRuntime::update > > >::create(
               Arena::task(), "world:update", Colors::make(89, 89, 180),
-              Task::MethodCaller< WorldRuntime, &WorldRuntime::update >(this)))
+              ref< Task::MethodCaller< WorldRuntime, &WorldRuntime::update > >::create(
+                  Arena::task(), this)))
     , m_eventTask(
           ref< Task::Task< Task::MethodCaller< WorldRuntime, &WorldRuntime::processEvents > > >::
-              create(Arena::task(), "world:processEvents", Colors::make(89, 89, 180),
-                     Task::MethodCaller< WorldRuntime, &WorldRuntime::processEvents >(this)))
+              create(
+                  Arena::task(), "world:processEvents", Colors::make(89, 89, 180),
+                  ref< Task::MethodCaller< WorldRuntime, &WorldRuntime::processEvents > >::create(
+                      Arena::task(), this)))
     , m_productEnds(Arena::task(), products.size() + 1)
 {
     m_resourceManager->attach< SubWorld >(this);

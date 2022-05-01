@@ -7,6 +7,7 @@
 
 #define motor_alignof(t) __alignof__(t)
 #define motor_break()
+#define motor_pause()
 
 typedef signed char       i8;
 typedef signed short      i16;

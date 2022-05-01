@@ -6,6 +6,7 @@
 /**************************************************************************************************/
 #include <motor/core/stdafx.h>
 #include <motor/core/string/istring.hh>
+#include <motor/core/threads/criticalsection.hh>
 #include <motor/minitl/hash_map.hh>
 #include <motor/minitl/tuple.hh>
 #include <motor/minitl/vector.hh>
@@ -44,6 +45,7 @@ class motor_api(CORE) Logger : public minitl::refcountable
     MOTOR_NOCOPY(Logger);
 
 private:
+    CriticalSection                                   m_cs;
     minitl::vector< minitl::weak< ILogListener > >    m_listeners;
     minitl::hashmap< istring, minitl::ref< Logger > > m_children;
     minitl::weak< Logger >                            m_parent;

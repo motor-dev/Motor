@@ -9,8 +9,9 @@
 namespace Motor { namespace KernelScheduler { namespace CPU {
 
 KernelObject::KernelObject(weak< const CodeObject > code, const istring name)
-    : m_entryPoint(
-        code->m_kernel.getSymbol< KernelMain >((minitl::format< 256u >("_%s") | name).c_str()))
+    : IExecutor()
+    , m_entryPoint(
+          code->m_kernel.getSymbol< KernelMain >((minitl::format< 256u >("_%s") | name).c_str()))
 {
     motor_debug("[%s]: %p" | name | m_entryPoint);
 }
@@ -19,7 +20,7 @@ KernelObject::~KernelObject()
 {
 }
 
-void KernelObject::run(const u32 index, const u32 total)
+void KernelObject::run(const u32 index, const u32 total) const
 {
     (*m_entryPoint)(index, total);
 }

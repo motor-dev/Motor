@@ -7,8 +7,7 @@
 #include <cerrno>
 #include <stdio.h>
 
-#ifdef __linux
-
+#if defined(__linux) && !defined(BE_THREAD_SANITIZER)
 #    include <limits.h>
 #    include <linux/futex.h>
 #    include <sys/syscall.h>
@@ -39,17 +38,16 @@ void Semaphore::release(int count)
 Threads::Waitable::WaitResult Semaphore::wait()
 {
     int    result;
-    i_i32* value = reinterpret_cast< i_i32* >(&m_data.value);
+    i_i32& value = *reinterpret_cast< i_i32* >(&m_data.value);
     do
     {
-        i32 count = *value += 0;
-        if(count > 0)
+        i32 count = value--;
+        if(count >= 1)
         {
-            if(value->setConditional(count - 1, count) == count) return Waitable::Finished;
+            return Waitable::Finished;
         }
-
-        result = syscall(SYS_futex, reinterpret_cast< i_i32* >(&m_data.value), FUTEX_WAIT_PRIVATE,
-                         count, NULL);
+        ++value;
+        result = syscall(SYS_futex, &m_data.value, FUTEX_WAIT_PRIVATE, count, NULL);
     } while(result == 0 || errno == EAGAIN);
 
     motor_error("Semaphore error: %d-%d[%s]" | result | errno | strerror(errno));

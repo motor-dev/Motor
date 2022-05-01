@@ -59,7 +59,7 @@ class istack
 public:
     struct node
     {
-        node* next;
+        T* next;
         node() : next(0)
         {
         }
@@ -78,6 +78,7 @@ public:
     void push(T* t);
     void pushList(T* h, T* t);
     T*   pop();
+    T*   popAll();
 };
 
 template < typename T >
@@ -97,7 +98,7 @@ void istack< T >::push(T* t)
     do
     {
         ticket  = m_head.getTicket();
-        t->next = static_cast< T* >((node*)m_head);
+        t->next = static_cast< T* >(ticket.value());
     } while(!m_head.setConditional(t, ticket));
 }
 
@@ -108,7 +109,7 @@ void istack< T >::pushList(T* h, T* t)
     do
     {
         ticket  = m_head.getTicket();
-        t->next = static_cast< T* >((node*)m_head);
+        t->next = static_cast< T* >(ticket.value());
     } while(!m_head.setConditional(h, ticket));
 }
 
@@ -117,11 +118,26 @@ T* istack< T >::pop()
 {
     typename itaggedptr< node >::ticket_t ticket;
     T*                                    result;
+    T*                                    next;
     do
     {
         ticket = m_head.getTicket();
-        result = static_cast< T* >((node*)m_head);
-    } while(result && !m_head.setConditional(const_cast< node* >(result->next), ticket));
+        result = static_cast< T* >(ticket.value());
+        next   = result->next;
+    } while(result && !m_head.setConditional(next, ticket));
+    return result;
+}
+
+template < typename T >
+T* istack< T >::popAll()
+{
+    typename itaggedptr< node >::ticket_t ticket;
+    T*                                    result;
+    do
+    {
+        ticket = m_head.getTicket();
+        result = static_cast< T* >(ticket.value());
+    } while(result && !m_head.setConditional(0, ticket));
     return result;
 }
 

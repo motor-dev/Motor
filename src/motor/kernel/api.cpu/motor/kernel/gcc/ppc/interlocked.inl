@@ -30,6 +30,7 @@ struct InterlockedType< 4 >
         inline bool      operator==(tagged_t& other);
     };
 
+    static inline value_t         fetch(const value_t* p);
     static inline value_t         fetch_and_add(value_t* p, value_t incr);
     static inline value_t         fetch_and_sub(value_t* p, value_t incr);
     static inline value_t         fetch_and_set(value_t* p, value_t v);
@@ -58,8 +59,8 @@ struct InterlockedType< 8 >
 
     struct tagged_t
     {
-        typedef void*   value_t;
-        typedef value_t tag_t;
+        typedef void*    value_t;
+        typedef tagged_t tag_t;
 
         __attribute__((aligned(8))) value_t m_value;
 
@@ -70,6 +71,7 @@ struct InterlockedType< 8 >
         inline bool      operator==(tagged_t& other);
     };
 
+    static inline value_t fetch(const value_t* p);
     static inline value_t fetch_and_add(value_t* p, value_t incr);
     static inline value_t fetch_and_sub(value_t* p, value_t incr);
     static inline value_t fetch_and_set(value_t* p, value_t v);
@@ -108,6 +110,17 @@ InterlockedType< 4 >::tagged_t::value_t InterlockedType< 4 >::tagged_t::value()
 bool InterlockedType< 4 >::tagged_t::operator==(tagged_t& other)
 {
     return m_value == other.m_value;
+}
+
+InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch(const value_t* p)
+{
+    value_t result;
+    __asm__ __volatile__(" lwz  %0, 0(%1)\n"
+                         " isync\n"
+                         : "=&r"(result)
+                         : "r"(p)
+                         : "memory", "cc");
+    return result;
 }
 
 InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_add(value_t* p, value_t incr)
@@ -187,12 +200,13 @@ bool InterlockedType< 4 >::set_conditional(tagged_t* p, tagged_t::value_t v,
                                            const tagged_t::tag_t& /*condition*/)
 {
     bool result;
-    __asm__ __volatile__("  li %0,0\n"
+    __asm__ __volatile__("  lwsync\n"
+                         "  li %0,0\n"
                          "  stwcx. %1, 0, %2\n"
                          "  bne  1f\n"
                          "  li %0,1\n"
-                         "1:\n"
                          "  isync\n"
+                         "1:\n"
                          : "=&r"(result)
                          : "r"(v), "r"(p)
                          : "memory", "cc");
@@ -223,6 +237,17 @@ InterlockedType< 8 >::tagged_t::value_t InterlockedType< 8 >::tagged_t::value()
 bool InterlockedType< 8 >::tagged_t::operator==(tagged_t& other)
 {
     return m_value == other.m_value;
+}
+
+InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch(const value_t* p)
+{
+    value_t result;
+    __asm__ __volatile__(" ld  %0, 0(%1)\n"
+                         " isync\n"
+                         : "=&r"(result)
+                         : "r"(p)
+                         : "memory", "cc");
+    return result;
 }
 
 InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_add(value_t* p, value_t incr)
@@ -302,12 +327,13 @@ bool InterlockedType< 8 >::set_conditional(tagged_t* p, tagged_t::value_t v,
                                            const tagged_t::tag_t& /*condition*/)
 {
     bool result;
-    __asm__ __volatile__("  li %0,0\n"
+    __asm__ __volatile__("  lwsync\n"
+                         "  li %0,0\n"
                          "  stdcx. %1, 0, %2\n"
                          "  bne 1f\n"
                          "  li %0,1\n"
-                         "1:\n"
                          "  isync\n"
+                         "1:\n"
                          : "=&r"(result)
                          : "r"(v), "r"(p)
                          : "memory", "cc");

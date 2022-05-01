@@ -4,34 +4,103 @@
 #include <motor/scheduler/stdafx.h>
 #include <taskscheduler.hh>
 
-#include <motor/core/environment.hh>
-
-#include <motor/scheduler/private/taskitem.hh>
-#include <motor/scheduler/range/sequence.hh>
-#include <motor/scheduler/task/task.hh>
 #include <settings.meta.hh>
+#include <taskitem.hh>
+
+#include <motor/core/environment.hh>
+#include <motor/core/threads/threadlocal.hh>
+#include <motor/scheduler/task/task.hh>
 
 namespace Motor { namespace Task {
+
+static tls< TaskScheduler::Worker > s_worker;
+
+static const u32 s_maxConcurrentTasks = 4096;
+static const u32 s_breakdownPerThread = 4;
+
+static inline u32 nextPowerOf2(u32 number)
+{
+    u32 result = s_maxConcurrentTasks * s_breakdownPerThread;
+    while(result < number)
+        result <<= 1;
+    return result;
+}
+
+TaskScheduler::TaskPool::TaskPool(u32 workerCount)
+    : m_workerCount(workerCount)
+    , m_poolSignal(0)
+    , m_poolLock(workerCount)
+    , m_taskPool(static_cast< TaskItem** >(Arena::task().alloc(
+          nextPowerOf2(s_maxConcurrentTasks * s_breakdownPerThread * m_workerCount)
+          * sizeof(TaskItem*))))
+    , m_firstQueued(i_u32::create(0))
+    , m_lastQueued(i_u32::create(0))
+    , m_firstFree(i_u32::create(0))
+    , m_poolMask(nextPowerOf2(s_maxConcurrentTasks * s_breakdownPerThread * m_workerCount) - 1)
+{
+}
+
+TaskScheduler::TaskPool::~TaskPool()
+{
+    Arena::task().free(m_taskPool);
+}
+
+void TaskScheduler::TaskPool::push(TaskItem* item, u32 count)
+{
+    /* In this method, beware of overflows! */
+    u32 poolStart  = m_firstFree.addExchange(count);
+    u32 poolEnd    = poolStart + count;
+    u32 bufferSize = m_poolMask + 1;
+
+    while(poolEnd - m_firstQueued > bufferSize)
+        motor_pause();
+
+    for(u32 i = 0; i < count; ++i)
+    {
+        m_taskPool[(i + poolStart) & m_poolMask] = item;
+    }
+
+    while(m_lastQueued != poolStart)
+        motor_pause();
+    m_lastQueued = poolEnd;
+    m_poolSignal.release(count);
+}
+
+TaskItem* TaskScheduler::TaskPool::pop()
+{
+    u32 index = m_firstQueued.addExchange(1);
+    return m_taskPool[index & m_poolMask];
+}
+
+void TaskScheduler::TaskPool::resize(u32 workerCount)
+{
+    motor_assert(m_workerCount != 0, "%d is not a valid worker count" | workerCount);
+    if(!s_worker) m_poolLock.wait();
+    for(u32 i = 1; i < m_workerCount; ++i)
+        m_poolLock.wait();
+
+    /* exclusive access to buffer */
+    /* do resizing */
+
+    if(s_worker)
+        m_poolLock.release(workerCount - 1);
+    else
+        m_poolLock.release(workerCount);
+}
 
 class TaskScheduler::Worker
 {
     MOTOR_NOCOPY(Worker);
 
-protected:
-    static const int s_frameCount = 8;
-
 private:
     size_t const m_workerId;
     Thread       m_workThread;
-
-protected:
-    void unhook(ITaskItem* prev, ITaskItem* t);
 
 public:
     Worker(weak< TaskScheduler > scheduler, size_t workerId);
     ~Worker();
 
-    bool doWork(weak< TaskScheduler > sc);
+    bool doWork(const weak< TaskScheduler >& sc);
 
     static intptr_t work(intptr_t p1, intptr_t p2);
 };
@@ -48,25 +117,44 @@ TaskScheduler::Worker::~Worker()
 {
 }
 
-bool TaskScheduler::Worker::doWork(weak< TaskScheduler > sc)
+bool TaskScheduler::Worker::doWork(const weak< TaskScheduler >& sc)
 {
-    ITaskItem* item = sc->pop(Scheduler::WorkerThread);
+    TaskItem* item = sc->m_workerTaskPool.pop();
 
-    if(!item) return false;
-    item->run(sc->m_scheduler);
-    motor_assert(sc->hasTasks(), "running task count should be more than 1");
-    return sc->taskDone();
+    if(item)
+    {
+        u32       index = item->m_started++;
+        const u32 total = item->m_total;
+        item->m_executor->run(index, total);
+        if(++item->m_finished != total)
+        {
+            return false;
+        }
+        else
+        {
+            item->m_owner->completed(sc->m_scheduler);
+            sc->m_taskItemPool.release(item);
+            sc->m_taskItemAvailable.release(1);
+            return sc->taskDone();
+        }
+    }
+    else
+        return true;
 }
 
 intptr_t TaskScheduler::Worker::work(intptr_t p1, intptr_t p2)
 {
-    Worker*        w  = reinterpret_cast< Worker* >(p1);
+    Worker* w         = reinterpret_cast< Worker* >(p1);
+    s_worker          = w;
     TaskScheduler* sc = reinterpret_cast< TaskScheduler* >(p2);
     while(sc->isRunning())
     {
-        if(sc->m_synchro.wait() == Threads::Waitable::Finished)
+        if(sc->m_workerTaskPool.m_poolSignal.wait() == Threads::Waitable::Finished)
         {
-            if(w->doWork(sc))
+            sc->m_workerTaskPool.m_poolLock.wait();
+            bool end = w->doWork(sc);
+            sc->m_workerTaskPool.m_poolLock.release(1);
+            if(end)
             {
                 sc->notifyEnd();
             }
@@ -77,20 +165,18 @@ intptr_t TaskScheduler::Worker::work(intptr_t p1, intptr_t p2)
 
 TaskScheduler::TaskScheduler(weak< Scheduler > scheduler)
     : m_workers(Arena::task())
-    , m_synchro(0)
-    , m_mainThreadSynchro(0)
     , m_scheduler(scheduler)
-    , m_tasks()
-    , m_mainThreadTasks()
+    , m_workerCount(i_u32::create(
+          SchedulerSettings::Scheduler::get().ThreadCount > 0
+              ? SchedulerSettings::Scheduler::get().ThreadCount
+              : size_t(minitl::max(1, i32(Environment::getEnvironment().getProcessorCount())))))
+    , m_mainThreadPool(1)
+    , m_workerTaskPool(m_workerCount)
+    , m_taskItemPool(Arena::task(), s_maxConcurrentTasks)
+    , m_taskItemAvailable(s_maxConcurrentTasks)
 {
-    const SchedulerSettings::Scheduler& settings = SchedulerSettings::Scheduler::get();
-    const size_t                        g_numWorkers
-        = settings.ThreadCount > 0
-              ? settings.ThreadCount
-              : size_t(minitl::max(1, i32(Environment::getEnvironment().getProcessorCount())
-                                          + settings.ThreadCount));
-    motor_info("initializing scheduler with %d workers" | g_numWorkers);
-    for(size_t i = 0; i < g_numWorkers; ++i)
+    motor_info("initializing scheduler with %d workers" | m_workerCount);
+    for(size_t i = 0; i < m_workerCount; ++i)
     {
         m_workers.push_back(new Worker(this, i));
     }
@@ -98,97 +184,69 @@ TaskScheduler::TaskScheduler(weak< Scheduler > scheduler)
 
 TaskScheduler::~TaskScheduler()
 {
-    m_synchro.release((int)m_workers.size());
-    m_mainThreadSynchro.release(1);
+    m_workerTaskPool.push(0, m_workers.size());
     for(size_t i = 0; i < m_workers.size(); ++i)
         delete m_workers[i];
 }
 
-void TaskScheduler::queue(ITaskItem* head, ITaskItem* tail, u32 count, int priority)
+void TaskScheduler::queue(weak< const ITask > task, weak< const IExecutor > executor,
+                          u32 breakdownCount)
 {
-#if MOTOR_ENABLE_ASSERT
-    u32        debugCount = 1;
-    ITaskItem* first      = head;
-    while(first != tail && first)
+    m_scheduler->m_runningTasks++;
+    m_taskItemAvailable.wait();
+    TaskItem* item = m_taskItemPool.allocate(task, executor, breakdownCount);
+
+    if(task->affinity == Scheduler::WorkerThread)
     {
-        debugCount++;
-        first = (ITaskItem*)first->next;
-    }
-    motor_assert(first, "queue task does not end with specified tail");
-    motor_assert(tail->next == 0, "queue task tail is not the last item");
-    motor_assert(debugCount == count,
-                 "queue task list is %d elements, but %d indicated" | debugCount | count);
-#endif
-    m_scheduler->m_runningTasks += count;
-    if(head->m_owner->affinity == Scheduler::WorkerThread)
-    {
-        m_tasks[priority].pushList(head, tail);
-        m_synchro.release(count);
+        m_workerTaskPool.push(item, breakdownCount);
     }
     else
     {
-        m_mainThreadTasks[priority].pushList(head, tail);
-        m_mainThreadSynchro.release(count);
+        m_mainThreadPool.push(item, breakdownCount);
     }
-}
-
-void TaskScheduler::queue(ITaskItem* head, ITaskItem* tail, u32 count)
-{
-    queue(head, tail, count, head->m_owner->priority);
-}
-
-ITaskItem* TaskScheduler::pop(Scheduler::Affinity affinity)
-{
-    minitl::istack< ITaskItem >* tasks
-        = affinity == Scheduler::WorkerThread ? m_tasks : m_mainThreadTasks;
-    for(unsigned int i = Scheduler::Immediate; i != Scheduler::Low; --i)
-    {
-        ITaskItem* t = tasks[i].pop();
-        if(t) return t;
-    }
-    return 0;
 }
 
 void TaskScheduler::mainThreadJoin()
 {
     while(true)
     {
-        if(m_mainThreadSynchro.wait() == Threads::Waitable::Finished)
+        if(m_mainThreadPool.m_poolSignal.wait() == Threads::Waitable::Finished)
         {
-            ITaskItem* t = pop(Scheduler::MainThread);
-            if(t)
+            TaskItem* item = m_mainThreadPool.pop();
+
+            if(item)
             {
-                // No split since only one main thread
-                t->run(m_scheduler);
-                if(--m_scheduler->m_runningTasks == 0)
+                u32 index = item->m_started++;
+                item->m_executor->run(index, item->m_total);
+                if(taskDone())
                 {
+                    m_taskItemPool.release(item);
                     break;
                 }
             }
             else
-            {
                 break;
-            }
         }
     }
 }
 
-void TaskScheduler::notifyEnd()
-{
-    m_mainThreadSynchro.release(1);
-}
-
 bool TaskScheduler::taskDone()
 {
-    return 0 == --m_scheduler->m_runningTasks;
+    if(0 == --m_scheduler->m_runningTasks)
+    {
+        motor_info("No task left; exiting");
+        return true;
+    }
+    else
+        return false;
 }
 
-bool TaskScheduler::hasTasks()
+void TaskScheduler::notifyEnd()
 {
-    return m_scheduler->m_runningTasks > 0;
+    m_mainThreadPool.push(0, 1);
 }
 
-bool TaskScheduler::isRunning()
+bool TaskScheduler::isRunning() const
 {
     return m_scheduler->m_running;
 }

@@ -13,7 +13,7 @@ pool< T >::pool(Allocator& allocator, u64 capacity, u64 alignment)
     , m_end(&m_pool[capacity])
 {
     for(u64 i = 0; i < capacity; ++i)
-        m_items.push((node*)(&m_pool[i]));
+        m_items.push(reinterpret_cast< node* >(&m_pool[i]));
 }
 
 template < typename T >

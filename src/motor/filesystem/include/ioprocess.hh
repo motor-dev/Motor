@@ -8,26 +8,33 @@
 #include <motor/core/threads/semaphore.hh>
 #include <motor/core/threads/thread.hh>
 #include <motor/filesystem/file.meta.hh>
+#include <motor/kernel/interlocked_stack.hh>
 
 namespace Motor { namespace IOProcess {
 
 class IOContext : public minitl::pointer
 {
 private:
+    struct IORequest : public minitl::istack< IORequest >::node
+    {
+        ref< File::Ticket > ticket;
+    };
     enum
     {
-        SlotCount = 32
+        MaxRequestCount = 32
     };
-    Semaphore           m_availableTickets;
-    Semaphore           m_freeSlots;
-    i_u32               m_firstFreeSlot;
-    i_u32               m_firstUsedSlot;
-    i_u8                m_ioDone;
-    ref< File::Ticket > m_ticketPool[SlotCount];
-    Thread              m_ioThread;
+    Semaphore m_availableTickets;
+    Semaphore m_freeSlots;
+    i_u8      m_ioDone;
+    Thread    m_ioThread;
+
+    IORequest                   m_requests[MaxRequestCount];
+    minitl::istack< IORequest > m_freeRequestList;
+    minitl::istack< IORequest > m_requestQueue;
 
 private:
     static intptr_t ioProcess(intptr_t p1, intptr_t p2);
+    void            processRequests(IORequest* head);
 
 public:
     IOContext();

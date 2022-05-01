@@ -21,7 +21,9 @@
 #        error Architecture not implemented on MSVC
 #    endif
 #elif defined(MOTOR_COMPILER_INTEL) || defined(MOTOR_COMPILER_GCC) || defined(MOTOR_COMPILER_CLANG)
-#    if defined(_X86) || defined(_AMD64)
+#    if defined(BE_THREAD_SANITIZER)
+#        include <motor/kernel/gcc/tsan/interlocked.inl>
+#    elif defined(_X86) || defined(_AMD64)
 #        include <motor/kernel/gcc/x86/interlocked.inl>
 #    elif defined(_POWERPC)
 #        include <motor/kernel/gcc/ppc/interlocked.inl>
@@ -64,7 +66,7 @@ public:
 
     __host __device operator T() const
     {
-        return static_cast< T >(m_value);
+        return static_cast< T >(impl::fetch(&m_value));
     }
     __host __device T operator=(T value)
     {
@@ -128,7 +130,7 @@ public:
     }
     __host __device operator const T*() const
     {
-        return reinterpret_cast< T* >(impl::fetch_and_add(const_cast< value_t* >(&m_value), 0));
+        return static_cast< T >(impl::load(&m_value));
     }
     __host __device operator T*()
     {

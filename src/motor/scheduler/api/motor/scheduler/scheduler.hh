@@ -8,13 +8,13 @@
 #include <motor/minitl/array.hh>
 #include <motor/minitl/pool.hh>
 #include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
+#include <motor/scheduler/task/iexecutor.hh>
 
 namespace Motor {
 
 namespace Task {
 class TaskScheduler;
 class TaskGroup;
-class ITaskItem;
 class KernelTask;
 }  // namespace Task
 
@@ -29,14 +29,6 @@ class motor_api(SCHEDULER) Scheduler : public minitl::pointer
     friend class Task::TaskScheduler;
 
 public:
-    enum Priority
-    {
-        Low           = 0,
-        Default       = 1,
-        High          = 2,
-        Immediate     = 3,
-        PriorityCount = 4
-    };
     enum Affinity
     {
         WorkerThread = 0,
@@ -59,13 +51,8 @@ private:
     friend struct WorkItem;
 
 private:
-    struct Buffer
-    {
-        char buffer[256];
-    };
     i_u32                                                 m_runningTasks;
     i_bool                                                m_running;
-    minitl::pool< Buffer >                                m_taskPool;
     scoped< Task::TaskScheduler >                         m_taskScheduler;
     minitl::vector< weak< KernelScheduler::IScheduler > > m_kernelSchedulers;
 
@@ -73,11 +60,9 @@ private:
     void notifyEnd();
 
 public:
-    void  queueTasks(Task::ITaskItem * head, Task::ITaskItem * tail, u32 count, Priority priority);
-    void  queueTasks(Task::ITaskItem * head, Task::ITaskItem * tail, u32 count);
-    void  queueKernel(weak< Task::KernelTask > task);
-    void* allocate(size_t size);
-    void  release(void* t, size_t size);
+    void queueTask(weak< const Task::ITask > task, weak< const Task::IExecutor > executor,
+                   u32 breakdownCount);
+    void queueKernel(weak< const Task::KernelTask > task);
     template < typename T >
     inline void* allocateTask();
     template < typename T >
@@ -90,19 +75,6 @@ public:
     void mainThreadJoin();
     u32  workerCount() const;
 };
-
-template < typename T >
-void* Scheduler::allocateTask()
-{
-    return allocate(sizeof(T));
-}
-
-template < typename T >
-void Scheduler::releaseTask(T* t)
-{
-    t->~T();
-    release(t, sizeof(T));
-}
 
 }  // namespace Motor
 

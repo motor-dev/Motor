@@ -26,9 +26,7 @@ public:
     Scheduler(const Plugin::Context& context);
     ~Scheduler();
 
-    virtual void* createData(weak< Task::KernelTask > task, u32 parameterCount) override;
-    virtual void  disposeData(void* data) override;
-    virtual void  run(weak< Task::KernelTask > task) override;
+    virtual void run(weak< const Task::KernelTask > task) override;
 };
 
 }}}  // namespace Motor::KernelScheduler::Cuda

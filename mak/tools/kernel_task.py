@@ -90,7 +90,6 @@ ref< ::Motor::KernelScheduler::Producer::Runtime > %(KernelName)sKernel::createR
             "%(kernel_full_name)s.%(KernelName)s",
             Motor::KernelScheduler::GPUType,
             Motor::Colors::Red::Red,
-            Motor::Scheduler::High,
             s_%(Name)sKernel%(KernelName)s,
             parameters, parameters + %(argument_count)s
         );

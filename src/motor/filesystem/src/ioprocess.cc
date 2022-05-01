@@ -11,13 +11,17 @@ static i_u32        s_contextUseCount;
 
 IOContext::IOContext()
     : m_availableTickets(0)
-    , m_freeSlots(SlotCount)
-    , m_firstFreeSlot(i_u32::create(0))
-    , m_firstUsedSlot(i_u32::create(0))
+    , m_freeSlots(MaxRequestCount)
     , m_ioDone(i_u8::create(0))
     , m_ioThread("IOThread", &IOContext::ioProcess, reinterpret_cast< intptr_t >(this), 0,
                  Thread::Highest)
+    , m_freeRequestList()
+    , m_requestQueue()
 {
+    for(u32 i = 0; i < MaxRequestCount - 1; ++i)
+        m_requests[i].next = &m_requests[i + 1];
+    m_requests[MaxRequestCount - 1].next = 0;
+    m_freeRequestList.pushList(&m_requests[0], &m_requests[MaxRequestCount - 1]);
 }
 
 IOContext::~IOContext()
@@ -25,9 +29,41 @@ IOContext::~IOContext()
     m_ioDone++;
     m_availableTickets.release(1);
     m_ioThread.wait();
-    for(int i = 0; i < SlotCount; ++i)
+}
+
+void IOContext::processRequests(IORequest* head)
+{
+    if(head->next)
     {
-        m_ticketPool[i] = ref< File::Ticket >();
+        m_availableTickets.wait();
+        processRequests(head->next);
+    }
+
+    ref< File::Ticket > ticket = head->ticket;
+    head->ticket               = ref< File::Ticket >();
+    m_freeRequestList.push(head);
+    m_freeSlots.release(1);
+
+    switch(ticket->action)
+    {
+    case File::Ticket::Read:
+        if(!m_ioDone)
+        {
+            if(ticket->text)
+            {
+                ticket->buffer.realloc(ticket->total + 1);
+                ticket->buffer[ticket->total] = 0;
+            }
+            else
+            {
+                ticket->buffer.realloc(ticket->total);
+            }
+            ticket->processed = 0;
+            ticket->file->fillBuffer(ticket);
+        }
+        break;
+    case File::Ticket::Write: ticket->file->writeBuffer(ticket); break;
+    default: motor_error("unknown IO request: %d" | ticket->action); break;
     }
 }
 
@@ -37,38 +73,14 @@ intptr_t IOContext::ioProcess(intptr_t p1, intptr_t /*p2*/)
     while(1)
     {
         context->m_availableTickets.wait();
-        u32                 slotIndex = context->m_firstUsedSlot % SlotCount;
-        ref< File::Ticket > request   = context->m_ticketPool[slotIndex];
-        if(!request)
+        IORequest* requests = context->m_requestQueue.popAll();
+
+        if(!requests)
         {
             motor_assert(context->m_ioDone, "IO context exited but was not yet finished");
             break;
         }
-        context->m_ticketPool[slotIndex] = ref< File::Ticket >();
-        context->m_firstUsedSlot++;
-        context->m_freeSlots.release(1);
-
-        switch(request->action)
-        {
-        case File::Ticket::Read:
-            if(!context->m_ioDone)
-            {
-                if(request->text)
-                {
-                    request->buffer.realloc(request->total + 1);
-                    request->buffer[request->total] = 0;
-                }
-                else
-                {
-                    request->buffer.realloc(request->total);
-                }
-                request->processed = 0;
-                request->file->fillBuffer(request);
-            }
-            break;
-        case File::Ticket::Write: request->file->writeBuffer(request); break;
-        default: motor_error("unknown IO request: %d" | request->action); break;
-        }
+        context->processRequests(requests);
     }
     return 0;
 }
@@ -76,10 +88,10 @@ intptr_t IOContext::ioProcess(intptr_t p1, intptr_t /*p2*/)
 void IOContext::pushTicket(ref< File::Ticket > ticket)
 {
     s_context->m_freeSlots.wait();
-    u32 slot = s_context->m_firstFreeSlot++;
-    motor_assert(slot < s_context->m_firstUsedSlot + SlotCount, "circular buffer inconsistency");
-    slot                          = slot % SlotCount;
-    s_context->m_ticketPool[slot] = ticket;
+    IORequest* request = s_context->m_freeRequestList.pop();
+    request->ticket    = ticket;
+
+    s_context->m_requestQueue.push(request);
     s_context->m_availableTickets.release(1);
 }
 
