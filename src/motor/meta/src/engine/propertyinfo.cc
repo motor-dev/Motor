@@ -22,7 +22,12 @@ Value Property::get(const Value& from) const
 
 void Property::set(Value& from, const Value& value) const
 {
-    get(from) = value;
+    motor_assert(from.type().metaclass->isA(owner.metaclass),
+                 "getting property on object of type %s, while expecting type %s" | from.type()
+                     | owner);
+    i32                   offset = from.type().metaclass->offset - owner.metaclass->offset;
+    raw< const Property > this_  = {this};
+    (*setter)(this_, (void*)((char*)from.rawget() + offset), value);
 }
 
 Value Property::getTag(const Type& tagType) const
