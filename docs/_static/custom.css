@@ -1,3 +1,9 @@
+@font-face {
+    font-family: 'SourceCodePro';
+    font-style: normal;
+    src: url('fonts/SourceCodePro-Regular.ttf.woff2') format('woff2');
+}
+
 .wy-nav-content {
     max-width: none;
 }
@@ -21,4 +27,12 @@
     border-radius: 5px;
     padding:0.0em 1.4em;
     content: " - hide";
+}
+
+.rst-content  pre,
+.rst-content div[class^=highlight] pre,
+.rst-content pre.literal-block {
+    font-family: 'SourceCodePro';
+    font-size: 12px;
+    line-height:1.3;
 }

@@ -131,13 +131,13 @@ encountering a token. There are several causes as to why conflicts happen, for i
    An example in the C++ grammar occurs around the definition of inline namespaces and inline
    declarations. An inline namespace is defined by the rule:
 
-   .. code-block:: EBNF
+   .. code-block:: abnf
 
       inline-namespace = inline namespace attribute-specifier-seq?  identifier { namespace-body }
 
    While an inline declaration is defined by the rule:
 
-   .. code-block:: EBNF
+   .. code-block:: abnf
       
       inline-declaration = attribute-specifier-seq? inline decl-specifier-seq declarator ;
 
@@ -312,7 +312,7 @@ token that is causing the conflict. This information alone is rarely sufficient 
 understand why the conflict occurs. Here is an example of the conflict report given for the
 dangling else construction:
 
-.. code-block:: EBNF
+.. code-block:: abnf
 
    shift-reduce conflict for token else in state 1750
    
@@ -704,25 +704,26 @@ interpreted as starting a *relational-expression*, or could be the closing brack
       ╰╴
       shift using rule relational-expression -> relational-expression ♦ > compare-expression
       ╭╴
-      │ template < attribute-specifier-seq? decl-specifier-seq abstract-declarator? = relational-expression ♦ > compare-expression assignment-operator initializer-clause >
-      │                                                                               ╰relational-expression─────────────────────╯
-      │                                                                               ╰equality-expression───────────────────────╯
-      │                                                                               ╰and-expression────────────────────────────╯
-      │                                                                               ╰exclusive-or-expression───────────────────╯
-      │                                                                               ╰inclusive-or-expression───────────────────╯
-      │                                                                               ╰logical-and-expression────────────────────╯
-      │                                                                               ╰logical-or-expression─────────────────────╯
-      │                                                                               ╰assignment-expression────────────────────────────────────────────────────────────╯
-      │                                                                               ╰initializer-clause───────────────────────────────────────────────────────────────╯
-      │            ╰parameter-declaration───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-      │            ╰template-parameter──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-      │            ╰template-parameter-list─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-      │ ╰template-head────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+      │ template-name < relational-expression ♦ > compare-expression >
+      │                 ╰relational-expression─────────────────────╯
+      │                 ╰equality-expression───────────────────────╯
+      │                 ╰and-expression────────────────────────────╯
+      │                 ╰exclusive-or-expression───────────────────╯
+      │                 ╰inclusive-or-expression───────────────────╯
+      │                 ╰logical-and-expression────────────────────╯
+      │                 ╰logical-or-expression─────────────────────╯
+      │                 ╰conditional-expression────────────────────╯
+      │                 ╰constant-expression───────────────────────╯
+      │                 ╰template-argument─────────────────────────╯
+      │                 ╰template-argument-list?───────────────────╯
+      │ ╰simple-template-id──────────────────────────────────────────╯
       ╰╴
 
-The C++ standard disambiguates the *template-parameter-list* conflict in section 13.2.16:
+The C++ standard disambiguates the *template-parameter-list* conflict in section 13.2.16\ [#]_.
+It also disambiguates the *template-argument-list* conflict in section 13.3.4\ [#]_.
+The resolution is to favor a reduce of the *relational-expression* over a shift of the ``>`` symbol.
 
-   When parsing a default *template-argument* for a non-type *template-parameter*, the first
+.. [#] When parsing a default *template-argument* for a non-type *template-parameter*, the first
    non-nested ``>`` is taken as the end of the *template-parameter-list* rather than a greater-than
    operator.
 
@@ -738,9 +739,7 @@ The C++ standard disambiguates the *template-parameter-list* conflict in section
 
    — end example]
 
-It also disambiguates the *template-argument-list* conflict in section 13.3.4:
-
-   When parsing a *template-argument-list*, the first non-nested ``>`` is taken as the ending
+.. [#] When parsing a *template-argument-list*, the first non-nested ``>`` is taken as the ending
    delimiter rather than a greater-than operator. Similarly, the first non-nested ``>>`` is treated
    as two consecutive but distinct ``>`` tokens, the first of which is taken as the end of the
    *template-argument-list* and completes the *template-id*.
@@ -826,13 +825,14 @@ if it reduces the rightmost *selection-statement* and continues the leftmost *se
       ╰╴
 
 
-The C++ standard explicitely excludes the second possibility in section 8.5.2:
-
-  In the second form of *if statement* (the one including *else*), if the first substatement is also
-  an *if statement* then that inner *if statement* shall contain an *else* part.
-
+The C++ standard explicitely excludes the second possibility in section 8.5.2\ [#]_.
 The conflict is resolved by annotating the grammar with a priority for the first form of the
 *selection-statement*.
+
+.. [#]  In the second form of *if statement* (the one including *else*), if the first substatement is also
+  an *if statement* then that inner *if statement* shall contain an *else* part.
+
+
 
 
 
@@ -916,7 +916,7 @@ In a member declaration, ``:`` token can introduce either a bitifiel specifier o
          reduce using rule elaborated-enum-specifier -> enum-key attribute-specifier-seq? enum-head-name ♦ 
          ╭╴
          │ attribute-specifier-seq? decl-specifier continue-decl-specifier-seq enum-key attribute-specifier-seq? enum-head-name ♦                                                       : constant-expression brace-or-equal-initializer? ;
-         │                                                                     ╰elaborated-enum-specifier───────────────────────╯  attribute-specifier-seq?╯ ╰attribute-specifier-seq?╯
+         │                                                                     ╰elaborated-enum-specifier───────────────────────╯ ╰attribute-specifier-seq?╯ ╰attribute-specifier-seq?╯
          │                                                                     ╰elaborated-type-specifier───────────────────────╯                            ╰member-declarator─────────────────────────────────────────────────────────╯
          │                                                                     ╰type-specifier──────────────────────────────────╯                            ╰member-declarator-list?───────────────────────────────────────────────────╯
          │                                                                     ╰defining-type-specifier─────────────────────────╯
@@ -926,9 +926,9 @@ In a member declaration, ``:`` token can introduce either a bitifiel specifier o
          │ ╰member-declaration────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
          ╰╴
 
-The C++ standard specifies which resolution to apply in section 9.7.1:
+The C++ standard specifies which resolution to apply in section 9.7.1\ [#]_.
 
-   A ``:`` following ``enum nested-name-specifier? identifier`` within the *decl-specifier-seq* of a
+.. [#] A ``:`` following ``enum nested-name-specifier? identifier`` within the *decl-specifier-seq* of a
    *member-declaration* is parsed as part of an *enum-base*.
 
    [Note 1: This resolves a potential ambiguity between the declaration of an enumeration with an
@@ -1079,9 +1079,9 @@ conflict between matching the *initializer-clause* to the *expression* or to the
       │ ╰member-declarator───────────────────────────────────────────────────────────────────────────────────────────────────╯
       ╰╴
 
-The C++ standard declares in section 11.4.1:
+The conflict is resolved in the C++ standard in section 11.4.1\ [#]_ by assigning a priority to shifing into the *brace-init-list*.
 
-   In a *member-declarator* for a bit-field, the *constant-expression* is parsed as the longest
+.. [#] In a *member-declarator* for a bit-field, the *constant-expression* is parsed as the longest
    sequence of tokens that could syntactically form a *constant-expression*.
 
    .. code-block:: C++
@@ -1089,8 +1089,6 @@ The C++ standard declares in section 11.4.1:
     struct S {
       int z : 1 || new int { 0 };   // OK, brace-or-equal-initializer is absent
     };
-
-The conflict is resolved by assigning a priority to shifing into the *brace-init-list*.
 
 
 *nested-name-specifier*, ``::``
@@ -1186,9 +1184,12 @@ exist for all *ptr-operator* constructs, and all *attribute-specifier*\ s.
       │ ╰noptr-declarator───────────────────────────────────────────────────────────────────────────────╯
       ╰╴
 
-The standard states in section 11.4.8.3:
 
-   The *conversion-type-id* in a *conversion-function-id* is the longest sequence of tokens that
+According to the standard in section 11.4.8.3\ [#]_, the attribute specifier sequence is consumed by the *conversion-type-id* by applying a priority on
+shifting the *attribute-specifier*\ s and *cv-qualifier*\ s over the reductions of
+*ptr-operator*\ s.
+
+.. [#] The *conversion-type-id* in a *conversion-function-id* is the longest sequence of tokens that
    could possibly form a *conversion-type-id*.
 
    [Note 1: This prevents ambiguities between the declarator operator ``*`` and its expression
@@ -1215,10 +1216,6 @@ The standard states in section 11.4.8.3:
       — end example]
       
    — end note]
-
-The attribute specifier sequence is consumed by the *conversion-type-id* by applying a priority on
-shifting the *attribute-specifier*\ s and *cv-qualifier*\ s over the reductions of
-*ptr-operator*\ s.
 
 
 *explicit-specifier*\ /\ *noexcept-specifier*, ``(``
@@ -1291,16 +1288,16 @@ the ``(`` token after the ``explicit`` keyword or the ``noexcept`` keyword:
          │ ╰init-declarator───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
          ╰╴
 
-The standard disambiguates the conflict for ``explicit`` in section 9.2.3:
+The standard disambiguates the conflict for ``explicit`` in section 9.2.3\ [#]_ and for ``noexcept`` in section 14.5.2\ [#]_ 
+In both cases, The grammar conflict is resolved by prioritizing the shift.
 
-    A ``(`` token that follows ``explicit`` is parsed as part of the *explicit-specifier*.
+.. [#] A ``(`` token that follows ``explicit`` is parsed as part of the *explicit-specifier*.
 
-And for ``noexcept`` in section 14.5.2:
 
-    A ``(`` token that follows ``noexcept`` is part of the *noexcept-specifier* and does not
+.. [#] A ``(`` token that follows ``noexcept`` is part of the *noexcept-specifier* and does not
     commence an *initializer*. 
 
-In both cases, The grammar conflict is resolved by prioritizing the shift.
+
 
 
 .. _new_delete:
@@ -1624,12 +1621,13 @@ or starting a binary operation using the shorter version of the *conmversion-typ
          │ ╰multiplicative-expression─────────────────────────────────────────╯
          ╰╴
 
-The C++ standard disambiguates this case by stating:
+The C++ standard disambiguates this case in section 11.4.8.3\ [#]_ by prioritizing a shift of the *ptr-operator* over
+reducing the *conversion-type-id*.
 
-   The *conversion-type-id* in a *conversion-function-id* is the longest sequence of tokens that
+.. [#]   The *conversion-type-id* in a *conversion-function-id* is the longest sequence of tokens that
    could possibly form a *conversion-type-id*.
    
-   [Note 1: This prevents ambiguities between the declarator operator * and its expression counterparts.
+   [Note 1: This prevents ambiguities between the declarator operator ``*`` and its expression counterparts.
    
    .. code-block:: C++
 
@@ -1637,13 +1635,13 @@ The C++ standard disambiguates this case by stating:
                           // parsed as: &(ac.operator int *)i
                           // not as: &(ac.operator int)*i
 
-   The * is the pointer declarator and not the multiplication operator. — end example]
+   The ``*`` is the pointer declarator and not the multiplication operator. — end example]
 
 
 *new-type-id*, binary operators
 """""""""""""""""""""""""""""""
 
-In a similar way to :ref:`_conversion_declarator`, a *new-expression* can appear as a left operand
+In a similar way to :ref:`conversion_declarator`, a *new-expression* can appear as a left operand
 of a *multiplicative-expression* causing a conflict when encountering the ``*`` token.
 
 
@@ -1684,9 +1682,10 @@ of a *multiplicative-expression* causing a conflict when encountering the ``*`` 
       │ ╰multiplicative-expression─────────────────────────────────────────────────╯
       ╰╴
 
-The standard specifies what to do in this case:
+The standard specifies in section 7.6.2.8\ [#]_ by prioritizing a shift of the *ptr-operator* over
+reducing the *new-type-id*.
 
-   The *new-type-id* in a *new-expression* is the longest possible sequence of *new-declarators*.
+.. [#] The *new-type-id* in a *new-expression* is the longest possible sequence of *new-declarators*.
    
    [Note 3: This prevents ambiguities between the declarator operators ``&``, ``&&``, ``*``, and
    ``[]`` and their expression counterparts. — end note]
@@ -1811,9 +1810,9 @@ two different expansions, using a destructor name as an *unqualified-id* or buil
          │ ╰unary-expression────────────────────────────────────────────╯
          ╰╴
 
-The C++ standard clarifies in section 7.6.2.2:
+The conflict is resolved in the C++ standard in section 7.6.2.2\ [#]_ by prioritizing the *unary-operator* rule.
 
-   There is an ambiguity in the grammar when ``~`` is followed by a *type-name* or
+.. [#] There is an ambiguity in the grammar when ``~`` is followed by a *type-name* or
    *decltype-specifier*. The ambiguity is resolved by treating ``~`` as the unary complement
    operator rather than as the start of an *unqualified-id* naming a destructor.
 
@@ -1821,7 +1820,7 @@ The C++ standard clarifies in section 7.6.2.2:
    tokens, a ``~`` followed by a *type-name* or *decltype-specifier* in a member access expression
    or *qualified-id* is unambiguously parsed as a destructor name. — end note]
 
-The conflict is resolved by prioritizing the *unary-operator* rule.
+ 
 
 
 *constraint-logical-and-expression*, ``&&``
@@ -2074,6 +2073,132 @@ The parser will continue to maintain several branches until either the lookahead
 errors in some of the tentative branches, or the branches reduce in the same state and the state
 can execute a merge action.
 
+*class-name*, *enum-name*, *typedef-name* in a *type-name*
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+When expecting a *type-name*, an ``identifier`` could be interpreted as either a *class-name*,
+an *enum-name*, or a *typedef-name*. It is trivial to merge the conflict in the *type-name* rule.
+
+*type-name*, *template-name* in a *simple-type-specifier*
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+When expecting a *type-specifier*, an ``identifier`` could correspond either to a *type-name* after
+merging the conflict above, or to a *template-name* used as a *simple-type-specifier*. The conflict
+is also solved directly at the *simple-type-specifier* level.
+
+.. graphviz::
+
+   digraph MergeTree {
+     node[style="rounded,filled"][shape="box"];
+     subgraph cluster_140319723099328 {
+       label="State 17"; style="rounded";
+       140319694449008[label="typedef-name[typedef_name]\n ♦ identifier"][fillcolor="aliceblue"];
+       140319694449056[label="template-name[template_name]\n ♦ identifier"][fillcolor="aquamarine"];
+       140319694449104[label="enum-name[enum_name]\n ♦ identifier"][fillcolor="burlywood"];
+       140319694449152[label="class-name[class_name]\n ♦ identifier"][fillcolor="cadetblue1"];
+       140319694026304[label="type-specifier[generic_simple_type_specifier]\n ♦ simple-type-specifier"][fillcolor="coral"];
+       140319694026352[label="defining-type-specifier[generic_simple_type_specifier]\n ♦ type-specifier"][fillcolor="coral"];
+       140319694026400[label="decl-specifier[generic_simple_type_specifier]\n ♦ defining-type-specifier"][fillcolor="coral"];
+       140319694026448[label="decl-specifier-seq[generic_simple_type_specifier]\n ♦ decl-specifier continue-decl-specifier-seq decl-specifier-seq"][fillcolor="coral"];
+       140319694026496[label="decl-specifier-seq[generic_simple_type_specifier]\n ♦ decl-specifier end-decl-specifier-seq attribute-specifier-seq?"][fillcolor="coral"];
+       140319694026544[label="simple-declaration[generic_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq init-declarator-list? ;"][fillcolor="coral"];
+       140319694026592[label="function-definition[generic_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator function-body"][fillcolor="coral"];
+       140319694026640[label="function-definition[generic_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator virt-specifier-seq function-body"][fillcolor="coral"];
+       140319694026688[label="function-definition[generic_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator requires-clause function-body"][fillcolor="coral"];
+       140319694026736[label="simple-declaration[generic_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;"][fillcolor="coral"];
+       subgraph cluster_generic_type_name_140319723099328 {
+         label="typedef_name/enum_name/class_name => generic_type_name"; style="rounded,filled"; color="pink";
+           140319693967712[label="type-name[typedef_name]\n ♦ typedef-name"][fillcolor="aliceblue"];
+           140319694026160[label="type-name[enum_name]\n ♦ enum-name"][fillcolor="burlywood"];
+           140319694026208[label="type-name[class_name]\n ♦ class-name"][fillcolor="cadetblue1"];
+       }
+       subgraph cluster_generic_simple_type_specifier_140319723099328 {
+         label="template_name/generic_type_name => generic_simple_type_specifier"; style="rounded,filled"; color="pink";
+           140319694026112[label="simple-type-specifier[template_name]\n ♦ template-name"][fillcolor="aquamarine"];
+           140319694026256[label="simple-type-specifier[generic_type_name]\n ♦ type-name"][fillcolor="darkgoldenrod1"];
+       }
+     }
+     subgraph cluster_140319723099232 {
+       label="State 63"; style="rounded";
+       140319694447616[label="typedef-name[typedef_name]\nidentifier ♦ "][fillcolor="aliceblue"];
+       140319693967472[label="template-name[template_name]\nidentifier ♦ "][fillcolor="aquamarine"];
+       140319693967520[label="enum-name[enum_name]\nidentifier ♦ "][fillcolor="burlywood"];
+       140319693967568[label="class-name[class_name]\nidentifier ♦ "][fillcolor="cadetblue1"];
+     }
+     subgraph cluster_140319736596800 {
+       label="State 0"; style="rounded";
+       140319693967760[label="function-definition[generic_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator function-body"][fillcolor="coral"];
+       140319693967808[label="simple-declaration[generic_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq init-declarator-list? ;"][fillcolor="coral"];
+       140319693967856[label="simple-declaration[generic_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;"][fillcolor="coral"];
+       140319693967904[label="function-definition[generic_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator requires-clause function-body"][fillcolor="coral"];
+       140319693967952[label="function-definition[generic_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator virt-specifier-seq function-body"][fillcolor="coral"];
+       140319949859664[label="translation-unit'[generic_simple_type_specifier]\n ♦ translation-unit <eof>"][fillcolor="coral"];
+       140319931244896[label="noexport-declaration[generic_simple_type_specifier]\n ♦ function-definition"][fillcolor="coral"];
+       140319931244944[label="block-declaration[generic_simple_type_specifier]\n ♦ simple-declaration"][fillcolor="coral"];
+       140319931244992[label="declaration[generic_simple_type_specifier]\n ♦ noexport-declaration"][fillcolor="coral"];
+       140319931245040[label="noexport-declaration[generic_simple_type_specifier]\n ♦ block-declaration"][fillcolor="coral"];
+       140319931245088[label="declaration-seq?[generic_simple_type_specifier]\n ♦ declaration"][fillcolor="coral"];
+       140319931245136[label="declaration-seq[generic_simple_type_specifier]\n ♦ declaration"][fillcolor="coral"];
+       140319931245184[label="translation-unit[generic_simple_type_specifier]\n ♦ declaration-seq?"][fillcolor="coral"];
+       140319931245232[label="declaration-seq?[generic_simple_type_specifier]\n ♦ declaration-seq declaration"][fillcolor="coral"];
+       140319931245280[label="declaration-seq[generic_simple_type_specifier]\n ♦ declaration-seq declaration"][fillcolor="coral"];
+     }
+     140319693967712->140319694449008;
+     140319694026112->140319694449056;
+     140319694026160->140319694449104;
+     140319694026208->140319694449152;
+     140319694449008->140319694447616;
+     140319694449056->140319693967472;
+     140319694449104->140319693967520;
+     140319694449152->140319693967568;
+     140319931244896->140319693967760;
+     140319931244944->140319693967808;
+     140319931244944->140319693967856;
+     140319931244896->140319693967904;
+     140319931244896->140319693967952;
+     140319694026256->140319693967712;
+     140319694026304->140319694026112;
+     140319694026256->140319694026160;
+     140319694026256->140319694026208;
+     140319694026304->140319694026256;
+     140319694026352->140319694026304;
+     140319694026400->140319694026352;
+     140319694026496->140319694026400;
+     140319694026448->140319694026400;
+     140319694026544->140319694026448;
+     140319694026592->140319694026448;
+     140319694026640->140319694026448;
+     140319694026688->140319694026448;
+     140319694026736->140319694026448;
+     140319694026640->140319694026496;
+     140319694026544->140319694026496;
+     140319694026688->140319694026496;
+     140319694026592->140319694026496;
+     140319693967808->140319694026544;
+     140319693967760->140319694026592;
+     140319693967952->140319694026640;
+     140319693967904->140319694026688;
+     140319693967856->140319694026736;
+     140319931244992->140319931244896;
+     140319931245040->140319931244944;
+     140319931245088->140319931244992;
+     140319931245136->140319931244992;
+     140319931244992->140319931245040;
+     140319931245184->140319931245088;
+     140319931245232->140319931245136;
+     140319931245280->140319931245136;
+     140319949859664->140319931245184;
+     140319931245184->140319931245232;
+     140319931245232->140319931245280;
+     140319931245280->140319931245280;
+   }
+
+
+*simple-type-specifier* and *unqualified-id*
+""""""""""""""""""""""""""""""""""""""""""""
+
+
+
 
 bitfield declaration, *mem-initializer*
 """""""""""""""""""""""""""""""""""""""
@@ -2094,8 +2219,8 @@ The following token sequence has two derivations in the C++ grammar:
 
    int                 variable    : x(0)                  { }
 
-   ╰decl-specifier╯    ╰declarator╯╰mem-initializer-list╯  ╰function-body╯
-   ╰decl-specifier-seq╯╰member-declarator╯
+   ╰decl-specifier╯    ╰declarator╯╰mem-initializer-list─╯ ╰function-body╯
+   ╰decl-specifier-seq╯╰member-declarator────────────────╯
 
 In reality, the declaration cannot be a constructor, but that selection is made by the semantic
 analyzer.
@@ -2206,9 +2331,10 @@ analysis.
       │ ╰parameter-declaration-clause───────────────────────────────────────────────────────────────╯
       ╰╴
 
-Section 9.3.4.6:
+The C++ describes this ambiguity in section 9.3.4.6\ [#]. The logic cannot be implemented at the syntax analysis step
+so both options are accepted until the semantic analysis.
 
-   There is a syntactic ambiguity when an ellipsis occurs at the end of a
+.. [#] There is a syntactic ambiguity when an ellipsis occurs at the end of a
    *parameter-declaration-clause* without a preceding comma. In this case, the ellipsis is parsed as
    part of the *abstract-declarator* if the type of the parameter either names a template parameter
    pack that has not been expanded or contains ``auto``; otherwise, it is parsed as part of the
@@ -2217,7 +2343,6 @@ Section 9.3.4.6:
 
 *primary-expression*, *pure-specifier*
 """"""""""""""""""""""""""""""""""""""
-
 
 .. container:: toggle
 
@@ -2559,402 +2684,85 @@ The merge is done at the *noexport-declaration* rule.
 .. graphviz::
 
    digraph MergeTree {
-      node[style=filled][shape=box];
-      139981414413408[label="deduction-guide-begin[explicit_deduction]\n ♦ "][fillcolor="aliceblue"];
-      139981414413552[label="explicit-specifier[explicit_declaration]\n ♦ explicit"][fillcolor="aquamarine"];
-      139981414413648[label="explicit-specifier[explicit_declaration]\n ♦ explicit ( constant-expression )"][fillcolor="aquamarine"];
-      139981414415856[label="deduction-guide[explicit_deduction]\n ♦ attribute-specifier-seq? deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;"][fillcolor="aliceblue"];
-      139981414413456[label="deduction-guide[explicit_deduction]\n ♦ attribute-specifier-seq? deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;"][fillcolor="aliceblue"];
-      139981414413168[label="deduction-guide[explicit_deduction]\n ♦ attribute-specifier-seq? deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;"][fillcolor="aliceblue"];
-      139981414416000[label="deduction-guide[explicit_deduction]\n ♦ attribute-specifier-seq? deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;"][fillcolor="aliceblue"];
-      139981414414368[label="deduction-guide[explicit_deduction]\n ♦ attribute-specifier-seq? deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;"][fillcolor="aliceblue"];
-      139981414415232[label="deduction-guide[explicit_deduction]\n ♦ attribute-specifier-seq? deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;"][fillcolor="aliceblue"];
-      139981414416096[label="simple-declaration[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq init-declarator-list? ;"][fillcolor="aquamarine"];
-      139981414414464[label="simple-declaration[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq init-declarator-list? ;"][fillcolor="aquamarine"];
-      139981414413792[label="simple-declaration[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq init-declarator-list? ;"][fillcolor="aquamarine"];
-      139981414413744[label="simple-declaration[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq init-declarator-list? ;"][fillcolor="aquamarine"];
-      139981414413360[label="simple-declaration[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq init-declarator-list? ;"][fillcolor="aquamarine"];
-      139981414414224[label="simple-declaration[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq init-declarator-list? ;"][fillcolor="aquamarine"];
-      139981414414608[label="function-specifier[explicit_declaration]\n ♦ explicit-specifier"][fillcolor="aquamarine"];
-      139981414416288[label="decl-specifier[explicit_declaration]\n ♦ function-specifier"][fillcolor="aquamarine"];
-      139981414415472[label="decl-specifier-seq[explicit_declaration]\n ♦ decl-specifier end-decl-specifier-seq attribute-specifier-seq?"][fillcolor="aquamarine"];
-      139981414415520[label="simple-declaration[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq init-declarator-list? ;"][fillcolor="aquamarine"];
-      139981414414128[label="decl-specifier-seq[explicit_declaration]\n ♦ decl-specifier continue-decl-specifier-seq decl-specifier-seq"][fillcolor="aquamarine"];
-      139981414414560[label="deduction-guide[explicit_deduction]\nattribute-specifier-seq? ♦ deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;"][fillcolor="aliceblue"];
-      139981414415424[label="translation-unit[explicit_noexport_declaration]\n ♦ module-declaration declaration-seq? private-module-fragment?"][fillcolor="burlywood"];
-      139981414414176[label="global-module-fragment[explicit_noexport_declaration]\n ♦ module ; declaration-seq"][fillcolor="burlywood"];
-      139981414414848[label="translation-unit[explicit_noexport_declaration]\n ♦ global-module-fragment module-declaration declaration-seq? private-module-fragment?"][fillcolor="burlywood"];
-      139981414414704[label="module-declaration[explicit_noexport_declaration]\n ♦ module module-name module-partition? attribute-specifier-seq? ;"][fillcolor="burlywood"];
-      139981414414800[label="translation-unit'[explicit_noexport_declaration]\n ♦ translation-unit <eof>"][fillcolor="burlywood"];
-      139981414415808[label="block-declaration[explicit_declaration]\n ♦ simple-declaration"][fillcolor="aquamarine"];
-      139981414414944[label="noexport-declaration[explicit_declaration]\n ♦ block-declaration"][fillcolor="aquamarine"];
-      139981419995200[label="declaration[explicit_noexport_declaration]\n ♦ noexport-declaration"][fillcolor="burlywood"];
-      139981419995296[label="declaration-seq[explicit_noexport_declaration]\n ♦ declaration"][fillcolor="burlywood"];
-      139981419995392[label="declaration-seq[explicit_noexport_declaration]\n ♦ declaration-seq declaration"][fillcolor="burlywood"];
-      139981419995488[label="declaration-seq?[explicit_noexport_declaration]\n ♦ declaration-seq declaration"][fillcolor="burlywood"];
-      139981419995584[label="translation-unit[explicit_noexport_declaration]\n ♦ declaration-seq?"][fillcolor="burlywood"];
-      139981419995680[label="declaration-seq?[explicit_noexport_declaration]\n ♦ declaration"][fillcolor="burlywood"];
-      139981414414752[label="noexport-declaration[explicit_deduction]\n ♦ deduction-guide"][fillcolor="aliceblue"];
-      139981419995776[label="translation-unit[explicit_noexport_declaration]\nmodule-declaration ♦ declaration-seq? private-module-fragment?"][fillcolor="burlywood"];
-      139981419996016[label="block-declaration[explicit_declaration]\n ♦ simple-declaration"][fillcolor="aquamarine"];
-      139981419996064[label="noexport-declaration[explicit_declaration]\n ♦ block-declaration"][fillcolor="aquamarine"];
-      139981419996160[label="declaration[explicit_noexport_declaration]\n ♦ noexport-declaration"][fillcolor="burlywood"];
-      139981419996256[label="declaration-seq[explicit_noexport_declaration]\n ♦ declaration"][fillcolor="burlywood"];
-      139981419996352[label="declaration-seq[explicit_noexport_declaration]\n ♦ declaration-seq declaration"][fillcolor="burlywood"];
-      139981419996448[label="declaration-seq?[explicit_noexport_declaration]\n ♦ declaration-seq declaration"][fillcolor="burlywood"];
-      139981419996544[label="declaration-seq?[explicit_noexport_declaration]\n ♦ declaration"][fillcolor="burlywood"];
-      139981419995968[label="noexport-declaration[explicit_deduction]\n ♦ deduction-guide"][fillcolor="aliceblue"];
-      139981419996688[label="global-module-fragment[explicit_noexport_declaration]\nmodule ♦ ; declaration-seq"][fillcolor="burlywood"];
-      139981419996832[label="block-declaration[explicit_declaration]\n ♦ simple-declaration"][fillcolor="aquamarine"];
-      139981419996880[label="noexport-declaration[explicit_declaration]\n ♦ block-declaration"][fillcolor="aquamarine"];
-      139981419996976[label="declaration[explicit_noexport_declaration]\n ♦ noexport-declaration"][fillcolor="burlywood"];
-      139981419997072[label="declaration-seq[explicit_noexport_declaration]\n ♦ declaration"][fillcolor="burlywood"];
-      139981419997168[label="declaration-seq[explicit_noexport_declaration]\n ♦ declaration-seq declaration"][fillcolor="burlywood"];
-      139981419997264[label="global-module-fragment[explicit_noexport_declaration]\nmodule ; ♦ declaration-seq"][fillcolor="burlywood"];
-      139981419996784[label="noexport-declaration[explicit_deduction]\n ♦ deduction-guide"][fillcolor="aliceblue"];
-      139981419997408[label="module-declaration[explicit_noexport_declaration]\nmodule ♦ module-name module-partition? attribute-specifier-seq? ;"][fillcolor="burlywood"];
-      139981419997504[label="translation-unit[explicit_noexport_declaration]\nglobal-module-fragment module-declaration ♦ declaration-seq? private-module-fragment?"][fillcolor="burlywood"];
-      139981419997600[label="translation-unit[explicit_noexport_declaration]\nglobal-module-fragment ♦ module-declaration declaration-seq? private-module-fragment?"][fillcolor="burlywood"];
-      139981419997840[label="block-declaration[explicit_declaration]\n ♦ simple-declaration"][fillcolor="aquamarine"];
-      139981419997888[label="noexport-declaration[explicit_declaration]\n ♦ block-declaration"][fillcolor="aquamarine"];
-      139981419997984[label="declaration[explicit_noexport_declaration]\n ♦ noexport-declaration"][fillcolor="burlywood"];
-      139981419998080[label="declaration-seq[explicit_noexport_declaration]\n ♦ declaration"][fillcolor="burlywood"];
-      139981419998176[label="declaration-seq[explicit_noexport_declaration]\n ♦ declaration-seq declaration"][fillcolor="burlywood"];
-      139981419998272[label="declaration-seq?[explicit_noexport_declaration]\n ♦ declaration-seq declaration"][fillcolor="burlywood"];
-      139981419998368[label="declaration-seq?[explicit_noexport_declaration]\n ♦ declaration"][fillcolor="burlywood"];
-      139981419997792[label="noexport-declaration[explicit_deduction]\n ♦ deduction-guide"][fillcolor="aliceblue"];
-      139981419998464[label="module-declaration[explicit_noexport_declaration]\n ♦ module module-name module-partition? attribute-specifier-seq? ;"][fillcolor="burlywood"];
-      139981419998560[label="private-module-fragment?[explicit_noexport_declaration]\nmodule : private ♦ ; declaration-seq?"][fillcolor="burlywood"];
-      139981419998800[label="block-declaration[explicit_declaration]\n ♦ simple-declaration"][fillcolor="aquamarine"];
-      139981419998848[label="noexport-declaration[explicit_declaration]\n ♦ block-declaration"][fillcolor="aquamarine"];
-      139981419998944[label="declaration[explicit_noexport_declaration]\n ♦ noexport-declaration"][fillcolor="burlywood"];
-      139981419999040[label="declaration-seq[explicit_noexport_declaration]\n ♦ declaration"][fillcolor="burlywood"];
-      139981419999136[label="declaration-seq[explicit_noexport_declaration]\n ♦ declaration-seq declaration"][fillcolor="burlywood"];
-      139981422612544[label="declaration-seq?[explicit_noexport_declaration]\n ♦ declaration-seq declaration"][fillcolor="burlywood"];
-      139981422612640[label="private-module-fragment?[explicit_noexport_declaration]\nmodule : private ; ♦ declaration-seq?"][fillcolor="burlywood"];
-      139981422612736[label="declaration-seq?[explicit_noexport_declaration]\n ♦ declaration"][fillcolor="burlywood"];
-      139981419998752[label="noexport-declaration[explicit_deduction]\n ♦ deduction-guide"][fillcolor="aliceblue"];
-      139981422612832[label="private-module-fragment?[explicit_noexport_declaration]\nmodule : ♦ private ; declaration-seq?"][fillcolor="burlywood"];
-      139981422612928[label="private-module-fragment?[explicit_noexport_declaration]\nmodule ♦ : private ; declaration-seq?"][fillcolor="burlywood"];
-      139981422613024[label="private-module-fragment?[explicit_noexport_declaration]\n ♦ module : private ; declaration-seq?"][fillcolor="burlywood"];
-      139981422613120[label="private-module-fragment?[explicit_noexport_declaration]\n ♦ module : private ; declaration-seq?"][fillcolor="burlywood"];
-      139981422613216[label="translation-unit[explicit_noexport_declaration]\nmodule-declaration declaration-seq? ♦ private-module-fragment?"][fillcolor="burlywood"];
-      139981422613312[label="translation-unit[explicit_noexport_declaration]\nglobal-module-fragment module-declaration declaration-seq? ♦ private-module-fragment?"][fillcolor="burlywood"];
-      139981422613408[label="template-declaration[explicit_noexport_declaration]\nattribute-specifier-seq? extern? ♦ template-head declaration"][fillcolor="burlywood"];
-      139981422613600[label="block-declaration[explicit_declaration]\n ♦ simple-declaration"][fillcolor="aquamarine"];
-      139981422613696[label="noexport-declaration[explicit_declaration]\n ♦ block-declaration"][fillcolor="aquamarine"];
-      139981422613792[label="declaration[explicit_noexport_declaration]\n ♦ noexport-declaration"][fillcolor="burlywood"];
-      139981422613888[label="template-declaration[explicit_noexport_declaration]\nattribute-specifier-seq? extern? template-head ♦ declaration"][fillcolor="burlywood"];
-      139981422613552[label="noexport-declaration[explicit_deduction]\n ♦ deduction-guide"][fillcolor="aliceblue"];
-      139981422613984[label="template-declaration[explicit_noexport_declaration]\nattribute-specifier-seq? ♦ extern? template-head declaration"][fillcolor="burlywood"];
-      139981422614080[label="template-declaration[explicit_noexport_declaration]\n ♦ attribute-specifier-seq? extern? template-head declaration"][fillcolor="burlywood"];
-      139981422614176[label="class-specifier[explicit_noexport_declaration]\nclass-head ♦ { member-specification? }"][fillcolor="burlywood"];
-      139981422614320[label="member-declaration[explicit_noexport_declaration]\n ♦ template-declaration"][fillcolor="burlywood"];
-      139981422614416[label="member-specification?[explicit_noexport_declaration]\n ♦ member-declaration member-specification?"][fillcolor="burlywood"];
-      139981422614512[label="class-specifier[explicit_noexport_declaration]\nclass-head { ♦ member-specification? }"][fillcolor="burlywood"];
-      139981422614272[label="class-specifier[explicit_noexport_declaration]\n ♦ class-head { member-specification? }"][fillcolor="burlywood"];
-      139981422614656[label="lambda-expression[explicit_noexport_declaration]\n ♦ lambda-introducer lambda-declarator compound-statement"][fillcolor="burlywood"];
-      139981422614800[label="defining-type-specifier[explicit_noexport_declaration]\n ♦ class-specifier"][fillcolor="burlywood"];
-      139981422614848[label="decl-specifier[explicit_noexport_declaration]\n ♦ defining-type-specifier"][fillcolor="burlywood"];
-      139981422614944[label="decl-specifier-seq[explicit_noexport_declaration]\n ♦ decl-specifier end-decl-specifier-seq attribute-specifier-seq?"][fillcolor="burlywood"];
-      139981422615040[label="decl-specifier-seq?[explicit_noexport_declaration]\n ♦ decl-specifier-seq"][fillcolor="burlywood"];
-      139981422615136[label="lambda-specifiers[explicit_noexport_declaration]\n ♦ decl-specifier-seq? exception-specification? attribute-specifier-seq? trailing-return-type?"][fillcolor="burlywood"];
-      139981422615232[label="lambda-declarator[explicit_noexport_declaration]\n ♦ lambda-specifiers"][fillcolor="burlywood"];
-      139981422615328[label="lambda-expression[explicit_noexport_declaration]\nlambda-introducer ♦ lambda-declarator compound-statement"][fillcolor="burlywood"];
-      139981422615472[label="decl-specifier-seq[explicit_noexport_declaration]\n ♦ decl-specifier continue-decl-specifier-seq decl-specifier-seq"][fillcolor="burlywood"];
-      139981422615424[label="alignment-specifier[explicit_noexport_declaration]\nalignas ♦ ( constant-expression ...? )"][fillcolor="burlywood"];
-      139981422616096[label="primary-expression[explicit_noexport_declaration]\n ♦ lambda-expression"][fillcolor="burlywood"];
-      139981422616144[label="postfix-expression[explicit_noexport_declaration]\n ♦ primary-expression"][fillcolor="burlywood"];
-      139981422616240[label="postfix-expression[explicit_noexport_declaration]\n ♦ postfix-expression [ expr-or-braced-init-list ]"][fillcolor="burlywood"];
-      139981422616336[label="postfix-expression[explicit_noexport_declaration]\n ♦ postfix-expression ( expression-list? )"][fillcolor="burlywood"];
-      139981422616432[label="postfix-expression[explicit_noexport_declaration]\n ♦ postfix-expression . template? id-expression"][fillcolor="burlywood"];
-      139981422616528[label="postfix-expression[explicit_noexport_declaration]\n ♦ postfix-expression -> template? id-expression"][fillcolor="burlywood"];
-      139981418106992[label="postfix-expression[explicit_noexport_declaration]\n ♦ postfix-expression ++"][fillcolor="burlywood"];
-      139981418107088[label="postfix-expression[explicit_noexport_declaration]\n ♦ postfix-expression --"][fillcolor="burlywood"];
-      139981418107184[label="unary-expression[explicit_noexport_declaration]\n ♦ postfix-expression"][fillcolor="burlywood"];
-      139981418107280[label="cast-expression[explicit_noexport_declaration]\n ♦ unary-expression"][fillcolor="burlywood"];
-      139981418107376[label="pm-expression[explicit_noexport_declaration]\n ♦ cast-expression"][fillcolor="burlywood"];
-      139981418107472[label="pm-expression[explicit_noexport_declaration]\n ♦ pm-expression .* cast-expression"][fillcolor="burlywood"];
-      139981418107568[label="pm-expression[explicit_noexport_declaration]\n ♦ pm-expression ->* cast-expression"][fillcolor="burlywood"];
-      139981418107664[label="multiplicative-expression[explicit_noexport_declaration]\n ♦ pm-expression"][fillcolor="burlywood"];
-      139981418107760[label="multiplicative-expression[explicit_noexport_declaration]\n ♦ multiplicative-expression * pm-expression"][fillcolor="burlywood"];
-      139981418107856[label="multiplicative-expression[explicit_noexport_declaration]\n ♦ multiplicative-expression / pm-expression"][fillcolor="burlywood"];
-      139981418107952[label="multiplicative-expression[explicit_noexport_declaration]\n ♦ multiplicative-expression % pm-expression"][fillcolor="burlywood"];
-      139981418108048[label="additive-expression[explicit_noexport_declaration]\n ♦ multiplicative-expression"][fillcolor="burlywood"];
-      139981418108144[label="additive-expression[explicit_noexport_declaration]\n ♦ additive-expression + multiplicative-expression"][fillcolor="burlywood"];
-      139981418108240[label="additive-expression[explicit_noexport_declaration]\n ♦ additive-expression - multiplicative-expression"][fillcolor="burlywood"];
-      139981418108336[label="shift-expression[explicit_noexport_declaration]\n ♦ additive-expression"][fillcolor="burlywood"];
-      139981418108432[label="shift-expression[explicit_noexport_declaration]\n ♦ shift-expression << additive-expression"][fillcolor="burlywood"];
-      139981418108528[label="shift-expression[explicit_noexport_declaration]\n ♦ shift-expression >> additive-expression"][fillcolor="burlywood"];
-      139981418108624[label="compare-expression[explicit_noexport_declaration]\n ♦ shift-expression"][fillcolor="burlywood"];
-      139981418108720[label="compare-expression[explicit_noexport_declaration]\n ♦ compare-expression <=> shift-expression"][fillcolor="burlywood"];
-      139981418108816[label="relational-expression[explicit_noexport_declaration]\n ♦ compare-expression"][fillcolor="burlywood"];
-      139981418108912[label="relational-expression[explicit_noexport_declaration]\n ♦ relational-expression < compare-expression"][fillcolor="burlywood"];
-      139981418109008[label="relational-expression[explicit_noexport_declaration]\n ♦ relational-expression > compare-expression"][fillcolor="burlywood"];
-      139981418109104[label="relational-expression[explicit_noexport_declaration]\n ♦ relational-expression <= compare-expression"][fillcolor="burlywood"];
-      139981418109200[label="relational-expression[explicit_noexport_declaration]\n ♦ relational-expression >= compare-expression"][fillcolor="burlywood"];
-      139981418109296[label="equality-expression[explicit_noexport_declaration]\n ♦ relational-expression"][fillcolor="burlywood"];
-      139981418109392[label="equality-expression[explicit_noexport_declaration]\n ♦ equality-expression == relational-expression"][fillcolor="burlywood"];
-      139981418109488[label="equality-expression[explicit_noexport_declaration]\n ♦ equality-expression != relational-expression"][fillcolor="burlywood"];
-      139981418109584[label="and-expression[explicit_noexport_declaration]\n ♦ equality-expression"][fillcolor="burlywood"];
-      139981418109680[label="and-expression[explicit_noexport_declaration]\n ♦ and-expression & equality-expression"][fillcolor="burlywood"];
-      139981418109776[label="exclusive-or-expression[explicit_noexport_declaration]\n ♦ and-expression"][fillcolor="burlywood"];
-      139981418109872[label="exclusive-or-expression[explicit_noexport_declaration]\n ♦ exclusive-or-expression ^ and-expression"][fillcolor="burlywood"];
-      139981418109968[label="inclusive-or-expression[explicit_noexport_declaration]\n ♦ exclusive-or-expression"][fillcolor="burlywood"];
-      139981418110064[label="inclusive-or-expression[explicit_noexport_declaration]\n ♦ inclusive-or-expression | exclusive-or-expression"][fillcolor="burlywood"];
-      139981418110160[label="logical-and-expression[explicit_noexport_declaration]\n ♦ inclusive-or-expression"][fillcolor="burlywood"];
-      139981418110256[label="logical-and-expression[explicit_noexport_declaration]\n ♦ logical-and-expression && inclusive-or-expression"][fillcolor="burlywood"];
-      139981418110352[label="logical-or-expression[explicit_noexport_declaration]\n ♦ logical-and-expression"][fillcolor="burlywood"];
-      139981418110448[label="conditional-expression[explicit_noexport_declaration]\n ♦ logical-or-expression ? expression : assignment-expression"][fillcolor="burlywood"];
-      139981418110544[label="constant-expression[explicit_noexport_declaration]\n ♦ conditional-expression"][fillcolor="burlywood"];
-      139981418110640[label="alignment-specifier[explicit_noexport_declaration]\nalignas ( ♦ constant-expression ...? )"][fillcolor="burlywood"];
-      139981418110736[label="logical-or-expression[explicit_noexport_declaration]\n ♦ logical-or-expression || logical-and-expression"][fillcolor="burlywood"];
-      139981418110832[label="conditional-expression[explicit_noexport_declaration]\n ♦ logical-or-expression"][fillcolor="burlywood"];
-      139981422615616[label="alignment-specifier[explicit_noexport_declaration]\n ♦ alignas ( constant-expression ...? )"][fillcolor="burlywood"];
-      139981422615712[label="module-declaration[explicit_noexport_declaration]\nmodule module-name ♦ module-partition? attribute-specifier-seq? ;"][fillcolor="burlywood"];
-      139981422615808[label="attribute-specifier[explicit_noexport_declaration]\n ♦ alignment-specifier"][fillcolor="burlywood"];
-      139981422616000[label="attribute-specifier-seq[explicit_noexport_declaration]\n ♦ attribute-specifier"][fillcolor="burlywood"];
-      139981418110928[label="attribute-specifier-seq[explicit_noexport_declaration]\n ♦ attribute-specifier-seq attribute-specifier"][fillcolor="burlywood"];
-      139981418094704[label="attribute-specifier-seq?[explicit_noexport_declaration]\n ♦ attribute-specifier-seq"][fillcolor="burlywood"];
-      139981418094800[label="module-declaration[explicit_noexport_declaration]\nmodule module-name module-partition? ♦ attribute-specifier-seq? ;"][fillcolor="burlywood"];
-      139981414439520[label="module-declaration[explicit_noexport_declaration]\nmodule ♦ module-name module-partition? attribute-specifier-seq? ;"][fillcolor="burlywood"];
-      139981414414560->139981414413408;
-      139981414414608->139981414413552;
-      139981414414608->139981414413648;
-      139981414414752->139981414415856;
-      139981419995968->139981414413456;
-      139981419996784->139981414413168;
-      139981419997792->139981414416000;
-      139981419998752->139981414414368;
-      139981422613552->139981414415232;
-      139981414415808->139981414416096;
-      139981419996016->139981414414464;
-      139981419996832->139981414413792;
-      139981419997840->139981414413744;
-      139981419998800->139981414413360;
-      139981422613600->139981414414224;
-      139981414416288->139981414414608;
-      139981414414128->139981414416288;
-      139981414415472->139981414416288;
-      139981414415520->139981414415472;
-      139981414413360->139981414415520;
-      139981414414464->139981414415520;
-      139981414416096->139981414415520;
-      139981414414224->139981414415520;
-      139981414413744->139981414415520;
-      139981414413792->139981414415520;
-      139981414415520->139981414414128;
-      139981414414368->139981414414560;
-      139981414416000->139981414414560;
-      139981414413456->139981414414560;
-      139981414413168->139981414414560;
-      139981414415232->139981414414560;
-      139981414415856->139981414414560;
-      139981414414800->139981414415424;
-      139981414414848->139981414414176;
-      139981414414800->139981414414848;
-      139981414415424->139981414414704;
-      139981414414944->139981414415808;
-      139981419995200->139981414414944[color=red];
-      139981419995296->139981419995200;
-      139981419995680->139981419995200;
-      139981419995392->139981419995296;
-      139981419995488->139981419995296;
-      139981419995488->139981419995392;
-      139981419995584->139981419995488;
-      139981414414800->139981419995584;
-      139981419995584->139981419995680;
-      139981419995200->139981414414752[color=red];
-      139981414415424->139981419995776;
-      139981419996064->139981419996016;
-      139981419996160->139981419996064[color=red];
-      139981419996544->139981419996160;
-      139981419996256->139981419996160;
-      139981419996448->139981419996256;
-      139981419996352->139981419996256;
-      139981419996448->139981419996352;
-      139981419995776->139981419996448;
-      139981419995776->139981419996544;
-      139981419996160->139981419995968[color=red];
-      139981414414176->139981419996688;
-      139981419996880->139981419996832;
-      139981419996976->139981419996880[color=red];
-      139981419997072->139981419996976;
-      139981419997264->139981419997072;
-      139981419997168->139981419997072;
-      139981419997264->139981419997168;
-      139981419996688->139981419997264;
-      139981419996976->139981419996784[color=red];
-      139981414414704->139981419997408;
-      139981419997600->139981419997504;
-      139981414414848->139981419997600;
-      139981419997888->139981419997840;
-      139981419997984->139981419997888[color=red];
-      139981419998080->139981419997984;
-      139981419998368->139981419997984;
-      139981419998272->139981419998080;
-      139981419998176->139981419998080;
-      139981419998272->139981419998176;
-      139981419997504->139981419998272;
-      139981419997504->139981419998368;
-      139981419997984->139981419997792[color=red];
-      139981419997600->139981419998464;
-      139981422612832->139981419998560;
-      139981419998848->139981419998800;
-      139981419998944->139981419998848[color=red];
-      139981422612736->139981419998944;
-      139981419999040->139981419998944;
-      139981419999136->139981419999040;
-      139981422612544->139981419999040;
-      139981422612544->139981419999136;
-      139981422612640->139981422612544;
-      139981419998560->139981422612640;
-      139981422612640->139981422612736;
-      139981419998944->139981419998752[color=red];
-      139981422612928->139981422612832;
-      139981422613120->139981422612928;
-      139981422613024->139981422612928;
-      139981422613216->139981422613024;
-      139981422613312->139981422613120;
-      139981419995776->139981422613216;
-      139981419997504->139981422613312;
-      139981422613984->139981422613408;
-      139981422613696->139981422613600;
-      139981422613792->139981422613696[color=red];
-      139981422613888->139981422613792;
-      139981422613408->139981422613888;
-      139981422613792->139981422613552[color=red];
-      139981422614080->139981422613984;
-      139981422614320->139981422614080;
-      139981422614272->139981422614176;
-      139981422614416->139981422614320;
-      139981422614512->139981422614416;
-      139981422614176->139981422614512;
-      139981422614800->139981422614272;
-      139981422616096->139981422614656;
-      139981422614848->139981422614800;
-      139981422614944->139981422614848;
-      139981422615472->139981422614848;
-      139981422615040->139981422614944;
-      139981422615136->139981422615040;
-      139981422615232->139981422615136;
-      139981422615328->139981422615232;
-      139981422614656->139981422615328;
-      139981422615040->139981422615472;
-      139981422615616->139981422615424;
-      139981422616144->139981422616096;
-      139981418106992->139981422616144;
-      139981422616240->139981422616144;
-      139981418107088->139981422616144;
-      139981422616336->139981422616144;
-      139981418107184->139981422616144;
-      139981422616432->139981422616144;
-      139981422616528->139981422616144;
-      139981418106992->139981422616240;
-      139981418107088->139981422616240;
-      139981422616336->139981422616240;
-      139981418107184->139981422616240;
-      139981422616432->139981422616240;
-      139981422616528->139981422616240;
-      139981418106992->139981422616336;
-      139981418107088->139981422616336;
-      139981418107184->139981422616336;
-      139981422616432->139981422616336;
-      139981422616528->139981422616336;
-      139981418107088->139981422616432;
-      139981418107184->139981422616432;
-      139981422616528->139981422616432;
-      139981418106992->139981422616432;
-      139981418107184->139981422616528;
-      139981418107088->139981422616528;
-      139981418106992->139981422616528;
-      139981418107184->139981418106992;
-      139981418107088->139981418106992;
-      139981418107184->139981418107088;
-      139981418107280->139981418107184;
-      139981418107376->139981418107280;
-      139981418107664->139981418107376;
-      139981418107568->139981418107376;
-      139981418107472->139981418107376;
-      139981418107664->139981418107472;
-      139981418107568->139981418107472;
-      139981418107664->139981418107568;
-      139981418108048->139981418107664;
-      139981418107952->139981418107664;
-      139981418107856->139981418107664;
-      139981418107760->139981418107664;
-      139981418108048->139981418107760;
-      139981418107952->139981418107760;
-      139981418107856->139981418107760;
-      139981418108048->139981418107856;
-      139981418107952->139981418107856;
-      139981418108048->139981418107952;
-      139981418108336->139981418108048;
-      139981418108240->139981418108048;
-      139981418108144->139981418108048;
-      139981418108336->139981418108144;
-      139981418108240->139981418108144;
-      139981418108336->139981418108240;
-      139981418108432->139981418108336;
-      139981418108624->139981418108336;
-      139981418108528->139981418108336;
-      139981418108624->139981418108432;
-      139981418108528->139981418108432;
-      139981418108624->139981418108528;
-      139981418108816->139981418108624;
-      139981418108720->139981418108624;
-      139981418108816->139981418108720;
-      139981418109008->139981418108816;
-      139981418109104->139981418108816;
-      139981418109200->139981418108816;
-      139981418109296->139981418108816;
-      139981418108912->139981418108816;
-      139981418109200->139981418108912;
-      139981418109104->139981418108912;
-      139981418109008->139981418108912;
-      139981418109296->139981418108912;
-      139981418109200->139981418109008;
-      139981418109104->139981418109008;
-      139981418109296->139981418109008;
-      139981418109200->139981418109104;
-      139981418109296->139981418109104;
-      139981418109296->139981418109200;
-      139981418109584->139981418109296;
-      139981418109488->139981418109296;
-      139981418109392->139981418109296;
-      139981418109584->139981418109392;
-      139981418109488->139981418109392;
-      139981418109584->139981418109488;
-      139981418109776->139981418109584;
-      139981418109680->139981418109584;
-      139981418109776->139981418109680;
-      139981418109968->139981418109776;
-      139981418109872->139981418109776;
-      139981418109968->139981418109872;
-      139981418110160->139981418109968;
-      139981418110064->139981418109968;
-      139981418110160->139981418110064;
-      139981418110352->139981418110160;
-      139981418110256->139981418110160;
-      139981418110352->139981418110256;
-      139981418110736->139981418110352;
-      139981418110832->139981418110352;
-      139981418110448->139981418110352;
-      139981418110544->139981418110448;
-      139981418110640->139981418110544;
-      139981422615424->139981418110640;
-      139981418110832->139981418110736;
-      139981418110448->139981418110736;
-      139981418110544->139981418110832;
-      139981422615808->139981422615616;
-      139981419997408->139981422615712;
-      139981414439520->139981422615712;
-      139981422616000->139981422615808;
-      139981418110928->139981422616000;
-      139981418094704->139981422616000;
-      139981418094704->139981418110928;
-      139981418094800->139981418094704;
-      139981422615712->139981418094800;
-      139981419998464->139981414439520;
+     node[style="rounded,filled"][shape="box"];
+     subgraph cluster_140294010898320 {
+       label="State 0"; style="rounded";
+       140293714524768[label="deduction-guide[explicit_deduction]\n ♦ attribute-specifier-seq? deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;"][fillcolor="aliceblue"];
+       140293714524816[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator function-body"][fillcolor="aquamarine"];
+       140293714524864[label="simple-declaration[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq init-declarator-list? ;"][fillcolor="aquamarine"];
+       140293714524912[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator virt-specifier-seq function-body"][fillcolor="aquamarine"];
+       140293714524960[label="simple-declaration[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;"][fillcolor="aquamarine"];
+       140293714525008[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator requires-clause function-body"][fillcolor="aquamarine"];
+       140293717178448[label="translation-unit'[explicit_noexport_declaration]\n ♦ translation-unit <eof>"][fillcolor="burlywood"];
+       140293714051280[label="block-declaration[explicit_declaration]\n ♦ simple-declaration"][fillcolor="aquamarine"];
+       140293714051328[label="declaration[explicit_noexport_declaration]\n ♦ noexport-declaration"][fillcolor="burlywood"];
+       140293714051424[label="declaration-seq?[explicit_noexport_declaration]\n ♦ declaration"][fillcolor="burlywood"];
+       140293714051472[label="declaration-seq[explicit_noexport_declaration]\n ♦ declaration"][fillcolor="burlywood"];
+       140293714051520[label="translation-unit[explicit_noexport_declaration]\n ♦ declaration-seq?"][fillcolor="burlywood"];
+       140293714051568[label="declaration-seq?[explicit_noexport_declaration]\n ♦ declaration-seq declaration"][fillcolor="burlywood"];
+       140293714051616[label="declaration-seq[explicit_noexport_declaration]\n ♦ declaration-seq declaration"][fillcolor="burlywood"];
+       subgraph cluster_explicit_noexport_declaration_140294010898320 {
+         label="explicit_deduction/explicit_declaration => explicit_noexport_declaration"; style="rounded,filled"; color="pink";
+           140293714051184[label="noexport-declaration[explicit_deduction]\n ♦ deduction-guide"][fillcolor="aliceblue"];
+           140293714051232[label="noexport-declaration[explicit_declaration]\n ♦ function-definition"][fillcolor="aquamarine"];
+           140293714051376[label="noexport-declaration[explicit_declaration]\n ♦ block-declaration"][fillcolor="aquamarine"];
+       }
+     }
+     subgraph cluster_140294010898224 {
+       label="State 17"; style="rounded";
+       140293714462128[label="deduction-guide-begin[explicit_deduction]\n ♦ "][fillcolor="aliceblue"];
+       140293714525632[label="explicit-specifier[explicit_declaration]\n ♦ explicit"][fillcolor="aquamarine"];
+       140293714525680[label="explicit-specifier[explicit_declaration]\n ♦ explicit ( constant-expression )"][fillcolor="aquamarine"];
+       140293714525728[label="deduction-guide[explicit_deduction]\nattribute-specifier-seq? ♦ deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;"][fillcolor="aliceblue"];
+       140293714525776[label="function-specifier[explicit_declaration]\n ♦ explicit-specifier"][fillcolor="aquamarine"];
+       140293714525824[label="decl-specifier[explicit_declaration]\n ♦ function-specifier"][fillcolor="aquamarine"];
+       140293714525872[label="decl-specifier-seq[explicit_declaration]\n ♦ decl-specifier continue-decl-specifier-seq decl-specifier-seq"][fillcolor="aquamarine"];
+       140293714525920[label="decl-specifier-seq[explicit_declaration]\n ♦ decl-specifier end-decl-specifier-seq attribute-specifier-seq?"][fillcolor="aquamarine"];
+       140293714525968[label="simple-declaration[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq init-declarator-list? ;"][fillcolor="aquamarine"];
+       140293714526016[label="function-definition[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator function-body"][fillcolor="aquamarine"];
+       140293714526064[label="function-definition[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator virt-specifier-seq function-body"][fillcolor="aquamarine"];
+       140293714526112[label="function-definition[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator requires-clause function-body"][fillcolor="aquamarine"];
+       140293714526160[label="simple-declaration[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;"][fillcolor="aquamarine"];
+     }
+     140293714051184->140293714524768;
+     140293714051232->140293714524816;
+     140293714051280->140293714524864;
+     140293714051232->140293714524912;
+     140293714051280->140293714524960;
+     140293714051232->140293714525008;
+     140293714525728->140293714462128;
+     140293714525776->140293714525632;
+     140293714525776->140293714525680;
+     140293714524768->140293714525728;
+     140293714525824->140293714525776;
+     140293714525872->140293714525824;
+     140293714525920->140293714525824;
+     140293714525968->140293714525872;
+     140293714526016->140293714525872;
+     140293714526064->140293714525872;
+     140293714526112->140293714525872;
+     140293714526160->140293714525872;
+     140293714525968->140293714525920;
+     140293714526016->140293714525920;
+     140293714526064->140293714525920;
+     140293714526112->140293714525920;
+     140293714526160->140293714525920;
+     140293714524864->140293714525968;
+     140293714524816->140293714526016;
+     140293714524912->140293714526064;
+     140293714525008->140293714526112;
+     140293714524960->140293714526160;
+     140293714051328->140293714051184;
+     140293714051328->140293714051232;
+     140293714051376->140293714051280;
+     140293714051472->140293714051328;
+     140293714051424->140293714051328;
+     140293714051328->140293714051376;
+     140293714051520->140293714051424;
+     140293714051616->140293714051472;
+     140293714051568->140293714051472;
+     140293717178448->140293714051520;
+     140293714051520->140293714051568;
+     140293714051616->140293714051616;
+     140293714051568->140293714051616;
    }
-

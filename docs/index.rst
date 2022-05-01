@@ -20,7 +20,6 @@ Welcome to Motor's documentation!
    api/index.rst
 
 
-
 Indices and tables
 ==================
 
