@@ -118,7 +118,7 @@ def thirdparty(bld, name, feature_list=[], path='', source_node=None, var='', us
                 source_nodes=[source_node],
                 use=[env.ENV_PREFIX % u for u in use],
                 private_use=[env.ENV_PREFIX % u for u in private_use],
-                project_name=None
+                project_name=name
             )
             archs = env.VALID_ARCHITECTURES
             arch_specific = archs + ['%s.%s' % (p, a) for p in platforms for a in archs]
