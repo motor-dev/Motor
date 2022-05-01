@@ -42,8 +42,8 @@ protected:
             const minitl::format< 1024u > message
                 = minitl::format< 1024u >("%s:%d (%s)\t(%s:%s) %s\n") | filename | line
                   | logname.c_str() | getLogLevelName(level) | thread | msg;
-            const char* msg = message.c_str();
-            m_logFile->beginWrite(msg, motor_checked_numcast< u32 >(strlen(msg)));
+            const char* str = message.c_str();
+            m_logFile->beginWrite(str, motor_checked_numcast< u32 >(strlen(str)));
         }
         return true;
     }
