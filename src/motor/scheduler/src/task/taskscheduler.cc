@@ -184,7 +184,7 @@ TaskScheduler::TaskScheduler(weak< Scheduler > scheduler)
 
 TaskScheduler::~TaskScheduler()
 {
-    m_workerTaskPool.push(0, m_workers.size());
+    m_workerTaskPool.push(0, static_cast< u32 >(m_workers.size()));
     for(size_t i = 0; i < m_workers.size(); ++i)
         delete m_workers[i];
 }
