@@ -44,7 +44,7 @@ struct InterlockedType< 4 >
     static inline value_t fetch(const value_t* p)
     {
         value_t result;
-        __asm__ __volatile__(AO_THUMB_GO_ARM "       ldar     %w0, [%w1]\n" AO_THUMB_RESTORE_MODE
+        __asm__ __volatile__(AO_THUMB_GO_ARM "       ldar     %w0, %1\n" AO_THUMB_RESTORE_MODE
                              : "=&r"(result)
                              : "r"(p)
                              : AO_THUMB_SWITCH_CLOBBERS "cc");
@@ -167,7 +167,7 @@ struct InterlockedType< 8 >
     static inline value_t fetch(const value_t* p)
     {
         value_t result;
-        __asm__ __volatile__(AO_THUMB_GO_ARM "       ldar     %0, [%w1]\n" AO_THUMB_RESTORE_MODE
+        __asm__ __volatile__(AO_THUMB_GO_ARM "       ldar     %0, %1\n" AO_THUMB_RESTORE_MODE
                              : "=&r"(result)
                              : "r"(p)
                              : AO_THUMB_SWITCH_CLOBBERS "cc");
