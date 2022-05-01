@@ -118,13 +118,11 @@ T* istack< T >::pop()
 {
     typename itaggedptr< node >::ticket_t ticket;
     T*                                    result;
-    T*                                    next;
     do
     {
         ticket = m_head.getTicket();
         result = static_cast< T* >(ticket.value());
-        next   = result->next;
-    } while(result && !m_head.setConditional(next, ticket));
+    } while(result && !m_head.setConditional(result->next, ticket));
     return result;
 }
 
