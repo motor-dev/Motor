@@ -121,8 +121,13 @@ typedef u8               byte;
 #  include <xmmintrin.h>
 # endif*/
 #    define motor_break() __debugbreak()
-#    include <emmintrin.h>
-#    define motor_pause() _mm_pause()
+#    if defined(_ARM) || defined(_ARM64)
+#        include <intrin.h>
+#        define motor_pause() YieldProcessor()
+#    else
+#        include <emmintrin.h>
+#        define motor_pause() _mm_pause()
+#endif
 #else
 #    define motor_break() asm { int 3;}
 #    include <emmintrin.h>
