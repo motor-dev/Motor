@@ -39,7 +39,7 @@ Threads::Waitable::WaitResult Semaphore::wait()
 
 Semaphore::Semaphore(int initialCount) : m_data()
 {
-    *reinterpret_cast< i_i32* >(&m_data.value) = initialCount;
+    m_data.value = initialCount;
 }
 
 Semaphore::~Semaphore()
@@ -49,7 +49,7 @@ Semaphore::~Semaphore()
 
 void Semaphore::release(int count)
 {
-    *reinterpret_cast< i_i32* >(&m_data.value) += count;
+    m_data.value += count;
     if(count == 1)
     {
         WakeByAddressSingle(&m_data.value);
@@ -62,15 +62,14 @@ void Semaphore::release(int count)
 
 Threads::Waitable::WaitResult Semaphore::wait()
 {
-    i_i32& value = *reinterpret_cast< i_i32* >(&m_data.value);
     do
     {
-        i32 count = value--;
+        i32 count = m_data.value--;
         if(count >= 1)
         {
             return Waitable::Finished;
         }
-        ++value;
+        ++m_data.value;
         WaitOnAddress(&m_data.value, &count, sizeof(i_u32), INFINITE);
     } while(1);
 }
