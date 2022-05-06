@@ -138,8 +138,7 @@ struct InterlockedType< 4 >
     static inline tagged_t::tag_t get_ticket(const tagged_t& p)
     {
         tagged_t::value_t result;
-        __asm__ __volatile__(AO_THUMB_GO_ARM "       dmb sy\n"
-                                             "       ldaxr   %w0, %1\n" AO_THUMB_RESTORE_MODE
+        __asm__ __volatile__(AO_THUMB_GO_ARM "       ldaxr   %w0, %1\n" AO_THUMB_RESTORE_MODE
                              : "=r"(result)
                              : "Q"(p.m_value)
                              : AO_THUMB_SWITCH_CLOBBERS "cc");
@@ -150,7 +149,8 @@ struct InterlockedType< 4 >
     {
         long result;
 
-        __asm__ __volatile__(AO_THUMB_GO_ARM "       stxr %w0, %w2, %3\n"
+        __asm__ __volatile__(AO_THUMB_GO_ARM "       dmb sy\n"
+                                             "       stxr %w0, %w2, %3\n"
                                              "       dmb st\n" AO_THUMB_RESTORE_MODE
                              : "=&r"(result), "+m"(*p)
                              : "r"(v), "Q"(*p)
@@ -260,8 +260,7 @@ struct InterlockedType< 8 >
     static inline tagged_t::tag_t get_ticket(const tagged_t& p)
     {
         tagged_t::value_t result;
-        __asm__ __volatile__(AO_THUMB_GO_ARM "       dmb sy\n"
-                                             "       ldaxr   %x0, %1\n" AO_THUMB_RESTORE_MODE
+        __asm__ __volatile__(AO_THUMB_GO_ARM "       ldaxr   %x0, %1\n" AO_THUMB_RESTORE_MODE
                              : "=r"(result)
                              : "Q"(p.m_value)
                              : AO_THUMB_SWITCH_CLOBBERS "cc");
@@ -272,7 +271,8 @@ struct InterlockedType< 8 >
     {
         long result;
 
-        __asm__ __volatile__(AO_THUMB_GO_ARM "       stlxr  %x0, %x2, %3\n"
+        __asm__ __volatile__(AO_THUMB_GO_ARM "       dmb sy\n"
+                                             "       stlxr  %x0, %x2, %3\n"
                                              "       dmb st\n" AO_THUMB_RESTORE_MODE
                              : "=&r"(result), "+m"(*p)
                              : "r"(v), "Q"(*p)
