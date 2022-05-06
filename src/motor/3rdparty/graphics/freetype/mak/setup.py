@@ -52,7 +52,7 @@ def setup_prebuilt(conf):
 def setup_source(conf):
     try:
         conf.env.FREETYPE_SOURCE = conf.pkg_unpack('freetype_src', FT_SOURCES).path_from(conf.package_node)
-    except WafError:
+    except WafError as e:
         return False
     else:
         conf.end_msg('from source')
@@ -62,16 +62,18 @@ def setup_source(conf):
 def setup(conf):
     conf.register_setup_option('freetype_package')
     conf.start_msg_setup()
-    found = False
     if conf.env.PROJECTS:
-        found = setup_source(conf)
-    if not found and Options.options.freetype_package in ('best', 'pkgconfig'):
-        found = setup_pkgconfig(conf)
-    if not found and Options.options.freetype_package in ('best', 'system'):
-        found = setup_system(conf)
-    if not found and Options.options.freetype_package in ('best', 'prebuilt'):
-        found = setup_prebuilt(conf)
-    if not found and Options.options.freetype_package in ('best', 'source'):
-        found = setup_source(conf)
-    if not found:
-        conf.end_msg('disabled', color='RED')
+        if not setup_source(conf):
+            conf.end_msg('disabled', color='RED')
+    else:
+        found = False
+        if Options.options.freetype_package in ('best', 'pkgconfig'):
+            found = setup_pkgconfig(conf)
+        if not found and Options.options.freetype_package in ('best', 'system'):
+            found = setup_system(conf)
+        if not found and Options.options.freetype_package in ('best', 'prebuilt'):
+            found = setup_prebuilt(conf)
+        if not found and Options.options.freetype_package in ('best', 'source'):
+            found = setup_source(conf)
+        if not found:
+            conf.end_msg('disabled', color='RED')
