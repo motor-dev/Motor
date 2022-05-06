@@ -7,7 +7,7 @@
 #include <cerrno>
 #include <stdio.h>
 
-#if defined(__linux) && !defined(BE_THREAD_SANITIZER)
+#if defined(__linux) && !defined(BE_THREAD_SANITIZER) && 1
 #    include <limits.h>
 #    include <linux/futex.h>
 #    include <sys/syscall.h>
@@ -17,18 +17,18 @@ namespace Motor {
 
 Semaphore::Semaphore(int initialCount) : m_data()
 {
-    *reinterpret_cast< i_i32* >(&m_data.value) = initialCount;
+    m_data.value = initialCount;
 }
 
 Semaphore::~Semaphore()
 {
-    syscall(SYS_futex, reinterpret_cast< i_i32* >(&m_data.value), FUTEX_WAKE_PRIVATE, INT_MAX);
+    syscall(SYS_futex, &m_data.value, FUTEX_WAKE_PRIVATE, INT_MAX);
 }
 
 void Semaphore::release(int count)
 {
-    *reinterpret_cast< i_i32* >(&m_data.value) += count;
-    if(syscall(SYS_futex, reinterpret_cast< i_i32* >(&m_data.value), FUTEX_WAKE_PRIVATE, count) < 0)
+    m_data.value += count;
+    if(syscall(SYS_futex, &m_data.value, FUTEX_WAKE_PRIVATE, count) < 0)
     {
         motor_error("Semaphore error: %d[%s]" | errno | strerror(errno));
         motor_notreached();
@@ -38,15 +38,14 @@ void Semaphore::release(int count)
 Threads::Waitable::WaitResult Semaphore::wait()
 {
     int    result;
-    i_i32& value = *reinterpret_cast< i_i32* >(&m_data.value);
     do
     {
-        i32 count = value--;
+        i32 count = m_data.value--;
         if(count >= 1)
         {
             return Waitable::Finished;
         }
-        ++value;
+        ++m_data.value;
         result = syscall(SYS_futex, &m_data.value, FUTEX_WAIT_PRIVATE, count, NULL);
     } while(result == 0 || errno == EAGAIN);
 
