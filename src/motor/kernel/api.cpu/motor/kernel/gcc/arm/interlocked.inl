@@ -56,7 +56,7 @@ struct InterlockedType< 4 >
                                  AO_THUMB_RESTORE_MODE
                              : "=&r"(result)
                              : "r"(p), "r"(0)
-                             : AO_THUMB_SWITCH_CLOBBERS "cc");
+                             : "memory", AO_THUMB_SWITCH_CLOBBERS "cc");
         return result;
     }
     static inline value_t fetch_and_add(value_t* p, value_t incr)
@@ -71,7 +71,7 @@ struct InterlockedType< 4 >
                                                         AO_THUMB_RESTORE_MODE
                              : "=&r"(old), "=&r"(flag), "=&r"(temp), "+m"(*p)
                              : "r"(incr), "r"(p), "r"(0)
-                             : AO_THUMB_SWITCH_CLOBBERS "cc");
+                             : "memory", AO_THUMB_SWITCH_CLOBBERS "cc");
         return old;
     }
     static inline value_t fetch_and_sub(value_t* p, value_t incr)
@@ -88,7 +88,7 @@ struct InterlockedType< 4 >
                                                         AO_THUMB_RESTORE_MODE
                              : "=&r"(prev), "=&r"(flag), "+m"(*p)
                              : "r"(p), "r"(v), "r"(0)
-                             : AO_THUMB_SWITCH_CLOBBERS "cc");
+                             : "memory", AO_THUMB_SWITCH_CLOBBERS "cc");
         return prev;
     }
     static inline value_t set_conditional(value_t* p, value_t v, value_t condition)
@@ -105,7 +105,7 @@ struct InterlockedType< 4 >
             DMB(6) AO_THUMB_RESTORE_MODE
             : "=&r"(result), "=&r"(old), "+m"(*p)
             : "r"(p), "r"(condition), "r"(v), "r"(0)
-            : AO_THUMB_SWITCH_CLOBBERS "cc");
+            : "memory", AO_THUMB_SWITCH_CLOBBERS "cc");
 
         return old;
     }
@@ -145,11 +145,11 @@ struct InterlockedType< 4 >
     static inline tagged_t::tag_t get_ticket(const tagged_t& p)
     {
         tagged_t::value_t result;
-        __asm__ __volatile__(
-            AO_THUMB_GO_ARM DMB(2) "       ldrex   %0, [%1]\n" AO_THUMB_RESTORE_MODE
-            : "=r"(result)
-            : "r"(&p.m_value), "r"(0)
-            : AO_THUMB_SWITCH_CLOBBERS "cc");
+        __asm__ __volatile__(AO_THUMB_GO_ARM "       ldrex   %0, [%1]\n" DMB(2)
+                                 AO_THUMB_RESTORE_MODE
+                             : "=r"(result)
+                             : "r"(&p.m_value), "r"(0)
+                             : "memory", AO_THUMB_SWITCH_CLOBBERS "cc");
         return result;
     }
     static inline bool set_conditional(tagged_t* p, tagged_t::value_t v,
@@ -157,11 +157,11 @@ struct InterlockedType< 4 >
     {
         long result;
 
-        __asm__ __volatile__(AO_THUMB_GO_ARM "       strex %0, %2, [%3]\n" DMB(4)
+        __asm__ __volatile__(AO_THUMB_GO_ARM DMB(4) "       strex %0, %2, [%3]\n" DMB(4)
                                  AO_THUMB_RESTORE_MODE
                              : "=&r"(result), "+m"(*p)
                              : "r"(v), "r"(p), "r"(0)
-                             : AO_THUMB_SWITCH_CLOBBERS "cc");
+                             : "memory", AO_THUMB_SWITCH_CLOBBERS "cc");
 
         return !(result);
     }
