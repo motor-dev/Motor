@@ -164,7 +164,7 @@ def read_value(node):
             if len(time) == 19:
                 value = datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S')
             elif len(time) == 23:
-                value = datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S.000')
+                value = datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S.%f')
             else:
                 raise ValueError('invalid date format: %s' % time)
         else:
@@ -688,7 +688,7 @@ class QtCreator(Build.BuildContext):
             for p_name, p in self.platforms:
                 if p_name == platform.PE_Profile_Id:
                     p.copy_from(platform)
-                    self.platforms_to_remove.remove(p)
+                    self.platforms_to_remove.append(p)
                     break
             else:
                 self.platforms.append((platform.PE_Profile_Id, platform))
