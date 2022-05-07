@@ -7,7 +7,7 @@
 #include <cerrno>
 #include <stdio.h>
 
-#if defined(__linux) && !defined(BE_THREAD_SANITIZER) && 1
+#if defined(__linux)
 #    include <limits.h>
 #    include <linux/futex.h>
 #    include <sys/syscall.h>
@@ -48,6 +48,51 @@ Threads::Waitable::WaitResult Semaphore::wait()
         ++m_data.value;
         result = syscall(SYS_futex, &m_data.value, FUTEX_WAIT_PRIVATE, count, NULL);
     } while(result == 0 || errno == EAGAIN);
+
+    motor_error("Semaphore error: %d-%d[%s]" | result | errno | strerror(errno));
+    motor_notreached();
+    return Abandoned;
+}
+
+}  // namespace Motor
+
+#elif defined(__FreeBSD__)
+
+#   include <sys/types.h>
+#   include <sys/umtx.h>
+#   include <limits.h>
+
+namespace Motor {
+
+Semaphore::Semaphore(int initialCount) : m_data()
+{
+    m_data.value = initialCount;
+}
+
+Semaphore::~Semaphore()
+{
+    _umtx_op(&m_data.value, UMTX_OP_WAKE, INT_MAX, 0, 0);
+}
+
+void Semaphore::release(int count)
+{
+    m_data.value += count;
+    _umtx_op(&m_data.value, UMTX_OP_WAKE, count, 0, 0);
+}
+
+Threads::Waitable::WaitResult Semaphore::wait()
+{
+    int    result;
+    do
+    {
+        i32 count = m_data.value--;
+        if(count >= 1)
+        {
+            return Waitable::Finished;
+        }
+        ++m_data.value;
+        result = _umtx_op(&m_data.value, UMTX_OP_WAIT, count, 0, 0);
+    } while(result == 0 || errno == EINTR);
 
     motor_error("Semaphore error: %d-%d[%s]" | result | errno | strerror(errno));
     motor_notreached();
