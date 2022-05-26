@@ -63,6 +63,7 @@ class Compiler:
         self.compiler_cxx = compiler_cxx
         self.defines = []
         self.extra_args = deepcopy(extra_args)
+        self.extra_args_private = {}
         self.version = version
         self.version_number = to_number(version)
         self.platform = platform
@@ -83,9 +84,9 @@ class Compiler:
 
     def add_flags(self, compiler, flags):
         try:
-            self.extra_args[compiler] += Utils.to_list(flags)[:]
+            self.extra_args_private[compiler] += Utils.to_list(flags)[:]
         except KeyError:
-            self.extra_args[compiler] = Utils.to_list(flags)[:]
+            self.extra_args_private[compiler] = Utils.to_list(flags)[:]
 
     @classmethod
     def to_target_arch(self, arch):
@@ -114,15 +115,15 @@ class Compiler:
 
     def run_c(self, args, input=None, env=None):
         return self.run(
-            [self.compiler_c] + self.extra_args.get('c', []) + self.extra_args.get('link', []) + args, env or self.env,
-            input
+            [self.compiler_c] + self.extra_args.get('c', []) + self.extra_args_private.get('c', []) +
+            self.extra_args.get('link', []) + self.extra_args_private.get('link', []) + args, env or self.env, input
         )
 
     def run_cxx(self, args, input=None, env=None):
         # print(' '.join([self.compiler_cxx] + self.extra_args.get('cxx', []) + args))
         return self.run(
-            [self.compiler_cxx] + self.extra_args.get('cxx', []) + self.extra_args.get('link', []) + args, env
-            or self.env, input
+            [self.compiler_cxx] + self.extra_args.get('cxx', []) + self.extra_args_private.get('cxx', []) +
+            self.extra_args.get('link', []) + self.extra_args_private.get('link', []) + args, env or self.env, input
         )
 
     def sort_name(self):
@@ -149,6 +150,9 @@ class Compiler:
         conf.env.append_value('CFLAGS', self.extra_args.get('c', []))
         conf.env.append_value('CXXFLAGS', self.extra_args.get('cxx', []))
         conf.env.append_value('LINKFLAGS', self.extra_args.get('link', []))
+        conf.env.append_value('CFLAGS', self.extra_args_private.get('c', []))
+        conf.env.append_value('CXXFLAGS', self.extra_args_private.get('cxx', []))
+        conf.env.append_value('LINKFLAGS', self.extra_args_private.get('link', []))
         conf.env.TARGET_ARCH = self.arch_name
         self.set_optimisation_options(conf)
         self.set_warning_options(conf)

@@ -4,6 +4,7 @@
 #include <motor/stdafx.h>
 #include <motor/application.hh>
 
+#include <motor/core/threads/semaphore.hh>
 #include <motor/core/timer.hh>
 #include <motor/filesystem/folder.meta.hh>
 #include <motor/plugin/plugin.hh>
@@ -113,11 +114,13 @@ void Application::frameUpdate()
     static float now        = Timer::now();
     if(++frames % frameCount == 0)
     {
-        float time = Timer::now();
-        float t    = (time - now) / float(frameCount);
+        float time       = Timer::now();
+        float t          = (time - now) / float(frameCount);
+        u32   pauseCount = Semaphore::flushPauseCount() / frameCount;
         if(t > 10.0f)
         {
-            motor_info("Average frame time (%d frames): %d milliseconds" | frameCount | (int)t);
+            motor_info("Average frame time (%d frames): %d milliseconds / %d pauses" | frameCount
+                       | (int)t | pauseCount);
             frameCount = 20;
         }
         else
@@ -125,13 +128,14 @@ void Application::frameUpdate()
             t = 1000.0f * t;
             if(t > 10.0f)
             {
-                motor_info("Average frame time (%d frames): %d microseconds" | frameCount | (int)t);
+                motor_info("Average frame time (%d frames): %d microseconds / %d pauses"
+                           | frameCount | (int)t | pauseCount);
                 frameCount = 5000;
             }
             else
             {
-                motor_info("Average frame time (%d frames): %d nanoseconds" | frameCount
-                           | (int)(t * 1000.0f));
+                motor_info("Average frame time (%d frames): %d nanoseconds / %d pauses" | frameCount
+                           | (int)(t * 1000.0f) | pauseCount);
                 frameCount = 200000;
             }
         }
@@ -141,7 +145,7 @@ void Application::frameUpdate()
 
 void Application::finish()
 {
-    m_runLoop = false;
+    m_runLoop.set(false);
 }
 
 }  // namespace Motor

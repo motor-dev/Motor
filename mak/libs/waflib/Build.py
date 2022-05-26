@@ -514,18 +514,17 @@ class BuildContext(Context.Context):
 		Utils.rot_idx += 1
 		ind = Utils.rot_chr[Utils.rot_idx % 4]
 
-		pc = (100. * idx)/total
-		fs = "[%%%dd/%%d][%%s%%2d%%%%%%s][%s][" % (n, ind)
-		left = fs % (idx, total, col1, pc, col2)
-		right = '][%s%s%s]' % (col1, self.timer, col2)
+		fs = "%s [%%%dd/%%d]" % (self.cmd, n)
+		left = fs % (idx, total)
+		right = '[%s%s%s]' % (col1, self.timer, col2)
 
-		cols = Logs.get_term_cols() - len(left) - len(right) + 2*len(col1) + 2*len(col2)
+		cols = Logs.get_term_cols() - len(left) - len(right) + len(col1) + len(col2)
 		if cols < 7:
 			cols = 7
 
-		ratio = ((cols * idx)//total) - 1
+		ratio = ((cols * idx) // total)
 
-		bar = ('='*ratio+'>').ljust(cols)
+		bar = ('\u2501' * (ratio)) + '\x1b[37m' + ('\u2501' * (cols - ratio))
 		msg = Logs.indicator % (left, bar, right)
 
 		return msg
@@ -1288,6 +1287,7 @@ class CleanContext(BuildContext):
 					quiet=True, generator=True)
 		"""
 		Logs.debug('build: clean called')
+		self.timer = Utils.Timer()
 
 		if hasattr(self, 'clean_files'):
 			for n in self.clean_files:
@@ -1297,10 +1297,27 @@ class CleanContext(BuildContext):
 			lst = []
 			for env in self.all_envs.values():
 				lst.extend(self.root.find_or_declare(f) for f in env[CFG_FILES])
-			for n in self.bldnode.ant_glob('**/*', excl='.lock* *conf_check_*/** config.log c4che/*', quiet=True):
+			nodes = list(self.bldnode.ant_glob('**/*', excl='.lock* *conf_check_*/** config.log c4che/*', quiet=True))
+			c = len(nodes)
+			for i, n in enumerate(nodes):
 				if n in lst:
 					continue
 				n.delete()
+				if self.progress_bar == 1 and sys.stdout.isatty():
+					m = self.progress_line(i, c, Logs.colors.BLUE, Logs.colors.NORMAL)
+					Logs.info(
+						m,
+						extra={
+							'stream': sys.stdout,
+							'terminator': '',
+							'c1': Logs.colors.cursor_off,
+							'c2': Logs.colors.cursor_on
+						}
+					)
+			if self.progress_bar == 1 and sys.stdout.isatty():
+				m = self.progress_line(c, c, Logs.colors.BLUE, Logs.colors.NORMAL)
+				Logs.info(m, extra={'stream': sys.stdout, 'c1': Logs.colors.cursor_off, 'c2': Logs.colors.cursor_on})
+
 		self.root.children = {}
 
 		for v in SAVED_ATTRS:

@@ -58,7 +58,7 @@ void IOContext::processRequests(IORequest* head)
             {
                 ticket->buffer.realloc(ticket->total);
             }
-            ticket->processed = 0;
+            ticket->processed.set(0);
             ticket->file->fillBuffer(ticket);
         }
         break;

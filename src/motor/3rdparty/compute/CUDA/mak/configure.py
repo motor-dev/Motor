@@ -104,9 +104,14 @@ def configure(configuration_context):
         v.NVCC_CXXFLAGS_debug = ['-D_DEBUG', '--generate-line-info']
         v.NVCC_CXXFLAGS_profile = ['-DNDEBUG', '-O2', '--generate-line-info']
         v.NVCC_CXXFLAGS_final = ['-DNDEBUG', '-O2']
-        v.NVCC_CXXFLAGS = [
-            '-c', '-x', 'cu', '-I%s' % configuration_context.path.parent.make_node('api.cuda').abspath()
-        ]
+        v.NVCC_CXXFLAGS_cxx98 = ['-std=c++03']
+        v.NVCC_CXXFLAGS_cxx03 = ['-std=c++03']
+        v.NVCC_CXXFLAGS_cxx11 = ['-std=c++11']
+        v.NVCC_CXXFLAGS_cxx14 = ['-std=c++14']
+        v.NVCC_CXXFLAGS_cxx17 = ['-std=c++17']
+        v.NVCC_CXXFLAGS_cxx20 = ['-std=c++17']
+        v.NVCC_CXXFLAGS_cxx23 = ['-std=c++17']
+        v.NVCC_CXXFLAGS = ['-c', '-x', 'cu', '-I%s' % configuration_context.path.parent.make_node('api.cuda').abspath()]
         v.NVCC_CXX_SRC_F = ''
         v.NVCC_CXX_TGT_F = ['-o']
         v.NVCC_ARCH_ST = ['-arch']
@@ -118,4 +123,3 @@ def configure(configuration_context):
     configuration_context.end_msg(
         ', '.join('.'.join(str(x) for x in p[0]) for p in configuration_context.env.NVCC_COMPILERS)
     )
-

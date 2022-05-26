@@ -41,7 +41,7 @@ def get_source_nodes(build_context, path, name):
 
 
 @conf
-def preprocess(build_context, name, path, root_namespace, plugin_name, extra_features=[]):
+def preprocess(build_context, name, path, root_namespace, plugin_name, uselib, extra_features=[]):
     source_nodes = get_source_nodes(build_context, path, name)
 
     pp_env = build_context.common_env.derive()
@@ -85,7 +85,8 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, extra_fea
         kernels_cpu=[],
         includes=includes,
         source_nodes=source_nodes,
-        root_namespace=root_namespace
+        root_namespace=root_namespace,
+        uselib=uselib
     )
 
     for source_node in source_nodes:
@@ -123,7 +124,7 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, extra_fea
 @conf
 def module(
     build_context, name, env, path, depends, private_depends, features, source_list, extra_includes,
-    extra_public_includes, extra_system_includes, extra_defines, extra_public_defines, conditions, project_name,
+    extra_public_includes, extra_system_includes, extra_defines, extra_public_defines, conditions, project_name, uselib,
     **kw_args
 ):
     for condition in conditions:
@@ -173,7 +174,7 @@ def module(
         features=features[:],
         use=[env.ENV_PREFIX % d for d in depends],
         private_use=[env.ENV_PREFIX % d for d in private_depends],
-        uselib=[build_context.__class__.optim] + (build_context.env.STATIC and ['static'] or ['dynamic']),
+        uselib=[build_context.__class__.optim] + (build_context.env.STATIC and ['static'] or ['dynamic']) + uselib,
         preprocess=preprocess,
         source_nodes=source_nodes,
         source=source_list,
@@ -208,7 +209,7 @@ def module(
                         features=['cxx', 'cxxprogram', 'motor:cxx', 'motor:unit_test'],
                         use=[task_gen.target],
                         uselib=[build_context.__class__.optim] +
-                        (build_context.env.STATIC and ['static'] or ['dynamic']),
+                        (build_context.env.STATIC and ['static'] or ['dynamic']) + uselib,
                         source=[test],
                         source_nodes=source_nodes,
                         defines=[

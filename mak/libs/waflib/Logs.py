@@ -48,7 +48,7 @@ colors_lst = {
 'cursor_off' :'\x1b[?25l',
 }
 
-indicator = '\r\x1b[K%s%s%s'
+indicator = '\r\x1b[K%s\x1b[32m%s\x1b[0m%s'
 
 try:
 	unicode

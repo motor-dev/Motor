@@ -5,15 +5,15 @@ import os
 
 
 @conf
-def python_module(bld, name, depends, path, conditions):
+def python_module(bld, name, depends, path, conditions, uselib=[]):
 
     def python_lib(env):
         features = (['c', 'cxx', 'cxxshlib', 'motor:c', 'motor:cxx', 'motor:shared_lib', 'motor:python_module'])
-        result = bld.module(name, env, path, depends, [], features, None, [], [], [], [], [], conditions, None)
+        result = bld.module(name, env, path, depends, [], features, None, [], [], [], [], [], conditions, None, uselib)
         if result is not None:
             result.env.cxxshlib_PATTERN = result.env.pymodule_PATTERN
 
-    bld.preprocess(name, path, 'Motor', name)
+    bld.preprocess(name, path, 'Motor', name, uselib=uselib)
     multiarch_module = bld.multiarch(name, [python_lib(env) for env in bld.multiarch_envs])
     if multiarch_module is not None:
         multiarch_module.env.cxxshlib_PATTERN = module.env.pymodule_PATTERN

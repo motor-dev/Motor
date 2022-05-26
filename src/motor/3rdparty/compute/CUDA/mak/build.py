@@ -1,6 +1,6 @@
 from waflib import Task
 from waflib.TaskGen import feature, before_method, taskgen_method, extension
-from waflib.Tools import c_preproc
+from waflib.Tools import c_preproc, ccroot
 try:
     import cPickle as pickle
 except ImportError:
@@ -34,10 +34,12 @@ _MOTOR_REGISTER_PLUGIN(MOTOR_KERNEL_ID, MOTOR_KERNEL_NAME);
 
 """
 
+ccroot.USELIB_VARS['cxx'].add('NVCC_CXXFLAGS')
+
 
 class nvcc(Task.Task):
     "nvcc"
-    run_str = '${NVCC_CXX} ${NVCC_CXXFLAGS} --fatbin ${NVCC_FRAMEWORKPATH_ST:FRAMEWORKPATH} ${NVCC_CPPPATH_ST:INCPATHS} -DMOTOR_COMPUTE=1 ${NVCC_DEFINES_ST:DEFINES} -D_NVCC=1 ${NVCC_CXX_SRC_F}${SRC[0].abspath()} ${NVCC_CXX_TGT_F} ${TGT}'
+    run_str = '${NVCC_CXX} ${NVCC_CXXFLAGS} --fatbin ${NVCC_FRAMEWORKPATH_ST:FRAMEWORKPATH} ${NVCC_CPPPATH_ST:INCPATHS} -DMOTOR_COMPUTE=2 ${NVCC_DEFINES_ST:DEFINES} -D_NVCC=1 ${NVCC_CXX_SRC_F}${SRC[0].abspath()} ${NVCC_CXX_TGT_F} ${TGT}'
     ext_out = ['.fatbin']
 
     def scan(self):

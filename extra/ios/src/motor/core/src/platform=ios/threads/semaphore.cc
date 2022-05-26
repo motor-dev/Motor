@@ -78,4 +78,9 @@ Threads::Waitable::WaitResult Semaphore::wait()
     }
 }
 
+u32 Semaphore::flushPauseCount()
+{
+    return 0;
+}
+
 }  // namespace Motor

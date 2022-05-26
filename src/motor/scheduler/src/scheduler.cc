@@ -22,7 +22,7 @@ Scheduler::Scheduler()
 
 Scheduler::~Scheduler()
 {
-    m_running = false;
+    m_running.set(false);
 }
 
 void Scheduler::queueTask(weak< const Task::ITask > task, weak< const Task::IExecutor > executor,

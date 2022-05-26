@@ -68,9 +68,9 @@ public:
     {
         return static_cast< T >(impl::fetch(&m_value));
     }
-    __host __device T operator=(T value)
+    __host __device void set(T value)
     {
-        return static_cast< T >(impl::set_and_fetch(&m_value, value));
+        impl::set_and_fetch(&m_value, value);
     }
     __host __device T exchange(T value)
     {

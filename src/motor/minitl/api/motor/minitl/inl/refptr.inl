@@ -14,9 +14,9 @@ namespace minitl {
 template < typename T >
 void ref< T >::swap(ref< T >& other)
 {
-    typename ptr< T >::pointer tmpPtr = other.operator->();
-    other.m_ptr                       = m_ptr;
-    m_ptr                             = tmpPtr;
+    T* tmpPtr   = other.operator->();
+    other.m_ptr = m_ptr;
+    m_ptr       = tmpPtr;
 }
 
 template < typename T >

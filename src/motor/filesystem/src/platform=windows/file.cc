@@ -46,7 +46,7 @@ void Win32File::doFillBuffer(weak< File::Ticket > ticket) const
         int errorCode = ::GetLastError();
         motor_info("file %s (%s) could not be opened: CreateFile returned an error (%d)"
                    | m_filename | pathname.name | errorCode);
-        ticket->error = true;
+        ticket->error.set(true);
     }
     else
     {
@@ -55,7 +55,7 @@ void Win32File::doFillBuffer(weak< File::Ticket > ticket) const
         u8*              target    = ticket->buffer.data();
         u32              processed = 0;
         setFilePointer(pathname.name, h, ticket->offset);
-        for(ticket->processed = 0; !ticket->done();)
+        for(ticket->processed.set(0); !ticket->done();)
         {
             DWORD read;
             if(ticket->text)
@@ -96,7 +96,7 @@ void Win32File::doFillBuffer(weak< File::Ticket > ticket) const
             {
                 motor_error("reached premature end of file in %s after reading %d bytes (offset %d)"
                             | m_filename | ticket->processed | ticket->total);
-                ticket->error = true;
+                ticket->error.set(true);
             }
         }
         if(ticket->text && !ticket->error)
@@ -122,13 +122,13 @@ void Win32File::doWriteBuffer(weak< Ticket > ticket) const
         int errorCode = ::GetLastError();
         motor_info("file %s (%s) could not be opened: CreateFile returned an error (%d)"
                    | m_filename | pathname.name | errorCode);
-        ticket->error = true;
+        ticket->error.set(true);
     }
     else
     {
         static const int s_bufferSize = 1024;
         setFilePointer(pathname.name, h, ticket->offset);
-        for(ticket->processed = 0; !ticket->done();)
+        for(ticket->processed.set(0); !ticket->done();)
         {
             DWORD written;
             if(ticket->processed + s_bufferSize > ticket->total)
@@ -144,7 +144,7 @@ void Win32File::doWriteBuffer(weak< Ticket > ticket) const
                     "could not write part of the buffer to file %s; failed after processing "
                     "%d bytes out of %d"
                     | m_filename | ticket->processed | ticket->total);
-                ticket->error = true;
+                ticket->error.set(true);
             }
         }
         CloseHandle(h);
