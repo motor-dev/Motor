@@ -37,9 +37,11 @@ Threads::Waitable::WaitResult Semaphore::wait()
 
 #else
 
+static i_u32 s_pauseCount;
+
 Semaphore::Semaphore(int initialCount) : m_data()
 {
-    m_data.value = initialCount;
+    m_data.value.set(initialCount);
 }
 
 Semaphore::~Semaphore()
@@ -70,8 +72,14 @@ Threads::Waitable::WaitResult Semaphore::wait()
             return Waitable::Finished;
         }
         ++m_data.value;
+        ++s_pauseCount;
         WaitOnAddress(&m_data.value, &count, sizeof(i_u32), INFINITE);
     } while(1);
+}
+
+u32 Semaphore::flushPauseCount()
+{
+    return s_pauseCount.exchange(0);
 }
 
 #endif

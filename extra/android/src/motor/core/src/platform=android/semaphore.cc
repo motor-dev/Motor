@@ -14,20 +14,22 @@
 
 namespace Motor {
 
+static i_u32 s_pauseCount;
+
 Semaphore::Semaphore(int initialCount) : m_data()
 {
-    *reinterpret_cast< i_i32* >(&m_data.value) = initialCount;
+    m_data.value.set(initialCount);
 }
 
 Semaphore::~Semaphore()
 {
-    syscall(__NR_futex, reinterpret_cast< i_i32* >(&m_data.value), FUTEX_WAKE, INT_MAX);
+    syscall(__NR_futex, &m_data.value, FUTEX_WAKE, INT_MAX);
 }
 
 void Semaphore::release(int count)
 {
-    *reinterpret_cast< i_i32* >(&m_data.value) += count;
-    if(syscall(__NR_futex, reinterpret_cast< i_i32* >(&m_data.value), FUTEX_WAKE, count) < 0)
+    m_data.value += count;
+    if(syscall(__NR_futex, &m_data.value, FUTEX_WAKE, count) < 0)
     {
         motor_error("Semaphore error: %d[%s]" | errno | strerror(errno));
         motor_notreached();
@@ -36,23 +38,27 @@ void Semaphore::release(int count)
 
 Threads::Waitable::WaitResult Semaphore::wait()
 {
-    int    result;
-    i_i32* value = reinterpret_cast< i_i32* >(&m_data.value);
+    int result;
     do
     {
-        i32 count = *value += 0;
-        if(count > 0)
+        i32 count = m_data.value--;
+        if(count >= 1)
         {
-            if(value->setConditional(count - 1, count) == count) return Waitable::Finished;
+            return Waitable::Finished;
         }
-
-        result = syscall(__NR_futex, reinterpret_cast< i_i32* >(&m_data.value), FUTEX_WAIT, count,
-                         NULL);
+        ++m_data.value;
+        ++s_pauseCount;
+        result = syscall(__NR_futex, &m_data.value, FUTEX_WAIT, count, NULL);
     } while(result == 0 || errno == EAGAIN);
 
     motor_error("Semaphore error: %d-%d[%s]" | result | errno | strerror(errno));
     motor_notreached();
     return Abandoned;
+}
+
+u32 Semaphore::flushPauseCount()
+{
+    return s_pauseCount.exchange(0);
 }
 
 }  // namespace Motor

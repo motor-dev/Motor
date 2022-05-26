@@ -20,7 +20,6 @@ TaskGroup::~TaskGroup()
 
 void TaskGroup::schedule(weak< Scheduler > scheduler) const
 {
-    Scheduler::WorkItem item(scheduler);
     if(!m_startTasks.empty())
     {
         for(minitl::vector< weak< ITask > >::const_iterator it = m_startTasks.begin();
@@ -74,7 +73,7 @@ void TaskGroup::Callback::onCompleted(weak< Scheduler > scheduler, weak< const I
 {
     if(++m_completed == m_owner->m_endTaskCount)
     {
-        m_completed = 0;
+        m_completed.set(0);
         m_owner->completed(scheduler);
     }
 }

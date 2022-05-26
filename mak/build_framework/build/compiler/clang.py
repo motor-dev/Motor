@@ -41,5 +41,7 @@ def build(bld):
             env.append_unique('CXXFLAGS', ['-MMD'])
     for cls_name in 'c', 'cxx', 'cshlib', 'cxxshlib', 'cprogram', 'cxxprogram':
         cls = Task.classes.get(cls_name, None)
-        derived = type(cls_name, (cls, ), {})
-        derived.exec_command = clang_exec_command(derived.exec_command)
+        if not getattr(cls, 'exec_command_patched', False):
+            derived = type(cls_name, (cls, ), {})
+            derived.exec_command = clang_exec_command(derived.exec_command)
+            derived.exec_command_patched = True

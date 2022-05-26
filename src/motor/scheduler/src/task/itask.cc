@@ -102,7 +102,7 @@ void ITask::ChainCallback::onCompleted(weak< Scheduler > scheduler, weak< const 
 {
     if(++m_completed == m_startedBy.size())
     {
-        m_completed = 0;
+        m_completed.set(0);
         m_starts->schedule(scheduler);
     }
 }

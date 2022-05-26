@@ -56,7 +56,8 @@ def build_source(bld, name, env, path):
             source_list=[
                 'src/BulletCollision/**/*.cpp', 'src/BulletDynamics/**/*.cpp', 'src/BulletSoftBody/**/*.cpp',
                 'src/LinearMath/**/*.cpp'
-            ]
+            ],
+            uselib=['cxx98']
         )
     else:
         return bld.shared_library(
@@ -74,7 +75,8 @@ def build_source(bld, name, env, path):
             source_list=[
                 'src/BulletCollision/**/*.cpp', 'src/BulletDynamics/**/*.cpp', 'src/BulletSoftBody/**/*.cpp',
                 'src/LinearMath/**/*.cpp'
-            ]
+            ],
+            uselib=['cxx98']
         )
 
 

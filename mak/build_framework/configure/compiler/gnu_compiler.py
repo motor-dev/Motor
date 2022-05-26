@@ -103,15 +103,15 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
             self, compiler_c, compiler_cxx, version, platform, arch, extra_args, extra_env
         )
         target = self.target.split('-')
-        for t in self.targets:
-            target_dir = os.path.normpath(os.path.join(self.directories[0], '..', t, 'bin'))
-            if os.path.isdir(target_dir):
-                self.directories.append(target_dir)
-            if os.path.isdir('/usr/lib/%s' % t):
-                try:
-                    self.extra_args['link'].append('-L/usr/lib/%s' % t)
-                except KeyError:
-                    self.extra_args['link'] = ['-L/usr/lib/%s' % t]
+        #for t in self.targets:
+        #    target_dir = os.path.normpath(os.path.join(self.directories[0], '..', t, 'bin'))
+        #    if os.path.isdir(target_dir):
+        #        self.directories.append(target_dir)
+        #    if os.path.isdir('/usr/lib/%s' % t):
+        #        try:
+        #            self.extra_args['link'].append('-L/usr/lib/%s' % t)
+        #        except KeyError:
+        #            self.extra_args['link'] = ['-L/usr/lib/%s' % t]
 
     def get_actual_targets(self, target, args, multilibs):
         target = target.split('-')
@@ -243,7 +243,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         tgtnode = node.change_ext('')
         node.write('int main() {}\n')
         try:
-            result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()] + extra_flags)
+            result, out, err = self.run_cxx([node.abspath(), '-std=c++14', '-c', '-o', tgtnode.abspath()] + extra_flags)
         except Exception as e:
             #print(e)
             return False
@@ -300,6 +300,13 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
             extra_flags_cxx = ['-Wextra', '-Wno-invalid-offsetof']
         else:
             extra_flags_c = extra_flags_cxx = []
+        v.CXXFLAGS_cxx98 = ['-std=c++98']
+        v.CXXFLAGS_cxx03 = ['-std=c++03']
+        v.CXXFLAGS_cxx11 = ['-std=c++11']
+        v.CXXFLAGS_cxx14 = ['-std=c++14']
+        v.CXXFLAGS_cxx17 = ['-std=c++17']
+        v.CXXFLAGS_cxx20 = ['-std=c++20']
+        v.CXXFLAGS_cxx23 = ['-std=c++23']
         v.CFLAGS_warnall = ['-std=c99', '-Wall'] + extra_flags_c + [
             '-pedantic', '-Winline', '-Werror', '-Wstrict-aliasing'
         ] + v.CFLAGS_warnall

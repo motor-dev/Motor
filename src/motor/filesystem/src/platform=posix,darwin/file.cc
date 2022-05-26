@@ -29,7 +29,7 @@ void PosixFile::doFillBuffer(weak< File::Ticket > ticket) const
         const char* errorMessage = strerror(errno);
         motor_forceuse(errorMessage);
         motor_error("file %s could not be opened: (%d) %s" | m_filename | errno | errorMessage);
-        ticket->error = true;
+        ticket->error.set(true);
     }
     else
     {
@@ -42,7 +42,7 @@ void PosixFile::doFillBuffer(weak< File::Ticket > ticket) const
             fseek(f, ticket->offset + 1, SEEK_END);
         }
         u8* data = ticket->buffer.data();
-        for(ticket->processed = 0; !ticket->done();)
+        for(ticket->processed.set(0); !ticket->done();)
         {
             int read
                 = (ticket->processed + g_bufferSize > ticket->total)
@@ -55,7 +55,7 @@ void PosixFile::doFillBuffer(weak< File::Ticket > ticket) const
             {
                 motor_error("reached premature end of file in %s after reading %d bytes (offset %d)"
                             | m_filename | ticket->processed | ticket->total);
-                ticket->error = true;
+                ticket->error.set(true);
             }
         }
         fclose(f);
@@ -74,7 +74,7 @@ void PosixFile::doWriteBuffer(weak< Ticket > ticket) const
         const char* errorMessage = strerror(errno);
         motor_forceuse(errorMessage);
         motor_error("file %s could not be opened: (%d) %s" | m_filename | errno | errorMessage);
-        ticket->error = true;
+        ticket->error.set(true);
     }
     else
     {
@@ -87,7 +87,7 @@ void PosixFile::doWriteBuffer(weak< Ticket > ticket) const
             fseek(f, ticket->offset + 1, SEEK_END);
         }
         u8* data = ticket->buffer.data();
-        for(ticket->processed = 0; !ticket->done();)
+        for(ticket->processed.set(0); !ticket->done();)
         {
             int written
                 = (ticket->processed + g_bufferSize > ticket->total)
@@ -104,7 +104,7 @@ void PosixFile::doWriteBuffer(weak< Ticket > ticket) const
                     "could not write part of the buffer to file %s; failed after processing "
                     "%d bytes out of %d (%s)"
                     | m_filename | ticket->processed | ticket->total | errorMessage);
-                ticket->error = true;
+                ticket->error.set(true);
             }
         }
     }

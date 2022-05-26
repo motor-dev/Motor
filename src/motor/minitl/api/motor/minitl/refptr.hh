@@ -19,19 +19,7 @@ class ref
     friend class refcountable;
 
 private:
-    template < typename OBJECT >
-    struct ptr
-    {
-        typedef minitl::refcountable* pointer;
-    };
-    template < typename OBJECT >
-    struct ptr< const OBJECT >
-    {
-        typedef const minitl::refcountable* pointer;
-    };
-
-private:
-    typename ptr< T >::pointer m_ptr;
+    T* m_ptr;
 
 private:
     inline void swap(ref& other);

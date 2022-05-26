@@ -62,7 +62,7 @@ void TaskScheduler::TaskPool::push(TaskItem* item, u32 count)
 
     while(m_lastQueued != poolStart)
         motor_pause();
-    m_lastQueued = poolEnd;
+    m_lastQueued.set(poolEnd);
     m_poolSignal.release(count);
 }
 

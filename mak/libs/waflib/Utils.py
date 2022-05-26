@@ -89,7 +89,7 @@ O644 = 420
 O755 = 493
 """Constant representing the permissions for executable files (0755 raises a syntax error on python 3)"""
 
-rot_chr = ['\\', '|', '/', '-']
+rot_chr = ['\u256d', '\u256e', '\u256f', '\u2570']
 "List of characters to use when displaying the throbber (progress bar)"
 
 rot_idx = 0

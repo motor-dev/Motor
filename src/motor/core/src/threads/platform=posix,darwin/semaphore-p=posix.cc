@@ -15,9 +15,11 @@
 
 namespace Motor {
 
+static i_u32 s_pauseCount;
+
 Semaphore::Semaphore(int initialCount) : m_data()
 {
-    m_data.value = initialCount;
+    m_data.value.set(initialCount);
 }
 
 Semaphore::~Semaphore()
@@ -37,7 +39,7 @@ void Semaphore::release(int count)
 
 Threads::Waitable::WaitResult Semaphore::wait()
 {
-    int    result;
+    int result;
     do
     {
         i32 count = m_data.value--;
@@ -46,6 +48,7 @@ Threads::Waitable::WaitResult Semaphore::wait()
             return Waitable::Finished;
         }
         ++m_data.value;
+        ++s_pauseCount;
         result = syscall(SYS_futex, &m_data.value, FUTEX_WAIT_PRIVATE, count, NULL);
     } while(result == 0 || errno == EAGAIN);
 
@@ -54,13 +57,18 @@ Threads::Waitable::WaitResult Semaphore::wait()
     return Abandoned;
 }
 
+u32 Semaphore::flushPauseCount()
+{
+    return s_pauseCount.exchange(0);
+}
+
 }  // namespace Motor
 
 #elif defined(__FreeBSD__)
 
-#   include <sys/types.h>
-#   include <sys/umtx.h>
-#   include <limits.h>
+#    include <limits.h>
+#    include <sys/types.h>
+#    include <sys/umtx.h>
 
 namespace Motor {
 
@@ -82,7 +90,7 @@ void Semaphore::release(int count)
 
 Threads::Waitable::WaitResult Semaphore::wait()
 {
-    int    result;
+    int result;
     do
     {
         i32 count = m_data.value--;
@@ -151,6 +159,11 @@ Threads::Waitable::WaitResult Semaphore::wait()
         motor_notreached();
         return Abandoned;
     }
+}
+
+u32 Semaphore::flushPauseCount()
+{
+    return 0;
 }
 
 }  // namespace Motor
