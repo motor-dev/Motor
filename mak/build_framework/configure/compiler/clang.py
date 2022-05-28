@@ -67,6 +67,7 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
 
     def set_warning_options(self, conf):
         Configure.ConfigurationContext.GnuCompiler.set_warning_options(self, conf)
+        conf.env.CXXFLAGS_warnall.append('-Wno-deprecated-register')
         if 'AppleClang' in self.NAMES:
             if self.version_number >= (6, 22):
                 conf.env.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
