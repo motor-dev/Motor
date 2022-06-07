@@ -13,9 +13,6 @@ jobs:
           name: Configure
           command: python waf configure
       - run:
-          name: Build Android Nougat GCC
-          command: python waf build:android_nougat_7.1-gcc-4.9.x:debug
-      - run:
           name: Build Android Nougat Clang
           command: python waf build:android_nougat_7.1-clang-5.0.300080:debug
 
