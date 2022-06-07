@@ -21,11 +21,14 @@ def setup_pkgconfig(conf):
 
 
 def setup_system(conf):
-    if conf.env.CXX_NAME != 'sun' and 'windows' not in conf.env.VALID_PLATFORMS and conf.check_lib(
+    if 'windows' not in conf.env.VALID_PLATFORMS and conf.env.CXX_NAME != 'sun' and conf.check_lib(
         ['BulletSoftBody', 'BulletDynamics', 'BulletCollision', 'LinearMath'],
         var='bullet',
         includepath=['=/usr/include/bullet', '=/usr/local/include/bullet'],
-        includes=['LinearMath/btAlignedAllocator.h', 'btBulletDynamicsCommon.h'],
+        includes=[
+            'LinearMath/btAlignedAllocator.h', 'btBulletDynamicsCommon.h',
+            'BulletCollision/BroadphaseCollision/btDbvt.h'
+        ],
         functions=['btAlignedAllocSetCustom']
     ):
         conf.env.BULLET_BINARY = True

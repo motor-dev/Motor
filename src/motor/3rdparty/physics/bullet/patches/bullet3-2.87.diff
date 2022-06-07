@@ -771,3 +771,16 @@ diff -r -u bullet3-2.87.orig/src/LinearMath/btThreads.h bullet3-2.87/src/LinearM
      return true;
  #endif // #if BT_THREADSAFE
  }
+
+diff -r -u bullet3-2.87.old/src/BulletCollision/BroadphaseCollision/btDbvt.h bullet3-2.87/src/BulletCollision/BroadphaseCollision/btDbvt.h
+--- bullet3-2.87.old/src/BulletCollision/BroadphaseCollision/btDbvt.h	2022-06-07 19:34:16.364493148 +0200
++++ bullet3-2.87/src/BulletCollision/BroadphaseCollision/btDbvt.h	2022-06-07 19:31:42.972506436 +0200
+@@ -1073,7 +1073,7 @@
+ 			rayDirectionInverse[0] = rayDir[0] == btScalar(0.0) ? btScalar(BT_LARGE_FLOAT) : btScalar(1.0) / rayDir[0];
+ 			rayDirectionInverse[1] = rayDir[1] == btScalar(0.0) ? btScalar(BT_LARGE_FLOAT) : btScalar(1.0) / rayDir[1];
+ 			rayDirectionInverse[2] = rayDir[2] == btScalar(0.0) ? btScalar(BT_LARGE_FLOAT) : btScalar(1.0) / rayDir[2];
+-			unsigned int signs[3] = { rayDirectionInverse[0] < 0.0, rayDirectionInverse[1] < 0.0, rayDirectionInverse[2] < 0.0};
++			unsigned int signs[3] = { unsigned(rayDirectionInverse[0] < 0.0), unsigned(rayDirectionInverse[1] < 0.0), unsigned(rayDirectionInverse[2] < 0.0)};
+ 
+ 			btScalar lambda_max = rayDir.dot(rayTo-rayFrom);
+ 
