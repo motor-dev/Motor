@@ -6,6 +6,7 @@
 /**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/refcountable.hh>
+#include <motor/minitl/utility.hh>
 
 namespace minitl {
 
@@ -34,7 +35,7 @@ public:
     template < typename U >
     inline ref(const ref< U > other);
     template < typename U >
-    inline ref(const scoped< U > other);
+    inline ref(scoped< U >&& other);
 
     inline ref& operator=(const ref& other);
     template < typename U >
@@ -48,64 +49,11 @@ public:
     inline T&   operator*();
 
     inline void clear();
-
-    static inline ref< T > create(Allocator& allocator)
+    template < typename... Args >
+    static inline ref< T > create(Allocator& allocator, Args&&... args)
     {
         void* mem = allocator.alloc(sizeof(T), motor_alignof(T));
-        return ref< T >(new(mem) T(), allocator);
-    }
-
-    template < class A1 >
-    static inline ref< T > create(Allocator& allocator, const A1& a1)
-    {
-        void* mem = allocator.alloc(sizeof(T), motor_alignof(T));
-        return ref< T >(new(mem) T(a1), allocator);
-    }
-
-    template < class A1, class A2 >
-    static inline ref< T > create(Allocator& allocator, const A1& a1, const A2& a2)
-    {
-        void* mem = allocator.alloc(sizeof(T), motor_alignof(T));
-        return ref< T >(new(mem) T(a1, a2), allocator);
-    }
-
-    template < class A1, class A2, class A3 >
-    static inline ref< T > create(Allocator& allocator, const A1& a1, const A2& a2, const A3& a3)
-    {
-        void* mem = allocator.alloc(sizeof(T), motor_alignof(T));
-        return ref< T >(new(mem) T(a1, a2, a3), allocator);
-    }
-
-    template < class A1, class A2, class A3, class A4 >
-    static inline ref< T > create(Allocator& allocator, const A1& a1, const A2& a2, const A3& a3,
-                                  const A4& a4)
-    {
-        void* mem = allocator.alloc(sizeof(T), motor_alignof(T));
-        return ref< T >(new(mem) T(a1, a2, a3, a4), allocator);
-    }
-
-    template < class A1, class A2, class A3, class A4, class A5 >
-    static inline ref< T > create(Allocator& allocator, const A1& a1, const A2& a2, const A3& a3,
-                                  const A4& a4, const A5& a5)
-    {
-        void* mem = allocator.alloc(sizeof(T), motor_alignof(T));
-        return ref< T >(new(mem) T(a1, a2, a3, a4, a5), allocator);
-    }
-
-    template < class A1, class A2, class A3, class A4, class A5, class A6 >
-    static inline ref< T > create(Allocator& allocator, const A1& a1, const A2& a2, const A3& a3,
-                                  const A4& a4, const A5& a5, const A6& a6)
-    {
-        void* mem = allocator.alloc(sizeof(T), motor_alignof(T));
-        return ref< T >(new(mem) T(a1, a2, a3, a4, a5, a6), allocator);
-    }
-
-    template < class A1, class A2, class A3, class A4, class A5, class A6, class A7 >
-    static inline ref< T > create(Allocator& allocator, const A1& a1, const A2& a2, const A3& a3,
-                                  const A4& a4, const A5& a5, const A6& a6, const A7& a7)
-    {
-        void* mem = allocator.alloc(sizeof(T), motor_alignof(T));
-        return ref< T >(new(mem) T(a1, a2, a3, a4, a5, a6, a7), allocator);
+        return ref< T >(new(mem) T(minitl::forward< Args >(args)...), allocator);
     }
 };
 

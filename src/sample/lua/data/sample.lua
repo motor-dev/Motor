@@ -59,10 +59,29 @@ function help(klass)
     end
 end
 
-p = plugin('sample.python')
-c = p.Motor.TestCases.Class(1.0, 2.0)
-c:doStuff{4.0, v2=8.0, v3=false}
+p = plugin('sample.lua')
 
 help(Motor.Meta.Class.ClassType.metaclass)
-help(Motor.text)
-help(Motor.DiskFolder)
+help(p.LuaTest)
+
+local property = p.LuaTest.properties[1]
+help(property.type.metaclass)
+
+tuple = property.type.metaclass(1, 2, 3, 4)
+print(tuple)
+function print_tuple(tuple)
+    print(tuple.__index)
+    result = '( '
+    for i=1, tuple.__type.metaclass.properties:size(), 1 do
+        local property = tuple.__type.metaclass.properties[i]
+        result = result .. tostring('%s[%s]:%s '):format(name(property.type), property.name, property:get(tuple))
+    end
+    result = result .. ')'
+    print(result)
+end
+
+print_tuple(tuple)
+tuple._0 = 5
+tuple._2 = 7
+print_tuple(tuple)
+

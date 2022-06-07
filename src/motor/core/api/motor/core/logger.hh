@@ -9,6 +9,7 @@
 #include <motor/core/threads/criticalsection.hh>
 #include <motor/minitl/hash_map.hh>
 #include <motor/minitl/tuple.hh>
+#include <motor/minitl/utility.hh>
 #include <motor/minitl/vector.hh>
 
 namespace Motor {
@@ -78,8 +79,11 @@ struct ScopedLogListener
 private:
     minitl::scoped< ILogListener > const m_listener;
 
+    ScopedLogListener(const ScopedLogListener&) = delete;
+
 public:
-    ScopedLogListener(minitl::scoped< ILogListener > listener) : m_listener(listener)
+    ScopedLogListener(minitl::scoped< ILogListener >&& listener)
+        : m_listener(minitl::move(listener))
     {
         Logger::root()->addListener(m_listener);
     }
@@ -87,10 +91,6 @@ public:
     {
         Logger::root()->removeListener(m_listener);
     }
-
-private:
-    ScopedLogListener(const ScopedLogListener&);
-    ScopedLogListener& operator=(const ScopedLogListener&);
 };
 
 #define ALLDEBUG

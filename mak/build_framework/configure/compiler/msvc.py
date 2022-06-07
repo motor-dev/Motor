@@ -124,6 +124,14 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         else:
             conf.find_program('cdb', var='CDB', mandatory=False)
 
+        env.CXXFLAGS_cxx98 = []
+        env.CXXFLAGS_cxx03 = []
+        env.CXXFLAGS_cxx11 = []
+        env.CXXFLAGS_cxx14 = ['/std:c++14']
+        env.CXXFLAGS_cxx17 = ['/std:c++17']
+        env.CXXFLAGS_cxx20 = ['/std:c++20']
+        env.CXXFLAGS_cxx23 = ['/std:c++latest']
+
 
 all_icl_platforms = (
     ('intel64', 'intel64', 'amd64'),
@@ -166,52 +174,6 @@ def gather_vswhere_versions(conf, versions):
         path = str(os.path.abspath(entry['installationPath']))
         if os.path.exists(path) and ('%s %s' % (product, ver)) not in versions:
             conf.gather_msvc_targets(versions, ver, path, product)
-
-
-@conf
-def gather_icl_versions(conf, versions):
-    """
-    Checks ICL compilers
-
-    :param versions: list to modify
-    :type versions: list
-    """
-    version_pattern = re.compile('^...?.?\....?.?')
-    version_pattern_old = re.compile('^..')
-    try:
-        all_versions = Utils.winreg.OpenKey(
-            Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Wow6432node\Intel\Compilers\C++'
-        )
-    except OSError:
-        try:
-            all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Intel\Compilers\C++')
-        except OSError:
-            return
-    index = 0
-    while 1:
-        try:
-            version = Utils.winreg.EnumKey(all_versions, index)
-        except OSError:
-            break
-        index += 1
-        if version_pattern.match(version):
-            version_str = '%s.%s' % (version[0:2], version[2])
-        elif version_pattern_old.match(version):
-            version_str = '%s.%s' % (version[0], version[1])
-        else:
-            continue
-        targets = {}
-        for target, target_arg, arch in all_icl_platforms:
-            try:
-                icl_version = Utils.winreg.OpenKey(all_versions, version + '\\' + target)
-                path, type = Utils.winreg.QueryValueEx(icl_version, 'ProductDir')
-            except OSError:
-                continue
-            else:
-                batch_file = os.path.join(path, 'bin', 'iclvars.bat')
-                if os.path.isfile(batch_file):
-                    targets[target_arg] = msvc.target_compiler(conf, 'intel', arch, version_str, target_arg, batch_file)
-        versions['intel ' + version_str] = targets
 
 
 @conf
@@ -270,10 +232,7 @@ def get_msvc_versions(self):
 	:rtype: dict
 	"""
     dct = Utils.ordered_iter_dict()
-    self.gather_icl_versions(dct)
     self.gather_intel_composer_versions(dct)
-    self.gather_wsdk_versions(dct)
-    self.gather_msvc_versions(dct)
     self.gather_vswhere_versions(dct)
     Logs.debug('msvc: detected versions %r', list(dct.keys()))
     return dct

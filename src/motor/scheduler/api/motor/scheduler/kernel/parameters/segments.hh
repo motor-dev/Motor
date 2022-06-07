@@ -9,7 +9,7 @@
 #include <motor/scheduler/kernel/parameters/parametertype.hh>
 
 #include <motor/kernel/input/segments.hh>
-#include <motor/minitl/typemanipulation.hh>
+#include <motor/minitl/type_traits.hh>
 #include <motor/scheduler/kernel/product.hh>
 
 namespace Motor { namespace KernelScheduler {
@@ -37,7 +37,7 @@ ISegments::ParameterRegistration Segments< T >::s_registration(motor_class< T >(
 template < typename T >
 struct ParamTypeToKernelType< ::Kernel::segments< T > >
 {
-    typedef Segments< typename minitl::remove_const< T >::type > Type;
+    typedef Segments< minitl::remove_const_t< T > > Type;
 };
 
 }}  // namespace Motor::KernelScheduler

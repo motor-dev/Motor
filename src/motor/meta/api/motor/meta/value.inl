@@ -7,7 +7,7 @@
 #include <motor/meta/stdafx.h>
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/typeinfo.hh>
-#include <motor/minitl/typemanipulation.hh>
+#include <motor/minitl/type_traits.hh>
 
 namespace Motor { namespace Meta {
 
@@ -97,11 +97,11 @@ const T Value::as() const
 template < typename T >
 T Value::as()
 {
-    typedef typename minitl::remove_reference< T >::type REALTYPE;
-    Type                                                 ti = motor_type< T >();
-    ref< minitl::refcountable >                          rptr;
-    weak< minitl::refcountable >                         wptr;
-    minitl::refcountable*                                obj;
+    typedef minitl::remove_reference_t< T > REALTYPE;
+    Type                                    ti = motor_type< T >();
+    ref< minitl::refcountable >             rptr;
+    weak< minitl::refcountable >            wptr;
+    minitl::refcountable*                   obj;
     return *(REALTYPE*)unpackAs(ti, rptr, wptr, obj);
 }
 
