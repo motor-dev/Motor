@@ -5,7 +5,6 @@
 #define MOTOR_SCHEDULER_TASL_TASK_INL_
 /**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
-#include <motor/minitl/typemanipulation.hh>
 #include <motor/scheduler/scheduler.hh>
 
 namespace Motor { namespace Task {

@@ -115,9 +115,18 @@ extern "C" int valueGet(lua_State* state)
     {
         Context::checkArg(state, 2, LUA_TSTRING);
 
-        const char* name = lua_tostring(state, -1);
-        Meta::Value v    = (*userdata)[name];
-        return Context::push(state, v);
+        istring              name = istring(lua_tostring(state, -1));
+        static const istring type = istring("__type");
+        if(name == type)
+        {
+            Meta::Value v = Meta::Value(userdata->type());
+            return Context::push(state, v);
+        }
+        else
+        {
+            Meta::Value v = (*userdata)[name];
+            return Context::push(state, v);
+        }
     }
 }
 
@@ -209,6 +218,14 @@ extern "C" int valueCall(lua_State* state)
         return error(state, minitl::format< 4096u >("%s.?call is of type &s; expected a Method")
                                 | userdata->type().name() | value.type().name());
     }
+}
+
+extern "C" int valueType(lua_State* state)
+{
+    Context::checkArg(state, 1, "Motor.Object");
+    Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, 1);
+    Meta::Value  v        = Meta::Value(userdata->type());
+    return Context::push(state, v);
 }
 
 const luaL_Reg s_valueMetaTable[]

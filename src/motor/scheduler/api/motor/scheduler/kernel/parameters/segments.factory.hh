@@ -25,15 +25,22 @@ namespace Motor { namespace Meta {
 template < typename T >
 struct ClassID< KernelScheduler::Segments< T > >
 {
-    static Meta::ObjectInfo s_productClass;
-
     static MOTOR_EXPORT raw< const Meta::Class > klass()
     {
+        static Meta::ObjectInfo s_productClass = {
+            {0},
+            {0},
+            KernelScheduler::IParameter::getProductTypePropertyName(),
+            Meta::Value(
+                motor_class< KernelScheduler::Product<
+                    KernelScheduler::Segments< typename minitl::remove_const< T >::type > > >())};
+
         static Meta::ObjectInfo s_parameterClassProperty
             = {{&s_productClass},
                {0},
                "ParameterClass",
                Meta::Value(motor_class< typename minitl::remove_const< T >::type >())};
+
         static const Meta::Class s_class = {name(),
                                             u32(sizeof(KernelScheduler::Segments< T >)),
                                             0,
@@ -57,14 +64,6 @@ struct ClassID< KernelScheduler::Segments< T > >
         return s_name;
     }
 };
-
-template < typename T >
-Meta::ObjectInfo ClassID< KernelScheduler::Segments< T > >::s_productClass = {
-    {0},
-    {0},
-    KernelScheduler::IParameter::getProductTypePropertyName(),
-    Meta::Value(motor_class< KernelScheduler::Product<
-                    KernelScheduler::Segments< typename minitl::remove_const< T >::type > > >())};
 
 }}  // namespace Motor::Meta
 

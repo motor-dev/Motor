@@ -32,21 +32,21 @@ scoped< T >::~scoped()
 }
 
 template < typename T >
-scoped< T >::scoped(const scoped& other) : m_ptr(other.m_ptr)
+scoped< T >::scoped(scoped&& other) : m_ptr(other.m_ptr)
 {
     other.m_ptr = 0;
 }
 
 template < typename T >
 template < typename U >
-scoped< T >::scoped(const scoped< U >& other) : m_ptr(other.m_ptr)
+scoped< T >::scoped(scoped< U >&& other) : m_ptr(other.m_ptr)
 {
     other.m_ptr = 0;
 }
 
 template < typename T >
 template < typename U >
-void scoped< T >::reset(const scoped< U >& other)
+void scoped< T >::reset(scoped< U >&& other)
 {
     if(m_ptr != other.m_ptr)
     {

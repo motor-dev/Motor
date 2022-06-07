@@ -300,13 +300,6 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
             extra_flags_cxx = ['-Wextra', '-Wno-invalid-offsetof']
         else:
             extra_flags_c = extra_flags_cxx = []
-        v.CXXFLAGS_cxx98 = ['-std=c++98']
-        v.CXXFLAGS_cxx03 = ['-std=c++03']
-        v.CXXFLAGS_cxx11 = ['-std=c++11']
-        v.CXXFLAGS_cxx14 = ['-std=c++14']
-        v.CXXFLAGS_cxx17 = ['-std=c++17']
-        v.CXXFLAGS_cxx20 = ['-std=c++20']
-        v.CXXFLAGS_cxx23 = ['-std=c++23']
         v.CFLAGS_warnall = ['-std=c99', '-Wall'] + extra_flags_c + [
             '-pedantic', '-Winline', '-Werror', '-Wstrict-aliasing'
         ] + v.CFLAGS_warnall
@@ -370,6 +363,14 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         env.COMPILER_NAME = self.__class__.__name__.lower()
         env.COMPILER_TARGET = self.arch + '-' + self.platform
         self.populate_useful_variables(conf, env.SYSROOT)
+
+        env.CXXFLAGS_cxx98 = ['-std=c++98']
+        env.CXXFLAGS_cxx03 = ['-std=c++03']
+        env.CXXFLAGS_cxx11 = ['-std=c++11']
+        env.CXXFLAGS_cxx14 = ['-std=c++14']
+        env.CXXFLAGS_cxx17 = ['-std=c++17']
+        env.CXXFLAGS_cxx20 = ['-std=c++20']
+        env.CXXFLAGS_cxx23 = ['-std=c++23']
 
     def populate_useful_variables(self, conf, sysroot):
         env = conf.env

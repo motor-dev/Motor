@@ -15,7 +15,7 @@ namespace minitl {
 template < typename T >
 void weak< T >::swap(weak& other)
 {
-    pointer tmp = other.m_ptr;
+    T* tmp      = other.m_ptr;
     other.m_ptr = m_ptr;
     m_ptr       = tmp;
 }

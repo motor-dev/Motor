@@ -6,7 +6,7 @@
 /**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/meta/typeinfo.meta.hh>
-#include <motor/minitl/typemanipulation.hh>
+#include <motor/minitl/type_traits.hh>
 
 namespace Motor { namespace Meta {
 
@@ -84,8 +84,7 @@ struct TypeID< ref< T > >
     static inline Type type()
     {
         return Type::makeType(TypeID< T >::type().metaclass, Type::RefPtr,
-                              minitl::is_const< T >::Value ? Type::Const : Type::Mutable,
-                              Type::Mutable);
+                              minitl::is_const< T >() ? Type::Const : Type::Mutable, Type::Mutable);
     }
     static inline istring name()
     {
@@ -99,8 +98,7 @@ struct TypeID< weak< T > >
     static inline Type type()
     {
         return Type::makeType(TypeID< T >::type().metaclass, Type::WeakPtr,
-                              minitl::is_const< T >::Value ? Type::Const : Type::Mutable,
-                              Type::Mutable);
+                              minitl::is_const< T >() ? Type::Const : Type::Mutable, Type::Mutable);
     }
     static inline istring name()
     {
@@ -114,8 +112,7 @@ struct TypeID< raw< T > >
     static inline Type type()
     {
         return Type::makeType(TypeID< T >::type().metaclass, Type::RawPtr,
-                              minitl::is_const< T >::Value ? Type::Const : Type::Mutable,
-                              Type::Mutable);
+                              minitl::is_const< T >() ? Type::Const : Type::Mutable, Type::Mutable);
     }
     static inline istring name()
     {
@@ -129,8 +126,7 @@ struct TypeID< T* >
     static inline Type type()
     {
         return Type::makeType(TypeID< T >::type().metaclass, Type::RawPtr,
-                              minitl::is_const< T >::Value ? Type::Const : Type::Mutable,
-                              Type::Mutable);
+                              minitl::is_const< T >() ? Type::Const : Type::Mutable, Type::Mutable);
     }
     static inline istring name()
     {
@@ -144,8 +140,7 @@ struct TypeID< ref< T > const >
     static inline Type type()
     {
         return Type::makeType(TypeID< T >::type().metaclass, Type::RefPtr,
-                              minitl::is_const< T >::Value ? Type::Const : Type::Mutable,
-                              Type::Const);
+                              minitl::is_const< T >() ? Type::Const : Type::Mutable, Type::Const);
     }
     static inline istring name()
     {
@@ -159,8 +154,7 @@ struct TypeID< weak< T > const >
     static inline Type type()
     {
         return Type::makeType(TypeID< T >::type().metaclass, Type::WeakPtr,
-                              minitl::is_const< T >::Value ? Type::Const : Type::Mutable,
-                              Type::Const);
+                              minitl::is_const< T >() ? Type::Const : Type::Mutable, Type::Const);
     }
     static inline istring name()
     {
@@ -174,8 +168,7 @@ struct TypeID< raw< T > const >
     static inline Type type()
     {
         return Type::makeType(TypeID< T >::type().metaclass, Type::RawPtr,
-                              minitl::is_const< T >::Value ? Type::Const : Type::Mutable,
-                              Type::Const);
+                              minitl::is_const< T >() ? Type::Const : Type::Mutable, Type::Const);
     }
     static inline istring name()
     {
@@ -189,8 +182,7 @@ struct TypeID< T* const >
     static inline Type type()
     {
         return Type::makeType(TypeID< T >::type().metaclass, Type::RawPtr,
-                              minitl::is_const< T >::Value ? Type::Const : Type::Mutable,
-                              Type::Const);
+                              minitl::is_const< T >() ? Type::Const : Type::Mutable, Type::Const);
     }
     static inline istring name()
     {

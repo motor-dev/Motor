@@ -243,6 +243,14 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
         v.SHLIB_MARKER = '-Bdynamic'
         v.STLIB_MARKER = '-Bstatic'
 
+        v.CXXFLAGS_cxx98 = ['-std=c++03']
+        v.CXXFLAGS_cxx03 = ['-std=c++03']
+        v.CXXFLAGS_cxx11 = ['-std=c++11']
+        v.CXXFLAGS_cxx14 = ['-std=c++14']
+        v.CXXFLAGS_cxx17 = ['-std=c++17']
+        v.CXXFLAGS_cxx20 = ['-std=c++20']
+        v.CXXFLAGS_cxx23 = ['-std=c++23']
+
         v.TARGETS = self.targets
 
     def populate_useful_variables(self, conf, sysroot):

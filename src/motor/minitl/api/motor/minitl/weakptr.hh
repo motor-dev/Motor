@@ -21,20 +21,7 @@ class weak
     friend weak< U > motor_const_cast(weak< V > v);
 
 private:
-    template < typename OBJECT >
-    struct ptr
-    {
-        typedef minitl::pointer* pointer;
-    };
-    template < typename OBJECT >
-    struct ptr< const OBJECT >
-    {
-        typedef const minitl::pointer* pointer;
-    };
-    typedef typename ptr< T >::pointer pointer;
-
-private:
-    pointer m_ptr;
+    T* m_ptr;
 
 private:
     inline void swap(weak& other);
