@@ -28,15 +28,6 @@ jobs:
           name: Configure
           command: python waf configure
       - run:
-          name: Build Windows MSVC 14.0 x64
-          command: python waf build:windows_amd64-msvc_x64-14.0:debug --tests
-      - run:
-          name: Build Windows MSVC 14.0 x86
-          command: python waf build:windows_x86-msvc_amd64_x86-14.0:debug
-      - run:
-          name: Build Windows MSVC 14.0 ARM
-          command: python waf build:windows_armv7a-msvc_amd64_arm-14.0:debug
-      - run:
           name: Build Windows MSVC 16.11 x64
           command: python waf build:windows_amd64-community_x64-16.11:debug --tests
       - run:
