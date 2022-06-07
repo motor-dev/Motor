@@ -48,5 +48,7 @@ public:
 
 }}  // namespace Motor::KernelScheduler
 
+#include <motor/scheduler/kernel/iproduct.meta.hh>
+
 /**************************************************************************************************/
 #endif
