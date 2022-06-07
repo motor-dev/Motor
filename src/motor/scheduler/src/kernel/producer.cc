@@ -4,6 +4,7 @@
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/kernel/producer.meta.hh>
 
+#include <motor/scheduler/kernel/iproduct.meta.hh>
 #include <motor/scheduler/kernel/producerloader.hh>
 
 namespace Motor { namespace KernelScheduler {
