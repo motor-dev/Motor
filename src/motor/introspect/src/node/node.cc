@@ -5,6 +5,21 @@
 #include <motor/introspect/node/node.hh>
 
 #include <motor/introspect/dbcontext.hh>
+#include <motor/introspect/node/array.hh>
+#include <motor/introspect/node/bool.hh>
+#include <motor/introspect/node/filename.hh>
+#include <motor/introspect/node/float.hh>
+#include <motor/introspect/node/float2.hh>
+#include <motor/introspect/node/float3.hh>
+#include <motor/introspect/node/float4.hh>
+#include <motor/introspect/node/int2.hh>
+#include <motor/introspect/node/int3.hh>
+#include <motor/introspect/node/int4.hh>
+#include <motor/introspect/node/integer.hh>
+#include <motor/introspect/node/object.hh>
+#include <motor/introspect/node/parameter.hh>
+#include <motor/introspect/node/reference.hh>
+#include <motor/introspect/node/string.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 
