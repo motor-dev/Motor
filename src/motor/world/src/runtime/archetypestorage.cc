@@ -10,6 +10,7 @@
 #include <motor/introspect/node/array.hh>
 #include <motor/introspect/node/object.hh>
 #include <motor/introspect/node/parameter.hh>
+#include <motor/introspect/node/reference.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
 #include <motor/meta/typeinfo.hh>
