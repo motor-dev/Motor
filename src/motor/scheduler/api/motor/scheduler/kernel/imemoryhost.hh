@@ -26,5 +26,7 @@ protected:
 
 }}  // namespace Motor::KernelScheduler
 
+#include <motor/scheduler/kernel/imemorybuffer.hh>
+
 /**************************************************************************************************/
 #endif
