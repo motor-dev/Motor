@@ -5,10 +5,10 @@
 #define MOTOR_DEBUG_RUNTIME_DWARF_HH_
 /**************************************************************************************************/
 #include <motor/plugin.debug.runtime/stdafx.h>
-#include <elf.hh>
 #include <motor/minitl/hash.hh>
-#include <motor/minitl/hash_map.hh>
+#include <motor/minitl/hashmap.hh>
 #include <motor/plugin.debug.runtime/symbols.hh>
+#include <elf.hh>
 
 namespace Motor { namespace Runtime {
 

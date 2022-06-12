@@ -74,20 +74,17 @@ public:
         ::operator delete(memory, where);
     }
 
-private:
-    void  operator&() const;
-    void* operator new(size_t size)
-    {
-        return ::operator new(size);
-    }
+private:  // entity behavior
+    pointer(const pointer& other)            = delete;
+    pointer& operator=(const pointer& other) = delete;
+    void     operator&() const               = delete;
+    void*    operator new(size_t size)       = delete;
+
+private:  // friend scopedptr/refptr
     void* operator new(size_t size, void* where)
     {
         return ::operator new(size, where);
     }
-
-private:  // entity behavior
-    pointer(const pointer& other);
-    pointer& operator=(const pointer& other);
 
 protected:
     inline void checked_delete() const
@@ -108,24 +105,6 @@ protected:
     }
 #endif
 };
-
-template < typename T >
-struct RefWrapper
-{
-    T& m_t;
-    RefWrapper(T& t) : m_t(t)
-    {
-    }
-    operator T&() const
-    {
-        return m_t;
-    }
-};
-template < typename T >
-inline RefWrapper< T > byref(T& t)
-{
-    return RefWrapper< T >(t);
-}
 
 }  // namespace minitl
 

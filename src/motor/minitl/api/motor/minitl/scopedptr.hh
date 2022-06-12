@@ -22,12 +22,12 @@ private:
 
 private:
     scoped(T* value, Allocator& deleter);
-    scoped(const scoped& other);
+    scoped(const scoped& other) = delete;
     template < typename U >
-    scoped& operator=(const scoped< U >& other);
-    scoped& operator=(const scoped& other);
+    inline scoped(const scoped< U >& other) = delete;
     template < typename U >
-    inline scoped(const scoped< U >& other);
+    scoped& operator=(const scoped< U >& other) = delete;
+    scoped& operator=(const scoped& other)      = delete;
 
 public:
     inline scoped();

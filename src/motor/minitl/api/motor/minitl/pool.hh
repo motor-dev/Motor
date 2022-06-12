@@ -8,6 +8,7 @@
 #include <motor/kernel/interlocked.hh>
 #include <motor/kernel/interlocked_stack.hh>
 #include <motor/minitl/allocator.hh>
+#include <motor/minitl/swap.hh>
 
 namespace minitl {
 
@@ -28,19 +29,25 @@ private:
 
 public:
     pool(Allocator& allocator, u64 capacity, u64 alignment = motor_alignof(T));
-    ~pool();
+    pool(pool&& other)            = default;
+    pool& operator=(pool&& other) = default;
+    ~pool()                       = default;
 
-    T* allocate();
-    template < typename T1 >
-    T* allocate(const T1& t1);
-    template < typename T1, typename T2 >
-    T* allocate(const T1& t1, const T2& t2);
-    template < typename T1, typename T2, typename T3 >
-    T*   allocate(const T1& t1, const T2& t2, const T3& t3);
+    pool(const pool& other)            = delete;
+    pool& operator=(const pool& other) = delete;
+
+    template < typename... Args >
+    T*   allocate(Args&&... args);
     void release(T* t);
 
     void swap(pool< T >& other);
 };
+
+template < typename T >
+void swap(pool< T >& a, pool< T >& b)
+{
+    a.swap(b);
+}
 
 }  // namespace minitl
 

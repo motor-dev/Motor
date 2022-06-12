@@ -26,9 +26,8 @@
 #include <motor/minitl/features.hh>
 
 #define MOTOR_NOCOPY(x)                                                                            \
-private:                                                                                           \
-    x(const x&);                                                                                   \
-    x& operator=(const x&)
+    x(const x&)            = delete;                                                               \
+    x& operator=(const x&) = delete
 
 namespace minitl {
 

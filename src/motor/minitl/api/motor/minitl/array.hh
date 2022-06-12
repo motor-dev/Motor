@@ -6,8 +6,9 @@
 /**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/kernel/interlocked.hh>
+#include <motor/minitl/algorithm.hh>
 #include <motor/minitl/allocator.hh>
-#include <motor/minitl/iterator.hh>
+#include <motor/minitl/swap.hh>
 
 namespace minitl {
 
@@ -29,6 +30,7 @@ public:
     template < typename ITERATOR >
     inline array(Allocator& allocator, ITERATOR begin, ITERATOR end);
     inline array(const array& other);
+    inline array(array&& other);
     inline ~array();
 
     inline void swap(array& other);
@@ -48,6 +50,12 @@ public:
     T&       last();
     const T& last() const;
 };
+
+template < typename T >
+void swap(array< T >& a, array< T >& b)
+{
+    a.swap(b);
+}
 
 }  // namespace minitl
 

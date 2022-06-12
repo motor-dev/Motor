@@ -24,6 +24,8 @@ private:
 protected:
     item();
     ~item();
+    item(item&& other);
+    item& operator=(item&& other);
     item(const item& other);
     item& operator=(const item& other);
 
@@ -42,17 +44,30 @@ intrusive_list< T, INDEX >::item::item() : m_next(this)
 }
 
 template < typename T, int INDEX >
-intrusive_list< T, INDEX >::item::item(const item& /*other*/) : m_next(this)
-                                                              , m_previous(this)
+intrusive_list< T, INDEX >::item::item(item&& other) : m_next(this)
+                                                     , m_previous(this)
 {
+    motor_forceuse(other);
+}
+
+template < typename T, int INDEX >
+intrusive_list< T, INDEX >::item::item(const item& other) : m_next(this)
+                                                          , m_previous(this)
+{
+    motor_forceuse(other);
+}
+
+template < typename T, int INDEX >
+typename intrusive_list< T, INDEX >::item& intrusive_list< T, INDEX >::item::operator=(item&& other)
+{
+    motor_forceuse(other);
 }
 
 template < typename T, int INDEX >
 typename intrusive_list< T, INDEX >::item&
-intrusive_list< T, INDEX >::item::operator=(const item& /*other*/)
+intrusive_list< T, INDEX >::item::operator=(const item& other)
 {
-    /* No unhook! */
-    return *this;
+    motor_forceuse(other);
 }
 
 template < typename T, int INDEX >
@@ -226,7 +241,8 @@ struct intrusive_list< T, INDEX >::iterator_policy
     typedef typename intrusive_list< T, INDEX >::item const*           item_pointer;
     typedef typename intrusive_list< T, INDEX >::iterator_policy       mutable_policy;
     typedef typename intrusive_list< T, INDEX >::const_iterator_policy const_policy;
-    static item_pointer                                                next(item_pointer i)
+
+    static item_pointer next(item_pointer i)
     {
         return i->m_next;
     }
@@ -248,7 +264,8 @@ struct intrusive_list< T, INDEX >::const_iterator_policy
     typedef typename intrusive_list< T, INDEX >::item const*           item_pointer;
     typedef typename intrusive_list< T, INDEX >::iterator_policy       mutable_policy;
     typedef typename intrusive_list< T, INDEX >::const_iterator_policy const_policy;
-    static item_pointer                                                next(item_pointer i)
+
+    static item_pointer next(item_pointer i)
     {
         return i->m_next;
     }
@@ -270,7 +287,8 @@ struct intrusive_list< T, INDEX >::reverse_iterator_policy
     typedef typename intrusive_list< T, INDEX >::item const*                   item_pointer;
     typedef typename intrusive_list< T, INDEX >::reverse_iterator_policy       mutable_policy;
     typedef typename intrusive_list< T, INDEX >::const_reverse_iterator_policy const_policy;
-    static item_pointer                                                        next(item_pointer i)
+
+    static item_pointer next(item_pointer i)
     {
         return i->m_previous;
     }
@@ -292,7 +310,8 @@ struct intrusive_list< T, INDEX >::const_reverse_iterator_policy
     typedef typename intrusive_list< T, INDEX >::item const*                   item_pointer;
     typedef typename intrusive_list< T, INDEX >::reverse_iterator_policy       mutable_policy;
     typedef typename intrusive_list< T, INDEX >::const_reverse_iterator_policy const_policy;
-    static item_pointer                                                        next(item_pointer i)
+
+    static item_pointer next(item_pointer i)
     {
         return i->m_previous;
     }
@@ -311,6 +330,29 @@ template < typename T, int INDEX >
 intrusive_list< T, INDEX >::~intrusive_list()
 {
     clear();
+}
+
+template < typename T, int INDEX >
+intrusive_list< T, INDEX >::intrusive_list(intrusive_list&& other) : m_root()
+{
+    other.m_root.m_next->m_previous = &m_root;
+    other.m_root.m_previous->m_next = &m_root;
+    m_root.m_next                   = other.m_root.m_next;
+    m_root.m_previous               = other.m_root.m_previous;
+    other.m_root.m_next             = &other.m_root;
+    other.m_root.m_previous         = &other.m_root;
+}
+
+template < typename T, int INDEX >
+intrusive_list< T, INDEX >& intrusive_list< T, INDEX >::operator=(intrusive_list&& other)
+{
+    other.m_root.m_next->m_previous = &m_root;
+    other.m_root.m_previous->m_next = &m_root;
+    m_root.m_next                   = other.m_root.m_next;
+    m_root.m_previous               = other.m_root.m_previous;
+    other.m_root.m_next             = &other.m_root;
+    other.m_root.m_previous         = &other.m_root;
+    return *this;
 }
 
 template < typename T, int INDEX >

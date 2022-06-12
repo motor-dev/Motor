@@ -28,13 +28,30 @@ struct tuple_field
 {
     T m_field;
 
-    constexpr T& get()
+    constexpr explicit tuple_field(const T& t) : m_field(t)
+    {
+    }
+    constexpr explicit tuple_field(T&& t) : m_field(move(t))
+    {
+    }
+    constexpr    tuple_field()                         = default;
+    constexpr    tuple_field(const tuple_field& other) = default;
+    constexpr    tuple_field(tuple_field&& other)      = default;
+    tuple_field& operator=(const tuple_field& other)   = default;
+    tuple_field& operator=(tuple_field&& other)        = default;
+    ~tuple_field()                                     = default;
+
+    constexpr T& get() &
     {
         return m_field;
     }
-    constexpr const T& get() const
+    constexpr const T& get() const&
     {
         return m_field;
+    }
+    constexpr T&& get() &&
+    {
+        return move(m_field);
     }
 };
 
@@ -43,13 +60,30 @@ struct tuple_field< 0, T >
 {
     T first;
 
-    constexpr T& get()
+    constexpr explicit tuple_field(const T& t) : first(t)
+    {
+    }
+    constexpr explicit tuple_field(T&& t) : first(move(t))
+    {
+    }
+    constexpr    tuple_field()                         = default;
+    constexpr    tuple_field(const tuple_field& other) = default;
+    constexpr    tuple_field(tuple_field&& other)      = default;
+    tuple_field& operator=(const tuple_field& other)   = default;
+    tuple_field& operator=(tuple_field&& other)        = default;
+    ~tuple_field()                                     = default;
+
+    constexpr T& get() &
     {
         return first;
     }
-    constexpr const T& get() const
+    constexpr const T& get() const&
     {
         return first;
+    }
+    T&& get() &&
+    {
+        return move(first);
     }
 };
 
@@ -58,13 +92,30 @@ struct tuple_field< 1, T >
 {
     T second;
 
-    constexpr T& get()
+    constexpr explicit tuple_field(const T& t) : second(t)
+    {
+    }
+    constexpr explicit tuple_field(T&& t) : second(move(t))
+    {
+    }
+    constexpr    tuple_field()                         = default;
+    constexpr    tuple_field(const tuple_field& other) = default;
+    constexpr    tuple_field(tuple_field&& other)      = default;
+    tuple_field& operator=(const tuple_field& other)   = default;
+    tuple_field& operator=(tuple_field&& other)        = default;
+    ~tuple_field()                                     = default;
+
+    constexpr T& get() &
     {
         return second;
     }
-    constexpr const T& get() const
+    constexpr const T& get() const&
     {
         return second;
+    }
+    constexpr T&& get() &&
+    {
+        return move(second);
     }
 };
 
@@ -73,13 +124,30 @@ struct tuple_field< 2, T >
 {
     T third;
 
-    constexpr T& get()
+    constexpr explicit tuple_field(const T& t) : third(t)
+    {
+    }
+    constexpr explicit tuple_field(T&& t) : third(move(t))
+    {
+    }
+    constexpr    tuple_field()                         = default;
+    constexpr    tuple_field(const tuple_field& other) = default;
+    constexpr    tuple_field(tuple_field&& other)      = default;
+    tuple_field& operator=(const tuple_field& other)   = default;
+    tuple_field& operator=(tuple_field&& other)        = default;
+    ~tuple_field()                                     = default;
+
+    constexpr T& get() &
     {
         return third;
     }
-    constexpr const T& get() const
+    constexpr const T& get() const&
     {
         return third;
+    }
+    constexpr T&& get() &&
+    {
+        return move(third);
     }
 };
 
@@ -92,25 +160,37 @@ struct tuple_helper
     constexpr tuple_helper(const tuple_helper&) = default;
     constexpr tuple_helper(tuple_helper&&)      = default;
     constexpr tuple_helper(const T& t, const TAIL&... tail)
-        : tuple_field< INDEX, T >({t})
+        : tuple_field< INDEX, T >(t)
         , tuple_helper< INDEX + 1, TAIL... >(tail...)
     {
     }
     template < typename T1, typename... TAIL1 >
     constexpr tuple_helper(const T1& t, const TAIL1&... tail)
-        : tuple_field< INDEX, T >({t})
+        : tuple_field< INDEX, T >(t)
         , tuple_helper< INDEX + 1, TAIL... >(tail...)
     {
     }
     template < typename T1, typename... TAIL1 >
+    constexpr tuple_helper(T1&& t, TAIL1&&... tail)
+        : tuple_field< INDEX, T >(move(t))
+        , tuple_helper< INDEX + 1, TAIL... >(move(tail)...)
+    {
+    }
+    template < typename T1, typename... TAIL1 >
     constexpr tuple_helper(const tuple_helper< INDEX, T1, TAIL1... >& tuple)
-        : tuple_field< INDEX, T >({tuple.tuple_field< INDEX, T1 >::get()})
+        : tuple_field< INDEX, T >(tuple.tuple_field< INDEX, T1 >::get())
+        , tuple_helper< INDEX + 1, TAIL... >((const tuple_helper< INDEX + 1, TAIL1... >&)tuple)
+    {
+    }
+    template < typename T1, typename... TAIL1 >
+    constexpr tuple_helper(tuple_helper< INDEX, T1, TAIL1... >&& tuple)
+        : tuple_field< INDEX, T >(tuple.tuple_field< INDEX, T1 >::get())
         , tuple_helper< INDEX + 1, TAIL... >((const tuple_helper< INDEX + 1, TAIL1... >&)tuple)
     {
     }
 
     tuple_helper& operator=(const tuple_helper& other) = default;
-    tuple_helper& operator=(tuple_helper&& other) = default;
+    tuple_helper& operator=(tuple_helper&& other)      = default;
 };
 
 template < int INDEX, typename T >
@@ -119,21 +199,30 @@ struct tuple_helper< INDEX, T > : public tuple_field< INDEX, T >
     constexpr tuple_helper()                    = default;
     constexpr tuple_helper(const tuple_helper&) = default;
     constexpr tuple_helper(tuple_helper&&)      = default;
-    constexpr tuple_helper(const T& t) : tuple_field< INDEX, T >({t})
+    constexpr tuple_helper(const T& t) : tuple_field< INDEX, T >(t)
     {
     }
     template < typename T1 >
-    constexpr tuple_helper(const T1& t) : tuple_field< INDEX, T >({t})
+    constexpr tuple_helper(const T1& t) : tuple_field< INDEX, T >(t)
+    {
+    }
+    template < typename T1 >
+    constexpr tuple_helper(T1&& t) : tuple_field< INDEX, T >(move(t))
     {
     }
     template < typename T1 >
     constexpr tuple_helper(const tuple_helper< INDEX, T1 >& tuple)
-        : tuple_field< INDEX, T >({tuple.tuple_field< INDEX, T1 >::get()})
+        : tuple_field< INDEX, T >(tuple.tuple_field< INDEX, T1 >::get())
+    {
+    }
+    template < typename T1 >
+    constexpr tuple_helper(tuple_helper< INDEX, T1 >&& tuple)
+        : tuple_field< INDEX, T >(move(tuple).tuple_field< INDEX, T1 >::get())
     {
     }
 
     tuple_helper& operator=(const tuple_helper& other) = default;
-    tuple_helper& operator=(tuple_helper&& other) = default;
+    tuple_helper& operator=(tuple_helper&& other)      = default;
 };
 
 template < int GET, int INDEX, typename T, typename... TAIL,
@@ -185,14 +274,27 @@ const auto& get(const tuple< T... >& t)
 }
 
 template < typename... T >
-tuple< T... >::tuple(const T&... args) : details::tuple_helper< 0, T... >(args...)
+constexpr tuple< T... >::tuple(const T&... args) : details::tuple_helper< 0, T... >(args...)
+{
+}
+
+template < typename... T >
+template < typename... Args >
+constexpr tuple< T... >::tuple(Args&&... args) : details::tuple_helper< 0, T... >(args...)
 {
 }
 
 template < typename... T >
 template < typename... T1 >
-tuple< T... >::tuple(const tuple< T1... >& other)
+constexpr tuple< T... >::tuple(const tuple< T1... >& other)
     : details::tuple_helper< 0, T... >((const details::tuple_helper< 0, T1... >&)other)
+{
+}
+
+template < typename... T >
+template < typename... T1 >
+constexpr tuple< T... >::tuple(tuple< T1... >&& other)
+    : details::tuple_helper< 0, T... >((details::tuple_helper< 0, T1... > &&) other)
 {
 }
 

@@ -17,48 +17,13 @@ pool< T >::pool(Allocator& allocator, u64 capacity, u64 alignment)
 }
 
 template < typename T >
-pool< T >::~pool()
-{
-}
-
-template < typename T >
-T* pool< T >::allocate()
+template < typename... Args >
+T* pool< T >::allocate(Args&&... args)
 {
     void* result = (void*)m_items.pop();
     motor_assert(result >= m_pool && result < m_end,
                  "allocated a node that is outside the node range");
-    new(result) T;
-    return (T*)result;
-}
-
-template < typename T >
-template < typename T1 >
-T* pool< T >::allocate(const T1& t1)
-{
-    void* result = (void*)m_items.pop();
-    motor_assert(result >= m_pool && result < m_end,
-                 "allocated a node that is outside the node range");
-    return new(result) T(t1);
-}
-
-template < typename T >
-template < typename T1, typename T2 >
-T* pool< T >::allocate(const T1& t1, const T2& t2)
-{
-    void* result = (void*)m_items.pop();
-    motor_assert(result >= m_pool && result < m_end,
-                 "allocated a node that is outside the node range");
-    return new(result) T(t1, t2);
-}
-
-template < typename T >
-template < typename T1, typename T2, typename T3 >
-T* pool< T >::allocate(const T1& t1, const T2& t2, const T3& t3)
-{
-    void* result = (void*)m_items.pop();
-    motor_assert(result >= m_pool && result < m_end,
-                 "allocated a node that is outside the node range");
-    return new(result) T(t1, t2, t3);
+    return new(result) T(forward< Args >(args)...);
 }
 
 template < typename T >

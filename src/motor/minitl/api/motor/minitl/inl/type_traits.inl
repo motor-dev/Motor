@@ -171,6 +171,12 @@ private:
     T* m_ptr;
 };
 
+template < class T >
+reference_wrapper< T > byref(T& t) noexcept
+{
+    return reference_wrapper< T >(move(t));
+}
+
 }  // namespace minitl
 
 /**************************************************************************************************/

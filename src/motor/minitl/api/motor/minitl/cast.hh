@@ -36,7 +36,7 @@ inline U motor_checked_numcast(T value);
 
 }  // namespace minitl
 
-#include <motor/minitl/cast.inl>
+#include <motor/minitl/inl/cast.inl>
 
 /**************************************************************************************************/
 #endif

@@ -17,9 +17,6 @@ struct less
     }
 };
 
-template < typename T >
-void swap(T& a, T& b);
-
 template < typename ITERATOR, typename FUNCTOR >
 void for_each(ITERATOR first, ITERATOR last, FUNCTOR f);
 

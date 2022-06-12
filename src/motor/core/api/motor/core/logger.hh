@@ -7,7 +7,7 @@
 #include <motor/core/stdafx.h>
 #include <motor/core/string/istring.hh>
 #include <motor/core/threads/criticalsection.hh>
-#include <motor/minitl/hash_map.hh>
+#include <motor/minitl/hashmap.hh>
 #include <motor/minitl/tuple.hh>
 #include <motor/minitl/utility.hh>
 #include <motor/minitl/vector.hh>

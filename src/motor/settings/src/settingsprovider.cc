@@ -6,6 +6,8 @@
 #include <motor/settings/settings.factory.hh>
 #include <motor/settings/settingsprovider.hh>
 
+#include <motor/minitl/type_traits.hh>
+
 namespace Motor { namespace Settings {
 
 void SettingsProvider::addSetting(minitl::hashmap< istring, SettingsList >& container,
@@ -23,7 +25,8 @@ void SettingsProvider::addSetting(minitl::hashmap< istring, SettingsList >& cont
         }
     }
     where->second.push_back(minitl::make_tuple(
-        name, ref< Meta::AST::Namespace >::create(Arena::general(), byref(Arena::general())),
+        name,
+        ref< Meta::AST::Namespace >::create(Arena::general(), minitl::byref(Arena::general())),
         value));
 }
 
@@ -65,7 +68,7 @@ SettingsProvider::SettingsRegistration::getSettingsList()
 void SettingsProvider::apply(SettingsBase& settings) const
 {
     Meta::Type  type          = Meta::Type::makeType(settings.m_settingsClass, Meta::Type::Value,
-                                           Meta::Type::Mutable, Meta::Type::Mutable);
+                                                     Meta::Type::Mutable, Meta::Type::Mutable);
     Meta::Value settingsValue = Meta::Value(type, &settings);
     for(SettingsCategoryMap::const_iterator it = m_settings.begin(); it != m_settings.end(); ++it)
     {
