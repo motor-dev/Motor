@@ -153,7 +153,9 @@ class GLWindow::Context : public minitl::refcountable
 private:
     ::Display* m_display;
     GLXContext m_glContext;
-    u64        m_threadId;
+#if MOTOR_ENABLE_ASSERT
+    u64 m_threadId;
+#endif
 
 public:
     Context(::Display* display, GLXContext context, u64 threadId);
@@ -163,8 +165,11 @@ public:
 GLWindow::Context::Context(::Display* display, GLXContext context, u64 threadId)
     : m_display(display)
     , m_glContext(context)
+#if MOTOR_ENABLE_ASSERT
     , m_threadId(threadId)
+#endif
 {
+    motor_forceuse(threadId);
 }
 
 GLWindow::Context::~Context()
