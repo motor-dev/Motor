@@ -242,7 +242,7 @@ static const char* s_elfMachineType [] =
 
 Elf::Elf(const char* filename, u64 baseAddress)
     : Module(filename, baseAddress)
-    , m_class(klass_invalid)
+    //, m_class(klass_invalid)
     , m_endianness(msb_invalid)
 {
     /*FILE* file = fopen(filename, "rb");

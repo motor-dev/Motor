@@ -6,7 +6,7 @@
 /**************************************************************************************************/
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/core/memory/streams.hh>
-#include <motor/minitl/hash_map.hh>
+#include <motor/minitl/hashmap.hh>
 #include <motor/plugin.graphics.3d/shader/node.meta.hh>
 
 namespace Motor { namespace Shaders {
@@ -104,7 +104,6 @@ private:
     minitl::vector< minitl::tuple< istring, istring > > m_attributeToVarying;
     MemoryStream                                        m_stream;
     i32                                                 m_indent;
-    u32                                                 m_counter;
 
 public:
     IShaderBuilder();

@@ -151,16 +151,18 @@ class GLWindow::Context : public minitl::refcountable
     friend class GLWindow;
 
 private:
+    ::Display* m_display;
     GLXContext m_glContext;
     u64        m_threadId;
 
 public:
-    Context(GLXContext context, u64 threadId);
+    Context(::Display* display, GLXContext context, u64 threadId);
     ~Context();
 };
 
-GLWindow::Context::Context(GLXContext context, u64 threadId)
-    : m_glContext(context)
+GLWindow::Context::Context(::Display* display, GLXContext context, u64 threadId)
+    : m_display(display)
+    , m_glContext(context)
     , m_threadId(threadId)
 {
 }
@@ -189,8 +191,8 @@ GLRenderer::~GLRenderer()
 void GLRenderer::attachWindow(weak< GLWindow > w) const
 {
     motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
-    w->m_context.reset(scoped< GLWindow::Context >::create(Arena::general(), m_context->m_glContext,
-                                                           m_context->m_threadId));
+    w->m_context.reset(scoped< GLWindow::Context >::create(
+        Arena::general(), m_context->m_display, m_context->m_glContext, m_context->m_threadId));
     if(m_context->glXSwapInterval)
     {
         w->setCurrent();
@@ -243,10 +245,8 @@ void GLWindow::setCurrent() const
     {
         motor_assert(Thread::currentId() == m_context->m_threadId,
                      "render command on wrong thread");
-        ::Window*                   w = (::Window*)getWindowHandle();
-        weak< GLRenderer::Context > c
-            = motor_checked_cast< const GLRenderer >(m_renderer)->m_context;
-        if(!glXMakeCurrent(c->m_display, *w, c->m_glContext))
+        ::Window* w = (::Window*)getWindowHandle();
+        if(!glXMakeCurrent(m_context->m_display, *w, m_context->m_glContext))
             motor_error("Unable to set current context");
     }
 }
