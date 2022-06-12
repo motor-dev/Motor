@@ -93,8 +93,7 @@ class TaskScheduler::Worker
     MOTOR_NOCOPY(Worker);
 
 private:
-    size_t const m_workerId;
-    Thread       m_workThread;
+    Thread m_workThread;
 
 public:
     Worker(weak< TaskScheduler > scheduler, size_t workerId);
@@ -106,8 +105,7 @@ public:
 };
 
 TaskScheduler::Worker::Worker(weak< TaskScheduler > scheduler, size_t workerId)
-    : m_workerId(workerId)
-    , m_workThread(istring(minitl::format< 128u >("worker %u") | workerId),
+    : m_workThread(istring(minitl::format< 128u >("worker %u") | workerId),
                    &TaskScheduler::Worker::work, reinterpret_cast< intptr_t >(this),
                    reinterpret_cast< intptr_t >(scheduler.operator->()), Thread::BelowNormal)
 {

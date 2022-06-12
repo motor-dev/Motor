@@ -32,7 +32,7 @@ private:
     void parse(/*FILE* file*/);
 
 private:
-    ElfClass      m_class;
+    // ElfClass      m_class;
     ElfEndianness m_endianness;
 
 public:

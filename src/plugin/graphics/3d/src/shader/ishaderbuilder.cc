@@ -17,7 +17,6 @@ IShaderBuilder::IShaderBuilder()
     , m_attributeToVarying(Arena::temporary())
     , m_stream(Arena::temporary(), 10000)
     , m_indent(0)
-    , m_counter(0)
 {
     m_namespaces.push_back(Namespace());
     m_stream.write("\0", 1);
