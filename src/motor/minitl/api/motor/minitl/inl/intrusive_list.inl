@@ -61,6 +61,7 @@ template < typename T, int INDEX >
 typename intrusive_list< T, INDEX >::item& intrusive_list< T, INDEX >::item::operator=(item&& other)
 {
     motor_forceuse(other);
+    return *this;
 }
 
 template < typename T, int INDEX >
@@ -68,6 +69,7 @@ typename intrusive_list< T, INDEX >::item&
 intrusive_list< T, INDEX >::item::operator=(const item& other)
 {
     motor_forceuse(other);
+    return *this;
 }
 
 template < typename T, int INDEX >
