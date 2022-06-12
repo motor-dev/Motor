@@ -1,14 +1,15 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_MINITL_HASH_MAP_HH_
-#define MOTOR_MINITL_HASH_MAP_HH_
+#ifndef MOTOR_MINITL_HASHMAP_HH_
+#define MOTOR_MINITL_HASHMAP_HH_
 /**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/hash.hh>
 #include <motor/minitl/intrusive_list.hh>
 #include <motor/minitl/iterator.hh>
 #include <motor/minitl/pool.hh>
+#include <motor/minitl/swap.hh>
 #include <motor/minitl/traits.hh>
 #include <motor/minitl/tuple.hh>
 
@@ -48,6 +49,9 @@ private:
         item(const value_type& value) : value(value)
         {
         }
+        item(value_type&& value) : value(move(value))
+        {
+        }
     };
     typedef typename intrusive_list< empty_item >::iterator       list_iterator;
     typedef typename intrusive_list< empty_item >::const_iterator const_list_iterator;
@@ -67,8 +71,10 @@ public:
     hashmap(Allocator& allocator, u32 reserved = 0);
     ~hashmap();
     hashmap(const hashmap& other);
+    hashmap(hashmap&& other) = default;
     hashmap(Allocator& allocator, const hashmap& other);
-    hashmap& operator=(const hashmap& other);
+    hashmap& operator=(hashmap&& other) = default;
+    hashmap& operator=(hashmap other);
 
     void reserve(u32 size);
 
@@ -88,15 +94,25 @@ public:
     iterator erase(iterator it);
     void     erase(const Key& key);
 
+    tuple< iterator, bool > insert(Key&& k, Value&& value);
+    tuple< iterator, bool > insert(Key&& k, const Value& value);
+    tuple< iterator, bool > insert(const Key& k, Value&& value);
     tuple< iterator, bool > insert(const Key& k, const Value& value);
     tuple< iterator, bool > insert(const tuple< const Key, Value >& v);
+    tuple< iterator, bool > insert(tuple< const Key, Value >&& v);
 
     void swap(hashmap& other);
 };
 
+template < typename Key, typename Value, typename Hash = hash< Key > >
+void swap(hashmap< Key, Value, Hash >& a, hashmap< Key, Value, Hash >& b)
+{
+    a.swap(b);
+}
+
 }  // namespace minitl
 
-#include <motor/minitl/inl/hash_map.inl>
+#include <motor/minitl/inl/hashmap.inl>
 
 /**************************************************************************************************/
 #endif

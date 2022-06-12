@@ -5,6 +5,7 @@
 #define MOTOR_MINITL_CONTAINER_INL_VECTOR_INL_
 /**************************************************************************************************/
 #include <motor/minitl/assert.hh>
+#include <motor/minitl/utility.hh>
 
 namespace minitl {
 
@@ -34,19 +35,17 @@ public:
     base_iterator();
     template < typename OTHERPOLICY >
     base_iterator(const base_iterator< OTHERPOLICY >& other);
-    base_iterator(const base_iterator& other);
-    ~base_iterator();
+    base_iterator(const base_iterator& other) = default;
+    base_iterator(base_iterator&& other)      = default;
+    ~base_iterator()                          = default;
 
 public:
     bool operator==(const base_iterator< POLICY >& other);
     bool operator!=(const base_iterator< POLICY >& other);
 
-    base_iterator< POLICY >& operator=(const base_iterator< POLICY >& other)
-    {
-        m_owner    = other.m_owner;
-        m_iterator = other.m_iterator;
-        return *this;
-    }
+    base_iterator< POLICY >& operator=(const base_iterator< POLICY >& other) = default;
+    base_iterator< POLICY >& operator=(base_iterator< POLICY >&& other)      = default;
+
     base_iterator< POLICY > operator+(typename POLICY::difference_type offset) const
     {
         return base_iterator< POLICY >(m_owner, POLICY::advance(m_iterator, offset));
@@ -116,24 +115,10 @@ vector< T >::base_iterator< POLICY >::base_iterator(const vector< T >*       own
 
 template < typename T >
 template < typename POLICY >
-vector< T >::base_iterator< POLICY >::base_iterator(const base_iterator< POLICY >& other)
-    : m_owner(other.m_owner)
-    , m_iterator(other.m_iterator)
-{
-}
-
-template < typename T >
-template < typename POLICY >
 template < typename OTHERPOLICY >
 vector< T >::base_iterator< POLICY >::base_iterator(const base_iterator< OTHERPOLICY >& other)
     : m_owner(other.m_owner)
     , m_iterator(other.m_iterator)
-{
-}
-
-template < typename T >
-template < typename POLICY >
-vector< T >::base_iterator< POLICY >::~base_iterator()
 {
 }
 
@@ -253,6 +238,13 @@ vector< T >::vector(const vector& other)
 }
 
 template < typename T >
+vector< T >::vector(vector&& other) : m_memory(minitl::move(other.m_memory))
+                                    , m_end(other.m_end)
+{
+    other.m_end = nullptr;
+}
+
+template < typename T >
 template < typename ITERATOR >
 vector< T >::vector(Allocator& allocator, ITERATOR first, ITERATOR last)
     : m_memory(allocator, minitl::distance(first, last))
@@ -359,6 +351,14 @@ void vector< T >::push_back(const_reference r)
 }
 
 template < typename T >
+void vector< T >::push_back(rvalue_reference r)
+{
+    ensure(size() + 1);
+    new((void*)m_end) T(minitl::move(r));
+    m_end = advance_ptr(m_end, 1);
+}
+
+template < typename T >
 template < typename ITERATOR >
 void vector< T >::push_back(ITERATOR first, ITERATOR last)
 {
@@ -370,6 +370,64 @@ void vector< T >::push_back(ITERATOR first, ITERATOR last)
         m_end = advance_ptr(m_end, 1);
         ++first;
     }
+}
+
+template < typename T >
+typename vector< T >::iterator vector< T >::insert(const_iterator location, const_reference r)
+{
+    iterator it = ensure(location, 1);
+    new(it.m_iterator) T(r);
+    return it;
+}
+
+template < typename T >
+typename vector< T >::iterator vector< T >::insert(const_iterator location, rvalue_reference r)
+{
+    iterator it = ensure(location, 1);
+    new(it.m_iterator) T(minitl::move(r));
+    return it;
+}
+
+template < typename T >
+template < typename ITERATOR >
+typename vector< T >::iterator vector< T >::insert(const_iterator location, ITERATOR first,
+                                                   ITERATOR last)
+{
+    motor_assert_recover(
+        location.m_owner == this, "can't insert at iterator that is not pointing on current vector",
+        return iterator(
+            this, advance_ptr(m_memory.data(), distance(m_memory.data(), location.m_iterator))));
+    iterator result = ensure(location, minitl::distance(first, last));
+
+    for(iterator it = result; first != last; ++it, ++first)
+        new(it.m_iterator) T(*first);
+
+    return result;
+}
+
+template < typename T >
+template < class... Args >
+typename vector< T >::iterator vector< T >::emplace(const_iterator location, Args&&... args)
+{
+    motor_assert_recover(
+        location.m_owner == this,
+        "can't emplace at iterator that is not pointing on current vector",
+        return iterator(
+            this, advance_ptr(m_memory.data(), distance(m_memory.data(), location.m_iterator))));
+    iterator result = ensure(location, 1);
+    new(result.m_iterator) T(minitl::forward< Args >(args)...);
+    return result;
+}
+
+template < typename T >
+template < class... Args >
+typename vector< T >::iterator vector< T >::emplace_back(Args&&... args)
+{
+    ensure(size() + 1);
+    new((void*)m_end) T(minitl::forward< Args >(args)...);
+    iterator result(this, m_end);
+    m_end = advance_ptr(m_end, 1);
+    return result;
 }
 
 template < typename T >
@@ -414,7 +472,7 @@ typename vector< T >::iterator vector< T >::erase(iterator first, iterator last)
     pointer t2 = last.m_iterator;
     for(; t2 != m_end; t = advance(t, 1), t2 = advance_ptr(t2, 1))
     {
-        new((void*)t) T(*t2);
+        new((void*)t) T(minitl::move(*t2));
         t2->~T();
     }
     m_end = t;
@@ -446,7 +504,7 @@ template < typename T >
 typename vector< T >::const_reference vector< T >::back() const
 {
     motor_assert(!empty(), "getting front of empty vector");
-    return *m_memory;
+    return *advance_ptr(m_end, -1);
 }
 
 template < typename T >
@@ -497,6 +555,56 @@ void vector< T >::ensure(size_type size)
 }
 
 template < typename T >
+typename vector< T >::iterator vector< T >::ensure(const_iterator location, size_type size)
+{
+    size_type object_count = size;
+    size += distance(m_memory.data(), m_end);
+    if(size > m_memory.count())
+    {
+        size = size >> 1 | size;
+        size = size >> 2 | size;
+        size = size >> 4 | size;
+        size = size >> 8 | size;
+        size = size >> 16 | size;
+        size = size >> (sizeof(size_type) == 64 ? 32 : 0) | size;
+        size++;
+
+        Allocator::Block< T > block(m_memory.arena(), size);
+        pointer               t  = block;
+        pointer               t2 = m_memory;
+        for(; t2 != location.m_iterator; t = advance_ptr(t, 1), t2 = advance_ptr(t2, 1))
+        {
+            new((void*)t) T(minitl::move(*t2));
+            t2->~T();
+        }
+        iterator result(this, t);
+        t = advance_ptr(t, object_count);
+        for(; t2 != m_end; t = advance_ptr(t, 1), t2 = advance_ptr(t2, 1))
+        {
+            new((void*)t) T(minitl::move(*t2));
+            t2->~T();
+        }
+
+        m_memory.swap(block);
+        m_end = t;
+        return result;
+    }
+    else
+    {
+        const_pointer end = advance_ptr(location.m_iterator, -1);
+        for(pointer t = advance_ptr(m_end, object_count - 1), t2 = advance_ptr(m_end, -1);
+            t2 != end; t = advance_ptr(t, -1), t2 = advance_ptr(t2, -1))
+        {
+            new((void*)t) T(minitl::move(*t2));
+            t2->~T();
+        }
+        m_end = advance_ptr(m_end, object_count);
+        return iterator(
+            this, advance_ptr(m_memory.begin(), distance(m_memory.begin(), location.m_iterator)));
+    }
+}
+
+template < typename T >
 void vector< T >::reserve(size_type size)
 {
     if(size > m_memory.count())
@@ -505,7 +613,7 @@ void vector< T >::reserve(size_type size)
         pointer               t = block;
         for(pointer t2 = m_memory; t2 != m_end; t = advance_ptr(t, 1), t2 = advance_ptr(t2, 1))
         {
-            new((void*)t) T(*t2);
+            new((void*)t) T(minitl::move(*t2));
             t2->~T();
         }
         m_memory.swap(block);

@@ -5,8 +5,8 @@
 #define MOTOR_MINITL_ALLOCATOR_HH_
 /**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
-#include <cstring>
 #include <motor/minitl/swap.hh>
+#include <cstring>
 #include <string.h>
 
 namespace minitl {
@@ -31,6 +31,24 @@ public:
             , m_data(count ? (T*)allocator.alloc(align(sizeof(T), motor_alignof(T)) * count,
                                                  max< u64 >(blockAlignment, motor_alignof(T)))
                            : 0) {};
+        Block(Block&& other)
+            : m_allocator(other.m_allocator)
+            , m_count(other.m_count)
+            , m_data(other.m_data)
+        {
+            other.m_count = 0;
+            other.m_data  = nullptr;
+        }
+        Block& operator=(Block&& other)
+        {
+            m_allocator->free(m_data);
+            m_allocator   = other.m_allocator;
+            m_count       = other.m_count;
+            m_data        = other.m_data;
+            other.m_count = 0;
+            other.m_data  = nullptr;
+            return *this;
+        }
         ~Block()
         {
             m_allocator->free(m_data);
@@ -182,6 +200,12 @@ template < typename T >
 T* Allocator::alloc()
 {
     return (T*)alloc(sizeof(T), motor_alignof(T));
+}
+
+template < typename T >
+void swap(Allocator::Block< T >& a, Allocator::Block< T >& b)
+{
+    a.swap(b);
 }
 
 }  // namespace minitl

@@ -73,7 +73,12 @@ private:
 
 public:
     istack();
-    ~istack();
+    istack(istack&& other)            = default;
+    istack& operator=(istack&& other) = default;
+    ~istack()                         = default;
+
+    istack(const istack& other)            = delete;
+    istack& operator=(const istack& other) = delete;
 
     void push(T* t);
     void pushList(T* h, T* t);
@@ -83,11 +88,6 @@ public:
 
 template < typename T >
 istack< T >::istack() : m_head(0)
-{
-}
-
-template < typename T >
-istack< T >::~istack()
 {
 }
 

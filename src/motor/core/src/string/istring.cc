@@ -7,7 +7,7 @@
 #include <motor/core/memory/allocators/system.hh>
 #include <motor/core/threads/criticalsection.hh>
 #include <motor/minitl/algorithm.hh>
-#include <motor/minitl/hash_map.hh>
+#include <motor/minitl/hashmap.hh>
 
 #include <cstring>
 
@@ -344,6 +344,11 @@ istring::istring(const char* begin, const char* end) : m_index(init(begin, end))
 {
 }
 
+istring::istring(istring&& other) : m_index(other.m_index)
+{
+    StringInfo::getCache().resolve(m_index)->retain();
+}
+
 istring::istring(const istring& other) : m_index(other.m_index)
 {
     StringInfo::getCache().resolve(m_index)->retain();
@@ -356,7 +361,14 @@ istring::~istring()
 
 istring& istring::operator=(const istring& other)
 {
-    if(&other == this) return *this;
+    StringInfo::getCache().resolve(other.m_index)->retain();
+    StringInfo::getCache().resolve(m_index)->release();
+    m_index = other.m_index;
+    return *this;
+}
+
+istring& istring::operator=(istring&& other)
+{
     StringInfo::getCache().resolve(other.m_index)->retain();
     StringInfo::getCache().resolve(m_index)->release();
     m_index = other.m_index;

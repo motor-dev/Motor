@@ -7,6 +7,7 @@
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/allocator.hh>
 #include <motor/minitl/iterator.hh>
+#include <motor/minitl/swap.hh>
 
 namespace minitl {
 
@@ -36,6 +37,7 @@ public:
     typedef T&                      reference;
     typedef const T*                const_pointer;
     typedef const T&                const_reference;
+    typedef T&&                     rvalue_reference;
     typedef minitl::size_type       size_type;
     typedef minitl::difference_type difference_type;
 
@@ -50,11 +52,13 @@ private:
     T*                    m_end;
 
 private:
-    void ensure(size_type size);
+    void     ensure(size_type size);
+    iterator ensure(const_iterator location, size_type size);
 
 public:
     explicit vector(Allocator& allocator, size_type initialCapacity = 0);
     vector(const vector< T >& other);
+    vector(vector< T >&& other);
     vector& operator=(const vector< T >& other);
     template < typename ITERATOR >
     vector(Allocator& allocator, ITERATOR first, ITERATOR last);
@@ -76,9 +80,21 @@ public:
     const_reference operator[](size_type i) const;
 
     void push_back(const_reference r);
+    void push_back(rvalue_reference r);
     template < typename ITERATOR >
-    void     push_back(ITERATOR first, ITERATOR last);
-    void     pop_back();
+    void push_back(ITERATOR first, ITERATOR last);
+    void pop_back();
+
+    iterator insert(const_iterator location, const_reference r);
+    iterator insert(const_iterator location, rvalue_reference r);
+    template < typename ITERATOR >
+    iterator insert(const_iterator location, ITERATOR first, ITERATOR last);
+
+    template < class... Args >
+    iterator emplace(const_iterator pos, Args&&... args);
+    template < class... Args >
+    iterator emplace_back(Args&&... args);
+
     iterator erase(iterator it);
     iterator erase(iterator begin, iterator end);
 

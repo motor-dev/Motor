@@ -6,14 +6,13 @@
 /**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/iterator.hh>
+#include <motor/minitl/swap.hh>
 
 namespace minitl {
 
 template < typename T, int INDEX = 0 >
 class intrusive_list
 {
-    MOTOR_NOCOPY(intrusive_list);
-
 public:
     class item;
 
@@ -45,6 +44,10 @@ private:
 
 public:
     intrusive_list();
+    intrusive_list(intrusive_list&& other);
+    intrusive_list(const intrusive_list& other) = delete;
+    intrusive_list& operator=(intrusive_list&& other);
+    intrusive_list& operator=(const intrusive_list& other) = delete;
     ~intrusive_list();
 
     iterator               begin();
@@ -73,6 +76,12 @@ public:
     void clear();
     void swap(intrusive_list& other);
 };
+
+template < typename T, int INDEX >
+void swap(intrusive_list< T, INDEX >& a, intrusive_list< T, INDEX >& b)
+{
+    a.swap(b);
+}
 
 }  // namespace minitl
 

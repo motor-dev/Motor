@@ -68,6 +68,9 @@ using unwrap_ref_decay_t = typename unwrap_ref_decay< T >::type;
 template < class T >
 class reference_wrapper;
 
+template < class T >
+reference_wrapper< T > byref(T& t) noexcept;
+
 }  // namespace minitl
 
 #include <motor/minitl/inl/type_traits.inl>

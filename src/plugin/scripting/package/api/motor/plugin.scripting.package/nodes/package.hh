@@ -9,7 +9,7 @@
 #include <motor/introspect/dbcontext.hh>
 #include <motor/introspect/node/node.hh>
 #include <motor/meta/value.hh>
-#include <motor/minitl/hash_map.hh>
+#include <motor/minitl/hashmap.hh>
 #include <motor/minitl/intrusive_list.hh>
 #include <motor/minitl/vector.hh>
 #include <motor/plugin/plugin.hh>

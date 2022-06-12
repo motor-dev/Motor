@@ -30,6 +30,11 @@ public:
         , m_current(l)
     {
     }
+    iterator_base(const iterator_base& other)            = default;
+    iterator_base(iterator_base&& other)                 = default;
+    iterator_base& operator=(const iterator_base& other) = default;
+    iterator_base& operator=(iterator_base&& other)      = default;
+
     template < typename OTHER_POLICY >
     bool operator==(const iterator_base< OTHER_POLICY >& other) const
     {
@@ -177,18 +182,21 @@ hashmap< Key, Value, Hash >::hashmap(Allocator& allocator, const hashmap& other)
 template < typename Key, typename Value, typename Hash >
 hashmap< Key, Value, Hash >::~hashmap()
 {
-    for(index_item* it = m_index.begin(); it != m_index.end() - 1; ++it)
+    if(m_index)
     {
-        list_iterator object = it->second;
-        object++;
-        while(object != (it + 1)->second)
+        for(index_item* it = m_index.begin(); it != m_index.end() - 1; ++it)
         {
-            list_iterator itemToDelete = object++;
-            m_itemPool.release(&static_cast< item& >(*itemToDelete));
+            list_iterator object = it->second;
+            object++;
+            while(object != (it + 1)->second)
+            {
+                list_iterator itemToDelete = object++;
+                m_itemPool.release(&static_cast< item& >(*itemToDelete));
+            }
+            it->~index_item();
         }
-        it->~index_item();
+        (m_index.end() - 1)->~index_item();
     }
-    (m_index.end() - 1)->~index_item();
 }
 
 template < typename Key, typename Value, typename Hash >
@@ -206,41 +214,45 @@ template < typename Key, typename Value, typename Hash >
 void hashmap< Key, Value, Hash >::grow(u32 size)
 {
     motor_assert(size > m_count, "cannot resize from %d to smaller capacity %d" | m_count | size);
+
+    size = nextPowerOf2(size);
+    pool< item >                   newPool(m_index.arena(), size);
+    Allocator::Block< index_item > newIndex(m_index.arena(), size + 1);
+    intrusive_list< empty_item >   newList;
+
+    list_iterator current = newList.begin();
+    for(index_item* it = newIndex.begin(); it != newIndex.end(); ++it)
     {
-        size = nextPowerOf2(size);
-        pool< item >                   oldPool(m_index.arena(), size);
-        Allocator::Block< index_item > oldIndex(m_index.arena(), size + 1);
-        intrusive_list< empty_item >   oldList;
-
-        oldList.swap(m_items);
-        oldPool.swap(m_itemPool);
-        oldIndex.swap(m_index);
-        buildIndex();
-
-        for(index_item* index = oldIndex.begin(); index != oldIndex.end() - 1; ++index)
-        {
-            list_iterator object = index->second;
-            object++;
-            while(object != (index + 1)->second)
-            {
-                list_iterator itemToCopy = object++;
-                item*         i          = static_cast< item* >(itemToCopy.operator->());
-                u32           hash       = Hash()(i->value.first) % (u32)(m_index.count() - 1);
-                item*         newItem    = m_itemPool.allocate(i->value);
-                m_items.insert(m_index[hash].second, *newItem);
-                oldPool.release(i);
-            }
-            index->~index_item();
-        }
-        (oldIndex.end() - 1)->~index_item();
+        new(it) index_item;
+        current = it->second = newList.insert(current, it->first);
     }
+
+    for(index_item* index = m_index.begin(); index != m_index.end() - 1; ++index)
+    {
+        list_iterator object = index->second;
+        object++;
+        while(object != (index + 1)->second)
+        {
+            list_iterator itemToCopy = object++;
+            item*         i          = static_cast< item* >(itemToCopy.operator->());
+            u32           hash       = Hash()(i->value.first) % (u32)(newIndex.count() - 1);
+            item*         newItem    = newPool.allocate(move(i->value));
+            newList.insert(newIndex[hash].second, *newItem);
+            m_itemPool.release(i);
+        }
+        index->~index_item();
+    }
+    (m_index.end() - 1)->~index_item();
+
+    m_itemPool = move(newPool);
+    m_items    = move(newList);
+    m_index    = move(newIndex);
 }
 
 template < typename Key, typename Value, typename Hash >
-hashmap< Key, Value, Hash >& hashmap< Key, Value, Hash >::operator=(const hashmap& other)
+hashmap< Key, Value, Hash >& hashmap< Key, Value, Hash >::operator=(hashmap other)
 {
-    motor_forceuse(other);
-    motor_notreached();
+    swap(other);
     return *this;
 }
 
@@ -346,13 +358,48 @@ void hashmap< Key, Value, Hash >::erase(const Key& key)
 
 template < typename Key, typename Value, typename Hash >
 tuple< typename hashmap< Key, Value, Hash >::iterator, bool >
+hashmap< Key, Value, Hash >::insert(Key&& key, Value&& value)
+{
+    return insert(tuple< const Key, Value >(move(key), move(value)));
+}
+
+template < typename Key, typename Value, typename Hash >
+tuple< typename hashmap< Key, Value, Hash >::iterator, bool >
+hashmap< Key, Value, Hash >::insert(Key&& key, const Value& value)
+{
+    return insert(tuple< const Key, Value >(move(key), value));
+}
+
+template < typename Key, typename Value, typename Hash >
+tuple< typename hashmap< Key, Value, Hash >::iterator, bool >
+hashmap< Key, Value, Hash >::insert(const Key& key, Value&& value)
+{
+    return insert(tuple< const Key, Value >(key, move(value)));
+}
+
+template < typename Key, typename Value, typename Hash >
+tuple< typename hashmap< Key, Value, Hash >::iterator, bool >
 hashmap< Key, Value, Hash >::insert(const Key& key, const Value& value)
 {
-    u32           hash = Hash()(key);
+    return insert(tuple< const Key, Value >(key, value));
+}
+
+template < typename Key, typename Value, typename Hash >
+tuple< typename hashmap< Key, Value, Hash >::iterator, bool >
+hashmap< Key, Value, Hash >::insert(const tuple< const Key, Value >& v)
+{
+    return insert(tuple< const Key, Value >(v));
+}
+
+template < typename Key, typename Value, typename Hash >
+tuple< typename hashmap< Key, Value, Hash >::iterator, bool >
+hashmap< Key, Value, Hash >::insert(tuple< const Key, Value >&& v)
+{
+    u32           hash = Hash()(v.first);
     list_iterator it   = m_index[hash % (m_index.count() - 1)].second;
     for(++it; it != m_index[1 + hash % (m_index.count() - 1)].second; ++it)
     {
-        if(Hash()(static_cast< item* >(it.operator->())->value.first, key))
+        if(Hash()(static_cast< item* >(it.operator->())->value.first, v.first))
         {
             return make_tuple(iterator(*this, it), false);
         }
@@ -364,15 +411,8 @@ hashmap< Key, Value, Hash >::insert(const Key& key, const Value& value)
         it = m_index[hash % (m_index.count() - 1)].second;
     }
     m_count++;
-    item* i = m_itemPool.allocate(make_tuple(key, value));
+    item* i = m_itemPool.allocate(move(v));
     return make_tuple(iterator(*this, m_items.insert(it, *i)), true);
-}
-
-template < typename Key, typename Value, typename Hash >
-tuple< typename hashmap< Key, Value, Hash >::iterator, bool >
-hashmap< Key, Value, Hash >::insert(const tuple< const Key, Value >& v)
-{
-    return insert(v.first, v.second);
 }
 
 template < typename Key, typename Value, typename Hash >

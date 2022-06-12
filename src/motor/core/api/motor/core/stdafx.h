@@ -79,7 +79,6 @@ inline u32 getFirstBit(u32 bitMask)
 #    include <motor/core/string/istring.hh>
 #    include <motor/core/string/text.hh>
 
-using minitl::byref;
 using minitl::motor_checked_cast;
 using minitl::motor_checked_numcast;
 using minitl::motor_const_cast;

@@ -21,11 +21,13 @@ public:
     istring();
     istring(const char* str);
     istring(const char* begin, const char* end);
+    istring(istring && other);
     istring(const istring& other);
 
     ~istring();
 
-    istring& operator=(const istring&);
+    istring& operator=(const istring& other);
+    istring& operator=(istring&& other);
 
     const char* c_str() const;
     size_t      size() const;
