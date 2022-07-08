@@ -3,7 +3,9 @@ from motor_typing import TYPE_CHECKING
 
 
 class Parser1(glrp.Parser):
+
     class Lexer(glrp.Lexer):
+
         @glrp.token(r'a', 'a')
         @glrp.token(r'b', 'b')
         @glrp.token(r'c', 'c')
@@ -25,6 +27,7 @@ class Parser1(glrp.Parser):
 
     @glrp.rule("A : a B c")
     @glrp.rule("A : a a B c")
+    @glrp.rule("A : a a a B c")
     @glrp.rule("A : a B d")
     @glrp.rule("A : a a B d")
     #@glrp.rule("A : a a a B ")
@@ -34,6 +37,7 @@ class Parser1(glrp.Parser):
         pass
 
     #@glrp.rule("B [prec:right,0][split:aab]: a a b")
+    @glrp.rule("B [prec:right,0][split:aab]: a a b")
     @glrp.rule("B [prec:right,0][split:ab]: a b")
     @glrp.rule("B [prec:right,0][split:b]: b")
     def p_B(self, p):
@@ -47,7 +51,9 @@ class Parser1(glrp.Parser):
 
 
 class Parser2(glrp.Parser):
+
     class Lexer(glrp.Lexer):
+
         @glrp.token(r'identifier', 'identifier')
         @glrp.token(r'typename', 'typename')
         @glrp.token(r';', ';')
@@ -98,7 +104,9 @@ class Parser2(glrp.Parser):
 
 
 class Parser3(glrp.Parser):
+
     class Lexer(glrp.Lexer):
+
         @glrp.token(r'if', 'if')
         @glrp.token(r'else', 'else')
         @glrp.token(r'\(', '(')
@@ -140,7 +148,9 @@ class Parser3(glrp.Parser):
 
 
 class Parser4(glrp.Parser):
+
     class Lexer(glrp.Lexer):
+
         @glrp.token(r'id', 'id')
         @glrp.token(r'\,', ',')
         def tok(self, token):
@@ -170,7 +180,9 @@ class Parser4(glrp.Parser):
 
 
 class Parser5(glrp.Parser):
+
     class Lexer(glrp.Lexer):
+
         @glrp.token(r'id', 'identifier')
         @glrp.token('::')
         @glrp.token(',')
@@ -247,7 +259,9 @@ class Parser5(glrp.Parser):
 
 
 class Parser6(glrp.Parser):
+
     class Lexer(glrp.Lexer):
+
         @glrp.token(r'identifier', 'identifier')
         @glrp.token(r';', ';')
         @glrp.token(r'\[', '[')
@@ -292,7 +306,9 @@ class Parser6(glrp.Parser):
 
 
 class Parser7(glrp.Parser):
+
     class Lexer(glrp.Lexer):
+
         @glrp.token(r'identifier', 'identifier')
         @glrp.token(r'\(', '(')
         @glrp.token(r'\)', ')')
@@ -336,6 +352,47 @@ class Parser7(glrp.Parser):
     @glrp.rule("abstract-declarator : ")
     @glrp.rule("abstract-declarator : '(' ')'")
     def p_abstract_declarator(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    def __init__(self):
+        # type: ()->None
+        self.lexer = self.__class__.Lexer()
+        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.', mode=1)
+
+
+class Parser8(glrp.Parser):
+
+    class Lexer(glrp.Lexer):
+
+        @glrp.token(r'identifier')
+        @glrp.token(r'::')
+        @glrp.token(r'<')
+        @glrp.token(r'>')
+        def tok(self, token):
+            # type: (glrp.Token) -> glrp.Token
+            return token
+
+    @glrp.rule("prog : prog qualified-name")
+    @glrp.rule("prog : ")
+    def p_prog(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    @glrp.rule('qualified-name : "::" name-qualifier "::" concept-name "<" ">"')
+    def p_qname(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    @glrp.rule('name-qualifier : namespace-name "<" ">"')
+    @glrp.rule('name-qualifier : name-qualifier "::" namespace-name "<" ">"')
+    def p_name_qualifier(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    @glrp.rule('namespace-name[split:namespace_name] : identifier')
+    @glrp.rule('concept-name[split:concept_name] : identifier')
+    def p_name(self, p):
         # type: (glrp.Production) -> None
         pass
 
