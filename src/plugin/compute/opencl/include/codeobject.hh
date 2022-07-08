@@ -20,6 +20,9 @@ private:
     Plugin::DynamicObject m_kernel;
     cl_program            m_program;
 
+private:
+    cl_program loadProgram(weak< const Context > context);
+
 public:
     CodeObject(weak< const Context > context, const inamespace& name);
     ~CodeObject();
