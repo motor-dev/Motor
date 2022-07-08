@@ -180,7 +180,7 @@ class vscode(Build.BuildContext):
                                         'directory':
                                             task.get_cwd().path_from(self.path),
                                         'arguments':
-                                            env.CXX + ['-I"%s"' % i for i in env.INCLUDES + task.env.INCPATHS] +
+                                            env.CXX + ['-I%s' % i for i in env.INCLUDES + task.env.INCPATHS] +
                                             ['-D%s' % d for d in task.env.DEFINES + env.DEFINES],
                                         'file':
                                             task.inputs[0].path_from(self.path),
