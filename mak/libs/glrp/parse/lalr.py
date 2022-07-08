@@ -15,10 +15,12 @@ class LALRTable(object):
         self._goto_table = goto_table
 
 
-def _find_merge_points(conflict_list, name_map, root_node, logger):
-    # type: (List[Tuple[LR0Node, Set[int], str]], List[str], LR0Node, Logger) -> None
-    merge_tree = MergeTree(conflict_list)
-    merge_tree.check_resolved(root_node, name_map, logger)
+def _find_merge_points(conflict_list, lookaheads, name_map, logger, error_log):
+    # type: (List[Tuple[LR0Node, bool, str]], Set[int], List[str], Logger, Logger) -> None
+    merge_tree = MergeTree(conflict_list, lookaheads)
+    merge_tree.check_resolved(name_map, logger)
+    for item, tags in sorted(merge_tree._error_nodes.items(), key=lambda x: (x[0].rule._filename, x[0].rule._lineno)):
+        error_log.warning('%s - need to resolve previous split[%s]' % (item.to_string(name_map), ",".join(tags)))
 
 
 def _log(title, conflict_paths, out, name_map):
@@ -494,7 +496,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     if j >= 0:
                         action_map[a] = action_map.get(a, []) + [(j, item)]
 
-        merges = {}    # type: Dict[FrozenSet[LR0Node], Dict[LR0Node, Tuple[Set[int], str]]]
+        merges = {}    # type: Dict[FrozenSet[LR0Node], Tuple[Set[int], Dict[LR0Node, Tuple[bool, str]]]]
 
         for a in sorted(action_map):
             actions = action_map[a]
@@ -646,8 +648,10 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                 try:
                     merge_set = merges[frozenset(key)]
                 except KeyError:
-                    merge_set = {}
+                    merge_set = (set([a]), {})
                     merges[frozenset(key)] = merge_set
+                else:
+                    merge_set[0].add(a)
 
                 sm_log.info('    %-30s split', name_map[a])
                 for j, token_action in st_action[a]:
@@ -661,13 +665,9 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                             action_error = True
                         if j < 0:
                             sm_log.info('        reduce using rule %s', item.to_string(name_map))
-                            try:
-                                merge_set[item_group[item]][0].add(a)
-                            except KeyError:
-                                merge_set[item_group[item]] = (set([a]), item._split)
+                            merge_set[1][item_group[item]] = (True, item._split)
                         else:
-                            if item_group[item] not in merges:
-                                merge_set[item_group[item]] = (set(), item._split)
+                            merge_set[1][item_group[item]] = (False, item._split)
                     if action_error:
                         error_log.error('action mismatch in state %d for token \'%s\':' % (st, name_map[a]))
                         for item in items:
@@ -692,14 +692,15 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         if merges:
             assert len(states[0]._core) == 1
             for _, merge_set in merges.items():
-                splits = [(node, lookaheads, split_name) for node, (lookaheads, split_name) in merge_set.items()]
+                lookaheads = merge_set[0]
+                splits = [(node, lookahead, split_name) for node, (lookahead, split_name) in merge_set[1].items()]
                 conflict_log.info('   Merge graph for rules:')
-                for node, lookaheads, split_name in splits:
+                for node, _, split_name in splits:
                     conflict_log.info(
                         '      [%s][%s] %s' %
                         (split_name, ','.join([name_map[x] for x in lookaheads]), node._item.to_string(name_map))
                     )
-                _find_merge_points(splits, name_map, list(states[0]._core)[0], conflict_log)
+                _find_merge_points(splits, lookaheads, name_map, conflict_log, error_log)
                 conflict_log.info('')
             conflict_log.info('')
 
@@ -714,7 +715,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                             st_goto[s] = j
                             nkeys.add(s)
                             sm_log.info('    %-30s shift and go to state %d', name_map[s], j)
-                            assert item._next is not None
+                            #assert item._next is not None
 
         action.append(st_action)
         goto_table.append(st_goto)

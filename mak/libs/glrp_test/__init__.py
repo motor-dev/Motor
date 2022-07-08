@@ -12,6 +12,7 @@ def run():
         #parser.Parser5()
         #parser.Parser6()
         #parser.Parser7()
+        #parser.Parser8()
     except SyntaxError as exception:
         print(exception)
         sys.exit(255)
