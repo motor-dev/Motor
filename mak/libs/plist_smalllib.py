@@ -3,8 +3,6 @@
 import binascii
 import codecs
 import datetime
-from io import BytesIO
-import itertools
 import os
 import re
 import struct
@@ -25,16 +23,6 @@ _controlCharPat = re.compile(
     r"[\x00\x01\x02\x03\x04\x05\x06\x07\x08\x0b\x0c\x0e\x0f"
     r"\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f]"
 )
-
-
-def _encode_base64(s, maxlinelength=76):
-    # copied from base64.encodebytes(), with added maxlinelength argument
-    maxbinsize = (maxlinelength // 4) * 3
-    pieces = []
-    for i in range(0, len(s), maxbinsize):
-        chunk = s[i:i + maxbinsize]
-        pieces.append(binascii.b2a_base64(chunk))
-    return b''.join(pieces)
 
 
 def _decode_base64(s):
@@ -65,23 +53,8 @@ def _date_from_string(s):
     return datetime.datetime(*lst)
 
 
-def _date_to_string(d):
-    return '%04d-%02d-%02dT%02d:%02d:%02dZ' % (d.year, d.month, d.day, d.hour, d.minute, d.second)
-
-
-def _escape(text):
-    m = _controlCharPat.search(text)
-    if m is not None:
-        raise ValueError("strings can't contains control characters; " "use bytes instead")
-    text = text.replace("\r\n", "\n")  # convert DOS line endings
-    text = text.replace("\r", "\n")    # convert Mac line endings
-    text = text.replace("&", "&amp;")  # escape '&'
-    text = text.replace("<", "&lt;")   # escape '<'
-    text = text.replace(">", "&gt;")   # escape '>'
-    return text
-
-
 class _PlistParser:
+
     def __init__(self):
         self.stack = []
         self.current_key = None
@@ -212,6 +185,7 @@ def _is_fmt_xml(header):
 
 
 class InvalidFileException(ValueError):
+
     def __init__(self, message="Invalid file"):
         ValueError.__init__(self, message)
 
@@ -229,6 +203,7 @@ class _BinaryPlistParser:
 
     see also: http://opensource.apple.com/source/CF/CF-744.18/CFBinaryPList.c
     """
+
     def __init__(self):
         pass
 
