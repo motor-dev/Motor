@@ -189,13 +189,13 @@ class Parser5(glrp.Parser):
         @glrp.token(';')
         @glrp.token('-')
         @glrp.token(r'\$', '$')
-        @glrp.token('£')
+        @glrp.token('%')
         @glrp.token('template')
         def tok(self, token):
             # type: (glrp.Token) -> glrp.Token
             return token
 
-    @glrp.rule("prog : prog comma_opt pound_opt dollar_opt id_expression")
+    @glrp.rule("prog : prog comma_opt percent_opt dollar_opt id_expression")
     @glrp.rule("prog : id_expression")
     def prog(self, p):
         pass
@@ -219,7 +219,7 @@ class Parser5(glrp.Parser):
     def qualified_id(self, p):
         pass
 
-    @glrp.rule("sign : dollar_opt pound_opt")
+    @glrp.rule("sign : dollar_opt percentw½_opt")
     def sign(self, p):
         pass
 
@@ -228,9 +228,9 @@ class Parser5(glrp.Parser):
     def dollar_opt(self, p):
         pass
 
-    @glrp.rule("pound_opt :")
-    @glrp.rule("pound_opt : '£'")
-    def pound_opt(self, p):
+    @glrp.rule("percent_opt :")
+    @glrp.rule("percent_opt : '%'")
+    def percent_opt(self, p):
         pass
 
     @glrp.rule("comma_opt : ','")

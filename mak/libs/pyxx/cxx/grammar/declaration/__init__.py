@@ -88,54 +88,39 @@ def declaration_seq(self, p):
     pass
 
 
-@glrp.rule('declaration : noexport-declaration')
+@glrp.rule('declaration : block-declaration')
+@glrp.rule('declaration : nodeclspec-function-declaration')
+@glrp.rule('declaration : function-definition')
+@glrp.rule('declaration : template-declaration')
+@glrp.rule('declaration : explicit-instantiation')
+@glrp.rule('declaration : explicit-specialization')
+@glrp.rule('declaration : linkage-specification')
+@glrp.rule('declaration : namespace-definition')
+@glrp.rule('declaration : empty-declaration')
 @cxx98
 def declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
+@glrp.rule('declaration : attribute-declaration')
+@cxx11
+def declaration_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('declaration : deduction-guide')
+@cxx17
+def declaration_cxx17(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule('declaration : export-declaration')
-@glrp.rule('declaration : module-import-declaration')
+@glrp.rule('declaration[prec:right,0] : module-import-declaration')
 @cxx20
 def declaration_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('noexport-declaration-seq? : noexport-declaration-seq? noexport-declaration')
-@glrp.rule('noexport-declaration-seq? :')
-@cxx20
-def noexport_declaration_seq_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('noexport-declaration : block-declaration')
-@glrp.rule('noexport-declaration : nodeclspec-function-declaration')
-@glrp.rule('noexport-declaration : function-definition')
-@glrp.rule('noexport-declaration : template-declaration')
-@glrp.rule('noexport-declaration : explicit-instantiation')
-@glrp.rule('noexport-declaration : explicit-specialization')
-@glrp.rule('noexport-declaration : linkage-specification')
-@glrp.rule('noexport-declaration : namespace-definition')
-@glrp.rule('noexport-declaration : empty-declaration')
-@cxx98
-def noexport_declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('noexport-declaration : attribute-declaration')
-@cxx11
-def noexport_declaration_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('noexport-declaration : deduction-guide')
-@cxx17
-def noexport_declaration_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -229,18 +214,6 @@ def identifier_list(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
-
-#@glrp.merge('noexport-declaration')
-#@cxx98_merge
-#def explicit_noexport_declaration(self, explicit_deduction, explicit_declaration):
-#    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-#    pass
-
-#@glrp.merge('noexport-declaration')
-#@cxx98_merge
-#def ambiguous_declaration(self, generic_declarator, generic_simple_type_specifier):
-#    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-#    pass
 
 if TYPE_CHECKING:
     from motor_typing import Optional
