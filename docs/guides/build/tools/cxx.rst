@@ -2061,6 +2061,47 @@ rule above is redundant and already covered in rule 1.
 
 In this case the second possibility is ignored by the parser.
 
+*export-declaration*, ``export`` *module-import-declaration*
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+The grammar accepts two ways of exporting a *module-import-declaration*.
+The *module-import-declaration* could first be reduced into a *declaration*, then
+the general rule ``export-declaration : export declaration`` applies.
+Alternatively, the rule ``export-declaration : export module-import-declaration``
+can be applied directly, shortcutting the intermediate reduction:
+
+.. container:: toggle
+
+   .. container:: header
+
+      .. code-block::
+
+         declaration -> module-import-declaration ♦ 
+         export-declaration -> export module-import-declaration ♦ 
+
+   .. code-block::
+
+      reduce using rule declaration -> module-import-declaration ♦ 
+      ╭╴
+      │ export module-import-declaration ♦
+      │        ╰declaration──────────────╯
+      │ ╰export-declaration──────────────╯
+      │ ╰declaration─────────────────────╯
+      ╰╴
+      reduce using rule export-declaration -> export module-import-declaration ♦ 
+      ╭╴
+      │ export module-import-declaration ♦
+      │ ╰export-declaration──────────────╯
+      │ ╰declaration─────────────────────╯
+      ╰╴
+
+
+The standard forbids in section 10.2\ [#]_ to reduce the *module-import-declaration* into a
+*declaration*. The other cases described in the standard do not cause additional syntax conflicts,
+so the restrictions can be applied during the semantic analysis in order to emit better error messages.
+
+.. [#] The *declaration* or *declaration-seq* of an *export-declaration* shall not contain an
+       *export-declaration* or *module-import-declaration*.
 
 Dynamic conflict resolution
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
