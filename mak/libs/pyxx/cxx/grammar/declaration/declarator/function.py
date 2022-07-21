@@ -59,24 +59,33 @@ def parameter_declaration_list_opt(self, p):
     pass
 
 
-@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq declarator')
-@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq declarator "=" initializer-clause')
-@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-declarator?')
-@glrp.rule(
-    'parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-declarator? "=" initializer-clause'
-)
+@glrp.rule('parameter-declaration : parameter-declaration-proxy')
 @cxx98
 def parameter_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-pack-declarator')
+@glrp.rule('parameter-declaration-proxy : attribute-specifier-seq? decl-specifier-seq declarator')
 @glrp.rule(
-    'parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-pack-declarator "=" initializer-clause'
+    'parameter-declaration-proxy : attribute-specifier-seq? decl-specifier-seq declarator "=" initializer-clause'
+)
+@glrp.rule('parameter-declaration-proxy : attribute-specifier-seq? decl-specifier-seq abstract-declarator?')
+@glrp.rule(
+    'parameter-declaration-proxy : attribute-specifier-seq? decl-specifier-seq abstract-declarator? "=" initializer-clause'
+)
+@cxx98
+def parameter_declaration_proxy(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('parameter-declaration-proxy : attribute-specifier-seq? decl-specifier-seq abstract-pack-declarator')
+@glrp.rule(
+    'parameter-declaration-proxy : attribute-specifier-seq? decl-specifier-seq abstract-pack-declarator "=" initializer-clause'
 )
 @cxx11
-def parameter_declaration_cxx11(self, p):
+def parameter_declaration_proxy_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
