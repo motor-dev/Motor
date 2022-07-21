@@ -103,11 +103,18 @@ def template_argument_list_cxx11(self, p):
     pass
 
 
-@glrp.rule('template-argument : constant-expression')
-@glrp.rule('template-argument : type-id')
-@glrp.rule('template-argument : id-expression')
+@glrp.rule('template-argument : template-argument-proxy')
 @cxx98
 def template_argument(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('template-argument-proxy : constant-expression')
+@glrp.rule('template-argument-proxy : type-id')
+@glrp.rule('template-argument-proxy : id-expression')
+@cxx98
+def template_argument_proxy(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

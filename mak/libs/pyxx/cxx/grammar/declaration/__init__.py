@@ -88,39 +88,46 @@ def declaration_seq(self, p):
     pass
 
 
-@glrp.rule('declaration : block-declaration')
-@glrp.rule('declaration : nodeclspec-function-declaration')
-@glrp.rule('declaration : function-definition')
-@glrp.rule('declaration : template-declaration')
-@glrp.rule('declaration : explicit-instantiation')
-@glrp.rule('declaration : explicit-specialization')
-@glrp.rule('declaration : linkage-specification')
-@glrp.rule('declaration : namespace-definition')
-@glrp.rule('declaration : empty-declaration')
+@glrp.rule('declaration-proxy : block-declaration')
+@glrp.rule('declaration-proxy : nodeclspec-function-declaration')
+@glrp.rule('declaration-proxy : function-definition')
+@glrp.rule('declaration-proxy : template-declaration')
+@glrp.rule('declaration-proxy : explicit-instantiation')
+@glrp.rule('declaration-proxy : explicit-specialization')
+@glrp.rule('declaration-proxy : linkage-specification')
+@glrp.rule('declaration-proxy : namespace-definition')
+@glrp.rule('declaration-proxy : empty-declaration')
+@cxx98
+def declaration_proxy(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('declaration-proxy : attribute-declaration')
+@cxx11
+def declaration_proxy_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('declaration-proxy : deduction-guide')
+@cxx17
+def declaration_proxy_cxx17(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('declaration-proxy : export-declaration')
+@glrp.rule('declaration-proxy[prec:right,0] : module-import-declaration')
+@cxx20
+def declaration_proxy_cxx20(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('declaration : declaration-proxy')
 @cxx98
 def declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('declaration : attribute-declaration')
-@cxx11
-def declaration_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('declaration : deduction-guide')
-@cxx17
-def declaration_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('declaration : export-declaration')
-@glrp.rule('declaration[prec:right,0] : module-import-declaration')
-@cxx20
-def declaration_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
