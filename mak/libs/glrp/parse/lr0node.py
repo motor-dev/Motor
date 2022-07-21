@@ -4,6 +4,7 @@ from .lr0path import LR0PathItem
 
 
 class LR0Node(object):
+
     def __init__(self, item_set, item, predecessor=None, parent=None):
         # type: (LR0ItemSet, LR0Item, Optional[Tuple[int, "LR0Node"]], Optional[LR0Node]) -> None
         self._item_set = item_set
@@ -11,13 +12,13 @@ class LR0Node(object):
 
         if predecessor is not None:
             self._predecessor_lookahead = predecessor[0] # type: Optional[int]
-            self._predecessors = [predecessor[1]]
+            self._predecessors = [predecessor[1]]        # type: List[LR0Node]
         else:
             self._predecessor_lookahead = None
             self._predecessors = []
         self._successor = None                           # type: Optional[LR0Node]
 
-        self._direct_parents = []
+        self._direct_parents = []      # type: List[LR0Node]
         self._direct_children = []     # type: List[LR0Node]
         if parent is not None:
             self._direct_parents.append(parent)
@@ -186,7 +187,7 @@ class LR0Node(object):
 
 
 if TYPE_CHECKING:
-    from motor_typing import List, Optional, Set, Optional, Tuple, Dict, Union
+    from motor_typing import Dict, List, Optional, Set, Tuple, Union
     from .lr0item import LR0Item
     from .lr0path import LR0Path
     from .lr0itemset import LR0ItemSet

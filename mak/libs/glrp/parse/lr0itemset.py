@@ -4,6 +4,7 @@ from motor_typing import TYPE_CHECKING
 
 
 class LR0ItemSet(object):
+
     def __init__(self, index, core):
         # type: (int, List[Tuple[LR0Item, Optional[LR0Node], int]]) -> None
         self._index = index
