@@ -4,6 +4,7 @@ from .lr0path import LR0PathItem
 from .lr0dominancenode import LR0DominanceSet
 from .merge_tree import MergeTree
 from motor_typing import TYPE_CHECKING
+from collections import OrderedDict
 import sys
 
 
@@ -19,8 +20,8 @@ def _find_merge_points(conflict_list, lookaheads, name_map, logger, error_log):
     # type: (List[Tuple[LR0Node, bool, str]], Set[int], List[str], Logger, Logger) -> None
     merge_tree = MergeTree(conflict_list, lookaheads)
     merge_tree.check_resolved(name_map, logger)
-    for item, tags in sorted(merge_tree._error_nodes.items(), key=lambda x: (x[0].rule._filename, x[0].rule._lineno)):
-        error_log.warning('%s - need to resolve previous split[%s]' % (item.to_string(name_map), ",".join(tags)))
+    #for item, tags in sorted(merge_tree._error_nodes.items(), key=lambda x: (x[0].rule._filename, x[0].rule._lineno)):
+    #    error_log.warning('%s - need to resolve previous split[%s]' % (item.to_string(name_map), ",".join(tags)))
 
 
 def _log(title, conflict_paths, out, name_map):
@@ -496,7 +497,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     if j >= 0:
                         action_map[a] = action_map.get(a, []) + [(j, item)]
 
-        merges = {}    # type: Dict[FrozenSet[LR0Node], Tuple[Set[int], Dict[LR0Node, Tuple[bool, str]]]]
+        merges = OrderedDict(
+        )                      # type: OrderedDict[FrozenSet[LR0Node], Tuple[Set[int], OrderedDict[LR0Node, Tuple[bool, str]]]]
 
         for a in sorted(action_map):
             actions = action_map[a]
@@ -648,7 +650,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                 try:
                     merge_set = merges[frozenset(key)]
                 except KeyError:
-                    merge_set = (set([a]), {})
+                    merge_set = (set([a]), OrderedDict())
                     merges[frozenset(key)] = merge_set
                 else:
                     merge_set[0].add(a)
