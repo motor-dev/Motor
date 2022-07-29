@@ -574,20 +574,32 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                                 conflict_log.info('  [no precedence] %s', item.to_string(name_map))
                             else:
                                 conflict_log.info('  [discarded] %s', item.to_string(name_map))
-                                item_group._discarded.add(item)
+                                try:
+                                    item_group._discarded[item].add(a)
+                                except KeyError:
+                                    item_group._discarded[item] = set([a])
                             continue
                         elif item._precedence is not None:
                             if item._precedence[1] < precedence:
                                 conflict_log.info('  [discarded] %s', item.to_string(name_map))
-                                item_group._discarded.add(item)
+                                try:
+                                    item_group._discarded[item].add(a)
+                                except KeyError:
+                                    item_group._discarded[item] = set([a])
                                 continue
                             if j < 0 and shift_actions and associativity == 'left':
                                 conflict_log.info('  [discarded] %s', item.to_string(name_map))
-                                item_group._discarded.add(item)
+                                try:
+                                    item_group._discarded[item].add(a)
+                                except KeyError:
+                                    item_group._discarded[item] = set([a])
                                 continue
                             if j >= 0 and reduce_actions and associativity == 'right':
                                 conflict_log.info('  [discarded] %s', item.to_string(name_map))
-                                item_group._discarded.add(item)
+                                try:
+                                    item_group._discarded[item].add(a)
+                                except KeyError:
+                                    item_group._discarded[item] = set([a])
                                 continue
                         if split and item._split is None:
                             try:

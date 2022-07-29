@@ -17,7 +17,7 @@ LOAD_OPTIMIZED = 0
 GENERATE = 1
 LOAD_CACHE = 2
 
-VERSION = '0.64'
+VERSION = '0.65'
 
 
 class Action(object):
