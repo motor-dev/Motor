@@ -20,6 +20,7 @@ def _find_merge_points(conflict_list, lookaheads, name_map, logger, error_log):
     # type: (List[Tuple[LR0Node, bool, str]], Set[int], List[str], Logger, Logger) -> None
     merge_tree = MergeTree(conflict_list, lookaheads)
     merge_tree.check_resolved(name_map, logger)
+    pass
     #for item, tags in sorted(merge_tree._error_nodes.items(), key=lambda x: (x[0].rule._filename, x[0].rule._lineno)):
     #    error_log.warning('%s - need to resolve previous split[%s]' % (item.to_string(name_map), ",".join(tags)))
 
@@ -573,16 +574,20 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                                 conflict_log.info('  [no precedence] %s', item.to_string(name_map))
                             else:
                                 conflict_log.info('  [discarded] %s', item.to_string(name_map))
+                                item_group._discarded.add(item)
                             continue
                         elif item._precedence is not None:
                             if item._precedence[1] < precedence:
                                 conflict_log.info('  [discarded] %s', item.to_string(name_map))
+                                item_group._discarded.add(item)
                                 continue
                             if j < 0 and shift_actions and associativity == 'left':
                                 conflict_log.info('  [discarded] %s', item.to_string(name_map))
+                                item_group._discarded.add(item)
                                 continue
                             if j >= 0 and reduce_actions and associativity == 'right':
                                 conflict_log.info('  [discarded] %s', item.to_string(name_map))
+                                item_group._discarded.add(item)
                                 continue
                         if split and item._split is None:
                             try:
