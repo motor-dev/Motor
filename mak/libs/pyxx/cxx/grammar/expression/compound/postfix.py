@@ -27,31 +27,38 @@ from ....parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('postfix-expression : primary-expression')
-@glrp.rule('postfix-expression : postfix-expression "[" expr-or-braced-init-list "]"')
-@glrp.rule('postfix-expression : postfix-expression "(" expression-list? ")"')
-@glrp.rule('postfix-expression : simple-type-specifier [split:expression]"(" expression-list? ")"')
-@glrp.rule('postfix-expression : typename-specifier [split:expression]"(" expression-list? ")"')
-@glrp.rule('postfix-expression : postfix-expression "." template? id-expression')
-@glrp.rule('postfix-expression : postfix-expression "->" template? id-expression')
-@glrp.rule('postfix-expression : postfix-expression "++"')
-@glrp.rule('postfix-expression : postfix-expression "--"')
-@glrp.rule('postfix-expression : "dynamic_cast" "<" type-id ">" "(" expression ")"')
-@glrp.rule('postfix-expression : "static_cast" "<" type-id ">" "(" expression ")"')
-@glrp.rule('postfix-expression : "reinterpret_cast" "<" type-id ">" "(" expression ")"')
-@glrp.rule('postfix-expression : "const_cast" "<" type-id ">" "(" expression ")"')
-@glrp.rule('postfix-expression : typeid "(" expression ")"')
-@glrp.rule('postfix-expression : typeid "(" type-id ")"')
+@glrp.rule('postfix-expression : postfix-expression-proxy')
 @cxx98
 def postfix_expression(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('postfix-expression : simple-type-specifier braced-init-list')
-@glrp.rule('postfix-expression : typename-specifier braced-init-list')
+@glrp.rule('postfix-expression-proxy : primary-expression')
+@glrp.rule('postfix-expression-proxy : postfix-expression-proxy "[" expr-or-braced-init-list "]"')
+@glrp.rule('postfix-expression-proxy : postfix-expression-proxy "(" expression-list? ")"')
+@glrp.rule('postfix-expression-proxy : simple-type-specifier [split:expression]"(" expression-list? ")"')
+@glrp.rule('postfix-expression-proxy : typename-specifier [split:expression]"(" expression-list? ")"')
+@glrp.rule('postfix-expression-proxy : postfix-expression-proxy "." template? id-expression')
+@glrp.rule('postfix-expression-proxy : postfix-expression-proxy "->" template? id-expression')
+@glrp.rule('postfix-expression-proxy : postfix-expression-proxy "++"')
+@glrp.rule('postfix-expression-proxy : postfix-expression-proxy "--"')
+@glrp.rule('postfix-expression-proxy : "dynamic_cast" "<" type-id ">" "(" expression ")"')
+@glrp.rule('postfix-expression-proxy : "static_cast" "<" type-id ">" "(" expression ")"')
+@glrp.rule('postfix-expression-proxy : "reinterpret_cast" "<" type-id ">" "(" expression ")"')
+@glrp.rule('postfix-expression-proxy : "const_cast" "<" type-id ">" "(" expression ")"')
+@glrp.rule('postfix-expression-proxy : typeid "(" expression ")"')
+@glrp.rule('postfix-expression-proxy : typeid "(" type-id ")"')
+@cxx98
+def postfix_expression_proxy(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('postfix-expression-proxy : simple-type-specifier braced-init-list')
+@glrp.rule('postfix-expression-proxy : typename-specifier braced-init-list')
 @cxx11
-def postfix_expression_cxx11(self, p):
+def postfix_expression_proxy_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
