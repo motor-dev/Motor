@@ -50,6 +50,17 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('simple-type-specifier : "float"')
 @glrp.rule('simple-type-specifier : "double"')
 @glrp.rule('simple-type-specifier : "void"')
+@glrp.rule('simple-type-specifier-3 : "char"')
+@glrp.rule('simple-type-specifier-3 : "wchar_t"')
+@glrp.rule('simple-type-specifier-3 : "bool"')
+@glrp.rule('simple-type-specifier-3 : "short"')
+@glrp.rule('simple-type-specifier-3 : "int"')
+@glrp.rule('simple-type-specifier-3 : "long"')
+@glrp.rule('simple-type-specifier-3 : "signed"')
+@glrp.rule('simple-type-specifier-3 : "unsigned"')
+@glrp.rule('simple-type-specifier-3 : "float"')
+@glrp.rule('simple-type-specifier-3 : "double"')
+@glrp.rule('simple-type-specifier-3 : "void"')
 @cxx98
 def simple_type_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -60,6 +71,8 @@ def simple_type_specifier(self, p):
 @glrp.rule('simple-type-specifier : placeholder-type-specifier')
 @glrp.rule('simple-type-specifier : "char16_t"')
 @glrp.rule('simple-type-specifier : "char32_t"')
+@glrp.rule('simple-type-specifier-3 : "char16_t"')
+@glrp.rule('simple-type-specifier-3 : "char32_t"')
 @cxx11
 def simple_type_specifier_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -67,6 +80,7 @@ def simple_type_specifier_cxx11(self, p):
 
 
 @glrp.rule('simple-type-specifier : "char8_t"')
+@glrp.rule('simple-type-specifier-3 : "char8_t"')
 @cxx20
 def simple_type_specifier_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
