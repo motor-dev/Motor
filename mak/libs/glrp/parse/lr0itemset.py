@@ -11,7 +11,7 @@ class LR0ItemSet(object):
         self._core = set([])       # type: Set[LR0Node]
         self._items = {}           # type:Dict[LR0Item, LR0Node]
         self._sorted_items = []    # type: List[LR0Item]
-        self._discarded = set()    # type: Set[LR0Item]
+        self._discarded = {}       # type: Dict[LR0Item, Set[int]]
         self.add_core(core)
         self._lr0_close()
 

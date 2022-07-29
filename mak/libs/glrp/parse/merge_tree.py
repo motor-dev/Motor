@@ -142,7 +142,8 @@ class _MergeState(object):
                 node, la, tags = queue.popleft()
 
                 if node._item in node._item_set._discarded:
-                    continue
+                    if lookaheads <= node._item_set._discarded[node._item]:
+                        continue
 
                 try:
                     prev_tags = seen[(node, la)]
@@ -205,7 +206,8 @@ class _MergeState(object):
                 node, la, tags, parent_nodes = queue.popleft()
 
                 if node._item in node._item_set._discarded:
-                    continue
+                    if lookaheads <= node._item_set._discarded[node._item]:
+                        continue
 
                 try:
                     current_node = seen[(node, la)]
@@ -255,7 +257,8 @@ class _MergeState(object):
                 node, la, tags, parent_nodes = queue.popleft()
 
                 if node._item in node._item_set._discarded:
-                    continue
+                    if lookaheads <= node._item_set._discarded[node._item]:
+                        continue
 
                 try:
                     current_node = state._nodes[(node, la)]
