@@ -106,15 +106,17 @@ class _MergeState(object):
     def __init__(self, entry):
         # type: (Entry) -> None
         self._entry = entry
-        self._nodes = {}           # type: Dict[Tuple[LR0Node, bool], _MergeNode]
-        self._predecessors = []    # type: List[_MergeState]
-        self._successors = []      # type: List[_MergeState]
+        self._nodes = {}               # type: Dict[Tuple[LR0Node, bool], _MergeNode]
+        self._predecessors = []        # type: List[_MergeState]
+        self._successors = []          # type: List[_MergeState]
         self._id = _MergeState.ID
         _MergeState.ID += 1
         item_set = self._entry[0][0]._item_set
         self._state_number = item_set._index
         self._leaf = False
         self._valid = False
+        self._important_items = {}     # type: Dict[LR0Node, int]
+        self._key_node_count = 0
 
     def validate(self):
         # type: () -> None
@@ -138,6 +140,10 @@ class _MergeState(object):
 
             while queue:
                 node, la, tags = queue.popleft()
+
+                if node._item in node._item_set._discarded:
+                    continue
+
                 try:
                     prev_tags = seen[(node, la)]
                 except KeyError:
@@ -187,9 +193,9 @@ class _MergeState(object):
         return [tuple(entry) for i, entry in parent_states.items()], has_joined
 
     def refine(self, lookaheads):
-        # type: (Set[int]) -> List[Tuple[int, LR0Item]]
-        merge_items = []   # type: List[Tuple[int, LR0Item]]
-        seen = {}          # type: Dict[Tuple[LR0Node, int], _MergeNode]
+        # type: (Set[int]) -> List[Tuple[int, LR0Node]]
+        merge_items = []   # type: List[Tuple[int, LR0Node]]
+        seen = {}          # type: Dict[Tuple[LR0Node, bool], _MergeNode]
 
         def backtrack_up(node, la, tags, parent_nodes):
             # type: (LR0Node, bool, _Tags, List[_MergeNode]) -> None
@@ -197,6 +203,10 @@ class _MergeState(object):
 
             while queue:
                 node, la, tags, parent_nodes = queue.popleft()
+
+                if node._item in node._item_set._discarded:
+                    continue
+
                 try:
                     current_node = seen[(node, la)]
                 except KeyError:
@@ -222,12 +232,12 @@ class _MergeState(object):
         for node, la, tags in self._entry:
             backtrack_up(node, la, tags, [])
 
-        for _, merge_node in seen.items():
+        for (node, la), merge_node in seen.items():
             for p in merge_node._predecessors:
-                if p._tags == merge_node._tags:
+                if p != merge_node and p._tags != merge_node._tags:
+                    merge_items.append((0, node))
+                    self._important_items[node] = 0
                     break
-                else:
-                    merge_items.append((0, merge_node._node._item))
 
         return merge_items
 
@@ -243,6 +253,10 @@ class _MergeState(object):
 
             while queue:
                 node, la, tags, parent_nodes = queue.popleft()
+
+                if node._item in node._item_set._discarded:
+                    continue
+
                 try:
                     current_node = state._nodes[(node, la)]
                 except KeyError:
@@ -320,22 +334,109 @@ class MergeTree(object):
         self.print_dot(name_map, logger)
         pass
 
+    def _gather_essential_states(self, interesting_states, lookaheads):
+        # type: (List[_MergeState], Set[int]) -> Set[_MergeState]
+        result = set()                   # type: Set[_MergeState]
+        important_states = OrderedDict() # type: OrderedDict[_MergeState, List[Tuple[int, LR0Node]]]
+        state_important_count = {}       # type: Dict[_MergeState, Tuple[int, int]]
+        state_important_items = {}       # type: Dict[_MergeState, Set[Tuple[int, LR0Item]]]
+
+        def filter_items(from_state):
+            # type: (List[_MergeState]) -> None
+            visited_items = set()
+            for state in from_state:
+                try:
+                    visited_items.update(state_important_items[state])
+                except KeyError:
+                    pass
+            for other_state, items in state_important_items.items():
+                if items:
+                    prev_count = state_important_count[other_state]
+                    prev_size = len(items)
+                    items.difference_update(visited_items)
+                    diff_size = prev_size - len(items)
+                    new_count = (prev_count[0] - diff_size, prev_count[1] + diff_size)
+                    state_important_count[other_state] = new_count
+                    if new_count[0] == 0:
+                        del important_states[other_state]
+
+        for state in interesting_states:
+            if state._valid:
+                important_nodes = state.refine(lookaheads)
+                if len(important_nodes) > 0:
+                    important_states[state] = important_nodes
+                    state_important_items[state] = set([(type, node._item) for type, node in important_nodes])
+                    state_important_count[state] = (len(state_important_items[state]), 0)
+
+        # go through all important states, find shortest path to top & bottom
+        downstream_states = set()  # type: Set[_MergeState]
+        while important_states:
+            x = sorted(important_states.keys(), key=lambda s: -state_important_count.get(s, (0, 0))[0])
+            origin_state = x[0]
+
+            # compute the shortest paths that goes from the root to a leaf that traverses this state
+            seen = set([origin_state])
+            queue = deque([(origin_state, [origin_state])])
+            while queue:
+                state, path = queue.popleft()
+                if state in result:
+                    result.update(path)
+                    break
+                if state._leaf:
+                    result.update(path)
+                    break
+                for successor in sorted(state._successors, key=lambda s: -state_important_count.get(s, (0, 0))[0]):
+                    if successor in seen:
+                        continue
+                    seen.add(successor)
+                    queue.append((successor, path + [successor]))
+
+            queue = deque([(origin_state, path)])
+            while queue:
+                state, path = queue.popleft()
+                if state in downstream_states:
+                    downstream_states.update(path)
+                    break
+                if not state._predecessors:
+                    downstream_states.update(path)
+                    break
+                for predecessor in sorted(
+                    state._predecessors, key=lambda s: state_important_count.get(s, (0, 0)), reverse=True
+                ):
+                    if predecessor in seen:
+                        continue
+                    seen.add(predecessor)
+                    queue.append((predecessor, path + [predecessor]))
+
+            # for each other state, remove all items that will be treated by this state
+            filter_items(path)
+            if origin_state in important_states:
+                pass
+
+            result.update(downstream_states)
+
+        print(len(result))
+        return result
+
     def _build_tree(self, node_set, lookaheads):
         # type: (List[Tuple[LR0Node, bool, str]], Set[int]) -> _MergeState
+        def get_index(i, tag):
+            # type: (int, str) -> int
+            for j, (_, _, symbol) in enumerate(node_set):
+                if tag == symbol:
+                    return j
+            assert False
+
         entry = tuple(
-            (node, la, _Tags({i: frozenset([symbol])})) for i, (node, la, symbol) in enumerate(node_set)
-        )                                                                                                  # type: Entry
+            (node, la, _Tags({get_index(i, symbol): frozenset([symbol])}))
+            for i, (node, la, symbol) in enumerate(node_set)
+        )                                                                    # type: Entry
         root = _MergeState(entry)
         states = {entry: root}
         queue = [root]
         leaves = []
 
         interesting_states = []    # type: List[_MergeState]
-        important_states = {
-            0: OrderedDict(),
-            1: OrderedDict(),
-            2: OrderedDict()
-        }                          # type: Dict[int, OrderedDict[LR0Item, List[_MergeState]]]
         while queue:
             state = queue.pop(0)
             entries, merges = state.collect_predecessors(lookaheads)
@@ -358,58 +459,8 @@ class MergeTree(object):
         for leaf in leaves:
             leaf.validate()
 
-        for state in interesting_states:
-            if state._valid:
-                for merge_type, merge_item in state.refine(lookaheads):
-                    d = important_states[merge_type]
-                    try:
-                        d[merge_item].append(state)
-                    except KeyError:
-                        d[merge_item] = [state]
-
-        # go through all important states, find shortest path to top & bottom
-        downstream_states = set()  # type: Set[_MergeState]
-        for index in 2, 1, 0:
-            for item, state_list in important_states[index].items():
-                for state in state_list:
-                    if state in self._all_states:
-                        break
-                else:
-                    for origin_state in state_list:
-                        if origin_state._valid:
-                            seen = set([origin_state])
-                            queue2 = deque([(origin_state, [origin_state])])
-                            while queue2:
-                                state, path = queue2.popleft()
-                                if state in self._all_states:
-                                    self._all_states.update(path)
-                                    break
-                                if state._leaf:
-                                    self._all_states.update(path)
-                                    break
-                                for successor in state._successors:
-                                    if successor in seen:
-                                        continue
-                                    seen.add(successor)
-                                    queue2.append((successor, path + [successor]))
-
-                            queue2 = deque([(origin_state, [origin_state])])
-                            while queue2:
-                                state, path = queue2.popleft()
-                                if state in downstream_states:
-                                    downstream_states.update(path)
-                                    break
-                                if not state._predecessors:
-                                    assert state == root
-                                    downstream_states.update(path)
-                                    break
-                                for predecessor in state._predecessors:
-                                    if predecessor in seen:
-                                        continue
-                                    seen.add(predecessor)
-                                    queue2.append((predecessor, path + [predecessor]))
-                            self._all_states.update(downstream_states)
-                            break
+        # compute a restricted set of states that contains all essential ones
+        self._all_states = self._gather_essential_states(interesting_states, lookaheads)
 
         # expand all states
         root.expand(states, self._all_states, lookaheads)
@@ -420,11 +471,11 @@ class MergeTree(object):
         out_stream.info('   digraph MergeTree {')
         out_stream.info('     node[style="rounded,filled"][shape="box"];')
         colors = [
-            'aliceblue', 'aquamarine', 'burlywood', 'cadetblue1', 'coral', 'darkgoldenrod1', 'darkolivegreen1',
-            'darkslategray2', 'deepskyblue', 'gray', 'khaki1', 'lightpink1', 'mistyrose', 'palegreen1', 'rosybrown2',
-            'thistle', 'wheat1'
+            'aquamarine', 'burlywood', 'coral', 'darkgoldenrod1', 'darkolivegreen1', 'darkslategray2', 'deepskyblue',
+            'gray', 'khaki1', 'lightpink1', 'mistyrose', 'palegreen1', 'rosybrown2', 'thistle', 'wheat1'
         ]
         tags = {}  # type: Dict[str, str]
+        borders = ('[color=red][penwidth=3]', '[color=blue][penwidth=3]', '[color=green][penwidth=3]', '')
 
         def get_color(tag):
             # type: (str) -> str
@@ -445,8 +496,8 @@ class MergeTree(object):
                     for tlist in merge_node._committed._tags.values():
                         all_tags.update(tlist)
 
-                    color = ':'.join([get_color(tag) for tag in all_tags])
-                    border_color = ''
+                    color = ':'.join(sorted([get_color(tag) for tag in all_tags]))
+                    border_color = borders[state._important_items.get(node, 3)]
                     out_stream.info(
                         '       %d[label="%s[%s]\\n%s"]%s[fillcolor="%s"];' % (
                             merge_node._id, name_map[node._item._symbol], ', '.join(all_tags),
