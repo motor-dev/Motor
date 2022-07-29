@@ -24,52 +24,64 @@ from . import typedef
 from . import type
 
 
-@glrp.rule('decl-specifier : storage-class-specifier')
-@glrp.rule('decl-specifier : defining-type-specifier')
-@glrp.rule('decl-specifier : function-specifier')
-@glrp.rule('decl-specifier : "friend"')
-@glrp.rule('decl-specifier : "typedef"')
-@glrp.rule('decl-specifier : "inline"')
-@glrp.rule('decl-specifier : "decl-specifier-macro"')
+@glrp.rule('decl-specifier-1 : storage-class-specifier')
+@glrp.rule('decl-specifier-1 : defining-type-specifier-1')
+@glrp.rule('decl-specifier-1 : function-specifier')
+@glrp.rule('decl-specifier-1 : "friend"')
+@glrp.rule('decl-specifier-1 : "typedef"')
+@glrp.rule('decl-specifier-1 : "inline"')
+@glrp.rule('decl-specifier-1 : "decl-specifier-macro"')
+@glrp.rule('decl-specifier-2 : defining-type-specifier-2')
+@glrp.rule('decl-specifier-3 : storage-class-specifier')
+@glrp.rule('decl-specifier-3 : defining-type-specifier-3')
+@glrp.rule('decl-specifier-3 : function-specifier')
+@glrp.rule('decl-specifier-3 : "friend"')
+@glrp.rule('decl-specifier-3 : "typedef"')
+@glrp.rule('decl-specifier-3 : "inline"')
+@glrp.rule('decl-specifier-3 : "decl-specifier-macro"')
 @cxx98
 def decl_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('decl-specifier : "constexpr"')
+@glrp.rule('decl-specifier-1 : "constexpr"')
+@glrp.rule('decl-specifier-3 : "constexpr"')
 @cxx11
 def decl_specifier_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('decl-specifier : "consteval"')
-@glrp.rule('decl-specifier : "constinit"')
+@glrp.rule('decl-specifier-1 : "consteval"')
+@glrp.rule('decl-specifier-1 : "constinit"')
+@glrp.rule('decl-specifier-3 : "consteval"')
+@glrp.rule('decl-specifier-3 : "constinit"')
 @cxx20
 def decl_specifier_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('decl-specifier-seq : decl-specifier end-decl-specifier-seq attribute-specifier-seq?')
-@glrp.rule('decl-specifier-seq : decl-specifier continue-decl-specifier-seq decl-specifier-seq')
+@glrp.rule('decl-specifier-seq : decl-specifier-seq-proxy')
 @cxx98
 def decl_specifier_seq(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('end-decl-specifier-seq[split:end_declaration_spec] :')
+@glrp.rule('decl-specifier-seq-proxy : decl-specifier-1 decl-specifier-seq-proxy')
+@glrp.rule('decl-specifier-seq-proxy : decl-specifier-2 decl-specifier-seq-tail')
 @cxx98
-def end_decl_specifier_seq(self, p):
+def decl_specifier_seq_proxy(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('continue-decl-specifier-seq[split:continue_declaration_spec] :')
+@glrp.rule('decl-specifier-seq-tail : attribute-specifier-seq?')
+@glrp.rule('decl-specifier-seq-tail : decl-specifier-3 decl-specifier-seq-tail')
 @cxx98
-def continue_decl_specifier_seq(self, p):
+def decl_specifier_seq_tail(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
