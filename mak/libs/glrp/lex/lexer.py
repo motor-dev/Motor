@@ -10,6 +10,7 @@ class Lexer:
     tokens = tuple()   # type: Tuple[str,...]
 
     class State:
+
         def __init__(self, regex_list):
             # type: (List[Tuple[Pattern[str], List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str, bool, int]]]]]) -> None
             self._regex = regex_list
@@ -131,7 +132,7 @@ class Lexer:
                 yield new_token
                 break
             else:
-                raise SyntaxError("Illegal character '%s' at index %d" % (lexdata[lexpos], lexpos), lexdata[lexpos:])
+                raise SyntaxError("Illegal character '%s' at index %d" % (lexdata[lexpos], lexpos))
 
         tok = Token(0, lexpos, lexpos, None, skipped_tokens)
         self._lexpos = lexpos
