@@ -3,7 +3,6 @@ from .grammar import Grammar
 from .context import Context
 from motor_typing import TYPE_CHECKING, TypeVar
 import os
-import sys
 import re
 import hashlib
 import zlib
@@ -291,11 +290,10 @@ def merge(rule_name):
 
         code = method.__code__
 
-        if sys.version_info >= (3, 0):
-            if code.co_posonlyargcount > 0:
-                raise SyntaxError('Invalid merge signature', (code.co_filename, code.co_firstlineno, 0, ''))
-            if code.co_kwonlyargcount > 0:
-                raise SyntaxError('Invalid merge signature', (code.co_filename, code.co_firstlineno, 0, ''))
+        if getattr(code, 'co_kwonlyargcount', 0) > 0:
+            raise SyntaxError('Invalid merge signature', (code.co_filename, code.co_firstlineno, 0, ''))
+        if getattr(code, 'co_posonlyargcount', 0) > 0:
+            raise SyntaxError('Invalid merge signature', (code.co_filename, code.co_firstlineno, 0, ''))
         if getattr(method, '__defaults__') is not None:
             raise SyntaxError(
                 'Merge method should not have default arguments', (code.co_filename, code.co_firstlineno, 0, '')
