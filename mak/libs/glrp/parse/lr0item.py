@@ -19,7 +19,7 @@ class LR0Item(object):
 
         self._before = predecessor
         self._after = successors
-        self._symbols = set(rule.production)
+        self._symbols = frozenset(rule.production)
         self._first = first
         self._follow = follow      # type: Dict[int, int]
         self._lookaheads = {}      # type: Dict[int, List[int]]
@@ -27,6 +27,17 @@ class LR0Item(object):
         self._split = None         # type: Optional[str]
         self._action = None        # type: Optional[str]
         self._merge = merge_list   # type: List[Tuple[str, Dict[str, None]]]
+        self._merge_map = {}       # type: Dict[str, str]
+
+        for result, inputs in self._merge:
+            for key, _ in inputs.items():
+                if key in self._merge_map:
+                    raise SyntaxError(
+                        'incorrect merge: key "%s" appears in more than one merge rule' % key,
+                        (rule._filename, rule._lineno, 0, '')
+                    )
+                self._merge_map[key] = result
+        self._merge_set = frozenset(self._merge_map.keys())
         self._split_use = 0
         self._merge_use = 0
 

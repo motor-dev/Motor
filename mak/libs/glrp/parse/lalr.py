@@ -7,6 +7,8 @@ from motor_typing import TYPE_CHECKING
 from collections import OrderedDict
 import sys
 
+GROUP_MERGE_GRAPHS = True
+
 
 class LALRTable(object):
 
@@ -230,7 +232,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
             i += 1
 
             # Collect all of the symbols that could possibly be in the goto(I,X) sets
-            asyms = set([])
+            asyms = set([])    # type: Set[int]
             for item in state:
                 asyms.update(item._symbols)
 
@@ -692,6 +694,16 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                         for item in items:
                             error_log.note('    %s' % item.to_string(name_map))
 
+                if not GROUP_MERGE_GRAPHS:
+                    splits = [(node, lookahead, split_name) for node, (lookahead, split_name) in merge_set[1].items()]
+                    conflict_log.info('   Merge graph for rules:')
+                    for node, _, split_name in splits:
+                        conflict_log.info(
+                            '      [%s][%s] %s' % (split_name, name_map[a], node._item.to_string(name_map))
+                        )
+                    _find_merge_points(splits, set([a]), name_map, conflict_log, error_log)
+                    conflict_log.info('')
+
             else:
                 for j, token_action in st_action[a]:
                     action_error = False
@@ -708,7 +720,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                         for item in items:
                             error_log.note('    %s' % item.to_string(name_map))
 
-        if merges:
+        if merges and GROUP_MERGE_GRAPHS:
             assert len(states[0]._core) == 1
             for _, merge_set in merges.items():
                 lookaheads = merge_set[0]

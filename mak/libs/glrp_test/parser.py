@@ -9,7 +9,6 @@ class Parser1(glrp.Parser):
         @glrp.token(r'a', 'a')
         @glrp.token(r'b', 'b')
         @glrp.token(r'c', 'c')
-        @glrp.token(r'd', 'd')
         def tok(self, token):
             # type: (glrp.Token) -> glrp.Token
             return token
@@ -20,24 +19,22 @@ class Parser1(glrp.Parser):
         # type: (glrp.Production) -> None
         pass
 
-    @glrp.merge('A')
-    def merged_A(self, ab, b):
+    @glrp.merge('B')
+    def merged_B(self, ab):
         # type: (Optional[int], Optional[int]) -> Optional[int]
         return ab
 
+    @glrp.merge('A')
+    def merged_A(self, merged_B, b):
+        # type: (Optional[int], Optional[int]) -> Optional[int]
+        return b
+
     @glrp.rule("A : a B c")
     @glrp.rule("A : a a B c")
-    @glrp.rule("A : a a a B c")
-    @glrp.rule("A : a B d")
-    @glrp.rule("A : a a B d")
-    #@glrp.rule("A : a a a B ")
-    #@glrp.rule("A : B c")
     def p_A(self, p):
         # type: (glrp.Production) -> None
         pass
 
-    #@glrp.rule("B [prec:right,0][split:aab]: a a b")
-    @glrp.rule("B [prec:right,0][split:aab]: a a b")
     @glrp.rule("B [prec:right,0][split:ab]: a b")
     @glrp.rule("B [prec:right,0][split:b]: b")
     def p_B(self, p):
