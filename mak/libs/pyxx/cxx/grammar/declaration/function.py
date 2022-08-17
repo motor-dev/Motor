@@ -11,7 +11,7 @@ function-body:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx20
+from ...parser import cxx98, cxx11, cxx20, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -52,5 +52,14 @@ def function_body_cxx11(self, p):
     pass
 
 
+@glrp.merge('function-definition')
+@cxx98_merge
+def ambiguous_function_definition(self, ambiguous_decl_specifier_seq, ambiguous_declarator):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    # attribute-specifier-seq? decl-specifier-seq declarator function-body | attribute-specifier-seq? declarator function-body
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Optional
     from ...parser import CxxParser

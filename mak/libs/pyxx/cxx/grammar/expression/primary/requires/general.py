@@ -20,7 +20,7 @@ requirement:
 """
 
 import glrp
-from .....parser import cxx20
+from .....parser import cxx20, cxx20_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -71,5 +71,13 @@ def requirement_cxx20(self, p):
     pass
 
 
+@glrp.merge('requirement')
+@cxx20_merge
+def ambiguous_requirement(self, ambiguous_cast_expression, ambiguous_type_name):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Optional
     from .....parser import CxxParser

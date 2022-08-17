@@ -17,13 +17,13 @@ def id_expression(self, p):
     pass
 
 
-#@glrp.merge('id-expression')
-#@cxx98_merge
-#def generic_id_expression(self, template_name, generic_type_name):
-#    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-#    # template_name corresponds to an unqualified-id
-#    # generic-type-name to a qualified-id
-#    pass
+@glrp.merge('id-expression')
+@glrp.merge_result('id_expression')
+@cxx98_merge
+def id_expression_rename(self, unqualified_id, template_id, template_name, ambiguous_nested_name_specifier):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
 
 if TYPE_CHECKING:
     from motor_typing import Optional

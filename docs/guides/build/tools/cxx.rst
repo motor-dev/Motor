@@ -33,8 +33,8 @@ complete C++ parser is a `notoriously <http://www.yosefk.com/c++fqa/defective.ht
 `task <http://www.swig.org/article_cpp.html>`_. But with the right parser generator and a deep
 analysis of the grammar, it is possible to create such a parser. The next sections describe the
 resulting parsing tool *Pyxx*, a frontend that can parse C, C++, Objective-C and Objective-C++
-source files, and the parser generator *glrp*, and present all conflicts in the C++ grammar and
-their resolution in the annotated grammar that the parser generator uses in *Pyxx*, 
+source files, and present all conflicts in the C++ grammar and their resolution in the annotated
+grammar that the parser generator uses in *Pyxx*.
 
 
 .. contents:: Contents
@@ -46,8 +46,8 @@ Parsing methodology
 Parsing stages
 """"""""""""""
 
-The C++ compilation process is normally done in several steps, some are common for compiling any
-programming language. Processing a C++ source file usually starts by the following steps:
+The C++ compilation process is traditionally done in several steps, some are common for compiling
+any programming language. Processing a C++ source file usually starts by the following steps:
 
 - A preprocessing step is responsible for concatenating all source files into a single text that
   is sent to the next phase. Preprocessor tokens are evaluated, included files are replaced by
@@ -829,8 +829,8 @@ The C++ standard explicitely excludes the second possibility in section 8.5.2\ [
 The conflict is resolved by annotating the grammar with a priority for the first form of the
 *selection-statement*.
 
-.. [#]  In the second form of *if statement* (the one including *else*), if the first substatement is also
-  an *if statement* then that inner *if statement* shall contain an *else* part.
+.. [#]  In the second form of *if statement* (the one including *else*), if the first substatement
+  is also an *if statement* then that inner *if statement* shall contain an *else* part.
 
 
 
@@ -928,8 +928,8 @@ In a member declaration, ``:`` token can introduce either a bitifiel specifier o
 
 The C++ standard specifies which resolution to apply in section 9.7.1\ [#]_.
 
-.. [#] A ``:`` following ``enum nested-name-specifier? identifier`` within the *decl-specifier-seq* of a
-   *member-declaration* is parsed as part of an *enum-base*.
+.. [#] A ``:`` following ``enum nested-name-specifier? identifier`` within the *decl-specifier-seq*
+   of a *member-declaration* is parsed as part of an *enum-base*.
 
    [Note 1: This resolves a potential ambiguity between the declaration of an enumeration with an
    *enum-base* and the declaration of an unnamed bit-field of enumeration type.]
@@ -986,7 +986,8 @@ The conflict arises after either *new-expression*, or a *conditional-expression*
 The following ``{``\ /\ ``=`` token will be opening an *initializer-clause*. The counterexample
 context shows that when parsing a *member-declarator*, if the bitfield specifier (a
 *constant-expression*) expands to a *new-expression* or a *conditional-expression*, there is a
-conflict between matching the *initializer-clause* to the *expression* or to the *member-declarator*.
+conflict between matching the *initializer-clause* to the *expression* or to the
+*member-declarator*.
 
 .. container:: toggle
 
@@ -1079,7 +1080,8 @@ conflict between matching the *initializer-clause* to the *expression* or to the
       │ ╰member-declarator───────────────────────────────────────────────────────────────────────────────────────────────────╯
       ╰╴
 
-The conflict is resolved in the C++ standard in section 11.4.1\ [#]_ by assigning a priority to shifing into the *brace-init-list*.
+The conflict is resolved in the C++ standard in section 11.4.1\ [#]_ by assigning a priority to
+shifing into the *brace-init-list*.
 
 .. [#] In a *member-declarator* for a bit-field, the *constant-expression* is parsed as the longest
    sequence of tokens that could syntactically form a *constant-expression*.
@@ -1185,9 +1187,9 @@ exist for all *ptr-operator* constructs, and all *attribute-specifier*\ s.
       ╰╴
 
 
-According to the standard in section 11.4.8.3\ [#]_, the attribute specifier sequence is consumed by the *conversion-type-id* by applying a priority on
-shifting the *attribute-specifier*\ s and *cv-qualifier*\ s over the reductions of
-*ptr-operator*\ s.
+According to the standard in section 11.4.8.3\ [#]_, the attribute specifier sequence is consumed by
+the *conversion-type-id* by applying a priority on shifting the *attribute-specifier*\ s and
+*cv-qualifier*\ s over the reductions of *ptr-operator*\ s.
 
 .. [#] The *conversion-type-id* in a *conversion-function-id* is the longest sequence of tokens that
    could possibly form a *conversion-type-id*.
@@ -1288,8 +1290,8 @@ the ``(`` token after the ``explicit`` keyword or the ``noexcept`` keyword:
          │ ╰init-declarator───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
          ╰╴
 
-The standard disambiguates the conflict for ``explicit`` in section 9.2.3\ [#]_ and for ``noexcept`` in section 14.5.2\ [#]_ 
-In both cases, The grammar conflict is resolved by prioritizing the shift.
+The standard disambiguates the conflict for ``explicit`` in section 9.2.3\ [#]_ and for ``noexcept``
+in section 14.5.2\ [#]_. In both cases, The grammar conflict is resolved by prioritizing the shift.
 
 .. [#] A ``(`` token that follows ``explicit`` is parsed as part of the *explicit-specifier*.
 
@@ -1621,13 +1623,14 @@ or starting a binary operation using the shorter version of the *conmversion-typ
          │ ╰multiplicative-expression─────────────────────────────────────────╯
          ╰╴
 
-The C++ standard disambiguates this case in section 11.4.8.3\ [#]_ by prioritizing a shift of the *ptr-operator* over
-reducing the *conversion-type-id*.
+The C++ standard disambiguates this case in section 11.4.8.3\ [#]_ by prioritizing a shift of the
+*ptr-operator* over reducing the *conversion-type-id*.
 
-.. [#]   The *conversion-type-id* in a *conversion-function-id* is the longest sequence of tokens that
-   could possibly form a *conversion-type-id*.
+.. [#]   The *conversion-type-id* in a *conversion-function-id* is the longest sequence of tokens
+   that could possibly form a *conversion-type-id*.
    
-   [Note 1: This prevents ambiguities between the declarator operator ``*`` and its expression counterparts.
+   [Note 1: This prevents ambiguities between the declarator operator ``*`` and its expression
+   counterparts.
    
    .. code-block:: C++
 
@@ -1685,7 +1688,8 @@ of a *multiplicative-expression* causing a conflict when encountering the ``*`` 
 The standard specifies in section 7.6.2.8\ [#]_ by prioritizing a shift of the *ptr-operator* over
 reducing the *new-type-id*.
 
-.. [#] The *new-type-id* in a *new-expression* is the longest possible sequence of *new-declarators*.
+.. [#] The *new-type-id* in a *new-expression* is the longest possible sequence of
+   *new-declarators*.
    
    [Note 3: This prevents ambiguities between the declarator operators ``&``, ``&&``, ``*``, and
    ``[]`` and their expression counterparts. — end note]
@@ -1810,7 +1814,8 @@ two different expansions, using a destructor name as an *unqualified-id* or buil
          │ ╰unary-expression────────────────────────────────────────────╯
          ╰╴
 
-The conflict is resolved in the C++ standard in section 7.6.2.2\ [#]_ by prioritizing the *unary-operator* rule.
+The conflict is resolved in the C++ standard in section 7.6.2.2\ [#]_ by prioritizing the
+*unary-operator* rule.
 
 .. [#] There is an ambiguity in the grammar when ``~`` is followed by a *type-name* or
    *decltype-specifier*. The ambiguity is resolved by treating ``~`` as the unary complement
@@ -2098,7 +2103,8 @@ can be applied directly, shortcutting the intermediate reduction:
 
 The standard forbids in section 10.2\ [#]_ to reduce the *module-import-declaration* into a
 *declaration*. The other cases described in the standard do not cause additional syntax conflicts,
-so the restrictions can be applied during the semantic analysis in order to emit better error messages.
+so the restrictions can be applied during the semantic analysis in order to emit better error
+messages.
 
 .. [#] The *declaration* or *declaration-seq* of an *export-declaration* shall not contain an
        *export-declaration* or *module-import-declaration*.
@@ -2130,110 +2136,113 @@ is also solved directly at the *simple-type-specifier* level.
 .. graphviz::
 
    digraph MergeTree {
-     node[style="rounded,filled"][shape="box"];
-     subgraph cluster_140319723099328 {
-       label="State 17"; style="rounded";
-       140319694449008[label="typedef-name[typedef_name]\n ♦ identifier"][fillcolor="aliceblue"];
-       140319694449056[label="template-name[template_name]\n ♦ identifier"][fillcolor="aquamarine"];
-       140319694449104[label="enum-name[enum_name]\n ♦ identifier"][fillcolor="burlywood"];
-       140319694449152[label="class-name[class_name]\n ♦ identifier"][fillcolor="cadetblue1"];
-       140319694026304[label="type-specifier[generic_simple_type_specifier]\n ♦ simple-type-specifier"][fillcolor="coral"];
-       140319694026352[label="defining-type-specifier[generic_simple_type_specifier]\n ♦ type-specifier"][fillcolor="coral"];
-       140319694026400[label="decl-specifier[generic_simple_type_specifier]\n ♦ defining-type-specifier"][fillcolor="coral"];
-       140319694026448[label="decl-specifier-seq[generic_simple_type_specifier]\n ♦ decl-specifier continue-decl-specifier-seq decl-specifier-seq"][fillcolor="coral"];
-       140319694026496[label="decl-specifier-seq[generic_simple_type_specifier]\n ♦ decl-specifier end-decl-specifier-seq attribute-specifier-seq?"][fillcolor="coral"];
-       140319694026544[label="simple-declaration[generic_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq init-declarator-list? ;"][fillcolor="coral"];
-       140319694026592[label="function-definition[generic_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator function-body"][fillcolor="coral"];
-       140319694026640[label="function-definition[generic_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator virt-specifier-seq function-body"][fillcolor="coral"];
-       140319694026688[label="function-definition[generic_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator requires-clause function-body"][fillcolor="coral"];
-       140319694026736[label="simple-declaration[generic_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;"][fillcolor="coral"];
-       subgraph cluster_generic_type_name_140319723099328 {
-         label="typedef_name/enum_name/class_name => generic_type_name"; style="rounded,filled"; color="pink";
-           140319693967712[label="type-name[typedef_name]\n ♦ typedef-name"][fillcolor="aliceblue"];
-           140319694026160[label="type-name[enum_name]\n ♦ enum-name"][fillcolor="burlywood"];
-           140319694026208[label="type-name[class_name]\n ♦ class-name"][fillcolor="cadetblue1"];
+     node[style="filled,striped,rounded",shape="box"];
+     subgraph cluster_0 {
+       label="State 64"; style="rounded"; labeljust="l"; bgcolor="lightgray"
+       0[label="typedef-name[typedef_name]\nidentifier ♦ ",fillcolor="aquamarine"];
+       1[label="template-name[template_name]\nidentifier ♦ ",fillcolor="burlywood"];
+       2[label="enum-name[enum_name]\nidentifier ♦ ",fillcolor="coral"];
+       3[label="class-name[class_name]\nidentifier ♦ ",fillcolor="darkgoldenrod1"];
+     }
+     subgraph cluster_109 {
+       label="State 0"; style="rounded"; labeljust="l"; bgcolor="lightgray"
+       25[label="simple-declaration[ambiguous_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq init-declarator-list? ;",fillcolor="darkolivegreen1"];
+       26[label="block-declaration[ambiguous_simple_type_specifier]\n ♦ simple-declaration",fillcolor="darkolivegreen1"];
+       27[label="declaration-proxy[ambiguous_simple_type_specifier]\n ♦ block-declaration",fillcolor="darkolivegreen1"];
+       28[label="declaration[ambiguous_simple_type_specifier]\n ♦ declaration-proxy",fillcolor="darkolivegreen1"];
+       29[label="declaration-seq?[ambiguous_simple_type_specifier]\n ♦ declaration",fillcolor="darkolivegreen1"];
+       30[label="declaration-seq[ambiguous_simple_type_specifier]\n ♦ declaration",fillcolor="darkolivegreen1"];
+       31[label="translation-unit[ambiguous_simple_type_specifier]\n ♦ declaration-seq?",fillcolor="darkolivegreen1"];
+       32[label="declaration-seq?[ambiguous_simple_type_specifier]\n ♦ declaration-seq declaration",fillcolor="darkolivegreen1"];
+       33[label="declaration-seq[ambiguous_simple_type_specifier]\n ♦ declaration-seq declaration",fillcolor="darkolivegreen1"];
+       34[label="translation-unit'[ambiguous_simple_type_specifier]\n ♦ translation-unit <eof>",fillcolor="darkolivegreen1"];
+       35[label="function-definition[ambiguous_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator function-body",fillcolor="darkolivegreen1"];
+       36[label="declaration-proxy[ambiguous_simple_type_specifier]\n ♦ function-definition",fillcolor="darkolivegreen1"];
+       37[label="function-definition[ambiguous_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator virt-specifier-seq function-body",fillcolor="darkolivegreen1"];
+       38[label="function-definition[ambiguous_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator requires-clause function-body",fillcolor="darkolivegreen1"];
+       39[label="simple-declaration[ambiguous_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;",fillcolor="darkolivegreen1"];
+     }
+     subgraph cluster_1 {
+       label="State 17"; style="rounded"; labeljust="l"; bgcolor="lightgray"
+       subgraph cluster_1_ambiguous_type_name {
+         label="class_name, enum_name, typedef_name ⇒ ambiguous_type_name"; style="rounded,filled"; color="lightpink"; labeljust="l";
+         5[label="type-name[typedef_name]\n ♦ typedef-name",fillcolor="aquamarine"];
+         22[label="type-name[enum_name]\n ♦ enum-name",fillcolor="coral"];
+         24[label="type-name[class_name]\n ♦ class-name",fillcolor="darkgoldenrod1"];
        }
-       subgraph cluster_generic_simple_type_specifier_140319723099328 {
-         label="template_name/generic_type_name => generic_simple_type_specifier"; style="rounded,filled"; color="pink";
-           140319694026112[label="simple-type-specifier[template_name]\n ♦ template-name"][fillcolor="aquamarine"];
-           140319694026256[label="simple-type-specifier[generic_type_name]\n ♦ type-name"][fillcolor="darkgoldenrod1"];
+       subgraph cluster_1_ambiguous_simple_type_specifier {
+         label="ambiguous_type_name, template_name ⇒ ambiguous_simple_type_specifier"; style="rounded,filled"; color="lightpink"; labeljust="l";
+         6[label="simple-type-specifier[ambiguous_type_name]\n ♦ type-name",fillcolor="darkslategray2"];
+         20[label="simple-type-specifier[template_name]\n ♦ template-name",fillcolor="burlywood"];
        }
+       4[label="typedef-name[typedef_name]\n ♦ identifier",fillcolor="aquamarine"];
+       7[label="type-specifier-2[ambiguous_simple_type_specifier]\n ♦ simple-type-specifier",fillcolor="darkolivegreen1"];
+       8[label="defining-type-specifier-2[ambiguous_simple_type_specifier]\n ♦ type-specifier-2",fillcolor="darkolivegreen1"];
+       9[label="decl-specifier-2[ambiguous_simple_type_specifier]\n ♦ defining-type-specifier-2",fillcolor="darkolivegreen1"];
+       10[label="decl-specifier-seq-proxy[ambiguous_simple_type_specifier]\n ♦ decl-specifier-2 decl-specifier-seq-tail",fillcolor="darkolivegreen1"];
+       11[label="decl-specifier-seq-proxy[ambiguous_simple_type_specifier]\n ♦ decl-specifier-2 decl-specifier-seq-tail",fillcolor="darkolivegreen1"];
+       12[label="decl-specifier-seq[ambiguous_simple_type_specifier]\n ♦ decl-specifier-seq-proxy",fillcolor="darkolivegreen1"];
+       13[label="decl-specifier-seq[ambiguous_simple_type_specifier]\n ♦ decl-specifier-seq-proxy",fillcolor="darkolivegreen1"];
+       14[label="simple-declaration[ambiguous_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq init-declarator-list? ;",fillcolor="darkolivegreen1"];
+       15[label="function-definition[ambiguous_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator function-body",fillcolor="darkolivegreen1"];
+       16[label="function-definition[ambiguous_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator virt-specifier-seq function-body",fillcolor="darkolivegreen1"];
+       17[label="function-definition[ambiguous_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator requires-clause function-body",fillcolor="darkolivegreen1"];
+       18[label="simple-declaration[ambiguous_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;",fillcolor="darkolivegreen1"];
+       19[label="template-name[template_name]\n ♦ identifier",fillcolor="burlywood"];
+       21[label="enum-name[enum_name]\n ♦ identifier",fillcolor="coral"];
+       23[label="class-name[class_name]\n ♦ identifier",fillcolor="darkgoldenrod1"];
      }
-     subgraph cluster_140319723099232 {
-       label="State 63"; style="rounded";
-       140319694447616[label="typedef-name[typedef_name]\nidentifier ♦ "][fillcolor="aliceblue"];
-       140319693967472[label="template-name[template_name]\nidentifier ♦ "][fillcolor="aquamarine"];
-       140319693967520[label="enum-name[enum_name]\nidentifier ♦ "][fillcolor="burlywood"];
-       140319693967568[label="class-name[class_name]\nidentifier ♦ "][fillcolor="cadetblue1"];
-     }
-     subgraph cluster_140319736596800 {
-       label="State 0"; style="rounded";
-       140319693967760[label="function-definition[generic_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator function-body"][fillcolor="coral"];
-       140319693967808[label="simple-declaration[generic_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq init-declarator-list? ;"][fillcolor="coral"];
-       140319693967856[label="simple-declaration[generic_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;"][fillcolor="coral"];
-       140319693967904[label="function-definition[generic_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator requires-clause function-body"][fillcolor="coral"];
-       140319693967952[label="function-definition[generic_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator virt-specifier-seq function-body"][fillcolor="coral"];
-       140319949859664[label="translation-unit'[generic_simple_type_specifier]\n ♦ translation-unit <eof>"][fillcolor="coral"];
-       140319931244896[label="noexport-declaration[generic_simple_type_specifier]\n ♦ function-definition"][fillcolor="coral"];
-       140319931244944[label="block-declaration[generic_simple_type_specifier]\n ♦ simple-declaration"][fillcolor="coral"];
-       140319931244992[label="declaration[generic_simple_type_specifier]\n ♦ noexport-declaration"][fillcolor="coral"];
-       140319931245040[label="noexport-declaration[generic_simple_type_specifier]\n ♦ block-declaration"][fillcolor="coral"];
-       140319931245088[label="declaration-seq?[generic_simple_type_specifier]\n ♦ declaration"][fillcolor="coral"];
-       140319931245136[label="declaration-seq[generic_simple_type_specifier]\n ♦ declaration"][fillcolor="coral"];
-       140319931245184[label="translation-unit[generic_simple_type_specifier]\n ♦ declaration-seq?"][fillcolor="coral"];
-       140319931245232[label="declaration-seq?[generic_simple_type_specifier]\n ♦ declaration-seq declaration"][fillcolor="coral"];
-       140319931245280[label="declaration-seq[generic_simple_type_specifier]\n ♦ declaration-seq declaration"][fillcolor="coral"];
-     }
-     140319693967712->140319694449008;
-     140319694026112->140319694449056;
-     140319694026160->140319694449104;
-     140319694026208->140319694449152;
-     140319694449008->140319694447616;
-     140319694449056->140319693967472;
-     140319694449104->140319693967520;
-     140319694449152->140319693967568;
-     140319931244896->140319693967760;
-     140319931244944->140319693967808;
-     140319931244944->140319693967856;
-     140319931244896->140319693967904;
-     140319931244896->140319693967952;
-     140319694026256->140319693967712;
-     140319694026304->140319694026112;
-     140319694026256->140319694026160;
-     140319694026256->140319694026208;
-     140319694026304->140319694026256;
-     140319694026352->140319694026304;
-     140319694026400->140319694026352;
-     140319694026496->140319694026400;
-     140319694026448->140319694026400;
-     140319694026544->140319694026448;
-     140319694026592->140319694026448;
-     140319694026640->140319694026448;
-     140319694026688->140319694026448;
-     140319694026736->140319694026448;
-     140319694026640->140319694026496;
-     140319694026544->140319694026496;
-     140319694026688->140319694026496;
-     140319694026592->140319694026496;
-     140319693967808->140319694026544;
-     140319693967760->140319694026592;
-     140319693967952->140319694026640;
-     140319693967904->140319694026688;
-     140319693967856->140319694026736;
-     140319931244992->140319931244896;
-     140319931245040->140319931244944;
-     140319931245088->140319931244992;
-     140319931245136->140319931244992;
-     140319931244992->140319931245040;
-     140319931245184->140319931245088;
-     140319931245232->140319931245136;
-     140319931245280->140319931245136;
-     140319949859664->140319931245184;
-     140319931245184->140319931245232;
-     140319931245232->140319931245280;
-     140319931245280->140319931245280;
+     14->25;
+     25->26;
+     39->26;
+     26->27;
+     27->28;
+     36->28;
+     28->29;
+     28->30;
+     29->31;
+     32->31;
+     30->32;
+     33->32;
+     30->33;
+     33->33;
+     31->34;
+     15->35;
+     35->36;
+     37->36;
+     38->36;
+     16->37;
+     17->38;
+     18->39;
+     0->4;
+     4->5;
+     5->6;
+     22->6;
+     24->6;
+     6->7;
+     20->7;
+     7->8;
+     8->9;
+     9->10;
+     9->11;
+     10->12;
+     11->13;
+     12->14;
+     13->14;
+     12->15;
+     13->15;
+     12->16;
+     13->16;
+     12->17;
+     13->17;
+     12->18;
+     1->19;
+     19->20;
+     2->21;
+     21->22;
+     3->23;
+     23->24;
    }
-
 
 *simple-type-specifier* and *unqualified-id*
 """"""""""""""""""""""""""""""""""""""""""""
@@ -2720,90 +2729,87 @@ branches to be parsed simultaneously and leaves the resolution to the semantic a
 In order to aid the parser, a dummy empty reduction is added early in the rules to move the conflict
 early. The grammar is tagged on the dummy reduction instead.
 
-The merge is done at the *noexport-declaration* rule.
+The merge is done at the *declaration-proxy* rule.
 
 .. graphviz::
 
    digraph MergeTree {
-     node[style="rounded,filled"][shape="box"];
-     subgraph cluster_140294010898320 {
-       label="State 0"; style="rounded";
-       140293714524768[label="deduction-guide[explicit_deduction]\n ♦ attribute-specifier-seq? deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;"][fillcolor="aliceblue"];
-       140293714524816[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator function-body"][fillcolor="aquamarine"];
-       140293714524864[label="simple-declaration[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq init-declarator-list? ;"][fillcolor="aquamarine"];
-       140293714524912[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator virt-specifier-seq function-body"][fillcolor="aquamarine"];
-       140293714524960[label="simple-declaration[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;"][fillcolor="aquamarine"];
-       140293714525008[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator requires-clause function-body"][fillcolor="aquamarine"];
-       140293717178448[label="translation-unit'[explicit_noexport_declaration]\n ♦ translation-unit <eof>"][fillcolor="burlywood"];
-       140293714051280[label="block-declaration[explicit_declaration]\n ♦ simple-declaration"][fillcolor="aquamarine"];
-       140293714051328[label="declaration[explicit_noexport_declaration]\n ♦ noexport-declaration"][fillcolor="burlywood"];
-       140293714051424[label="declaration-seq?[explicit_noexport_declaration]\n ♦ declaration"][fillcolor="burlywood"];
-       140293714051472[label="declaration-seq[explicit_noexport_declaration]\n ♦ declaration"][fillcolor="burlywood"];
-       140293714051520[label="translation-unit[explicit_noexport_declaration]\n ♦ declaration-seq?"][fillcolor="burlywood"];
-       140293714051568[label="declaration-seq?[explicit_noexport_declaration]\n ♦ declaration-seq declaration"][fillcolor="burlywood"];
-       140293714051616[label="declaration-seq[explicit_noexport_declaration]\n ♦ declaration-seq declaration"][fillcolor="burlywood"];
-       subgraph cluster_explicit_noexport_declaration_140294010898320 {
-         label="explicit_deduction/explicit_declaration => explicit_noexport_declaration"; style="rounded,filled"; color="pink";
-           140293714051184[label="noexport-declaration[explicit_deduction]\n ♦ deduction-guide"][fillcolor="aliceblue"];
-           140293714051232[label="noexport-declaration[explicit_declaration]\n ♦ function-definition"][fillcolor="aquamarine"];
-           140293714051376[label="noexport-declaration[explicit_declaration]\n ♦ block-declaration"][fillcolor="aquamarine"];
+     node[style="filled,striped,rounded",shape="box"];
+     subgraph cluster_1 {
+       label="State 17"; style="rounded"; labeljust="l"; bgcolor="lightgray"
+       0[label="deduction-guide-begin[explicit_deduction]\n ♦ ",fillcolor="aquamarine"];
+       1[label="deduction-guide[explicit_deduction]\nattribute-specifier-seq? ♦ deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;",fillcolor="aquamarine"];
+       2[label="explicit-specifier[explicit_declaration]\n ♦ explicit",fillcolor="burlywood"];
+       3[label="function-specifier[explicit_declaration]\n ♦ explicit-specifier",fillcolor="burlywood"];
+       4[label="decl-specifier-1[explicit_declaration]\n ♦ function-specifier",fillcolor="burlywood"];
+       5[label="decl-specifier-seq-proxy[explicit_declaration]\n ♦ decl-specifier-1 decl-specifier-seq-proxy",fillcolor="burlywood"];
+       6[label="decl-specifier-seq[explicit_declaration]\n ♦ decl-specifier-seq-proxy",fillcolor="burlywood"];
+       7[label="simple-declaration[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq init-declarator-list? ;",fillcolor="burlywood"];
+       8[label="function-definition[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator function-body",fillcolor="burlywood"];
+       9[label="function-definition[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator virt-specifier-seq function-body",fillcolor="burlywood"];
+       10[label="function-definition[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator requires-clause function-body",fillcolor="burlywood"];
+       11[label="simple-declaration[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;",fillcolor="burlywood"];
+       12[label="explicit-specifier[explicit_declaration]\n ♦ explicit ( constant-expression )",fillcolor="burlywood"];
+     }
+     subgraph cluster_2 {
+       label="State 0"; style="rounded"; labeljust="l"; bgcolor="lightgray"
+       subgraph cluster_2_ambiguous_explicit_declaration {
+         label="explicit_declaration, explicit_deduction ⇒ ambiguous_explicit_declaration"; style="rounded,filled"; color="lightpink"; labeljust="l";
+         14[label="declaration-proxy[explicit_deduction]\n ♦ deduction-guide",fillcolor="aquamarine"];
+         24[label="declaration-proxy[explicit_declaration]\n ♦ block-declaration",fillcolor="burlywood"];
+         26[label="declaration-proxy[explicit_declaration]\n ♦ function-definition",fillcolor="burlywood"];
        }
+       13[label="deduction-guide[explicit_deduction]\n ♦ attribute-specifier-seq? deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;",fillcolor="aquamarine"];
+       15[label="declaration[ambiguous_explicit_declaration]\n ♦ declaration-proxy",fillcolor="coral"];
+       16[label="declaration-seq?[ambiguous_explicit_declaration]\n ♦ declaration",fillcolor="coral"];
+       17[label="declaration-seq[ambiguous_explicit_declaration]\n ♦ declaration",fillcolor="coral"];
+       18[label="translation-unit[ambiguous_explicit_declaration]\n ♦ declaration-seq?",fillcolor="coral"];
+       19[label="declaration-seq?[ambiguous_explicit_declaration]\n ♦ declaration-seq declaration",fillcolor="coral"];
+       20[label="declaration-seq[ambiguous_explicit_declaration]\n ♦ declaration-seq declaration",fillcolor="coral"];
+       21[label="translation-unit'[ambiguous_explicit_declaration]\n ♦ translation-unit <eof>",fillcolor="coral"];
+       22[label="simple-declaration[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq init-declarator-list? ;",fillcolor="burlywood"];
+       23[label="block-declaration[explicit_declaration]\n ♦ simple-declaration",fillcolor="burlywood"];
+       25[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator function-body",fillcolor="burlywood"];
+       27[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator virt-specifier-seq function-body",fillcolor="burlywood"];
+       28[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator requires-clause function-body",fillcolor="burlywood"];
+       29[label="simple-declaration[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;",fillcolor="burlywood"];
      }
-     subgraph cluster_140294010898224 {
-       label="State 17"; style="rounded";
-       140293714462128[label="deduction-guide-begin[explicit_deduction]\n ♦ "][fillcolor="aliceblue"];
-       140293714525632[label="explicit-specifier[explicit_declaration]\n ♦ explicit"][fillcolor="aquamarine"];
-       140293714525680[label="explicit-specifier[explicit_declaration]\n ♦ explicit ( constant-expression )"][fillcolor="aquamarine"];
-       140293714525728[label="deduction-guide[explicit_deduction]\nattribute-specifier-seq? ♦ deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;"][fillcolor="aliceblue"];
-       140293714525776[label="function-specifier[explicit_declaration]\n ♦ explicit-specifier"][fillcolor="aquamarine"];
-       140293714525824[label="decl-specifier[explicit_declaration]\n ♦ function-specifier"][fillcolor="aquamarine"];
-       140293714525872[label="decl-specifier-seq[explicit_declaration]\n ♦ decl-specifier continue-decl-specifier-seq decl-specifier-seq"][fillcolor="aquamarine"];
-       140293714525920[label="decl-specifier-seq[explicit_declaration]\n ♦ decl-specifier end-decl-specifier-seq attribute-specifier-seq?"][fillcolor="aquamarine"];
-       140293714525968[label="simple-declaration[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq init-declarator-list? ;"][fillcolor="aquamarine"];
-       140293714526016[label="function-definition[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator function-body"][fillcolor="aquamarine"];
-       140293714526064[label="function-definition[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator virt-specifier-seq function-body"][fillcolor="aquamarine"];
-       140293714526112[label="function-definition[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator requires-clause function-body"][fillcolor="aquamarine"];
-       140293714526160[label="simple-declaration[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;"][fillcolor="aquamarine"];
-     }
-     140293714051184->140293714524768;
-     140293714051232->140293714524816;
-     140293714051280->140293714524864;
-     140293714051232->140293714524912;
-     140293714051280->140293714524960;
-     140293714051232->140293714525008;
-     140293714525728->140293714462128;
-     140293714525776->140293714525632;
-     140293714525776->140293714525680;
-     140293714524768->140293714525728;
-     140293714525824->140293714525776;
-     140293714525872->140293714525824;
-     140293714525920->140293714525824;
-     140293714525968->140293714525872;
-     140293714526016->140293714525872;
-     140293714526064->140293714525872;
-     140293714526112->140293714525872;
-     140293714526160->140293714525872;
-     140293714525968->140293714525920;
-     140293714526016->140293714525920;
-     140293714526064->140293714525920;
-     140293714526112->140293714525920;
-     140293714526160->140293714525920;
-     140293714524864->140293714525968;
-     140293714524816->140293714526016;
-     140293714524912->140293714526064;
-     140293714525008->140293714526112;
-     140293714524960->140293714526160;
-     140293714051328->140293714051184;
-     140293714051328->140293714051232;
-     140293714051376->140293714051280;
-     140293714051472->140293714051328;
-     140293714051424->140293714051328;
-     140293714051328->140293714051376;
-     140293714051520->140293714051424;
-     140293714051616->140293714051472;
-     140293714051568->140293714051472;
-     140293717178448->140293714051520;
-     140293714051520->140293714051568;
-     140293714051616->140293714051616;
-     140293714051568->140293714051616;
+     0->1;
+     2->3;
+     12->3;
+     3->4;
+     4->5;
+     5->6;
+     6->7;
+     6->8;
+     6->9;
+     6->10;
+     6->11;
+     1->13;
+     13->14;
+     14->15;
+     24->15;
+     26->15;
+     15->16;
+     15->17;
+     16->18;
+     19->18;
+     17->19;
+     20->19;
+     17->20;
+     20->20;
+     18->21;
+     7->22;
+     22->23;
+     29->23;
+     23->24;
+     8->25;
+     25->26;
+     27->26;
+     28->26;
+     9->27;
+     10->28;
+     11->29;
    }
+
+

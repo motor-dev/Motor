@@ -125,6 +125,30 @@ def declaration_proxy_cxx20(self, p):
     pass
 
 
+@glrp.merge('declaration-proxy')
+@cxx98_merge
+def ambiguous_explicit_declaration(self, explicit_deduction, explicit_declaration):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@glrp.merge('declaration-proxy')
+@cxx98_merge
+def ambiguous_declaration(
+    self, nodeclspec_function_declaration, ambiguous_function_definition, template_decl, deduction_guide,
+    ambiguous_block_declaration
+):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@glrp.merge('declaration-proxy')
+@cxx98_merge
+def ambiguous_declaration_init_list(self, braced_init_list, compound_statement):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 @glrp.rule('declaration : declaration-proxy')
 @cxx98
 def declaration(self, p):
@@ -159,6 +183,13 @@ def block_declaration_cxx20(self, p):
     pass
 
 
+@glrp.merge('block-declaration')
+@cxx98_merge
+def ambiguous_block_declaration(self, simple_declaration, opaque_enum_declaration):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 @glrp.rule('nodeclspec-function-declaration : attribute-specifier-seq? declarator ";"')
 @cxx98
 def nodeclspec_function_declaration(self, p):
@@ -183,6 +214,14 @@ def alias_declaration(self, p):
 @cxx98
 def simple_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.merge('simple-declaration')
+@glrp.merge_result('simple_declaration')
+@cxx98_merge
+def simple_declaration_rename(self, ambiguous_decl_specifier_seq):
+    # type: (CxxParser, Optional[glrp.Production]) -> None
     pass
 
 
@@ -218,6 +257,14 @@ def attribute_declaration(self, p):
 @glrp.rule('identifier-list : identifier-list "," "identifier"')
 @cxx98
 def identifier_list(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.merge('nodeclspec-function-declaration')
+@glrp.merge_result('nodeclspec_function_declaration')
+@cxx98_merge
+def nodeclspec_function_declaration_rename(self, ambiguous_declarator):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

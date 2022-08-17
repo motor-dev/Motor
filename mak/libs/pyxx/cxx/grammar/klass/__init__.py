@@ -23,7 +23,7 @@ class-key:
 """
 
 import glrp
-from ...parser import cxx98, cxx11
+from ...parser import cxx98, cxx11, cxx98_merge
 from motor_typing import TYPE_CHECKING
 from . import member
 from . import initializer
@@ -70,6 +70,13 @@ def class_head_name(self, p):
     pass
 
 
+@glrp.merge('class-head-name')
+@cxx98_merge
+def ambiguous_class_head_name(self, class_template_id, ambiguous_nested_name_specifier, template_name):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 @glrp.rule('class-virt-specifier : "final"')
 @cxx11
 def class_virt_specifier_cxx11(self, p):
@@ -87,4 +94,5 @@ def class_key(self, p):
 
 
 if TYPE_CHECKING:
+    from typing import Optional
     from ...parser import CxxParser

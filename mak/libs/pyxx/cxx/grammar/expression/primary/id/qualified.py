@@ -49,11 +49,12 @@ def scope_opt(self, p):
     pass
 
 
-#@glrp.merge('nested-name-specifier')
-#@cxx98_merge
-#def generic_nested_name_specifier(self, generic_type_name, namespace_name, namespace_alias):
-#    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
-#    pass
+@glrp.merge('nested-name-specifier')
+@cxx98_merge
+def ambiguous_nested_name_specifier(self, ambiguous_namespace_name, ambiguous_type_name):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
 
 if TYPE_CHECKING:
     from motor_typing import Optional

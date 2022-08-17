@@ -8,7 +8,7 @@ relational-expression:
 """
 
 import glrp
-from ....parser import cxx98
+from ....parser import cxx98, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -23,5 +23,22 @@ def relational_expression(self, p):
     pass
 
 
+@glrp.merge('relational-expression')
+@cxx98_merge
+def ambiguous_relational_expression_literal(self, template_literal, nontemplate_literal):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    # new new-placement (type-id) vs new(type-id)
+    pass
+
+
+@glrp.merge('relational-expression')
+@cxx98_merge
+def ambiguous_relational_expression_operator(self, template_operator, nontemplate_operator):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    # new new-placement (type-id) vs new(type-id)
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Optional
     from ....parser import CxxParser

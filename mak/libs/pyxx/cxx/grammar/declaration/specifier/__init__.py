@@ -16,7 +16,7 @@ decl-specifier-seq:
 """
 
 import glrp
-from ....parser import cxx98, cxx11, cxx20
+from ....parser import cxx98, cxx11, cxx20, cxx98_merge
 from motor_typing import TYPE_CHECKING
 from . import storage
 from . import function
@@ -63,6 +63,24 @@ def decl_specifier_cxx20(self, p):
     pass
 
 
+@glrp.merge('decl-specifier-seq-proxy')
+@cxx98_merge
+def ambiguous_decl_specifier_seq(
+    self, ambiguous_nested_name_specifier, ambiguous_type_specifier, ambiguous_defining_type_specifier_2
+):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@glrp.merge('decl-specifier-seq')
+@cxx98_merge
+def ambiguous_decl_specifier_seq_2(self, ambiguous_class_head_name, class_name):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    # Should never reach; option #2  has a lower precedence than option #1, but it can't be detected
+    # during the merge tree construction
+    pass
+
+
 @glrp.rule('decl-specifier-seq : decl-specifier-seq-proxy')
 @cxx98
 def decl_specifier_seq(self, p):
@@ -95,4 +113,5 @@ def decl_specifier_seq_opt(self, p):
 
 
 if TYPE_CHECKING:
+    from typing import Optional
     from ....parser import CxxParser

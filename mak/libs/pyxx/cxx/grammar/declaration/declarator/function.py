@@ -15,7 +15,7 @@ parameter-declaration:
 """
 
 import glrp
-from ....parser import cxx98, cxx11
+from ....parser import cxx98, cxx11, cxx98_merge, cxx11_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -98,5 +98,34 @@ def ellipsis_opt(self, p):
     pass
 
 
+@glrp.merge('parameter-declaration-list?')
+@cxx11_merge
+def ambiguous_parameter_declaration_list_opt(self, pack_declarator, declarator_end):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@glrp.merge('parameter-declaration-proxy')
+@cxx98_merge
+def ambiguous_parameter_declaration(self, ambiguous_declarator, ambiguous_nested_name_specifier):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@glrp.merge('parameter-declaration-proxy')
+@cxx98_merge
+def ambiguous_parameter_declaration_2(self, ambiguous_abstract_declarator_opt, noptr_declarator):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@glrp.merge('parameter-declaration-clause')
+@cxx11_merge
+def ambiguous_parameter_declaration_clause(self, ambiguous_parameter_declaration_list_opt, pack_declarator):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Optional
     from ....parser import CxxParser

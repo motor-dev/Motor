@@ -18,7 +18,7 @@ exception-declaration:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx98, cxx98_merge
 from motor_typing import TYPE_CHECKING
 from . import specification
 
@@ -68,5 +68,20 @@ def exception_declaration(self, p):
     pass
 
 
+@glrp.merge('exception-declaration')
+@cxx98_merge
+def ambiguous_exception_declaration(self, ambiguous_declarator, ambiguous_nested_name_specifier):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@glrp.merge('exception-declaration')
+@cxx98_merge
+def ambiguous_exception_declaration_2(self, ambiguous_abstract_declarator_opt, noptr_declarator):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Optional
     from ...parser import CxxParser

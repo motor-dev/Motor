@@ -39,7 +39,7 @@ pure-specifier:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx17, cxx20
+from ...parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -88,6 +88,16 @@ def member_declaration_cxx20(self, p):
     pass
 
 
+@glrp.merge('member-declaration')
+@cxx98_merge
+def ambiguous_member_declaration(
+    self, ambiguous_function_definition, ambiguous_declarator, ambiguous_decl_specifier_seq, opaque_enum_declaration,
+    deduction_guide, template_decl
+):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 @glrp.rule('member-declarator-list : member-declarator')
 @glrp.rule('member-declarator-list : member-declarator-list "," member-declarator')
 @cxx98
@@ -115,6 +125,13 @@ def member_declarator_list_opt(self, p):
 @cxx98
 def member_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.merge('member-declarator')
+@cxx98_merge
+def ambiguous_member_declarator(self, pure_specifier, initializer):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
@@ -164,4 +181,5 @@ def pure_specifier(self, p):
 
 
 if TYPE_CHECKING:
+    from typing import Optional
     from ...parser import CxxParser

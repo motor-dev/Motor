@@ -20,7 +20,7 @@ defining-type-specifier-seq:
 """
 
 import glrp
-from .....parser import cxx98
+from .....parser import cxx98, cxx98_merge
 from motor_typing import TYPE_CHECKING
 from . import simple
 from . import elaborated
@@ -29,9 +29,9 @@ from . import placeholder
 
 
 @glrp.rule('type-specifier-1 : cv-qualifier')
-@glrp.rule('type-specifier-2 : simple-type-specifier[split:declaration]')
+@glrp.rule('type-specifier-2 : simple-type-specifier[split:ambiguous_simple_type_specifier]')
 @glrp.rule('type-specifier-2 : elaborated-type-specifier')
-@glrp.rule('type-specifier-2 : typename-specifier[split:declaration]')
+@glrp.rule('type-specifier-2 : typename-specifier[split:ambiguous_simple_type_specifier]')
 @glrp.rule('type-specifier-3 : simple-type-specifier-3')
 @glrp.rule('type-specifier-3 : elaborated-type-specifier')
 @glrp.rule('type-specifier-3 : typename-specifier')
@@ -81,5 +81,38 @@ def defining_type_specifier_seq_tail(self, p):
     pass
 
 
+@glrp.merge('type-specifier-2')
+@cxx98_merge
+def ambiguous_type_specifier(self, ambiguous_simple_type_specifier, ambiguous_nested_name_specifier):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@glrp.merge('type-specifier-seq')
+@cxx98_merge
+def ambiguous_type_specifier_seq(self, ambiguous_class_head_name, class_name):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    # Should never reach; option #2  has a lower precedence than option #1, but it can't be detected
+    # during the merge tree construction
+    pass
+
+
+@glrp.merge('defining-type-specifier-2')
+@cxx98_merge
+def ambiguous_defining_type_specifier_2(self, ambiguous_nested_name_specifier, ambiguous_type_specifier):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@glrp.merge('defining-type-specifier-seq')
+@cxx98_merge
+def ambiguous_defining_type_specifier_seq(self, ambiguous_class_head_name, class_name):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    # Should never reach; option #2  has a lower precedence than option #1, but it can't be detected
+    # during the merge tree construction
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Optional
     from .....parser import CxxParser

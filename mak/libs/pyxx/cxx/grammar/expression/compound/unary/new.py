@@ -23,7 +23,7 @@ new-initializer:
 """
 
 import glrp
-from .....parser import cxx98, cxx11
+from .....parser import cxx98, cxx11, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -84,5 +84,14 @@ def new_initializer_opt_cxx11(self, p):
     pass
 
 
+@glrp.merge('new-expression')
+@cxx98_merge
+def ambiguous_new_expression(self, ambiguous_cast_expression, ambiguous_type_id):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    # new new-placement (type-id) vs new(type-id)
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Optional
     from .....parser import CxxParser

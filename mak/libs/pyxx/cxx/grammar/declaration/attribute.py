@@ -47,7 +47,7 @@ balanced-token:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx20, cxx23
+from ...parser import cxx98, cxx11, cxx20, cxx23, cxx11_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -89,6 +89,14 @@ def attribute_specifier_cxx11(self, p):
 @cxx11
 def alignment_specifier_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.merge('alignment-specifier')
+@cxx11_merge
+def ambiguous_alignment_specifier(self, ambiguous_type_id, ambiguous_cast_expression):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    # alignas(type-id) | alignas(constant-expression)
     pass
 
 
@@ -328,4 +336,5 @@ def balanced_token_cxx23(self, p):
 
 
 if TYPE_CHECKING:
+    from typing import Optional
     from ...parser import CxxParser
