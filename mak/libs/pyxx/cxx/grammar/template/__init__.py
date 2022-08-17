@@ -76,6 +76,14 @@ def requires_clause_cxx20(self, p):
     pass
 
 
+@glrp.rule('requires-clause? :')
+@glrp.rule('requires-clause? : requires-clause')
+@cxx20
+def requires_clause_opt_cxx20(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule('constraint-logical-or-expression : constraint-logical-and-expression')
 @glrp.rule('constraint-logical-or-expression : constraint-logical-or-expression "||" constraint-logical-and-expression')
 @cxx20

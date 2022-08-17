@@ -104,14 +104,6 @@ def decl_specifier_seq_tail(self, p):
     pass
 
 
-@glrp.rule('decl-specifier-seq? : decl-specifier-seq')
-@glrp.rule('decl-specifier-seq? :')
-@cxx11
-def decl_specifier_seq_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
 if TYPE_CHECKING:
     from typing import Optional
     from ....parser import CxxParser
