@@ -504,12 +504,14 @@ class MergeTree(object):
                 state, path = queue2.popleft()
                 if state in seen:
                     continue
+                seen.add(state)
                 entries, merges = state.collect_predecessors(lookaheads)
                 if state._leaf:
                     leaves.append(state)
                     for state in path:
                         state._leaf = True
                     break
+                assert state._state_number != 0
 
                 for entry in entries:
                     try:
@@ -520,7 +522,8 @@ class MergeTree(object):
                     if new_state not in state._successors:
                         state._successors.append(new_state)
                         new_state._predecessors.append(state)
-                    queue2.append((new_state, path + [new_state]))
+                    if new_state not in seen:
+                        queue2.append((new_state, path + [new_state]))
 
         for leaf in leaves:
             leaf.validate()
