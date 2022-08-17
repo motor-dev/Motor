@@ -19,7 +19,7 @@ condition:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parser import cxx98, cxx98_merge
 from motor_typing import TYPE_CHECKING
 from . import labeled
 from . import expression
@@ -72,5 +72,34 @@ def condition_opt(self, p):
     pass
 
 
+@glrp.merge('condition')
+@cxx98_merge
+def ambiguous_condition(self, ambiguous_decl_specifier_seq, ambiguous_cast_expression):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@glrp.merge('condition?')
+@cxx98_merge
+def ambiguous_condition_opt(self, ambiguous_decl_specifier_seq, ambiguous_cast_expression):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@glrp.merge('init-statement')
+@cxx98_merge
+def ambiguous_init_statement(self, simple_declaration, ambiguous_cast_expression):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@glrp.merge('statement')
+@cxx98_merge
+def ambiguous_statement(self, ambiguous_block_declaration, ambiguous_cast_expression):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Optional
     from ...parser import CxxParser

@@ -25,7 +25,7 @@ typename-specifier:
 """
 
 import glrp
-from ...parser import cxx98, cxx11
+from ...parser import cxx98, cxx11, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -119,6 +119,27 @@ def template_argument_proxy(self, p):
     pass
 
 
+@glrp.merge('template-argument-proxy')
+@cxx98_merge
+def ambiguous_template_argument_proxy(self, ambiguous_cast_expression, ambiguous_type_id, id_expression):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@glrp.merge('template-argument-proxy')
+@cxx98_merge
+def ambiguous_template_argument_proxy_literal(self, ambiguous_relational_expression_literal, template_literal):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@glrp.merge('template-argument-proxy')
+@cxx98_merge
+def ambiguous_template_argument_proxy_operator(self, ambiguous_relational_expression_operator, template_operator):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 # TODO: template not allowed
 @glrp.rule('typename-specifier : "typename" typename-disambiguation nested-name-specifier "template"? "identifier"')
 @glrp.rule(
@@ -138,4 +159,5 @@ def typename_disambiguation(self, p):
 
 
 if TYPE_CHECKING:
+    from typing import Optional
     from ...parser import CxxParser

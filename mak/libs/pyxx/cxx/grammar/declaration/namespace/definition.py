@@ -26,7 +26,7 @@ namespace-body:
 """
 
 import glrp
-from ....parser import cxx98, cxx11, cxx17, cxx20
+from ....parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -35,6 +35,13 @@ from motor_typing import TYPE_CHECKING
 @cxx98
 def namespace_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.merge('namespace-name')
+@cxx98_merge
+def ambiguous_namespace_name(self, namespace_name, namespace_alias):
+    # type: (CxxParser, glrp.Production, glrp.Production) -> None
     pass
 
 

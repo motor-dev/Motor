@@ -8,7 +8,7 @@ selection-statement:
 """
 
 import glrp
-from ...parser import cxx98, deprecated_cxx17, cxx17, cxx23
+from ...parser import cxx98, deprecated_cxx17, cxx17, cxx23, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -65,5 +65,15 @@ def not_opt_cxx23(self, p):
     pass
 
 
+@glrp.merge('selection-statement')
+@cxx98_merge
+def ambiguous_selection_statement(self, ambiguous_condition, ambiguous_init_statement):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    # switch(init-statement condition) vs switch(condition)
+    # if(init-statement condition) vs switch(condition)
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Optional
     from ...parser import CxxParser

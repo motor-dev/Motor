@@ -14,7 +14,7 @@ for-range-initializer:
 """
 
 import glrp
-from ...parser import cxx98, cxx11
+from ...parser import cxx98, cxx11, cxx11_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -52,5 +52,21 @@ def for_range_initializer_cxx11(self, p):
     pass
 
 
+@glrp.merge('for-range-declaration')
+@cxx11_merge
+def for_range_declaration(self, ambiguous_decl_specifier_seq):
+    # type: (CxxParser, Optional[glrp.Production]) -> None
+    # Simple rename
+    pass
+
+
+@glrp.merge('iteration-statement')
+@cxx11_merge
+def ambiguous_iteration_statement(self, for_range_declaration, ambiguous_condition_opt, ambiguous_init_statement):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Optional
     from ...parser import CxxParser

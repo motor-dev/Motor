@@ -60,10 +60,22 @@ def cxx98(func):
     return cast(Callable[[glrp.Parser, glrp.Production], None], func)
 
 
+def cxx03_merge(func):
+    # type: (Callable[..., None]) -> Callable[..., None]
+    setattr(Cxx03Parser, func.__name__, func)
+    return func
+
+
 def cxx03(func):
     # type: (Callable[[CxxParser, glrp.Production], None]) -> Callable[[glrp.Parser, glrp.Production], None]
     setattr(Cxx03Parser, func.__name__, func)
     return cast(Callable[[glrp.Parser, glrp.Production], None], func)
+
+
+def cxx11_merge(func):
+    # type: (Callable[..., None]) -> Callable[..., None]
+    setattr(Cxx11Parser, func.__name__, func)
+    return func
 
 
 def cxx11(func):
@@ -72,10 +84,22 @@ def cxx11(func):
     return cast(Callable[[glrp.Parser, glrp.Production], None], func)
 
 
+def cxx14_merge(func):
+    # type: (Callable[..., None]) -> Callable[..., None]
+    setattr(Cxx14Parser, func.__name__, func)
+    return func
+
+
 def cxx14(func):
     # type: (Callable[[CxxParser, glrp.Production], None]) -> Callable[[glrp.Parser, glrp.Production], None]
     setattr(Cxx14Parser, func.__name__, func)
     return cast(Callable[[glrp.Parser, glrp.Production], None], func)
+
+
+def cxx17_merge(func):
+    # type: (Callable[..., None]) -> Callable[..., None]
+    setattr(Cxx17Parser, func.__name__, func)
+    return func
 
 
 def cxx17(func):
@@ -84,10 +108,22 @@ def cxx17(func):
     return cast(Callable[[glrp.Parser, glrp.Production], None], func)
 
 
+def cxx20_merge(func):
+    # type: (Callable[..., None]) -> Callable[..., None]
+    setattr(Cxx20Parser, func.__name__, func)
+    return func
+
+
 def cxx20(func):
     # type: (Callable[[CxxParser, glrp.Production], None]) -> Callable[[glrp.Parser, glrp.Production], None]
     setattr(Cxx20Parser, func.__name__, func)
     return cast(Callable[[glrp.Parser, glrp.Production], None], func)
+
+
+def cxx23_merge(func):
+    # type: (Callable[..., None]) -> Callable[..., None]
+    setattr(Cxx23Parser, func.__name__, func)
+    return func
 
 
 def cxx23(func):

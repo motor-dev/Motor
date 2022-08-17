@@ -23,7 +23,7 @@ constraint-logical-and-expression:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx20
+from ...parser import cxx98, cxx11, cxx20, cxx20_merge
 from motor_typing import TYPE_CHECKING
 from . import parameter
 from . import name
@@ -94,6 +94,13 @@ def constraint_logical_and_expression_cxx20(self, p):
     pass
 
 
+@glrp.merge('constraint-logical-and-expression')
+@cxx20_merge
+def ambiguous_constraint_logical_and_expression(self, ambiguous_nested_name_specifier, template_id):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 @glrp.rule('constraint-primary-expression : "integer-literal"')
 @glrp.rule('constraint-primary-expression : "character-literal"')
 @glrp.rule('constraint-primary-expression : "floating-literal"')
@@ -145,4 +152,5 @@ def identifier_opt(self, p):
 
 
 if TYPE_CHECKING:
+    from typing import Optional
     from ...parser import CxxParser

@@ -18,7 +18,7 @@ unary-operator: one of
 """
 
 import glrp
-from .....parser import cxx98, cxx11, cxx20
+from .....parser import cxx98, cxx11, cxx20, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -26,8 +26,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('unary-expression : unary-operator cast-expression')
 @glrp.rule('unary-expression : "++" cast-expression')
 @glrp.rule('unary-expression : "--" cast-expression')
-@glrp.rule('unary-expression : "sizeof" unary-expression')
-@glrp.rule('unary-expression : "sizeof" "(" type-id ")"')
+@glrp.rule('unary-expression : sizeof-expression')
 @glrp.rule('unary-expression : new-expression')
 @glrp.rule('unary-expression : delete-expression')
 @cxx98
@@ -52,6 +51,14 @@ def unary_expression_cxx20(self, p):
     pass
 
 
+@glrp.rule('sizeof-expression : "sizeof" unary-expression')
+@glrp.rule('sizeof-expression : "sizeof" "(" type-id ")"')
+@cxx98
+def sizeof_expression(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule('unary-operator : "*" | "&" | "+" | "-" | "!" | "~"[prec:right,2]')
 @cxx98
 def unary_operator(self, p):
@@ -59,5 +66,14 @@ def unary_operator(self, p):
     pass
 
 
+@glrp.merge('sizeof-expression')
+@cxx98_merge
+def ambiguous_sizeof_expression(self, ambiguous_type_id, ambiguous_cast_expression):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    # sizeof (type-id) vs sizeof unary-expression
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Optional
     from .....parser import CxxParser

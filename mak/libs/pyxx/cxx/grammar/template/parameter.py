@@ -21,7 +21,7 @@ type-constraint:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx20
+from ...parser import cxx98, cxx11, cxx20, cxx98_merge, cxx20_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -30,6 +30,27 @@ from motor_typing import TYPE_CHECKING
 @cxx98
 def template_parameter(self, p):
     # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.merge('template-parameter')
+@cxx98_merge
+def ambiguous_template_parameter(self, ambiguous_type_constraint, ambiguous_decl_specifier_seq):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@glrp.merge('template-parameter')
+@cxx98_merge
+def ambiguous_template_parameter_2(self, type_parameter, defining_type_specifier):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@glrp.merge('template-parameter')
+@cxx98_merge
+def ambiguous_template_parameter_3(self, typename_parameter, typename_specifier):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
@@ -100,5 +121,13 @@ def type_constraint_cxx20(self, p):
     pass
 
 
+@glrp.merge('type-constraint')
+@cxx20_merge
+def ambiguous_type_constraint(self, template_name, concept_name, ambiguous_nested_name_specifier):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Optional
     from ...parser import CxxParser

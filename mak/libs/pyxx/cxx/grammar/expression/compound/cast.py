@@ -5,7 +5,7 @@ cast-expression:
 """
 
 import glrp
-from ....parser import cxx98
+from ....parser import cxx98, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -17,5 +17,13 @@ def cast_expression(self, p):
     pass
 
 
+@glrp.merge('cast-expression')
+@cxx98_merge
+def ambiguous_cast_expression(self, ambiguous_simple_type_specifier, generic_postfix_expression):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Optional
     from ....parser import CxxParser

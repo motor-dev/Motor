@@ -36,7 +36,7 @@ enumerator:
 """
 
 import glrp
-from ...parser import cxx98, cxx11
+from ...parser import cxx98, cxx11, cxx11_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -78,6 +78,14 @@ def enum_head_name(self, p):
 @cxx11
 def opaque_enum_declaration_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.merge('opaque-enum-declaration')
+@glrp.merge_result('opaque_enum_declaration')
+@cxx11_merge
+def opaque_enum_declaration_rename(self, ambiguous_type_specifier, ambiguous_nested_name_specifier):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
@@ -143,4 +151,5 @@ def enumerator(self, p):
 
 
 if TYPE_CHECKING:
+    from typing import Optional
     from ...parser import CxxParser

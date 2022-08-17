@@ -4,7 +4,7 @@ deduction-guide:
 """
 
 import glrp
-from ...parser import cxx17
+from ...parser import cxx17, cxx17_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -24,6 +24,14 @@ def deduction_guide_cxx17(self, p):
 @glrp.rule('deduction-guide-begin[split:explicit_deduction] :')
 @cxx17
 def deduction_guide_begin_cxx17(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.merge('deduction-guide')
+@glrp.merge_result('deduction_guide')
+@cxx17_merge
+def deduction_guide_rename(self, template_name):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

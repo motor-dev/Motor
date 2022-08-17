@@ -16,7 +16,7 @@ LOAD_OPTIMIZED = 0
 GENERATE = 1
 LOAD_CACHE = 2
 
-VERSION = '0.77'
+VERSION = '0.98'
 
 
 class Action(object):
@@ -74,6 +74,7 @@ class Parser(object):
                     h.update(merge_string.encode())
                 for signature in getattr(action, 'merge_signature', []):
                     h.update(signature.encode())
+                h.update(getattr(action, 'merge_result', rule_action).encode())
             if mode == LOAD_CACHE:
                 try:
                     self._grammar = self._load_table(output_directory)
@@ -101,6 +102,7 @@ class Parser(object):
                 rules += _parse_rule(rule_string, rule_action, filename, lineno)
             signature = getattr(action, 'merge_signature', None) # type: Optional[Dict[str, None]]
             if signature is not None:
+                rule_action = getattr(action, 'merge_result', rule_action)
                 for symbol in getattr(action, 'merge', []):
                     try:
                         merges[symbol].append((rule_action, signature))
@@ -302,6 +304,18 @@ def merge(rule_name):
         argument_names = code.co_varnames[1:argument_count]
         setattr(method, 'merge_signature', dict([(a, None) for a in argument_names]))
         getattr(method, 'merge').append(rule_name)
+        return method
+
+    return attach
+
+
+def merge_result(variable_name):
+    # type: (str) -> Callable[[Callable[..., None]], Callable[..., None]]
+    def attach(method):
+        # type: (Callable[..., None]) -> Callable[..., None]
+        if not hasattr(method, 'merge_result'):
+            setattr(method, 'merge_result', variable_name)
+
         return method
 
     return attach
