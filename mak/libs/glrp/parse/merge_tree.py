@@ -37,7 +37,7 @@ class _MergeNode(object):
         self._node = node
         self._lookahead = lookahead
         self._tags_entry = tags
-        self._committed = True
+        self._committed = False
         if node._item._index == 0:
             self._merge_map = node._item._last._merge_map
             self._merge_set = node._item._last._merge_set
@@ -130,6 +130,7 @@ class _MergeState(object):
         self._valid = False
         self._important_items = {}     # type: Dict[LR0Node, int]
         self._key_node_count = 0
+        self._leaf_node = None         # type: Optional[_MergeNode]
 
     def validate(self):
         # type: () -> None
@@ -304,6 +305,7 @@ class _MergeState(object):
 
                     if len(node._predecessors) == 0 and len(node._direct_parents) == 0:
                         leaves.append(current_node)
+                        state._leaf_node = current_node
                     else:
                         for parent in node._direct_parents:
                             item = parent._item
@@ -369,7 +371,10 @@ class MergeTree(object):
         #merge_node = self._map[root_node._item]
         #if len(merge_node._tags) > 1:
         #    logger.warning('   merge conflicts: [%s]' % ', '.join(merge_node._tags))
-        self.print_dot(name_map, logger)
+        for leaf_state, graph in self._paths.items():
+            assert leaf_state._leaf_node is not None
+            if len(leaf_state._leaf_node._tags_exit._tags) > 1:
+                self.print_dot(graph, name_map, logger)
         pass
 
     def _gather_essential_states(self, interesting_states, lookaheads):
@@ -527,92 +532,100 @@ class MergeTree(object):
         root.expand(states, self._all_states, lookaheads)
         return root
 
-    def print_dot(self, name_map, out_stream):
-        # type: (List[str], Logger) -> None
-        for graph in self._paths.values():
-            out_stream.info('')
-            out_stream.info('   digraph MergeTree {')
-            out_stream.info('     node[style="filled,striped,rounded",shape="box"];')
-            colors = [
-                'aquamarine', 'burlywood', 'coral', 'darkgoldenrod1', 'darkolivegreen1', 'darkslategray2',
-                'deepskyblue', 'gray', 'khaki1', 'lightpink1', 'mistyrose', 'palegreen1', 'rosybrown2', 'thistle',
-                'wheat1'
-            ]
-            tags = {}  # type: Dict[str, str]
-            borders = (',color=red,penwidth=3', ',color=blue,penwidth=3', ',color=green,penwidth=3', '')
+    def print_dot(self, graph, name_map, out_stream):
+        # type: (Set[_MergeState], List[str], Logger) -> None
+        out_stream.info('')
+        out_stream.info('   digraph MergeTree {')
+        out_stream.info('     node[style="filled,striped,rounded",shape="box"];')
+        colors = [
+            'aquamarine',
+            'burlywood',
+            'coral',
+            'darkgoldenrod1',
+            'darkolivegreen1',
+            'darkslategray2',
+            'deepskyblue',
+            'gray',
+            'khaki1',
+            'lightpink1',
+            'mistyrose',
+            'palegreen1',
+            'rosybrown2',
+            'thistle',
+            'wheat1',
+            'chartreuse2',
+            'darkorchid1',
+            'gainsboro',
+        ]
+        tags = {}  # type: Dict[str, str]
+        borders = (',color=red,penwidth=3', ',color=blue,penwidth=3', ',color=green,penwidth=3', '')
 
-            def get_color(tag):
-                # type: (str) -> str
-                try:
-                    return tags[tag]
-                except KeyError:
-                    result = colors[len(tags)]
-                    tags[tag] = result
-                    return result
+        def get_color(tag):
+            # type: (str) -> str
+            try:
+                return tags[tag]
+            except KeyError:
+                result = colors[len(tags)]
+                tags[tag] = result
+                return result
 
-            for state in graph:
-                out_stream.info('     subgraph cluster_%d {' % (state._id))
+        for state in graph:
+            out_stream.info('     subgraph cluster_%d {' % (state._id))
+            out_stream.info(
+                '       label="State %d"; style="rounded"; labeljust="l"; bgcolor="lightgray"' % (state._state_number)
+            )
+
+            node_index = {}    # type: Dict[str, Tuple[Set[str], List[_MergeNode]]]
+            for (node, _), merge_node in state._nodes.items():
+                if merge_node._committed:
+                    for origin, target in merge_node._merge_registry.items():
+                        try:
+                            s, n = node_index[target]
+                        except KeyError:
+                            node_index[target] = (set((origin, )), [merge_node])
+                        else:
+                            s.add(origin)
+                            n.append(merge_node)
+
+            for merge_result, (tag_set, merge_nodes) in node_index.items():
+                out_stream.info('       subgraph cluster_%d_%s {' % (state._id, merge_result))
                 out_stream.info(
-                    '       label="State %d"; style="rounded"; labeljust="l"; bgcolor="lightgray"' %
-                    (state._state_number)
+                    '         label="%s \u21d2 %s"; style="rounded,filled"; color="lightpink"; labeljust="l";' %
+                    (', '.join(sorted(tag_set)), merge_result)
                 )
-
-                node_index = {}    # type: Dict[str, Tuple[Set[str], List[_MergeNode]]]
-                for (node, _), merge_node in state._nodes.items():
-                    if merge_node._committed:
-                        for origin, target in merge_node._merge_registry.items():
-                            try:
-                                s, n = node_index[target]
-                            except KeyError:
-                                node_index[target] = (set((origin, )), [merge_node])
-                            else:
-                                s.add(origin)
-                                n.append(merge_node)
-
-                for merge_result, (tag_set, merge_nodes) in node_index.items():
-                    out_stream.info('       subgraph cluster_%d_%s {' % (state._id, merge_result))
+                for merge_node in merge_nodes:
+                    color = ':'.join(sorted([get_color(tag) for tag in merge_node._tags_entry._tags]))
                     out_stream.info(
-                        '         label="%s \u21d2 %s"; style="rounded,filled"; color="lightpink"; labeljust="l";' %
-                        (', '.join(sorted(tag_set)), merge_result)
+                        '         %d[label="%s[%s]\\n%s",fillcolor="%s"];' % (
+                            merge_node._id, name_map[merge_node._node._item._symbol], ', '.join(
+                                merge_node._tags_entry._tags
+                            ), merge_node._node._item.to_short_string(name_map), color
+                        )
                     )
-                    for merge_node in merge_nodes:
-                        color = ':'.join(sorted([get_color(tag) for tag in merge_node._tags_entry._tags]))
-                        out_stream.info(
-                            '         %d[label="%s[%s]\\n%s",fillcolor="%s"];' % (
-                                merge_node._id, name_map[merge_node._node._item._symbol], ', '.join(
-                                    merge_node._tags_entry._tags
-                                ), merge_node._node._item.to_short_string(name_map), color
-                            )
-                        )
-                    out_stream.info('       }')
+                out_stream.info('       }')
 
-                for (node, la), merge_node in state._nodes.items():
-                    merge_rule = ''
-                    if node._item._index == 0:
-                        merge_rule = '\\n' + '\\n'.join(
-                            ['%s -> %s' % (x, y) for x, y in node._item._last._merge_map.items()]
+            for (node, la), merge_node in state._nodes.items():
+                if merge_node._committed and len(merge_node._merge_registry) == 0:
+                    color = ':'.join(sorted([get_color(tag) for tag in merge_node._tags_entry._tags]))
+                    border_color = borders[state._important_items.get(node, 3)]
+                    out_stream.info(
+                        '       %d[label="%s[%s]\\n%s"%s,fillcolor="%s"];' % (
+                            merge_node._id, name_map[node._item._symbol], ', '.join(merge_node._tags_entry._tags),
+                            node._item.to_short_string(name_map), border_color, color
                         )
-                    if merge_node._committed and len(merge_node._merge_registry) == 0:
-                        color = ':'.join(sorted([get_color(tag) for tag in merge_node._tags_entry._tags]))
-                        border_color = borders[state._important_items.get(node, 3)]
-                        out_stream.info(
-                            '       %d[label="%s[%s]\\n%s%s"%s,fillcolor="%s"];' % (
-                                merge_node._id, name_map[node._item._symbol], ', '.join(merge_node._tags_entry._tags),
-                                node._item.to_short_string(name_map), merge_rule, border_color, color
-                            )
-                        )
+                    )
 
-                out_stream.info('     }')
+            out_stream.info('     }')
 
-            for state in graph:
-                for merge_node in state._nodes.values():
-                    if merge_node._committed:
-                        for predecessor in merge_node._predecessors:
-                            if predecessor._state in graph and predecessor._committed:
-                                out_stream.info('     %d->%d;' % (predecessor._id, merge_node._id))
-            out_stream.info('   }')
-            out_stream.info('')
-            out_stream.info('')
+        for state in graph:
+            for merge_node in state._nodes.values():
+                if merge_node._committed:
+                    for predecessor in merge_node._predecessors:
+                        if predecessor._state in graph and predecessor._committed:
+                            out_stream.info('     %d->%d;' % (predecessor._id, merge_node._id))
+        out_stream.info('   }')
+        out_stream.info('')
+        out_stream.info('')
 
 
 if TYPE_CHECKING:
