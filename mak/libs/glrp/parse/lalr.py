@@ -5,9 +5,36 @@ from .lr0dominancenode import LR0DominanceSet
 from .merge_tree import MergeTree
 from motor_typing import TYPE_CHECKING
 from collections import OrderedDict
+import os
 import sys
 
 GROUP_MERGE_GRAPHS = True
+
+
+def get_terminal_size():
+    # type: () -> Tuple[int, int]
+    env = os.environ
+
+    def ioctl_GWINSZ(fd):
+        # type: (int) -> Optional[Tuple[str, str]]
+        try:
+            import fcntl, termios, struct
+            cr = struct.unpack('HHHH', fcntl.ioctl(fd, termios.TIOCGWINSZ, struct.pack("HHHH", 0, 0, 0, 0)))
+        except Exception as e:
+            return None
+        return str(cr[0]), str(cr[1])
+
+    cr = ioctl_GWINSZ(0) or ioctl_GWINSZ(1) or ioctl_GWINSZ(2)
+    if not cr:
+        try:
+            fd = os.open(os.ctermid(), os.O_RDONLY)
+            cr = ioctl_GWINSZ(fd)
+            os.close(fd)
+        except:
+            pass
+    if not cr:
+        cr = (env.get('LINES', '25'), env.get('COLUMNS', '80'))
+    return int(cr[0]), int(cr[1])
 
 
 class LALRTable(object):
@@ -20,8 +47,8 @@ class LALRTable(object):
 
 def _find_merge_points(conflict_list, lookaheads, name_map, logger, error_log):
     # type: (List[Tuple[LR0Node, bool, str]], Set[int], List[str], Logger, Logger) -> None
-    merge_tree = MergeTree(conflict_list, lookaheads)
-    merge_tree.check_resolved(name_map, logger)
+    #merge_tree = MergeTree(conflict_list, lookaheads)
+    #merge_tree.check_resolved(name_map, logger)
     pass
     #for item, tags in sorted(merge_tree._error_nodes.items(), key=lambda x: (x[0].rule._filename, x[0].rule._lineno)):
     #    error_log.warning('%s - need to resolve previous split[%s]' % (item.to_string(name_map), ",".join(tags)))
@@ -467,8 +494,12 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
     num_rr = 0
     num_sr = 0
 
+    bar_size = get_terminal_size()[1] - 2
     for st, item_group in enumerate(states):
         # Loop over each production
+        completed = int(bar_size * (1 + st) / len(states))
+        remaining = bar_size - completed
+        sys.stdout.write('\r[\x1b[32m%s\x1b[37m%s\x1b[0m]' % ('\u2501' * completed, '\u2501' * remaining))
         action_map = {}    # type: Dict[int, List[Tuple[int, LR0Item]]]
         st_action = {}     # type: Dict[int, Tuple[Tuple[int, Optional[str]],...]]
         st_goto = {}       # type: Dict[int, int]
@@ -752,6 +783,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         goto_table.append(st_goto)
 
     # Report errors
+    sys.stdout.write('\n')
     for _, production in productions.items():
         for rule in production:
             if rule._reduced == 0:
