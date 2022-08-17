@@ -74,5 +74,13 @@ def noexcept_specifier_cxx11(self, p):
     pass
 
 
+@glrp.rule('noexcept-specification? : noexcept-specification')
+@glrp.rule('noexcept-specification? :')
+@cxx11
+def noexcept_specifier_opt_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 if TYPE_CHECKING:
     from ...parser import CxxParser
