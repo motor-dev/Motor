@@ -51,8 +51,8 @@ def scope_opt(self, p):
 
 @glrp.merge('nested-name-specifier')
 @cxx98_merge
-def ambiguous_nested_name_specifier(self, ambiguous_namespace_name, ambiguous_type_name):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_nested_name_specifier(self, ambiguous_namespace_name, ambiguous_type_name, template_name):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
