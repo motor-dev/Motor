@@ -19,8 +19,8 @@ def cast_expression(self, p):
 
 @glrp.merge('cast-expression')
 @cxx98_merge
-def ambiguous_cast_expression(self, ambiguous_simple_type_specifier, generic_postfix_expression):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_cast_expression(self, ambiguous_type_id, generic_postfix_expression, ambiguous_cast_expression):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 

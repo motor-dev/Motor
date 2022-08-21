@@ -23,7 +23,7 @@ access-specifier:
 """
 
 import glrp
-from ...parser import cxx98, cxx11
+from ...parser import cxx98, cxx11, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -49,6 +49,13 @@ def base_specifier_list(self, p):
 @cxx98
 def base_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.merge('base-specifier')
+@cxx98_merge
+def ambiguous_base_specifier(self, ambiguous_type_name, ambiguous_nested_name_specifier):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
@@ -99,4 +106,5 @@ def virtual_opt(self, p):
 
 
 if TYPE_CHECKING:
+    from typing import Optional
     from ...parser import CxxParser

@@ -56,7 +56,7 @@ identifier-list:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge
+from ...parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge, cxx20_merge
 from motor_typing import TYPE_CHECKING
 from . import specifier
 from . import declarator
@@ -126,7 +126,7 @@ def declaration_proxy_cxx20(self, p):
 
 
 @glrp.merge('declaration-proxy')
-@cxx98_merge
+@cxx20_merge
 def ambiguous_explicit_declaration(self, explicit_deduction, explicit_declaration):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass

@@ -10,7 +10,7 @@ qualified-namespace-specifier:
 """
 
 import glrp
-from ....parser import cxx98
+from ....parser import cxx98, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -39,5 +39,13 @@ def qualified_namespace_specifier(self, p):
     pass
 
 
+@glrp.merge('qualified-namespace-specifier')
+@cxx98_merge
+def ambiguous_qualified_namespace_specifier(self, ambiguous_namespace_name, ambiguous_nested_name_specifier):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Optional
     from ....parser import CxxParser

@@ -4,7 +4,7 @@ using-directive:
 """
 
 import glrp
-from ....parser import cxx98
+from ....parser import cxx98, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -18,5 +18,13 @@ def using_directive(self, p):
     pass
 
 
+@glrp.merge('using-directive')
+@cxx98_merge
+def ambiguous_using_directive(self, ambiguous_namespace_name, ambiguous_nested_name_specifier):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Optional
     from ....parser import CxxParser

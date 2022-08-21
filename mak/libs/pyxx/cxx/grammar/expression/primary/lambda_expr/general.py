@@ -10,8 +10,7 @@ lambda-declarator:
     lambda-specifier-seq noexcept-specifier? attribute-specifier-seq? trailing-return-type? 
     noexcept-specifier attribute-specifier-seq? trailing-return-type?
     trailing-return-type?
-    ( parameter-declaration-clause ) lambda-specifier-seq? noexcept-specifier? attribute-specifier-seq?
-   trailing-return-type? requires-clause?
+    ( parameter-declaration-clause ) lambda-specifier-seq? noexcept-specifier? attribute-specifier-seq? trailing-return-type? requires-clause?
 
 lambda-specifier:
     consteval
@@ -98,7 +97,7 @@ def lambda_specifier_cxx20(self, p):
 
 @glrp.rule('lambda-specifier : "static"')
 @cxx23
-def lambda_specifier_cxx20(self, p):
+def lambda_specifier_cxx23(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

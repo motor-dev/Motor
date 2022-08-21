@@ -20,7 +20,7 @@ def id_expression(self, p):
 @glrp.merge('id-expression')
 @glrp.merge_result('id_expression')
 @cxx98_merge
-def id_expression_rename(self, unqualified_id, template_id, template_name, ambiguous_nested_name_specifier):
+def id_expression_rename(self, unqualified_id, template_id, template_name, ambiguous_qualified_id):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
