@@ -44,7 +44,7 @@ class _MergeNode(object):
         else:
             self._merge_map = {}
             self._merge_set = frozenset()
-        self._merge_registry = {}  # type: Dict[str, str]
+        self._merge_registry = {}  # type: Dict[str, Tuple[MergeAction, str]]
         self._predecessors = []    # type: List[_MergeNode]
         self._successors = []      # type: List[_MergeNode]
         self._id = _MergeNode.ID
@@ -64,7 +64,7 @@ class _MergeNode(object):
                     return tag
                 else:
                     self._merge_registry[tag] = result
-                    return result
+                    return result[1]
 
             return _Tags(tags._indices, frozenset((_get_tag(x) for x in tags._tags)))
         else:
@@ -97,18 +97,6 @@ class _MergeNode(object):
             queue += [(s, original_tags, node._tags_exit) for s in node._successors]
 
 
-def to_debug_string(entry):
-    # type: (Entry) -> str
-    return ' | '.join(
-        [
-            '[%d] %s %d (%d/%s)' % (
-                key[0]._item._index, key[0]._item.rule._debug_str, key[1], key[2]._indices,
-                ', '.join(sorted(key[2]._tags))
-            ) for key in entry
-        ]
-    )
-
-
 class _MergeState(object):
 
     ID = 1
@@ -118,8 +106,8 @@ class _MergeState(object):
         self._entry = entry
         self._entry_indices = 0
         for e in entry:
-            self._entry_indices |= e[2]._indices
-        self._nodes = {}               # type: Dict[Tuple[LR0Node, bool], _MergeNode]
+            self._entry_indices |= e[3]._indices
+        self._nodes = {}               # type: Dict[Tuple[LR0Node, bool, bool], _MergeNode]
         self._predecessors = []        # type: List[_MergeState]
         self._successors = []          # type: List[_MergeState]
         self._id = _MergeState.ID
@@ -127,10 +115,10 @@ class _MergeState(object):
         item_set = self._entry[0][0]._item_set
         self._state_number = item_set._index
         self._leaf = False
+        self._leaf_nodes = []          # type: List[_MergeNode]
         self._valid = False
         self._important_items = {}     # type: Dict[LR0Node, int]
-        self._key_node_count = 0
-        self._leaf_node = None         # type: Optional[_MergeNode]
+        self._error_nodes = []         # type: List[_MergeNode]
 
     def validate(self):
         # type: () -> None
@@ -142,40 +130,40 @@ class _MergeState(object):
                 state._valid = True
                 queue += state._predecessors
 
-    def collect_predecessors(self, lookaheads):
-        # type: (Set[int]) -> Tuple[List["Entry"], bool]
+    def collect_predecessors(self, lookahead):
+        # type: (int) -> Tuple[List["Entry"], bool]
         next_nodes = OrderedDict()     # type: OrderedDict[Tuple[LR0Node, bool], _Tags]
-        seen = {}                      # type: Dict[Tuple[LR0Node, int], _Tags]
+        seen = {}                      # type: Dict[Tuple[LR0Node, bool, bool], _Tags]
 
-        def backtrack_up(node, la, tags):
-            # type: (LR0Node, bool, _Tags) -> bool
-            queue = deque([(node, la, tags)])
+        def backtrack_up(node, la, reduction, tags):
+            # type: (LR0Node, bool, bool, _Tags) -> bool
+            queue = deque([(node, la, reduction, tags)])
             has_joined = False
 
             while queue:
-                node, la, tags = queue.popleft()
+                node, la, reduction, tags = queue.popleft()
 
                 if node._item in node._item_set._discarded:
-                    if lookaheads <= node._item_set._discarded[node._item]:
+                    if lookahead in node._item_set._discarded[node._item]:
                         continue
 
                 try:
-                    prev_tags = seen[(node, la)]
+                    prev_tags = seen[(node, la, reduction)]
                 except KeyError:
-                    seen[(node, la)] = tags
+                    seen[(node, la, reduction)] = tags
                 else:
                     if prev_tags == tags:
                         continue
                     tags = prev_tags.create_merge(tags)
                     if id(tags) == id(prev_tags):
                         continue
-                    seen[(node, la)] = tags
+                    seen[(node, la, reduction)] = tags
                     # register join
                     has_joined = True
 
                 if node._item._index == 0 and not node._item._last._merge_set.isdisjoint(tags._tags):
                     merge_map = node._item._last._merge_map
-                    tags = _Tags(tags._indices, frozenset((merge_map.get(t, t) for t in tags._tags)))
+                    tags = _Tags(tags._indices, frozenset((merge_map.get(t, (t, t))[1] for t in tags._tags)))
 
                 if len(node._predecessors) == 0 and len(node._direct_parents) == 0:
                     self._leaf = True
@@ -183,12 +171,12 @@ class _MergeState(object):
                     for parent in node._direct_parents:
                         item = parent._item
                         if la:
-                            if not lookaheads.isdisjoint(item._follow):
-                                queue.append((parent, False, tags))
+                            if lookahead in item._follow:
+                                queue.append((parent, False, True, tags))
                             if -1 in item._follow:
-                                queue.append((parent, True, tags))
+                                queue.append((parent, True, True, tags))
                         else:
-                            queue.append((parent, False, tags))
+                            queue.append((parent, False, True, tags))
 
                     for predecessor in node._predecessors:
                         try:
@@ -198,32 +186,30 @@ class _MergeState(object):
             return has_joined
 
         has_joined = False
-        for node, la, tags in self._entry:
-            has_joined |= backtrack_up(node, la, tags)
+        for node, la, reduction, tags in self._entry:
+            has_joined |= backtrack_up(node, la, reduction, tags)
 
-        parent_states = OrderedDict()  # type: OrderedDict[int, List[Tuple[LR0Node, bool, _Tags]]]
-        leaf = True
+        parent_states = OrderedDict()  # type: OrderedDict[int, List[Tuple[LR0Node, bool, bool, _Tags]]]
         for (node, la), tags in next_nodes.items():
             try:
-                parent_states[node._item_set._index].append((node, la, tags))
-                leaf = False
+                parent_states[node._item_set._index].append((node, la, False, tags))
             except KeyError:
-                parent_states[node._item_set._index] = [(node, la, tags)]
+                parent_states[node._item_set._index] = [(node, la, False, tags)]
         return [tuple(entry) for i, entry in parent_states.items()], has_joined
 
-    def refine(self, lookaheads):
-        # type: (Set[int]) -> None
-        seen = {}  # type: Dict[Tuple[LR0Node, bool], _MergeNode]
+    def refine(self, lookahead):
+        # type: (int) -> None
+        seen = {}  # type: Dict[Tuple[LR0Node, bool, bool], _MergeNode]
 
-        def backtrack_up(node, la, tags, parent_nodes):
-            # type: (LR0Node, bool, _Tags, List[_MergeNode]) -> None
-            queue = deque([(node, la, tags, parent_nodes)])
+        def backtrack_up(node, la, reduction, tags, parent_nodes):
+            # type: (LR0Node, bool, bool, _Tags, List[_MergeNode]) -> None
+            queue = deque([(node, la, reduction, tags, parent_nodes)])
 
             while queue:
-                node, la, tags, parent_nodes = queue.popleft()
+                node, la, reduction, tags, parent_nodes = queue.popleft()
 
                 if node._item in node._item_set._discarded:
-                    if lookaheads <= node._item_set._discarded[node._item]:
+                    if lookahead in node._item_set._discarded[node._item]:
                         continue
 
                 if parent_nodes:
@@ -232,20 +218,20 @@ class _MergeState(object):
                         tags = tags.create_merge(p._tags_exit)
 
                 try:
-                    current_node = seen[(node, la)]
+                    current_node = seen[(node, la, reduction)]
                 except KeyError:
                     current_node = _MergeNode(self, node, la, tags)
-                    seen[(node, la)] = current_node
+                    seen[(node, la, reduction)] = current_node
 
                     for parent in node._direct_parents:
                         item = parent._item
                         if la:
-                            if not lookaheads.isdisjoint(item._follow):
-                                queue.append((parent, False, tags, [current_node]))
+                            if lookahead in item._follow:
+                                queue.append((parent, False, True, tags, [current_node]))
                             if -1 in item._follow:
-                                queue.append((parent, True, tags, [current_node]))
+                                queue.append((parent, True, True, tags, [current_node]))
                         else:
-                            queue.append((parent, False, tags, [current_node]))
+                            queue.append((parent, False, True, tags, [current_node]))
                 else:
                     current_node.update_tags(tags)
                 for parent_node in parent_nodes:
@@ -253,17 +239,17 @@ class _MergeState(object):
                         current_node._predecessors.append(parent_node)
                         parent_node._successors.append(current_node)
 
-        for node, la, tags in self._entry:
-            backtrack_up(node, la, tags, [])
+        for node, la, reduction, tags in self._entry:
+            backtrack_up(node, la, reduction, tags, [])
 
-        for (node, la), merge_node in seen.items():
+        for (node, la, _), merge_node in seen.items():
             for p in merge_node._predecessors:
                 if p != merge_node and id(p._tags_exit) != id(
                     merge_node._tags_entry
                 ) and p._tags_exit._indices != merge_node._tags_entry._indices and p._tags_exit._tags != merge_node._tags_entry._tags:
                     self._important_items[node] = 0
                     break
-        for (node, _), merge_node in seen.items():
+        for (node, _, _), merge_node in seen.items():
             count = 0
             for p in merge_node._predecessors:
                 if p._tags_exit._indices != merge_node._tags_entry._indices:
@@ -273,23 +259,23 @@ class _MergeState(object):
                     if p._tags_exit._indices != merge_node._tags_entry._indices and len(p._merge_registry) > 0:
                         self._important_items[p._node] = 2
 
-    def expand(self, all_states, reduced_states, lookaheads):
-        # type: (Dict[Entry, _MergeState], Set[_MergeState], Set[int]) -> None
+    def expand(self, all_states, reduced_states, lookahead):
+        # type: (Dict[Entry, _MergeState], Set[_MergeState], int) -> None
         next_nodes = OrderedDict()     # type: OrderedDict[Tuple[LR0Node, bool], List[_MergeNode]]
         state = self
         leaves = []                    # type: List[_MergeNode]
         _MergeNode.ID = 0
         _MergeState.ID = 0
 
-        def backtrack_up(state, node, la, tags, parent_nodes):
-            # type: (_MergeState, LR0Node, bool, _Tags, List[_MergeNode]) -> None
-            queue = deque([(node, la, tags, parent_nodes)])
+        def backtrack_up(state, node, la, reduction, tags, parent_nodes):
+            # type: (_MergeState, LR0Node, bool, bool, _Tags, List[_MergeNode]) -> None
+            queue = deque([(node, la, reduction, tags, parent_nodes)])
 
             while queue:
-                node, la, tags, parent_nodes = queue.popleft()
+                node, la, reduction, tags, parent_nodes = queue.popleft()
 
                 if node._item in node._item_set._discarded:
-                    if lookaheads <= node._item_set._discarded[node._item]:
+                    if lookahead in node._item_set._discarded[node._item]:
                         continue
 
                 if parent_nodes:
@@ -298,30 +284,31 @@ class _MergeState(object):
                         tags = tags.create_merge(p._tags_exit)
 
                 try:
-                    current_node = state._nodes[(node, la)]
+                    current_node = state._nodes[(node, la, reduction)]
                 except KeyError:
                     current_node = _MergeNode(state, node, la, tags)
-                    state._nodes[(node, la)] = current_node
+                    state._nodes[(node, la, reduction)] = current_node
 
                     if len(node._predecessors) == 0 and len(node._direct_parents) == 0:
                         leaves.append(current_node)
-                        state._leaf_node = current_node
                     else:
                         for parent in node._direct_parents:
                             item = parent._item
                             if la:
-                                if not lookaheads.isdisjoint(item._follow):
-                                    queue.append((parent, False, tags, [current_node]))
+                                if lookahead in item._follow:
+                                    queue.append((parent, False, True, tags, [current_node]))
                                 if -1 in item._follow:
-                                    queue.append((parent, True, tags, [current_node]))
+                                    queue.append((parent, True, True, tags, [current_node]))
                             else:
-                                queue.append((parent, False, tags, [current_node]))
+                                queue.append((parent, False, True, tags, [current_node]))
 
-                        for predecessor in node._predecessors:
-                            try:
-                                next_nodes[(predecessor, la)].append(current_node)
-                            except KeyError:
-                                next_nodes[(predecessor, la)] = [current_node]
+                        if node._predecessors:
+                            state._leaf_nodes.append(current_node)
+                            for predecessor in node._predecessors:
+                                try:
+                                    next_nodes[(predecessor, la)].append(current_node)
+                                except KeyError:
+                                    next_nodes[(predecessor, la)] = [current_node]
                 else:
                     current_node.update_tags(tags)
                 for parent_node in parent_nodes:
@@ -329,29 +316,40 @@ class _MergeState(object):
                         current_node._predecessors.append(parent_node)
                         parent_node._successors.append(current_node)
 
-        parent_nodes = []  # type: List[_MergeNode]
-        entries = deque([tuple((self, node, la, tags, parent_nodes) for node, la, tags in self._entry)])
+            for current_node in state._nodes.values():
+                if len(current_node._tags_entry._tags) > 1:
+                    state._error_nodes.append(current_node)
+
+        parent_nodes = []                                                                                         # type: List[_MergeNode]
+        entries = deque(
+            [tuple((self, node, la, reduction, tags, parent_nodes) for node, la, reduction, tags in self._entry)]
+        )
         while entries:
             entry = entries.popleft()
             next_nodes = OrderedDict()
-            for state, node, la, tags, parent_nodes in entry:
-                backtrack_up(state, node, la, tags, parent_nodes)
+            for state, node, la, reduction, tags, parent_nodes in entry:
+                backtrack_up(state, node, la, reduction, tags, parent_nodes)
 
-            parent_states = OrderedDict() # type: OrderedDict[int, List[Tuple[LR0Node, bool, _Tags, List[_MergeNode]]]]
+            parent_states = OrderedDict()                                         # type: OrderedDict[int, List[Tuple[LR0Node, bool, _Tags, List[_MergeNode]]]]
             for (node, la), parent_nodes in next_nodes.items():
                 tags = parent_nodes[0]._tags_exit
                 try:
                     parent_states[node._item_set._index].append((node, la, tags, parent_nodes))
                 except KeyError:
                     parent_states[node._item_set._index] = [(node, la, tags, parent_nodes)]
-
-            for _, nodes in parent_states.items():
-                key = tuple((node, la, tags) for node, la, tags, parent_nodes in nodes)
-                next_state = all_states[key]
-                if next_state in reduced_states:
-                    entries.append(
-                        tuple((next_state, node, la, tags, parent_nodes) for node, la, tags, parent_nodes in nodes)
-                    )
+            if state._leaf:
+                leaves += state._leaf_nodes
+            else:
+                for _, nodes in parent_states.items():
+                    key = tuple((node, la, False, tags) for node, la, tags, parent_nodes in nodes)
+                    next_state = all_states[key]
+                    if next_state in reduced_states:
+                        entries.append(
+                            tuple(
+                                (next_state, node, la, False, tags, parent_nodes)
+                                for node, la, tags, parent_nodes in nodes
+                            )
+                        )
 
         for leaf in leaves:
             if bin(leaf._tags_exit._indices).count("1") > 1:
@@ -360,11 +358,12 @@ class _MergeState(object):
 
 class MergeTree(object):
 
-    def __init__(self, node_set, lookaheads):
-        # type: (List[Tuple[LR0Node, bool, str]], Set[int]) -> None
+    def __init__(self, node_set, lookahead):
+        # type: (List[Tuple[LR0Node, bool, str]], int) -> None
         self._all_states = set()   # type: Set[_MergeState]
         self._paths = {}           # type: Dict[_MergeState, Set[_MergeState]]
-        self._root_state = self._build_tree(node_set, lookaheads)
+        self._error_nodes = []     # type: List[_MergeNode]
+        self._root_state = self._build_tree(node_set, lookahead)
 
     def check_resolved(self, name_map, logger):
         # type: (List[str], Logger) -> None
@@ -372,13 +371,14 @@ class MergeTree(object):
         #if len(merge_node._tags) > 1:
         #    logger.warning('   merge conflicts: [%s]' % ', '.join(merge_node._tags))
         for leaf_state, graph in self._paths.items():
-            assert leaf_state._leaf_node is not None
-            if len(leaf_state._leaf_node._tags_exit._tags) > 1:
-                self.print_dot(graph, name_map, logger)
+            for state in graph:
+                if state._error_nodes:
+                    self.print_dot(graph, name_map, logger)
+                    break
         pass
 
-    def _gather_essential_states(self, interesting_states, lookaheads):
-        # type: (List[_MergeState], Set[int]) -> Set[_MergeState]
+    def _gather_essential_states(self, interesting_states, lookahead):
+        # type: (List[_MergeState], int) -> Set[_MergeState]
         result = set()         # type: Set[_MergeState]
         important_items = {}   # type: Dict[Tuple[int, LR0Item], List[_MergeState]]
 
@@ -393,7 +393,7 @@ class MergeTree(object):
 
         for state in interesting_states:
             if state._valid:
-                state.refine(lookaheads)
+                state.refine(lookahead)
                 for node, t in state._important_items.items():
                     try:
                         important_items[(t, node._item)].append(state)
@@ -440,8 +440,8 @@ class MergeTree(object):
 
         return result
 
-    def _build_tree(self, node_set, lookaheads):
-        # type: (List[Tuple[LR0Node, bool, str]], Set[int]) -> _MergeState
+    def _build_tree(self, node_set, lookahead):
+        # type: (List[Tuple[LR0Node, bool, str]], int) -> _MergeState
         def get_index(i, tag):
             # type: (int, str) -> int
             for j, (_, _, symbol) in enumerate(node_set):
@@ -450,89 +450,49 @@ class MergeTree(object):
             assert False
 
         entry = tuple(
-            (node, la, _Tags(get_index(i, symbol), frozenset((symbol, ))))
+            (node, la, False, _Tags(get_index(i, symbol), frozenset((symbol, ))))
             for i, (node, la, symbol) in enumerate(node_set)
         )
 
         root = _MergeState(entry)
         states = {entry: root}
         queue = [root]
-        fasttrack_leaf = {}        # type: Dict[Entry, _MergeState]
         leaves = []
-        leaves_paths = set()       # type: Set[Entry]
         interesting_states = []    # type: List[_MergeState]
 
         while queue:
             state = queue.pop(0)
-            entries, merges = state.collect_predecessors(lookaheads)
+            entries, merges = state.collect_predecessors(lookahead)
             if merges:
                 interesting_states.append(state)
             if state._leaf:
-                leaves_paths.add(state._entry)
                 leaves.append(state)
-                continue
-
-            for entry in entries:
-                for e in entry:
-                    if e[2]._indices != state._entry_indices:
-                        try:
-                            new_state = states[entry]
-                        except KeyError:
-                            new_state = _MergeState(entry)
-                            states[entry] = new_state
-                            queue.append(new_state)
-                        if new_state not in state._successors:
-                            state._successors.append(new_state)
-                            new_state._predecessors.append(state)
-                        break
-                else:
-                    try:
-                        new_state = states[entry]
-                    except KeyError:
-                        new_state = _MergeState(entry)
-                        states[entry] = new_state
-                    if new_state not in state._successors:
-                        state._successors.append(new_state)
-                        new_state._predecessors.append(state)
-                    fasttrack_leaf[entry] = state
-
-        for entry, state in fasttrack_leaf.items():
-            seen = set()   # type: Set[_MergeState]
-            queue2 = deque([(state, [state])])
-
-            while queue2:
-                state, path = queue2.popleft()
-                if state in seen:
-                    continue
-                seen.add(state)
-                entries, merges = state.collect_predecessors(lookaheads)
-                if state._leaf:
-                    leaves.append(state)
-                    for state in path:
-                        state._leaf = True
-                    break
-                assert state._state_number != 0
-
+            else:
                 for entry in entries:
-                    try:
-                        new_state = states[entry]
-                    except KeyError:
-                        new_state = _MergeState(entry)
-                        states[entry] = new_state
-                    if new_state not in state._successors:
-                        state._successors.append(new_state)
-                        new_state._predecessors.append(state)
-                    if new_state not in seen:
-                        queue2.append((new_state, path + [new_state]))
+                    for e in entry:
+                        if e[3]._indices != state._entry_indices:
+                            try:
+                                new_state = states[entry]
+                            except KeyError:
+                                new_state = _MergeState(entry)
+                                states[entry] = new_state
+                                queue.append(new_state)
+                            if new_state not in state._successors:
+                                state._successors.append(new_state)
+                                new_state._predecessors.append(state)
+                            break
+                    else:
+                        state._leaf = True
+                        leaves.append(state)
 
         for leaf in leaves:
             leaf.validate()
 
         # compute a restricted set of states that contains all essential ones
-        self._all_states = self._gather_essential_states(interesting_states, lookaheads)
+        self._all_states = self._gather_essential_states(interesting_states, lookahead)
 
         # expand all states
-        root.expand(states, self._all_states, lookaheads)
+        root.expand(states, self._all_states, lookahead)
         return root
 
     def print_dot(self, graph, name_map, out_stream):
@@ -559,6 +519,11 @@ class MergeTree(object):
             'chartreuse2',
             'darkorchid1',
             'gainsboro',
+            'lightcyan3',
+            'peachpuff',
+            'seashell3',
+            'slategray1',
+            'rosybrown1',
         ]
         tags = {}  # type: Dict[str, str]
         borders = (',color=red,penwidth=3', ',color=blue,penwidth=3', ',color=green,penwidth=3', '')
@@ -579,13 +544,13 @@ class MergeTree(object):
             )
 
             node_index = {}    # type: Dict[str, Tuple[Set[str], List[_MergeNode]]]
-            for (node, _), merge_node in state._nodes.items():
+            for (node, _, _), merge_node in state._nodes.items():
                 if merge_node._committed:
                     for origin, target in merge_node._merge_registry.items():
                         try:
-                            s, n = node_index[target]
+                            s, n = node_index[target[1]]
                         except KeyError:
-                            node_index[target] = (set((origin, )), [merge_node])
+                            node_index[target[1]] = (set((origin, )), [merge_node])
                         else:
                             s.add(origin)
                             n.append(merge_node)
@@ -607,7 +572,7 @@ class MergeTree(object):
                     )
                 out_stream.info('       }')
 
-            for (node, la), merge_node in state._nodes.items():
+            for (node, la, _), merge_node in state._nodes.items():
                 if merge_node._committed and len(merge_node._merge_registry) == 0:
                     color = ':'.join(sorted([get_color(tag) for tag in merge_node._tags_entry._tags]))
                     border_color = borders[state._important_items.get(node, 3)]
@@ -634,7 +599,8 @@ class MergeTree(object):
 if TYPE_CHECKING:
     from motor_typing import Any, Dict, FrozenSet, List, Optional, Set, Tuple
     Indices = int
-    Entry = Tuple[Tuple[LR0Node, bool, _Tags], ...]
+    Entry = Tuple[Tuple[LR0Node, bool, bool, _Tags], ...]
     from .lr0node import LR0Node
     from .lr0item import LR0Item
+    from .grammar import MergeAction
     from ..log import Logger

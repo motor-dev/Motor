@@ -8,12 +8,14 @@ import sys
 
 
 class Grammar(object):
+
     class Rule(object):
+
         def __init__(
             self, id, prod_symbol, prod_name, production, action, annnotation_list, filename, lineno, debug_str,
             merge_list
         ):
-            # type: (int, int, str, Tuple[int,...], Action, List[Tuple[str, List[str], int]], str, int, str, List[Tuple[str, Dict[str, None]]]) -> None
+            # type: (int, int, str, Tuple[int,...], Action, List[Tuple[str, List[str], int]], str, int, str, List[Tuple[str, MergeAction, Dict[str, None]]]) -> None
             self._id = id
             self._prod_symbol = prod_symbol
             self._prod_name = prod_name
@@ -44,6 +46,7 @@ class Grammar(object):
             return iter(self.production)
 
     class Production(object):
+
         def __init__(self, prod_symbol, rule_list):
             # type: (int, List[Grammar.Rule]) -> None
             self._rule_list = rule_list
@@ -75,7 +78,7 @@ class Grammar(object):
             return len(self._rule_list)
 
     def __init__(self, name, rule_hash, terminals, rules, merges, start_symbol, parser, temp_dir):
-        # type: (str, str, Dict[str, Tuple[int, bool]], List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, List[Tuple[str, Dict[str, None]]]], str, Parser, str) -> None
+        # type: (str, str, Dict[str, Tuple[int, bool]], List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, List[Tuple[str, MergeAction, Dict[str, None]]]], str, Parser, str) -> None
         debug_filename = os.path.join(temp_dir, name + '.txt')
         conflict_filename = os.path.join(temp_dir, name + '-Conflicts.txt')
         index = {}
@@ -120,7 +123,7 @@ class Grammar(object):
 
 
 def _create_productions(rules, merges, index, log, name_map, terminals, start_id):
-    # type: (List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, List[Tuple[str, Dict[str, None]]]], Dict[str, int], Logger, List[str], Dict[str, Tuple[int, bool]], int) -> Tuple[Dict[int, Grammar.Production], List[Tuple[int, Tuple[int,...], Action]]]
+    # type: (List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, List[Tuple[str, MergeAction, Dict[str, None]]]], Dict[str, int], Logger, List[str], Dict[str, Tuple[int, bool]], int) -> Tuple[Dict[int, Grammar.Production], List[Tuple[int, Tuple[int,...], Action]]]
     rule_index = 1
     productions = {}   # type: Dict[int, Grammar.Production]
     rule_table = []
@@ -260,5 +263,5 @@ def _create_lr0_items(productions):
 
 
 if TYPE_CHECKING:
-    from typing import Dict, Iterator, List, Set, Tuple
-    from .parser import Parser, Action
+    from typing import Callable, Dict, Iterator, List, Set, Tuple
+    from .parser import Parser, Action, MergeAction

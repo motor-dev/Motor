@@ -4,7 +4,7 @@ from motor_typing import TYPE_CHECKING
 class LR0Item(object):
 
     def __init__(self, rule, index, next, predecessor, successors, first, follow, merge_list=[]):
-        # type: (Grammar.Rule, int, Optional[LR0Item], Optional[int], List[Grammar.Rule], Set[int], Dict[int, int], List[Tuple[str, Dict[str, None]]]) -> None
+        # type: (Grammar.Rule, int, Optional[LR0Item], Optional[int], List[Grammar.Rule], Set[int], Dict[int, int], List[Tuple[str, MergeAction, Dict[str, None]]]) -> None
         self.rule = rule
         self.len = rule.len
         self._symbol = rule._prod_symbol # type: int
@@ -26,17 +26,17 @@ class LR0Item(object):
         self._precedence = None    # type: Optional[Tuple[str, int]]
         self._split = None         # type: Optional[str]
         self._action = None        # type: Optional[str]
-        self._merge = merge_list   # type: List[Tuple[str, Dict[str, None]]]
-        self._merge_map = {}       # type: Dict[str, str]
+        self._merge = merge_list   # type: List[Tuple[str, MergeAction, Dict[str, None]]]
+        self._merge_map = {}       # type: Dict[str, Tuple[MergeAction, str]]
 
-        for result, inputs in self._merge:
+        for result, action, inputs in self._merge:
             for key, _ in inputs.items():
                 if key in self._merge_map:
                     raise SyntaxError(
                         'incorrect merge: key "%s" appears in more than one merge rule' % key,
                         (rule._filename, rule._lineno, 0, '')
                     )
-                self._merge_map[key] = result
+                self._merge_map[key] = (action, result)
         self._merge_set = frozenset(self._merge_map.keys())
         self._split_use = 0
         self._merge_use = 0
@@ -134,4 +134,4 @@ class LR0Item(object):
 
 if TYPE_CHECKING:
     from motor_typing import Dict, List, Optional, Set, Text, Tuple
-    from .grammar import Grammar
+    from .grammar import Grammar, MergeAction
