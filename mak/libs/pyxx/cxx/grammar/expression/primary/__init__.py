@@ -10,7 +10,7 @@ primary-expression:
 """
 
 import glrp
-from ....parser import cxx98, cxx11, cxx17, cxx20
+from ....parser import cxx98, cxx11, cxx17, cxx20, cxx17_merge
 from motor_typing import TYPE_CHECKING
 from . import id
 from . import lambda_expr
@@ -58,5 +58,13 @@ def primary_expression_cxx20(self, p):
     pass
 
 
+@glrp.merge('primary-expression')
+@cxx17_merge
+def generic_postfix_expression_2(self, pm_expression, fold_expression):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Optional
     from ....parser import CxxParser

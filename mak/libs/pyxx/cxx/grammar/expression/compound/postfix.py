@@ -23,7 +23,7 @@ expression-list:
 """
 
 import glrp
-from ....parser import cxx98, cxx11, cxx98_merge, cxx17_merge
+from ....parser import cxx98, cxx11, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -92,13 +92,6 @@ def generic_postfix_expression(
     self, ambiguous_type_id, id_expression, ambiguous_simple_type_specifier, ambiguous_nested_name_specifier
 ):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('postfix-expression')
-@cxx17_merge
-def generic_postfix_expression_2(self, pm_expression, fold_expression):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 

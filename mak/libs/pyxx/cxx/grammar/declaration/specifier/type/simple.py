@@ -113,8 +113,10 @@ def ambiguous_type_name_template_id(self, class_template_id, typedef_template_id
 
 @glrp.merge('simple-type-specifier')
 @cxx98_merge
-def ambiguous_simple_type_specifier(self, ambiguous_type_name, template_name, ambiguous_type_constraint):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_simple_type_specifier(
+    self, ambiguous_type_name, ambiguous_nested_name_specifier, ambiguous_type_constraint, template_name
+):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 

@@ -26,10 +26,17 @@ def qualified_id(self, p):
 @glrp.rule('nested-name-specifier : "::"')
 @glrp.rule('nested-name-specifier : type-name [prec:left,2]"::"')
 @glrp.rule('nested-name-specifier : namespace-name [prec:left,2]"::"')
-@glrp.rule('nested-name-specifier : nested-name-specifier "template"? "identifier" [prec:left,2]"::"')
-@glrp.rule('nested-name-specifier : nested-name-specifier "template"? simple-template-id [prec:left,2]"::"')
+@glrp.rule('nested-name-specifier : nested-name-specifier nested-name-specifier-tail')
 @cxx98
-def nested_name_specifier(self, p):
+def nested_name_specifier_proxy(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@cxx98
+@glrp.rule('nested-name-specifier-tail : "template"? "identifier" [prec:left,2]"::"')
+@glrp.rule('nested-name-specifier-tail : "template"? simple-template-id [prec:left,2]"::"')
+def nested_name_specifier_tail(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -49,10 +56,27 @@ def scope_opt(self, p):
     pass
 
 
+@glrp.merge('qualified-id')
+@cxx98_merge
+def ambiguous_qualified_id(self, ambiguous_nested_name_specifier, template_name):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
 @glrp.merge('nested-name-specifier')
 @cxx98_merge
-def ambiguous_nested_name_specifier(self, ambiguous_namespace_name, ambiguous_type_name, template_name):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_nested_name_specifier(
+    self, ambiguous_type_name, ambiguous_namespace_name, ambiguous_nested_name_specifier_tail,
+    ambiguous_nested_name_specifier
+):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+    pass
+
+
+@glrp.merge('nested-name-specifier-tail')
+@cxx98_merge
+def ambiguous_nested_name_specifier_tail(self, ambiguous_type_name, template_name):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
