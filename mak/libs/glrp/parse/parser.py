@@ -16,7 +16,7 @@ LOAD_OPTIMIZED = 0
 GENERATE = 1
 LOAD_CACHE = 2
 
-VERSION = '0.98'
+VERSION = '0.99'
 
 
 class Action(object):
@@ -52,6 +52,17 @@ class _AcceptAction(Action):
     def __call__(self, parser):
         # type: (Parser) -> Callable[[Production], None]
         return parser.accept
+
+
+class MergeAction(object):
+
+    def __init__(self, merge_name):
+        # type: (str) -> None
+        self._merge_name = merge_name
+
+    def __call__(self, parser):
+        # type: (Parser) -> Callable[..., None]
+        return getattr(parser, self._merge_name)
 
 
 class Parser(object):
@@ -95,19 +106,19 @@ class Parser(object):
     def _generate_table(self, rule_hash, start_symbol, temp_directory, output_directory):
         # type: (str, str, str, str) -> Grammar
         rules = []                                               # type: List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]]
-        merges = {}                                              # type: Dict[str, List[Tuple[str, Dict[str, None]]]]
+        merges = {}                                              # type: Dict[str, List[Tuple[str, MergeAction, Dict[str, None]]]]
         for rule_action in dir(self):
             action = getattr(self, rule_action)
             for rule_string, filename, lineno in getattr(action, 'rules', []):
                 rules += _parse_rule(rule_string, rule_action, filename, lineno)
             signature = getattr(action, 'merge_signature', None) # type: Optional[Dict[str, None]]
             if signature is not None:
-                rule_action = getattr(action, 'merge_result', rule_action)
+                merge_result = getattr(action, 'merge_result', rule_action)
                 for symbol in getattr(action, 'merge', []):
                     try:
-                        merges[symbol].append((rule_action, signature))
+                        merges[symbol].append((merge_result, MergeAction(rule_action), signature))
                     except KeyError:
-                        merges[symbol] = [(rule_action, signature)]
+                        merges[symbol] = [(merge_result, MergeAction(rule_action), signature)]
 
         grammar = Grammar(
             self.__class__.__name__, rule_hash, self._lexer._terminals, rules, merges, start_symbol, self,

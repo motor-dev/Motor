@@ -8,8 +8,6 @@ from collections import OrderedDict
 import os
 import sys
 
-GROUP_MERGE_GRAPHS = True
-
 
 def get_terminal_size():
     # type: () -> Tuple[int, int]
@@ -45,10 +43,10 @@ class LALRTable(object):
         self._goto_table = goto_table
 
 
-def _find_merge_points(conflict_list, lookaheads, name_map, logger, error_log):
-    # type: (List[Tuple[LR0Node, bool, str]], Set[int], List[str], Logger, Logger) -> None
-    #merge_tree = MergeTree(conflict_list, lookaheads)
-    #merge_tree.check_resolved(name_map, logger)
+def _find_merge_points(conflict_list, lookahead, name_map, logger, error_log):
+    # type: (List[Tuple[LR0Node, bool, str]], int, List[str], Logger, Logger) -> None
+    merge_tree = MergeTree(conflict_list, lookahead)
+    merge_tree.check_resolved(name_map, logger)
     pass
     #for item, tags in sorted(merge_tree._error_nodes.items(), key=lambda x: (x[0].rule._filename, x[0].rule._lineno)):
     #    error_log.warning('%s - need to resolve previous split[%s]' % (item.to_string(name_map), ",".join(tags)))
@@ -499,7 +497,12 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         # Loop over each production
         completed = int(bar_size * (1 + st) / len(states))
         remaining = bar_size - completed
-        sys.stdout.write('\r[\x1b[32m%s\x1b[37m%s\x1b[0m]' % ('\u2501' * completed, '\u2501' * remaining))
+        if sys.version_info >= (3, ):
+            sys.stdout.write('\r[\x1b[32m%s\x1b[37m%s\x1b[0m]' % ('\u2501' * completed, '\u2501' * remaining))
+        else:
+            sys.stdout.write(
+                (u'\r[\x1b[32m%s\x1b[37m%s\x1b[0m]' % (u'\u2501' * completed, u'\u2501' * remaining)).encode('utf-8')
+            )
         action_map = {}    # type: Dict[int, List[Tuple[int, LR0Item]]]
         st_action = {}     # type: Dict[int, Tuple[Tuple[int, Optional[str]],...]]
         st_goto = {}       # type: Dict[int, int]
@@ -725,15 +728,12 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                         for item in items:
                             error_log.note('    %s' % item.to_string(name_map))
 
-                if not GROUP_MERGE_GRAPHS:
-                    splits = [(node, lookahead, split_name) for node, (lookahead, split_name) in merge_set[1].items()]
-                    conflict_log.info('   Merge graph for rules:')
-                    for node, _, split_name in splits:
-                        conflict_log.info(
-                            '      [%s][%s] %s' % (split_name, name_map[a], node._item.to_string(name_map))
-                        )
-                    _find_merge_points(splits, set([a]), name_map, conflict_log, error_log)
-                    conflict_log.info('')
+                splits = [(node, lookahead, split_name) for node, (lookahead, split_name) in merge_set[1].items()]
+                conflict_log.info('   Merge graph for rules:')
+                for node, _, split_name in splits:
+                    conflict_log.info('      [%s][%s] %s' % (split_name, name_map[a], node._item.to_string(name_map)))
+                _find_merge_points(splits, a, name_map, conflict_log, error_log)
+                conflict_log.info('')
 
             else:
                 for j, token_action in st_action[a]:
@@ -750,21 +750,6 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                         error_log.error('action mismatch in state %d for token \'%s\':' % (st, name_map[a]))
                         for item in items:
                             error_log.note('    %s' % item.to_string(name_map))
-
-        if merges and GROUP_MERGE_GRAPHS:
-            assert len(states[0]._core) == 1
-            for _, merge_set in merges.items():
-                lookaheads = merge_set[0]
-                splits = [(node, lookahead, split_name) for node, (lookahead, split_name) in merge_set[1].items()]
-                conflict_log.info('   Merge graph for rules:')
-                for node, _, split_name in splits:
-                    conflict_log.info(
-                        '      [%s][%s] %s' %
-                        (split_name, ','.join([name_map[x] for x in lookaheads]), node._item.to_string(name_map))
-                    )
-                _find_merge_points(splits, lookaheads, name_map, conflict_log, error_log)
-                conflict_log.info('')
-            conflict_log.info('')
 
         nkeys = set([])
         for item in item_group:
