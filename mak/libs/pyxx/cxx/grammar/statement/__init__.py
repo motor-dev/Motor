@@ -74,21 +74,21 @@ def condition_opt(self, p):
 
 @glrp.merge('condition')
 @cxx98_merge
-def ambiguous_condition(self, ambiguous_decl_specifier_seq, ambiguous_cast_expression):
+def ambiguous_condition(self, ambiguous_type_specifier, ambiguous_cast_expression):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
 @glrp.merge('condition?')
 @cxx98_merge
-def ambiguous_condition_opt(self, ambiguous_decl_specifier_seq, ambiguous_cast_expression):
+def ambiguous_condition_opt(self, ambiguous_type_specifier, ambiguous_cast_expression):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
 @glrp.merge('init-statement')
 @cxx98_merge
-def ambiguous_init_statement(self, simple_declaration, ambiguous_cast_expression):
+def ambiguous_init_statement(self, ambiguous_type_specifier, ambiguous_cast_expression):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 

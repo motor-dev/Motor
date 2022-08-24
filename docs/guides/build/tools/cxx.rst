@@ -2124,10 +2124,46 @@ can execute a merge action.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 When expecting a *type-name*, an ``identifier`` could be interpreted as either a *class-name*,
-an *enum-name*, or a *typedef-name*. It is trivial to merge the conflict in the *type-name* rule.
+an *enum-name*, or a *typedef-name*. It is trivial to merge the conflict in the *type-name* rule to
+create an *ambiguous-type-name*.
 
-*type-name*, *template-name* in a *simple-type-specifier*
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.. graphviz::
+
+   digraph MergeTree {
+     node[style="filled,striped,rounded",shape="box"];
+     subgraph cluster_1 {
+       label="State 17"; style="rounded"; labeljust="l"; bgcolor="lightgray"
+       subgraph cluster_1_ambiguous_type_name {
+         label="class_name, enum_name, typedef_name ⇒ ambiguous_type_name"; style="rounded,filled"; color="lightpink"; labeljust="l";
+         5[label="type-name[typedef_name]\n ♦ typedef-name",fillcolor="aquamarine"];
+         20[label="type-name[enum_name]\n ♦ enum-name",fillcolor="burlywood"];
+         22[label="type-name[class_name]\n ♦ class-name",fillcolor="coral"];
+       }
+       6[label="simple-type-specifier[ambiguous_type_name]\n ♦ type-name",fillcolor="darkgoldenrod1"];
+       4[label="typedef-name[typedef_name]\n ♦ identifier",fillcolor="aquamarine"];
+       19[label="enum-name[enum_name]\n ♦ identifier",fillcolor="burlywood"];
+       21[label="class-name[class_name]\n ♦ identifier",fillcolor="coral"];
+     }
+     subgraph cluster_0 {
+       label="State 63"; style="rounded"; labeljust="l"; bgcolor="lightgray"
+       0[label="typedef-name[typedef_name]\nidentifier ♦ ",fillcolor="aquamarine"];
+       2[label="enum-name[enum_name]\nidentifier ♦ ",fillcolor="burlywood"];
+       3[label="class-name[class_name]\nidentifier ♦ ",fillcolor="coral"];
+     }
+     0->4;
+     4->5;
+     5->6;
+     20->6;
+     22->6;
+     2->19;
+     19->20;
+     3->21;
+     21->22;
+   }
+
+
+*ambiguous-type-name*, *template-name* in a *simple-type-specifier*
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 When expecting a *type-specifier*, an ``identifier`` could correspond either to a *type-name* after
 merging the conflict above, or to a *template-name* used as a *simple-type-specifier*. The conflict
@@ -2137,111 +2173,45 @@ is also solved directly at the *simple-type-specifier* level.
 
    digraph MergeTree {
      node[style="filled,striped,rounded",shape="box"];
-     subgraph cluster_0 {
-       label="State 64"; style="rounded"; labeljust="l"; bgcolor="lightgray"
-       0[label="typedef-name[typedef_name]\nidentifier ♦ ",fillcolor="aquamarine"];
-       1[label="template-name[template_name]\nidentifier ♦ ",fillcolor="burlywood"];
-       2[label="enum-name[enum_name]\nidentifier ♦ ",fillcolor="coral"];
-       3[label="class-name[class_name]\nidentifier ♦ ",fillcolor="darkgoldenrod1"];
-     }
-     subgraph cluster_109 {
-       label="State 0"; style="rounded"; labeljust="l"; bgcolor="lightgray"
-       25[label="simple-declaration[ambiguous_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq init-declarator-list? ;",fillcolor="darkolivegreen1"];
-       26[label="block-declaration[ambiguous_simple_type_specifier]\n ♦ simple-declaration",fillcolor="darkolivegreen1"];
-       27[label="declaration-proxy[ambiguous_simple_type_specifier]\n ♦ block-declaration",fillcolor="darkolivegreen1"];
-       28[label="declaration[ambiguous_simple_type_specifier]\n ♦ declaration-proxy",fillcolor="darkolivegreen1"];
-       29[label="declaration-seq?[ambiguous_simple_type_specifier]\n ♦ declaration",fillcolor="darkolivegreen1"];
-       30[label="declaration-seq[ambiguous_simple_type_specifier]\n ♦ declaration",fillcolor="darkolivegreen1"];
-       31[label="translation-unit[ambiguous_simple_type_specifier]\n ♦ declaration-seq?",fillcolor="darkolivegreen1"];
-       32[label="declaration-seq?[ambiguous_simple_type_specifier]\n ♦ declaration-seq declaration",fillcolor="darkolivegreen1"];
-       33[label="declaration-seq[ambiguous_simple_type_specifier]\n ♦ declaration-seq declaration",fillcolor="darkolivegreen1"];
-       34[label="translation-unit'[ambiguous_simple_type_specifier]\n ♦ translation-unit <eof>",fillcolor="darkolivegreen1"];
-       35[label="function-definition[ambiguous_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator function-body",fillcolor="darkolivegreen1"];
-       36[label="declaration-proxy[ambiguous_simple_type_specifier]\n ♦ function-definition",fillcolor="darkolivegreen1"];
-       37[label="function-definition[ambiguous_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator virt-specifier-seq function-body",fillcolor="darkolivegreen1"];
-       38[label="function-definition[ambiguous_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator requires-clause function-body",fillcolor="darkolivegreen1"];
-       39[label="simple-declaration[ambiguous_simple_type_specifier]\n ♦ attribute-specifier-seq? decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;",fillcolor="darkolivegreen1"];
-     }
      subgraph cluster_1 {
        label="State 17"; style="rounded"; labeljust="l"; bgcolor="lightgray"
        subgraph cluster_1_ambiguous_type_name {
          label="class_name, enum_name, typedef_name ⇒ ambiguous_type_name"; style="rounded,filled"; color="lightpink"; labeljust="l";
          5[label="type-name[typedef_name]\n ♦ typedef-name",fillcolor="aquamarine"];
-         22[label="type-name[enum_name]\n ♦ enum-name",fillcolor="coral"];
-         24[label="type-name[class_name]\n ♦ class-name",fillcolor="darkgoldenrod1"];
+         20[label="type-name[enum_name]\n ♦ enum-name",fillcolor="burlywood"];
+         22[label="type-name[class_name]\n ♦ class-name",fillcolor="coral"];
        }
        subgraph cluster_1_ambiguous_simple_type_specifier {
          label="ambiguous_type_name, template_name ⇒ ambiguous_simple_type_specifier"; style="rounded,filled"; color="lightpink"; labeljust="l";
-         6[label="simple-type-specifier[ambiguous_type_name]\n ♦ type-name",fillcolor="darkslategray2"];
-         20[label="simple-type-specifier[template_name]\n ♦ template-name",fillcolor="burlywood"];
+         6[label="simple-type-specifier[ambiguous_type_name]\n ♦ type-name",fillcolor="darkgoldenrod1"];
+         18[label="simple-type-specifier[template_name]\n ♦ template-name",fillcolor="darkolivegreen1"];
        }
+       7[label="type-specifier[ambiguous_simple_type_specifier]\n ♦ simple-type-specifier",fillcolor="darkslategray2"];
        4[label="typedef-name[typedef_name]\n ♦ identifier",fillcolor="aquamarine"];
-       7[label="type-specifier-2[ambiguous_simple_type_specifier]\n ♦ simple-type-specifier",fillcolor="darkolivegreen1"];
-       8[label="defining-type-specifier-2[ambiguous_simple_type_specifier]\n ♦ type-specifier-2",fillcolor="darkolivegreen1"];
-       9[label="decl-specifier-2[ambiguous_simple_type_specifier]\n ♦ defining-type-specifier-2",fillcolor="darkolivegreen1"];
-       10[label="decl-specifier-seq-proxy[ambiguous_simple_type_specifier]\n ♦ decl-specifier-2 decl-specifier-seq-tail",fillcolor="darkolivegreen1"];
-       11[label="decl-specifier-seq-proxy[ambiguous_simple_type_specifier]\n ♦ decl-specifier-2 decl-specifier-seq-tail",fillcolor="darkolivegreen1"];
-       12[label="decl-specifier-seq[ambiguous_simple_type_specifier]\n ♦ decl-specifier-seq-proxy",fillcolor="darkolivegreen1"];
-       13[label="decl-specifier-seq[ambiguous_simple_type_specifier]\n ♦ decl-specifier-seq-proxy",fillcolor="darkolivegreen1"];
-       14[label="simple-declaration[ambiguous_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq init-declarator-list? ;",fillcolor="darkolivegreen1"];
-       15[label="function-definition[ambiguous_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator function-body",fillcolor="darkolivegreen1"];
-       16[label="function-definition[ambiguous_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator virt-specifier-seq function-body",fillcolor="darkolivegreen1"];
-       17[label="function-definition[ambiguous_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator requires-clause function-body",fillcolor="darkolivegreen1"];
-       18[label="simple-declaration[ambiguous_simple_type_specifier]\nattribute-specifier-seq? ♦ decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;",fillcolor="darkolivegreen1"];
-       19[label="template-name[template_name]\n ♦ identifier",fillcolor="burlywood"];
-       21[label="enum-name[enum_name]\n ♦ identifier",fillcolor="coral"];
-       23[label="class-name[class_name]\n ♦ identifier",fillcolor="darkgoldenrod1"];
+       17[label="template-name[template_name]\n ♦ identifier",fillcolor="darkolivegreen1"];
+       19[label="enum-name[enum_name]\n ♦ identifier",fillcolor="burlywood"];
+       21[label="class-name[class_name]\n ♦ identifier",fillcolor="coral"];
      }
-     14->25;
-     25->26;
-     39->26;
-     26->27;
-     27->28;
-     36->28;
-     28->29;
-     28->30;
-     29->31;
-     32->31;
-     30->32;
-     33->32;
-     30->33;
-     33->33;
-     31->34;
-     15->35;
-     35->36;
-     37->36;
-     38->36;
-     16->37;
-     17->38;
-     18->39;
+     subgraph cluster_0 {
+       label="State 63"; style="rounded"; labeljust="l"; bgcolor="lightgray"
+       0[label="typedef-name[typedef_name]\nidentifier ♦ ",fillcolor="aquamarine"];
+       1[label="template-name[template_name]\nidentifier ♦ ",fillcolor="darkolivegreen1"];
+       2[label="enum-name[enum_name]\nidentifier ♦ ",fillcolor="burlywood"];
+       3[label="class-name[class_name]\nidentifier ♦ ",fillcolor="coral"];
+     }
      0->4;
      4->5;
      5->6;
+     20->6;
      22->6;
-     24->6;
      6->7;
-     20->7;
-     7->8;
-     8->9;
-     9->10;
-     9->11;
-     10->12;
-     11->13;
-     12->14;
-     13->14;
-     12->15;
-     13->15;
-     12->16;
-     13->16;
-     12->17;
-     13->17;
-     12->18;
-     1->19;
+     18->7;
+     1->17;
+     17->18;
+     2->19;
      19->20;
-     2->21;
+     3->21;
      21->22;
-     3->23;
-     23->24;
    }
 
 *simple-type-specifier* and *unqualified-id*
@@ -2729,21 +2699,43 @@ branches to be parsed simultaneously and leaves the resolution to the semantic a
 In order to aid the parser, a dummy empty reduction is added early in the rules to move the conflict
 early. The grammar is tagged on the dummy reduction instead.
 
-The merge is done at the *declaration-proxy* rule.
+The merge is done at the *declaration* rule or the *member-declaration* rule.
 
 .. graphviz::
 
    digraph MergeTree {
      node[style="filled,striped,rounded",shape="box"];
+     subgraph cluster_2 {
+       label="State 0"; style="rounded"; labeljust="l"; bgcolor="lightgray"
+       subgraph cluster_2_ambiguous_explicit_declaration {
+         label="explicit_declaration, explicit_deduction ⇒ ambiguous_explicit_declaration"; style="rounded,filled"; color="lightpink"; labeljust="l";
+         14[label="declaration[explicit_deduction]\n ♦ deduction-guide",fillcolor="aquamarine"];
+         23[label="declaration[explicit_declaration]\n ♦ block-declaration",fillcolor="burlywood"];
+         25[label="declaration[explicit_declaration]\n ♦ function-definition",fillcolor="burlywood"];
+       }
+       13[label="deduction-guide[explicit_deduction]\n ♦ attribute-specifier-seq? deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;",fillcolor="aquamarine"];
+       15[label="declaration-seq?[ambiguous_explicit_declaration]\n ♦ declaration",fillcolor="coral"];
+       16[label="declaration-seq[ambiguous_explicit_declaration]\n ♦ declaration",fillcolor="coral"];
+       17[label="translation-unit[ambiguous_explicit_declaration]\n ♦ declaration-seq?",fillcolor="coral"];
+       18[label="declaration-seq?[ambiguous_explicit_declaration]\n ♦ declaration-seq declaration",fillcolor="coral"];
+       19[label="declaration-seq[ambiguous_explicit_declaration]\n ♦ declaration-seq declaration",fillcolor="coral"];
+       20[label="translation-unit'[ambiguous_explicit_declaration]\n ♦ translation-unit <eof>",fillcolor="coral"];
+       21[label="simple-declaration[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq init-declarator-list? ;",fillcolor="burlywood"];
+       22[label="block-declaration[explicit_declaration]\n ♦ simple-declaration",fillcolor="burlywood"];
+       24[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator function-body",fillcolor="burlywood"];
+       26[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator virt-specifier-seq function-body",fillcolor="burlywood"];
+       27[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator requires-clause function-body",fillcolor="burlywood"];
+       28[label="simple-declaration[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;",fillcolor="burlywood"];
+     }
      subgraph cluster_1 {
        label="State 17"; style="rounded"; labeljust="l"; bgcolor="lightgray"
        0[label="deduction-guide-begin[explicit_deduction]\n ♦ ",fillcolor="aquamarine"];
        1[label="deduction-guide[explicit_deduction]\nattribute-specifier-seq? ♦ deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;",fillcolor="aquamarine"];
        2[label="explicit-specifier[explicit_declaration]\n ♦ explicit",fillcolor="burlywood"];
        3[label="function-specifier[explicit_declaration]\n ♦ explicit-specifier",fillcolor="burlywood"];
-       4[label="decl-specifier-1[explicit_declaration]\n ♦ function-specifier",fillcolor="burlywood"];
-       5[label="decl-specifier-seq-proxy[explicit_declaration]\n ♦ decl-specifier-1 decl-specifier-seq-proxy",fillcolor="burlywood"];
-       6[label="decl-specifier-seq[explicit_declaration]\n ♦ decl-specifier-seq-proxy",fillcolor="burlywood"];
+       4[label="decl-specifier[explicit_declaration]\n ♦ function-specifier",fillcolor="burlywood"];
+       5[label="decl-specifier-seq[explicit_declaration]\n ♦ decl-specifier continue-decl-specifier-seq decl-specifier-seq",fillcolor="burlywood"];
+       6[label="decl-specifier-seq[explicit_declaration]\n ♦ decl-specifier end-decl-specifier-seq attribute-specifier-seq?",fillcolor="burlywood"];
        7[label="simple-declaration[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq init-declarator-list? ;",fillcolor="burlywood"];
        8[label="function-definition[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator function-body",fillcolor="burlywood"];
        9[label="function-definition[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator virt-specifier-seq function-body",fillcolor="burlywood"];
@@ -2751,65 +2743,111 @@ The merge is done at the *declaration-proxy* rule.
        11[label="simple-declaration[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;",fillcolor="burlywood"];
        12[label="explicit-specifier[explicit_declaration]\n ♦ explicit ( constant-expression )",fillcolor="burlywood"];
      }
-     subgraph cluster_2 {
-       label="State 0"; style="rounded"; labeljust="l"; bgcolor="lightgray"
-       subgraph cluster_2_ambiguous_explicit_declaration {
-         label="explicit_declaration, explicit_deduction ⇒ ambiguous_explicit_declaration"; style="rounded,filled"; color="lightpink"; labeljust="l";
-         14[label="declaration-proxy[explicit_deduction]\n ♦ deduction-guide",fillcolor="aquamarine"];
-         24[label="declaration-proxy[explicit_declaration]\n ♦ block-declaration",fillcolor="burlywood"];
-         26[label="declaration-proxy[explicit_declaration]\n ♦ function-definition",fillcolor="burlywood"];
-       }
-       13[label="deduction-guide[explicit_deduction]\n ♦ attribute-specifier-seq? deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;",fillcolor="aquamarine"];
-       15[label="declaration[ambiguous_explicit_declaration]\n ♦ declaration-proxy",fillcolor="coral"];
-       16[label="declaration-seq?[ambiguous_explicit_declaration]\n ♦ declaration",fillcolor="coral"];
-       17[label="declaration-seq[ambiguous_explicit_declaration]\n ♦ declaration",fillcolor="coral"];
-       18[label="translation-unit[ambiguous_explicit_declaration]\n ♦ declaration-seq?",fillcolor="coral"];
-       19[label="declaration-seq?[ambiguous_explicit_declaration]\n ♦ declaration-seq declaration",fillcolor="coral"];
-       20[label="declaration-seq[ambiguous_explicit_declaration]\n ♦ declaration-seq declaration",fillcolor="coral"];
-       21[label="translation-unit'[ambiguous_explicit_declaration]\n ♦ translation-unit <eof>",fillcolor="coral"];
-       22[label="simple-declaration[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq init-declarator-list? ;",fillcolor="burlywood"];
-       23[label="block-declaration[explicit_declaration]\n ♦ simple-declaration",fillcolor="burlywood"];
-       25[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator function-body",fillcolor="burlywood"];
-       27[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator virt-specifier-seq function-body",fillcolor="burlywood"];
-       28[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator requires-clause function-body",fillcolor="burlywood"];
-       29[label="simple-declaration[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;",fillcolor="burlywood"];
-     }
+     1->13;
+     13->14;
+     14->15;
+     23->15;
+     25->15;
+     14->16;
+     23->16;
+     25->16;
+     15->17;
+     18->17;
+     16->18;
+     19->18;
+     16->19;
+     19->19;
+     17->20;
+     7->21;
+     21->22;
+     28->22;
+     22->23;
+     8->24;
+     24->25;
+     26->25;
+     27->25;
+     9->26;
+     10->27;
+     11->28;
      0->1;
      2->3;
      12->3;
      3->4;
      4->5;
-     5->6;
+     4->6;
+     5->7;
      6->7;
+     5->8;
      6->8;
+     5->9;
      6->9;
+     5->10;
      6->10;
+     5->11;
      6->11;
-     1->13;
-     13->14;
-     14->15;
-     24->15;
-     26->15;
-     15->16;
-     15->17;
-     16->18;
-     19->18;
-     17->19;
-     20->19;
-     17->20;
-     20->20;
-     18->21;
-     7->22;
-     22->23;
-     29->23;
-     23->24;
-     8->25;
-     25->26;
-     27->26;
-     28->26;
-     9->27;
-     10->28;
-     11->29;
    }
 
 
+.. graphviz::
+
+
+   digraph MergeTree {
+     node[style="filled,striped,rounded",shape="box"];
+     subgraph cluster_1 {
+       label="State 336"; style="rounded"; labeljust="l"; bgcolor="lightgray"
+       subgraph cluster_1_ambiguous_explicit_member_declaration {
+         label="explicit_declaration, explicit_deduction ⇒ ambiguous_explicit_member_declaration"; style="rounded,filled"; color="lightpink"; labeljust="l";
+         13[label="member-declaration[explicit_deduction]\n ♦ deduction-guide",fillcolor="aquamarine"];
+         16[label="member-declaration[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq member-declarator-list? ;",fillcolor="burlywood"];
+         18[label="member-declaration[explicit_declaration]\n ♦ function-definition",fillcolor="burlywood"];
+       }
+       12[label="deduction-guide[explicit_deduction]\n ♦ attribute-specifier-seq? deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;",fillcolor="aquamarine"];
+       14[label="member-specification?[ambiguous_explicit_member_declaration]\n ♦ member-declaration member-specification?",fillcolor="coral"];
+       15[label="class-specifier[ambiguous_explicit_member_declaration]\nclass-head { ♦ member-specification? }",fillcolor="coral"];
+       17[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator function-body",fillcolor="burlywood"];
+       19[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator virt-specifier-seq function-body",fillcolor="burlywood"];
+       20[label="function-definition[explicit_declaration]\n ♦ attribute-specifier-seq? decl-specifier-seq declarator requires-clause function-body",fillcolor="burlywood"];
+     }
+     subgraph cluster_0 {
+       label="State 544"; style="rounded"; labeljust="l"; bgcolor="lightgray"
+       0[label="deduction-guide-begin[explicit_deduction]\n ♦ ",fillcolor="aquamarine"];
+       1[label="deduction-guide[explicit_deduction]\nattribute-specifier-seq? ♦ deduction-guide-begin explicit-specifier template-name ( parameter-declaration-clause ) -> simple-template-id ;",fillcolor="aquamarine"];
+       2[label="explicit-specifier[explicit_declaration]\n ♦ explicit",fillcolor="burlywood"];
+       3[label="function-specifier[explicit_declaration]\n ♦ explicit-specifier",fillcolor="burlywood"];
+       4[label="decl-specifier[explicit_declaration]\n ♦ function-specifier",fillcolor="burlywood"];
+       5[label="decl-specifier-seq[explicit_declaration]\n ♦ decl-specifier continue-decl-specifier-seq decl-specifier-seq",fillcolor="burlywood"];
+       6[label="decl-specifier-seq[explicit_declaration]\n ♦ decl-specifier end-decl-specifier-seq attribute-specifier-seq?",fillcolor="burlywood"];
+       7[label="member-declaration[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq member-declarator-list? ;",fillcolor="burlywood"];
+       8[label="function-definition[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator function-body",fillcolor="burlywood"];
+       9[label="function-definition[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator virt-specifier-seq function-body",fillcolor="burlywood"];
+       10[label="function-definition[explicit_declaration]\nattribute-specifier-seq? ♦ decl-specifier-seq declarator requires-clause function-body",fillcolor="burlywood"];
+       11[label="explicit-specifier[explicit_declaration]\n ♦ explicit ( constant-expression )",fillcolor="burlywood"];
+     }
+     1->12;
+     12->13;
+     13->14;
+     16->14;
+     18->14;
+     14->15;
+     7->16;
+     8->17;
+     17->18;
+     19->18;
+     20->18;
+     9->19;
+     10->20;
+     0->1;
+     2->3;
+     11->3;
+     3->4;
+     4->5;
+     4->6;
+     5->7;
+     6->7;
+     5->8;
+     6->8;
+     5->9;
+     6->9;
+     5->10;
+     6->10;
+   }

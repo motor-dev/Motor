@@ -38,7 +38,7 @@ def get_terminal_size():
 class LALRTable(object):
 
     def __init__(self, action_table, goto_table):
-        # type: (List[Dict[int, Tuple[Tuple[int, Optional[str]],...]]], List[Dict[int, int]]) -> None
+        # type: (List[Dict[int, Tuple[Tuple[int, Optional[str], Optional[str]],...]]], List[Dict[int, int]]) -> None
         self._action_table = action_table
         self._goto_table = goto_table
 
@@ -504,7 +504,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                 (u'\r[\x1b[32m%s\x1b[37m%s\x1b[0m]' % (u'\u2501' * completed, u'\u2501' * remaining)).encode('utf-8')
             )
         action_map = {}    # type: Dict[int, List[Tuple[int, LR0Item]]]
-        st_action = {}     # type: Dict[int, Tuple[Tuple[int, Optional[str]],...]]
+        st_action = {}     # type: Dict[int, Tuple[Tuple[int, Optional[str], Optional[str]],...]]
         st_goto = {}       # type: Dict[int, int]
         sm_log.info('')
         sm_log.info('')
@@ -651,13 +651,15 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
             else:
                 accepted_actions = action_dest
 
-            st_action[a] = tuple(sorted([(j, items[0]._action) for j, items in accepted_actions.items()]))
+            st_action[a] = tuple(
+                sorted([(j, items[0]._split, items[0]._action) for j, items in accepted_actions.items()])
+            )
             if len(accepted_actions) > 1 and not split:
                 # handle conflicts
                 conflicts = []     # type: List[Tuple[LR0Node, Optional[int]]]
                 num_rr += 1
                 sm_log.info('    %-30s conflict split', name_map[a])
-                for j, token_action in st_action[a]:
+                for j, _, token_action in st_action[a]:
                     items = accepted_actions[j]
                     if j >= 0:
                         sm_log.info('        shift and go to state %d', j)
@@ -709,7 +711,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     merge_set[0].add(a)
 
                 sm_log.info('    %-30s split', name_map[a])
-                for j, token_action in st_action[a]:
+                for j, _, token_action in st_action[a]:
                     action_error = False
                     items = accepted_actions[j]
                     if j >= 0:
@@ -736,11 +738,11 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                 conflict_log.info('')
 
             else:
-                for j, token_action in st_action[a]:
+                for j, _, token_action in st_action[a]:
                     action_error = False
                     items = accepted_actions[j]
                     if j >= 0:
-                        sm_log.info('    %-30s shift and go to state %d', name_map[a], j)
+                        sm_log.info('    %-30s[%d] shift and go to state %d', name_map[a], a, j)
                     for item in items:
                         if item._action != token_action:
                             action_error = True
@@ -754,7 +756,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         nkeys = set([])
         for item in item_group:
             for s in item._symbols:
-                if s > terminal_count:
+                if s >= terminal_count:
                     g = goto(item_group, len(states), s)
                     j = cidhash.get(id(g), -1)
                     if j >= 0:

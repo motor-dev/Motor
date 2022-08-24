@@ -39,7 +39,7 @@ pure-specifier:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge, cxx20_merge
+from ...parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge, cxx17_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -92,9 +92,9 @@ def member_declaration_cxx20(self, p):
 @cxx98_merge
 def ambiguous_member_declaration(
     self, ambiguous_function_definition, ambiguous_declarator, ambiguous_decl_specifier_seq, opaque_enum_declaration,
-    deduction_guide, template_decl
+    deduction_guide, template_decl, ambiguous_type_specifier
 ):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
@@ -106,7 +106,7 @@ def ambiguous_member_declaration_init_list(self, braced_init_list, compound_stat
 
 
 @glrp.merge('member-declaration')
-@cxx20_merge
+@cxx17_merge
 def ambiguous_explicit_member_declaration(self, explicit_deduction, explicit_declaration):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass

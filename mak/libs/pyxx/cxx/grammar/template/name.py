@@ -103,40 +103,37 @@ def template_argument_list_cxx11(self, p):
     pass
 
 
-@glrp.rule('template-argument : template-argument-proxy')
+@glrp.rule('template-argument : constant-expression')
+@glrp.rule('template-argument : type-id')
+@glrp.rule('template-argument : id-expression')
 @cxx98
 def template_argument(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('template-argument-proxy : constant-expression')
-@glrp.rule('template-argument-proxy : type-id')
-@glrp.rule('template-argument-proxy : id-expression')
-@cxx98
-def template_argument_proxy(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.merge('template-argument-proxy')
+@glrp.merge('template-argument')
 @cxx98_merge
-def ambiguous_template_argument_proxy(self, ambiguous_cast_expression, ambiguous_type_id, id_expression):
+def ambiguous_template_argument(self, ambiguous_cast_expression, ambiguous_type_id, id_expression):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
-@glrp.merge('template-argument-proxy')
+@glrp.merge('template-argument')
 @cxx98_merge
-def ambiguous_template_argument_proxy_literal(self, ambiguous_relational_expression_literal, template_literal):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_template_argument_literal(
+    self, ambiguous_cast_expression_template_literal, ambiguous_relational_expression_literal, template_literal
+):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
-@glrp.merge('template-argument-proxy')
+@glrp.merge('template-argument')
 @cxx98_merge
-def ambiguous_template_argument_proxy_operator(self, ambiguous_relational_expression_operator, template_operator):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_template_argument_operator(
+    self, ambiguous_cast_expression_template_operator, ambiguous_relational_expression_operator, template_operator
+):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 

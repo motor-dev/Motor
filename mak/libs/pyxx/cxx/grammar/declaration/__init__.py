@@ -56,7 +56,7 @@ identifier-list:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge, cxx20_merge
+from ...parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge, cxx17_merge
 from motor_typing import TYPE_CHECKING
 from . import specifier
 from . import declarator
@@ -88,71 +88,64 @@ def declaration_seq(self, p):
     pass
 
 
-@glrp.rule('declaration-proxy : block-declaration')
-@glrp.rule('declaration-proxy : nodeclspec-function-declaration')
-@glrp.rule('declaration-proxy : function-definition')
-@glrp.rule('declaration-proxy : template-declaration')
-@glrp.rule('declaration-proxy : explicit-instantiation')
-@glrp.rule('declaration-proxy : explicit-specialization')
-@glrp.rule('declaration-proxy : linkage-specification')
-@glrp.rule('declaration-proxy : namespace-definition')
-@glrp.rule('declaration-proxy : empty-declaration')
+@glrp.rule('declaration : block-declaration')
+@glrp.rule('declaration : nodeclspec-function-declaration')
+@glrp.rule('declaration : function-definition')
+@glrp.rule('declaration : template-declaration')
+@glrp.rule('declaration : explicit-instantiation')
+@glrp.rule('declaration : explicit-specialization')
+@glrp.rule('declaration : linkage-specification')
+@glrp.rule('declaration : namespace-definition')
+@glrp.rule('declaration : empty-declaration')
 @cxx98
-def declaration_proxy(self, p):
+def declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('declaration-proxy : attribute-declaration')
+@glrp.rule('declaration : attribute-declaration')
 @cxx11
-def declaration_proxy_cxx11(self, p):
+def declaration_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('declaration-proxy : deduction-guide')
+@glrp.rule('declaration : deduction-guide')
 @cxx17
-def declaration_proxy_cxx17(self, p):
+def declaration_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('declaration-proxy : export-declaration')
-@glrp.rule('declaration-proxy[prec:right,0] : module-import-declaration')
+@glrp.rule('declaration : export-declaration')
+@glrp.rule('declaration[prec:right,0] : module-import-declaration')
 @cxx20
-def declaration_proxy_cxx20(self, p):
+def declaration_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.merge('declaration-proxy')
-@cxx20_merge
+@glrp.merge('declaration')
+@cxx17_merge
 def ambiguous_explicit_declaration(self, explicit_deduction, explicit_declaration):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
-@glrp.merge('declaration-proxy')
+@glrp.merge('declaration')
 @cxx98_merge
 def ambiguous_declaration(
     self, nodeclspec_function_declaration, ambiguous_function_definition, template_decl, deduction_guide,
-    ambiguous_block_declaration
+    ambiguous_block_declaration, ambiguous_decl_specifier_seq, ambiguous_type_specifier
 ):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
-@glrp.merge('declaration-proxy')
+@glrp.merge('declaration')
 @cxx98_merge
 def ambiguous_declaration_init_list(self, braced_init_list, compound_statement):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.rule('declaration : declaration-proxy')
-@cxx98
-def declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> None
     pass
 
 
@@ -185,7 +178,7 @@ def block_declaration_cxx20(self, p):
 
 @glrp.merge('block-declaration')
 @cxx98_merge
-def ambiguous_block_declaration(self, simple_declaration, opaque_enum_declaration):
+def ambiguous_block_declaration(self, ambiguous_type_specifier, opaque_enum_declaration):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
@@ -214,14 +207,6 @@ def alias_declaration(self, p):
 @cxx98
 def simple_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.merge('simple-declaration')
-@glrp.merge_result('simple_declaration')
-@cxx98_merge
-def simple_declaration_rename(self, ambiguous_decl_specifier_seq):
-    # type: (CxxParser, Optional[glrp.Production]) -> None
     pass
 
 

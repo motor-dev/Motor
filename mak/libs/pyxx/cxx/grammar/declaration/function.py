@@ -54,7 +54,7 @@ def function_body_cxx11(self, p):
 
 @glrp.merge('function-definition')
 @cxx98_merge
-def ambiguous_function_definition(self, ambiguous_decl_specifier_seq, ambiguous_declarator):
+def ambiguous_function_definition(self, ambiguous_type_specifier, ambiguous_declarator):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     # attribute-specifier-seq? decl-specifier-seq declarator function-body | attribute-specifier-seq? declarator function-body
     pass

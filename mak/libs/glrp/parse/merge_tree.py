@@ -372,7 +372,7 @@ class MergeTree(object):
         #    logger.warning('   merge conflicts: [%s]' % ', '.join(merge_node._tags))
         for leaf_state, graph in self._paths.items():
             for state in graph:
-                if state._error_nodes:
+                if state._error_nodes or True:
                     self.print_dot(graph, name_map, logger)
                     break
         pass
