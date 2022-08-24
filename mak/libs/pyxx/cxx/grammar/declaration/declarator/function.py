@@ -59,33 +59,24 @@ def parameter_declaration_list_opt(self, p):
     pass
 
 
-@glrp.rule('parameter-declaration : parameter-declaration-proxy')
+@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq declarator')
+@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq declarator "=" initializer-clause')
+@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-declarator?')
+@glrp.rule(
+    'parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-declarator? "=" initializer-clause'
+)
 @cxx98
 def parameter_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('parameter-declaration-proxy : attribute-specifier-seq? decl-specifier-seq declarator')
+@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-pack-declarator')
 @glrp.rule(
-    'parameter-declaration-proxy : attribute-specifier-seq? decl-specifier-seq declarator "=" initializer-clause'
-)
-@glrp.rule('parameter-declaration-proxy : attribute-specifier-seq? decl-specifier-seq abstract-declarator?')
-@glrp.rule(
-    'parameter-declaration-proxy : attribute-specifier-seq? decl-specifier-seq abstract-declarator? "=" initializer-clause'
-)
-@cxx98
-def parameter_declaration_proxy(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('parameter-declaration-proxy : attribute-specifier-seq? decl-specifier-seq abstract-pack-declarator')
-@glrp.rule(
-    'parameter-declaration-proxy : attribute-specifier-seq? decl-specifier-seq abstract-pack-declarator "=" initializer-clause'
+    'parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-pack-declarator "=" initializer-clause'
 )
 @cxx11
-def parameter_declaration_proxy_cxx11(self, p):
+def parameter_declaration_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -105,14 +96,14 @@ def ambiguous_parameter_declaration_list_opt(self, pack_declarator, declarator_e
     pass
 
 
-@glrp.merge('parameter-declaration-proxy')
+@glrp.merge('parameter-declaration')
 @cxx98_merge
 def ambiguous_parameter_declaration(self, ambiguous_declarator, ambiguous_nested_name_specifier):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
-@glrp.merge('parameter-declaration-proxy')
+@glrp.merge('parameter-declaration')
 @cxx98_merge
 def ambiguous_parameter_declaration_2(self, ambiguous_abstract_declarator_opt, noptr_declarator):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None

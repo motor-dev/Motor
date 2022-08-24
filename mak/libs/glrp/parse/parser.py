@@ -130,7 +130,6 @@ class Parser(object):
 
     def parse(self, filename):
         # type: (str) -> Any
-        self._lexer.input(filename)
 
         contexts = [Context(None, "'")]
 
@@ -139,15 +138,48 @@ class Parser(object):
         rules = [(r[0], r[1], r[2](self)) for r in self._grammar._rules]
         prev_position = 0
 
-        for token in self._lexer.token():
-            for context in contexts:
+        for token in self._lexer.input(filename):
+            next_contexts = []
+            print(len(contexts))
+            while contexts:
+                context = contexts.pop(0)
                 actions = action_table[context._state_stack[-1]].get(token._id, tuple())
-                if len(actions) != 1:
-                    # TODO
-                    pass
+                if len(actions) == 0:
+                    continue
+                elif len(actions) == 1:
+                    action, name, token_action = actions[0]
+                    #assert name is None
+
+                    if action < 0:
+                        rule = rules[-action - 1]
+                        symbol = rule[0]
+                        symbol_count = len(rule[1])
+                        if symbol_count:
+                            production = Production(
+                                symbol, context._sym_stack[-symbol_count]._start_position,
+                                context._sym_stack[-1]._end_position, context._sym_stack[-symbol_count:], rule[2]
+                            )
+                        else:
+                            production = Production(symbol, prev_position, token._start_position, [], rule[2])
+                        production.run()
+                        if symbol_count:
+                            del context._sym_stack[-symbol_count:]
+                            del context._state_stack[-symbol_count:]
+                        context._sym_stack.append(production)
+                        context._state_stack.append(goto_table[context._state_stack[-1]][symbol])
+                        contexts.append(context)
+
+                    elif action > 0:
+                        context._sym_stack.append(token)
+                        context._state_stack.append(action)
+                        next_contexts.append(context)
                 else:
-                    for action, token_action in actions[:1]:
-                        while action < 0:
+                    parent = context
+                    for action, name, token_action in actions:
+                        assert name is not None
+                        context = Context(parent, name)
+
+                        if action < 0:
                             rule = rules[-action - 1]
                             symbol = rule[0]
                             symbol_count = len(rule[1])
@@ -164,17 +196,20 @@ class Parser(object):
                                 del context._state_stack[-symbol_count:]
                             context._sym_stack.append(production)
                             context._state_stack.append(goto_table[context._state_stack[-1]][symbol])
-                            actions = action_table[context._state_stack[-1]].get(token._id, tuple())
-                            action, token_action = actions[0]
+                            contexts.append(context)
 
-                        if action > 0:
+                        elif action > 0:
                             context._sym_stack.append(token)
                             context._state_stack.append(action)
+                            next_contexts.append(context)
+            contexts = next_contexts
             prev_position = token._end_position
+
+        print(len(contexts))
         for context in contexts:
             actions = action_table[context._state_stack[-1]].get(-1, tuple())
             if len(actions) == 1:
-                for action, token_action in actions:
+                for action, name, token_action in actions:
                     rule = rules[-action - 1]
                     symbol = rule[0]
                     production = Production(

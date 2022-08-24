@@ -35,21 +35,14 @@ def template_parameter(self, p):
 
 @glrp.merge('template-parameter')
 @cxx98_merge
-def ambiguous_template_parameter(self, ambiguous_type_constraint, ambiguous_decl_specifier_seq):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_template_parameter(self, ambiguous_type_constraint, ambiguous_type_specifier, typename_parameter):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
 @glrp.merge('template-parameter')
 @cxx98_merge
 def ambiguous_template_parameter_2(self, type_parameter, defining_type_specifier):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('template-parameter')
-@cxx98_merge
-def ambiguous_template_parameter_3(self, typename_parameter, typename_specifier):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 

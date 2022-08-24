@@ -35,11 +35,12 @@ class Lexer:
                 self._terminals[token_name] = (len(self._terminals), True)
 
     def input(self, filename):
-        # type: (str) -> None
+        # type: (str) -> Generator[Token, None, None]
         self._filename = filename
         with open(filename, 'r') as file:
             self._lexdata = file.read()
             self._lexlen = len(self._lexdata)
+        return self._token()
 
     def get_token_id(self, token_type):
         # type: (str) -> int
@@ -96,7 +97,7 @@ class Lexer:
             index_end += 1
         return self._lexdata[index_start:index_end + 1].split('\n')
 
-    def token(self, track_blanks=False):
+    def _token(self, track_blanks=False):
         # type: (bool) -> Generator[Token, None, None]
         lexpos = 0
         lexdata = self._lexdata

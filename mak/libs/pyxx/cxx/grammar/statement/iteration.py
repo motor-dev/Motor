@@ -54,7 +54,7 @@ def for_range_initializer_cxx11(self, p):
 
 @glrp.merge('for-range-declaration')
 @cxx11_merge
-def for_range_declaration(self, ambiguous_decl_specifier_seq):
+def for_range_declaration(self, ambiguous_type_specifier):
     # type: (CxxParser, Optional[glrp.Production]) -> None
     # Simple rename
     pass
