@@ -16,7 +16,7 @@ LOAD_OPTIMIZED = 0
 GENERATE = 1
 LOAD_CACHE = 2
 
-VERSION = '0.99'
+VERSION = '1.0'
 
 
 class Action(object):
@@ -56,13 +56,15 @@ class _AcceptAction(Action):
 
 class MergeAction(object):
 
-    def __init__(self, merge_name):
-        # type: (str) -> None
-        self._merge_name = merge_name
+    def __init__(self, method_name, filename, lineno):
+        # type: (str, str, int) -> None
+        self._method_name = method_name
+        self._filename = filename
+        self._lineno = lineno
 
     def __call__(self, parser):
         # type: (Parser) -> Callable[..., None]
-        return getattr(parser, self._merge_name)
+        return getattr(parser, self._method_name)
 
 
 class Parser(object):
@@ -83,7 +85,7 @@ class Parser(object):
                     h.update(rule_string.encode())
                 for merge_string in getattr(action, 'merge', []):
                     h.update(merge_string.encode())
-                for signature in getattr(action, 'merge_signature', []):
+                for signature in getattr(action, 'merge_signature', [[], [], []])[2]:
                     h.update(signature.encode())
                 h.update(getattr(action, 'merge_result', rule_action).encode())
             if mode == LOAD_CACHE:
@@ -105,20 +107,24 @@ class Parser(object):
 
     def _generate_table(self, rule_hash, start_symbol, temp_directory, output_directory):
         # type: (str, str, str, str) -> Grammar
-        rules = []                                               # type: List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]]
-        merges = {}                                              # type: Dict[str, List[Tuple[str, MergeAction, Dict[str, None]]]]
+        rules = []                                                                                             # type: List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]]
+        merges = {}                                                                                            # type: Dict[str, List[Tuple[str, MergeAction, Tuple[str, ...]]]]
         for rule_action in dir(self):
             action = getattr(self, rule_action)
             for rule_string, filename, lineno in getattr(action, 'rules', []):
                 rules += _parse_rule(rule_string, rule_action, filename, lineno)
-            signature = getattr(action, 'merge_signature', None) # type: Optional[Dict[str, None]]
+            signature = getattr(action, 'merge_signature', None)                                               # type: Optional[Tuple[str, int, Tuple[str, ...]]]
             if signature is not None:
                 merge_result = getattr(action, 'merge_result', rule_action)
                 for symbol in getattr(action, 'merge', []):
                     try:
-                        merges[symbol].append((merge_result, MergeAction(rule_action), signature))
+                        merges[symbol].append(
+                            (merge_result, MergeAction(rule_action, signature[0], signature[1]), signature[2])
+                        )
                     except KeyError:
-                        merges[symbol] = [(merge_result, MergeAction(rule_action), signature)]
+                        merges[symbol] = [
+                            (merge_result, MergeAction(rule_action, signature[0], signature[1]), signature[2])
+                        ]
 
         grammar = Grammar(
             self.__class__.__name__, rule_hash, self._lexer._terminals, rules, merges, start_symbol, self,
@@ -348,7 +354,7 @@ def merge(rule_name):
             )
         argument_count = code.co_argcount
         argument_names = code.co_varnames[1:argument_count]
-        setattr(method, 'merge_signature', dict([(a, None) for a in argument_names]))
+        setattr(method, 'merge_signature', (code.co_filename, code.co_firstlineno, tuple(a for a in argument_names)))
         getattr(method, 'merge').append(rule_name)
         return method
 
