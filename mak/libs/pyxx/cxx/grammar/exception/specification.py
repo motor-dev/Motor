@@ -25,8 +25,14 @@ from ...parser import cxx98, cxx11, deprecated_cxx17, deprecated_cxx20
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('exception-specification? : dynamic-exception-specification')
 @glrp.rule('exception-specification? : ')
+@cxx98
+def exception_specification_opt(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('exception-specification? : dynamic-exception-specification')
 @cxx98
 @deprecated_cxx20
 def exception_specification_opt_until_cxx20(self, p):
