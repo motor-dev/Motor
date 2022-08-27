@@ -58,7 +58,9 @@ class Logger:
             (color_error_type, color_filename, color_message, color_caret,
              color_off) = self.COLOR_PATTERN.get(error_type, self.DEFAULT_COLOR_PATTERN)
             self._out_file.write(
-                u'{color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n'.format(**locals())
+                u'\r\x1b[2K{color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n'.format(
+                    **locals()
+                )
             )
         else:
             color_error_type = ''
