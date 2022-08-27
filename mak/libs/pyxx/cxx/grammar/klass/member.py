@@ -91,10 +91,10 @@ def member_declaration_cxx20(self, p):
 @glrp.merge('member-declaration')
 @cxx98_merge
 def ambiguous_member_declaration(
-    self, ambiguous_function_definition, ambiguous_declarator, ambiguous_decl_specifier_seq, opaque_enum_declaration,
-    deduction_guide, template_decl, ambiguous_type_specifier
+    self, ambiguous_function_definition, ambiguous_declarator, deduction_template, deduction_guide, template_decl,
+    ambiguous_type_specifier
 ):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 

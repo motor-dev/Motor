@@ -70,13 +70,6 @@ def exception_declaration(self, p):
 
 @glrp.merge('exception-declaration')
 @cxx98_merge
-def ambiguous_exception_declaration(self, ambiguous_declarator, ambiguous_nested_name_specifier):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('exception-declaration')
-@cxx98_merge
 def ambiguous_exception_declaration_2(self, ambiguous_abstract_declarator_opt, noptr_declarator):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass

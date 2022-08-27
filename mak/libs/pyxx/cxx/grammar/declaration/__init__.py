@@ -135,10 +135,10 @@ def ambiguous_explicit_declaration(self, explicit_deduction, explicit_declaratio
 @glrp.merge('declaration')
 @cxx98_merge
 def ambiguous_declaration(
-    self, nodeclspec_function_declaration, ambiguous_function_definition, template_decl, deduction_guide,
-    ambiguous_block_declaration, ambiguous_decl_specifier_seq, ambiguous_type_specifier
+    self, nodeclspec_function_declaration, ambiguous_function_definition, template_decl, deduction_template,
+    deduction_guide, ambiguous_block_declaration, ambiguous_decl_specifier_seq, ambiguous_type_specifier
 ):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
@@ -178,8 +178,8 @@ def block_declaration_cxx20(self, p):
 
 @glrp.merge('block-declaration')
 @cxx98_merge
-def ambiguous_block_declaration(self, ambiguous_type_specifier, opaque_enum_declaration):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_block_declaration(self, ambiguous_type_specifier):
+    # type: (CxxParser, Optional[glrp.Production]) -> None
     pass
 
 

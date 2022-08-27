@@ -29,9 +29,9 @@ def deduction_guide_begin_cxx17(self, p):
 
 
 @glrp.merge('deduction-guide')
-@glrp.merge_result('deduction_guide')
+@glrp.merge_result('deduction_template')
 @cxx17_merge
-def deduction_guide_rename(self, template_name):
+def deduction_template_rename(self, template_name):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

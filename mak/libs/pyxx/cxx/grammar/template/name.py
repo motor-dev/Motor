@@ -105,7 +105,7 @@ def template_argument_list_cxx11(self, p):
 
 @glrp.rule('template-argument : constant-expression')
 @glrp.rule('template-argument : type-id')
-@glrp.rule('template-argument : id-expression')
+#@glrp.rule('template-argument : id-expression')
 @cxx98
 def template_argument(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -114,26 +114,8 @@ def template_argument(self, p):
 
 @glrp.merge('template-argument')
 @cxx98_merge
-def ambiguous_template_argument(self, ambiguous_cast_expression, ambiguous_type_id, id_expression):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('template-argument')
-@cxx98_merge
-def ambiguous_template_argument_literal(
-    self, ambiguous_cast_expression_template_literal, ambiguous_relational_expression_literal, template_literal
-):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('template-argument')
-@cxx98_merge
-def ambiguous_template_argument_operator(
-    self, ambiguous_cast_expression_template_operator, ambiguous_relational_expression_operator, template_operator
-):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_template_argument(self, ambiguous_cast_expression, ambiguous_type_id):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 

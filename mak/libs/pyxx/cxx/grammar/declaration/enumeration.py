@@ -81,14 +81,6 @@ def opaque_enum_declaration_cxx11(self, p):
     pass
 
 
-@glrp.merge('opaque-enum-declaration')
-@glrp.merge_result('opaque_enum_declaration')
-@cxx11_merge
-def opaque_enum_declaration_rename(self, ambiguous_type_specifier, ambiguous_nested_name_specifier):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
 @glrp.rule('enum-key : "enum"')
 @cxx98
 def enum_key(self, p):

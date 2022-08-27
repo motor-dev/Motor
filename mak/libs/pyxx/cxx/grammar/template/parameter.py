@@ -42,7 +42,7 @@ def ambiguous_template_parameter(self, ambiguous_type_constraint, ambiguous_type
 
 @glrp.merge('template-parameter')
 @cxx98_merge
-def ambiguous_template_parameter_2(self, type_parameter, defining_type_specifier):
+def ambiguous_template_parameter_2(self, type_parameter, defining_type_specifier_class):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
@@ -116,8 +116,8 @@ def type_constraint_cxx20(self, p):
 
 @glrp.merge('type-constraint')
 @cxx20_merge
-def ambiguous_type_constraint(self, template_name, concept_name, ambiguous_nested_name_specifier):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_type_constraint(self, concept_name, ambiguous_nested_name_specifier):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 

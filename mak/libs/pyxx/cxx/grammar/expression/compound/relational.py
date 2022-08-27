@@ -25,17 +25,15 @@ def relational_expression(self, p):
 
 @glrp.merge('relational-expression')
 @cxx98_merge
-def ambiguous_relational_expression_literal(self, template_literal, nontemplate_literal):
+def ambiguous_relational_expression_template_operator(self, template_operator, nontemplate_operator):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    # new new-placement (type-id) vs new(type-id)
     pass
 
 
 @glrp.merge('relational-expression')
 @cxx98_merge
-def ambiguous_relational_expression_operator(self, template_operator, nontemplate_operator):
+def ambiguous_relational_expression_template_literal(self, template_literal, nontemplate_literal):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    # new new-placement (type-id) vs new(type-id)
     pass
 
 

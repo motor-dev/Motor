@@ -84,16 +84,10 @@ def type_name(self, p):
 
 @glrp.merge('type-name')
 @cxx98_merge
-def ambiguous_type_name(self, class_name, enum_name, typedef_name, template_name):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('type-name')
-@glrp.merge_result('ambiguous_type_name')
-@cxx98_merge
-def ambiguous_type_name_template_id(self, class_template_id, typedef_template_id):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_type_name(
+    self, class_name, enum_name, typedef_name, template_name, class_template_id, typedef_template_id
+):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
