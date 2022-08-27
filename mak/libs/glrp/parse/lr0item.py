@@ -4,7 +4,7 @@ from motor_typing import TYPE_CHECKING
 class LR0Item(object):
 
     def __init__(self, rule, index, next, predecessor, successors, first, follow, merge_list=[]):
-        # type: (Grammar.Rule, int, Optional[LR0Item], Optional[int], List[Grammar.Rule], Set[int], Dict[int, int], List[Tuple[str, MergeAction, Dict[str, None]]]) -> None
+        # type: (Grammar.Rule, int, Optional[LR0Item], Optional[int], List[Grammar.Rule], Set[int], Dict[int, int], List[Grammar.Merge]) -> None
         self.rule = rule
         self.len = rule.len
         self._symbol = rule._prod_symbol # type: int
@@ -21,25 +21,26 @@ class LR0Item(object):
         self._after = successors
         self._symbols = frozenset(rule.production)
         self._first = first
-        self._follow = follow      # type: Dict[int, int]
-        self._lookaheads = {}      # type: Dict[int, List[int]]
-        self._precedence = None    # type: Optional[Tuple[str, int]]
-        self._split = None         # type: Optional[str]
-        self._action = None        # type: Optional[str]
-        self._merge = merge_list   # type: List[Tuple[str, MergeAction, Dict[str, None]]]
-        self._merge_map = {}       # type: Dict[str, Tuple[MergeAction, str]]
+        self._follow = follow            # type: Dict[int, int]
+        self._lookaheads = {}            # type: Dict[int, List[int]]
+        self._precedence = None          # type: Optional[Tuple[str, int]]
+        self._split = None               # type: Optional[str]
+        self._action = None              # type: Optional[str]
+        self._merges = tuple(merge_list) # type: Tuple[Grammar.Merge, ...]
+        self._merge_map = {}             # type: Dict[str, Grammar.Merge]
+        self._merge_map_str = {}         # type: Dict[str, str]
 
-        for result, action, inputs in self._merge:
-            for key, _ in inputs.items():
+        for merge in self._merges:
+            for key in merge._arguments:
                 if key in self._merge_map:
                     raise SyntaxError(
                         'incorrect merge: key "%s" appears in more than one merge rule' % key,
                         (rule._filename, rule._lineno, 0, '')
                     )
-                self._merge_map[key] = (action, result)
+                self._merge_map[key] = merge
+                self._merge_map_str[key] = merge._result
         self._merge_set = frozenset(self._merge_map.keys())
         self._split_use = 0
-        self._merge_use = 0
 
         if index == rule.len:
             index = -1

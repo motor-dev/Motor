@@ -46,10 +46,7 @@ class LALRTable(object):
 def _find_merge_points(conflict_list, lookahead, name_map, logger, error_log):
     # type: (List[Tuple[LR0Node, bool, str]], int, List[str], Logger, Logger) -> None
     merge_tree = MergeTree(conflict_list, lookahead)
-    merge_tree.check_resolved(name_map, logger)
-    pass
-    #for item, tags in sorted(merge_tree._error_nodes.items(), key=lambda x: (x[0].rule._filename, x[0].rule._lineno)):
-    #    error_log.warning('%s - need to resolve previous split[%s]' % (item.to_string(name_map), ",".join(tags)))
+    merge_tree.check_resolved(name_map, error_log, logger)
 
 
 def _log(title, conflict_paths, out, name_map):
@@ -815,9 +812,21 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     error_log.diagnostic(rule._filename, rule._lineno, item_iterator.to_string(name_map))
                 item_iterator = item_iterator._next
 
-                #if rule._item._last._merge and rule._item._last._merge_use == 0:
-                #    error_log.warning('unused merge annotation')
-                #    error_log.diagnostic(rule._filename, rule._lineno, rule._item._last.to_string(name_map))
+        for merge in rule._item._last._merges:
+            if merge._use_count == 0:
+                error_log.warning('unused merge annotation %s' % merge._action._method_name)
+                error_log.diagnostic(
+                    merge._action._filename, merge._action._lineno,
+                    '%s(%s)' % (merge._action._method_name, ', '.join(merge._arguments))
+                )
+            else:
+                for argument, use_count in merge._arguments.items():
+                    if use_count == 0:
+                        error_log.warning('unused merge arguments "%s"' % argument)
+                        error_log.diagnostic(
+                            merge._action._filename, merge._action._lineno,
+                            '%s(%s)' % (merge._action._method_name, ', '.join(merge._arguments))
+                        )
 
     if num_sr == 1:
         error_log.warning('1 shift/reduce conflict')

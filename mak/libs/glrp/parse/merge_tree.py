@@ -44,7 +44,7 @@ class _MergeNode(object):
         else:
             self._merge_map = {}
             self._merge_set = frozenset()
-        self._merge_registry = {}  # type: Dict[str, Tuple[MergeAction, str]]
+        self._merge_registry = {}  # type: Dict[str, str]
         self._predecessors = []    # type: List[_MergeNode]
         self._successors = []      # type: List[_MergeNode]
         self._id = _MergeNode.ID
@@ -63,8 +63,10 @@ class _MergeNode(object):
                 except KeyError:
                     return tag
                 else:
-                    self._merge_registry[tag] = result
-                    return result[1]
+                    self._merge_registry[tag] = result._result
+                    self._state._add_merge(self, result)
+                    result.use(tag)
+                    return result._result
 
             return _Tags(tags._indices, frozenset((_get_tag(x) for x in tags._tags)))
         else:
@@ -108,6 +110,7 @@ class _MergeState(object):
         for e in entry:
             self._entry_indices |= e[3]._indices
         self._nodes = {}               # type: Dict[Tuple[LR0Node, bool, bool], _MergeNode]
+        self._merge_registry = {}      # type: Dict[Grammar.Merge, List[_MergeNode]]
         self._predecessors = []        # type: List[_MergeState]
         self._successors = []          # type: List[_MergeState]
         self._id = _MergeState.ID
@@ -118,7 +121,7 @@ class _MergeState(object):
         self._leaf_nodes = []          # type: List[_MergeNode]
         self._valid = False
         self._important_items = {}     # type: Dict[LR0Node, int]
-        self._error_nodes = []         # type: List[_MergeNode]
+        self._error_nodes = []         # type: List[Tuple[_MergeNode, str]]
 
     def validate(self):
         # type: () -> None
@@ -129,6 +132,13 @@ class _MergeState(object):
             if not state._valid:
                 state._valid = True
                 queue += state._predecessors
+
+    def _add_merge(self, node, merge):
+        # type: (_MergeNode, Grammar.Merge) -> None
+        try:
+            self._merge_registry[merge].append(node)
+        except KeyError:
+            self._merge_registry[merge] = [node]
 
     def collect_predecessors(self, lookahead):
         # type: (int) -> Tuple[List["Entry"], bool]
@@ -163,7 +173,18 @@ class _MergeState(object):
 
                 if node._item._index == 0 and not node._item._last._merge_set.isdisjoint(tags._tags):
                     merge_map = node._item._last._merge_map
-                    tags = _Tags(tags._indices, frozenset((merge_map.get(t, (t, t))[1] for t in tags._tags)))
+
+                    def _get_tag(tag):
+                        # type: (str) -> str
+                        try:
+                            result = merge_map[tag]
+                        except KeyError:
+                            return tag
+                        else:
+                            result.use(tag)
+                            return result._result
+
+                    tags = _Tags(tags._indices, frozenset((_get_tag(t) for t in tags._tags)))
 
                 if len(node._predecessors) == 0 and len(node._direct_parents) == 0:
                     self._leaf = True
@@ -318,7 +339,10 @@ class _MergeState(object):
 
             for current_node in state._nodes.values():
                 if len(current_node._tags_entry._tags) > 1:
-                    state._error_nodes.append(current_node)
+                    for p in current_node._predecessors:
+                        if current_node._tags_entry._tags != p._tags_exit._tags:
+                            state._error_nodes.append((current_node, 'missing merge annotation'))
+                            break
 
         parent_nodes = []                                                                                         # type: List[_MergeNode]
         entries = deque(
@@ -365,17 +389,30 @@ class MergeTree(object):
         self._error_nodes = []     # type: List[_MergeNode]
         self._root_state = self._build_tree(node_set, lookahead)
 
-    def check_resolved(self, name_map, logger):
-        # type: (List[str], Logger) -> None
-        #merge_node = self._map[root_node._item]
-        #if len(merge_node._tags) > 1:
-        #    logger.warning('   merge conflicts: [%s]' % ', '.join(merge_node._tags))
+    def check_resolved(self, name_map, error_log, file_log):
+        # type: (List[str], Logger, Logger) -> None
         for leaf_state, graph in self._paths.items():
+            errors = {}    # type: Dict[Tuple[int, str], List[_MergeNode]]
+
+            seen = set()
             for state in graph:
-                if state._error_nodes or True:
-                    self.print_dot(graph, name_map, logger)
-                    break
-        pass
+                for error_node, message in state._error_nodes:
+                    for parent in error_node._predecessors:
+                        if (parent._node, parent._tags_exit, message) not in seen:
+                            seen.add((parent._node, parent._tags_exit, message))
+                            try:
+                                errors[(parent._node._item._symbol, message)].append(parent)
+                            except KeyError:
+                                errors[(parent._node._item._symbol, message)] = [parent]
+            if errors:
+                for (nonterminal, message), error_list in sorted(errors.items()):
+                    error_log.warning('%s at nonterminal %s' % (message, name_map[nonterminal]))
+                    for error in error_list:
+                        error_log.diagnostic(
+                            error._node._item.rule._filename, error._node._item.rule._lineno,
+                            '[%s] %s' % (', '.join(error._tags_exit._tags), error._node._item.to_string(name_map))
+                        )
+                self.print_dot(graph, name_map, file_log)
 
     def _gather_essential_states(self, interesting_states, lookahead):
         # type: (List[_MergeState], int) -> Set[_MergeState]
@@ -537,7 +574,7 @@ class MergeTree(object):
                 tags[tag] = result
                 return result
 
-        for state in graph:
+        for state in sorted(graph, key=lambda x: x._id):
             out_stream.info('     subgraph cluster_%d {' % (state._id))
             out_stream.info(
                 '       label="State %d"; style="rounded"; labeljust="l"; bgcolor="lightgray"' % (state._state_number)
@@ -548,9 +585,9 @@ class MergeTree(object):
                 if merge_node._committed:
                     for origin, target in merge_node._merge_registry.items():
                         try:
-                            s, n = node_index[target[1]]
+                            s, n = node_index[target]
                         except KeyError:
-                            node_index[target[1]] = (set((origin, )), [merge_node])
+                            node_index[target] = (set((origin, )), [merge_node])
                         else:
                             s.add(origin)
                             n.append(merge_node)
@@ -563,11 +600,12 @@ class MergeTree(object):
                 )
                 for merge_node in merge_nodes:
                     color = ':'.join(sorted([get_color(tag) for tag in merge_node._tags_entry._tags]))
+                    border_color = borders[state._important_items.get(node, 3)]
                     out_stream.info(
-                        '         %d[label="%s[%s]\\n%s",fillcolor="%s"];' % (
+                        '         %d[label="%s[%s]\\n%s"%s,fillcolor="%s"];' % (
                             merge_node._id, name_map[merge_node._node._item._symbol], ', '.join(
                                 merge_node._tags_entry._tags
-                            ), merge_node._node._item.to_short_string(name_map), color
+                            ), merge_node._node._item.to_short_string(name_map), border_color, color
                         )
                     )
                 out_stream.info('       }')
@@ -597,10 +635,10 @@ class MergeTree(object):
 
 
 if TYPE_CHECKING:
-    from motor_typing import Any, Dict, FrozenSet, List, Optional, Set, Tuple
+    from motor_typing import Any, Dict, FrozenSet, List, Set, Tuple
     Indices = int
     Entry = Tuple[Tuple[LR0Node, bool, bool, _Tags], ...]
     from .lr0node import LR0Node
     from .lr0item import LR0Item
-    from .grammar import MergeAction
+    from .grammar import Grammar
     from ..log import Logger

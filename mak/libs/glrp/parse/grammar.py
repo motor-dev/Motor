@@ -9,13 +9,27 @@ import sys
 
 class Grammar(object):
 
+    class Merge(object):
+
+        def __init__(self, result, action, arguments):
+            # type: (str, MergeAction, Tuple[str, ...]) -> None
+            self._result = result
+            self._action = action
+            self._arguments = dict(((a, 0) for a in arguments))
+            self._use_count = 0
+
+        def use(self, argument):
+            # type: (str) -> None
+            self._use_count += 1
+            self._arguments[argument] += 1
+
     class Rule(object):
 
         def __init__(
             self, id, prod_symbol, prod_name, production, action, annnotation_list, filename, lineno, debug_str,
             merge_list
         ):
-            # type: (int, int, str, Tuple[int,...], Action, List[Tuple[str, List[str], int]], str, int, str, List[Tuple[str, MergeAction, Dict[str, None]]]) -> None
+            # type: (int, int, str, Tuple[int,...], Action, List[Tuple[str, List[str], int]], str, int, str, List[Grammar.Merge]) -> None
             self._id = id
             self._prod_symbol = prod_symbol
             self._prod_name = prod_name
@@ -78,7 +92,7 @@ class Grammar(object):
             return len(self._rule_list)
 
     def __init__(self, name, rule_hash, terminals, rules, merges, start_symbol, parser, temp_dir):
-        # type: (str, str, Dict[str, Tuple[int, bool]], List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, List[Tuple[str, MergeAction, Dict[str, None]]]], str, Parser, str) -> None
+        # type: (str, str, Dict[str, Tuple[int, bool]], List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, List[Tuple[str, MergeAction, Tuple[str, ...]]]], str, Parser, str) -> None
         debug_filename = os.path.join(temp_dir, name + '.txt')
         conflict_filename = os.path.join(temp_dir, name + '-Conflicts.txt')
         index = {}
@@ -123,7 +137,7 @@ class Grammar(object):
 
 
 def _create_productions(rules, merges, index, log, name_map, terminals, start_id):
-    # type: (List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, List[Tuple[str, MergeAction, Dict[str, None]]]], Dict[str, int], Logger, List[str], Dict[str, Tuple[int, bool]], int) -> Tuple[Dict[int, Grammar.Production], List[Tuple[int, Tuple[int,...], Action]]]
+    # type: (List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, List[Tuple[str, MergeAction, Tuple[str, ...]]]], Dict[str, int], Logger, List[str], Dict[str, Tuple[int, bool]], int) -> Tuple[Dict[int, Grammar.Production], List[Tuple[int, Tuple[int,...], Action]]]
     rule_index = 1
     productions = {}   # type: Dict[int, Grammar.Production]
     rule_table = []
@@ -131,6 +145,10 @@ def _create_productions(rules, merges, index, log, name_map, terminals, start_id
     symbol_usage = [0] * len(index)    # type: List[int]
     unreachable = []                   # type: List[Grammar.Production]
     errors = False
+
+    merge_rules = {}
+    for nonterminal, merge_rule in merges.items():
+        merge_rules[nonterminal] = [Grammar.Merge(name, action, arguments) for name, action, arguments in merge_rule]
 
     for nonterminal, action, production, attribute_list, filename, lineno in rules:
         prod_symbol = index[nonterminal]
@@ -143,7 +161,7 @@ def _create_productions(rules, merges, index, log, name_map, terminals, start_id
             rule_table.append((prod_symbol, symbols, action))
             rule = Grammar.Rule(
                 rule_index, prod_symbol, nonterminal, symbols, action, attribute_list, filename, lineno,
-                '%s : %s' % (nonterminal, ' '.join(production)), merges.get(nonterminal, [])
+                '%s : %s' % (nonterminal, ' '.join(production)), merge_rules.get(nonterminal, [])
             )
             rule_index += 1
             for s in symbols:
