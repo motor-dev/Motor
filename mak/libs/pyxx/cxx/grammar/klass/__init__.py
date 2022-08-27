@@ -72,8 +72,8 @@ def class_head_name(self, p):
 
 @glrp.merge('class-head-name')
 @cxx98_merge
-def ambiguous_class_head_name(self, class_template_id, ambiguous_nested_name_specifier, template_name):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_class_head_name(self, ambiguous_nested_name_specifier, template_name):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
@@ -84,7 +84,7 @@ def class_virt_specifier_cxx11(self, p):
     pass
 
 
-@glrp.rule('class-key : [split:defining_type_specifier]"class"')
+@glrp.rule('class-key : [split:defining_type_specifier_class]"class"')
 @glrp.rule('class-key : "struct"')
 @glrp.rule('class-key : "union"')
 @cxx98

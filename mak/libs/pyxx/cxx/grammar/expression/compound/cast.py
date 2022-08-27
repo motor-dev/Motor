@@ -5,7 +5,7 @@ cast-expression:
 """
 
 import glrp
-from ....parser import cxx98, cxx98_merge, cxx17_merge
+from ....parser import cxx98, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -21,20 +21,6 @@ def cast_expression(self, p):
 @cxx98_merge
 def ambiguous_cast_expression(self, ambiguous_type_id, generic_postfix_expression, ambiguous_cast_expression):
     # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('cast-expression')
-@cxx17_merge
-def ambiguous_cast_expression_template_literal(self, template_literal, nontemplate_literal):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('cast-expression')
-@cxx17_merge
-def ambiguous_cast_expression_template_operator(self, template_operator, nontemplate_operator):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 

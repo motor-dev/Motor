@@ -52,13 +52,6 @@ def base_specifier(self, p):
     pass
 
 
-@glrp.merge('base-specifier')
-@cxx98_merge
-def ambiguous_base_specifier(self, ambiguous_type_name, ambiguous_nested_name_specifier):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
 @glrp.rule('class-or-decltype : type-name')
 @glrp.rule('class-or-decltype : nested-name-specifier template? type-name')
 # TODO: already covered above

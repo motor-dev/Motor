@@ -193,8 +193,8 @@ def ambiguous_ptr_declarator(self, declarator_id, ambiguous_nested_name_specifie
 
 @glrp.merge('declarator')
 @cxx98_merge
-def ambiguous_declarator(self, declarator_id, ambiguous_ptr_declarator, ambiguous_nested_name_specifier):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_declarator(self, declarator_id, ambiguous_ptr_declarator):
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 

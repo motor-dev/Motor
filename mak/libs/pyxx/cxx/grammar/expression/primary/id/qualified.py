@@ -66,17 +66,16 @@ def ambiguous_qualified_id(self, ambiguous_nested_name_specifier, template_name)
 @glrp.merge('nested-name-specifier')
 @cxx98_merge
 def ambiguous_nested_name_specifier(
-    self, ambiguous_type_name, ambiguous_namespace_name, ambiguous_nested_name_specifier_tail,
-    ambiguous_nested_name_specifier
+    self, ambiguous_type_name, ambiguous_namespace_name, ambiguous_nested_name_specifier_tail
 ):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
 @glrp.merge('nested-name-specifier-tail')
 @cxx98_merge
-def ambiguous_nested_name_specifier_tail(self, ambiguous_type_name, template_name):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_nested_name_specifier_tail(self, template_name):
+    # type: (CxxParser, Optional[glrp.Production]) -> None
     pass
 
 

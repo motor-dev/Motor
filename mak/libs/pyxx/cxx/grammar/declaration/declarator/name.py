@@ -43,8 +43,8 @@ def type_id(self, p):
 
 @glrp.merge('type-id')
 @cxx98_merge
-def ambiguous_type_id(self, ambiguous_nested_name_specifier, ambiguous_type_specifier):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_type_id(self, ambiguous_type_specifier):
+    # type: (CxxParser, Optional[glrp.Production]) -> None
     # Should never actually conflict as the precedence on '::' prevents option #2 from existing.
     # Used as rename.
     pass
