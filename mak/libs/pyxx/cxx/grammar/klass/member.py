@@ -129,6 +129,7 @@ def member_declarator_list_opt(self, p):
     pass
 
 
+@glrp.rule('member-declarator : declarator')
 @glrp.rule('member-declarator : declarator pure-specifier')
 @glrp.rule('member-declarator : declarator virt-specifier-seq pure-specifier')
 @glrp.rule('member-declarator : declarator brace-or-equal-initializer')
