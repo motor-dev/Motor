@@ -137,7 +137,7 @@ class Grammar(object):
 
 
 def _create_productions(rules, merges, index, log, name_map, terminals, start_id):
-    # type: (List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, List[Tuple[str, MergeAction, Tuple[str, ...]]]], Dict[str, int], Logger, List[str], Dict[str, Tuple[int, bool]], int) -> Tuple[Dict[int, Grammar.Production], List[Tuple[int, Tuple[int,...], Action]]]
+    # type: (List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, List[Tuple[str, MergeAction, Tuple[str, ...]]]], Dict[str, int], Logger, List[str], Dict[str, Tuple[int, bool]], int) -> Tuple[Dict[int, Grammar.Production], List[Tuple[int, Tuple[int,...], Action, Dict[str, Grammar.Merge]]]]
     rule_index = 1
     productions = {}   # type: Dict[int, Grammar.Production]
     rule_table = []
@@ -158,11 +158,11 @@ def _create_productions(rules, merges, index, log, name_map, terminals, start_id
             log.error('%s:%d: Symbol %s used, but not defined as a token or a rule' % (filename, lineno, str(error)))
             errors = True
         else:
-            rule_table.append((prod_symbol, symbols, action))
             rule = Grammar.Rule(
                 rule_index, prod_symbol, nonterminal, symbols, action, attribute_list, filename, lineno,
                 '%s : %s' % (nonterminal, ' '.join(production)), merge_rules.get(nonterminal, [])
             )
+            rule_table.append((prod_symbol, symbols, action, rule._item._merge_map))
             rule_index += 1
             for s in symbols:
                 symbol_usage[s] += 1

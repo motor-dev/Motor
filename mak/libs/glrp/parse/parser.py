@@ -1,6 +1,6 @@
 from .production import Production
 from .grammar import Grammar
-from .context import Context
+from .context import Context, RootOperation, Merge
 from motor_typing import TYPE_CHECKING, TypeVar
 import os
 import re
@@ -56,15 +56,32 @@ class _AcceptAction(Action):
 
 class MergeAction(object):
 
-    def __init__(self, method_name, filename, lineno):
-        # type: (str, str, int) -> None
+    class MergeCall(object):
+
+        def __init__(self, call, arguments, result):
+            # type: (Callable[..., None], Tuple[str, ...], str) -> None
+            self._call = call
+            self._arguments = dict((a, None) for a in arguments) # type: Dict[str, Any]
+            self._result = result
+
+        def __call__(self, **kw):
+            # type: (Dict[str, Any]) -> None
+            arguments = dict(self._arguments)
+            for a, v in kw.items():
+                arguments[a] = v
+            self._call(**arguments)
+
+    def __init__(self, method_name, result_name, filename, lineno, arguments):
+        # type: (str, str, str, int, Tuple[str, ...]) -> None
         self._method_name = method_name
+        self._result = result_name
         self._filename = filename
         self._lineno = lineno
+        self._arguments = arguments
 
     def __call__(self, parser):
-        # type: (Parser) -> Callable[..., None]
-        return getattr(parser, self._method_name)
+        # type: (Parser) -> MergeAction.MergeCall
+        return MergeAction.MergeCall(getattr(parser, self._method_name), self._arguments, self._result)
 
 
 class Parser(object):
@@ -107,24 +124,24 @@ class Parser(object):
 
     def _generate_table(self, rule_hash, start_symbol, temp_directory, output_directory):
         # type: (str, str, str, str) -> Grammar
-        rules = []                                                                                             # type: List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]]
-        merges = {}                                                                                            # type: Dict[str, List[Tuple[str, MergeAction, Tuple[str, ...]]]]
+        rules = []                                                                                       # type: List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]]
+        merges = {}                                                                                      # type: Dict[str, List[Tuple[str, MergeAction, Tuple[str, ...]]]]
         for rule_action in dir(self):
             action = getattr(self, rule_action)
             for rule_string, filename, lineno in getattr(action, 'rules', []):
                 rules += _parse_rule(rule_string, rule_action, filename, lineno)
-            signature = getattr(action, 'merge_signature', None)                                               # type: Optional[Tuple[str, int, Tuple[str, ...]]]
+            signature = getattr(action, 'merge_signature', None)                                         # type: Optional[Tuple[str, int, Tuple[str, ...]]]
             if signature is not None:
                 merge_result = getattr(action, 'merge_result', rule_action)
                 for symbol in getattr(action, 'merge', []):
+                    action = (
+                        merge_result, MergeAction(rule_action, merge_result, signature[0], signature[1],
+                                                  signature[2]), signature[2]
+                    )
                     try:
-                        merges[symbol].append(
-                            (merge_result, MergeAction(rule_action, signature[0], signature[1]), signature[2])
-                        )
+                        merges[symbol].append(action)
                     except KeyError:
-                        merges[symbol] = [
-                            (merge_result, MergeAction(rule_action, signature[0], signature[1]), signature[2])
-                        ]
+                        merges[symbol] = [action]
 
         grammar = Grammar(
             self.__class__.__name__, rule_hash, self._lexer._terminals, rules, merges, start_symbol, self,
@@ -137,95 +154,80 @@ class Parser(object):
     def parse(self, filename):
         # type: (str) -> Any
 
-        contexts = [Context(None, "'")]
+        contexts = [RootOperation(Context(None, None))] # type: List[Operation]
 
         action_table = self._grammar._action_table
         goto_table = self._grammar._goto_table
-        rules = [(r[0], r[1], r[2](self)) for r in self._grammar._rules]
-        prev_position = 0
+        global_split_counter = 0
+
+        def _merge_dict(merge):
+            # type: (Dict[str, Grammar.Merge]) -> Dict[str, MergeAction.MergeCall]
+            result = {}
+            merge_calls = {}   # type: Dict[Grammar.Merge, MergeAction.MergeCall]
+            for key, value in merge.items():
+                result[key] = value._action(self)
+            return result
+
+        rules = [(r[0], r[1], r[2](self), _merge_dict(r[3])) for r in self._grammar._rules]
 
         for token in self._lexer.input(filename):
-            next_contexts = []
-            print(len(contexts))
+            next_contexts = []     # type: List[Operation]
+            merges = {}            # type: Dict[Tuple[int, Callable[[], None]], Merge]
             while contexts:
-                context = contexts.pop(0)
-                actions = action_table[context._state_stack[-1]].get(token._id, tuple())
-                if len(actions) == 0:
-                    continue
-                elif len(actions) == 1:
-                    action, name, token_action = actions[0]
-                    #assert name is None
-
+                parent = contexts.pop(-1)
+                actions = action_table[parent._state].get(token._id, tuple())
+                if len(actions) > 1:
+                    global_split_counter += 1
+                for action, name, token_action in actions:
+                    if len(actions) > 1:
+                        assert name is not None
+                        operation = parent.split(name, global_split_counter)
+                    else:
+                        operation = parent
                     if action < 0:
                         rule = rules[-action - 1]
-                        symbol = rule[0]
-                        symbol_count = len(rule[1])
-                        if symbol_count:
-                            production = Production(
-                                symbol, context._sym_stack[-symbol_count]._start_position,
-                                context._sym_stack[-1]._end_position, context._sym_stack[-symbol_count:], rule[2]
-                            )
-                        else:
-                            production = Production(symbol, prev_position, token._start_position, [], rule[2])
-                        production.run()
-                        if symbol_count:
-                            del context._sym_stack[-symbol_count:]
-                            del context._state_stack[-symbol_count:]
-                        context._sym_stack.append(production)
-                        context._state_stack.append(goto_table[context._state_stack[-1]][symbol])
-                        contexts.append(context)
+                        operation = operation.reduce(rule)
+                        end = False
+                        while not end:
+                            for split_counter, name in sorted(operation._result_context._names.items())[::-1]:
+                                try:
+                                    merge_action = rule[3][name]
+                                except KeyError:
+                                    pass
+                                else:
+                                    try:
+                                        merge_op = merges[(split_counter, merge_action._call)]
+                                    except KeyError:
+                                        merge_op = Merge(operation, merge_action, name, split_counter)
+                                        merges[(split_counter, merge_action._call)] = merge_op
+                                        operation = merge_op
+                                    else:
+                                        merge_op.add_operation(operation, name, split_counter)
+                                        end = True
+                                    break
+                            break
+                        if not end:
+                                   # goto symbol, then loop back for another round
+                            target_state = goto_table[operation._state][rule[0]]
+                            contexts.append(operation.goto(target_state))
+                    else:
+                        next_contexts.append(operation.goto_token(action, token))
 
-                    elif action > 0:
-                        context._sym_stack.append(token)
-                        context._state_stack.append(action)
-                        next_contexts.append(context)
-                else:
-                    parent = context
-                    for action, name, token_action in actions:
-                        assert name is not None
-                        context = Context(parent, name)
-
-                        if action < 0:
-                            rule = rules[-action - 1]
-                            symbol = rule[0]
-                            symbol_count = len(rule[1])
-                            if symbol_count:
-                                production = Production(
-                                    symbol, context._sym_stack[-symbol_count]._start_position,
-                                    context._sym_stack[-1]._end_position, context._sym_stack[-symbol_count:], rule[2]
-                                )
-                            else:
-                                production = Production(symbol, prev_position, token._start_position, [], rule[2])
-                            production.run()
-                            if symbol_count:
-                                del context._sym_stack[-symbol_count:]
-                                del context._state_stack[-symbol_count:]
-                            context._sym_stack.append(production)
-                            context._state_stack.append(goto_table[context._state_stack[-1]][symbol])
-                            contexts.append(context)
-
-                        elif action > 0:
-                            context._sym_stack.append(token)
-                            context._state_stack.append(action)
-                            next_contexts.append(context)
-            contexts = next_contexts
-            prev_position = token._end_position
+            contexts = [RootOperation(operation.run()[0]) for operation in next_contexts]
 
         print(len(contexts))
         for context in contexts:
-            actions = action_table[context._state_stack[-1]].get(-1, tuple())
+            actions = action_table[context._state].get(-1, tuple())
             if len(actions) == 1:
                 for action, name, token_action in actions:
                     rule = rules[-action - 1]
                     symbol = rule[0]
-                    production = Production(
-                        symbol, context._sym_stack[0]._start_position, context._sym_stack[-1]._end_position,
-                        context._sym_stack, rule[2]
-                    )
+                    production = Production(symbol, 0, 0, context._result_context._sym_stack, rule[2])
                     production.run()
-                return production.value
-        else:
-            raise SyntaxError('unexpected end of file')
+                    production.debug_print(self._grammar._name_map)
+        #        #return production.value
+        #else:
+        #    raise SyntaxError('unexpected end of file')
 
     def accept(self, p):
         # type: (Production) -> None
@@ -387,6 +389,6 @@ def rule(rule_string):
 
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Callable, List, Optional, Tuple, Type
+    from typing import Any, Dict, Callable, List, Optional, Tuple
     from ..lex import Lexer
-    from ..symbol import Symbol
+    from .context import Operation
