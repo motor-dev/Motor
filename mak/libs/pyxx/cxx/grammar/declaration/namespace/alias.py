@@ -10,7 +10,7 @@ qualified-namespace-specifier:
 """
 
 import glrp
-from ....parser import cxx98, cxx98_merge
+from ....parser import cxx98
 from motor_typing import TYPE_CHECKING
 
 
@@ -23,7 +23,7 @@ def namespace_alias(self, p):
 
 # TODO: attribute-specifier-seq? -> empty
 @glrp.rule(
-    'namespace-alias-definition : attribute-specifier-seq? "namespace" attribute-specifier-seq? "identifier" "=" qualified-namespace-specifier ";"'
+    'namespace-alias-definition : begin-decl-other attribute-specifier-seq? "namespace" attribute-specifier-seq? "identifier" "=" qualified-namespace-specifier ";"'
 )
 @cxx98
 def namespace_alias_definition(self, p):
@@ -39,13 +39,5 @@ def qualified_namespace_specifier(self, p):
     pass
 
 
-@glrp.merge('qualified-namespace-specifier')
-@cxx98_merge
-def ambiguous_qualified_namespace_specifier(self, ambiguous_namespace_name, ambiguous_nested_name_specifier):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
 if TYPE_CHECKING:
-    from typing import Optional
     from ....parser import CxxParser

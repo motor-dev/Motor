@@ -31,7 +31,7 @@ from . import declaration
 
 
 @glrp.rule('statement : labeled-statement')
-@glrp.rule('statement : attribute-specifier-seq? expression-statement')
+@glrp.rule('statement : begin-expression-statement attribute-specifier-seq? expression-statement')
 @glrp.rule('statement : attribute-specifier-seq? compound-statement')
 @glrp.rule('statement : attribute-specifier-seq? selection-statement')
 @glrp.rule('statement : attribute-specifier-seq? iteration-statement')
@@ -44,7 +44,7 @@ def statement(self, p):
     pass
 
 
-@glrp.rule('init-statement : attribute-specifier-seq? expression-statement')
+@glrp.rule('init-statement : begin-expression-statement attribute-specifier-seq? expression-statement')
 @glrp.rule('init-statement : simple-declaration')
 @cxx98
 def init_statement(self, p):
@@ -53,8 +53,10 @@ def init_statement(self, p):
     pass
 
 
-@glrp.rule('condition : attribute-specifier-seq? expression')
-@glrp.rule('condition : attribute-specifier-seq? decl-specifier-seq declarator brace-or-equal-initializer')
+@glrp.rule('condition : begin-expression-statement attribute-specifier-seq? expression')
+@glrp.rule(
+    'condition : begin-simple-declaration attribute-specifier-seq? decl-specifier-seq begin-declarator-initializer declarator brace-or-equal-initializer'
+)
 @cxx98
 def condition(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -62,8 +64,10 @@ def condition(self, p):
     pass
 
 
-@glrp.rule('condition? : attribute-specifier-seq? expression')
-@glrp.rule('condition? : attribute-specifier-seq? decl-specifier-seq declarator brace-or-equal-initializer')
+@glrp.rule('condition? : begin-expression-statement attribute-specifier-seq? expression')
+@glrp.rule(
+    'condition? : begin-simple-declaration attribute-specifier-seq? decl-specifier-seq begin-declarator-initializer declarator brace-or-equal-initializer'
+)
 @glrp.rule('condition? :')
 @cxx98
 def condition_opt(self, p):
@@ -72,34 +76,21 @@ def condition_opt(self, p):
     pass
 
 
-@glrp.merge('condition')
-@cxx98_merge
-def ambiguous_condition(self, ambiguous_type_specifier, ambiguous_cast_expression):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('condition?')
-@cxx98_merge
-def ambiguous_condition_opt(self, ambiguous_type_specifier, ambiguous_cast_expression):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('init-statement')
-@cxx98_merge
-def ambiguous_init_statement(self, ambiguous_type_specifier, ambiguous_cast_expression):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+@glrp.rule('begin-expression-statement : [split:expression_statement]')
+@cxx98
+def begin_expression_statement(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    # TODO: attribute-specifier-seq? expression attribute-specifier-seq should be empty
     pass
 
 
 @glrp.merge('statement')
 @cxx98_merge
-def ambiguous_statement(self, ambiguous_block_declaration, ambiguous_cast_expression):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_statement(self, expression_statement, ambiguous_block_declaration):
+    # type: (CxxParser, Any, Any) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Any
     from ...parser import CxxParser

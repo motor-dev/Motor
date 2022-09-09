@@ -28,147 +28,93 @@ from . import decltype
 from . import placeholder
 
 
-@glrp.rule('type-specifier : simple-type-specifier[split:typename_specifier]')
-@glrp.rule('type-specifier : elaborated-type-specifier')
-@glrp.rule('type-specifier : typename-specifier[split:typename_specifier]')
-@glrp.rule('type-specifier : cv-qualifier')
+@glrp.rule('type-specifier-pre : cv-qualifier')
+@glrp.rule('type-specifier-def : simple-type-specifier-def')
+@glrp.rule('type-specifier-def : elaborated-type-specifier')
+@glrp.rule('type-specifier-def : typename-specifier')
+@glrp.rule('type-specifier-tail : simple-type-specifier-tail')
+@glrp.rule('type-specifier-tail : cv-qualifier')
 @cxx98
 def type_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('type-specifier-end[split:end_type_specifier_seq] : type-specifier')
-@glrp.rule('type-specifier-continue[split:continue_type_specifier_seq] : type-specifier')
-@cxx98
-def type_specifier_end_continue(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('type-specifier-seq : type-specifier-end attribute-specifier-seq?')
-@glrp.rule('type-specifier-seq : type-specifier-continue type-specifier-seq')
+@glrp.rule('type-specifier-seq : type-specifier-pre type-specifier-seq')
+@glrp.rule('type-specifier-seq : type-specifier-def type-specifier-seq-tail')
 @cxx98
 def type_specifier_seq(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('defining-type-specifier : type-specifier')
-@glrp.rule('defining-type-specifier : class-specifier')
-@glrp.rule('defining-type-specifier : enum-specifier')
+@glrp.rule('type-specifier-seq-tail : attribute-specifier-seq?')
+@glrp.rule('type-specifier-seq-tail : type-specifier-tail type-specifier-seq-tail')
+@cxx98
+def type_specifier_seq_tail(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('defining-type-specifier-pre : type-specifier-pre')
+@glrp.rule('defining-type-specifier-def : type-specifier-def')
+@glrp.rule('defining-type-specifier-def : class-specifier')
+@glrp.rule('defining-type-specifier-def : enum-specifier')
+@glrp.rule('defining-type-specifier-tail : type-specifier-tail')
 @cxx98
 def defining_type_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('defining-type-specifier-end[split:end_defining_type_specifier_seq] : defining-type-specifier')
-@glrp.rule('defining-type-specifier-continue[split:continue_defining_type_specifier_seq] : defining-type-specifier')
-@cxx98
-def defining_type_specifier_end_continue(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('defining-type-specifier-seq : defining-type-specifier-end attribute-specifier-seq?')
-@glrp.rule('defining-type-specifier-seq : defining-type-specifier-continue defining-type-specifier-seq')
+@glrp.rule('defining-type-specifier-seq : defining-type-specifier-pre defining-type-specifier-seq')
+@glrp.rule('defining-type-specifier-seq : defining-type-specifier-def defining-type-specifier-seq-tail')
 @cxx98
 def defining_type_specifier_seq(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.merge('type-specifier')
-@cxx98_merge
-def ambiguous_type_specifier(self, ambiguous_simple_type_specifier, typename_specifier):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('type-specifier-continue')
-@cxx98_merge
-def ambiguous_type_specifier_continue(self, class_template_id, class_name, ambiguous_class_head_name):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('type-specifier-end')
-@cxx98_merge
-def type_specifier_end_class_template_id(self, class_template_id):
-    # type: (CxxParser, Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('type-specifier-end')
-@cxx98_merge
-def type_specifier_end_class_name(self, class_name):
-    # type: (CxxParser, Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('type-specifier-end')
-@cxx98_merge
-def type_specifier_end_ambiguous_class_head_name(self, ambiguous_class_head_name):
-    # type: (CxxParser, Optional[glrp.Production]) -> None
+@glrp.rule('defining-type-specifier-seq-tail : attribute-specifier-seq?')
+@glrp.rule('defining-type-specifier-seq-tail : defining-type-specifier-tail defining-type-specifier-seq-tail')
+@cxx98
+def defining_type_specifier_seq_tail(self, p):
+    # type: (CxxParser, glrp.Production) -> None
     pass
 
 
 @glrp.merge('type-specifier-seq')
 @cxx98_merge
-def ambiguous_type_specifier_seq(
-    self, end_type_specifier_seq, type_specifier_end_class_template_id, type_specifier_end_class_name,
-    type_specifier_end_ambiguous_class_head_name, continue_type_specifier_seq, ambiguous_type_specifier_continue
-):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_type_specifier_seq(self, ambiguous_simple_type_specifier, ambiguous_nested_name_specifier):
+    # type: (CxxParser, Any, Any) -> Any
+    # Not a conflict;
     pass
 
 
-@glrp.merge('defining-type-specifier-continue')
+@glrp.merge('type-specifier-seq')
 @cxx98_merge
-def ambiguous_defining_type_specifier_continue(self, class_template_id, class_name, ambiguous_class_head_name):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('defining-type-specifier-end')
-@cxx98_merge
-def defining_type_specifier_end_class_template_id(self, class_template_id):
-    # type: (CxxParser, Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('defining-type-specifier-end')
-@cxx98_merge
-def defining_type_specifier_end_class_name(self, class_name):
-    # type: (CxxParser, Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('defining-type-specifier-end')
-@cxx98_merge
-def defining_type_specifier_end_ambiguous_class_head_name(self, ambiguous_class_head_name):
-    # type: (CxxParser, Optional[glrp.Production]) -> None
+def ambiguous_type_specifier_seq_2(self, ambiguous_template_type_name, class_template_id):
+    # type: (CxxParser, Any, Any) -> Any
+    # Not a conflict;
     pass
 
 
 @glrp.merge('defining-type-specifier-seq')
 @cxx98_merge
-def ambiguous_defining_type_specifier_seq(
-    self, end_defining_type_specifier_seq, defining_type_specifier_end_class_template_id,
-    defining_type_specifier_end_class_name, defining_type_specifier_end_ambiguous_class_head_name,
-    continue_defining_type_specifier_seq, ambiguous_defining_type_specifier_continue
-):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_defining_type_specifier_seq(self, ambiguous_simple_type_specifier, ambiguous_nested_name_specifier):
+    # type: (CxxParser, Any, Any) -> Any
+    # Not a conflict;
     pass
 
 
-#@glrp.merge('type-specifier')
-#@cxx98_merge
-#def ambiguous_type_specifier_class(self, ambiguous_class_head_name, class_name):
-#    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-#    pass
+@glrp.merge('defining-type-specifier-seq')
+@cxx98_merge
+def ambiguous_defining_type_specifier_seq_2(self, ambiguous_template_type_name, class_template_id):
+    # type: (CxxParser, Any, Any) -> Any
+    # Not a conflict;
+    pass
+
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Any
     from .....parser import CxxParser

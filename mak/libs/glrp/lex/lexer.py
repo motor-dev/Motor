@@ -19,7 +19,7 @@ class Lexer:
         # type: () -> None
         self._states = {}          # type: Dict[str, Lexer.State]
         self._state_stack = []     # type: List[Lexer.State]
-        self._terminals = {'<eof>': (0, False), '<mark>': (1, False), '<start>': (2, False)}
+        self._terminals = {'#eof': (0, False), '#mark': (1, False), '#start': (2, False), '#error': (3, False)}
         self._filename = ''
         self._lexdata = ''
         self._lexlen = 0
@@ -181,9 +181,11 @@ def _form_master_re(rule_list, start_index):
 
 def _build_states(owner):
     # type: (Type[Lexer]) -> Dict[str, Lexer.State]
-    rules = {}     # type: Dict[str, List[Tuple[str, str, Pattern[str], bool, Callable[[F, Token], Optional[Token]]]]]
+    rules = {}                                                                                # type: Dict[str, List[Tuple[str, str, Pattern[str], bool, Callable[[F, Token], Optional[Token]]]]]
     for action in dir(owner):
-        for rule, name, states, warn in getattr(getattr(owner, action), 'patterns', []):
+        for rule, name, states, warn in sorted(
+            getattr(getattr(owner, action), 'patterns', []), key=lambda x: x[0], reverse=True
+        ):
             regex = re.compile(rule)
             for state in states:
                 try:
@@ -191,7 +193,7 @@ def _build_states(owner):
                 except KeyError:
                     rules[state] = [(rule, name, regex, warn, getattr(owner, action))]
     result = {}
-    index = 3
+    index = 4
     for state, rule_list in rules.items():
         result[state] = Lexer.State(_form_master_re(rule_list, index))
         index += len(rule_list)

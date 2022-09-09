@@ -45,6 +45,7 @@ class _MergeNode(object):
             self._merge_map = {}
             self._merge_set = frozenset()
         self._merge_registry = {}  # type: Dict[str, str]
+        self._merge_object = None  # type: Optional[Grammar.Merge]
         self._predecessors = []    # type: List[_MergeNode]
         self._successors = []      # type: List[_MergeNode]
         self._id = _MergeNode.ID
@@ -63,12 +64,17 @@ class _MergeNode(object):
                 except KeyError:
                     return tag
                 else:
+                    assert self._merge_object is None or self._merge_object == result
+                    self._merge_object = result
                     self._merge_registry[tag] = result._result
                     self._state._add_merge(self, result)
                     result.use(tag)
                     return result._result
 
-            return _Tags(tags._indices, frozenset((_get_tag(x) for x in tags._tags)))
+            tags = _Tags(tags._indices, frozenset((_get_tag(x) for x in tags._tags)))
+            assert self._merge_object is not None
+            self._state._add_merge_result(self._merge_object, tags)
+            return tags
         else:
             return tags
 
@@ -111,6 +117,8 @@ class _MergeState(object):
             self._entry_indices |= e[3]._indices
         self._nodes = {}               # type: Dict[Tuple[LR0Node, bool, bool], _MergeNode]
         self._merge_registry = {}      # type: Dict[Grammar.Merge, List[_MergeNode]]
+        self._merge_result = {}        # type: Dict[Grammar.Merge, _Tags]
+        self._node_merge_registry = {} # type: Dict[_MergeNode, Grammar.Merge]
         self._predecessors = []        # type: List[_MergeState]
         self._successors = []          # type: List[_MergeState]
         self._id = _MergeState.ID
@@ -139,6 +147,14 @@ class _MergeState(object):
             self._merge_registry[merge].append(node)
         except KeyError:
             self._merge_registry[merge] = [node]
+        assert node not in self._node_merge_registry
+
+    def _add_merge_result(self, merge, tags):
+        # type: (Grammar.Merge, _Tags) -> None
+        try:
+            self._merge_result[merge] = self._merge_result[merge].create_merge(tags)
+        except KeyError:
+            self._merge_result[merge] = tags
 
     def collect_predecessors(self, lookahead):
         # type: (int) -> Tuple[List["Entry"], bool]
@@ -279,6 +295,18 @@ class _MergeState(object):
                 for p in merge_node._predecessors:
                     if p._tags_exit._indices != merge_node._tags_entry._indices and len(p._merge_registry) > 0:
                         self._important_items[p._node] = 2
+
+        for (node, _, _), merge_node in seen.items():
+            if len(merge_node._predecessors) > 1:
+                for p in merge_node._predecessors:
+                    if p._merge_object is not None:
+                        tags = self._merge_result[p._merge_object]
+                    else:
+                        tags = p._tags_exit
+                    if tags != merge_node._tags_entry:
+                        #self._error_nodes.append((merge_node, 'weird'))
+                        self._important_items[node] = 1
+                        break
 
     def expand(self, all_states, reduced_states, lookahead):
         # type: (Dict[Entry, _MergeState], Set[_MergeState], int) -> None
@@ -635,7 +663,7 @@ class MergeTree(object):
 
 
 if TYPE_CHECKING:
-    from motor_typing import Any, Dict, FrozenSet, List, Set, Tuple
+    from motor_typing import Any, Dict, FrozenSet, List, Optional, Set, Tuple
     Indices = int
     Entry = Tuple[Tuple[LR0Node, bool, bool, _Tags], ...]
     from .lr0node import LR0Node

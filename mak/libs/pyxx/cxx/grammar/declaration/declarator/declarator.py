@@ -41,7 +41,7 @@ declarator-id:
 """
 
 import glrp
-from ....parser import cxx98, cxx11, cxx98_merge
+from ....parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
@@ -176,35 +176,5 @@ def declarator_id_cxx11(self, p):
     pass
 
 
-@glrp.merge('declarator-id')
-@glrp.merge_result('declarator_id')
-@cxx98_merge
-def declarator_id_rename(self, id_expression):
-    # type: (CxxParser, Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('ptr-declarator')
-@cxx98_merge
-def ambiguous_ptr_declarator(self, declarator_id, ambiguous_nested_name_specifier):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('declarator')
-@cxx98_merge
-def ambiguous_declarator(self, declarator_id, ambiguous_ptr_declarator):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('declarator')
-@cxx98_merge
-def ambiguous_declarator_param(self, declarator_continue, declarator_end):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
 if TYPE_CHECKING:
-    from motor_typing import Optional
     from ....parser import CxxParser

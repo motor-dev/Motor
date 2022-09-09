@@ -53,7 +53,7 @@ _c_char_sequence = '(?:%(_c_char)s)+' % locals()
 _character_constant = '%(_encoding_prefix)s?\'%(_c_char_sequence)s\'' % locals()
 
 _s_char = '(?:[^"\\n]|%(_escape_sequence)s)' % locals()
-_string_literal = '(?:%(_encoding_prefix)s"%(_s_char)s*")' % locals()
+_string_literal = '(?:%(_encoding_prefix)s?"%(_s_char)s*")' % locals()
 
 _keywords = (
     'auto',
@@ -226,12 +226,12 @@ class C89Lexer(glrp.Lexer):
         t.value = self.text(t)[1:-1]
         return t
 
-    def token(self, track_blanks=False):
+    def _token(self, track_blanks=False):
         # type: (bool) -> Generator[glrp.Token, None, None]
         # override token to concatenate [ [ into [[
         # preserving comments and other items between the [ symbols
         queue = []     # type: List[glrp.Token]
-        generator = glrp.Lexer.token(self, track_blanks)
+        generator = glrp.Lexer._token(self, track_blanks)
         bracket_id = self.get_token_id('[')
         while True:
             if queue:

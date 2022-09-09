@@ -84,19 +84,11 @@ def attribute_specifier_cxx11(self, p):
     pass
 
 
-@glrp.rule('alignment-specifier : [prec:left,1]"alignas" "(" type-id "..."? ")"')
-@glrp.rule('alignment-specifier : [prec:left,1]"alignas" "(" constant-expression "..."? ")"')
+@glrp.rule('alignment-specifier : [prec:left,1]"alignas" "(" begin-type-id type-id "..."? ")"')
+@glrp.rule('alignment-specifier : [prec:left,1]"alignas" "(" begin-expression constant-expression "..."? ")"')
 @cxx11
 def alignment_specifier_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.merge('alignment-specifier')
-@cxx11_merge
-def ambiguous_alignment_specifier(self, ambiguous_type_id, ambiguous_cast_expression):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    # alignas(type-id) | alignas(constant-expression)
     pass
 
 
@@ -335,6 +327,13 @@ def balanced_token_cxx23(self, p):
     pass
 
 
+@glrp.merge('alignment-specifier')
+@cxx11_merge
+def ambiguous_alignment_specifier(self, type_id, expression):
+    # type: (CxxParser, Any, Any) -> Any
+    pass
+
+
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Any
     from ...parser import CxxParser

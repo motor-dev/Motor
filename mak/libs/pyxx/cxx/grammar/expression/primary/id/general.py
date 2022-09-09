@@ -5,7 +5,7 @@ id-expression:
 """
 
 import glrp
-from .....parser import cxx98, cxx98_merge
+from .....parser import cxx98
 from motor_typing import TYPE_CHECKING
 
 
@@ -17,14 +17,5 @@ def id_expression(self, p):
     pass
 
 
-@glrp.merge('id-expression')
-@glrp.merge_result('id_expression')
-@cxx98_merge
-def id_expression_rename(self, unqualified_id, template_id, template_name, ambiguous_qualified_id):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
 if TYPE_CHECKING:
-    from motor_typing import Optional
     from .....parser import CxxParser

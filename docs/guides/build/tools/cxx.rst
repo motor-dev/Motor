@@ -2574,17 +2574,6 @@ is truly ambiguous.
          ╰╴
 
 
-*braced-init-list*, *function-body*
-"""""""""""""""""""""""""""""""""""
-
-After a *declarator* can come a *braced-init-list* or a *function-body* starting with a
-*compound-statement*. The type of *declarator* should normally disambiguate what is expected after,
-but this analysis is once again postponed until a later step. The parser analyzes both branches
-and to aid the parser, a dummy reduction *braced-init-list-begin* is inserted at the beginning of
-the *braced-init-list* rule. It creates an early conflict between the two possibilitiies and
-annotating the grammar with a *split* instruction delegates the resolution to the semantic
-analyzer.
-
 
 *trailing-return-type*, *abstract-declarator* / *parameters-and-qualifiers* / *initializer*
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

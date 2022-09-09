@@ -48,15 +48,6 @@ def initializer(self, p):
     pass
 
 
-@glrp.rule('initializer? : brace-or-equal-initializer')
-@glrp.rule('initializer? : "(" expression-list ")"')
-@glrp.rule('initializer? : ')
-@cxx98
-def initializer_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
 @glrp.rule('brace-or-equal-initializer : "=" initializer-clause')
 @cxx98
 def brace_or_equal_initializer(self, p):
@@ -94,22 +85,15 @@ def initializer_clause(self, p):
     pass
 
 
-@glrp.rule('braced-init-list : braced-init-list-begin "{" initializer-list ","? "}"')
-@glrp.rule('braced-init-list : braced-init-list-begin "{"  "}"')
+@glrp.rule('braced-init-list : [prec:nonassoc,1]"{" initializer-list ","? "}"')
+@glrp.rule('braced-init-list : [prec:nonassoc,1]"{"  "}"')
 @cxx98
 def braced_init_list(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('braced-init-list-begin : [prec:nonassoc,1][split:braced_init_list]')
-@cxx98
-def braced_init_list_begin(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('braced-init-list : braced-init-list-begin "{" designated-initializer-list ","? "}"')
+@glrp.rule('braced-init-list : [prec:nonassoc,1]"{" designated-initializer-list ","? "}"')
 @cxx20
 def braced_init_list_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
