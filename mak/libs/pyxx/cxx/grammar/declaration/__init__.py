@@ -56,7 +56,7 @@ identifier-list:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge, cxx17_merge
+from ...parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge
 from motor_typing import TYPE_CHECKING
 from . import specifier
 from . import declarator
@@ -125,30 +125,6 @@ def declaration_cxx20(self, p):
     pass
 
 
-@glrp.merge('declaration')
-@cxx17_merge
-def ambiguous_explicit_declaration(self, explicit_deduction, explicit_declaration):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('declaration')
-@cxx98_merge
-def ambiguous_declaration(
-    self, nodeclspec_function_declaration, ambiguous_function_definition, template_decl, deduction_template,
-    deduction_guide, ambiguous_block_declaration, ambiguous_decl_specifier_seq, ambiguous_type_specifier
-):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('declaration')
-@cxx98_merge
-def ambiguous_declaration_init_list(self, braced_init_list, compound_statement):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
 @glrp.rule('block-declaration : simple-declaration')
 @glrp.rule('block-declaration : asm-declaration')
 @glrp.rule('block-declaration : namespace-alias-definition')
@@ -176,14 +152,9 @@ def block_declaration_cxx20(self, p):
     pass
 
 
-@glrp.merge('block-declaration')
-@cxx98_merge
-def ambiguous_block_declaration(self, ambiguous_type_specifier):
-    # type: (CxxParser, Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.rule('nodeclspec-function-declaration : attribute-specifier-seq? declarator ";"')
+@glrp.rule(
+    'nodeclspec-function-declaration : begin-nodeclspec-function-declaration attribute-specifier-seq? declarator ";"'
+)
 @cxx98
 def nodeclspec_function_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -200,9 +171,11 @@ def alias_declaration(self, p):
     pass
 
 
-@glrp.rule('simple-declaration : attribute-specifier-seq? decl-specifier-seq init-declarator-list? ";"')
 @glrp.rule(
-    'simple-declaration : attribute-specifier-seq? decl-specifier-seq ref-qualifier? "[" identifier-list "]" initializer ";"'
+    'simple-declaration : begin-simple-declaration attribute-specifier-seq? decl-specifier-seq init-declarator-list? ";"'
+)
+@glrp.rule(
+    'simple-declaration : begin-simple-declaration attribute-specifier-seq? decl-specifier-seq begin-declarator-initializer ref-qualifier? "[" identifier-list "]" initializer ";"'
 )
 @cxx98
 def simple_declaration(self, p):
@@ -246,14 +219,47 @@ def identifier_list(self, p):
     pass
 
 
-@glrp.merge('nodeclspec-function-declaration')
-@glrp.merge_result('nodeclspec_function_declaration')
-@cxx98_merge
-def nodeclspec_function_declaration_rename(self, ambiguous_declarator):
+@glrp.rule('begin-nodeclspec-function-declaration : [split:nodeclspec_function_declaration]')
+@glrp.rule('begin-simple-declaration : [split:simple_declaration]')
+@glrp.rule('begin-decl-other : [split:decl_other]')
+@glrp.rule('begin-decl-nodeclspec : [split:decl_nodeclspec]')
+@cxx98
+def begin_decl(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
+@glrp.rule('begin-decl-deduction-guide : [split:decl_deduction_guide]')
+@cxx17
+def begin_decl_cxx17(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.merge('block-declaration')
+@cxx98_merge
+def ambiguous_block_declaration(self, decl_other, simple_declaration):
+    # type: (CxxParser, Any, Any) -> Any
+    pass
+
+
+@glrp.merge('declaration')
+@cxx98_merge
+def ambiguous_declaration(
+    self, decl_deduction_guide, ambiguous_block_declaration, ambiguous_function_definition,
+    nodeclspec_function_declaration, decl_other
+):
+    # type: (CxxParser, Any, Any, Any, Any, Any) -> Any
+    pass
+
+
+@glrp.merge('simple-declaration')
+@cxx98_merge
+def ambiguous_simple_declaration(self, declarator_initializer, ambiguous_init_declarator):
+    # type: (CxxParser, Any, Any) -> Any
+    pass
+
+
 if TYPE_CHECKING:
-    from motor_typing import Optional
+    from typing import Any
     from ...parser import CxxParser

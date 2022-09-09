@@ -54,7 +54,7 @@ _c_char_sequence = '%(_c_char)s+' % locals()
 _character_literal = '%(_encoding_prefix)s?\'%(_c_char_sequence)s\'' % locals()
 
 _s_char = '(?:[^"\\n]|%(_escape_sequence)s)' % locals()
-_string_literal = '(?:%(_encoding_prefix)s"%(_s_char)s*")' % locals()
+_string_literal = '(?:%(_encoding_prefix)s?"%(_s_char)s*")' % locals()
 
 _user_defined_integer_literal = '(?:%(_decimal_constant)s%(_identifier)s)|(?:%(_hexadecimal_constant)s%(_identifier)s)|(?:%(_octal_constant)s%(_identifier)s)|(?:%(_binary_constant)s%(_identifier)s)' % locals(
 )
@@ -286,9 +286,15 @@ class Cxx98Lexer(glrp.Lexer):
         # type: (glrp.Token) -> Optional[glrp.Token]
         text = self.text(t)
         if text[-1] in 'fFdD':
-            t.value = decimal.Decimal(text[:-1])
+            try:
+                t.value = decimal.Decimal(text[:-1])
+            except decimal.InvalidOperation:
+                t.value = 0    # TODO!
         else:
-            t.value = decimal.Decimal(text)
+            try:
+                t.value = decimal.Decimal(text)
+            except decimal.InvalidOperation:
+                t.value = 0    # TODO!
         return t
 
     @glrp.token(_integer_literal, 'integer-literal')
@@ -319,13 +325,13 @@ class Cxx11Lexer(Cxx03Lexer):
     tokens = Cxx03Lexer.tokens + ('[[', ) + _keywords_cxx11
     keywords = Cxx03Lexer.keywords + _keywords_cxx11
 
-    def token(self, track_blanks=False):
+    def _token(self, track_blanks=False):
         # type: (bool) -> Generator[glrp.Token, None, None]
         # override token to concatenate [ [ into [[
         # preserving comments and other items between the [ symbols
         queue = []     # type: List[glrp.Token]
         bracket_id = self.get_token_id('[')
-        generator = Cxx03Lexer.token(self, track_blanks)
+        generator = Cxx03Lexer._token(self, track_blanks)
         while True:
             if queue:
                 yield queue.pop(0)

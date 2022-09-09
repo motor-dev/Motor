@@ -54,7 +54,7 @@ class AmbiguousProduction(Symbol):
 
     def debug_print(self, name_map, self_indent='', inner_indent=''):
         # type: (List[str], str, str) -> None
-        print('%sAmbigous[%s]' % (self_indent, name_map[self._id]))
+        print('%sAmbiguous[%s]' % (self_indent, name_map[self._id]))
         for p in self._productions[0:-1]:
             p.debug_print(name_map, inner_indent + '\u255f ', inner_indent + '\u2551 ')
         self._productions[-1].debug_print(name_map, inner_indent + '\u2559 ', inner_indent + '  ')

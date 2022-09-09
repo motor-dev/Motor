@@ -8,43 +8,29 @@ selection-statement:
 """
 
 import glrp
-from ...parser import cxx98, deprecated_cxx17, cxx17, cxx23, cxx98_merge
+from ...parser import cxx98, cxx17, cxx23
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('selection-statement : "switch" "(" condition ")" statement')
-@glrp.rule('selection-statement : "switch" "(" init-statement condition ")" statement')
+@glrp.rule('selection-statement : "switch" "(" selection-condition ")" statement')
 @cxx98
 def selection_statement(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('selection-statement : "if" "(" condition ")" statement')
-@glrp.rule('selection-statement : "if" "(" condition ")" statement [prec:left,1]"else" statement')
+@glrp.rule('selection-statement : "if" "(" selection-condition ")" statement')
+@glrp.rule('selection-statement : "if" "(" selection-condition ")" statement [prec:left,1]"else" statement')
 @cxx98
-@deprecated_cxx17
 def selection_statement_if(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('selection-statement : "if" "constexpr"? "(" condition ")" statement')
-@glrp.rule('selection-statement : "if" "constexpr"? "(" condition ")" statement [prec:left,1]"else" statement')
-@glrp.rule('selection-statement : "if" "constexpr"? "(" init-statement condition ")" statement')
-@glrp.rule(
-    'selection-statement : "if" "constexpr"? "(" init-statement condition ")" statement [prec:left,1]"else" statement'
-)
+@glrp.rule('selection-statement : "if" "constexpr" "(" selection-condition ")" statement')
+@glrp.rule('selection-statement : "if" "constexpr" "(" selection-condition ")" statement [prec:left,1]"else" statement')
 @cxx17
 def selection_statement_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('constexpr? : "constexpr"')
-@glrp.rule('constexpr? : ')
-@cxx17
-def constexpr_opt_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -57,6 +43,20 @@ def selection_statement_cxx23(self, p):
     pass
 
 
+@glrp.rule('selection-condition : condition')
+@cxx98
+def selection_condition(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('selection-condition : init-statement condition')
+@cxx17
+def selection_condition_cxx17(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
 @glrp.rule('"!"? : "!"')
 @glrp.rule('"!"? :')
 @cxx23
@@ -65,15 +65,5 @@ def not_opt_cxx23(self, p):
     pass
 
 
-@glrp.merge('selection-statement')
-@cxx98_merge
-def ambiguous_selection_statement(self, ambiguous_condition, ambiguous_init_statement):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    # switch(init-statement condition) vs switch(condition)
-    # if(init-statement condition) vs switch(condition)
-    pass
-
-
 if TYPE_CHECKING:
-    from typing import Optional
     from ...parser import CxxParser

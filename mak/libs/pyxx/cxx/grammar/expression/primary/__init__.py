@@ -10,7 +10,7 @@ primary-expression:
 """
 
 import glrp
-from ....parser import cxx98, cxx11, cxx17, cxx20, cxx17_merge
+from ....parser import cxx98, cxx11, cxx17, cxx20
 from motor_typing import TYPE_CHECKING
 from . import id
 from . import lambda_expr
@@ -25,7 +25,7 @@ from . import requires
 @glrp.rule('primary-expression : "this"')
 @glrp.rule('primary-expression : "true"')
 @glrp.rule('primary-expression : "false"')
-@glrp.rule('primary-expression : "(" expression ")"')
+@glrp.rule('primary-expression : "(" begin-expression expression ")"')
 @glrp.rule('primary-expression[prec:right,1] : id-expression')
 @cxx98
 def primary_expression(self, p):
@@ -55,13 +55,6 @@ def primary_expression_cxx17(self, p):
 @cxx20
 def primary_expression_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.merge('primary-expression')
-@cxx17_merge
-def generic_postfix_expression_2(self, pm_expression, fold_expression):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 

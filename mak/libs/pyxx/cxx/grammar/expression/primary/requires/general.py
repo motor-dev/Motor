@@ -61,8 +61,8 @@ def requirement_seq_cxx20(self, p):
     pass
 
 
-@glrp.rule('requirement : simple-requirement')
-@glrp.rule('requirement : type-requirement')
+@glrp.rule('requirement : begin-expression simple-requirement')
+@glrp.rule('requirement : begin-type-id type-requirement')
 @glrp.rule('requirement : compound-requirement')
 @glrp.rule('requirement : nested-requirement')
 @cxx20
@@ -73,11 +73,11 @@ def requirement_cxx20(self, p):
 
 @glrp.merge('requirement')
 @cxx20_merge
-def ambiguous_requirement(self, ambiguous_cast_expression, ambiguous_type_name):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
+def ambiguous_requirement(self, type_id, expression):
+    # type: (CxxParser, Any, Any) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Any
     from .....parser import CxxParser

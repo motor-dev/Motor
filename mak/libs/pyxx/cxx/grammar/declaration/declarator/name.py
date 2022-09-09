@@ -30,7 +30,7 @@ noptr-abstract-pack-declarator:
 """
 
 import glrp
-from ....parser import cxx98, cxx11, cxx98_merge
+from ....parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
@@ -38,15 +38,6 @@ from motor_typing import TYPE_CHECKING
 @cxx98
 def type_id(self, p):
     # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.merge('type-id')
-@cxx98_merge
-def ambiguous_type_id(self, ambiguous_type_specifier):
-    # type: (CxxParser, Optional[glrp.Production]) -> None
-    # Should never actually conflict as the precedence on '::' prevents option #2 from existing.
-    # Used as rename.
     pass
 
 
@@ -74,15 +65,6 @@ def abstract_declarator_opt_cxx11(self, p):
     pass
 
 
-@glrp.merge('abstract-declarator?')
-@cxx98_merge
-def ambiguous_abstract_declarator_opt(self, ambiguous_noptr_abstract_declarator, parameters_and_qualifiers):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    # Should never actually conflict as the precedence on '::' prevents option #2 from existing.
-    # Used as rename.
-    pass
-
-
 @glrp.rule('ptr-abstract-declarator : noptr-abstract-declarator[split:declarator_end]')
 @glrp.rule('ptr-abstract-declarator : ptr-operator[split:declarator_end]')
 @glrp.rule('ptr-abstract-declarator : ptr-operator ptr-abstract-declarator')
@@ -104,13 +86,6 @@ def ptr_abstract_declarator(self, p):
 @cxx98
 def noptr_abstract_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.merge('noptr-abstract-declarator')
-@cxx98_merge
-def ambiguous_noptr_abstract_declarator(self, noptr_abstract_declarator, parameters_and_qualifiers):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
@@ -141,5 +116,4 @@ def noptr_abstract_pack_declarator(self, p):
 
 
 if TYPE_CHECKING:
-    from typing import Optional
     from ....parser import CxxParser

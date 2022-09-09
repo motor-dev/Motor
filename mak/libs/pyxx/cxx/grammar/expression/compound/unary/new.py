@@ -28,7 +28,7 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('new-expression : "::"? "new" new-type-id new-initializer?')
-@glrp.rule('new-expression : "::"? "new" "(" type-id ")" new-initializer?')
+@glrp.rule('new-expression : "::"? "new" "(" begin-type-id type-id ")" new-initializer?')
 @glrp.rule('new-expression : "::"? "new" new-placement new-type-id new-initializer?')
 @glrp.rule('new-expression : "::"? "new" new-placement "(" type-id ")" new-initializer?')
 @cxx98
@@ -37,7 +37,7 @@ def new_expression(self, p):
     pass
 
 
-@glrp.rule('new-placement : "(" expression-list ")"')
+@glrp.rule('new-placement : "(" begin-expression expression-list ")"')
 @cxx98
 def new_placement(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -86,12 +86,11 @@ def new_initializer_opt_cxx11(self, p):
 
 @glrp.merge('new-expression')
 @cxx98_merge
-def ambiguous_new_expression(self, ambiguous_cast_expression, ambiguous_type_id):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    # new new-placement (type-id) vs new(type-id)
+def ambiguous_new_expression(self, type_id, expression):
+    # type: (CxxParser, Any, Any) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Any
     from .....parser import CxxParser

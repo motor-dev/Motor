@@ -4,16 +4,16 @@ deduction-guide:
 """
 
 import glrp
-from ...parser import cxx17, cxx17_merge
+from ...parser import cxx17
 from motor_typing import TYPE_CHECKING
 
 
 # TODO: attribute-specifier-seq? should be empty
 @glrp.rule(
-    'deduction-guide : attribute-specifier-seq? deduction-guide-begin explicit-specifier template-name "(" parameter-declaration-clause ")" "->" simple-template-id ";"'
+    'deduction-guide : begin-decl-deduction-guide attribute-specifier-seq? explicit-specifier template-name "(" parameter-declaration-clause ")" "->" simple-template-id ";"'
 )
 @glrp.rule(
-    'deduction-guide : attribute-specifier-seq? template-name[split:deduction_guide] "(" parameter-declaration-clause ")" "->" simple-template-id ";"'
+    'deduction-guide : begin-decl-deduction-guide attribute-specifier-seq? template-name "(" parameter-declaration-clause ")" "->" simple-template-id ";"'
 )
 @cxx17
 def deduction_guide_cxx17(self, p):
@@ -21,20 +21,6 @@ def deduction_guide_cxx17(self, p):
     pass
 
 
-@glrp.rule('deduction-guide-begin[split:explicit_deduction] :')
-@cxx17
-def deduction_guide_begin_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.merge('deduction-guide')
-@glrp.merge_result('deduction_template')
-@cxx17_merge
-def deduction_template_rename(self, template_name):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
 if TYPE_CHECKING:
+    from typing import Any
     from ...parser import CxxParser

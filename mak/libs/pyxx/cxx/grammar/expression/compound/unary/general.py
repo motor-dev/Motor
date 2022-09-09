@@ -52,7 +52,7 @@ def unary_expression_cxx20(self, p):
 
 
 @glrp.rule('sizeof-expression : "sizeof" unary-expression')
-@glrp.rule('sizeof-expression : "sizeof" "(" type-id ")"')
+@glrp.rule('sizeof-expression : "sizeof" "(" begin-type-id type-id ")"')
 @cxx98
 def sizeof_expression(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -68,12 +68,11 @@ def unary_operator(self, p):
 
 @glrp.merge('sizeof-expression')
 @cxx98_merge
-def ambiguous_sizeof_expression(self, ambiguous_type_id, ambiguous_cast_expression):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    # sizeof (type-id) vs sizeof unary-expression
+def ambiguous_sizeof_expression(self, expression, type_id):
+    # type: (CxxParser, Any, Any) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Any
     from .....parser import CxxParser

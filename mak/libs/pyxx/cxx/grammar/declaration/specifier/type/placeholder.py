@@ -16,7 +16,7 @@ def placeholder_type_specifier_cxx11(self, p):
     pass
 
 
-@glrp.rule('placeholder-type-specifier : "decltype" "(" "auto" ")"')
+@glrp.rule('placeholder-type-specifier : "decltype" "(" begin-type-id "auto" ")"')
 @cxx14
 def placeholder_type_specifier_cxx14(self, p):
     # type: (CxxParser, glrp.Production) -> None

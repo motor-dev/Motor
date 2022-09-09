@@ -70,7 +70,7 @@ class LR0Node(object):
         raise ValueError()
 
     def expand_lookahead(self, lookahead):
-        # type: (int) -> LR0Path
+        # type: (Set[int]) -> LR0Path
         # expand the first item of the path until it starts with the lookahead
         queue = [(self, [[]])]     # type: List[Tuple[LR0Node, List[List[LR0Path]]]]
         seen = set()
@@ -83,7 +83,7 @@ class LR0Node(object):
 
             if node._item != node._item._last:
                 following_symbol = node._item.rule.production[node._item._index]
-                if following_symbol == lookahead:
+                if following_symbol in lookahead:
                     previous = None
                     paths[-1].append(LR0PathItem(node._item))
                     while paths:
@@ -95,7 +95,7 @@ class LR0Node(object):
                         previous = result
                     return result
                 else:
-                    if lookahead in node._item._first:
+                    if not lookahead.isdisjoint(node._item._first):
                         for child in node._direct_children:
                             queue.append((child, paths[:-1] + [paths[-1] + [LR0PathItem(node._item)]]))
                     if -1 in node._item._first and node._successor is not None:
@@ -104,12 +104,12 @@ class LR0Node(object):
         raise ValueError()
 
     def filter_node_by_lookahead(self, path, lookahead):
-        # type: (LR0Path, Optional[int]) -> LR0Path
+        # type: (LR0Path, Set[int]) -> LR0Path
         following_symbol = self._item.rule.production[self._item._index + 1]
         assert self._successor is not None
-        if lookahead == following_symbol:
+        if following_symbol in lookahead:
             return path
-        elif lookahead in self._successor._item._first:
+        elif not lookahead.isdisjoint(self._successor._item._first):
             try:
                 successor_path = self._successor.expand_lookahead(lookahead)
             except ValueError:
@@ -124,10 +124,10 @@ class LR0Node(object):
             raise ValueError()
 
     def backtrack_up(self, path, lookahead, seen):
-        # type: (LR0Path, Optional[int], Set[Union[Tuple["LR0Node", Optional[int]], LR0ItemSet]]) -> List[Tuple["LR0Node", LR0Path, Optional[int], Optional[int]]]
+        # type: (LR0Path, Set[int], Set[Union[Tuple["LR0Node", bool], LR0ItemSet]]) -> List[Tuple["LR0Node", LR0Path, Set[int], Optional[int]]]
         queue = [(self, path, lookahead)]
-        result = []    # type: List[Tuple["LR0Node", LR0Path, Optional[int], Optional[int]]]
-        state_path_seen = set()
+        result = []                # type: List[Tuple["LR0Node", LR0Path, Set[int], Optional[int]]]
+        state_path_seen = set()    # type: Set[Tuple[LR0ItemSet, int]]
 
         seen.add(self._item_set)
 
@@ -135,15 +135,15 @@ class LR0Node(object):
             node, path, lookahead = queue.pop(0)
 
             for parent in node._direct_parents:
-                if (parent, lookahead) in seen:
+                if (parent, bool(lookahead)) in seen:
                     continue
-                seen.add((parent, lookahead))
+                seen.add((parent, bool(lookahead)))
                 item = parent._item
-                if lookahead is not None:
-                    if lookahead in item._follow:
+                if lookahead:
+                    if not lookahead.isdisjoint(item._follow):
                         p = parent.filter_node_by_lookahead(path.derive_from(parent._item), lookahead)
-                        result.append((parent, p, None, None))
-                        queue.append((parent, p, None))
+                        result.append((parent, p, set(), None))
+                        queue.append((parent, p, set()))
                     if -1 in item._follow:
                         if item != item._last:
                             assert parent._successor is not None
@@ -155,7 +155,7 @@ class LR0Node(object):
                 else:
                     queue.append((parent, path.derive_from(parent._item), lookahead))
             for predecessor in node._predecessors:
-                if lookahead is None:
+                if lookahead:
                     if (predecessor._item_set, predecessor._item._symbol) in state_path_seen:
                         continue
                     state_path_seen.add((predecessor._item_set, predecessor._item._symbol))

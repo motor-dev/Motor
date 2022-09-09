@@ -103,19 +103,12 @@ def template_argument_list_cxx11(self, p):
     pass
 
 
-@glrp.rule('template-argument : constant-expression')
-@glrp.rule('template-argument : type-id')
+@glrp.rule('template-argument : begin-template-argument-constant constant-expression')
+@glrp.rule('template-argument : begin-template-argument-type type-id')
 #@glrp.rule('template-argument : id-expression')
 @cxx98
 def template_argument(self, p):
     # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.merge('template-argument')
-@cxx98_merge
-def ambiguous_template_argument(self, ambiguous_cast_expression, ambiguous_type_id):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
@@ -137,6 +130,21 @@ def typename_disambiguation(self, p):
     pass
 
 
+@glrp.rule('begin-template-argument-constant[split:template_argument_constant] :')
+@glrp.rule('begin-template-argument-type[split:template_argument_type] :')
+@cxx98
+def begin_template_argument(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.merge('template-argument')
+@cxx98_merge
+def ambiguous_template_argument(self, template_argument_constant, template_argument_type):
+    # type: (CxxParser, Any, Any) -> Any
+    pass
+
+
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Any
     from ...parser import CxxParser

@@ -56,29 +56,13 @@ def scope_opt(self, p):
     pass
 
 
-@glrp.merge('qualified-id')
-@cxx98_merge
-def ambiguous_qualified_id(self, ambiguous_nested_name_specifier, template_name):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
 @glrp.merge('nested-name-specifier')
 @cxx98_merge
-def ambiguous_nested_name_specifier(
-    self, ambiguous_type_name, ambiguous_namespace_name, ambiguous_nested_name_specifier_tail
-):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('nested-name-specifier-tail')
-@cxx98_merge
-def ambiguous_nested_name_specifier_tail(self, template_name):
-    # type: (CxxParser, Optional[glrp.Production]) -> None
+def ambiguous_nested_name_specifier(self, ambiguous_type_name, ambiguous_namespace_name):
+    # type: (CxxParser, Any, Any) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from motor_typing import Optional
+    from typing import Any
     from .....parser import CxxParser

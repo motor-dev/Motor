@@ -39,7 +39,7 @@ pure-specifier:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge, cxx17_merge
+from ...parser import cxx98, cxx11, cxx17, cxx20
 from motor_typing import TYPE_CHECKING
 
 
@@ -52,8 +52,12 @@ def member_specification_opt(self, p):
     pass
 
 
-@glrp.rule('member-declaration : attribute-specifier-seq? member-declarator-list? ";"')
-@glrp.rule('member-declaration : attribute-specifier-seq? decl-specifier-seq member-declarator-list? ";"')
+@glrp.rule('member-declaration : begin-decl-nodeclspec attribute-specifier-seq? ";"')
+@glrp.rule('member-declaration : begin-simple-declaration attribute-specifier-seq? decl-specifier-seq";"')
+@glrp.rule('member-declaration : begin-decl-nodeclspec attribute-specifier-seq? member-declarator-list ";"')
+@glrp.rule(
+    'member-declaration : begin-simple-declaration attribute-specifier-seq? decl-specifier-seq member-declarator-list ";"'
+)
 @glrp.rule('member-declaration : function-definition')
 @glrp.rule('member-declaration : using-declaration')
 @glrp.rule('member-declaration : template-declaration')
@@ -88,30 +92,6 @@ def member_declaration_cxx20(self, p):
     pass
 
 
-@glrp.merge('member-declaration')
-@cxx98_merge
-def ambiguous_member_declaration(
-    self, ambiguous_function_definition, ambiguous_declarator, deduction_template, deduction_guide, template_decl,
-    ambiguous_type_specifier
-):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('member-declaration')
-@cxx98_merge
-def ambiguous_member_declaration_init_list(self, braced_init_list, compound_statement):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
-@glrp.merge('member-declaration')
-@cxx17_merge
-def ambiguous_explicit_member_declaration(self, explicit_deduction, explicit_declaration):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
-    pass
-
-
 @glrp.rule('member-declarator-list : member-declarator')
 @glrp.rule('member-declarator-list : member-declarator-list "," member-declarator')
 @cxx98
@@ -120,33 +100,19 @@ def member_declarator_list(self, p):
     pass
 
 
-@glrp.rule('member-declarator-list? : member-declarator')
-@glrp.rule('member-declarator-list? : member-declarator-list "," member-declarator')
-@glrp.rule('member-declarator-list? : ')
-@cxx98
-def member_declarator_list_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
 @glrp.rule('member-declarator : declarator')
 @glrp.rule('member-declarator : declarator pure-specifier')
 @glrp.rule('member-declarator : declarator virt-specifier-seq pure-specifier')
 @glrp.rule('member-declarator : declarator brace-or-equal-initializer')
-@glrp.rule('member-declarator : attribute-specifier-seq? ":" constant-expression brace-or-equal-initializer?')
+@glrp.rule('member-declarator : attribute-specifier-seq? ":" constant-expression')
+@glrp.rule('member-declarator : attribute-specifier-seq? ":" constant-expression brace-or-equal-initializer')
+@glrp.rule('member-declarator : bitfield-name attribute-specifier-seq? ":" constant-expression')
 @glrp.rule(
-    'member-declarator : bitfield-name attribute-specifier-seq? ":" constant-expression brace-or-equal-initializer?'
+    'member-declarator : bitfield-name attribute-specifier-seq? ":" constant-expression brace-or-equal-initializer'
 )
 @cxx98
 def member_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.merge('member-declarator')
-@cxx98_merge
-def ambiguous_member_declarator(self, pure_specifier, initializer):
-    # type: (CxxParser, Optional[glrp.Production], Optional[glrp.Production]) -> None
     pass
 
 
@@ -196,5 +162,4 @@ def pure_specifier(self, p):
 
 
 if TYPE_CHECKING:
-    from typing import Optional
     from ...parser import CxxParser

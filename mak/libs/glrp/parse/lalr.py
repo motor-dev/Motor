@@ -88,7 +88,7 @@ def _find_common_parent(node_list):
 
 
 def _find_counterexamples(conflict_list):
-    # type: (List[Tuple[LR0Node, Optional[int]]]) -> List[Tuple[LR0Node, List[Tuple[LR0Node, LR0Path]]]]
+    # type: (List[Tuple[LR0Node, Set[int]]]) -> List[Tuple[LR0Node, List[Tuple[LR0Node, LR0Path]]]]
     class IntermediateResult(object):
 
         def __init__(self, path_list):
@@ -101,10 +101,9 @@ def _find_counterexamples(conflict_list):
     ]                                           # type: List[Tuple[LR0Node, List[Tuple[LR0Node, LR0Path]]]]
     reduce_node = [1 if node._item == node._item._last else 0 for node, _ in conflict_list]
 
-    lst = [
-    ]                              # type: List[List[Tuple[LR0Node, LR0Path, Optional[int], Set[Union[Tuple[LR0Node, Optional[int]], LR0ItemSet]]]]]
+    lst = []                       # type: List[List[Tuple[LR0Node, LR0Path, Set[int], Set[Union[Tuple[LR0Node, bool], LR0ItemSet]]]]]
     states = {
-    }                              # type: Dict[Tuple[LR0ItemSet, int], List[List[Tuple[LR0Node, LR0Path, Optional[int], Set[Union[Tuple[LR0Node, Optional[int]], LR0ItemSet]]]]]]
+    }                              # type: Dict[Tuple[LR0ItemSet, int], List[List[Tuple[LR0Node, LR0Path, Set[int], Set[Union[Tuple[LR0Node, bool], LR0ItemSet]]]]]]
     for s in conflict_list:
         lst.append([(s[0], LR0PathItem(s[0]._item), s[1], set())])
     intermediate_result = None     # type: Optional[IntermediateResult]
@@ -120,7 +119,7 @@ def _find_counterexamples(conflict_list):
         for paths in path_list:
             temp_result.append([])
             for node, path, lookahead, _ in paths:
-                if node._item._index == 0 and lookahead is None:
+                if node._item._index == 0 and not lookahead:
                     all_nodes.append(node)
                     temp_result[-1].append((node, path))
                 else:
@@ -483,8 +482,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
     merge_missing = {}     # type: Dict[LR0Item, List[int]]
 
     priority_conflict = {}     # type: Dict[FrozenSet[LR0Item], List[int]]
-    merge_conflict = {}        # type: Dict[FrozenSet[Grammar.Rule], List[int]]
     conflict_issues = {}       # type: Dict[FrozenSet[LR0Item], Dict[LR0Item, List[Tuple[LR0Node, LR0Path]]]]
+    merge_requests = {}        # type: Dict[int, List[Tuple[Set[str], Dict[str, Set[LR0Path]]]]]
 
     num_rr = 0
     num_sr = 0
@@ -503,6 +502,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         action_map = {}    # type: Dict[int, List[Tuple[int, LR0Item]]]
         st_action = {}     # type: Dict[int, Tuple[Tuple[int, Optional[str], Optional[str]],...]]
         st_goto = {}       # type: Dict[int, int]
+        merges = {}        # type: Dict[FrozenSet[LR0Item], Tuple[Set[int], Set[LR0Node]]]
+
         sm_log.info('')
         sm_log.info('')
         sm_log.info('state %d:', st)
@@ -530,9 +531,6 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     j = cidhash[id(g)]
                     if j >= 0:
                         action_map[a] = action_map.get(a, []) + [(j, item)]
-
-        merges = OrderedDict(
-        )                      # type: OrderedDict[FrozenSet[LR0Node], Tuple[Set[int], OrderedDict[LR0Node, Tuple[bool, str]]]]
 
         for a in sorted(action_map):
             actions = action_map[a]
@@ -653,7 +651,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
             )
             if len(accepted_actions) > 1 and not split:
                 # handle conflicts
-                conflicts = []     # type: List[Tuple[LR0Node, Optional[int]]]
+                conflicts = []     # type: List[Tuple[LR0Node, Set[int]]]
                 num_rr += 1
                 sm_log.info('    %-30s conflict split', name_map[a])
                 for j, _, token_action in st_action[a]:
@@ -665,10 +663,10 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     for item in items:
                         node = item_group[item]
                         if j >= 0:
-                            conflicts.append((node, None))
+                            conflicts.append((node, set()))
                         else:
                             sm_log.info('        reduce using rule %s', item.to_string(name_map))
-                            conflicts.append((node, a))
+                            conflicts.append((node, set([a])))
 
                 counterexamples = _find_counterexamples(conflicts)
                 result_count = 0
@@ -691,49 +689,62 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     except KeyError:
                         item_conflict_node[node._item] = paths
             elif len(accepted_actions) > 1:
-                key = set()
-                for j, items in accepted_actions.items():
-                    for item in items:
-                        assert item._split is not None
-                        item._split_use += 1
-                        key.add(item_group[item])
-                conflict_log.info('')
-
+                sm_log.info('    %-30s split', name_map[a])
+                split_error = False
+                split_names = set()
+                key = frozenset((item for (j, _, _) in st_action[a] for item in accepted_actions[j]))
                 try:
-                    merge_set = merges[frozenset(key)]
+                    merge_lookaheads, merge_nodes = merges[key]
+                    merge_lookaheads.add(a)
                 except KeyError:
-                    merge_set = (set([a]), OrderedDict())
-                    merges[frozenset(key)] = merge_set
-                else:
-                    merge_set[0].add(a)
+                    merge_lookaheads = set([a])
+                    merge_nodes = set()
+                    merges[key] = (merge_lookaheads, merge_nodes)
 
                 sm_log.info('    %-30s split', name_map[a])
-                for j, _, token_action in st_action[a]:
+                for action_index, (j, split_name, token_action) in enumerate(st_action[a]):
                     action_error = False
+
+                    if split_name in split_names:
+                        split_error = True
+                    split_names.add(split_name)
                     items = accepted_actions[j]
                     if j >= 0:
                         sm_log.info('        shift and go to state %d', j)
+                        for item in items:
+                            if item._split != split_name:
+                                split_error = True
+
                     for item in items:
+                        item._split_use += 1
                         assert item._split is not None
+                        merge_nodes.add(item_group[item])
                         if item._action != token_action:
                             action_error = True
                         if j < 0:
                             sm_log.info('        reduce using rule %s', item.to_string(name_map))
-                            merge_set[1][item_group[item]] = (True, item._split)
-                        else:
-                            merge_set[1][item_group[item]] = (False, item._split)
+
                     if action_error:
                         error_log.error('action mismatch in state %d for token \'%s\':' % (st, name_map[a]))
                         for item in items:
                             error_log.note('    %s' % item.to_string(name_map))
+                if split_error:
+                    error_log.error('split tag mismatch in state %d for token \'%s\':' % (st, name_map[a]))
+                    error_log.note('  ensure all reduce rules have different names')
+                    error_log.note('  ensure all shift rules have the same name')
+                    for j, split_name, token_action in st_action[a]:
+                        for item in accepted_actions[j]:
+                            error_log.note('    %s' % item.to_string(name_map))
 
-                splits = [(node, lookahead, split_name) for node, (lookahead, split_name) in merge_set[1].items()]
+                splits = [
+                    (node, node._item._next is None, node._item._split or ('_%d' % merge_index))
+                    for merge_index, node in enumerate(merge_nodes)
+                ]
                 conflict_log.info('   Merge graph for rules:')
                 for node, _, split_name in splits:
                     conflict_log.info('      [%s][%s] %s' % (split_name, name_map[a], node._item.to_string(name_map)))
                 _find_merge_points(splits, a, name_map, conflict_log, error_log)
                 conflict_log.info('')
-
             else:
                 for j, _, token_action in st_action[a]:
                     action_error = False
@@ -750,6 +761,32 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                         for item in items:
                             error_log.note('    %s' % item.to_string(name_map))
 
+        for lookaheads, nodes in merges.values():
+            local_paths = {}                                                                     # type: Dict[int, Dict[str, Set[LR0Path]]]
+            for la in lookaheads:
+                counterexamples = _find_counterexamples(
+                    [(node, set([la]) if node._item._next is None else set()) for node in nodes]
+                )
+                for source_node, paths in counterexamples:
+                    assert source_node._item._split is not None
+                    split_name = source_node._item._split
+                    for target_node, path in paths:
+                        symbol = target_node._item._symbol
+                        try:
+                            param_paths = local_paths[symbol]
+                        except KeyError:
+                            local_paths[symbol] = {split_name: set([path])}
+                        else:
+                            try:
+                                param_paths[split_name].add(path)
+                            except KeyError:
+                                param_paths[split_name] = set([path])
+            for symbol, param_paths in local_paths.items():
+                try:
+                    merge_requests[symbol].append((set(param_paths.keys()), param_paths))
+                except KeyError:
+                    merge_requests[symbol] = [(set(param_paths.keys()), param_paths)]
+
         nkeys = set([])
         for item in item_group:
             for s in item._symbols:
@@ -765,6 +802,29 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
 
         action.append(st_action)
         goto_table.append(st_goto)
+
+    # process merges
+    #for symbol, merge_list in merge_requests.items():
+    #    while merge_list:
+    #        params, param_paths = merge_list.pop(-1)
+    #        for m in merge_list:
+    #            if not m[0].isdisjoint(params):
+    #                m[0].update(params)
+    #                for param, path_set in param_paths.items():
+    #                    try:
+    #                        m[1][param].update(path_set)
+    #                    except KeyError:
+    #                        m[1][param] = path_set
+    #                break
+    #        else:
+    #            conflict_log.info('def %s_merge(%s):' % (name_map[symbol], ', '.join(sorted(params))))
+    #            for param, path_set in sorted(param_paths.items()):
+    #                conflict_log.info('    # %s' % param)
+    #                for path in path_set:
+    #                    for string in path.to_string(name_map):
+    #                        conflict_log.info('    # # %s' % string)
+    #                    conflict_log.info('    #')
+    #                conflict_log.info('    #')
 
     # Report errors
     sys.stdout.write('\n')
@@ -793,15 +853,6 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         error_log.warning('conflicting precedence in states %s:', ', '.join([str(i) for i in state_numbers]))
         for item in sorted(item_set, key=lambda x: (x.rule._filename, x.rule._lineno)):
             error_log.diagnostic(item.rule._filename, item.rule._lineno, item.to_string(name_map))
-
-    if len(merge_conflict) == 1:
-        error_log.warning('1 conflicting merge annotation')
-    elif len(merge_conflict) > 1:
-        error_log.warning('%d conflicting merge annotations', len(merge_conflict))
-    for rules, state_numbers in merge_conflict.items():
-        error_log.warning('conflicting merge in states %s:', ', '.join([str(i) for i in state_numbers]))
-        for rule in sorted(rules, key=lambda x: (x._filename, x._lineno)):
-            error_log.diagnostic(rule._filename, rule._lineno, rule._item.to_string(name_map))
 
     for _, production in sorted(productions.items()):
         for rule in production:
