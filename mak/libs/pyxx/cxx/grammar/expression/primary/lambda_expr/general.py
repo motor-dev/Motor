@@ -36,7 +36,7 @@ def lambda_expression_cxx11(self, p):
 
 
 @glrp.rule(
-    'lambda-expression : lambda-introducer [action:split_rightshift]"<" template-parameter-list ">"  requires-clause? attribute-specifier-seq? lambda-declarator compound-statement'
+    'lambda-expression : lambda-introducer [action:begin_template_list]"<" template-parameter-list "%>"  requires-clause? attribute-specifier-seq? lambda-declarator compound-statement'
 )
 @cxx20
 def lambda_expression_cxx20(self, p):

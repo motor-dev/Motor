@@ -88,11 +88,11 @@ def type_parameter_disambiguation(self, p):
 
 
 @glrp.rule('type-constraint : concept-name')
-@glrp.rule('type-constraint : concept-name [action:split_rightshift]"<" template-argument-list? ">"')
+@glrp.rule('type-constraint : concept-name [action:begin_template_list]"<" template-argument-list? "%>"')
 # TODO: template not allowed
 @glrp.rule('type-constraint : nested-name-specifier template? concept-name')
 @glrp.rule(
-    'type-constraint : nested-name-specifier template? concept-name [action:split_rightshift]"<" template-argument-list? ">"'
+    'type-constraint : nested-name-specifier template? concept-name [action:begin_template_list]"<" template-argument-list? "%>"'
 )
 @cxx20
 def type_constraint_cxx20(self, p):
