@@ -1,6 +1,6 @@
 from .production import Production
 from .grammar import Grammar
-from .context import Context, RootOperation, Merge, SplitContext
+from .context import Context, Merge, SplitContext
 from motor_typing import TYPE_CHECKING, TypeVar
 import os
 import re
@@ -156,7 +156,7 @@ class Parser(object):
     def parse(self, filename):
         # type: (str) -> Any
 
-        contexts = [RootOperation(Context(None, None))] # type: List[Operation]
+        contexts = [Context(None, None)]
 
         action_table = self._grammar._action_table
         goto_table = self._grammar._goto_table
@@ -171,13 +171,13 @@ class Parser(object):
         rules = [(r[0], r[1], r[2](self), _merge_dict(r[3])) for r in self._grammar._rules]
 
         for token in self._lexer.input(filename):
-            #print(len(contexts))
+            operations = [context.input(token) for context in contexts]
             next_contexts = []         # type: List[Operation]
             merges = {}                # type: Dict[Tuple[SplitContext, Callable[[], None]], Merge]
             recovery_contexts = []     # type: List[Operation]
-            while contexts:
-                parent = contexts.pop(-1)
-                actions = action_table[parent._state].get(token._id, tuple())
+            while operations:
+                parent = operations.pop(-1)
+                actions = action_table[parent._state].get(parent._tokens[0]._id, tuple())
                 if len(actions) == 0:
                     recovery_contexts.append(parent)
                 else:
@@ -196,6 +196,8 @@ class Parser(object):
                             operation = parent.split(name, split_context)
                         else:
                             operation = parent
+                        if token_action is not None:
+                            getattr(self, token_action)(operation._result_context)
                         if action < 0:
                             rule = rules[-action - 1]
                             operation = operation.reduce(rule)
@@ -223,9 +225,13 @@ class Parser(object):
                             if not end:
                                 # goto symbol, then loop back for another round
                                 target_state = goto_table[operation._state][rule[0]]
-                                contexts.append(operation.goto(target_state))
+                                operations.append(operation.goto(target_state))
                         else:
-                            next_contexts.append(operation.goto_token(action, token))
+                            operation = operation.consume_token(action)
+                            if operation._tokens:
+                                operations.append(operation)
+                            else:
+                                next_contexts.append(operation)
 
             if len(next_contexts) == 0:
                 valid_tokens = set()
@@ -241,7 +247,7 @@ class Parser(object):
                     '  expected %s' %
                     ', '.join([self._grammar._name_map[production_id] for production_id in sorted(valid_tokens)])
                 )
-            contexts = [RootOperation(operation.run()[0]) for operation in next_contexts]
+            contexts = [operation.run()[0] for operation in next_contexts]
 
         print(len(contexts))
         for context in contexts:
@@ -250,9 +256,9 @@ class Parser(object):
                 for action, name, token_action in actions:
                     rule = rules[-action - 1]
                     symbol = rule[0]
-                    production = Production(symbol, 0, 0, context._result_context._sym_stack, rule[2])
+                    production = Production(symbol, 0, 0, context._sym_stack, rule[2])
                     production.run()
-                    #production.debug_print(self._grammar._name_map)
+                    production.debug_print(self._grammar._name_map)
         #        #return production.value
         #else:
         #    raise SyntaxError('unexpected end of file')
