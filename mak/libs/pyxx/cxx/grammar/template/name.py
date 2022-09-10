@@ -37,7 +37,9 @@ def template_opt(self, p):
     pass
 
 
-@glrp.rule('simple-template-id : template-name [prec:left,1][action:split_rightshift]"<" template-argument-list? ">"')
+@glrp.rule(
+    'simple-template-id : template-name [prec:left,1][action:begin_template_list]"<" template-argument-list? "%>"'
+)
 @cxx98
 def simple_template_id(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -46,7 +48,7 @@ def simple_template_id(self, p):
 
 @glrp.rule('template-id[prec:right,1][split:template_id] : simple-template-id')
 @glrp.rule(
-    'template-id : operator-function-id [split:template_operator][action:split_rightshift]"<" template-argument-list? ">"'
+    'template-id : operator-function-id [split:template_operator][action:begin_template_list]"<" template-argument-list? "%>"'
 )
 @cxx98
 def template_id(self, p):
@@ -55,7 +57,7 @@ def template_id(self, p):
 
 
 @glrp.rule(
-    'template-id : literal-operator-id [split:template_literal][action:split_rightshift]"<" template-argument-list? ">"'
+    'template-id : literal-operator-id [split:template_literal][action:begin_template_list]"<" template-argument-list? "%>"'
 )
 @cxx11
 def template_id_cxx11(self, p):

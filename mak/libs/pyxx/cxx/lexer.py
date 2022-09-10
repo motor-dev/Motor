@@ -186,11 +186,8 @@ _keywords_cxx23 = _keywords_transactional + _keywords_reflection
 class Cxx98Lexer(glrp.Lexer):
     keywords = _keywords
     tokens = _keywords + (
-        'virt-specifier-macro',
-        'access-specifier-macro',
-        'decl-specifier-macro',
-        'attribute-specifier-macro',
-        'storage-class-specifier-macro',
+        'virt-specifier-macro', 'access-specifier-macro', 'decl-specifier-macro', 'attribute-specifier-macro',
+        'storage-class-specifier-macro', '%>'
     )
 
     # arithmetic operators

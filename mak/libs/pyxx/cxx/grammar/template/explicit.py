@@ -13,7 +13,7 @@ from motor_typing import TYPE_CHECKING
 
 # amendment: @glrp.rule('explicit-specialization : "template" "<" ">" declaration')
 @glrp.rule(
-    'explicit-specialization : begin-decl-other attribute-specifier-seq? "extern"? "template" [action:split_rightshift]"<" ">" declaration'
+    'explicit-specialization : begin-decl-other attribute-specifier-seq? "extern"? "template" [action:begin_template_list]"<" "%>" declaration'
 )
 @cxx98
 def explicit_specialization(self, p):
