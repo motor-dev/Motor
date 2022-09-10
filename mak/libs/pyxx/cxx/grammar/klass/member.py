@@ -39,7 +39,7 @@ pure-specifier:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx17, cxx20
+from ...parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -161,5 +161,13 @@ def pure_specifier(self, p):
     pass
 
 
+@glrp.merge('member-declaration')
+@cxx98_merge
+def ambiguous_member_declaration(self, decl_deduction_guide, ambiguous_function_definition, decl_other):
+    # type: (CxxParser, Any, Any, Any) -> Any
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Any
     from ...parser import CxxParser
