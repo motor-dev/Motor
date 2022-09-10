@@ -22,9 +22,10 @@ class SplitContext(object):
 
 class Operation(object):
 
-    def __init__(self, context, pop_count, state, own_stack=[]):
-        # type: (Context, int, int, List[int]) -> None
+    def __init__(self, tokens, context, pop_count, state, own_stack=[]):
+        # type: (List[Token], Context, int, int, List[int]) -> None
         assert pop_count <= len(context._state_stack)
+        self._tokens = tokens
         self._result_context = context
         self._pop_count = pop_count
         self._state = state
@@ -48,9 +49,9 @@ class Operation(object):
         # type: (int) -> Operation
         return Goto(self, state)
 
-    def goto_token(self, state, token):
-        # type: (int, Symbol) -> Operation
-        return GotoToken(self, state, token)
+    def consume_token(self, state):
+        # type: (int) -> Operation
+        return ConsumeToken(self, state)
 
     def split(self, name, split_context):
         # type: (str, SplitContext) -> Operation
@@ -75,7 +76,7 @@ class Reduce(Operation):
 
     def __init__(self, origin, pop_count, state, own_stack, rule):
         # type: (Operation, int, int, List[int], Tuple[int, Tuple[int, ...], Callable[[Production], None], Dict[str, MergeAction.MergeCall]]) -> None
-        Operation.__init__(self, origin._result_context, pop_count, state, own_stack)
+        Operation.__init__(self, origin._tokens, origin._result_context, pop_count, state, own_stack)
         self._rule = rule
         self._predecessor = origin
 
@@ -100,7 +101,8 @@ class Goto(Operation):
         if target_state == 249:
             pass
         Operation.__init__(
-            self, origin._result_context, origin._pop_count, target_state, origin._own_stack + [target_state]
+            self, origin._tokens, origin._result_context, origin._pop_count, target_state,
+            origin._own_stack + [target_state]
         )
         self._predecessor = origin
 
@@ -112,17 +114,18 @@ class Goto(Operation):
         return context, symbol
 
 
-class GotoToken(Operation):
+class ConsumeToken(Operation):
 
-    def __init__(self, origin, target_state, symbol):
-        # type: (Operation, int, Symbol) -> None
+    def __init__(self, origin, target_state):
+        # type: (Operation, int) -> None
         if target_state == 249:
             pass
         Operation.__init__(
-            self, origin._result_context, origin._pop_count, target_state, origin._own_stack + [target_state]
+            self, origin._tokens[1:], origin._result_context, origin._pop_count, target_state,
+            origin._own_stack + [target_state]
         )
         self._predecessor = origin
-        self._symbol = symbol
+        self._symbol = origin._tokens[0]
 
     def _run(self):
         # type: () -> Tuple[Context, Optional[Symbol]]
@@ -137,8 +140,8 @@ class Split(Operation):
     def __init__(self, origin, name, split_context):
         # type: (Operation, str, SplitContext) -> None
         Operation.__init__(
-            self, Context(origin._result_context, (split_context, name, origin._sym_len)), origin._pop_count,
-            origin._state, origin._own_stack
+            self, origin._tokens, Context(origin._result_context, (split_context, name, origin._sym_len)),
+            origin._pop_count, origin._state, origin._own_stack
         )
         split_context.register(self._result_context)
         self._predecessor = origin
@@ -162,7 +165,9 @@ class Merge(Operation):
         for i, (c, n, j) in enumerate(context._names[::-1]):
             if c == split_context:
                 context._names[-i - 1] = (c, action._result, j)
-        Operation.__init__(self, context, operation._pop_count, operation._state, operation._own_stack)
+        Operation.__init__(
+            self, operation._tokens, context, operation._pop_count, operation._state, operation._own_stack
+        )
         self._operations = {}  # type: Dict[str, Operation]
         self._action = action
         self._split_context = split_context
@@ -197,9 +202,9 @@ class Merge(Operation):
 
 class RootOperation(Operation):
 
-    def __init__(self, context):
-        # type: (Context) -> None
-        Operation.__init__(self, context, 0, context._state)
+    def __init__(self, context, tokens):
+        # type: (Context, List[Token]) -> None
+        Operation.__init__(self, tokens, context, 0, context._state)
 
     def _run(self):
         # type: () -> Tuple[Context, Optional[Symbol]]
@@ -207,6 +212,16 @@ class RootOperation(Operation):
 
 
 class Context(object):
+
+    class TokenCallback(object):
+
+        def __init__(self):
+            # type: () -> None
+            pass
+
+        def filter(self, context, token):
+            # type: (Context, Token) -> List[Token]
+            return [token]
 
     def __init__(self, parent, param_name):
         # type: (Optional[Context], Optional[Tuple[SplitContext, str, int]]) -> None
@@ -216,11 +231,13 @@ class Context(object):
             self._names = parent._names[:]             # type: List[Tuple[SplitContext, str, int]]
             self._state_stack = parent._state_stack[:] # type: List[int]
             self._sym_stack = parent._sym_stack[:]     # type: List[Symbol]
+            self._filters = parent._filters[:]         # type: List[Context.TokenCallback]
         else:
             self._state = 0
             self._names = []
             self._state_stack = [0]
             self._sym_stack = []
+            self._filters = [Context.TokenCallback()]
         if param_name is not None:
             self._names.append(param_name)
 
@@ -235,8 +252,13 @@ class Context(object):
         self._state_stack = self._state_stack[:-pop_count]
         self._sym_stack = self._sym_stack[:-pop_count]
 
+    def input(self, token):
+        # type: (Token) -> Operation
+        return RootOperation(self, self._filters[-1].filter(self, token))
+
 
 if TYPE_CHECKING:
     from typing import Callable, Dict, List, Optional, Set, Tuple
     from .parser import MergeAction
+    from ..lex import Token
     from ..symbol import Symbol
