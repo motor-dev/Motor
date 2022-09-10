@@ -163,7 +163,7 @@ def nodeclspec_function_declaration(self, p):
 
 # todo: attribute-specifier-seq?, typename? not allowed
 @glrp.rule(
-    'alias-declaration : attribute-specifier-seq? "using" "typename"? "identifier" attribute-specifier-seq? "=" defining-type-id ";"'
+    'alias-declaration : begin-decl-other attribute-specifier-seq? "using" "typename"? "identifier" attribute-specifier-seq? "=" defining-type-id ";"'
 )
 @cxx98
 def alias_declaration(self, p):
@@ -197,14 +197,14 @@ def static_assert_declaration_cxx17(self, p):
     pass
 
 
-@glrp.rule('empty-declaration : [prec:left,1]";"')
+@glrp.rule('empty-declaration : begin-decl-other [prec:left,1]";"')
 @cxx98
 def empty_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('attribute-declaration : attribute-specifier-seq ";"')
+@glrp.rule('attribute-declaration : begin-decl-other attribute-specifier-seq? ";"')
 @cxx11
 def attribute_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None

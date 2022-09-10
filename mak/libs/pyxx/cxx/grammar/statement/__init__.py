@@ -32,12 +32,12 @@ from . import declaration
 
 @glrp.rule('statement : labeled-statement')
 @glrp.rule('statement : begin-expression-statement attribute-specifier-seq? expression-statement')
-@glrp.rule('statement : attribute-specifier-seq? compound-statement')
-@glrp.rule('statement : attribute-specifier-seq? selection-statement')
-@glrp.rule('statement : attribute-specifier-seq? iteration-statement')
-@glrp.rule('statement : attribute-specifier-seq? jump-statement')
+@glrp.rule('statement : begin-expression-statement attribute-specifier-seq? compound-statement')
+@glrp.rule('statement : begin-expression-statement attribute-specifier-seq? selection-statement')
+@glrp.rule('statement : begin-expression-statement attribute-specifier-seq? iteration-statement')
+@glrp.rule('statement : begin-expression-statement attribute-specifier-seq? jump-statement')
 @glrp.rule('statement : declaration-statement')
-@glrp.rule('statement : attribute-specifier-seq? try-block')
+@glrp.rule('statement : begin-expression-statement attribute-specifier-seq? try-block')
 @cxx98
 def statement(self, p):
     # type: (CxxParser, glrp.Production) -> None

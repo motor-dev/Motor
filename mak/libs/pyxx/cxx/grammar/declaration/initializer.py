@@ -62,21 +62,6 @@ def brace_or_equal_initializer_cxx11(self, p):
     pass
 
 
-@glrp.rule('brace-or-equal-initializer? : "=" initializer-clause')
-@glrp.rule('brace-or-equal-initializer? : ')
-@cxx98
-def brace_or_equal_initializer_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('brace-or-equal-initializer? : braced-init-list')
-@cxx11
-def brace_or_equal_initializer_opt_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
 @glrp.rule('initializer-clause : assignment-expression')
 @glrp.rule('initializer-clause : braced-init-list')
 @cxx98

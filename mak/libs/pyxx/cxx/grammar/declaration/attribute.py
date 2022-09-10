@@ -51,15 +51,7 @@ from ...parser import cxx98, cxx11, cxx20, cxx23, cxx11_merge
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('attribute-specifier-seq : attribute-specifier-seq attribute-specifier')
-@glrp.rule('attribute-specifier-seq : attribute-specifier')
-@cxx98
-def attribute_specifier_seq(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('attribute-specifier-seq? : attribute-specifier-seq')
+@glrp.rule('attribute-specifier-seq? : attribute-specifier-seq? attribute-specifier')
 @glrp.rule('attribute-specifier-seq? : ')
 @cxx98
 def attribute_specifier_seq_opt(self, p):
