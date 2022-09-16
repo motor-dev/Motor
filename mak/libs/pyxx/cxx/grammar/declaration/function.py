@@ -19,13 +19,13 @@ from motor_typing import TYPE_CHECKING
     'function-definition : begin-function-definition-nodeclspec attribute-specifier-seq? declarator function-body'
 )
 @glrp.rule(
-    'function-definition : begin-function-definition-declspec attribute-specifier-seq? decl-specifier-seq declarator function-body'
+    'function-definition : begin-function-definition-declspec attribute-specifier-seq? [no-merge-warning] decl-specifier-seq declarator function-body'
 )
 @glrp.rule(
     'function-definition : begin-function-definition-nodeclspec attribute-specifier-seq? declarator virt-specifier-seq function-body'
 )
 @glrp.rule(
-    'function-definition : begin-function-definition-declspec attribute-specifier-seq? decl-specifier-seq declarator virt-specifier-seq function-body'
+    'function-definition : begin-function-definition-declspec attribute-specifier-seq? [no-merge-warning] decl-specifier-seq declarator virt-specifier-seq function-body'
 )
 @cxx98
 def function_definition(self, p):
@@ -37,7 +37,7 @@ def function_definition(self, p):
     'function-definition : begin-function-definition-nodeclspec attribute-specifier-seq? declarator requires-clause function-body'
 )
 @glrp.rule(
-    'function-definition : begin-function-definition-declspec attribute-specifier-seq? decl-specifier-seq declarator requires-clause function-body'
+    'function-definition : begin-function-definition-declspec attribute-specifier-seq? [no-merge-warning] decl-specifier-seq declarator requires-clause function-body'
 )
 @cxx20
 def function_definition_cxx20(self, p):
@@ -73,6 +73,13 @@ def begin_function_definition(self, p):
 @glrp.merge('function-definition')
 @cxx98_merge
 def ambiguous_function_definition(self, function_definition_declspec, function_definition_nodeclspec):
+    # type: (CxxParser, Any, Any) -> Any
+    pass
+
+
+@glrp.merge('function-definition')
+@cxx98_merge
+def ambiguous_function_definition_2(self, decl_specifier_seq_end, decl_specifier_seq_continue):
     # type: (CxxParser, Any, Any) -> Any
     pass
 

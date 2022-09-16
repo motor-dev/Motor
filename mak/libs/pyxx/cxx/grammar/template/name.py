@@ -46,26 +46,22 @@ def simple_template_id(self, p):
     pass
 
 
-@glrp.rule('template-id[prec:right,1][split:template_id] : simple-template-id')
-@glrp.rule(
-    'template-id : operator-function-id [split:template_operator][action:begin_template_list]"<" template-argument-list? "%>"'
-)
+@glrp.rule('template-id[prec:right,1] : simple-template-id')
+@glrp.rule('template-id : operator-function-id [action:begin_template_list]"<" template-argument-list? "%>"')
 @cxx98
 def template_id(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule(
-    'template-id : literal-operator-id [split:template_literal][action:begin_template_list]"<" template-argument-list? "%>"'
-)
+@glrp.rule('template-id : literal-operator-id [action:begin_template_list]"<" template-argument-list? "%>"')
 @cxx11
 def template_id_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('template-name[prec:right,1][split:template_name] : "identifier"')
+@glrp.rule('template-name[prec:right,1] : "identifier"')
 @cxx98
 def template_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -125,7 +121,7 @@ def typename_specifier(self, p):
     pass
 
 
-@glrp.rule('typename-disambiguation[split:typename_specifier] :')
+@glrp.rule('typename-disambiguation :')
 @cxx98
 def typename_disambiguation(self, p):
     # type: (CxxParser, glrp.Production) -> None

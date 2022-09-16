@@ -68,7 +68,7 @@ def unary_operator(self, p):
 
 @glrp.merge('sizeof-expression')
 @cxx98_merge
-def ambiguous_sizeof_expression(self, expression, type_id):
+def ambiguous_sizeof_expression(self, type_id, ambiguous_primary_expression):
     # type: (CxxParser, Any, Any) -> Any
     pass
 

@@ -55,8 +55,9 @@ def member_specification_opt(self, p):
 @glrp.rule('member-declaration : begin-decl-nodeclspec attribute-specifier-seq? ";"')
 @glrp.rule('member-declaration : begin-simple-declaration attribute-specifier-seq? decl-specifier-seq";"')
 @glrp.rule('member-declaration : begin-decl-nodeclspec attribute-specifier-seq? member-declarator-list ";"')
+@glrp.rule('member-declaration : member-declaration-declarator')
 @glrp.rule(
-    'member-declaration : begin-simple-declaration attribute-specifier-seq? decl-specifier-seq member-declarator-list ";"'
+    'member-declaration-declarator : begin-simple-declaration-declarator attribute-specifier-seq? [no-merge-warning] decl-specifier-seq member-declarator-list ";"'
 )
 @glrp.rule('member-declaration : function-definition')
 @glrp.rule('member-declaration : using-declaration')
@@ -161,10 +162,27 @@ def pure_specifier(self, p):
     pass
 
 
+@glrp.merge('member-declarator')
+@cxx98_merge
+def ambiguous_member_declarator(self, pure_specifier, initializer):
+    # type: (CxxParser, Any, Any) -> Any
+    pass
+
+
 @glrp.merge('member-declaration')
 @cxx98_merge
-def ambiguous_member_declaration(self, decl_deduction_guide, ambiguous_function_definition, decl_other):
-    # type: (CxxParser, Any, Any, Any) -> Any
+def ambiguous_member_declaration(
+    self, decl_deduction_guide, ambiguous_function_definition, decl_nodeclspec, simple_declaration,
+    simple_declaration_declarator, decl_other
+):
+    # type: (CxxParser, Any, Any, Any, Any, Any, Any) -> Any
+    pass
+
+
+@glrp.merge('member-declaration-declarator')
+@cxx98_merge
+def ambiguous_member_declaration_declarator(self, decl_specifier_seq_end, decl_specifier_seq_continue):
+    # type: (CxxParser, Any, Any) -> Any
     pass
 
 

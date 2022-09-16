@@ -31,55 +31,42 @@ from .....parser import cxx98, cxx11, cxx20, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('simple-type-specifier-def : type-name')
+@glrp.rule('simple-type-specifier : type-name')
 # TODO: template? not allowed
-@glrp.rule('simple-type-specifier-def : nested-name-specifier "template"? type-name')
+@glrp.rule('simple-type-specifier : nested-name-specifier "template"? type-name')
 # TODO: already covered
 #@glrp.rule('simple-type-specifier : nested-name-specifier "template"? simple-template-id')
-@glrp.rule('simple-type-specifier-def : template-name')
+@glrp.rule('simple-type-specifier : template-name')
 # TODO: template? not allowed
-@glrp.rule('simple-type-specifier-def : nested-name-specifier "template"? template-name')
-@glrp.rule('simple-type-specifier-def : "char"')
-@glrp.rule('simple-type-specifier-def : "wchar_t"')
-@glrp.rule('simple-type-specifier-def : "bool"')
-@glrp.rule('simple-type-specifier-def : "short"')
-@glrp.rule('simple-type-specifier-def : "int"')
-@glrp.rule('simple-type-specifier-def : "long"')
-@glrp.rule('simple-type-specifier-def : "signed"')
-@glrp.rule('simple-type-specifier-def : "unsigned"')
-@glrp.rule('simple-type-specifier-def : "float"')
-@glrp.rule('simple-type-specifier-def : "double"')
-@glrp.rule('simple-type-specifier-def : "void"')
-@glrp.rule('simple-type-specifier-tail : "char"')
-@glrp.rule('simple-type-specifier-tail : "wchar_t"')
-@glrp.rule('simple-type-specifier-tail : "bool"')
-@glrp.rule('simple-type-specifier-tail : "short"')
-@glrp.rule('simple-type-specifier-tail : "int"')
-@glrp.rule('simple-type-specifier-tail : "long"')
-@glrp.rule('simple-type-specifier-tail : "signed"')
-@glrp.rule('simple-type-specifier-tail : "unsigned"')
-@glrp.rule('simple-type-specifier-tail : "float"')
-@glrp.rule('simple-type-specifier-tail : "double"')
+@glrp.rule('simple-type-specifier : nested-name-specifier "template"? template-name')
+@glrp.rule('simple-type-specifier : "char"')
+@glrp.rule('simple-type-specifier : "wchar_t"')
+@glrp.rule('simple-type-specifier : "bool"')
+@glrp.rule('simple-type-specifier : "short"')
+@glrp.rule('simple-type-specifier : "int"')
+@glrp.rule('simple-type-specifier : "long"')
+@glrp.rule('simple-type-specifier : "signed"')
+@glrp.rule('simple-type-specifier : "unsigned"')
+@glrp.rule('simple-type-specifier : "float"')
+@glrp.rule('simple-type-specifier : "double"')
+@glrp.rule('simple-type-specifier : "void"')
 @cxx98
 def simple_type_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('simple-type-specifier-def : decltype-specifier')
-@glrp.rule('simple-type-specifier-def : placeholder-type-specifier')
-@glrp.rule('simple-type-specifier-def : "char16_t"')
-@glrp.rule('simple-type-specifier-def : "char32_t"')
-@glrp.rule('simple-type-specifier-tail : "char16_t"')
-@glrp.rule('simple-type-specifier-tail : "char32_t"')
+@glrp.rule('simple-type-specifier : decltype-specifier')
+@glrp.rule('simple-type-specifier : placeholder-type-specifier')
+@glrp.rule('simple-type-specifier : "char16_t"')
+@glrp.rule('simple-type-specifier : "char32_t"')
 @cxx11
 def simple_type_specifier_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('simple-type-specifier-def : "char8_t"')
-@glrp.rule('simple-type-specifier-tail : "char8_t"')
+@glrp.rule('simple-type-specifier : "char8_t"')
 @cxx20
 def simple_type_specifier_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -97,22 +84,15 @@ def type_name(self, p):
 
 @glrp.merge('type-name')
 @cxx98_merge
-def ambiguous_type_name(self, class_name, enum_name, typedef_name):
-    # type: (CxxParser, Any, Any, Any) -> Any
+def ambiguous_type_name(self, _):
+    # type: (CxxParser, Any) -> Any
     pass
 
 
-@glrp.merge('type-name')
+@glrp.merge('simple-type-specifier')
 @cxx98_merge
-def ambiguous_template_type_name(self, class_template_id, typedef_template_id):
+def ambiguous_simple_type_specifier(self, ambiguous_type_name, _):
     # type: (CxxParser, Any, Any) -> Any
-    pass
-
-
-@glrp.merge('simple-type-specifier-def')
-@cxx98_merge
-def ambiguous_simple_type_specifier(self, ambiguous_type_name, ambiguous_type_constraint, template_name):
-    # type: (CxxParser, Any, Any, Any) -> Any
     pass
 
 

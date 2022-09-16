@@ -29,6 +29,7 @@ class LR0Item(object):
         self._merges = tuple(merge_list) # type: Tuple[Grammar.Merge, ...]
         self._merge_map = {}             # type: Dict[str, Grammar.Merge]
         self._merge_map_str = {}         # type: Dict[str, str]
+        self._no_merge_warning = False
 
         for merge in self._merges:
             for key in merge._arguments:
@@ -94,6 +95,13 @@ class LR0Item(object):
                         (','.join(values) if values else 'none'), (rule._filename, rule._lineno, 0, '')
                     )
                 self._action = values[0]
+            elif annotation == "no-merge-warning":
+                if len(values) != 0:
+                    raise SyntaxError(
+                        'incorrect annotation: "no-merge-warning" expects no argument, got %s',
+                        (','.join(values) if values else 'none'), (rule._filename, rule._lineno, 0, '')
+                    )
+                self._no_merge_warning = True
             else:
                 raise SyntaxError('unknown annotation %s' % annotation, (rule._filename, rule._lineno, 0, ''))
 

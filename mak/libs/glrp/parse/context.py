@@ -5,10 +5,11 @@ from motor_typing import TYPE_CHECKING
 class SplitContext(object):
     INDEX = 0
 
-    def __init__(self):
-        # type: () -> None
+    def __init__(self, stack_unwind):
+        # type: (int) -> None
         self._contexts = set()     # type: Set[Context]
         self._index = SplitContext.INDEX
+        self._stack_unwind = stack_unwind
         SplitContext.INDEX += 1
 
     def register(self, context):
@@ -18,6 +19,12 @@ class SplitContext(object):
     def unregister(self, context):
         # type: (Context) -> None
         self._contexts.remove(context)
+        if len(self._contexts) == 1:
+            context = self._contexts.pop()
+            for i, (sc, _) in enumerate(context._names):
+                if sc == self:
+                    context._names.pop(i)
+                    break
 
 
 class Operation(object):
@@ -70,6 +77,11 @@ class Operation(object):
                 self, self._pop_count + pop_count, self._result_context._state_stack[-pop_count - self._pop_count - 1],
                 [], rule
             )
+
+    def discard(self):
+        # type: () -> None
+        for sc, _ in self._result_context._names:
+            sc.unregister(self._result_context)
 
 
 class Reduce(Operation):
@@ -140,10 +152,9 @@ class Split(Operation):
     def __init__(self, origin, name, split_context):
         # type: (Operation, str, SplitContext) -> None
         Operation.__init__(
-            self, origin._tokens, Context(origin._result_context, (split_context, name, origin._sym_len)),
-            origin._pop_count, origin._state, origin._own_stack
+            self, origin._tokens, Context(origin._result_context, (split_context, name)), origin._pop_count,
+            origin._state, origin._own_stack
         )
-        split_context.register(self._result_context)
         self._predecessor = origin
         self._name = name
 
@@ -161,23 +172,24 @@ class Merge(Operation):
     def __init__(self, operation, action, name, split_context):
         # type: (Operation, MergeAction.MergeCall, str, SplitContext) -> None
         context = Context(operation._result_context, None)
-        context._parent = operation._result_context._parent
-        for i, (c, n, j) in enumerate(context._names[::-1]):
-            if c == split_context:
-                context._names[-i - 1] = (c, action._result, j)
+        operation.discard()
+        for i, (sc, _) in enumerate(context._names):
+            if sc == split_context:
+                context._names[i] = (split_context, action._result)
+                break
         Operation.__init__(
             self, operation._tokens, context, operation._pop_count, operation._state, operation._own_stack
         )
-        self._operations = {}  # type: Dict[str, Operation]
+        self._operations = {name: operation} # type: Dict[str, Operation]
         self._action = action
         self._split_context = split_context
-        self.add_operation(operation, name, split_context)
 
     def add_operation(self, operation, name, split_context):
         # type: (Operation, str, SplitContext) -> None
         assert split_context == self._split_context
         #print('[%d] merge %s -> %s' % (split_context._index, name, self._action._result))
-        #assert name not in self._operations
+        #assert name == '_' or name not in self._operations
+        operation.discard()
         self._operations[name] = operation
 
     def _run(self):
@@ -224,11 +236,12 @@ class Context(object):
             return [token]
 
     def __init__(self, parent, param_name):
-        # type: (Optional[Context], Optional[Tuple[SplitContext, str, int]]) -> None
-        self._parent = parent
+        # type: (Optional[Context], Optional[Tuple[SplitContext, str]]) -> None
         if parent is not None:
+            for sc, _ in parent._names:
+                sc.register(self)
             self._state = parent._state                # type: int
-            self._names = parent._names[:]             # type: List[Tuple[SplitContext, str, int]]
+            self._names = parent._names[:]             # type: List[Tuple[SplitContext, str]]
             self._state_stack = parent._state_stack[:] # type: List[int]
             self._sym_stack = parent._sym_stack[:]     # type: List[Symbol]
             self._filters = parent._filters[:]         # type: List[Context.TokenCallback]
@@ -240,6 +253,7 @@ class Context(object):
             self._filters = [Context.TokenCallback()]
         if param_name is not None:
             self._names.append(param_name)
+            param_name[0].register(self)
 
     def goto(self, state, symbol):
         # type: (int, Symbol) -> None

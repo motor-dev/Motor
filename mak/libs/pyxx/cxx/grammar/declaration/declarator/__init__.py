@@ -24,17 +24,8 @@ def init_declarator_list(self, p):
     pass
 
 
-@glrp.rule('init-declarator-list? : init-declarator')
-@glrp.rule('init-declarator-list? : init-declarator-list "," init-declarator')
-@glrp.rule('init-declarator-list? : ')
-@cxx98
-def init_declarator_list_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
 @glrp.rule('init-declarator : begin-declarator-no-initializer declarator')
-@glrp.rule('init-declarator : begin-declarator-initializer declarator initializer')
+@glrp.rule('init-declarator : begin-declarator-initializer [no-merge-warning]declarator initializer')
 @cxx98
 def init_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -54,6 +45,15 @@ def init_declarator_cxx20(self, p):
 def begin_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
+
+
+@glrp.merge('init-declarator')
+@cxx98_merge
+def ambiguous_init_declarator_initializer(self, continue_declarator_list, end_declarator_list):
+    # type: (CxxParser, Any, Any) -> Any
+    # end_declarator_list should always mark the end of recursion, and continue_declarator_list should always be None here.
+    assert continue_declarator_list is None
+    return end_declarator_list
 
 
 @glrp.merge('init-declarator')

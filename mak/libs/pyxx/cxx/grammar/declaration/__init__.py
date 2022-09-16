@@ -171,11 +171,16 @@ def alias_declaration(self, p):
     pass
 
 
+@glrp.rule('simple-declaration : simple-declaration-declarator')
+@glrp.rule('simple-declaration : simple-declaration-no-declarator')
 @glrp.rule(
-    'simple-declaration : begin-simple-declaration attribute-specifier-seq? decl-specifier-seq init-declarator-list? ";"'
+    'simple-declaration-no-declarator : begin-simple-declaration attribute-specifier-seq? decl-specifier-seq ";"'
 )
 @glrp.rule(
-    'simple-declaration : begin-simple-declaration attribute-specifier-seq? decl-specifier-seq begin-declarator-initializer ref-qualifier? "[" identifier-list "]" initializer ";"'
+    'simple-declaration-no-declarator : begin-simple-declaration attribute-specifier-seq? decl-specifier-seq begin-declarator-initializer ref-qualifier? "[" identifier-list "]" initializer ";"'
+)
+@glrp.rule(
+    'simple-declaration-declarator : begin-simple-declaration-declarator attribute-specifier-seq? [no-merge-warning] decl-specifier-seq init-declarator-list ";"'
 )
 @cxx98
 def simple_declaration(self, p):
@@ -221,6 +226,7 @@ def identifier_list(self, p):
 
 @glrp.rule('begin-nodeclspec-function-declaration : [split:nodeclspec_function_declaration]')
 @glrp.rule('begin-simple-declaration : [split:simple_declaration]')
+@glrp.rule('begin-simple-declaration-declarator : [split:simple_declaration_declarator]')
 @glrp.rule('begin-decl-other : [split:decl_other]')
 @glrp.rule('begin-decl-nodeclspec : [split:decl_nodeclspec]')
 @cxx98
@@ -236,9 +242,23 @@ def begin_decl_cxx17(self, p):
     pass
 
 
+@glrp.merge('simple-declaration-declarator')
+@cxx98_merge
+def ambiguous_simple_declaration_declarator(self, decl_specifier_seq_end, decl_specifier_seq_continue):
+    # type: (CxxParser, Any, Any) -> Any
+    pass
+
+
+@glrp.merge('simple-declaration')
+@cxx98_merge
+def ambiguous_simple_declaration(self, simple_declaration, simple_declaration_declarator):
+    # type: (CxxParser, Any, Any) -> Any
+    pass
+
+
 @glrp.merge('block-declaration')
 @cxx98_merge
-def ambiguous_block_declaration(self, decl_other, simple_declaration):
+def ambiguous_block_declaration(self, decl_other, ambiguous_simple_declaration):
     # type: (CxxParser, Any, Any) -> Any
     pass
 
@@ -253,9 +273,9 @@ def ambiguous_declaration(
     pass
 
 
-@glrp.merge('simple-declaration')
+@glrp.merge('simple-declaration-declarator')
 @cxx98_merge
-def ambiguous_simple_declaration(self, declarator_initializer, ambiguous_init_declarator):
+def ambiguous_simple_declaration_2(self, declarator_initializer, ambiguous_init_declarator):
     # type: (CxxParser, Any, Any) -> Any
     pass
 

@@ -31,8 +31,8 @@ from . import derived
 from . import conversion
 
 
-@glrp.rule('class-name[prec:right,1][split:class_name] : "identifier"')
-@glrp.rule('class-name[prec:right,1][split:class_template_id] : simple-template-id')
+@glrp.rule('class-name[prec:right,1] : "identifier"')
+@glrp.rule('class-name[prec:right,1] : simple-template-id')
 @cxx98
 def class_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -77,7 +77,7 @@ def class_virt_specifier_cxx11(self, p):
     pass
 
 
-@glrp.rule('class-key : [split:defining_type_specifier_class]"class"')
+@glrp.rule('class-key : "class"')
 @glrp.rule('class-key : "struct"')
 @glrp.rule('class-key : "union"')
 @cxx98

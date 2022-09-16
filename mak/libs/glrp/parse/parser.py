@@ -171,18 +171,21 @@ class Parser(object):
         rules = [(r[0], r[1], r[2](self), _merge_dict(r[3])) for r in self._grammar._rules]
 
         for token in self._lexer.input(filename):
+            #print(len(contexts))
             operations = [context.input(token) for context in contexts]
             next_contexts = []         # type: List[Operation]
-            merges = {}                # type: Dict[Tuple[SplitContext, Callable[[], None]], Merge]
+            merges = {}                # type: Dict[Tuple[SplitContext, int, int, Callable[[], None]], Merge]
+            merge_opportunities = {}   # type: Dict[Tuple[SplitContext, int, int, int], List[Tuple[Operation, str]]]
             recovery_contexts = []     # type: List[Operation]
             while operations:
                 parent = operations.pop(-1)
                 actions = action_table[parent._state].get(parent._tokens[0]._id, tuple())
                 if len(actions) == 0:
                     recovery_contexts.append(parent)
+                    parent.discard()
                 else:
                     if len(actions) > 1:
-                        split_context = SplitContext()
+                        split_context = SplitContext(parent._sym_len)
 
                         #print(
                         #    '[%d->%d] split %s -> %s' % (
@@ -192,7 +195,8 @@ class Parser(object):
                         #)
                     for action, name, token_action in actions:
                         if len(actions) > 1:
-                            assert name is not None
+                            # assert name is not None
+                            name = name or '_'
                             operation = parent.split(name, split_context)
                         else:
                             operation = parent
@@ -203,25 +207,43 @@ class Parser(object):
                             operation = operation.reduce(rule)
                             end = False
                             while not end:
-                                for scontext, name, max_stack in operation._result_context._names[::-1]:
-                                    if max_stack < operation._sym_len:
-                                        break
-                                    try:
-                                        merge_action = rule[3][name]
-                                    except KeyError:
-                                        pass
-                                    else:
+                                for scontext, name in operation._result_context._names:
+                                    if scontext._stack_unwind >= operation._sym_len:
+                                        #scontext._stack_unwind = operation._sym_len
                                         try:
-                                            merge_op = merges[(scontext, merge_action._call)]
+                                            merge_action = rule[3][name]
                                         except KeyError:
-                                            merge_op = Merge(operation, merge_action, name, scontext)
-                                            merges[(scontext, merge_action._call)] = merge_op
-                                            operation = merge_op
+                                            pass
                                         else:
-                                            merge_op.add_operation(operation, name, scontext)
-                                            end = True
-                                        break
-                                break
+                                            try:
+                                                merge_op = merges[(
+                                                    scontext, operation._state, operation._sym_len, merge_action._call
+                                                )]
+                                            except KeyError:
+                                                merge_op = Merge(operation, merge_action, name, scontext)
+                                                merges[(
+                                                    scontext, operation._state, operation._sym_len, merge_action._call
+                                                )] = merge_op
+                                                operation = merge_op
+                                            else:
+                                                merge_op.add_operation(operation, name, scontext)
+                                                end = True
+                                            break
+                                else:
+                                    for scontext, name in operation._result_context._names:
+                                        if scontext._stack_unwind < operation._sym_len:
+                                            break
+                                        try:
+                                            merge_opportunities[
+                                                (scontext, operation._state, operation._sym_len, rule[0])].append(
+                                                    (operation, name)
+                                                )
+                                        except KeyError:
+                                            merge_opportunities[
+                                                (scontext, operation._state, operation._sym_len, rule[0])] = [
+                                                    (operation, name)
+                                                ]
+                                    break
                             if not end:
                                 # goto symbol, then loop back for another round
                                 target_state = goto_table[operation._state][rule[0]]
@@ -232,6 +254,19 @@ class Parser(object):
                                 operations.append(operation)
                             else:
                                 next_contexts.append(operation)
+
+                    if len(actions) > 1:
+                        parent.discard()
+
+            for (split_context, _, _, symbol), ops in merge_opportunities.items():
+                if len(ops) > 1:
+                    print('potential merge:')
+                    for reduce_op, name in ops:
+                        print('\u250f %s\n\u2503 %s' % (name, '\u2501' * len(name)))
+                        production = reduce_op.run()[1]
+                        assert production is not None
+                        production.debug_print(self._grammar._name_map, '\u2503 ', '\u2503 ')
+                        print('\u2517')
 
             if len(next_contexts) == 0:
                 valid_tokens = set()
@@ -258,7 +293,7 @@ class Parser(object):
                     symbol = rule[0]
                     production = Production(symbol, 0, 0, context._sym_stack, rule[2])
                     production.run()
-                    production.debug_print(self._grammar._name_map)
+                    #production.debug_print(self._grammar._name_map)
         #        #return production.value
         #else:
         #    raise SyntaxError('unexpected end of file')
