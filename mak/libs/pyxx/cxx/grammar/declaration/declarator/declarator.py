@@ -59,7 +59,7 @@ def declarator_cxx11(self, p):
     pass
 
 
-@glrp.rule('ptr-declarator : noptr-declarator[split:declarator_end]')
+@glrp.rule('ptr-declarator : noptr-declarator [split:end_declarator_list]')
 @glrp.rule('ptr-declarator : ptr-operator ptr-declarator')
 @cxx98
 def ptr_declarator(self, p):
@@ -70,32 +70,18 @@ def ptr_declarator(self, p):
 @glrp.rule('noptr-declarator : declarator-id attribute-specifier-seq?')
 @glrp.rule('noptr-declarator : noptr-declarator parameters-and-qualifiers')
 @glrp.rule('noptr-declarator : noptr-declarator "[" constant-expression? "]" attribute-specifier-seq?')
-@glrp.rule('noptr-declarator : "(" noptr-declarator-disambiguation ptr-declarator ")"')
+@glrp.rule('noptr-declarator : "(" begin-ptr-declarator ptr-declarator ")"')
 @cxx98
 def noptr_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('noptr-declarator-disambiguation[split:noptr_declarator] :')
-@cxx98
-def noptr_declarator_disambiguation(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
 @glrp.rule(
-    'parameters-and-qualifiers : [split:declarator_continue]"(" parameters-and-qualifiers-disambiguation parameter-declaration-clause ")" cv-qualifier-seq? ref-qualifier? exception-specification? attribute-specifier-seq?'
+    'parameters-and-qualifiers : [split:continue_declarator_list]"(" begin-parameter-declaration-clause parameter-declaration-clause ")" cv-qualifier-seq? ref-qualifier? exception-specification? attribute-specifier-seq?'
 )
 @cxx98
 def parameters_and_qualifiers(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.rule('parameters-and-qualifiers-disambiguation[split:parameters_and_qualifiers] :')
-@cxx98
-def parameters_and_qualifiers_disambiguation(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -169,9 +155,23 @@ def declarator_id(self, p):
     pass
 
 
-@glrp.rule('declarator-id : [split:pack_declarator]"..." id-expression')
+@glrp.rule('declarator-id : [prec:left,1]"..." id-expression')
 @cxx11
 def declarator_id_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('begin-ptr-declarator : [split:ptr_declarator]')
+@cxx98
+def begin_ptr_declarator(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('begin-parameter-declaration-clause : [split:parameter_declaration_clause]')
+@cxx98
+def begin_parameter_declaration_clause(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

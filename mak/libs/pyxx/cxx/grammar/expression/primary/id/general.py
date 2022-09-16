@@ -5,7 +5,7 @@ id-expression:
 """
 
 import glrp
-from .....parser import cxx98
+from .....parser import cxx98, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -17,5 +17,14 @@ def id_expression(self, p):
     pass
 
 
+@glrp.merge('id-expression')
+@glrp.merge_result('id_expression')
+@cxx98_merge
+def id_expression_rename(self, nested_name_specifier, unqualified_id):
+    # type: (CxxParser, Any, Any) -> None
+    pass
+
+
 if TYPE_CHECKING:
+    from typing import Any
     from .....parser import CxxParser

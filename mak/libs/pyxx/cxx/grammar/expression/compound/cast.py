@@ -17,6 +17,13 @@ def cast_expression(self, p):
     pass
 
 
+@glrp.merge('cast-expression')
+@cxx98_merge
+def ambiguous_cast_expression(self, type_id, ambiguous_primary_expression):
+    # type: (CxxParser, Any, Any) -> Any
+    pass
+
+
 if TYPE_CHECKING:
     from typing import Any
     from ....parser import CxxParser

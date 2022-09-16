@@ -21,11 +21,11 @@ type-constraint:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx20, cxx20_merge
+from ...parser import cxx98, cxx11, cxx20, cxx98_merge, cxx20_merge
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('template-parameter : type-parameter')
+@glrp.rule('template-parameter : begin-type-parameter type-parameter')
 @glrp.rule('template-parameter : parameter-declaration')
 @cxx98
 def template_parameter(self, p):
@@ -72,17 +72,17 @@ def type_parameter_cxx20(self, p):
     pass
 
 
-@glrp.rule('type-parameter-key : type-parameter-disambiguation "class"')
-@glrp.rule('type-parameter-key[split:typename_parameter] : "typename"')
+@glrp.rule('type-parameter-key : "class"')
+@glrp.rule('type-parameter-key : "typename"')
 @cxx98
 def type_parameter_key(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('type-parameter-disambiguation[split:type_parameter] :')
+@glrp.rule('begin-type-parameter : [split:type_parameter]')
 @cxx98
-def type_parameter_disambiguation(self, p):
+def begin_type_parameter(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -108,11 +108,9 @@ def ambiguous_type_constraint(self, template_name, concept_name):
 
 
 @glrp.merge('template-parameter')
-@cxx20_merge
-def ambiguous_template_parameter(
-    self, ambiguous_type_constraint, ambiguous_decl_specifier_seq, ambiguous_nested_name_specifier
-):
-    # type: (CxxParser, Any, Any, Any) -> Any
+@cxx98_merge
+def ambiguous_template_parameter(self, ambiguous_parameter_declaration, type_parameter):
+    # type: (CxxParser, Any, Any) -> Any
     pass
 
 

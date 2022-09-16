@@ -14,7 +14,7 @@ from ....parser import cxx98
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('namespace-alias[prec:right,1][split:namespace_alias] : "identifier"')
+@glrp.rule('namespace-alias[prec:right,1] : "identifier"')
 @cxx98
 def namespace_alias(self, p):
     # type: (CxxParser, glrp.Production) -> None

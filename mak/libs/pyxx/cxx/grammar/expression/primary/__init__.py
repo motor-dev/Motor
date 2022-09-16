@@ -10,7 +10,7 @@ primary-expression:
 """
 
 import glrp
-from ....parser import cxx98, cxx11, cxx17, cxx20
+from ....parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge
 from motor_typing import TYPE_CHECKING
 from . import id
 from . import lambda_expr
@@ -25,10 +25,17 @@ from . import requires
 @glrp.rule('primary-expression : "this"')
 @glrp.rule('primary-expression : "true"')
 @glrp.rule('primary-expression : "false"')
-@glrp.rule('primary-expression : "(" begin-expression expression ")"')
+@glrp.rule('primary-expression : primary-expression-proxy')
 @glrp.rule('primary-expression[prec:right,1] : id-expression')
 @cxx98
 def primary_expression(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('primary-expression-proxy : "(" begin-expression expression ")"')
+@cxx98
+def primary_expression_proxy(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -44,9 +51,9 @@ def primary_expression_cxx11(self, p):
     pass
 
 
-@glrp.rule('primary-expression : fold-expression')
+@glrp.rule('primary-expression-proxy : fold-expression')
 @cxx17
-def primary_expression_cxx17(self, p):
+def primary_expression_proxy_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -58,6 +65,13 @@ def primary_expression_cxx20(self, p):
     pass
 
 
+@glrp.merge('primary-expression-proxy')
+@cxx98_merge
+def ambiguous_primary_expression(self, expression, fold_expression):
+    # type: (CxxParser, Any, Any) -> Any
+    pass
+
+
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Any
     from ....parser import CxxParser

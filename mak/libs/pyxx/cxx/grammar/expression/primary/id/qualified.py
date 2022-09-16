@@ -26,16 +26,8 @@ def qualified_id(self, p):
 @glrp.rule('nested-name-specifier : "::"')
 @glrp.rule('nested-name-specifier : type-name [prec:left,2]"::"')
 @glrp.rule('nested-name-specifier : namespace-name [prec:left,2]"::"')
-@glrp.rule('nested-name-specifier : nested-name-specifier nested-name-specifier-tail')
-@cxx98
-def nested_name_specifier_proxy(self, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@cxx98
-@glrp.rule('nested-name-specifier-tail : "template"? "identifier" [prec:left,2]"::"')
-@glrp.rule('nested-name-specifier-tail : "template"? simple-template-id [prec:left,2]"::"')
+@glrp.rule('nested-name-specifier : nested-name-specifier template"? "identifier" [prec:left,2]"::"')
+@glrp.rule('nested-name-specifier : nested-name-specifier template"? simple-template-id [prec:left,2]"::"')
 def nested_name_specifier_tail(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
@@ -53,13 +45,6 @@ def nested_name_specifier_cxx11(self, p):
 @cxx98
 def scope_opt(self, p):
     # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
-@glrp.merge('nested-name-specifier')
-@cxx98_merge
-def ambiguous_nested_name_specifier(self, ambiguous_type_name, ambiguous_namespace_name):
-    # type: (CxxParser, Any, Any) -> Any
     pass
 
 

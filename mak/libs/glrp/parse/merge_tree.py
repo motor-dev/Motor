@@ -1,3 +1,4 @@
+from ast import Continue
 from collections import deque, OrderedDict
 from motor_typing import TYPE_CHECKING
 
@@ -37,7 +38,7 @@ class _MergeNode(object):
         self._node = node
         self._lookahead = lookahead
         self._tags_entry = tags
-        self._committed = False
+        self._committed = True     # TODO!
         if node._item._index == 0:
             self._merge_map = node._item._last._merge_map
             self._merge_set = node._item._last._merge_set
@@ -297,6 +298,8 @@ class _MergeState(object):
                         self._important_items[p._node] = 2
 
         for (node, _, _), merge_node in seen.items():
+            if node._item._no_merge_warning:
+                continue
             if len(merge_node._predecessors) > 1:
                 for p in merge_node._predecessors:
                     if p._merge_object is not None:
@@ -304,7 +307,7 @@ class _MergeState(object):
                     else:
                         tags = p._tags_exit
                     if tags != merge_node._tags_entry:
-                        #self._error_nodes.append((merge_node, 'weird'))
+                        self._error_nodes.append((merge_node, 'weird'))
                         self._important_items[node] = 1
                         break
 
@@ -340,6 +343,8 @@ class _MergeState(object):
 
                     if len(node._predecessors) == 0 and len(node._direct_parents) == 0:
                         leaves.append(current_node)
+                        if len(current_node._tags_entry._tags) > 1:
+                            state._error_nodes.append((current_node, 'split not fully resolved'))
                     else:
                         for parent in node._direct_parents:
                             item = parent._item
@@ -366,6 +371,8 @@ class _MergeState(object):
                         parent_node._successors.append(current_node)
 
             for current_node in state._nodes.values():
+                if current_node._node._item._no_merge_warning:
+                    continue
                 if len(current_node._tags_entry._tags) > 1:
                     for p in current_node._predecessors:
                         if current_node._tags_entry._tags != p._tags_exit._tags:
@@ -535,7 +542,7 @@ class MergeTree(object):
             else:
                 for entry in entries:
                     for e in entry:
-                        if e[3]._indices != state._entry_indices:
+                        if e[3]._indices != state._entry_indices or len(e[3]._tags) > 1:
                             try:
                                 new_state = states[entry]
                             except KeyError:

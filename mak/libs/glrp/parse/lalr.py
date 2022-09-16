@@ -761,31 +761,31 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                         for item in items:
                             error_log.note('    %s' % item.to_string(name_map))
 
-        for lookaheads, nodes in merges.values():
-            local_paths = {}                                                                     # type: Dict[int, Dict[str, Set[LR0Path]]]
-            for la in lookaheads:
-                counterexamples = _find_counterexamples(
-                    [(node, set([la]) if node._item._next is None else set()) for node in nodes]
-                )
-                for source_node, paths in counterexamples:
-                    assert source_node._item._split is not None
-                    split_name = source_node._item._split
-                    for target_node, path in paths:
-                        symbol = target_node._item._symbol
-                        try:
-                            param_paths = local_paths[symbol]
-                        except KeyError:
-                            local_paths[symbol] = {split_name: set([path])}
-                        else:
-                            try:
-                                param_paths[split_name].add(path)
-                            except KeyError:
-                                param_paths[split_name] = set([path])
-            for symbol, param_paths in local_paths.items():
-                try:
-                    merge_requests[symbol].append((set(param_paths.keys()), param_paths))
-                except KeyError:
-                    merge_requests[symbol] = [(set(param_paths.keys()), param_paths)]
+        #for lookaheads, nodes in merges.values():
+        #    local_paths = {}                                                                     # type: Dict[int, Dict[str, Set[LR0Path]]]
+        #    for la in lookaheads:
+        #        counterexamples = _find_counterexamples(
+        #            [(node, set([la]) if node._item._next is None else set()) for node in nodes]
+        #        )
+        #        for source_node, paths in counterexamples:
+        #            assert source_node._item._split is not None
+        #            split_name = source_node._item._split
+        #            for target_node, path in paths:
+        #                symbol = target_node._item._symbol
+        #                try:
+        #                    param_paths = local_paths[symbol]
+        #                except KeyError:
+        #                    local_paths[symbol] = {split_name: set([path])}
+        #                else:
+        #                    try:
+        #                        param_paths[split_name].add(path)
+        #                    except KeyError:
+        #                        param_paths[split_name] = set([path])
+        #    for symbol, param_paths in local_paths.items():
+        #        try:
+        #            merge_requests[symbol].append((set(param_paths.keys()), param_paths))
+        #        except KeyError:
+        #            merge_requests[symbol] = [(set(param_paths.keys()), param_paths)]
 
         nkeys = set([])
         for item in item_group:
@@ -804,27 +804,27 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         goto_table.append(st_goto)
 
     # process merges
-    #for symbol, merge_list in merge_requests.items():
-    #    while merge_list:
-    #        params, param_paths = merge_list.pop(-1)
-    #        for m in merge_list:
-    #            if not m[0].isdisjoint(params):
-    #                m[0].update(params)
-    #                for param, path_set in param_paths.items():
-    #                    try:
-    #                        m[1][param].update(path_set)
-    #                    except KeyError:
-    #                        m[1][param] = path_set
-    #                break
-    #        else:
-    #            conflict_log.info('def %s_merge(%s):' % (name_map[symbol], ', '.join(sorted(params))))
-    #            for param, path_set in sorted(param_paths.items()):
-    #                conflict_log.info('    # %s' % param)
-    #                for path in path_set:
-    #                    for string in path.to_string(name_map):
-    #                        conflict_log.info('    # # %s' % string)
-    #                    conflict_log.info('    #')
-    #                conflict_log.info('    #')
+    for symbol, merge_list in merge_requests.items():
+        while merge_list:
+            params, param_paths = merge_list.pop(-1)
+            for m in merge_list:
+                if not m[0].isdisjoint(params):
+                    m[0].update(params)
+                    for param, path_set in param_paths.items():
+                        try:
+                            m[1][param].update(path_set)
+                        except KeyError:
+                            m[1][param] = path_set
+                    break
+            else:
+                conflict_log.info('def %s_merge(%s):' % (name_map[symbol], ', '.join(sorted(params))))
+                for param, path_set in sorted(param_paths.items()):
+                    conflict_log.info('    # %s' % param)
+                    for path in path_set:
+                        for string in path.to_string(name_map):
+                            conflict_log.info('    # # %s' % string)
+                        conflict_log.info('    #')
+                    conflict_log.info('    #')
 
     # Report errors
     sys.stdout.write('\n')
