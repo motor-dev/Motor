@@ -55,7 +55,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('attribute-specifier-seq? : ')
 @cxx98
 def attribute_specifier_seq_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -64,7 +64,7 @@ def attribute_specifier_seq_opt(self, p):
 @glrp.rule('attribute-specifier : [prec:left,1]"attribute-specifier-macro"')
 @cxx98
 def attribute_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -72,7 +72,7 @@ def attribute_specifier(self, p):
 @glrp.rule('attribute-specifier : alignment-specifier')
 @cxx11
 def attribute_specifier_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -80,7 +80,7 @@ def attribute_specifier_cxx11(self, p):
 @glrp.rule('alignment-specifier : [prec:left,1]"alignas" "(" begin-expression constant-expression "..."? ")"')
 @cxx11
 def alignment_specifier_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -88,7 +88,7 @@ def alignment_specifier_cxx11(self, p):
 @glrp.rule('attribute-using-prefix? : ')
 @cxx11
 def attribute_using_prefix_opt_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -98,7 +98,7 @@ def attribute_using_prefix_opt_cxx11(self, p):
 @glrp.rule('attribute-list : attribute-list "," attribute "..."')
 @cxx11
 def attribute_list_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -106,14 +106,14 @@ def attribute_list_cxx11(self, p):
 @glrp.rule('attribute? : ')
 @cxx11
 def attribute_opt_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('attribute : attribute-token attribute-argument-clause?')
 @cxx11
 def attribute_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -121,21 +121,21 @@ def attribute_cxx11(self, p):
 @glrp.rule('attribute-token : attribute-scoped-token')
 @cxx11
 def attribute_token_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('attribute-scoped-token : attribute-namespace "::" "identifier"')
 @cxx11
 def attribute_scoped_token_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('attribute-namespace : "identifier"')
 @cxx11
 def attribute_namespace_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -143,7 +143,7 @@ def attribute_namespace_cxx11(self, p):
 @glrp.rule('attribute-argument-clause? : ')
 @cxx11
 def attribute_argument_clause_opt_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -151,7 +151,7 @@ def attribute_argument_clause_opt_cxx11(self, p):
 @glrp.rule('balanced-token-seq? :')
 @cxx11
 def balanced_token_seq_opt_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -286,7 +286,7 @@ def balanced_token_seq_opt_cxx11(self, p):
 @glrp.rule('balanced-token : "user-defined-character-literal"')
 @cxx11
 def balanced_token_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -304,7 +304,7 @@ def balanced_token_cxx11(self, p):
 @glrp.rule('balanced-token : "<=>"')
 @cxx20
 def balanced_token_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -315,17 +315,17 @@ def balanced_token_cxx20(self, p):
 @glrp.rule('balanced-token : "reflexpr"')
 @cxx23
 def balanced_token_cxx23(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.merge('alignment-specifier')
 @cxx11_merge
 def ambiguous_alignment_specifier(self, type_id, expression):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, List
     from ...parser import CxxParser

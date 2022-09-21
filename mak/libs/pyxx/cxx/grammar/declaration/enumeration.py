@@ -43,7 +43,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('enum-name[prec:right,1] : "identifier"')
 @cxx98
 def enum_name(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -51,7 +51,7 @@ def enum_name(self, p):
 @glrp.rule('enum-specifier : enum-head "{" enumerator-list "," "}"')
 @cxx98
 def enum_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -59,7 +59,7 @@ def enum_specifier(self, p):
 @glrp.rule('enum-head : enum-key attribute-specifier-seq? enum-head-name enum-base?')
 @cxx98
 def enum_head(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -67,7 +67,7 @@ def enum_head(self, p):
 @glrp.rule('enum-head-name : nested-name-specifier template? "identifier"')
 @cxx98
 def enum_head_name(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -77,14 +77,14 @@ def enum_head_name(self, p):
 )
 @cxx11
 def opaque_enum_declaration_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('enum-key : "enum"')
 @cxx98
 def enum_key(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -92,21 +92,21 @@ def enum_key(self, p):
 @glrp.rule('enum-key : "enum" "struct"')
 @cxx11
 def enum_key_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('enum-base? : [prec:right,1]')
 @cxx98
 def enum_base_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('enum-base? : [prec:left,1]":" type-specifier-seq')
 @cxx11
 def enum_base_opt_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -114,7 +114,7 @@ def enum_base_opt_cxx11(self, p):
 @glrp.rule('enumerator-list : enumerator-list "," enumerator-definition')
 @cxx98
 def enumerator_list(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -123,7 +123,7 @@ def enumerator_list(self, p):
 @glrp.rule('enumerator-list? : ')
 @cxx98
 def enumerator_list_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -131,17 +131,17 @@ def enumerator_list_opt(self, p):
 @glrp.rule('enumerator-definition : enumerator "=" constant-expression')
 @cxx98
 def enumerator_definition(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('enumerator : identifier attribute-specifier-seq?')
 @cxx98
 def enumerator(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Any
     from ...parser import CxxParser

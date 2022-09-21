@@ -15,9 +15,10 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('export-declaration[prec:right,1] : [prec:right,1]"export" module-import-declaration')
 @cxx20
 def export_declaration_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from ...parser import CxxParser

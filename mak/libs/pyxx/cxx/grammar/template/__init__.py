@@ -36,7 +36,7 @@ from . import guide
 @glrp.rule('template-declaration : begin-decl-other attribute-specifier-seq? "extern"? template-head declaration')
 @cxx98
 def template_declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -45,21 +45,21 @@ def template_declaration(self, p):
 )
 @cxx20
 def template_declaration_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('template-head : "template" [action:begin_template_list]"<" template-parameter-list "%>"')
 @cxx98
 def template_head(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('template-head : "template" [action:begin_template_list]"<" template-parameter-list "%>" requires-clause')
 @cxx20
 def template_head_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -67,14 +67,14 @@ def template_head_cxx20(self, p):
 @glrp.rule('template-parameter-list : template-parameter-list "," template-parameter')
 @cxx98
 def template_parameter_list(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('requires-clause : "requires" constraint-logical-or-expression')
 @cxx20
 def requires_clause_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -82,7 +82,7 @@ def requires_clause_cxx20(self, p):
 @glrp.rule('requires-clause? : requires-clause')
 @cxx20
 def requires_clause_opt_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -90,7 +90,7 @@ def requires_clause_opt_cxx20(self, p):
 @glrp.rule('constraint-logical-or-expression : constraint-logical-or-expression "||" constraint-logical-and-expression')
 @cxx20
 def constraint_logical_or_expression_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -100,7 +100,7 @@ def constraint_logical_or_expression_cxx20(self, p):
 )
 @cxx20
 def constraint_logical_and_expression_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -119,7 +119,7 @@ def constraint_logical_and_expression_cxx20(self, p):
 @glrp.rule('constraint-primary-expression : "user-defined-string-literal"')
 @cxx20
 def constraint_primary_expression_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -127,7 +127,7 @@ def constraint_primary_expression_cxx20(self, p):
 @glrp.rule('constraint-id-expression : constraint-qualified-id')
 @cxx20
 def constraint_id_expression_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -135,14 +135,14 @@ def constraint_id_expression_cxx20(self, p):
 @glrp.rule('constraint-unqualified-id : template-id')
 @cxx20
 def constraint_unqualified_id_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('constraint-qualified-id : nested-name-specifier "template"? constraint-unqualified-id')
 @cxx20
 def constraint_qualified_id_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -150,9 +150,10 @@ def constraint_qualified_id_cxx20(self, p):
 @glrp.rule('identifier? : ')
 @cxx98
 def identifier_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from ...parser import CxxParser

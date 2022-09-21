@@ -29,7 +29,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('template-parameter : parameter-declaration')
 @cxx98
 def template_parameter(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -43,7 +43,7 @@ def template_parameter(self, p):
 @glrp.rule('type-parameter : attribute-specifier-seq? template-head type-parameter-key "identifier"? "=" id-expression')
 @cxx98
 def type_parameter(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     # TODO: attribute-specifier-seq? not allowed
     pass
 
@@ -54,7 +54,7 @@ def type_parameter(self, p):
 @glrp.rule('type-parameter : attribute-specifier-seq? template-head type-parameter-key "..." "identifier"?')
 @cxx11
 def type_parameter_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     # TODO: attribute-specifier-seq? not allowed
     pass
 
@@ -67,7 +67,7 @@ def type_parameter_cxx11(self, p):
 @glrp.rule('type-parameter : attribute-specifier-seq? type-constraint "identifier"? "=" type-id')
 @cxx20
 def type_parameter_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     # TODO: attribute-specifier-seq? not allowed
     pass
 
@@ -76,14 +76,14 @@ def type_parameter_cxx20(self, p):
 @glrp.rule('type-parameter-key : "typename"')
 @cxx98
 def type_parameter_key(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('begin-type-parameter : [split:type_parameter]')
 @cxx98
 def begin_type_parameter(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -96,24 +96,24 @@ def begin_type_parameter(self, p):
 )
 @cxx20
 def type_constraint_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.merge('type-constraint')
 @cxx20_merge
 def ambiguous_type_constraint(self, template_name, concept_name):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
 @glrp.merge('template-parameter')
 @cxx98_merge
 def ambiguous_template_parameter(self, ambiguous_parameter_declaration, type_parameter):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, List
     from ...parser import CxxParser

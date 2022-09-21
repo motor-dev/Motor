@@ -19,14 +19,14 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('assignment-expression : logical-or-expression assignment-operator initializer-clause')
 @cxx98
 def assignment_expression(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('assignment-expression : yield-expression')
 @cxx20
 def assignment_expression_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -36,14 +36,14 @@ def assignment_expression_cxx20(self, p):
 @glrp.rule('assignment-expression? : logical-or-expression assignment-operator initializer-clause')
 @cxx98
 def assignment_expression_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('assignment-expression? : yield-expression')
 @cxx20
 def assignment_expression_opt_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -60,9 +60,10 @@ def assignment_expression_opt_cxx20(self, p):
 @glrp.rule('assignment-operator : "|="')
 @cxx98
 def assignment_operator(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from ....parser import CxxParser

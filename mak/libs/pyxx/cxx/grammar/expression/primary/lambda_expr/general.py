@@ -31,7 +31,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('lambda-expression : lambda-introducer attribute-specifier-seq? lambda-declarator compound-statement')
 @cxx11
 def lambda_expression_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -40,14 +40,14 @@ def lambda_expression_cxx11(self, p):
 )
 @cxx20
 def lambda_expression_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('lambda-introducer : "[" lambda-capture? "]"')
 @cxx11
 def lambda_introducer_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -61,7 +61,7 @@ def lambda_introducer_cxx11(self, p):
 )
 @cxx11
 def lambda_declarator_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -70,35 +70,35 @@ def lambda_declarator_cxx11(self, p):
 )
 @cxx20
 def lambda_declarator_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('lambda-specifier : "mutable"')
 @cxx11
 def lambda_specifier_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('lambda-specifier : "constexpr"')
 @cxx17
 def lambda_specifier_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('lambda-specifier : "consteval"')
 @cxx20
 def lambda_specifier_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('lambda-specifier : "static"')
 @cxx23
 def lambda_specifier_cxx23(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -106,7 +106,7 @@ def lambda_specifier_cxx23(self, p):
 @glrp.rule('lambda-specifier-seq : lambda-specifier lambda-specifier-seq')
 @cxx11
 def lambda_specifier_seq_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -114,9 +114,10 @@ def lambda_specifier_seq_cxx11(self, p):
 @glrp.rule('lambda-specifier-seq? : lambda-specifier-seq')
 @cxx11
 def lambda_specifier_seq_opt_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from .....parser import CxxParser

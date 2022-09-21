@@ -34,7 +34,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('namespace-name : namespace-alias')
 @cxx98
 def namespace_name(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -42,14 +42,14 @@ def namespace_name(self, p):
 @glrp.rule('namespace-definition : unnamed-namespace-definition')
 @cxx98
 def namespace_definition(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('namespace-definition : nested-namespace-definition')
 @cxx17
 def namespace_definition_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -59,7 +59,7 @@ def namespace_definition_cxx17(self, p):
 )
 @cxx98
 def named_namespace_definition(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -69,7 +69,7 @@ def named_namespace_definition(self, p):
 )
 @cxx11
 def named_namespace_definition_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -79,7 +79,7 @@ def named_namespace_definition_cxx11(self, p):
 )
 @cxx98
 def unnamed_namespace_definition(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -89,7 +89,7 @@ def unnamed_namespace_definition(self, p):
 )
 @cxx11
 def unnamed_namespace_definition_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -99,7 +99,7 @@ def unnamed_namespace_definition_cxx11(self, p):
 )
 @cxx17
 def nested_namespace_definition_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -109,7 +109,7 @@ def nested_namespace_definition_cxx17(self, p):
 )
 @cxx20
 def nested_namespace_definition_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -117,31 +117,31 @@ def nested_namespace_definition_cxx20(self, p):
 @glrp.rule('enclosing-namespace-specifier : enclosing-namespace-specifier "::" "identifier"')
 @cxx17
 def enclosing_namespace_specifier_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('enclosing-namespace-specifier : enclosing-namespace-specifier "::" "inline" "identifier"')
 @cxx20
 def enclosing_namespace_specifier_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('namespace-body : declaration-seq?')
 @cxx98
 def namespace_body(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.merge('namespace-name')
 @cxx98_merge
-def ambiguous_namespace_name(self, namespace_name, namespace_alias):
-    # type: (CxxParser, Any, Any) -> Any
+def ambiguous_namespace_name(self, _):
+    # type: (CxxParser, List[Any]) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, List
     from ....parser import CxxParser

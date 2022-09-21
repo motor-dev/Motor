@@ -12,7 +12,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('translation-unit : declaration-seq?')
 @cxx98
 def translation_unit(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -20,9 +20,10 @@ def translation_unit(self, p):
 @glrp.rule('translation-unit : global-module-fragment module-declaration declaration-seq? private-module-fragment?')
 @cxx20
 def translation_unit_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from ...parser import CxxParser

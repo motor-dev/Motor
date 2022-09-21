@@ -180,7 +180,7 @@ class Merge(Operation):
         Operation.__init__(
             self, operation._tokens, context, operation._pop_count, operation._state, operation._own_stack
         )
-        self._operations = {name: operation} # type: Dict[str, Operation]
+        self._operations = {name: [operation]}
         self._action = action
         self._split_context = split_context
 
@@ -190,18 +190,25 @@ class Merge(Operation):
         #print('[%d] merge %s -> %s' % (split_context._index, name, self._action._result))
         #assert name == '_' or name not in self._operations
         operation.discard()
-        self._operations[name] = operation
+        try:
+            self._operations[name].append(operation)
+        except KeyError:
+            self._operations[name] = [operation]
 
     def _run(self):
         # type: () -> Tuple[Context, Optional[Symbol]]
         values = dict(self._action._arguments)
         prods = []
-        for key, operation in self._operations.items():
-            context, symbol = operation.run()
-            assert symbol is not None
-            values[key] = symbol
-            prods.append(symbol)
-        #print('[%d] %s -> %s' % (self._counter, ', '.join(self._operations.keys()), self._action._result))
+        for key, operations in self._operations.items():
+            symbols = []   # type: List[Symbol]
+            values[key] = symbols
+            for operation in operations:
+                context, symbol = operation.run()
+                assert symbol is not None
+                symbols.append(symbol)
+                prods.append(symbol)
+                           #print('[%d] %s -> %s' % (self._counter, ', '.join(self._operations.keys()), self._action._result))
+
         self._action(**values)
         self._result_context._state_stack = context._state_stack[:]
         self._result_context._sym_stack = context._sym_stack[:]

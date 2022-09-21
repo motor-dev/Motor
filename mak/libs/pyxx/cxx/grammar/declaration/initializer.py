@@ -36,7 +36,7 @@ expr-or-braced-init-list:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx20
+from ...parser import cxx98, cxx11, cxx20, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -44,21 +44,21 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('initializer : "(" expression-list ")"')
 @cxx98
 def initializer(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('brace-or-equal-initializer : "=" initializer-clause')
 @cxx98
 def brace_or_equal_initializer(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('brace-or-equal-initializer : braced-init-list')
 @cxx11
 def brace_or_equal_initializer_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -66,7 +66,7 @@ def brace_or_equal_initializer_cxx11(self, p):
 @glrp.rule('initializer-clause : braced-init-list')
 @cxx98
 def initializer_clause(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -74,14 +74,14 @@ def initializer_clause(self, p):
 @glrp.rule('braced-init-list : [prec:nonassoc,1]"{"  "}"')
 @cxx98
 def braced_init_list(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('braced-init-list : [prec:nonassoc,1]"{" designated-initializer-list ","? "}"')
 @cxx20
 def braced_init_list_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -89,7 +89,7 @@ def braced_init_list_cxx20(self, p):
 @glrp.rule('initializer-list : initializer-list "," initializer-clause "..."?')
 @cxx98
 def initializer_list(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -97,35 +97,35 @@ def initializer_list(self, p):
 @glrp.rule('designated-initializer-list : designated-initializer-list "," designated-initializer-clause')
 @cxx20
 def designated_initializer_list_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('designated-initializer-clause : designator brace-or-equal-initializer')
 @cxx20
 def designated_initializer_clause_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('designator : "." "identifier"')
 @cxx20
 def designator_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('expr-or-braced-init-list : expression')
 @cxx98
 def expr_or_braced_init_list(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('expr-or-braced-init-list : braced-init-list')
 @cxx11
 def expr_or_braced_init_list_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -133,14 +133,14 @@ def expr_or_braced_init_list_cxx11(self, p):
 @glrp.rule('expr-or-braced-init-list? : ')
 @cxx98
 def expr_or_braced_init_list_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('expr-or-braced-init-list? : braced-init-list')
 @cxx11
 def expr_or_braced_init_list_opt_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -148,9 +148,17 @@ def expr_or_braced_init_list_opt_cxx11(self, p):
 @glrp.rule('","? : ')
 @cxx98
 def comma_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
+    pass
+
+
+@glrp.merge('initializer-clause')
+@cxx98_merge
+def ambiguous_initializer_clause(self, ambiguous_postfix_expression, id_template):
+    # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any, List
     from ...parser import CxxParser

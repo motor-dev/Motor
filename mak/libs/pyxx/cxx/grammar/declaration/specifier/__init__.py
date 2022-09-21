@@ -33,14 +33,14 @@ from . import type
 @glrp.rule('decl-specifier : "decl-specifier-macro"')
 @cxx98
 def decl_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('decl-specifier : "constexpr"')
 @cxx11
 def decl_specifier_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -48,7 +48,7 @@ def decl_specifier_cxx11(self, p):
 @glrp.rule('decl-specifier : "constinit"')
 @cxx20
 def decl_specifier_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -58,7 +58,15 @@ def decl_specifier_cxx20(self, p):
 )
 @cxx98
 def decl_specifier_seq(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
+    pass
+
+
+@glrp.rule('decl-specifier-seq? : begin-decl-specifier decl-specifier attribute-specifier-seq? decl-specifier-seq?')
+@glrp.rule('decl-specifier-seq? : ')
+@cxx98
+def decl_specifier_seq_opt(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -66,7 +74,14 @@ def decl_specifier_seq(self, p):
 @glrp.rule('decl-specifier-seq-end : [split:decl_specifier_seq_end]')
 @cxx98
 def decl_specifier_seq_continue_end(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
+    pass
+
+
+@glrp.rule('begin-decl-specifier :')
+@cxx98
+def begin_decl_specifier(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 

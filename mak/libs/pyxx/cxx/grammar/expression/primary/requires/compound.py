@@ -13,7 +13,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('compound-requirement : "{" expression "}" "noexcept"? return-type-requirement? ";"')
 @cxx20
 def compound_requirement_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -21,7 +21,7 @@ def compound_requirement_cxx20(self, p):
 @glrp.rule('"noexcept"? : ')
 @cxx20
 def noexcept_opt_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -29,9 +29,10 @@ def noexcept_opt_cxx20(self, p):
 @glrp.rule('return-type-requirement? : ')
 @cxx20
 def return_type_requirement_opt_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from .....parser import CxxParser

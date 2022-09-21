@@ -17,7 +17,7 @@ from motor_typing import TYPE_CHECKING
 )
 @cxx17
 def deduction_guide_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 

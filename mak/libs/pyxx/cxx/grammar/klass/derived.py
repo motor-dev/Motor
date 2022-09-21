@@ -31,7 +31,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('base-clause? : ')
 @cxx98
 def base_clause_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -39,7 +39,7 @@ def base_clause_opt(self, p):
 @glrp.rule('base-specifier-list : base-specifier-list "," base-specifier "..."?')
 @cxx98
 def base_specifier_list(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -48,7 +48,7 @@ def base_specifier_list(self, p):
 @glrp.rule('base-specifier : attribute-specifier-seq? access-specifier virtual? class-or-decltype')
 @cxx98
 def base_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -58,14 +58,14 @@ def base_specifier(self, p):
 #@glrp.rule('class-or-decltype : nested-name-specifier template? simple-template-id')
 @cxx98
 def class_or_decltype(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('class-or-decltype : decltype-specifier')
 @cxx11
 def class_or_decltype_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -75,7 +75,7 @@ def class_or_decltype_cxx11(self, p):
 @glrp.rule('access-specifier : "access-specifier-macro"')
 @cxx98
 def access_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -86,7 +86,7 @@ def access_specifier(self, p):
 @glrp.rule('access-specifier? : ')
 @cxx98
 def access_specifier_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -94,10 +94,10 @@ def access_specifier_opt(self, p):
 @glrp.rule('virtual? : ')
 @cxx98
 def virtual_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Any
     from ...parser import CxxParser

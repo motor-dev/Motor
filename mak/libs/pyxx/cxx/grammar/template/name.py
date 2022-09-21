@@ -33,7 +33,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('template? : ')
 @cxx98
 def template_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -42,29 +42,33 @@ def template_opt(self, p):
 )
 @cxx98
 def simple_template_id(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
-@glrp.rule('template-id[prec:right,1] : simple-template-id')
-@glrp.rule('template-id : operator-function-id [action:begin_template_list]"<" template-argument-list? "%>"')
+@glrp.rule('template-id[prec:right,1][split:unqualified_id_template] : simple-template-id')
+@glrp.rule(
+    'template-id : operator-function-id [split:id_template][action:begin_template_list]"<" template-argument-list? "%>"'
+)
 @cxx98
 def template_id(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
-@glrp.rule('template-id : literal-operator-id [action:begin_template_list]"<" template-argument-list? "%>"')
+@glrp.rule(
+    'template-id : literal-operator-id [split:id_template][action:begin_template_list]"<" template-argument-list? "%>"'
+)
 @cxx11
 def template_id_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('template-name[prec:right,1] : "identifier"')
 @cxx98
 def template_name(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -73,7 +77,7 @@ def template_name(self, p):
 @glrp.rule('template-argument-list? : ')
 @cxx98
 def template_argument_list_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -81,7 +85,7 @@ def template_argument_list_opt(self, p):
 @glrp.rule('template-argument-list? : template-argument-list "," template-argument "..."')
 @cxx11
 def template_argument_list_opt_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -89,7 +93,7 @@ def template_argument_list_opt_cxx11(self, p):
 @glrp.rule('template-argument-list : template-argument-list "," template-argument')
 @cxx98
 def template_argument_list(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -97,7 +101,7 @@ def template_argument_list(self, p):
 @glrp.rule('template-argument-list : template-argument-list "," template-argument "..."')
 @cxx11
 def template_argument_list_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -106,7 +110,7 @@ def template_argument_list_cxx11(self, p):
 #@glrp.rule('template-argument : id-expression')
 @cxx98
 def template_argument(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -117,14 +121,14 @@ def template_argument(self, p):
 )
 @cxx98
 def typename_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('typename-disambiguation :')
 @cxx98
 def typename_disambiguation(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -132,17 +136,17 @@ def typename_disambiguation(self, p):
 @glrp.rule('begin-template-argument-type[split:template_argument_type] :')
 @cxx98
 def begin_template_argument(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.merge('template-argument')
 @cxx98_merge
 def ambiguous_template_argument(self, template_argument_constant, template_argument_type):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, List
     from ...parser import CxxParser

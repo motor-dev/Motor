@@ -18,7 +18,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('operator-function-id : "operator" overloadable-operator')
 @cxx98
 def operator_function_id(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -66,7 +66,7 @@ def operator_function_id(self, p):
 @glrp.rule('overloadable-operator : ","')
 @cxx98
 def overloadable_operator(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -74,9 +74,10 @@ def overloadable_operator(self, p):
 @glrp.rule('overloadable-operator : "<=>"')
 @cxx20
 def overloadable_operator_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from ...parser import CxxParser
