@@ -52,7 +52,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('simple-type-specifier : "void"')
 @cxx98
 def simple_type_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -62,14 +62,14 @@ def simple_type_specifier(self, p):
 @glrp.rule('simple-type-specifier : "char32_t"')
 @cxx11
 def simple_type_specifier_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('simple-type-specifier : "char8_t"')
 @cxx20
 def simple_type_specifier_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -78,24 +78,24 @@ def simple_type_specifier_cxx20(self, p):
 @glrp.rule('type-name : typedef-name')
 @cxx98
 def type_name(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.merge('type-name')
 @cxx98_merge
 def ambiguous_type_name(self, _):
-    # type: (CxxParser, Any) -> Any
+    # type: (CxxParser, List[Any]) -> Any
     pass
 
 
 @glrp.merge('simple-type-specifier')
 @cxx98_merge
 def ambiguous_simple_type_specifier(self, ambiguous_type_name, _):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, List
     from .....parser import CxxParser

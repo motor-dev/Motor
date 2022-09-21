@@ -23,14 +23,14 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('parameter-declaration-clause : parameter-declaration-list "," variadic-parameter-list')
 @cxx98
 def parameter_declaration_clause(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('variadic-parameter-list : "..."')
 @cxx98
 def variadic_parameter_list(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -38,7 +38,7 @@ def variadic_parameter_list(self, p):
 @glrp.rule('variadic-parameter-list? :')
 @cxx98
 def variadic_parameter_list_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -46,7 +46,7 @@ def variadic_parameter_list_opt(self, p):
 @glrp.rule('parameter-declaration-list : parameter-declaration-list "," parameter-declaration')
 @cxx98
 def parameter_declaration_list(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -55,7 +55,7 @@ def parameter_declaration_list(self, p):
 @glrp.rule('parameter-declaration-list? : ')
 @cxx98
 def parameter_declaration_list_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -82,7 +82,7 @@ def parameter_declaration_list_opt(self, p):
 )
 @cxx98
 def parameter_declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -91,7 +91,7 @@ def parameter_declaration(self, p):
 @glrp.rule('begin-parameter-declaration-abstract-declarator : [split:parameter_declaration_abstract_declarator]')
 @cxx98
 def begin_parameter_declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -99,21 +99,21 @@ def begin_parameter_declaration(self, p):
 @glrp.rule('"..."? : ')
 @cxx98
 def ellipsis_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.merge('parameter-declaration-declarator')
 @cxx98_merge
 def ambiguous_parameter_declaration_declarator(self, decl_specifier_seq_end, decl_specifier_seq_continue):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
 @glrp.merge('parameter-declaration-abstract-declarator')
 @cxx98_merge
 def ambiguous_parameter_declaration_abstract_declarator(self, decl_specifier_seq_end, decl_specifier_seq_continue):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
@@ -123,10 +123,10 @@ def ambiguous_parameter_declaration(
     self, parameter_declaration_declarator, parameter_declaration_no_declarator,
     parameter_declaration_abstract_declarator
 ):
-    # type: (CxxParser, Any, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any], List[Any]) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, List
     from ....parser import CxxParser

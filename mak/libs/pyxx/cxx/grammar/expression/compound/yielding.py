@@ -13,9 +13,10 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('yield-expression : "co_yield" braced-init-list')
 @cxx20
 def yield_expression_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from ....parser import CxxParser

@@ -17,7 +17,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('namespace-alias[prec:right,1] : "identifier"')
 @cxx98
 def namespace_alias(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -27,7 +27,7 @@ def namespace_alias(self, p):
 )
 @cxx98
 def namespace_alias_definition(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -35,9 +35,10 @@ def namespace_alias_definition(self, p):
 @glrp.rule('qualified-namespace-specifier : nested-name-specifier template? namespace-name')
 @cxx98
 def qualified_namespace_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from ....parser import CxxParser

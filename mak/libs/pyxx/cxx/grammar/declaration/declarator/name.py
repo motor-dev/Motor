@@ -42,7 +42,7 @@ from motor_typing import TYPE_CHECKING
 )
 @cxx98
 def type_id(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -54,14 +54,14 @@ def type_id(self, p):
 )
 @cxx98
 def defining_type_id(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('abstract-declarator : begin-ptr-abstract-declarator ptr-abstract-declarator')
 @cxx98
 def abstract_declarator_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -72,7 +72,7 @@ def abstract_declarator_opt(self, p):
 @glrp.rule('abstract-declarator : begin-ptr-abstract-declarator abstract-pack-declarator')
 @cxx11
 def abstract_declarator_opt_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -80,7 +80,7 @@ def abstract_declarator_opt_cxx11(self, p):
 @glrp.rule('ptr-abstract-declarator : ptr-operator ptr-abstract-declarator?')
 @cxx98
 def ptr_abstract_declarator(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -89,7 +89,7 @@ def ptr_abstract_declarator(self, p):
 @glrp.rule('ptr-abstract-declarator? : [split:end_declarator_list]')
 @cxx98
 def ptr_abstract_declarator_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -105,7 +105,7 @@ def ptr_abstract_declarator_opt(self, p):
 @glrp.rule('noptr-abstract-declarator? : ')
 @cxx98
 def noptr_abstract_declarator(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -113,7 +113,7 @@ def noptr_abstract_declarator(self, p):
 @glrp.rule('abstract-pack-declarator : ptr-operator abstract-pack-declarator')
 @cxx11
 def abstract_pack_declarator(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -124,7 +124,7 @@ def abstract_pack_declarator(self, p):
 @glrp.rule('noptr-abstract-pack-declarator : [prec:left,0]"..."')
 @cxx11
 def noptr_abstract_pack_declarator(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -132,7 +132,7 @@ def noptr_abstract_pack_declarator(self, p):
 @glrp.rule('begin-parameters-and-qualifiers : [split:parameters_and_qualifiers]')
 @cxx98
 def begin_abstract_declarator(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -141,52 +141,52 @@ def begin_abstract_declarator(self, p):
 @glrp.rule('begin-type-id-abstract-declarator : [split:type_id_abstract_declarator]')
 @cxx98
 def begin_type_id(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.merge('abstract-declarator')
 @cxx98_merge
 def ambiguous_abstract_declarator(self, ptr_abstract_declarator, parameters_and_qualifiers):
-    # type: (CxxParser, Any, Any) -> None
+    # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 
 
 @glrp.merge('noptr-abstract-declarator')
 @cxx98_merge
 def ambiguous_noptr_abstract_declarator(self, ptr_declarator, parameter_declaration_clause):
-    # type: (CxxParser, Any, Any) -> None
+    # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 
 
 @glrp.merge('type-id-declarator')
 @cxx98_merge
 def ambiguous_type_id_declarator(self, type_specifier_seq_end, type_specifier_seq_continue):
-    # type: (CxxParser, Any, Any) -> None
+    # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 
 
 @glrp.merge('type-id')
 @cxx98_merge
 def ambiguous_type_id(self, type_id_abstract_declarator, type_id_no_declarator):
-    # type: (CxxParser, Any, Any) -> None
+    # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 
 
 @glrp.merge('defining-type-id-declarator')
 @cxx98_merge
 def ambiguous_defining_type_id_declarator(self, defining_type_specifier_seq_end, defining_type_specifier_seq_continue):
-    # type: (CxxParser, Any, Any) -> None
+    # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 
 
 @glrp.merge('defining-type-id')
 @cxx98_merge
 def ambiguous_defining_type_id(self, type_id_abstract_declarator, type_id_no_declarator):
-    # type: (CxxParser, Any, Any) -> None
+    # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, List
     from ....parser import CxxParser

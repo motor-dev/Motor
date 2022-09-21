@@ -23,14 +23,14 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('iteration-statement : "for" "(" for-range ")" statement')
 @cxx98
 def iteration_statement(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('for-range : begin-init-statement init-statement condition? ";" expression?')
 @cxx98
 def for_range(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -48,7 +48,7 @@ def for_range(self, p):
 )
 @cxx11
 def for_range_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -60,14 +60,14 @@ def for_range_cxx11(self, p):
 )
 @cxx11
 def for_range_declaration_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('for-range-initializer : expr-or-braced-init-list')
 @cxx11
 def for_range_initializer_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -75,7 +75,7 @@ def for_range_initializer_cxx11(self, p):
 @glrp.rule('begin-for-range-declaration-no-declarator : [split:for_range_declaration_no_declarator]')
 @cxx11
 def begin_for_range_declaration_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -84,17 +84,17 @@ def begin_for_range_declaration_cxx11(self, p):
 def ambiguous_for_range(
     self, init_statement, for_range_declaration_declarator, for_range_declaration_no_declarator, ambiguous_condition_opt
 ):
-    # type: (CxxParser, Any, Any, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any]) -> Any
     pass
 
 
 @glrp.merge('for-range-declaration-declarator')
 @cxx98_merge
 def ambiguous_for_range_declaration_declarator(self, decl_specifier_seq_end, decl_specifier_seq_continue):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, List
     from ...parser import CxxParser

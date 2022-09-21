@@ -26,21 +26,21 @@ from . import private_fragment
 @glrp.rule('module-declaration : "export" "module" module-name module-partition? attribute-specifier-seq? ";"')
 @cxx20
 def module_declaration_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('module-name : module-name-qualifier? "identifier"')
 @cxx20
 def module_name_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('module-partition : ":" module-name-qualifier? "identifier"')
 @cxx20
 def module_partition_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -48,7 +48,7 @@ def module_partition_cxx20(self, p):
 @glrp.rule('module-partition? : ')
 @cxx20
 def module_partition_opt_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -56,9 +56,10 @@ def module_partition_opt_cxx20(self, p):
 @glrp.rule('module-name-qualifier? : ')
 @cxx20
 def module_name_qualifier_opt_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from ...parser import CxxParser

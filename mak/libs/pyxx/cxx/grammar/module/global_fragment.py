@@ -12,9 +12,10 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('global-module-fragment : "module" ";" declaration-seq')
 @cxx20
 def global_module_fragment_opt_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from ...parser import CxxParser

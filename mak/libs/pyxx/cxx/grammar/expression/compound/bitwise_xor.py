@@ -13,9 +13,10 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('exclusive-or-expression : exclusive-or-expression "^" and-expression')
 @cxx98
 def exclusive_or_expression(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from ....parser import CxxParser

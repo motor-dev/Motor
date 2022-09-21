@@ -17,14 +17,14 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('storage-class-specifier : "storage-class-specifier-macro"')
 @cxx98
 def storage_class_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('storage-class-specifier : "thread_local"')
 @cxx11
 def storage_class_specifier_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -32,7 +32,7 @@ def storage_class_specifier_cxx11(self, p):
 @cxx98
 @deprecated_cxx11
 def storage_class_specifier_until_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -40,9 +40,10 @@ def storage_class_specifier_until_cxx11(self, p):
 @cxx98
 @deprecated_cxx17
 def storage_class_specifier_until_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from ....parser import CxxParser

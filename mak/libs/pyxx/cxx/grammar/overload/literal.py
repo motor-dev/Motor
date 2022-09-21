@@ -13,9 +13,10 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('literal-operator-id : "operator" user-defined-string-literal')
 @cxx11
 def literal_operator_id_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from ...parser import CxxParser

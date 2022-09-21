@@ -12,14 +12,14 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('placeholder-type-specifier : "auto"')
 @cxx11
 def placeholder_type_specifier_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('placeholder-type-specifier : "decltype" "(" "auto" ")"')
 @cxx14
 def placeholder_type_specifier_cxx14(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -27,9 +27,10 @@ def placeholder_type_specifier_cxx14(self, p):
 @glrp.rule('placeholder-type-specifier : type-constraint "decltype" "(" "auto" ")"')
 @cxx20
 def placeholder_type_specifier_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from .....parser import CxxParser

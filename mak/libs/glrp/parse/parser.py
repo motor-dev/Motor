@@ -171,7 +171,7 @@ class Parser(object):
         rules = [(r[0], r[1], r[2](self), _merge_dict(r[3])) for r in self._grammar._rules]
 
         for token in self._lexer.input(filename):
-            #print(len(contexts))
+            print(self._grammar._name_map[token._id], len(contexts))
             operations = [context.input(token) for context in contexts]
             next_contexts = []         # type: List[Operation]
             merges = {}                # type: Dict[Tuple[SplitContext, int, int, Callable[[], None]], Merge]
@@ -264,8 +264,8 @@ class Parser(object):
                     for reduce_op, name in ops:
                         print('\u250f %s\n\u2503 %s' % (name, '\u2501' * len(name)))
                         production = reduce_op.run()[1]
-                        assert production is not None
-                        production.debug_print(self._grammar._name_map, '\u2503 ', '\u2503 ')
+                        #assert production is not None
+                        #production.debug_print(self._grammar._name_map, '\u2503 ', '\u2503 ')
                         print('\u2517')
 
             if len(next_contexts) == 0:
@@ -293,7 +293,7 @@ class Parser(object):
                     symbol = rule[0]
                     production = Production(symbol, 0, 0, context._sym_stack, rule[2])
                     production.run()
-                    #production.debug_print(self._grammar._name_map)
+                    production.debug_print(self._grammar._name_map)
         #        #return production.value
         #else:
         #    raise SyntaxError('unexpected end of file')

@@ -34,7 +34,7 @@ from . import placeholder
 @glrp.rule('type-specifier : cv-qualifier')
 @cxx98
 def type_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -44,7 +44,7 @@ def type_specifier(self, p):
 )
 @cxx98
 def type_specifier_seq(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -53,7 +53,7 @@ def type_specifier_seq(self, p):
 @glrp.rule('defining-type-specifier : enum-specifier')
 @cxx98
 def defining_type_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -65,23 +65,24 @@ def defining_type_specifier(self, p):
 )
 @cxx98
 def defining_type_specifier_seq(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('type-specifier-seq-continue : [split:type_specifier_seq_continue]')
 @cxx98
 def type_specifier_seq_continue(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('defining-type-specifier-seq-continue : [split:defining_type_specifier_seq_continue]')
 @cxx98
 def defining_type_specifier_seq_continue(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from .....parser import CxxParser

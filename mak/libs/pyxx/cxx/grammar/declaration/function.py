@@ -29,7 +29,7 @@ from motor_typing import TYPE_CHECKING
 )
 @cxx98
 def function_definition(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -41,7 +41,7 @@ def function_definition(self, p):
 )
 @cxx20
 def function_definition_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -50,7 +50,7 @@ def function_definition_cxx20(self, p):
 @glrp.rule('function-body : function-try-block')
 @cxx98
 def function_body(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -58,7 +58,7 @@ def function_body(self, p):
 @glrp.rule('function-body : "=" "delete" ";"')
 @cxx11
 def function_body_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -66,24 +66,24 @@ def function_body_cxx11(self, p):
 @glrp.rule('begin-function-definition-declspec : [split:function_definition_declspec]')
 @cxx98
 def begin_function_definition(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.merge('function-definition')
 @cxx98_merge
 def ambiguous_function_definition(self, function_definition_declspec, function_definition_nodeclspec):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
 @glrp.merge('function-definition')
 @cxx98_merge
 def ambiguous_function_definition_2(self, decl_specifier_seq_end, decl_specifier_seq_continue):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, List
     from ...parser import CxxParser

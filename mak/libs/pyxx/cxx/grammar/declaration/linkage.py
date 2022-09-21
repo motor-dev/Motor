@@ -16,9 +16,10 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('linkage-specification : begin-decl-other attribute-specifier-seq? "extern" "string-literal" declaration')
 @cxx98
 def linkage_specification(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from ...parser import CxxParser

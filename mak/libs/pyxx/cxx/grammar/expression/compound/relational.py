@@ -19,9 +19,10 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('relational-expression : relational-expression ">=" compare-expression')
 @cxx98
 def relational_expression(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from ....parser import CxxParser

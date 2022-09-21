@@ -29,7 +29,7 @@ from motor_typing import TYPE_CHECKING
 @cxx98
 @deprecated_cxx17
 def using_declaration_until_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -37,7 +37,7 @@ def using_declaration_until_cxx17(self, p):
 @glrp.rule('using-declaration : begin-decl-other attribute-specifier-seq? "using" using-declarator-list ";"')
 @cxx17
 def using_declaration_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -45,14 +45,14 @@ def using_declaration_cxx17(self, p):
 @glrp.rule('using-declarator-list : using-declarator-list "," using-declarator "..."?')
 @cxx17
 def using_declarator_list_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('using-declarator : "typename"? nested-name-specifier template? unqualified-id')
 @cxx17
 def using_declarator_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -60,9 +60,10 @@ def using_declarator_cxx17(self, p):
 @glrp.rule('"typename"? :')
 @cxx98
 def typename_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from ...parser import CxxParser

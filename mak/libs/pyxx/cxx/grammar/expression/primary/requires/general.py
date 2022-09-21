@@ -27,14 +27,14 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('requires-expression : requires-disambiguation requires requirement-parameter-list? requirement-body')
 @cxx20
 def requires_expression_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('requires-disambiguation : ')
 @cxx20
 def requires_disambiguation_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -42,14 +42,14 @@ def requires_disambiguation_cxx20(self, p):
 @glrp.rule('requirement-parameter-list? : ')
 @cxx20
 def requires_parameter_list_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('requirement-body : "{" requirement-seq "}"')
 @cxx20
 def requirement_body_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -57,7 +57,7 @@ def requirement_body_cxx20(self, p):
 @glrp.rule('requirement-seq : requirement-seq requirement')
 @cxx20
 def requirement_seq_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -67,17 +67,17 @@ def requirement_seq_cxx20(self, p):
 @glrp.rule('requirement : nested-requirement')
 @cxx20
 def requirement_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.merge('requirement')
 @cxx20_merge
 def ambiguous_requirement(self, type_id, expression):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, List
     from .....parser import CxxParser

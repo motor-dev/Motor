@@ -23,7 +23,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('elaborated-type-specifier : elaborated-enum-specifier')
 @cxx98
 def elaborated_type_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -32,9 +32,10 @@ def elaborated_type_specifier(self, p):
 @glrp.rule('elaborated-enum-specifier : enum-key attribute-specifier-seq? enum-head-name')
 @cxx98
 def elaborated_enum_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from .....parser import CxxParser

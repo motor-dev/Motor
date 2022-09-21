@@ -76,7 +76,7 @@ from . import attribute
 @glrp.rule('declaration-seq? : ')
 @cxx98
 def declaration_seq_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -84,7 +84,7 @@ def declaration_seq_opt(self, p):
 @glrp.rule('declaration-seq : declaration-seq declaration')
 @cxx98
 def declaration_seq(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -99,21 +99,21 @@ def declaration_seq(self, p):
 @glrp.rule('declaration : empty-declaration')
 @cxx98
 def declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('declaration : attribute-declaration')
 @cxx11
 def declaration_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('declaration : deduction-guide')
 @cxx17
 def declaration_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -121,7 +121,7 @@ def declaration_cxx17(self, p):
 @glrp.rule('declaration[prec:right,0] : module-import-declaration')
 @cxx20
 def declaration_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -133,7 +133,7 @@ def declaration_cxx20(self, p):
 @glrp.rule('block-declaration : alias-declaration')
 @cxx98
 def block_declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -141,14 +141,14 @@ def block_declaration(self, p):
 @glrp.rule('block-declaration : opaque-enum-declaration')
 @cxx11
 def block_declaration_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('block-declaration : using-enum-declaration')
 @cxx20
 def block_declaration_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -157,7 +157,7 @@ def block_declaration_cxx20(self, p):
 )
 @cxx98
 def nodeclspec_function_declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -167,7 +167,7 @@ def nodeclspec_function_declaration(self, p):
 )
 @cxx98
 def alias_declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -184,35 +184,35 @@ def alias_declaration(self, p):
 )
 @cxx98
 def simple_declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('static_assert-declaration : "static_assert" "(" constant-expression "," "string-literal" ")" ";"')
 @cxx11
 def static_assert_declaration_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('static_assert-declaration : "static_assert" "(" constant-expression ")" ";"')
 @cxx17
 def static_assert_declaration_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('empty-declaration : begin-decl-other [prec:left,1]";"')
 @cxx98
 def empty_declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('attribute-declaration : begin-decl-other attribute-specifier-seq? ";"')
 @cxx11
 def attribute_declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -220,7 +220,7 @@ def attribute_declaration(self, p):
 @glrp.rule('identifier-list : identifier-list "," "identifier"')
 @cxx98
 def identifier_list(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -231,35 +231,35 @@ def identifier_list(self, p):
 @glrp.rule('begin-decl-nodeclspec : [split:decl_nodeclspec]')
 @cxx98
 def begin_decl(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('begin-decl-deduction-guide : [split:decl_deduction_guide]')
 @cxx17
 def begin_decl_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.merge('simple-declaration-declarator')
 @cxx98_merge
 def ambiguous_simple_declaration_declarator(self, decl_specifier_seq_end, decl_specifier_seq_continue):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
 @glrp.merge('simple-declaration')
 @cxx98_merge
 def ambiguous_simple_declaration(self, simple_declaration, simple_declaration_declarator):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
 @glrp.merge('block-declaration')
 @cxx98_merge
 def ambiguous_block_declaration(self, decl_other, ambiguous_simple_declaration):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
@@ -269,17 +269,17 @@ def ambiguous_declaration(
     self, decl_deduction_guide, ambiguous_block_declaration, ambiguous_function_definition,
     nodeclspec_function_declaration, decl_other
 ):
-    # type: (CxxParser, Any, Any, Any, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any], List[Any]) -> Any
     pass
 
 
 @glrp.merge('simple-declaration-declarator')
 @cxx98_merge
 def ambiguous_simple_declaration_2(self, declarator_initializer, ambiguous_init_declarator):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, List
     from ...parser import CxxParser

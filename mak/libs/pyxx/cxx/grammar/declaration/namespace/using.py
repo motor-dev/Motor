@@ -14,10 +14,10 @@ from motor_typing import TYPE_CHECKING
 )
 @cxx98
 def using_directive(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Any
     from ....parser import CxxParser

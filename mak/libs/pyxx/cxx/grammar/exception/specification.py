@@ -28,7 +28,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('exception-specification? : ')
 @cxx98
 def exception_specification_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -36,14 +36,14 @@ def exception_specification_opt(self, p):
 @cxx98
 @deprecated_cxx20
 def exception_specification_opt_until_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('exception-specification? : noexcept-specification')
 @cxx11
 def exception_specification_opt_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -51,7 +51,7 @@ def exception_specification_opt_cxx11(self, p):
 @cxx98
 @deprecated_cxx17
 def dynamic_exception_specification_until_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -59,7 +59,7 @@ def dynamic_exception_specification_until_cxx17(self, p):
 @cxx98
 @deprecated_cxx20
 def dynamic_exception_specification_until_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -68,7 +68,7 @@ def dynamic_exception_specification_until_cxx20(self, p):
 @cxx98
 @deprecated_cxx17
 def type_id_list_until_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -76,7 +76,7 @@ def type_id_list_until_cxx17(self, p):
 @glrp.rule('noexcept-specification : "noexcept" ')
 @cxx11
 def noexcept_specifier_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -84,9 +84,10 @@ def noexcept_specifier_cxx11(self, p):
 @glrp.rule('noexcept-specification? :')
 @cxx11
 def noexcept_specifier_opt_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from ...parser import CxxParser

@@ -17,7 +17,7 @@ from motor_typing import TYPE_CHECKING
 )
 @cxx98
 def explicit_specialization(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     # TODO: extern? not allowed
     # TODO: attribute-specifier-seq? not allowed
     pass
@@ -27,7 +27,7 @@ def explicit_specialization(self, p):
 @glrp.rule('explicit-instantiation : begin-decl-other attribute-specifier-seq? "extern"? "template" declaration')
 @cxx98
 def explicit_instantiation(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     # TODO: attribute-specifier-seq? not allowed
     pass
 
@@ -36,9 +36,10 @@ def explicit_instantiation(self, p):
 @glrp.rule('"extern"? : ')
 @cxx98
 def extern_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 if TYPE_CHECKING:
+    from typing import Any
     from ...parser import CxxParser

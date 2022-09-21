@@ -29,14 +29,14 @@ from . import requires
 @glrp.rule('primary-expression[prec:right,1] : id-expression')
 @cxx98
 def primary_expression(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('primary-expression-proxy : "(" begin-expression expression ")"')
 @cxx98
 def primary_expression_proxy(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -47,31 +47,31 @@ def primary_expression_proxy(self, p):
 @glrp.rule('primary-expression : lambda-expression')
 @cxx11
 def primary_expression_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('primary-expression-proxy : fold-expression')
 @cxx17
 def primary_expression_proxy_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('primary-expression : requires-expression')
 @cxx20
 def primary_expression_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.merge('primary-expression-proxy')
 @cxx98_merge
 def ambiguous_primary_expression(self, expression, fold_expression):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, List
     from ....parser import CxxParser

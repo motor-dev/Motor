@@ -48,7 +48,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('member-specification? : ')
 @cxx98
 def member_specification_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -67,7 +67,7 @@ def member_specification_opt(self, p):
 @glrp.rule('member-declaration : empty-declaration')
 @cxx98
 def member_declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -75,21 +75,21 @@ def member_declaration(self, p):
 @glrp.rule('member-declaration : opaque-enum-declaration')
 @cxx11
 def member_declaration_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('member-declaration : deduction-guide')
 @cxx17
 def member_declaration_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('member-declaration : using-enum-declaration')
 @cxx20
 def member_declaration_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -97,7 +97,7 @@ def member_declaration_cxx20(self, p):
 @glrp.rule('member-declarator-list : member-declarator-list "," member-declarator')
 @cxx98
 def member_declarator_list(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -113,21 +113,21 @@ def member_declarator_list(self, p):
 )
 @cxx98
 def member_declarator(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('bitfield-name : identifier')
 @cxx98
 def bitfield_name(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('member-declarator : declarator requires-clause')
 @cxx20
 def member_declarator_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -135,14 +135,14 @@ def member_declarator_cxx20(self, p):
 @glrp.rule('virt-specifier-seq : virt-specifier')
 @cxx98
 def virt_specifier_seq(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.rule('virt-specifier : "virt-specifier-macro"')
 @cxx98
 def virt_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
@@ -150,7 +150,7 @@ def virt_specifier(self, p):
 @glrp.rule('virt-specifier : "final"')
 @cxx11
 def virt_specifier_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     # TODO: accept macro_virt_specifier
     pass
 
@@ -158,14 +158,14 @@ def virt_specifier_cxx11(self, p):
 @glrp.rule('pure-specifier : "=" "integer-literal"[split:pure_specifier]')
 @cxx98
 def pure_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> None
+    # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
 @glrp.merge('member-declarator')
 @cxx98_merge
 def ambiguous_member_declarator(self, pure_specifier, initializer):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
@@ -175,17 +175,17 @@ def ambiguous_member_declaration(
     self, decl_deduction_guide, ambiguous_function_definition, decl_nodeclspec, simple_declaration,
     simple_declaration_declarator, decl_other
 ):
-    # type: (CxxParser, Any, Any, Any, Any, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any], List[Any], List[Any]) -> Any
     pass
 
 
 @glrp.merge('member-declaration-declarator')
 @cxx98_merge
 def ambiguous_member_declaration_declarator(self, decl_specifier_seq_end, decl_specifier_seq_continue):
-    # type: (CxxParser, Any, Any) -> Any
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, List
     from ...parser import CxxParser
