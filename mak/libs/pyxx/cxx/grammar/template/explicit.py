@@ -13,7 +13,7 @@ from motor_typing import TYPE_CHECKING
 
 # amendment: @glrp.rule('explicit-specialization : "template" "<" ">" declaration')
 @glrp.rule(
-    'explicit-specialization : begin-decl-other attribute-specifier-seq? "extern"? "template" [action:begin_template_list]"<" "%>" declaration'
+    'explicit-specialization : attribute-specifier-seq? begin-declaration "extern"? "template" [action:begin_template_list]"<" "%>" declaration'
 )
 @cxx98
 def explicit_specialization(self, p):
@@ -24,7 +24,7 @@ def explicit_specialization(self, p):
 
 
 # amendment: @glrp.rule('explicit-instantiation : "extern"? "template" declaration')
-@glrp.rule('explicit-instantiation : begin-decl-other attribute-specifier-seq? "extern"? "template" declaration')
+@glrp.rule('explicit-instantiation : attribute-specifier-seq? begin-declaration "extern"? "template" declaration')
 @cxx98
 def explicit_instantiation(self, p):
     # type: (CxxParser, glrp.Production) -> Any

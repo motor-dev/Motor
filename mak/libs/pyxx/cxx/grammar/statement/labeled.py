@@ -10,11 +10,11 @@ from ...parser import cxx98
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('labeled-statement : begin-expression-statement attribute-specifier-seq? "identifier" ":" statement')
+@glrp.rule('labeled-statement : attribute-specifier-seq? begin-expression-statement "identifier" ":" statement')
 @glrp.rule(
-    'labeled-statement : begin-expression-statement attribute-specifier-seq? "case" constant-expression ":" statement'
+    'labeled-statement : attribute-specifier-seq? begin-expression-statement  "case" constant-expression ":" statement'
 )
-@glrp.rule('labeled-statement : begin-expression-statement attribute-specifier-seq? "default" ":" statement')
+@glrp.rule('labeled-statement : attribute-specifier-seq? begin-expression-statement  "default" ":" statement')
 @cxx98
 def labeled_statement(self, p):
     # type: (CxxParser, glrp.Production) -> Any

@@ -26,7 +26,7 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('template-parameter : begin-type-parameter type-parameter')
-@glrp.rule('template-parameter : parameter-declaration')
+@glrp.rule('template-parameter : begin-parameter parameter-declaration')
 @cxx98
 def template_parameter(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -81,8 +81,9 @@ def type_parameter_key(self, p):
 
 
 @glrp.rule('begin-type-parameter : [split:type_parameter]')
+@glrp.rule('begin-parameter : [split:parameter]')
 @cxx98
-def begin_type_parameter(self, p):
+def begin_parameter(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 
@@ -109,7 +110,7 @@ def ambiguous_type_constraint(self, template_name, concept_name):
 
 @glrp.merge('template-parameter')
 @cxx98_merge
-def ambiguous_template_parameter(self, ambiguous_parameter_declaration, type_parameter):
+def ambiguous_template_parameter(self, parameter, type_parameter):
     # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 

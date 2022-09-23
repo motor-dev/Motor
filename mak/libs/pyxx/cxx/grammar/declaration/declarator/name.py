@@ -34,42 +34,32 @@ from ....parser import cxx98, cxx11, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('type-id : type-id-no-declarator')
-@glrp.rule('type-id : type-id-declarator')
-@glrp.rule('type-id-no-declarator : begin-type-id-no-declarator type-specifier-seq')
-@glrp.rule(
-    'type-id-declarator : begin-type-id-abstract-declarator [no-merge-warning] type-specifier-seq abstract-declarator'
-)
+@glrp.rule('type-id : [no-merge-warning] type-specifier-seq [split:end_declarator_list]')
+@glrp.rule('type-id : [no-merge-warning] type-specifier-seq abstract-declarator')
 @cxx98
 def type_id(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
-@glrp.rule('defining-type-id : defining-type-id-no-declarator')
-@glrp.rule('defining-type-id : defining-type-id-declarator')
-@glrp.rule('defining-type-id-no-declarator : begin-type-id-no-declarator defining-type-specifier-seq')
-@glrp.rule(
-    'defining-type-id-declarator : begin-type-id-abstract-declarator [no-merge-warning] defining-type-specifier-seq abstract-declarator'
-)
+@glrp.rule('defining-type-id : [no-merge-warning] defining-type-specifier-seq [split:end_declarator_list]')
+@glrp.rule('defining-type-id : [no-merge-warning] defining-type-specifier-seq abstract-declarator')
 @cxx98
 def defining_type_id(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
-@glrp.rule('abstract-declarator : begin-ptr-abstract-declarator ptr-abstract-declarator')
+@glrp.rule('abstract-declarator : ptr-abstract-declarator')
 @cxx98
 def abstract_declarator_opt(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
-@glrp.rule('abstract-declarator : begin-parameters-and-qualifiers parameters-and-qualifiers trailing-return-type')
-@glrp.rule(
-    'abstract-declarator : begin-ptr-abstract-declarator noptr-abstract-declarator parameters-and-qualifiers trailing-return-type'
-)
-@glrp.rule('abstract-declarator : begin-ptr-abstract-declarator abstract-pack-declarator')
+@glrp.rule('abstract-declarator : parameters-and-qualifiers trailing-return-type')
+@glrp.rule('abstract-declarator : noptr-abstract-declarator parameters-and-qualifiers trailing-return-type')
+@glrp.rule('abstract-declarator : abstract-pack-declarator')
 @cxx11
 def abstract_declarator_opt_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -147,6 +137,13 @@ def begin_type_id(self, p):
 
 @glrp.merge('abstract-declarator')
 @cxx98_merge
+def ambiguous_abstract_declarator_2(self, ambiguous_noptr_abstract_declarator, parameter_declaration_clause):
+    # type: (CxxParser, List[Any], List[Any]) -> None
+    pass
+
+
+@glrp.merge('abstract-declarator')
+@cxx98_merge
 def ambiguous_abstract_declarator(self, ptr_abstract_declarator, parameters_and_qualifiers):
     # type: (CxxParser, List[Any], List[Any]) -> None
     pass
@@ -159,30 +156,44 @@ def ambiguous_noptr_abstract_declarator(self, ptr_declarator, parameter_declarat
     pass
 
 
-@glrp.merge('type-id-declarator')
+@glrp.merge('type-id')
 @cxx98_merge
-def ambiguous_type_id_declarator(self, type_specifier_seq_end, type_specifier_seq_continue):
+def ambiguous_type_id(self, continue_declarator_list, end_declarator_list):
     # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 
 
 @glrp.merge('type-id')
 @cxx98_merge
-def ambiguous_type_id(self, type_id_abstract_declarator, type_id_no_declarator):
+def ambiguous_type_id_2(self, type_specifier_seq_continue, type_specifier_seq_end):
     # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 
 
-@glrp.merge('defining-type-id-declarator')
+@glrp.merge('type-id')
 @cxx98_merge
-def ambiguous_defining_type_id_declarator(self, defining_type_specifier_seq_end, defining_type_specifier_seq_continue):
+def ambiguous_type_id_3(self, ambiguous_noptr_abstract_declarator, parameter_declaration_clause):
     # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 
 
 @glrp.merge('defining-type-id')
 @cxx98_merge
-def ambiguous_defining_type_id(self, type_id_abstract_declarator, type_id_no_declarator):
+def ambiguous_defining_type_id(self, continue_declarator_list, end_declarator_list):
+    # type: (CxxParser, List[Any], List[Any]) -> None
+    pass
+
+
+@glrp.merge('defining-type-id')
+@cxx98_merge
+def ambiguous_defining_type_id_2(self, defining_type_specifier_seq_continue, defining_type_specifier_seq_end):
+    # type: (CxxParser, List[Any], List[Any]) -> None
+    pass
+
+
+@glrp.merge('defining-type-id')
+@cxx98_merge
+def ambiguous_defining_type_id_3(self, ambiguous_noptr_abstract_declarator, parameter_declaration_clause):
     # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 

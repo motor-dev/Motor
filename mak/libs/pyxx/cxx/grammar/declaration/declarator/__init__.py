@@ -41,6 +41,7 @@ def init_declarator_cxx20(self, p):
 
 @glrp.rule('begin-declarator-no-initializer: [split:declarator_no_initializer]')
 @glrp.rule('begin-declarator-initializer: [split:declarator_initializer]')
+@glrp.rule('begin-no-declarator: [split:no_declarator]')
 @cxx98
 def begin_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> Any

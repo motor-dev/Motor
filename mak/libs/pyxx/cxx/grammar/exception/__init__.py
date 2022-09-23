@@ -59,55 +59,34 @@ def handler(self, p):
     pass
 
 
-@glrp.rule('exception-declaration : begin-exception-declaration-declarator exception-declaration-declarator')
-@glrp.rule('exception-declaration : begin-exception-declaration-no-declarator exception-declaration-no-declarator')
-@glrp.rule(
-    'exception-declaration : begin-exception-declaration-abstract-declarator exception-declaration-abstract-declarator'
-)
-@glrp.rule(
-    'exception-declaration-declarator : attribute-specifier-seq? begin-type-id-declarator [no-merge-warning] type-specifier-seq declarator'
-)
-@glrp.rule(
-    'exception-declaration-no-declarator : attribute-specifier-seq? begin-type-id-no-declarator type-specifier-seq'
-)
-@glrp.rule(
-    'exception-declaration-abstract-declarator : attribute-specifier-seq? begin-type-id-abstract-declarator [no-merge-warning] type-specifier-seq abstract-declarator'
-)
-@glrp.rule('exception-declaration-no-declarator : "..."')
+@glrp.rule('exception-declaration : attribute-specifier-seq? [no-merge-warning] type-specifier-seq declarator')
+@glrp.rule('exception-declaration : attribute-specifier-seq? type-specifier-seq [split:end_declarator_list]')
+@glrp.rule('exception-declaration : attribute-specifier-seq? [no-merge-warning] type-specifier-seq abstract-declarator')
+@glrp.rule('exception-declaration : "..."')
 @cxx98
 def exception_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
-@glrp.rule('begin-exception-declaration-declarator : [split:exception_declaration_declarator]')
-@glrp.rule('begin-exception-declaration-no-declarator : [split:exception_declaration_no_declarator]')
-@glrp.rule('begin-exception-declaration-abstract-declarator : [split:exception_declaration_abstract_declarator]')
-@cxx98
-def begin_exception_declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    pass
-
-
-@glrp.merge('exception-declaration-declarator')
+@glrp.merge('exception-declaration')
 @cxx98_merge
-def ambiguous_exception_declaration_declarator(self, type_specifier_seq_end, type_specifier_seq_continue):
-    # type: (CxxParser, List[Any], List[Any]) -> None
-    pass
-
-
-@glrp.merge('exception-declaration-abstract-declarator')
-@cxx98_merge
-def ambiguous_exception_declaration_abstract_declarator(self, type_specifier_seq_end, type_specifier_seq_continue):
+def ambiguous_exception_declaration(self, continue_declarator_list, end_declarator_list):
     # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 
 
 @glrp.merge('exception-declaration')
 @cxx98_merge
-def ambiguous_exception_declaration(
-    self, exception_declaration_declarator, exception_declaration_no_declarator,
-    exception_declaration_abstract_declarator
+def ambiguous_exception_declaration_2(self, type_specifier_seq_continue, type_specifier_seq_end):
+    # type: (CxxParser, List[Any], List[Any]) -> None
+    pass
+
+
+@glrp.merge('exception-declaration')
+@cxx98_merge
+def ambiguous_exception_declaration_3(
+    self, ambiguous_noptr_abstract_declarator, ambiguous_abstract_declarator_2, ptr_declarator
 ):
     # type: (CxxParser, List[Any], List[Any], List[Any]) -> None
     pass

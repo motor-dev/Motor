@@ -23,7 +23,7 @@ from motor_typing import TYPE_CHECKING
 
 # TODO:attribute-specifier-seq? empty, template?
 @glrp.rule(
-    'using-declaration : begin-decl-other attribute-specifier-seq? "using" "typename"? nested-name-specifier template? unqualified-id ";"'
+    'using-declaration : attribute-specifier-seq? begin-declaration "using" "typename"? nested-name-specifier template? unqualified-id ";"'
 )
 #@glrp.rule('using-declaration : attribute-specifier-seq? "using" "::" unqualified-id ";"')
 @cxx98
@@ -34,7 +34,7 @@ def using_declaration_until_cxx17(self, p):
 
 
 # TODO:attribute-specifier-seq? empty
-@glrp.rule('using-declaration : begin-decl-other attribute-specifier-seq? "using" using-declarator-list ";"')
+@glrp.rule('using-declaration : attribute-specifier-seq? begin-declaration "using" using-declarator-list ";"')
 @cxx17
 def using_declaration_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> Any

@@ -33,7 +33,7 @@ from . import constraint
 from . import guide
 
 
-@glrp.rule('template-declaration : begin-decl-other attribute-specifier-seq? "extern"? template-head declaration')
+@glrp.rule('template-declaration : attribute-specifier-seq? begin-declaration "extern"? template-head declaration')
 @cxx98
 def template_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -41,7 +41,7 @@ def template_declaration(self, p):
 
 
 @glrp.rule(
-    'template-declaration : begin-decl-other attribute-specifier-seq? "extern"? template-head concept-definition'
+    'template-declaration : attribute-specifier-seq? begin-declaration "extern"? template-head concept-definition'
 )
 @cxx20
 def template_declaration_cxx20(self, p):
