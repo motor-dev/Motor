@@ -19,8 +19,11 @@ from ....parser import cxx98, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('parameter-declaration-clause : parameter-declaration-list? variadic-parameter-list?')
+@glrp.rule('parameter-declaration-clause : ')
+@glrp.rule('parameter-declaration-clause : parameter-declaration-list')
 @glrp.rule('parameter-declaration-clause : parameter-declaration-list "," variadic-parameter-list')
+@glrp.rule('parameter-declaration-clause : variadic-parameter-list')
+@glrp.rule('parameter-declaration-clause : parameter-declaration-list variadic-parameter-list')
 @cxx98
 def parameter_declaration_clause(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -61,36 +64,24 @@ def parameter_declaration_list_opt(self, p):
 
 @glrp.rule('parameter-declaration : parameter-declaration-declarator')
 @glrp.rule('parameter-declaration : parameter-declaration-no-declarator')
-@glrp.rule('parameter-declaration : parameter-declaration-abstract-declarator')
 @glrp.rule(
-    'parameter-declaration-declarator : begin-parameter-declaration-declarator attribute-specifier-seq? [no-merge-warning]decl-specifier-seq declarator'
+    'parameter-declaration-declarator : attribute-specifier-seq? [no-merge-warning]decl-specifier-seq begin-declarator-no-initializer declarator'
 )
 @glrp.rule(
-    'parameter-declaration-declarator : begin-parameter-declaration-declarator attribute-specifier-seq? [no-merge-warning]decl-specifier-seq declarator "=" initializer-clause'
+    'parameter-declaration-declarator : attribute-specifier-seq? [no-merge-warning]decl-specifier-seq begin-declarator-initializer declarator "=" initializer-clause'
 )
 @glrp.rule(
-    'parameter-declaration-no-declarator : begin-parameter-declaration-no-declarator attribute-specifier-seq? decl-specifier-seq'
+    'parameter-declaration-declarator : attribute-specifier-seq? [no-merge-warning]decl-specifier-seq begin-declarator-no-initializer abstract-declarator'
 )
 @glrp.rule(
-    'parameter-declaration-no-declarator : begin-parameter-declaration-no-declarator attribute-specifier-seq? decl-specifier-seq "=" initializer-clause'
+    'parameter-declaration-declarator : attribute-specifier-seq? [no-merge-warning]decl-specifier-seq begin-declarator-initializer abstract-declarator "=" initializer-clause'
 )
+@glrp.rule('parameter-declaration-no-declarator : attribute-specifier-seq? decl-specifier-seq begin-no-declarator')
 @glrp.rule(
-    'parameter-declaration-abstract-declarator : begin-parameter-declaration-abstract-declarator attribute-specifier-seq? [no-merge-warning]decl-specifier-seq abstract-declarator'
-)
-@glrp.rule(
-    'parameter-declaration-abstract-declarator : begin-parameter-declaration-abstract-declarator attribute-specifier-seq? [no-merge-warning]decl-specifier-seq abstract-declarator "=" initializer-clause'
+    'parameter-declaration-no-declarator : attribute-specifier-seq? decl-specifier-seq begin-no-declarator "=" initializer-clause'
 )
 @cxx98
 def parameter_declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    pass
-
-
-@glrp.rule('begin-parameter-declaration-declarator : [split:parameter_declaration_declarator]')
-@glrp.rule('begin-parameter-declaration-no-declarator : [split:parameter_declaration_no_declarator]')
-@glrp.rule('begin-parameter-declaration-abstract-declarator : [split:parameter_declaration_abstract_declarator]')
-@cxx98
-def begin_parameter_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 
@@ -103,25 +94,50 @@ def ellipsis_opt(self, p):
     pass
 
 
-@glrp.merge('parameter-declaration-declarator')
+@glrp.merge('parameter-declaration-list')
+@cxx98_merge
+def ambiguous_parameter_declaration_list_opt(
+    self, ambiguous_parameter_declaration_declarator_initializer, declarator_initializer, no_declarator
+):
+    # type: (CxxParser, List[Any], List[Any],  List[Any]) -> Any
+    pass
+
+
+@glrp.merge('parameter-declaration')
 @cxx98_merge
 def ambiguous_parameter_declaration_declarator(self, decl_specifier_seq_end, decl_specifier_seq_continue):
     # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
-@glrp.merge('parameter-declaration-abstract-declarator')
+@glrp.merge('parameter-declaration-declarator')
 @cxx98_merge
-def ambiguous_parameter_declaration_abstract_declarator(self, decl_specifier_seq_end, decl_specifier_seq_continue):
+def ambiguous_parameter_declaration_declarator_initializer(self, declarator_no_initializer, declarator_initializer):
     # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
-@glrp.merge('parameter-declaration')
+@glrp.merge('parameter-declaration-declarator')
 @cxx98_merge
-def ambiguous_parameter_declaration(
-    self, parameter_declaration_declarator, parameter_declaration_no_declarator,
-    parameter_declaration_abstract_declarator
+def ambiguous_parameter_declaration_2(self, ambiguous_abstract_declarator_2, ptr_declarator):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    pass
+
+
+@glrp.merge('parameter-declaration-clause-variadic')
+@cxx98_merge
+def ambiguous_parameter_declaration_clause_variadic(
+    self, ambiguous_parameter_declaration_declarator_initializer, no_declarator
+):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    pass
+
+
+@glrp.merge('parameter-declaration-clause')
+@cxx98_merge
+def ambiguous_parameter_declaration_clause(
+    self, ambiguous_parameter_declaration_declarator_initializer, ambiguous_parameter_declaration_clause_variadic,
+    ambiguous_parameter_declaration_list_opt
 ):
     # type: (CxxParser, List[Any], List[Any], List[Any]) -> Any
     pass

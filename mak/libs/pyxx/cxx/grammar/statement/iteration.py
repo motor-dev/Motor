@@ -53,10 +53,10 @@ def for_range_cxx11(self, p):
 
 
 @glrp.rule(
-    'for-range-declaration-declarator : begin-simple-declaration attribute-specifier-seq? [no-merge-warning] decl-specifier-seq begin-declarator-no-initializer declarator'
+    'for-range-declaration-declarator : begin-declaration attribute-specifier-seq? [no-merge-warning] decl-specifier-seq begin-declarator-no-initializer declarator'
 )
 @glrp.rule(
-    'for-range-declaration-no-declarator : begin-simple-declaration attribute-specifier-seq? decl-specifier-seq begin-declarator-no-initializer ref-qualifier? "[" identifier-list "]"'
+    'for-range-declaration-no-declarator : begin-declaration attribute-specifier-seq? decl-specifier-seq begin-declarator-no-initializer ref-qualifier? "[" identifier-list "]"'
 )
 @cxx11
 def for_range_declaration_cxx11(self, p):

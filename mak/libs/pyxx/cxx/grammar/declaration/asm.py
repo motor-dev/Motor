@@ -8,7 +8,7 @@ from ...parser import cxx98
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('asm-declaration : begin-decl-other attribute-specifier-seq? "asm" "(" "string-literal" ")" ";"')
+@glrp.rule('asm-declaration : attribute-specifier-seq? begin-declaration "asm" "(" "string-literal" ")" ";"')
 @cxx98
 def asm_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> Any

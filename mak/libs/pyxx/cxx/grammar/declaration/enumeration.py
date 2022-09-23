@@ -73,7 +73,7 @@ def enum_head_name(self, p):
 
 # TODO: attribute-specifier-seq? empty
 @glrp.rule(
-    'opaque-enum-declaration : begin-decl-other attribute-specifier-seq? enum-key attribute-specifier-seq? enum-head-name enum-base? ";"'
+    'opaque-enum-declaration : attribute-specifier-seq? begin-declaration enum-key attribute-specifier-seq? enum-head-name enum-base? ";"'
 )
 @cxx11
 def opaque_enum_declaration_cxx11(self, p):
