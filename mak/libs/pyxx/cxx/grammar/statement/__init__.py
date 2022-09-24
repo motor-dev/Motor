@@ -55,7 +55,7 @@ def init_statement(self, p):
 
 @glrp.rule('condition : begin-expression-statement attribute-specifier-seq? expression')
 @glrp.rule(
-    'condition : begin-declaration attribute-specifier-seq? [no-merge-warning] decl-specifier-seq begin-declarator-initializer declarator brace-or-equal-initializer'
+    'condition : begin-declaration attribute-specifier-seq? decl-specifier-seq declarator brace-or-equal-initializer'
 )
 @cxx98
 def condition(self, p):
@@ -66,7 +66,7 @@ def condition(self, p):
 
 @glrp.rule('condition? : begin-expression-statement attribute-specifier-seq? expression')
 @glrp.rule(
-    'condition? : begin-declaration  attribute-specifier-seq? [no-merge-warning] decl-specifier-seq begin-declarator-initializer declarator brace-or-equal-initializer'
+    'condition? : begin-declaration  attribute-specifier-seq? decl-specifier-seq declarator brace-or-equal-initializer'
 )
 @glrp.rule('condition? :')
 @cxx98
@@ -97,23 +97,9 @@ def ambiguous_condition(self, expression_statement, simple_declaration):
     pass
 
 
-@glrp.merge('condition')
-@cxx98_merge
-def ambiguous_condition_2(self, decl_specifier_seq_end, decl_specifier_seq_continue):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
-    pass
-
-
 @glrp.merge('condition?')
 @cxx98_merge
 def ambiguous_condition_opt(self, expression_statement, simple_declaration):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
-    pass
-
-
-@glrp.merge('condition?')
-@cxx98_merge
-def ambiguous_condition_opt_2(self, decl_specifier_seq_end, decl_specifier_seq_continue):
     # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 

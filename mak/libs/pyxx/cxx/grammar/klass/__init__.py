@@ -30,13 +30,12 @@ from . import initializer
 from . import derived
 from . import conversion
 
-
-@glrp.rule('class-name[prec:right,1] : "identifier"')
-@glrp.rule('class-name[prec:right,1] : simple-template-id')
-@cxx98
-def class_name(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    pass
+#@glrp.rule('class-name[prec:right,1] : "identifier"')
+#@glrp.rule('class-name[prec:right,1] : simple-template-id')
+#@cxx98
+#def class_name(self, p):
+#    # type: (CxxParser, glrp.Production) -> Any
+#    pass
 
 
 @glrp.rule('class-specifier : class-head "{" member-specification? "}"')
@@ -62,8 +61,11 @@ def class_head_cxx11(self, p):
 
 
 # TODO: template? not allowed
-@glrp.rule('class-head-name : class-name')
-@glrp.rule('class-head-name : nested-name-specifier template? class-name')
+#@glrp.rule('class-head-name : class-name')
+@glrp.rule('class-head-name[prec:right,1] : identifier')
+@glrp.rule('class-head-name[prec:right,1] : simple-template-id')
+@glrp.rule('class-head-name[prec:right,1] : nested-name-specifier template? identifier')
+@glrp.rule('class-head-name[prec:right,1] : nested-name-specifier template? simple-template-id')
 @cxx98
 def class_head_name(self, p):
     # type: (CxxParser, glrp.Production) -> Any

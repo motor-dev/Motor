@@ -59,9 +59,9 @@ def handler(self, p):
     pass
 
 
-@glrp.rule('exception-declaration : attribute-specifier-seq? [no-merge-warning] type-specifier-seq declarator')
-@glrp.rule('exception-declaration : attribute-specifier-seq? type-specifier-seq [split:end_declarator_list]')
-@glrp.rule('exception-declaration : attribute-specifier-seq? [no-merge-warning] type-specifier-seq abstract-declarator')
+@glrp.rule('exception-declaration : attribute-specifier-seq? type-specifier-seq declarator')
+@glrp.rule('exception-declaration : attribute-specifier-seq? type-specifier-seq ')
+@glrp.rule('exception-declaration : attribute-specifier-seq? type-specifier-seq abstract-declarator')
 @glrp.rule('exception-declaration : "..."')
 @cxx98
 def exception_declaration(self, p):

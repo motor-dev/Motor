@@ -30,8 +30,8 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('postfix-expression : primary-expression')
 @glrp.rule('postfix-expression : postfix-expression "[" expr-or-braced-init-list "]"')
 @glrp.rule('postfix-expression : postfix-expression "(" expression-list? ")"')
-@glrp.rule('postfix-expression : simple-type-specifier "(" expression-list? ")"')
-@glrp.rule('postfix-expression : typename-specifier"(" expression-list? ")"')
+@glrp.rule('postfix-expression : simple-type-specifier-2 "(" expression-list? ")"')
+@glrp.rule('postfix-expression : typename-specifier "(" expression-list? ")"')
 @glrp.rule('postfix-expression : postfix-expression "." template? id-expression')
 @glrp.rule('postfix-expression : postfix-expression "->" template? id-expression')
 @glrp.rule('postfix-expression : postfix-expression "++"')
@@ -47,7 +47,7 @@ def postfix_expression(self, p):
     pass
 
 
-@glrp.rule('postfix-expression : simple-type-specifier braced-init-list')
+@glrp.rule('postfix-expression : simple-type-specifier-2 braced-init-list')
 @glrp.rule('postfix-expression : typename-specifier braced-init-list')
 @cxx11
 def postfix_expression_cxx11(self, p):
