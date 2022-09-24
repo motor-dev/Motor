@@ -13,12 +13,11 @@ import glrp
 from ....parser import cxx98
 from motor_typing import TYPE_CHECKING
 
-
-@glrp.rule('namespace-alias[prec:right,1] : "identifier"')
-@cxx98
-def namespace_alias(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    pass
+#@glrp.rule('namespace-alias[prec:right,1] : "identifier"')
+#@cxx98
+#def namespace_alias(self, p):
+#    # type: (CxxParser, glrp.Production) -> Any
+#    pass
 
 
 # TODO: attribute-specifier-seq? -> empty

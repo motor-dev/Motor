@@ -33,9 +33,11 @@ def nested_name_specifier(self, p):
     pass
 
 
-@glrp.rule('nested-name-specifier-element : type-name [prec:left,2]"::"')
-@glrp.rule('nested-name-specifier-element : namespace-name [prec:left,2]"::"')
-@cxx11
+#@glrp.rule('nested-name-specifier-element : type-name [prec:left,2]"::"')
+#@glrp.rule('nested-name-specifier-element : namespace-name [prec:left,2]"::"')
+@glrp.rule('nested-name-specifier-element : identifier [prec:left,2]"::"')
+@glrp.rule('nested-name-specifier-element : simple-template-id [prec:left,2]"::"')
+@cxx98
 def nested_name_specifier_element(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass

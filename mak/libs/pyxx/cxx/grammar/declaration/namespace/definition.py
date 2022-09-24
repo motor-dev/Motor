@@ -31,7 +31,7 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('namespace-name[prec:right,1] : "identifier"')
-@glrp.rule('namespace-name : namespace-alias')
+#lass-head-name@glrp.rule('namespace-name : namespace-alias')
 @cxx98
 def namespace_name(self, p):
     # type: (CxxParser, glrp.Production) -> Any

@@ -155,7 +155,7 @@ def declarator_id(self, p):
     pass
 
 
-@glrp.rule('declarator-id : [prec:left,1]"..." id-expression')
+@glrp.rule('declarator-id : [split:continue_declarator_list]"..." id-expression')
 @cxx11
 def declarator_id_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any

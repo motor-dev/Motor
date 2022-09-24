@@ -4,6 +4,7 @@ if MYPY:
 else:
 
     class _Index(object):
+
         def __getitem__(self, key):
             return None
 
@@ -15,6 +16,7 @@ else:
     List = _Index()
     TypeVar = _Index()
     Callable = _Index()
+    Any = object()
 
     def overload(x):
         return x

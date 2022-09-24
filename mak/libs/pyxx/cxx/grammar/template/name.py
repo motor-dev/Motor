@@ -37,6 +37,9 @@ def template_opt(self, p):
     pass
 
 
+#@glrp.rule(
+#    'simple-template-id : identifier [prec:left,1][action:begin_template_list]"<" template-argument-list? "%>"'
+#)
 @glrp.rule(
     'simple-template-id : template-name [prec:left,1][action:begin_template_list]"<" template-argument-list? "%>"'
 )
@@ -72,19 +75,10 @@ def template_name(self, p):
     pass
 
 
-@glrp.rule('template-argument-list? : template-argument')
-@glrp.rule('template-argument-list? : template-argument-list "," template-argument')
+@glrp.rule('template-argument-list? : template-argument-list')
 @glrp.rule('template-argument-list? : ')
 @cxx98
 def template_argument_list_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    pass
-
-
-@glrp.rule('template-argument-list? : template-argument "..."')
-@glrp.rule('template-argument-list? : template-argument-list "," template-argument "..."')
-@cxx11
-def template_argument_list_opt_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 
@@ -97,8 +91,8 @@ def template_argument_list(self, p):
     pass
 
 
-@glrp.rule('template-argument-list : template-argument "..."')
-@glrp.rule('template-argument-list : template-argument-list "," template-argument "..."')
+@glrp.rule('template-argument-list : [no-merge-warning] template-argument "..."')
+@glrp.rule('template-argument-list : template-argument-list "," [no-merge-warning] template-argument "..."')
 @cxx11
 def template_argument_list_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -115,7 +109,9 @@ def template_argument(self, p):
 
 
 # TODO: template not allowed
-@glrp.rule('typename-specifier : "typename" typename-disambiguation nested-name-specifier "template"? "identifier"')
+@glrp.rule(
+    'typename-specifier : "typename" typename-disambiguation nested-name-specifier "template"? "identifier"[prec:right,1]'
+)
 @glrp.rule(
     'typename-specifier : "typename" typename-disambiguation nested-name-specifier "template"? simple-template-id'
 )
@@ -143,6 +139,13 @@ def begin_template_argument(self, p):
 @glrp.merge('template-argument')
 @cxx98_merge
 def ambiguous_template_argument(self, template_argument_constant, template_argument_type):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    pass
+
+
+@glrp.merge('template-argument-list')
+@cxx98_merge
+def ambiguous_template_argument_list_ellipsis(self, end_declarator_list, continue_declarator_list):
     # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
