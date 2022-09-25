@@ -15,7 +15,7 @@ parameter-declaration:
 """
 
 import glrp
-from ....parser import cxx98, cxx98_merge
+from ....parser import cxx98, cxx98_merge, cxx23
 from motor_typing import TYPE_CHECKING
 
 
@@ -63,6 +63,24 @@ def parameter_declaration_list(self, p):
 @glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq "=" initializer-clause')
 @cxx98
 def parameter_declaration(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    pass
+
+
+@glrp.rule('parameter-declaration : attribute-specifier-seq? "this" [no-merge-warning] decl-specifier-seq declarator')
+@glrp.rule(
+    'parameter-declaration : attribute-specifier-seq? "this" [no-merge-warning] decl-specifier-seq declarator "=" initializer-clause'
+)
+@glrp.rule(
+    'parameter-declaration : attribute-specifier-seq? "this" [no-merge-warning] decl-specifier-seq abstract-declarator'
+)
+@glrp.rule(
+    'parameter-declaration : attribute-specifier-seq? "this" [no-merge-warning] decl-specifier-seq abstract-declarator "=" initializer-clause'
+)
+@glrp.rule('parameter-declaration : attribute-specifier-seq? "this" decl-specifier-seq [split:end_declarator_list]')
+@glrp.rule('parameter-declaration : attribute-specifier-seq? "this" decl-specifier-seq "=" initializer-clause')
+@cxx23
+def parameter_declaration_cxx23(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 
