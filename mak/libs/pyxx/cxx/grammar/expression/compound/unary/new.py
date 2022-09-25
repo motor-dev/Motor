@@ -45,7 +45,7 @@ def new_placement(self, p):
 
 
 @glrp.rule('new-type-id : type-specifier-seq')
-@glrp.rule('new-type-id : type-specifier-seq new-declarator')
+@glrp.rule('new-type-id : [no-merge-warning]type-specifier-seq new-declarator')
 @cxx98
 def new_type_id(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -84,13 +84,6 @@ def new_initializer_opt_cxx11(self, p):
     pass
 
 
-@glrp.merge('new-type-id')
-@cxx98_merge
-def ambiguous_new_type_id(self, new_type_id_no_declarator, new_type_id_declarator):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
-    pass
-
-
 @glrp.merge('new-type-id-no-declarator')
 @cxx98_merge
 def ambiguous_new_type_id_no_declarator(self, type_specifier_seq_continue, type_specifier_seq_end):
@@ -109,6 +102,13 @@ def ambiguous_new_type_id_declarator(self, type_specifier_seq_continue, type_spe
 @cxx98_merge
 def ambiguous_new_expression(self, type_id, expression):
     # type: (CxxParser, List[Any], List[Any]) -> Any
+    pass
+
+
+@glrp.merge('new-type-id')
+@cxx98_merge
+def ambiguous_new_type_id_constraint(self, id_nontemplate, type_constraint):
+    # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 
 

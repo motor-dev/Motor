@@ -17,13 +17,13 @@ from motor_typing import TYPE_CHECKING
 
 @glrp.rule('function-definition : attribute-specifier-seq? begin-declaration-nodeclspec declarator function-body')
 @glrp.rule(
-    'function-definition : attribute-specifier-seq? begin-declaration decl-specifier-seq declarator function-body'
+    'function-definition : attribute-specifier-seq? begin-declaration [no-merge-warning] decl-specifier-seq declarator function-body'
 )
 @glrp.rule(
     'function-definition : attribute-specifier-seq? begin-declaration-nodeclspec declarator virt-specifier-seq function-body'
 )
 @glrp.rule(
-    'function-definition : attribute-specifier-seq? begin-declaration decl-specifier-seq declarator virt-specifier-seq function-body'
+    'function-definition : attribute-specifier-seq? begin-declaration [no-merge-warning] decl-specifier-seq declarator virt-specifier-seq function-body'
 )
 @cxx98
 def function_definition(self, p):
@@ -35,7 +35,7 @@ def function_definition(self, p):
     'function-definition : attribute-specifier-seq? begin-declaration-nodeclspec declarator requires-clause function-body'
 )
 @glrp.rule(
-    'function-definition : attribute-specifier-seq? begin-declaration decl-specifier-seq declarator requires-clause function-body'
+    'function-definition : attribute-specifier-seq? begin-declaration [no-merge-warning]  decl-specifier-seq declarator requires-clause function-body'
 )
 @cxx20
 def function_definition_cxx20(self, p):
@@ -57,6 +57,13 @@ def function_body(self, p):
 @cxx11
 def function_body_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
+    pass
+
+
+@glrp.merge('function-definition')
+@cxx98_merge
+def ambiguous_function_definition_constraint(self, id_nontemplate, type_constraint):
+    # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 
 

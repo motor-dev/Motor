@@ -80,8 +80,11 @@ def fold_operator_cxx17(self, p):
 
 @glrp.merge('cast-expression-proxy')
 @cxx17_merge
-def ambiguous_cast_expression_proxy(self, ambiguous_postfix_expression, id_template):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
+def ambiguous_cast_expression_proxy(
+    self, ambiguous_postfix_expression, ambiguous_new_type_id_constraint, ambiguous_conversion_type_id_constraint,
+    id_template
+):
+    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any]) -> Any
     pass
 
 

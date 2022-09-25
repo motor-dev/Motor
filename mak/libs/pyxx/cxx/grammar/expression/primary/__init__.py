@@ -26,7 +26,7 @@ from . import requires
 @glrp.rule('primary-expression : "true"')
 @glrp.rule('primary-expression : "false"')
 @glrp.rule('primary-expression : primary-expression-proxy')
-@glrp.rule('primary-expression[prec:right,1] : id-expression')
+@glrp.rule('primary-expression : id-expression')
 @cxx98
 def primary_expression(self, p):
     # type: (CxxParser, glrp.Production) -> Any

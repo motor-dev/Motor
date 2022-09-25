@@ -53,7 +53,7 @@ def for_range_cxx11(self, p):
 
 
 @glrp.rule(
-    'for-range-declaration-declarator : begin-declaration attribute-specifier-seq? decl-specifier-seq declarator'
+    'for-range-declaration-declarator : begin-declaration attribute-specifier-seq? [no-merge-warning] decl-specifier-seq declarator'
 )
 @glrp.rule(
     'for-range-declaration-no-declarator : begin-declaration attribute-specifier-seq? decl-specifier-seq ref-qualifier? "[" identifier-list "]"'
@@ -79,19 +79,19 @@ def begin_for_range_declaration_cxx11(self, p):
     pass
 
 
+@glrp.merge('for-range-declaration-declarator')
+@cxx98_merge
+def ambiguous_for_range_declaration_declarator_constraint(self, id_nontemplate, type_constraint):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    pass
+
+
 @glrp.merge('for-range')
 @cxx98_merge
 def ambiguous_for_range(
     self, init_statement, for_range_declaration_declarator, for_range_declaration_no_declarator, ambiguous_condition_opt
 ):
     # type: (CxxParser, List[Any], List[Any], List[Any], List[Any]) -> Any
-    pass
-
-
-@glrp.merge('for-range-declaration-declarator')
-@cxx98_merge
-def ambiguous_for_range_declaration_declarator(self, decl_specifier_seq_end, decl_specifier_seq_continue):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 

@@ -34,8 +34,11 @@ def expression_opt(self, p):
 
 @glrp.merge('expression')
 @cxx98_merge
-def ambiguous_expression(self, ambiguous_postfix_expression, id_template):
-    # type: (CxxParser, List[Any], List[Any]) -> None
+def ambiguous_expression(
+    self, ambiguous_postfix_expression, ambiguous_new_type_id_constraint, ambiguous_conversion_type_id_constraint,
+    id_template
+):
+    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any]) -> None
     pass
 
 

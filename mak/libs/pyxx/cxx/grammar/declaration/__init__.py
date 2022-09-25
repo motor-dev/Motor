@@ -174,7 +174,7 @@ def alias_declaration(self, p):
     'simple-declaration :  attribute-specifier-seq? begin-declaration decl-specifier-seq ref-qualifier? "[" identifier-list "]" initializer ";"'
 )
 @glrp.rule(
-    'simple-declaration : attribute-specifier-seq? begin-declaration decl-specifier-seq init-declarator-list ";"'
+    'simple-declaration : attribute-specifier-seq? begin-declaration [no-merge-warning] decl-specifier-seq init-declarator-list ";"'
 )
 @cxx98
 def simple_declaration(self, p):
@@ -251,6 +251,20 @@ def ambiguous_declaration_deduction(self, simple_declaration, decl_deduction_gui
 @cxx98_merge
 def ambiguous_declaration_2(self, initializer_list, compound_statement):
     # type: (CxxParser, List[Any], List[Any]) -> Any
+    pass
+
+
+@glrp.merge('declaration')
+@cxx98_merge
+def ambiguous_declaration_3(self, ambiguous_function_definition_constraint, ambiguous_simple_declaration_constraint):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    pass
+
+
+@glrp.merge('simple-declaration')
+@cxx98_merge
+def ambiguous_simple_declaration_constraint(self, id_nontemplate, type_constraint):
+    # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 
 

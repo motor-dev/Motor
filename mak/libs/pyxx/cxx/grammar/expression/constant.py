@@ -25,8 +25,11 @@ def constant_expression_opt(self, p):
 
 @glrp.merge('constant-expression')
 @cxx98_merge
-def ambiguous_constant_expression(self, ambiguous_postfix_expression, id_template):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
+def ambiguous_constant_expression(
+    self, ambiguous_postfix_expression, ambiguous_new_type_id_constraint, ambiguous_conversion_type_id_constraint,
+    id_template
+):
+    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any]) -> Any
     pass
 
 

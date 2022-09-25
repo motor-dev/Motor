@@ -17,8 +17,11 @@ def constraint_expression_cxx20(self, p):
 
 @glrp.merge('constraint-expression')
 @cxx20_merge
-def ambiguous_constraint_expression(self, ambiguous_postfix_expression, id_template):
-    # type: (CxxParser, List[Any], List[Any]) -> None
+def ambiguous_constraint_expression(
+    self, ambiguous_postfix_expression, ambiguous_new_type_id_constraint, ambiguous_conversion_type_id_constraint,
+    id_template
+):
+    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any]) -> None
     pass
 
 

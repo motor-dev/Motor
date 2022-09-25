@@ -52,8 +52,12 @@ def base_specifier(self, p):
     pass
 
 
-@glrp.rule('class-or-decltype : type-name')
-@glrp.rule('class-or-decltype : nested-name-specifier template? type-name')
+@glrp.rule('class-or-decltype[split:class_or_decltype] : "identifier"')
+@glrp.rule('class-or-decltype : template-name [action:begin_template_list]"<" template-argument-list? "%>"')
+@glrp.rule('class-or-decltype : nested-name-specifier template? identifier')
+@glrp.rule(
+    'class-or-decltype : nested-name-specifier template? template-name [action:begin_template_list]"<" template-argument-list? "%>"'
+)
 # TODO: already covered above
 #@glrp.rule('class-or-decltype : nested-name-specifier template? simple-template-id')
 @cxx98

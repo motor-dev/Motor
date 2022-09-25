@@ -8,14 +8,14 @@ import glrp
 from ....parser import cxx98, cxx20
 from motor_typing import TYPE_CHECKING
 
-#@glrp.rule('typedef-name[prec:right,1] : "identifier"')
+#@glrp.rule('typedef-name : "identifier"')
 #@cxx98
 #def typedef_name(self, p):
 #    # type: (CxxParser, glrp.Production) -> Any
 #    pass
 #
 #
-#@glrp.rule('typedef-name[prec:right,1] : simple-template-id')
+#@glrp.rule('typedef-name : simple-template-id')
 #@cxx20
 #def typedef_name_cxx20(self, p):
 #    # type: (CxxParser, glrp.Production) -> Any

@@ -51,11 +51,13 @@ def parameter_declaration_list(self, p):
     pass
 
 
-@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq declarator')
-@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq declarator "=" initializer-clause')
-@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-declarator')
+@glrp.rule('parameter-declaration : attribute-specifier-seq? [no-merge-warning] decl-specifier-seq declarator')
 @glrp.rule(
-    'parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-declarator "=" initializer-clause'
+    'parameter-declaration : attribute-specifier-seq? [no-merge-warning] decl-specifier-seq declarator "=" initializer-clause'
+)
+@glrp.rule('parameter-declaration : attribute-specifier-seq? [no-merge-warning] decl-specifier-seq abstract-declarator')
+@glrp.rule(
+    'parameter-declaration : attribute-specifier-seq? [no-merge-warning] decl-specifier-seq abstract-declarator "=" initializer-clause'
 )
 @glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq [split:end_declarator_list]')
 @glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq "=" initializer-clause')
@@ -76,6 +78,13 @@ def ellipsis_opt(self, p):
 @glrp.merge('parameter-declaration')
 @cxx98_merge
 def ambiguous_parameter_declaration(self, ptr_declarator, ambiguous_abstract_declarator_2):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    pass
+
+
+@glrp.merge('parameter-declaration')
+@cxx98_merge
+def ambiguous_parameter_declaration_constraint(self, type_constraint, id_nontemplate):
     # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 

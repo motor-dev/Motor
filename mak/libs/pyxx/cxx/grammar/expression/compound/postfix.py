@@ -27,15 +27,15 @@ from ....parser import cxx98, cxx11, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('postfix-expression : primary-expression')
-@glrp.rule('postfix-expression : postfix-expression "[" expr-or-braced-init-list "]"')
-@glrp.rule('postfix-expression : postfix-expression "(" expression-list? ")"')
-@glrp.rule('postfix-expression : simple-type-specifier-2 "(" expression-list? ")"')
+@glrp.rule('postfix-expression : [no-merge-warning] primary-expression')
+@glrp.rule('postfix-expression : [no-merge-warning] postfix-expression "[" expr-or-braced-init-list "]"')
+@glrp.rule('postfix-expression : [no-merge-warning] postfix-expression "(" expression-list? ")"')
+@glrp.rule('postfix-expression : simple-type-specifier-cast "(" expression-list? ")"')
 @glrp.rule('postfix-expression : typename-specifier "(" expression-list? ")"')
-@glrp.rule('postfix-expression : postfix-expression "." template? id-expression')
-@glrp.rule('postfix-expression : postfix-expression "->" template? id-expression')
-@glrp.rule('postfix-expression : postfix-expression "++"')
-@glrp.rule('postfix-expression : postfix-expression "--"')
+@glrp.rule('postfix-expression : [no-merge-warning] postfix-expression "." template? id-expression')
+@glrp.rule('postfix-expression : [no-merge-warning] postfix-expression "->" template? id-expression')
+@glrp.rule('postfix-expression : [no-merge-warning] postfix-expression "++"')
+@glrp.rule('postfix-expression : [no-merge-warning] postfix-expression "--"')
 @glrp.rule('postfix-expression : "dynamic_cast" "<" type-id ">" "(" expression ")"')
 @glrp.rule('postfix-expression : "static_cast" "<" type-id ">" "(" expression ")"')
 @glrp.rule('postfix-expression : "reinterpret_cast" "<" type-id ">" "(" expression ")"')
@@ -47,7 +47,7 @@ def postfix_expression(self, p):
     pass
 
 
-@glrp.rule('postfix-expression : simple-type-specifier-2 braced-init-list')
+@glrp.rule('postfix-expression : [no-merge-warning]simple-type-specifier-cast braced-init-list')
 @glrp.rule('postfix-expression : typename-specifier braced-init-list')
 @cxx11
 def postfix_expression_cxx11(self, p):
@@ -89,6 +89,13 @@ def begin_type_or_expression(self, p):
 @glrp.merge('typeid-expression')
 @cxx98_merge
 def ambiguous_typeid_expression(self, type_id, expression):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    pass
+
+
+@glrp.merge('postfix-expression')
+@cxx98_merge
+def ambiguous_postfix_expression(self, simple_type_specifier_cast, id_nontemplate, ambiguous_postfix_expression):
     # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 

@@ -13,10 +13,10 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('relational-expression : compare-expression')
-@glrp.rule('relational-expression : relational-expression "<" compare-expression')
-@glrp.rule('relational-expression : relational-expression ">" compare-expression')
-@glrp.rule('relational-expression : relational-expression "<=" compare-expression')
-@glrp.rule('relational-expression : relational-expression ">=" compare-expression')
+@glrp.rule('relational-expression : [no-merge-warning] relational-expression "<" compare-expression')
+@glrp.rule('relational-expression : [no-merge-warning] relational-expression ">" compare-expression')
+@glrp.rule('relational-expression : [no-merge-warning] relational-expression "<=" compare-expression')
+@glrp.rule('relational-expression : [no-merge-warning] relational-expression ">=" compare-expression')
 @cxx98
 def relational_expression(self, p):
     # type: (CxxParser, glrp.Production) -> Any

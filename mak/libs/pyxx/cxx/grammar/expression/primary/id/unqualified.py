@@ -14,11 +14,13 @@ from .....parser import cxx98, cxx11
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('unqualified-id[prec:right,1] : "identifier"')
-#@glrp.rule('unqualified-id : operator-function-id[split:id_nontemplate]')
-@glrp.rule('unqualified-id : operator-function-id')
+@glrp.rule('unqualified-id : "identifier" [split:id_nontemplate]')
+@glrp.rule('unqualified-id : operator-function-id[split:id_nontemplate]')
 @glrp.rule('unqualified-id : conversion-function-id')
-@glrp.rule('unqualified-id : "~" destructor-disambiguation type-name')
+@glrp.rule('unqualified-id : "~" destructor-disambiguation "identifier" [split:id_nontemplate]')
+@glrp.rule(
+    'unqualified-id : "~" destructor-disambiguation template-name [action:begin_template_list]"<" template-argument-list? "%>"'
+)
 @glrp.rule('unqualified-id : template-id')
 @cxx98
 def unqualified_id(self, p):
@@ -26,8 +28,7 @@ def unqualified_id(self, p):
     pass
 
 
-#@glrp.rule('unqualified-id : literal-operator-id[split:id_nontemplate]')
-@glrp.rule('unqualified-id : literal-operator-id')
+@glrp.rule('unqualified-id : literal-operator-id[split:id_nontemplate]')
 @glrp.rule('unqualified-id : "~" destructor-disambiguation decltype-specifier')
 @cxx11
 def unqualified_id_cxx11(self, p):
