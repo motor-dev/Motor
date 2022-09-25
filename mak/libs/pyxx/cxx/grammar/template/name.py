@@ -38,18 +38,17 @@ def template_opt(self, p):
 
 
 #@glrp.rule(
-#    'simple-template-id : identifier [prec:left,1][action:begin_template_list]"<" template-argument-list? "%>"'
+#    'simple-template-id : template-name [action:begin_template_list]"<" template-argument-list? "%>"'
 #)
+#@cxx98
+#def simple_template_id(self, p):
+#    # type: (CxxParser, glrp.Production) -> Any
+#    pass
+
+
 @glrp.rule(
-    'simple-template-id : template-name [prec:left,1][action:begin_template_list]"<" template-argument-list? "%>"'
+    'template-id : template-name [action:begin_template_list]"<" template-argument-list? "%>" [split:id_nontemplate]'
 )
-@cxx98
-def simple_template_id(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    pass
-
-
-@glrp.rule('template-id[prec:right,1][split:unqualified_id_template] : simple-template-id')
 @glrp.rule(
     'template-id : operator-function-id [split:id_template][action:begin_template_list]"<" template-argument-list? "%>"'
 )
@@ -68,7 +67,7 @@ def template_id_cxx11(self, p):
     pass
 
 
-@glrp.rule('template-name[prec:right,1] : "identifier"')
+@glrp.rule('template-name : "identifier" [split:id_template]')
 @cxx98
 def template_name(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -110,10 +109,10 @@ def template_argument(self, p):
 
 # TODO: template not allowed
 @glrp.rule(
-    'typename-specifier : "typename" typename-disambiguation nested-name-specifier "template"? "identifier"[prec:right,1]'
+    'typename-specifier : "typename" typename-disambiguation nested-name-specifier "template"? "identifier" [split:id_nontemplate]'
 )
 @glrp.rule(
-    'typename-specifier : "typename" typename-disambiguation nested-name-specifier "template"? simple-template-id'
+    'typename-specifier : "typename" typename-disambiguation nested-name-specifier "template"? template-name [action:begin_template_list]"<" template-argument-list? "%>"'
 )
 @cxx98
 def typename_specifier(self, p):

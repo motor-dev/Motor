@@ -8,9 +8,13 @@ from .....parser import cxx20
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('type-requirement : type-name ";"')
+@glrp.rule('type-requirement : "identifier" ";"')
+@glrp.rule('type-requirement : template-name [action:begin_template_list]"<" template-argument-list? "%>" ";"')
 # TODO: template not allowed
-@glrp.rule('type-requirement : nested-name-specifier template? type-name ";"')
+@glrp.rule('type-requirement : nested-name-specifier template? "identifier" ";"')
+@glrp.rule(
+    'type-requirement : nested-name-specifier template? template-name [action:begin_template_list]"<" template-argument-list? "%>" ";"'
+)
 @cxx20
 def type_requirement_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any

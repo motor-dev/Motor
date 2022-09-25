@@ -46,13 +46,6 @@ def ambiguous_init_declarator_initializer(self, continue_declarator_list, end_de
     pass
 
 
-@glrp.merge('init-declarator')
-@cxx98_merge
-def ambiguous_init_declarator(self, declarator_no_initializer, declarator_initializer):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
-    pass
-
-
 if TYPE_CHECKING:
     from typing import Any, List
     from ....parser import CxxParser

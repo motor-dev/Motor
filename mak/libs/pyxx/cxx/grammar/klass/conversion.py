@@ -22,7 +22,7 @@ def conversion_function_id(self, p):
 
 
 @glrp.rule('conversion-type-id : type-specifier-seq')
-@glrp.rule('conversion-type-id : type-specifier-seq conversion-declarator')
+@glrp.rule('conversion-type-id : [no-merge-warning] type-specifier-seq conversion-declarator')
 @cxx98
 def conversion_type_id(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -41,6 +41,13 @@ def conversion_declarator(self, p):
 @cxx98
 def conversion_declarator_opt(self, p):
     # type: (CxxParser, glrp.Production) -> Any
+    pass
+
+
+@glrp.merge('conversion-type-id')
+@cxx98_merge
+def ambiguous_conversion_type_id_constraint(self, id_nontemplate, type_constraint):
+    # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 
 

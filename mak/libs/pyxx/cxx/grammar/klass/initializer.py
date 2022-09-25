@@ -20,14 +20,14 @@ from ...parser import cxx98, cxx11, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('ctor-initializer : ":" mem-initializer-list')
+@glrp.rule('ctor-initializer : ":" begin-ctor-initializer mem-initializer-list')
 @cxx98
 def ctor_initializer(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
-@glrp.rule('ctor-initializer? : ":" mem-initializer-list')
+@glrp.rule('ctor-initializer? : ":" begin-ctor-initializer mem-initializer-list')
 @glrp.rule('ctor-initializer? : ')
 @cxx98
 def ctor_initializer_opt(self, p):
@@ -66,7 +66,7 @@ def mem_initializer_cxx11(self, p):
 
 
 @glrp.rule('mem-initializer-id : class-or-decltype')
-@glrp.rule('mem-initializer-id[prec:right,1][split:mem_initializer_id] : "identifier"')
+@glrp.rule('mem-initializer-id[split:mem_initializer] : "identifier"')
 @cxx98
 def mem_initializer_id(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -75,7 +75,7 @@ def mem_initializer_id(self, p):
 
 @glrp.merge('mem-initializer-id')
 @cxx98_merge
-def ambiguous_mem_initializer_id(self, ambiguous_type_name, mem_initializer_id):
+def ambiguous_mem_initializer_id(self, class_or_decltype, mem_initializer):
     # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 

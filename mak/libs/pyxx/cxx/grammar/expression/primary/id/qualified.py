@@ -26,7 +26,9 @@ def qualified_id(self, p):
 @glrp.rule('nested-name-specifier : "::"')
 @glrp.rule('nested-name-specifier : nested-name-specifier-element')
 @glrp.rule('nested-name-specifier : nested-name-specifier "template"? "identifier" [prec:left,2]"::"')
-@glrp.rule('nested-name-specifier : nested-name-specifier "template"? simple-template-id [prec:left,2]"::"')
+@glrp.rule(
+    'nested-name-specifier : nested-name-specifier "template"? template-name [action:begin_template_list]"<" template-argument-list? "%>" [prec:left,2]"::"'
+)
 @cxx98
 def nested_name_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -35,8 +37,10 @@ def nested_name_specifier(self, p):
 
 #@glrp.rule('nested-name-specifier-element : type-name [prec:left,2]"::"')
 #@glrp.rule('nested-name-specifier-element : namespace-name [prec:left,2]"::"')
-@glrp.rule('nested-name-specifier-element : identifier [prec:left,2]"::"')
-@glrp.rule('nested-name-specifier-element : simple-template-id [prec:left,2]"::"')
+@glrp.rule('nested-name-specifier-element : "identifier" [prec:left,2]"::"')
+@glrp.rule(
+    'nested-name-specifier-element : template-name [action:begin_template_list]"<" template-argument-list? "%>" [prec:left,2]"::"'
+)
 @cxx98
 def nested_name_specifier_element(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -55,13 +59,6 @@ def nested_name_specifier_cxx11(self, p):
 @cxx98
 def scope_opt(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
-
-
-@glrp.merge('nested-name-specifier-element')
-@cxx98_merge
-def ambiguous_nested_name_specifier(self, ambiguous_type_name, ambiguous_namespace_name):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 

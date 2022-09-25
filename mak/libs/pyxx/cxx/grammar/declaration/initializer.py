@@ -161,8 +161,11 @@ def comma_opt(self, p):
 
 @glrp.merge('initializer-clause')
 @cxx98_merge
-def ambiguous_initializer_clause(self, ambiguous_postfix_expression, id_template):
-    # type: (CxxParser, List[Any], List[Any]) -> None
+def ambiguous_initializer_clause(
+    self, ambiguous_postfix_expression, ambiguous_new_type_id_constraint, ambiguous_conversion_type_id_constraint,
+    id_template
+):
+    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any]) -> None
     pass
 
 

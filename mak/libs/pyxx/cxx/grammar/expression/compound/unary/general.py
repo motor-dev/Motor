@@ -22,7 +22,7 @@ from .....parser import cxx98, cxx11, cxx20, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('unary-expression : postfix-expression')
+@glrp.rule('unary-expression : [no-merge-warning]postfix-expression')
 @glrp.rule('unary-expression : unary-operator cast-expression')
 @glrp.rule('unary-expression : "++" cast-expression')
 @glrp.rule('unary-expression : "--" cast-expression')

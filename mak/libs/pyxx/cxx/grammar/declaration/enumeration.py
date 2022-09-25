@@ -62,8 +62,8 @@ def enum_head(self, p):
     pass
 
 
-@glrp.rule('enum-head-name[prec:right,1] : "identifier"')
-@glrp.rule('enum-head-name[prec:right,1] : nested-name-specifier template? "identifier"')
+@glrp.rule('enum-head-name : "identifier" [split:id_nontemplate]')
+@glrp.rule('enum-head-name : nested-name-specifier template? "identifier"[split:id_nontemplate]')
 @cxx98
 def enum_head_name(self, p):
     # type: (CxxParser, glrp.Production) -> Any

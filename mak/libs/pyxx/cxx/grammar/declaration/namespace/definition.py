@@ -30,7 +30,7 @@ from ....parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
-@glrp.rule('namespace-name[prec:right,1] : "identifier"')
+@glrp.rule('namespace-name : "identifier"')
 #lass-head-name@glrp.rule('namespace-name : namespace-alias')
 @cxx98
 def namespace_name(self, p):
@@ -132,13 +132,6 @@ def enclosing_namespace_specifier_cxx20(self, p):
 @cxx98
 def namespace_body(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
-
-
-@glrp.merge('namespace-name')
-@cxx98_merge
-def ambiguous_namespace_name(self, _):
-    # type: (CxxParser, List[Any]) -> Any
     pass
 
 

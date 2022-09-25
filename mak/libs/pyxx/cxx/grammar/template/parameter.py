@@ -88,23 +88,18 @@ def begin_parameter(self, p):
     pass
 
 
-@glrp.rule('type-constraint : concept-name')
-@glrp.rule('type-constraint : concept-name [action:begin_template_list]"<" template-argument-list? "%>"')
-# TODO: template not allowed
-@glrp.rule('type-constraint : nested-name-specifier template? concept-name')
+@glrp.rule('type-constraint : "identifier"[split:type_constraint]')
 @glrp.rule(
-    'type-constraint : nested-name-specifier template? concept-name [action:begin_template_list]"<" template-argument-list? "%>"'
+    'type-constraint : template-name [action:begin_template_list]"<" template-argument-list? "%>"[split:type_constraint]'
+)
+# TODO: template not allowed
+@glrp.rule('type-constraint : nested-name-specifier template? "identifier"[split:type_constraint]')
+@glrp.rule(
+    'type-constraint : nested-name-specifier template? template-name [action:begin_template_list]"<" template-argument-list? "%>"[split:type_constraint]'
 )
 @cxx20
 def type_constraint_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
-
-
-@glrp.merge('type-constraint')
-@cxx20_merge
-def ambiguous_type_constraint(self, template_name, concept_name):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 

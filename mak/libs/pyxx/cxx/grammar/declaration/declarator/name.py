@@ -35,7 +35,7 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('type-id : type-specifier-seq [split:end_declarator_list]')
-@glrp.rule('type-id : type-specifier-seq abstract-declarator')
+@glrp.rule('type-id : [no-merge-warning]type-specifier-seq abstract-declarator')
 @cxx98
 def type_id(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -43,7 +43,7 @@ def type_id(self, p):
 
 
 @glrp.rule('defining-type-id : defining-type-specifier-seq ')
-@glrp.rule('defining-type-id : defining-type-specifier-seq abstract-declarator')
+@glrp.rule('defining-type-id : [no-merge-warning]defining-type-specifier-seq abstract-declarator')
 @cxx98
 def defining_type_id(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -120,13 +120,6 @@ def noptr_abstract_pack_declarator(self, p):
 
 @glrp.merge('abstract-declarator')
 @cxx98_merge
-def ambiguous_abstract_declarator(self, ptr_abstract_declarator, parameters_and_qualifiers):
-    # type: (CxxParser, List[Any], List[Any]) -> None
-    pass
-
-
-@glrp.merge('abstract-declarator')
-@cxx98_merge
 def ambiguous_abstract_declarator_2(self, ambiguous_noptr_abstract_declarator, parameter_declaration_clause):
     # type: (CxxParser, List[Any], List[Any]) -> None
     pass
@@ -135,6 +128,20 @@ def ambiguous_abstract_declarator_2(self, ambiguous_noptr_abstract_declarator, p
 @glrp.merge('noptr-abstract-declarator')
 @cxx98_merge
 def ambiguous_noptr_abstract_declarator(self, ptr_declarator, parameter_declaration_clause):
+    # type: (CxxParser, List[Any], List[Any]) -> None
+    pass
+
+
+@glrp.merge('type-id')
+@cxx98_merge
+def ambiguous_type_id_constraint(self, id_nontemplate, type_constraint):
+    # type: (CxxParser, List[Any], List[Any]) -> None
+    pass
+
+
+@glrp.merge('defining-type-id')
+@cxx98_merge
+def ambiguous_defining_type_id_constraint(self, id_nontemplate, type_constraint):
     # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 
