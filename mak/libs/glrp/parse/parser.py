@@ -171,12 +171,15 @@ class Parser(object):
         rules = [(r[0], r[1], r[2](self), _merge_dict(r[3])) for r in self._grammar._rules]
 
         for token in self._lexer.input(filename):
-            print(self._grammar._name_map[token._id], len(contexts))
+            #print(len(contexts))
             operations = [context.input(token) for context in contexts]
+            if len(contexts) == 42:
+                pass
             next_contexts = []         # type: List[Operation]
             merges = {}                # type: Dict[Tuple[SplitContext, int, int, Callable[[], None]], Merge]
             merge_opportunities = {}   # type: Dict[Tuple[SplitContext, int, int, int], List[Tuple[Operation, str]]]
             recovery_contexts = []     # type: List[Operation]
+
             while operations:
                 parent = operations.pop(-1)
                 actions = action_table[parent._state].get(parent._tokens[0]._id, tuple())
@@ -184,22 +187,7 @@ class Parser(object):
                     recovery_contexts.append(parent)
                     parent.discard()
                 else:
-                    if len(actions) > 1:
-                        split_context = SplitContext(parent._sym_len)
-
-                        #print(
-                        #    '[%d->%d] split %s -> %s' % (
-                        #        parent._result_context._state, split_context._index, self._grammar._name_map[token._id],
-                        #        ', '.join([str(n) for _, n, _ in actions])
-                        #    )
-                        #)
-                    for action, name, token_action in actions:
-                        if len(actions) > 1:
-                            # assert name is not None
-                            name = name or '_'
-                            operation = parent.split(name, split_context)
-                        else:
-                            operation = parent
+                    for operation, (action, _, token_action) in zip(parent.split(actions), actions):
                         if token_action is not None:
                             getattr(self, token_action)(operation._result_context)
                         if action < 0:
@@ -230,19 +218,19 @@ class Parser(object):
                                                 end = True
                                             break
                                 else:
-                                    for scontext, name in operation._result_context._names:
-                                        if scontext._stack_unwind < operation._sym_len:
-                                            break
-                                        try:
-                                            merge_opportunities[
-                                                (scontext, operation._state, operation._sym_len, rule[0])].append(
-                                                    (operation, name)
-                                                )
-                                        except KeyError:
-                                            merge_opportunities[
-                                                (scontext, operation._state, operation._sym_len, rule[0])] = [
-                                                    (operation, name)
-                                                ]
+                                    #for scontext, name in operation._result_context._names:
+                                    #    if scontext._stack_unwind < operation._sym_len:
+                                    #        break
+                                    #    try:
+                                    #        merge_opportunities[
+                                    #            (scontext, operation._state, operation._sym_len, rule[0])].append(
+                                    #                (operation, name)
+                                    #            )
+                                    #    except KeyError:
+                                    #        merge_opportunities[
+                                    #            (scontext, operation._state, operation._sym_len, rule[0])] = [
+                                    #                (operation, name)
+                                    #            ]
                                     break
                             if not end:
                                 # goto symbol, then loop back for another round
@@ -255,18 +243,15 @@ class Parser(object):
                             else:
                                 next_contexts.append(operation)
 
-                    if len(actions) > 1:
-                        parent.discard()
-
-            for (split_context, _, _, symbol), ops in merge_opportunities.items():
-                if len(ops) > 1:
-                    print('potential merge:')
-                    for reduce_op, name in ops:
-                        print('\u250f %s\n\u2503 %s' % (name, '\u2501' * len(name)))
-                        production = reduce_op.run()[1]
-                        #assert production is not None
-                        #production.debug_print(self._grammar._name_map, '\u2503 ', '\u2503 ')
-                        print('\u2517')
+            #for (split_context, _, _, symbol), ops in merge_opportunities.items():
+            #    if len(ops) > 1:
+            #        print('potential merge:')
+            #        for reduce_op, name in ops:
+            #            print('\u250f %s\n\u2503 %s' % (name, '\u2501' * len(name)))
+            #            production = reduce_op.run()[1]
+            #            assert production is not None
+            #            production.debug_print(self._grammar._name_map, '\u2503 ', '\u2503 ')
+            #            print('\u2517')
 
             if len(next_contexts) == 0:
                 valid_tokens = set()
@@ -293,7 +278,7 @@ class Parser(object):
                     symbol = rule[0]
                     production = Production(symbol, 0, 0, context._sym_stack, rule[2])
                     production.run()
-                    production.debug_print(self._grammar._name_map)
+                    #production.debug_print(self._grammar._name_map)
         #        #return production.value
         #else:
         #    raise SyntaxError('unexpected end of file')

@@ -60,9 +60,15 @@ class Operation(object):
         # type: (int) -> Operation
         return ConsumeToken(self, state)
 
-    def split(self, name, split_context):
-        # type: (str, SplitContext) -> Operation
-        return Split(self, name, split_context)
+    def split(self, actions):
+        # type: (Tuple[Tuple[int, Optional[str], Optional[str]],...]) -> Tuple[Operation,...]
+        if len(actions) > 1:
+            split_context = SplitContext(self._sym_len)
+            result = tuple(Split(self, name or '_', split_context) for _, name, _ in actions)
+            self.discard()
+            return result
+        else:
+            return (self, )
 
     def reduce(self, rule):
         # type: (Tuple[int, Tuple[int, ...], Callable[[Production], None], Dict[str, MergeAction.MergeCall]]) -> Operation
