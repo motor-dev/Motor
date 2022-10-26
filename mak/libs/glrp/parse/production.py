@@ -1,64 +1,29 @@
 from ..symbol import Symbol
-from motor_typing import TYPE_CHECKING, TypeVar
+from motor_typing import TYPE_CHECKING
 
 
-class Production(Symbol):
+class Production(object):
 
-    def __init__(self, id, start_position, end_position, production_values, action):
-        # type: (int, int, int, List[Symbol], Callable[["Production"], None]) -> None
-        Symbol.__init__(self, id, start_position, end_position)
-        self._production = production_values
-        self._action = action
+    def __init__(self, context, prod_len):
+        # type: (Context, int) -> None
+        self._context = context
+        self._index = len(self._context._prod_stack) - prod_len
 
-    def _insert(self, index, value):
-        # type: (int, Symbol) -> None
-        assert index > 0
-        self._production.insert(index, value)
-
-    def run(self):
-        # type: () -> None
-        self._action(self)
+    def __len__(self):
+        # type: () -> int
+        return len(self._context._prod_stack) - self._index
 
     def __getitem__(self, index):
         # type: (int) -> Any
-        if index == 0:
-            return self.value
-        elif index > 0:
-            return self._production[index - 1].value
-
-    def __setitem__(self, index, value):
-        # type: (int, Any) -> None
-        if index == 0:
-            self.value = value
-        else:
-            raise IndexError('can only assign to production[0]')
-
-    def debug_print(self, name_map, self_indent='', inner_indent=''):
-        # type: (List[str], str, str) -> None
-        if self._production:
-            print('%s%s' % (self_indent, name_map[self._id]))
-            for p in self._production[0:-1]:
-                p.debug_print(name_map, inner_indent + '\u251c ', inner_indent + '\u2502 ')
-            self._production[-1].debug_print(name_map, inner_indent + '\u2570 ', inner_indent + '  ')
-        else:
-            print('%s%s (nil)' % (self_indent, name_map[self._id]))
-
-
-class AmbiguousProduction(Symbol):
-
-    def __init__(self, productions):
-        # type: (List[Symbol]) -> None
-        production = productions[0]
-        Symbol.__init__(self, production._id, production._start_position, production._end_position)
-        self._productions = productions
-
-    def debug_print(self, name_map, self_indent='', inner_indent=''):
-        # type: (List[str], str, str) -> None
-        print('%sAmbiguous[%s]' % (self_indent, name_map[self._id]))
-        for p in self._productions[0:-1]:
-            p.debug_print(name_map, inner_indent + '\u255f ', inner_indent + '\u2551 ')
-        self._productions[-1].debug_print(name_map, inner_indent + '\u2559 ', inner_indent + '  ')
+        context = self._context
+        index += self._index
+        while index < 0:
+            assert context._prod_parent is not None
+            context = context._prod_parent
+            index += len(context._prod_stack)
+        return context._prod_stack[index]
 
 
 if TYPE_CHECKING:
-    from motor_typing import Any, Callable, List
+    from typing import Any
+    from .context import Context

@@ -77,6 +77,7 @@ def class_or_decltype_cxx11(self, p):
 @glrp.rule('access-specifier : "protected"')
 @glrp.rule('access-specifier : "public"')
 @glrp.rule('access-specifier : "access-specifier-macro"')
+@glrp.rule('access-specifier : "access-specifier-macro-function" "(" balanced-token-seq? ")"')
 @cxx98
 def access_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -87,6 +88,7 @@ def access_specifier(self, p):
 @glrp.rule('access-specifier? : "protected"')
 @glrp.rule('access-specifier? : "public"')
 @glrp.rule('access-specifier? : "access-specifier-macro"')
+@glrp.rule('access-specifier? : "access-specifier-macro-function" "(" balanced-token-seq? ")"')
 @glrp.rule('access-specifier? : ')
 @cxx98
 def access_specifier_opt(self, p):
@@ -102,6 +104,13 @@ def virtual_opt(self, p):
     pass
 
 
+@glrp.merge('base-specifier-list')
+@cxx98_merge
+def ambiguous_base_specifier_list(self, ambiguous_base_specifier_list, ambiguous_template_argument_list_ellipsis):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    pass
+
+
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, List
     from ...parser import CxxParser

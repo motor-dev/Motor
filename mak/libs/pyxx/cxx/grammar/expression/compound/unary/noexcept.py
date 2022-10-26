@@ -5,6 +5,7 @@ noexcept-expression:
 
 import glrp
 from .....parser import cxx11
+from ......ast.expressions import NoexceptExpression
 from motor_typing import TYPE_CHECKING
 
 
@@ -12,7 +13,7 @@ from motor_typing import TYPE_CHECKING
 @cxx11
 def noexcept_expression_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return NoexceptExpression(p[2])
 
 
 if TYPE_CHECKING:

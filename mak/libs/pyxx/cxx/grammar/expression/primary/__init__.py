@@ -18,15 +18,17 @@ from . import fold
 from . import requires
 
 
-@glrp.rule('primary-expression : "integer-literal"[split:initializer]')
+@glrp.rule('primary-expression : "integer-literal"')
 @glrp.rule('primary-expression : "character-literal"')
 @glrp.rule('primary-expression : "floating-literal"')
-@glrp.rule('primary-expression : "string-literal"')
+@glrp.rule('primary-expression : string-literal-list')
 @glrp.rule('primary-expression : "this"')
 @glrp.rule('primary-expression : "true"')
 @glrp.rule('primary-expression : "false"')
 @glrp.rule('primary-expression : primary-expression-proxy')
 @glrp.rule('primary-expression : id-expression')
+@glrp.rule('primary-expression : "type-trait-macro"')
+@glrp.rule('primary-expression : "type-trait-macro-function" "(" balanced-token-seq? ")"')
 @cxx98
 def primary_expression(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -43,10 +45,33 @@ def primary_expression_proxy(self, p):
 @glrp.rule('primary-expression : "user-defined-integer-literal"')
 @glrp.rule('primary-expression : "user-defined-character-literal"')
 @glrp.rule('primary-expression : "user-defined-floating-literal"')
-@glrp.rule('primary-expression : "user-defined-string-literal"')
 @glrp.rule('primary-expression : lambda-expression')
+@glrp.rule('primary-expression : "nullptr"')
 @cxx11
 def primary_expression_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    pass
+
+
+@glrp.rule('string-literal-list : "string-literal" string-literal-list?')
+@glrp.rule('string-literal-list? : "string-literal" string-literal-list?')
+@cxx98
+def string_literal_list(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    pass
+
+
+@glrp.rule('string-literal-list : "user-defined-string-literal" string-literal-list?')
+@glrp.rule('string-literal-list? : "user-defined-string-literal" string-literal-list?')
+@cxx11
+def string_literal_list_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    pass
+
+
+@glrp.rule('string-literal-list? : ')
+@cxx98
+def string_literal_list_opt(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 

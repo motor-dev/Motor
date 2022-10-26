@@ -23,7 +23,7 @@ constraint-logical-and-expression:
 """
 
 import glrp
-from ...parser import cxx98, cxx20
+from ...parser import cxx98, cxx20, cxx98_merge
 from motor_typing import TYPE_CHECKING
 from . import parameter
 from . import name
@@ -33,15 +33,19 @@ from . import constraint
 from . import guide
 
 
-@glrp.rule('template-declaration : attribute-specifier-seq? begin-declaration "extern"? template-head declaration')
+@glrp.rule('template-declaration : attribute-specifier-seq? begin-declaration template-head declaration')
+@glrp.rule(
+    'template-declaration : attribute-specifier-seq? begin-declaration decl-specifier-seq-continue "extern" template-head declaration'
+)
 @cxx98
 def template_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
+@glrp.rule('template-declaration : attribute-specifier-seq? begin-declaration template-head concept-definition')
 @glrp.rule(
-    'template-declaration : attribute-specifier-seq? begin-declaration "extern"? template-head concept-definition'
+    'template-declaration : attribute-specifier-seq? begin-declaration decl-specifier-seq-continue "extern" template-head concept-definition'
 )
 @cxx20
 def template_declaration_cxx20(self, p):
@@ -107,7 +111,7 @@ def constraint_logical_and_expression_cxx20(self, p):
 @glrp.rule('constraint-primary-expression : "integer-literal"')
 @glrp.rule('constraint-primary-expression : "character-literal"')
 @glrp.rule('constraint-primary-expression : "floating-literal"')
-@glrp.rule('constraint-primary-expression : "string-literal"')
+@glrp.rule('constraint-primary-expression : string-literal-list')
 @glrp.rule('constraint-primary-expression : "this"')
 @glrp.rule('constraint-primary-expression : "true"')
 @glrp.rule('constraint-primary-expression : "false"')
@@ -116,7 +120,8 @@ def constraint_logical_and_expression_cxx20(self, p):
 @glrp.rule('constraint-primary-expression : "user-defined-integer-literal"')
 @glrp.rule('constraint-primary-expression : "user-defined-character-literal"')
 @glrp.rule('constraint-primary-expression : "user-defined-floating-literal"')
-@glrp.rule('constraint-primary-expression : "user-defined-string-literal"')
+@glrp.rule('constraint-primary-expression : "type-trait-macro"')
+@glrp.rule('constraint-primary-expression : "type-trait-macro-function" "(" balanced-token-seq? ")"')
 @cxx20
 def constraint_primary_expression_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -154,6 +159,13 @@ def identifier_opt(self, p):
     pass
 
 
+@glrp.merge('template-parameter-list')
+@cxx98_merge
+def ambiguous_template_parameter_list(self, ambiguous_template_parameter_list, ambiguous_initializer_clause):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    return
+
+
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, List
     from ...parser import CxxParser

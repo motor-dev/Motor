@@ -5,6 +5,7 @@ await-expression:
 
 import glrp
 from .....parser import cxx20
+from ......ast.expressions import AwaitExpression
 from motor_typing import TYPE_CHECKING
 
 
@@ -12,7 +13,7 @@ from motor_typing import TYPE_CHECKING
 @cxx20
 def await_expression_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return AwaitExpression(p[1])
 
 
 if TYPE_CHECKING:

@@ -10,17 +10,16 @@ import glrp
 from ...parser import cxx98
 from motor_typing import TYPE_CHECKING
 
+#@glrp.rule('compound-statement : "{" statement-seq? "}"')
+#@cxx98
+#def compound_statement(self, p):
+#    # type: (CxxParser, glrp.Production) -> Any
+#    pass
 
-@glrp.rule('compound-statement : "{" begin-compound-statement statement-seq? "}"')
+
+@glrp.rule('compound-statement : "{" balanced-token-seq? "}"')
 @cxx98
 def compound_statement(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    pass
-
-
-@glrp.rule('begin-compound-statement : [split:compound_statement]')
-@cxx98
-def begin_compound_statement(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 

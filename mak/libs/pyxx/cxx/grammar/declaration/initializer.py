@@ -70,24 +70,17 @@ def initializer_clause(self, p):
     pass
 
 
-@glrp.rule('braced-init-list : [prec:nonassoc,1]"{" begin-initializer-list initializer-list ","? "}"')
-@glrp.rule('braced-init-list : [prec:nonassoc,1]"{" begin-initializer-list  "}"')
+@glrp.rule('braced-init-list : "{" initializer-list ","? "}"')
+@glrp.rule('braced-init-list : "{"  "}"')
 @cxx98
 def braced_init_list(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
-@glrp.rule('braced-init-list : [prec:nonassoc,1]"{" begin-initializer-list  designated-initializer-list ","? "}"')
+@glrp.rule('braced-init-list : "{" designated-initializer-list ","? "}"')
 @cxx20
 def braced_init_list_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    pass
-
-
-@glrp.rule('begin-initializer-list : [split:initializer_list]')
-@cxx98
-def begin_initializer_init(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 
@@ -161,11 +154,15 @@ def comma_opt(self, p):
 
 @glrp.merge('initializer-clause')
 @cxx98_merge
-def ambiguous_initializer_clause(
-    self, ambiguous_postfix_expression, ambiguous_new_type_id_constraint, ambiguous_conversion_type_id_constraint,
-    id_template
-):
-    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any]) -> None
+def ambiguous_initializer_clause(self, ambiguous_relational_expression):
+    # type: (CxxParser, List[Any]) -> None
+    pass
+
+
+@glrp.merge('initializer-list')
+@cxx98_merge
+def ambiguous_initializer_list(self, ambiguous_initializer_list, ambiguous_initializer_clause):
+    # type: (CxxParser, List[Any], List[Any]) -> None
     pass
 
 

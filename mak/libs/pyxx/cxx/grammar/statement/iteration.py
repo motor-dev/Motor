@@ -14,7 +14,7 @@ for-range-initializer:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx98_merge
+from ...parser import cxx98, cxx11, cxx17, cxx98_merge
 from motor_typing import TYPE_CHECKING
 
 
@@ -27,25 +27,17 @@ def iteration_statement(self, p):
     pass
 
 
-@glrp.rule('for-range : begin-init-statement init-statement condition? ";" expression?')
+@glrp.rule('for-range : init-statement condition? ";" expression?')
 @cxx98
 def for_range(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
-@glrp.rule(
-    'for-range : begin-for-range-declaration-declarator for-range-declaration-declarator ":" for-range-initializer'
-)
-@glrp.rule(
-    'for-range : begin-for-range-declaration-no-declarator for-range-declaration-no-declarator ":" for-range-initializer'
-)
-@glrp.rule(
-    'for-range : begin-init-statement init-statement begin-for-range-declaration-declarator for-range-declaration-declarator ":" for-range-initializer'
-)
-@glrp.rule(
-    'for-range : begin-init-statement init-statement begin-for-range-declaration-no-declarator for-range-declaration-no-declarator ":" for-range-initializer'
-)
+@glrp.rule('for-range : for-range-declaration-declarator ":" for-range-initializer')
+@glrp.rule('for-range : for-range-declaration-no-declarator ":" for-range-initializer')
+@glrp.rule('for-range : init-statement for-range-declaration-declarator ":" for-range-initializer')
+@glrp.rule('for-range : init-statement for-range-declaration-no-declarator ":" for-range-initializer')
 @cxx11
 def for_range_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -53,13 +45,19 @@ def for_range_cxx11(self, p):
 
 
 @glrp.rule(
-    'for-range-declaration-declarator : begin-declaration attribute-specifier-seq? [no-merge-warning] decl-specifier-seq declarator'
-)
-@glrp.rule(
-    'for-range-declaration-no-declarator : begin-declaration attribute-specifier-seq? decl-specifier-seq ref-qualifier? "[" identifier-list "]"'
+    'for-range-declaration-declarator : attribute-specifier-seq? begin-declaration [no-merge-warning]decl-specifier-seq? declarator'
 )
 @cxx11
 def for_range_declaration_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    pass
+
+
+@glrp.rule(
+    'for-range-declaration-no-declarator : attribute-specifier-seq? begin-declaration decl-specifier-seq? ref-qualifier? "[" identifier-list "]"'
+)
+@cxx17
+def for_range_declaration_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 
@@ -71,17 +69,9 @@ def for_range_initializer_cxx11(self, p):
     pass
 
 
-@glrp.rule('begin-for-range-declaration-declarator : [split:for_range_declaration_declarator]')
-@glrp.rule('begin-for-range-declaration-no-declarator : [split:for_range_declaration_no_declarator]')
-@cxx11
-def begin_for_range_declaration_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    pass
-
-
 @glrp.merge('for-range-declaration-declarator')
 @cxx98_merge
-def ambiguous_for_range_declaration_declarator_constraint(self, id_nontemplate, type_constraint):
+def ambiguous_for_range_declaration(self, decl_specifier_seq_end, decl_specifier_seq_continue):
     # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
@@ -89,9 +79,17 @@ def ambiguous_for_range_declaration_declarator_constraint(self, id_nontemplate, 
 @glrp.merge('for-range')
 @cxx98_merge
 def ambiguous_for_range(
-    self, init_statement, for_range_declaration_declarator, for_range_declaration_no_declarator, ambiguous_condition_opt
+    self, ambiguous_for_range_declaration, ambiguous_init_statement, ambiguous_condition_opt, ambiguous_condition_opt_2,
+    decl_specifier_seq_continue, ambiguous_simple_declaration, simple_declaration
 ):
-    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any]) -> Any
+    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any], List[Any], List[Any], List[Any]) -> Any
+    pass
+
+
+@glrp.merge('for-range')
+@cxx98_merge
+def ambiguous_for_range_2(self, continue_declarator_list, ambiguous_init_declarator_initializer):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 

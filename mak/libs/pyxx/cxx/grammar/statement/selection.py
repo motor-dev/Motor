@@ -50,7 +50,7 @@ def selection_condition(self, p):
     pass
 
 
-@glrp.rule('selection-condition : begin-init-statement init-statement condition')
+@glrp.rule('selection-condition : init-statement condition')
 @cxx17
 def selection_condition_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -67,7 +67,21 @@ def not_opt_cxx23(self, p):
 
 @glrp.merge('selection-condition')
 @cxx98_merge
-def ambiguous_selection_condition(self, init_statement, ambiguous_condition):
+def ambiguous_selection_condition(self, ambiguous_init_statement, ambiguous_condition):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    pass
+
+
+@glrp.merge('selection-condition')
+@cxx98_merge
+def ambiguous_selection_condition_2(self, ambiguous_simple_declaration, ambiguous_condition_2):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    pass
+
+
+@glrp.merge('selection-condition')
+@cxx98_merge
+def ambiguous_selection_condition_3(self, continue_declarator_list, ambiguous_init_declarator_initializer):
     # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 

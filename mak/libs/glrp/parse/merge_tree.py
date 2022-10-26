@@ -306,10 +306,10 @@ class _MergeState(object):
                         tags = self._merge_result[p._merge_object]
                     else:
                         tags = p._tags_exit
-                    if tags != merge_node._tags_entry:
-                        self._error_nodes.append((merge_node, 'weird'))
-                        self._important_items[node] = 1
-                        break
+                    #if tags != merge_node._tags_entry:
+                    #    self._error_nodes.append((merge_node, 'weird'))
+                    #    self._important_items[node] = 1
+                    #    break
 
     def expand(self, all_states, reduced_states, lookahead):
         # type: (Dict[Entry, _MergeState], Set[_MergeState], int) -> None

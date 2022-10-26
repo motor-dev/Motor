@@ -31,6 +31,12 @@ class CxxParser(glrp.Parser):
                 context._filters.pop(-1)
             return [token]
 
+        def clone(self):
+            # type: () -> glrp.Context.TokenCallback
+            result = CxxParser.TokenFilter(self._lexer)
+            result._nested_count = self._nested_count
+            return result
+
     def __init__(self, tmp_dir, mode=glrp.LOAD_CACHE):
         # type: (str, int)->None
         self.lexer = self.__class__.Lexer()
@@ -86,6 +92,12 @@ class Cxx11Parser(Cxx03Parser):
                 context._filters.pop(-1)
                 return [token] + context._filters[-1].filter(context, token2)
             return [token]
+
+        def clone(self):
+            # type: () -> glrp.Context.TokenCallback
+            result = Cxx11Parser.TokenFilter(self._lexer)
+            result._nested_count = self._nested_count
+            return result
 
     def begin_template_list(self, context):
         # type: (glrp.Context) -> None

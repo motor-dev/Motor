@@ -300,11 +300,21 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
             extra_flags_cxx = ['-Wextra', '-Wno-invalid-offsetof']
         else:
             extra_flags_c = extra_flags_cxx = []
+        if 'GCC' in self.NAMES and self.version_number >= (12, ):
+            extra_flags_cxx.append('-Wno-unknown-attributes=motor::')
+        else:
+            extra_flags_cxx.append('-Wno-attributes')
         v.CFLAGS_warnall = ['-std=c99', '-Wall'] + extra_flags_c + [
-            '-pedantic', '-Winline', '-Werror', '-Wstrict-aliasing'
+            '-pedantic',
+            '-Winline',
+            '-Werror',
+            '-Wstrict-aliasing',
         ] + v.CFLAGS_warnall
         v.CXXFLAGS_warnall = ['-Wall'] + extra_flags_cxx + [
-            '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wstrict-aliasing'
+            '-Werror',
+            '-Wno-sign-compare',
+            '-Woverloaded-virtual',
+            '-Wstrict-aliasing',
         ] + v.CXXFLAGS_warnall
 
     def find_target_program(self, conf, platform, program, mandatory=True, os_paths=[], var=''):
