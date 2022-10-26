@@ -119,7 +119,7 @@ class Lexer:
                 assert rule is not None
                 lexpos_end = m.end()
 
-                tok = Token(rule[3], lexpos, lexpos_end, None, skipped_tokens)
+                tok = Token(rule[3], self, lexpos, lexpos_end, None, skipped_tokens)
                 lexpos = lexpos_end
 
                 new_token = rule[0](self, tok) # type: ignore
@@ -135,7 +135,7 @@ class Lexer:
             else:
                 raise SyntaxError("Illegal character '%s' at index %d" % (lexdata[lexpos], lexpos))
 
-        tok = Token(0, lexpos, lexpos, None, skipped_tokens)
+        tok = Token(0, self, lexpos, lexpos, None, skipped_tokens)
         self._lexpos = lexpos
         yield tok
 
@@ -157,7 +157,7 @@ def token(pattern, name=None, states=('INITIAL', ), warn=True):
 
 
 def _form_master_re(rule_list, start_index):
-    # type: (List[Tuple[str, str, Pattern[str], bool, Callable[[F, Token], Optional[Token]]]], int) -> List[Tuple[Pattern[str], List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str, bool, int]]]]]
+    # type: (List[Tuple[str, str, Pattern[str], bool, Callable[[F, Token], Optional[Token]], str]], int) -> List[Tuple[Pattern[str], List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str, bool, int]]]]]
     if not rule_list:
         return []
 
@@ -181,7 +181,7 @@ def _form_master_re(rule_list, start_index):
 
 def _build_states(owner):
     # type: (Type[Lexer]) -> Dict[str, Lexer.State]
-    rules = {}                                                                                # type: Dict[str, List[Tuple[str, str, Pattern[str], bool, Callable[[F, Token], Optional[Token]]]]]
+    rules = {}                                                                                # type: Dict[str, List[Tuple[str, str, Pattern[str], bool, Callable[[F, Token], Optional[Token]], str]]]
     for action in dir(owner):
         for rule, name, states, warn in sorted(
             getattr(getattr(owner, action), 'patterns', []), key=lambda x: x[0], reverse=True
@@ -189,13 +189,13 @@ def _build_states(owner):
             regex = re.compile(rule)
             for state in states:
                 try:
-                    rules[state].append((rule, name, regex, warn, getattr(owner, action)))
+                    rules[state].append((rule, name, regex, warn, getattr(owner, action), action))
                 except KeyError:
-                    rules[state] = [(rule, name, regex, warn, getattr(owner, action))]
+                    rules[state] = [(rule, name, regex, warn, getattr(owner, action), action)]
     result = {}
     index = 4
     for state, rule_list in rules.items():
-        result[state] = Lexer.State(_form_master_re(rule_list, index))
+        result[state] = Lexer.State(_form_master_re(sorted(rule_list, key=lambda x: x[5], reverse=True), index))
         index += len(rule_list)
     return result
 

@@ -83,13 +83,6 @@ def ambiguous_exception_declaration_2(self, ambiguous_abstract_declarator_2, ptr
     pass
 
 
-@glrp.merge('exception-declaration')
-@cxx98_merge
-def ambiguous_exception_declaration_3(self, id_nontemplate, type_constraint):
-    # type: (CxxParser, List[Any], List[Any]) -> None
-    pass
-
-
 if TYPE_CHECKING:
     from typing import Any, List
     from ...parser import CxxParser

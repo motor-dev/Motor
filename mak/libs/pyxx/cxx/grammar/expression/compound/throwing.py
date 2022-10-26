@@ -5,6 +5,7 @@ throw-expression:
 
 import glrp
 from ....parser import cxx98
+from .....ast.expressions import ThrowExpression
 from motor_typing import TYPE_CHECKING
 
 
@@ -12,7 +13,7 @@ from motor_typing import TYPE_CHECKING
 @cxx98
 def throw_expression(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return ThrowExpression(p[1])
 
 
 if TYPE_CHECKING:

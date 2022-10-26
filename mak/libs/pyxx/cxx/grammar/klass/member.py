@@ -52,13 +52,12 @@ def member_specification_opt(self, p):
     pass
 
 
-@glrp.rule('member-declaration : attribute-specifier-seq? begin-declaration ";"')
-@glrp.rule('member-declaration : attribute-specifier-seq? begin-declaration decl-specifier-seq ";"')
-@glrp.rule('member-declaration : attribute-specifier-seq? begin-declaration-nodeclspec member-declarator-list ";"')
+#@glrp.rule('member-declaration : attribute-specifier-seq? begin-declaration ";"')
+@glrp.rule('member-declaration : attribute-specifier-seq? begin-declaration decl-specifier-seq? ";"')
 @glrp.rule(
-    'member-declaration : attribute-specifier-seq? begin-declaration [no-merge-warning] decl-specifier-seq member-declarator-list ";"'
+    'member-declaration : attribute-specifier-seq? begin-declaration [no-merge-warning]decl-specifier-seq? member-declarator-list ";"'
 )
-@glrp.rule('member-declaration : [no-merge-warning]function-definition')
+@glrp.rule('member-declaration : function-definition')
 @glrp.rule('member-declaration : using-declaration')
 @glrp.rule('member-declaration : template-declaration')
 @glrp.rule('member-declaration : explicit-specialization')
@@ -101,25 +100,24 @@ def member_declarator_list(self, p):
 
 
 @glrp.rule('member-declarator : declarator')
-@glrp.rule('member-declarator : declarator pure-specifier')
-@glrp.rule('member-declarator : declarator virt-specifier-seq pure-specifier')
-@glrp.rule('member-declarator : declarator brace-or-equal-initializer')
+@glrp.rule('member-declarator : declarator begin-function-body pure-specifier')
+@glrp.rule('member-declarator : declarator begin-function-body virt-specifier-seq pure-specifier')
+@glrp.rule('member-declarator : declarator begin-initializer brace-or-equal-initializer')
 @glrp.rule('member-declarator : attribute-specifier-seq? ":" begin-bitfield constant-expression')
 @glrp.rule(
     'member-declarator : attribute-specifier-seq? ":" begin-bitfield [no-merge-warning]constant-expression brace-or-equal-initializer'
 )
-@glrp.rule('member-declarator : declarator ":" begin-bitfield constant-expression')
-#@glrp.rule('member-declarator : member-declarator-initializer')
-#@glrp.rule(
-#    'member-declarator-initializer : declarator ":" begin-bitfield constant-expression brace-or-equal-initializer'
-#)
+@glrp.rule('member-declarator : declarator begin-initializer ":" begin-bitfield constant-expression')
+@glrp.rule(
+    'member-declarator : declarator begin-initializer ":" begin-bitfield constant-expression brace-or-equal-initializer'
+)
 @cxx98
 def member_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
-@glrp.rule('member-declarator : declarator requires-clause')
+@glrp.rule('member-declarator : declarator begin-function-body requires-clause')
 @cxx20
 def member_declarator_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -141,6 +139,13 @@ def virt_specifier(self, p):
     pass
 
 
+@glrp.rule('virt-specifier : "virt-specifier-macro-function" "(" balanced-token-seq? ")"')
+@cxx98
+def virt_specifier_function(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    pass
+
+
 @glrp.rule('virt-specifier : "override"')
 @glrp.rule('virt-specifier : "final"')
 @cxx11
@@ -150,7 +155,7 @@ def virt_specifier_cxx11(self, p):
     pass
 
 
-@glrp.rule('pure-specifier : "=" "integer-literal"[split:pure_specifier]')
+@glrp.rule('pure-specifier : "=" "integer-literal"')
 @cxx98
 def pure_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -167,7 +172,7 @@ def member_declarator_begin(self, p):
 
 @glrp.merge('member-declarator')
 @cxx98_merge
-def ambiguous_member_declarator(self, initializer, pure_specifier):
+def ambiguous_member_declarator(self, initializer, function_body):
     # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
@@ -181,31 +186,34 @@ def ambiguous_member_declarator_2(self, ambiguous_constant_expression, ambiguous
 
 @glrp.merge('member-declaration')
 @cxx98_merge
-def ambiguous_member_declaration_deduction(self, simple_declaration, decl_deduction_guide, nodeclspec_declaration):
+def ambiguous_member_declaration_deduction(self, simple_declaration, decl_deduction_guide):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    pass
+
+
+@glrp.merge('member-declaration')
+@cxx98_merge
+def ambiguous_member_declaration(
+    self, decl_specifier_seq_end, decl_specifier_seq_continue, ambiguous_function_definition
+):
     # type: (CxxParser, List[Any], List[Any], List[Any]) -> Any
     pass
 
 
 @glrp.merge('member-declaration')
 @cxx98_merge
-def ambiguous_member_declaration(self, bitfield_declaration, constructor_declaration):
+def ambiguous_member_declaration_2(self, bitfield_declaration, constructor_declaration):
     # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 
 @glrp.merge('member-declaration')
 @cxx98_merge
-def ambiguous_member_declaration_2(self, initializer_list, compound_statement):
+def ambiguous_member_declaration_3(self, initializer, function_body):
     # type: (CxxParser, List[Any], List[Any]) -> Any
-    pass
-
-
-@glrp.merge('member-declaration')
-@cxx98_merge
-def ambiguous_member_declaration_constraint(
-    self, id_nontemplate, type_constraint, ambiguous_function_definition_constraint
-):
-    # type: (CxxParser, List[Any], List[Any], List[Any]) -> None
+    # This method is actually not called because the initializer and the function_body
+    # options will raise syntax errors for invalid combinations
+    #assert False
     pass
 
 

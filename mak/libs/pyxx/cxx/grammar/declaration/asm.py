@@ -5,6 +5,7 @@ asm-declaration:
 
 import glrp
 from ...parser import cxx98
+from ....ast.declarations import AsmDeclaration
 from motor_typing import TYPE_CHECKING
 
 
@@ -12,7 +13,7 @@ from motor_typing import TYPE_CHECKING
 @cxx98
 def asm_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return AsmDeclaration(p[0], p[4].value)
 
 
 if TYPE_CHECKING:

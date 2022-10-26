@@ -1,15 +1,15 @@
-from .production import Production, AmbiguousProduction
+from .production import Production
+from .compound_symbol import CompoundSymbol, AmbiguousSymbol
 from motor_typing import TYPE_CHECKING
 
 
 class SplitContext(object):
     INDEX = 0
 
-    def __init__(self, stack_unwind):
-        # type: (int) -> None
+    def __init__(self):
+        # type: () -> None
         self._contexts = set()     # type: Set[Context]
         self._index = SplitContext.INDEX
-        self._stack_unwind = stack_unwind
         SplitContext.INDEX += 1
 
     def register(self, context):
@@ -21,35 +21,40 @@ class SplitContext(object):
         self._contexts.remove(context)
         if len(self._contexts) == 1:
             context = self._contexts.pop()
-            for i, (sc, _) in enumerate(context._names):
-                if sc == self:
+            for i, st in enumerate(context._names):
+                if st[0] == self:
                     context._names.pop(i)
                     break
 
 
 class Operation(object):
 
-    def __init__(self, tokens, context, pop_count, state, own_stack=[]):
-        # type: (List[Token], Context, int, int, List[int]) -> None
-        assert pop_count <= len(context._state_stack)
+    def __init__(self, tokens, context, state):
+        # type: (List[Token], Context, int) -> None
         self._tokens = tokens
         self._result_context = context
-        self._pop_count = pop_count
         self._state = state
-        self._own_stack = own_stack
-        self._cache = None     # type: Optional[Tuple[Context, Optional[Symbol]]]
-        self._sym_len = len(context._sym_stack) - pop_count + len(own_stack)
+        self._cache = None         # type: Optional[Tuple[Any]]
+        self._cache_debug = None   # type: Optional[Tuple[Any, Symbol]]
 
     def run(self):
-        # type: () -> Tuple[Context, Optional[Symbol]]
-        if self._cache is not None:
-            return self._cache
-        else:
-            self._cache = self._run()
-            return self._cache
+        # type: () -> Any
+        if self._cache is None:
+            self._cache = (self._run(), )
+        return self._cache[0]
+
+    def run_debug(self):
+        # type: () -> Tuple[Any, Symbol]
+        if self._cache_debug is None:
+            self._cache_debug = self._run_debug()
+        return self._cache_debug
 
     def _run(self):
-        # type: () -> Tuple[Context, Optional[Symbol]]
+        # type: () -> Any
+        raise NotImplementedError
+
+    def _run_debug(self):
+        # type: () -> Tuple[Any, Symbol]
         raise NotImplementedError
 
     def goto(self, state):
@@ -63,9 +68,9 @@ class Operation(object):
     def split(self, actions):
         # type: (Tuple[Tuple[int, Optional[str], Optional[str]],...]) -> Tuple[Operation,...]
         if len(actions) > 1:
-            split_context = SplitContext(self._sym_len)
+            split_context = SplitContext()
             result = tuple(Split(self, name or '_', split_context) for _, name, _ in actions)
-            self.discard()
+            #self.discard()
             return result
         else:
             return (self, )
@@ -73,43 +78,49 @@ class Operation(object):
     def reduce(self, rule):
         # type: (Tuple[int, Tuple[int, ...], Callable[[Production], None], Dict[str, MergeAction.MergeCall]]) -> Operation
         pop_count = len(rule[1])
-        if pop_count == 0:
-            return Reduce(self, self._pop_count, self._state, self._own_stack, rule)
-        elif pop_count < len(self._own_stack):
-            return Reduce(self, self._pop_count, self._own_stack[-pop_count - 1], self._own_stack[:-pop_count], rule)
-        else:
-            pop_count -= len(self._own_stack)
-            return Reduce(
-                self, self._pop_count + pop_count, self._result_context._state_stack[-pop_count - self._pop_count - 1],
-                [], rule
-            )
+        return Reduce(self, pop_count, self._state, rule)
 
     def discard(self):
         # type: () -> None
-        for sc, _ in self._result_context._names:
-            sc.unregister(self._result_context)
+        for st in self._result_context._names:
+            st[0].unregister(self._result_context)
 
 
 class Reduce(Operation):
 
-    def __init__(self, origin, pop_count, state, own_stack, rule):
-        # type: (Operation, int, int, List[int], Tuple[int, Tuple[int, ...], Callable[[Production], None], Dict[str, MergeAction.MergeCall]]) -> None
-        Operation.__init__(self, origin._tokens, origin._result_context, pop_count, state, own_stack)
+    def __init__(self, origin, pop_count, state, rule):
+        # type: (Operation, int, int, Tuple[int, Tuple[int, ...], Callable[[Production], None], Dict[str, MergeAction.MergeCall]]) -> None
+        origin._result_context.pop(pop_count)
+        Operation.__init__(self, origin._tokens, origin._result_context, origin._result_context._state)
         self._rule = rule
         self._predecessor = origin
 
     def _run(self):
-        # type: () -> Tuple[Context, Optional[Symbol]]
-        context, symbol = self._predecessor.run()
+        # type: () -> Any
+        self._predecessor.run()
         pop_count = len(self._rule[1])
-        if pop_count == 0:
-            p = Production(self._rule[0], 0, 0, [], self._rule[2])
+        while pop_count > len(self._result_context._prod_stack):
+            self._result_context._merge_prod_parent()
+        p = Production(self._result_context, pop_count)
+        result = self._rule[2](p)
+        self._result_context.reduce(pop_count)
+        return result
+
+    def _run_debug(self):
+        # type: () -> Tuple[Any, Symbol]
+        self._predecessor.run_debug()
+        pop_count = len(self._rule[1])
+        while pop_count > len(self._result_context._prod_stack):
+            self._result_context._merge_prod_parent()
+        p = Production(self._result_context, pop_count)
+        result = self._rule[2](p)
+        if pop_count:
+            debug_sym = CompoundSymbol(self._rule[0], 0, 0, self._result_context._debug_stack[-pop_count:])
         else:
-            symbols = context._sym_stack[-pop_count:]
-            p = Production(self._rule[0], 0, 0, symbols, self._rule[2])
-            context.pop(pop_count)
-        p.run()
-        return context, p
+            debug_sym = CompoundSymbol(self._rule[0], 0, 0, [])
+
+        self._result_context.reduce_debug(pop_count)
+        return (result, debug_sym)
 
 
 class Goto(Operation):
@@ -118,38 +129,43 @@ class Goto(Operation):
         # type: (Operation, int) -> None
         if target_state == 249:
             pass
-        Operation.__init__(
-            self, origin._tokens, origin._result_context, origin._pop_count, target_state,
-            origin._own_stack + [target_state]
-        )
+        Operation.__init__(self, origin._tokens, origin._result_context, target_state)
         self._predecessor = origin
+        self._result_context.goto(target_state)
 
     def _run(self):
-        # type: () -> Tuple[Context, Optional[Symbol]]
-        context, symbol = self._predecessor.run()
-        assert symbol is not None
-        context.goto(self._state, symbol)
-        return context, symbol
+        # type: () -> Any
+        prod = self._predecessor.run()
+        self._result_context.add_prod(prod)
+        return None
+
+    def _run_debug(self):
+        # type: () -> Tuple[Any, Symbol]
+        prod, symbol = self._predecessor.run_debug()
+        self._result_context.add_prod_debug(prod, symbol)
+        return prod, symbol
 
 
 class ConsumeToken(Operation):
 
     def __init__(self, origin, target_state):
         # type: (Operation, int) -> None
-        if target_state == 249:
-            pass
-        Operation.__init__(
-            self, origin._tokens[1:], origin._result_context, origin._pop_count, target_state,
-            origin._own_stack + [target_state]
-        )
+        Operation.__init__(self, origin._tokens[1:], origin._result_context, target_state)
         self._predecessor = origin
         self._symbol = origin._tokens[0]
+        self._result_context.goto(target_state)
 
     def _run(self):
-        # type: () -> Tuple[Context, Optional[Symbol]]
-        context, symbol = self._predecessor.run()
-        context.goto(self._state, self._symbol)
-        return context, self._symbol
+        # type: () -> Any
+        self._predecessor.run()
+        self._result_context.add_prod(self._symbol)
+        return None
+
+    def _run_debug(self):
+        # type: () -> Tuple[Any, Symbol]
+        self._predecessor.run_debug()
+        self._result_context.add_prod_debug(self._symbol, self._symbol)
+        return (None, self._symbol)
 
 
 class Split(Operation):
@@ -158,43 +174,39 @@ class Split(Operation):
     def __init__(self, origin, name, split_context):
         # type: (Operation, str, SplitContext) -> None
         Operation.__init__(
-            self, origin._tokens, Context(origin._result_context, (split_context, name)), origin._pop_count,
-            origin._state, origin._own_stack
+            self, origin._tokens,
+            Context(origin._result_context, (split_context, name, origin._result_context._sym_len)), origin._state
         )
         self._predecessor = origin
-        self._name = name
 
     def _run(self):
-        # type: () -> Tuple[Context, Optional[Symbol]]
-        context, symbol = self._predecessor.run()
-        self._result_context._state_stack = context._state_stack[:]
-        self._result_context._sym_stack = context._sym_stack[:]
-        self._result_context._state = context._state
-        return self._result_context, symbol
+        # type: () -> Any
+        return self._predecessor.run()
+
+    def _run_debug(self):
+        # type: () -> Tuple[Any, Symbol]
+        return self._predecessor.run_debug()
 
 
 class Merge(Operation):
 
     def __init__(self, operation, action, name, split_context):
         # type: (Operation, MergeAction.MergeCall, str, SplitContext) -> None
-        context = Context(operation._result_context, None)
-        operation.discard()
-        for i, (sc, _) in enumerate(context._names):
-            if sc == split_context:
-                context._names[i] = (split_context, action._result)
-                break
-        Operation.__init__(
-            self, operation._tokens, context, operation._pop_count, operation._state, operation._own_stack
-        )
+        Operation.__init__(self, operation._tokens, operation._result_context, operation._state)
+        for i, st in enumerate(operation._result_context._names):
+            if st[0] == split_context:
+                operation._result_context._names[i] = (st[0], action._result, st[2])
         self._operations = {name: [operation]}
         self._action = action
         self._split_context = split_context
+        self._do_run = False
 
     def add_operation(self, operation, name, split_context):
         # type: (Operation, str, SplitContext) -> None
         assert split_context == self._split_context
         #print('[%d] merge %s -> %s' % (split_context._index, name, self._action._result))
         #assert name == '_' or name not in self._operations
+        self._do_run = True
         operation.discard()
         try:
             self._operations[name].append(operation)
@@ -202,38 +214,74 @@ class Merge(Operation):
             self._operations[name] = [operation]
 
     def _run(self):
-        # type: () -> Tuple[Context, Optional[Symbol]]
-        values = dict(self._action._arguments)
-        prods = []
-        for key, operations in self._operations.items():
-            symbols = []   # type: List[Symbol]
-            values[key] = symbols
-            for operation in operations:
-                context, symbol = operation.run()
-                assert symbol is not None
-                symbols.append(symbol)
-                prods.append(symbol)
-                           #print('[%d] %s -> %s' % (self._counter, ', '.join(self._operations.keys()), self._action._result))
-
-        self._action(**values)
-        self._result_context._state_stack = context._state_stack[:]
-        self._result_context._sym_stack = context._sym_stack[:]
-        self._result_context._state = context._state
-        if len(prods) > 1:
-            return self._result_context, AmbiguousProduction(prods)
+        # type: () -> Any
+        if self._do_run:
+            prod_count = 0
+            values = dict(self._action._arguments)
+            for key, operations in self._operations.items():
+                prods = []     # type: List[Any]
+                values[key] = prods
+                for operation in operations:
+                    try:
+                        result = operation.run()
+                    except SyntaxError:
+                        pass
+                    else:
+                        prods.append(result)
+                        prod_count += 1
+            if prod_count == 0:
+                raise SyntaxError
+            elif prod_count > 1:
+                result = self._action(**values)
         else:
-            return self._result_context, prods[0]
+            operations = self._operations.popitem()[1]
+            result = operations[0].run()
+
+        return result
+
+    def _run_debug(self):
+        # type: () -> Tuple[Any, Symbol]
+        if self._do_run:
+            prod_count = 0
+            debug_symbols = []
+            values = dict(self._action._arguments)
+            for key, operations in self._operations.items():
+                prods = []     # type: List[Any]
+                values[key] = prods
+                for operation in operations:
+                    try:
+                        result, debug_sym = operation.run_debug()
+                    except SyntaxError:
+                        pass
+                    else:
+                        prods.append(result)
+                        debug_symbols.append(debug_sym)
+                        prod_count += 1
+            if prod_count == 0:
+                raise SyntaxError
+            elif prod_count > 1:
+                result = self._action(**values)
+                debug_sym = AmbiguousSymbol(debug_symbols)
+        else:
+            operations = self._operations.popitem()[1]
+            result, debug_sym = operations[0].run_debug()
+
+        return result, debug_sym
 
 
 class RootOperation(Operation):
 
     def __init__(self, context, tokens):
         # type: (Context, List[Token]) -> None
-        Operation.__init__(self, tokens, context, 0, context._state)
+        Operation.__init__(self, tokens, context, context._state)
 
     def _run(self):
-        # type: () -> Tuple[Context, Optional[Symbol]]
-        return self._result_context, None
+        # type: () -> Any
+        return None
+
+    def _run_debug(self):
+        # type: () -> Tuple[Any, Symbol]
+        return (None, self._tokens[0])
 
 
 class Context(object):
@@ -248,36 +296,93 @@ class Context(object):
             # type: (Context, Token) -> List[Token]
             return [token]
 
+        def clone(self):
+            # type: () -> Context.TokenCallback
+            return self
+
     def __init__(self, parent, param_name):
-        # type: (Optional[Context], Optional[Tuple[SplitContext, str]]) -> None
+        # type: (Optional[Context], Optional[SplitName]) -> None
+        self._refcount = 0
+        self._parent = parent
+        self._prod_parent = parent
         if parent is not None:
-            for sc, _ in parent._names:
-                sc.register(self)
-            self._state = parent._state                # type: int
-            self._names = parent._names[:]             # type: List[Tuple[SplitContext, str]]
-            self._state_stack = parent._state_stack[:] # type: List[int]
-            self._sym_stack = parent._sym_stack[:]     # type: List[Symbol]
-            self._filters = parent._filters[:]         # type: List[Context.TokenCallback]
+            parent._refcount += 1
+            self._state_stack = []                               # type: List[int]
+            self._sym_len = parent._sym_len                      # type: int
+            self._state = parent._state                          # type: int
+            self._filters = [f.clone() for f in parent._filters] # type: List[Context.TokenCallback]
         else:
-            self._state = 0
-            self._names = []
             self._state_stack = [0]
-            self._sym_stack = []
+            self._sym_len = 0
+            self._state = 0
             self._filters = [Context.TokenCallback()]
+        self._names = []                                         # type: List[SplitName]
+        self._prod_stack = []                                    # type: List[Any]
+        self._debug_stack = []                                   # type: List[Symbol]
         if param_name is not None:
             self._names.append(param_name)
             param_name[0].register(self)
 
-    def goto(self, state, symbol):
-        # type: (int, Symbol) -> None
+    def _abandon(self):
+        # type: () -> None
+        for st in self._names:
+            st[0].unregister(self)
+
+    def _merge_parent(self):
+        # type: () -> None
+        parent = self._parent
+        assert parent is not None
+        for st in parent._names:
+            st[0].register(self)
+        parent._refcount -= 1
+        if parent._refcount == 0:
+            parent._abandon()
+        self._names = parent._names + self._names
+        self._state_stack = parent._state_stack + self._state_stack
+        self._parent = parent._parent
+
+    def _merge_prod_parent(self):
+        # type: () -> None
+        parent = self._prod_parent
+        assert parent is not None
+        self._prod_stack = parent._prod_stack + self._prod_stack
+        self._debug_stack = parent._debug_stack + self._debug_stack
+        self._prod_parent = parent._prod_parent
+
+    def goto(self, state):
+        # type: (int) -> None
+        self._sym_len += 1
         self._state = state
         self._state_stack.append(state)
-        self._sym_stack.append(symbol)
+
+    def add_prod(self, prod):
+        # type: (Any) -> None
+        self._prod_stack.append(prod)
+
+    def add_prod_debug(self, prod, symbol):
+        # type: (Any, Symbol) -> None
+        self._prod_stack.append(prod)
+        self._debug_stack.append(symbol)
 
     def pop(self, pop_count):
         # type: (int) -> None
-        self._state_stack = self._state_stack[:-pop_count]
-        self._sym_stack = self._sym_stack[:-pop_count]
+        if pop_count != 0:
+            while pop_count >= len(self._state_stack):
+                self._merge_parent()
+            self._sym_len -= pop_count
+            del self._state_stack[-pop_count:]
+            self._state = self._state_stack[-1]
+
+    def reduce(self, pop_count):
+        # type: (int) -> None
+        if pop_count != 0:
+            del self._prod_stack[-pop_count:]
+
+    def reduce_debug(self, pop_count):
+        # type: (int) -> None
+        if pop_count != 0:
+            del self._prod_stack[-pop_count:]
+            del self._debug_stack[-pop_count:]
 
     def input(self, token):
         # type: (Token) -> Operation
@@ -285,7 +390,8 @@ class Context(object):
 
 
 if TYPE_CHECKING:
-    from typing import Callable, Dict, List, Optional, Set, Tuple
+    from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+    SplitName = Tuple[SplitContext, str, int]
     from .parser import MergeAction
     from ..lex import Token
     from ..symbol import Symbol

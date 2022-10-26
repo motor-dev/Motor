@@ -10,7 +10,8 @@ conversion-declarator:
 """
 
 import glrp
-from ...parser import cxx98, cxx98_merge
+from ...parser import cxx98
+from ....ast.reference import ConversionOperatorId
 from motor_typing import TYPE_CHECKING
 
 
@@ -18,7 +19,7 @@ from motor_typing import TYPE_CHECKING
 @cxx98
 def conversion_function_id(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return ConversionOperatorId(p[1])
 
 
 @glrp.rule('conversion-type-id : type-specifier-seq')
@@ -44,13 +45,6 @@ def conversion_declarator_opt(self, p):
     pass
 
 
-@glrp.merge('conversion-type-id')
-@cxx98_merge
-def ambiguous_conversion_type_id_constraint(self, id_nontemplate, type_constraint):
-    # type: (CxxParser, List[Any], List[Any]) -> None
-    pass
-
-
 if TYPE_CHECKING:
-    from typing import Any, List
+    from typing import Any
     from ...parser import CxxParser

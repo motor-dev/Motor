@@ -91,8 +91,8 @@ class Grammar(object):
             # type: () -> int
             return len(self._rule_list)
 
-    def __init__(self, name, rule_hash, terminals, rules, merges, start_symbol, parser, temp_dir):
-        # type: (str, str, Dict[str, Tuple[int, bool]], List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, List[Tuple[str, MergeAction, Tuple[str, ...]]]], str, Parser, str) -> None
+    def __init__(self, name, rule_hash, terminals, rules, merges, start_symbol, parser, temp_dir, show_merges):
+        # type: (str, str, Dict[str, Tuple[int, bool]], List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, List[Tuple[str, MergeAction, Tuple[str, ...]]]], str, Parser, str, bool) -> None
         debug_filename = os.path.join(temp_dir, name + '.txt')
         conflict_filename = os.path.join(temp_dir, name + '-Conflicts.txt')
         index = {}
@@ -128,7 +128,9 @@ class Grammar(object):
                 log.info('  %s', rule.to_string(name_map))
 
         _create_lr0_items(productions)
-        tables = lalr.create_parser_table(productions, start_id, name_map, len(terminals), log, conflict_log, stderr)
+        tables = lalr.create_parser_table(
+            productions, start_id, name_map, len(terminals), show_merges, log, conflict_log, stderr
+        )
         self._action_table = tables._action_table
         self._goto_table = tables._goto_table
         self._rules = rule_table

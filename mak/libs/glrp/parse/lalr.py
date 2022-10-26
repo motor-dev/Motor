@@ -47,6 +47,7 @@ def _find_merge_points(conflict_list, lookahead, name_map, logger, error_log):
     # type: (List[Tuple[LR0Node, bool, str]], int, List[str], Logger, Logger) -> None
     merge_tree = MergeTree(conflict_list, lookahead)
     merge_tree.check_resolved(name_map, error_log, logger)
+    pass
 
 
 def _log(title, conflict_paths, out, name_map):
@@ -194,8 +195,8 @@ def _find_counterexamples(conflict_list):
     return conflict_paths
 
 
-def create_parser_table(productions, start_id, name_map, terminal_count, sm_log, conflict_log, error_log):
-    # type: (Dict[int, Grammar.Production], int, List[str], int, Logger, Logger, Logger) -> LALRTable
+def create_parser_table(productions, start_id, name_map, terminal_count, show_merges, sm_log, conflict_log, error_log):
+    # type: (Dict[int, Grammar.Production], int, List[str], int, bool, Logger, Logger, Logger) -> LALRTable
     cidhash = {}       # type: Dict[int, int]
     goto_cache = {}    # type: Dict[Tuple[int, int], Optional[LR0ItemSet]]
     goto_cache_2 = {}  # type: Dict[int, Any]
@@ -736,15 +737,18 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                         for item in accepted_actions[j]:
                             error_log.note('    %s' % item.to_string(name_map))
 
-                splits = [
-                    (node, node._item._next is None, node._item._split or ('_%d' % merge_index))
-                    for merge_index, node in enumerate(merge_nodes)
-                ]
-                conflict_log.info('   Merge graph for rules:')
-                for node, _, split_name in splits:
-                    conflict_log.info('      [%s][%s] %s' % (split_name, name_map[a], node._item.to_string(name_map)))
-                _find_merge_points(splits, a, name_map, conflict_log, error_log)
-                conflict_log.info('')
+                if show_merges:
+                    splits = [
+                        (node, node._item._next is None, node._item._split or ('_%d' % merge_index))
+                        for merge_index, node in enumerate(merge_nodes)
+                    ]
+                    conflict_log.info('   Merge graph for rules:')
+                    for node, _, split_name in splits:
+                        conflict_log.info(
+                            '      [%s][%s] %s' % (split_name, name_map[a], node._item.to_string(name_map))
+                        )
+                    _find_merge_points(splits, a, name_map, conflict_log, error_log)
+                    conflict_log.info('')
             else:
                 for j, _, token_action in st_action[a]:
                     action_error = False
@@ -854,30 +858,31 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         for item in sorted(item_set, key=lambda x: (x.rule._filename, x.rule._lineno)):
             error_log.diagnostic(item.rule._filename, item.rule._lineno, item.to_string(name_map))
 
-    for _, production in sorted(productions.items()):
-        for rule in production:
-            item_iterator = rule._item # type: Optional[LR0Item]
-            while item_iterator:
-                if item_iterator._split is not None and item_iterator._split_use == 0:
-                    error_log.warning('unused split annotation')
-                    error_log.diagnostic(rule._filename, rule._lineno, item_iterator.to_string(name_map))
-                item_iterator = item_iterator._next
+    if show_merges:
+        for _, production in sorted(productions.items()):
+            for rule in production:
+                item_iterator = rule._item # type: Optional[LR0Item]
+                while item_iterator:
+                    if item_iterator._split is not None and item_iterator._split_use == 0:
+                        error_log.warning('unused split annotation')
+                        error_log.diagnostic(rule._filename, rule._lineno, item_iterator.to_string(name_map))
+                    item_iterator = item_iterator._next
 
-        for merge in rule._item._last._merges:
-            if merge._use_count == 0:
-                error_log.warning('unused merge annotation %s' % merge._action._method_name)
-                error_log.diagnostic(
-                    merge._action._filename, merge._action._lineno,
-                    '%s(%s)' % (merge._action._method_name, ', '.join(merge._arguments))
-                )
-            else:
-                for argument, use_count in merge._arguments.items():
-                    if use_count == 0:
-                        error_log.warning('unused merge arguments "%s"' % argument)
-                        error_log.diagnostic(
-                            merge._action._filename, merge._action._lineno,
-                            '%s(%s)' % (merge._action._method_name, ', '.join(merge._arguments))
-                        )
+            for merge in rule._item._last._merges:
+                if merge._use_count == 0:
+                    error_log.warning('unused merge annotation %s' % merge._action._method_name)
+                    error_log.diagnostic(
+                        merge._action._filename, merge._action._lineno,
+                        '%s(%s)' % (merge._action._method_name, ', '.join(merge._arguments))
+                    )
+                else:
+                    for argument, use_count in merge._arguments.items():
+                        if use_count == 0:
+                            error_log.warning('unused merge arguments "%s"' % argument)
+                            error_log.diagnostic(
+                                merge._action._filename, merge._action._lineno,
+                                '%s(%s)' % (merge._action._method_name, ', '.join(merge._arguments))
+                            )
 
     if num_sr == 1:
         error_log.warning('1 shift/reduce conflict')

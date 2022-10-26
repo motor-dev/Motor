@@ -21,7 +21,7 @@ _long_suffix = '[lL]'
 _long_long_suffix = '(?:(?:ll)|(?:LL))'
 _integer_suffix = '(?:(?:%(_unsigned_suffix)s%(_long_suffix)s?)|(?:%(_unsigned_suffix)s%(_long_long_suffix)s)|(?:%(_long_suffix)s%(_unsigned_suffix)s?)|(?:%(_long_long_suffix)s%(_unsigned_suffix)s?))' % locals(
 )
-_integer_literal = '(?:%(_decimal_constant)s|%(_octal_constant)s|%(_hexadecimal_constant)s|%(_binary_constant)s)%(_integer_suffix)s?' % locals(
+_integer_literal = '(?:%(_decimal_constant)s|%(_hexadecimal_constant)s|%(_binary_constant)s|%(_octal_constant)s)%(_integer_suffix)s?' % locals(
 )
 
 _floating_suffix = '(?:f|l|F|L|(?:df)|(?:dd)|(?:dl)|(?:DF)|(?:DD)|(?:DL))'
@@ -34,7 +34,7 @@ _decimal_floating_constant = '(?:(?:%(_fractional_constant)s%(_exponent_part)s?%
 _hexadecimal_fractional_constant = '(?:(?:%(_hexadecimal_digit)s*\\.%(_hexadecimal_digit)s+)|(?:%(_hexadecimal_digit)s+\\.))' % locals(
 )
 _binary_exponent_part = r'(?:[pP][+\-]?[0-9]+)'
-_hexadecimal_floating_constant = '(?:(?:%(_hexadecimal_prefix)s%(_hexadecimal_fractional_constant)s)|(?:%(_binary_exponent_part)s%(_floating_suffix)s?)|(?:%(_hexadecimal_prefix)s%(_hexadecimal_digit)s+)|(?:%(_binary_exponent_part)s%(_floating_suffix)s))' % locals(
+_hexadecimal_floating_constant = '(?:(?:%(_hexadecimal_prefix)s%(_hexadecimal_fractional_constant)s%(_binary_exponent_part)s%(_floating_suffix)s?)|(?:%(_hexadecimal_prefix)s%(_hexadecimal_digit)s+%(_binary_exponent_part)s%(_floating_suffix)s))' % locals(
 )
 
 _floating_literal = '%(_decimal_floating_constant)s|%(_hexadecimal_floating_constant)s' % locals()
@@ -49,9 +49,9 @@ _universal_character_name = '(?:(?:\\\\u%(_hexadecimal_quad)s)|(?:\\\\U%(_hexade
 )
 _escape_sequence = '(?:%(_simple_escape_sequence)s|%(_octal_escape_sequence)s|%(_hexadecimal_escape_sequence)s|%(_universal_character_name)s)' % locals(
 )
-_c_char = '[^\\\'\\\\\\n]|%(_escape_sequence)s' % locals()
+_c_char = '(?:[^\\\'\\\\\\n]|%(_escape_sequence)s)' % locals()
 _c_char_sequence = '%(_c_char)s+' % locals()
-_character_literal = '%(_encoding_prefix)s?\'%(_c_char_sequence)s\'' % locals()
+_character_literal = '%(_encoding_prefix)s?\\\'%(_c_char_sequence)s\\\'' % locals()
 
 _s_char = '(?:[^"\\n]|%(_escape_sequence)s)' % locals()
 _string_literal = '(?:%(_encoding_prefix)s?"%(_s_char)s*")' % locals()
@@ -62,9 +62,9 @@ _user_defined_integer_literal = '(?:%(_decimal_constant)s%(_identifier)s)|(?:%(_
 _user_defined_floating_literal = '(?:%(_fractional_constant)s%(_exponent_part)s?%(_identifier)s)|(?:[0-9]+%(_exponent_part)s%(_identifier)s)|(?:%(_hexadecimal_prefix)s%(_hexadecimal_fractional_constant)s%(_binary_exponent_part)s%(_identifier)s)|(?:%(_hexadecimal_prefix)s%(_hexadecimal_digit)s+%(_binary_exponent_part)s%(_identifier)s)' % locals(
 )
 
-_user_defined_string_literal = '(?:%(_string_literal)s%(_identifier)s)' % locals()
+_user_defined_string_literal = '%(_string_literal)s%(_identifier)s' % locals()
 
-_user_defined_character_literal = '(?:%(_character_literal)s%(_identifier)s)' % locals()
+_user_defined_character_literal = '%(_character_literal)s%(_identifier)s' % locals()
 
 _keywords = (
                            #'and',
@@ -140,6 +140,7 @@ _keywords = (
     'while',
                            #'xor',
                            #'xor_eq',
+    '__int128',
 )                          # type: Tuple[str,...]
 
 _keywords_cxx11 = (
@@ -186,9 +187,90 @@ _keywords_cxx23 = _keywords_transactional + _keywords_reflection
 class Cxx98Lexer(glrp.Lexer):
     keywords = _keywords
     tokens = _keywords + (
-        'virt-specifier-macro', 'access-specifier-macro', 'decl-specifier-macro', 'attribute-specifier-macro',
-        'storage-class-specifier-macro', '%>'
+        'virt-specifier-macro', 'virt-specifier-macro-function', 'access-specifier-macro',
+        'access-specifier-macro-function', 'decl-specifier-macro', 'decl-specifier-macro-function',
+        'attribute-specifier-macro', 'attribute-specifier-macro-function', 'storage-class-specifier-macro',
+        'storage-class-specifier-macro-function', 'decltype-macro', 'type-trait-macro', 'type-trait-macro-function',
+        '%>'
     )
+
+    def __init__(self):
+        # type: () -> None
+        glrp.Lexer.__init__(self)
+        self._macros = {
+            '__attribute__': 'attribute-specifier-macro-function',
+            '__attribute': 'attribute-specifier-macro-function',
+            '__declspec': 'attribute-specifier-macro-function',
+            '__asm': 'attribute-specifier-macro-function',
+            '__asm__': 'attribute-specifier-macro-function',
+            '__restrict': 'attribute-specifier-macro',
+            '__extension__': 'attribute-specifier-macro',
+            '__typeof': 'decltype-macro',
+            '__inline': 'decl-specifier-macro',
+            '__inline__': 'decl-specifier-macro',
+            '__has_unique_object_representations': 'type-trait-macro-function',
+            '__has_virtual_destructor': 'type-trait-macro-function',
+            '__is_abstract': 'type-trait-macro-function',
+            '__is_aggregate': 'type-trait-macro-function',
+            '__is_arithmetic': 'type-trait-macro-function',
+            '__is_array': 'type-trait-macro-function',
+            '__is_assignable': 'type-trait-macro-function',
+            '__is_base_of': 'type-trait-macro-function',
+            '__is_bounded_array': 'type-trait-macro-function',
+            '__is_class': 'type-trait-macro-function',
+            '__is_compound': 'type-trait-macro-function',
+            '__is_const': 'type-trait-macro-function',
+            '__is_constructible': 'type-trait-macro-function',
+            '__is_convertible': 'type-trait-macro-function',
+            '__is_destructible': 'type-trait-macro-function',
+            '__is_empty': 'type-trait-macro-function',
+            '__is_final': 'type-trait-macro-function',
+            '__is_floating_point': 'type-trait-macro-function',
+            '__is_function': 'type-trait-macro-function',
+            '__is_fundamental': 'type-trait-macro-function',
+            '__is_integral': 'type-trait-macro-function',
+            '__is_interface_class': 'type-trait-macro-function',
+            '__is_literal_type': 'type-trait-macro-function',
+            '__is_lvalue_reference': 'type-trait-macro-function',
+            '__is_member_object_pointer': 'type-trait-macro-function',
+            '__is_member_function_pointer': 'type-trait-macro-function',
+            '__is_member_pointer': 'type-trait-macro-function',
+            '__is_nothrow_assignable': 'type-trait-macro-function',
+            '__is_nothrow_constructible': 'type-trait-macro-function',
+            '__is_nothrow_destructible': 'type-trait-macro-function',
+            '__is_nullptr': 'type-trait-macro-function',
+            '__is_object': 'type-trait-macro-function',
+            '__is_pod': 'type-trait-macro-function',
+            '__is_pointer': 'type-trait-macro-function',
+            '__is_polymorphic': 'type-trait-macro-function',
+            '__is_reference': 'type-trait-macro-function',
+                                                                                  #'__is_referenceable': 'type-trait-macro-function',
+            '__is_rvalue_reference': 'type-trait-macro-function',
+            '__is_same': 'type-trait-macro-function',
+            '__is_same_as': 'type-trait-macro-function',
+            '__is_scalar': 'type-trait-macro-function',
+            '__is_scoped_enum': 'type-trait-macro-function',
+            '__is_sealed': 'type-trait-macro-function',
+            '__is_signed': 'type-trait-macro-function',
+            '__is_standard_layout': 'type-trait-macro-function',
+            '__is_trivial': 'type-trait-macro-function',
+            '__is_trivially_assignable': 'type-trait-macro-function',
+            '__is_trivially_constructible': 'type-trait-macro-function',
+            '__is_trivially_copyable': 'type-trait-macro-function',
+            '__is_trivially_destructible': 'type-trait-macro-function',
+            '__is_trivially_relocatable': 'type-trait-macro-function',
+            '__is_unbounded_array': 'type-trait-macro-function',
+            '__is_union': 'type-trait-macro-function',
+            '__is_unsigned': 'type-trait-macro-function',
+            '__is_void': 'type-trait-macro-function',
+            '__is_volatile': 'type-trait-macro-function',
+            '__reference_binds_to_temporary': 'type-trait-macro-function'
+        }
+
+    @glrp.token(r'[ \t\n]+', 'whitespace', warn=False)
+    def _00_skip(self, t):
+        # type: (glrp.Token) -> Optional[glrp.Token]
+        return None
 
     # arithmetic operators
     @glrp.token(r'\+', '+')
@@ -200,86 +282,100 @@ class Cxx98Lexer(glrp.Lexer):
     @glrp.token(r'&')
     @glrp.token(r'~')
     @glrp.token(r'\^', '^')
-    @glrp.token(r'<<')
-    @glrp.token(r'>>')
-    # logic operators
-    @glrp.token(r'\|\|', '||')
-    @glrp.token(r'&&')
     @glrp.token(r'!')
     @glrp.token(r'<')
     @glrp.token(r'>')
-    @glrp.token(r'<=')
-    @glrp.token(r'>=')
-    @glrp.token(r'==')
-    @glrp.token(r'!=')
     # assignment operators
     @glrp.token(r'=')
-    @glrp.token(r'\*=', '*=')
-    @glrp.token(r'/=')
-    @glrp.token(r'%=')
-    @glrp.token(r'\+=', '+=')
-    @glrp.token(r'-=')
-    @glrp.token(r'<<=')
-    @glrp.token(r'>>=')
-    @glrp.token(r'&=')
-    @glrp.token(r'\|=', '|=')
-    @glrp.token(r'\^=', '^=')
-    @glrp.token(r'\+\+', '++')
-    @glrp.token(r'--')
-    # member access operators
-    @glrp.token(r'->')
-    @glrp.token(r'->\*', '->*')
-    @glrp.token(r'\.\*', '.*')
-    # conditional operator
     @glrp.token(r'\?', '?')
-    # scope operator
-    @glrp.token(r'::')
-    # punctuation
     @glrp.token(r',')
     @glrp.token(r'\.', '.')
     @glrp.token(r';')
     @glrp.token(r':')
-    @glrp.token(r'\.\.\.', '...')
     @glrp.token(r'\[', '[')
     @glrp.token(r'\{', '{')
     @glrp.token(r'\(', '(')
     @glrp.token(r'\]', ']')
     @glrp.token(r'\}', '}')
     @glrp.token(r'\)', ')')
-    @glrp.token(r'/\*[\!\*](.|\n)*?\*/', 'doxycomment-block')
-    @glrp.token(r'//[/\!](?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'doxycomment-line')
-    def tok(self, token):
+    def _01_tok(self, token):
+        # type: (glrp.Token) -> glrp.Token
+        return token
+
+    @glrp.token(r'<<')
+    @glrp.token(r'>>')
+    @glrp.token(r'\|\|', '||')
+    @glrp.token(r'&&')
+    @glrp.token(r'<=')
+    @glrp.token(r'>=')
+    @glrp.token(r'==')
+    @glrp.token(r'!=')
+    @glrp.token(r'\*=', '*=')
+    @glrp.token(r'/=')
+    @glrp.token(r'%=')
+    @glrp.token(r'\+=', '+=')
+    @glrp.token(r'-=')
+    @glrp.token(r'&=')
+    @glrp.token(r'\|=', '|=')
+    @glrp.token(r'\^=', '^=')
+    @glrp.token(r'\+\+', '++')
+    @glrp.token(r'--')
+    @glrp.token(r'->')
+    @glrp.token(r'\.\*', '.*')
+    @glrp.token(r'::')
+    def _02_tok(self, token):
+        # type: (glrp.Token) -> glrp.Token
+        return token
+
+    @glrp.token(r'<<=')
+    @glrp.token(r'>>=')
+    @glrp.token(r'->\*', '->*')
+    @glrp.token(r'\.\.\.', '...')
+    def _03_tok(self, token):
         # type: (glrp.Token) -> glrp.Token
         return token
 
     @glrp.token(r'\#(:?[^\\\n]|(?:\\.)|(?:\\\n))*', 'preprocessor', warn=False)
-    def preprocessor(self, t):
+    def _04_preprocessor(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         #if t.value.find('include') != -1:
         #    t.lexer.includes.append(t.value)
         return None
 
-    @glrp.token(r'[ \t\n]+', 'whitespace', warn=False)
-    def skip(self, t):
-        # type: (glrp.Token) -> Optional[glrp.Token]
-        return None
+    @glrp.token(r'/\*[\!\*](.|\n)*?\*/', 'doxycomment-block')
+    @glrp.token(r'//[/\!](?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'doxycomment-line')
+    def _05_documentation(self, token):
+        # type: (glrp.Token) -> glrp.Token
+        return token
 
     @glrp.token(r'/\*(.|\n)*?\*/', 'block-comment', warn=False)
     @glrp.token(r'//(?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'line-comment', warn=False)
-    def comment(self, t):
+    def _06_comment(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         return None
 
     @glrp.token(_identifier, 'identifier')
-    def identifier(self, t):
+    def _07_identifier(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         t.value = self.text(t)
         if t.value in self.keywords:
             self.set_token_type(t, t.value)
+        else:
+            try:
+                macro_type = self._macros[t.value]
+            except KeyError:
+                pass
+            else:
+                self.set_token_type(t, macro_type)
+        return t
+
+    @glrp.token(_integer_literal, 'integer-literal')
+    def _08_integer_literal(self, t):
+        # type: (glrp.Token) -> Optional[glrp.Token]
         return t
 
     @glrp.token(_floating_literal, 'floating-literal')
-    def floating_literal(self, t):
+    def _10_floating_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         text = self.text(t)
         if text[-1] in 'fFdD':
@@ -294,20 +390,15 @@ class Cxx98Lexer(glrp.Lexer):
                 t.value = 0    # TODO!
         return t
 
-    @glrp.token(_integer_literal, 'integer-literal')
-    def integer_literal(self, t):
-        # type: (glrp.Token) -> Optional[glrp.Token]
-        return t
-
     @glrp.token(_string_literal, 'string-literal')
-    def string_literal(self, t):
+    def _12_string_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         text = self.text(t)
         t.value = text[1:-1]
         return t
 
     @glrp.token(_character_literal, 'character-literal')
-    def character_literal(self, t):
+    def _12_character_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         text = self.text(t)
         t.value = text[1:-1]
@@ -354,27 +445,31 @@ class Cxx11Lexer(Cxx03Lexer):
                     yield token
 
     @glrp.token(_user_defined_integer_literal, 'user-defined-integer-literal')
-    def user_integer_literal(self, t):
+    def _09_user_integer_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         t.value = self.text(t)
         return t
 
     @glrp.token(_user_defined_floating_literal, 'user-defined-floating-literal')
-    def user_floating_literal(self, t):
+    def _11_user_floating_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         t.value = self.text(t)
         return t
 
     @glrp.token(_user_defined_character_literal, 'user-defined-character-literal')
-    def user_defined_character_literal(self, t):
+    def _13_user_defined_character_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         t.value = self.text(t)
         return t
 
     @glrp.token(_user_defined_string_literal, 'user-defined-string-literal')
-    def user_defined_string_literal(self, t):
+    def _13_user_defined_string_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        t.value = self.text(t)
+        value = self.text(t)
+        end_string = value.rfind('"')
+        literal_id = value[end_string + 1:]
+        text = value[1:end_string]
+        t.value = (text, literal_id)
         return t
 
 
@@ -387,11 +482,11 @@ class Cxx17Lexer(Cxx14Lexer):
 
 
 class Cxx20Lexer(Cxx17Lexer):
-    tokens = Cxx17Lexer.tokens + _keywords_cxx20
+    tokens = Cxx17Lexer.tokens + _keywords_cxx20 + ('type-trait-macro', 'type-trait-macro-function')
     keywords = Cxx17Lexer.keywords + _keywords_cxx20
 
     @glrp.token(r'<=>')
-    def tok_spaceship(self, token):
+    def _03_tok_spaceship(self, token):
         # type: (glrp.Token) -> glrp.Token
         return token
 
@@ -402,4 +497,4 @@ class Cxx23Lexer(Cxx20Lexer):
 
 
 if TYPE_CHECKING:
-    from motor_typing import List, Optional, Tuple, Generator
+    from motor_typing import List, Optional, Tuple, Generator, Set

@@ -57,6 +57,7 @@ identifier-list:
 
 import glrp
 from ...parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge
+from ....ast.declarations import AmbiguousDeclaration, SimpleDeclaration, StructuredBindingDeclaration, InitDeclarator, StaticAssert, AliasDeclaration
 from motor_typing import TYPE_CHECKING
 from . import specifier
 from . import declarator
@@ -71,26 +72,34 @@ from . import linkage
 from . import attribute
 
 
-@glrp.rule('declaration-seq? : declaration-seq declaration')
-@glrp.rule('declaration-seq? : declaration')
 @glrp.rule('declaration-seq? : ')
 @cxx98
-def declaration_seq_opt(self, p):
+def declaration_seq_empty(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return []
 
 
 @glrp.rule('declaration-seq : declaration')
+@glrp.rule('declaration-seq? : declaration')
+@cxx98
+def declaration_seq_last(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return [p[0]]
+
+
+@glrp.rule('declaration-seq? : declaration-seq declaration')
 @glrp.rule('declaration-seq : declaration-seq declaration')
 @cxx98
-def declaration_seq(self, p):
+def declaration_seq_recursive(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    result = p[0]
+    result.append(p[1])
+    return result
 
 
 @glrp.rule('declaration : block-declaration')
-@glrp.rule('declaration : nodeclspec-function-declaration')
-@glrp.rule('declaration : [no-merge-warning]function-definition')
+#@glrp.rule('declaration : nodeclspec-function-declaration')
+@glrp.rule('declaration : function-definition')
 @glrp.rule('declaration : template-declaration')
 @glrp.rule('declaration : explicit-instantiation')
 @glrp.rule('declaration : explicit-specialization')
@@ -100,21 +109,21 @@ def declaration_seq(self, p):
 @cxx98
 def declaration(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return p[0]
 
 
 @glrp.rule('declaration : attribute-declaration')
 @cxx11
 def declaration_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return p[0]
 
 
 @glrp.rule('declaration : deduction-guide')
 @cxx17
 def declaration_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return p[0]
 
 
 @glrp.rule('declaration : export-declaration')
@@ -122,7 +131,7 @@ def declaration_cxx17(self, p):
 @cxx20
 def declaration_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return p[0]
 
 
 @glrp.rule('block-declaration : simple-declaration')
@@ -134,7 +143,7 @@ def declaration_cxx20(self, p):
 @cxx98
 def block_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return p[0]
 
 
 @glrp.rule('block-declaration : static_assert-declaration')
@@ -142,21 +151,23 @@ def block_declaration(self, p):
 @cxx11
 def block_declaration_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return p[0]
 
 
 @glrp.rule('block-declaration : using-enum-declaration')
 @cxx20
 def block_declaration_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return p[0]
 
 
-@glrp.rule('nodeclspec-function-declaration : attribute-specifier-seq? begin-declaration-nodeclspec declarator ";"')
-@cxx98
-def nodeclspec_function_declaration(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    pass
+#@glrp.rule(
+#    'nodeclspec-function-declaration : attribute-specifier-seq? begin-declaration declarator ";"'
+#)
+#@cxx98
+#def nodeclspec_function_declaration(self, p):
+#    # type: (CxxParser, glrp.Production) -> Any
+#    return SimpleDeclaration(p[0], None, [InitDeclarator(p[3], p[2], None)])
 
 
 # todo: attribute-specifier-seq?, typename? not allowed
@@ -166,60 +177,79 @@ def nodeclspec_function_declaration(self, p):
 @cxx98
 def alias_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return AliasDeclaration(p[0], p[4], p[5], p[7])
 
 
-@glrp.rule('simple-declaration : attribute-specifier-seq? begin-declaration decl-specifier-seq ";"')
+@glrp.rule('simple-declaration : attribute-specifier-seq? begin-declaration decl-specifier-seq? ";"')
+@cxx98
+def simple_declaration_no_declarator(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return SimpleDeclaration(p[0], p[2], [])
+
+
 @glrp.rule(
-    'simple-declaration :  attribute-specifier-seq? begin-declaration decl-specifier-seq ref-qualifier? "[" identifier-list "]" initializer ";"'
-)
-@glrp.rule(
-    'simple-declaration : attribute-specifier-seq? begin-declaration [no-merge-warning] decl-specifier-seq init-declarator-list ";"'
+    'simple-declaration : attribute-specifier-seq? begin-declaration [no-merge-warning]decl-specifier-seq? init-declarator-list ";"'
 )
 @cxx98
 def simple_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return SimpleDeclaration(p[0], p[2], p[3])
 
 
-@glrp.rule('static_assert-declaration : "static_assert" "(" constant-expression "," "string-literal" ")" ";"')
+@glrp.rule(
+    'simple-declaration :  attribute-specifier-seq? begin-declaration decl-specifier-seq? ref-qualifier? "[" identifier-list "]" initializer ";"'
+)
+@cxx17
+def simple_declaration_structured_binding_cxx17(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return StructuredBindingDeclaration(p[0], p[2], p[3], p[5], p[6])
+
+
+@glrp.rule('static_assert-declaration : "static_assert" "(" constant-expression "," string-literal-list ")" ";"')
 @cxx11
 def static_assert_declaration_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return StaticAssert(p[2], p[4])
 
 
 @glrp.rule('static_assert-declaration : "static_assert" "(" constant-expression ")" ";"')
 @cxx17
 def static_assert_declaration_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return StaticAssert(p[2], None)
 
 
 @glrp.rule('empty-declaration : [prec:left,1]";"')
 @cxx98
 def empty_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return SimpleDeclaration(None, None, [])
 
 
-@glrp.rule('attribute-declaration : attribute-specifier-seq? ";"')
+@glrp.rule('attribute-declaration : attribute-specifier-seq? [prec:right,1]";"')
 @cxx11
 def attribute_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return SimpleDeclaration(p[0], None, [])
 
 
 @glrp.rule('identifier-list : "identifier"')
+@cxx17
+def identifier_list_end(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return [p[0].value]
+
+
 @glrp.rule('identifier-list : identifier-list "," "identifier"')
-@cxx98
+@cxx17
 def identifier_list(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    result = p[0]
+    result.append(p[2].value)
+    return result
 
 
 @glrp.rule('begin-declaration : [split:simple_declaration]')
-@glrp.rule('begin-declaration-nodeclspec : [split:nodeclspec_declaration]')
 @cxx98
 def begin_decl(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -237,35 +267,38 @@ def begin_decl_cxx17(self, p):
 @cxx98_merge
 def ambiguous_declaration(self, continue_declarator_list, ambiguous_init_declarator_initializer):
     # type: (CxxParser, List[Any], List[Any]) -> Any
-    pass
+    return AmbiguousDeclaration(continue_declarator_list + ambiguous_init_declarator_initializer)
 
 
 @glrp.merge('declaration')
 @cxx98_merge
-def ambiguous_declaration_deduction(self, simple_declaration, decl_deduction_guide, nodeclspec_declaration):
-    # type: (CxxParser, List[Any], List[Any], List[Any]) -> Any
-    pass
-
-
-@glrp.merge('declaration')
-@cxx98_merge
-def ambiguous_declaration_2(self, initializer_list, compound_statement):
+def ambiguous_declaration_deduction(self, simple_declaration, decl_deduction_guide):
     # type: (CxxParser, List[Any], List[Any]) -> Any
-    pass
+    return AmbiguousDeclaration(simple_declaration + decl_deduction_guide)
 
 
 @glrp.merge('declaration')
 @cxx98_merge
-def ambiguous_declaration_3(self, ambiguous_function_definition_constraint, ambiguous_simple_declaration_constraint):
+def ambiguous_declaration_2(self, initializer, function_body):
     # type: (CxxParser, List[Any], List[Any]) -> Any
+    # This method is actually not called because the initializer and the function_body
+    # options will raise syntax errors for invalid combinations
+    #assert False
     pass
 
 
 @glrp.merge('simple-declaration')
 @cxx98_merge
-def ambiguous_simple_declaration_constraint(self, id_nontemplate, type_constraint):
-    # type: (CxxParser, List[Any], List[Any]) -> None
-    pass
+def ambiguous_simple_declaration(self, decl_specifier_seq_end, decl_specifier_seq_continue):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    return AmbiguousDeclaration(decl_specifier_seq_end + decl_specifier_seq_continue)
+
+
+@glrp.merge('declaration')
+@cxx98_merge
+def ambiguous_declaration_4(self, ambiguous_simple_declaration, ambiguous_function_definition):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    assert False
 
 
 if TYPE_CHECKING:
