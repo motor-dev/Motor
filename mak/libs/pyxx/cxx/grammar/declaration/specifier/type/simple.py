@@ -27,7 +27,7 @@ type-name:
 """
 
 import glrp
-from .....parser import cxx98, cxx11, cxx20
+from .....parser import cxx98, cxx11, cxx20, cxx98_merge
 from ......ast.reference import TemplateId, Id, Reference
 from ......ast.types import PrimitiveTypeSpecifiers, TypeSpecifierReference
 from motor_typing import TYPE_CHECKING
@@ -224,6 +224,22 @@ def simple_type_specifier_primitive_char32_t_cxx11(self, p):
 def simple_type_specifier_char8_t_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     return PrimitiveTypeSpecifiers.CHAR8_T
+
+
+@glrp.merge('simple-type-specifier-2')
+@cxx98_merge
+def ambiguous_simple_type_specifier_2(self, ambiguous_template_argument_list_ellipsis, ambiguous_constant_expression):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    pass
+
+
+@glrp.merge('simple-type-specifier-cast')
+@cxx98_merge
+def ambiguous_simple_type_specifier_cast(
+    self, ambiguous_template_argument_list_ellipsis, ambiguous_constant_expression
+):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    pass
 
 
 if TYPE_CHECKING:

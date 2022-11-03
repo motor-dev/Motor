@@ -186,7 +186,7 @@ def ambiguous_member_declarator_2(self, ambiguous_constant_expression, ambiguous
 
 @glrp.merge('member-declaration')
 @cxx98_merge
-def ambiguous_member_declaration_deduction(self, simple_declaration, decl_deduction_guide):
+def ambiguous_member_declaration_deduction(self, ambiguous_simple_declaration, decl_deduction_guide):
     # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 

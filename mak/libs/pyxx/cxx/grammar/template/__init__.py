@@ -122,6 +122,7 @@ def constraint_logical_and_expression_cxx20(self, p):
 @glrp.rule('constraint-primary-expression : "user-defined-floating-literal"')
 @glrp.rule('constraint-primary-expression : "type-trait-macro"')
 @glrp.rule('constraint-primary-expression : "type-trait-macro-function" "(" balanced-token-seq? ")"')
+@glrp.rule('constraint-primary-expression : requires-expression')
 @cxx20
 def constraint_primary_expression_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -161,8 +162,10 @@ def identifier_opt(self, p):
 
 @glrp.merge('template-parameter-list')
 @cxx98_merge
-def ambiguous_template_parameter_list(self, ambiguous_template_parameter_list, ambiguous_initializer_clause):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
+def ambiguous_template_parameter_list(
+    self, ambiguous_template_parameter_list, ambiguous_template_parameter, ambiguous_initializer_clause
+):
+    # type: (CxxParser, List[Any], List[Any], List[Any]) -> Any
     return
 
 

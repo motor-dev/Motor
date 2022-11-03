@@ -444,16 +444,9 @@ def balanced_token_cxx23(self, p):
 @cxx11_merge
 def ambiguous_alignment_specifier(self, type_id, expression):
     # type: (CxxParser, List[Any], List[Any]) -> Any
-    if not type_id:
-        assert len(expression) == 1
-        return expression[0]
-    elif not expression:
-        assert len(type_id) == 1
-        return type_id[0]
-    else:
-        assert len(expression) == 1
-        assert len(type_id) == 1
-        return AttributeAlignAsAmbiguous(type_id[0], expression[0])
+    assert len(expression) == 1
+    assert len(type_id) == 1
+    return AttributeAlignAsAmbiguous(type_id[0], expression[0])
 
 
 @glrp.merge('alignment-specifier')

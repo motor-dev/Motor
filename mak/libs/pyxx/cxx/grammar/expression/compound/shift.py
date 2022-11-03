@@ -6,8 +6,8 @@ shift-expression:
 """
 
 import glrp
-from ....parser import cxx98
-from .....ast.expressions import BinaryExpression
+from ....parser import cxx98, cxx98_merge
+from .....ast.expressions import BinaryExpression, AmbiguousExpression
 from motor_typing import TYPE_CHECKING
 
 
@@ -26,6 +26,14 @@ def shift_expression(self, p):
     return BinaryExpression(p[0], p[2], p[1].text())
 
 
+@glrp.merge('shift-expression')
+@cxx98_merge
+def ambiguous_shift_expression(self, ambiguous_type_id, ambiguous_shift_expression):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    expressions = ambiguous_type_id + ambiguous_shift_expression
+    return AmbiguousExpression(expressions)
+
+
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, List
     from ....parser import CxxParser

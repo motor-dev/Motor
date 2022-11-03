@@ -163,10 +163,10 @@ def ambiguous_typeid_expression(self, type_id, expression):
 @glrp.merge('postfix-expression')
 @cxx98_merge
 def ambiguous_postfix_expression(
-    self, simple_type_specifier_cast, id_template, id_nontemplate, ambiguous_postfix_expression
+    self, simple_type_specifier_cast, ambiguous_template_id, id_template, id_nontemplate, ambiguous_postfix_expression
 ):
-    # type: (CxxParser, List[Any], List[Any], List[Any]) -> Any
-    expressions = simple_type_specifier_cast + id_nontemplate + ambiguous_postfix_expression
+    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any], List[Any]) -> Any
+    expressions = simple_type_specifier_cast + ambiguous_template_id + id_template + id_nontemplate + ambiguous_postfix_expression
     return AmbiguousExpression(expressions)
 
 

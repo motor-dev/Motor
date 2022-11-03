@@ -211,6 +211,20 @@ def ambiguous_noptr_abstract_declarator(self, ptr_declarator, parameter_declarat
     return declarator_list[0]
 
 
+@glrp.merge('type-id')
+@cxx98_merge
+def ambiguous_type_id(self, ambiguous_simple_type_specifier_2, ambiguous_template_argument_list_ellipsis):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    pass
+
+
+@glrp.merge('defining-type-id')
+@cxx98_merge
+def ambiguous_defining_type_id(self, ambiguous_simple_type_specifier_2, ambiguous_template_argument_list_ellipsis):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    pass
+
+
 if TYPE_CHECKING:
     from typing import Any, List
     from ....parser import CxxParser

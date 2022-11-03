@@ -176,6 +176,7 @@ class Parser(object):
         for token in self._lexer.input(filename):
             #print(self._grammar._name_map[token._id])
             #print(len(contexts))
+            print(len(contexts))
             operations = [context.input(token) for context in contexts]
 
             next_contexts = []         # type: List[Operation]
@@ -258,7 +259,7 @@ class Parser(object):
                     for reduce_op, name in ops:
                         print('\u250f %s\n\u2503 %s' % (name, '\u2501' * len(name)))
                         debug_sym = reduce_op.run_debug()[1]
-                        debug_sym.debug_print(self._grammar._name_map, '\u2503 ', '\u2503 ')
+                        #debug_sym.debug_print(self._grammar._name_map, '\u2503 ', '\u2503 ')
                         print('\u2517')
                     print('')
 
@@ -295,11 +296,10 @@ class Parser(object):
                     rule = rules[-action - 1]
                     results.append(rule[2](Production(context, len(rule[1]))))
                     context._debug_stack[0].debug_print(name_map)
-        return results
-
-        #        #return production.value
-        #else:
-        #    raise SyntaxError('unexpected end of file')
+        if results:
+            return results
+        else:
+            raise SyntaxError('unexpected end of file')
 
     def parse_opt(self, filename):
         # type: (str) -> List[Any]
@@ -415,7 +415,10 @@ class Parser(object):
                 for action, _, token_action in actions:
                     rule = rules[-action - 1]
                     results.append(rule[2](Production(context, len(rule[1]))))
-        return results
+        if results:
+            return results
+        else:
+            raise SyntaxError('unexpected end of file')
 
     def parse(self, filename):
         # type: (str) -> List[Any]
