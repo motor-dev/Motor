@@ -272,9 +272,11 @@ def ambiguous_declaration(self, continue_declarator_list, ambiguous_init_declara
 
 @glrp.merge('declaration')
 @cxx98_merge
-def ambiguous_declaration_deduction(self, simple_declaration, decl_deduction_guide):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
-    return AmbiguousDeclaration(simple_declaration + decl_deduction_guide)
+def ambiguous_declaration_deduction(
+    self, ambiguous_simple_declaration, ambiguous_function_definition, decl_deduction_guide
+):
+    # type: (CxxParser, List[Any], List[Any], List[Any]) -> Any
+    return AmbiguousDeclaration(ambiguous_simple_declaration + ambiguous_function_definition + decl_deduction_guide)
 
 
 @glrp.merge('declaration')
@@ -289,16 +291,9 @@ def ambiguous_declaration_2(self, initializer, function_body):
 
 @glrp.merge('simple-declaration')
 @cxx98_merge
-def ambiguous_simple_declaration(self, decl_specifier_seq_end, decl_specifier_seq_continue):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
-    return AmbiguousDeclaration(decl_specifier_seq_end + decl_specifier_seq_continue)
-
-
-@glrp.merge('declaration')
-@cxx98_merge
-def ambiguous_declaration_4(self, ambiguous_simple_declaration, ambiguous_function_definition):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
-    assert False
+def ambiguous_simple_declaration(self, simple_declaration, decl_specifier_seq_end, decl_specifier_seq_continue):
+    # type: (CxxParser, List[Any], List[Any], List[Any]) -> Any
+    return AmbiguousDeclaration(simple_declaration + decl_specifier_seq_end + decl_specifier_seq_continue)
 
 
 if TYPE_CHECKING:

@@ -130,29 +130,20 @@ def template_argument(self, p):
 
 
 # TODO: template not allowed
-@glrp.rule(
-    'typename-specifier : "typename" typename-disambiguation nested-name-specifier "template"? "identifier" [split:id_nontemplate]'
-)
+@glrp.rule('typename-specifier : "typename" nested-name-specifier "template"? "identifier" [split:id_nontemplate]')
 @cxx98
 def typename_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return TypeSpecifierReference(Reference(p[2] + [(p[3], Id(p[4].value))]), True)
+    return TypeSpecifierReference(Reference(p[1] + [(p[2], Id(p[3].value))]), True)
 
 
 @glrp.rule(
-    'typename-specifier : "typename" typename-disambiguation nested-name-specifier "template"? template-name [action:begin_template_list]"<" template-argument-list? "%>"'
+    'typename-specifier : "typename" nested-name-specifier "template"? template-name [action:begin_template_list]"<" template-argument-list? "%>"'
 )
 @cxx98
 def typename_specifier_template(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return TypeSpecifierReference(Reference(p[2] + [(p[3], TemplateId(p[4], p[6]))]), True)
-
-
-@glrp.rule('typename-disambiguation :')
-@cxx98
-def typename_disambiguation(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return TypeSpecifierReference(Reference(p[1] + [(p[2], TemplateId(p[3], p[5]))]), True)
 
 
 @glrp.rule('begin-template-argument-constant[split:template_argument_constant] :')
@@ -177,6 +168,13 @@ def ambiguous_template_argument_list_ellipsis(
     continue_declarator_list
 ):
     # type: (CxxParser, List[Any], List[Any], List[Any], List[Any]) -> Any
+    pass
+
+
+@glrp.merge('template-id')
+@cxx98_merge
+def ambiguous_template_id(self, id_template, ambiguous_template_argument_list_ellipsis):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
 
 

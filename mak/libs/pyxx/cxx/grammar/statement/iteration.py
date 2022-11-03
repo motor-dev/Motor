@@ -80,9 +80,9 @@ def ambiguous_for_range_declaration(self, decl_specifier_seq_end, decl_specifier
 @cxx98_merge
 def ambiguous_for_range(
     self, ambiguous_for_range_declaration, ambiguous_init_statement, ambiguous_condition_opt, ambiguous_condition_opt_2,
-    decl_specifier_seq_continue, ambiguous_simple_declaration, simple_declaration
+    decl_specifier_seq_continue, ambiguous_simple_declaration
 ):
-    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any], List[Any], List[Any], List[Any]) -> Any
+    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any], List[Any], List[Any]) -> Any
     pass
 
 

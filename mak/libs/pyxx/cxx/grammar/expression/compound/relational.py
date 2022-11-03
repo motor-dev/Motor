@@ -33,10 +33,11 @@ def relational_expression(self, p):
 @glrp.merge('relational-expression')
 @cxx98_merge
 def ambiguous_relational_expression(
-    self, ambiguous_relational_expression, ambiguous_postfix_expression, id_template, id_nontemplate
+    self, ambiguous_relational_expression, ambiguous_postfix_expression, ambiguous_template_id, id_template,
+    id_nontemplate, ambiguous_template_argument_list_ellipsis
 ):
-    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any]) -> Any
-    all_exprs = ambiguous_relational_expression + ambiguous_postfix_expression + id_template + id_nontemplate
+    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any], List[Any], List[Any]) -> Any
+    all_exprs = ambiguous_relational_expression + ambiguous_postfix_expression + ambiguous_template_id + id_template + id_nontemplate + ambiguous_template_argument_list_ellipsis
     return AmbiguousExpression(all_exprs)
 
 

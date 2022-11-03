@@ -41,8 +41,8 @@ def expression_opt(self, p):
 
 @glrp.merge('expression-proxy')
 @cxx98_merge
-def ambiguous_expression(self, ambiguous_expression, ambiguous_relational_expression):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
+def ambiguous_expression(self, ambiguous_expression, ambiguous_relational_expression, ambiguous_initializer_clause):
+    # type: (CxxParser, List[Any], List[Any], List[Any]) -> Any
     all_exprs = ambiguous_expression + ambiguous_relational_expression
     return AmbiguousExpression(all_exprs)
 

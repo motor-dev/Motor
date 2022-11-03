@@ -64,8 +64,10 @@ def ambiguous_init_declarator_initializer(self, continue_declarator_list, end_de
 
 @glrp.merge('init-declarator-list')
 @cxx98_merge
-def ambiguous_init_declarator_list(self, ambiguous_template_argument_list_ellipsis, ambiguous_init_declarator_list):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
+def ambiguous_init_declarator_list(
+    self, ambiguous_template_argument_list_ellipsis, ambiguous_template_id, ambiguous_init_declarator_list
+):
+    # type: (CxxParser, List[Any], List[Any], List[Any]) -> Any
     pass
 
 
