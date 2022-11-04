@@ -50,7 +50,7 @@ def nested_name_specifier_identifier(self, p):
 
 
 @glrp.rule(
-    'nested-name-specifier : nested-name-specifier "template"? template-name [action:begin_template_list]"<" template-argument-list? "%>" [prec:left,2]"::"'
+    'nested-name-specifier : nested-name-specifier "template"? template-name "<" template-argument-list? "#>" [prec:left,2]"::"'
 )
 @cxx98
 def nested_name_specifier_template(self, p):
@@ -69,9 +69,7 @@ def nested_name_specifier_element_identifier(self, p):
     return Id(p[0].value)
 
 
-@glrp.rule(
-    'nested-name-specifier-element : template-name [action:begin_template_list]"<" template-argument-list? "%>" [prec:left,2]"::"'
-)
+@glrp.rule('nested-name-specifier-element : template-name "<" template-argument-list? "#>" [prec:left,2]"::"')
 @cxx98
 def nested_name_specifier_element_template(self, p):
     # type: (CxxParser, glrp.Production) -> Any

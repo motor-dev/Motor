@@ -17,8 +17,12 @@ from motor_typing import TYPE_CHECKING
 
 @glrp.rule('assignment-expression : conditional-expression')
 @glrp.rule('assignment-expression : throw-expression')
+@glrp.rule('"assignment-expression#" : "conditional-expression#"')
+@glrp.rule('"assignment-expression#" : "throw-expression#"')
 @glrp.rule('assignment-expression? : conditional-expression')
 @glrp.rule('assignment-expression? : throw-expression')
+@glrp.rule('"assignment-expression#?" : "conditional-expression#"')
+@glrp.rule('"assignment-expression#?" : "throw-expression#"')
 @cxx98
 def assignment_expression_stop(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -26,7 +30,9 @@ def assignment_expression_stop(self, p):
 
 
 @glrp.rule('assignment-expression : logical-or-expression assignment-operator initializer-clause')
+@glrp.rule('"assignment-expression#" : "logical-or-expression#" assignment-operator "initializer-clause#"')
 @glrp.rule('assignment-expression? : logical-or-expression assignment-operator initializer-clause')
+@glrp.rule('"assignment-expression#"? : "logical-or-expression#" assignment-operator "initializer-clause#"')
 @cxx98
 def assignment_expression(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -34,7 +40,9 @@ def assignment_expression(self, p):
 
 
 @glrp.rule('assignment-expression : yield-expression')
+@glrp.rule('"assignment-expression#" : "yield-expression#"')
 @glrp.rule('assignment-expression? : yield-expression')
+@glrp.rule('"assignment-expression#"? : "yield-expression#"')
 @cxx20
 def assignment_expression_stop_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -42,6 +50,7 @@ def assignment_expression_stop_cxx20(self, p):
 
 
 @glrp.rule('assignment-expression? :')
+@glrp.rule('"assignment-expression#"? :')
 @cxx20
 def assignment_expression_opt(self, p):
     # type: (CxxParser, glrp.Production) -> Any

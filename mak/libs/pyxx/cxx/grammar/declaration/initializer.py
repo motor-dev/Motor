@@ -64,6 +64,8 @@ def brace_or_equal_initializer_cxx11(self, p):
 
 @glrp.rule('initializer-clause : assignment-expression')
 @glrp.rule('initializer-clause : braced-init-list')
+@glrp.rule('"initializer-clause#" : "assignment-expression#"')
+@glrp.rule('"initializer-clause#" : braced-init-list')
 @cxx98
 def initializer_clause(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -155,6 +157,14 @@ def comma_opt(self, p):
 @glrp.merge('initializer-clause')
 @cxx98_merge
 def ambiguous_initializer_clause(self, ambiguous_relational_expression):
+    # type: (CxxParser, List[Any]) -> None
+    pass
+
+
+@glrp.merge('initializer-clause#')
+@glrp.merge_result('ambiguous_initializer_clause')
+@cxx98_merge
+def ambiguous_initializer_clause_ext(self, ambiguous_relational_expression):
     # type: (CxxParser, List[Any]) -> None
     pass
 

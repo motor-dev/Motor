@@ -11,6 +11,7 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('exclusive-or-expression : and-expression')
+@glrp.rule('"exclusive-or-expression#" : "and-expression#"')
 @cxx98
 def exclusive_or_expression_stop(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -18,6 +19,7 @@ def exclusive_or_expression_stop(self, p):
 
 
 @glrp.rule('exclusive-or-expression : exclusive-or-expression "^" and-expression')
+@glrp.rule('"exclusive-or-expression#" : "exclusive-or-expression#" "^" "and-expression#"')
 @cxx98
 def exclusive_or_expression(self, p):
     # type: (CxxParser, glrp.Production) -> Any

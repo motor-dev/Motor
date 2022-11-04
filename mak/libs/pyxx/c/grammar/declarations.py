@@ -786,7 +786,7 @@ def balanced_token_sequence(self, p):
 @glrp.rule('balanced-token : "/"')
 @glrp.rule('balanced-token : "%"')
 @glrp.rule('balanced-token : "<<"')
-@glrp.rule('balanced-token : ">>"')
+@glrp.rule('balanced-token : "%>"')
 @glrp.rule('balanced-token : "<"')
 @glrp.rule('balanced-token : ">"')
 @glrp.rule('balanced-token : "<="')

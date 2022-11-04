@@ -46,7 +46,7 @@ def template_empty_opt(self, p):
 
 
 #@glrp.rule(
-#    'simple-template-id : template-name [action:begin_template_list]"<" template-argument-list? "%>"'
+#    'simple-template-id : template-name "<" template-argument-list? "#>"'
 #)
 #@cxx98
 #def simple_template_id(self, p):
@@ -54,21 +54,15 @@ def template_empty_opt(self, p):
 #    pass
 
 
-@glrp.rule(
-    'template-id : template-name [action:begin_template_list]"<" template-argument-list? "%>" [split:id_nontemplate]'
-)
-@glrp.rule(
-    'template-id : operator-function-id [split:id_template][action:begin_template_list]"<" template-argument-list? "%>"'
-)
+@glrp.rule('template-id : template-name "<" template-argument-list? "#>" [split:id_nontemplate]')
+@glrp.rule('template-id : operator-function-id [split:id_template]"<" template-argument-list? "#>"')
 @cxx98
 def template_id(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     return TemplateId(p[0], p[2])
 
 
-@glrp.rule(
-    'template-id : literal-operator-id [split:id_template][action:begin_template_list]"<" template-argument-list? "%>"'
-)
+@glrp.rule('template-id : literal-operator-id [split:id_template]"<" template-argument-list? "#>"')
 @cxx11
 def template_literal_id(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -120,7 +114,7 @@ def template_argument_list_cxx11(self, p):
     pass
 
 
-@glrp.rule('template-argument : begin-template-argument-constant constant-expression')
+@glrp.rule('template-argument : begin-template-argument-constant "constant-expression#"')
 @glrp.rule('template-argument : begin-template-argument-type type-id')
 #@glrp.rule('template-argument : id-expression')
 @cxx98
@@ -138,7 +132,7 @@ def typename_specifier(self, p):
 
 
 @glrp.rule(
-    'typename-specifier : "typename" nested-name-specifier "template"? template-name [action:begin_template_list]"<" template-argument-list? "%>"'
+    'typename-specifier : "typename" nested-name-specifier "template"? template-name "<" template-argument-list? "#>"'
 )
 @cxx98
 def typename_specifier_template(self, p):
@@ -165,9 +159,9 @@ def ambiguous_template_argument(self, template_argument_constant, template_argum
 @cxx98_merge
 def ambiguous_template_argument_list_ellipsis(
     self, ambiguous_template_argument, ambiguous_template_argument_list_ellipsis, end_declarator_list,
-    continue_declarator_list
+    continue_declarator_list, ambiguous_constant_expression
 ):
-    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any]) -> Any
+    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any], List[Any]) -> Any
     pass
 
 

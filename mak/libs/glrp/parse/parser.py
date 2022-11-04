@@ -186,14 +186,12 @@ class Parser(object):
 
             while operations:
                 parent = operations.pop(-1)
-                actions = action_table[parent._state].get(parent._tokens[0]._id, tuple())
+                actions = action_table[parent._state].get(token._id, tuple())
                 if len(actions) == 0:
                     recovery_contexts.append(parent)
                     parent.discard()
                 else:
-                    for operation, (action, _, token_action) in zip(parent.split(actions), actions):
-                        if token_action is not None:
-                            getattr(self, token_action)(operation._result_context)
+                    for operation, (action, _) in zip(parent.split(actions), actions):
                         if action < 0:
                             rule = rules[-action - 1]
                             operation = operation.reduce(rule)
@@ -247,11 +245,8 @@ class Parser(object):
                                 target_state = goto_table[operation._state][rule[0]]
                                 operations.append(operation.goto(target_state))
                         else:
-                            operation = operation.consume_token(action)
-                            if operation._tokens:
-                                operations.append(operation)
-                            else:
-                                next_contexts.append(operation)
+                            operation = operation.consume_token(token, action)
+                            next_contexts.append(operation)
 
             for (split_context, _, _, symbol), ops in merge_opportunities.items():
                 if len(ops) > 1:
@@ -259,7 +254,7 @@ class Parser(object):
                     for reduce_op, name in ops:
                         print('\u250f %s\n\u2503 %s' % (name, '\u2501' * len(name)))
                         debug_sym = reduce_op.run_debug()[1]
-                        #debug_sym.debug_print(self._grammar._name_map, '\u2503 ', '\u2503 ')
+                        debug_sym.debug_print(self._grammar._name_map, '\u2503 ', '\u2503 ')
                         print('\u2517')
                     print('')
 
@@ -292,7 +287,7 @@ class Parser(object):
         for context in contexts:
             actions = action_table[context._state].get(-1, tuple())
             if len(actions) == 1:
-                for action, _, token_action in actions:
+                for action, _ in actions:
                     rule = rules[-action - 1]
                     results.append(rule[2](Production(context, len(rule[1]))))
                     context._debug_stack[0].debug_print(name_map)
@@ -329,14 +324,12 @@ class Parser(object):
 
             while operations:
                 parent = operations.pop(-1)
-                actions = action_table[parent._state].get(parent._tokens[0]._id, tuple())
+                actions = action_table[parent._state].get(token._id, tuple())
                 if len(actions) == 0:
                     recovery_contexts.append(parent)
                     parent.discard()
                 else:
-                    for operation, (action, _, token_action) in zip(parent.split(actions), actions):
-                        if token_action is not None:
-                            getattr(self, token_action)(operation._result_context)
+                    for operation, (action, _) in zip(parent.split(actions), actions):
                         if action < 0:
                             rule = rules[-action - 1]
                             operation = operation.reduce(rule)
@@ -377,11 +370,8 @@ class Parser(object):
                                 target_state = goto_table[operation._state][rule[0]]
                                 operations.append(operation.goto(target_state))
                         else:
-                            operation = operation.consume_token(action)
-                            if operation._tokens:
-                                operations.append(operation)
-                            else:
-                                next_contexts.append(operation)
+                            operation = operation.consume_token(token, action)
+                            next_contexts.append(operation)
 
             if len(next_contexts) == 0:
                 valid_tokens = set()
@@ -412,7 +402,7 @@ class Parser(object):
         for context in contexts:
             actions = action_table[context._state].get(-1, tuple())
             if len(actions) == 1:
-                for action, _, token_action in actions:
+                for action, _ in actions:
                     rule = rules[-action - 1]
                     results.append(rule[2](Production(context, len(rule[1]))))
         if results:
@@ -422,7 +412,7 @@ class Parser(object):
 
     def parse(self, filename):
         # type: (str) -> List[Any]
-        return self.parse_opt(filename)
+        return self.parse_debug(filename)
 
     def accept(self, p):
         # type: (Production) -> Any

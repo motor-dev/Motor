@@ -8,44 +8,11 @@ from motor_typing import Callable, TYPE_CHECKING, cast, Any
 class CxxParser(glrp.Parser):
     Lexer = glrp.Lexer
 
-    class TokenFilter(glrp.Context.TokenCallback):
-
-        def __init__(self, lexer):
-            # type: (glrp.Lexer) -> None
-            glrp.Context.TokenCallback.__init__(self)
-            self._nested_count = 0
-            self._lexer = lexer
-            self._opening_ids = (lexer.get_token_id('['), lexer.get_token_id('('), lexer.get_token_id('{'))
-            self._closing_ids = (lexer.get_token_id(']'), lexer.get_token_id(')'), lexer.get_token_id('}'))
-            self._closing_bracket = lexer.get_token_id('>')
-
-        def filter(self, context, token):
-            # type: (glrp.Context, glrp.Token) -> List[glrp.Token]
-            if token._id in self._opening_ids:
-                self._nested_count += 1
-            elif token._id in self._closing_ids:
-                self._nested_count -= 1
-            elif self._nested_count == 0 and token._id == self._closing_bracket:
-                token = token.duplicate()
-                self._lexer.set_token_type(token, '%>')
-                context._filters.pop(-1)
-            return [token]
-
-        def clone(self):
-            # type: () -> glrp.Context.TokenCallback
-            result = CxxParser.TokenFilter(self._lexer)
-            result._nested_count = self._nested_count
-            return result
-
     def __init__(self, tmp_dir, mode=glrp.LOAD_CACHE):
         # type: (str, int)->None
         self.lexer = self.__class__.Lexer()
         out_dir = os.path.dirname(tables.__file__)
         glrp.Parser.__init__(self, self.lexer, 'translation-unit', tmp_dir, out_dir, mode)
-
-    def begin_template_list(self, context):
-        # type: (glrp.Context) -> None
-        context._filters.append(CxxParser.TokenFilter(self.lexer))
 
 
 class Cxx98Parser(CxxParser):
@@ -58,50 +25,6 @@ class Cxx03Parser(Cxx98Parser):
 
 class Cxx11Parser(Cxx03Parser):
     Lexer = lexer.Cxx11Lexer
-
-    class TokenFilter(glrp.Context.TokenCallback):
-
-        def __init__(self, lexer):
-            # type: (glrp.Lexer) -> None
-            glrp.Context.TokenCallback.__init__(self)
-            self._nested_count = 0
-            self._lexer = lexer
-            self._opening_ids = (lexer.get_token_id('['), lexer.get_token_id('('), lexer.get_token_id('{'))
-            self._opening_ids_double = (lexer.get_token_id('[['), )
-            self._closing_ids = (lexer.get_token_id(']'), lexer.get_token_id(')'), lexer.get_token_id('}'))
-            self._closing_bracket = lexer.get_token_id('>')
-            self._closing_bracket_double = lexer.get_token_id('>>')
-
-        def filter(self, context, token):
-            # type: (glrp.Context, glrp.Token) -> List[glrp.Token]
-            if token._id in self._opening_ids:
-                self._nested_count += 1
-            elif token._id in self._opening_ids_double:
-                self._nested_count += 2
-            elif token._id in self._closing_ids:
-                self._nested_count -= 1
-            elif self._nested_count == 0 and token._id == self._closing_bracket:
-                token = token.duplicate()
-                self._lexer.set_token_type(token, '%>')
-                context._filters.pop(-1)
-            elif self._nested_count == 0 and token._id == self._closing_bracket_double:
-                token = token.duplicate()
-                token2 = token.duplicate()
-                self._lexer.set_token_type(token, '%>')
-                self._lexer.set_token_type(token2, '>')
-                context._filters.pop(-1)
-                return [token] + context._filters[-1].filter(context, token2)
-            return [token]
-
-        def clone(self):
-            # type: () -> glrp.Context.TokenCallback
-            result = Cxx11Parser.TokenFilter(self._lexer)
-            result._nested_count = self._nested_count
-            return result
-
-    def begin_template_list(self, context):
-        # type: (glrp.Context) -> None
-        context._filters.append(Cxx11Parser.TokenFilter(self.lexer))
 
 
 class Cxx14Parser(Cxx11Parser):

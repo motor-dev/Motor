@@ -10,6 +10,7 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('throw-expression : "throw" assignment-expression?')
+@glrp.rule('"throw-expression#" : "throw" "assignment-expression#"?')
 @cxx98
 def throw_expression(self, p):
     # type: (CxxParser, glrp.Production) -> Any
