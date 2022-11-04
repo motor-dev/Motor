@@ -12,11 +12,9 @@ from motor_typing import TYPE_CHECKING
 
 
 # amendment: @glrp.rule('explicit-specialization : "template" "<" ">" declaration')
+@glrp.rule('explicit-specialization : attribute-specifier-seq? begin-declaration "template" "<" "#>" declaration')
 @glrp.rule(
-    'explicit-specialization : attribute-specifier-seq? begin-declaration "template" [action:begin_template_list]"<" "%>" declaration'
-)
-@glrp.rule(
-    'explicit-specialization : attribute-specifier-seq? begin-declaration decl-specifier-seq-continue "extern" "template" [action:begin_template_list]"<" "%>" declaration'
+    'explicit-specialization : attribute-specifier-seq? begin-declaration decl-specifier-seq-continue "extern" "template" "<" "#>" declaration'
 )
 @cxx98
 def explicit_specialization(self, p):

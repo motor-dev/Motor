@@ -26,7 +26,7 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('template-parameter : begin-type-parameter type-parameter')
-@glrp.rule('template-parameter : begin-parameter parameter-declaration')
+@glrp.rule('template-parameter : begin-parameter "parameter-declaration#"')
 @cxx98
 def template_parameter(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -89,12 +89,10 @@ def begin_parameter(self, p):
 
 
 @glrp.rule('type-constraint : "identifier"')
-@glrp.rule('type-constraint : template-name [action:begin_template_list]"<" template-argument-list? "%>"')
+@glrp.rule('type-constraint : template-name "<" template-argument-list? "#>"')
 # TODO: template not allowed
 @glrp.rule('type-constraint : nested-name-specifier template? "identifier"')
-@glrp.rule(
-    'type-constraint : nested-name-specifier template? template-name [action:begin_template_list]"<" template-argument-list? "%>"'
-)
+@glrp.rule('type-constraint : nested-name-specifier template? template-name "<" template-argument-list? "#>"')
 @cxx20
 def type_constraint_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any

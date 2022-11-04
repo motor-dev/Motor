@@ -25,7 +25,6 @@ class LR0Item(object):
         self._lookaheads = {}            # type: Dict[int, List[int]]
         self._precedence = None          # type: Optional[Tuple[str, int]]
         self._split = None               # type: Optional[str]
-        self._action = None              # type: Optional[str]
         self._merges = tuple(merge_list) # type: Tuple[Grammar.Merge, ...]
         self._merge_map = {}             # type: Dict[str, Grammar.Merge]
         self._merge_map_str = {}         # type: Dict[str, str]
@@ -88,13 +87,6 @@ class LR0Item(object):
                     self._split = values[0]
                 else:
                     self._split = ''
-            elif annotation == "action":
-                if len(values) != 1:
-                    raise SyntaxError(
-                        'incorrect annotation: "action" expects one argument, got %s',
-                        (','.join(values) if values else 'none'), (rule._filename, rule._lineno, 0, '')
-                    )
-                self._action = values[0]
             elif annotation == "no-merge-warning":
                 if len(values) != 0:
                     raise SyntaxError(
@@ -112,8 +104,6 @@ class LR0Item(object):
             result += '[prec:%s,%d]' % self._precedence
         if self._split is not None:
             result += '[split:%s]' % self._split
-        if self._action is not None:
-            result += '[action:%s]' % self._action
         return result
 
     def to_string(self, name_map):

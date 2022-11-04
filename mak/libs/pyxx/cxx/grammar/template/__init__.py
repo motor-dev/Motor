@@ -33,6 +33,20 @@ from . import constraint
 from . import guide
 
 
+@glrp.rule('"#>" : ">"')
+@cxx98
+def template_bracket(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    pass
+
+
+@glrp.rule('"#>" : "%>"')
+@cxx98
+def template_bracket_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    pass
+
+
 @glrp.rule('template-declaration : attribute-specifier-seq? begin-declaration template-head declaration')
 @glrp.rule(
     'template-declaration : attribute-specifier-seq? begin-declaration decl-specifier-seq-continue "extern" template-head declaration'
@@ -53,14 +67,14 @@ def template_declaration_cxx20(self, p):
     pass
 
 
-@glrp.rule('template-head : "template" [action:begin_template_list]"<" template-parameter-list "%>"')
+@glrp.rule('template-head : "template" "<" template-parameter-list "#>"')
 @cxx98
 def template_head(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 
 
-@glrp.rule('template-head : "template" [action:begin_template_list]"<" template-parameter-list "%>" requires-clause')
+@glrp.rule('template-head : "template" "<" template-parameter-list "#>" requires-clause')
 @cxx20
 def template_head_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any

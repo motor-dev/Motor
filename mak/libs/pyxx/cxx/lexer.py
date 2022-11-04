@@ -277,7 +277,6 @@ class Cxx98Lexer(glrp.Lexer):
     @glrp.token(r'\^', '^')
     @glrp.token(r'!')
     @glrp.token(r'<')
-    @glrp.token(r'>')
     # assignment operators
     @glrp.token(r'=')
     @glrp.token(r'\?', '?')
@@ -295,8 +294,17 @@ class Cxx98Lexer(glrp.Lexer):
         # type: (glrp.Token) -> glrp.Token
         return token
 
+    @glrp.token(r'>')
+    def _01_angle_bracket(self, token):
+        # type: (glrp.Token) -> glrp.Token
+        try:
+            if self._lexdata[token._end_position] == '>':
+                self.set_token_type(token, '%>')
+            return token
+        except IndexError:
+            return token
+
     @glrp.token(r'<<')
-    @glrp.token(r'>>')
     @glrp.token(r'\|\|', '||')
     @glrp.token(r'&&')
     @glrp.token(r'<=')

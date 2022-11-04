@@ -11,6 +11,7 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('and-expression : equality-expression')
+@glrp.rule('"and-expression#" : "equality-expression#"')
 @cxx98
 def and_expression_stop(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -18,6 +19,7 @@ def and_expression_stop(self, p):
 
 
 @glrp.rule('and-expression : and-expression "&" equality-expression')
+@glrp.rule('"and-expression#" : "and-expression#" "&" "equality-expression#"')
 @cxx98
 def and_expression(self, p):
     # type: (CxxParser, glrp.Production) -> Any

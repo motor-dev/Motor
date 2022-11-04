@@ -38,7 +38,7 @@ def get_terminal_size():
 class LALRTable(object):
 
     def __init__(self, action_table, goto_table):
-        # type: (List[Dict[int, Tuple[Tuple[int, Optional[str], Optional[str]],...]]], List[Dict[int, int]]) -> None
+        # type: (List[Dict[int, Tuple[Tuple[int, Optional[str]],...]]], List[Dict[int, int]]) -> None
         self._action_table = action_table
         self._goto_table = goto_table
 
@@ -501,7 +501,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, show_me
                 (u'\r[\x1b[32m%s\x1b[37m%s\x1b[0m]' % (u'\u2501' * completed, u'\u2501' * remaining)).encode('utf-8')
             )
         action_map = {}    # type: Dict[int, List[Tuple[int, LR0Item]]]
-        st_action = {}     # type: Dict[int, Tuple[Tuple[int, Optional[str], Optional[str]],...]]
+        st_action = {}     # type: Dict[int, Tuple[Tuple[int, Optional[str]],...]]
         st_goto = {}       # type: Dict[int, int]
         merges = {}        # type: Dict[FrozenSet[LR0Item], Tuple[Set[int], Set[LR0Node]]]
 
@@ -647,15 +647,13 @@ def create_parser_table(productions, start_id, name_map, terminal_count, show_me
             else:
                 accepted_actions = action_dest
 
-            st_action[a] = tuple(
-                sorted([(j, items[0]._split, items[0]._action) for j, items in accepted_actions.items()])
-            )
+            st_action[a] = tuple(sorted([(j, items[0]._split) for j, items in accepted_actions.items()]))
             if len(accepted_actions) > 1 and not split:
                 # handle conflicts
                 conflicts = []     # type: List[Tuple[LR0Node, Set[int]]]
                 num_rr += 1
                 sm_log.info('    %-30s conflict split', name_map[a])
-                for j, _, token_action in st_action[a]:
+                for j, _ in st_action[a]:
                     items = accepted_actions[j]
                     if j >= 0:
                         sm_log.info('        shift and go to state %d', j)
@@ -693,7 +691,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, show_me
                 sm_log.info('    %-30s split', name_map[a])
                 split_error = False
                 split_names = set()
-                key = frozenset((item for (j, _, _) in st_action[a] for item in accepted_actions[j]))
+                key = frozenset((item for (j, _) in st_action[a] for item in accepted_actions[j]))
                 try:
                     merge_lookaheads, merge_nodes = merges[key]
                     merge_lookaheads.add(a)
@@ -703,9 +701,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, show_me
                     merges[key] = (merge_lookaheads, merge_nodes)
 
                 sm_log.info('    %-30s split', name_map[a])
-                for action_index, (j, split_name, token_action) in enumerate(st_action[a]):
-                    action_error = False
-
+                for action_index, (j, split_name) in enumerate(st_action[a]):
                     if split_name in split_names:
                         split_error = True
                     split_names.add(split_name)
@@ -720,20 +716,13 @@ def create_parser_table(productions, start_id, name_map, terminal_count, show_me
                         item._split_use += 1
                         assert item._split is not None
                         merge_nodes.add(item_group[item])
-                        if item._action != token_action:
-                            action_error = True
                         if j < 0:
                             sm_log.info('        reduce using rule %s', item.to_string(name_map))
-
-                    if action_error:
-                        error_log.error('action mismatch in state %d for token \'%s\':' % (st, name_map[a]))
-                        for item in items:
-                            error_log.note('    %s' % item.to_string(name_map))
                 if split_error:
                     error_log.error('split tag mismatch in state %d for token \'%s\':' % (st, name_map[a]))
                     error_log.note('  ensure all reduce rules have different names')
                     error_log.note('  ensure all shift rules have the same name')
-                    for j, split_name, token_action in st_action[a]:
+                    for j, split_name in st_action[a]:
                         for item in accepted_actions[j]:
                             error_log.note('    %s' % item.to_string(name_map))
 
@@ -750,20 +739,13 @@ def create_parser_table(productions, start_id, name_map, terminal_count, show_me
                     _find_merge_points(splits, a, name_map, conflict_log, error_log)
                     conflict_log.info('')
             else:
-                for j, _, token_action in st_action[a]:
-                    action_error = False
+                for j, _ in st_action[a]:
                     items = accepted_actions[j]
                     if j >= 0:
                         sm_log.info('    %-30s[%d] shift and go to state %d', name_map[a], a, j)
                     for item in items:
-                        if item._action != token_action:
-                            action_error = True
                         if j < 0:
                             sm_log.info('    %-30s reduce using rule %s', name_map[a], item.to_string(name_map))
-                    if action_error:
-                        error_log.error('action mismatch in state %d for token \'%s\':' % (st, name_map[a]))
-                        for item in items:
-                            error_log.note('    %s' % item.to_string(name_map))
 
         #for lookaheads, nodes in merges.values():
         #    local_paths = {}                                                                     # type: Dict[int, Dict[str, Set[LR0Path]]]

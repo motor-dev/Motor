@@ -29,9 +29,8 @@ class SplitContext(object):
 
 class Operation(object):
 
-    def __init__(self, tokens, context, state):
-        # type: (List[Token], Context, int) -> None
-        self._tokens = tokens
+    def __init__(self, context, state):
+        # type: (Context, int) -> None
         self._result_context = context
         self._state = state
         self._cache = None         # type: Optional[Tuple[Any]]
@@ -61,15 +60,15 @@ class Operation(object):
         # type: (int) -> Operation
         return Goto(self, state)
 
-    def consume_token(self, state):
-        # type: (int) -> Operation
-        return ConsumeToken(self, state)
+    def consume_token(self, token, state):
+        # type: (Token, int) -> Operation
+        return ConsumeToken(self, token, state)
 
     def split(self, actions):
-        # type: (Tuple[Tuple[int, Optional[str], Optional[str]],...]) -> Tuple[Operation,...]
+        # type: (Tuple[Tuple[int, Optional[str]],...]) -> Tuple[Operation,...]
         if len(actions) > 1:
             split_context = SplitContext()
-            result = tuple(Split(self, name or '_', split_context) for _, name, _ in actions)
+            result = tuple(Split(self, name or '_', split_context) for _, name in actions)
             #self.discard()
             return result
         else:
@@ -91,7 +90,7 @@ class Reduce(Operation):
     def __init__(self, origin, pop_count, state, rule):
         # type: (Operation, int, int, Tuple[int, Tuple[int, ...], Callable[[Production], None], Dict[str, MergeAction.MergeCall]]) -> None
         origin._result_context.pop(pop_count)
-        Operation.__init__(self, origin._tokens, origin._result_context, origin._result_context._state)
+        Operation.__init__(self, origin._result_context, origin._result_context._state)
         self._rule = rule
         self._predecessor = origin
 
@@ -129,7 +128,7 @@ class Goto(Operation):
         # type: (Operation, int) -> None
         if target_state == 249:
             pass
-        Operation.__init__(self, origin._tokens, origin._result_context, target_state)
+        Operation.__init__(self, origin._result_context, target_state)
         self._predecessor = origin
         self._result_context.goto(target_state)
 
@@ -148,11 +147,11 @@ class Goto(Operation):
 
 class ConsumeToken(Operation):
 
-    def __init__(self, origin, target_state):
-        # type: (Operation, int) -> None
-        Operation.__init__(self, origin._tokens[1:], origin._result_context, target_state)
+    def __init__(self, origin, token, target_state):
+        # type: (Operation, Token, int) -> None
+        Operation.__init__(self, origin._result_context, target_state)
         self._predecessor = origin
-        self._symbol = origin._tokens[0]
+        self._symbol = token
         self._result_context.goto(target_state)
 
     def _run(self):
@@ -174,8 +173,7 @@ class Split(Operation):
     def __init__(self, origin, name, split_context):
         # type: (Operation, str, SplitContext) -> None
         Operation.__init__(
-            self, origin._tokens,
-            Context(origin._result_context, (split_context, name, origin._result_context._sym_len)), origin._state
+            self, Context(origin._result_context, (split_context, name, origin._result_context._sym_len)), origin._state
         )
         self._predecessor = origin
 
@@ -192,7 +190,7 @@ class Merge(Operation):
 
     def __init__(self, operation, action, name, split_context):
         # type: (Operation, MergeAction.MergeCall, str, SplitContext) -> None
-        Operation.__init__(self, operation._tokens, operation._result_context, operation._state)
+        Operation.__init__(self, operation._result_context, operation._state)
         for i, st in enumerate(operation._result_context._names):
             if st[0] == split_context:
                 operation._result_context._names[i] = (st[0], action._result, st[2])
@@ -271,9 +269,10 @@ class Merge(Operation):
 
 class RootOperation(Operation):
 
-    def __init__(self, context, tokens):
-        # type: (Context, List[Token]) -> None
-        Operation.__init__(self, tokens, context, context._state)
+    def __init__(self, context, token):
+        # type: (Context, Token) -> None
+        Operation.__init__(self, context, context._state)
+        self._token = token
 
     def _run(self):
         # type: () -> Any
@@ -281,24 +280,10 @@ class RootOperation(Operation):
 
     def _run_debug(self):
         # type: () -> Tuple[Any, Symbol]
-        return (None, self._tokens[0])
+        return (None, self._token)
 
 
 class Context(object):
-
-    class TokenCallback(object):
-
-        def __init__(self):
-            # type: () -> None
-            pass
-
-        def filter(self, context, token):
-            # type: (Context, Token) -> List[Token]
-            return [token]
-
-        def clone(self):
-            # type: () -> Context.TokenCallback
-            return self
 
     def __init__(self, parent, param_name):
         # type: (Optional[Context], Optional[SplitName]) -> None
@@ -307,18 +292,16 @@ class Context(object):
         self._prod_parent = parent
         if parent is not None:
             parent._refcount += 1
-            self._state_stack = []                               # type: List[int]
-            self._sym_len = parent._sym_len                      # type: int
-            self._state = parent._state                          # type: int
-            self._filters = [f.clone() for f in parent._filters] # type: List[Context.TokenCallback]
+            self._state_stack = []          # type: List[int]
+            self._sym_len = parent._sym_len # type: int
+            self._state = parent._state     # type: int
         else:
             self._state_stack = [0]
             self._sym_len = 0
             self._state = 0
-            self._filters = [Context.TokenCallback()]
-        self._names = []                                         # type: List[SplitName]
-        self._prod_stack = []                                    # type: List[Any]
-        self._debug_stack = []                                   # type: List[Symbol]
+        self._names = []                    # type: List[SplitName]
+        self._prod_stack = []               # type: List[Any]
+        self._debug_stack = []              # type: List[Symbol]
         if param_name is not None:
             self._names.append(param_name)
             param_name[0].register(self)
@@ -386,7 +369,7 @@ class Context(object):
 
     def input(self, token):
         # type: (Token) -> Operation
-        return RootOperation(self, self._filters[-1].filter(self, token))
+        return RootOperation(self, token)
 
 
 if TYPE_CHECKING:

@@ -12,6 +12,7 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('equality-expression : [no-merge-warning] relational-expression')
+@glrp.rule('"equality-expression#" : [no-merge-warning] "relational-expression#"')
 @cxx98
 def equality_expression_stop(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -20,6 +21,8 @@ def equality_expression_stop(self, p):
 
 @glrp.rule('equality-expression : equality-expression "==" [no-merge-warning] relational-expression')
 @glrp.rule('equality-expression : equality-expression "!=" [no-merge-warning] relational-expression')
+@glrp.rule('"equality-expression#" : "equality-expression#" "==" [no-merge-warning] "relational-expression#"')
+@glrp.rule('"equality-expression#" : "equality-expression#" "!=" [no-merge-warning] "relational-expression#"')
 @cxx98
 def equality_expression(self, p):
     # type: (CxxParser, glrp.Production) -> Any

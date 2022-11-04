@@ -43,9 +43,7 @@ def unqualified_destructor_id(self, p):
     return DestructorId(Id(p[2].value))
 
 
-@glrp.rule(
-    'unqualified-id : "~" destructor-disambiguation template-name [action:begin_template_list]"<" template-argument-list? "%>"'
-)
+@glrp.rule('unqualified-id : "~" destructor-disambiguation template-name "<" template-argument-list? "#>"')
 @cxx98
 def unqualified_destructor_template_id(self, p):
     # type: (CxxParser, glrp.Production) -> Any

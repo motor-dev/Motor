@@ -63,11 +63,9 @@ def class_head_cxx11(self, p):
 # TODO: template? not allowed
 #@glrp.rule('class-head-name : class-name')
 @glrp.rule('class-head-name : "identifier" [split:id_nontemplate]')
-@glrp.rule('class-head-name : template-name [action:begin_template_list]"<" template-argument-list? "%>"')
+@glrp.rule('class-head-name : template-name "<" template-argument-list? "#>"')
 @glrp.rule('class-head-name : nested-name-specifier template? "identifier" [split:id_nontemplate]')
-@glrp.rule(
-    'class-head-name : nested-name-specifier template? template-name [action:begin_template_list]"<" template-argument-list? "%>"'
-)
+@glrp.rule('class-head-name : nested-name-specifier template? template-name "<" template-argument-list? "#>"')
 @cxx98
 def class_head_name(self, p):
     # type: (CxxParser, glrp.Production) -> Any

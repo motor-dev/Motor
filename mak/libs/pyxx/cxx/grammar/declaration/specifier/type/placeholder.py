@@ -24,22 +24,20 @@ def placeholder_type_specifier_cxx14(self, p):
 
 
 @glrp.rule('placeholder-type-specifier : "identifier" [prec:left,1]"auto"')
-@glrp.rule(
-    'placeholder-type-specifier : template-name [action:begin_template_list]"<" template-argument-list? "%>" [prec:left,1]"auto"'
-)
+@glrp.rule('placeholder-type-specifier : template-name "<" template-argument-list? "#>" [prec:left,1]"auto"')
 @glrp.rule('placeholder-type-specifier : nested-name-specifier "template"? "identifier" [prec:left,1]"auto"')
 @glrp.rule(
-    'placeholder-type-specifier : nested-name-specifier "template"? template-name [action:begin_template_list]"<" template-argument-list? "%>" [prec:left,1]"auto"'
+    'placeholder-type-specifier : nested-name-specifier "template"? template-name "<" template-argument-list? "#>" [prec:left,1]"auto"'
 )
 @glrp.rule('placeholder-type-specifier : "identifier" [prec:left,1]"decltype" "(" "auto" ")"')
 @glrp.rule(
-    'placeholder-type-specifier : template-name [action:begin_template_list]"<" template-argument-list? "%>" [prec:left,1]"decltype" "(" "auto" ")"'
+    'placeholder-type-specifier : template-name "<" template-argument-list? "#>" [prec:left,1]"decltype" "(" "auto" ")"'
 )
 @glrp.rule(
     'placeholder-type-specifier : nested-name-specifier "template"? "identifier" [prec:left,1]"decltype" "(" "auto" ")"'
 )
 @glrp.rule(
-    'placeholder-type-specifier : nested-name-specifier "template"? template-name [action:begin_template_list]"<" template-argument-list? "%>" [prec:left,1]"decltype" "(" "auto" ")"'
+    'placeholder-type-specifier : nested-name-specifier "template"? template-name "<" template-argument-list? "#>" [prec:left,1]"decltype" "(" "auto" ")"'
 )
 @cxx20
 def placeholder_type_specifier_cxx20(self, p):

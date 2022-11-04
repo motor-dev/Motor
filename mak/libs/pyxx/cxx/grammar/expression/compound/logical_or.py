@@ -11,6 +11,7 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('logical-or-expression : logical-and-expression')
+@glrp.rule('"logical-or-expression#" : "logical-and-expression#"')
 @cxx98
 def logical_or_expression_stop(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -18,6 +19,7 @@ def logical_or_expression_stop(self, p):
 
 
 @glrp.rule('logical-or-expression : logical-or-expression "||" logical-and-expression')
+@glrp.rule('"logical-or-expression#" : "logical-or-expression#" "||" "logical-and-expression#"')
 @cxx98
 def logical_or_expression(self, p):
     # type: (CxxParser, glrp.Production) -> Any

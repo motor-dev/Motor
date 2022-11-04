@@ -42,9 +42,9 @@ def simple_type_specifier_identifier(self, p):
     return TypeSpecifierReference(Reference([(False, Id(p[0].value))]), False)
 
 
-@glrp.rule('simple-type-specifier-2 : template-name [action:begin_template_list]"<" template-argument-list? "%>"')
+@glrp.rule('simple-type-specifier-2 : template-name "<" template-argument-list? "#>"')
 @glrp.rule(
-    'simple-type-specifier-cast : template-name [action:begin_template_list]"<" template-argument-list? "%>" [split:simple_type_specifier_cast]'
+    'simple-type-specifier-cast : template-name "<" template-argument-list? "#>" [split:simple_type_specifier_cast]'
 )
 @cxx98
 def simple_type_specifier_template(self, p):
@@ -63,11 +63,9 @@ def simple_type_specifier_qualified_name(self, p):
     return TypeSpecifierReference(Reference(p[0] + [(p[1], Id(p[2].value))]), False)
 
 
+@glrp.rule('simple-type-specifier-2 : nested-name-specifier "template"? template-name "<" template-argument-list? "#>"')
 @glrp.rule(
-    'simple-type-specifier-2 : nested-name-specifier "template"? template-name [action:begin_template_list]"<" template-argument-list? "%>"'
-)
-@glrp.rule(
-    'simple-type-specifier-cast : nested-name-specifier "template"? template-name [action:begin_template_list]"<" template-argument-list? "%>" [split:simple_type_specifier_cast]'
+    'simple-type-specifier-cast : nested-name-specifier "template"? template-name "<" template-argument-list? "#>" [split:simple_type_specifier_cast]'
 )
 @cxx98
 def simple_type_specifier_qualified_template(self, p):
