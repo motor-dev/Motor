@@ -278,11 +278,12 @@ class Parser(object):
                 try:
                     operation.run_debug()
                 except SyntaxError:
-                    pass
+                    operation.discard()
                 else:
                     contexts.append(operation._result_context)
 
         print(len(contexts))
+        print(len(contexts[0]._names))
         results = []   # type: List[Any]
         for context in contexts:
             actions = action_table[context._state].get(-1, tuple())
@@ -393,11 +394,12 @@ class Parser(object):
                 try:
                     operation.run()
                 except SyntaxError:
-                    pass
+                    operation.discard()
                 else:
                     contexts.append(operation._result_context)
 
         print(len(contexts))
+        print(len(contexts[0]._names))
         results = []   # type: List[Any]
         for context in contexts:
             actions = action_table[context._state].get(-1, tuple())
@@ -412,7 +414,7 @@ class Parser(object):
 
     def parse(self, filename):
         # type: (str) -> List[Any]
-        return self.parse_debug(filename)
+        return self.parse_opt(filename)
 
     def accept(self, p):
         # type: (Production) -> Any
