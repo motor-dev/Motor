@@ -40,6 +40,7 @@ pure-specifier:
 
 import glrp
 from ...parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge
+from ....ast.declarations import AmbiguousDeclaration
 from motor_typing import TYPE_CHECKING
 
 
@@ -215,6 +216,19 @@ def ambiguous_member_declaration_3(self, initializer, function_body):
     # options will raise syntax errors for invalid combinations
     #assert False
     pass
+
+
+@glrp.merge('member-declaration')
+@cxx98_merge
+def ambiguous_member_declaration_final(self, final_keyword, final_identifier):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    if len(final_keyword) == 1:
+        return final_keyword[0]
+    elif len(final_keyword) > 1:
+        return AmbiguousDeclaration(final_keyword)
+    else:
+        assert len(final_identifier) > 1
+        return AmbiguousDeclaration(final_identifier)
 
 
 if TYPE_CHECKING:

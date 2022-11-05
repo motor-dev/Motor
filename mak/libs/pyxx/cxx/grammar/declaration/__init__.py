@@ -296,6 +296,19 @@ def ambiguous_simple_declaration(self, simple_declaration, decl_specifier_seq_en
     return AmbiguousDeclaration(simple_declaration + decl_specifier_seq_end + decl_specifier_seq_continue)
 
 
+@glrp.merge('simple-declaration')
+@cxx98_merge
+def ambiguous_simple_declaration_final(self, final_keyword, final_identifier):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    if len(final_keyword) == 1:
+        return final_keyword[0]
+    elif len(final_keyword) > 1:
+        return AmbiguousDeclaration(final_keyword)
+    else:
+        assert len(final_identifier) > 1
+        return AmbiguousDeclaration(final_identifier)
+
+
 if TYPE_CHECKING:
     from typing import Any, List
     from ...parser import CxxParser

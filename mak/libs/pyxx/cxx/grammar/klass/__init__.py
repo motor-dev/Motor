@@ -72,7 +72,7 @@ def class_head_name(self, p):
     pass
 
 
-@glrp.rule('class-virt-specifier : "final"')
+@glrp.rule('class-virt-specifier : [split:final_keyword]"final"')
 @cxx11
 def class_virt_specifier_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any

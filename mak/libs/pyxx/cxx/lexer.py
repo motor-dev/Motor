@@ -355,7 +355,7 @@ class Cxx98Lexer(glrp.Lexer):
         # type: (glrp.Token) -> Optional[glrp.Token]
         return None
 
-    @glrp.token(_identifier, 'identifier')
+    @glrp.token(_identifier, '%identifier')
     def _07_identifier(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         t.value = self.text(t)

@@ -15,6 +15,21 @@ from ......ast.reference import Id, TemplateId, DestructorId
 from motor_typing import TYPE_CHECKING
 
 
+@glrp.rule('"identifier" : "%identifier"')
+@cxx98
+def identifier(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return p[0]
+
+
+@glrp.rule('"identifier" : [prec:nonassoc,0][split:continue_declarator_list]"final"')
+@glrp.rule('"identifier" : [prec:nonassoc,0][split:continue_declarator_list]"override"')
+@cxx11
+def identifier_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return p[0]
+
+
 @glrp.rule('unqualified-id : "identifier" [split:id_nontemplate]')
 @cxx98
 def unqualified_id(self, p):
