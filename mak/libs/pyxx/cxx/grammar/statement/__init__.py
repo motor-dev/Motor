@@ -97,6 +97,19 @@ def ambiguous_condition_2(self, decl_specifier_seq_end, decl_specifier_seq_conti
     pass
 
 
+@glrp.merge('condition')
+@cxx98_merge
+def ambiguous_condition_final(self, final_keyword, final_identifier):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    if len(final_keyword) == 1:
+        return final_keyword[0]
+    elif len(final_keyword) > 1:
+        return None    # TODO
+    else:
+        assert len(final_identifier) > 1
+        return None    # TODO
+
+
 @glrp.merge('condition?')
 @cxx98_merge
 def ambiguous_condition_opt(self, expression_statement, ambiguous_simple_declaration):
@@ -109,6 +122,19 @@ def ambiguous_condition_opt(self, expression_statement, ambiguous_simple_declara
 def ambiguous_condition_opt_2(self, decl_specifier_seq_end, decl_specifier_seq_continue):
     # type: (CxxParser, List[Any], List[Any]) -> Any
     pass
+
+
+@glrp.merge('condition?')
+@cxx98_merge
+def ambiguous_condition_ext_final(self, final_keyword, final_identifier):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    if len(final_keyword) == 1:
+        return final_keyword[0]
+    elif len(final_keyword) > 1:
+        return None    # TODO
+    else:
+        assert len(final_identifier) > 1
+        return None    # TODO
 
 
 @glrp.merge('init-statement')

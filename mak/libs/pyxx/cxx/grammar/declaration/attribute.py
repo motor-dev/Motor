@@ -365,7 +365,7 @@ def balanced_token_seq_opt(self, p):
 @glrp.rule('balanced-token : ";"')
 @glrp.rule('balanced-token : ":"')
 @glrp.rule('balanced-token : "..."')
-@glrp.rule('balanced-token : "identifier"')
+@glrp.rule('balanced-token : "%identifier"')
 @glrp.rule('balanced-token : "floating-literal"')
 @glrp.rule('balanced-token : "integer-literal"')
 @glrp.rule('balanced-token : "string-literal"')

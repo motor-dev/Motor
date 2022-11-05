@@ -113,8 +113,12 @@ def parameter_declaration_initializer(self, p):
     return ParameterDeclaration(p[0], p[2], None, p[4], p[1])
 
 
-@glrp.rule('parameter-declaration : attribute-specifier-seq? "this"? decl-specifier-seq [split:end_declarator_list]')
-@glrp.rule('"parameter-declaration#" : attribute-specifier-seq? "this"? decl-specifier-seq [split:end_declarator_list]')
+@glrp.rule(
+    'parameter-declaration : attribute-specifier-seq? "this"? decl-specifier-seq [prec:nonassoc,0][split:end_declarator_list]'
+)
+@glrp.rule(
+    '"parameter-declaration#" : attribute-specifier-seq? "this"? decl-specifier-seq [prec:nonassoc,0][split:end_declarator_list]'
+)
 @cxx98
 def parameter_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -184,6 +188,32 @@ def ambiguous_parameter_declaration_ext_2(self, ptr_declarator, ambiguous_abstra
 def ambiguous_parameter_declaration_clause(self, continue_declarator_list, end_declarator_list):
     # type: (CxxParser, List[Any], List[Any]) -> Any
     return AmbiguousParameterClause(continue_declarator_list + end_declarator_list)
+
+
+@glrp.merge('parameter-declaration')
+@cxx98_merge
+def ambiguous_parameter_declaration_final(self, final_keyword, final_identifier):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    if len(final_keyword) == 1:
+        return final_keyword[0]
+    elif len(final_keyword) > 1:
+        return AmbiguousDeclaration(final_keyword)
+    else:
+        assert len(final_identifier) > 1
+        return AmbiguousDeclaration(final_identifier)
+
+
+@glrp.merge('parameter-declaration#')
+@cxx98_merge
+def ambiguous_parameter_declaration_ext_final(self, final_keyword, final_identifier):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    if len(final_keyword) == 1:
+        return final_keyword[0]
+    elif len(final_keyword) > 1:
+        return AmbiguousDeclaration(final_keyword)
+    else:
+        assert len(final_identifier) > 1
+        return AmbiguousDeclaration(final_identifier)
 
 
 if TYPE_CHECKING:

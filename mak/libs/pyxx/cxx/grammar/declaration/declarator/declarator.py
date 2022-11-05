@@ -60,7 +60,7 @@ def declarator_cxx11(self, p):
     return DeclaratorList(p[0] + [DeclaratorElementMethod(p[1][0], p[2], p[1][1], p[1][2], p[1][3], p[1][4])])
 
 
-@glrp.rule('ptr-declarator : noptr-declarator [split:end_declarator_list]')
+@glrp.rule('ptr-declarator : noptr-declarator [prec:nonassoc,0][split:end_declarator_list]')
 @cxx98
 def ptr_declarator_noptr(self, p):
     # type: (CxxParser, glrp.Production) -> Any
@@ -106,7 +106,7 @@ def noptr_declarator(self, p):
 
 
 @glrp.rule(
-    'parameters-and-qualifiers : [split:continue_declarator_list]"(" begin-parameter-declaration-clause parameter-declaration-clause ")" cv-qualifier-seq? ref-qualifier? exception-specification? attribute-specifier-seq?'
+    'parameters-and-qualifiers : [prec:nonassoc,0][split:continue_declarator_list]"(" begin-parameter-declaration-clause parameter-declaration-clause ")" cv-qualifier-seq? ref-qualifier? exception-specification? attribute-specifier-seq?'
 )
 @cxx98
 def parameters_and_qualifiers(self, p):
@@ -213,7 +213,7 @@ def declarator_id(self, p):
     return (False, p[0])
 
 
-@glrp.rule('declarator-id : [split:continue_declarator_list]"..." id-expression')
+@glrp.rule('declarator-id : [prec:nonassoc,0][split:continue_declarator_list]"..." id-expression')
 @cxx11
 def declarator_id_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
