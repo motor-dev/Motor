@@ -69,7 +69,6 @@ class Operation(object):
         if len(actions) > 1:
             split_context = SplitContext()
             result = tuple(Split(self, name or '_', split_context) for _, name in actions)
-            #self.discard()
             return result
         else:
             return (self, )
@@ -194,6 +193,10 @@ class Merge(Operation):
         for i, st in enumerate(operation._result_context._names):
             if st[0] == split_context:
                 operation._result_context._names[i] = (st[0], action._result, st[2])
+                for st in operation._result_context._names[i + 1:]:
+                    st[0].unregister(operation._result_context)
+                operation._result_context._names = operation._result_context._names[0:i + 1]
+                break
         self._operations = {name: [operation]}
         self._action = action
         self._split_context = split_context
