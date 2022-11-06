@@ -176,7 +176,6 @@ class Parser(object):
         for token in self._lexer.input(filename):
             #print(self._grammar._name_map[token._id])
             #print(len(contexts))
-            print(len(contexts))
             operations = [context.input(token) for context in contexts]
 
             next_contexts = []         # type: List[Operation]

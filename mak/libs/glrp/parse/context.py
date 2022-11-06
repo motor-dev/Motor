@@ -69,6 +69,7 @@ class Operation(object):
         if len(actions) > 1:
             split_context = SplitContext()
             result = tuple(Split(self, name or '_', split_context) for _, name in actions)
+            self.discard()
             return result
         else:
             return (self, )
@@ -80,8 +81,7 @@ class Operation(object):
 
     def discard(self):
         # type: () -> None
-        for st in self._result_context._names:
-            st[0].unregister(self._result_context)
+        self._result_context._abandon()
 
 
 class Reduce(Operation):
@@ -290,7 +290,7 @@ class Context(object):
 
     def __init__(self, parent, param_name):
         # type: (Optional[Context], Optional[SplitName]) -> None
-        self._refcount = 0
+        self._refcount = 1
         self._parent = parent
         self._prod_parent = parent
         if parent is not None:
@@ -311,21 +311,25 @@ class Context(object):
 
     def _abandon(self):
         # type: () -> None
-        for st in self._names:
-            st[0].unregister(self)
+        self._refcount -= 1
+        if self._refcount == 0:
+            for st in self._names:
+                st[0].unregister(self)
+            if self._parent is not None:
+                self._parent._abandon()
 
     def _merge_parent(self):
         # type: () -> None
         parent = self._parent
         assert parent is not None
+        if parent._parent is not None:
+            parent._parent._refcount += 1
         for st in parent._names:
             st[0].register(self)
-        parent._refcount -= 1
-        if parent._refcount == 0:
-            parent._abandon()
         self._names = parent._names + self._names
         self._state_stack = parent._state_stack + self._state_stack
         self._parent = parent._parent
+        parent._abandon()
 
     def _merge_prod_parent(self):
         # type: () -> None
