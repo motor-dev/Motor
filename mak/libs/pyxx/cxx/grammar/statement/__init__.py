@@ -55,7 +55,7 @@ def init_statement(self, p):
 
 @glrp.rule('condition : attribute-specifier-seq? begin-expression-statement expression')
 @glrp.rule(
-    'condition : attribute-specifier-seq? begin-declaration [no-merge-warning]decl-specifier-seq? declarator begin-initializer brace-or-equal-initializer'
+    'condition : attribute-specifier-seq? begin-declaration [no-merge-warning]decl-specifier-seq? declarator-initializer brace-or-equal-initializer'
 )
 @cxx98
 def condition(self, p):
@@ -66,7 +66,7 @@ def condition(self, p):
 
 @glrp.rule('condition? : attribute-specifier-seq? begin-expression-statement expression')
 @glrp.rule(
-    'condition? : attribute-specifier-seq? begin-declaration [no-merge-warning]decl-specifier-seq? declarator begin-initializer brace-or-equal-initializer'
+    'condition? : attribute-specifier-seq? begin-declaration [no-merge-warning]decl-specifier-seq? declarator-initializer brace-or-equal-initializer'
 )
 @glrp.rule('condition? :')
 @cxx98

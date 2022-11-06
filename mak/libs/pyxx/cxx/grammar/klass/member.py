@@ -101,16 +101,16 @@ def member_declarator_list(self, p):
 
 
 @glrp.rule('member-declarator : declarator')
-@glrp.rule('member-declarator : declarator begin-function-body pure-specifier')
-@glrp.rule('member-declarator : declarator begin-function-body virt-specifier-seq pure-specifier')
-@glrp.rule('member-declarator : declarator begin-initializer brace-or-equal-initializer')
+@glrp.rule('member-declarator : declarator-function-body pure-specifier')
+@glrp.rule('member-declarator : declarator-function-body virt-specifier-seq pure-specifier')
+@glrp.rule('member-declarator : declarator-initializer brace-or-equal-initializer')
 @glrp.rule('member-declarator : attribute-specifier-seq? ":" begin-bitfield constant-expression')
 @glrp.rule(
     'member-declarator : attribute-specifier-seq? ":" begin-bitfield [no-merge-warning]constant-expression brace-or-equal-initializer'
 )
-@glrp.rule('member-declarator : declarator begin-initializer ":" begin-bitfield constant-expression')
+@glrp.rule('member-declarator : declarator-initializer ":" begin-bitfield constant-expression')
 @glrp.rule(
-    'member-declarator : declarator begin-initializer ":" begin-bitfield constant-expression brace-or-equal-initializer'
+    'member-declarator : declarator-initializer ":" begin-bitfield constant-expression brace-or-equal-initializer'
 )
 @cxx98
 def member_declarator(self, p):
@@ -118,7 +118,7 @@ def member_declarator(self, p):
     pass
 
 
-@glrp.rule('member-declarator : declarator begin-function-body requires-clause')
+@glrp.rule('member-declarator : declarator-function-body requires-clause')
 @cxx20
 def member_declarator_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any

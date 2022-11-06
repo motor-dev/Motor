@@ -17,22 +17,19 @@ from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule(
-    'function-definition : attribute-specifier-seq? begin-declaration [no-merge-warning]decl-specifier-seq? declarator begin-function-body function-body'
+    'function-definition : attribute-specifier-seq? begin-declaration [no-merge-warning]decl-specifier-seq? declarator-function-body function-body'
 )
 @glrp.rule(
-    'function-definition : attribute-specifier-seq? begin-declaration [no-merge-warning]decl-specifier-seq? declarator begin-function-body virt-specifier-seq function-body'
+    'function-definition : attribute-specifier-seq? begin-declaration [no-merge-warning]decl-specifier-seq? declarator-function-body virt-specifier-seq function-body'
 )
 @cxx98
 def function_definition(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    declarator = p[3]
-    if not declarator.is_method():
-        raise SyntaxError
     pass
 
 
 @glrp.rule(
-    'function-definition : attribute-specifier-seq? begin-declaration [no-merge-warning]decl-specifier-seq? declarator begin-function-body requires-clause function-body'
+    'function-definition : attribute-specifier-seq? begin-declaration [no-merge-warning]decl-specifier-seq? declarator-function-body requires-clause function-body'
 )
 @cxx20
 def function_definition_cxx20(self, p):
@@ -40,23 +37,24 @@ def function_definition_cxx20(self, p):
     pass
 
 
-@glrp.rule('begin-function-body : [split:function_body]')
+@glrp.rule('declarator-function-body : declarator [split:function_body]')
 @cxx98
 def begin_function_body(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    declarator = p[-1]
+    declarator = p[0]
     if not declarator.is_method():
         raise SyntaxError
-    pass
+    return declarator
 
 
-@glrp.rule('begin-initializer : [split:initializer]')
+@glrp.rule('declarator-initializer : declarator [split:initializer]')
 @cxx98
 def begin_function_initializer(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    declarator = p[-1]
+    declarator = p[0]
     if declarator.is_method():
         raise SyntaxError
+    return declarator
 
 
 @glrp.rule('function-body : compound-statement')

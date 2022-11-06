@@ -38,17 +38,14 @@ def init_declarator(self, p):
     return InitDeclarator(p[0], None, None)
 
 
-@glrp.rule('init-declarator : [no-merge-warning]declarator begin-initializer initializer')
+@glrp.rule('init-declarator : [no-merge-warning]declarator-initializer initializer')
 @cxx98
 def init_declarator_initializer(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    declarator = p[0]
-    if declarator.is_method():
-        raise SyntaxError
     return InitDeclarator(p[0], p[1], None)
 
 
-@glrp.rule('init-declarator : declarator begin-function-body requires-clause')
+@glrp.rule('init-declarator : declarator-function-body requires-clause')
 @cxx20
 def init_declarator_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any
