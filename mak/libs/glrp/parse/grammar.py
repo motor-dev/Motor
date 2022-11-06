@@ -282,6 +282,8 @@ def _create_lr0_items(productions):
                 follow_buffer = follow
 
 
+Merge = Grammar.Merge
+
 if TYPE_CHECKING:
     from typing import Callable, Dict, Iterator, List, Set, Tuple
     from .parser import Parser, Action, MergeAction
