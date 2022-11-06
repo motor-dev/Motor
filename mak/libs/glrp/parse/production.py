@@ -17,10 +17,7 @@ class Production(object):
         # type: (int) -> Any
         context = self._context
         index += self._index
-        while index < 0:
-            assert context._prod_parent is not None
-            context = context._prod_parent
-            index += len(context._prod_stack)
+        assert index >= 0
         return context._prod_stack[index]
 
 
