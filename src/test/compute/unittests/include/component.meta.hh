@@ -1,105 +1,100 @@
 /* Motor <motor.devel@gmail.com> under New BSD License
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_TEST_COMPUTE_UNITTESTS_COMPONENT_META_HH_
-#define MOTOR_TEST_COMPUTE_UNITTESTS_COMPONENT_META_HH_
-/**************************************************************************************************/
 #include <stdafx.h>
 #include <motor/world/component/component.meta.hh>
 
 namespace Motor { namespace Test { namespace Compute { namespace UnitTests {
 
-motor_pod ComponentFloat
+struct ComponentFloat
 {
     float value;
 };
 
-motor_pod ComponentFloat2
+struct ComponentFloat2
 {
-    float2 value;
+    knl::float2 value;
 };
 
-motor_pod ComponentFloat3
+struct ComponentFloat3
 {
-    float3 value;
+    knl::float3 value;
 };
 
-motor_pod ComponentFloat4
+struct ComponentFloat4
 {
-    float4 value;
+    knl::float4 value;
 };
 
-motor_pod ComponentFloat8
+struct ComponentFloat8
 {
-    float8 value;
+    knl::float8 value;
 };
 
-motor_pod ComponentFloat16
+struct ComponentFloat16
 {
-    float16 value;
+    knl::float16 value;
 };
 
-motor_pod ComponentInt
+struct ComponentInt
 {
     int value;
 };
 
-motor_pod ComponentInt2
+struct ComponentInt2
 {
-    int2 value;
+    knl::int2 value;
 };
 
-motor_pod ComponentInt3
+struct ComponentInt3
 {
-    int3 value;
+    knl::int3 value;
 };
 
-motor_pod ComponentInt4
+struct ComponentInt4
 {
-    int4 value;
+    knl::int4 value;
 };
 
-motor_pod ComponentInt8
+struct ComponentInt8
 {
-    int8 value;
+    knl::int8 value;
 };
 
-motor_pod ComponentInt16
+struct ComponentInt16
 {
-    int16 value;
+    knl::int16 value;
 };
 
-motor_pod ComponentDouble
+struct ComponentDouble
 {
     double value;
 };
 
-motor_pod ComponentDouble2
+struct ComponentDouble2
 {
-    double2 value;
+    knl::double2 value;
 };
 
-motor_pod ComponentDouble3
+struct ComponentDouble3
 {
-    double3 value;
+    knl::double3 value;
 };
 
-motor_pod ComponentDouble4
+struct ComponentDouble4
 {
-    double4 value;
+    knl::double4 value;
 };
 
-motor_pod ComponentDouble8
+struct ComponentDouble8
 {
-    double8 value;
+    knl::double8 value;
 };
 
-motor_pod ComponentDouble16
+struct ComponentDouble16
 {
-    double16 value;
+    knl::double16 value;
 };
 
 }}}}  // namespace Motor::Test::Compute::UnitTests
-
-/**************************************************************************************************/
-#endif

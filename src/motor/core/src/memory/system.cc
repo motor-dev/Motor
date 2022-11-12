@@ -40,8 +40,8 @@ SystemAllocator::~SystemAllocator()
 void* SystemAllocator::allocate()
 {
     ++m_used;
-    minitl::itaggedptr< Block >::ticket_t ticket;
-    Block*                                result;
+    knl::itaggedptr< Block >::ticket_t ticket;
+    Block*                             result;
     do
     {
         ticket = m_head.getTicket();
@@ -63,8 +63,8 @@ void* SystemAllocator::allocate()
 void SystemAllocator::free(void* memory)
 {
     --m_used;
-    minitl::itaggedptr< Block >::ticket_t ticket;
-    Block*                                block;
+    knl::itaggedptr< Block >::ticket_t ticket;
+    Block*                             block;
     do
     {
         ticket      = m_head.getTicket();

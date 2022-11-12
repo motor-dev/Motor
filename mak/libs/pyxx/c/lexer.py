@@ -114,6 +114,7 @@ class C89Lexer(glrp.Lexer):
         # type: () -> None
         glrp.Lexer.__init__(self)
         self._enum_constants = set([]) # type: Set[str]
+        self._macros = {}              # type: Dict[str, str]
 
     @glrp.token(r"\[", "[")
     @glrp.token(r"\]", "]")
@@ -275,4 +276,4 @@ class C23Lexer(C17Lexer):
 
 
 if TYPE_CHECKING:
-    from typing import Optional, Set, List, Tuple, Generator
+    from typing import Dict, Optional, Set, List, Tuple, Generator

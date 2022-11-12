@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_TYPE_TRAITS_HH_
-#define MOTOR_MINITL_TYPE_TRAITS_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 
 namespace minitl {
@@ -74,6 +72,3 @@ reference_wrapper< T > byref(T& t) noexcept;
 }  // namespace minitl
 
 #include <motor/minitl/inl/type_traits.inl>
-
-/**************************************************************************************************/
-#endif

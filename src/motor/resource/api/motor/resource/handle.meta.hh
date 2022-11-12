@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_RESOURCE_HANDLE_HH_
-#define MOTOR_RESOURCE_HANDLE_HH_
-/**************************************************************************************************/
 #include <motor/resource/stdafx.h>
 
 namespace Motor { namespace Resource {
@@ -22,6 +20,3 @@ struct motor_api(RESOURCE) Handle
 };
 
 }}  // namespace Motor::Resource
-
-/**************************************************************************************************/
-#endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MOTOR_SCRIPTENGINE_INL_
-#define MOTOR_MOTOR_SCRIPTENGINE_INL_
-/**************************************************************************************************/
 #include <motor/stdafx.h>
 #include <motor/scriptengine.hh>
 
@@ -65,6 +63,3 @@ void ScriptEngine< T >::onTicketLoaded(weak< const Resource::IDescription >  scr
 }
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

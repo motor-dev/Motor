@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_CONFIG_CUDA_COMPILER_HH_
-#define MOTOR_CONFIG_CUDA_COMPILER_HH_
-/**************************************************************************************************/
+#pragma once
 
 #define __host    __host__
 #define __device  __device__
@@ -20,7 +17,6 @@ typedef unsigned long long  u64;
 typedef u8                  byte;
 
 #define motor_break()
-#define override
 #define MOTOR_NOINLINE
 #define MOTOR_ALWAYSINLINE
 #define MOTOR_SUPPORTS_EXCEPTIONS  0
@@ -34,6 +30,3 @@ typedef u8                  byte;
 #define kernel_constant   __device const
 #define kernel_global     __device
 #define kernel_generic
-
-/**************************************************************************************************/
-#endif

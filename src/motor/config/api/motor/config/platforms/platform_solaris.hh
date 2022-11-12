@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_CONFIG_PLATFORMS_PLATFORM_SUNOS_HH_
-#define MOTOR_CONFIG_PLATFORMS_PLATFORM_SUNOS_HH_
-/**************************************************************************************************/
+#pragma once
 
 #define MOTOR_PLATFORM_NAME  SunOS
 #define MOTOR_PLATFORM_SUN   1
@@ -18,6 +15,3 @@
 #define malloca  alloca
 #define freea(p) (void)p
 #define DIRENT_H <dirent.h>
-
-/**************************************************************************************************/
-#endif

@@ -18,7 +18,7 @@ IRenderer::IRenderer(minitl::Allocator& allocator, weak< Resource::ResourceManag
     : m_allocator(allocator)
     , m_resourceManager(manager)
     , m_syncTask(ref< Task::Task< Task::MethodCaller< IRenderer, &IRenderer::flush > > >::create(
-          Arena::task(), "flush", Colors::Red::Red,
+          Arena::task(), "flush", knl::Colors::Red::Red,
           ref< Task::MethodCaller< IRenderer, &IRenderer::flush > >::create(Arena::task(), this),
           affinity))
     , m_renderSurfaceLoader(
@@ -27,22 +27,22 @@ IRenderer::IRenderer(minitl::Allocator& allocator, weak< Resource::ResourceManag
           scoped< GPUResourceLoader< RenderWindowDescription > >::create(Arena::resource(), this))
     , m_shaderProgramLoader(
           scoped< GPUResourceLoader< ShaderProgramDescription > >::create(Arena::resource(), this))
-//,   m_kernelSort(scoped<Kernel::KernelDescription>::create(Arena::task(),
+//,   m_kernelSort(scoped<knl::KernelDescription>::create(Arena::task(),
 //"graphics.3d.batchsort")) ,
-// m_kernelRender(scoped<Kernel::KernelDescription>::create(Arena::task(),
+// m_kernelRender(scoped<knl::KernelDescription>::create(Arena::task(),
 //"graphics.3d.batchrender"))
 {
     m_resourceManager->attach(motor_class< RenderSurfaceDescription >(), m_renderSurfaceLoader);
     m_resourceManager->attach(motor_class< RenderWindowDescription >(), m_renderWindowLoader);
     m_resourceManager->attach(motor_class< ShaderProgramDescription >(), m_shaderProgramLoader);
-    // m_resourceManager->load(weak<Kernel::KernelDescription>(m_kernelSort));
-    // m_resourceManager->load(weak<Kernel::KernelDescription>(m_kernelRender));
+    // m_resourceManager->load(weak<knl::KernelDescription>(m_kernelSort));
+    // m_resourceManager->load(weak<knl::KernelDescription>(m_kernelRender));
 }
 
 IRenderer::~IRenderer()
 {
-    // m_resourceManager->unload(weak<Kernel::KernelDescription>(m_kernelRender));
-    // m_resourceManager->unload(weak<Kernel::KernelDescription>(m_kernelSort));
+    // m_resourceManager->unload(weak<knl::KernelDescription>(m_kernelRender));
+    // m_resourceManager->unload(weak<knl::KernelDescription>(m_kernelSort));
     m_resourceManager->detach(motor_class< ShaderProgramDescription >(), m_shaderProgramLoader);
     m_resourceManager->detach(motor_class< RenderWindowDescription >(), m_renderWindowLoader);
     m_resourceManager->detach(motor_class< RenderSurfaceDescription >(), m_renderSurfaceLoader);

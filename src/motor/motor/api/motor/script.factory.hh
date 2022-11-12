@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MOTOR_SCRIPT_FACTORY_HH_
-#define MOTOR_MOTOR_SCRIPT_FACTORY_HH_
-/**************************************************************************************************/
 #include <motor/stdafx.h>
 #include <motor/script.hh>
 
@@ -17,7 +15,7 @@ namespace Motor { namespace Meta {
 template < typename T >
 struct ClassID< Script< T > >
 {
-    static MOTOR_EXPORT raw< const Meta::Class > klass()
+    MOTOR_EXPORT static raw< const Meta::Class > klass()
     {
         static const Meta::Class s_class
             = {name(), u32(sizeof(Script< T >)),
@@ -30,7 +28,7 @@ struct ClassID< Script< T > >
         raw< const Meta::Class > result = {&s_class};
         return result;
     }
-    static MOTOR_EXPORT istring name()
+    MOTOR_EXPORT static istring name()
     {
         static const istring s_name(minitl::format< 2048u >("Script<%s>") | TypeID< T >::name());
         return s_name;
@@ -38,6 +36,3 @@ struct ClassID< Script< T > >
 };
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

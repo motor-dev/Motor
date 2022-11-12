@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SCHEDULER_KERNEL_PARAMETER_SEGMENTS_HH_
-#define MOTOR_SCHEDULER_KERNEL_PARAMETER_SEGMENTS_HH_
-/**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
 #include <motor/scheduler/kernel/parameters/parametertype.hh>
@@ -18,7 +16,7 @@ template < typename T >
 class Segments : public ISegments
 {
 private:
-    static MOTOR_EXPORT ISegments::ParameterRegistration s_registration;
+    MOTOR_EXPORT static ISegments::ParameterRegistration s_registration;
 
 public:
     Segments()
@@ -35,7 +33,7 @@ ISegments::ParameterRegistration Segments< T >::s_registration(motor_class< T >(
                                                                motor_class< Segments< T > >());
 
 template < typename T >
-struct ParamTypeToKernelType< ::Kernel::segments< T > >
+struct ParamTypeToKernelType< ::knl::segments< T > >
 {
     typedef Segments< minitl::remove_const_t< T > > Type;
 };
@@ -43,6 +41,3 @@ struct ParamTypeToKernelType< ::Kernel::segments< T > >
 }}  // namespace Motor::KernelScheduler
 
 #include <motor/scheduler/kernel/parameters/segments.factory.hh>
-
-/**************************************************************************************************/
-#endif

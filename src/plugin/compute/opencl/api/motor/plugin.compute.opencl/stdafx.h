@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_COMPUTE_OPENCL_STDAFX_H_
-#define MOTOR_COMPUTE_OPENCL_STDAFX_H_
-/**************************************************************************************************/
+#pragma once
 
 #include <motor/stdafx.h>
 
@@ -40,6 +37,3 @@ struct CLStringInfo
 };
 
 }}}  // namespace Motor::KernelScheduler::OpenCL
-
-/**************************************************************************************************/
-#endif

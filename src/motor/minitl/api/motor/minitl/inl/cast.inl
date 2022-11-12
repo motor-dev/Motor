@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_CAST_INL_
-#define MOTOR_MINITL_CAST_INL_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/assert.hh>
 #include <motor/minitl/features.hh>
@@ -79,6 +77,3 @@ inline U motor_checked_numcast(T value)
 #    pragma warning(pop)
 #endif
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

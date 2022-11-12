@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SCHEDULER_TASKSCHEDULER_HH_
-#define MOTOR_SCHEDULER_TASKSCHEDULER_HH_
-/**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 #include <motor/core/threads/event.hh>
 #include <motor/core/threads/semaphore.hh>
@@ -79,6 +77,3 @@ public:
 
 }  // namespace Task
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

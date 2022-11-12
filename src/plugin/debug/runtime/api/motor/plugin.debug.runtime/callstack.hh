@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_RUNTIME_CALLSTACK_HH_
-#define MOTOR_RUNTIME_CALLSTACK_HH_
-/**************************************************************************************************/
 #include <motor/plugin.debug.runtime/stdafx.h>
 
 namespace Motor { namespace Runtime {
@@ -36,6 +34,3 @@ public:
 };
 
 }}  // namespace Motor::Runtime
-
-/**************************************************************************************************/
-#endif

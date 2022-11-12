@@ -336,11 +336,37 @@ class Cxx98Lexer(glrp.Lexer):
         # type: (glrp.Token) -> glrp.Token
         return token
 
-    @glrp.token(r'\#(:?[^\\\n]|(?:\\.)|(?:\\\n))*', 'preprocessor', warn=False)
-    def _04_preprocessor(self, t):
+    @glrp.token(r'\#(?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'preprocessor', warn=False)
+    def _03_preprocessor(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         #if t.value.find('include') != -1:
         #    t.lexer.includes.append(t.value)
+        return None
+
+    @glrp.token(
+        r'\#[ \t\v\r]*line(?:[ \t\v\r]+\d+)*(?:[ \t\v\r]+"[^\n"]*")?[ \t\v\r]*\n', 'preprocessor_line', warn=False
+    )
+    def _04_preprocessor_line(self, t):
+        # type: (glrp.Token) -> Optional[glrp.Token]
+        #if t.value.find('include') != -1:
+        #    t.lexer.includes.append(t.value)
+        tokens = t.text()[1:].split()
+        self._lineno = 1 + int(tokens[1])
+        if len(tokens) > 2:
+            self._filename = tokens[-1][1:-1]
+        return None
+
+    @glrp.token(
+        r'\#[ \t\v\r]\d+(?:[ \t\v\r]+"[^\n"]*"(?:[ \t\v\r]+\d+)*)?[ \t\v\r]*\n', 'preprocessor_line_2', warn=False
+    )
+    def _04_preprocessor_line_2(self, t):
+        # type: (glrp.Token) -> Optional[glrp.Token]
+        #if t.value.find('include') != -1:
+        #    t.lexer.includes.append(t.value)
+        tokens = t.text()[1:].split()
+        self._lineno = 1 + int(tokens[0])
+        if len(tokens) > 1:
+            self._filename = tokens[1][1:-1]
         return None
 
     @glrp.token(r'/\*[\!\*](.|\n)*?\*/', 'doxycomment-block')

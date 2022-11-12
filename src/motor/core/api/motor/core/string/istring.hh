@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_CORE_STRING_ISTRING_HH_
-#define MOTOR_CORE_STRING_ISTRING_HH_
-/**************************************************************************************************/
 #include <motor/core/stdafx.h>
 
 namespace Motor {
@@ -223,6 +221,3 @@ const format< SIZE >& operator|(const format< SIZE >& f, const Motor::ifilename&
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_CONFIG_PLATFORMS_PLATFORM_WIN32_HH_
-#define MOTOR_CONFIG_PLATFORMS_PLATFORM_WIN32_HH_
-/**************************************************************************************************/
+#pragma once
 
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX
@@ -29,7 +26,4 @@
 #    include <malloc.h>
 #    define malloca  alloca
 #    define freea(p) (void)p
-#endif
-
-/**************************************************************************************************/
 #endif

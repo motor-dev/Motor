@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_CONFIG_COMPILERS_CLANG_HH_
-#define MOTOR_CONFIG_COMPILERS_CLANG_HH_
-/**************************************************************************************************/
+#pragma once
 
 #define motor_alignof(t) __alignof__(t)
 #if defined(_X86) || defined(_AMD64)
@@ -84,7 +81,4 @@ typedef u8       byte;
 #else
 #    define MOTOR_EXPORT
 #    define MOTOR_IMPORT
-#endif
-
-/**************************************************************************************************/
 #endif

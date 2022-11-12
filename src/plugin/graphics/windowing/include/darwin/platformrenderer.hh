@@ -1,12 +1,10 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_WINDOWING_DARWIN_RENDERER_HH_
-#define MOTOR_WINDOWING_DARWIN_RENDERER_HH_
-/**************************************************************************************************/
 #include <motor/plugin.graphics.windowing/stdafx.h>
-#include <Cocoa/Cocoa.h>
 #include <motor/plugin.graphics.windowing/renderer.hh>
+#include <Cocoa/Cocoa.h>
 
 namespace Motor { namespace Windowing {
 
@@ -23,6 +21,3 @@ public:
 };
 
 }}  // namespace Motor::Windowing
-
-/**************************************************************************************************/
-#endif

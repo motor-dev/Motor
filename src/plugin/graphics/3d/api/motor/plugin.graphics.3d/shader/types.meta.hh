@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_3D_SHADER_TYPES_META_HH_
-#define MOTOR_3D_SHADER_TYPES_META_HH_
-/**************************************************************************************************/
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/plugin.graphics.3d/shader/node.meta.hh>
 
@@ -110,6 +108,3 @@ protected:
 };
 
 }}  // namespace Motor::Shaders
-
-/**************************************************************************************************/
-#endif

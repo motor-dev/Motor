@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_FILESYSTEM_DISKWATCH_HH_
-#define MOTOR_FILESYSTEM_DISKWATCH_HH_
-/**************************************************************************************************/
 #include <motor/filesystem/stdafx.h>
 #include <motor/filesystem/diskfolder.meta.hh>
 
@@ -24,6 +22,3 @@ public:
 };
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

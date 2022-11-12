@@ -6,7 +6,7 @@
 
 namespace Motor { namespace Task {
 
-ITask::ITask(istring name, color32 color, Scheduler::Affinity affinity)
+ITask::ITask(istring name, knl::color32 color, Scheduler::Affinity affinity)
     : name(name)
     , color(color)
     , affinity(affinity)

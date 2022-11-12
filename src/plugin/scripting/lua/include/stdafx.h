@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_LUA_STDAFX_H_
-#define MOTOR_LUA_STDAFX_H_
-/**************************************************************************************************/
+#pragma once
 
 #include <motor/stdafx.h>
 
@@ -13,6 +10,3 @@ extern "C"
 #include <lua.h>
 #include <lualib.h>
 }
-
-/**************************************************************************************************/
-#endif

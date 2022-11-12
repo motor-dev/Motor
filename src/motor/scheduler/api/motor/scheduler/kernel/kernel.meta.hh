@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SCHEDULER_KERNEL_KERNEL_META_HH_
-#define MOTOR_SCHEDULER_KERNEL_KERNEL_META_HH_
-/**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 #include <motor/resource/description.hh>
 #include <motor/scheduler/kernel/code.meta.hh>
@@ -37,6 +35,3 @@ public:
 };
 
 }}  // namespace Motor::KernelScheduler
-
-/**************************************************************************************************/
-#endif

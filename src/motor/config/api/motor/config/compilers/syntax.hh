@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_CONFIG_COMPILERS_SYNTAX_HH_
-#define MOTOR_CONFIG_COMPILERS_SYNTAX_HH_
-/**************************************************************************************************/
+#pragma once
 
 #define motor_alignof(t) __alignof__(t)
 #define motor_break()
@@ -29,13 +26,9 @@ typedef unsigned long int intptr_t;
 #    define motor_restrict __restrict
 #endif
 
-#define override
 #define MOTOR_NOINLINE
 #define MOTOR_ALWAYSINLINE        inline
 #define MOTOR_SUPPORTS_EXCEPTIONS 1
 
 #define MOTOR_EXPORT
 #define MOTOR_IMPORT
-
-/**************************************************************************************************/
-#endif

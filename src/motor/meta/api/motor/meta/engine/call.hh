@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_ENGINE_CALL_HH_
-#define MOTOR_META_ENGINE_CALL_HH_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/meta/conversion.meta.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
@@ -130,7 +128,7 @@ CallInfo resolve(raw< const Method > method, ArgInfo< T > arguments[], u32 argum
                  ArgInfo< T > namedArguments[] = 0, u32 namedArgumentCount = 0)
 {
     u32*     indices[2] = {(u32*)malloca(sizeof(u32) * (namedArgumentCount + 1)),
-                       (u32*)malloca(sizeof(u32) * (namedArgumentCount + 1))};
+                           (u32*)malloca(sizeof(u32) * (namedArgumentCount + 1))};
     u32      indexTmp   = 0;
     u32      indexBest  = 1;
     CallInfo best       = {ConversionCost::s_incompatible, {0}, 0, 0};
@@ -203,6 +201,3 @@ Value call(raw< const Method > method, CallInfo callInfo, const ArgInfo< T > arg
 }
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

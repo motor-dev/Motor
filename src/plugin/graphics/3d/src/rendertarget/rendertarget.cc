@@ -15,7 +15,7 @@ RenderTargetDescription::~RenderTargetDescription()
 }
 
 RenderSurfaceDescription::RenderSurfaceDescription(u16 width, u16 height)
-    : dimensions(make_uint2(width, height))
+    : dimensions(knl::make_uint2(width, height))
 {
 }
 

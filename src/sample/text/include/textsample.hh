@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SAMPLES_TEXT_KERNELSAMPLE_HH_
-#define MOTOR_SAMPLES_TEXT_KERNELSAMPLE_HH_
-/**************************************************************************************************/
 #include <stdafx.h>
 #include <motor/application.hh>
 #include <motor/filesystem/folder.meta.hh>
@@ -33,6 +31,3 @@ public:
 };
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

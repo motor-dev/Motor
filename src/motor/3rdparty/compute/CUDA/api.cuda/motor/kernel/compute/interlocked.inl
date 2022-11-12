@@ -1,12 +1,10 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_KERNEL_CUDA_COMPUTE_INTERLOCKED_INL_
-#define MOTOR_KERNEL_CUDA_COMPUTE_INTERLOCKED_INL_
-/**************************************************************************************************/
 #include    <motor/kernel/stdafx.h>
 
-namespace _Kernel
+namespace knl
 {
 
 template< unsigned size >
@@ -72,7 +70,7 @@ struct InterlockedType<8>
 }
 
 
-namespace _Kernel
+namespace knl
 {
 
 __device InterlockedType<4>::value_t InterlockedType<4>::fetch_and_add(value_t *p, value_t incr)
@@ -160,6 +158,3 @@ __device InterlockedType<8>::value_t InterlockedType<8>::set_and_fetch(value_t *
 }
 
 }
-
-/**************************************************************************************************/
-#endif

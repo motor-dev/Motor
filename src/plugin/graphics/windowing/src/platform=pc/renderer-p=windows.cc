@@ -110,11 +110,11 @@ void Renderer::flush()
     return;
 }
 
-uint2 Renderer::getScreenSize() const
+knl::uint2 Renderer::getScreenSize() const
 {
     RECT rect;
     GetWindowRect(GetDesktopWindow(), &rect);
-    return make_uint2(rect.right - rect.left, rect.bottom - rect.top);
+    return knl::make_uint2(rect.right - rect.left, rect.bottom - rect.top);
 }
 
 }}  // namespace Motor::Windowing

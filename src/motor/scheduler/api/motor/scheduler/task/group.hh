@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SCHEDULER_TASK_GROUP_HH_
-#define MOTOR_SCHEDULER_TASK_GROUP_HH_
-/**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/task/itask.hh>
 
@@ -35,7 +33,7 @@ private:
     friend class Callback;
 
 public:
-    TaskGroup(istring name, color32 color);
+    TaskGroup(istring name, knl::color32 color);
     ~TaskGroup();
 
 public:  // ITask
@@ -81,6 +79,3 @@ public:
 };
 
 }}  // namespace Motor::Task
-
-/**************************************************************************************************/
-#endif

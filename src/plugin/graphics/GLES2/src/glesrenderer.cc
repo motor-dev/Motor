@@ -24,26 +24,26 @@ void GLESRenderer::flush()
 }
 
 ref< IGPUResource >
-    GLESRenderer::create(weak< const RenderSurfaceDescription > /*renderSurfaceDescription*/) const
+GLESRenderer::create(weak< const RenderSurfaceDescription > /*renderSurfaceDescription*/) const
 {
     return ref< IGPUResource >();
 }
 
 ref< IGPUResource >
-    GLESRenderer::create(weak< const RenderWindowDescription > /*renderWindowDescription*/) const
+GLESRenderer::create(weak< const RenderWindowDescription > /*renderWindowDescription*/) const
 {
     return ref< IGPUResource >();
 }
 
 ref< IGPUResource >
-    GLESRenderer::create(weak< const ShaderProgramDescription > /*shaderDescription*/) const
+GLESRenderer::create(weak< const ShaderProgramDescription > /*shaderDescription*/) const
 {
     return ref< IGPUResource >();
 }
 
-uint2 GLESRenderer::getScreenSize() const
+knl::uint2 GLESRenderer::getScreenSize() const
 {
-    return make_uint2(320, 200);
+    return knl::make_uint2(320, 200);
 }
 
 }}  // namespace Motor::OpenGLES

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_CORE_STREAMS_HH_
-#define MOTOR_CORE_STREAMS_HH_
-/**************************************************************************************************/
 #include <motor/core/stdafx.h>
 
 namespace Motor {
@@ -41,6 +39,3 @@ public:
 };
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

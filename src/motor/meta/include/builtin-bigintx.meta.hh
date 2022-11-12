@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_BUILTIN_BIGINTX_META_HH_
-#define MOTOR_META_BUILTIN_BIGINTX_META_HH_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/meta/builtin.hh>
 #include <motor/meta/classinfo.meta.hh>
@@ -14,7 +12,7 @@ namespace Motor
 
 motor_tag(Index(Motor::Meta::ClassType_Vector2
           + (Motor::Meta::ClassIndex_i64 << 16)))
-motor_pod bigint2
+struct bigint2
 {
     i64 operator[](u32) const;
     i64& operator[](u32);
@@ -23,7 +21,7 @@ motor_pod bigint2
 
 motor_tag(Index(Motor::Meta::ClassType_Vector3
           + (Motor::Meta::ClassIndex_i64 << 16)))
-motor_pod bigint3
+struct bigint3
 {
     i64 operator[](u32) const;
     i64& operator[](u32);
@@ -31,7 +29,7 @@ motor_pod bigint3
 
 motor_tag(Index(Motor::Meta::ClassType_Vector4
           + (Motor::Meta::ClassIndex_i64 << 16)))
-motor_pod bigint4
+struct bigint4
 {
     i64 operator[](u32) const;
     i64& operator[](u32);
@@ -39,7 +37,7 @@ motor_pod bigint4
 
 motor_tag(Index(Motor::Meta::ClassType_Vector8
           + (Motor::Meta::ClassIndex_i64 << 16)))
-motor_pod bigint8
+struct bigint8
 {
     i64 operator[](u32) const;
     i64& operator[](u32);
@@ -47,14 +45,11 @@ motor_pod bigint8
 
 motor_tag(Index(Motor::Meta::ClassType_Vector16
           + (Motor::Meta::ClassIndex_i64 << 16)))
-motor_pod bigint16
+struct bigint16
 {
     i64 operator[](u32) const;
     i64& operator[](u32);
 };
 
 }
-#endif
-
-/**************************************************************************************************/
 #endif

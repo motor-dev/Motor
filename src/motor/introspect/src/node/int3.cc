@@ -8,7 +8,7 @@
 
 namespace Motor { namespace Meta { namespace AST {
 
-Int3::Int3(bigint3 value) : Node(), m_value(value)
+Int3::Int3(knl::bigint3 value) : Node(), m_value(value)
 {
     motor_forceuse(m_value);
 }
@@ -19,39 +19,43 @@ Int3::~Int3()
 
 ConversionCost Int3::distance(const Type& type) const
 {
-    return ConversionCalculator< bigint3 >::calculate(type);
+    return ConversionCalculator< knl::bigint3 >::calculate(type);
 }
 
 void Int3::doEval(const Meta::Type& expectedType, Value& result) const
 {
-    if(motor_type< byte3 >().isA(expectedType))
-        result = Meta::Value(make_byte3(motor_checked_numcast< i8 >(m_value[0]),
-                                        motor_checked_numcast< i8 >(m_value[1]),
-                                        motor_checked_numcast< i8 >(m_value[2])));
-    else if(motor_type< short3 >().isA(expectedType))
-        result = Meta::Value(make_short3(motor_checked_numcast< i16 >(m_value[0]),
-                                         motor_checked_numcast< i16 >(m_value[1]),
-                                         motor_checked_numcast< i16 >(m_value[2])));
-    else if(motor_type< int3 >().isA(expectedType))
-        result = Meta::Value(make_int3(motor_checked_numcast< i32 >(m_value[0]),
-                                       motor_checked_numcast< i32 >(m_value[1]),
-                                       motor_checked_numcast< i32 >(m_value[2])));
-    else if(motor_type< bigint3 >().isA(expectedType))
-        result = Meta::Value(make_bigint3(motor_checked_numcast< i64 >(m_value[0]),
-                                          motor_checked_numcast< i64 >(m_value[1]),
-                                          motor_checked_numcast< i64 >(m_value[2])));
-    else if(motor_type< ushort3 >().isA(expectedType))
-        result = Meta::Value(make_ushort3(motor_checked_numcast< u16 >(m_value[0]),
-                                          motor_checked_numcast< u16 >(m_value[1]),
-                                          motor_checked_numcast< u16 >(m_value[2])));
-    else if(motor_type< uint3 >().isA(expectedType))
-        result = Meta::Value(make_uint3(motor_checked_numcast< u32 >(m_value[0]),
-                                        motor_checked_numcast< u32 >(m_value[1]),
-                                        motor_checked_numcast< u32 >(m_value[2])));
-    else if(motor_type< biguint3 >().isA(expectedType))
-        result = Meta::Value(make_biguint3(motor_checked_numcast< u64 >(m_value[0]),
-                                           motor_checked_numcast< u64 >(m_value[1]),
-                                           motor_checked_numcast< u64 >(m_value[2])));
+    if(motor_type< knl::byte3 >().isA(expectedType))
+        result = Meta::Value(knl::make_byte3(motor_checked_numcast< i8 >(m_value[0]),
+                                             motor_checked_numcast< i8 >(m_value[1]),
+                                             motor_checked_numcast< i8 >(m_value[2])));
+    else if(motor_type< knl::short3 >().isA(expectedType))
+        result = Meta::Value(knl::make_short3(motor_checked_numcast< i16 >(m_value[0]),
+                                              motor_checked_numcast< i16 >(m_value[1]),
+                                              motor_checked_numcast< i16 >(m_value[2])));
+    else if(motor_type< knl::int3 >().isA(expectedType))
+        result = Meta::Value(knl::make_int3(motor_checked_numcast< i32 >(m_value[0]),
+                                            motor_checked_numcast< i32 >(m_value[1]),
+                                            motor_checked_numcast< i32 >(m_value[2])));
+    else if(motor_type< knl::bigint3 >().isA(expectedType))
+        result = Meta::Value(knl::make_bigint3(motor_checked_numcast< i64 >(m_value[0]),
+                                               motor_checked_numcast< i64 >(m_value[1]),
+                                               motor_checked_numcast< i64 >(m_value[2])));
+    else if(motor_type< knl::ubyte3 >().isA(expectedType))
+        result = Meta::Value(knl::make_ubyte3(motor_checked_numcast< u8 >(m_value[0]),
+                                              motor_checked_numcast< u8 >(m_value[1]),
+                                              motor_checked_numcast< u8 >(m_value[2])));
+    else if(motor_type< knl::ushort3 >().isA(expectedType))
+        result = Meta::Value(knl::make_ushort3(motor_checked_numcast< u16 >(m_value[0]),
+                                               motor_checked_numcast< u16 >(m_value[1]),
+                                               motor_checked_numcast< u16 >(m_value[2])));
+    else if(motor_type< knl::uint3 >().isA(expectedType))
+        result = Meta::Value(knl::make_uint3(motor_checked_numcast< u32 >(m_value[0]),
+                                             motor_checked_numcast< u32 >(m_value[1]),
+                                             motor_checked_numcast< u32 >(m_value[2])));
+    else if(motor_type< knl::biguint3 >().isA(expectedType))
+        result = Meta::Value(knl::make_biguint3(motor_checked_numcast< u64 >(m_value[0]),
+                                                motor_checked_numcast< u64 >(m_value[1]),
+                                                motor_checked_numcast< u64 >(m_value[2])));
     else
         motor_notreached();
 }

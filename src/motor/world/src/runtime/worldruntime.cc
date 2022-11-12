@@ -31,13 +31,13 @@ WorldRuntime::WorldRuntime(weak< const KernelScheduler::ProducerLoader >        
     , m_registryRuntime(registryRuntime)
     , m_updateTask(
           ref< Task::Task< Task::MethodCaller< WorldRuntime, &WorldRuntime::update > > >::create(
-              Arena::task(), "world:update", Colors::make(89, 89, 180),
+              Arena::task(), "world:update", knl::Colors::make(89, 89, 180),
               ref< Task::MethodCaller< WorldRuntime, &WorldRuntime::update > >::create(
                   Arena::task(), this)))
     , m_eventTask(
           ref< Task::Task< Task::MethodCaller< WorldRuntime, &WorldRuntime::processEvents > > >::
               create(
-                  Arena::task(), "world:processEvents", Colors::make(89, 89, 180),
+                  Arena::task(), "world:processEvents", knl::Colors::make(89, 89, 180),
                   ref< Task::MethodCaller< WorldRuntime, &WorldRuntime::processEvents > >::create(
                       Arena::task(), this)))
     , m_productEnds(Arena::task(), products.size() + 1)

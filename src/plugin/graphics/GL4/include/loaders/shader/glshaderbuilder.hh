@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_GL4_LOADERS_GLSHADERBUILDER_HH_
-#define MOTOR_GL4_LOADERS_GLSHADERBUILDER_HH_
-/**************************************************************************************************/
 #include <motor/plugin.graphics.GL4/stdafx.h>
 #include <motor/plugin.graphics.3d/shader/ishaderbuilder.hh>
 #include <motor/plugin.graphics.3d/shader/shader.meta.hh>
@@ -33,19 +31,16 @@ private:
     virtual void doAddMethod(const istring& name) override;
     virtual void doEndMethod() override;
     virtual void doWrite(float value) override;
-    virtual void doWrite(float2 value) override;
-    virtual void doWrite(float3 value) override;
-    virtual void doWrite(float4 value) override;
+    virtual void doWrite(knl::float2 value) override;
+    virtual void doWrite(knl::float3 value) override;
+    virtual void doWrite(knl::float4 value) override;
     virtual void doWrite(int value) override;
-    virtual void doWrite(int2 value) override;
-    virtual void doWrite(int3 value) override;
-    virtual void doWrite(int4 value) override;
+    virtual void doWrite(knl::int2 value) override;
+    virtual void doWrite(knl::int3 value) override;
+    virtual void doWrite(knl::int4 value) override;
     virtual void doWrite(bool value) override;
     virtual void doSaveTo(Shaders::Semantic semantic, const istring& value) override;
     virtual void doSaveTo(const istring& name, const istring& value) override;
 };
 
 }}  // namespace Motor::OpenGL
-
-/**************************************************************************************************/
-#endif

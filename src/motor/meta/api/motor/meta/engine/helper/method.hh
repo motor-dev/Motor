@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_ENGINE_HELPER_METHOD_HH_
-#define MOTOR_META_ENGINE_HELPER_METHOD_HH_
-/**************************************************************************************************/
 #include <motor/meta/value.hh>
 
 namespace Motor { namespace Meta {
@@ -86,6 +84,3 @@ static Value createPodCopy(raw< const Method > method, Value* params, u32 paramC
 }
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

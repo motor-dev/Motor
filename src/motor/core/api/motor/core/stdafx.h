@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_CORE_STDAFX_H_
-#define MOTOR_CORE_STDAFX_H_
-/**************************************************************************************************/
+#pragma once
 
 #include <motor/kernel/stdafx.h>
 #include <motor/kernel/simd.hh>
@@ -87,7 +84,4 @@ using minitl::raw;
 using minitl::ref;
 using minitl::scoped;
 using minitl::weak;
-#endif
-
-/**************************************************************************************************/
 #endif

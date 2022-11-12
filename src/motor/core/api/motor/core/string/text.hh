@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_CORE_STRING_TEXT_HH_
-#define MOTOR_CORE_STRING_TEXT_HH_
-/**************************************************************************************************/
 #include <motor/core/stdafx.h>
 #include <motor/minitl/format.hh>
 
@@ -43,6 +41,3 @@ const format< SIZE >& operator|(const format< SIZE >& f, const Motor::text& valu
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

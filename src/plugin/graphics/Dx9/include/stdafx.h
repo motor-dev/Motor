@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_DX9_STDAFX_H_
-#define MOTOR_DX9_STDAFX_H_
-/**************************************************************************************************/
+#pragma once
 
 #include <motor/stdafx.h>
 
@@ -15,6 +12,3 @@
 #endif
 
 #include <d3d9.h>
-
-/**************************************************************************************************/
-#endif

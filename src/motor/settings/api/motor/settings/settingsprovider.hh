@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SETTINGS_SETTINGSPROVIDER_HH_
-#define MOTOR_SETTINGS_SETTINGSPROVIDER_HH_
-/**************************************************************************************************/
 #include <motor/settings/stdafx.h>
 #include <motor/minitl/tuple.hh>
 #include <motor/minitl/vector.hh>
@@ -55,6 +53,3 @@ private:
 };
 
 }}  // namespace Motor::Settings
-
-/**************************************************************************************************/
-#endif

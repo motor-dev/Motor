@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_GUI_GTK3_GTK3LOADER_HH_
-#define MOTOR_GUI_GTK3_GTK3LOADER_HH_
-/**************************************************************************************************/
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/plugin/plugin.hh>
 #include <motor/resource/loader.hh>
@@ -29,6 +27,3 @@ public:
 };
 
 }}  // namespace Motor::Gtk3
-
-/**************************************************************************************************/
-#endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_ITERATORS_HH_
-#define MOTOR_MINITL_ITERATORS_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <stddef.h>
 
@@ -138,6 +136,3 @@ T* end(T (&c)[SIZE])
 //! @}
 
 #include <motor/minitl/inl/iterator.inl>
-
-/**************************************************************************************************/
-#endif

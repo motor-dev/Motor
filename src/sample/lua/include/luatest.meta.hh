@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SAMPLE_LUATEST_META_HH_
-#define MOTOR_SAMPLE_LUATEST_META_HH_
-/**************************************************************************************************/
 #include <stdafx.h>
 #include <motor/minitl/tuple.hh>
 
@@ -15,6 +13,3 @@ struct LuaTest
 };
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

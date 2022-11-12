@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_MINITL_MEMORY_POOL_INL_
-#define MOTOR_MINITL_MEMORY_POOL_INL_
-/**************************************************************************************************/
+#pragma once
 
 namespace minitl {
 
@@ -43,6 +40,3 @@ void pool< T >::swap(pool< T >& other)
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

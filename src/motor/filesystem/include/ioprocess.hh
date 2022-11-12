@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_FILESYSTEM_IOPROCESS_HH_
-#define MOTOR_FILESYSTEM_IOPROCESS_HH_
-/**************************************************************************************************/
 #include <motor/filesystem/stdafx.h>
 #include <motor/core/threads/semaphore.hh>
 #include <motor/core/threads/thread.hh>
@@ -15,7 +13,7 @@ namespace Motor { namespace IOProcess {
 class IOContext : public minitl::pointer
 {
 private:
-    struct IORequest : public minitl::istack< IORequest >::node
+    struct IORequest : public knl::istack< IORequest >::node
     {
         ref< File::Ticket > ticket;
     };
@@ -28,9 +26,9 @@ private:
     i_u8      m_ioDone;
     Thread    m_ioThread;
 
-    IORequest                   m_requests[MaxRequestCount];
-    minitl::istack< IORequest > m_freeRequestList;
-    minitl::istack< IORequest > m_requestQueue;
+    IORequest                m_requests[MaxRequestCount];
+    knl::istack< IORequest > m_freeRequestList;
+    knl::istack< IORequest > m_requestQueue;
 
 private:
     static intptr_t ioProcess(intptr_t p1, intptr_t p2);
@@ -46,6 +44,3 @@ public:
 };
 
 }}  // namespace Motor::IOProcess
-
-/**************************************************************************************************/
-#endif

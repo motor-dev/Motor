@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_CONFIG_CL_COMPILERS_HH_
-#define MOTOR_CONFIG_CL_COMPILERS_HH_
-/**************************************************************************************************/
+#pragma once
 
 #define __host
 #define __device
@@ -39,6 +36,3 @@ typedef u8             byte;
 
 #pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
 #include <opencl-c.h>
-
-/**************************************************************************************************/
-#endif

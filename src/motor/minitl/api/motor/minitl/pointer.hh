@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_POINTER_HH_
-#define MOTOR_MINITL_POINTER_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/allocator.hh>
 
@@ -107,6 +105,3 @@ protected:
 };
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

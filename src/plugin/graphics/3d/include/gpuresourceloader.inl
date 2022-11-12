@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_3D_RENDERER_GPURESOURCELOADER_INL_
-#define MOTOR_3D_RENDERER_GPURESOURCELOADER_INL_
-/**************************************************************************************************/
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/plugin.graphics.3d/renderer/igpuresource.hh>
 #include <gpuresourceloader.hh>
@@ -63,6 +61,3 @@ void GPUResourceLoader< R >::flush()
 }
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

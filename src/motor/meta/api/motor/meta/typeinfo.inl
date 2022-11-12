@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_TYPEINFO_INL_
-#define MOTOR_META_TYPEINFO_INL_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/meta/conversion.hh>
 #include <motor/meta/typeinfo.hh>
@@ -17,6 +15,3 @@ bool Type::isA() const
 }
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

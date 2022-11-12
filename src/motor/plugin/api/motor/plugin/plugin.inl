@@ -1,5 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
 #include <motor/plugin/stdafx.h>
 #include <motor/core/environment.hh>

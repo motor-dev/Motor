@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_DEBUG_RUNTIME_DWARFTYPES_HH_
-#define MOTOR_DEBUG_RUNTIME_DWARFTYPES_HH_
-/**************************************************************************************************/
 #include <motor/plugin.debug.runtime/stdafx.h>
 
 namespace Motor { namespace Runtime { namespace Dwarf {
@@ -258,6 +256,3 @@ enum Type
 };
 
 }}}  // namespace Motor::Runtime::Dwarf
-
-/**************************************************************************************************/
-#endif

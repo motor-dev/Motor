@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SCHEDULER_TASK_ITASK_HH_
-#define MOTOR_SCHEDULER_TASK_ITASK_HH_
-/**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 #include <motor/core/threads/criticalsection.hh>
 #include <motor/kernel/colors.hh>
@@ -62,7 +60,7 @@ private:
 
 public:
     const istring             name;
-    const color32             color;
+    const knl::color32        color;
     const Scheduler::Affinity affinity;
 
 private:
@@ -83,7 +81,7 @@ public:
     weak< ICallback > startCallback();
 
 protected:
-    ITask(istring name, color32 color, Scheduler::Affinity affinity);
+    ITask(istring name, knl::color32 color, Scheduler::Affinity affinity);
 };
 
 class motor_api(SCHEDULER) ITask::CallbackConnection
@@ -102,6 +100,3 @@ public:
 };
 
 }}  // namespace Motor::Task
-
-/**************************************************************************************************/
-#endif

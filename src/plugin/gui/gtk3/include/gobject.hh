@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_UI_GTK3_GOBJECT_HH_
-#define MOTOR_UI_GTK3_GOBJECT_HH_
-/**************************************************************************************************/
 #include <stdafx.h>
 
 namespace Motor { namespace Gtk3 {
@@ -16,6 +14,3 @@ void                     destroyGObjectClass(Gtk3Plugin& plugin, GType type);
 void storeMetaValue(const Meta::Value& value, GValue* target);
 
 }}  // namespace Motor::Gtk3
-
-/**************************************************************************************************/
-#endif

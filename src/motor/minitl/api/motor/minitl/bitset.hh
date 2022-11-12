@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_BITSET_HH_
-#define MOTOR_MINITL_BITSET_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 
 namespace minitl {
@@ -76,6 +74,3 @@ inline bitset< BITS > operator^(const bitset< BITS >& lhs, const bitset< BITS >&
 }  // namespace minitl
 
 #include <motor/minitl/inl/bitset.inl>
-
-/**************************************************************************************************/
-#endif

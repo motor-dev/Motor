@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_WORLD_KERNEL_SEGMENTSMEMORYBUFFER_HH_
-#define MOTOR_WORLD_KERNEL_SEGMENTSMEMORYBUFFER_HH_
-/**************************************************************************************************/
 #include <motor/world/stdafx.h>
 #include <motor/minitl/intrusive_list.hh>
 #include <motor/scheduler/kernel/imemorybuffer.hh>
@@ -20,6 +18,3 @@ public:
 };
 
 }}  // namespace Motor::World
-
-/**************************************************************************************************/
-#endif

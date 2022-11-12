@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_CONTAINER_INL_VECTOR_INL_
-#define MOTOR_MINITL_CONTAINER_INL_VECTOR_INL_
-/**************************************************************************************************/
 #include <motor/minitl/assert.hh>
 #include <motor/minitl/utility.hh>
 
@@ -629,6 +627,3 @@ void swap(vector< T >& t1, vector< T >& t2)
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

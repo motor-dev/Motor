@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_RESOURCE_STDAFX_H_
-#define MOTOR_RESOURCE_STDAFX_H_
-/**************************************************************************************************/
+#pragma once
 
 #include <motor/core/stdafx.h>
 #include <motor/filesystem/stdafx.h>
@@ -21,7 +18,4 @@
 namespace Motor { namespace Arena {
 motor_api(RESOURCE) minitl::Allocator& resource();
 }}  // namespace Motor::Arena
-#endif
-
-/**************************************************************************************************/
 #endif

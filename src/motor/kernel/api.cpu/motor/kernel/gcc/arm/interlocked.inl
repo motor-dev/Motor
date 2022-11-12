@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_KERNEL_GCC_ARM_INTERLOCKED_INL_
-#define MOTOR_KERNEL_GCC_ARM_INTERLOCKED_INL_
-/**************************************************************************************************/
 #include <motor/kernel/stdafx.h>
 
 #if defined(_ARM_V7)
@@ -40,7 +38,7 @@
 #    define AO_THUMB_SWITCH_CLOBBERS /* empty */
 #endif                               /* !__thumb__ */
 
-namespace _Kernel {
+namespace knl {
 
 template < unsigned size >
 struct InterlockedType;
@@ -177,7 +175,4 @@ struct InterlockedType< 2 > : public InterlockedType< 4 >
 {
 };
 
-}  // namespace _Kernel
-
-/**************************************************************************************************/
-#endif
+}  // namespace knl

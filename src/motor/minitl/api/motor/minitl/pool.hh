@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_POOL_
-#define MOTOR_MINITL_POOL_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/kernel/interlocked.hh>
 #include <motor/kernel/interlocked_stack.hh>
@@ -16,14 +14,14 @@ template < typename T >
 class pool
 {
 private:
-    struct node : public minitl::istack< node >::node
+    struct node : public knl::istack< node >::node
     {
     };
     enum
     {
         ElementSize = sizeof(T)
     };
-    istack< node >        m_items;
+    knl::istack< node >   m_items;
     Allocator::Block< T > m_pool;
     T*                    m_end;
 
@@ -52,6 +50,3 @@ void swap(pool< T >& a, pool< T >& b)
 }  // namespace minitl
 
 #include <motor/minitl/inl/pool.inl>
-
-/**************************************************************************************************/
-#endif

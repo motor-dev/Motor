@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_CORE_RUNTIME_MD5_HH_
-#define MOTOR_CORE_RUNTIME_MD5_HH_
-/**************************************************************************************************/
 #include <motor/core/stdafx.h>
 #include <motor/minitl/format.hh>
 
@@ -57,6 +55,3 @@ static inline const format< SIZE >& operator|(const format< SIZE >& f, const Mot
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

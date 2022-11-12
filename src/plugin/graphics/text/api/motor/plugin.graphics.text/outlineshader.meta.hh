@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_TEXT_OUTLINESHADER_META_HH_
-#define MOTOR_TEXT_OUTLINESHADER_META_HH_
-/**************************************************************************************************/
 #include <motor/plugin.graphics.text/stdafx.h>
 #include <motor/plugin.graphics.3d/shader/shader.meta.hh>
 #include <motor/plugin.graphics.3d/shader/types.meta.hh>
@@ -19,6 +17,3 @@ published:
 };
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

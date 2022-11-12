@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_CONFIG_COMPILERS_MSVC_HH_
-#define MOTOR_CONFIG_COMPILERS_MSVC_HH_
-/**************************************************************************************************/
+#pragma once
 
 #if(_MSC_VER >= 1400) && !defined(_ARM) && !defined(_ARM64)
 //  Following 8 lines: workaround for a bug in some older SDKs
@@ -127,18 +124,14 @@ typedef u8               byte;
 #    else
 #        include <emmintrin.h>
 #        define motor_pause() _mm_pause()
-#endif
+#    endif
 #else
 #    define motor_break() asm { int 3;}
 #    include <emmintrin.h>
 #    define motor_pause() _mm_pause()
 #endif
 
-#if _MSC_VER >= 1400
-// use of "override" extension
-#    pragma warning(disable : 4481)
-#else
-#    define override
+#if _MSC_VER < 1400
 // unreachable code
 #    pragma warning(disable : 4702)
 // function marked as __forceinline but not inlined
@@ -146,6 +139,3 @@ typedef u8               byte;
 #endif
 
 #define _CRT_SECURE_NO_DEPRECATE 1
-
-/**************************************************************************************************/
-#endif

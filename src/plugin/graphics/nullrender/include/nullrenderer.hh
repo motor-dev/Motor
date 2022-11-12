@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_NULLRENDER_RENDERER_HH_
-#define MOTOR_NULLRENDER_RENDERER_HH_
-/**************************************************************************************************/
 #include <stdafx.h>
 #include <motor/filesystem/folder.meta.hh>
 #include <motor/plugin.graphics.3d/renderer/irenderer.hh>
@@ -24,10 +22,10 @@ public:
         return 1;
     }
 
-    void  flush() override;
-    uint2 getScreenSize() const override
+    void       flush() override;
+    knl::uint2 getScreenSize() const override
     {
-        return make_uint2(1920, 1080);
+        return knl::make_uint2(1920, 1080);
     }
 
 private:
@@ -40,6 +38,3 @@ private:
 };
 
 }}  // namespace Motor::Null
-
-/**************************************************************************************************/
-#endif

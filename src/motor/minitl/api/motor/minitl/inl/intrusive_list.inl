@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_CONTAINER_INL_INTRUSIVE_LIST_INL_
-#define MOTOR_MINITL_CONTAINER_INL_INTRUSIVE_LIST_INL_
-/**************************************************************************************************/
 #include <motor/minitl/assert.hh>
 
 namespace minitl {
@@ -535,6 +533,3 @@ void intrusive_list< T, INDEX >::swap(intrusive_list< T, INDEX >& other)
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

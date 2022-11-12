@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_DX9_LOADERS_DX9SHADER_HH_
-#define MOTOR_DX9_LOADERS_DX9SHADER_HH_
-/**************************************************************************************************/
 #include <stdafx.h>
 #include <motor/plugin.graphics.3d/renderer/igpuresource.hh>
 #include <d3d9.h>
@@ -24,6 +22,3 @@ public:
 };
 
 }}  // namespace Motor::DirectX9
-
-/**************************************************************************************************/
-#endif

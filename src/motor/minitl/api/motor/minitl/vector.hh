@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_VECTOR_HH_
-#define MOTOR_MINITL_VECTOR_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/allocator.hh>
 #include <motor/minitl/iterator.hh>
@@ -111,6 +109,3 @@ public:
 }  // namespace minitl
 
 #include <motor/minitl/inl/vector.inl>
-
-/**************************************************************************************************/
-#endif

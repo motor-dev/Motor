@@ -2,12 +2,12 @@
    see LICENSE for detail */
 
 #include <motor/plugin.graphics.windowing/stdafx.h>
-#include <GL/glx.h>
-#include <X11/Xatom.h>
-#include <X11/keysym.h>
 #include <motor/core/threads/event.hh>
 #include <motor/plugin.graphics.windowing/renderer.hh>
 #include <motor/plugin.graphics.windowing/window.hh>
+#include <GL/glx.h>
+#include <X11/Xatom.h>
+#include <X11/keysym.h>
 #include <posix/platformrenderer.hh>
 
 namespace Motor { namespace Windowing {
@@ -113,9 +113,9 @@ int Renderer::PlatformRenderer::ioError(::Display* /*display*/)
     attributes.event_mask  = ExposureMask | KeyPressMask | ButtonPressMask | StructureNotifyMask;
     int      attributeMask = CWBorderPixel | CWEventMask | CWOverrideRedirect | CWColormap;
     ::Window result        = XCreateWindow(
-        m_platformData.display, XRootWindow(m_platformData.display, m_platformData.visual->screen),
-        x, y, w, h, 1, m_platformData.visual->depth, InputOutput, m_platformData.visual->visual,
-        attributeMask, &attributes);
+               m_platformData.display, XRootWindow(m_platformData.display, m_platformData.visual->screen),
+               x, y, w, h, 1, m_platformData.visual->depth, InputOutput, m_platformData.visual->visual,
+               attributeMask, &attributes);
     if(result)
     {
         XMapRaised(m_platformData.display, result);
@@ -141,11 +141,11 @@ bool Renderer::success() const
     return m_platformRenderer->m_platformData.display != 0;
 }
 
-uint2 Renderer::getScreenSize() const
+knl::uint2 Renderer::getScreenSize() const
 {
     Screen* s = XScreenOfDisplay(m_platformRenderer->m_platformData.display,
                                  XDefaultScreen(m_platformRenderer->m_platformData.display));
-    return make_uint2(XWidthOfScreen(s), XHeightOfScreen(s));
+    return knl::make_uint2(XWidthOfScreen(s), XHeightOfScreen(s));
 }
 
 void Renderer::flush()
@@ -180,7 +180,7 @@ void Renderer::flush()
                 ev.xunmap.window         = event.xkey.window;
                 ev.xunmap.from_configure = False;
                 int result               = XSendEvent(display, root_window, False,
-                                        SubstructureRedirectMask | SubstructureNotifyMask, &ev);
+                                                      SubstructureRedirectMask | SubstructureNotifyMask, &ev);
                 if(!result)
                 {
                     motor_error("XSendEvent return error %d" | result);
@@ -203,7 +203,7 @@ void Renderer::flush()
                     ev.xunmap.window         = event.xclient.window;
                     ev.xunmap.from_configure = False;
                     int result               = XSendEvent(display, root_window, False,
-                                            SubstructureRedirectMask | SubstructureNotifyMask, &ev);
+                                                          SubstructureRedirectMask | SubstructureNotifyMask, &ev);
                     if(!result)
                     {
                         motor_error("XSendEvent return error %d" | result);

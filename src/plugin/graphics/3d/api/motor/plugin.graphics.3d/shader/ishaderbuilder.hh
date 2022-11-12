@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_3D_SHADER_ISHADERBUILDER_HH_
-#define MOTOR_3D_SHADER_ISHADERBUILDER_HH_
-/**************************************************************************************************/
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/core/memory/streams.hh>
 #include <motor/minitl/hashmap.hh>
@@ -123,13 +121,13 @@ public:
     void addOperator(weak< const Node > node, Operator op, ValueType type, weak< const Node > node1,
                      weak< const Node > node2);
     void write(float value);
-    void write(float2 value);
-    void write(float3 value);
-    void write(float4 value);
+    void write(knl::float2 value);
+    void write(knl::float3 value);
+    void write(knl::float4 value);
     void write(int value);
-    void write(int2 value);
-    void write(int3 value);
-    void write(int4 value);
+    void write(knl::int2 value);
+    void write(knl::int3 value);
+    void write(knl::int4 value);
     void write(bool value);
 
 protected:
@@ -141,13 +139,13 @@ protected:
     virtual void doAddMethod(const istring& name)                                            = 0;
     virtual void doEndMethod()                                                               = 0;
     virtual void doWrite(float value)                                                        = 0;
-    virtual void doWrite(float2 value)                                                       = 0;
-    virtual void doWrite(float3 value)                                                       = 0;
-    virtual void doWrite(float4 value)                                                       = 0;
+    virtual void doWrite(knl::float2 value)                                                  = 0;
+    virtual void doWrite(knl::float3 value)                                                  = 0;
+    virtual void doWrite(knl::float4 value)                                                  = 0;
     virtual void doWrite(int value)                                                          = 0;
-    virtual void doWrite(int2 value)                                                         = 0;
-    virtual void doWrite(int3 value)                                                         = 0;
-    virtual void doWrite(int4 value)                                                         = 0;
+    virtual void doWrite(knl::int2 value)                                                    = 0;
+    virtual void doWrite(knl::int3 value)                                                    = 0;
+    virtual void doWrite(knl::int4 value)                                                    = 0;
     virtual void doWrite(bool value)                                                         = 0;
 
     virtual void doSaveTo(Semantic semantic, const istring& expr)     = 0;
@@ -168,6 +166,3 @@ protected:
 };
 
 }}  // namespace Motor::Shaders
-
-/**************************************************************************************************/
-#endif

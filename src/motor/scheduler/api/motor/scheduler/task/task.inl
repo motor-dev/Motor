@@ -1,16 +1,14 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SCHEDULER_TASL_TASK_INL_
-#define MOTOR_SCHEDULER_TASL_TASK_INL_
-/**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/scheduler.hh>
 
 namespace Motor { namespace Task {
 
 template < typename Executor >
-Task< Executor >::Task(istring name, color32 color, ref< Executor > executor,
+Task< Executor >::Task(istring name, knl::color32 color, ref< Executor > executor,
                        Scheduler::Affinity affinity)
     : ITask(name, color, affinity)
     , executor(executor)
@@ -25,6 +23,3 @@ void Task< Executor >::schedule(weak< Scheduler > sc) const
 }
 
 }}  // namespace Motor::Task
-
-/**************************************************************************************************/
-#endif

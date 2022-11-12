@@ -1,13 +1,11 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_KERNEL_CUDA_INPUT_SEGMENT_HH_
-#define MOTOR_KERNEL_CUDA_INPUT_SEGMENT_HH_
-/**************************************************************************************************/
 #include    <motor/kernel/stdafx.h>
 
 
-namespace Kernel
+namespace knl
 {
 
 template < typename T >
@@ -43,6 +41,3 @@ public:
 
 
 }
-
-/**************************************************************************************************/
-#endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_3D_RENDERTARGET_RENDERTARGET_META_HH_
-#define MOTOR_3D_RENDERTARGET_RENDERTARGET_META_HH_
-/**************************************************************************************************/
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/resource/description.hh>
 
@@ -25,7 +23,7 @@ class motor_api(3D) RenderSurfaceDescription : public RenderTargetDescription
 {
     MOTOR_NOCOPY(RenderSurfaceDescription);
 published:
-    const uint2 dimensions;
+    const knl::uint2 dimensions;
 published:
     RenderSurfaceDescription(u16 width, u16 height);
     ~RenderSurfaceDescription();
@@ -42,6 +40,3 @@ published:
 };
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

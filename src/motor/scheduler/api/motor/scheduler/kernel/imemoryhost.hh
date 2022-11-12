@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SCHEDULER_KERNEL_IMEMORYHOST_HH_
-#define MOTOR_SCHEDULER_KERNEL_IMEMORYHOST_HH_
-/**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 
 namespace Motor { namespace KernelScheduler {
@@ -27,6 +25,3 @@ protected:
 }}  // namespace Motor::KernelScheduler
 
 #include <motor/scheduler/kernel/imemorybuffer.hh>
-
-/**************************************************************************************************/
-#endif

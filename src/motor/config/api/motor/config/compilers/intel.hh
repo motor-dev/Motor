@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_CONFIG_COMPILERS_INTEL_HH_
-#define MOTOR_CONFIG_COMPILERS_INTEL_HH_
-/**************************************************************************************************/
+#pragma once
 
 #define motor_alignof(t) __alignof(t)
 #define motor_break()    /*__asm("int $3")*/
@@ -122,14 +119,6 @@ typedef u8               byte;
                          // __declspec(nothrow)
 #    pragma warning(disable : 4127)
 
-#    if __ICL < 1000
-#        define override
-#    elif _MSC_VER >= 1400
-#        pragma warning(disable : 4481)  // use of "override" extension
-#    else
-#        define override
-#    endif
-
 #    ifndef _CRT_SECURE_NO_WARNINGS
 #        define _CRT_SECURE_NO_WARNINGS 1
 #    endif
@@ -137,7 +126,4 @@ typedef u8               byte;
 #        define _CRT_SECURE_NO_DEPRECATE 1
 #    endif
 
-#endif
-
-/**************************************************************************************************/
 #endif

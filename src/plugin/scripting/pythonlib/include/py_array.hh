@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_PYTHONLIB_PY_ARRAY_HH_
-#define MOTOR_PYTHONLIB_PY_ARRAY_HH_
-/**************************************************************************************************/
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <motor/meta/engine/methodinfo.meta.hh>
 #include <py_object.hh>
@@ -24,6 +22,3 @@ struct PyMotorArray : public PyMotorObject
 };
 
 }}  // namespace Motor::Python
-
-/**************************************************************************************************/
-#endif

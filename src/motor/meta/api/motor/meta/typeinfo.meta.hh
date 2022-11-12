@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_TYPEINFO_META_HH_
-#define MOTOR_META_TYPEINFO_META_HH_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/conversion.meta.hh>
@@ -119,6 +117,3 @@ const minitl::format< SIZE >& operator|(const minitl::format< SIZE >& format,
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

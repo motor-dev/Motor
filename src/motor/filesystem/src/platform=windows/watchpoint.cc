@@ -18,7 +18,7 @@ struct THREADNAME_INFO
 };
 #pragma pack(pop)
 
-class WatchRequest : public minitl::istack< WatchRequest >::node
+class WatchRequest : public knl::istack< WatchRequest >::node
 {
     friend class WatchThread;
 
@@ -47,7 +47,7 @@ private:
     static const u32 s_maximumWatchCount = MAXIMUM_WAIT_OBJECTS - 1;
     HANDLE           m_semaphore;
     minitl::vector< minitl::tuple< HANDLE, weak< FileSystem::WatchPoint > > > m_watches;
-    minitl::istack< WatchRequest >                                            m_requests;
+    knl::istack< WatchRequest >                                               m_requests;
     u32                                                                       m_watchCount;
     HANDLE                                                                    m_thread;
 

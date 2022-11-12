@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_INTROSPECT_SIMPLEPOLICY_FACTORY_HH_
-#define MOTOR_INTROSPECT_SIMPLEPOLICY_FACTORY_HH_
-/**************************************************************************************************/
 #include <motor/introspect/stdafx.h>
 #include <motor/introspect/policy.meta.hh>
 
@@ -37,7 +35,7 @@ public:
 template < typename INTROSPECTION_HINT >
 struct ClassID< AST::SimplePolicy< INTROSPECTION_HINT > >
 {
-    static MOTOR_EXPORT raw< const Meta::Class > klass()
+    MOTOR_EXPORT static raw< const Meta::Class > klass()
     {
         static const Meta::Class s_class
             = {name(),
@@ -57,7 +55,7 @@ struct ClassID< AST::SimplePolicy< INTROSPECTION_HINT > >
         raw< const Meta::Class > result = {&s_class};
         return result;
     }
-    static MOTOR_EXPORT istring name()
+    MOTOR_EXPORT static istring name()
     {
         static const istring s_name(minitl::format< 4096u >("SimplePolicy<%s>")
                                     | TypeID< INTROSPECTION_HINT >::name());
@@ -66,6 +64,3 @@ struct ClassID< AST::SimplePolicy< INTROSPECTION_HINT > >
 };
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SCHEDULER_KERNEL_PRODUCT_FACTORY_HH_
-#define MOTOR_SCHEDULER_KERNEL_PRODUCT_FACTORY_HH_
-/**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/kernel/iproduct.meta.hh>
 
@@ -37,7 +35,7 @@ struct ClassID< KernelScheduler::Product< T > >
     static const Meta::Method::Overload s_ctrOverload;
     static const Meta::Method           s_ctr;
 
-    static MOTOR_EXPORT raw< const Meta::Class > klass()
+    MOTOR_EXPORT static raw< const Meta::Class > klass()
     {
         static const Meta::Class s_class = {name(),
                                             u32(sizeof(KernelScheduler::Product< T >)),
@@ -65,7 +63,7 @@ struct ClassID< KernelScheduler::Product< T > >
 
         return result;
     }
-    static MOTOR_EXPORT istring name()
+    MOTOR_EXPORT static istring name()
     {
         static const istring s_name(minitl::format< 2048u >("Product<%s>") | TypeID< T >::name());
         return s_name;
@@ -83,6 +81,3 @@ const Meta::Method ClassID< KernelScheduler::Product< T > >::s_ctr
        {&ClassID< KernelScheduler::Product< T > >::s_ctr}};
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

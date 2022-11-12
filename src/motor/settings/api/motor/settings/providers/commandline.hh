@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SETTINGS_PROVIDERS_COMMANDLINE_HH_
-#define MOTOR_SETTINGS_PROVIDERS_COMMANDLINE_HH_
-/**************************************************************************************************/
 #include <motor/settings/stdafx.h>
 #include <motor/settings/settingsprovider.hh>
 
@@ -23,6 +21,3 @@ public:
 };
 
 }}  // namespace Motor::Settings
-
-/**************************************************************************************************/
-#endif

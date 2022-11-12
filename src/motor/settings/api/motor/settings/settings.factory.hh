@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SETTINGS_SETTINGS_FACTORY_HH_
-#define MOTOR_SETTINGS_SETTINGS_FACTORY_HH_
-/**************************************************************************************************/
 #include <motor/settings/stdafx.h>
 #include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
@@ -42,8 +40,8 @@ template < typename T >
 struct Settings : public SettingsBase
 {
 private:
-    static MOTOR_EXPORT SettingsProvider::SettingsRegistration s_registration;
-    static MOTOR_EXPORT T& getStaticSettings()
+    MOTOR_EXPORT static SettingsProvider::SettingsRegistration s_registration;
+    MOTOR_EXPORT static T&                                     getStaticSettings()
     {
         static T s_settings;
         return s_settings;
@@ -56,7 +54,7 @@ protected:
     }
 
 public:
-    static MOTOR_EXPORT const T& get()
+    MOTOR_EXPORT static const T& get()
     {
         return getStaticSettings();
     }
@@ -77,8 +75,8 @@ namespace Meta {
 template < typename T >
 struct ClassID< Settings::Settings< T > >
 {
-    static MOTOR_EXPORT raw< const Meta::Class > klass();
-    static MOTOR_EXPORT istring                  name()
+    MOTOR_EXPORT static raw< const Meta::Class > klass();
+    MOTOR_EXPORT static istring                  name()
     {
         static const istring s_name(minitl::format< 2048u >("Settings<%s>") | TypeID< T >::name());
         return s_name;
@@ -124,24 +122,21 @@ template < typename T >
 MOTOR_EXPORT raw< const Meta::Class > Meta::ClassID< Settings::Settings< T > >::klass()
 {
     static Meta::Class       s_class = {name(),
-                                  0,
-                                  0,
-                                  Meta::ClassType_Struct,
-                                  {motor_motor_Namespace_Motor_Settings().m_ptr},
-                                  motor_class< void >(),
-                                  {0},
-                                  {0},
-                                  {0, 0},
-                                  {1, Settings::Settings_RTTIHelper< T >::s_methods},
-                                  {0},
-                                  Meta::OperatorTable::s_emptyTable,
-                                  0,
-                                  0};
+                                        0,
+                                        0,
+                                        Meta::ClassType_Struct,
+                                        {motor_motor_Namespace_Motor_Settings().m_ptr},
+                                        motor_class< void >(),
+                                        {0},
+                                        {0},
+                                        {0, 0},
+                                        {1, Settings::Settings_RTTIHelper< T >::s_methods},
+                                        {0},
+                                        Meta::OperatorTable::s_emptyTable,
+                                        0,
+                                        0};
     raw< const Meta::Class > result  = {&s_class};
     return result;
 }
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

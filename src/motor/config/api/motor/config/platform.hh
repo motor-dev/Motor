@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_CONFIG_PLATFORMS_HH_
-#define MOTOR_CONFIG_PLATFORMS_HH_
-/**************************************************************************************************/
+#pragma once
 
 #ifndef _WIN32
 #    define OutputDebugString(s) printf("%s", s)
@@ -61,7 +58,4 @@
 #    undef MOTOR_PLATFORM_INCLUDE_
 #    undef MOTOR_STRINGIZE_
 #    undef MOTOR_STRINGIZE__
-#endif
-
-/**************************************************************************************************/
 #endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_INL_ARRAY_INL_
-#define MOTOR_MINITL_INL_ARRAY_INL_
-/**************************************************************************************************/
 #include <motor/minitl/algorithm.hh>
 #include <motor/minitl/array.hh>
 #include <motor/minitl/assert.hh>
@@ -135,6 +133,3 @@ const T& array< T >::last() const
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_PYTHONLIB_PY_BOUNDMETHOD_HH_
-#define MOTOR_PYTHONLIB_PY_BOUNDMETHOD_HH_
-/**************************************************************************************************/
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <motor/plugin.scripting.pythonlib/pythontypes.hh>
 
@@ -28,6 +26,3 @@ struct PyBoundMethod
 };
 
 }}  // namespace Motor::Python
-
-/**************************************************************************************************/
-#endif

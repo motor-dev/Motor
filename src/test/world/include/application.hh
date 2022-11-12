@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com> under New BSD License
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_TEST_WORLD_APPLICATION_HH_
-#define MOTOR_TEST_WORLD_APPLICATION_HH_
-/**************************************************************************************************/
 #include <stdafx.h>
 #include <motor/application.hh>
 #include <motor/plugin.scripting.package/package.meta.hh>
@@ -23,6 +21,3 @@ public:
 };
 
 }}}  // namespace Motor::Test::World
-
-/**************************************************************************************************/
-#endif

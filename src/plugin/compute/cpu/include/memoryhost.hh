@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_COMPUTE_CPU_MEMORYHOST_HH_
-#define MOTOR_COMPUTE_CPU_MEMORYHOST_HH_
-/**************************************************************************************************/
 #include <motor/plugin.compute.cpu/stdafx.h>
 #include <motor/scheduler/kernel/imemoryhost.hh>
 
@@ -19,6 +17,3 @@ public:
 };
 
 }}}  // namespace Motor::KernelScheduler::CPU
-
-/**************************************************************************************************/
-#endif

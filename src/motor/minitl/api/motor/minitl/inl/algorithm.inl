@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_CONTAINER_INL_ALGORITHM_INL_
-#define MOTOR_MINITL_CONTAINER_INL_ALGORITHM_INL_
-/**************************************************************************************************/
 #include <motor/minitl/iterator.hh>
 
 namespace minitl {
@@ -82,6 +80,3 @@ ITERATOR find(const T& t, ITERATOR begin, ITERATOR end)
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

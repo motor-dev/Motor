@@ -1,13 +1,11 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_DX9_RENDERER_HH_
-#define MOTOR_DX9_RENDERER_HH_
-/**************************************************************************************************/
 #include <stdafx.h>
-#include <d3d9.h>
 #include <motor/plugin.graphics.windowing/renderer.hh>
 #include <motor/plugin/plugin.hh>
+#include <d3d9.h>
 
 namespace Motor {
 
@@ -74,6 +72,3 @@ private:
 
 }  // namespace DirectX9
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SCHEDULER_TASK_TASK_HH_
-#define MOTOR_SCHEDULER_TASK_TASK_HH_
-/**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/task/iexecutor.hh>
 #include <motor/scheduler/task/itask.hh>
@@ -20,7 +18,7 @@ public:
 
 public:
     /* todo: perfect forwarding of arguments to executor */
-    Task(istring name, color32 color, ref< Executor > executor,
+    Task(istring name, knl::color32 color, ref< Executor > executor,
          Scheduler::Affinity affinity = Scheduler::WorkerThread);
     virtual void schedule(weak< Scheduler > sc) const override;
 };
@@ -28,6 +26,3 @@ public:
 }}  // namespace Motor::Task
 
 #include <motor/scheduler/task/task.inl>
-
-/**************************************************************************************************/
-#endif

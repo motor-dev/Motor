@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_CONVERSION_META_HH_
-#define MOTOR_META_CONVERSION_META_HH_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 
 namespace Motor { namespace Meta {
@@ -74,6 +72,3 @@ public:
 };
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

@@ -12,7 +12,7 @@ namespace Motor { namespace KernelScheduler {
 ProducerLoader::ProducerLoader()
     : m_startTask(
         ref< Task::Task< Task::MethodCaller< ProducerLoader, &ProducerLoader::start > > >::create(
-            Arena::task(), "loader:start", Colors::make(89, 89, 180),
+            Arena::task(), "loader:start", knl::Colors::make(89, 89, 180),
             ref< Task::MethodCaller< ProducerLoader, &ProducerLoader::start > >::create(
                 Arena::task(), this)))
 {

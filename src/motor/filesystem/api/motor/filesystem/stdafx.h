@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_FILESYSTEM_STDAFX_H_
-#define MOTOR_FILESYSTEM_STDAFX_H_
-/**************************************************************************************************/
+#pragma once
 
 #include <motor/core/stdafx.h>
 #include <motor/meta/stdafx.h>
@@ -20,7 +17,4 @@
 namespace Motor { namespace Arena {
 motor_api(FILESYSTEM) minitl::Allocator& filesystem();
 }}  // namespace Motor::Arena
-#endif
-
-/**************************************************************************************************/
 #endif

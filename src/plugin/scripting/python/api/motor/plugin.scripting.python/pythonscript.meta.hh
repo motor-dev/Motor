@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_PYTHONLIB_PYTHONSCRIPT_META_HH_
-#define MOTOR_PYTHONLIB_PYTHONSCRIPT_META_HH_
-/**************************************************************************************************/
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <motor/meta/tags/editor.meta.hh>
 #include <motor/script.hh>
@@ -19,6 +17,3 @@ published:
 };
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

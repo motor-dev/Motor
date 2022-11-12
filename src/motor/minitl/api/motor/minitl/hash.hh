@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_HASH_HH_
-#define MOTOR_MINITL_HASH_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <cstring>
 
@@ -89,6 +87,3 @@ struct hash< i64 > : public scalar_hash< i64 >
 };
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_COMPUTE_CUDA_CODELOADER_HH_
-#define MOTOR_COMPUTE_CUDA_CODELOADER_HH_
-/**************************************************************************************************/
 #include <motor/plugin.compute.cuda/stdafx.h>
 #include <motor/scheduler/kernel/icodeloader.hh>
 
@@ -22,6 +20,3 @@ public:
 };
 
 }}}  // namespace Motor::KernelScheduler::Cuda
-
-/**************************************************************************************************/
-#endif

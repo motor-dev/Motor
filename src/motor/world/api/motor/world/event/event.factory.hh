@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_WORLD_EVENT_EVENT_FACTORY_HH_
-#define MOTOR_WORLD_EVENT_EVENT_FACTORY_HH_
-/**************************************************************************************************/
 #include <motor/world/stdafx.h>
 #include <motor/world/event/event.hh>
 
@@ -15,8 +13,8 @@ namespace Motor { namespace Meta {
 template < typename T1, typename T2, typename T3, typename T4 >
 struct ClassID< World::Event< T1, T2, T3, T4 > >
 {
-    static MOTOR_EXPORT raw< const Meta::Class > klass();
-    static MOTOR_EXPORT istring                  name()
+    MOTOR_EXPORT static raw< const Meta::Class > klass();
+    MOTOR_EXPORT static istring                  name()
     {
         static const istring s_name(minitl::format< 2048u >("Event<%s,%s,%s,%s>")
                                     | TypeID< T1 >::name() | TypeID< T2 >::name()
@@ -48,6 +46,3 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< World::Event< T1, T2, T3, T4 > >:
 }
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

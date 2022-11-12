@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_INTROSPECT_NODE_REFERENCE_HH_
-#define MOTOR_INTROSPECT_NODE_REFERENCE_HH_
-/**************************************************************************************************/
 #include <motor/introspect/stdafx.h>
 #include <motor/introspect/node/node.hh>
 
@@ -39,6 +37,3 @@ public:
 };
 
 }}}  // namespace Motor::Meta::AST
-
-/**************************************************************************************************/
-#endif

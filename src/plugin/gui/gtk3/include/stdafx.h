@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_GUI_GTK3_STDAFX_H_
-#define MOTOR_GUI_GTK3_STDAFX_H_
-/**************************************************************************************************/
 #include <motor/stdafx.h>
 
 #if defined(building_gtk3)
@@ -20,6 +18,3 @@
 
 #include <glib-object.h>
 #include <gtk/gtk.h>
-
-/**************************************************************************************************/
-#endif

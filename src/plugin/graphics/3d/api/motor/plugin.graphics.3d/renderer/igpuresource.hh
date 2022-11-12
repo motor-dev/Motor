@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_3D_RENDERER_IGPURESOURCE_HH_
-#define MOTOR_3D_RENDERER_IGPURESOURCE_HH_
-/**************************************************************************************************/
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/minitl/intrusive_list.hh>
 #include <motor/minitl/refcountable.hh>
@@ -50,6 +48,3 @@ public:
 };
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

@@ -1,13 +1,10 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_KERNEL_CL_INPUT_SEGMENT_HH_
-#define MOTOR_KERNEL_CL_INPUT_SEGMENT_HH_
-/**************************************************************************************************/
 #include <motor/kernel/stdafx.h>
 
-namespace Kernel {
-
+namespace knl {
 template < typename T >
 struct segment
 {
@@ -31,7 +28,4 @@ struct segment
     }
 };
 
-}  // namespace Kernel
-
-/**************************************************************************************************/
-#endif
+}  // namespace knl

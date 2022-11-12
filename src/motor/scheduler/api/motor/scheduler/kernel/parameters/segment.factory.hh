@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SCHEDULER_KERNEL_PARAMETER_SEGMENT_FACTORY_HH_
-#define MOTOR_SCHEDULER_KERNEL_PARAMETER_SEGMENT_FACTORY_HH_
-/**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
 
@@ -25,7 +23,7 @@ namespace Motor { namespace Meta {
 template < typename T >
 struct ClassID< KernelScheduler::Segment< T > >
 {
-    static MOTOR_EXPORT raw< const Meta::Class > klass()
+    MOTOR_EXPORT static raw< const Meta::Class > klass()
     {
         static const Meta::Class s_class = {name(), u32(sizeof(KernelScheduler::Segment< T >)),
                                             0,      Meta::ClassType_Object,
@@ -37,7 +35,7 @@ struct ClassID< KernelScheduler::Segment< T > >
         raw< const Meta::Class > result  = {&s_class};
         return result;
     }
-    static MOTOR_EXPORT istring name()
+    MOTOR_EXPORT static istring name()
     {
         static const istring s_name(minitl::format< 2048u >("Segment<%s>") | TypeID< T >::name());
         return s_name;
@@ -45,6 +43,3 @@ struct ClassID< KernelScheduler::Segment< T > >
 };
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

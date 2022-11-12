@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_RAWPTR_HH_
-#define MOTOR_MINITL_RAWPTR_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 
 namespace minitl {
@@ -43,6 +41,3 @@ public:
 }  // namespace minitl
 
 #include <motor/minitl/inl/rawptr.inl>
-
-/**************************************************************************************************/
-#endif

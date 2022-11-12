@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_ENGINE_HELPER_GET_HH_
-#define MOTOR_META_ENGINE_HELPER_GET_HH_
-/**************************************************************************************************/
 #include <motor/meta/value.hh>
 
 namespace Motor { namespace Meta {
@@ -47,6 +45,3 @@ struct PropertyHelper< const T, Owner, Member >
 };
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

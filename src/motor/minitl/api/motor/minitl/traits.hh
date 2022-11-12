@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_TRAITS_HH_
-#define MOTOR_MINITL_TRAITS_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <string.h>
 
@@ -22,6 +20,3 @@ struct less< const char* >
 };
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

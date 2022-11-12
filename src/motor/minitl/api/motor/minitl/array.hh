@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_ARRAY_HH_
-#define MOTOR_MINITL_ARRAY_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/kernel/interlocked.hh>
 #include <motor/minitl/algorithm.hh>
@@ -60,6 +58,3 @@ void swap(array< T >& a, array< T >& b)
 }  // namespace minitl
 
 #include <motor/minitl/inl/array.inl>
-
-/**************************************************************************************************/
-#endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_GAMEPLAY_SUBWORLD_SUBWORLDCOMPONENT_META_HH_
-#define MOTOR_GAMEPLAY_SUBWORLD_SUBWORLDCOMPONENT_META_HH_
-/**************************************************************************************************/
 #include <stdafx.h>
 #include <motor/world/component/component.meta.hh>
 #include <motor/world/entity/context.meta.hh>
@@ -13,7 +11,7 @@
 
 namespace Motor { namespace World {
 
-motor_tag(LogicComponent()) motor_pod SubWorldComponent
+motor_tag(LogicComponent()) struct SubWorldComponent
 {
     ResourceHandle subworld;
 
@@ -29,6 +27,3 @@ motor_tag(LogicComponent()) motor_pod SubWorldComponent
 };
 
 }}  // namespace Motor::World
-
-/**************************************************************************************************/
-#endif

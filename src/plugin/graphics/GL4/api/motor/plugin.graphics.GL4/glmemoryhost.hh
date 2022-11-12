@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_GL4_GLMEMORYHOST_HH_
-#define MOTOR_GL4_GLMEMORYHOST_HH_
-/**************************************************************************************************/
 #include <motor/plugin.graphics.GL4/stdafx.h>
 #include <motor/scheduler/kernel/imemoryhost.hh>
 
@@ -19,6 +17,3 @@ public:
 };
 
 }}  // namespace Motor::OpenGL
-
-/**************************************************************************************************/
-#endif

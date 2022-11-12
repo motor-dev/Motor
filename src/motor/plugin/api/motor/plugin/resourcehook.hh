@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_PLUGIN_RESOURCEHOOK_HH_
-#define MOTOR_PLUGIN_RESOURCEHOOK_HH_
-/**************************************************************************************************/
 #include <motor/plugin/stdafx.h>
 #include <motor/plugin/hook.hh>
 #include <motor/plugin/plugin.hh>
@@ -31,6 +29,3 @@ public:
 };
 
 }}  // namespace Motor::Plugin
-
-/**************************************************************************************************/
-#endif

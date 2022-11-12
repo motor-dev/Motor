@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_PACKAGEBUILDER_BUILDCONTEXT_HH_
-#define MOTOR_PACKAGEBUILDER_BUILDCONTEXT_HH_
-/**************************************************************************************************/
 #include <motor/plugin.scripting.package/stdafx.h>
 #include <motor/plugin.scripting.package/nodes/package.hh>
 
@@ -48,6 +46,3 @@ extern int g_packageObjectNestedLevel;
 
 extern const minitl::Allocator::Block< u8 >* g_buffer;
 extern int                                   g_bufferPosition;
-
-/**************************************************************************************************/
-#endif

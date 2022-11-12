@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_INPUT_CONTROLLERS_CONTROLLER_HH_
-#define MOTOR_INPUT_CONTROLLERS_CONTROLLER_HH_
-/**************************************************************************************************/
 #include <motor/plugin.input.input/stdafx.h>
 
 namespace Motor { namespace Input {
@@ -18,6 +16,3 @@ protected:
 };
 
 }}  // namespace Motor::Input
-
-/**************************************************************************************************/
-#endif

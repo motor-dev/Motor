@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SCHEDULER_TASKITEM_HH_
-#define MOTOR_SCHEDULER_TASKITEM_HH_
-/**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 
 namespace Motor { namespace Task {
@@ -32,6 +30,3 @@ private:
 };
 
 }}  // namespace Motor::Task
-
-/**************************************************************************************************/
-#endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_INTROSPECT_INTROSPECTIONHINT_INL_
-#define MOTOR_INTROSPECT_INTROSPECTIONHINT_INL_
-/**************************************************************************************************/
 #include <motor/introspect/stdafx.h>
 #include <motor/introspect/introspectionhint.meta.hh>
 #include <motor/meta/engine/call.hh>
@@ -22,6 +20,3 @@ static inline void convert(weak< const Node > node, void* buffer, Meta::Type typ
 }
 
 }}}  // namespace Motor::Meta::AST
-
-/**************************************************************************************************/
-#endif
