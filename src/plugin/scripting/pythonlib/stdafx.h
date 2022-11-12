@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_PYTHON_STDAFX_H_
-#define MOTOR_PYTHON_STDAFX_H_
-/**************************************************************************************************/
+#pragma once
 
 #include <motor/stdafx.h>
 
@@ -20,6 +17,3 @@ namespace Motor { namespace Arena {
 motor_api(PYTHON) minitl::Allocator& python();
 
 }}  // namespace Motor::Arena
-
-/**************************************************************************************************/
-#endif

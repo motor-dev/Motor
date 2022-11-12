@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_VALUE_INL_
-#define MOTOR_META_VALUE_INL_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/typeinfo.hh>
@@ -164,6 +162,3 @@ void* Value::rawget() const
 }}  // namespace Motor::Meta
 
 #include <motor/meta/typeinfo.inl>
-
-/**************************************************************************************************/
-#endif

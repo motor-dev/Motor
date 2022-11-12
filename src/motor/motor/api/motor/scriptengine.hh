@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MOTOR_SCRIPTENGINE_HH_
-#define MOTOR_MOTOR_SCRIPTENGINE_HH_
-/**************************************************************************************************/
 #include <motor/stdafx.h>
 #include <motor/resource/loader.hh>
 #include <motor/script.hh>
@@ -44,6 +42,3 @@ private:
 }  // namespace Motor
 
 #include <motor/scriptengine.inl>
-
-/**************************************************************************************************/
-#endif

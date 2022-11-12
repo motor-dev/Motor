@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_PYTHONLIB_PYTHONLIB_H_
-#define MOTOR_PYTHONLIB_PYTHONLIB_H_
-/**************************************************************************************************/
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <motor/core/threads/threadlocal.hh>
 #include <motor/plugin.scripting.pythonlib/pythontypes.hh>
@@ -177,6 +175,3 @@ motor_api(PYTHONLIB) void setCurrentContext(weak< PythonLibrary > library);
 motor_api(PYTHONLIB) void clearCurrentContext();
 
 }}  // namespace Motor::Python
-
-/**************************************************************************************************/
-#endif

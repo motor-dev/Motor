@@ -397,8 +397,6 @@ class Parser(object):
                 else:
                     contexts.append(operation._result_context)
 
-        print(len(contexts))
-        print(len(contexts[0]._names))
         results = []   # type: List[Any]
         for context in contexts:
             actions = action_table[context._state].get(-1, tuple())

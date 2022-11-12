@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_PARSE_LOCATION_HH_
-#define MOTOR_META_PARSE_LOCATION_HH_
-/**************************************************************************************************/
 #include <motor/reflection/stdafx.h>
 
 namespace Motor { namespace Meta { namespace Parse {
@@ -28,6 +26,3 @@ struct Location
 };
 
 }}}  // namespace Motor::Meta::Parse
-
-/**************************************************************************************************/
-#endif

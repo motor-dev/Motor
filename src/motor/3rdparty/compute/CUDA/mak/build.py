@@ -26,7 +26,7 @@ template_cpp = """
 #include    <motor/plugin.compute.cuda/memorybuffer.hh>
 #include    <motor/scheduler/kernel/parameters/parameters.hh>
 
-using namespace Kernel;
+using namespace knl;
 
 _MOTOR_REGISTER_PLUGIN(MOTOR_KERNEL_ID, MOTOR_KERNEL_NAME);
 

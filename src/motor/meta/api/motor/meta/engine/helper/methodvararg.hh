@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_META_ENGINE_HELPER_METHODVARARG_HH_
-#define MOTOR_META_ENGINE_HELPER_METHODVARARG_HH_
-/**************************************************************************************************/
+#pragma once
 
 namespace Motor { namespace Meta {
 
@@ -43,6 +40,3 @@ struct functionhelper< T, Value, Value*, u32 >
 };
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

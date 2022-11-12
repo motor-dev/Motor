@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_3D_RENDERER_IRENDERER_HH_
-#define MOTOR_3D_RENDERER_IRENDERER_HH_
-/**************************************************************************************************/
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/plugin.graphics.3d/renderer/igpuresource.hh>
 #include <motor/resource/resourcemanager.hh>
@@ -66,11 +64,8 @@ public:
     minitl::Allocator&  arena() const;
     weak< Task::ITask > syncTask() const;
 
-    virtual uint2 getScreenSize() const                   = 0;
-    virtual u32   getMaxSimultaneousRenderTargets() const = 0;
+    virtual knl::uint2 getScreenSize() const                   = 0;
+    virtual u32        getMaxSimultaneousRenderTargets() const = 0;
 };
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

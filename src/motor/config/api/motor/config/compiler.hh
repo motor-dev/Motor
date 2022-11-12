@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_CONFIG_COMPILER_HH_
-#define MOTOR_CONFIG_COMPILER_HH_
-/**************************************************************************************************/
+#pragma once
 
 #if defined(__INTEL_COMPILER)
 #    define MOTOR_COMPILER_INTEL 1
@@ -48,6 +45,3 @@
 #define kernel_local
 #define kernel_private
 #define kernel_generic
-
-/**************************************************************************************************/
-#endif

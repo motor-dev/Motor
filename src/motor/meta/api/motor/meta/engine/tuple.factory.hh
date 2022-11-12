@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_ENGINE_TUPLE_HH_
-#define MOTOR_META_ENGINE_TUPLE_HH_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/minitl/tuple.hh>
 
@@ -140,8 +138,8 @@ struct ClassID< minitl::tuple< T... > >
     static const Method::Overload  s_method_tuple_overloads[];
     static const Meta::Method      s_methods[];
 
-    static MOTOR_EXPORT raw< const Class > klass();
-    static MOTOR_EXPORT istring            name()
+    MOTOR_EXPORT static raw< const Class > klass();
+    MOTOR_EXPORT static istring            name()
     {
         static const istring s_name(minitl::format< 4096u >("tuple<TODO>"));
         return s_name;
@@ -212,6 +210,3 @@ MOTOR_EXPORT raw< const Class > ClassID< minitl::tuple< T... > >::klass()
 }
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

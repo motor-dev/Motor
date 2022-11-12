@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_CORE_THREADS_THREADLOCAL_HH_
-#define MOTOR_CORE_THREADS_THREADLOCAL_HH_
-/**************************************************************************************************/
 #include <motor/core/stdafx.h>
 
 template < typename T >
@@ -100,6 +98,3 @@ public:
         return Motor::ThreadLocal::tlsGet(m_tlsKey) == 0;
     }
 };
-
-/**************************************************************************************************/
-#endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_GUI_GTK3_GTK3PLUGIN_HH_
-#define MOTOR_GUI_GTK3_GTK3PLUGIN_HH_
-/**************************************************************************************************/
 #include <motor/core/memory/allocators/system.hh>
 #include <glib-object.h>
 
@@ -60,6 +58,3 @@ public:
 };
 
 }}  // namespace Motor::Gtk3
-
-/**************************************************************************************************/
-#endif

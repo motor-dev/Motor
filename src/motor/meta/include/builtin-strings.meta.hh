@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_BUILTIN_META_HH_
-#define MOTOR_META_BUILTIN_META_HH_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/meta/builtin.hh>
 #include <motor/meta/classinfo.meta.hh>
@@ -68,7 +66,4 @@ published:
 
 }
 
-#endif
-
-/**************************************************************************************************/
 #endif

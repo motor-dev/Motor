@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_ENGINE_ARRAY_FACTORY_HH_
-#define MOTOR_META_ENGINE_ARRAY_FACTORY_HH_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/helper/method.hh>
@@ -46,8 +44,8 @@ struct ClassID< minitl::array< T > >
     static const Meta::ArrayOperatorTable scriptingArrayAPI;
     static const Meta::OperatorTable      scriptingAPI;
 
-    static MOTOR_EXPORT raw< const Meta::Class > klass();
-    static MOTOR_EXPORT istring                  name()
+    MOTOR_EXPORT static raw< const Meta::Class > klass();
+    MOTOR_EXPORT static istring                  name()
     {
         static const istring s_name(minitl::format< 2048u >("array<%s>") | TypeID< T >::name());
         return s_name;
@@ -215,6 +213,3 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< minitl::array< T > >::klass()
 }
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

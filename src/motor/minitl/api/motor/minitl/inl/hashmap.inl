@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_INL_HASH_MAP_INL_
-#define MOTOR_MINITL_INL_HASH_MAP_INL_
-/**************************************************************************************************/
 #include <motor/minitl/algorithm.hh>
 
 namespace minitl {
@@ -425,6 +423,3 @@ void hashmap< Key, Value, Hash >::swap(hashmap& other)
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

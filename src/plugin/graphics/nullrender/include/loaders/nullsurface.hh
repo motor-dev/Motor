@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_NULLRENDER_LOADERS_NULLSURFACE_HH_
-#define MOTOR_NULLRENDER_LOADERS_NULLSURFACE_HH_
-/**************************************************************************************************/
 #include <stdafx.h>
 #include <motor/plugin.graphics.3d/renderer/irenderer.hh>
 #include <motor/plugin.graphics.3d/renderer/irendertarget.hh>
@@ -30,6 +28,3 @@ private:
 };
 
 }}  // namespace Motor::Null
-
-/**************************************************************************************************/
-#endif

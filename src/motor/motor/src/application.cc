@@ -25,7 +25,7 @@ Application::Application(ref< Folder >                     dataFolder,
     , m_resourceManager(resourceManager)
     , m_pluginContext(resourceManager, m_dataFolder, m_scheduler)
     , m_updateTask(ref< Task::TaskGroup >::create(Arena::task(), "application:update",
-                                                  Colors::Yellow::Yellow))
+                                                  knl::Colors::Yellow::Yellow))
     , m_producerLoader(scoped< KernelScheduler::ProducerLoader >::create(Arena::game()))
     , m_worldLoader(scoped< World::WorldLoader >::create(Arena::game(), m_updateTask,
                                                          m_producerLoader, m_pluginContext))
@@ -40,12 +40,12 @@ Application::Application(ref< Folder >                     dataFolder,
 
     addTask(
         ref< Task::Task< Task::MethodCaller< Application, &Application::updateResources > > >::
-            create(Arena::task(), "application:update_resource", Colors::Green::Green,
+            create(Arena::task(), "application:update_resource", knl::Colors::Green::Green,
                    ref< Task::MethodCaller< Application, &Application::updateResources > >::create(
                        Arena::task(), this)));
     addTask(
         ref< Task::Task< Task::MethodCaller< Application, &Application::frameUpdate > > >::create(
-            Arena::task(), "application:update_sync", Colors::Green::Green,
+            Arena::task(), "application:update_sync", knl::Colors::Green::Green,
             ref< Task::MethodCaller< Application, &Application::frameUpdate > >::create(
                 Arena::task(), this)));
     registerInterruptions();

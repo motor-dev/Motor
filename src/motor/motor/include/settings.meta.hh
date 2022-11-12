@@ -1,8 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#ifndef MOTOR_MOTOR_SETTINGS_HH_
-#define MOTOR_MOTOR_SETTINGS_HH_
-/**************************************************************************************************/
+#pragma once
+
 #include <motor/stdafx.h>
 #include <motor/settings/settings.factory.hh>
 
@@ -19,6 +18,3 @@ struct Log : public Settings::Settings< Log >
 };
 
 }}  // namespace Motor::MainSettings
-
-/**************************************************************************************************/
-#endif

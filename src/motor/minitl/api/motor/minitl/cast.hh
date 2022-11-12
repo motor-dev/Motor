@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_CAST_HH_
-#define MOTOR_MINITL_CAST_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 
 namespace minitl {
@@ -37,6 +35,3 @@ inline U motor_checked_numcast(T value);
 }  // namespace minitl
 
 #include <motor/minitl/inl/cast.inl>
-
-/**************************************************************************************************/
-#endif

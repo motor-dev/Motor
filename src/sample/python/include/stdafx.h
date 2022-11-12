@@ -1,13 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_SAMPLES_PYTHON_STDAFX_H_
-#define MOTOR_SAMPLES_PYTHON_STDAFX_H_
-/**************************************************************************************************/
+#pragma once
 
 #include <motor/stdafx.h>
 
 #include <motor/plugin.scripting.package/stdafx.h>
-
-/**************************************************************************************************/
-#endif

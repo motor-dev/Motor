@@ -1,13 +1,11 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_KERNEL_INPUT_SEGMENTS_HH_
-#define MOTOR_KERNEL_INPUT_SEGMENTS_HH_
-/**************************************************************************************************/
 #include <motor/kernel/stdafx.h>
 #include <motor/kernel/input/segment.hh>
 
-namespace Kernel {
+namespace knl {
 
 template < typename T >
 struct segments
@@ -148,7 +146,4 @@ public:
     }
 };
 
-}  // namespace Kernel
-
-/**************************************************************************************************/
-#endif
+}  // namespace knl

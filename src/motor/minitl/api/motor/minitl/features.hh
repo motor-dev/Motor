@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_MINITL_FEATURES_HH_
-#define MOTOR_MINITL_FEATURES_HH_
-/**************************************************************************************************/
+#pragma once
 
 #define MOTOR_OPTIM_LEVEL_DEBUG   1
 #define MOTOR_OPTIM_LEVEL_PROFILE 2
@@ -41,7 +38,4 @@
 #    define MOTOR_ENABLE_MEMORY_DEBUGGING    0
 #    define MOTOR_ENABLE_EXCEPTIONS          0
 #    define MOTOR_ENABLE_COMPONENT_DEBUGGING 0
-#endif
-
-/**************************************************************************************************/
 #endif

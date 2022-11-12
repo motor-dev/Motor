@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_FILESYSTEM_WATCHQUEUE_HH_
-#define MOTOR_FILESYSTEM_WATCHQUEUE_HH_
-/**************************************************************************************************/
 #include <motor/filesystem/stdafx.h>
 #include <motor/core/threads/thread.hh>
 #include <motor/filesystem/diskfolder.meta.hh>
@@ -37,6 +35,3 @@ public:
 };
 
 }}  // namespace Motor::FileSystem
-
-/**************************************************************************************************/
-#endif

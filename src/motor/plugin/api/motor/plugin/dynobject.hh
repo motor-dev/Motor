@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_PLUGIN_DYNOBJECT_HH_
-#define MOTOR_PLUGIN_DYNOBJECT_HH_
-/**************************************************************************************************/
 #include <motor/plugin/stdafx.h>
 #include <motor/core/string/istring.hh>
 
@@ -51,6 +49,3 @@ public:
 };
 
 }}  // namespace Motor::Plugin
-
-/**************************************************************************************************/
-#endif

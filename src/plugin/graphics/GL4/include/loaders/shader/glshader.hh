@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_GL4_LOADERS_SHADER_GLSHADER_HH_
-#define MOTOR_GL4_LOADERS_SHADER_GLSHADER_HH_
-/**************************************************************************************************/
 #include <motor/plugin.graphics.GL4/stdafx.h>
 #include <motor/plugin.graphics.3d/renderer/igpuresource.hh>
 #include <motor/plugin.graphics.3d/shader/shader.meta.hh>
@@ -34,6 +32,3 @@ public:
 };
 
 }}  // namespace Motor::OpenGL
-
-/**************************************************************************************************/
-#endif

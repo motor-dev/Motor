@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_CORE_THREADS_WAITABLE_HH_
-#define MOTOR_CORE_THREADS_WAITABLE_HH_
-/**************************************************************************************************/
 #include <motor/core/stdafx.h>
 
 namespace Motor { namespace Threads {
@@ -29,6 +27,3 @@ protected:
 };
 
 }}  // namespace Motor::Threads
-
-/**************************************************************************************************/
-#endif

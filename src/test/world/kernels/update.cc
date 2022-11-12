@@ -3,12 +3,12 @@
 
 using namespace Motor::Test::World;
 
-__kernel void update(u32 index, u32 total, Kernel::segments< Component > inout)
+__kernel void update(u32 index, u32 total, knl::segments< Component > inout)
 {
-    Kernel::segments< Component >::iterator first = inout.begin() + (index * inout.size() / total);
-    Kernel::segments< Component >::iterator last
+    knl::segments< Component >::iterator first = inout.begin() + (index * inout.size() / total);
+    knl::segments< Component >::iterator last
         = inout.begin() + ((index + 1) * inout.size() / total);
-    for(Kernel::segments< Component >::iterator it = first; it != last; ++it)
+    for(knl::segments< Component >::iterator it = first; it != last; ++it)
     {
     }
 }

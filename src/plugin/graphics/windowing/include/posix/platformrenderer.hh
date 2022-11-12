@@ -1,13 +1,11 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_WINDOWING_POSIX_RENDERER_HH_
-#define MOTOR_WINDOWING_POSIX_RENDERER_HH_
-/**************************************************************************************************/
 #include <motor/plugin.graphics.windowing/stdafx.h>
+#include <motor/plugin.graphics.windowing/renderer.hh>
 #include <GL/glx.h>
 #include <X11/Xatom.h>
-#include <motor/plugin.graphics.windowing/renderer.hh>
 
 namespace Motor { namespace Windowing {
 
@@ -43,6 +41,3 @@ public:
 };
 
 }}  // namespace Motor::Windowing
-
-/**************************************************************************************************/
-#endif

@@ -8,7 +8,7 @@
 
 namespace Motor { namespace Meta { namespace AST {
 
-Float3::Float3(float3 value) : Node(), m_value(value)
+Float3::Float3(knl::float3 value) : Node(), m_value(value)
 {
     motor_forceuse(m_value);
 }
@@ -19,7 +19,7 @@ Float3::~Float3()
 
 ConversionCost Float3::distance(const Type& type) const
 {
-    return ConversionCalculator< float3 >::calculate(type);
+    return ConversionCalculator< knl::float3 >::calculate(type);
 }
 
 void Float3::doEval(const Meta::Type& expectedType, Meta::Value& result) const

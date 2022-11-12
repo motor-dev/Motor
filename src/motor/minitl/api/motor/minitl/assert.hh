@@ -1,12 +1,10 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_ASSERT_HH_
-#define MOTOR_MINITL_ASSERT_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
-#include <cstdlib>
 #include <motor/minitl/format.hh>
+#include <cstdlib>
 
 namespace minitl {
 
@@ -56,6 +54,3 @@ motor_api(MINITL) AssertionCallback_t getAssertionCallback();
 #define motor_notreached()                        motor_assert_impl_(!"reached", "should not reach code", ;)
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_RESOURCE_IDESCRIPTION_META_HH_
-#define MOTOR_RESOURCE_IDESCRIPTION_META_HH_
-/**************************************************************************************************/
 #include <motor/resource/stdafx.h>
 #include <motor/minitl/intrusive_list.hh>
 #include <motor/minitl/refcountable.hh>
@@ -49,6 +47,3 @@ public:
 };
 
 }}  // namespace Motor::Resource
-
-/**************************************************************************************************/
-#endif

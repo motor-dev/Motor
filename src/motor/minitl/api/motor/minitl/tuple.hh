@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_TUPLE_HH_
-#define MOTOR_MINITL_TUPLE_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 
 namespace minitl {
@@ -46,6 +44,3 @@ constexpr tuple< unwrap_ref_decay_t< T >... > make_tuple(T&&... args);
 }  // namespace minitl
 
 #include <motor/minitl/inl/tuple.inl>
-
-/**************************************************************************************************/
-#endif

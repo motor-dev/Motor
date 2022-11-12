@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_META_PARSE_STDAFX_H_
-#define MOTOR_META_PARSE_STDAFX_H_
-/**************************************************************************************************/
+#pragma once
 
 #include <motor/core/stdafx.h>
 #include <motor/filesystem/stdafx.h>
@@ -16,7 +13,4 @@
 #    define MOTOR_API_REFLECTION MOTOR_IMPORT
 #else
 #    define MOTOR_API_REFLECTION
-#endif
-
-/**************************************************************************************************/
 #endif

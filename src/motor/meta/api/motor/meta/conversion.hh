@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_CONVERSION_HH_
-#define MOTOR_META_CONVERSION_HH_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/meta/conversion.meta.hh>
 #include <motor/meta/typeinfo.hh>
@@ -18,7 +16,7 @@ struct ConversionCalculator
 };
 
 template < typename T >
-struct ConversionCalculator< _Kernel::array< T, 2 > >
+struct ConversionCalculator< knl::array< T, 2 > >
 {
     static inline ConversionCost calculate(const Type& targetType);
 };
@@ -96,7 +94,7 @@ ConversionCost ConversionCalculator< T >::calculate(const Type& targetType)
 }
 
 template < typename T >
-ConversionCost ConversionCalculator< _Kernel::array< T, 2 > >::calculate(const Type& targetType)
+ConversionCost ConversionCalculator< knl::array< T, 2 > >::calculate(const Type& targetType)
 {
     if(targetType.metaclass->type() == ClassType_Vector2)
     {
@@ -110,6 +108,3 @@ ConversionCost ConversionCalculator< _Kernel::array< T, 2 > >::calculate(const T
 }
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

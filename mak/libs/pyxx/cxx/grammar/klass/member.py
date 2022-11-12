@@ -101,6 +101,7 @@ def member_declarator_list(self, p):
 
 
 @glrp.rule('member-declarator : declarator')
+@glrp.rule('member-declarator : declarator-function-body virt-specifier-seq')
 @glrp.rule('member-declarator : declarator-function-body pure-specifier')
 @glrp.rule('member-declarator : declarator-function-body virt-specifier-seq pure-specifier')
 @glrp.rule('member-declarator : declarator-initializer brace-or-equal-initializer')

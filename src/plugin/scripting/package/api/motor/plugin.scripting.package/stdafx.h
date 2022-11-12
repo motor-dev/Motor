@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_PACKAGE_STDAFX_H_
-#define MOTOR_PACKAGE_STDAFX_H_
-/**************************************************************************************************/
+#pragma once
 
 #include <motor/stdafx.h>
 
@@ -22,7 +19,4 @@ minitl::Allocator& package();
 minitl::Allocator& packageBuilder();
 
 }}  // namespace Motor::Arena
-#endif
-
-/**************************************************************************************************/
 #endif

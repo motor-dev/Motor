@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_MINITL_CONTAINER_INL_BITSET_INL_
-#define MOTOR_MINITL_CONTAINER_INL_BITSET_INL_
-/**************************************************************************************************/
+#pragma once
 
 namespace minitl {
 
@@ -137,6 +134,3 @@ u32 bitset< BITS >::operator()(u32 begin, u32 end) const
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

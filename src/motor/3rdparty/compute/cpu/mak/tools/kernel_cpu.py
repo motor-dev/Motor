@@ -29,7 +29,7 @@ template = """
 #include <motor/plugin/dynobjectlist.hh>
 #include <motor/scheduler/kernel/parameters/parameters.hh>
 
-using namespace Kernel;
+using namespace knl;
 
 #include "%(source)s"
 

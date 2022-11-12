@@ -184,17 +184,17 @@ void IShaderBuilder::write(float value)
     doWrite(value);
 }
 
-void IShaderBuilder::write(float2 value)
+void IShaderBuilder::write(knl::float2 value)
 {
     doWrite(value);
 }
 
-void IShaderBuilder::write(float3 value)
+void IShaderBuilder::write(knl::float3 value)
 {
     doWrite(value);
 }
 
-void IShaderBuilder::write(float4 value)
+void IShaderBuilder::write(knl::float4 value)
 {
     doWrite(value);
 }
@@ -204,17 +204,17 @@ void IShaderBuilder::write(int value)
     doWrite(value);
 }
 
-void IShaderBuilder::write(int2 value)
+void IShaderBuilder::write(knl::int2 value)
 {
     doWrite(value);
 }
 
-void IShaderBuilder::write(int3 value)
+void IShaderBuilder::write(knl::int3 value)
 {
     doWrite(value);
 }
 
-void IShaderBuilder::write(int4 value)
+void IShaderBuilder::write(knl::int4 value)
 {
     doWrite(value);
 }

@@ -35,11 +35,17 @@ def for_range(self, p):
 
 
 @glrp.rule('for-range : for-range-declaration-declarator ":" for-range-initializer')
-@glrp.rule('for-range : for-range-declaration-no-declarator ":" for-range-initializer')
 @glrp.rule('for-range : init-statement for-range-declaration-declarator ":" for-range-initializer')
-@glrp.rule('for-range : init-statement for-range-declaration-no-declarator ":" for-range-initializer')
 @cxx11
 def for_range_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    pass
+
+
+@glrp.rule('for-range : for-range-declaration-no-declarator ":" for-range-initializer')
+@glrp.rule('for-range : init-statement for-range-declaration-no-declarator ":" for-range-initializer')
+@cxx17
+def for_range_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     pass
 

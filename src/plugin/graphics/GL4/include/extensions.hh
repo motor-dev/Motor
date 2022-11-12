@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_GL4_EXTENSIONS_HH_
-#define MOTOR_GL4_EXTENSIONS_HH_
-/**************************************************************************************************/
 #include <motor/plugin.graphics.GL4/stdafx.h>
 
 namespace Motor { namespace OpenGL {
@@ -46,6 +44,3 @@ private:
 };
 
 }}  // namespace Motor::OpenGL
-
-/**************************************************************************************************/
-#endif

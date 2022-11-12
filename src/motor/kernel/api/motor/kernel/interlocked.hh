@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_KERNEL_INTERLOCKED_HH_
-#define MOTOR_KERNEL_INTERLOCKED_HH_
-/**************************************************************************************************/
 #include <motor/kernel/stdafx.h>
 
 #if defined(MOTOR_COMPILER_MSVC) || (defined(MOTOR_COMPILER_INTEL) && defined(_WIN32))
@@ -44,7 +42,7 @@
 #    error Compiler not implemented
 #endif
 
-namespace _Kernel {
+namespace knl {
 
 template < typename T >
 struct interlocked
@@ -112,14 +110,12 @@ public:
     }
 };
 
-}  // namespace _Kernel
-
 template < typename T >
 struct iptr
 {
 private:
-    typedef _Kernel::InterlockedType< sizeof(T*) > impl;
-    typedef typename impl::value_t                 value_t;
+    typedef InterlockedType< sizeof(T*) > impl;
+    typedef typename impl::value_t        value_t;
 
 private:
     value_t m_value;
@@ -161,14 +157,14 @@ public:
     }
 };
 
-typedef _Kernel::interlocked< bool >   i_bool;
-typedef _Kernel::interlocked< u8 >     i_u8;
-typedef _Kernel::interlocked< u16 >    i_u16;
-typedef _Kernel::interlocked< u32 >    i_u32;
-typedef _Kernel::interlocked< i8 >     i_i8;
-typedef _Kernel::interlocked< i16 >    i_i16;
-typedef _Kernel::interlocked< i32 >    i_i32;
-typedef _Kernel::interlocked< size_t > i_size_t;
+}  // namespace knl
 
-/**************************************************************************************************/
-#endif
+typedef knl::interlocked< bool >   i_bool;
+typedef knl::interlocked< u8 >     i_u8;
+typedef knl::interlocked< u16 >    i_u16;
+typedef knl::interlocked< u32 >    i_u32;
+typedef knl::interlocked< i8 >     i_i8;
+typedef knl::interlocked< i16 >    i_i16;
+typedef knl::interlocked< i32 >    i_i32;
+typedef knl::interlocked< size_t > i_size_t;
+using knl::iptr;

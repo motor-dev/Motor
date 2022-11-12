@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_FILESYSTEM_WATCHPOINT_HH_
-#define MOTOR_FILESYSTEM_WATCHPOINT_HH_
-/**************************************************************************************************/
 #include <motor/filesystem/stdafx.h>
 #include <motor/filesystem/diskfolder.meta.hh>
 
@@ -43,6 +41,3 @@ private:
 };
 
 }}  // namespace Motor::FileSystem
-
-/**************************************************************************************************/
-#endif

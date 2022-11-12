@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_WORLD_RUNTIME_WORLDRUNTIME_HH_
-#define MOTOR_WORLD_RUNTIME_WORLDRUNTIME_HH_
-/**************************************************************************************************/
 #include <motor/world/stdafx.h>
 #include <motor/resource/loader.hh>
 
@@ -72,6 +70,3 @@ public:
 };
 
 }}  // namespace Motor::World
-
-/**************************************************************************************************/
-#endif

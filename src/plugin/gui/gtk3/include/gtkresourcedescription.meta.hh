@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_UI_GTK3_GTKRESOURCEDESCRIPTION_HH_
-#define MOTOR_UI_GTK3_GTKRESOURCEDESCRIPTION_HH_
-/**************************************************************************************************/
 #include <motor/resource/description.hh>
 
 namespace Motor { namespace Gtk3 {
@@ -40,6 +38,3 @@ protected:
 };
 
 }}  // namespace Motor::Gtk3
-
-/**************************************************************************************************/
-#endif

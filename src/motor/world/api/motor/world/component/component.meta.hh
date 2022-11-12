@@ -1,12 +1,8 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_WORLD_COMPONENT_COMPONENT_META_HH_
-#define MOTOR_WORLD_COMPONENT_COMPONENT_META_HH_
-/**************************************************************************************************/
 #include <motor/world/stdafx.h>
-
-#define motor_pod struct
 
 #ifndef MOTOR_COMPUTE
 
@@ -26,7 +22,4 @@ struct motor_api(WORLD) LogicComponent
 
 }}  // namespace Motor::World
 
-#endif
-
-/**************************************************************************************************/
 #endif

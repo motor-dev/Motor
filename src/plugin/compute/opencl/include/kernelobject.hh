@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_COMPUTE_OPENCL_KERNELOBJECT_HH_
-#define MOTOR_COMPUTE_OPENCL_KERNELOBJECT_HH_
-/**************************************************************************************************/
 #include <motor/plugin.compute.opencl/stdafx.h>
 #include <motor/plugin.compute.opencl/scheduler.hh>
 #include <motor/plugin/dynobject.hh>
@@ -26,6 +24,3 @@ public:
 };
 
 }}}  // namespace Motor::KernelScheduler::OpenCL
-
-/**************************************************************************************************/
-#endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_COMPUTE_CPU_CODEOBJECT_HH_
-#define MOTOR_COMPUTE_CPU_CODEOBJECT_HH_
-/**************************************************************************************************/
 #include <motor/plugin.compute.cpu/stdafx.h>
 #include <motor/plugin/dynobject.hh>
 #include <motor/scheduler/task/task.hh>
@@ -25,6 +23,3 @@ public:
 };
 
 }}}  // namespace Motor::KernelScheduler::CPU
-
-/**************************************************************************************************/
-#endif

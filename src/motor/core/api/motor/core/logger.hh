@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_CORE_LOGGER_HH_
-#define MOTOR_CORE_LOGGER_HH_
-/**************************************************************************************************/
 #include <motor/core/stdafx.h>
 #include <motor/core/string/istring.hh>
 #include <motor/core/threads/criticalsection.hh>
@@ -125,6 +123,3 @@ public:
                                  (minitl::format< 1024u >)msg)
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

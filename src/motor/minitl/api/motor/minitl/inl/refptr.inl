@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_PTR_REFPTR_INL_
-#define MOTOR_MINITL_PTR_REFPTR_INL_
-/**************************************************************************************************/
 #include <motor/minitl/features.hh>
 #if MOTOR_ENABLE_ASSERT
 #    include <typeinfo>
@@ -126,6 +124,3 @@ bool operator!=(const ref< T >& ref1, const ref< U >& ref2)
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_CONFIG_COMPILERS_GCC_HH_
-#define MOTOR_CONFIG_COMPILERS_GCC_HH_
-/**************************************************************************************************/
+#pragma once
 
 #define motor_alignof(t) __alignof__(t)
 #if(defined(_X86) || defined(_AMD64))
@@ -44,11 +41,6 @@ typedef uint32_t u32;
 typedef uint64_t u64;
 typedef u8       byte;
 
-#if __GXX_EXPERIMENTAL_CXX0X__
-#    define MOTOR_HAS_MOVE_SEMANTICS
-#endif
-
-#define override
 #define MOTOR_NOINLINE     __attribute__((noinline))
 #define MOTOR_ALWAYSINLINE __attribute__((always_inline))
 #ifdef __EXCEPTIONS
@@ -77,7 +69,4 @@ typedef u8       byte;
 #else
 #    define MOTOR_EXPORT
 #    define MOTOR_IMPORT
-#endif
-
-/**************************************************************************************************/
 #endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_UTILITY_HH_
-#define MOTOR_MINITL_UTILITY_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/type_traits.hh>
 
@@ -20,6 +18,3 @@ constexpr T&& forward(remove_reference_t< T >&& t) noexcept;
 }  // namespace minitl
 
 #include <motor/minitl/inl/utility.inl>
-
-/**************************************************************************************************/
-#endif

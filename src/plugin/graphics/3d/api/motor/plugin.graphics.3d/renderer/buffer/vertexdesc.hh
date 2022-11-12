@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_3D_RENDERER_BUFFER_VERTEXDESC_HH_
-#define MOTOR_3D_RENDERER_BUFFER_VERTEXDESC_HH_
-/**************************************************************************************************/
 #include <motor/plugin.graphics.3d/stdafx.h>
 
 namespace Motor {
@@ -135,7 +133,7 @@ struct VertexDescription
         static VertexBufferFlags pflags   = parent::getFlags();
         desc[VertexComponents - 1].offset = pflags.vertexSize;
         desc[VertexComponents - 1].type   = VertexElementInfo::VertexElementType(
-            VertexElementTypeMapToIndex< typename Queue::VertexSemanticType >::Index);
+              VertexElementTypeMapToIndex< typename Queue::VertexSemanticType >::Index);
         desc[VertexComponents - 1].semantic = VertexSemantics(Queue::semantic);
         if(VertexComponents > 1)
             memcpy(desc, pflags.info, sizeof(VertexElementInfo) * (VertexComponents - 1));
@@ -242,6 +240,3 @@ enum IndexUsage
 };
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

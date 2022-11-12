@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_REFCOUNTABLE_HH_
-#define MOTOR_MINITL_REFCOUNTABLE_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/cast.hh>
 #include <motor/minitl/pointer.hh>
@@ -78,6 +76,3 @@ public:
 };
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

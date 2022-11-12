@@ -7,7 +7,7 @@
 
 namespace Motor { namespace Float { namespace Float4 {
 
-Constant::Constant(float4 value) : value(value)
+Constant::Constant(knl::float4 value) : value(value)
 {
 }
 

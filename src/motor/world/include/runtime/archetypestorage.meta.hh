@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_WORLD_RUNTIME_ARCHETYPESTORAGE_META_HH_
-#define MOTOR_WORLD_RUNTIME_ARCHETYPESTORAGE_META_HH_
-/**************************************************************************************************/
 #include <motor/world/stdafx.h>
 #include <motor/scheduler/kernel/producer.meta.hh>
 
@@ -48,6 +46,3 @@ public:
 };
 
 }}  // namespace Motor::World
-
-/**************************************************************************************************/
-#endif

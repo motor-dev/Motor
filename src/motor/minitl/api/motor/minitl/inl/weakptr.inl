@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_INL_WEAKPTR_INL_
-#define MOTOR_MINITL_INL_WEAKPTR_INL_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/hash.hh>
 #include <motor/minitl/refcountable.hh>
@@ -133,6 +131,3 @@ void weak< T >::clear()
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

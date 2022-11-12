@@ -1,11 +1,5 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_BUGEDITOR_UI_STDAFX_H_
-#define MOTOR_BUGEDITOR_UI_STDAFX_H_
-/**************************************************************************************************/
+#pragma once
 
 #include <motor/stdafx.h>
-
-/**************************************************************************************************/
-#endif

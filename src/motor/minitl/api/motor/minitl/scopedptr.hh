@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_SCOPEDPTR_HH_
-#define MOTOR_MINITL_SCOPEDPTR_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/utility.hh>
 
@@ -63,6 +61,3 @@ const format< SIZE >& operator|(const format< SIZE >& format, const scoped< T >&
 }  // namespace minitl
 
 #include <motor/minitl/inl/scopedptr.inl>
-
-/**************************************************************************************************/
-#endif

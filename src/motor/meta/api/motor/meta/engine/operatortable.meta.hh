@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_ENGINE_OPERATORTABLE_META_HH_
-#define MOTOR_META_ENGINE_OPERATORTABLE_META_HH_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/meta/value.hh>
 
@@ -24,10 +22,7 @@ struct OperatorTable
     staticarray< const Method >     casts;
     raw< const Meta::Class >        templatedClass;
 
-    static motor_api(META) raw< const OperatorTable > s_emptyTable;
+    motor_api(META) static raw< const OperatorTable > s_emptyTable;
 };
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

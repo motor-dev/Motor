@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_CORE_MEMORY_ALLOCATORS_SYSTEM_HH_
-#define MOTOR_CORE_MEMORY_ALLOCATORS_SYSTEM_HH_
-/**************************************************************************************************/
 #include <motor/core/stdafx.h>
 #include <motor/core/threads/mutex.hh>
 #include <motor/kernel/interlocked_stack.hh>
@@ -32,13 +30,13 @@ public:
 private:
     struct Block
     {
-        minitl::itaggedptr< Block > next;
+        knl::itaggedptr< Block > next;
     };
-    minitl::itaggedptr< Block > m_head;
-    i_u32                       m_capacity;
-    i_u32                       m_used;
-    const BlockSize             m_blockSize;
-    Mutex                       m_allocLock;
+    knl::itaggedptr< Block > m_head;
+    i_u32                    m_capacity;
+    i_u32                    m_used;
+    const BlockSize          m_blockSize;
+    Mutex                    m_allocLock;
 
 private:
     u32   platformPageSize();
@@ -63,6 +61,3 @@ private:
 };
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

@@ -6,7 +6,7 @@
 
 namespace Motor { namespace Task {
 
-TaskGroup::TaskGroup(istring name, color32 color)
+TaskGroup::TaskGroup(istring name, knl::color32 color)
     : ITask(name, color, Scheduler::WorkerThread)
     , m_startTasks(Arena::task())
     , m_endTaskCount(i_u32::create(0))

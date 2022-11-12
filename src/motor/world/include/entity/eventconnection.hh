@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_WORLD_ENTITY_EVENTCONNECTION_HH_
-#define MOTOR_WORLD_ENTITY_EVENTCONNECTION_HH_
-/**************************************************************************************************/
 #include <motor/world/stdafx.h>
 
 namespace Motor { namespace World {
@@ -25,6 +23,3 @@ struct motor_api(WORLD) CommandConnectionList
 };
 
 }}  // namespace Motor::World
-
-/**************************************************************************************************/
-#endif

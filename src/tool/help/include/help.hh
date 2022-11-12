@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_HELP_HELP_HH_
-#define MOTOR_HELP_HELP_HH_
-/**************************************************************************************************/
 #include <stdafx.h>
 #include <motor/application.hh>
 #include <motor/plugin.scripting.package/package.meta.hh>
@@ -25,6 +23,3 @@ public:
 };
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

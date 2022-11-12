@@ -1,0 +1,6 @@
+{
+    "published": "access-specifier-macro",
+    "motor_api": "attribute-specifier-macro-function",
+    "MOTOR_EXPORT": "attribute-specifier-macro",
+    "motor_tag": "attribute-specifier-macro-function"
+}

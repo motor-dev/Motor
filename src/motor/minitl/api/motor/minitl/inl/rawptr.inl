@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_MINITL_PTR_RAWPTR_INL_
-#define MOTOR_MINITL_PTR_RAWPTR_INL_
-/**************************************************************************************************/
+#pragma once
 
 namespace minitl {
 
@@ -45,6 +42,3 @@ raw< T > raw< T >::null()
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

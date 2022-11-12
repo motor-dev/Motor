@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_INTROSPECT_NODE_INT3_HH_
-#define MOTOR_INTROSPECT_NODE_INT3_HH_
-/**************************************************************************************************/
 #include <motor/introspect/stdafx.h>
 #include <motor/introspect/node/node.hh>
 #include <motor/kernel/simd.hh>
@@ -13,7 +11,7 @@ namespace Motor { namespace Meta { namespace AST {
 class motor_api(INTROSPECT) Int3 : public Node
 {
 private:
-    const bigint3 m_value;
+    const knl::bigint3 m_value;
 
 protected:
     virtual ConversionCost distance(const Type& type) const override;
@@ -21,11 +19,8 @@ protected:
     virtual void           doVisit(Node::Visitor & visitor) const override;
 
 public:
-    Int3(bigint3 value);
+    Int3(knl::bigint3 value);
     ~Int3();
 };
 
 }}}  // namespace Motor::Meta::AST
-
-/**************************************************************************************************/
-#endif

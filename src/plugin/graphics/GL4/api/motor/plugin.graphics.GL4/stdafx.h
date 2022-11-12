@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_GL4_STDAFX_H_
-#define MOTOR_GL4_STDAFX_H_
-/**************************************************************************************************/
+#pragma once
 
 #include <motor/stdafx.h>
 
@@ -30,7 +27,4 @@
 #    define GL_GLEXT_PROTOTYPES 1
 #    include <GL4/glcorearb.h>
 #    include <GL4/glext.h>
-#endif
-
-/**************************************************************************************************/
 #endif

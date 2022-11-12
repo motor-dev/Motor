@@ -19,7 +19,7 @@ private:
 private:
     typedef ::Motor::Plugin::ResourceHook< ::Motor::KernelScheduler::Kernel > ResourceHook;
     typedef ::Motor::Plugin::PluginHook< ResourceHook > PluginHook;
-    static MOTOR_EXPORT PluginHook g_kernelHook;
+    MOTOR_EXPORT static PluginHook g_kernelHook;
 
     virtual ref< ::Motor::KernelScheduler::Producer::Runtime > createRuntime(
         weak< const ::Motor::KernelScheduler::ProducerLoader > loader
@@ -89,7 +89,7 @@ ref< ::Motor::KernelScheduler::Producer::Runtime > %(KernelName)sKernel::createR
             ::Motor::Arena::task(),
             "%(kernel_full_name)s.%(KernelName)s",
             Motor::KernelScheduler::GPUType,
-            Motor::Colors::Red::Red,
+            knl::Colors::Red::Red,
             s_%(Name)sKernel%(KernelName)s,
             parameters, parameters + %(argument_count)s
         );

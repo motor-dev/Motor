@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_INPUT_STDAFX_H_
-#define MOTOR_INPUT_STDAFX_H_
-/**************************************************************************************************/
+#pragma once
 
 #include <motor/stdafx.h>
 
@@ -13,7 +10,4 @@
 #    define MOTOR_API_INPUT MOTOR_IMPORT
 #else
 #    define MOTOR_API_INPUT
-#endif
-
-/**************************************************************************************************/
 #endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_WEAKPTR_HH_
-#define MOTOR_MINITL_WEAKPTR_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/hash.hh>
 #include <motor/minitl/refcountable.hh>
@@ -76,6 +74,3 @@ const format< SIZE >& operator|(const format< SIZE >& format, weak< T > t)
 }  // namespace minitl
 
 #include <motor/minitl/inl/weakptr.inl>
-
-/**************************************************************************************************/
-#endif

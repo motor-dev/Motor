@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_CONFIG_COMPILERS_SUNCC_HH_
-#define MOTOR_CONFIG_COMPILERS_SUNCC_HH_
-/**************************************************************************************************/
+#pragma once
 
 #define motor_alignof(t) __alignof__(t)
 #if defined(_X86) || defined(_AMD64)
@@ -50,7 +47,6 @@ extern "C" void* __builtin_alloca(size_t);
 #    include <errno.h>
 #endif
 
-#define override
 #define MOTOR_NOINLINE
 #define MOTOR_ALWAYSINLINE inline
 
@@ -69,7 +65,4 @@ extern "C" void* __builtin_alloca(size_t);
 #endif
 #if __SUNPRO_CC >= 0x5140 && __SUNPRO_CC < 0x5150
 #    pragma error_messages(off, placementdelmatch)
-#endif
-
-/**************************************************************************************************/
 #endif

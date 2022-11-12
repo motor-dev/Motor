@@ -4,10 +4,10 @@
 
 namespace Motor { namespace Gameplay {
 
-__kernel void delay(u32 index, u32 total, Kernel::segments< Delay > inout)
+__kernel void delay(u32 index, u32 total, knl::segments< Delay > inout)
 {
-    Kernel::segments< Delay >::iterator first = inout.begin() + (index * inout.size() / total);
-    Kernel::segments< Delay >::iterator last = inout.begin() + ((index + 1) * inout.size() / total);
+    knl::segments< Delay >::iterator first = inout.begin() + (index * inout.size() / total);
+    knl::segments< Delay >::iterator last = inout.begin() + ((index + 1) * inout.size() / total);
     while(first != last)
     {
         first++;

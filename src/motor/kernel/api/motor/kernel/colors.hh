@@ -1,13 +1,11 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_KERNEL_COLORS_HH_
-#define MOTOR_KERNEL_COLORS_HH_
-/**************************************************************************************************/
 #include <motor/kernel/stdafx.h>
 #include <motor/kernel/simd.hh>
 
-namespace Motor { namespace Colors {
+namespace knl { namespace Colors {
 
 namespace Red {
 static const color32 Red = {{255, 0, 0, 255}};
@@ -31,7 +29,4 @@ static inline color32 make(u8 r, u8 g, u8 b, u8 a = 255)
     return result;
 }
 
-}}  // namespace Motor::Colors
-
-/**************************************************************************************************/
-#endif
+}}  // namespace knl::Colors

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_INTERLOCKED_MSVC_X86_INTERLOCKED_INL_
-#define MOTOR_MINITL_INTERLOCKED_MSVC_X86_INTERLOCKED_INL_
-/**************************************************************************************************/
 #include <motor/kernel/stdafx.h>
 
 #if defined(__ICL) && __ICL < 1010
@@ -36,7 +34,7 @@ extern "C"
 #pragma warning(push)
 #pragma warning(disable : 4521)  // multiple copy constructor
 
-namespace _Kernel {
+namespace knl {
 
 template < unsigned size >
 struct InterlockedType;
@@ -167,9 +165,6 @@ struct InterlockedType< 2 > : public InterlockedType< 4 >
 {
 };
 
-}  // namespace _Kernel
+}  // namespace knl
 
 #pragma warning(pop)
-
-/**************************************************************************************************/
-#endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_CLASSINFO_META_HH_
-#define MOTOR_META_CLASSINFO_META_HH_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/core/md5.hh>
 #include <motor/meta/engine/helper/staticarray.hh>
@@ -149,6 +147,3 @@ MOTOR_EXPORT raw< Meta::Class > motor_motor_Namespace();
 MOTOR_EXPORT raw< Meta::Class > motor_motor_Namespace_Motor();
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_TYPEINFO_HH_
-#define MOTOR_META_TYPEINFO_HH_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/meta/typeinfo.meta.hh>
 #include <motor/minitl/type_traits.hh>
@@ -17,8 +15,8 @@ struct Method;
 template < typename T >
 struct ClassID
 {
-    static MOTOR_EXPORT raw< const Class > klass();
-    static MOTOR_EXPORT istring            name();
+    MOTOR_EXPORT static raw< const Class > klass();
+    MOTOR_EXPORT static istring            name();
 };
 
 template < typename T >
@@ -208,6 +206,3 @@ raw< const Motor::Meta::Class > motor_class()
 {
     return Motor::Meta::ClassID< T >::klass();
 }
-
-/**************************************************************************************************/
-#endif

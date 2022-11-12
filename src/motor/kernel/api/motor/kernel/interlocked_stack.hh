@@ -1,21 +1,19 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_KERNEL_INTERLOCKED_STACK_HH_
-#define MOTOR_KERNEL_INTERLOCKED_STACK_HH_
-/**************************************************************************************************/
 #include <motor/kernel/stdafx.h>
 #include <motor/kernel/interlocked.hh>
 
-namespace minitl {
+namespace knl {
 
 template < typename T >
 struct itaggedptr
 {
 private:
-    typedef _Kernel::InterlockedType< sizeof(T*) > impl;
-    typedef typename impl::tagged_t                type_t;
-    typedef typename type_t::value_t               value_t;
+    typedef InterlockedType< sizeof(T*) > impl;
+    typedef typename impl::tagged_t       type_t;
+    typedef typename type_t::value_t      value_t;
 
 private:
     type_t m_value;
@@ -139,7 +137,4 @@ T* istack< T >::popAll()
     return result;
 }
 
-}  // namespace minitl
-
-/**************************************************************************************************/
-#endif
+}  // namespace knl

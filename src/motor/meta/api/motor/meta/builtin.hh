@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_BUILTIN_HH_
-#define MOTOR_META_BUILTIN_HH_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/meta/classinfo.meta.hh>
 
@@ -39,6 +37,3 @@ motor_api(META) const Type& getTypeFromIndex(ClassIndex_Numeric index);
 motor_api(META) const Type& getTypeFromIndex(ClassIndex_String index);
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

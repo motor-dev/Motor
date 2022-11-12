@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_INL_TUPLE_INL_
-#define MOTOR_MINITL_INL_TUPLE_INL_
-/**************************************************************************************************/
 #include <motor/minitl/type_traits.hh>
 #include <motor/minitl/utility.hh>
 
@@ -34,12 +32,12 @@ struct tuple_field
     constexpr explicit tuple_field(T&& t) : m_field(move(t))
     {
     }
-    constexpr    tuple_field()                         = default;
-    constexpr    tuple_field(const tuple_field& other) = default;
-    constexpr    tuple_field(tuple_field&& other)      = default;
-    tuple_field& operator=(const tuple_field& other)   = default;
-    tuple_field& operator=(tuple_field&& other)        = default;
-    ~tuple_field()                                     = default;
+    constexpr tuple_field()                          = default;
+    constexpr tuple_field(const tuple_field& other)  = default;
+    constexpr tuple_field(tuple_field&& other)       = default;
+    tuple_field& operator=(const tuple_field& other) = default;
+    tuple_field& operator=(tuple_field&& other)      = default;
+    ~tuple_field()                                   = default;
 
     constexpr T& get() &
     {
@@ -66,12 +64,12 @@ struct tuple_field< 0, T >
     constexpr explicit tuple_field(T&& t) : first(move(t))
     {
     }
-    constexpr    tuple_field()                         = default;
-    constexpr    tuple_field(const tuple_field& other) = default;
-    constexpr    tuple_field(tuple_field&& other)      = default;
-    tuple_field& operator=(const tuple_field& other)   = default;
-    tuple_field& operator=(tuple_field&& other)        = default;
-    ~tuple_field()                                     = default;
+    constexpr tuple_field()                          = default;
+    constexpr tuple_field(const tuple_field& other)  = default;
+    constexpr tuple_field(tuple_field&& other)       = default;
+    tuple_field& operator=(const tuple_field& other) = default;
+    tuple_field& operator=(tuple_field&& other)      = default;
+    ~tuple_field()                                   = default;
 
     constexpr T& get() &
     {
@@ -98,12 +96,12 @@ struct tuple_field< 1, T >
     constexpr explicit tuple_field(T&& t) : second(move(t))
     {
     }
-    constexpr    tuple_field()                         = default;
-    constexpr    tuple_field(const tuple_field& other) = default;
-    constexpr    tuple_field(tuple_field&& other)      = default;
-    tuple_field& operator=(const tuple_field& other)   = default;
-    tuple_field& operator=(tuple_field&& other)        = default;
-    ~tuple_field()                                     = default;
+    constexpr tuple_field()                          = default;
+    constexpr tuple_field(const tuple_field& other)  = default;
+    constexpr tuple_field(tuple_field&& other)       = default;
+    tuple_field& operator=(const tuple_field& other) = default;
+    tuple_field& operator=(tuple_field&& other)      = default;
+    ~tuple_field()                                   = default;
 
     constexpr T& get() &
     {
@@ -130,12 +128,12 @@ struct tuple_field< 2, T >
     constexpr explicit tuple_field(T&& t) : third(move(t))
     {
     }
-    constexpr    tuple_field()                         = default;
-    constexpr    tuple_field(const tuple_field& other) = default;
-    constexpr    tuple_field(tuple_field&& other)      = default;
-    tuple_field& operator=(const tuple_field& other)   = default;
-    tuple_field& operator=(tuple_field&& other)        = default;
-    ~tuple_field()                                     = default;
+    constexpr tuple_field()                          = default;
+    constexpr tuple_field(const tuple_field& other)  = default;
+    constexpr tuple_field(tuple_field&& other)       = default;
+    tuple_field& operator=(const tuple_field& other) = default;
+    tuple_field& operator=(tuple_field&& other)      = default;
+    ~tuple_field()                                   = default;
 
     constexpr T& get() &
     {
@@ -307,6 +305,3 @@ tuple< T... >& tuple< T... >::operator=(const tuple< T1... >& other)
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

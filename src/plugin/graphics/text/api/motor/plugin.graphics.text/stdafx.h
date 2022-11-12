@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_TEXT_STDAFX_H_
-#define MOTOR_TEXT_STDAFX_H_
-/**************************************************************************************************/
+#pragma once
 
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/stdafx.h>
@@ -14,7 +11,4 @@
 #    define MOTOR_API_TEXT MOTOR_IMPORT
 #else
 #    define MOTOR_API_TEXT
-#endif
-
-/**************************************************************************************************/
 #endif

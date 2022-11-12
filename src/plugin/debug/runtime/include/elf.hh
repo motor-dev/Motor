@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_DEBUG_RUNTIME_ELF_HH_
-#define MOTOR_DEBUG_RUNTIME_ELF_HH_
-/**************************************************************************************************/
 #include <motor/plugin.debug.runtime/stdafx.h>
 #include <motor/plugin.debug.runtime/module.hh>
 
@@ -57,6 +55,3 @@ private:
 };
 
 }}  // namespace Motor::Runtime
-
-/**************************************************************************************************/
-#endif

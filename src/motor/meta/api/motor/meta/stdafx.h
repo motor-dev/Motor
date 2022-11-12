@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_META_STDAFX_H_
-#define MOTOR_META_STDAFX_H_
-/**************************************************************************************************/
+#pragma once
 
 #include <motor/core/stdafx.h>
 #include <motor/kernel/colors.hh>
@@ -36,7 +33,4 @@ class Value;
 }}  // namespace Motor::Meta
 
 #    include <motor/meta/builtin.hh>
-#endif
-
-/**************************************************************************************************/
 #endif

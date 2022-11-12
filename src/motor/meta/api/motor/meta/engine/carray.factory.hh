@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_ENGINE_CARRAY_FACTORY_HH_
-#define MOTOR_META_ENGINE_CARRAY_FACTORY_HH_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/helper/method.hh>
@@ -17,8 +15,8 @@ namespace Motor { namespace Meta {
 template < typename T, u32 Count >
 struct ClassID< T[Count] >
 {
-    static MOTOR_EXPORT raw< const Meta::Class > klass();
-    static MOTOR_EXPORT istring                  name()
+    MOTOR_EXPORT static raw< const Meta::Class > klass();
+    MOTOR_EXPORT static istring                  name()
     {
         static const istring s_name(minitl::format< 2048u >("%s[%d]") | TypeID< T >::name()
                                     | Count);
@@ -29,8 +27,8 @@ struct ClassID< T[Count] >
 template < typename T, u32 Count >
 struct ClassID< const T[Count] >
 {
-    static MOTOR_EXPORT raw< const Meta::Class > klass();
-    static MOTOR_EXPORT istring                  name()
+    MOTOR_EXPORT static raw< const Meta::Class > klass();
+    MOTOR_EXPORT static istring                  name()
     {
         static const istring s_name(minitl::format< 2048u >("%s[%d]") | TypeID< T >::name()
                                     | Count);
@@ -244,6 +242,3 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< const T[Count] >::klass()
 }
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

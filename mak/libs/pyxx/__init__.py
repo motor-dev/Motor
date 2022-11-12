@@ -1,11 +1,12 @@
 from . import messages, parser
-from argparse import ArgumentParser
+import argparse
 import glrp
+import json
 
 
 def init_arguments():
-    # type: () -> ArgumentParser
-    argument_context = ArgumentParser()
+    # type: () -> argparse.ArgumentParser
+    argument_context = argparse.ArgumentParser()
     argument_context.add_argument(
         "-o",
         "--optimized",
@@ -28,14 +29,6 @@ def init_arguments():
         help="Assume running from a debugger",
         default=False,
         action="store_true",
-    )
-    argument_context.add_argument(
-        "-m",
-        "--macros",
-        dest="macros",
-        help="Preprocessor macros to expand",
-        default='',
-        action="store",
     )
     argument_context.add_argument(
         "-x",
@@ -66,6 +59,12 @@ def init_arguments():
         action="store"
     )
     argument_context.add_argument(
+        "-D",
+        dest="macro_file",
+        action="append",
+        help="Add the content of <macrofile> to the macros, one macro per line"
+    )
+    argument_context.add_argument(
         "input",
         help="Input source file",
         metavar="IN",
@@ -74,13 +73,12 @@ def init_arguments():
     return argument_context
 
 
-def run(argument_context):
-    # type: (ArgumentParser) -> None
+def run(arguments):
+    # type: (argparse.Namespace) -> List[Any]
     import os
     import sys
     import logging
 
-    arguments = argument_context.parse_args()
     logger = messages.load_arguments(arguments)
 
     ExceptionType = Exception
@@ -89,13 +87,18 @@ def run(argument_context):
     try:
         mode = glrp.LOAD_OPTIMIZED if arguments.optimized else glrp.LOAD_CACHE
         p = parser.parser(arguments.lang, os.path.splitext(arguments.input)[1], arguments.std)(arguments.tmp_dir, mode)
+        for macro_file in arguments.macro_file:
+            with open(macro_file, 'r') as macro_file_content:
+                macros = json.load(macro_file_content)
+                for macro, macro_type in macros.items():
+                    p.lexer._macros[macro] = macro_type
         result = p.parse(arguments.input)
         if not result:
             sys.exit(0)
         elif logger._error_count > 0:
             sys.exit(logger._error_count)
         else:
-            return
+            return result
     except (SyntaxError, ExceptionType) as exception:
         logging.exception(exception)
         sys.exit(255)
@@ -103,5 +106,4 @@ def run(argument_context):
 
 from motor_typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from optparse import OptionParser
-    from types import ModuleType
+    from typing import Any, List

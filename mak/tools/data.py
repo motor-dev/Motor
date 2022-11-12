@@ -15,31 +15,20 @@ def scan(self):
     return ([], [])
 
 
-ddf = """
-%s ${DDF}
--d ${MACROS_IGNORE}
-${PCH_HEADER:PCH}
+metagen = """
+%s ${METAGEN}
+-D ${MACROS_DEF}
+-t ${TMPDIR}
 --module ${PLUGIN}
 --root ${ROOT_ALIAS}
---tmp ${TMPDIR}
+-x c++
+--std c++14
 ${SRC[0].abspath()}
-${LOCAL_INCLUDE}
 ${TGT[0].abspath()}
 ${TGT[1].abspath()}
 ${TGT[2].abspath()}
-${TGT[3].abspath()}
 """ % sys.executable.replace('\\', '/')
-cls = Task.task_factory('datagen', ddf, [], 'BLUE', ext_in='.h .hh .hxx', ext_out='.cc')
-cls.scan = scan
-
-cpprtti = """
-%s ${CPPRTTI_GENERATE}
--m ${MACROS_IGNORE}
--t ${TMPDIR}
---std c++11
-${SRC[0].abspath()}
-""" % sys.executable.replace('\\', '/')
-cls = Task.task_factory('rtti', cpprtti, [], 'BLUE', ext_in='.h .hh .hxx', ext_out='.cc')
+cls = Task.task_factory('metagen', metagen, [], 'BLUE', ext_in='.h .hh .hxx', ext_out='.cc')
 cls.scan = scan
 
 namespace_register = 'MOTOR_REGISTER_NAMESPACE_%d_NAMED(%s, %s)\n'
@@ -47,6 +36,7 @@ namespace_alias = 'MOTOR_REGISTER_ROOT_NAMESPACE(%s, %s, %s)\n'
 
 
 class docgen(Task.Task):
+
     def process_node(self, node):
         return []
 
@@ -57,6 +47,7 @@ class docgen(Task.Task):
 
 
 class nsdef(Task.Task):
+
     def run(self):
         seen = set([])
         with open(self.outputs[0].abspath(), 'w') as namespace_file:
@@ -89,35 +80,23 @@ class nsdef(Task.Task):
 def datagen(self, node):
     outs = []
     out_node = self.make_bld_node('src', node.parent, '%s.cc' % node.name[:node.name.rfind('.')])
+    out_node.parent.mkdir()
     outs.append(out_node)
-    outs.append(out_node.change_ext('-instances.cc'))
     outs.append(out_node.change_ext('.doc'))
     outs.append(out_node.change_ext('.namespaces'))
 
-    #tsk = self.create_task('rtti', node, [])
-    #tsk.env.CPPRTTI_GENERATE = self.bld.motornode.find_node('mak/tools/bin/cpprtti_generate.py').abspath()
-    #tsk.env.MACROS_IGNORE = self.bld.motornode.find_node('mak/libs/cpp/macros_ignore').abspath()
-    #tsk.env.TMPDIR = self.bld.bldnode.parent.parent.abspath()
-    #tsk.dep_nodes = [self.bld.motornode.find_node('mak/tools/bin/cpprtti_generate.py')]
-    #tsk.dep_nodes += self.bld.motornode.find_node('mak/libs/cpprtti').ant_glob('**/*.py')
-
-    tsk = self.create_task('datagen', node, outs)
-    for include_node in self.includes:
-        if node.is_child_of(include_node):
-            tsk.env.LOCAL_INCLUDE = node.path_from(include_node)
-            break
-    else:
-        raise Errors.WafError('unable to find include root for node %s' % node)
-    tsk.env.DDF = self.bld.motornode.find_node('mak/tools/bin/ddf.py').abspath()
-    tsk.env.MACROS_IGNORE = self.bld.motornode.find_node('mak/libs/cpp/macros_ignore').abspath()
+    tsk = self.create_task('metagen', node, outs)
+    tsk.env.METAGEN = self.bld.motornode.find_node('mak/tools/bin/metagen.py').abspath()
+    tsk.env.MACROS_DEF = self.bld.motornode.find_node('mak/tools/macros_def.json').abspath()
     tsk.env.TMPDIR = self.bld.bldnode.parent.parent.abspath()
-    tsk.path = self.bld.variant_dir
     tsk.env.PCH_HEADER = ['--pch']
     tsk.env.PCH = self.pchstop and [self.pchstop] or []
     tsk.env.ROOT_ALIAS = self.root_namespace
-    out_node.parent.mkdir()
-    tsk.dep_nodes = [self.bld.motornode.find_node('mak/tools/bin/ddf.py')]
-    tsk.dep_nodes += self.bld.motornode.find_node('mak/libs/cpp').ant_glob('**/*.py')
+    tsk.dep_nodes = [self.bld.motornode.find_node('mak/tools/bin/metagen.py')]
+    tsk.dep_nodes = [self.bld.motornode.find_node('mak/tools/macros_def.json')]
+    tsk.dep_nodes += self.bld.motornode.find_node('mak/libs/pyxx').ant_glob('**/*.py')
+    tsk.dep_nodes += self.bld.motornode.find_node('mak/libs/glrp').ant_glob('**/*.py')
+
     try:
         self.out_sources += outs[:2]
     except:

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_FORMAT_H_
-#define MOTOR_MINITL_FORMAT_H_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/allocator.hh>
 #include <string.h>
@@ -212,6 +210,3 @@ const format< SIZE >& operator|(const format< SIZE >& f, const format< SIZE2 >& 
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

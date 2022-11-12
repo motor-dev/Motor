@@ -6,7 +6,7 @@ from motor_typing import Callable, TYPE_CHECKING, cast
 
 
 class CParser(glrp.Parser):
-    Lexer = glrp.Lexer
+    Lexer = lexer.C89Lexer
 
     def __init__(self, tmp_dir, mode=glrp.LOAD_CACHE):
         # type: (str, int)->None

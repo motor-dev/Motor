@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_ENGINE_NAMESPACE_HH_
-#define MOTOR_META_ENGINE_NAMESPACE_HH_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/helper/staticarray.hh>
@@ -36,19 +34,19 @@
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2()                                    \
     {                                                                                              \
         static Meta::Class ci  = {#n2,                                                             \
-                                 0,                                                               \
-                                 0,                                                               \
-                                 Meta::ClassType_Namespace,                                       \
-                                 {motor_##plugin##_Namespace_##n1().m_ptr},                       \
-                                 {0},                                                             \
-                                 {0},                                                             \
-                                 {0},                                                             \
-                                 {0, 0},                                                          \
-                                 {0, 0},                                                          \
-                                 {0},                                                             \
-                                 Meta::OperatorTable::s_emptyTable,                               \
-                                 0,                                                               \
-                                 0};                                                              \
+                                  0,                                                               \
+                                  0,                                                               \
+                                  Meta::ClassType_Namespace,                                       \
+                                  {motor_##plugin##_Namespace_##n1().m_ptr},                       \
+                                  {0},                                                             \
+                                  {0},                                                             \
+                                  {0},                                                             \
+                                  {0, 0},                                                          \
+                                  {0, 0},                                                          \
+                                  {0},                                                             \
+                                  Meta::OperatorTable::s_emptyTable,                               \
+                                  0,                                                               \
+                                  0};                                                              \
         raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
@@ -68,19 +66,19 @@
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3()                             \
     {                                                                                              \
         static Meta::Class ci  = {#n3,                                                             \
-                                 0,                                                               \
-                                 0,                                                               \
-                                 Meta::ClassType_Namespace,                                       \
-                                 {motor_##plugin##_Namespace_##n1##_##n2().m_ptr},                \
-                                 {0},                                                             \
-                                 {0},                                                             \
-                                 {0},                                                             \
-                                 {0, 0},                                                          \
-                                 {0, 0},                                                          \
-                                 {0},                                                             \
-                                 Meta::OperatorTable::s_emptyTable,                               \
-                                 0,                                                               \
-                                 0};                                                              \
+                                  0,                                                               \
+                                  0,                                                               \
+                                  Meta::ClassType_Namespace,                                       \
+                                  {motor_##plugin##_Namespace_##n1##_##n2().m_ptr},                \
+                                  {0},                                                             \
+                                  {0},                                                             \
+                                  {0},                                                             \
+                                  {0, 0},                                                          \
+                                  {0, 0},                                                          \
+                                  {0},                                                             \
+                                  Meta::OperatorTable::s_emptyTable,                               \
+                                  0,                                                               \
+                                  0};                                                              \
         raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
@@ -100,19 +98,19 @@
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()                      \
     {                                                                                              \
         static Meta::Class ci  = {#n4,                                                             \
-                                 0,                                                               \
-                                 0,                                                               \
-                                 Meta::ClassType_Namespace,                                       \
-                                 {motor_##plugin##_Namespace_##n1##_##n2##_##n3().m_ptr},         \
-                                 {0},                                                             \
-                                 {0},                                                             \
-                                 {0},                                                             \
-                                 {0, 0},                                                          \
-                                 {0, 0},                                                          \
-                                 {0},                                                             \
-                                 Meta::OperatorTable::s_emptyTable,                               \
-                                 0,                                                               \
-                                 0};                                                              \
+                                  0,                                                               \
+                                  0,                                                               \
+                                  Meta::ClassType_Namespace,                                       \
+                                  {motor_##plugin##_Namespace_##n1##_##n2##_##n3().m_ptr},         \
+                                  {0},                                                             \
+                                  {0},                                                             \
+                                  {0},                                                             \
+                                  {0, 0},                                                          \
+                                  {0, 0},                                                          \
+                                  {0},                                                             \
+                                  Meta::OperatorTable::s_emptyTable,                               \
+                                  0,                                                               \
+                                  0};                                                              \
         raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
@@ -132,19 +130,19 @@
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5()               \
     {                                                                                              \
         static Meta::Class ci  = {#n5,                                                             \
-                                 0,                                                               \
-                                 0,                                                               \
-                                 Meta::ClassType_Namespace,                                       \
-                                 {motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4().m_ptr},  \
-                                 {0},                                                             \
-                                 {0},                                                             \
-                                 {0},                                                             \
-                                 {0, 0},                                                          \
-                                 {0, 0},                                                          \
-                                 {0},                                                             \
-                                 Meta::OperatorTable::s_emptyTable,                               \
-                                 0,                                                               \
-                                 0};                                                              \
+                                  0,                                                               \
+                                  0,                                                               \
+                                  Meta::ClassType_Namespace,                                       \
+                                  {motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4().m_ptr},  \
+                                  {0},                                                             \
+                                  {0},                                                             \
+                                  {0},                                                             \
+                                  {0, 0},                                                          \
+                                  {0, 0},                                                          \
+                                  {0},                                                             \
+                                  Meta::OperatorTable::s_emptyTable,                               \
+                                  0,                                                               \
+                                  0};                                                              \
         raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
@@ -192,6 +190,3 @@
         = (motor_##id##_Namespace##parent()->objects.m_ptr = &ob##id##parent##_##name);            \
     }
 #define MOTOR_REGISTER_ROOT_NAMESPACE(id, ns, parent) MOTOR_REGISTER_ROOT_NAMESPACE_(id, ns, parent)
-
-/**************************************************************************************************/
-#endif

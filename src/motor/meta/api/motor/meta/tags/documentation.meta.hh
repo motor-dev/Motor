@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_TAGS_DOCUMENTATION_META_HH_
-#define MOTOR_META_TAGS_DOCUMENTATION_META_HH_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 
 namespace Motor { namespace Meta {
@@ -20,6 +18,3 @@ published:
 };
 
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

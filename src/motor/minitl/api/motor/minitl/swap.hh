@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_SWAP_HH_
-#define MOTOR_MINITL_SWAP_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 
 namespace minitl {
@@ -14,6 +12,3 @@ void swap(T& a, T& b);
 }
 
 #include <motor/minitl/inl/swap.inl>
-
-/**************************************************************************************************/
-#endif

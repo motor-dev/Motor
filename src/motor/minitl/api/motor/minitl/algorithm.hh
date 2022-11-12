@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_ALGORITHM_HH_
-#define MOTOR_MINITL_ALGORITHM_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 
 namespace minitl {
@@ -35,6 +33,3 @@ ITERATOR find(const T& t, ITERATOR begin, ITERATOR end);
 }  // namespace minitl
 
 #include <motor/minitl/inl/algorithm.inl>
-
-/**************************************************************************************************/
-#endif

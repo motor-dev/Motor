@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_ALLOCATOR_HH_
-#define MOTOR_MINITL_ALLOCATOR_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/swap.hh>
 #include <cstring>
@@ -251,6 +249,3 @@ inline void operator delete[](void* ptr, minitl::Allocator& allocator, size_t /*
 {
     allocator.free(ptr);
 }
-
-/**************************************************************************************************/
-#endif

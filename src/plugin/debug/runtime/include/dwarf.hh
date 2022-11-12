@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_DEBUG_RUNTIME_DWARF_HH_
-#define MOTOR_DEBUG_RUNTIME_DWARF_HH_
-/**************************************************************************************************/
 #include <motor/plugin.debug.runtime/stdafx.h>
 #include <motor/minitl/hash.hh>
 #include <motor/minitl/hashmap.hh>
@@ -121,5 +119,3 @@ struct hash< Motor::Runtime::DwarfModule::AddressRange >
 };
 
 }  // namespace minitl
-/**************************************************************************************************/
-#endif

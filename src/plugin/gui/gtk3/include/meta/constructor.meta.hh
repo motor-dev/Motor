@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_UI_GTK3_META_CONSTRUCTOR_META_HH_
-#define MOTOR_UI_GTK3_META_CONSTRUCTOR_META_HH_
-/**************************************************************************************************/
 #include <motor/meta/engine/methodinfo.meta.hh>
 
 namespace Motor { namespace Gtk3 {
@@ -19,6 +17,3 @@ public:
 };
 
 }}  // namespace Motor::Gtk3
-
-/**************************************************************************************************/
-#endif

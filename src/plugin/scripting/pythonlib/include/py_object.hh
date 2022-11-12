@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_PYTHONLIB_PY_OBJECT_HH_
-#define MOTOR_PYTHONLIB_PY_OBJECT_HH_
-/**************************************************************************************************/
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <motor/meta/value.hh>
 #include <motor/plugin.scripting.pythonlib/pythontypes.hh>
@@ -36,6 +34,3 @@ struct PyMotorObject : public PyObject
 };
 
 }}  // namespace Motor::Python
-
-/**************************************************************************************************/
-#endif

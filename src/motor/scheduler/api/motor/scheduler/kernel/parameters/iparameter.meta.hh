@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SCHEDULER_KERNEL_PARAMETER_IPARAMETER_META_HH_
-#define MOTOR_SCHEDULER_KERNEL_PARAMETER_IPARAMETER_META_HH_
-/**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 
 namespace Motor { namespace Task {
@@ -193,6 +191,3 @@ public:
 };
 
 }}  // namespace Motor::KernelScheduler
-
-/**************************************************************************************************/
-#endif

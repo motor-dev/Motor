@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_KERNEL_SUNCC_INTERLOCKED_INL_
-#define MOTOR_KERNEL_SUNCC_INTERLOCKED_INL_
-/**************************************************************************************************/
 #include <motor/kernel/stdafx.h>
 
 extern "C" i32 fetch_and_add_32(i32* p, i32 add);
@@ -16,7 +14,7 @@ extern "C" i64  fetch_and_set_64(i64* p, i64 v);
 extern "C" char set_conditional_128(i64* p, i64 nvalue, i64 oldvalue, i64 tag);
 #endif
 
-namespace _Kernel {
+namespace knl {
 
 template < unsigned size >
 struct InterlockedType;
@@ -206,7 +204,4 @@ struct InterlockedType< 8 >
 };
 #endif
 
-}  // namespace _Kernel
-
-/**************************************************************************************************/
-#endif
+}  // namespace knl

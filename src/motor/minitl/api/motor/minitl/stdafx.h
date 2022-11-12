@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_MINITL_STDAFX_H_
-#define MOTOR_MINITL_STDAFX_H_
-/**************************************************************************************************/
+#pragma once
 
 #include <motor/kernel/stdafx.h>
 
@@ -65,6 +62,3 @@ T nextPowerOf2(T t)
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

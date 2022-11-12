@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_INTROSPECT_POLICY_META_HH_
-#define MOTOR_INTROSPECT_POLICY_META_HH_
-/**************************************************************************************************/
 #include <motor/introspect/stdafx.h>
 #include <motor/introspect/dbcontext.hh>
 #include <motor/introspect/introspectionhint.meta.hh>
@@ -27,6 +25,3 @@ public:
 
 }  // namespace AST
 }}  // namespace Motor::Meta
-
-/**************************************************************************************************/
-#endif

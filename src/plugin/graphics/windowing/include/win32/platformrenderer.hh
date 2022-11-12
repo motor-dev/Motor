@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_WINDOWING_WIN32_PLATFORMRENDERER_HH_
-#define MOTOR_WINDOWING_WIN32_PLATFORMRENDERER_HH_
-/**************************************************************************************************/
 #include <motor/plugin.graphics.windowing/stdafx.h>
 #include <motor/core/threads/thread.hh>
 #include <windows.h>
@@ -39,6 +37,3 @@ public:
 };
 
 }}  // namespace Motor::Windowing
-
-/**************************************************************************************************/
-#endif

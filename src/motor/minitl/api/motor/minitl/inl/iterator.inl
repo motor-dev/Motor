@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_CONTAINER_INL_ITERATORS_INL_
-#define MOTOR_MINITL_CONTAINER_INL_ITERATORS_INL_
-/**************************************************************************************************/
 #include <motor/minitl/assert.hh>
 
 namespace minitl {
@@ -91,6 +89,3 @@ static const T* advance_ptr(const T* input, difference_type offset)
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

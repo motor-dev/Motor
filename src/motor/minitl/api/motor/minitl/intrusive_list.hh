@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_INTRUSIVE_LIST_HH_
-#define MOTOR_MINITL_INTRUSIVE_LIST_HH_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/iterator.hh>
 #include <motor/minitl/swap.hh>
@@ -86,6 +84,3 @@ void swap(intrusive_list< T, INDEX >& a, intrusive_list< T, INDEX >& b)
 }  // namespace minitl
 
 #include <motor/minitl/inl/intrusive_list.inl>
-
-/**************************************************************************************************/
-#endif

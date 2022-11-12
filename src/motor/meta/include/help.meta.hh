@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_META_HELP_META_HH_
-#define MOTOR_META_HELP_META_HH_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
@@ -20,6 +18,3 @@ void help(const Meta::Method::Parameter& parameter);
 void help(const Meta::Value& v);
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

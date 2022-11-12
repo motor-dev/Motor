@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_LUA_CONTEXT_H_
-#define MOTOR_LUA_CONTEXT_H_
-/**************************************************************************************************/
 #include <stdafx.h>
 #include <motor/filesystem/file.meta.hh>
 #include <motor/meta/classinfo.meta.hh>
@@ -44,6 +42,3 @@ private:
 };
 
 }}  // namespace Motor::Lua
-
-/**************************************************************************************************/
-#endif

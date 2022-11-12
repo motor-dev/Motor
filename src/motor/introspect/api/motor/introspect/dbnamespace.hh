@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_INTROSPECT_DBNAMESPACE_HH_
-#define MOTOR_INTROSPECT_DBNAMESPACE_HH_
-/**************************************************************************************************/
 #include <motor/introspect/stdafx.h>
 #include <motor/introspect/node/node.hh>
 #include <motor/meta/value.hh>
@@ -33,6 +31,3 @@ public:
 };
 
 }}}  // namespace Motor::Meta::AST
-
-/**************************************************************************************************/
-#endif

@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_SCHEDULER_TASK_KERNELTASK_HH_
-#define MOTOR_SCHEDULER_TASK_KERNELTASK_HH_
-/**************************************************************************************************/
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/kernel/kernel.meta.hh>
 #include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
@@ -33,10 +31,10 @@ private:
 
 public:
     template < typename Container >
-    KernelTask(istring name, KernelScheduler::SchedulerType type, color32 color,
+    KernelTask(istring name, KernelScheduler::SchedulerType type, knl::color32 color,
                weak< const Motor::KernelScheduler::Kernel > kernel, const Container& parameters);
     template < typename Iterator >
-    KernelTask(istring name, KernelScheduler::SchedulerType type, color32 color,
+    KernelTask(istring name, KernelScheduler::SchedulerType type, knl::color32 color,
                weak< const Motor::KernelScheduler::Kernel > kernel, const Iterator& begin,
                const Iterator& end);
     ~KernelTask();
@@ -56,7 +54,7 @@ public:
 namespace Motor { namespace Task {
 
 template < typename Container >
-KernelTask::KernelTask(istring name, KernelScheduler::SchedulerType type, color32 color,
+KernelTask::KernelTask(istring name, KernelScheduler::SchedulerType type, knl::color32 color,
                        weak< const Motor::KernelScheduler::Kernel > kernel,
                        const Container&                             parameters)
     : ITask(name, color, Scheduler::WorkerThread)
@@ -67,7 +65,7 @@ KernelTask::KernelTask(istring name, KernelScheduler::SchedulerType type, color3
 }
 
 template < typename Iterator >
-KernelTask::KernelTask(istring name, KernelScheduler::SchedulerType type, color32 color,
+KernelTask::KernelTask(istring name, KernelScheduler::SchedulerType type, knl::color32 color,
                        weak< const Motor::KernelScheduler::Kernel > kernel, const Iterator& begin,
                        const Iterator& end)
     : ITask(name, color, Scheduler::WorkerThread)
@@ -78,6 +76,3 @@ KernelTask::KernelTask(istring name, KernelScheduler::SchedulerType type, color3
 }
 
 }}  // namespace Motor::Task
-
-/**************************************************************************************************/
-#endif

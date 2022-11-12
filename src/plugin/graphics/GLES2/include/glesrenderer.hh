@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_GLES2_RENDERER_HH_
-#define MOTOR_GLES2_RENDERER_HH_
-/**************************************************************************************************/
 #include <stdafx.h>
 #include <motor/plugin.graphics.3d/renderer/irenderer.hh>
 #include <motor/plugin/plugin.hh>
@@ -35,11 +33,8 @@ private:
     ref< IGPUResource >
     create(weak< const RenderWindowDescription > renderWindowDescription) const override;
     ref< IGPUResource >
-          create(weak< const ShaderProgramDescription > shaderDescription) const override;
-    uint2 getScreenSize() const override;
+               create(weak< const ShaderProgramDescription > shaderDescription) const override;
+    knl::uint2 getScreenSize() const override;
 };
 
 }}  // namespace Motor::OpenGLES
-
-/**************************************************************************************************/
-#endif

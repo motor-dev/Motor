@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_PYTHONLIB_PY_PLUGIN_HH_
-#define MOTOR_PYTHONLIB_PY_PLUGIN_HH_
-/**************************************************************************************************/
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <motor/plugin.scripting.pythonlib/pythontypes.hh>
 #include <motor/plugin/plugin.hh>
@@ -26,6 +24,3 @@ struct PyMotorPlugin
 };
 
 }}  // namespace Motor::Python
-
-/**************************************************************************************************/
-#endif

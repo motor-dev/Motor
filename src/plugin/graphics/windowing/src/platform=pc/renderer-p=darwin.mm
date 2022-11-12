@@ -65,12 +65,12 @@ Renderer::~Renderer()
 {
 }
 
-uint2 Renderer::getScreenSize() const
+knl::uint2 Renderer::getScreenSize() const
 {
     NSArray* screens = [NSScreen screens];
     NSScreen* screen = [screens objectAtIndex:0];
     NSRect frame = [screen visibleFrame];
-    return make_uint2(frame.size.width, frame.size.height);
+    return knl::make_uint2(frame.size.width, frame.size.height);
 }
 
 void Renderer::flush()

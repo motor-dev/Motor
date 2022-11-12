@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_TEXT_FREETYPEFACE_HH_
-#define MOTOR_TEXT_FREETYPEFACE_HH_
-/**************************************************************************************************/
 #include <motor/plugin.graphics.text/stdafx.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -21,6 +19,3 @@ public:
 };
 
 }  // namespace Motor
-
-/**************************************************************************************************/
-#endif

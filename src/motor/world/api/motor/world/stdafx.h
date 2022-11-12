@@ -1,9 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_WORLD_STDAFX_H_
-#define MOTOR_WORLD_STDAFX_H_
-/**************************************************************************************************/
+#pragma once
 
 #include <motor/core/stdafx.h>
 #include <motor/filesystem/stdafx.h>
@@ -26,6 +23,3 @@ motor_api(WORLD) minitl::Allocator& game();
 #endif
 
 }}  // namespace Motor::Arena
-
-/**************************************************************************************************/
-#endif
