@@ -30,8 +30,8 @@ noptr-abstract-pack-declarator:
 """
 
 import glrp
-from ....parser import cxx98, cxx11, cxx98_merge
-from .....ast.types import AmbiguousTypeId, TypeIdDeclarator, AmbiguousAbstractDeclarator, AbstractDeclaratorList, DeclaratorElementMethod, DeclaratorElementArray, DeclaratorElementAbstractPackId
+from ....parse import cxx98, cxx11, cxx98_merge
+from .....ast.type import AmbiguousTypeId, TypeIdDeclarator, AmbiguousAbstractDeclarator, AbstractDeclaratorList, DeclaratorElementMethod, DeclaratorElementArray, DeclaratorElementAbstractPackId
 from motor_typing import TYPE_CHECKING
 
 
@@ -215,14 +215,14 @@ def ambiguous_noptr_abstract_declarator(self, ptr_declarator, parameter_declarat
 @cxx98_merge
 def ambiguous_type_id(self, ambiguous_simple_type_specifier_2, ambiguous_template_argument_list_ellipsis):
     # type: (CxxParser, List[Any], List[Any]) -> Any
-    pass
+    return AmbiguousTypeId(ambiguous_simple_type_specifier_2 + ambiguous_template_argument_list_ellipsis)
 
 
 @glrp.merge('defining-type-id')
 @cxx98_merge
 def ambiguous_defining_type_id(self, ambiguous_simple_type_specifier_2, ambiguous_template_argument_list_ellipsis):
     # type: (CxxParser, List[Any], List[Any]) -> Any
-    pass
+    return AmbiguousTypeId(ambiguous_simple_type_specifier_2 + ambiguous_template_argument_list_ellipsis)
 
 
 @glrp.merge('type-id')
@@ -232,10 +232,10 @@ def ambiguous_type_id_final(self, final_keyword, final_identifier):
     if len(final_keyword) == 1:
         return final_keyword[0]
     elif len(final_keyword) > 1:
-        return None    #TODO
+        return AmbiguousTypeId(final_keyword)
     else:
         assert len(final_identifier) > 1
-        return None    #TODO
+        return AmbiguousTypeId(final_identifier)
 
 
 @glrp.merge('defining-type-id')
@@ -245,12 +245,12 @@ def ambiguous_defining_type_id_final(self, final_keyword, final_identifier):
     if len(final_keyword) == 1:
         return final_keyword[0]
     elif len(final_keyword) > 1:
-        return None    #TODO
+        return AmbiguousTypeId(final_keyword)
     else:
         assert len(final_identifier) > 1
-        return None    #TODO
+        return AmbiguousTypeId(final_identifier)
 
 
 if TYPE_CHECKING:
     from typing import Any, List
-    from ....parser import CxxParser
+    from ....parse import CxxParser

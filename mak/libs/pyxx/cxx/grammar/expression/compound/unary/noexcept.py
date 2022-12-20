@@ -4,7 +4,7 @@ noexcept-expression:
 """
 
 import glrp
-from .....parser import cxx11
+from .....parse import cxx11
 from ......ast.expressions import NoexceptExpression
 from motor_typing import TYPE_CHECKING
 
@@ -18,4 +18,4 @@ def noexcept_expression_cxx11(self, p):
 
 if TYPE_CHECKING:
     from typing import Any
-    from .....parser import CxxParser
+    from .....parse import CxxParser

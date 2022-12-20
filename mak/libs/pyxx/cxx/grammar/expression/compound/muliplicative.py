@@ -7,7 +7,7 @@ multiplicative-expression:
 """
 
 import glrp
-from ....parser import cxx98
+from ....parse import cxx98
 from .....ast.expressions import BinaryExpression
 from motor_typing import TYPE_CHECKING
 
@@ -30,4 +30,4 @@ def multiplicative_expression(self, p):
 
 if TYPE_CHECKING:
     from typing import Any
-    from ....parser import CxxParser
+    from ....parse import CxxParser

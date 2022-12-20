@@ -23,8 +23,8 @@ expression-list:
 """
 
 import glrp
-from ....parser import cxx98, cxx11, cxx98_merge
-from .....ast.expressions import SimpleCastExpression, TypeIdExpression, TypeIdExpressionType, ExpressionList, PostfixExpression, CxxCastExpression, CallExpression, SubscriptExpression, MemberAccessExpression, MemberAccessPtrExpression, AmbiguousExpression
+from ....parse import cxx98, cxx11
+from .....ast.expressions import SimpleCastExpression, TypeIdExpression, TypeIdExpressionType, ExpressionList, PostfixExpression, CxxCastExpression, CallExpression, SubscriptExpression, MemberAccessExpression, MemberAccessPtrExpression
 from motor_typing import TYPE_CHECKING
 
 
@@ -153,23 +153,6 @@ def begin_type_or_expression(self, p):
     pass
 
 
-@glrp.merge('typeid-expression')
-@cxx98_merge
-def ambiguous_typeid_expression(self, type_id, expression):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
-    return AmbiguousExpression(type_id + expression)
-
-
-@glrp.merge('postfix-expression')
-@cxx98_merge
-def ambiguous_postfix_expression(
-    self, simple_type_specifier_cast, ambiguous_template_id, id_template, id_nontemplate, ambiguous_postfix_expression
-):
-    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any], List[Any]) -> Any
-    expressions = simple_type_specifier_cast + ambiguous_template_id + id_template + id_nontemplate + ambiguous_postfix_expression
-    return AmbiguousExpression(expressions)
-
-
 if TYPE_CHECKING:
-    from typing import Any, List
-    from ....parser import CxxParser
+    from typing import Any
+    from ....parse import CxxParser

@@ -1,12 +1,12 @@
 import glrp
-from . import lexer
+from . import lex
 from .. import tables
 import os
 from motor_typing import Callable, TYPE_CHECKING, cast, Any
 
 
 class CxxParser(glrp.Parser):
-    Lexer = lexer.Cxx98Lexer
+    Lexer = lex.Cxx98Lexer
 
     def __init__(self, tmp_dir, mode=glrp.LOAD_CACHE):
         # type: (str, int)->None
@@ -16,31 +16,31 @@ class CxxParser(glrp.Parser):
 
 
 class Cxx98Parser(CxxParser):
-    Lexer = lexer.Cxx98Lexer
+    Lexer = lex.Cxx98Lexer
 
 
 class Cxx03Parser(Cxx98Parser):
-    Lexer = lexer.Cxx03Lexer
+    Lexer = lex.Cxx03Lexer
 
 
 class Cxx11Parser(Cxx03Parser):
-    Lexer = lexer.Cxx11Lexer
+    Lexer = lex.Cxx11Lexer
 
 
 class Cxx14Parser(Cxx11Parser):
-    Lexer = lexer.Cxx14Lexer
+    Lexer = lex.Cxx14Lexer
 
 
 class Cxx17Parser(Cxx14Parser):
-    Lexer = lexer.Cxx17Lexer
+    Lexer = lex.Cxx17Lexer
 
 
 class Cxx20Parser(Cxx17Parser):
-    Lexer = lexer.Cxx20Lexer
+    Lexer = lex.Cxx20Lexer
 
 
 class Cxx23Parser(Cxx20Parser):
-    Lexer = lexer.Cxx23Lexer
+    Lexer = lex.Cxx23Lexer
 
 
 def _empty_rule(parser, production):

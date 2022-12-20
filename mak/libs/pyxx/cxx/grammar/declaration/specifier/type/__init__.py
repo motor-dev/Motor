@@ -20,8 +20,8 @@ defining-type-specifier-seq:
 """
 
 import glrp
-from .....parser import cxx98
-from ......ast.types import TypeSpecifierSeq, DefiningTypeSpecifierSeq
+from .....parse import cxx98
+from ......ast.type import TypeSpecifierSeq, DefiningTypeSpecifierSeq
 from motor_typing import TYPE_CHECKING
 from . import simple
 from . import elaborated
@@ -90,4 +90,4 @@ def defining_type_specifier_seq_end(self, p):
 
 if TYPE_CHECKING:
     from typing import Any
-    from .....parser import CxxParser
+    from .....parse import CxxParser

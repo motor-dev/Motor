@@ -6,7 +6,8 @@ module-import-declaration:
 """
 
 import glrp
-from ...parser import cxx20
+from ...parse import cxx20
+from ....ast.module import ModuleImportDeclaration
 from motor_typing import TYPE_CHECKING
 
 
@@ -16,9 +17,9 @@ from motor_typing import TYPE_CHECKING
 @cxx20
 def module_import_declaration_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return ModuleImportDeclaration(p[1], p[2])
 
 
 if TYPE_CHECKING:
     from typing import Any
-    from ...parser import CxxParser
+    from ...parse import CxxParser

@@ -5,7 +5,7 @@ compare-expression:
 """
 
 import glrp
-from ....parser import cxx98, cxx20
+from ....parse import cxx98, cxx20
 from .....ast.expressions import BinaryExpression
 from motor_typing import TYPE_CHECKING
 
@@ -28,4 +28,4 @@ def compare_expression_cxx20(self, p):
 
 if TYPE_CHECKING:
     from typing import Any
-    from ....parser import CxxParser
+    from ....parse import CxxParser

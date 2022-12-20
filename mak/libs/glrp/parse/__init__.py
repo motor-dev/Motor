@@ -1,2 +1,2 @@
 from .production import Production
-from .parser import Parser, rule, merge, merge_result, Context, LOAD_OPTIMIZED, GENERATE, LOAD_CACHE
+from .parse import Parser, rule, merge, merge_result, Context, LOAD_OPTIMIZED, GENERATE, LOAD_CACHE

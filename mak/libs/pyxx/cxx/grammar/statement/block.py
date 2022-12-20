@@ -7,7 +7,8 @@ statement-seq:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parse import cxx98
+from ....ast.statements import CompoundStatement
 from motor_typing import TYPE_CHECKING
 
 
@@ -15,7 +16,7 @@ from motor_typing import TYPE_CHECKING
 @cxx98
 def compound_statement(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return CompoundStatement(p[1])
 
 
 #@glrp.rule('compound-statement : "{" balanced-token-seq? "}"')
@@ -26,13 +27,21 @@ def compound_statement(self, p):
 
 
 @glrp.rule('statement-seq? : statement-seq? statement')
+@cxx98
+def statement_seq(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    result = p[0]
+    result.append(p[1])
+    return result
+
+
 @glrp.rule('statement-seq? :')
 @cxx98
 def statement_seq_opt(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return []
 
 
 if TYPE_CHECKING:
     from typing import Any
-    from ...parser import CxxParser
+    from ...parse import CxxParser

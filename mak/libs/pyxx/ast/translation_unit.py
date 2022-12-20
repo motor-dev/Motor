@@ -8,7 +8,12 @@ class TranslationUnit(object):
         self._declarations = declarations
         self._private_module_frgment = private_module_fragment
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_translation_unit(self)
+
 
 if TYPE_CHECKING:
     from typing import List
+    from . import Visitor
     from .declarations import Declaration

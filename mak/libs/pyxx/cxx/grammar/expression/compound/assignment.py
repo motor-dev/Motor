@@ -10,7 +10,7 @@ assignment-operator: one of
 """
 
 import glrp
-from ....parser import cxx98, cxx20
+from ....parse import cxx98, cxx20
 from .....ast.expressions import BinaryExpression
 from motor_typing import TYPE_CHECKING
 
@@ -51,7 +51,7 @@ def assignment_expression_stop_cxx20(self, p):
 
 @glrp.rule('assignment-expression? :')
 @glrp.rule('"assignment-expression#"? :')
-@cxx20
+@cxx98
 def assignment_expression_opt(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     return None
@@ -76,4 +76,4 @@ def assignment_operator(self, p):
 
 if TYPE_CHECKING:
     from typing import Any
-    from ....parser import CxxParser
+    from ....parse import CxxParser

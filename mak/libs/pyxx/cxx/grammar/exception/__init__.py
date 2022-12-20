@@ -18,7 +18,9 @@ exception-declaration:
 """
 
 import glrp
-from ...parser import cxx98, cxx98_merge
+from ...parse import cxx98, cxx98_merge
+from ....ast.function import TryFunctionBody, StatementFunctionBody
+from ....ast.statements import TryBlock, ExceptionHandler, ExceptionDeclarationTypeSpecifier, ExceptionDeclarationAny, AmbiguousExceptionDeclaration
 from motor_typing import TYPE_CHECKING
 from . import specification
 
@@ -27,62 +29,76 @@ from . import specification
 @cxx98
 def try_block(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return TryBlock(p[1], p[2])
 
 
 @glrp.rule('function-try-block : "try" ctor-initializer? compound-statement handler-seq')
 @cxx98
 def function_try_block(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return TryFunctionBody(StatementFunctionBody(p[1], p[2]), p[3])
 
 
 @glrp.rule('handler-seq : handler handler-seq?')
+@glrp.rule('handler-seq? : handler handler-seq?')
 @cxx98
 def handler_seq(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    result = p[1]
+    result.insert(0, p[0])
+    return result
 
 
-@glrp.rule('handler-seq? : handler handler-seq?')
 @glrp.rule('handler-seq? : ')
 @cxx98
 def handler_seq_opt(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return []
 
 
 @glrp.rule('handler : "catch" "(" exception-declaration ")" compound-statement')
 @cxx98
 def handler(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return ExceptionHandler(p[2], p[4])
 
 
 @glrp.rule('exception-declaration : attribute-specifier-seq? [no-merge-warning] type-specifier-seq declarator')
-@glrp.rule('exception-declaration : attribute-specifier-seq? type-specifier-seq ')
 @glrp.rule('exception-declaration : attribute-specifier-seq? [no-merge-warning] type-specifier-seq abstract-declarator')
+@cxx98
+def exception_declaration_declarator(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return ExceptionDeclarationTypeSpecifier(p[0], p[1], p[2])
+
+
+@glrp.rule('exception-declaration : attribute-specifier-seq? type-specifier-seq ')
+@cxx98
+def exception_declaration_no_declarator(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return ExceptionDeclarationTypeSpecifier(p[0], p[1], None)
+
+
 @glrp.rule('exception-declaration : "..."')
 @cxx98
-def exception_declaration(self, p):
+def exception_declaration_declarator_any(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return ExceptionDeclarationAny()
 
 
 @glrp.merge('exception-declaration')
 @cxx98_merge
 def ambiguous_exception_declaration(self, continue_declarator_list, end_declarator_list):
-    # type: (CxxParser, List[Any], List[Any]) -> None
-    pass
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    return AmbiguousExceptionDeclaration(continue_declarator_list + end_declarator_list)
 
 
 @glrp.merge('exception-declaration')
 @cxx98_merge
 def ambiguous_exception_declaration_2(self, ambiguous_abstract_declarator_2, ptr_declarator):
-    # type: (CxxParser, List[Any], List[Any]) -> None
-    pass
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    return AmbiguousExceptionDeclaration(ambiguous_abstract_declarator_2 + ptr_declarator)
 
 
 if TYPE_CHECKING:
     from typing import Any, List
-    from ...parser import CxxParser
+    from ...parse import CxxParser

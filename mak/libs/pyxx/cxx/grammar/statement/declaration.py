@@ -4,7 +4,8 @@ declaration-statement:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parse import cxx98
+from ....ast.statements import DeclarationStatement
 from motor_typing import TYPE_CHECKING
 
 
@@ -12,9 +13,9 @@ from motor_typing import TYPE_CHECKING
 @cxx98
 def declaration_statement(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return DeclarationStatement(p[0])
 
 
 if TYPE_CHECKING:
     from typing import Any
-    from ...parser import CxxParser
+    from ...parse import CxxParser

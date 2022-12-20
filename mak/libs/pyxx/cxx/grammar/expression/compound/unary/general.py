@@ -18,8 +18,8 @@ unary-operator: one of
 """
 
 import glrp
-from .....parser import cxx98, cxx11, cxx20, cxx98_merge
-from ......ast.expressions import UnaryExpression, SizeofExpression, SizeofTypeExpression, SizeofPackExpression, AlignofExpression, AmbiguousExpression
+from .....parse import cxx98, cxx11, cxx20
+from ......ast.expressions import UnaryExpression, SizeofExpression, SizeofTypeExpression, SizeofPackExpression, AlignofExpression
 from motor_typing import TYPE_CHECKING
 
 
@@ -65,7 +65,14 @@ def unary_expression_sizeof_cxx11(self, p):
 @cxx11
 def unary_expression_alignof_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return AlignofExpression(p[2])
+    return AlignofExpression(p[0].text(), p[2])
+
+
+@glrp.rule('unary-expression : "alignof-macro" "(" type-id ")"')
+@cxx98
+def unary_expression_alignof_macro(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return AlignofExpression(p[0].text(), p[2])
 
 
 @glrp.rule('unary-expression : noexcept-expression')
@@ -103,14 +110,6 @@ def unary_operator(self, p):
     return p[0].text()
 
 
-@glrp.merge('sizeof-expression')
-@cxx98_merge
-def ambiguous_sizeof_expression(self, type_id, ambiguous_primary_expression):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
-    expression_list = type_id + ambiguous_primary_expression
-    return AmbiguousExpression(expression_list)
-
-
 if TYPE_CHECKING:
-    from typing import Any, List
-    from .....parser import CxxParser
+    from typing import Any
+    from .....parse import CxxParser

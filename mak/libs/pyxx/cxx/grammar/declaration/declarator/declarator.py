@@ -41,8 +41,8 @@ declarator-id:
 """
 
 import glrp
-from ....parser import cxx98, cxx11
-from .....ast.types import CvQualifiers, RefQualifiers, DeclaratorList, DeclaratorElementId, DeclaratorElementPackId, DeclaratorElementArray, DeclaratorElementPointer, DeclaratorElementReference, DeclaratorElementRValueReference, DeclaratorElementMethod
+from ....parse import cxx98, cxx11
+from .....ast.type import CvQualifiers, RefQualifiers, DeclaratorList, DeclaratorElementId, DeclaratorElementPackId, DeclaratorElementArray, DeclaratorElementPointer, DeclaratorElementReference, DeclaratorElementRValueReference, DeclaratorElementMethod
 from motor_typing import TYPE_CHECKING
 
 
@@ -236,4 +236,4 @@ def begin_parameter_declaration_clause(self, p):
 
 if TYPE_CHECKING:
     from typing import Any
-    from ....parser import CxxParser
+    from ....parse import CxxParser

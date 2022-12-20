@@ -5,7 +5,7 @@ yield-expression:
 """
 
 import glrp
-from ....parser import cxx20
+from ....parse import cxx20
 from .....ast.expressions import YieldExpression, LiteralExpression
 from motor_typing import TYPE_CHECKING
 
@@ -28,4 +28,4 @@ def yield_expression_braced_init_list_cxx20(self, p):
 
 if TYPE_CHECKING:
     from typing import Any
-    from ....parser import CxxParser
+    from ....parse import CxxParser

@@ -7,7 +7,7 @@ storage-class-specifier:
 """
 
 import glrp
-from ....parser import cxx98, cxx11, deprecated_cxx11, deprecated_cxx17
+from ....parse import cxx98, cxx11, deprecated_cxx11, deprecated_cxx17
 from .....ast.declarations import StorageClassSpecifiers, StorageClassSpecifierMacro
 from motor_typing import TYPE_CHECKING
 
@@ -72,4 +72,4 @@ def storage_class_specifier_register_until_cxx17(self, p):
 
 if TYPE_CHECKING:
     from typing import Any
-    from ....parser import CxxParser
+    from ....parse import CxxParser

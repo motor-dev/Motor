@@ -5,8 +5,8 @@ cast-expression:
 """
 
 import glrp
-from ....parser import cxx98, cxx98_merge
-from .....ast.expressions import CastExpression, AmbiguousExpression
+from ....parse import cxx98
+from .....ast.expressions import CastExpression
 from motor_typing import TYPE_CHECKING
 
 
@@ -24,13 +24,6 @@ def cast_expression(self, p):
     return CastExpression(p[4], p[2])
 
 
-@glrp.merge('cast-expression')
-@cxx98_merge
-def ambiguous_cast_expression(self, type_id, ambiguous_primary_expression):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
-    return AmbiguousExpression(type_id + ambiguous_primary_expression)
-
-
 if TYPE_CHECKING:
-    from typing import Any, List
-    from ....parser import CxxParser
+    from typing import Any
+    from ....parse import CxxParser

@@ -11,21 +11,28 @@ function-body:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx20, cxx98_merge
+from ...parse import cxx98, cxx11, cxx20, cxx98_merge
 from ....ast.declarations import AmbiguousDeclaration
+from ....ast.function import FunctionDefinition, DeletedFunctionBody, DefaultFunctionBody, StatementFunctionBody
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule(
     'function-definition : attribute-specifier-seq? begin-declaration [no-merge-warning]decl-specifier-seq? declarator-function-body function-body'
 )
+@cxx98
+def function_definition(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return FunctionDefinition(p[0], p[2], p[3], None, [], p[4])
+
+
 @glrp.rule(
     'function-definition : attribute-specifier-seq? begin-declaration [no-merge-warning]decl-specifier-seq? declarator-function-body virt-specifier-seq function-body'
 )
 @cxx98
-def function_definition(self, p):
+def function_definition_virt_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return FunctionDefinition(p[0], p[2], p[3], None, p[4], p[5])
 
 
 @glrp.rule(
@@ -34,7 +41,7 @@ def function_definition(self, p):
 @cxx20
 def function_definition_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return FunctionDefinition(p[0], p[2], p[3], p[4], [], p[5])
 
 
 @glrp.rule('declarator-function-body : declarator [split:function_body]')
@@ -58,20 +65,38 @@ def begin_function_initializer(self, p):
 
 
 @glrp.rule('function-body : compound-statement')
-@glrp.rule('function-body : ctor-initializer compound-statement')
-@glrp.rule('function-body : function-try-block')
 @cxx98
 def function_body(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return StatementFunctionBody(None, p[0])
+
+
+@glrp.rule('function-body : ctor-initializer compound-statement')
+@cxx98
+def function_body_ctor(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return StatementFunctionBody(p[0], p[1])
+
+
+@glrp.rule('function-body : function-try-block')
+@cxx98
+def function_body_try_block(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return p[0]
 
 
 @glrp.rule('function-body : "=" "default" ";"')
+@cxx11
+def function_body_default_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return DefaultFunctionBody()
+
+
 @glrp.rule('function-body : "=" "delete" ";"')
 @cxx11
-def function_body_cxx11(self, p):
+def function_body_delete_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return DeletedFunctionBody()
 
 
 @glrp.merge('function-definition')
@@ -96,4 +121,4 @@ def ambiguous_function_definition_final(self, final_keyword, final_identifier):
 
 if TYPE_CHECKING:
     from typing import Any, List
-    from ...parser import CxxParser
+    from ...parse import CxxParser

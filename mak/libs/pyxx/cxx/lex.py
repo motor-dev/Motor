@@ -187,17 +187,18 @@ _keywords_cxx23 = _keywords_transactional + _keywords_reflection
 class Cxx98Lexer(glrp.Lexer):
     keywords = _keywords
     tokens = _keywords + (
-        'virt-specifier-macro', 'virt-specifier-macro-function', 'access-specifier-macro',
+        'alignof-macro', 'virt-specifier-macro', 'virt-specifier-macro-function', 'access-specifier-macro',
         'access-specifier-macro-function', 'decl-specifier-macro', 'decl-specifier-macro-function',
         'attribute-specifier-macro', 'attribute-specifier-macro-function', 'storage-class-specifier-macro',
         'storage-class-specifier-macro-function', 'decltype-macro', 'type-trait-macro', 'type-trait-macro-function',
-        '%>'
+        'string-literal-macro', 'string-literal-macro-function', '%>'
     )
 
     def __init__(self):
         # type: () -> None
         glrp.Lexer.__init__(self)
         self._macros = {
+            '__alignof__': 'alignof-macro',
             '__attribute__': 'attribute-specifier-macro-function',
             '__attribute': 'attribute-specifier-macro-function',
             '__declspec': 'attribute-specifier-macro-function',
@@ -399,22 +400,13 @@ class Cxx98Lexer(glrp.Lexer):
     @glrp.token(_integer_literal, 'integer-literal')
     def _08_integer_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
+        t.value = t.text()
         return t
 
     @glrp.token(_floating_literal, 'floating-literal')
     def _10_floating_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        text = self.text(t)
-        if text[-1] in 'fFdD':
-            try:
-                t.value = decimal.Decimal(text[:-1])
-            except decimal.InvalidOperation:
-                t.value = 0    # TODO!
-        else:
-            try:
-                t.value = decimal.Decimal(text)
-            except decimal.InvalidOperation:
-                t.value = 0    # TODO!
+        t.value = t.text()
         return t
 
     @glrp.token(_string_literal, 'string-literal')
@@ -474,19 +466,19 @@ class Cxx11Lexer(Cxx03Lexer):
     @glrp.token(_user_defined_integer_literal, 'user-defined-integer-literal')
     def _09_user_integer_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        t.value = self.text(t)
+        t.value = (self.text(t), '')   # TODO
         return t
 
     @glrp.token(_user_defined_floating_literal, 'user-defined-floating-literal')
     def _11_user_floating_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        t.value = self.text(t)
+        t.value = (self.text(t), '')   # TODO
         return t
 
     @glrp.token(_user_defined_character_literal, 'user-defined-character-literal')
     def _13_user_defined_character_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        t.value = self.text(t)
+        t.value = (self.text(t), '')   # TODO
         return t
 
     @glrp.token(_user_defined_string_literal, 'user-defined-string-literal')

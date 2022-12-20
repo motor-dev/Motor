@@ -15,7 +15,7 @@ parameter-declaration:
 """
 
 import glrp
-from ....parser import cxx98, cxx98_merge, cxx23
+from ....parse import cxx98, cxx98_merge, cxx23
 from .....ast.declarations import AmbiguousDeclaration
 from .....ast.function import SimpleParameterClause, ParameterDeclaration, AmbiguousParameterClause
 from motor_typing import TYPE_CHECKING
@@ -218,4 +218,4 @@ def ambiguous_parameter_declaration_ext_final(self, final_keyword, final_identif
 
 if TYPE_CHECKING:
     from typing import Any, List
-    from ....parser import CxxParser
+    from ....parse import CxxParser

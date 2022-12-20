@@ -11,8 +11,8 @@ fold-operator: one of
 """
 
 import glrp
-from ....parser import cxx17, cxx17_merge
-from .....ast.expressions import AmbiguousExpression, FoldExpressionLeft, FoldExpressionRight, FoldExpressionBoth
+from ....parse import cxx17
+from .....ast.expressions import FoldExpressionLeft, FoldExpressionRight, FoldExpressionBoth
 from motor_typing import TYPE_CHECKING
 
 
@@ -55,7 +55,6 @@ def begin_fold_expression_cxx17(self, p):
 @glrp.rule('fold-operator : "&"')
 @glrp.rule('fold-operator : "|"')
 @glrp.rule('fold-operator : "<<"')
-@glrp.rule('fold-operator : ">>"')
 @glrp.rule('fold-operator : "+="')
 @glrp.rule('fold-operator : "-="')
 @glrp.rule('fold-operator : "*="')
@@ -84,17 +83,13 @@ def fold_operator_cxx17(self, p):
     return p[0].text()
 
 
-@glrp.merge('fold-expression')
-@cxx17_merge
-def ambiguous_cast_expression_proxy(self, id_nontemplate, id_template):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
-    all_exprs = id_nontemplate + id_template
-    if len(all_exprs) == 1:
-        return all_exprs[0]
-    else:
-        return AmbiguousExpression(all_exprs)
+@glrp.rule('fold-operator : ">>"')
+@cxx17
+def fold_operator_rshift_cxx17(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return p[0]
 
 
 if TYPE_CHECKING:
-    from typing import Any, List
-    from ....parser import CxxParser
+    from typing import Any
+    from ....parse import CxxParser

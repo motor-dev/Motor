@@ -1,4 +1,4 @@
-from . import messages, parser
+from . import messages, parse
 import argparse
 import glrp
 import json
@@ -86,15 +86,15 @@ def run(arguments):
         ExceptionType = SyntaxError
     try:
         mode = glrp.LOAD_OPTIMIZED if arguments.optimized else glrp.LOAD_CACHE
-        p = parser.parser(arguments.lang, os.path.splitext(arguments.input)[1], arguments.std)(arguments.tmp_dir, mode)
-        for macro_file in arguments.macro_file:
+        p = parse.parser(arguments.lang, os.path.splitext(arguments.input)[1], arguments.std)(arguments.tmp_dir, mode)
+        for macro_file in arguments.macro_file or []:
             with open(macro_file, 'r') as macro_file_content:
                 macros = json.load(macro_file_content)
                 for macro, macro_type in macros.items():
                     p.lexer._macros[macro] = macro_type
         result = p.parse(arguments.input)
         if not result:
-            sys.exit(0)
+            sys.exit(1)
         elif logger._error_count > 0:
             sys.exit(logger._error_count)
         else:

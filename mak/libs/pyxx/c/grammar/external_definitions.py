@@ -13,7 +13,7 @@ A.2.4 External definitions
 """
 
 import glrp
-from ..parser import c89
+from ..parse import c89
 from motor_typing import TYPE_CHECKING
 
 
@@ -48,4 +48,4 @@ def function_body(self, p):
 
 
 if TYPE_CHECKING:
-    from ..parser import CParser
+    from ..parse import CParser

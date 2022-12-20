@@ -5,7 +5,7 @@ translation-unit:
 """
 
 import glrp
-from ...parser import cxx98, cxx20
+from ...parse import cxx98, cxx20
 from ....ast.translation_unit import TranslationUnit
 from motor_typing import TYPE_CHECKING
 
@@ -33,4 +33,4 @@ def translation_unit_global_module_cxx20(self, p):
 
 if TYPE_CHECKING:
     from typing import Any
-    from ...parser import CxxParser
+    from ...parse import CxxParser

@@ -31,31 +31,31 @@ class ObjC17Parser(C17Parser, ObjCParser):
     Lexer = ObjC17Lexer
 
 
-class ObjCxx98Parser(Cxx98Parser):
+class ObjCxx98Parser(Cxx98Parser, ObjCParser):
     Lexer = ObjCxx98Lexer
 
 
-class ObjCxx03Parser(Cxx03Parser):
+class ObjCxx03Parser(Cxx03Parser, ObjCParser):
     Lexer = ObjCxx03Lexer
 
 
-class ObjCxx11Parser(Cxx11Parser):
+class ObjCxx11Parser(Cxx11Parser, ObjCParser):
     Lexer = ObjCxx11Lexer
 
 
-class ObjCxx14Parser(Cxx14Parser):
+class ObjCxx14Parser(Cxx14Parser, ObjCParser):
     Lexer = ObjCxx14Lexer
 
 
-class ObjCxx17Parser(Cxx17Parser):
+class ObjCxx17Parser(Cxx17Parser, ObjCParser):
     Lexer = ObjCxx17Lexer
 
 
-class ObjCxx20Parser(Cxx20Parser):
+class ObjCxx20Parser(Cxx20Parser, ObjCParser):
     Lexer = ObjCxx20Lexer
 
 
-class ObjCxx23Parser(Cxx23Parser):
+class ObjCxx23Parser(Cxx23Parser, ObjCParser):
     Lexer = ObjCxx23Lexer
 
 

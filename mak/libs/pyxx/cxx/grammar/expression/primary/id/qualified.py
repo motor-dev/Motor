@@ -12,7 +12,7 @@ nested-name-specifier:
 """
 
 import glrp
-from .....parser import cxx98, cxx11
+from .....parse import cxx98, cxx11
 from ......ast.reference import Reference, Id, RootId, TemplateId
 from motor_typing import TYPE_CHECKING
 
@@ -99,4 +99,4 @@ def scope_opt(self, p):
 
 if TYPE_CHECKING:
     from typing import Any, List
-    from .....parser import CxxParser
+    from .....parse import CxxParser
