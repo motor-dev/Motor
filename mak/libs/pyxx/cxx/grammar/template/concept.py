@@ -7,7 +7,8 @@ concept-name:
 """
 
 import glrp
-from ...parser import cxx20
+from ...parse import cxx20
+from ....ast.declarations import ConceptDefinition
 from motor_typing import TYPE_CHECKING
 
 
@@ -15,7 +16,7 @@ from motor_typing import TYPE_CHECKING
 @cxx20
 def concept_definition_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return ConceptDefinition(p[1].text(), p[3])
 
 
 #@glrp.rule('concept-name : "identifier"')
@@ -26,4 +27,4 @@ def concept_definition_cxx20(self, p):
 
 if TYPE_CHECKING:
     from typing import Any
-    from ...parser import CxxParser
+    from ...parse import CxxParser

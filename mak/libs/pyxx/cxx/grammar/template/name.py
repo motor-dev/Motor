@@ -25,9 +25,10 @@ typename-specifier:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx98_merge
+from ...parse import cxx98, cxx11, cxx98_merge
 from ....ast.reference import Id, TemplateId, Reference
-from ....ast.types import TypeSpecifierReference
+from ....ast.type import TypeSpecifierReference
+from ....ast.template import AmbiguousTemplateArgument, TemplateArgumentPackExpand, TemplateArgumentConstant, TemplateArgumentTypeId
 from motor_typing import TYPE_CHECKING
 
 
@@ -87,14 +88,14 @@ def template_argument_list_opt(self, p):
 @cxx98
 def template_argument_list_empty_opt(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return []
+    return [[]]
 
 
 @glrp.rule('template-argument-list : template-argument')
 @cxx98
 def template_argument_list_end(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return [p[0]]
+    return [[p[0]]]
 
 
 @glrp.rule('template-argument-list : template-argument-list "," template-argument')
@@ -102,25 +103,41 @@ def template_argument_list_end(self, p):
 def template_argument_list(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     result = p[0]
-    #result.append(p[2])
+    for r in result:
+        r.append(p[2])
     return result
 
 
 @glrp.rule('template-argument-list : [no-merge-warning] template-argument "..."')
+@cxx11
+def template_argument_list_pack_end_cxx11(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return [[TemplateArgumentPackExpand(p[0])]]
+
+
 @glrp.rule('template-argument-list : template-argument-list "," [no-merge-warning] template-argument "..."')
 @cxx11
-def template_argument_list_cxx11(self, p):
+def template_argument_list_pack_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    result = p[0]
+    for r in result:
+        r.append(TemplateArgumentPackExpand(p[2]))
+    return result
 
 
 @glrp.rule('template-argument : begin-template-argument-constant "constant-expression#"')
+@cxx98
+def template_argument_constant(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return TemplateArgumentConstant(p[1])
+
+
 @glrp.rule('template-argument : begin-template-argument-type type-id')
 #@glrp.rule('template-argument : id-expression')
 @cxx98
 def template_argument(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return TemplateArgumentTypeId(p[1])
 
 
 # TODO: template not allowed
@@ -152,26 +169,22 @@ def begin_template_argument(self, p):
 @cxx98_merge
 def ambiguous_template_argument(self, template_argument_constant, template_argument_type):
     # type: (CxxParser, List[Any], List[Any]) -> Any
-    pass
+    return AmbiguousTemplateArgument(template_argument_constant + template_argument_type)
 
 
 @glrp.merge('template-argument-list')
 @cxx98_merge
 def ambiguous_template_argument_list_ellipsis(
     self, ambiguous_template_argument, ambiguous_template_argument_list_ellipsis, end_declarator_list,
-    continue_declarator_list, ambiguous_constant_expression
+    continue_declarator_list, ambiguous_expression
 ):
     # type: (CxxParser, List[Any], List[Any], List[Any], List[Any], List[Any]) -> Any
-    pass
-
-
-@glrp.merge('template-id')
-@cxx98_merge
-def ambiguous_template_id(self, id_template, ambiguous_template_argument_list_ellipsis):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
-    pass
+    return sum(
+        ambiguous_template_argument + ambiguous_template_argument_list_ellipsis + end_declarator_list +
+        continue_declarator_list + ambiguous_expression, []
+    )
 
 
 if TYPE_CHECKING:
     from typing import Any, List
-    from ...parser import CxxParser
+    from ...parse import CxxParser

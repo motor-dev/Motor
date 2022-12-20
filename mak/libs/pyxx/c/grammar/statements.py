@@ -43,7 +43,7 @@
 """
 
 import glrp
-from ..parser import c89
+from ..parse import c89
 from motor_typing import TYPE_CHECKING
 
 
@@ -147,4 +147,4 @@ def jump_statement(self, p):
 
 
 if TYPE_CHECKING:
-    from ..parser import CParser
+    from ..parse import CParser

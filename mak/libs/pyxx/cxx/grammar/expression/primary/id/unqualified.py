@@ -10,7 +10,7 @@ unqualified-id:
 """
 
 import glrp
-from .....parser import cxx98, cxx11
+from .....parse import cxx98, cxx11
 from ......ast.reference import Id, TemplateId, DestructorId
 from motor_typing import TYPE_CHECKING
 
@@ -95,4 +95,4 @@ def destructor_disambiguation(self, p):
 
 if TYPE_CHECKING:
     from typing import Any
-    from .....parser import CxxParser
+    from .....parse import CxxParser

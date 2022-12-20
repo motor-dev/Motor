@@ -26,7 +26,7 @@ namespace-body:
 """
 
 import glrp
-from ....parser import cxx98, cxx11, cxx17, cxx20
+from ....parse import cxx98, cxx11, cxx17, cxx20
 from .....ast.declarations import NamespaceDeclaration
 from motor_typing import TYPE_CHECKING
 
@@ -81,7 +81,7 @@ def named_namespace_definition_cxx11(self, p):
 @cxx98
 def unnamed_namespace_definition(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return NamespaceDeclaration(p[0], p[3], None, False, None, None, p[5])
+    return NamespaceDeclaration(p[0], p[3], [], False, None, None, p[5])
 
 
 # amendment: attribute-specifier-seq? to simplify grammar.
@@ -91,7 +91,7 @@ def unnamed_namespace_definition(self, p):
 @cxx11
 def unnamed_namespace_definition_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return NamespaceDeclaration(p[0], p[5], None, True, None, None, p[7])
+    return NamespaceDeclaration(p[0], p[5], [], True, None, None, p[7])
 
 
 # amendment: attribute-specifier-seq? to simplify grammar.
@@ -144,4 +144,4 @@ def namespace_body(self, p):
 
 if TYPE_CHECKING:
     from typing import Any, List
-    from ....parser import CxxParser
+    from ....parse import CxxParser

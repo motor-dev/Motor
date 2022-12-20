@@ -16,7 +16,7 @@ decl-specifier-seq:
 """
 
 import glrp
-from ....parser import cxx98, cxx11, cxx20
+from ....parse import cxx98, cxx11, cxx20
 from .....ast.declarations import DeclSpecifierSeq, DeclarationSpecifierMacro, DeclarationSpecifiers
 from motor_typing import TYPE_CHECKING
 from . import storage
@@ -134,4 +134,4 @@ def decl_specifier_seq_end_continue(self, p):
 
 if TYPE_CHECKING:
     from typing import Any
-    from ....parser import CxxParser
+    from ....parse import CxxParser

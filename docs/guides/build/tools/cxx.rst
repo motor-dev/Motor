@@ -2120,136 +2120,50 @@ The parser will continue to maintain several branches until either the lookahead
 errors in some of the tentative branches, or the branches reduce in the same state and the state
 can execute a merge action.
 
+There are two possible outcomes:
+
+- The parse will naturally return to one possibility after a few tokens have been parsed. When the
+  grammar requires additional tokens to disambiguate, the parser simply keep all options alive.
+- The parse will produce two or more valid reductions. Those reductions need to be merged into a
+  single production as early as possible in order to reduce parsing time; as long as there are two
+  options available to the parser, it will have to maintain both in parallel. Since there are a few
+  ambiguities that can lead to further ambiguities, the combination of options can quickly increase.
+
+
 *class-name*, *enum-name*, *typedef-name* in a *type-name*
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 When expecting a *type-name*, an ``identifier`` could be interpreted as either a *class-name*,
-an *enum-name*, or a *typedef-name*. It is trivial to merge the conflict in the *type-name* rule to
-create an *ambiguous-type-name*.
+an *enum-name*, or a *typedef-name*. While it would be possible to let the parser handle this as a
+dynamic conflict, this type of conflict is so frequent that it causes significant overhead during
+parsing.
 
-.. graphviz::
-
-   digraph MergeTree {
-     node[style="filled,striped,rounded",shape="box"];
-     subgraph cluster_1 {
-       label="State 17"; style="rounded"; labeljust="l"; bgcolor="lightgray"
-       subgraph cluster_1_ambiguous_type_name {
-         label="class_name, enum_name, typedef_name ⇒ ambiguous_type_name"; style="rounded,filled"; color="lightpink"; labeljust="l";
-         5[label="type-name[typedef_name]\n ♦ typedef-name",fillcolor="aquamarine"];
-         20[label="type-name[enum_name]\n ♦ enum-name",fillcolor="burlywood"];
-         22[label="type-name[class_name]\n ♦ class-name",fillcolor="coral"];
-       }
-       6[label="simple-type-specifier[ambiguous_type_name]\n ♦ type-name",fillcolor="darkgoldenrod1"];
-       4[label="typedef-name[typedef_name]\n ♦ identifier",fillcolor="aquamarine"];
-       19[label="enum-name[enum_name]\n ♦ identifier",fillcolor="burlywood"];
-       21[label="class-name[class_name]\n ♦ identifier",fillcolor="coral"];
-     }
-     subgraph cluster_0 {
-       label="State 63"; style="rounded"; labeljust="l"; bgcolor="lightgray"
-       0[label="typedef-name[typedef_name]\nidentifier ♦ ",fillcolor="aquamarine"];
-       2[label="enum-name[enum_name]\nidentifier ♦ ",fillcolor="burlywood"];
-       3[label="class-name[class_name]\nidentifier ♦ ",fillcolor="coral"];
-     }
-     0->4;
-     4->5;
-     5->6;
-     20->6;
-     22->6;
-     2->19;
-     19->20;
-     3->21;
-     21->22;
-   }
+The rules were amended to expand all *class-name*, *enum-name*, or *typedef-name* references into
+*identifier* references.
 
 
-*ambiguous-type-name*, *template-name* in a *simple-type-specifier*
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+*declarator*, *decl-specifier*
+""""""""""""""""""""""""""""""
 
-When expecting a *type-specifier*, an ``identifier`` could correspond either to a *type-name* after
-merging the conflict above, or to a *template-name* used as a *simple-type-specifier*. The conflict
-is also solved directly at the *simple-type-specifier* level.
-
-.. graphviz::
-
-   digraph MergeTree {
-     node[style="filled,striped,rounded",shape="box"];
-     subgraph cluster_1 {
-       label="State 17"; style="rounded"; labeljust="l"; bgcolor="lightgray"
-       subgraph cluster_1_ambiguous_type_name {
-         label="class_name, enum_name, typedef_name ⇒ ambiguous_type_name"; style="rounded,filled"; color="lightpink"; labeljust="l";
-         5[label="type-name[typedef_name]\n ♦ typedef-name",fillcolor="aquamarine"];
-         20[label="type-name[enum_name]\n ♦ enum-name",fillcolor="burlywood"];
-         22[label="type-name[class_name]\n ♦ class-name",fillcolor="coral"];
-       }
-       subgraph cluster_1_ambiguous_simple_type_specifier {
-         label="ambiguous_type_name, template_name ⇒ ambiguous_simple_type_specifier"; style="rounded,filled"; color="lightpink"; labeljust="l";
-         6[label="simple-type-specifier[ambiguous_type_name]\n ♦ type-name",fillcolor="darkgoldenrod1"];
-         18[label="simple-type-specifier[template_name]\n ♦ template-name",fillcolor="darkolivegreen1"];
-       }
-       7[label="type-specifier[ambiguous_simple_type_specifier]\n ♦ simple-type-specifier",fillcolor="darkslategray2"];
-       4[label="typedef-name[typedef_name]\n ♦ identifier",fillcolor="aquamarine"];
-       17[label="template-name[template_name]\n ♦ identifier",fillcolor="darkolivegreen1"];
-       19[label="enum-name[enum_name]\n ♦ identifier",fillcolor="burlywood"];
-       21[label="class-name[class_name]\n ♦ identifier",fillcolor="coral"];
-     }
-     subgraph cluster_0 {
-       label="State 63"; style="rounded"; labeljust="l"; bgcolor="lightgray"
-       0[label="typedef-name[typedef_name]\nidentifier ♦ ",fillcolor="aquamarine"];
-       1[label="template-name[template_name]\nidentifier ♦ ",fillcolor="darkolivegreen1"];
-       2[label="enum-name[enum_name]\nidentifier ♦ ",fillcolor="burlywood"];
-       3[label="class-name[class_name]\nidentifier ♦ ",fillcolor="coral"];
-     }
-     0->4;
-     4->5;
-     5->6;
-     20->6;
-     22->6;
-     6->7;
-     18->7;
-     1->17;
-     17->18;
-     2->19;
-     19->20;
-     3->21;
-     21->22;
-   }
-
-*simple-type-specifier* and *unqualified-id*
-""""""""""""""""""""""""""""""""""""""""""""
-
-
-
-
-bitfield declaration, *mem-initializer*
-"""""""""""""""""""""""""""""""""""""""
-
-In most cases, a bitfield declaration looks very different from an inlined constructor definition
-with a *mem-initializer-list* as the declarator for the constructor needs to be declaring a method,
-and the bitfield declaration cannot be a method. Unfortunately, due to the *declarator* grammar
-delegating most of the work to the semantic analyzer, the grammar accepts constructor definition of
-non-method declarators.
-
-The following token sequence has two derivations in the C++ grammar:
-
+In a *simple-declaration*, an ``identifier`` can be part of either the *decl-specifier-seq* (as a
+*type-specifier*) or as part of the *declarator* (as a *qualified-id* or *unqualified-id*). There is
+not enough information at the moment the ``identifier`` is encountered to make that decision, so the
+parser attempts to continue both versions. We do know however that the *decl-specifier-seq* can only
+contain one *type-specifier*, so if a *decl-specifier-seq* already contains a *type-specifier* of
+some sort, then the ``identifier`` must be considered part of the *declarator*.
 
 .. code-block::
 
-   ╭decl-specifier-seq╮            ╭bitfield─────────────╮
-   ╭decl-specifier╮    ╭identifier╮  ╭constant-expression╮ ╭brace-initializer╮
+   typedef X int;
 
-   int                 variable    : x(0)                  { }
+   ╭decl-specifier-seq╮
+   ╭decl-specifier╮     ╭identifier╮
+   unsigned             X            ;
+   // unsigned is enough for a type, therefore the next identifier
+   // is treated as part of the declarator
 
-   ╰decl-specifier╯    ╰declarator╯╰mem-initializer-list─╯ ╰function-body╯
-   ╰decl-specifier-seq╯╰member-declarator────────────────╯
-
-In reality, the declaration cannot be a constructor, but that selection is made by the semantic
-analyzer.
-
-To help the semantic analysis, the ``identifier`` token is first reduced into a *bitfield-name*
-rule, which causes conflicts with other uses of ``identifier`` (i.e. *unqualified-id*). These
-conflicts are resolved at runtime by exploring all possibilities and letting the semantic analyzer
-identify the correct branch if more than one remains valid after the full declaration has been
-parsed.
+During reduction, if a *decl-specifier-seq* is constructed by adding a second *type-specifier*, the
+reduction rule raises a ``SyntaxError`` to abort the parsing of that branch.
 
 
 *template-id*, ``<``
@@ -2305,7 +2219,36 @@ in front of the ``<`` token, it could be part of a *template-id* or a *relationa
          ╰╴
 
 The parser explores both solutions as there is no way to know which path is correct until semantic
-analysis.
+analysis. There are many solutions to this conflict; the conflict can include the ``,`` token as
+either a delimiter for the template argument, or a comma-separated *expression*, or anywhere where
+*type-list* are expected:
+
+.. code-block:: C++
+
+   struct A : B< Y<1>, Z<2>
+      // A has one parent class: B< Y<1>, (Z<2) >
+      // or two parent classes: B< (Y<1) > and Z<2>
+   {
+   };
+
+The parser creates a split (which often leads to subsequent splits) and will attempt merges in
+several rules:
+
+- *expression*
+- *constant-expression*
+- *cast-expression*
+- *postfix-expression*
+- *relational-expression*
+- *shift-expression*
+- *fold-expression*
+- *constraint-expression*
+- *template-argument-list*
+- *base-specifier-list*
+- *type-id-list* of a *dynamic-exception-specification*
+
+Unfortunately many of those create valid (although unlikely) possibilities that are merged in an
+ambiguous parse tree node in the abstract syntax tree. A semantic pass can then discard the invalid
+possibilities when the ``identifier`` can be resolved.
 
 
 *variadic-parameter-list*, *pack-declarator*
@@ -2361,56 +2304,84 @@ so both options are accepted until the semantic analysis.
    *parameter-declaration-clause*
 
 
-*primary-expression*, *pure-specifier*
-""""""""""""""""""""""""""""""""""""""
+*primary-expression*, *pure-specifier* / bitfield declaration, *mem-initializer* / *compound-statement*, *brace-or-equal-initializer*
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-.. container:: toggle
+There are three tokens that can introduce either a function definition or an initializer:
 
-   .. container:: header
-
-      .. code-block::
-
-         primary-expression -> integer-literal ♦ 
-         pure-specifier -> = integer-literal ♦ 
+- ``{`` can introduce a function body or a brace initializer:
 
    .. code-block::
 
-      reduce using rule primary-expression -> integer-literal ♦ 
       ╭╴
-      │ attribute-specifier-seq? declarator = integer-literal ♦           ;
-      │                                       ╰primary-expression╯
-      │                                       ╰postfix-expression╯
-      │                                       ╰unary-expression──╯
-      │                                       ╰cast-expression───╯
-      │                                       ╰pm-expression─────╯
-      │                                       ╰multiplicative-expression╯
-      │                                       ╰additive-expression──────╯
-      │                                       ╰shift-expression─────────╯
-      │                                       ╰compare-expression───────╯
-      │                                       ╰relational-expression────╯
-      │                                       ╰equality-expression──────╯
-      │                                       ╰and-expression───────────╯
-      │                                       ╰exclusive-or-expression──╯
-      │                                       ╰inclusive-or-expression──╯
-      │                                       ╰logical-and-expression───╯
-      │                                       ╰logical-or-expression────╯
-      │                                       ╰conditional-expression───╯
-      │                                       ╰assignment-expression────╯
-      │                                       ╰initializer-clause───────╯
-      │                                     ╰brace-or-equal-initializer─╯
-      │                          ╰member-declarator─────────────────────╯
-      │                          ╰member-declarator-list?───────────────╯
-      │ ╰member-declaration───────────────────────────────────────────────╯
-      ╰╴
-      reduce using rule pure-specifier -> = integer-literal ♦ 
-      ╭╴
-      │ attribute-specifier-seq? declarator = integer-literal ♦ ;
-      │                                     ╰pure-specifier───╯
-      │                          ╰member-declarator───────────╯
-      │                          ╰member-declarator-list?─────╯
-      │ ╰member-declaration─────────────────────────────────────╯
+      │ attribute-specifier-seq? decl-specifier-seq? declarator ♦ { statement-seq? }
+      │                                                           ╰compound-statement╯
+      │                                                           ╰function-body─────╯
+      │ ╰function-definition─────────────────────────────────────────────────────────╯
+      │ ╰declaration─────────────────────────────────────────────────────────────────╯
       ╰╴
 
+      ╭╴
+      │ attribute-specifier-seq? decl-specifier-seq? declarator ♦ { }                          ;
+      │                                                           ╰braced-init-list╯
+      │                                                           ╰brace-or-equal-initializer╯
+      │                                                           ╰initializer───────────────╯
+      │                                              ╰init-declarator────────────────────────╯
+      │                                              ╰init-declarator-list───────────────────╯
+      │ ╰simple-declaration──────────────────────────────────────────────────────────────────╯
+      │ ╰block-declaration───────────────────────────────────────────────────────────────────╯
+      │ ╰declaration─────────────────────────────────────────────────────────────────────────╯
+      ╰╴
+
+- ``=`` can introduce an initializer or a pure specifier:
+
+   .. code-block::
+
+      ╭╴
+      │ attribute-specifier-seq? decl-specifier-seq? declarator ♦               = integer-literal ;
+      │                                              ╰declarator-function-body╯ ╰pure-specifier─╯
+      │                                              ╰member-declarator─────────────────────────╯
+      │                                              ╰member-declarator-list────────────────────╯
+      │ ╰member-declaration───────────────────────────────────────────────────────────────────────╯
+      ╰╴
+
+      ╭╴
+      │ attribute-specifier-seq? decl-specifier-seq? declarator ♦ = initializer-clause         ;
+      │                                                           ╰brace-or-equal-initializer╯
+      │                                                           ╰initializer───────────────╯
+      │                                              ╰init-declarator────────────────────────╯
+      │                                              ╰init-declarator-list───────────────────╯
+      │ ╰simple-declaration────────────────────────────────────────────────────────────────────╯
+      │ ╰block-declaration─────────────────────────────────────────────────────────────────────╯
+      │ ╰declaration───────────────────────────────────────────────────────────────────────────╯
+      ╰╴
+
+- ``:`` can introduce a bitfield or a constructor initializer
+
+   .. code-block::
+
+      ╭╴
+      │ attribute-specifier-seq? decl-specifier-seq? declarator ♦ : begin-ctor-initializer mem-initializer-list compound-statement
+      │                                                           ╰ctor-initializer───────────────────────────╯
+      │                                                           ╰function-body─────────────────────────────────────────────────╯
+      │ ╰function-definition─────────────────────────────────────────────────────────────────────────────────────────────────────╯
+      │ ╰member-declaration──────────────────────────────────────────────────────────────────────────────────────────────────────╯
+      ╰╴
+
+      ╭╴
+      │ attribute-specifier-seq? decl-specifier-seq? declarator ♦ : begin-bitfield constant-expression ;
+      │                                              ╰member-declarator──────────────────────────────╯
+      │                                              ╰member-declarator-list─────────────────────────╯
+      │ ╰member-declaration────────────────────────────────────────────────────────────────────────────╯
+      ╰╴
+
+We can however avoid parsing both branches by looking at the declarator. If the declarator is a
+method, we can can discard the initializer branch. If it is not a method then we can discard the
+function body branch.
+
+An empty production is inserted after the declarator has been parsed; this causes a conflict, which
+causes a split. During the reduction of the empty production, we can raise a ``SyntaxError`` to
+discard the branch if the declarator is not a method declarator.
 
 
 *typename-specifier*, *typename-parameter*

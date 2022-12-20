@@ -1,2 +1,2 @@
-from .parser import CParser, C89Parser, C99Parser, C11Parser, C17Parser
+from .parse import CParser, C89Parser, C99Parser, C11Parser, C17Parser
 from .lexer import C89Lexer, C99Lexer, C11Lexer, C17Lexer

@@ -21,8 +21,8 @@ noexcept-specification:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, deprecated_cxx17, deprecated_cxx20, cxx98_merge
-from ....ast.types import DynamicExceptionSpecifier, NoExceptSpecifier, TypeIdPack
+from ...parse import cxx98, cxx11, deprecated_cxx17, deprecated_cxx20, cxx98_merge
+from ....ast.type import DynamicExceptionSpecifier, NoExceptSpecifier, TypeIdPack
 from motor_typing import TYPE_CHECKING
 
 
@@ -70,9 +70,9 @@ def dynamic_exception_specification_until_cxx20(self, p):
 def type_id_list_end_until_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     if p[1]:
-        return [TypeIdPack(p[0])]
+        return [[TypeIdPack(p[0])]]
     else:
-        return [p[0]]
+        return [[p[0]]]
 
 
 @glrp.rule('type-id-list : type-id-list "," [no-merge-warning]type-id "..."?')
@@ -82,9 +82,11 @@ def type_id_list_until_cxx17(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     result = p[0]
     if p[3]:
-        result.append(TypeIdPack(p[2]))
+        type_id = TypeIdPack(p[2])
     else:
-        result.append(p[2])
+        type_id = p[2]
+    for r in result:
+        r.append(type_id)
     return result
 
 
@@ -120,9 +122,16 @@ def noexcept_specifier_opt_empty_cxx11(self, p):
 @cxx98_merge
 def ambiguous_type_id_list_ellipsis(self, end_declarator_list, continue_declarator_list):
     # type: (CxxParser, List[Any], List[Any]) -> Any
-    pass
+    return sum(end_declarator_list + continue_declarator_list, [])
+
+
+@glrp.merge('type-id-list')
+@cxx98_merge
+def ambiguous_type_id_list_template(self, ambiguous_type_id, ambiguous_type_id_list_template):
+    # type: (CxxParser, List[Any], List[Any]) -> Any
+    return sum(ambiguous_type_id + ambiguous_type_id_list_template, [])
 
 
 if TYPE_CHECKING:
     from typing import List, Any
-    from ...parser import CxxParser
+    from ...parse import CxxParser

@@ -47,7 +47,7 @@ balanced-token:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx17, cxx20, cxx23, cxx11_merge
+from ...parse import cxx98, cxx11, cxx17, cxx20, cxx23, cxx11_merge
 from ....ast.attributes import AttributeDocumentation, AttributeNamed, AttributeAlignAsExpression, AttributeAlignAsType, AttributeAlignAsAmbiguous, AttributeAlignAsAmbiguousPack, AttributeMacro, AttributeNamedList
 from ....ast.pack import PackExpandType, PackExpandExpression, PackExpandAttributeNamed
 from motor_typing import TYPE_CHECKING
@@ -332,7 +332,8 @@ def balanced_token_seq_opt(self, p):
 @glrp.rule('balanced-token : "~"')
 @glrp.rule('balanced-token : "^"')
 @glrp.rule('balanced-token : "<<"')
-@glrp.rule('balanced-token : ">>"')
+#@glrp.rule('balanced-token : ">>"')
+@glrp.rule('balanced-token : "%>"')
 @glrp.rule('balanced-token : "||"')
 @glrp.rule('balanced-token : "&&"')
 @glrp.rule('balanced-token : "!"')
@@ -386,7 +387,7 @@ def balanced_token_seq_opt(self, p):
 @cxx98
 def balanced_token(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return [p[0]]
+    return p[0]
 
 
 @glrp.rule('balanced-token : "alignas"')
@@ -408,7 +409,7 @@ def balanced_token(self, p):
 @cxx11
 def balanced_token_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return [p[0]]
+    return p[0]
 
 
 @glrp.rule('balanced-token : "char8_t"')
@@ -426,7 +427,7 @@ def balanced_token_cxx11(self, p):
 @cxx20
 def balanced_token_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return [p[0]]
+    return p[0]
 
 
 @glrp.rule('balanced-token : "atomic_cancel"')
@@ -437,7 +438,7 @@ def balanced_token_cxx20(self, p):
 @cxx23
 def balanced_token_cxx23(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return [p[0]]
+    return p[0]
 
 
 @glrp.merge('alignment-specifier')
@@ -461,4 +462,4 @@ def ambiguous_alignment_specifier_ellipsis(self, end_declarator_list, continue_d
 
 if TYPE_CHECKING:
     from typing import Any, List
-    from ...parser import CxxParser
+    from ...parse import CxxParser

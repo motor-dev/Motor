@@ -9,7 +9,7 @@ explicit-specifier:
 """
 
 import glrp
-from ....parser import cxx98, cxx20
+from ....parse import cxx98, cxx17, cxx20
 from .....ast.declarations import ExplicitSpecifier, FunctionSpecifiers
 from motor_typing import TYPE_CHECKING
 
@@ -35,13 +35,28 @@ def explicit_specifier(self, p):
     return ExplicitSpecifier(None)
 
 
+@glrp.rule('explicit-specifier? : "explicit"')
+@cxx17
+def explicit_specifier_cxx17(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return ExplicitSpecifier(None)
+
+
 @glrp.rule('explicit-specifier : "explicit" [prec:left,1]"(" constant-expression ")"')
+@glrp.rule('explicit-specifier? : "explicit" [prec:left,1]"(" constant-expression ")"')
 @cxx20
 def explicit_specifier_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     return ExplicitSpecifier(p[2])
 
 
+@glrp.rule('explicit-specifier? : ')
+@cxx17
+def explicit_specifier_opt(self, p):
+    # type: (CxxParser, glrp.Production) -> Any
+    return None
+
+
 if TYPE_CHECKING:
     from typing import Any
-    from ....parser import CxxParser
+    from ....parse import CxxParser

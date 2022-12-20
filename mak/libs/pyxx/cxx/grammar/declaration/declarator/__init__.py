@@ -9,8 +9,8 @@ init-declarator:
 """
 
 import glrp
-from ....parser import cxx98, cxx20, cxx98_merge
-from .....ast.declarations import AmbiguousInitDeclarator, InitDeclarator
+from ....parse import cxx98, cxx20, cxx98_merge
+from .....ast.declarations import AmbiguousInitDeclarator, InitDeclarator, InitDeclaratorList, AmbiguousInitDeclaratorList
 from motor_typing import TYPE_CHECKING
 from . import declarator
 from . import name
@@ -21,14 +21,14 @@ from . import function
 @cxx98
 def init_declarator_list_end(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return [p[0]]
+    return InitDeclaratorList(p[0])
 
 
 @glrp.rule('init-declarator-list : init-declarator-list "," init-declarator')
 @cxx98
 def init_declarator_list(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return p[0] + [p[2]]
+    return p[0].add(p[2])
 
 
 @glrp.rule('init-declarator : declarator')
@@ -62,12 +62,16 @@ def ambiguous_init_declarator_initializer(self, continue_declarator_list, end_de
 @glrp.merge('init-declarator-list')
 @cxx98_merge
 def ambiguous_init_declarator_list(
-    self, ambiguous_template_argument_list_ellipsis, ambiguous_template_id, ambiguous_init_declarator_list
+    self, ambiguous_template_argument_list_ellipsis, id_template, ambiguous_initializer_clause,
+    ambiguous_init_declarator_list, ambiguous_type_id
 ):
-    # type: (CxxParser, List[Any], List[Any], List[Any]) -> Any
-    pass
+    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any], List[Any]) -> Any
+    return AmbiguousInitDeclaratorList(
+        ambiguous_template_argument_list_ellipsis + id_template + ambiguous_initializer_clause +
+        ambiguous_init_declarator_list + ambiguous_type_id
+    )
 
 
 if TYPE_CHECKING:
     from typing import Any, List
-    from ....parser import CxxParser
+    from ....parse import CxxParser

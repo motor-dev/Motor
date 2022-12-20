@@ -382,6 +382,6 @@ class Context(object):
 if TYPE_CHECKING:
     from typing import Any, Callable, Dict, List, Optional, Set, Tuple
     SplitName = Tuple[SplitContext, str, int]
-    from .parser import MergeAction
+    from .parse import MergeAction
     from ..lex import Token
     from ..symbol import Symbol

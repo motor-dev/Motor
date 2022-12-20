@@ -8,8 +8,8 @@ relational-expression:
 """
 
 import glrp
-from ....parser import cxx98, cxx98_merge
-from .....ast.expressions import BinaryExpression, AmbiguousExpression
+from ....parse import cxx98
+from .....ast.expressions import BinaryExpression
 from motor_typing import TYPE_CHECKING
 
 
@@ -34,29 +34,6 @@ def relational_expression(self, p):
     return BinaryExpression(p[0], p[2], p[1].text())
 
 
-@glrp.merge('relational-expression')
-@cxx98_merge
-def ambiguous_relational_expression(
-    self, ambiguous_relational_expression, ambiguous_shift_expression, ambiguous_template_id, id_template,
-    id_nontemplate, ambiguous_template_argument_list_ellipsis
-):
-    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any], List[Any], List[Any]) -> Any
-    all_exprs = ambiguous_relational_expression + ambiguous_shift_expression + ambiguous_template_id + id_template + id_nontemplate + ambiguous_template_argument_list_ellipsis
-    return AmbiguousExpression(all_exprs)
-
-
-@glrp.merge('relational-expression#')
-@glrp.merge_result('ambiguous_relational_expression')
-@cxx98_merge
-def ambiguous_relational_expression_ext(
-    self, ambiguous_relational_expression, ambiguous_shift_expression, ambiguous_template_id, id_template,
-    id_nontemplate, ambiguous_template_argument_list_ellipsis
-):
-    # type: (CxxParser, List[Any], List[Any], List[Any], List[Any], List[Any], List[Any]) -> Any
-    all_exprs = ambiguous_relational_expression + ambiguous_shift_expression + ambiguous_template_id + id_template + id_nontemplate + ambiguous_template_argument_list_ellipsis
-    return AmbiguousExpression(all_exprs)
-
-
 if TYPE_CHECKING:
-    from typing import Any, List
-    from ....parser import CxxParser
+    from typing import Any
+    from ....parse import CxxParser

@@ -23,9 +23,9 @@ new-initializer:
 """
 
 import glrp
-from .....parser import cxx98, cxx11, cxx98_merge
-from ......ast.expressions import AmbiguousExpression, NewExpression
-from ......ast.types import AbstractDeclaratorList, TypeIdDeclarator, AmbiguousTypeId, DeclaratorElementArray
+from .....parse import cxx98, cxx11
+from ......ast.expressions import NewExpression
+from ......ast.type import AbstractDeclaratorList, TypeIdDeclarator, DeclaratorElementArray
 from motor_typing import TYPE_CHECKING
 
 
@@ -75,16 +75,14 @@ def new_type_id(self, p):
 @cxx98
 def new_type_id_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return TypeIdDeclarator(p[0], p[1])
+    return TypeIdDeclarator(p[0], AbstractDeclaratorList(p[1]))
 
 
 @glrp.rule('new-declarator : ptr-operator')
 @cxx98
 def new_declarator_ptr(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    result = AbstractDeclaratorList()
-    result.add(p[0])
-    return result
+    return [p[0]]
 
 
 @glrp.rule('new-declarator : ptr-operator new-declarator')
@@ -92,7 +90,7 @@ def new_declarator_ptr(self, p):
 def new_declarator_recursive(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     result = p[1]
-    result.add(p[0])
+    result.append(p[0])
     return result
 
 
@@ -107,10 +105,7 @@ def new_declarator_noptr(self, p):
 @cxx98
 def noptr_new_declarator_array(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    #result = AbstractDeclaratorList()
-    #result.add(DeclaratorElementArray(p[1], p[3]))
-    #return result
-    pass
+    return [DeclaratorElementArray(p[1], p[3])]
 
 
 @glrp.rule('noptr-new-declarator : noptr-new-declarator "[" constant-expression "]" attribute-specifier-seq?')
@@ -118,7 +113,7 @@ def noptr_new_declarator_array(self, p):
 def noptr_new_declarator_array_2(self, p):
     # type: (CxxParser, glrp.Production) -> Any
     result = p[0]
-    result.add(DeclaratorElementArray(p[2], p[4]))
+    result.append(DeclaratorElementArray(p[2], p[4]))
     return result
 
 
@@ -140,24 +135,16 @@ def new_initializer_opt(self, p):
 @cxx11
 def new_initializer_opt_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return p[0]
+    return p[1]
 
 
 @glrp.rule('begin-new-initializer[prec:right,1] : ')
 @cxx11
 def begin_new_initializer_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return p[0]
-
-
-@glrp.merge('new-expression')
-@cxx98_merge
-def ambiguous_new_expression(self, type_id, expression):
-    # type: (CxxParser, List[Any], List[Any]) -> Any
-    expressions = type_id + expression
-    return AmbiguousExpression(expressions)
+    pass
 
 
 if TYPE_CHECKING:
-    from typing import Any, List
-    from .....parser import CxxParser
+    from typing import Any
+    from .....parse import CxxParser

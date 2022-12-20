@@ -4,7 +4,8 @@ decltype-specifier:
 """
 
 import glrp
-from .....parser import cxx11
+from .....parse import cxx11
+from ......ast.type import DecltypeTypeSpecifier
 from motor_typing import TYPE_CHECKING
 
 
@@ -13,9 +14,9 @@ from motor_typing import TYPE_CHECKING
 @cxx11
 def decltype_specifier_cxx11(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return DecltypeTypeSpecifier(p[0].text(), p[2])
 
 
 if TYPE_CHECKING:
     from typing import Any
-    from .....parser import CxxParser
+    from .....parse import CxxParser

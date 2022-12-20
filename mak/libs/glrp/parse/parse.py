@@ -124,7 +124,7 @@ class Parser(object):
     def _load_table(self, output_directory):
         # type: (str) -> Grammar
         with open(os.path.join(output_directory, self.__class__.__name__ + '.tbl'), 'rb') as table_file:
-            return pickle.loads(zlib.decompress(base64.b64decode(table_file.read())))
+            return pickle.load(table_file)
 
     def _generate_table(self, rule_hash, start_symbol, temp_directory, output_directory):
         # type: (str, str, str, str) -> Grammar
@@ -152,7 +152,7 @@ class Parser(object):
             temp_directory, SHOW_MERGES
         )
         with open(os.path.join(output_directory, self.__class__.__name__ + '.tbl'), 'wb') as table_file:
-            table_file.write(base64.b64encode(zlib.compress(pickle.dumps(grammar, protocol=0), 9)))
+            pickle.dump(grammar, table_file, protocol=-1)
         return self._load_table(output_directory)
 
     def parse_debug(self, filename):
@@ -179,7 +179,7 @@ class Parser(object):
             operations = [context.input(token) for context in contexts]
 
             next_contexts = []         # type: List[Operation]
-            merges = {}                # type: Dict[Tuple[SplitContext, int, int, Callable[[], None]], Merge]
+            merges = {}                # type: Dict[Tuple[SplitContext, int, int, int, Callable[[], None]], Merge]
             merge_opportunities = {}   # type: Dict[Tuple[SplitContext, int, int, int], List[Tuple[Operation, str]]]
             recovery_contexts = []     # type: List[Operation]
 
@@ -214,11 +214,12 @@ class Parser(object):
                                             seen.add(scontext)
                                             try:
                                                 merge_op = merges[
-                                                    (scontext, operation._state, sym_len, merge_action._call)]
+                                                    (scontext, rule[0], operation._state, sym_len, merge_action._call)]
                                             except KeyError:
                                                 merge_op = Merge(operation, merge_action, name, scontext)
-                                                merges[(scontext, operation._state, sym_len, merge_action._call)
-                                                       ] = merge_op
+                                                merges[
+                                                    (scontext, rule[0], operation._state, sym_len,
+                                                     merge_action._call)] = merge_op
                                                 operation = merge_op
                                             else:
                                                 merge_op.add_operation(operation, name, scontext)
@@ -231,11 +232,11 @@ class Parser(object):
                                         if split_task[2] < sym_len:
                                             break
                                         try:
-                                            merge_opportunities[(scontext, operation._state, sym_len, rule[0])].append(
+                                            merge_opportunities[(scontext, rule[0], operation._state, sym_len)].append(
                                                 (operation, name)
                                             )
                                         except KeyError:
-                                            merge_opportunities[(scontext, operation._state, sym_len, rule[0])] = [
+                                            merge_opportunities[(scontext, rule[0], operation._state, sym_len)] = [
                                                 (operation, name)
                                             ]
                                     break
@@ -247,14 +248,20 @@ class Parser(object):
                             operation = operation.consume_token(token, action)
                             next_contexts.append(operation)
 
-            for (split_context, _, _, symbol), ops in merge_opportunities.items():
+            for (split_context, symbol, _, _), ops in merge_opportunities.items():
                 if len(ops) > 1:
-                    print('potential merge:')
+                    reduced_ops = []
                     for reduce_op, name in ops:
-                        print('\u250f %s\n\u2503 %s' % (name, '\u2501' * len(name)))
-                        debug_sym = reduce_op.run_debug()[1]
-                        debug_sym.debug_print(self._grammar._name_map, '\u2503 ', '\u2503 ')
-                        print('\u2517')
+                        try:
+                            reduced_ops.append((reduce_op.run_debug()[1], name))
+                        except SyntaxError:
+                            pass
+                    if len(reduced_ops) > 1:
+                        print('potential merge:')
+                        for debug_sym, name in reduced_ops:
+                            print('\u250f %s\n\u2503 %s' % (name, '\u2501' * len(name)))
+                            debug_sym.debug_print(self._grammar._name_map, '\u2503 ', '\u2503 ')
+                            print('\u2517')
                     print('')
 
             if len(next_contexts) == 0:
@@ -319,7 +326,7 @@ class Parser(object):
             operations = [context.input(token) for context in contexts]
 
             next_contexts = []         # type: List[Operation]
-            merges = {}                # type: Dict[Tuple[SplitContext, int, int, Callable[[], None]], Merge]
+            merges = {}                # type: Dict[Tuple[SplitContext, int, int, int, Callable[[], None]], Merge]
             recovery_contexts = []     # type: List[Operation]
 
             while operations:
@@ -353,11 +360,12 @@ class Parser(object):
                                             seen.add(scontext)
                                             try:
                                                 merge_op = merges[
-                                                    (scontext, operation._state, sym_len, merge_action._call)]
+                                                    (scontext, rule[0], operation._state, sym_len, merge_action._call)]
                                             except KeyError:
                                                 merge_op = Merge(operation, merge_action, name, scontext)
-                                                merges[(scontext, operation._state, sym_len, merge_action._call)
-                                                       ] = merge_op
+                                                merges[
+                                                    (scontext, rule[0], operation._state, sym_len,
+                                                     merge_action._call)] = merge_op
                                                 operation = merge_op
                                             else:
                                                 merge_op.add_operation(operation, name, scontext)

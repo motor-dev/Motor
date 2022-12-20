@@ -4,7 +4,7 @@ asm-declaration:
 """
 
 import glrp
-from ...parser import cxx98
+from ...parse import cxx98
 from ....ast.declarations import AsmDeclaration
 from motor_typing import TYPE_CHECKING
 
@@ -18,4 +18,4 @@ def asm_declaration(self, p):
 
 if TYPE_CHECKING:
     from typing import Any
-    from ...parser import CxxParser
+    from ...parse import CxxParser

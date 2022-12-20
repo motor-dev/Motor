@@ -10,7 +10,7 @@ qualified-namespace-specifier:
 """
 
 import glrp
-from ....parser import cxx98
+from ....parse import cxx98
 from .....ast.declarations import NamespaceAliasDeclaration
 from .....ast.reference import Reference, Id
 from motor_typing import TYPE_CHECKING
@@ -48,4 +48,4 @@ def qualified_namespace_specifier_nested(self, p):
 
 if TYPE_CHECKING:
     from typing import Any
-    from ....parser import CxxParser
+    from ....parse import CxxParser

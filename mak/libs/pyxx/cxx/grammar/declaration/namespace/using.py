@@ -4,7 +4,7 @@ using-directive:
 """
 
 import glrp
-from ....parser import cxx98
+from ....parse import cxx98
 from .....ast.declarations import UsingDirective
 from .....ast.reference import Reference, Id
 from motor_typing import TYPE_CHECKING
@@ -28,4 +28,4 @@ def using_directive_nested(self, p):
 
 if TYPE_CHECKING:
     from typing import Any
-    from ....parser import CxxParser
+    from ....parse import CxxParser

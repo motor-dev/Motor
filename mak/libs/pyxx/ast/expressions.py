@@ -11,12 +11,20 @@ class ExpressionList(Expression):
         # type: (Optional[List[Expression]]) -> None
         self._expressions = expressions
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_expression_list(self)
 
-class ExpressionId(Expression):
+
+class IdExpression(Expression):
 
     def __init__(self, reference):
         # type: (Reference) -> None
         self._reference = reference
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_id_expression(self)
 
 
 class AmbiguousExpression(Expression):
@@ -25,12 +33,20 @@ class AmbiguousExpression(Expression):
         # type: (List[Expression]) -> None
         self._ambiguous_expressions = ambiguous_expressions
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_ambiguous_expression(self)
+
 
 class LiteralExpression(Expression):
 
     def __init__(self, literal):
         # type: (Literal) -> None
         self._literal = literal
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_literal_expression(self)
 
 
 class UnaryExpression(Expression):
@@ -39,6 +55,10 @@ class UnaryExpression(Expression):
         # type: (Expression, Expression, str) -> None
         self._operand = operand
         self._operator = operator
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_unary_expression(self)
 
 
 class BinaryExpression(Expression):
@@ -49,6 +69,10 @@ class BinaryExpression(Expression):
         self._right_operand = right_operand
         self._operator = operator
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_binary_expression(self)
+
 
 class PostfixExpression(Expression):
 
@@ -57,12 +81,20 @@ class PostfixExpression(Expression):
         self._operand = operand
         self._operator = operator
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_postfix_expression(self)
+
 
 class SizeofExpression(Expression):
 
     def __init__(self, operand):
         # type: (Expression) -> None
         self._operand = operand
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_sizeof_expression(self)
 
 
 class SizeofTypeExpression(Expression):
@@ -71,6 +103,10 @@ class SizeofTypeExpression(Expression):
         # type: (TypeId) -> None
         self._type = type
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_sizeof_type_expression(self)
+
 
 class SizeofPackExpression(Expression):
 
@@ -78,12 +114,21 @@ class SizeofPackExpression(Expression):
         # type: (str) -> None
         self._identifier = identifier
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_sizeof_pack_expression(self)
+
 
 class AlignofExpression(Expression):
 
-    def __init__(self, type):
-        # type: (TypeId) -> None
+    def __init__(self, alignof_token, type):
+        # type: (str, TypeId) -> None
+        self._alignof_token = alignof_token
         self._type = type
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_alignof_expression(self)
 
 
 class NoexceptExpression(Expression):
@@ -91,6 +136,10 @@ class NoexceptExpression(Expression):
     def __init__(self, operand):
         # type: (Expression) -> None
         self._operand = operand
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_noexcept_expression(self)
 
 
 class CallExpression(Expression):
@@ -100,6 +149,10 @@ class CallExpression(Expression):
         self._method = method
         self._arguments = arguments
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_call_expression(self)
+
 
 class SubscriptExpression(Expression):
 
@@ -108,6 +161,10 @@ class SubscriptExpression(Expression):
         self._operand = operand
         self._subscript = subscript
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_subscript_expression(self)
+
 
 class CastExpression(Expression):
 
@@ -115,6 +172,10 @@ class CastExpression(Expression):
         # type: (Expression, TypeId) -> None
         self._operand = operand
         self._target_type = target_type
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_cast_expression(self)
 
 
 class CxxCastExpression(Expression):
@@ -125,6 +186,10 @@ class CxxCastExpression(Expression):
         self._target_type = target_type
         self._cast_type = cast_type
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_cxx_cast_expression(self)
+
 
 class ConditionalExpression(Expression):
 
@@ -133,6 +198,10 @@ class ConditionalExpression(Expression):
         self._condition = condition
         self._expression_true = expression_true
         self._expression_false = expression_false
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_conditional_expression(self)
 
 
 class MemberAccessExpression(Expression):
@@ -143,6 +212,10 @@ class MemberAccessExpression(Expression):
         self._member_expression = member_expression
         self._template = template
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_member_access_expression(self)
+
 
 class MemberAccessPtrExpression(Expression):
 
@@ -152,6 +225,10 @@ class MemberAccessPtrExpression(Expression):
         self._member_expression = member_expression
         self._template = template
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_member_access_ptr_expression(self)
+
 
 class MemberPtrExpression(Expression):
 
@@ -160,12 +237,20 @@ class MemberPtrExpression(Expression):
         self._expression = expression
         self._member_expression = member_expression
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_member_ptr_expression(self)
+
 
 class TypeIdExpression(Expression):
 
     def __init__(self, operand):
         # type: (Expression) -> None
         self._operand = operand
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_type_id_expression(self)
 
 
 class TypeIdExpressionType(Expression):
@@ -174,6 +259,10 @@ class TypeIdExpressionType(Expression):
         # type: (TypeId) -> None
         self._type = type
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_type_id_expression_type(self)
+
 
 class SimpleCastExpression(Expression):
 
@@ -181,6 +270,10 @@ class SimpleCastExpression(Expression):
         # type: (Expression, TypeId) -> None
         self._expression = expression
         self._type = type
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_simple_cast_expression(self)
 
 
 class NewExpression(Expression):
@@ -192,6 +285,10 @@ class NewExpression(Expression):
         self._initializer = initializer
         self._root = root
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_new_expression(self)
+
 
 class DeleteExpression(Expression):
 
@@ -201,12 +298,20 @@ class DeleteExpression(Expression):
         self._array = array
         self._root = root
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_delete_expression(self)
+
 
 class ThrowExpression(Expression):
 
     def __init__(self, operand):
         # type: (Optional[Expression]) -> None
         self._operand = operand
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_throw_expression(self)
 
 
 class YieldExpression(Expression):
@@ -215,12 +320,20 @@ class YieldExpression(Expression):
         # type: (Expression) -> None
         self._operand = operand
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_yield_expression(self)
+
 
 class AwaitExpression(Expression):
 
     def __init__(self, operand):
         # type: (Expression) -> None
         self._operand = operand
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_await_expression(self)
 
 
 class FoldExpressionLeft(Expression):
@@ -230,6 +343,10 @@ class FoldExpressionLeft(Expression):
         self._expression = expression
         self._operator = operator
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_fold_expression_left(self)
+
 
 class FoldExpressionRight(Expression):
 
@@ -237,6 +354,10 @@ class FoldExpressionRight(Expression):
         # type: (Expression, str) -> None
         self._expression = expression
         self._operator = operator
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_fold_expression_right(self)
 
 
 class FoldExpressionBoth(Expression):
@@ -248,9 +369,52 @@ class FoldExpressionBoth(Expression):
         self._operator_left = operator_left
         self._operator_right = operator_right
 
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_fold_expression_both(self)
+
+
+class ParenthesizedExpression(Expression):
+
+    def __init__(self, expression):
+        # type: (Expression) -> None
+        self._expression = expression
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_parenthesized_expression(self)
+
+
+class ThisExpression(Expression):
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_this_expression(self)
+
+
+class NullPtrExpression(Expression):
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_null_ptr_expression(self)
+
+
+class TypeTraitExpression(Expression):
+
+    def __init__(self, type_trait, arguments):
+        # type: (str, Optional[List[Token]]) -> None
+        self._type_trait = type_trait
+        self._arguments = arguments
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_type_trait_expression(self)
+
 
 if TYPE_CHECKING:
+    from typing import List, Optional
+    from . import Visitor
     from .reference import Reference
     from .literals import Literal
-    from .types import TypeId
-    from typing import Any, List, Optional
+    from .type import TypeId
+    from glrp import Token

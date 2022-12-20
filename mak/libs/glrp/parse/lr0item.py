@@ -28,7 +28,7 @@ class LR0Item(object):
         self._merges = tuple(merge_list) # type: Tuple[Grammar.Merge, ...]
         self._merge_map = {}             # type: Dict[str, Grammar.Merge]
         self._merge_map_str = {}         # type: Dict[str, str]
-        self._no_merge_warning = False
+        self._no_merge_warning = False   # type: bool
 
         for merge in self._merges:
             for key in merge._arguments:
@@ -39,7 +39,7 @@ class LR0Item(object):
                     )
                 self._merge_map[key] = merge
                 self._merge_map_str[key] = merge._result
-        self._merge_set = frozenset(self._merge_map.keys())
+        self._merge_set = frozenset(self._merge_map.keys()) # type: FrozenSet[str]
         self._split_use = 0
 
         if index == rule.len:
@@ -132,5 +132,5 @@ class LR0Item(object):
 
 
 if TYPE_CHECKING:
-    from motor_typing import Dict, List, Optional, Set, Text, Tuple
+    from motor_typing import Dict, FrozenSet, List, Optional, Set, Text, Tuple
     from .grammar import Grammar, MergeAction

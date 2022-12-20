@@ -4,7 +4,8 @@ using-enum-declaration:
 """
 
 import glrp
-from ...parser import cxx20
+from ...parse import cxx20
+from ....ast.declarations import UsingEnumDeclaration
 from motor_typing import TYPE_CHECKING
 
 
@@ -13,9 +14,9 @@ from motor_typing import TYPE_CHECKING
 @cxx20
 def using_enum_declaration_cxx20(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    pass
+    return UsingEnumDeclaration(p[0], p[3])
 
 
 if TYPE_CHECKING:
     from typing import Any
-    from ...parser import CxxParser
+    from ...parse import CxxParser

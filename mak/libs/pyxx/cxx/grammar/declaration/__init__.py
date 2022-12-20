@@ -56,8 +56,8 @@ identifier-list:
 """
 
 import glrp
-from ...parser import cxx98, cxx11, cxx17, cxx20, cxx98_merge
-from ....ast.declarations import AmbiguousDeclaration, SimpleDeclaration, StructuredBindingDeclaration, InitDeclarator, StaticAssert, AliasDeclaration
+from ...parse import cxx98, cxx11, cxx17, cxx20, cxx98_merge
+from ....ast.declarations import AmbiguousDeclaration, SimpleDeclaration, StructuredBindingDeclaration, StaticAssert, AliasDeclaration
 from motor_typing import TYPE_CHECKING
 from . import specifier
 from . import declarator
@@ -184,7 +184,7 @@ def alias_declaration(self, p):
 @cxx98
 def simple_declaration_no_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return SimpleDeclaration(p[0], p[2], [])
+    return SimpleDeclaration(p[0], p[2], None)
 
 
 @glrp.rule(
@@ -223,14 +223,14 @@ def static_assert_declaration_cxx17(self, p):
 @cxx98
 def empty_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return SimpleDeclaration(None, None, [])
+    return SimpleDeclaration([], None, None)
 
 
 @glrp.rule('attribute-declaration : attribute-specifier-seq? [prec:right,1]";"')
 @cxx11
 def attribute_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return SimpleDeclaration(p[0], None, [])
+    return SimpleDeclaration(p[0], None, None)
 
 
 @glrp.rule('identifier-list : "identifier"')
@@ -283,10 +283,12 @@ def ambiguous_declaration_deduction(
 @cxx98_merge
 def ambiguous_declaration_2(self, initializer, function_body):
     # type: (CxxParser, List[Any], List[Any]) -> Any
-    # This method is actually not called because the initializer and the function_body
-    # options will raise syntax errors for invalid combinations
-    #assert False
-    pass
+    # Only one set of options should be valid here
+    if initializer:
+        assert len(function_body) == 0
+        return AmbiguousDeclaration(initializer)
+    else:
+        return AmbiguousDeclaration(function_body)
 
 
 @glrp.merge('simple-declaration')
@@ -311,4 +313,4 @@ def ambiguous_simple_declaration_final(self, final_keyword, final_identifier):
 
 if TYPE_CHECKING:
     from typing import Any, List
-    from ...parser import CxxParser
+    from ...parse import CxxParser

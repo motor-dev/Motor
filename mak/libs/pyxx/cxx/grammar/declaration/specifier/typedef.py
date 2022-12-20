@@ -5,7 +5,7 @@ typedef-name:
 """
 
 import glrp
-from ....parser import cxx98, cxx20
+from ....parse import cxx98, cxx20
 from motor_typing import TYPE_CHECKING
 
 #@glrp.rule('typedef-name : "identifier"')
@@ -23,4 +23,4 @@ from motor_typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Any
-    from ....parser import CxxParser
+    from ....parse import CxxParser

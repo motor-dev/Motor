@@ -19,7 +19,7 @@ class Id(_Id):
 class TemplateId(_Id):
 
     def __init__(self, id, template_arguments):
-        # type: (_Id, List[Any]) -> None
+        # type: (_Id, List[TemplateArgument]) -> None
         self._id = id
         self._template_arguments = template_arguments
 
@@ -31,11 +31,25 @@ class DestructorId(_Id):
         self._id = id
 
 
+class OperatorId(_Id):
+
+    def __init__(self, operator):
+        # type: (str) -> None
+        self._operator = operator
+
+
 class ConversionOperatorId(_Id):
 
     def __init__(self, conversion_type):
-        # type: (Any) -> None
+        # type: (TypeId) -> None
         self._conversion_type = conversion_type
+
+
+class LiteralOperatorId(_Id):
+
+    def __init__(self, literal_operator):
+        # type: (str) -> None
+        self._literal_operator = literal_operator
 
 
 class Reference(object):
@@ -47,3 +61,5 @@ class Reference(object):
 
 if TYPE_CHECKING:
     from typing import Any, List, Tuple
+    from .type import TypeId
+    from .template import TemplateArgument

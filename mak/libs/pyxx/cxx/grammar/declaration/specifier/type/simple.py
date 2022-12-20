@@ -27,9 +27,9 @@ type-name:
 """
 
 import glrp
-from .....parser import cxx98, cxx11, cxx20, cxx98_merge
+from .....parse import cxx98, cxx11, cxx20, cxx98_merge
 from ......ast.reference import TemplateId, Id, Reference
-from ......ast.types import PrimitiveTypeSpecifiers, TypeSpecifierReference
+from ......ast.type import PrimitiveTypeSpecifiers, TypeSpecifierReference, AmbiguousTypeSpecifier
 from motor_typing import TYPE_CHECKING
 
 
@@ -226,20 +226,18 @@ def simple_type_specifier_char8_t_cxx20(self, p):
 
 @glrp.merge('simple-type-specifier-2')
 @cxx98_merge
-def ambiguous_simple_type_specifier_2(self, ambiguous_template_argument_list_ellipsis, ambiguous_constant_expression):
+def ambiguous_simple_type_specifier_2(self, ambiguous_template_argument_list_ellipsis, ambiguous_expression):
     # type: (CxxParser, List[Any], List[Any]) -> Any
-    pass
+    return AmbiguousTypeSpecifier(ambiguous_template_argument_list_ellipsis + ambiguous_expression)
 
 
 @glrp.merge('simple-type-specifier-cast')
 @cxx98_merge
-def ambiguous_simple_type_specifier_cast(
-    self, ambiguous_template_argument_list_ellipsis, ambiguous_constant_expression
-):
+def ambiguous_simple_type_specifier_cast(self, ambiguous_template_argument_list_ellipsis, ambiguous_expression):
     # type: (CxxParser, List[Any], List[Any]) -> Any
-    pass
+    return AmbiguousTypeSpecifier(ambiguous_template_argument_list_ellipsis + ambiguous_expression)
 
 
 if TYPE_CHECKING:
     from typing import Any, List
-    from .....parser import CxxParser
+    from .....parse import CxxParser

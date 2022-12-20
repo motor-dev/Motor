@@ -5,7 +5,7 @@ id-expression:
 """
 
 import glrp
-from .....parser import cxx98
+from .....parse import cxx98
 from ......ast.reference import Reference
 from motor_typing import TYPE_CHECKING
 
@@ -21,9 +21,9 @@ def id_expression_unqualified(self, p):
 @cxx98
 def id_expression_qualified(self, p):
     # type: (CxxParser, glrp.Production) -> Any
-    return p[0]
+    return Reference(p[0])
 
 
 if TYPE_CHECKING:
     from typing import Any, List
-    from .....parser import CxxParser
+    from .....parse import CxxParser
