@@ -107,6 +107,7 @@ static void completeGObjectClass(Gtk3Plugin& plugin, Meta::Class* cls, GType typ
         cls->constructor.set(&constructor->metaMethod);
     }
     g_type_class_unref(objectClass);
+    motor_forceuse(propertyCount);
 }  // namespace Gtk3
 
 raw< const Meta::Class > getGObjectClass(Gtk3Plugin& plugin, GType type)

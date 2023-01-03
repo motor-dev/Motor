@@ -165,6 +165,7 @@ keywords = (
     'nocf_check',
     'shadowcallstack',
     'mustprogress',
+    'nocallback',
 
                                        # fp
     'ieee',

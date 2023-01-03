@@ -556,7 +556,7 @@ bool DwarfModule::fillNode(Buffer< endianness >& buffer, CompilationUnit& r,
         while(readInfos(buffer, m, abbreviations, ptrSize)) /* Again */
             ;
     }
-    return false;  // attributesMatched == 3;
+    return attributesMatched == 3;
 }
 
 template < Endianness endianness >
