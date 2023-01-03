@@ -239,7 +239,7 @@ int call(lua_State* state, raw< const Meta::Method > method)
             parameterCount++;
         }
         lua_pushnil(state);
-        for(u32 i = 0; !error && lua_next(state, nargs + 1); ++i)
+        while(!error && lua_next(state, nargs + 1))
         {
             /* removes value */
             lua_pop(state, 1);

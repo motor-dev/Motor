@@ -145,6 +145,7 @@ def p_ir_attribute_method(p):
                             | SHADOWCALLSTACK
                             | POISON
                             | MUSTPROGRESS
+                            | NOCALLBACK
     """
     p[0] = IrAttribute(p[1])
 
