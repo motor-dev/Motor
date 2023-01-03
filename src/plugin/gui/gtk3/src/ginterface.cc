@@ -39,6 +39,8 @@ static void completeGInterfaceClass(Gtk3Plugin& plugin, Meta::Class* cls, GType 
                 propertyCount++;
             }
         }
+        motor_forceuse(propertyCount);
+        motor_forceuse(constructorParameterCount);
         g_type_default_interface_unref(interface);
     }
 }  // namespace Gtk3
