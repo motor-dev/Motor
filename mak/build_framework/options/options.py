@@ -1,9 +1,82 @@
 import os
+import sys
 from motor_typing import TYPE_CHECKING
+from waflib import Logs, Configure, Utils
+
+legacy_log_emit_override = Logs.log_handler.emit_override
+
+status_line = None
+
+
+def log_handler_emit(self, record):
+    if status_line is not None:
+        global cursor_pos
+        self.stream.write('\0338\033[K')
+        legacy_log_emit_override(self, record)
+        if self.terminator != '\n' and record.msg[-1] != '\n':
+            self.stream.write('\033D\033M\0337\n%s' % status_line)
+        else:
+            self.stream.write('\0337%s' % status_line)
+    else:
+        legacy_log_emit_override(self, record)
+
+
+Logs.log_handler.emit_override = log_handler_emit
+sys.stdout.write('\0337')
+
+
+@Configure.conf
+def set_status_line(context, line):
+    global status_line
+    if status_line is not None:
+        sys.stdout.write('\r\033[K%s' % line)
+    else:
+        sys.stdout.write('\0337%s' % line)
+    status_line = line
+
+
+@Configure.conf
+def progress_line(context, idx, total, col1, col2):
+    """
+    Computes a progress bar line displayed when running ``waf -p``
+
+    :returns: progress bar line
+    :rtype: string
+    """
+    if not sys.stdout.isatty():
+        return None
+
+    n = len(str(total))
+
+    Utils.rot_idx += 1
+    ind = Utils.rot_chr[Utils.rot_idx % 4]
+
+    right = '[%s%s%s]' % (col1, context.timer, col2)
+    cols = Logs.get_term_cols() - len(right) + len(col2) + len(col1)
+    cmd = context.cmd[:cols]
+    fs = "[%%%dd/%%d] %s" % (n, cmd)
+    left = fs % (idx, total)
+
+    ratio = ((cols * idx * 8) // total)
+    full_length = ratio // 8
+
+    if idx == total:
+        bar = '\x1b[30;42m' + cmd + '\x1b[32;100m' + ('\u2588' * (full_length - len(cmd))) + '\x1b[0m'
+    elif full_length >= len(cmd):
+        subpixel = ' \u258f\u258e\u258d\u258c\u258b\u258a\u2589'
+        bar = '\x1b[30;42m' + cmd + '\x1b[32;100m' + ('\u2588' * (full_length - len(cmd))) + subpixel[
+            ratio % 8] + (' ' * (cols - full_length - 1)) + '\x1b[0m'
+    else:
+        subpixel = ' \u258f\u258e\u258d\u258c\u258b\u258a\u2589'
+        bar = '\x1b[30;42m' + cmd[:full_length] + '\x1b[32;100m' + subpixel[
+            ratio % 8] + '\x1b[37;100m' + cmd[full_length + 1:] + (' ' * (cols - len(cmd))) + '\x1b[0m'
+    msg = Logs.indicator % ('', bar, right)
+
+    return msg
 
 
 def add_package_options(option_context, package_name):
-    # type: (Options.OptionsContext) -> None
+    # type: (Options.OptionsContext, str) -> None
     gr = option_context.get_option_group('3rd party libraries')
     gr.add_option(
         '--with-%s' % package_name,

@@ -250,18 +250,18 @@ class vscode(Build.BuildContext):
                 launch_configs['inputs'] = []
 
         for action, command, is_default in [
-            ('build', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '-p'], True),
+            ('build', ['build:${input:motor-Toolchain}:${input:motor-Variant}'], True),
             (
-                'build[fail-tests=no]',
-                ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--no-fail-on-tests', '-p'], False
-            ), ('build[static]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--static', '-p'], False),
-            ('build[dynamic]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--dynamic', '-p'], False),
-            ('build[nomaster]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--nomaster', '-p'], False),
+                'build[fail-tests=no]', ['build:${input:motor-Toolchain}:${input:motor-Variant}',
+                                         '--no-fail-on-tests'], False
+            ), ('build[static]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--static'], False),
+            ('build[dynamic]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--dynamic'], False),
+            ('build[nomaster]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--nomaster'], False),
             ('clean', ['clean:${input:motor-Toolchain}:${input:motor-Variant}'], False),
             (
                 'rebuild', [
                     'clean:${input:motor-Toolchain}:${input:motor-Variant}',
-                    'build:${input:motor-Toolchain}:${input:motor-Variant}', '-p'
+                    'build:${input:motor-Toolchain}:${input:motor-Variant}',
                 ], False
             ), ('setup', ['setup:${input:motor-Toolchain}'], False), ('reconfigure', ['reconfigure'], False),
             (self.cmd, [self.cmd], False)

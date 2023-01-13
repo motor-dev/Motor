@@ -39,10 +39,6 @@ def multiarch_setup(configuration_context):
     configuration_context.fun = 'setup'
     if configuration_context.env.SUB_TOOLCHAINS:
         for t in configuration_context.env.SUB_TOOLCHAINS:
-            if Options.options.progress_bar == 1 and sys.stdout.isatty():
-                configuration_context.in_msg = True
-                pprint = Logs.pprint
-                Logs.pprint = lambda *k, **kw: None
             try:
                 configuration_context.start_msg('Setting up environment')
                 configuration_context.end_msg(t)
@@ -55,9 +51,6 @@ def multiarch_setup(configuration_context):
                 configuration_context.env.MOTOR_SETUP = True
             finally:
                 configuration_context.variant = configuration_context.motor_variant
-                if Options.options.progress_bar == 1 and sys.stdout.isatty():
-                    configuration_context.in_msg = False
-                    Logs.pprint = pprint
         configuration_context.setenv(
             configuration_context.motor_variant + '.setup',
             configuration_context.all_envs[configuration_context.motor_variant]
@@ -66,10 +59,6 @@ def multiarch_setup(configuration_context):
         configuration_context.env.MOTOR_SETUP = True
     else:
         t = configuration_context.motor_variant
-        if Options.options.progress_bar == 1 and sys.stdout.isatty():
-            configuration_context.in_msg = True
-            pprint = Logs.pprint
-            Logs.pprint = lambda *k, **kw: None
         try:
             configuration_context.start_msg('Setting up environment')
             configuration_context.end_msg(t)
@@ -80,10 +69,6 @@ def multiarch_setup(configuration_context):
             raise
         else:
             configuration_context.env.MOTOR_SETUP = True
-        finally:
-            if Options.options.progress_bar == 1 and sys.stdout.isatty():
-                configuration_context.in_msg = False
-                Logs.pprint = pprint
 
 
 if TYPE_CHECKING:

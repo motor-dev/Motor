@@ -107,8 +107,7 @@ def tidy_rm(self, node):
     col1 = Logs.colors.CYAN
     col2 = Logs.colors.NORMAL
     parent = node.parent
-    if getattr(self, '.progress_bar', 0) == 0 and not Options.options.silent:
-        print('{rm}     %s%s%s' % (col1, node, col2))
+    Logs.info('{rm}     %s%s%s' % (col1, node, col2))
     node.delete(evict=True)
     if len(parent.children) == 0:
         self.tidy_rm(parent)
