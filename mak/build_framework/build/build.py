@@ -1,4 +1,4 @@
-from waflib import Task, Options, Build, Utils, Errors, TaskGen, Node, ConfigSet, Context
+from waflib import Task, Options, Build, Utils, Errors, TaskGen, Node, ConfigSet, Context, Logs
 from waflib.Configure import conf
 from waflib.TaskGen import feature, taskgen_method, extension, before_method, after_method
 import os
@@ -23,11 +23,43 @@ def to_string(self):
 
 
 def log_display(self, bld):
-    if not Options.options.silent:
-        old_log_display(self, bld)
+    if Options.options.silent:
+        return
+    s = self.display()
+    if s:
+        if bld.logger:
+            logger = bld.logger
+        else:
+            logger = Logs
+        logger.info(s, extra={'terminator': '', 'c1': '', 'c2': ''})
+
+
+def display(self):
+    bld = self.generator.bld
+    col1 = Logs.colors(self.color)
+    col2 = Logs.colors.NORMAL
+    master = bld.producer
+
+    if bld.progress_bar >= 1:
+        bld.set_status_line(bld.progress_line(master.processed - master.ready.qsize(), master.total, col1, col2))
+    if bld.progress_bar == 2:
+        return None
+
+    s = str(self)
+    if not s:
+        return None
+
+    total = master.total
+    n = len(str(total))
+    fs = '[%%%dd/%%%dd] %%s%%s%%s%%s\n' % (n, n)
+    kw = self.keyword()
+    if kw:
+        kw += ' '
+    return fs % (master.processed - master.ready.qsize(), total, kw, col1, s, col2)
 
 
 setattr(Task.Task, '__str__', to_string)
+setattr(Task.Task, 'display', display)
 setattr(Task.Task, 'log_display', log_display)
 setattr(Task.Task, 'keyword', (lambda self: ''))
 
