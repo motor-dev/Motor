@@ -301,7 +301,9 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         else:
             extra_flags_c = extra_flags_cxx = []
         if 'GCC' in self.NAMES and self.version_number >= (12, ):
-            extra_flags_cxx.append('-Wno-unknown-attributes=motor::')
+            extra_flags_cxx.append('-Wno-attributes=motor::')
+        elif 'Clang' in self.NAMES:
+            extra_flags_cxx.append('-Wno-unknown-attributes')
         else:
             extra_flags_cxx.append('-Wno-attributes')
         v.CFLAGS_warnall = ['-std=c99', '-Wall'] + extra_flags_c + [
