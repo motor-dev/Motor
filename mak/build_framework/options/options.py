@@ -10,17 +10,22 @@ status_line = None
 
 def log_handler_emit(self, record):
     if status_line is not None:
-        global cursor_pos
-        self.stream.write('\0338\033[K')
-        legacy_log_emit_override(self, record)
-        if self.terminator != '\n' and record.msg[-1] != '\n':
-            self.stream.write('\033D\033M\0337\n%s' % status_line)
+        if record.msg.count('\n') > 1 or len(record.msg) > Logs.get_term_cols():
+            self.stream.write('\033[2K\0338\033[K')
         else:
-            self.stream.write('\0337%s' % status_line)
+            self.stream.write('\0338\033[K')
+        legacy_log_emit_override(self, record)
+        #if self.terminator != '\n' and record.msg[-1] != '\n':
+        self.stream.write('\033D\033M\0337\033[K\n%s' % status_line)
+        #else:
+        #    self.stream.write('\0337%s' % status_line)
     else:
         legacy_log_emit_override(self, record)
 
-
+if(sys.platform == "win32"):
+    import ctypes
+    kernel32 = ctypes.windll.kernel32
+    kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
 Logs.log_handler.emit_override = log_handler_emit
 sys.stdout.write('\0337')
 
@@ -47,9 +52,6 @@ def progress_line(context, idx, total, col1, col2):
         return None
 
     n = len(str(total))
-
-    Utils.rot_idx += 1
-    ind = Utils.rot_chr[Utils.rot_idx % 4]
 
     right = '[%s%s%s]' % (col1, context.timer, col2)
     cols = Logs.get_term_cols() - len(right) + len(col2) + len(col1)

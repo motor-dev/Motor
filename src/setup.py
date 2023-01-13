@@ -13,6 +13,7 @@ def setup(configuration_context):
             category_node = third_party_node.make_node(category)
             for third_party in category_node.listdir():
                 setups.append((category, third_party))
+
     for i, (category, third_party) in enumerate(setups):
         if Options.options.progress_bar == 1 and sys.stdout.isatty():
             m = configuration_context.progress_line(i, len(setups) + 1, Logs.colors.BLUE, Logs.colors.NORMAL)
