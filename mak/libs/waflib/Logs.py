@@ -9,12 +9,12 @@ logging, colors, terminal width and pretty-print
 import os, re, traceback, sys
 from waflib import Utils, ansiterm
 
-if not os.environ.get('NOSYNC', False):
-	# synchronized output is nearly mandatory to prevent garbled output
-	if sys.stdout.isatty() and id(sys.stdout) == id(sys.__stdout__):
-		sys.stdout = ansiterm.AnsiTerm(sys.stdout)
-	if sys.stderr.isatty() and id(sys.stderr) == id(sys.__stderr__):
-		sys.stderr = ansiterm.AnsiTerm(sys.stderr)
+#if not os.environ.get('NOSYNC', False):
+#	# synchronized output is nearly mandatory to prevent garbled output
+#	if sys.stdout.isatty() and id(sys.stdout) == id(sys.__stdout__):
+#		sys.stdout = ansiterm.AnsiTerm(sys.stdout)
+#	if sys.stderr.isatty() and id(sys.stderr) == id(sys.__stderr__):
+#		sys.stderr = ansiterm.AnsiTerm(sys.stderr)
 
 # import the logging module after since it holds a reference on sys.stderr
 # in case someone uses the root logger
