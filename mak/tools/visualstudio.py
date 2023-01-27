@@ -286,27 +286,27 @@ class VCproj:
                             command = getattr(task_gen, 'command', '')
                             if command:
                                 command = command % {'toolchain': toolchain, 'variant': variant}
-                                tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s %s %s' % (
+                                tool['BuildCommandLine'] = 'cd "$(SolutionDir)" && "%s" "%s" %s %s' % (
                                     sys.executable, sys.argv[0], command, ' '.join(options)
                                 )
                                 clean_command = getattr(task_gen, 'clean_command', '')
                                 if clean_command:
                                     clean_command = clean_command % {'toolchain': toolchain, 'variant': variant}
-                                    tool['CleanCommandLine'] = 'cd $(SolutionDir) && %s %s %s %s' % (
+                                    tool['CleanCommandLine'] = 'cd "$(SolutionDir)" && "%s" "%s" %s %s' % (
                                         sys.executable, sys.argv[0], clean_command, ' '.join(options)
                                     )
-                                    tool['ReBuildCommandLine'] = 'cd $(SolutionDir) && %s %s %s %s %s' % (
+                                    tool['ReBuildCommandLine'] = 'cd "$(SolutionDir)" && "%s" "%s" %s %s %s' % (
                                         sys.executable, sys.argv[0], clean_command, command, ' '.join(options)
                                     )
                             else:
-                                tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s build:%s:%s %s --targets=%s' % (
+                                tool['BuildCommandLine'] = 'cd "$(SolutionDir)" && "%s" "%s" build:%s:%s %s --targets=%s' % (
                                     sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target
                                 )
-                                tool['CleanCommandLine'] = 'cd $(SolutionDir) && %s %s clean:%s:%s %s --targets=%s' % (
+                                tool['CleanCommandLine'] = 'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s %s --targets=%s' % (
                                     sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target
                                 )
                                 tool['ReBuildCommandLine'
-                                     ] = 'cd $(SolutionDir) && %s %s clean:%s:%s build:%s:%s %s --targets=%s' % (
+                                     ] = 'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s build:%s:%s %s --targets=%s' % (
                                          sys.executable, sys.argv[0], toolchain, variant, toolchain, variant,
                                          ' '.join(options), task_gen.target
                                      )
@@ -509,33 +509,33 @@ class VCxproj:
                     command = command % {'toolchain': toolchain, 'variant': variant}
                     self.vcxproj._add(
                         properties, 'NMakeBuildCommandLine',
-                        'cd $(SolutionDir) && %s %s %s %s' % (sys.executable, sys.argv[0], command, ' '.join(options))
+                        'cd "$(SolutionDir)" && "%s" "%s" %s %s' % (sys.executable, sys.argv[0], command, ' '.join(options))
                     )
                     clean_command = getattr(task_gen, 'clean_command', '')
                     if clean_command:
                         clean_command = clean_command % {'toolchain': toolchain, 'variant': variant}
                         self.vcxproj._add(
-                            properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s %s %s %s' %
+                            properties, 'NMakeCleanCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" %s %s' %
                             (sys.executable, sys.argv[0], clean_command, ' '.join(options))
                         )
                         self.vcxproj._add(
-                            properties, 'NMakeReBuildCommandLine', 'cd $(SolutionDir) && %s %s %s %s %s' %
+                            properties, 'NMakeReBuildCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" %s %s %s' %
                             (sys.executable, sys.argv[0], clean_command, command, ' '.join(options))
                         )
                 else:
                     self.vcxproj._add(
-                        properties, 'NMakeBuildCommandLine', 'cd $(SolutionDir) && %s %s build:%s:%s %s --targets=%s' %
+                        properties, 'NMakeBuildCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" build:%s:%s %s --targets=%s' %
                         (sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target)
                     )
                     self.vcxproj._add(
                         properties, 'NMakeReBuildCommandLine',
-                        'cd $(SolutionDir) && %s %s clean:%s:%s build:%s:%s %s --targets=%s' % (
+                        'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s build:%s:%s %s --targets=%s' % (
                             sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), toolchain, variant,
                             task_gen.target
                         )
                     )
                     self.vcxproj._add(
-                        properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s %s clean:%s:%s %s --targets=%s' %
+                        properties, 'NMakeCleanCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s %s --targets=%s' %
                         (sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target)
                     )
                     if 'cxxprogram' in task_gen.features:

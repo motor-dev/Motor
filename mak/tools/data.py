@@ -10,13 +10,8 @@ try:
 except ImportError:
     import pickle as cPickle
 
-
-def scan(self):
-    return ([], [])
-
-
 ddf = """
-%s ${DDF}
+"%s" ${DDF}
 -d ${MACROS_IGNORE}
 ${PCH_HEADER:PCH}
 --module ${PLUGIN}
@@ -29,8 +24,38 @@ ${TGT[1].abspath()}
 ${TGT[2].abspath()}
 ${TGT[3].abspath()}
 """ % sys.executable.replace('\\', '/')
-cls = Task.task_factory('datagen', ddf, [], 'BLUE', ext_in='.h .hh .hxx', ext_out='.cc')
-cls.scan = scan
+
+
+class datagen(Task.Task):
+    color = 'BLUE'
+
+    def run(self):
+        env = self.env
+        return self.exec_command(
+            [
+                sys.executable,
+                self.ddf.abspath(),
+                '-d',
+                self.macros.abspath(),
+                '--module',
+                self.env.PLUGIN,
+                '--root',
+                self.generator.root_namespace,
+                '--tmp',
+                self.generator.bld.bldnode.parent.parent.abspath(),
+                self.inputs[0].abspath(),
+                self.local_include,
+                self.outputs[0].abspath(),
+                self.outputs[1].abspath(),
+                self.outputs[2].abspath(),
+                self.outputs[3].abspath(),
+            ]
+        )
+
+
+def scan(self):
+    return ([], [])
+
 
 cpprtti = """
 %s ${CPPRTTI_GENERATE}
@@ -47,6 +72,7 @@ namespace_alias = 'MOTOR_REGISTER_ROOT_NAMESPACE(%s, %s, %s)\n'
 
 
 class docgen(Task.Task):
+
     def process_node(self, node):
         return []
 
@@ -57,6 +83,7 @@ class docgen(Task.Task):
 
 
 class nsdef(Task.Task):
+
     def run(self):
         seen = set([])
         with open(self.outputs[0].abspath(), 'w') as namespace_file:
@@ -101,20 +128,21 @@ def datagen(self, node):
     #tsk.dep_nodes = [self.bld.motornode.find_node('mak/tools/bin/cpprtti_generate.py')]
     #tsk.dep_nodes += self.bld.motornode.find_node('mak/libs/cpprtti').ant_glob('**/*.py')
 
-    tsk = self.create_task('datagen', node, outs)
     for include_node in self.includes:
         if node.is_child_of(include_node):
-            tsk.env.LOCAL_INCLUDE = node.path_from(include_node)
+            local_include = node.path_from(include_node)
             break
     else:
         raise Errors.WafError('unable to find include root for node %s' % node)
-    tsk.env.DDF = self.bld.motornode.find_node('mak/tools/bin/ddf.py').abspath()
-    tsk.env.MACROS_IGNORE = self.bld.motornode.find_node('mak/libs/cpp/macros_ignore').abspath()
-    tsk.env.TMPDIR = self.bld.bldnode.parent.parent.abspath()
-    tsk.path = self.bld.variant_dir
-    tsk.env.PCH_HEADER = ['--pch']
-    tsk.env.PCH = self.pchstop and [self.pchstop] or []
-    tsk.env.ROOT_ALIAS = self.root_namespace
+    tsk = self.create_task(
+        'datagen',
+        node,
+        outs,
+        local_include=local_include,
+        ddf=self.bld.motornode.find_node('mak/tools/bin/ddf.py'),
+        macros=self.bld.motornode.find_node('mak/libs/cpp/macros_ignore'),
+        path=self.bld.variant_dir,
+    )
     out_node.parent.mkdir()
     tsk.dep_nodes = [self.bld.motornode.find_node('mak/tools/bin/ddf.py')]
     tsk.dep_nodes += self.bld.motornode.find_node('mak/libs/cpp').ant_glob('**/*.py')
