@@ -7,17 +7,17 @@
 
 #include <motor/stdafx.h>
 
-#if defined(building_python) || defined(building_py_motor)
-#    define MOTOR_API_PYTHON MOTOR_EXPORT
-#elif defined(python_dll)
-#    define MOTOR_API_PYTHON MOTOR_IMPORT
+#if defined(building_pythonlib) || defined(building_py_motor)
+#    define MOTOR_API_PYTHONLIB MOTOR_EXPORT
+#elif defined(pythonlib_dll)
+#    define MOTOR_API_PYTHONLIB MOTOR_IMPORT
 #else
-#    define MOTOR_API_PYTHON
+#    define MOTOR_API_PYTHONLIB
 #endif
 
 namespace Motor { namespace Arena {
 
-motor_api(PYTHON) minitl::Allocator& python();
+motor_api(PYTHONLIB) minitl::Allocator& python();
 
 }}  // namespace Motor::Arena
 
