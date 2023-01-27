@@ -1,4 +1,4 @@
-from waflib import Configure, Logs, Utils
+from waflib import Configure, Errors
 from copy import deepcopy
 import os
 import shlex
@@ -90,7 +90,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         (('__arm__', '__ARM_ARCH_7S__'), 'armv7s'),
         (('__arm__', '__ARM_ARCH_7A__'), 'armv7a'),
     )
-    ARCHIVER = 'ar'
+    ARCHIVERS = ['ar']
 
     def __init__(self, compiler_c, compiler_cxx, extra_args={}, extra_env={}):
         extra_env = dict(extra_env)
@@ -343,7 +343,12 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
 
     def load_tools(self, conf, platform):
         os_paths = os.environ['PATH'].split(os.pathsep)
-        self.find_target_program(conf, platform, self.ARCHIVER, os_paths=os_paths)
+        for archiver in self.ARCHIVERS:
+            print(os_paths, archiver)
+            if self.find_target_program(conf, platform, archiver, var='AR', os_paths=os_paths, mandatory=False):
+                break
+        else:
+            raise Errors.WafError('unable to find an archiver')
         self.find_target_program(conf, platform, 'strip', os_paths=os_paths)
         self.find_target_program(conf, platform, 'objcopy', mandatory=False, os_paths=os_paths)
         self.find_target_program(conf, platform, 'gdb', mandatory=False, os_paths=os_paths)
