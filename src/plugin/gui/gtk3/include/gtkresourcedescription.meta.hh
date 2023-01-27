@@ -4,6 +4,7 @@
 #ifndef MOTOR_UI_GTK3_GTKRESOURCEDESCRIPTION_HH_
 #define MOTOR_UI_GTK3_GTKRESOURCEDESCRIPTION_HH_
 /**************************************************************************************************/
+#include <stdafx.h>
 #include <motor/resource/description.hh>
 
 namespace Motor { namespace Gtk3 {
