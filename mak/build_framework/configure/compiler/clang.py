@@ -56,7 +56,6 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
     DEFINES = ['__clang__', '__GNUC__', '__GNUG__']
     NAMES = ('Clang', )
     TOOLS = 'clang clangxx'
-    ARCHIVERS = ['ar', 'llvm-ar']
 
     def __init__(self, clang, clangxx, extra_args={}, extra_env={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, clang, clangxx, extra_args, extra_env)

@@ -123,7 +123,7 @@ class Netbeans(Build.BuildContext):
             root_folder.xml = lf
             for p in path[:-1]:
                 root_folder = self.add_folder(p, doc, root_folder)
-            for node in getattr(task_gen, 'source_nodes', []):
+            for _, node in getattr(task_gen, 'source_nodes', []):
                 self.add(doc, root_folder, node)
 
             #f, subs = categories[category]

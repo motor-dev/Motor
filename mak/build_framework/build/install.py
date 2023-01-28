@@ -61,7 +61,7 @@ def dummy_deploy_off(self):
 def install_module_files(self):
     if 'motor:deploy:off' not in self.features:
         env = self.env
-        for source_node in self.source_nodes:
+        for _, source_node in self.source_nodes:
             bin_paths = [
                 i for i in [source_node.make_node('bin')] +
                 [source_node.make_node('bin.%s' % p) for p in env.VALID_PLATFORMS] if os.path.isdir(i.abspath())

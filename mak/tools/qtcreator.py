@@ -825,7 +825,7 @@ class QtCreator(Build.BuildContext):
 
     def write_files(self, task_gen):
         file_list = []
-        for source_node in getattr(task_gen, 'source_nodes', []):
+        for _, source_node in getattr(task_gen, 'source_nodes', []):
             try:
                 file_list += [node.path_from(self.base_node) for node in source_node.ant_glob('**')]
             except Exception:
@@ -1382,7 +1382,7 @@ class Qbs(QtCreator):
                     project_file.write('%s        "%s",\n' % (indent, define))
                 project_file.write('%s    ]\n' % (indent))
                 project_file.write('%s    files: [\n' % indent)
-                for source_node in getattr(p, 'source_nodes', []):
+                for _, source_node in getattr(p, 'source_nodes', []):
                     if source_node.isdir():
                         for node in source_node.ant_glob('**'):
                             for r in IGNORE_PATTERNS:

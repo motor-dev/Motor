@@ -21,6 +21,9 @@ class Platform:
     def platform_name(self, compiler):
         return self.NAME.lower()
 
+    def platform_targets(self, compiler):
+        return []
+
     def add_toolchain(self, conf, compiler, sub_compilers=[], add=True):
         toolchain = '%s_%s-%s_%s-%s' % (
             self.platform_name(compiler), compiler.arch, compiler.NAMES[0].lower(), compiler.arch_name, compiler.version

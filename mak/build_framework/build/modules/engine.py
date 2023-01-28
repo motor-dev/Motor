@@ -38,11 +38,11 @@ def engine(
         if 'windows' in bld.env.VALID_PLATFORMS:
             if project_name is not None:
                 project_name = project_name + '.console'
-            bld.preprocess(name + '.console', p.source_nodes[0], root_namespace, 'motor', uselib=uselib)
+            bld.preprocess(name + '.console', p.source_nodes[0][1], root_namespace, 'motor', uselib=uselib)
             bld.multiarch(
                 name + '.console', [
                     engine(
-                        bld, name + '.console', depends, private_depends + ['console'], p.source_nodes[0], features,
+                        bld, name + '.console', depends, private_depends + ['console'], p.source_nodes[0][1], features,
                         extra_includes, extra_defines, extra_public_includes, extra_system_includes,
                         extra_public_defines, uselib, source_list, conditions, root_namespace, project_name, env
                     ) for env in bld.multiarch_envs

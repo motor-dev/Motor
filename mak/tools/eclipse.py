@@ -177,7 +177,7 @@ class eclipse(Build.BuildContext):
                                 continue
                             if not 'motor:kernel' in tg.features:
                                 name = createProjectFolder(tg.name, resources, seen)
-                                for node in getattr(tg, 'source_nodes', []):
+                                for _, node in getattr(tg, 'source_nodes', []):
                                     self.addSourceTree(
                                         resources, node, name,
                                         os.path.join('PROJECT_LOC', node.path_from(self.srcnode))
