@@ -29,14 +29,14 @@ def get_source_nodes(build_context, path, name):
             path = path.find_node(n)
             if not path:
                 raise Errors.WafError('could not find module %s in %s' % (name, build_context.path.abspath()))
-    source_nodes = [path]
+    source_nodes = [('', path)]
     if path.is_child_of(build_context.motornode):
         relative_path = path.path_from(build_context.motornode)
         for platform in build_context.motornode.find_node('extra').listdir():
             if build_context.env.PROJECTS or platform in build_context.env.VALID_PLATFORMS:
                 node = build_context.motornode.find_node('extra').find_node(platform).find_node(relative_path)
                 if node:
-                    source_nodes.append(node)
+                    source_nodes.append(('[%s]'%platform, node))
     return source_nodes
 
 
@@ -53,7 +53,7 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, uselib, e
         globs = ['nothing']
     else:
         globs = ['src/**/*.yy', 'src/**/*.ll', 'src/**/*.plist', 'api/**/*.meta.hh', 'include/**/*.meta.hh']
-    for source_node in source_nodes:
+    for _, source_node in source_nodes:
         preprocess_sources += source_node.ant_glob(globs)
 
         include = source_node.find_node('api')
@@ -62,17 +62,17 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, uselib, e
         include = source_node.find_node('include')
         if include is not None:
             includes.append(include)
-    pchstop = source_nodes[0].find_node('api/motor/%s/stdafx.h' % name)
+    pchstop = source_nodes[0][1].find_node('api/motor/%s/stdafx.h' % name)
     if pchstop:
-        pchstop = pchstop.path_from(source_nodes[0].find_node('api'))
+        pchstop = pchstop.path_from(source_nodes[0][1].find_node('api'))
     else:
-        pchstop = source_nodes[0].find_node('api/%s/stdafx.h' % name)
+        pchstop = source_nodes[0][1].find_node('api/%s/stdafx.h' % name)
         if pchstop:
-            pchstop = pchstop.path_from(source_nodes[0].find_node('api'))
+            pchstop = pchstop.path_from(source_nodes[0][1].find_node('api'))
         else:
-            pchstop = source_nodes[0].find_node('include/stdafx.h')
+            pchstop = source_nodes[0][1].find_node('include/stdafx.h')
             if pchstop:
-                pchstop = pchstop.path_from(source_nodes[0].find_node('include'))
+                pchstop = pchstop.path_from(source_nodes[0][1].find_node('include'))
 
     preprocess = build_context(
         env=pp_env,
@@ -89,7 +89,7 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, uselib, e
         uselib=uselib
     )
 
-    for source_node in source_nodes:
+    for _, source_node in source_nodes:
         if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
             kernelspath = source_node.make_node('kernels')
             for kernel in kernelspath.ant_glob('**'):
@@ -140,7 +140,7 @@ def module(
     platform_specific += ['.%s.%s' % (p, a) for p in env.VALID_PLATFORMS for a in env.VALID_ARCHITECTURES]
     if source_list is None:
         source_list = []
-        for node in source_nodes:
+        for _, node in source_nodes:
             source_list.append(node.ant_glob(source_filter))
             for suffix in platform_specific:
                 if node.find_node('include%s' % suffix):
@@ -148,7 +148,7 @@ def module(
                 if node.find_node('api%s' % suffix):
                     api.append(node.find_node('api%s' % suffix))
     elif source_list:
-        source_list = source_nodes[0].ant_glob(source_list)
+        source_list = source_nodes[0][1].ant_glob(source_list)
     else:
         source_list = []
     if not build_context.env.PROJECTS:
@@ -159,7 +159,7 @@ def module(
 
     module_path = None
     if path:
-        path_node = source_nodes[0]
+        path_node = source_nodes[0][1]
         if path_node.is_child_of(build_context.path):
             module_path = path_node.path_from(build_context.path).replace('/', '.').replace('\\', '. ')
         elif path_node.is_child_of(build_context.package_node):
@@ -193,7 +193,7 @@ def module(
         task_gen.module_path = module_path
 
     if Options.options.tests and env.BUILD_UNIT_TESTS:
-        for source_node in source_nodes:
+        for _, source_node in source_nodes:
             if os.path.isdir(os.path.join(source_node.abspath(), 'tests')):
                 test_path = source_node.make_node('tests')
                 for test in test_path.ant_glob('**'):
@@ -217,7 +217,7 @@ def module(
                             'MOTOR_PROJECTID=%s' % safe_name('_'.join(test_name)),
                             'MOTOR_PROJECTNAME=%s' % target_name
                         ],
-                        includes=extra_includes + includes + api + source_nodes + [build_context.srcnode],
+                        includes=extra_includes + includes + api + [p for _, p in source_nodes] + [build_context.srcnode],
                     )
 
     return task_gen

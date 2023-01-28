@@ -90,7 +90,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         (('__arm__', '__ARM_ARCH_7S__'), 'armv7s'),
         (('__arm__', '__ARM_ARCH_7A__'), 'armv7a'),
     )
-    ARCHIVERS = ['ar']
+    ARCHIVER = 'ar'
 
     def __init__(self, compiler_c, compiler_cxx, extra_args={}, extra_env={}):
         extra_env = dict(extra_env)
@@ -217,6 +217,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
     def get_multilib_compilers(self):
         try:
             multilibs = self.MULTILIBS[self.arch]
+            multilibs = self.MULTILIBS[self.arch]
         except KeyError:
             return []
         else:
@@ -328,7 +329,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
                 sys_dirs.append(pd)
             d, a = os.path.split(d)
         var = var or program.upper()
-        for t in list(self.targets) + [self.target]:
+        for t in list(self.targets) + [self.target] + platform.platform_targets(self):
             if conf.find_program('%s-%s' % (t, program), var=var, path_list=sys_dirs, mandatory=False):
                 break
         else:
@@ -343,12 +344,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
 
     def load_tools(self, conf, platform):
         os_paths = os.environ['PATH'].split(os.pathsep)
-        for archiver in self.ARCHIVERS:
-            print(os_paths, archiver)
-            if self.find_target_program(conf, platform, archiver, var='AR', os_paths=os_paths, mandatory=False):
-                break
-        else:
-            raise Errors.WafError('unable to find an archiver')
+        self.find_target_program(conf, platform, self.ARCHIVER, var='AR', os_paths=os_paths)
         self.find_target_program(conf, platform, 'strip', os_paths=os_paths)
         self.find_target_program(conf, platform, 'objcopy', mandatory=False, os_paths=os_paths)
         self.find_target_program(conf, platform, 'gdb', mandatory=False, os_paths=os_paths)

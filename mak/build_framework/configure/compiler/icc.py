@@ -33,7 +33,7 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
             ('.avx2', ['-march=core-avx2']),
         ),
     }
-    ARCHIVERS = ['xiar']
+    ARCHIVER = 'xiar'
 
     def __init__(self, icc, icpc, extra_args={}, extra_env={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, icc, icpc, extra_args, extra_env)

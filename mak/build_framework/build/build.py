@@ -430,7 +430,7 @@ def _make_bld_node(self, node, category, path, name):
             node = node.make_node(out_dir)
             node = node.make_node(name)
         else:
-            for source_node in self.source_nodes:
+            for _, source_node in self.source_nodes:
                 if path.is_child_of(source_node):
                     out_dir = path.path_from(source_node)
                     break

@@ -93,18 +93,19 @@ class Windows(Configure.ConfigurationContext.Platform):
         )
 
     def find_winres(self, conf, compiler):
-        winres = conf.find_program(
-            compiler.target + '-windres', var='WINRC', path_list=compiler.directories, mandatory=False
-        )
-        if not winres:
-            winres = conf.find_program('windres', var='WINRC', path_list=compiler.directories, mandatory=False)
-        if not winres:
-            winres = conf.find_program('windres', var='WINRC', mandatory=False)
-        conf.load('winres_patch', tooldir=[os.path.join(conf.motornode.abspath(), 'mak', 'tools')])
-        if compiler.arch == 'x86':
-            conf.env.append_unique('WINRCFLAGS', ['--target=pe-i386'])
-        elif compiler.arch == 'amd64':
-            conf.env.append_unique('WINRCFLAGS', ['--target=pe-x86-64'])
+        if not compiler.target.endswith('-msvc'):
+            winres = conf.find_program(
+                compiler.target + '-windres', var='WINRC', path_list=compiler.directories, mandatory=False
+            )
+            if not winres:
+                winres = conf.find_program('windres', var='WINRC', path_list=compiler.directories, mandatory=False)
+            if not winres:
+                winres = conf.find_program('windres', var='WINRC', mandatory=False)
+            conf.load('winres_patch', tooldir=[os.path.join(conf.motornode.abspath(), 'mak', 'tools')])
+            if compiler.arch == 'x86':
+                conf.env.append_unique('WINRCFLAGS', ['--target=pe-i386'])
+            elif compiler.arch == 'amd64':
+                conf.env.append_unique('WINRCFLAGS', ['--target=pe-x86-64'])
 
     def platform_name(self, compiler):
         return compiler.platform_name
@@ -116,6 +117,11 @@ class Windows_Clang(Windows):
         if not compiler.target.endswith('-msvc'):
             return 'mingw'
         return Windows.platform_name(self, compiler)
+
+    def platform_targets(self, compiler):
+        if not compiler.target.endswith('-msvc'):
+            return []
+        return ['llvm']
 
     def load_in_env(self, conf, compiler):
         Windows.load_in_env(self, conf, compiler)
