@@ -19,6 +19,7 @@ def helper_static(struct_owners):
 
 
 class CppObject(object):
+
     def __init__(self):
         self.tags = []
         self.aliases = []
@@ -97,6 +98,7 @@ class CppObject(object):
 
 
 class Parameter(CppObject):
+
     def __init__(self, type, name, default_value):
         super(Parameter, self).__init__()
         self.type = type
@@ -105,6 +107,7 @@ class Parameter(CppObject):
 
 
 class Method(CppObject):
+
     def __init__(self, name, return_type, parameters, attributes):
         super(Method, self).__init__()
         self.name = name
@@ -190,7 +193,8 @@ class Method(CppObject):
                         '}\n' % self.call(owner, struct_owners)
                     )
                 else:
-                    definition.write('    return ::Motor::Meta::Value(%s);\n' '}\n' % self.call(owner, struct_owners))
+                    definition.write('    return ::Motor::Meta::Value(%s);\n'
+                                     '}\n' % self.call(owner, struct_owners))
             else:
                 definition.write(
                     '    %s;\n'
@@ -248,6 +252,7 @@ class Method(CppObject):
 
 
 class BuiltinMethod(Method):
+
     def __init__(self, name, return_type, parameters, attributes):
         super(BuiltinMethod, self).__init__(name, return_type, parameters, attributes + ['builtin'])
 
@@ -310,6 +315,7 @@ class Operator(Method):
 
 
 class Constructor(Method):
+
     def __init__(self, owner, name, return_type, parameters, attributes):
         if owner.type == 'class':
             return_type = 'ref< %s >' % return_type
@@ -332,6 +338,7 @@ class Constructor(Method):
 
 
 class PodConstructor(Constructor):
+
     def __init__(self, owner):
         super(PodConstructor, self).__init__(owner, owner.name[-1], owner.name[-1], [], [])
 
@@ -343,6 +350,7 @@ class PodConstructor(Constructor):
 
 
 class PodConstructorCopy(Constructor):
+
     def __init__(self, owner):
         super(PodConstructorCopy, self).__init__(
             owner, owner.name[-1], owner.name[-1], [Parameter('const %s&' % owner.cpp_name(), 'other', None)], []
@@ -356,6 +364,7 @@ class PodConstructorCopy(Constructor):
 
 
 class Destructor(Method):
+
     def __init__(self, name, return_type, parameters, attributes):
         super(Destructor, self).__init__('destroy_%s' % name.strip(), return_type, parameters, attributes)
 
@@ -367,6 +376,7 @@ class Destructor(Method):
 
 
 class OverloadedMethod(CppObject):
+
     def __init__(self, method, alias, alias_cpp):
         super(OverloadedMethod, self).__init__()
         self.name = alias
@@ -461,6 +471,7 @@ class OverloadedMethod(CppObject):
 
 
 class Variable(CppObject):
+
     def __init__(self, name, type):
         super(Variable, self).__init__()
         self.name = name
@@ -501,6 +512,7 @@ class Variable(CppObject):
 
 
 class Typedef(CppObject):
+
     def __init__(self, name, type):
         super(Typedef, self).__init__()
         self.name = name
@@ -542,6 +554,7 @@ class Typedef(CppObject):
 
 
 class EnumValue(Variable):
+
     def __init__(self, name, value, type):
         super(EnumValue, self).__init__(name, type)
         self.value = value
@@ -577,6 +590,7 @@ class EnumValue(Variable):
 
 
 class Container(CppObject):
+
     def __init__(self, name):
         super(Container, self).__init__()
         self.name = name
@@ -611,6 +625,7 @@ class Container(CppObject):
 
 
 class Class(Container):
+
     def __init__(self, name, type, parents):
         super(Class, self).__init__(name)
         self.type = type
@@ -744,7 +759,7 @@ class Class(Container):
                 '{\n'
                 '    %s\n'
                 '    %s\n'
-                '    return istring(minitl::format<64u>("Unknown(%%d)") | (u32)v);\n'
+                '    return istring(minitl::format<64u>(FMT("Unknown({0})"), (u32)v));\n'
                 '}\n' % (
                     helper, self.cpp_name(), '\n    '.join(
                         ('static const ::Motor::istring s_%s = "%s";' % (o.name, o.name) for o in self.objects[::-1])
@@ -875,7 +890,8 @@ class Class(Container):
             else:
                 params['CLASSTYPE'] = '0'
 
-        definition.write('raw< const ::Motor::Meta::Class > klass_%s()\n' '{\n' % (self.name[-1]))
+        definition.write('raw< const ::Motor::Meta::Class > klass_%s()\n'
+                         '{\n' % (self.name[-1]))
         self.typedef(definition)
         definition.write(
             '    static const\n'
@@ -933,6 +949,7 @@ class Class(Container):
 
 
 class Namespace(Container):
+
     def __init__(self, root_namespace, name, root_alias):
         super(Namespace, self).__init__(name)
         self.root_namespace = root_namespace
@@ -945,7 +962,8 @@ class Namespace(Container):
         return '::'.join(self.name)
 
     def declare_namespace(self, definition):
-        definition.write('raw<Meta::Class> ' 'motor_%s_Namespace_%s();\n' % (self.root_namespace, '_'.join(self.name)))
+        definition.write('raw<Meta::Class> '
+                         'motor_%s_Namespace_%s();\n' % (self.root_namespace, '_'.join(self.name)))
         for object in self.objects:
             object.declare_namespace(definition)
 
@@ -987,6 +1005,7 @@ class Namespace(Container):
 
 
 class AnonymousNamespace(Container):
+
     def __init__(self):
         super(AnonymousNamespace, self).__init__([])
         self.anonymous = True
@@ -1002,6 +1021,7 @@ class AnonymousNamespace(Container):
 
 
 class AnonymousClass(Container):
+
     def __init__(self):
         super(AnonymousClass, self).__init__([])
         self.anonymous = True
@@ -1020,6 +1040,7 @@ class AnonymousClass(Container):
 
 
 class Root(Container):
+
     def __init__(self, root_namespace, root_alias):
         super(Root, self).__init__([])
         self.root_namespace = root_namespace
@@ -1055,7 +1076,8 @@ class Root(Container):
 
         if self.objects:
             definition.write('\nnamespace Motor\n{\n')
-            definition.write('raw<Meta::Class> ' 'motor_%s_Namespace();\n' % (self.root_namespace))
+            definition.write('raw<Meta::Class> '
+                             'motor_%s_Namespace();\n' % (self.root_namespace))
             for object in self.objects:
                 object.declare_namespace(definition)
             definition.write('}\n')
