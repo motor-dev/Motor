@@ -24,6 +24,7 @@ reserved = {
     'inline': 'INLINE',
     'extern': 'EXTERN',
     'static': 'STATIC',
+    'constexpr': 'CONSTEXPR',
     'mutable': 'MUTABLE',
     'const': 'CONST',
     'volatile': 'VOLATILE',

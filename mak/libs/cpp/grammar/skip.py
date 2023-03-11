@@ -25,6 +25,7 @@ def p_skip_keyword(p):
                      | INLINE
                      | EXTERN
                      | STATIC
+                     | CONSTEXPR
                      | MUTABLE
                      | CONST
                      | VOLATILE

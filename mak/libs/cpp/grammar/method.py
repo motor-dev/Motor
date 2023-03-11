@@ -158,6 +158,7 @@ def p_attribute_left(p):
                        | INLINE
                        | EXPLICIT
                        | MUTABLE
+                       | CONSTEXPR
                        | __HOST
                        | __DEVICE
                        | __KERNEL
