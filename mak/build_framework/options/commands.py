@@ -121,8 +121,10 @@ def tidy_build(execute_method):
     """
 
     def execute(self):
-        result = execute_method(self)
-        self.clear_status_line()
+        try:
+            result = execute_method(self)
+        finally:
+            self.clear_status_line()
         if Options.options.tidy == 'force' or (
             Options.options.tidy == 'auto' and Options.options.nomaster == False and Options.options.static == False
             and Options.options.dynamic == False and Options.options.targets == '' and Options.options.tests
@@ -353,8 +355,10 @@ def add_build_command(toolchain, optimisation):
             old_execute = command.execute
 
             def execute(self):
-                result = self.old_execute()
-                self.clear_status_line()
+                try:
+                    result = self.old_execute()
+                finally:
+                    self.clear_status_line()
                 return result
 
         c[command] = Command
