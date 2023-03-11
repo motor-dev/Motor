@@ -12,7 +12,7 @@ def log_handler_emit(self, record):
     if status_line is not None:
         newline_count = record.msg.count('\n')
         if newline_count > 1 or len(record.msg) > Logs.get_term_cols():
-            sys.stdout.write('\0337\033[999B\033[2K\0338')
+            sys.stdout.write('\0337\033[999B\r\033[K\0338')
         legacy_log_emit_override(self, record)
         if self.terminator == '\n' or newline_count:
             sys.stdout.write('\033[2K\033D\033M\0337\033[999B\r\033[K%s\0338' % status_line)
@@ -41,7 +41,7 @@ def clear_status_line(context):
     global status_line
     if status_line is not None:
         status_line = None
-        sys.stdout.write('\0337\033[999B\033[2K\0338')
+        sys.stdout.write('\0337\033[999B\r\033[K\0338')
 
 
 @Configure.conf
