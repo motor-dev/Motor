@@ -32,9 +32,9 @@ public:
 private:
     struct Block
     {
-        minitl::itaggedptr< Block > next;
+        kernel::itaggedptr< Block > next;
     };
-    minitl::itaggedptr< Block > m_head;
+    kernel::itaggedptr< Block > m_head;
     i_u32                       m_capacity;
     i_u32                       m_used;
     const BlockSize             m_blockSize;

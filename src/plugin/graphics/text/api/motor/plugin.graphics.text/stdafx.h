@@ -16,5 +16,11 @@
 #    define MOTOR_API_TEXT
 #endif
 
+namespace Motor { namespace Log {
+
+weak< Logger > text();
+
+}}  // namespace Motor::Log
+
 /**************************************************************************************************/
 #endif

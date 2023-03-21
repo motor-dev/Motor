@@ -19,7 +19,7 @@ static BOOL WINAPI HandleControlEvent(DWORD eventType)
     {
     case CTRL_C_EVENT:
     case CTRL_BREAK_EVENT:
-        motor_info("interrupt event");
+        motor_info(Log::system(), "interrupt event");
         if(s_application) s_application->finish();
         return TRUE;
     default: return FALSE;

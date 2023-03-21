@@ -56,8 +56,9 @@ public:
     }
     typename POLICY::difference_type operator-(const base_iterator< POLICY >& other) const
     {
-        motor_assert_recover(m_owner == other.m_owner, "can't differ between unrelated iterators",
-                             return 0);
+        if(motor_assert(m_owner == other.m_owner,
+                        "cannot calculate distance between unrelated iterators"))
+            return 0;
         return POLICY::distance(other.m_iterator, m_iterator);
     }
 
@@ -393,10 +394,11 @@ template < typename ITERATOR >
 typename vector< T >::iterator vector< T >::insert(const_iterator location, ITERATOR first,
                                                    ITERATOR last)
 {
-    motor_assert_recover(
-        location.m_owner == this, "can't insert at iterator that is not pointing on current vector",
+    if(motor_assert(location.m_owner == this,
+                    "can't insert at iterator that is not pointing on current vector"))
         return iterator(
-            this, advance_ptr(m_memory.data(), distance(m_memory.data(), location.m_iterator))));
+            this, advance_ptr(m_memory.data(), distance(m_memory.data(), location.m_iterator)));
+
     iterator result = ensure(location, minitl::distance(first, last));
 
     for(iterator it = result; first != last; ++it, ++first)
@@ -409,11 +411,11 @@ template < typename T >
 template < class... Args >
 typename vector< T >::iterator vector< T >::emplace(const_iterator location, Args&&... args)
 {
-    motor_assert_recover(
-        location.m_owner == this,
-        "can't emplace at iterator that is not pointing on current vector",
+    if(motor_assert(location.m_owner == this,
+                    "can't emplace at iterator that is not pointing on current vector"))
         return iterator(
-            this, advance_ptr(m_memory.data(), distance(m_memory.data(), location.m_iterator))));
+            this, advance_ptr(m_memory.data(), distance(m_memory.data(), location.m_iterator)));
+
     iterator result = ensure(location, 1);
     new(result.m_iterator) T(minitl::forward< Args >(args)...);
     return result;
@@ -446,23 +448,23 @@ typename vector< T >::iterator vector< T >::erase(iterator it)
 template < typename T >
 typename vector< T >::iterator vector< T >::erase(iterator first, iterator last)
 {
-    motor_assert_recover(first.m_owner == this,
-                         "can't erase iterator that is not pointing on current vector",
-                         return first);
-    motor_assert_recover(last.m_owner == this,
-                         "can't erase iterator that is not pointing on current vector",
-                         return first);
-    motor_assert_recover(m_memory <= first.m_iterator && m_end > first.m_iterator,
-                         "first %p is not in the range of the vector [%p,%p)" | first.m_iterator
-                             | m_memory.data() | m_end,
-                         return first);
-    motor_assert_recover(m_memory <= last.m_iterator && m_end >= last.m_iterator,
-                         "last %p is not in the range of the vector [%p,%p)" | last.m_iterator
-                             | m_memory.data() | m_end,
-                         return first);
-    motor_assert_recover(first.m_iterator <= last.m_iterator,
-                         "first %p is not before last %p" | first.m_iterator | last.m_iterator,
-                         return first);
+    if(motor_assert(first.m_owner == this,
+                    "can't erase iterator that is not pointing on current vector"))
+        return first;
+    if(motor_assert(last.m_owner == this,
+                    "can't erase iterator that is not pointing on current vector"))
+        return first;
+    if(motor_assert_format(m_memory <= first.m_iterator && m_end > first.m_iterator,
+                           "first {0} is not in the range of the vector [{1},{2})",
+                           first.m_iterator, m_memory.data(), m_end))
+        return first;
+    if(motor_assert_format(m_memory <= last.m_iterator && m_end >= last.m_iterator,
+                           "last {0} is not in the range of the vector [{1},{2})", last.m_iterator,
+                           m_memory.data(), m_end))
+        return first;
+    if(motor_assert_format(first.m_iterator <= last.m_iterator, "first {0} is not before last {1}",
+                           first.m_iterator, last.m_iterator))
+        return first;
 
     for(pointer i = first.m_iterator; i != last.m_iterator; i = advance_ptr(i, 1))
     {

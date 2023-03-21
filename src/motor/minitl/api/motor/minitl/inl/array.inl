@@ -81,16 +81,16 @@ typename array< T >::const_iterator array< T >::end() const
 template < typename T >
 T& array< T >::operator[](u32 index)
 {
-    motor_assert(index < m_array.count(),
-                 "index %d out of bounds: array size is %d" | index | m_array.count());
+    motor_assert_format(index < m_array.count(), "index {0} out of bounds: array size is {1}",
+                        index, m_array.count());
     return m_array[index];
 }
 
 template < typename T >
 const T& array< T >::operator[](u32 index) const
 {
-    motor_assert(index < m_array.count(),
-                 "index %d out of bounds: array size is %d" | index | m_array.count());
+    motor_assert_format(index < m_array.count(), "index {0} out of bounds: array size is {1}",
+                        index, m_array.count());
     return m_array[index];
 }
 

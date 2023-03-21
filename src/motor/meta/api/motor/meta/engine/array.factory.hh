@@ -49,7 +49,8 @@ struct ClassID< minitl::array< T > >
     static MOTOR_EXPORT raw< const Meta::Class > klass();
     static MOTOR_EXPORT istring                  name()
     {
-        static const istring s_name(minitl::format< 2048u >("array<%s>") | TypeID< T >::name());
+        static const istring s_name(
+            minitl::format< 2048u >(FMT("array<{0}>"), TypeID< T >::name()));
         return s_name;
     }
 };

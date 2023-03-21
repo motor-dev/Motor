@@ -22,12 +22,14 @@ size_t Environment::getProcessorCount() const
     mib[1] = HW_NCPU;
     if(sysctl(mib, 2, &cpuCount, &len, NULL, 0) == -1)
     {
-        motor_error("Could not retrieve number of processors: %s" | sys_errlist[errno]);
+        motor_error_format(Log::system(), "Could not retrieve number of processors: {0}",
+                           sys_errlist[errno]);
         cpuCount = 1;
     }
-    motor_assert_recover(cpuCount >= 1, "Invalid number of CPUs returned by sysctl: %d" | cpuCount,
-                         cpuCount = 1);
-    motor_info("found %d CPU" | cpuCount);
+    if(motor_assert_format(cpuCount >= 1, "Invalid number of CPUs returned by sysctl: {0}",
+                           cpuCount))
+        cpuCount = 1;
+    motor_info_format(Log::system(), "found {0} CPU", cpuCount);
     return cpuCount;
 }
 

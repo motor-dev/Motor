@@ -28,7 +28,7 @@ struct ClassID< KernelScheduler::Product< T > >
     static Value construct(raw< const Meta::Method > method, Value* parameters, u32 parameterCount)
     {
         motor_forceuse(method);
-        motor_assert(parameterCount == 1, "expected 1 parameter; got %d" | parameterCount);
+        motor_assert_format(parameterCount == 1, "expected 1 parameter; got {0}", parameterCount);
         motor_forceuse(parameters);
         return Value(ref< KernelScheduler::Product< T > >::create(
             Arena::task(), parameters[0].as< weak< const KernelScheduler::Producer > >()));
@@ -67,7 +67,8 @@ struct ClassID< KernelScheduler::Product< T > >
     }
     static MOTOR_EXPORT istring name()
     {
-        static const istring s_name(minitl::format< 2048u >("Product<%s>") | TypeID< T >::name());
+        static const istring s_name(
+            minitl::format< 2048u >(FMT("Product<{0}>"), TypeID< T >::name()));
         return s_name;
     }
 };

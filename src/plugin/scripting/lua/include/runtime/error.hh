@@ -9,7 +9,7 @@
 
 namespace Motor { namespace Lua {
 
-int error(lua_State* state, const minitl::format< 4096u >& message);
+int error(lua_State* state, const char* message);
 
 }}  // namespace Motor::Lua
 

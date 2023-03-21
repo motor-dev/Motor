@@ -60,10 +60,10 @@ bool Reference::doResolve(DbContext& context)
                 const Value& v = ns->getValue();
                 if(!v)
                 {
-                    context.error(
-                        this, Message::MessageType(
-                                  "when resolving %s: namespace %s does not have a child named %s")
-                                  | m_referenceName | current | n);
+                    context.error(this,
+                                  minitl::format< 512 >(FMT("when resolving {0}: namespace {1} "
+                                                            "does not have a child named {2}"),
+                                                        m_referenceName, current, n));
                     return false;
                 }
                 else
@@ -78,10 +78,10 @@ bool Reference::doResolve(DbContext& context)
                         m_value.swap(propValue);
                         if(!found)
                         {
-                            context.error(
-                                this, Message::MessageType("when resolving %s: object %s of type "
-                                                           "%s does not have a property named %s")
-                                          | m_referenceName | current | t.name() | n);
+                            context.error(this, minitl::format< 512 >(
+                                                    FMT("when resolving {0}: object {1} of type "
+                                                        "{2} does not have a property named {3}"),
+                                                    m_referenceName, current, t.name(), n));
                             return false;
                         }
                         current.push_back(n);

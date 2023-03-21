@@ -48,9 +48,9 @@ FreetypeFace::FreetypeFace(weak< FreetypeLibrary >               freetype,
     error = FT_New_Memory_Face(freetype->library, buffer.begin(),
                                motor_checked_numcast< u32 >(buffer.byteCount()), 0, &face);
     motor_forceuse(error);
-    motor_assert(!error, "Freetype error %d" | error);
+    motor_assert_format(!error, "Freetype error {0}", error);
     error = FT_Select_Charmap(face, FT_ENCODING_UNICODE);
-    motor_assert(!error, "Freetype error %d" | error);
+    motor_assert_format(!error, "Freetype error {0}", error);
     FT_UInt  glyphIndex = 0;
     FT_ULong charcode   = FT_Get_First_Char(face, &glyphIndex);
     while(glyphIndex)

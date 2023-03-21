@@ -5,8 +5,7 @@
 #define MOTOR_KERNEL_GCC_X86_INTERLOCKED_INL_
 /**************************************************************************************************/
 #include <motor/kernel/stdafx.h>
-
-namespace _Kernel {
+namespace kernel { namespace interlocked_detail {
 
 template < unsigned size >
 struct InterlockedType;
@@ -97,9 +96,9 @@ struct InterlockedType< 8 >
 };
 #endif
 
-}  // namespace _Kernel
+}}  // namespace kernel::interlocked_detail
 
-namespace _Kernel {
+namespace kernel { namespace interlocked_detail {
 
 InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch(const value_t* p)
 {
@@ -315,7 +314,7 @@ bool InterlockedType< 8 >::set_conditional(tagged_t* p, tagged_t::value_t v,
 
 #endif
 
-}  // namespace _Kernel
+}}  // namespace kernel::interlocked_detail
 
 /**************************************************************************************************/
 #endif

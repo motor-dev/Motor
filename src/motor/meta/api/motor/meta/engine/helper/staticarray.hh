@@ -26,14 +26,14 @@ struct staticarray
 template < typename T >
 T& staticarray< T >::operator[](const u32 index)
 {
-    motor_assert(index < count, "index %d out of range (0, %d)" | index | (count - 1));
+    motor_assert_format(index < count, "index {0} out of range (0, {1})", index, (count - 1));
     return *(begin() + index);
 }
 
 template < typename T >
 const T& staticarray< T >::operator[](const u32 index) const
 {
-    motor_assert(index < count, "index %d out of range (0, %d)" | index | (count - 1));
+    motor_assert_format(index < count, "index {0} out of range (0, {1})", index, (count - 1));
     return *(begin() + index);
 }
 

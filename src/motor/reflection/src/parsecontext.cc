@@ -22,7 +22,7 @@ ParseContext::ParseContext(minitl::Allocator& allocator, const char* bufferStart
 {
     if(s_useCount++ != 0)
     {
-        motor_error("RTTI Parser is not reentrant");
+        motor_error(Log::meta(), "RTTI Parser is not reentrant");
     }
     location.line        = lineStart;
     location.columnStart = columnStart;

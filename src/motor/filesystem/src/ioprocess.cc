@@ -63,7 +63,7 @@ void IOContext::processRequests(IORequest* head)
         }
         break;
     case File::Ticket::Write: ticket->file->writeBuffer(ticket); break;
-    default: motor_error("unknown IO request: %d" | ticket->action); break;
+    default: motor_error_format(Log::fs(), "unknown IO request: {0}", int(ticket->action)); break;
     }
 }
 

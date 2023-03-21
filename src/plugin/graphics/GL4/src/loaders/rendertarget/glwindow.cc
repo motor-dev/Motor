@@ -17,7 +17,6 @@ void GLWindow::begin(ClearMode clear) const
             glClear(GL_COLOR_BUFFER_BIT);
         }
     }
-    motor_info("blabla");
 }
 
 void GLWindow::end(PresentMode presentMode) const
@@ -31,7 +30,6 @@ void GLWindow::end(PresentMode presentMode) const
         }
         clearCurrent();
     }
-    motor_info("blabla");
 }
 
 }}  // namespace Motor::OpenGL

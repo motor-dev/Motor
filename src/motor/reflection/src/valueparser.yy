@@ -47,11 +47,11 @@ static int yyerror(::Motor::Meta::Parse::ParseContext* context, const char *msg)
     using namespace Motor::Meta::AST;
     using namespace Motor::Meta::Parse;
     context->errors.push_back(Message(weak<const Node>(),
-                                      Message::MessageType("%s at line %d (%d:%d)")
-                                                         | msg
-                                                         | (context->location.line+1)
-                                                         | (context->location.columnStart+1)
-                                                         | (context->location.columnEnd+1),
+                                      minitl::format<512>(FMT("{0} at line {1} ({2}:{3})")
+                                                         , msg
+                                                         , (context->location.line+1)
+                                                         , (context->location.columnStart+1)
+                                                         , (context->location.columnEnd+1)),
                                       Motor::logError));
     return 0;
 }
@@ -276,8 +276,8 @@ object:
                         if ((*it)->name() == (*it2)->name())
                         {
                             context->errors.push_back(Message(*it2,
-                                                              Message::MessageType("attribute %s specified several times")
-                                                                                 | (*it2)->name(),
+                                                              minitl::format<512>(FMT("attribute {0} specified several times"),
+                                                                                  (*it2)->name()),
                                                               Motor::logError));
                             it2 = $3.value->erase(it2);
                         }

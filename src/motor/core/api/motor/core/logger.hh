@@ -16,12 +16,11 @@ namespace Motor {
 
 enum LogLevel
 {
-    logSpam    = 0,
-    logDebug   = 1,
-    logInfo    = 2,
-    logWarning = 3,
-    logError   = 4,
-    logFatal   = 5
+    logDebug   = 0,
+    logInfo    = 1,
+    logWarning = 2,
+    logError   = 3,
+    logFatal   = 4
 };
 
 class Logger;
@@ -35,8 +34,9 @@ protected:
     virtual ~ILogListener()
     {
     }
-    virtual bool log(const istring& logname, LogLevel level, const char* filename, int line,
-                     const char* thread, const char* msg) const = 0;
+    virtual bool log(const inamespace& logname, LogLevel level, const char* filename, int line,
+                     const char* thread, const char* msg) const
+        = 0;
 };
 
 class motor_api(CORE) Logger : public minitl::refcountable
@@ -50,28 +50,40 @@ private:
     minitl::vector< minitl::weak< ILogListener > >    m_listeners;
     minitl::hashmap< istring, minitl::ref< Logger > > m_children;
     minitl::weak< Logger >                            m_parent;
-    istring                                           m_name;
+    inamespace                                        m_name;
+    LogLevel                                          m_logFilter;
 
 private:
     Logger();
+    Logger(minitl::weak< Logger > parent, const istring& name, LogLevel minLogLevel = logDebug);
 
 public:
-    Logger(minitl::ref< Logger > parent, const istring& name);
     ~Logger();
 
-    minitl::ref< Logger >        getChild(const istring& name);
-    static minitl::ref< Logger > instance(const inamespace& name);
+    minitl::ref< Logger >         getChild(const istring& name);
+    static minitl::weak< Logger > instance(const inamespace& name);
     static bool log(const inamespace& name, LogLevel level, const char* filename, int line,
                     const char* msg);
     static minitl::ref< Logger > root();
 
-    bool log(LogLevel level, const char* filename, int line, const char* msg) const;
+    inline bool willLog(LogLevel level) const
+    {
+        return level >= m_logFilter;
+    }
+    inline bool log(LogLevel level, const char* filename, int line, const char* msg) const
+    {
+        if(level >= m_logFilter)
+        {
+            return doLog(level, m_name, filename, line, msg);
+        }
+        return false;
+    }
 
 private:
     void addListener(minitl::weak< ILogListener > listener);
     void removeListener(minitl::weak< ILogListener > listener);
-    bool doLog(LogLevel level, istring logName, const char* filename, int line, const char* msg)
-        const;
+    bool doLog(LogLevel level, const inamespace& logName, const char* filename, int line,
+               const char* msg) const;
 };
 
 struct ScopedLogListener
@@ -93,36 +105,45 @@ public:
     }
 };
 
-#define ALLDEBUG
-#if defined(_DEBUG) || defined(ALLDEBUG)
-#    define motor_spam(msg)                                                                        \
-        ::Motor::Logger::root()->log(::Motor::logSpam, __FILE__, __LINE__,                         \
-                                     (minitl::format< 1024u >)msg)
-#    define motor_debug(msg)                                                                       \
-        ::Motor::Logger::root()->log(::Motor::logDebug, __FILE__, __LINE__,                        \
-                                     (minitl::format< 1024u >)msg)
+#define motor_log(logger, level, msg)                                                              \
+    do                                                                                             \
+    {                                                                                              \
+        const weak< ::Motor::Logger >& l = logger;                                                 \
+        if(l->willLog(level)) l->log(level, __FILE__, __LINE__, msg);                              \
+    } while(0)
+
+#define motor_log_format(logger, level, msg, ...)                                                  \
+    do                                                                                             \
+    {                                                                                              \
+        const weak< ::Motor::Logger >& l = logger;                                                 \
+        if(l->willLog(level))                                                                      \
+            l->log(level, __FILE__, __LINE__, minitl::format< 4096 >(FMT(msg), __VA_ARGS__));      \
+    } while(0)
+
+#if defined(_DEBUG)
+#    define motor_debug(logger, msg) motor_log(logger, ::Motor::logDebug, msg)
+#    define motor_debug_format(logger, msg, ...)                                                   \
+        motor_log_format(logger, ::Motor::logDebug, msg, __VA_ARGS__)
 #else
-#    define motor_spam(msg)
-#    define motor_debug(msg)
+#    define motor_debug(logger, msg)
+#    define motor_debug_format(logger, msg, ...)
 #endif
 
-#if !defined(NDEBUG) || defined(ALLDEBUG)
-#    define motor_info(msg)                                                                        \
-        ::Motor::Logger::root()->log(::Motor::logInfo, __FILE__, __LINE__,                         \
-                                     (minitl::format< 1024u >)msg)
-#else
-#    define motor_info(msg)
-#endif
+#define motor_info(logger, msg) motor_log(logger, ::Motor::logInfo, msg)
+#define motor_info_format(logger, msg, ...)                                                        \
+    motor_log_format(logger, ::Motor::logInfo, msg, __VA_ARGS__)
 
-#define motor_warning(msg)                                                                         \
-    ::Motor::Logger::root()->log(::Motor::logWarning, __FILE__, __LINE__,                          \
-                                 (minitl::format< 1024u >)msg)
-#define motor_error(msg)                                                                           \
-    ::Motor::Logger::root()->log(::Motor::logError, __FILE__, __LINE__,                            \
-                                 (minitl::format< 1024u >)msg)
-#define motor_fatal(msg)                                                                           \
-    ::Motor::Logger::root()->log(::Motor::logFatal, __FILE__, __LINE__,                            \
-                                 (minitl::format< 1024u >)msg)
+#define motor_warning(logger, msg) motor_log(logger, ::Motor::logWarning, msg)
+#define motor_warning_format(logger, msg, ...)                                                     \
+    motor_log_format(logger, ::Motor::logWarning, msg, __VA_ARGS__)
+
+#define motor_error(logger, msg) motor_log(logger, ::Motor::logError, msg)
+#define motor_error_format(logger, msg, ...)                                                       \
+    motor_log_format(logger, ::Motor::logError, msg, __VA_ARGS__)
+
+#define motor_fatal(logger, msg) motor_log(logger, ::Motor::logFatal, msg)
+#define motor_fatal_format(logger, msg, ...)                                                       \
+    motor_log_format(logger, ::Motor::logFatal, msg, __VA_ARGS__)
 
 }  // namespace Motor
 

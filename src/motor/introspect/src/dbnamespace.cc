@@ -94,13 +94,13 @@ void Namespace::remove(const inamespace& name, ref< Node > node)
         for(u32 i = 0; i < name.size() - 1; ++i)
         {
             current = current->getChild(name[i]);
-            motor_assert_recover(current,
-                                 "could not remove object %s: unable to find child namespace %s"
-                                     | name | name[i],
-                                 return;);
+            if(motor_assert_format(
+                   current, "could not remove object {0}: unable to find child namespace {1}", name,
+                   name[i]))
+                return;
         }
-        motor_assert(node == current->m_nodes[name[name.size() - 1]],
-                     "node %s does not match the node to remove" | name);
+        motor_assert_format(node == current->m_nodes[name[name.size() - 1]],
+                            "node {0} does not match the node to remove", name);
         current->m_nodes.erase(current->m_nodes.find(name[name.size() - 1]));
     }
 }

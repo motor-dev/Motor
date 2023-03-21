@@ -19,7 +19,6 @@ static minitl::Allocator& lua()
 
 namespace Lua {
 
-static ref< Logger >                  s_logger(Logger::instance("scripting.lua"));
 static const raw< const Meta::Class > s_voidClass = motor_class< void >();
 
 static const char* s_metaTables[]
@@ -158,17 +157,17 @@ int Context::push(lua_State* state, const Meta::Value& v)
     }
 }
 
-minitl::format< 1024u > Context::tostring(lua_State* state, int element)
+minitl::format_buffer< 1024u > Context::tostring(lua_State* state, int element)
 {
     int t = lua_type(state, element);
     switch(t)
     {
     case LUA_TSTRING:
-        return minitl::format< 1024u >("lua_string('%s')") | lua_tostring(state, element);
+        return minitl::format< 1024u >(FMT("lua_string('{0}')"), lua_tostring(state, element));
     case LUA_TBOOLEAN:
-        return minitl::format< 1024u >("lua_boolean(%s)") | lua_toboolean(state, element);
+        return minitl::format< 1024u >(FMT("lua_boolean({0})"), lua_toboolean(state, element));
     case LUA_TNUMBER:
-        return minitl::format< 1024u >("lua_number(%g)") | lua_tonumber(state, element);
+        return minitl::format< 1024u >(FMT("lua_number({0})"), lua_tonumber(state, element));
     case LUA_TUSERDATA:
     {
         lua_getmetatable(state, element);
@@ -207,8 +206,9 @@ minitl::format< 1024u > Context::tostring(lua_State* state, int element)
                 break;
             }
             const char* access = (userdata->type().access == Meta::Type::Const) ? "const " : "";
-            return minitl::format< 1024u >("%s%s%s%s%s[@0x%p]") | constness | reference | access
-                   | userdata->type().metaclass->name.c_str() | closing | userdata;
+            return minitl::format< 1024u >(FMT("{0}{1}{2}{3}{4}[@0x{5}]"), constness, reference,
+                                           access, userdata->type().metaclass->name.c_str(),
+                                           closing, userdata);
         }
         lua_pop(state, 1);
         luaL_getmetatable(state, "Motor.Plugin");
@@ -217,29 +217,30 @@ minitl::format< 1024u > Context::tostring(lua_State* state, int element)
             lua_pop(state, 2);
             Plugin::Plugin< void >* userdata
                 = (Plugin::Plugin< void >*)lua_touserdata(state, element);
-            return minitl::format< 1024u >("Motor.Plugin[%s]") | userdata->name();
+            return minitl::format< 1024u >(FMT("Motor.Plugin[{0}]"), userdata->name());
         }
         lua_pop(state, 1);
         luaL_getmetatable(state, "Motor.ResourceManager");
         if(lua_rawequal(state, -1, -2))
         {
             lua_pop(state, 2);
-            return minitl::format< 1024u >("Motor.ResourceManager");
+            return minitl::format_buffer< 1024u > {"Motor.ResourceManager"};
         }
         lua_pop(state, 1);
         luaL_getmetatable(state, "Motor.Resource");
         if(lua_rawequal(state, -1, -2))
         {
             lua_pop(state, 2);
-            return minitl::format< 1024u >("Motor.Resource");
+            return minitl::format_buffer< 1024u > {"Motor.Resource"};
         }
         else
         {
             lua_pop(state, 2);
-            return minitl::format< 1024u >("lua_userdata[@0x%p]") | lua_touserdata(state, element);
+            return minitl::format< 1024u >(FMT("lua_userdata[@0x{0}]"),
+                                           lua_touserdata(state, element));
         }
     }
-    default: return minitl::format< 1024u >("%s") | lua_typename(state, t);
+    default: return minitl::format< 1024u >(FMT("{0}"), lua_typename(state, t));
     }
 }
 
@@ -248,11 +249,11 @@ void Context::printStack(lua_State* state)
     int i;
     int top = lua_gettop(state);
 
-    motor_debug("total in stack %d\n" | top);
+    motor_debug_format(Log::lua(), "total in stack {0}\n", top);
 
     for(i = 1; i <= top; i++)
     {
-        motor_debug(" %d: %s" | (top - i + 1) | tostring(state, -i).c_str());
+        motor_debug_format(Log::lua(), " {0}: {1}", (top - i + 1), tostring(state, -i).c_str());
     }
 }
 
@@ -273,11 +274,11 @@ extern "C" int luaPrint(lua_State* L)
         if(lua_getstack(L, 1, &ar))
         {
             lua_getinfo(L, "Snl", &ar);
-            s_logger->log(logInfo, ar.source, ar.currentline, s);
+            Log::lua()->log(logInfo, ar.source, ar.currentline, s);
         }
         else
         {
-            s_logger->log(logInfo, MOTOR_FILE, MOTOR_LINE, s);
+            Log::lua()->log(logInfo, MOTOR_FILE, MOTOR_LINE, s);
         }
         lua_pop(L, 1); /* pop result */
     }
@@ -361,7 +362,7 @@ void* Context::luaAlloc(void* /*ud*/, void* ptr, size_t osize, size_t nsize)
     }
 }
 
-minitl::format< 1024u > Context::getCallInfo(lua_State* state)
+minitl::format_buffer< 1024u > Context::getCallInfo(lua_State* state)
 {
     lua_Debug   ar0, ar1;
     const char* source = "unknown source";
@@ -376,7 +377,7 @@ minitl::format< 1024u > Context::getCallInfo(lua_State* state)
         source = ar1.source;
         line   = ar1.currentline;
     }
-    return minitl::format< 1024u >("%s:%d (%s)") | source | line | name;
+    return minitl::format< 1024u >(FMT("{0}:{1} ({2})"), source, line, name);
 }
 
 Context::Context(const Plugin::Context& context)
@@ -451,7 +452,7 @@ void Context::runBuffer(weak< const LuaScript > script, Resource::Resource& /*re
     {
         result = lua_pcall(m_state, 0, LUA_MULTRET, 0);
     }
-    motor_assert(result == 0, lua_tostring(m_state, -1));
+    motor_assert_format(result == 0, "{0}", lua_tostring(m_state, -1));
 }
 
 void Context::reloadBuffer(weak< const LuaScript > script, Resource::Resource& /*resource*/,
@@ -466,7 +467,7 @@ void Context::reloadBuffer(weak< const LuaScript > script, Resource::Resource& /
     {
         result = lua_pcall(m_state, 0, LUA_MULTRET, 0);
     }
-    motor_assert(result == 0, lua_tostring(m_state, -1));
+    motor_assert_format(result == 0, "{0}", lua_tostring(m_state, -1));
 }
 
 }  // namespace Lua

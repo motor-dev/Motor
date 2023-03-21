@@ -73,7 +73,7 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
 {
     if(G_TYPE_FUNDAMENTAL(type) == G_TYPE_GTYPE)
     {
-        motor_assert(false, "don't know how to handle type %s" | g_type_name(type));
+        motor_assert_format(false, "don't know how to handle type {0}", g_type_name(type));
         return false;
     }
 
@@ -262,7 +262,7 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
     case G_TYPE_POINTER:
     default:
     {
-        motor_assert(false, "don't know how to handle type %s" | g_type_name(type));
+        motor_assert_format(false, "don't know how to handle type {0}", g_type_name(type));
         return false;
     }
     }

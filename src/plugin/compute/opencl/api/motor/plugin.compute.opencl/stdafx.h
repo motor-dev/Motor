@@ -25,10 +25,14 @@
     do                                                                                             \
     {                                                                                              \
         cl_int err = a;                                                                            \
-        if(err != CL_SUCCESS) motor_error("OpenCL call %s failed with error code %d" | #a | err);  \
+        if(err != CL_SUCCESS)                                                                      \
+            motor_error_format(Motor::Log::opencl(), "OpenCL call {0} failed with error code {1}", \
+                               #a, err);                                                           \
     } while(0)
 
-namespace Motor { namespace KernelScheduler { namespace OpenCL {
+namespace Motor {
+
+namespace KernelScheduler { namespace OpenCL {
 
 struct CLStringInfo
 {
@@ -39,7 +43,15 @@ struct CLStringInfo
     char info[InfoLogSize];
 };
 
-}}}  // namespace Motor::KernelScheduler::OpenCL
+}}  // namespace KernelScheduler::OpenCL
+
+namespace Log {
+
+motor_api(OPENCL) weak< Logger > opencl();
+
+}
+
+}  // namespace Motor
 
 /**************************************************************************************************/
 #endif

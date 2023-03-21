@@ -40,7 +40,7 @@ SystemAllocator::~SystemAllocator()
 void* SystemAllocator::allocate()
 {
     ++m_used;
-    minitl::itaggedptr< Block >::ticket_t ticket;
+    kernel::itaggedptr< Block >::ticket_t ticket;
     Block*                                result;
     do
     {
@@ -63,7 +63,7 @@ void* SystemAllocator::allocate()
 void SystemAllocator::free(void* memory)
 {
     --m_used;
-    minitl::itaggedptr< Block >::ticket_t ticket;
+    kernel::itaggedptr< Block >::ticket_t ticket;
     Block*                                block;
     do
     {
@@ -94,7 +94,10 @@ void SystemAllocator::grow(u32 extraCapacity)
     }
     else
     {
-        motor_assert(pageSize % blockSize() == 0, "Page size should be a multiple of block size");
+        motor_assert_format(
+            pageSize % blockSize() == 0,
+            "Page size should be a multiple of block size; pageSize={0}, blockSize={1}", pageSize,
+            blockSize());
         u32 blocksPerPage = pageSize / blockSize();
         u32 pageCount     = extraCapacity / blocksPerPage;
         for(u32 i = 0; i < pageCount; ++i)

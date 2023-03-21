@@ -76,7 +76,7 @@ void FileSystemWatchProcessQueue::onFileSystemEvent(ConstFSEventStreamRef /*stre
         weak<FileSystem::WatchPoint> point = FileSystem::WatchPoint::getWatchPoint(path);
         if (point)
         {
-            motor_info("refreshing path %s" | path);
+            motor_info_format(Log::fs(), "refreshing path {0}", path);
             point->signalDirty();
         }
     }

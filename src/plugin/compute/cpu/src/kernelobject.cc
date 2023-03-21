@@ -10,10 +10,10 @@ namespace Motor { namespace KernelScheduler { namespace CPU {
 
 KernelObject::KernelObject(weak< const CodeObject > code, const istring name)
     : IExecutor()
-    , m_entryPoint(
-          code->m_kernel.getSymbol< KernelMain >((minitl::format< 256u >("_%s") | name).c_str()))
+    , m_entryPoint(code->m_kernel.getSymbol< KernelMain >(
+          (minitl::format< 256u >(FMT("_{0}"), name).c_str())))
 {
-    motor_debug("[%s]: %p" | name | m_entryPoint);
+    motor_debug_format(Log::cpu(), "[{0}]: {1}", name, m_entryPoint);
 }
 
 KernelObject::~KernelObject()

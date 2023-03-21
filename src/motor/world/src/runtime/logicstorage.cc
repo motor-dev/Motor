@@ -30,8 +30,9 @@ createProducer(raw< const Meta::Class >                componentClass,
             }
             else
             {
-                motor_error("Kernel task %s for logic component %s has no constructor"
-                            | kernelClass->fullname() | componentClass->fullname());
+                motor_error_format(Log::world(),
+                                   "Kernel task {0} for logic component {1} has no constructor",
+                                   kernelClass->fullname(), componentClass->fullname());
                 return ref< KernelScheduler::Producer >();
             }
         }
@@ -42,9 +43,10 @@ createProducer(raw< const Meta::Class >                componentClass,
     }
     else
     {
-        motor_error("Component class %s registered as Logic Component but does not have a "
-                    "LogicComponent tag"
-                    | componentClass->fullname());
+        motor_error_format(Log::world(),
+                           "Component class {0} registered as Logic Component but does not have a "
+                           "LogicComponent tag",
+                           componentClass->fullname());
         return ref< KernelScheduler::Producer >();
     }
 }

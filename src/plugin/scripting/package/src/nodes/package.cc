@@ -44,7 +44,7 @@ void Package::insertNode(const istring name, ref< Meta::AST::Node > object)
     {
         if(*it == object)
         {
-            motor_error("Object added twice");
+            motor_error(Log::package(), "Object added twice");
             return;
         }
     }
@@ -68,7 +68,7 @@ void Package::removeNode(ref< Meta::AST::Node > object)
         }
         ++it;
     }
-    motor_error("Object does not exist");
+    motor_error(Log::package(), "Object does not exist");
 }
 
 ref< Meta::AST::Node > Package::findByName(istring name) const

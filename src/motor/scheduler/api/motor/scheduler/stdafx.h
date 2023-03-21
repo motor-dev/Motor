@@ -19,9 +19,22 @@
 #endif
 
 #ifndef MOTOR_COMPUTE
-namespace Motor { namespace Arena {
+namespace Motor {
+
+namespace Arena {
+
 motor_api(SCHEDULER) minitl::Allocator& task();
-}}  // namespace Motor::Arena
+
+}
+
+namespace Log {
+
+motor_api(SCHEDULER) weak< Logger > scheduler();
+motor_api(SCHEDULER) weak< Logger > compute();
+
+}  // namespace Log
+
+}  // namespace Motor
 #endif
 
 #define motor_product(x)

@@ -24,9 +24,9 @@ cl_program CodeObject::loadProgram(weak< const Context > context)
     if(m_kernel)
     {
         const char* kernelSource = *m_kernel.getSymbol< const char* >(
-            istring(minitl::format< 128u >("s_clKernel%d") | context->getPointerSize()));
+            istring(minitl::format< 128u >(FMT("s_clKernel{0}"), context->getPointerSize())));
         const u64 kernelSourceSize = *m_kernel.getSymbol< const u64 >(
-            istring(minitl::format< 128u >("s_clKernel%dSize") | context->getPointerSize()));
+            istring(minitl::format< 128u >(FMT("s_clKernel{0}Size"), context->getPointerSize())));
         return context->buildProgram(kernelSourceSize, kernelSource);
     }
     else

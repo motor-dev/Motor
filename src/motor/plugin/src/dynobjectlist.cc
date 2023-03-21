@@ -21,7 +21,7 @@ DynamicObjectList::DynamicObjectList(const char* name)
     , m_name(name)
     , m_symbolCount(0)
 {
-    motor_info("Registering built-in dynamic object %s" | name);
+    motor_info_format(Log::plugin(), "Registering built-in dynamic object {0}", name);
     s_dynamicObjectRoot = this;
 }
 
@@ -33,7 +33,7 @@ DynamicObjectList::~DynamicObjectList()
 
 DynamicObjectList* DynamicObjectList::findDynamicObject(const char* name)
 {
-    motor_info("loading dynamic object %s (built-in)" | name);
+    motor_info_format(Log::plugin(), "loading dynamic object {0} (built-in)", name);
     DynamicObjectList* current = s_dynamicObjectRoot;
     while(current)
     {
@@ -43,7 +43,7 @@ DynamicObjectList* DynamicObjectList::findDynamicObject(const char* name)
         }
         current = current->m_next;
     }
-    motor_info("unable to load dynamic object %s" | name);
+    motor_info_format(Log::plugin(), "unable to load dynamic object {0}", name);
     return 0;
 }
 
@@ -78,7 +78,7 @@ void DynamicObjectList::showList()
     DynamicObjectList* object = s_dynamicObjectRoot;
     while(object)
     {
-        motor_info("registered built-in plugin %s" | object->m_name);
+        motor_info_format(Log::plugin(), "registered built-in plugin {0}", object->m_name);
         object = object->m_next;
     }
 }
