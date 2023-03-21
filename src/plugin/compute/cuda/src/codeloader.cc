@@ -19,8 +19,8 @@ CodeLoader::~CodeLoader()
 void CodeLoader::load(weak< const Resource::IDescription > kernelDescription,
                       Resource::Resource&                  resource)
 {
-    motor_info("loading Cuda kernel %s"
-               | motor_checked_cast< const Kernel >(kernelDescription)->name());
+    motor_info_format(Log::cuda(), "loading Cuda kernel {0}",
+                      motor_checked_cast< const Kernel >(kernelDescription)->name());
     inamespace name
         = motor_checked_cast< const Kernel >(kernelDescription)->name() + inamespace("cuda");
     resource.setRefHandle(ref< KernelObject >::create(Arena::task(), name));

@@ -29,6 +29,7 @@ private:
     intptr_t               m_param1;
     intptr_t               m_param2;
     intptr_t               m_result;
+    intptr_t               m_id;
 
 public:
     ThreadParams(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2);
@@ -68,7 +69,10 @@ Thread::ThreadParams::ThreadParams(const istring& name, ThreadFunction f, intptr
     , m_param2(p2)
     , m_result(0)
 {
-    motor_info("starting thread %s" | name);
+    motor_info_format(Log::thread(), "starting thread {0}", name);
+#ifdef MOTOR_PLATFORM_INUX
+    m_id = getttid();
+#endif
 }
 
 Thread::ThreadParams::~ThreadParams()
@@ -86,9 +90,9 @@ void* Thread::ThreadParams::threadWrapper(void* params)
 #elif MOTOR_PLATFORM_MACOSX
     pthread_setname_np(p->m_name.c_str());
 #endif
-    motor_debug("started thread %s" | p->m_name);
+    motor_debug_format(Log::thread(), "started thread {0}", p->m_name);
     p->m_result = (*p->m_function)(p->m_param1, p->m_param2);
-    motor_info("stopped thread %s" | p->m_name);
+    motor_info_format(Log::thread(), "stopped thread {0}", p->m_name);
     return 0;
 }
 
@@ -110,8 +114,8 @@ Thread::~Thread()
     clock_gettime(CLOCK_REALTIME, &abstime);
     abstime.tv_sec += 2;
     int result = pthread_timedjoin_np(*reinterpret_cast< pthread_t* >(m_data), &rvalue, &abstime);
-    motor_assert(result != ETIMEDOUT,
-                 "timed out when waiting for thread %s" | m_params->m_name.c_str());
+    motor_assert_format(result != ETIMEDOUT, "timed out when waiting for thread {0}",
+                        m_params->m_name.c_str());
 #else
     int result = pthread_join(*reinterpret_cast< pthread_t* >(m_data), &rvalue);
 #endif
@@ -150,7 +154,7 @@ istring Thread::name()
     }
     else
     {
-        return istring(minitl::format< 128u >("%d") | currentId());
+        return istring(minitl::format< 128u >(FMT("{0:x}"), currentId()));
     }
 }
 
@@ -165,6 +169,18 @@ void Thread::setPriority(Priority p)
     sched_param param;
     param.sched_priority = sched_get_priority_min(SCHED_RR) + (int)p;
     pthread_setschedparam(*reinterpret_cast< pthread_t* >(m_data), SCHED_RR, &param);
+}
+
+void Thread::pin(u32 cpuIndex)
+{
+    cpu_set_t cpuSet;
+    CPU_ZERO(&cpuSet);
+    CPU_SET(cpuIndex, &cpuSet);
+#ifdef MOTOR_PLATFORM_LINUX
+    sched_setaffinity(m_id, sizeof(cpuSet), &cpuSet);
+#else
+    pthread_setaffinity_np(*reinterpret_cast< pthread_t* >(m_data), sizeof(cpuSet), &cpuSet);
+#endif
 }
 
 }  // namespace Motor

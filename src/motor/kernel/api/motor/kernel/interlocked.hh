@@ -44,14 +44,14 @@
 #    error Compiler not implemented
 #endif
 
-namespace _Kernel {
+namespace kernel {
 
 template < typename T >
 struct interlocked
 {
 private:
-    typedef InterlockedType< sizeof(T) > impl;
-    typedef typename impl::value_t       value_t;
+    typedef interlocked_detail::InterlockedType< sizeof(T) > impl;
+    typedef typename impl::value_t                           value_t;
 
 private:
     value_t m_value;
@@ -112,14 +112,14 @@ public:
     }
 };
 
-}  // namespace _Kernel
+}  // namespace kernel
 
 template < typename T >
 struct iptr
 {
 private:
-    typedef _Kernel::InterlockedType< sizeof(T*) > impl;
-    typedef typename impl::value_t                 value_t;
+    typedef kernel::interlocked_detail::InterlockedType< sizeof(T*) > impl;
+    typedef typename impl::value_t                                    value_t;
 
 private:
     value_t m_value;
@@ -161,14 +161,14 @@ public:
     }
 };
 
-typedef _Kernel::interlocked< bool >   i_bool;
-typedef _Kernel::interlocked< u8 >     i_u8;
-typedef _Kernel::interlocked< u16 >    i_u16;
-typedef _Kernel::interlocked< u32 >    i_u32;
-typedef _Kernel::interlocked< i8 >     i_i8;
-typedef _Kernel::interlocked< i16 >    i_i16;
-typedef _Kernel::interlocked< i32 >    i_i32;
-typedef _Kernel::interlocked< size_t > i_size_t;
+typedef kernel::interlocked< bool >   i_bool;
+typedef kernel::interlocked< u8 >     i_u8;
+typedef kernel::interlocked< u16 >    i_u16;
+typedef kernel::interlocked< u32 >    i_u32;
+typedef kernel::interlocked< i8 >     i_i8;
+typedef kernel::interlocked< i16 >    i_i16;
+typedef kernel::interlocked< i32 >    i_i32;
+typedef kernel::interlocked< size_t > i_size_t;
 
 /**************************************************************************************************/
 #endif

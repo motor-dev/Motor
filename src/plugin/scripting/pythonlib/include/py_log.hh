@@ -18,9 +18,9 @@ struct PyMotorLog
         logTypeStdErr
     };
 
-    PyObject      py_object;
-    ref< Logger > logger;
-    LogType       type;
+    PyObject       py_object;
+    weak< Logger > logger;
+    LogType        type;
 
     static void registerType(PyObject* module);
 

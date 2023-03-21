@@ -49,8 +49,8 @@ bool TaskGroup::removeStartTask(weak< ITask > task)
         {
             bool result = (*it)->startCallback()->onDisconnected(this);
             motor_forceuse(result);
-            motor_assert(result,
-                         "unable to disconnect task %s from group %s" | task->name | this->name);
+            motor_assert_format(result, "unable to disconnect task {0} from group {1}", task->name,
+                                this->name);
             m_startTasks.erase(it);
             return true;
         }
@@ -121,8 +121,8 @@ TaskGroup::TaskStartConnection::operator=(const TaskStartConnection& other)
     {
         bool result = m_group->removeStartTask(m_task);
         motor_forceuse(result);
-        motor_assert(result,
-                     "could not disconnect task %s from group %s" | m_task->name | m_group->name);
+        motor_assert_format(result, "could not disconnect task {0} from group {1}", m_task->name,
+                            m_group->name);
     }
     m_group = other.m_group;
     m_task  = other.m_task;
@@ -139,8 +139,8 @@ TaskGroup::TaskStartConnection::~TaskStartConnection()
     {
         bool result = m_group->removeStartTask(m_task);
         motor_forceuse(result);
-        motor_assert(result,
-                     "could not disconnect task %s from group %s" | m_task->name | m_group->name);
+        motor_assert_format(result, "could not disconnect task {0} from group {1}", m_task->name,
+                            m_group->name);
     }
 }
 

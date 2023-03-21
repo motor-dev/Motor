@@ -16,7 +16,7 @@ extern "C" i64  fetch_and_set_64(i64* p, i64 v);
 extern "C" char set_conditional_128(i64* p, i64 nvalue, i64 oldvalue, i64 tag);
 #endif
 
-namespace _Kernel {
+namespace kernel { namespace interlocked_detail {
 
 template < unsigned size >
 struct InterlockedType;
@@ -206,7 +206,7 @@ struct InterlockedType< 8 >
 };
 #endif
 
-}  // namespace _Kernel
+}}  // namespace kernel::interlocked_detail
 
 /**************************************************************************************************/
 #endif

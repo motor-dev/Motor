@@ -16,16 +16,16 @@ template < typename T >
 class pool
 {
 private:
-    struct node : public minitl::istack< node >::node
+    struct node : public kernel::istack< node >::node
     {
     };
     enum
     {
         ElementSize = sizeof(T)
     };
-    istack< node >        m_items;
-    Allocator::Block< T > m_pool;
-    T*                    m_end;
+    kernel::istack< node > m_items;
+    Allocator::Block< T >  m_pool;
+    T*                     m_end;
 
 public:
     pool(Allocator& allocator, u64 capacity, u64 alignment = motor_alignof(T));

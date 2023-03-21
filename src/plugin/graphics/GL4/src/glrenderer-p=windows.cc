@@ -71,8 +71,8 @@ public:
 
 static HWND createDummyWnd(weak< const GLRenderer > renderer)
 {
-    minitl::format< 128u > classname
-        = minitl::format< 128u >("__motor__%p__") | (const void*)renderer;
+    minitl::format_buffer< 128u > classname
+        = minitl::format< 128u >(FMT("__motor__{0}__"), (const void*)renderer);
     HWND hWnd = CreateWindowEx(0, classname.c_str(), "", WS_POPUP, 0, 0, 1, 1, 0, 0,
                                (HINSTANCE)::GetModuleHandle(0), 0);
     if(!hWnd)
@@ -80,7 +80,7 @@ static HWND createDummyWnd(weak< const GLRenderer > renderer)
         char* errorMessage;
         ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL,
                         ::GetLastError(), 0, reinterpret_cast< LPTSTR >(&errorMessage), 0, NULL);
-        motor_error(errorMessage);
+        motor_error(Log::gl(), errorMessage);
         ::LocalFree(errorMessage);
     }
     return hWnd;
@@ -152,12 +152,13 @@ static HGLRC createGLContext(weak< const GLRenderer > renderer, HDC hdc)
     if(rc)
     {
         wglMakeCurrent(hdc, rc);
-        motor_info("Created OpenGL context %s (%s) on %s" | (const char*)glGetString(GL_VERSION)
-                   | (const char*)glGetString(GL_VENDOR) | (const char*)glGetString(GL_RENDERER));
+        motor_info_format(Log::gl(), "Created OpenGL context {0} ({1}) on {2}",
+                          (const char*)glGetString(GL_VERSION), (const char*)glGetString(GL_VENDOR),
+                          (const char*)glGetString(GL_RENDERER));
     }
     else
     {
-        motor_error("Could not create a GL context");
+        motor_error(Log::gl(), "Could not create a GL context");
     }
     return rc;
 }
@@ -291,7 +292,7 @@ void GLWindow::setCurrent() const
         char* errorMessage;
         ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL,
                         ::GetLastError(), 0, reinterpret_cast< LPTSTR >(&errorMessage), 0, NULL);
-        motor_error(errorMessage);
+        motor_error(Log::gl(), errorMessage);
         ::LocalFree(errorMessage);
     }
 }
@@ -304,7 +305,7 @@ void GLWindow::clearCurrent() const
         char* errorMessage;
         ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL,
                         ::GetLastError(), 0, reinterpret_cast< LPTSTR >(&errorMessage), 0, NULL);
-        motor_error(errorMessage);
+        motor_error(Log::gl(), errorMessage);
         ::LocalFree(errorMessage);
     }
 }

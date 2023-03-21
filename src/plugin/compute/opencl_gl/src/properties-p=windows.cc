@@ -22,7 +22,8 @@ minitl::array< cl_context_properties > Scheduler::createPlatformSpecificContextP
     }
     else
     {
-        motor_info("no OpenGL context found; OpenGL/OpenCL compatibility disabled");
+        motor_info(Log::opencl_gl(),
+                   "no OpenGL context found; OpenGL/OpenCL compatibility disabled");
         minitl::array< cl_context_properties > properties(Arena::temporary(), 1);
         properties[0] = 0;
         return properties;

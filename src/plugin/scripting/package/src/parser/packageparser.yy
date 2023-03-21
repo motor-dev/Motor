@@ -34,9 +34,9 @@ static int yyerror(void* context, const char *msg)
     using namespace Motor::Meta::AST;
     Motor::PackageBuilder::BuildContext* buildContext = static_cast<Motor::PackageBuilder::BuildContext*>(context);
     buildContext->result->context().error(weak<const Node>(),
-                                          Message::MessageType("%s at line %d (%d:%d)") | msg | (g_packageLine+1)
-                                                                                        | (g_packageColumnBefore)
-                                                                                        | (g_packageColumnAfter));
+                                          minitl::format<512>(FMT("{0} at line {1} ({2}:{3})"), msg, (g_packageLine+1)
+                                                                                              , (g_packageColumnBefore)
+                                                                                              , (g_packageColumnAfter)));
     return 0;
 }
 

@@ -32,7 +32,7 @@
 #    define AO_THUMB_SWITCH_CLOBBERS /* empty */
 #endif                               /* !__thumb__ */
 
-namespace _Kernel {
+namespace kernel { namespace interlocked_detail {
 
 template < unsigned size >
 struct InterlockedType;
@@ -292,7 +292,7 @@ struct InterlockedType< 2 > : public InterlockedType< 4 >
 {
 };
 
-}  // namespace _Kernel
+}}  // namespace kernel::interlocked_detail
 
 /**************************************************************************************************/
 #endif

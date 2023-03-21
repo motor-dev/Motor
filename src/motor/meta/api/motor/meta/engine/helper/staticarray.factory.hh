@@ -44,8 +44,8 @@ struct ClassID< Meta::staticarray< T > >
     static MOTOR_EXPORT raw< const Meta::Class > klass();
     static MOTOR_EXPORT istring                  name()
     {
-        static const istring s_name(minitl::format< 2048u >("staticarray<%s>")
-                                    | TypeID< T >::name());
+        static const istring s_name(
+            minitl::format< 2048u >(FMT("staticarray<{0}>"), TypeID< T >::name()));
         return s_name;
     }
 };
@@ -77,7 +77,7 @@ ClassID< Meta::staticarray< T > >::callStaticArrayOperatorIndex(raw< const Meta:
                                                                 Meta::Value* params, u32 paramCount)
 {
     motor_forceuse(method);
-    motor_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
+    motor_assert_format(paramCount == 1, "expected 1 parameter; received {0}", paramCount);
     return Meta::Value(params[0].as< Meta::staticarray< T >& >().operator[](params[1].as< u32 >()));
 }
 
@@ -87,7 +87,7 @@ Meta::Value ClassID< Meta::staticarray< T > >::callStaticArraySize(raw< const Me
                                                                    u32 paramCount)
 {
     motor_forceuse(method);
-    motor_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
+    motor_assert_format(paramCount == 1, "expected 1 parameter; received {0}", paramCount);
     return Meta::Value(params[0].as< const Meta::staticarray< T >& >().count);
 }
 
@@ -96,7 +96,7 @@ Meta::Value ClassID< Meta::staticarray< T > >::callStaticArrayOperatorIndexConst
     raw< const Meta::Method > method, Meta::Value* params, u32 paramCount)
 {
     motor_forceuse(method);
-    motor_assert(paramCount == 2, "expected 2 parameter; received %d" | paramCount);
+    motor_assert_format(paramCount == 2, "expected 2 parameter; received {0}", paramCount);
     return Meta::Value(
         params[0].as< const Meta::staticarray< T >& >().operator[](params[1].as< u32 >()));
 }

@@ -27,6 +27,11 @@ public:
     u32 length() const;
     u32 size() const;
 
+    operator const char*() const
+    {
+        return begin();
+    }
+
 private:
     text& operator=(const text& other);
     text();
@@ -36,11 +41,15 @@ private:
 
 namespace minitl {
 
-template < u16 SIZE >
-const format< SIZE >& operator|(const format< SIZE >& f, const Motor::text& value)
+template <>
+struct formatter< Motor::text > : public formatter< const char* >
 {
-    return f | value.begin();
-}
+    static u32 length(const Motor::text& value, const format_options& options)
+    {
+        motor_forceuse(options);
+        return value.length();
+    }
+};
 
 }  // namespace minitl
 

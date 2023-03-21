@@ -10,6 +10,7 @@ namespace Motor { namespace Gtk3 {
 
 class Gtk3Plugin;
 
+bool                     registerGObjectClass(Gtk3Plugin& plugin, GType type);
 raw< const Meta::Class > getGObjectClass(Gtk3Plugin& plugin, GType type);
 void                     destroyGObjectClass(Gtk3Plugin& plugin, GType type);
 

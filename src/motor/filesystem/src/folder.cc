@@ -128,7 +128,7 @@ void Folder::mount(istring name, ref< Folder > folder)
     {
         if(it->first == name)
         {
-            motor_warning("mounting filesystem hides folder %s" | name);
+            motor_warning_format(Log::fs(), "mounting filesystem hides folder {0}", name);
         }
     }
     for(minitl::vector< minitl::tuple< istring, ref< Folder > > >::iterator it = m_mounts.begin();
@@ -136,7 +136,8 @@ void Folder::mount(istring name, ref< Folder > folder)
     {
         if(it->first == name)
         {
-            motor_warning("mounting filesystem will unmount filesystem %s" | name);
+            motor_warning_format(Log::fs(), "mounting filesystem will unmount filesystem {0}",
+                                 name);
             it->second = folder;
             return;
         }
@@ -156,7 +157,9 @@ void Folder::mount(ipath name, ref< Folder > folder)
         }
         else
         {
-            motor_error("could not mount folder; path %s does not exist in the file system" | name);
+            motor_error_format(Log::fs(),
+                               "could not mount folder; path {0} does not exist in the file system",
+                               name);
         }
     }
     else
@@ -178,7 +181,7 @@ void Folder::umount(istring name)
             return;
         }
     }
-    motor_error("could not unmount folder; path %s is not mounted" | name);
+    motor_error_format(Log::fs(), "could not unmount folder; path {0} is not mounted", name);
 }
 
 void Folder::umount(ipath name)
@@ -193,8 +196,9 @@ void Folder::umount(ipath name)
         }
         else
         {
-            motor_error("could not unmount folder; path %s does not exist in the file system"
-                        | name);
+            motor_error_format(
+                Log::fs(), "could not unmount folder; path {0} does not exist in the file system",
+                name);
         }
     }
     else

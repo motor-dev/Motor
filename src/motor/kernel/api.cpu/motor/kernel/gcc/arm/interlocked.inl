@@ -9,7 +9,7 @@
 #if defined(_ARM_V7)
 #    define DMB(x) "       dmb\n"
 #elif defined(_ARM_V6)
-#    define DMB(x) "       mcr p15, 0, %" #    x ", c7, c10, 5\n"
+#    define DMB(x) "       mcr p15, 0, %" #x ", c7, c10, 5\n"
 #else
 #    error Unsupported ARM architecture;interlocked operations supported on ARM6 and above
 #endif
@@ -40,7 +40,7 @@
 #    define AO_THUMB_SWITCH_CLOBBERS /* empty */
 #endif                               /* !__thumb__ */
 
-namespace _Kernel {
+namespace kernel { namespace interlocked_detail {
 
 template < unsigned size >
 struct InterlockedType;
@@ -177,7 +177,7 @@ struct InterlockedType< 2 > : public InterlockedType< 4 >
 {
 };
 
-}  // namespace _Kernel
+}}  // namespace kernel::interlocked_detail
 
 /**************************************************************************************************/
 #endif

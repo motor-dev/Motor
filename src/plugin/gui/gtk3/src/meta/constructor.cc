@@ -23,8 +23,8 @@ Meta::Value Constructor::call(raw< const Meta::Method > method, Meta::Value* par
     guint         paramSpecCount;
     GParamSpec**  paramSpecs = g_object_class_list_properties(objectClass, &paramSpecCount);
 
-    u32 actualParamCount = 0;
-    GValue zeroValue = G_VALUE_INIT;
+    u32    actualParamCount = 0;
+    GValue zeroValue        = G_VALUE_INIT;
 
 #ifdef GLIB_VERSION_2_54
     const char** names  = static_cast< const char** >(malloca(nparams * sizeof(char*)));
@@ -72,8 +72,8 @@ Meta::Value Constructor::call(raw< const Meta::Method > method, Meta::Value* par
     GObjectWrapper object = {(GObject*)g_object_newv(type, actualParamCount, gparams)};
 #endif
 
-    motor_assert(method->overloads.count == 1,
-                 "Constructor for type %s has more than one overload" | g_type_name(type));
+    motor_assert_format(method->overloads.count == 1,
+                        "Constructor for type {0} has more than one overload", g_type_name(type));
     Meta::Type  returnType = method->overloads[0].returnType;
     Meta::Value result(returnType, &object, Meta::Value::MakeCopy);
     g_type_class_unref(objectClass);

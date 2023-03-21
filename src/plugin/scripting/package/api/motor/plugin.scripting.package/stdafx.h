@@ -16,12 +16,21 @@
 #endif
 
 #ifndef MOTOR_COMPUTE
-namespace Motor { namespace Arena {
+namespace Motor {
+
+namespace Arena {
 
 minitl::Allocator& package();
 minitl::Allocator& packageBuilder();
 
-}}  // namespace Motor::Arena
+}  // namespace Arena
+
+namespace Log {
+
+weak< Logger > package();
+}
+
+}  // namespace Motor
 #endif
 
 /**************************************************************************************************/

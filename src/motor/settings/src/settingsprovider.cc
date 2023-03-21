@@ -19,7 +19,8 @@ void SettingsProvider::addSetting(minitl::hashmap< istring, SettingsList >& cont
     {
         if(it->first == name)
         {
-            motor_warning("setting %s.%s overriden; first value ignored" | category | name);
+            motor_warning_format(Log::settings(), "setting {0}.{1} overriden; first value ignored",
+                                 category, name);
             it->third = value;
             return;
         }
@@ -81,7 +82,8 @@ void SettingsProvider::apply(SettingsBase& settings) const
                     = settings.m_settingsClass->getProperty(setting->first);
                 if(!property)
                 {
-                    motor_error("Unknwon setting %s in category %s" | setting->first | it->first);
+                    motor_error_format(Log::settings(), "Unknwon setting {0} in category {1}",
+                                       setting->first, it->first);
                 }
                 else
                 {

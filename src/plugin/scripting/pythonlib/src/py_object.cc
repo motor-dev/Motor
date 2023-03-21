@@ -359,10 +359,10 @@ void PyMotorObject::registerType(PyObject* module)
 
 static inline void unpackArray(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    motor_assert(type.metaclass->type() == Meta::ClassType_Array
-                     || type.metaclass->type() == Meta::ClassType_Variant,
-                 "expected to unpack Python Array into Meta::ClassType_Array, got %s"
-                     | type.metaclass->name);
+    motor_assert_format(type.metaclass->type() == Meta::ClassType_Array
+                            || type.metaclass->type() == Meta::ClassType_Variant,
+                        "expected to unpack Python Array into Meta::ClassType_Array, got {0}",
+                        type.metaclass->name);
     motor_unimplemented();
     motor_forceuse(arg);
     motor_forceuse(buffer);
@@ -370,10 +370,10 @@ static inline void unpackArray(PyObject* arg, const Meta::Type& type, void* buff
 
 static inline void unpackNumber(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    motor_assert(type.metaclass->type() == Meta::ClassType_Number
-                     || type.metaclass->type() == Meta::ClassType_Variant,
-                 "expected to unpack Python Number into Meta::ClassType_Number, got %s"
-                     | type.metaclass->name);
+    motor_assert_format(type.metaclass->type() == Meta::ClassType_Number
+                            || type.metaclass->type() == Meta::ClassType_Variant,
+                        "expected to unpack Python Number into Meta::ClassType_Number, got {0}",
+                        type.metaclass->name);
     unsigned long long value
         = arg->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS
               ? (unsigned long long)s_library->m_PyInt_AsUnsignedLongMask(arg)
@@ -452,10 +452,10 @@ static inline void unpackNumber(PyObject* arg, const Meta::Type& type, void* buf
 
 static inline void unpackFloat(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    motor_assert(type.metaclass->type() == Meta::ClassType_Number
-                     || type.metaclass->type() == Meta::ClassType_Variant,
-                 "expected to unpack Python Float into Meta::ClassType_Number, got %s"
-                     | type.metaclass->name);
+    motor_assert_format(type.metaclass->type() == Meta::ClassType_Number
+                            || type.metaclass->type() == Meta::ClassType_Variant,
+                        "expected to unpack Python Float into Meta::ClassType_Number, got {0}",
+                        type.metaclass->name);
     double value = s_library->m_PyFloat_AsDouble(arg);
     switch(type.metaclass->index())
     {
@@ -531,10 +531,10 @@ static inline void unpackFloat(PyObject* arg, const Meta::Type& type, void* buff
 
 static inline void unpackString(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    motor_assert(type.metaclass->type() == Meta::ClassType_String
-                     || type.metaclass->type() == Meta::ClassType_Variant,
-                 "expected to unpack Python String into Meta::ClassType_String, got %s"
-                     | type.metaclass->name);
+    motor_assert_format(type.metaclass->type() == Meta::ClassType_String
+                            || type.metaclass->type() == Meta::ClassType_Variant,
+                        "expected to unpack Python String into Meta::ClassType_String, got {0}",
+                        type.metaclass->name);
     char*     string;
     PyObject* decodedUnicode = 0;
     if(arg->py_type->tp_flags & Py_TPFLAGS_UNICODE_SUBCLASS)
@@ -570,9 +570,9 @@ static inline void unpackString(PyObject* arg, const Meta::Type& type, void* buf
 
 static inline void unpackPod(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    motor_assert(type.metaclass->type() == Meta::ClassType_Pod,
-                 "expected to unpack Python Dict into Meta::ClassType_Pod, got %s"
-                     | type.metaclass->name);
+    motor_assert_format(type.metaclass->type() == Meta::ClassType_Pod,
+                        "expected to unpack Python Dict into Meta::ClassType_Pod, got {0}",
+                        type.metaclass->name);
 
     Meta::Value* result = new(buffer) Meta::Value(type, Meta::Value::Reserve);
     Meta::Value* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
@@ -629,12 +629,12 @@ Meta::ConversionCost PyMotorObject::distance(PyObject* object, const Meta::Type&
     {
         if(desiredType.metaclass->type() == Meta::ClassType_Array)
         {
-            motor_assert(desiredType.metaclass->operators,
-                         "Array type %s does not implement operator methods"
-                             | desiredType.metaclass->fullname());
-            motor_assert(desiredType.metaclass->operators->arrayOperators,
-                         "Array type %s does not implement Array API methods"
-                             | desiredType.metaclass->fullname());
+            motor_assert_format(desiredType.metaclass->operators,
+                                "Array type {0} does not implement operator methods",
+                                desiredType.metaclass->fullname());
+            motor_assert_format(desiredType.metaclass->operators->arrayOperators,
+                                "Array type {0} does not implement Array API methods",
+                                desiredType.metaclass->fullname());
             PyTuple_SizeType    size = object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS)
                                            ? s_library->m_PyList_Size
                                            : s_library->m_PyTuple_Size;
@@ -720,9 +720,9 @@ void PyMotorObject::unpack(PyObject* object, const Meta::Type& desiredType, void
             || object->py_type->tp_base == &PyMotorObject::s_pyType)
     {
         PyMotorObject* object_ = static_cast< PyMotorObject* >(object);
-        motor_assert(desiredType <= object_->value.type(),
-                     "incompatible types: %s is not compatible with %s"
-                         | object_->value.type().name().c_str() | desiredType.name().c_str());
+        motor_assert_format(desiredType <= object_->value.type(),
+                            "incompatible types: {0} is not compatible with {1}",
+                            object_->value.type().name().c_str(), desiredType.name().c_str());
         new(buffer) Meta::Value(Meta::Value::ByRef(object_->value));
     }
     else if(object->py_type->tp_flags & (Py_TPFLAGS_INT_SUBCLASS | Py_TPFLAGS_LONG_SUBCLASS))

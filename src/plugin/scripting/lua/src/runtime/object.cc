@@ -51,7 +51,7 @@ static int pushUserdataString(lua_State* L, Meta::Value* userdata)
     return 1;
 }
 
-extern "C" int valueGC(lua_State* state)
+static int valueGC(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Object");
 
@@ -60,7 +60,7 @@ extern "C" int valueGC(lua_State* state)
     return 0;
 }
 
-extern "C" int valueToString(lua_State* state)
+static int valueToString(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Object");
 
@@ -87,7 +87,7 @@ extern "C" int valueToString(lua_State* state)
     return pushUserdataString(state, userdata);
 }
 
-extern "C" int valueGet(lua_State* state)
+static int valueGet(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Object");
     Meta::Value*             userdata = (Meta::Value*)lua_touserdata(state, -2);
@@ -95,10 +95,10 @@ extern "C" int valueGet(lua_State* state)
 
     if(cls->type() == Meta::ClassType_Array && lua_type(state, 2) == LUA_TNUMBER)
     {
-        motor_assert(cls->operators,
-                     "Array type %s does not implement operator methods" | cls->fullname());
-        motor_assert(cls->operators->arrayOperators,
-                     "Array type %s does not implement Array API methods" | cls->fullname());
+        motor_assert_format(cls->operators, "Array type {0} does not implement operator methods",
+                            cls->fullname());
+        motor_assert_format(cls->operators->arrayOperators,
+                            "Array type {0} does not implement Array API methods", cls->fullname());
         const u32 i = motor_checked_numcast< u32 >(lua_tonumber(state, 2));
         if(userdata->type().isConst())
         {
@@ -130,17 +130,17 @@ extern "C" int valueGet(lua_State* state)
     }
 }
 
-extern "C" int valueSet(lua_State* state)
+static int valueSet(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Object");
     Meta::Value*             userdata = (Meta::Value*)lua_touserdata(state, 1);
     raw< const Meta::Class > cls      = userdata->type().metaclass;
     if(cls->type() == Meta::ClassType_Array && lua_type(state, 2) == LUA_TNUMBER)
     {
-        motor_assert(cls->operators,
-                     "Array type %s does not implement operator methods" | cls->fullname());
-        motor_assert(cls->operators->arrayOperators,
-                     "Array type %s does not implement Array API methods" | cls->fullname());
+        motor_assert_format(cls->operators, "Array type {0} does not implement operator methods",
+                            cls->fullname());
+        motor_assert_format(cls->operators->arrayOperators,
+                            "Array type {0} does not implement Array API methods", cls->fullname());
         const u32 i = motor_checked_numcast< u32 >(lua_tonumber(state, 2));
         if(userdata->type().isConst())
         {
@@ -161,18 +161,20 @@ extern "C" int valueSet(lua_State* state)
         raw< const Meta::Property > p    = userdata->type().metaclass->getProperty(name);
         if(!p)
         {
-            return error(state, minitl::format< 4096u >("object of type %s has no property %s")
-                                    | userdata->type().name().c_str() | name.c_str());
+            return error(state,
+                         minitl::format< 4096u >(FMT("object of type {0} has no property {1}"),
+                                                 userdata->type().name().c_str(), name.c_str()));
         }
         else if(userdata->type().constness == Meta::Type::Const)
         {
-            return error(state, minitl::format< 4096u >("object %s is const")
-                                    | userdata->type().name().c_str());
+            return error(state, minitl::format< 4096u >(FMT("object {0} is const"),
+                                                        userdata->type().name().c_str()));
         }
         else if(p->type.constness == Meta::Type::Const)
         {
-            return error(state, minitl::format< 4096u >("property %s.%s is const")
-                                    | userdata->type().name().c_str() | name.c_str());
+            return error(state,
+                         minitl::format< 4096u >(FMT("property {0}.{1} is const"),
+                                                 userdata->type().name().c_str(), name.c_str()));
         }
         else
         {
@@ -188,25 +190,25 @@ extern "C" int valueSet(lua_State* state)
 
             if(!result)
             {
-                return error(state,
-                             minitl::format< 4096u >("property %s.%s has incompatible type %s")
-                                 | userdata->type().name().c_str() | name.c_str()
-                                 | p->type.name().c_str());
+                return error(state, minitl::format< 4096u >(
+                                        FMT("property {0}.{1} has incompatible type {2}"),
+                                        userdata->type().name().c_str(), name.c_str(),
+                                        p->type.name().c_str()));
             }
         }
     }
     return 0;
 }
 
-extern "C" int valueCall(lua_State* state)
+static int valueCall(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Object");
     Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, 1);
     Meta::Value  value    = (*userdata)["?call"];
     if(!value)
     {
-        return error(state, minitl::format< 4096u >("object %s is not callable")
-                                | userdata->type().name());
+        return error(state, minitl::format< 4096u >(FMT("object {0} is not callable"),
+                                                    userdata->type().name()));
     }
     raw< const Meta::Method > method = value.as< raw< const Meta::Method > >();
     if(method)
@@ -215,12 +217,13 @@ extern "C" int valueCall(lua_State* state)
     }
     else
     {
-        return error(state, minitl::format< 4096u >("%s.?call is of type &s; expected a Method")
-                                | userdata->type().name() | value.type().name());
+        return error(state,
+                     minitl::format< 4096u >(FMT("{0}.?call is of type {1}; expected a Method"),
+                                             userdata->type().name(), value.type().name()));
     }
 }
 
-extern "C" int valueType(lua_State* state)
+static int valueType(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Object");
     Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, 1);
@@ -228,8 +231,12 @@ extern "C" int valueType(lua_State* state)
     return Context::push(state, v);
 }
 
-const luaL_Reg s_valueMetaTable[]
-    = {{"__gc", valueGC},        {"__tostring", valueToString}, {"__index", valueGet},
-       {"__newindex", valueSet}, {"__call", valueCall},         {0, 0}};
+const luaL_Reg s_valueMetaTable[] = {{"__gc", valueGC},
+                                     {"__tostring", valueToString},
+                                     {"__index", valueGet},
+                                     {"__newindex", valueSet},
+                                     {"__call", valueCall},
+                                     {"typeof", valueType},
+                                     {0, 0}};
 
 }}  // namespace Motor::Lua

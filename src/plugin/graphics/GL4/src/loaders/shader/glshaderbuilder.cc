@@ -14,7 +14,8 @@ static const char* toString(Shaders::Semantic semantic)
     case Shaders::Color: return "gl_FragColor";
     case Shaders::Depth: return "gl_FragDepth";
     default:
-        motor_error("semantic %d not recognized by the GLSL shader builder" | semantic);
+        motor_error_format(Log::gl(), "semantic {0} not recognized by the GLSL shader builder",
+                           u32(semantic));
         return "gl_FragColor";
     }
 }
@@ -61,7 +62,10 @@ static const char* toString(Shaders::ValueType type)
     case Shaders::Type_Bool2: return "bvec2";
     case Shaders::Type_Bool3: return "bvec3";
     case Shaders::Type_Bool4: return "bvec4";
-    default: motor_error("type %d not recognized by the GLSL shader builder" | type); return "mat4";
+    default:
+        motor_error_format(Log::gl(), "type {0} not recognized by the GLSL shader builder",
+                           u32(type));
+        return "mat4";
     }
 }
 
@@ -78,7 +82,7 @@ GLShaderBuilder::~GLShaderBuilder()
 void GLShaderBuilder::doAddUniformDeclaration(const istring&     name, Shaders::Stage /*stage*/,
                                               Shaders::ValueType type)
 {
-    writeln((minitl::format< 1024u >("uniform %s %s;") | toString(type) | name).c_str());
+    writeln(minitl::format< 1024u >(FMT("uniform {0} {1};"), toString(type), name).c_str());
 }
 
 void GLShaderBuilder::doAddVaryingDeclaration(const istring& name, Shaders::Stage stage,
@@ -86,11 +90,11 @@ void GLShaderBuilder::doAddVaryingDeclaration(const istring& name, Shaders::Stag
 {
     if(stage == Shaders::VertexStage)
     {
-        writeln((minitl::format< 1024u >("out %s %s;") | toString(type) | name).c_str());
+        writeln(minitl::format< 1024u >(FMT("out {0} {1};"), toString(type), name).c_str());
     }
     else
     {
-        writeln((minitl::format< 1024u >("in %s %s;") | toString(type) | name).c_str());
+        writeln(minitl::format< 1024u >(FMT("in {0} {1};"), toString(type), name).c_str());
     }
 }
 
@@ -99,7 +103,7 @@ void GLShaderBuilder::doAddAttributeDeclaration(const istring& name, Shaders::St
 {
     if(stage == Shaders::VertexStage)
     {
-        writeln((minitl::format< 1024u >("in %s %s;") | toString(type) | name).c_str());
+        writeln(minitl::format< 1024u >(FMT("in {0} {1};"), toString(type), name).c_str());
     }
     else if(stage == Shaders::FragmentStage)
     {
@@ -110,7 +114,7 @@ void GLShaderBuilder::doAddAttributeDeclaration(const istring& name, Shaders::St
 void GLShaderBuilder::doAddMethod(const istring& name)
 {
     writeln("");
-    writeln((minitl::format< 1024u >("void %s ()") | name).c_str());
+    writeln(minitl::format< 1024u >(FMT("void {0} ()"), name).c_str());
     writeln("{");
     indent();
 }
@@ -123,61 +127,62 @@ void GLShaderBuilder::doEndMethod()
 
 void GLShaderBuilder::doSaveTo(Shaders::Semantic semantic, const istring& value)
 {
-    writeln((minitl::format< 1024u >("%s = %s;") | toString(semantic) | value).c_str());
+    writeln(minitl::format< 1024u >(FMT("{0} = {1};"), toString(semantic), value).c_str());
 }
 
 void GLShaderBuilder::doSaveTo(const istring& name, const istring& value)
 {
-    writeln((minitl::format< 1024u >("%s = %s;") | name | value).c_str());
+    writeln(minitl::format< 1024u >(FMT("{0} = {1};"), name, value).c_str());
 }
 
 void GLShaderBuilder::doAddOperator(Shaders::Operator op, Shaders::ValueType type,
                                     const istring& result, const istring& op1, const istring& op2)
 {
-    writeln((minitl::format< 1024u >("%s %s = %s %c %s;") | toString(type) | result | op1 | (char)op
-             | op2)
+    writeln(minitl::format< 1024u >(FMT("{0} {1} = {2} {3} {4};"), toString(type), result, op1,
+                                    (char)op, op2)
                 .c_str());
 }
 
 void GLShaderBuilder::doWrite(float value)
 {
-    write(minitl::format< 1024u >("%f") | value);
+    write(minitl::format< 1024u >(FMT("{0}"), value));
 }
 
 void GLShaderBuilder::doWrite(float2 value)
 {
-    write(minitl::format< 1024u >("vec2(%f, %f)") | value[0] | value[1]);
+    write(minitl::format< 1024u >(FMT("vec2({0}, {1})"), value[0], value[1]));
 }
 
 void GLShaderBuilder::doWrite(float3 value)
 {
-    write(minitl::format< 1024u >("vec3(%f, %f, %f)") | value[0] | value[1] | value[2]);
+    write(minitl::format< 1024u >(FMT("vec3({0}, {1}, {2})"), value[0], value[1], value[2]));
 }
 
 void GLShaderBuilder::doWrite(float4 value)
 {
-    write(minitl::format< 1024u >("vec4(%f, %f, %f, %f)") | value[0] | value[1] | value[2]
-          | value[3]);
+    write(minitl::format< 1024u >(FMT("vec4({0}, {1}, {2}, {3})"), value[0], value[1], value[2],
+                                  value[3]));
 }
 
 void GLShaderBuilder::doWrite(int value)
 {
-    write(minitl::format< 1024u >("%d") | value);
+    write(minitl::format< 1024u >(FMT("{0}"), value));
 }
 
 void GLShaderBuilder::doWrite(int2 value)
 {
-    write(minitl::format< 1024u >("ivec2(%d, %d)") | value[0] | value[1]);
+    write(minitl::format< 1024u >(FMT("ivec2({0}, {1})"), value[0], value[1]));
 }
 
 void GLShaderBuilder::doWrite(int3 value)
 {
-    write(minitl::format< 1024u >("ivec3(%d, %d)") | value[0] | value[1] | value[2]);
+    write(minitl::format< 1024u >(FMT("ivec3({0}, {1}, {2})"), value[0], value[1], value[2]));
 }
 
 void GLShaderBuilder::doWrite(int4 value)
 {
-    write(minitl::format< 1024u >("ivec4(%d, %d)") | value[0] | value[1] | value[2] | value[3]);
+    write(minitl::format< 1024u >(FMT("ivec4({0}, {1}, {2}, {3})"), value[0], value[1], value[2],
+                                  value[3]));
 }
 
 void GLShaderBuilder::doWrite(bool value)

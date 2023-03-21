@@ -18,9 +18,22 @@
 #endif
 
 #ifndef MOTOR_COMPUTE
-namespace Motor { namespace Arena {
+namespace Motor {
+
+namespace Arena {
+
 motor_api(RESOURCE) minitl::Allocator& resource();
-}}  // namespace Motor::Arena
+
+}
+
+namespace Log {
+
+motor_api(RESOURCE) weak< Logger > resource();
+
+}
+
+}  // namespace Motor
+
 #endif
 
 /**************************************************************************************************/

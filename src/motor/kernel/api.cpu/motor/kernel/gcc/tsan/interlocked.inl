@@ -6,8 +6,7 @@
 /**************************************************************************************************/
 #include <motor/kernel/stdafx.h>
 #include <sanitizer/tsan_interface_atomic.h>
-
-namespace _Kernel {
+namespace kernel { namespace interlocked_detail {
 
 template < unsigned size >
 struct InterlockedType;
@@ -96,9 +95,9 @@ struct InterlockedType< 8 >
                                                   const tagged_t::tag_t& condition);
 };
 
-}  // namespace _Kernel
+}}  // namespace kernel::interlocked_detail
 
-namespace _Kernel {
+namespace kernel { namespace interlocked_detail {
 
 InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch(const value_t* p)
 {
@@ -271,7 +270,7 @@ bool InterlockedType< 8 >::set_conditional(tagged_t* p, tagged_t::value_t v,
         __tsan_memory_order_acq_rel, __tsan_memory_order_relaxed);
 }
 
-}  // namespace _Kernel
+}}  // namespace kernel::interlocked_detail
 
 /**************************************************************************************************/
 #endif

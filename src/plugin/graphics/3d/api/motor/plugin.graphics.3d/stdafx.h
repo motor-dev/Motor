@@ -15,5 +15,12 @@
 #    define MOTOR_API_3D
 #endif
 
+namespace Motor { namespace Log {
+
+weak< Logger > graphics();
+weak< Logger > shader();
+
+}}  // namespace Motor::Log
+
 /**************************************************************************************************/
 #endif

@@ -16,20 +16,21 @@
 #        define PLUGIN_EXT ".so"
 #    endif
 
-#    define PLUGIN_FILE_NAME PLUGIN_PREFIX "%s" PLUGIN_EXT
+#    define PLUGIN_FILE_NAME PLUGIN_PREFIX "{0}" PLUGIN_EXT
 
 namespace Motor { namespace Plugin {
 
 DynamicObject::Handle DynamicObject::load(const inamespace& pluginName, const ipath& pluginPath)
 {
     motor_forceuse(pluginPath);
-    const minitl::format< 1024u > pluginFile
-        = minitl::format< 1024u >(PLUGIN_FILE_NAME) | pluginName;
-    motor_info("loading dynamic object %s" | pluginName);
+    const minitl::format_buffer< 1024u > pluginFile
+        = minitl::format< 1024u >(FMT(PLUGIN_FILE_NAME), pluginName);
+    motor_info_format(Log::plugin(), "loading dynamic object {0}", pluginName);
     void* handle = dlopen(pluginFile, RTLD_NOW | RTLD_LOCAL);
     if(!handle)
     {
-        motor_error("Error loading dynamic object %s: %s" | pluginName | dlerror());
+        motor_error_format(Log::plugin(), "Error loading dynamic object {0}: {1}", pluginName,
+                           dlerror());
     }
     return handle;
 }

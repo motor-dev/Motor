@@ -43,7 +43,7 @@ struct TypeID< const T > : public TypeID< T >
     }
     static inline istring name()
     {
-        return istring(minitl::format< 1024u >("%s const") | TypeID< T >::name());
+        return istring(minitl::format< 1024u >(FMT("{0} {1}"), TypeID< T >::name(), "const"));
     }
 };
 
@@ -59,7 +59,7 @@ struct TypeID< T& >
     }
     static inline istring name()
     {
-        return istring(minitl::format< 1024u >("%s&") | TypeID< T >::name());
+        return istring(minitl::format< 1024u >(FMT("{0}&"), TypeID< T >::name()));
     }
 };
 
@@ -74,7 +74,7 @@ struct TypeID< const T& >
     }
     static inline istring name()
     {
-        return istring(minitl::format< 1024u >("%s const&") | TypeID< T >::name());
+        return istring(minitl::format< 1024u >(FMT("{0} const&"), TypeID< T >::name()));
     }
 };
 
@@ -88,7 +88,7 @@ struct TypeID< ref< T > >
     }
     static inline istring name()
     {
-        return istring(minitl::format< 1024u >("ref<%s>") | TypeID< T >::name());
+        return istring(minitl::format< 1024u >(FMT("ref<{0}>"), TypeID< T >::name()));
     }
 };
 
@@ -102,7 +102,7 @@ struct TypeID< weak< T > >
     }
     static inline istring name()
     {
-        return istring(minitl::format< 1024u >("weak<%s>") | TypeID< T >::name());
+        return istring(minitl::format< 1024u >(FMT("weak<{0}>"), TypeID< T >::name()));
     }
 };
 
@@ -116,7 +116,7 @@ struct TypeID< raw< T > >
     }
     static inline istring name()
     {
-        return istring(minitl::format< 1024u >("raw<%s>") | TypeID< T >::name());
+        return istring(minitl::format< 1024u >(FMT("raw<{0}>"), TypeID< T >::name()));
     }
 };
 
@@ -130,7 +130,7 @@ struct TypeID< T* >
     }
     static inline istring name()
     {
-        return istring(minitl::format< 1024u >("%s*") | TypeID< T >::name());
+        return istring(minitl::format< 1024u >(FMT("{0}*"), TypeID< T >::name()));
     }
 };
 
@@ -144,7 +144,7 @@ struct TypeID< ref< T > const >
     }
     static inline istring name()
     {
-        return istring(minitl::format< 1024u >("ref<%s> const") | TypeID< T >::name());
+        return istring(minitl::format< 1024u >(FMT("ref<{0}> const"), TypeID< T >::name()));
     }
 };
 
@@ -158,7 +158,7 @@ struct TypeID< weak< T > const >
     }
     static inline istring name()
     {
-        return istring(minitl::format< 1024u >("weak<%s> const") | TypeID< T >::name());
+        return istring(minitl::format< 1024u >(FMT("weak<{0}> const"), TypeID< T >::name()));
     }
 };
 
@@ -172,7 +172,7 @@ struct TypeID< raw< T > const >
     }
     static inline istring name()
     {
-        return istring(minitl::format< 1024u >("raw<%s> const") | TypeID< T >::name());
+        return istring(minitl::format< 1024u >(FMT("raw<{0}> const"), TypeID< T >::name()));
     }
 };
 
@@ -186,7 +186,7 @@ struct TypeID< T* const >
     }
     static inline istring name()
     {
-        return istring(minitl::format< 1024u >("%s* const") | TypeID< T >::name());
+        return istring(minitl::format< 1024u >(FMT("{0}* const"), TypeID< T >::name()));
     }
 };
 

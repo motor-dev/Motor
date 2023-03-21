@@ -21,19 +21,28 @@
 #define motor_tag(v)
 
 #ifndef MOTOR_COMPUTE
-namespace Motor { namespace Arena {
+namespace Motor {
+namespace Arena {
 motor_api(META) minitl::Allocator& meta();
 motor_api(META) minitl::Allocator& script();
 
-}}  // namespace Motor::Arena
+}  // namespace Arena
 
-namespace Motor { namespace Meta {
+namespace Meta {
 
 struct Class;
 struct Type;
 class Value;
 
-}}  // namespace Motor::Meta
+}  // namespace Meta
+
+namespace Log {
+
+motor_api(META) weak< Logger > meta();
+
+}
+
+}  // namespace Motor
 
 #    include <motor/meta/builtin.hh>
 #endif

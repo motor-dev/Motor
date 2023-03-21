@@ -36,7 +36,7 @@ extern "C"
 #pragma warning(push)
 #pragma warning(disable : 4521)  // multiple copy constructor
 
-namespace _Kernel {
+namespace kernel { namespace interlocked_detail {
 
 template < unsigned size >
 struct InterlockedType;
@@ -167,7 +167,7 @@ struct InterlockedType< 2 > : public InterlockedType< 4 >
 {
 };
 
-}  // namespace _Kernel
+}}  // namespace kernel::interlocked_detail
 
 #pragma warning(pop)
 

@@ -32,7 +32,8 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
         }
         else
         {
-            motor_info("directory %s could not be created: error code %d" | pathname.name | err);
+            motor_info_format(Log::fs(), "directory {0} could not be created: error code {1}",
+                              pathname.name, err);
         }
     }
 }
@@ -51,12 +52,13 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy,
     }
     ipath::Filename pathname = m_path.str('\\');
     m_handle.ptrHandle       = CreateFileA(pathname.name, GENERIC_READ,
-                                     FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, 0,
-                                     OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
+                                           FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, 0,
+                                           OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
     if(m_handle.ptrHandle == INVALID_HANDLE_VALUE)
     {
         int errorCode = ::GetLastError();
-        motor_info("Directory %s could not be opened: (%d)" | pathname.name | errorCode);
+        motor_info_format(Log::fs(), "Directory {0} could not be opened: ({1})", pathname.name,
+                          errorCode);
     }
     else
     {
@@ -129,8 +131,9 @@ weak< File > DiskFolder::createFile(const istring& name)
     if(h == INVALID_HANDLE_VALUE)
     {
         int errorCode = ::GetLastError();
-        motor_info("file %s (%s) could not be opened: CreateFile returned an error (%d)" | m_path
-                   | path.name | errorCode);
+        motor_info_format(Log::fs(),
+                          "file {0} ({1}) could not be opened: CreateFile returned an error ({2})",
+                          m_path, path.name, errorCode);
         return weak< File >();
     }
     else
@@ -141,8 +144,9 @@ weak< File > DiskFolder::createFile(const istring& name)
         if(h == INVALID_HANDLE_VALUE)
         {
             int errorCode = ::GetLastError();
-            motor_info("file %s (%s) could not be opened: CreateFile returned an error (%d)"
-                       | m_path | path.name | errorCode);
+            motor_info_format(
+                Log::fs(), "file {0} ({1}) could not be opened: CreateFile returned an error ({2})",
+                m_path, path.name, errorCode);
             return weak< File >();
         }
         FindClose(h);

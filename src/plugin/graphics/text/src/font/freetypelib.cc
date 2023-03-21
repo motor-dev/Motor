@@ -10,7 +10,7 @@ FreetypeLibrary::FreetypeLibrary()
 {
     FT_Error error = FT_Init_FreeType(&library);
     motor_forceuse(error);
-    motor_assert(!error, "Freetype error %d" | error);
+    motor_assert_format(!error, "Freetype error {0}", error);
 }
 
 FreetypeLibrary::~FreetypeLibrary()
