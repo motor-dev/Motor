@@ -10,7 +10,6 @@
 #    include <typeinfo>
 #endif
 
-
 namespace minitl {
 
 template < typename T >
@@ -158,8 +157,8 @@ struct formatter< ref< T > > : public format_details::default_partial_formatter<
         else if(options.width == 0)
         {
 #if MOTOR_ENABLE_WEAKCHECK
-            return minitl::format_to(destination, reservedLength, FMT("ref<{0:#p},{1},{2}>"),
-                                     r, r ? r->m_refCount : 0, r ? r->m_weakCount : 0);
+            return minitl::format_to(destination, reservedLength, FMT("ref<{0:#p},{1},{2}>"), r,
+                                     r ? r->m_refCount : 0, r ? r->m_weakCount : 0);
 #else
             return minitl::format_to(destination, reservedLength, FMT("ref<{0:#p},{1}>"), r,
                                      r ? r->m_refCount : 0);
@@ -167,11 +166,16 @@ struct formatter< ref< T > > : public format_details::default_partial_formatter<
         }
         else
         {
-            char* buffer      = (char*)malloca(reservedLength);
-            u32   size        = minitl::format_to(buffer, reservedLength,
-                                                  FMT("ref<{0:s}>({1:p}){{{2}s,{3}w}}"), typeid(T).name(), r,
-                                         r ? r->m_refCount : 0, r ? r->m_weakCount : 0);
-            u32   paddingSize = size > options.width ? 0 : options.width - size;
+            char* buffer = (char*)malloca(reservedLength);
+            u32   size =
+#if MOTOR_ENABLE_WEAKCHECK
+                minitl::format_to(buffer, reservedLength, FMT("ref<{0:#p},{1},{2}>"), r,
+                                  r ? r->m_refCount : 0, r ? r->m_weakCount : 0);
+#else
+                minitl::format_to(buffer, reservedLength, FMT("ref<{0:#p},{1}>"), r,
+                                  r ? r->m_refCount : 0);
+#endif
+            u32 paddingSize = size > options.width ? 0 : options.width - size;
 
             switch(options.align)
             {

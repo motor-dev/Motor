@@ -171,9 +171,14 @@ struct formatter< weak< T > > : public format_details::default_partial_formatter
         else
         {
             char* buffer = (char*)malloca(reservedLength);
-            u32   size = minitl::format_to(buffer, reservedLength, FMT("ref<{0:s}>({1:p}){{{2}w}}"),
-                                           typeid(T).name(), r, r ? r->m_weakCount : 0);
-            u32   paddingSize = size > options.width ? 0 : options.width - size;
+            u32   size =
+#if MOTOR_ENABLE_WEAKCHECK
+                minitl::format_to(buffer, reservedLength, FMT("weak<{0:#p},{1}>"), r,
+                                  r ? r->m_weakCount : 0);
+#else
+                minitl::format_to(buffer, reservedLength, FMT("weak<{0:#p}>"), r);
+#endif
+            u32 paddingSize = size > options.width ? 0 : options.width - size;
 
             switch(options.align)
             {

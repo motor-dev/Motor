@@ -96,7 +96,7 @@ private:
     Thread m_workThread;
 
 public:
-    Worker(weak< TaskScheduler > scheduler, size_t workerId);
+    Worker(weak< TaskScheduler > scheduler, u32 workerId);
     ~Worker();
 
     bool doWork(const weak< TaskScheduler >& sc);
@@ -104,7 +104,7 @@ public:
     static intptr_t work(intptr_t p1, intptr_t p2);
 };
 
-TaskScheduler::Worker::Worker(weak< TaskScheduler > scheduler, size_t workerId)
+TaskScheduler::Worker::Worker(weak< TaskScheduler > scheduler, u32 workerId)
     : m_workThread(istring(minitl::format< 128u >(FMT("worker {0}"), workerId)),
                    &TaskScheduler::Worker::work, reinterpret_cast< intptr_t >(this),
                    reinterpret_cast< intptr_t >(scheduler.operator->()), Thread::BelowNormal)
@@ -174,7 +174,7 @@ TaskScheduler::TaskScheduler(weak< Scheduler > scheduler)
     , m_taskItemAvailable(s_maxConcurrentTasks)
 {
     motor_info_format(Log::scheduler(), "initializing scheduler with {0} workers", m_workerCount);
-    for(size_t i = 0; i < m_workerCount; ++i)
+    for(u32 i = 0; i < m_workerCount; ++i)
     {
         m_workers.push_back(new Worker(this, i));
     }
@@ -183,7 +183,7 @@ TaskScheduler::TaskScheduler(weak< Scheduler > scheduler)
 TaskScheduler::~TaskScheduler()
 {
     m_workerTaskPool.push(0, static_cast< u32 >(m_workers.size()));
-    for(size_t i = 0; i < m_workers.size(); ++i)
+    for(u32 i = 0; i < m_workers.size(); ++i)
         delete m_workers[i];
 }
 
