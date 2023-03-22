@@ -12,7 +12,11 @@
 #ifdef _PPC
 
 /* POWERPC ********************/
-#    define MOTOR_BIGENDIAN
+#    if defined _LITTLE_ENDIAN
+#        define MOTOR_LITTLEENDIAN
+#    else
+#        define MOTOR_BIGENDIAN
+#    endif
 #    ifdef _PPC64
 #        define MOTOR_64
 #    else
@@ -22,10 +26,12 @@
 #elif defined(_ARM)
 
 /* ARM Big and little endian **/
-#    if defined(_ARMEL)
-#        define MOTOR_LITTLEENDIAN
-#    else
+#    if defined(_ARMEB)
 #        define MOTOR_BIGENDIAN
+#    elif defined(__ARMEB__)
+#        define MOTOR_BIGENDIAN
+#    else
+#        define MOTOR_LITTLEENDIAN
 #    endif
 
 #elif defined(_X86)
@@ -55,7 +61,7 @@
 // clang-format off
 #    define MOTOR_PLATFORM_INCLUDE_ motor/config/platforms/MOTOR_PLATFORM.hh
 // clang-format on
-#    define MOTOR_STRINGIZE__(x) #    x
+#    define MOTOR_STRINGIZE__(x) #x
 #    define MOTOR_STRINGIZE_(x)  MOTOR_STRINGIZE__(x)
 #    include MOTOR_STRINGIZE_(MOTOR_PLATFORM_INCLUDE_)
 #    undef MOTOR_PLATFORM_INCLUDE_
