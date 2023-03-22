@@ -48,7 +48,6 @@ public:
     static void    yield();
     static u64     currentId();
     static istring name();
-    void           pin(u32 cpuIndex);
 };
 
 }  // namespace Motor

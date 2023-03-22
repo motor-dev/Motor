@@ -109,7 +109,6 @@ TaskScheduler::Worker::Worker(weak< TaskScheduler > scheduler, size_t workerId)
                    &TaskScheduler::Worker::work, reinterpret_cast< intptr_t >(this),
                    reinterpret_cast< intptr_t >(scheduler.operator->()), Thread::BelowNormal)
 {
-    //m_workThread.pin(u32(workerId * 2));
 }
 
 TaskScheduler::Worker::~Worker()
