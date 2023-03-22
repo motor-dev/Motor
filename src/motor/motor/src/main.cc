@@ -20,8 +20,6 @@
 
 namespace {
 
-Motor::Meta::Type type = Motor::Meta::TypeID< minitl::tuple< int, int > >::type();
-
 class FileLogListener : public Motor::ILogListener
 {
 private:
