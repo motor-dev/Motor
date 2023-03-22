@@ -30,7 +30,7 @@ Semaphore::Semaphore(int initialCount)
     if(reinterpret_cast< sem_t* >(m_data.ptr) == SEM_FAILED)
 #endif
     {
-        motor_error_format(Log :.thread(), "Could not initialize semaphore: {0}", strerror(errno));
+        motor_error_format(Log::thread(), "Could not initialize semaphore: {0}", strerror(errno));
     }
 #if !USE_DISPATCH_SEMAPHORE
     release(initialCount);
