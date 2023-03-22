@@ -628,7 +628,7 @@ struct formatter< T* >
         return formatter< u64 >::format_to_partial(destination, ptrConvert.v64, options,
                                                    reservedLength, maximalLength);
 #else
-        return formatter< u32 >::format_to_partial(destination, ptrConvert.v64, options,
+        return formatter< u32 >::format_to_partial(destination, ptrConvert.v32, options,
                                                    reservedLength, maximalLength);
 #endif
     }
@@ -645,7 +645,7 @@ struct formatter< T* >
 #ifdef _LP64
         return formatter< u64 >::format_to(destination, ptrConvert.v64, options, reservedLength);
 #else
-        return formatter< u32 >::format_to(destination, ptrConvert.v64, options, reservedLength);
+        return formatter< u32 >::format_to(destination, ptrConvert.v32, options, reservedLength);
 #endif
     }
 };

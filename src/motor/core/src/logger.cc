@@ -133,12 +133,6 @@ weak< Logger > thread()
     return logger;
 }
 
-weak< Logger > fs()
-{
-    static weak< Logger > logger = system()->getChild("fs");
-    return logger;
-}
-
 }  // namespace Log
 
 }  // namespace Motor
