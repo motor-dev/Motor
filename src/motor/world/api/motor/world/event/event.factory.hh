@@ -18,9 +18,9 @@ struct ClassID< World::Event< T1, T2, T3, T4 > >
     static MOTOR_EXPORT raw< const Meta::Class > klass();
     static MOTOR_EXPORT istring                  name()
     {
-        static const istring s_name(minitl::format< 2048u >("Event<%s,%s,%s,%s>")
-                                    | TypeID< T1 >::name() | TypeID< T2 >::name()
-                                    | TypeID< T3 >::name() | TypeID< T4 >::name());
+        static const istring s_name(minitl::format< 2048u >(
+            FMT("Event<{0},{1},{2},{3}>"), TypeID< T1 >::name(), TypeID< T2 >::name(),
+            TypeID< T3 >::name(), TypeID< T4 >::name()));
         return s_name;
     }
 };

@@ -50,7 +50,9 @@ static GLenum toGLShaderStage(Shaders::Stage stage)
     case Shaders::VertexStage: return GL_VERTEX_SHADER_ARB;
     case Shaders::GeometryStage: return GL_GEOMETRY_SHADER_EXT;
     case Shaders::FragmentStage: return GL_FRAGMENT_SHADER_ARB;
-    default: motor_error("Unknown shader type %d" | stage); return GL_FRAGMENT_SHADER_ARB;
+    default:
+        motor_error_format(Log::gl(), "Unknown shader type {0}", u32(stage));
+        return GL_FRAGMENT_SHADER_ARB;
     }
 }
 
@@ -80,11 +82,11 @@ GLhandleARB GLShaderProgram::build(weak< const ShaderProgramDescription > progra
         shaderext.glGetInfoLog(shader, maxLength, &result, log.data());
         if (!success)
         {
-            motor_error(log.data());
+            motor_error(Log::gl(), log.data());
         }
         else
         {
-            motor_info(log.data());
+            motor_info(Log::gl(), log.data());
         }
     }
 #    endif
@@ -121,11 +123,11 @@ void GLShaderProgram::load(weak< const Resource::IDescription > shaderDescriptio
         shaderext.glGetInfoLog(m_shaderProgram, maxLength, &result, log.data());
         if(!success)
         {
-            motor_error(log.data());
+            motor_error(Log::gl(), log.data());
         }
         else
         {
-            motor_info(log.data());
+            motor_info(Log::gl(), log.data());
         }
     }
 #endif

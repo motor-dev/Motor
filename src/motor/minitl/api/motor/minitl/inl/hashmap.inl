@@ -213,7 +213,8 @@ void hashmap< Key, Value, Hash >::buildIndex()
 template < typename Key, typename Value, typename Hash >
 void hashmap< Key, Value, Hash >::grow(u32 size)
 {
-    motor_assert(size > m_count, "cannot resize from %d to smaller capacity %d" | m_count | size);
+    motor_assert_format(size > m_count, "cannot resize from {0} to smaller capacity {1}", m_count,
+                        size);
 
     size = nextPowerOf2(size);
     pool< item >                   newPool(m_index.arena(), size);
@@ -352,7 +353,7 @@ template < typename Key, typename Value, typename Hash >
 void hashmap< Key, Value, Hash >::erase(const Key& key)
 {
     iterator it = find(key);
-    motor_assert(it != end(), "could not find item with index %s" | key);
+    if(motor_assert_format(it != end(), "could not find item with index {0}", key)) return;
     erase(it);
 }
 

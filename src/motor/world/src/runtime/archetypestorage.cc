@@ -34,15 +34,17 @@ static raw< const Meta::Class > findProductType(raw< const Meta::Class > compone
         }
         else
         {
-            motor_error("class %s has not registered a %s" | parameterClass->name
-                        | KernelScheduler::IParameter::getProductTypePropertyName());
+            motor_error_format(Log::world(), "class {0} has not registered a {1}",
+                               parameterClass->name,
+                               KernelScheduler::IParameter::getProductTypePropertyName());
             return motor_class< KernelScheduler::IProduct >();
         }
     }
     else
     {
-        motor_error("class %s has not been registered as a segments parameter"
-                    | componentType->fullname());
+        motor_error_format(Log::world(),
+                           "class {0} has not been registered as a segments parameter",
+                           componentType->fullname());
         return motor_class< KernelScheduler::IProduct >();
     }
 }
@@ -99,10 +101,11 @@ struct Visitor : public Meta::AST::Node::Visitor
             {
                 if(classes[i] == cls)
                 {
-                    context.error(owner,
-                                  Meta::AST::Message::MessageType(
-                                      "Component %s specified at index %d, duplicate at index %d")
-                                      | cls->name | i | index);
+                    context.error(
+                        owner,
+                        minitl::format< 512 >(
+                            FMT("Component {0} specified at index {1}, duplicate at index {2}"),
+                            cls->name, i, index));
                     errorCount++;
                 }
             }
@@ -122,10 +125,10 @@ struct Visitor : public Meta::AST::Node::Visitor
             }
             if(!found)
             {
-                context.error(owner,
-                              Meta::AST::Message::MessageType(
-                                  "Archetype member %s is not part of the input component types")
-                                  | cls->name);
+                context.error(
+                    owner, minitl::format< 512 >(
+                               FMT("Archetype member {0} is not part of the input component types"),
+                               cls->name));
                 errorCount++;
             }
         }
@@ -204,11 +207,11 @@ createProduct(raw< const Meta::Class >                componentClass,
     {
         return ref< KernelScheduler::IProduct >();
     }
-    motor_assert(productClass->constructor,
-                 "product class %s does not have a constructor" | productClass->fullname());
-    motor_assert(productClass->constructor->overloads.count == 1,
-                 "product class %s has more than one constructor overload"
-                     | productClass->fullname());
+    motor_assert_format(productClass->constructor, "product class {0} does not have a constructor",
+                        productClass->fullname());
+    motor_assert_format(productClass->constructor->overloads.count == 1,
+                        "product class {0} has more than one constructor overload",
+                        productClass->fullname());
     Meta::Value                   parameter(producer);
     const Meta::Method::Overload& overload = productClass->constructor->overloads[0];
     return (overload.call)(productClass->constructor, &parameter, 1)

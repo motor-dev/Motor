@@ -5,9 +5,7 @@
 #define MOTOR_MINITL_PTR_REFPTR_INL_
 /**************************************************************************************************/
 #include <motor/minitl/features.hh>
-#if MOTOR_ENABLE_ASSERT
-#    include <typeinfo>
-#endif
+#include <typeinfo>
 
 namespace minitl {
 
@@ -28,9 +26,10 @@ ref< T >::ref(T* value) : m_ptr(value)
 template < typename T >
 ref< T >::ref(T* value, Allocator& deleter) : m_ptr(value)
 {
-    motor_assert(value->pointer::m_allocator == 0,
-                 "value of type %s already has a deleter; being refcounting multiple times?"
-                     | typeid(T).name());
+    motor_assert_format(
+        value->pointer::m_allocator == 0,
+        "value of type {0} already has a deleter; being refcounting multiple times?",
+        typeid(T).name());
     value->pointer::m_allocator = &deleter;
     if(m_ptr) m_ptr->addref();
 }
@@ -124,6 +123,70 @@ bool operator!=(const ref< T >& ref1, const ref< U >& ref2)
 {
     return ref1.operator->() != ref2.operator->();
 }
+
+template < typename T >
+struct formatter< ref< T > > : public format_details::default_partial_formatter< ref< T > >
+{
+    static constexpr format_options DefaultOptions {0, 0, ' ', '<', ' ', 'p', false, false, false};
+    static constexpr bool           validate_options(const format_options& options)
+    {
+        using format_details::invalid_format;
+        if(options.format != 'p')
+            return invalid_format("pointer formatter does not support specified format specifier");
+        return true;
+    }
+    static u32 length(const ref< T >& value, const format_options& options)
+    {
+        motor_forceuse(options);
+        if(options.alternate)
+            return formatter< T* >::length(value.operator->(), options);
+        else
+        {
+            return 10 + 10 + 9 + 9 + 2 + strlen(typeid(T).name());
+        }
+    }
+    static u32 format_to(char* destination, const ref< T >& value, const format_options& options,
+                         u32 reservedLength)
+    {
+        const refcountable* r = value.operator->();
+        if(options.alternate)
+            return formatter< void* >::format_to(destination, r, options, reservedLength);
+        else if(options.width == 0)
+        {
+            return minitl::format_to(destination, reservedLength,
+                                     FMT("ref<{0:s}>({1:#p}){{{2}s,{3}w}}"), typeid(T).name(), r,
+                                     r ? r->m_refCount : 0, r ? r->m_weakCount : 0);
+        }
+        else
+        {
+            char* buffer      = (char*)malloca(reservedLength);
+            u32   size        = minitl::format_to(buffer, reservedLength,
+                                                  FMT("ref<{0:s}>({1:p}){{{2}s,{3}w}}"), typeid(T).name(), r,
+                                         r ? r->m_refCount : 0, r ? r->m_weakCount : 0);
+            u32   paddingSize = size > options.width ? 0 : options.width - size;
+
+            switch(options.align)
+            {
+            case '<':
+                memcpy(destination, buffer, size);
+                memset(destination + reservedLength, options.fill, paddingSize);
+                break;
+            case '>':
+                memset(destination, options.fill, paddingSize);
+                memcpy(destination + paddingSize, buffer, size);
+                break;
+            case '^':
+                memset(destination, options.fill, paddingSize / 2);
+                memcpy(destination + paddingSize / 2, buffer, size);
+                memset(destination + paddingSize / 2 + reservedLength, options.fill,
+                       paddingSize - paddingSize / 2);
+                break;
+            }
+            freea(buffer);
+            return size + paddingSize;
+        }
+    }
+};
 
 }  // namespace minitl
 

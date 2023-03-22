@@ -87,6 +87,15 @@ using minitl::raw;
 using minitl::ref;
 using minitl::scoped;
 using minitl::weak;
+
+namespace Motor { namespace Log {
+
+motor_api(CORE) weak< Logger > motor();
+motor_api(CORE) weak< Logger > system();
+motor_api(CORE) weak< Logger > thread();
+
+}}  // namespace Motor::Log
+
 #endif
 
 /**************************************************************************************************/

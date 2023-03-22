@@ -34,7 +34,8 @@ void MemoryStream::write(const void* buffer, u64 size_)
 
 void MemoryStream::erase(u64 count)
 {
-    motor_assert(m_size >= count, "erasing %d bytes from a stream of %d bytes" | count | m_size);
+    motor_assert_format(m_size >= count, "erasing {0} bytes from a stream of {1} bytes", count,
+                        m_size);
     m_size -= count;
 }
 

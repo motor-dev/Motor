@@ -7,15 +7,15 @@
 #include <motor/kernel/stdafx.h>
 #include <motor/kernel/interlocked.hh>
 
-namespace minitl {
+namespace kernel {
 
 template < typename T >
 struct itaggedptr
 {
 private:
-    typedef _Kernel::InterlockedType< sizeof(T*) > impl;
-    typedef typename impl::tagged_t                type_t;
-    typedef typename type_t::value_t               value_t;
+    typedef interlocked_detail::InterlockedType< sizeof(T*) > impl;
+    typedef typename impl::tagged_t                           type_t;
+    typedef typename type_t::value_t                          value_t;
 
 private:
     type_t m_value;
@@ -139,7 +139,7 @@ T* istack< T >::popAll()
     return result;
 }
 
-}  // namespace minitl
+}  // namespace kernel
 
 /**************************************************************************************************/
 #endif

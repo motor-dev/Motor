@@ -60,11 +60,11 @@ Value& Value::operator=(const T& t)
 {
     if(m_reference)
     {
-        motor_assert_recover(m_type.isA(motor_type< T >()),
-                             "Value has type %s; unable to copy from type %s" | m_type
-                                 | motor_type< T >(),
-                             return *this);
-        motor_assert_recover(m_type.constness != Type::Const, "Value is const", return *this);
+        if(motor_assert_format(m_type.isA(motor_type< T >()),
+                               "Value has type {0}; unable to copy from type {1}", m_type,
+                               motor_type< T >()))
+            return *this;
+        if(motor_assert(m_type.constness != Type::Const, "Value is const")) return *this;
         void* mem = memory();
         m_type.destroy(mem);
         m_type.copy(&t, mem);

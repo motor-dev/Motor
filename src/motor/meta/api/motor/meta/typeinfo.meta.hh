@@ -58,9 +58,9 @@ struct motor_api(META) Type
 
 public:
     template < typename T >
-    bool                    isA() const;
-    minitl::format< 1024u > name() const;
-    bool                    isConst() const
+    bool                           isA() const;
+    minitl::format_buffer< 1024u > name() const;
+    bool                           isConst() const
     {
         return indirection == Value ? (constness == 0) : (access == 0);
     }
@@ -81,44 +81,7 @@ static inline ConversionCost calculateConversion(const Type& type, const Type& t
 
 }}  // namespace Motor::Meta
 
-namespace minitl {
-
-template < u16 SIZE >
-const minitl::format< SIZE >& operator|(const minitl::format< SIZE >& format,
-                                        const Motor::Meta::Type&      type)
-{
-    minitl::format< 4096 > typeName("%s%s%s%s%s");
-    if(type.constness == Motor::Meta::Type::Const)
-    {
-        typeName | "const ";
-    }
-    else
-    {
-        typeName | "";
-    }
-    const char* constness = "";
-    if(type.access == Motor::Meta::Type::Const)
-    {
-        constness = "const ";
-    }
-    switch(type.indirection)
-    {
-    case Motor::Meta::Type::RefPtr:
-        typeName | "ref<" | constness | type.metaclass->fullname() | ">";
-        break;
-    case Motor::Meta::Type::WeakPtr:
-        typeName | "weak<" | constness | type.metaclass->fullname() | ">";
-        break;
-    case Motor::Meta::Type::RawPtr:
-        typeName | "raw<" | constness | type.metaclass->fullname() | ">";
-        break;
-    case Motor::Meta::Type::Value: typeName | "" | "" | type.metaclass->fullname() | ""; break;
-    default: motor_notreached(); break;
-    }
-    return format | typeName.c_str();
-}
-
-}  // namespace minitl
+#include <motor/meta/typeinfo_format.hh>
 
 /**************************************************************************************************/
 #endif

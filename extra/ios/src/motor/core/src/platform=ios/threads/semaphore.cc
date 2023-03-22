@@ -26,11 +26,11 @@ Semaphore::Semaphore(int initialCount)
     m_data.ptr = dispatch_semaphore_create(initialCount);
     if(!m_data.ptr)
 #else
-    m_data.ptr = sem_open(minitl::format< 1024u >("/motor_%s") | x++, O_CREAT, 0644, 65535);
+    m_data.ptr = sem_open(minitl::format< 1024u >(FMT("/motor_{0}"), x++), O_CREAT, 0644, 65535);
     if(reinterpret_cast< sem_t* >(m_data.ptr) == SEM_FAILED)
 #endif
     {
-        motor_error("Could not initialize semaphore: %s" | strerror(errno));
+        motor_error_format(Log :.thread(), "Could not initialize semaphore: {0}", strerror(errno));
     }
 #if !USE_DISPATCH_SEMAPHORE
     release(initialCount);
@@ -72,7 +72,7 @@ Threads::Waitable::WaitResult Semaphore::wait()
     }
     else
     {
-        motor_error("Could not wait on semaphore: %s" | strerror(errno));
+        motor_error_format(Log::thread(), "Could not wait on semaphore: {0}", strerror(errno));
         motor_notreached();
         return Abandoned;
     }

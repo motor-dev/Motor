@@ -19,5 +19,15 @@
 #    define MOTOR_API_PLUGIN
 #endif
 
+#ifndef MOTOR_COMPUTE
+
+namespace Motor { namespace Log {
+
+motor_api(PLUGIN) weak< Logger > plugin();
+
+}}  // namespace Motor::Log
+
+#endif
+
 /**************************************************************************************************/
 #endif

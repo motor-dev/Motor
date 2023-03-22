@@ -14,10 +14,10 @@ namespace Motor { namespace Meta { namespace AST {
 
 struct Message
 {
-    typedef minitl::format< 512u > MessageType;
-    weak< const Node >             owner;
-    MessageType                    message;
-    LogLevel                       severity;
+    typedef minitl::format_buffer< 512u > MessageType;
+    weak< const Node >                    owner;
+    MessageType                           message;
+    LogLevel                              severity;
     Message(weak< const Node > owner, const MessageType& message, LogLevel severity)
         : owner(owner)
         , message(message)

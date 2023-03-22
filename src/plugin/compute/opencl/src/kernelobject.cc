@@ -2,16 +2,16 @@
    see LICENSE for detail */
 
 #include <motor/plugin.compute.opencl/stdafx.h>
+#include <motor/scheduler/kernel/ischeduler.hh>
 #include <codeobject.hh>
 #include <kernelobject.hh>
-#include <motor/scheduler/kernel/ischeduler.hh>
 
 namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
 KernelObject::KernelObject(weak< const CodeObject > code, const istring name)
-    : m_kernel(clCreateKernel(code->m_program, (minitl::format< 128u >("%s_spir") | name), 0))
+    : m_kernel(clCreateKernel(code->m_program, minitl::format< 128u >(FMT("{0}_spir"), name), 0))
 {
-    motor_info("OpenCL kernel entry point: %p" | m_kernel);
+    motor_info_format(Log::opencl(), "OpenCL kernel entry point: {0}", m_kernel);
 }
 
 KernelObject::~KernelObject()

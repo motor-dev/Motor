@@ -23,20 +23,20 @@ BitmapFontManager::~BitmapFontManager()
 void BitmapFontManager::load(weak< const Resource::IDescription > /*description*/,
                              Resource::Resource& /*resource*/)
 {
-    motor_info("loading bitmap font");
+    motor_info(Log::resource(), "loading bitmap font");
 }
 
 void BitmapFontManager::reload(weak< const Resource::IDescription > /*oldDescription*/,
                                weak< const Resource::IDescription > /*newDescription*/,
                                Resource::Resource& /*resource*/)
 {
-    motor_info("reloading bitmap font");
+    motor_info(Log::resource(), "reloading bitmap font");
 }
 
 void BitmapFontManager::unload(weak< const Resource::IDescription > /*description*/,
                                Resource::Resource& /*resource*/)
 {
-    motor_info("unloading bitmap font");
+    motor_info(Log::resource(), "unloading bitmap font");
 }
 
 void BitmapFontManager::onTicketLoaded(weak< const Resource::IDescription > /*description*/,
@@ -44,7 +44,7 @@ void BitmapFontManager::onTicketLoaded(weak< const Resource::IDescription > /*de
                                        const minitl::Allocator::Block< u8 >& /*buffer*/,
                                        LoadType /*type*/)
 {
-    motor_info("bitmap font file done loading");
+    motor_info(Log::resource(), "bitmap font file done loading");
 }
 
 }  // namespace Motor

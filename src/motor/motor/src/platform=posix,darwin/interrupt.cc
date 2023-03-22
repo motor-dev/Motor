@@ -12,7 +12,7 @@ static Application* s_application = 0;
 
 extern "C" void signalHandler(int /*signal*/)
 {
-    //motor_info("interrupted");
+    // motor_info(Log::system(), "interrupted");
     if(s_application)
     {
         s_application->finish();

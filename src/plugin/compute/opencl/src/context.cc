@@ -28,11 +28,12 @@ Context::Context(weak< Platform > platform, cl_device_id device, cl_context cont
     , m_context(context)
     , m_pointerSize(getDevicePointerSize(device))
 {
-    motor_info("Found %s %s on %s (%s/%s)" | getDeviceInfo(m_device, CL_DEVICE_VERSION).info
-               | getDeviceInfo(m_device, CL_DEVICE_PROFILE).info
-               | getDeviceInfo(m_device, CL_DEVICE_NAME).info
-               | getDeviceInfo(m_device, CL_DEVICE_VENDOR).info
-               | getDeviceInfo(m_device, CL_DRIVER_VERSION).info);
+    motor_info_format(Log::opencl(), "Found {0} {1} on {2} ({3}/{4})",
+                      getDeviceInfo(m_device, CL_DEVICE_VERSION).info,
+                      getDeviceInfo(m_device, CL_DEVICE_PROFILE).info,
+                      getDeviceInfo(m_device, CL_DEVICE_NAME).info,
+                      getDeviceInfo(m_device, CL_DEVICE_VENDOR).info,
+                      getDeviceInfo(m_device, CL_DRIVER_VERSION).info);
     size_t size = 0;
     checkResult(clGetDeviceInfo(m_device, CL_DEVICE_EXTENSIONS, 0, 0, &size));
 
@@ -50,10 +51,11 @@ Context::Context(weak< Platform > platform, cl_device_id device, cl_context cont
             size++;
         }
         *nextLine = 0;
-        motor_info("Extensions: %s" | deviceExtensionsIterator);
+        motor_info_format(Log::opencl(), "Extensions: {0}", deviceExtensionsIterator);
         deviceExtensionsIterator = nextLine + 1;
     }
-    if(*deviceExtensionsIterator) motor_info("Extensions: %s" | deviceExtensionsIterator);
+    if(*deviceExtensionsIterator)
+        motor_info_format(Log::opencl(), "Extensions: {0}", deviceExtensionsIterator);
     freea(deviceExtensions);
 }
 
@@ -69,8 +71,10 @@ cl_program Context::buildProgram(const u64 size, const char* code) const
     cl_program program   = clCreateProgramWithSource(m_context, 1, &code, &codeSize, &errorCode);
     if(errorCode != CL_SUCCESS)
     {
-        motor_error("failed to load OpenCL kernel: clCreateProgramWithBinary failed with code %d"
-                    | errorCode);
+        motor_error_format(
+            Log::opencl(),
+            "failed to load OpenCL kernel: clCreateProgramWithBinary failed with code {0}",
+            errorCode);
         return program;
     }
 
@@ -84,11 +88,13 @@ cl_program Context::buildProgram(const u64 size, const char* code) const
         minitl::Allocator::Block< char > buffer(Arena::temporary(), len + 1);
         clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG, (len + 1), buffer.data(),
                               &len);
-        motor_info("compilation result:\n%s" | buffer.data());
+        motor_info_format(Log::opencl(), "compilation result:\n{0}", buffer.data());
     }
     if(errorCode != CL_SUCCESS)
     {
-        motor_error("failed to load OpenCL kernel: clBuildProgram failed with code %d" | errorCode);
+        motor_error_format(Log::opencl(),
+                           "failed to load OpenCL kernel: clBuildProgram failed with code {0}",
+                           errorCode);
         return program;
     }
 #if CL_VERSION_1_2
@@ -96,19 +102,19 @@ cl_program Context::buildProgram(const u64 size, const char* code) const
         checkResult(clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, 0, 0, &len));
         minitl::Allocator::Block< char > buffer(Arena::temporary(), len + 1);
         clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, (len + 1), buffer.data(), &len);
-        motor_info("list of kernels: %s" | buffer.data());
+        motor_info_format(Log::opencl(), "list of kernels: {0}", buffer.data());
         freea(buffer);
     }
 #endif
     /*kernel = clCreateKernel(program, "_kmain", &errorCode);
     if(errorCode != CL_SUCCESS)
     {
-        motor_error("failed to load OpenCL kernel: clCreateKernel failed with code %d" | errorCode);
-        return minitl::make_tuple(kernel, program);
+        motor_error_format(Log::opencl(), "failed to load OpenCL kernel: clCreateKernel failed with
+    code {0}", errorCode); return minitl::make_tuple(kernel, program);
     }
     else
     {
-        motor_info("success");
+        motor_info(Log::opencl(), "success");
     }*/
     return program;
 }

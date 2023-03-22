@@ -12,9 +12,9 @@ namespace Motor { namespace Meta {
 
 Value Property::get(const Value& from) const
 {
-    motor_assert(from.type().metaclass->isA(owner.metaclass),
-                 "getting property on object of type %s, while expecting type %s" | from.type()
-                     | owner);
+    motor_assert_format(from.type().metaclass->isA(owner.metaclass),
+                        "getting property on object of type {0}, while expecting type {1}",
+                        from.type(), owner);
     i32                   offset = from.type().metaclass->offset - owner.metaclass->offset;
     raw< const Property > this_  = {this};
     return (*getter)(this_, (void*)((char*)from.rawget() + offset));
@@ -22,9 +22,9 @@ Value Property::get(const Value& from) const
 
 void Property::set(Value& from, const Value& value) const
 {
-    motor_assert(from.type().metaclass->isA(owner.metaclass),
-                 "getting property on object of type %s, while expecting type %s" | from.type()
-                     | owner);
+    motor_assert_format(from.type().metaclass->isA(owner.metaclass),
+                        "getting property on object of type {0}, while expecting type {1}",
+                        from.type(), owner);
     i32                   offset = from.type().metaclass->offset - owner.metaclass->offset;
     raw< const Property > this_  = {this};
     (*setter)(this_, (void*)((char*)from.rawget() + offset), value);

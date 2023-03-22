@@ -31,14 +31,14 @@ static HMODULE getPythonModuleHandle()
         DWORD needed = 0;
         if(!(*EnumProcessModules)(GetCurrentProcess(), 0, 0, &needed))
         {
-            motor_error("Could not locate python: EnumProcessModules failed");
+            motor_error(Log::python(), "Could not locate python: EnumProcessModules failed");
             return (HMODULE)NULL;
         }
         minitl::Allocator::Block< HMODULE > modules(Arena::temporary(), needed / sizeof(HMODULE));
         if(!(*EnumProcessModules)(GetCurrentProcess(), modules.data(), (DWORD)modules.byteCount(),
                                   &needed))
         {
-            motor_error("Could not locate python: EnumProcessModules failed");
+            motor_error(Log::python(), "Could not locate python: EnumProcessModules failed");
             return (HMODULE)NULL;
         }
         FreeLibrary(h);
@@ -49,17 +49,19 @@ static HMODULE getPythonModuleHandle()
             {
                 char filename[1024];
                 if(GetModuleFileNameA(modules[i - 1], filename, sizeof(filename)))
-                    motor_info("using %s" | filename);
+                    motor_info_format(Log::python(), "using {0}", filename);
                 return modules[i - 1];
             }
         }
-        motor_error("Could not locate python: could not locate module with Py_InitializeEx");
+        motor_error(Log::python(),
+                    "Could not locate python: could not locate module with Py_InitializeEx");
         return NULL;
     }
     else
     {
         FreeLibrary(h);
-        motor_error("Could not locate python: could not locate procedure \"EnumProcessModules\" in "
+        motor_error(Log::python(),
+                    "Could not locate python: could not locate procedure \"EnumProcessModules\" in "
                     "Psapi.dll or Kernel32.dll");
         return NULL;
     }
@@ -68,7 +70,7 @@ static HMODULE getPythonModuleHandle()
 PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     : m_pythonLibraryName(pythonLibraryName)
     , m_handle(m_pythonLibraryName
-                   ? LoadLibraryA(minitl::format< 1024u >("%s.dll") | m_pythonLibraryName)
+                   ? LoadLibraryA(minitl::format< 1024u >(FMT("{0}.dll"), m_pythonLibraryName))
                    : getPythonModuleHandle())
     , m_status(m_handle != 0)
     , m_api(1013)
@@ -76,7 +78,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
 {
     if(!m_status)
     {
-        motor_error("unable to load library %s" | pythonLibraryName);
+        motor_error_format(Log::python(), "unable to load library {0}", pythonLibraryName);
     }
     else
     {
@@ -93,8 +95,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         motor_get_func_name_opt(f, dest);                                                          \
         if(!m_##dest)                                                                              \
         {                                                                                          \
-            motor_error("could not locate function %s in module %s" | #f                           \
-                        | (pythonLibraryName ? pythonLibraryName : "root"));                       \
+            motor_error_format(Log::python(), "could not locate function {0} in module {1}", #f,   \
+                               (pythonLibraryName ? pythonLibraryName : "root"));                  \
             m_status = false;                                                                      \
         }                                                                                          \
     } while(0)
@@ -251,7 +253,7 @@ void PythonLibrary::platformInitialize()
     ifilename programPath = Environment::getEnvironment().getProgramPath();
     programPath.pop_back();
     programPath.push_back("lib");
-    programPath.push_back(istring(minitl::format< 32u >("python%d") | m_version));
+    programPath.push_back(istring(minitl::format< 32u >(FMT("python%d"), m_version)));
     if(m_version < 30)
     {
         static ifilename::Filename f = programPath.str();
@@ -270,8 +272,8 @@ void PythonLibrary::setupPath()
     ifilename programPath = Environment::getEnvironment().getProgramPath();
     programPath.pop_back();
     programPath.push_back("lib");
-    (*m_PyRun_SimpleString)(minitl::format< 4096 >("import sys; sys.path.append(\"%s\")")
-                            | programPath.str().name);
+    (*m_PyRun_SimpleString)(minitl::format< 4096 >(FMT("import sys; sys.path.append(\"{0}\")"),
+                                                   programPath.str().name));
 }
 
 }}  // namespace Motor::Python

@@ -93,8 +93,8 @@ ITask::ChainCallback::~ChainCallback()
     {
         bool result = m_startedBy.back()->removeCallback(this);
         motor_forceuse(result);
-        motor_assert(result,
-                     "unable to disconnect from task %s" | m_startedBy.back()->name.c_str());
+        motor_assert_format(result, "unable to disconnect from task {0}",
+                            m_startedBy.back()->name.c_str());
     }
 }
 
@@ -163,7 +163,7 @@ ITask::CallbackConnection& ITask::CallbackConnection::operator=(const CallbackCo
     {
         bool result = m_task->removeCallback(m_callback);
         motor_forceuse(result);
-        motor_assert(result, "could not disconnect callback from task %s" | m_task->name);
+        motor_assert_format(result, "could not disconnect callback from task {0}", m_task->name);
     }
     m_task     = other.m_task;
     m_callback = other.m_callback;
@@ -180,7 +180,7 @@ ITask::CallbackConnection::~CallbackConnection()
     {
         bool result = m_task->removeCallback(m_callback);
         motor_forceuse(result);
-        motor_assert(result, "could not disconnect callback from task %s" | m_task->name);
+        motor_assert_format(result, "could not disconnect callback from task {0}", m_task->name);
     }
 }
 

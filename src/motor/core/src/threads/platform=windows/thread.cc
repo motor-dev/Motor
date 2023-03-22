@@ -45,7 +45,7 @@ public:
     {
         if(FAILED(m_key))
         {
-            motor_warning("TLS not available");
+            motor_warning(Log::thread(), "TLS not available");
         }
         static Thread::ThreadParams p("main", 0, 0, 0);
         createThreadSpecificData(p);
@@ -86,7 +86,7 @@ Thread::ThreadParams::ThreadParams(const istring& name, ThreadFunction f, intptr
     , m_param2(p2)
     , m_result(0)
 {
-    motor_info("starting thread %s" | name);
+    motor_info_format(Log::thread(), "starting thread {0}", name);
 }
 
 Thread::ThreadParams::~ThreadParams()
@@ -117,10 +117,10 @@ unsigned long WINAPI Thread::ThreadParams::threadWrapper(void* params)
 {
     ThreadParams* p = static_cast< ThreadParams* >(params);
     s_threadData.createThreadSpecificData(*p);
-    motor_debug("started thread %s" | p->m_name);
+    motor_debug_format(Log::thread(), "started thread {0}", p->m_name);
     setThreadName(p->m_name);
     p->m_result = (*p->m_function)(p->m_param1, p->m_param2);
-    motor_info("stopped thread %s" | p->m_name);
+    motor_info_format(Log::thread(), "stopped thread {0}", p->m_name);
 
     return 0;
 }
@@ -135,8 +135,8 @@ Thread::Thread(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2, 
 Thread::~Thread()
 {
     DWORD result = WaitForSingleObject((HANDLE)m_data, 2000);
-    motor_assert(result != WAIT_TIMEOUT,
-                 "timed out when waiting for thread %s" | m_params->m_name.c_str());
+    motor_assert_format(result != WAIT_TIMEOUT, "timed out when waiting for thread {0}",
+                        m_params->m_name.c_str());
     motor_forceuse(result);
     CloseHandle((HANDLE)m_data);
     delete static_cast< ThreadParams* >(m_params);

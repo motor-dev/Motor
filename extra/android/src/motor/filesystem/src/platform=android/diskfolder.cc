@@ -54,7 +54,8 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy,
         m_handle.ptrHandle       = opendir(pathname.name);
         if(!m_handle.ptrHandle)
         {
-            motor_error("Could not open directory %s: %s" | diskpath | strerror(errno));
+            motor_error_format(Log::fs(), "Could not open directory {0}: {1}", diskpath,
+                               strerror(errno));
         }
     }
     else
@@ -66,7 +67,7 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy,
         m_handle.ptrHandle = unzOpen2(s_packagePath, &defs);
         if(!m_handle.ptrHandle)
         {
-            motor_error("Could not open directory %s/" | m_path);
+            motor_error_format(Log::fs(), "Could not open directory {0}/", m_path);
         }
     }
 
@@ -120,8 +121,8 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                 stat(filename.name, &s);
                 if(errno == 0)
                 {
-                    motor_error("could not stat file %s: %s(%d)" | filename.name | strerror(errno)
-                                | errno);
+                    motor_error_format(Log::fs(), "could not stat file {0}: {1}({2})",
+                                       filename.name, strerror(errno), errno);
                 }
                 else if(s.st_mode & S_IFDIR)
                 {
@@ -177,19 +178,15 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                 for(minitl::vector< istring >::const_iterator it = subdirs.begin();
                     it != subdirs.end(); ++it)
                 {
-                    motor_info("%s" | *it);
                     if(openFolderNoLock(ipath(*it)) == weak< Folder >())
                     {
-                        motor_info("> %s" | *it);
                         ipath path = relativePath;
                         path.push_back(*it);
                         m_folders.push_back(minitl::make_tuple(
                             *it, ref< ZipFolder >::create(Arena::filesystem(), m_handle.ptrHandle,
                                                           path, newPolicy)));
                     }
-                    motor_info("%s" | *it);
                 }
-                motor_info("test");
             }
         }
     }
@@ -199,21 +196,24 @@ weak< File > DiskFolder::createFile(const istring& name)
 {
     if(m_index == 0)
     {
-        motor_assert_recover(m_path[0] != istring("apk:"),
-                             "can't create a file in the Package directory", return weak< File >());
+        if(motor_assert(m_path[0] != istring("apk:"),
+                        "can't create a file in the Package directory"))
+            return weak< File >();
         ifilename::Filename path = (m_path + ifilename(name)).str();
         struct stat         s;
         errno   = 0;
         FILE* f = fopen(path.name, "w");
         if(f == 0)
         {
-            motor_error("could not create file %s: %s(%d)" | path.name | strerror(errno) | errno);
+            motor_error_format(Log::fs(), "could not create file {0}: {1}({2})", path.name,
+                               strerror(errno), errno);
             return ref< File >();
         }
         fclose(f);
         if(stat(path.name, &s) != 0)
         {
-            motor_error("could not create file %s: %s(%d)" | path.name | strerror(errno) | errno);
+            motor_error_format(Log::fs(), "could not create file {0}: {1}({2})", path.name,
+                               strerror(errno), errno);
             return ref< File >();
         }
 
@@ -236,7 +236,7 @@ weak< File > DiskFolder::createFile(const istring& name)
     }
     else
     {
-        motor_error("can't create new file: read-only APK filesystem");
+        motor_error(Log::fs(), "can't create new file: read-only APK filesystem");
         return weak< File >();
     }
 }

@@ -18,7 +18,7 @@ struct THREADNAME_INFO
 };
 #pragma pack(pop)
 
-class WatchRequest : public minitl::istack< WatchRequest >::node
+class WatchRequest : public kernel::istack< WatchRequest >::node
 {
     friend class WatchThread;
 
@@ -47,7 +47,7 @@ private:
     static const u32 s_maximumWatchCount = MAXIMUM_WAIT_OBJECTS - 1;
     HANDLE           m_semaphore;
     minitl::vector< minitl::tuple< HANDLE, weak< FileSystem::WatchPoint > > > m_watches;
-    minitl::istack< WatchRequest >                                            m_requests;
+    kernel::istack< WatchRequest >                                            m_requests;
     u32                                                                       m_watchCount;
     HANDLE                                                                    m_thread;
 
@@ -85,7 +85,7 @@ unsigned long WINAPI WatchThread::doWatchFolders(void* params)
 {
     WatchThread* watchThread   = reinterpret_cast< WatchThread* >(params);
     static i_u32 s_threadIndex = i_u32::create(0);
-    setThreadName(istring(minitl::format< 1024u >("FileSystem watch %d") | s_threadIndex++));
+    setThreadName(istring(minitl::format< 1024u >(FMT("FileSystem watch {0}"), s_threadIndex++)));
 
     while(true)
     {
@@ -141,7 +141,7 @@ unsigned long WINAPI WatchThread::doWatchFolders(void* params)
             FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL,
                           errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                           reinterpret_cast< LPSTR >(&errorMessage), 0, NULL);
-            motor_error("file watch wait interrupted: %s" | errorMessage);
+            motor_error_format(Log::fs(), "file watch wait interrupted: {0}", errorMessage);
             ::LocalFree(errorMessage);
             motor_notreached();
         }

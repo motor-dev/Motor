@@ -14,5 +14,11 @@ extern "C"
 #include <lualib.h>
 }
 
+namespace Motor { namespace Log {
+
+weak< Logger > lua();
+
+}}  // namespace Motor::Log
+
 /**************************************************************************************************/
 #endif

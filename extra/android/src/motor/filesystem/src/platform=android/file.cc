@@ -29,7 +29,8 @@ void PosixFile::doFillBuffer(weak< File::Ticket > ticket) const
     {
         const char* errorMessage = strerror(errno);
         motor_forceuse(errorMessage);
-        motor_error("file %s could not be opened: (%d) %s" | m_filename | errno | errorMessage);
+        motor_error_format(Log::fs(), "file {0} could not be opened: ({1}) {2}", m_filename, errno,
+                           errorMessage);
         ticket->error.set(true);
     }
     else
@@ -54,8 +55,10 @@ void PosixFile::doFillBuffer(weak< File::Ticket > ticket) const
             data += read;
             if(read == 0)
             {
-                motor_error("reached premature end of file in %s after reading %d bytes (offset %d)"
-                            | m_filename | ticket->processed | ticket->total);
+                motor_error_format(
+                    Log::fs(),
+                    "reached premature end of file in {0} after reading {1} bytes (offset {2})",
+                    m_filename, ticket->processed, ticket->total);
                 ticket->error.set(true);
             }
         }
@@ -74,7 +77,8 @@ void PosixFile::doWriteBuffer(weak< Ticket > ticket) const
     {
         const char* errorMessage = strerror(errno);
         motor_forceuse(errorMessage);
-        motor_error("file %s could not be opened: (%d) %s" | m_filename | errno | errorMessage);
+        motor_error_format(Log::fs(), "file {0} could not be opened: ({1}) {2}", m_filename, errno,
+                           errorMessage);
         ticket->error.set(true);
     }
     else
@@ -101,10 +105,11 @@ void PosixFile::doWriteBuffer(weak< Ticket > ticket) const
             {
                 const char* errorMessage = strerror(errno);
                 motor_forceuse(errorMessage);
-                motor_error(
-                    "could not write part of the buffer to file %s; failed after processing "
-                    "%d bytes out of %d (%s)"
-                    | m_filename | ticket->processed | ticket->total | errorMessage);
+                motor_error_format(
+                    Log::fs(),
+                    "could not write part of the buffer to file {0}; failed after processing "
+                    "{1} bytes out of {2} ({3})",
+                    m_filename, ticket->processed, ticket->total, errorMessage);
                 ticket->error.set(true);
             }
         }

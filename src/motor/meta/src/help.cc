@@ -18,19 +18,16 @@ void help(const Meta::Type& type)
 
 void help(const Meta::Class& klass)
 {
-    motor_info("%s" | klass.name);
     motor_forceuse(klass);
 }
 
 void help(const Meta::Property& property)
 {
-    motor_info("%s" | property.name);
     motor_forceuse(property);
 }
 
 void help(const Meta::Method& method)
 {
-    motor_info("%s" | method.name);
     motor_forceuse(method);
 }
 
@@ -41,7 +38,6 @@ void help(const Meta::Method::Overload& overload)
 
 void help(const Meta::Method::Parameter& parameter)
 {
-    motor_info("%s" | parameter.name);
     motor_forceuse(parameter);
 }
 

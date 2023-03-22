@@ -115,12 +115,12 @@ Meta::ConversionCost calculateConversion(const LuaParameterType& type, const Met
         case LUA_TTABLE:
             if(target.metaclass->type() == Meta::ClassType_Array)
             {
-                motor_assert(target.metaclass->operators,
-                             "Array class %s does not have an operator table"
-                                 | target.metaclass->name);
-                motor_assert(target.metaclass->operators->arrayOperators,
-                             "Array class %s does not have an array operator table"
-                                 | target.metaclass->name);
+                motor_assert_format(target.metaclass->operators,
+                                    "Array class {0} does not have an operator table",
+                                    target.metaclass->name);
+                motor_assert_format(target.metaclass->operators->arrayOperators,
+                                    "Array class {0} does not have an array operator table",
+                                    target.metaclass->name);
                 const Meta::Type& valueType
                     = target.metaclass->operators->arrayOperators->value_type;
                 Meta::ConversionCost c;
@@ -207,8 +207,8 @@ void convert(const LuaParameterType& type, void* buffer, const Meta::Type& targe
     }
     LuaPop p(type.state, index, type.key != -1);
     bool   result = createValue(type.state, index, target, buffer);
-    motor_assert(result, "could not convert lua value %s to %s"
-                             | Context::tostring(type.state, index) | target.name());
+    motor_assert_format(result, "could not convert lua value {0} to {1}",
+                        Context::tostring(type.state, index), target.name());
     motor_forceuse(result);
 }
 
@@ -310,8 +310,8 @@ int call(lua_State* state, raw< const Meta::Method > method)
         char message[4096] = "no overload can convert all parameters\n  ";
         for(u32 i = 0; i < nargs; ++i)
         {
-            strcat(message, minitl::format< 128u >("%s%s") | Context::tostring(state, 2 + i)
-                                | (i < nargs - 1 ? ", " : ""));
+            strcat(message, minitl::format< 128u >(FMT("{0}{1}"), Context::tostring(state, 2 + i),
+                                                   (i < nargs - 1 ? ", " : "")));
         }
         return error(state, message);
     }
