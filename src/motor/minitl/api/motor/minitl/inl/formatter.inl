@@ -638,6 +638,7 @@ struct formatter< T* >
         union
         {
             const T* v;
+            u64      v64;
             u32      v32;
         } ptrConvert;
         ptrConvert.v = value;
