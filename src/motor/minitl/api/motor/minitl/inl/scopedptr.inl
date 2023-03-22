@@ -114,7 +114,7 @@ struct formatter< scoped< T > > : public format_details::default_partial_formatt
             return formatter< T* >::length(value.operator->(), options);
         else
         {
-            return 13 + 10 + 9 + 9 + 2 + strlen(typeid(T).name());
+            return 9 + 10 + 9;
         }
     }
     static u32 format_to(char* destination, const scoped< T >& value, const format_options& options,
@@ -125,9 +125,12 @@ struct formatter< scoped< T > > : public format_details::default_partial_formatt
             return formatter< void* >::format_to(destination, r, options, reservedLength);
         else if(options.width == 0)
         {
-            return minitl::format_to(destination, reservedLength,
-                                     FMT("scoped<{0:s}>({1:#p}){{{2}w}}"), typeid(T).name(), r,
+#if MOTOR_ENABLE_WEAKCHECK
+            return minitl::format_to(destination, reservedLength, FMT("scoped<{0:#p},{1}>"), r,
                                      r ? r->m_weakCount : 0);
+#else
+            return minitl::format_to(destination, reservedLength, FMT("scoped<{0:#p}>"), r);
+#endif
         }
         else
         {
