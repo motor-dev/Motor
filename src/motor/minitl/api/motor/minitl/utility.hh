@@ -18,9 +18,8 @@ template < class T >
 constexpr T&& forward(remove_reference_t< T >&& t) noexcept;
 
 template < int GET, typename T, typename... TAIL, enable_if_t< GET == 0, bool > = false >
-const T& get(const T& t, const TAIL&... tail)
+const T& get(const T& t, const TAIL&... )
 {
-    motor_forceuse_pack(tail);
     return t;
 }
 

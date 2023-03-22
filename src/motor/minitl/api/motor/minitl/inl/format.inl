@@ -313,7 +313,7 @@ buffer_info fill_buffer(char* destination, u32 length, const buffer_info& buffer
 
 template < typename T, typename... Args, u32... PATTERN_INDICES, u32... ARGUMENT_INDICES >
 u32 format(char* destination, u32 destinationLength, const Args&... arguments,
-           index_sequence< PATTERN_INDICES... >, index_sequence< ARGUMENT_INDICES... >)
+              index_sequence< PATTERN_INDICES... >, index_sequence< ARGUMENT_INDICES... >)
 {
     T                             format;
     constexpr u32                 patternCount = sizeof...(PATTERN_INDICES);

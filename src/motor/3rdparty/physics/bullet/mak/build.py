@@ -10,7 +10,7 @@ def deploy_bullet_package(task_gen):
     if task_gen.env.PROJECTS:
         return
 
-    path = task_gen.source_nodes[0]
+    path = task_gen.source_nodes[0][1]
     bullet_dest = 'bullet-2.87-%s-multiarch-%s' % (task_gen.env.VALID_PLATFORMS[0], task_gen.env.COMPILER_ABI)
     src = path.make_node('src')
 

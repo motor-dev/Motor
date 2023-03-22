@@ -253,7 +253,7 @@ void PythonLibrary::platformInitialize()
     ifilename programPath = Environment::getEnvironment().getProgramPath();
     programPath.pop_back();
     programPath.push_back("lib");
-    programPath.push_back(istring(minitl::format< 32u >(FMT("python%d"), m_version)));
+    programPath.push_back(istring(minitl::format< 32u >(FMT("python{0}"), m_version)));
     if(m_version < 30)
     {
         static ifilename::Filename f = programPath.str();

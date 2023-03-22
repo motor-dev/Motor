@@ -157,7 +157,7 @@ public:
         motor_assert(m_refCount, "string's refcount already 0");
         m_refCount--;
     }
-    size_t size() const
+    u32 size() const
     {
         return m_length;
     }
@@ -380,7 +380,7 @@ u32 istring::hash() const
     return (u32)(ptrdiff_t(m_index) & 0xFFFFFFFF);
 }
 
-size_t istring::size() const
+u32 istring::size() const
 {
     return StringInfo::getCache().resolve(m_index)->size();
 }

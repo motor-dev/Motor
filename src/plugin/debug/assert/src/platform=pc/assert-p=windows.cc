@@ -64,7 +64,7 @@ minitl::AssertionResult AssertionCallback(const char* file, int line, const char
         size_t                      result = Runtime::Callstack::backtrace(address, 128, 1);
         for(Runtime::Callstack::Address* a = address; a < address + result; ++a)
         {
-            (void)_snprintf(buffer, BUFFER_SIZE - 1, "  [%p]\r\n", *a);
+            minitl::format_to(buffer, sizeof(buffer), FMT("[{0: #x}]\r\n"), a->address());
             strcat(callstack, buffer);
             OutputDebugString(buffer);
         }

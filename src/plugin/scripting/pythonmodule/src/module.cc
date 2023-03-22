@@ -33,7 +33,7 @@ protected:
                      int line, const char* thread, const char* msg) const override
     {
 #ifdef MOTOR_PLATFORM_WIN32
-        minitl::format< 1024u > message = minitl::format< 1024u >(
+        minitl::format_buffer< 1024u > message = minitl::format< 1024u >(
             FMT("{0}({1}): {2}\t({3}) {4}{5}"), filename, line, logname, getLogLevelName(level),
             msg, (msg[strlen(msg) - 1] == '\n' ? "" : "\n"));
         OutputDebugString(message);

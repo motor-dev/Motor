@@ -17,8 +17,8 @@
 
 namespace Motor { namespace Log {
 
-weak< Logger > graphics();
-weak< Logger > shader();
+motor_api(3D) weak< Logger > graphics();
+motor_api(3D) weak< Logger > shader();
 
 }}  // namespace Motor::Log
 

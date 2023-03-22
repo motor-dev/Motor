@@ -35,7 +35,7 @@ public:
     istring& operator=(istring&& other);
 
     const char* c_str() const;
-    size_t      size() const;
+    u32         size() const;
     u32         hash() const;
 
     bool operator==(const istring& other) const;
