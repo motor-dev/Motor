@@ -171,16 +171,4 @@ void Thread::setPriority(Priority p)
     pthread_setschedparam(*reinterpret_cast< pthread_t* >(m_data), SCHED_RR, &param);
 }
 
-void Thread::pin(u32 cpuIndex)
-{
-    cpu_set_t cpuSet;
-    CPU_ZERO(&cpuSet);
-    CPU_SET(cpuIndex, &cpuSet);
-#ifdef MOTOR_PLATFORM_LINUX
-    sched_setaffinity(m_id, sizeof(cpuSet), &cpuSet);
-#else
-    pthread_setaffinity_np(*reinterpret_cast< pthread_t* >(m_data), sizeof(cpuSet), &cpuSet);
-#endif
-}
-
 }  // namespace Motor
