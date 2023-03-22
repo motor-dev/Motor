@@ -22,7 +22,7 @@ Semaphore::Semaphore(int initialCount) : m_data()
 
     if(!m_data.ptr)
     {
-        motor_error("Could not initialize semaphore: %s" | strerror(errno));
+        motor_error_format(Log::thread(), "Could not initialize semaphore: {0}", strerror(errno));
     }
 #else
     m_data.ptr = new MPSemaphoreID;
@@ -71,7 +71,7 @@ Threads::Waitable::WaitResult Semaphore::wait()
     }
     else
     {
-        motor_error("MPWaitOnSemaphore returned %d" | result);
+        motor_error_format(Log::thread(), "MPWaitOnSemaphore returned {0}", result);
         return Abandoned;
     }
 }

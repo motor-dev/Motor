@@ -5,7 +5,7 @@
 #include <motor/core/environment.hh>
 #include <motor/filesystem/diskfolder.meta.hh>
 #include <luasample.hh>
-
+/*
 namespace Motor {
 
 LuaSample::LuaSample(const Plugin::Context& context)
@@ -26,3 +26,4 @@ LuaSample::~LuaSample()
 }
 
 }  // namespace Motor
+*/

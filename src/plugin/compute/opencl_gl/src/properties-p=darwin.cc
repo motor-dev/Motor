@@ -15,7 +15,8 @@ minitl::array< cl_context_properties > Scheduler::createPlatformSpecificContextP
         = (t_CGLGetShareGroup)dlsym(RTLD_DEFAULT, "CGLGetShareGroup");
     if(!b_CGLGetShareGroup)
     {
-        motor_warning("CGLGetShareGroup not found; OpenGL/OpenCL compatibility disabled");
+        motor_warning(Log::opencl_gl(),
+                      "CGLGetShareGroup not found; OpenGL/OpenCL compatibility disabled");
         minitl::array< cl_context_properties > properties(Arena::temporary(), 1);
         properties[0] = 0;
         return properties;
@@ -29,7 +30,7 @@ minitl::array< cl_context_properties > Scheduler::createPlatformSpecificContextP
         properties[2] = 0;
         return properties;
     }
-    motor_info("no OpenGL context found; OpenGL/OpenCL compatibility disabled");
+    motor_info(Log::opencl_gl(), "no OpenGL context found; OpenGL/OpenCL compatibility disabled");
     minitl::array< cl_context_properties > properties(Arena::temporary(), 1);
     properties[0] = 0;
     return properties;

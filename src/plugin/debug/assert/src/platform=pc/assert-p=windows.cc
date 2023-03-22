@@ -4,8 +4,6 @@
 #include <stdafx.h>
 #include <motor/minitl/assert.hh>
 #include <motor/plugin.debug.runtime/callstack.hh>
-#include <motor/plugin.debug.runtime/module.hh>
-#include <motor/plugin.debug.runtime/symbols.hh>
 
 #include <malloc.h>
 #include <stdio.h>
@@ -64,27 +62,9 @@ minitl::AssertionResult AssertionCallback(const char* file, int line, const char
     {
         Runtime::Callstack::Address address[128];
         size_t                      result = Runtime::Callstack::backtrace(address, 128, 1);
-
-        ref< const Runtime::Module >                executable = Runtime::Module::self();
-        static weak< const Runtime::Module >        last       = executable;
-        static ref< const Runtime::SymbolResolver > s_symbols
-            = Runtime::SymbolResolver::loadSymbols(executable->getSymbolInformation(),
-                                                   ref< const Runtime::SymbolResolver >());
-        while(last && last->next())
-        {
-            last                                              = last->next();
-            Runtime::SymbolResolver::SymbolInformations infos = last->getSymbolInformation();
-            s_symbols = Runtime::SymbolResolver::loadSymbols(infos, s_symbols);
-        }
         for(Runtime::Callstack::Address* a = address; a < address + result; ++a)
         {
-            Runtime::Symbol s;
-            if(s_symbols)
-            {
-                s_symbols->resolve(*a, s);
-            }
-            (void)_snprintf(buffer, BUFFER_SIZE - 1, "[%s] %s(%d) : %s\r\n", s.module(),
-                            s.filename(), s.line(), s.function());
+            (void)_snprintf(buffer, BUFFER_SIZE - 1, "  [%p]\r\n", *a);
             strcat(callstack, buffer);
             OutputDebugString(buffer);
         }

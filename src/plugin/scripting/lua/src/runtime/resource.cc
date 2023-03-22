@@ -16,7 +16,7 @@ struct ResourceToken
     weak< const Resource::IDescription > description;
 };
 
-extern "C" int resourceLoaderGC(lua_State* state)
+static int resourceLoaderGC(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.ResourceManager");
     weak< Resource::ResourceManager >* userdata
@@ -25,7 +25,7 @@ extern "C" int resourceLoaderGC(lua_State* state)
     return 0;
 }
 
-extern "C" int resourceLoaderToString(lua_State* state)
+static int resourceLoaderToString(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.ResourceManager");
     weak< Resource::ResourceManager >* userdata
@@ -34,7 +34,7 @@ extern "C" int resourceLoaderToString(lua_State* state)
     return 1;
 }
 
-extern "C" int resourceLoaderLoad(lua_State* state)
+static int resourceLoaderLoad(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.ResourceManager");
     Context::checkArg(state, 2, "Motor.Object");
@@ -60,7 +60,7 @@ const luaL_Reg s_resourceLoaderMetaTable[] = {{"__gc", resourceLoaderGC},
                                               {"load", resourceLoaderLoad},
                                               {0, 0}};
 
-extern "C" int resourceGC(lua_State* state)
+static int resourceGC(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Resource");
     ResourceToken* userdata = (ResourceToken*)lua_touserdata(state, 1);
@@ -69,7 +69,7 @@ extern "C" int resourceGC(lua_State* state)
     return 0;
 }
 
-extern "C" int resourceToString(lua_State* state)
+static int resourceToString(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Resource");
     ResourceToken* userdata = (ResourceToken*)lua_touserdata(state, 1);

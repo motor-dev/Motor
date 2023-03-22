@@ -15,11 +15,21 @@
 #    define MOTOR_API_PYTHONLIB
 #endif
 
-namespace Motor { namespace Arena {
+namespace Motor {
+
+namespace Arena {
 
 motor_api(PYTHONLIB) minitl::Allocator& python();
 
-}}  // namespace Motor::Arena
+}
+
+namespace Log {
+
+motor_api(PYTHONLIB) weak< Logger > python();
+
+}
+
+}  // namespace Motor
 
 /**************************************************************************************************/
 #endif

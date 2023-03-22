@@ -59,8 +59,7 @@ struct ClassID< AST::SimplePolicy< INTROSPECTION_HINT > >
     }
     static MOTOR_EXPORT istring name()
     {
-        static const istring s_name(minitl::format< 4096u >("SimplePolicy<%s>")
-                                    | TypeID< INTROSPECTION_HINT >::name());
+        static const istring s_name(minitl::format< 4096u >(FMT("SimplePolicy<{0}>"), TypeID< INTROSPECTION_HINT >::name());
         return s_name;
     }
 };

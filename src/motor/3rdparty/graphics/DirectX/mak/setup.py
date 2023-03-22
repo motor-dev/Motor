@@ -20,32 +20,14 @@ def setup(configuration_context):
             libdirs = []
         found = []
         if configuration_context.check_lib(
-            'd3d9',
-            var='dx9',
+            'd3d12',
+            var='dx12',
             libpath=libdirs,
             includepath=includes,
-            includes=['d3d9.h'],
-            functions=['Direct3DCreate9']
+            includes=['d3d12.h'],
+            functions=['D3D12CreateDevice']
         ):
-            found.append('DirectX 9')
-        if configuration_context.check_lib(
-            'd3d10',
-            var='dx10',
-            libpath=libdirs,
-            includepath=includes,
-            includes=['d3d10.h'],
-            functions=['D3D10CreateDevice']
-        ):
-            found.append('DirectX 10')
-        if configuration_context.check_lib(
-            'd3d11',
-            var='dx11',
-            libpath=libdirs,
-            includepath=includes,
-            includes=['d3d11.h'],
-            functions=['D3D11CreateDevice']
-        ):
-            found.append('DirectX 11')
+            found.append('DirectX 12')
         if not found:
             configuration_context.end_msg('not found', color='YELLOW')
         else:

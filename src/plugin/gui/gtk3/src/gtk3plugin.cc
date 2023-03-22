@@ -33,8 +33,8 @@ namespace Motor { namespace Gtk3 {
 static void log(const gchar* domain, GLogLevelFlags log_level, const gchar* message,
                 gpointer userData)
 {
-    ref< Logger > logger = *reinterpret_cast< ref< Logger >* >(userData);
-    LogLevel      level  = logInfo;
+    weak< Logger >& logger = *reinterpret_cast< weak< Logger >* >(userData);
+    LogLevel        level  = logInfo;
     switch(log_level & G_LOG_LEVEL_MASK)
     {
     case G_LOG_LEVEL_ERROR: level = logFatal; break;
@@ -62,13 +62,12 @@ Gtk3Plugin::Gtk3Plugin()
     , m_firstPage(static_cast< Page* >(m_allocator.allocate()))
     , m_motorQuark(g_quark_from_static_string("motor"))
     , m_objectPtr(motor_plugin_gui_gtk3_Namespace()->objects)
-    , m_logger(Logger::instance(inamespace("GtkPlugin")))
+    , m_logger(Log::gtk())
     , m_logHandlerDefault(g_log_set_handler(NULL, GLogLevelFlags(~0), log, &m_logger))
     , m_logHandlerGLib(g_log_set_handler("GLib", GLogLevelFlags(~0), log, &m_logger))
     , m_logHandlerGtk(g_log_set_handler("GTK", GLogLevelFlags(~0), log, &m_logger))
 {
     g_log_set_default_handler(log, &m_logger);
-    g_debug("oops");
     gtk_init(0, 0);
     gtk_test_register_all_types();
 
@@ -129,12 +128,12 @@ void Gtk3Plugin::registerBoxed(GType type)
     getGBoxedClass(*this, type);
 
     guint  childrenCount;
-    GType* parents = g_type_children(type, &childrenCount);
+    GType* children = g_type_children(type, &childrenCount);
     for(guint i = 0; i < childrenCount; ++i)
     {
-        registerBoxed(parents[i]);
+        registerBoxed(children[i]);
     }
-    g_free(parents);
+    g_free(children);
 }
 
 void Gtk3Plugin::registerEnum(GType type)
@@ -142,12 +141,12 @@ void Gtk3Plugin::registerEnum(GType type)
     getGEnumClass(*this, type);
 
     guint  childrenCount;
-    GType* parents = g_type_children(type, &childrenCount);
+    GType* children = g_type_children(type, &childrenCount);
     for(guint i = 0; i < childrenCount; ++i)
     {
-        registerEnum(parents[i]);
+        registerEnum(children[i]);
     }
-    g_free(parents);
+    g_free(children);
 }
 
 void Gtk3Plugin::registerFlags(GType type)
@@ -155,12 +154,12 @@ void Gtk3Plugin::registerFlags(GType type)
     getGFlagsClass(*this, type);
 
     guint  childrenCount;
-    GType* parents = g_type_children(type, &childrenCount);
+    GType* children = g_type_children(type, &childrenCount);
     for(guint i = 0; i < childrenCount; ++i)
     {
-        registerFlags(parents[i]);
+        registerFlags(children[i]);
     }
-    g_free(parents);
+    g_free(children);
 }
 
 void Gtk3Plugin::registerInterface(GType type)
@@ -168,25 +167,25 @@ void Gtk3Plugin::registerInterface(GType type)
     getGInterfaceClass(*this, type);
 
     guint  childrenCount;
-    GType* parents = g_type_children(type, &childrenCount);
+    GType* children = g_type_children(type, &childrenCount);
     for(guint i = 0; i < childrenCount; ++i)
     {
-        registerInterface(parents[i]);
+        registerInterface(children[i]);
     }
-    g_free(parents);
+    g_free(children);
 }
 
 void Gtk3Plugin::unregisterInterface(GType type)
 {
-    g_type_set_qdata(type, m_motorQuark, 0);
     destroyGInterfaceClass(*this, type);
     guint  childrenCount;
-    GType* parents = g_type_children(type, &childrenCount);
+    GType* children = g_type_children(type, &childrenCount);
     for(guint i = 0; i < childrenCount; ++i)
     {
-        unregisterClass(parents[i]);
+        unregisterClass(children[i]);
     }
-    g_free(parents);
+    g_free(children);
+    g_type_set_qdata(type, m_motorQuark, 0);
 }
 
 void Gtk3Plugin::registerClass(GType type)
@@ -194,25 +193,25 @@ void Gtk3Plugin::registerClass(GType type)
     getGObjectClass(*this, type);
 
     guint  childrenCount;
-    GType* parents = g_type_children(type, &childrenCount);
+    GType* children = g_type_children(type, &childrenCount);
     for(guint i = 0; i < childrenCount; ++i)
     {
-        registerClass(parents[i]);
+        registerClass(children[i]);
     }
-    g_free(parents);
+    g_free(children);
 }
 
 void Gtk3Plugin::unregisterClass(GType type)
 {
-    g_type_set_qdata(type, m_motorQuark, 0);
     destroyGObjectClass(*this, type);
     guint  childrenCount;
-    GType* parents = g_type_children(type, &childrenCount);
+    GType* children = g_type_children(type, &childrenCount);
     for(guint i = 0; i < childrenCount; ++i)
     {
-        unregisterClass(parents[i]);
+        unregisterClass(children[i]);
     }
-    g_free(parents);
+    g_free(children);
+    g_type_set_qdata(type, m_motorQuark, 0);
 }
 
 Meta::Type Gtk3Plugin::fromGType(GType type)
@@ -272,7 +271,7 @@ Meta::Type Gtk3Plugin::fromGType(GType type)
     case G_TYPE_POINTER:
     default:
     {
-        motor_assert(false, "don't know how to handle type %s" | g_type_name(type));
+        motor_assert_format(false, "don't know how to handle type {0}", g_type_name(type));
         return motor_type< void >();
     }
     }
@@ -284,7 +283,7 @@ Meta::Value Gtk3Plugin::fromGValue(const GValue* value)
     GType type = G_VALUE_TYPE(value);
     if(G_TYPE_FUNDAMENTAL(type) == G_TYPE_GTYPE)
     {
-        motor_assert(false, "don't know how to handle type %s" | g_type_name(type));
+        motor_assert_format(false, "don't know how to handle type {0}", g_type_name(type));
         return Meta::Value();
     }
 
@@ -350,7 +349,7 @@ Meta::Value Gtk3Plugin::fromGValue(const GValue* value)
     case G_TYPE_POINTER:
     default:
     {
-        motor_assert(false, "don't know how to handle type %s" | g_type_name(type));
+        motor_assert_format(false, "don't know how to handle type {0}", g_type_name(type));
         return Meta::Value();
     }
     }

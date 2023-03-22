@@ -31,7 +31,7 @@ void Semaphore::release(int count)
     m_data.value += count;
     if(syscall(__NR_futex, &m_data.value, FUTEX_WAKE, count) < 0)
     {
-        motor_error("Semaphore error: %d[%s]" | errno | strerror(errno));
+        motor_error_format(Log::thread(), "Semaphore error: {0}[{1}]", errno, strerror(errno));
         motor_notreached();
     }
 }
@@ -51,7 +51,8 @@ Threads::Waitable::WaitResult Semaphore::wait()
         result = syscall(__NR_futex, &m_data.value, FUTEX_WAIT, count, NULL);
     } while(result == 0 || errno == EAGAIN);
 
-    motor_error("Semaphore error: %d-%d[%s]" | result | errno | strerror(errno));
+    motor_error_format(Log::thread(), "Semaphore error: {0}-{1}[{2}]", result, errno,
+                       strerror(errno));
     motor_notreached();
     return Abandoned;
 }

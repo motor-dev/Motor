@@ -85,65 +85,65 @@ PyTypeObject::Py3NumberMethods PyMotorNumber< T >::s_py3NumberNumber
        0};
 
 template < typename T >
-PyTypeObject PyMotorNumber< T >::s_pyType
-    = {{{0, 0}, 0},
-       istring(minitl::format< 128u >("py_motor.%s") | motor_type< T >().metaclass->name).c_str(),
-       sizeof(PyMotorNumber< T >),
-       0,
-       &PyMotorNumber< T >::dealloc,
-       0,
-       0,
-       0,
-       0,
-       &PyMotorNumber< T >::repr,
-       0,
-       0,
-       0,
-       0,
-       0,
-       &PyMotorNumber< T >::str,
-       0,
-       0,
-       0,
-       Py_TPFLAGS_MOTOR_DEFAULT,
-       "Wrapper class for the C++ Motor number types",
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       PyMotorObject::s_methods,
-       0,
-       0,
-       &PyMotorObject::s_pyType,
-       0,
-       0,
-       0,
-       0,
-       &PyMotorNumber< T >::init,
-       0,
-       &PyMotorNumber< T >::newinst,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0};
+PyTypeObject PyMotorNumber< T >::s_pyType = {
+    {{0, 0}, 0},
+    istring(minitl::format< 128u >(FMT("py_motor.{0}"), motor_type< T >().metaclass->name)).c_str(),
+    sizeof(PyMotorNumber< T >),
+    0,
+    &PyMotorNumber< T >::dealloc,
+    0,
+    0,
+    0,
+    0,
+    &PyMotorNumber< T >::repr,
+    0,
+    0,
+    0,
+    0,
+    0,
+    &PyMotorNumber< T >::str,
+    0,
+    0,
+    0,
+    Py_TPFLAGS_MOTOR_DEFAULT,
+    "Wrapper class for the C++ Motor number types",
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    PyMotorObject::s_methods,
+    0,
+    0,
+    &PyMotorObject::s_pyType,
+    0,
+    0,
+    0,
+    0,
+    &PyMotorNumber< T >::init,
+    0,
+    &PyMotorNumber< T >::newinst,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0};
 
 template < typename T >
 PyObject* PyMotorNumber< T >::stealValue(PyObject* owner, Meta::Value& value)
 {
     motor_assert(value.type().metaclass->type() == Meta::ClassType_Number,
                  "PyMotorNumber only accepts Number types");
-    motor_assert(value.type().metaclass->index() == motor_type< T >().metaclass->index(),
-                 "expected %s; got %s" | motor_type< T >().metaclass->name
-                     | value.type().metaclass->name);
+    motor_assert_format(value.type().metaclass->index() == motor_type< T >().metaclass->index(),
+                        "expected {0}; got {1}", motor_type< T >().metaclass->name,
+                        value.type().metaclass->name);
     PyObject* result                             = s_pyType.tp_alloc(&s_pyType, 0);
     static_cast< PyMotorNumber* >(result)->owner = owner;
 
@@ -197,10 +197,10 @@ int PyMotorNumber< T >::init(PyObject* self, PyObject* args, PyObject* kwds)
 template < typename T >
 PyObject* PyMotorNumber< T >::repr(PyObject* self)
 {
-    PyMotorObject*          self_ = static_cast< PyMotorObject* >(self);
-    const Meta::Value&      v     = self_->value;
-    minitl::format< 1024u > format
-        = minitl::format< 1024u >("[%s %d]") | v.type().name().c_str() | v.as< const T >();
+    PyMotorObject*                 self_ = static_cast< PyMotorObject* >(self);
+    const Meta::Value&             v     = self_->value;
+    minitl::format_buffer< 1024u > format
+        = minitl::format< 1024u >(FMT("[{0} {1}]"), v.type().name().c_str(), v.as< const T >());
     if(s_library->getVersion() >= 30)
     {
         return s_library->m_PyUnicode_FromFormat(format);
@@ -243,7 +243,7 @@ PyObject* PyMotorNumber< T >::str(PyObject* self)
     PyObject* (*tostring)(const char* format, ...) = s_library->getVersion() >= 30
                                                          ? s_library->m_PyUnicode_FromFormat
                                                          : s_library->m_PyString_FromFormat;
-    return tostring(minitl::format< 1024u >("%d") | v.as< const T >());
+    return tostring(minitl::format< 1024u >(FMT("{0}"), v.as< const T >()));
 }
 
 template < typename T >

@@ -7,5 +7,11 @@
 
 #include <motor/stdafx.h>
 
+namespace Motor { namespace Log {
+
+weak< Logger > cuda();
+
+}}  // namespace Motor::Log
+
 /**************************************************************************************************/
 #endif

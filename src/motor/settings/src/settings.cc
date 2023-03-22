@@ -22,8 +22,8 @@ SettingsBase::SettingsBase(raw< const Meta::Class > settingsClass) : m_settingsC
 
 SettingsBase::~SettingsBase()
 {
-    motor_assert(this->hooked(), "Settings object %s was removed from the settings list"
-                                     | m_settingsClass->fullname());
+    motor_assert_format(this->hooked(), "Settings object {0} was removed from the settings list",
+                        m_settingsClass->fullname());
     this->unhook();
 }
 

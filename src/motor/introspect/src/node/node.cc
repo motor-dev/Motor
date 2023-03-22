@@ -128,7 +128,7 @@ bool Node::resolve(DbContext& context)
     motor_assert(m_state != Evaluated, "node is already evaluated");
     if(m_state == InResolution)
     {
-        context.error(this, Message::MessageType("circular reference detected"));
+        context.error(this, minitl::format_buffer< 512 > {"circular reference detected"});
         return false;
     }
     else if(m_state == Resolved)
@@ -190,7 +190,7 @@ minitl::tuple< raw< const Meta::Method >, bool > Node::getCall(DbContext& contex
 ref< Node > Node::getProperty(DbContext& context, const inamespace& name) const
 {
     motor_forceuse(name);
-    context.error(this, Message::MessageType("object does not have properties"));
+    context.error(this, minitl::format_buffer< 512 > {"object does not have properties"});
     return ref< Node >();
 }
 

@@ -10,34 +10,38 @@ status_line = None
 
 def log_handler_emit(self, record):
     if status_line is not None:
-        if record.msg.count('\n') > 1 or len(record.msg) > Logs.get_term_cols():
-            self.stream.write('\033[2K\0338\033[K')
-        else:
-            self.stream.write('\0338\033[K')
+        newline_count = record.msg.count('\n')
+        if newline_count > 1 or len(record.msg) > Logs.get_term_cols():
+            sys.stdout.write('\0337\033[999B\r\033[K\0338')
         legacy_log_emit_override(self, record)
-        #if self.terminator != '\n' and record.msg[-1] != '\n':
-        self.stream.write('\033D\033M\0337\033[K\n%s' % status_line)
-        #else:
-        #    self.stream.write('\0337%s' % status_line)
+        if self.terminator == '\n' or newline_count:
+            sys.stdout.write('\033[2K\033D\033M\0337\033[999B\r\033[K%s\0338' % status_line)
     else:
         legacy_log_emit_override(self, record)
 
-if(sys.platform == "win32"):
+
+if (sys.platform == "win32"):
     import ctypes
     kernel32 = ctypes.windll.kernel32
     kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
 Logs.log_handler.emit_override = log_handler_emit
-sys.stdout.write('\0337')
 
 
 @Configure.conf
 def set_status_line(context, line):
     global status_line
-    if status_line is not None:
-        sys.stdout.write('\r\033[K%s' % line)
-    else:
-        sys.stdout.write('\0337%s' % line)
+    if status_line is None:
+        sys.stdout.write('\033D\033M')
     status_line = line
+    sys.stdout.write('\0337\033[999B\r\033[K%s\0338' % status_line)
+
+
+@Configure.conf
+def clear_status_line(context):
+    global status_line
+    if status_line is not None:
+        status_line = None
+        sys.stdout.write('\0337\033[999B\r\033[K\0338')
 
 
 @Configure.conf

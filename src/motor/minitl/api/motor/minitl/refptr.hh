@@ -57,14 +57,6 @@ public:
     }
 };
 
-template < u16 SIZE >
-class format;
-template < typename T, u16 SIZE >
-const format< SIZE >& operator|(const format< SIZE >& format, ref< T > t)
-{
-    return format | t.operator->();
-}
-
 }  // namespace minitl
 #include <motor/minitl/inl/refptr.inl>
 

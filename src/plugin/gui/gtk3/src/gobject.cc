@@ -16,7 +16,7 @@ namespace Motor { namespace Gtk3 {
 
 static void completeGObjectClass(Gtk3Plugin& plugin, Meta::Class* cls, GType type)
 {
-    motor_debug("finishing registration of type %s" | g_type_name(type));
+    motor_info_format(Log::gtk(), "finishing registration of type {0}", g_type_name(type));
     GObjectClass* objectClass = static_cast< GObjectClass* >(g_type_class_ref(type));
     guint         paramSpecCount;
     GParamSpec**  paramSpecs    = g_object_class_list_properties(objectClass, &paramSpecCount);
@@ -27,15 +27,15 @@ static void completeGObjectClass(Gtk3Plugin& plugin, Meta::Class* cls, GType typ
         if(paramSpecs[i]->value_type == G_TYPE_POINTER
            || paramSpecs[i]->value_type == G_TYPE_VARIANT)
         {
-            motor_warning("skipping property %s.%s of type %s" | g_type_name(type)
-                          | g_param_spec_get_name(paramSpecs[i])
-                          | g_type_name(paramSpecs[i]->value_type));
+            motor_warning_format(Log::gtk(), "skipping property {0}.{1} of type {2}",
+                                 g_type_name(type), g_param_spec_get_name(paramSpecs[i]),
+                                 g_type_name(paramSpecs[i]->value_type));
             continue;
         }
         if(paramSpecs[i]->flags & G_PARAM_DEPRECATED)
         {
-            motor_spam("skipping deprecated property %s.%s" | g_type_name(type)
-                       | g_param_spec_get_name(paramSpecs[i]));
+            motor_debug_format(Log::gtk(), "skipping deprecated property {0}.{1}",
+                               g_type_name(type), g_param_spec_get_name(paramSpecs[i]));
             continue;
         }
         if(((paramSpecs[i]->flags & G_PARAM_READWRITE) == G_PARAM_READWRITE)
@@ -50,10 +50,10 @@ static void completeGObjectClass(Gtk3Plugin& plugin, Meta::Class* cls, GType typ
         }
         if((paramSpecs[i]->flags & G_PARAM_WRITABLE) && !(paramSpecs[i]->flags & G_PARAM_READABLE))
         {
-            motor_warning("skipping signal property %s.%s [%s]\n    %s" | g_type_name(type)
-                          | g_param_spec_get_name(paramSpecs[i])
-                          | g_type_name(paramSpecs[i]->value_type)
-                          | g_param_spec_get_blurb(paramSpecs[i]));
+            motor_warning_format(Log::gtk(), "skipping signal property {0}.{1} [{2}]\n    {3}",
+                                 g_type_name(type), g_param_spec_get_name(paramSpecs[i]),
+                                 g_type_name(paramSpecs[i]->value_type),
+                                 g_param_spec_get_blurb(paramSpecs[i]));
         }
     }
     if(G_TYPE_IS_INSTANTIATABLE(type))
@@ -67,8 +67,6 @@ static void completeGObjectClass(Gtk3Plugin& plugin, Meta::Class* cls, GType typ
             parameters = plugin.allocateArray< Meta::Method::Parameter >(constructorParameterCount);
             for(guint i = 0, j = 0; i < paramSpecCount; ++i)
             {
-                // motor_assert(istring("child") != istring(g_param_spec_get_name(paramSpecs[i])),
-                //             "hop");
                 if(paramSpecs[i]->value_type == G_TYPE_POINTER
                    || paramSpecs[i]->value_type == G_TYPE_VARIANT
                    || (paramSpecs[i]->flags & G_PARAM_DEPRECATED))
@@ -110,11 +108,49 @@ static void completeGObjectClass(Gtk3Plugin& plugin, Meta::Class* cls, GType typ
     motor_forceuse(propertyCount);
 }  // namespace Gtk3
 
+bool registerGObjectClass(Gtk3Plugin& plugin, GType type)
+{
+    motor_assert_format(G_TYPE_FUNDAMENTAL(type) == G_TYPE_OBJECT,
+                        "expected GObject type, got {0} which is a {1}", g_type_name(type),
+                        g_type_name(G_TYPE_FUNDAMENTAL(type)));
+    Meta::Class* cls = static_cast< Meta::Class* >(g_type_get_qdata(type, plugin.quark()));
+    if(!cls)
+    {
+        GType parent = g_type_parent(type);
+        cls          = plugin.allocate< Meta::Class >();
+        g_type_set_qdata(type, plugin.quark(), cls);
+        raw< const Meta::Class > parentClass
+            = parent ? getGObjectClass(plugin, parent) : motor_class< GObjectWrapper >();
+        Meta::Class clsTemplate = {istring(g_type_name(type)),
+                                   parentClass->size,
+                                   0,
+                                   Meta::ClassType_Struct,
+                                   {0},
+                                   parentClass,
+                                   {0},
+                                   {0},
+                                   {0, 0},
+                                   {0, 0},
+                                   {0},
+                                   Meta::OperatorTable::s_emptyTable,
+                                   parentClass->copyconstructor,
+                                   parentClass->destructor};
+
+        new(cls) Meta::Class(clsTemplate);
+        completeGObjectClass(plugin, cls, type);
+        raw< const Meta::Class > registry = {cls};
+        plugin.registerValue(cls->name, Meta::Value(registry));
+        return true;
+    }
+    else
+        return false;
+}
+
 raw< const Meta::Class > getGObjectClass(Gtk3Plugin& plugin, GType type)
 {
-    motor_assert(G_TYPE_FUNDAMENTAL(type) == G_TYPE_OBJECT,
-                 "expected GObject type, got %s which is a %s" | g_type_name(type)
-                     | g_type_name(G_TYPE_FUNDAMENTAL(type)));
+    motor_assert_format(G_TYPE_FUNDAMENTAL(type) == G_TYPE_OBJECT,
+                        "expected GObject type, got {0} which is a {1}", g_type_name(type),
+                        g_type_name(G_TYPE_FUNDAMENTAL(type)));
     Meta::Class* cls = static_cast< Meta::Class* >(g_type_get_qdata(type, plugin.quark()));
     if(!cls)
     {
@@ -143,15 +179,13 @@ raw< const Meta::Class > getGObjectClass(Gtk3Plugin& plugin, GType type)
         raw< const Meta::Class > registry = {cls};
         plugin.registerValue(cls->name, Meta::Value(registry));
     }
-    raw< const Meta::Class > result = {cls};
-    return result;
+    return raw< const Meta::Class > {cls};
 }
 
 void destroyGObjectClass(Gtk3Plugin& plugin, GType type)
 {
-    motor_forceuse(plugin);
     Meta::Class* cls = static_cast< Meta::Class* >(g_type_get_qdata(type, plugin.quark()));
-    if(cls->constructor)
+    if(cls && cls->constructor)
     {
         for(u32 i = 0; i < cls->constructor->overloads.count; ++i)
         {
@@ -162,6 +196,10 @@ void destroyGObjectClass(Gtk3Plugin& plugin, GType type)
                 if(param.defaultValue) param.defaultValue->~Value();
             }
         }
+    }
+    else if(!cls)
+    {
+        motor_info_format(Log::gtk(), "Type not registered: {0}", g_type_name(type));
     }
 }
 

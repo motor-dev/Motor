@@ -38,6 +38,8 @@ def autoreconfigure(execute_method):
                         do_config = True
                 do_config = do_config or (hash_value != env.hash)
 
+        self.clear_status_line()
+
         if do_config:
             Logs.warn('wscript files have changed; reconfiguring the project')
             Options.commands.insert(0, self.cmd)
@@ -119,7 +121,10 @@ def tidy_build(execute_method):
     """
 
     def execute(self):
-        result = execute_method(self)
+        try:
+            result = execute_method(self)
+        finally:
+            self.clear_status_line()
         if Options.options.tidy == 'force' or (
             Options.options.tidy == 'auto' and Options.options.nomaster == False and Options.options.static == False
             and Options.options.dynamic == False and Options.options.targets == '' and Options.options.tests
@@ -145,6 +150,7 @@ def tidy_build(execute_method):
                                     all_nodes.discard(node)
             for node in all_nodes:
                 self.tidy_rm(node)
+        self.clear_status_line()
         return result
 
     return execute
@@ -319,6 +325,7 @@ class Setup(Configure.ConfigurationContext):
                 self.bldnode.find_node(Build.CACHE_DIR).abspath(), Options.lockfile + '.%s.setup' % self.motor_variant
             )
         )
+        self.clear_status_line()
 
 
 Build.BuildContext.execute = autoreconfigure(autosetup(tidy_build(Build.BuildContext.execute)))
@@ -345,41 +352,16 @@ def add_build_command(toolchain, optimisation):
             motor_toolchain = toolchain
             motor_variant = toolchain + '.setup'
             variant = os.path.join(toolchain, optimisation)
+            old_execute = command.execute
+
+            def execute(self):
+                try:
+                    result = self.old_execute()
+                finally:
+                    self.clear_status_line()
+                return result
 
         c[command] = Command
-
-    class Deploy(c[Build.BuildContext]):
-        cmd = 'deploy:%s:%s' % (toolchain, optimisation)
-        motor_variant = toolchain + '.setup'
-        motor_toolchain = toolchain
-        variant = os.path.join(toolchain, optimisation)
-
-        def execute(self):
-            if super(Deploy, self).execute() == "SKIP":
-                return "SKIP"
-            else:
-                self.fun = 'deploy'
-                self.recurse(self.motornode.abspath())
-
-    class Run(Deploy):
-        cmd = 'run:%s:%s' % (toolchain, optimisation)
-
-        def execute(self):
-            if super(Run, self).execute() == "SKIP":
-                return "SKIP"
-            else:
-                self.fun = 'run'
-                self.recurse(self.motornode.abspath())
-
-    class Debug(Deploy):
-        cmd = 'debug:%s:%s' % (toolchain, optimisation)
-
-        def execute(self):
-            if super(Debug, self).execute() == "SKIP":
-                return "SKIP"
-            else:
-                self.fun = 'debug'
-                self.recurse(self.motornode.abspath())
 
 
 def add_all_build_commands(env):

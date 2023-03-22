@@ -64,8 +64,8 @@ bool Object::doResolve(DbContext& context)
     }
     else
     {
-        motor_assert_recover(!m_introspectionHint, "object resolution failed, but produced a hint",
-                             m_introspectionHint.clear(););
+        if(motor_assert(!m_introspectionHint, "object resolution failed, but produced a hint"))
+            m_introspectionHint.clear();
     }
     return result;
 }
@@ -84,8 +84,8 @@ bool Object::resolveInternal(DbContext& context)
         minitl::tuple< raw< const Meta::Method >, bool > method = m_className->getCall(context);
         if(!method.first)
         {
-            context.error(this,
-                          Message::MessageType("unable to call object %s") | m_className->name());
+            context.error(
+                this, minitl::format< 512 >(FMT("unable to call object {0}"), m_className->name()));
             result = false;
         }
         else
@@ -128,9 +128,10 @@ bool Object::resolveInternal(DbContext& context)
             {
                 result = false;
                 context.error(
-                    this, Message::MessageType(
-                              "unable to call object %s: no overload could convert all arguments")
-                              | m_className->name());
+                    this,
+                    minitl::format< 512 >(
+                        FMT("unable to call object {0}: no overload could convert all arguments"),
+                        m_className->name()));
             }
         }
     }

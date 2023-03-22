@@ -6,7 +6,7 @@
 /**************************************************************************************************/
 #include    <motor/kernel/stdafx.h>
 
-namespace _Kernel
+namespace kernel { namespace interlocked_detail
 {
 
 template< unsigned size >
@@ -69,10 +69,10 @@ struct InterlockedType<8>
                                        const tagged_t::tag_t& /*condition*/);
 };
 
-}
+}}
 
 
-namespace _Kernel
+namespace kernel { namespace interlocked_detail
 {
 
 __device InterlockedType<4>::value_t InterlockedType<4>::fetch_and_add(value_t *p, value_t incr)
@@ -159,7 +159,7 @@ __device InterlockedType<8>::value_t InterlockedType<8>::set_and_fetch(value_t *
     return v;
 }
 
-}
+}}
 
 /**************************************************************************************************/
 #endif

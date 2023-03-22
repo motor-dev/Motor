@@ -21,7 +21,8 @@ CodeLoader::~CodeLoader()
 void CodeLoader::load(weak< const Resource::IDescription > codeDescription,
                       Resource::Resource&                  resource)
 {
-    motor_info("loading CPU kernel %s" | motor_checked_cast< const Code >(codeDescription)->name());
+    motor_info_format(Log::cpu(), "loading CPU kernel {0}",
+                      motor_checked_cast< const Code >(codeDescription)->name());
     inamespace name = motor_checked_cast< const Code >(codeDescription)->name();
     name += m_cpuVariant;
     resource.setRefHandle(ref< CodeObject >::create(Arena::task(), name));

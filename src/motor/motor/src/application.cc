@@ -101,8 +101,9 @@ void Application::updateResources()
     m_resourceLoadingCount = resourceCount;
     if(!m_runLoop)
     {
-        motor_info("interrupt - stopping application (%d resource loading)"
-                   | m_resourceLoadingCount);
+        motor_info_format(Log::system(),
+                          "interrupt - stopping application ({0} resource(s) loading)",
+                          m_resourceLoadingCount);
         m_worldLoader->disconnectWorlds();
     }
 }
@@ -119,8 +120,9 @@ void Application::frameUpdate()
         u32   pauseCount = Semaphore::flushPauseCount() / frameCount;
         if(t > 10.0f)
         {
-            motor_info("Average frame time (%d frames): %d milliseconds / %d pauses" | frameCount
-                       | (int)t | pauseCount);
+            motor_info_format(Log::system(),
+                              "Average frame time ({0} frames): {1} milliseconds / {2} pauses",
+                              frameCount, (int)t, pauseCount);
             frameCount = 20;
         }
         else
@@ -128,14 +130,16 @@ void Application::frameUpdate()
             t = 1000.0f * t;
             if(t > 10.0f)
             {
-                motor_info("Average frame time (%d frames): %d microseconds / %d pauses"
-                           | frameCount | (int)t | pauseCount);
+                motor_info_format(Log::system(),
+                                  "Average frame time ({0} frames): {1} microseconds / {2} pauses",
+                                  frameCount, (int)t, pauseCount);
                 frameCount = 5000;
             }
             else
             {
-                motor_info("Average frame time (%d frames): %d nanoseconds / %d pauses" | frameCount
-                           | (int)(t * 1000.0f) | pauseCount);
+                motor_info_format(Log::system(),
+                                  "Average frame time ({0} frames): {1} nanoseconds / {2} pauses",
+                                  frameCount, (int)(t * 1000.0f), pauseCount);
                 frameCount = 200000;
             }
         }

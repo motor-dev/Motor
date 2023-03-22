@@ -6,7 +6,7 @@
 /**************************************************************************************************/
 #include <motor/kernel/stdafx.h>
 
-namespace _Kernel {
+namespace kernel {
 
 template < typename T, unsigned C >
 struct array
@@ -22,18 +22,18 @@ struct array
     }
 };
 
-}  // namespace _Kernel
+}  // namespace kernel
 
 namespace Motor {
 
-typedef _Kernel::array< u8, 4 >    color32;
-typedef _Kernel::array< float, 4 > color128;
+typedef kernel::array< u8, 4 >    color32;
+typedef kernel::array< float, 4 > color128;
 
-typedef _Kernel::array< u8, 2 >  ubyte2;
-typedef _Kernel::array< u8, 3 >  ubyte3;
-typedef _Kernel::array< u8, 4 >  ubyte4;
-typedef _Kernel::array< u8, 8 >  ubyte8;
-typedef _Kernel::array< u8, 16 > ubyte16;
+typedef kernel::array< u8, 2 >  ubyte2;
+typedef kernel::array< u8, 3 >  ubyte3;
+typedef kernel::array< u8, 4 >  ubyte4;
+typedef kernel::array< u8, 8 >  ubyte8;
+typedef kernel::array< u8, 16 > ubyte16;
 
 static inline ubyte2 make_ubyte2(u8 x1, u8 x2)
 {
@@ -62,11 +62,11 @@ static inline ubyte16 make_ubyte16(u8 x1, u8 x2, u8 x3, u8 x4, u8 x5, u8 x6, u8 
     return result;
 }
 
-typedef _Kernel::array< i8, 2 >  byte2;
-typedef _Kernel::array< i8, 3 >  byte3;
-typedef _Kernel::array< i8, 4 >  byte4;
-typedef _Kernel::array< i8, 8 >  byte8;
-typedef _Kernel::array< i8, 16 > byte16;
+typedef kernel::array< i8, 2 >  byte2;
+typedef kernel::array< i8, 3 >  byte3;
+typedef kernel::array< i8, 4 >  byte4;
+typedef kernel::array< i8, 8 >  byte8;
+typedef kernel::array< i8, 16 > byte16;
 
 static inline byte2 make_byte2(i8 x1, i8 x2)
 {
@@ -95,11 +95,11 @@ static inline byte16 make_byte16(i8 x1, i8 x2, i8 x3, i8 x4, i8 x5, i8 x6, i8 x7
     return result;
 }
 
-typedef _Kernel::array< u16, 2 >  ushort2;
-typedef _Kernel::array< u16, 3 >  ushort3;
-typedef _Kernel::array< u16, 4 >  ushort4;
-typedef _Kernel::array< u16, 8 >  ushort8;
-typedef _Kernel::array< u16, 16 > ushort16;
+typedef kernel::array< u16, 2 >  ushort2;
+typedef kernel::array< u16, 3 >  ushort3;
+typedef kernel::array< u16, 4 >  ushort4;
+typedef kernel::array< u16, 8 >  ushort8;
+typedef kernel::array< u16, 16 > ushort16;
 
 static inline ushort2 make_ushort2(u16 x1, u16 x2)
 {
@@ -129,11 +129,11 @@ static inline ushort16 make_ushort16(u16 x1, u16 x2, u16 x3, u16 x4, u16 x5, u16
     return result;
 }
 
-typedef _Kernel::array< i16, 2 >  short2;
-typedef _Kernel::array< i16, 3 >  short3;
-typedef _Kernel::array< i16, 4 >  short4;
-typedef _Kernel::array< i16, 8 >  short8;
-typedef _Kernel::array< i16, 16 > short16;
+typedef kernel::array< i16, 2 >  short2;
+typedef kernel::array< i16, 3 >  short3;
+typedef kernel::array< i16, 4 >  short4;
+typedef kernel::array< i16, 8 >  short8;
+typedef kernel::array< i16, 16 > short16;
 
 static inline short2 make_short2(i16 x1, i16 x2)
 {
@@ -163,11 +163,11 @@ static inline short16 make_short16(i16 x1, i16 x2, i16 x3, i16 x4, i16 x5, i16 x
     return result;
 }
 
-typedef _Kernel::array< u32, 2 >  uint2;
-typedef _Kernel::array< u32, 3 >  uint3;
-typedef _Kernel::array< u32, 4 >  uint4;
-typedef _Kernel::array< u32, 8 >  uint8;
-typedef _Kernel::array< u32, 16 > uint16;
+typedef kernel::array< u32, 2 >  uint2;
+typedef kernel::array< u32, 3 >  uint3;
+typedef kernel::array< u32, 4 >  uint4;
+typedef kernel::array< u32, 8 >  uint8;
+typedef kernel::array< u32, 16 > uint16;
 
 static inline uint2 make_uint2(u32 x1, u32 x2)
 {
@@ -197,11 +197,11 @@ static inline uint16 make_uint16(u32 x1, u32 x2, u32 x3, u32 x4, u32 x5, u32 x6,
     return result;
 }
 
-typedef _Kernel::array< i32, 2 >  int2;
-typedef _Kernel::array< i32, 3 >  int3;
-typedef _Kernel::array< i32, 4 >  int4;
-typedef _Kernel::array< i32, 8 >  int8;
-typedef _Kernel::array< i32, 16 > int16;
+typedef kernel::array< i32, 2 >  int2;
+typedef kernel::array< i32, 3 >  int3;
+typedef kernel::array< i32, 4 >  int4;
+typedef kernel::array< i32, 8 >  int8;
+typedef kernel::array< i32, 16 > int16;
 
 static inline int2 make_int2(i32 x1, i32 x2)
 {
@@ -231,11 +231,11 @@ static inline int16 make_int16(i32 x1, i32 x2, i32 x3, i32 x4, i32 x5, i32 x6, i
     return result;
 }
 
-typedef _Kernel::array< u64, 2 >  biguint2;
-typedef _Kernel::array< u64, 3 >  biguint3;
-typedef _Kernel::array< u64, 4 >  biguint4;
-typedef _Kernel::array< u64, 8 >  biguint8;
-typedef _Kernel::array< u64, 16 > biguint16;
+typedef kernel::array< u64, 2 >  biguint2;
+typedef kernel::array< u64, 3 >  biguint3;
+typedef kernel::array< u64, 4 >  biguint4;
+typedef kernel::array< u64, 8 >  biguint8;
+typedef kernel::array< u64, 16 > biguint16;
 
 static inline biguint2 make_biguint2(u64 x1, u64 x2)
 {
@@ -265,11 +265,11 @@ static inline biguint16 make_biguint16(u64 x1, u64 x2, u64 x3, u64 x4, u64 x5, u
     return result;
 }
 
-typedef _Kernel::array< i64, 2 >  bigint2;
-typedef _Kernel::array< i64, 3 >  bigint3;
-typedef _Kernel::array< i64, 4 >  bigint4;
-typedef _Kernel::array< i64, 8 >  bigint8;
-typedef _Kernel::array< i64, 16 > bigint16;
+typedef kernel::array< i64, 2 >  bigint2;
+typedef kernel::array< i64, 3 >  bigint3;
+typedef kernel::array< i64, 4 >  bigint4;
+typedef kernel::array< i64, 8 >  bigint8;
+typedef kernel::array< i64, 16 > bigint16;
 
 static inline bigint2 make_bigint2(i64 x1, i64 x2)
 {
@@ -299,11 +299,11 @@ static inline bigint16 make_bigint16(i64 x1, i64 x2, i64 x3, i64 x4, i64 x5, i64
     return result;
 }
 
-typedef _Kernel::array< float, 2 >  float2;
-typedef _Kernel::array< float, 3 >  float3;
-typedef _Kernel::array< float, 4 >  float4;
-typedef _Kernel::array< float, 8 >  float8;
-typedef _Kernel::array< float, 16 > float16;
+typedef kernel::array< float, 2 >  float2;
+typedef kernel::array< float, 3 >  float3;
+typedef kernel::array< float, 4 >  float4;
+typedef kernel::array< float, 8 >  float8;
+typedef kernel::array< float, 16 > float16;
 
 static inline float2 make_float2(float x1, float x2)
 {
@@ -334,11 +334,11 @@ static inline float16 make_float16(float x1, float x2, float x3, float x4, float
     return result;
 }
 
-typedef _Kernel::array< double, 2 >  double2;
-typedef _Kernel::array< double, 3 >  double3;
-typedef _Kernel::array< double, 4 >  double4;
-typedef _Kernel::array< double, 8 >  double8;
-typedef _Kernel::array< double, 16 > double16;
+typedef kernel::array< double, 2 >  double2;
+typedef kernel::array< double, 3 >  double3;
+typedef kernel::array< double, 4 >  double4;
+typedef kernel::array< double, 8 >  double8;
+typedef kernel::array< double, 16 > double16;
 
 static inline double2 make_double2(double x1, double x2)
 {

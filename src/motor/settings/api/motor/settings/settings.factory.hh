@@ -43,7 +43,7 @@ struct Settings : public SettingsBase
 {
 private:
     static MOTOR_EXPORT SettingsProvider::SettingsRegistration s_registration;
-    static MOTOR_EXPORT T& getStaticSettings()
+    static MOTOR_EXPORT T&                                     getStaticSettings()
     {
         static T s_settings;
         return s_settings;
@@ -80,7 +80,8 @@ struct ClassID< Settings::Settings< T > >
     static MOTOR_EXPORT raw< const Meta::Class > klass();
     static MOTOR_EXPORT istring                  name()
     {
-        static const istring s_name(minitl::format< 2048u >("Settings<%s>") | TypeID< T >::name());
+        static const istring s_name(
+            minitl::format< 2048u >(FMT("Settings<{0}>"), TypeID< T >::name()));
         return s_name;
     }
 };
@@ -105,7 +106,7 @@ Settings_RTTIHelper< T >::trampoline_method_get_overload_0(raw< const Meta::Meth
                                                            Meta::Value* params, u32 paramCount)
 {
     motor_forceuse(method);
-    motor_assert(paramCount == 0, "expected no parameter; received %d" | paramCount);
+    motor_assert_format(paramCount == 0, "expected no parameter; received {0}", paramCount);
     motor_forceuse(params);
     return Meta::Value(Meta::Value::ByRef(Settings< T >::get()));
 }
@@ -124,19 +125,19 @@ template < typename T >
 MOTOR_EXPORT raw< const Meta::Class > Meta::ClassID< Settings::Settings< T > >::klass()
 {
     static Meta::Class       s_class = {name(),
-                                  0,
-                                  0,
-                                  Meta::ClassType_Struct,
-                                  {motor_motor_Namespace_Motor_Settings().m_ptr},
-                                  motor_class< void >(),
-                                  {0},
-                                  {0},
-                                  {0, 0},
-                                  {1, Settings::Settings_RTTIHelper< T >::s_methods},
-                                  {0},
-                                  Meta::OperatorTable::s_emptyTable,
-                                  0,
-                                  0};
+                                        0,
+                                        0,
+                                        Meta::ClassType_Struct,
+                                        {motor_motor_Namespace_Motor_Settings().m_ptr},
+                                        motor_class< void >(),
+                                        {0},
+                                        {0},
+                                        {0, 0},
+                                        {1, Settings::Settings_RTTIHelper< T >::s_methods},
+                                        {0},
+                                        Meta::OperatorTable::s_emptyTable,
+                                        0,
+                                        0};
     raw< const Meta::Class > result  = {&s_class};
     return result;
 }

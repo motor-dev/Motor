@@ -18,7 +18,7 @@ struct ConversionCalculator
 };
 
 template < typename T >
-struct ConversionCalculator< _Kernel::array< T, 2 > >
+struct ConversionCalculator< kernel::array< T, 2 > >
 {
     static inline ConversionCost calculate(const Type& targetType);
 };
@@ -96,7 +96,7 @@ ConversionCost ConversionCalculator< T >::calculate(const Type& targetType)
 }
 
 template < typename T >
-ConversionCost ConversionCalculator< _Kernel::array< T, 2 > >::calculate(const Type& targetType)
+ConversionCost ConversionCalculator< kernel::array< T, 2 > >::calculate(const Type& targetType)
 {
     if(targetType.metaclass->type() == ClassType_Vector2)
     {

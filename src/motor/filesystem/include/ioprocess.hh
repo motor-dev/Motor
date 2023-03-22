@@ -15,7 +15,7 @@ namespace Motor { namespace IOProcess {
 class IOContext : public minitl::pointer
 {
 private:
-    struct IORequest : public minitl::istack< IORequest >::node
+    struct IORequest : public kernel::istack< IORequest >::node
     {
         ref< File::Ticket > ticket;
     };
@@ -29,8 +29,8 @@ private:
     Thread    m_ioThread;
 
     IORequest                   m_requests[MaxRequestCount];
-    minitl::istack< IORequest > m_freeRequestList;
-    minitl::istack< IORequest > m_requestQueue;
+    kernel::istack< IORequest > m_freeRequestList;
+    kernel::istack< IORequest > m_requestQueue;
 
 private:
     static intptr_t ioProcess(intptr_t p1, intptr_t p2);
