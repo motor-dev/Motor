@@ -44,7 +44,7 @@ void IShaderBuilder::write(const char* text)
     {
         for(int i = 0; i < m_indent; ++i)
             m_stream.write("  ", 2);
-        m_stream.write(text, strlen(text));
+        m_stream.write(text, motor_checked_numcast<u32>(strlen(text)));
     }
     m_stream.write("\0", 1);
 }

@@ -44,7 +44,7 @@ static inline u32 formatBinaryGeneric(char* destination, u64 number, char sign, 
     {
         if(number >> (8 * highest))
         {
-            u64 result = formatBinary_8(number >> (8 * highest));
+            u64 result = formatBinary_8(u8(number >> (8 * highest)));
             u32 digitCount;
             for(digitCount = 8; digitCount > 1; --digitCount)
             {
@@ -56,18 +56,18 @@ static inline u32 formatBinaryGeneric(char* destination, u64 number, char sign, 
             destination += digitCount;
             for(u32 i = highest - 1; i > 0; --i)
             {
-                result = formatBinary_8(number >> (8 * i));
+                result = formatBinary_8(u8((number >> (8 * i)) & 0xff));
                 result += zeroString;
                 memcpy(destination, &result, sizeof(result));
                 destination += 8;
             }
-            result = formatBinary_8(number);
+            result = formatBinary_8(u8(number & 0xff));
             result += zeroString;
             memcpy(destination, &result, sizeof(result));
             return digitCount + addSign + 8 * highest;
         }
     }
-    u64 result = formatBinary_8(number);
+    u64 result = formatBinary_8(u8(number));
     u32 digitCount;
     for(digitCount = 8; digitCount > 1; --digitCount)
     {
@@ -106,7 +106,7 @@ static inline u32 formatOctalGeneric(char* destination, u64 number, char sign, u
     {
         if(number >> (24 * highest))
         {
-            u64 result = formatOctal_8(number >> (24 * highest));
+            u64 result = formatOctal_8(u32(number >> (24 * highest)));
             u32 digitCount;
             for(digitCount = 8; digitCount > 1; --digitCount)
             {
@@ -118,18 +118,18 @@ static inline u32 formatOctalGeneric(char* destination, u64 number, char sign, u
             destination += digitCount;
             for(u32 i = highest - 1; i > 0; --i)
             {
-                result = formatOctal_8(number >> (24 * i));
+                result = formatOctal_8(u32((number >> (24 * i)) & 0xffffffff));
                 result += zeroString;
                 memcpy(destination, &result, sizeof(result));
                 destination += 8;
             }
-            result = formatOctal_8(number);
+            result = formatOctal_8(u32(number & 0xffffffff));
             result += zeroString;
             memcpy(destination, &result, sizeof(result));
             return digitCount + addSign + 8 * highest;
         }
     }
-    u64 result = formatOctal_8(number);
+    u64 result = formatOctal_8(u32(number));
     u32 digitCount;
     for(digitCount = 8; digitCount > 1; --digitCount)
     {
@@ -167,7 +167,7 @@ static inline u32 formatHexadecimalGeneric(char* destination, u64 number, char s
 
     if(WORD_COUNT >= 2 && number >> 32)
     {
-        u64 result = formatHexadecimal_8(number >> 32);
+        u64 result = formatHexadecimal_8(u32(number >> 32));
         u32 digitCount;
         for(digitCount = 8; digitCount > 1; --digitCount)
         {
@@ -183,7 +183,7 @@ static inline u32 formatHexadecimalGeneric(char* destination, u64 number, char s
         memcpy(destination, &result, sizeof(result));
 
         destination += digitCount;
-        result  = formatHexadecimal_8(number);
+        result  = formatHexadecimal_8(u32(number & 0xffffffff));
         above10 = result + 0x0606060606060606;
         above10 >>= 4;
         above10 &= 0x0101010101010101;
@@ -194,7 +194,7 @@ static inline u32 formatHexadecimalGeneric(char* destination, u64 number, char s
     }
     else
     {
-        u64 result = formatHexadecimal_8(number);
+        u64 result = formatHexadecimal_8(u32(number & 0xffffffff));
         u32 digitCount;
         for(digitCount = 8; digitCount > 1; --digitCount)
         {
@@ -275,7 +275,7 @@ motor_api(MINITL) u32 format_octal(char* destination, u64 number, char sign, u32
 motor_api(MINITL) u32 format_decimal(char* destination, u8 number, char sign, u32 addSign)
 {
     const u32 zeroString
-        = (('0' << 24) | ('0' << 16) | ('0' << 8) | '0') + char((sign - '0') & -addSign);
+        = (('0' << 24) | ('0' << 16) | ('0' << 8) | '0') + char((sign - '0') & (~addSign + 1));
 
     u32 digitCount = addSign + 1;
     digitCount += number >= 10;
@@ -292,7 +292,7 @@ motor_api(MINITL) u32 format_decimal(char* destination, u16 number, char sign, u
 {
     const u64 zeroString = ((u64('0') << 56) | (u64('0') << 48) | (u64('0') << 40)
                             | (u64('0') << 32) | ('0' << 24) | ('0' << 16) | ('0' << 8) | '0')
-                           + char((sign - '0') & -addSign);
+                           + char((sign - '0') & (~addSign + 1));
 
     u64 number64;
     u32 digitCount = addSign;
@@ -323,7 +323,7 @@ motor_api(MINITL) u32 format_decimal(char* destination, u32 number, char sign, u
 {
     const u64 zeroString = (u64('0') << 56) | (u64('0') << 48) | (u64('0') << 40) | (u64('0') << 32)
                            | ('0' << 24) | ('0' << 16) | ('0' << 8) | '0';
-    const u64 zeroSignString = zeroString + char((sign - '0') & -addSign);
+    const u64 zeroSignString = zeroString + char((sign - '0') & (~addSign + 1));
 
     if((number < 10000000) || (number < 100000000 && !addSign))
     {
@@ -364,7 +364,7 @@ motor_api(MINITL) u32 format_decimal(char* destination, u32 number, char sign, u
         digitCount += top >= 10;
         top = formatDecimal_4(top);
         top >>= 8 * (4 - digitCount);
-        top = top + zeroSignString;
+        top = top + u32(zeroSignString);
         memcpy(destination, &top, sizeof(top));
 
         u64 number64 = number / 10000;
@@ -382,7 +382,7 @@ motor_api(MINITL) u32 format_decimal(char* destination, u64 number, char sign, u
 {
     const u64 zeroString     = ((u64('0') << 56) | (u64('0') << 48) | (u64('0') << 40)
                             | (u64('0') << 32) | ('0' << 24) | ('0' << 16) | ('0' << 8) | '0');
-    const u64 zeroSignString = zeroString + char((sign - '0') & -addSign);
+    const u64 zeroSignString = zeroString + char((sign - '0') & (~addSign + 1));
 
     if((number < 10000000) || (number < 100000000 && !addSign))
     {

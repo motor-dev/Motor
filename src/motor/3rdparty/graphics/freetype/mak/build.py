@@ -63,7 +63,7 @@ def deploy_freetype_package(task_gen):
     if task_gen.env.PROJECTS:
         return
 
-    path = task_gen.source_nodes[0]
+    path = task_gen.source_nodes[0][1]
     ft_dest = 'freetype-2.10.2-%s-multiarch-%s' % (task_gen.env.VALID_PLATFORMS[0], task_gen.env.COMPILER_ABI)
 
     def deploy_to(file, subdir):

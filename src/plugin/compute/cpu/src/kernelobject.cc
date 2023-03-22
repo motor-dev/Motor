@@ -13,7 +13,7 @@ KernelObject::KernelObject(weak< const CodeObject > code, const istring name)
     , m_entryPoint(code->m_kernel.getSymbol< KernelMain >(
           (minitl::format< 256u >(FMT("_{0}"), name).c_str())))
 {
-    motor_debug_format(Log::cpu(), "[{0}]: {1}", name, m_entryPoint);
+    motor_debug_format(Log::cpu(), "[{0}]: {1}", name, (void*)m_entryPoint);
 }
 
 KernelObject::~KernelObject()

@@ -111,11 +111,11 @@ struct numeric_formatter : public default_partial_formatter< T >
     static u32 format_to(char* destination, T value, const format_options& options,
                          u32 reservedLength)
     {
-        UnsignedT negative = u32(value < 0);
-        u32       addSign  = negative | u32(options.sign == '+');
-        char      sign     = options.sign + (('-' - options.sign) & -negative);
+        UnsignedT negative = UnsignedT(value < 0);
+        u32 addSign  = u32(negative) | u32(options.sign == '+');
+        char      sign     = options.sign + (('-' - options.sign) & (~negative + 1));
         UnsignedT v        = static_cast< UnsignedT >(value);
-        v                  = v + ((~v + 1 - v) & -negative);
+        v                  = v + ((~v + 1 - v) & (~negative + 1));
 
         if(options.width == 0)
         {
@@ -232,7 +232,7 @@ struct numeric_formatter : public default_partial_formatter< T >
             memset(destination, options.fill, leftPadding);
             destination += leftPadding;
             *destination = sign;
-            destination += addSign & options.signPadding;
+            destination += addSign & u32(options.signPadding);
             if(options.alternate)
             {
                 switch(options.format)
@@ -253,7 +253,7 @@ struct numeric_formatter : public default_partial_formatter< T >
             memset(destination, '0', zeroPadding);
             destination += zeroPadding;
             *destination = sign;
-            destination += addSign & !options.signPadding;
+            destination += addSign & u32(!options.signPadding);
 
             memcpy(destination, buffer, numberSize);
             freea(buffer);
@@ -279,7 +279,7 @@ struct formatter< const char* >
     static u32 length(const char* value, const format_options& options)
     {
         motor_forceuse(options);
-        return strlen(value);
+        return u32(strlen(value));
     }
     static u32 format_to_partial(char* destination, const char* value,
                                  const format_options& options, u32 reservedLength,

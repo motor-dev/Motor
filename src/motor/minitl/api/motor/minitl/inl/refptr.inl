@@ -5,6 +5,7 @@
 #define MOTOR_MINITL_PTR_REFPTR_INL_
 /**************************************************************************************************/
 #include <motor/minitl/features.hh>
+#include <motor/minitl/format.hh>
 #include <typeinfo>
 
 namespace minitl {
