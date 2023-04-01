@@ -4,7 +4,7 @@ import sys
 
 
 class ICC(Configure.ConfigurationContext.GnuCompiler):
-    DEFINES = ['__INTEL_COMPILER', '__GNUC__', '_MSC_VER']
+    DEFINES = []
     NAMES = ('ICC', )
     ICC_PLATFORMS = {
         '__gnu_linux__': 'linux-gnu',

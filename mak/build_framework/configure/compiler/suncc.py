@@ -4,7 +4,7 @@ import sys
 
 
 class SunCC(Configure.ConfigurationContext.GnuCompiler):
-    DEFINES = ['__SUNPRO_CC']
+    DEFINES = []
     NAMES = ('SunCC', )
     SUNCC_PLATFORMS = {
         '__gnu_linux__': 'linux-gnu',
