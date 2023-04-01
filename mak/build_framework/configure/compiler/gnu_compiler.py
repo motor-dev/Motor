@@ -1,4 +1,4 @@
-from waflib import Configure, Errors
+from waflib import Configure, Logs, Utils
 from copy import deepcopy
 import os
 import shlex
@@ -7,29 +7,19 @@ import shlex
 class GnuCompiler(Configure.ConfigurationContext.Compiler):
     ALL_ARM_ARCHS = ('armv7a', 'armv7k', 'armv7s')
     ARCH_FLAGS = {
+        'x86': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2'],
+        'amd64': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2'],
         'arm': ['-march=armv7-a'],
     }
     VECTORIZED_FLAGS = {
-        'x86':
-            (
-                ('.sse3', ['-msse3', '-mssse3']),
-                ('.sse4', [
-                    '-msse4.1',
-                    '-msse4.2',
-                ]),
-                ('.avx', ['-mavx']),
-                ('.avx2', ['-mavx2']),
-            ),
-        'amd64':
-            (
-                ('.sse3', ['-msse3', '-mssse3']),
-                ('.sse4', [
-                    '-msse4.1',
-                    '-msse4.2',
-                ]),
-                ('.avx', ['-mavx']),
-                ('.avx2', ['-mavx2']),
-            ),
+        'x86': (
+            ('.avx', ['-mavx']),
+            ('.avx2', ['-mavx2']),
+        ),
+        'amd64': (
+            ('.avx', ['-mavx']),
+            ('.avx2', ['-mavx2']),
+        ),
         'ppc': (('.altivec', ['-maltivec']), ),
         'ppc64': (('.altivec', ['-maltivec']), ),
         'armv6': (('.neon', ['-mfpu=neon']), ),
@@ -217,7 +207,6 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
     def get_multilib_compilers(self):
         try:
             multilibs = self.MULTILIBS[self.arch]
-            multilibs = self.MULTILIBS[self.arch]
         except KeyError:
             return []
         else:
@@ -302,9 +291,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         else:
             extra_flags_c = extra_flags_cxx = []
         if 'GCC' in self.NAMES and self.version_number >= (12, ):
-            extra_flags_cxx.append('-Wno-attributes=motor::')
-        elif 'Clang' in self.NAMES:
-            extra_flags_cxx.append('-Wno-unknown-attributes')
+            extra_flags_cxx.append('-Wno-unknown-attributes=motor::')
         else:
             extra_flags_cxx.append('-Wno-attributes')
         v.CFLAGS_warnall = ['-std=c99', '-Wall'] + extra_flags_c + [
@@ -329,7 +316,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
                 sys_dirs.append(pd)
             d, a = os.path.split(d)
         var = var or program.upper()
-        for t in list(self.targets) + [self.target] + platform.platform_targets(self):
+        for t in list(self.targets) + [self.target]:
             if conf.find_program('%s-%s' % (t, program), var=var, path_list=sys_dirs, mandatory=False):
                 break
         else:
@@ -344,7 +331,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
 
     def load_tools(self, conf, platform):
         os_paths = os.environ['PATH'].split(os.pathsep)
-        self.find_target_program(conf, platform, self.ARCHIVER, var='AR', os_paths=os_paths)
+        self.find_target_program(conf, platform, self.ARCHIVER, os_paths=os_paths)
         self.find_target_program(conf, platform, 'strip', os_paths=os_paths)
         self.find_target_program(conf, platform, 'objcopy', mandatory=False, os_paths=os_paths)
         self.find_target_program(conf, platform, 'gdb', mandatory=False, os_paths=os_paths)
@@ -393,13 +380,13 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         if result != 0:
             print('could not retrieve system includes: %s' % err)
         else:
-            out = out.split('\n')
+            out = err.split('\n') + out.split('\n')
             while out:
                 line = out.pop(0)
                 if line.startswith('#include <...>'):
                     while out:
                         path = out.pop(0).strip()
-                        if path[0] != ' ':
+                        if not os.path.isdir(path):
                             break
                         env.append_unique('SYSTEM_INCLUDES', [os.path.normpath(path)])
                 elif line.startswith('#define'):

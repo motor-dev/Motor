@@ -1,5 +1,5 @@
 from waflib import Context, Build, TaskGen, Options, Utils
-from waflib.TaskGen import feature
+from waflib.TaskGen import task_gen
 import os
 import sys
 import json
@@ -38,6 +38,9 @@ class vscode(Build.BuildContext):
                '    "python.autoComplete.extraPaths": [\n' \
                '      "%(motorpath)s/mak/libs"\n' \
                '    ],\n' \
+               '    "python.analysis.extraPaths": [\n' \
+               '      "%(motorpath)s/mak/libs"\n' \
+               '    ],\n' \
                '    "files.exclude": {\n' \
                '      "**/.git": true,\n' \
                '      "**/.svn": true,\n' \
@@ -57,7 +60,8 @@ class vscode(Build.BuildContext):
                '    },\n' \
                '    "clangd.arguments": [\n' \
                '      "--header-insertion=never"\n' \
-               '    ]\n' \
+               '    ],\n' \
+               '    "C_Cpp.codeAnalysis.clangTidy.enabled": true\n' \
                '  }\n'
 
     def execute(self):
@@ -166,42 +170,61 @@ class vscode(Build.BuildContext):
                         if not isinstance(tg, TaskGen.task_gen):
                             continue
                         tg.post()
-                        include_paths += getattr(tg, 'includes', [])
-                        include_paths += getattr(tg, 'export_includes', [])
-                        include_paths += getattr(tg, 'export_system_includes', [])
-                        include_paths += getattr(tg, 'extra_includes', [])
-                        defines += getattr(tg, 'defines', [])
-                        defines += getattr(tg, 'export_defines', [])
-                        defines += getattr(tg, 'extra_defines', [])
+                        mark = len(commands)
+                        resp_file_name = variant_node.make_node('%s.txt' % tg.name).path_from(self.srcnode)
+
                         for task in tg.tasks:
-                            if task.__class__.__name__ in ('cxx', 'c', 'objc', 'objcxx'):
+                            if task.__class__.__name__ in ('c', 'objc'):
                                 commands.append(
                                     {
-                                        'directory':
-                                            task.get_cwd().path_from(self.path),
-                                        'arguments':
-                                            env.CXX + ['-I%s' % i for i in env.INCLUDES + task.env.INCPATHS] +
-                                            ['-D%s' % d for d in task.env.DEFINES + env.DEFINES],
-                                        'file':
-                                            task.inputs[0].path_from(self.path),
-                                        'output':
-                                            task.outputs[0].path_from(task.get_cwd())
+                                        'directory': self.path.abspath(),
+                                        'arguments': env.CC + ['@%s' % resp_file_name],
+                                        'file': task.inputs[0].path_from(self.path),
+                                        'output': task.outputs[0].path_from(self.path)
                                     }
                                 )
-                            elif task.__class__.__name__ in ('cpuc'):
+                            elif task.__class__.__name__ in ('cxx', 'objcxx'):
                                 commands.append(
                                     {
-                                        'directory':
-                                            task.get_cwd().path_from(self.path),
-                                        'arguments':
-                                            env.CXX + ['-I"%s"' % i for i in env.INCLUDES + task.env.INCPATHS] +
-                                            ['-D%s' % d for d in task.env.DEFINES + env.DEFINES],
-                                        'file':
-                                            task.generator.source[0].path_from(self.path),
-                                        'output':
-                                            task.outputs[0].path_from(task.get_cwd())
+                                        'directory': self.path.abspath(),
+                                        'arguments': env.CXX + ['-std=c++14', '@%s' % resp_file_name],
+                                        'file': task.inputs[0].path_from(self.path),
+                                        'output': task.outputs[0].path_from(self.path)
                                     }
                                 )
+                            elif task.__class__.__name__ in ('cpuc',):
+                                commands.append(
+                                    {
+                                        'directory': self.path.abspath(),
+                                        'arguments': env.CXX + ['-std=c++14', '@%s' % resp_file_name],
+                                        'file': task.generator.source[0].path_from(self.path),
+                                        'output': task.outputs[0].path_from(self.path)
+                                    }
+                                )
+
+                        if len(commands) != mark:
+                            tg_includes = []
+                            tg_defines = []
+                            tg_includes += getattr(tg, 'includes', [])
+                            tg_includes += getattr(tg, 'export_includes', [])
+                            tg_includes += getattr(tg, 'export_system_includes', [])
+                            tg_includes += getattr(tg, 'extra_includes', [])
+                            tg_includes = [vscode_path_from(i, self.srcnode) for i in tg_includes]
+                            tg_defines += getattr(tg, 'defines', [])
+                            tg_defines += getattr(tg, 'export_defines', [])
+                            tg_defines += getattr(tg, 'extra_defines', [])
+                            tg_defines += tg.env.DEFINES
+                            with open(resp_file_name, 'w') as response_file:
+                                for i in env.SYSTEM_INCLUDES + env.INCLUDES:
+                                    response_file.write('-isystem\n%s\n' % i)
+                                for i in tg_includes + tg.env.INCPATHS:
+                                    response_file.write('-I%s\n' % i)
+                                for d in env.SYSTEM_DEFINES + env.DEFINES + tg_defines:
+                                    response_file.write('-D%s\n' % d)
+
+                            include_paths += tg_includes
+                            defines += tg_defines
+
                 with open(variant_node.make_node('compile_commands.json').abspath(), 'w') as compile_commands:
                     json.dump(commands, compile_commands, indent=2)
                 seen = set([self.srcnode, self.bldnode])
@@ -209,11 +232,7 @@ class vscode(Build.BuildContext):
                     {
                         'name':
                             '%s - %s' % (env_name, variant),
-                        'includePath':
-                            [
-                                vscode_path_from(i, self.srcnode) for i in include_paths
-                                if i not in seen and not seen.add(i) and (isinstance(i, str) or i.isdir())
-                            ],
+                        'includePath': [i for i in include_paths if i not in seen and not seen.add(i)],
                         'defines': [d for d in defines if d not in seen and not seen.add(d)],
                         'compileCommands':
                             '${workspaceFolder}/.vscode/toolchains/%s/%s/compile_commands.json' % (env_name, variant),
@@ -250,18 +269,18 @@ class vscode(Build.BuildContext):
                 launch_configs['inputs'] = []
 
         for action, command, is_default in [
-            ('build', ['build:${input:motor-Toolchain}:${input:motor-Variant}'], True),
+            ('build', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '-p'], True),
             (
-                'build[fail-tests=no]', ['build:${input:motor-Toolchain}:${input:motor-Variant}',
-                                         '--no-fail-on-tests'], False
-            ), ('build[static]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--static'], False),
-            ('build[dynamic]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--dynamic'], False),
-            ('build[nomaster]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--nomaster'], False),
+                'build[fail-tests=no]',
+                ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--no-fail-on-tests', '-p'], False
+            ), ('build[static]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--static', '-p'], False),
+            ('build[dynamic]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--dynamic', '-p'], False),
+            ('build[nomaster]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--nomaster', '-p'], False),
             ('clean', ['clean:${input:motor-Toolchain}:${input:motor-Variant}'], False),
             (
                 'rebuild', [
                     'clean:${input:motor-Toolchain}:${input:motor-Variant}',
-                    'build:${input:motor-Toolchain}:${input:motor-Variant}',
+                    'build:${input:motor-Toolchain}:${input:motor-Variant}', '-p'
                 ], False
             ), ('setup', ['setup:${input:motor-Toolchain}'], False), ('reconfigure', ['reconfigure'], False),
             (self.cmd, [self.cmd], False)
@@ -290,6 +309,9 @@ class vscode(Build.BuildContext):
                     'program': sys.argv[0],
                     'args': command + options,
                     'cwd': '${workspaceFolder}',
+                    'env': {
+                        'PYDEVD_DISABLE_FILE_VALIDATION': '1'
+                    }
                 }
             )
 
@@ -411,7 +433,6 @@ class vscode(Build.BuildContext):
             json.dump(launch_configs, document, indent=2)
 
 
-@feature('motor:preprocess')
 def create_vscode_kernels(task_gen):
     if 'vscode' in task_gen.env.PROJECTS:
         for kernel, kernel_source, kernel_path, kernel_ast in task_gen.kernels:
@@ -433,7 +454,6 @@ def create_vscode_kernels(task_gen):
                     'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel',
                     'motor:cpu:kernel_create'
                 ],
-                pchstop=tgen.preprocess.pchstop if tgen.preprocess is not None else None,
                 defines=tgen.defines + [
                     'MOTOR_KERNEL_ID=%s_%s' % (task_gen.parent.replace('.', '_'), kernel_target.replace('.', '_')),
                     'MOTOR_KERNEL_NAME=%s' % (kernel_target),
@@ -448,3 +468,7 @@ def create_vscode_kernels(task_gen):
                 uselib=tgen.uselib,
             )
             kernel_task_gen.env.PLUGIN = task_gen.env.plugin_name
+
+
+def build(build_context):
+    task_gen.kernel_processors.append(create_vscode_kernels)
