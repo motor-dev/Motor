@@ -6,9 +6,9 @@ from waflib import Context, Build, TaskGen, Options
 
 def clion_path_from(path, node):
     if isinstance(path, str):
-        return path
+        return path.replace('\\', '/')
     else:
-        return path.path_from(node)
+        return path.path_from(node).replace('\\', '/')
 
 
 class CLion(Build.BuildContext):
@@ -62,10 +62,12 @@ class CLion(Build.BuildContext):
 
         configurations = []
         files = []
-        bld_path = self.bldnode.path_from(self.srcnode)
+        bld_path = self.bldnode.path_from(self.srcnode).replace('\\', '/')
         idea_dir = self.srcnode.make_node('.idea')
         run_configs_dir = idea_dir.make_node('runConfigurations')
+        code_styles_dir = idea_dir.make_node('codeStyles')
         run_configs_dir.mkdir()
+        code_styles_dir.mkdir()
         with open(idea_dir.make_node('.name').abspath(), 'w') as name:
             name.write(appname)
         with open(idea_dir.make_node('modules.xml').abspath(), 'w') as modules_xml:
@@ -111,6 +113,20 @@ class CLion(Build.BuildContext):
                             '  </component>\n'
                             '</project>\n')
 
+        with open(code_styles_dir.make_node('codeStyleConfig.xml').abspath(), 'w') as config:
+            config.write('<component name="ProjectCodeStyleConfiguration">\n'
+                         '  <state>\n'
+                         '    <option name="USE_PER_PROJECT_SETTINGS" value="true" />\n'
+                         '  </state>\n'
+                         '</component>')
+        with open(code_styles_dir.make_node('Project.xml').abspath(), 'w') as project:
+            project.write('<component name="ProjectCodeStyleConfiguration">\n'
+                          '  <code_scheme name="Project" version="173">\n'
+                          '    <clangFormatSettings>\n'
+                          '      <option name="ENABLED" value="true" />\n'
+                          '    </clangFormatSettings>\n'
+                          '  </code_scheme>\n'
+                          '</component>')
         with open('cmake-variants.yaml', 'w') as variants:
             variants.write('buildType:\n'
                            '  default: %s-%s\n'
@@ -127,16 +143,111 @@ class CLion(Build.BuildContext):
             CMakeLists.write('cmake_minimum_required(VERSION 3.15)\n'
                              'project(%s)\n'
                              'set(CMAKE_CONFIGURATION_TYPES "%s" CACHE STRING "" FORCE)\n\n'
+                             'set(CMAKE_CXX_STANDARD 14)\n'
+                             'set(CMAKE_CXX_STANDARD_REQUIRED ON)\n'
+                             'set(CMAKE_CXX_EXTENSIONS OFF)\n'
                              '%s\n'
                              'set_property(GLOBAL PROPERTY RULE_MESSAGES OFF)\n\n'
-                             'add_custom_target(\n'
-                             '    build ALL\n'
-                             '    COMMAND "%s" "%s" build:${WAF_COMMAND}\n'
-                             '    WORKING_DIRECTORY "%s"\n'
-                             '    USES_TERMINAL\n'
-                             ')\n' % (appname, ';'.join(configurations), '\n'.join(files), sys.executable, sys.argv[0],
-                                      self.srcnode.abspath()))
+                             '\n' % (appname, ';'.join(configurations), '\n'.join(files)))
 
+            for g in self.groups:
+                for tg in g:
+                    if not isinstance(tg, TaskGen.task_gen):
+                        continue
+                    tg.post()
+
+                    files = []
+                    for task in tg.tasks:
+                        if task.__class__.__name__ in ('c', 'objc', 'cxx', 'objcxx', 'cpuc'):
+                            files.append(task.inputs[0].path_from(self.path).replace('\\', '/'))
+
+                    if files:
+                        CMakeLists.write('add_library(%s.completion STATIC EXCLUDE_FROM_ALL\n'
+                                         '    %s\n'
+                                         ')\n' % (tg.name, '\n    '.join(files)))
+                        tg_includes = []
+                        tg_includes += getattr(tg, 'includes', [])
+                        tg_includes += getattr(tg, 'export_includes', [])
+                        tg_includes += getattr(tg, 'export_system_includes', [])
+                        tg_includes += getattr(tg, 'extra_includes', [])
+                        tg_includes = [clion_path_from(i, self.srcnode) for i in tg_includes]
+
+                        if tg_includes + tg.env.INCPATHS:
+                            CMakeLists.write('target_include_directories(\n'
+                                             '    %s.completion\n'
+                                             '    PRIVATE\n'
+                                             '        "%s"\n'
+                                             ')\n\n' % (
+                                                 tg.name, '"\n        "'.join(
+                                                     tg_includes + [i.replace('\\', '/')
+                                                                    for i in tg.env.INCPATHS])))
+
+                        tg_defines = []
+                        tg_defines += getattr(tg, 'defines', [])
+                        tg_defines += getattr(tg, 'export_defines', [])
+                        tg_defines += getattr(tg, 'extra_defines', [])
+                        tg_defines += tg.env.DEFINES
+                        if tg_defines:
+                            defines = (d.replace('(', '\\(').replace(')', '\\)') for d in tg_defines)
+                            CMakeLists.write('target_compile_definitions(\n'
+                                             '    %s.completion\n'
+                                             '    PRIVATE\n'
+                                             '        %s\n'
+                                             ')\n\n' % (tg.name, '\n        '.join(defines)))
+
+                        with open(run_configs_dir.make_node('%s.completion.xml' % tg.name).path_from(self.path),
+                                  'w') as run_file:
+                            run_file.write('<component name="ProjectRunConfigurationManager">\n'
+                                           '  <configuration default="false" name="%(target)s.completion"'
+                                           ' folderName=".completion"'
+                                           ' type="CMakeRunConfiguration"'
+                                           ' factoryName="Application"'
+                                           ' PROGRAM_PARAMS="" '
+                                           ' REDIRECT_INPUT="false"'
+                                           ' ELEVATE="false"'
+                                           ' USE_EXTERNAL_CONSOLE="false"'
+                                           ' PASS_PARENT_ENVS_2="true"'
+                                           ' PROJECT_NAME="%(project)s"'
+                                           ' TARGET_NAME="%(target)s.completion"'
+                                           ' RUN_TARGET_PROJECT_NAME="%(project)s"'
+                                           ' RUN_TARGET_NAME="%(launcher)s">\n'
+                                           '    <method v="2">\n'
+                                           '      <option'
+                                           ' name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$'
+                                           'BuildBeforeRunTask" enabled="true" />\n'
+                                           '    </method>\n'
+                                           '  </configuration>\n'
+                                           '</component>\n' % {
+                                               'project': appname,
+                                               'launcher': self.launcher.target,
+                                               'target': tg.name
+                                           })
+                    if 'motor:game' in tg.features:
+                        with open(run_configs_dir.make_node('%s.xml' % tg.name).path_from(self.path), 'w') as run_file:
+                            run_file.write('<component name="ProjectRunConfigurationManager">\n'
+                                           '  <configuration default="false" name="%(target)s"'
+                                           ' type="CMakeRunConfiguration"'
+                                           ' factoryName="Application"'
+                                           ' PROGRAM_PARAMS="%(target)s" '
+                                           ' REDIRECT_INPUT="false"'
+                                           ' ELEVATE="false"'
+                                           ' USE_EXTERNAL_CONSOLE="false"'
+                                           ' PASS_PARENT_ENVS_2="true"'
+                                           ' PROJECT_NAME="%(project)s"'
+                                           ' TARGET_NAME="%(launcher)s"'
+                                           ' RUN_TARGET_PROJECT_NAME="%(project)s"'
+                                           ' RUN_TARGET_NAME="%(launcher)s">\n'
+                                           '    <method v="2">\n'
+                                           '      <option'
+                                           ' name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$'
+                                           'BuildBeforeRunTask" enabled="true" />\n'
+                                           '    </method>\n'
+                                           '  </configuration>\n'
+                                           '</component>\n' % {
+                                               'project': appname,
+                                               'launcher': self.launcher.target,
+                                               'target': tg.name
+                                           })
         for env_name in self.env.ALL_TOOLCHAINS:
             bld_env = self.all_envs[env_name]
             if bld_env.SUB_TOOLCHAINS:
@@ -153,108 +264,40 @@ class CLion(Build.BuildContext):
                     CMakeLists.write('set(WAF_COMMAND %s:%s)\n' % (env_name, variant))
 
                     if env.SYSTEM_INCLUDES + env.INCLUDES:
+                        includes = [i.replace('\\', '/') for i in env.SYSTEM_INCLUDES + env.INCLUDES]
                         CMakeLists.write('include_directories(\n'
                                          '    SYSTEM\n'
                                          '        "%s"\n'
-                                         ')\n\n' % ('"\n        "'.join(env.SYSTEM_INCLUDES + env.INCLUDES)))
+                                         ')\n\n' % ('"\n        "'.join(includes)))
                     if env.SYSTEM_DEFINES + env.DEFINES:
                         CMakeLists.write('add_compile_definitions(\n'
                                          '    %s\n'
                                          ')\n\n' % ('\n    '.join(env.SYSTEM_DEFINES + env.DEFINES)))
-                    for g in self.groups:
-                        for tg in g:
-                            if not isinstance(tg, TaskGen.task_gen):
-                                continue
-                            tg.post()
-                            files = []
-                            for task in tg.tasks:
-                                if task.__class__.__name__ in ('c', 'objc'):
-                                    files.append(task.inputs[0].path_from(self.path))
-                                elif task.__class__.__name__ in ('cxx', 'objcxx'):
-                                    files.append(task.inputs[0].path_from(self.path))
-                                elif task.__class__.__name__ in ('cpuc',):
-                                    files.append(task.inputs[0].path_from(self.path))
 
-                            if files:
-                                CMakeLists.write('add_library(%s.completion OBJECT\n'
-                                                 '    %s\n'
-                                                 ')\n' % (tg.name, '\n    '.join(files)))
-                                tg_includes = []
-                                tg_includes += getattr(tg, 'includes', [])
-                                tg_includes += getattr(tg, 'export_includes', [])
-                                tg_includes += getattr(tg, 'export_system_includes', [])
-                                tg_includes += getattr(tg, 'extra_includes', [])
-                                tg_includes = [clion_path_from(i, self.srcnode) for i in tg_includes]
-
-                                if tg_includes + tg.env.INCPATHS:
-                                    CMakeLists.write('target_include_directories(\n'
-                                                     '    %s.completion\n'
-                                                     '    PRIVATE\n'
-                                                     '        "%s"\n'
-                                                     ')\n\n' % (
-                                                         tg.name, '"\n        "'.join(tg_includes + tg.env.INCPATHS)))
-
-                                tg_defines = []
-                                tg_defines += getattr(tg, 'defines', [])
-                                tg_defines += getattr(tg, 'export_defines', [])
-                                tg_defines += getattr(tg, 'extra_defines', [])
-                                tg_defines += tg.env.DEFINES
-                                if tg_defines:
-                                    defines = (d.replace('(', '\\(').replace(')', '\\)') for d in tg_defines)
-                                    CMakeLists.write('target_compile_definitions(\n'
-                                                     '    %s.completion\n'
-                                                     '    PRIVATE\n'
-                                                     '        %s\n'
-                                                     ')\n\n' % (tg.name, '\n        '.join(defines)))
                     CMakeLists.write('\n'
                                      'add_executable(%s %s)\n'
                                      'set_property(TARGET %s PROPERTY\n'
                                      '        RUNTIME_OUTPUT_DIRECTORY "../../../../../../%s/%s/%s/")\n'
                                      'add_custom_command(TARGET %s POST_BUILD\n'
-                                     '    COMMAND "%s" "%s" build:%s:%s -p\n'
+                                     '    COMMAND "%s" "%s" build:%s:%s\n'
                                      '    WORKING_DIRECTORY "%s"\n'
                                      '    USES_TERMINAL\n'
+                                     '    DEPENDS always_build\n'
                                      ')\n\n'
+                                     'add_custom_command(OUTPUT always_build COMMAND cmake -E echo)\n'
                                      'endif()\n' % (
-                                         self.launcher.target, dir_node.make_node('main.cpp').path_from(self.path),
-                                         self.launcher.target, bld_env.PREFIX, variant, bld_env.DEPLOY_BINDIR,
-                                         self.launcher.target, sys.executable, sys.argv[0], env_name, variant,
-                                         self.srcnode.abspath()))
-        for g in self.groups:
-            for tg in g:
-                if not isinstance(tg, TaskGen.task_gen):
-                    continue
-                tg.post()
-                if 'motor:game' in tg.features:
-                    with open(run_configs_dir.make_node('%s.xml' % tg.name).path_from(self.path), 'w') as run_file:
-                        run_file.write('<component name="ProjectRunConfigurationManager">\n'
-                                       '  <configuration default="false" name="%(target)s"'
-                                       ' type="CMakeRunConfiguration"'
-                                       ' factoryName="Application"'
-                                       ' PROGRAM_PARAMS="%(target)s" '
-                                       ' REDIRECT_INPUT="false"'
-                                       ' ELEVATE="false"'
-                                       ' USE_EXTERNAL_CONSOLE="false"'
-                                       ' PASS_PARENT_ENVS_2="true"'
-                                       ' PROJECT_NAME="%(project)s"'
-                                       ' TARGET_NAME="%(launcher)s"'
-                                       ' RUN_TARGET_PROJECT_NAME="%(project)s"'
-                                       ' RUN_TARGET_NAME="%(launcher)s">\n'
-                                       '    <method v="2">\n'
-                                       '      <option'
-                                       ' name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$'
-                                       'BuildBeforeRunTask" enabled="true" />\n'
-                                       '    </method>\n'
-                                       '  </configuration>\n'
-                                       '</component>\n' % {
-                                                'project': appname,
-                                                'launcher': self.launcher.target,
-                                                'target': tg.name
-                                            })
+                                         self.launcher.target,
+                                         dir_node.make_node('main.cpp').path_from(self.path).replace('\\', '/'),
+                                         self.launcher.target, bld_env.PREFIX.replace('\\', '/'), variant,
+                                         bld_env.DEPLOY_BINDIR.replace('\\', '/'),
+                                         self.launcher.target, sys.executable.replace('\\', '/'),
+                                         sys.argv[0].replace('\\', '/'), env_name, variant,
+                                         self.srcnode.abspath().replace('\\', '/')))
 
         for env_name in self.env.ALL_TOOLCHAINS:
             for variant in self.env.ALL_VARIANTS:
-                with open(run_configs_dir.make_node('build_%s_%s.xml' % (env_name, variant)).abspath(), 'w') as run_config:
+                build_filename = run_configs_dir.make_node('build_%s_%s.xml' % (env_name, variant)).abspath()
+                with open(build_filename, 'w') as run_config:
                     run_config.write(
                         '<component name="ProjectRunConfigurationManager">\n'
                         '  <configuration default="false" name="build:%(toolchain)s:%(variant)s"'
@@ -284,7 +327,8 @@ class CLion(Build.BuildContext):
                             'waf': sys.argv[0]
                         }
                     )
-                with open(run_configs_dir.make_node('clean_%s_%s.xml' % (env_name, variant)).abspath(), 'w') as run_config:
+                with open(run_configs_dir.make_node('clean_%s_%s.xml' % (env_name, variant)).abspath(),
+                          'w') as run_config:
                     run_config.write(
                         '<component name="ProjectRunConfigurationManager">\n'
                         '  <configuration default="false" name="clean:%(toolchain)s:%(variant)s"'
