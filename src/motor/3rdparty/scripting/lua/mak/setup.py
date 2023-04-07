@@ -68,13 +68,14 @@ def setup(conf):
     found = False
     if conf.env.PROJECTS:
         found = setup_source(conf)
-    if not found and Options.options.lua_package in ('best', 'pkgconfig'):
-        found = setup_pkgconfig(conf)
-    if not found and Options.options.lua_package in ('best', 'system'):
-        found = setup_system(conf)
-    if not found and Options.options.lua_package in ('best', 'prebuilt'):
-        found = setup_prebuilt(conf)
-    if not found and Options.options.lua_package in ('best', 'source'):
-        found = setup_source(conf)
+    else:
+        if not found and Options.options.lua_package in ('best', 'pkgconfig'):
+            found = setup_pkgconfig(conf)
+        if not found and Options.options.lua_package in ('best', 'system'):
+            found = setup_system(conf)
+        if not found and Options.options.lua_package in ('best', 'prebuilt'):
+            found = setup_prebuilt(conf)
+        if not found and Options.options.lua_package in ('best', 'source'):
+            found = setup_source(conf)
     if not found:
         conf.end_msg('disabled', color='RED')

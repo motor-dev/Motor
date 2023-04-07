@@ -17,7 +17,7 @@ private:
     Page*                         m_firstPage;
     GQuark                        m_motorQuark;
     raw< const Meta::ObjectInfo > m_objectPtr;
-    ref< Logger >                 m_logger;
+    weak< Logger >                m_logger;
     guint                         m_logHandlerDefault;
     guint                         m_logHandlerGLib;
     guint                         m_logHandlerGtk;

@@ -28,9 +28,9 @@ bool FileName::doResolve(DbContext& context)
     m_file = context.rootFolder->openFile(m_value);
     if(!m_file)
     {
-        context.error(this,
-                      Message::MessageType("could not open file: %s: no such file or directory")
-                          | m_value);
+        context.error(
+            this, minitl::format< 512 >(FMT("could not open file: {0}: no such file or directory"),
+                                        m_value));
         return false;
     }
     return true;

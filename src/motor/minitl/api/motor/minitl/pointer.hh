@@ -40,6 +40,8 @@ class pointer
     friend class weak;
     template < typename T >
     friend class scoped;
+    template < typename T >
+    friend struct formatter;
 
 private:
     mutable Allocator* m_allocator;
@@ -57,8 +59,8 @@ public:
     inline virtual ~pointer()
     {
 #if MOTOR_ENABLE_WEAKCHECK
-        motor_assert(m_weakCount == 0,
-                     "object is destroyed but has %d weak references" | m_weakCount);
+        motor_assert_format(m_weakCount == 0, "object is destroyed but has {0} weak references",
+                            m_weakCount);
 #endif
     }
 

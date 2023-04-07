@@ -41,11 +41,12 @@ Value::Value(Type type, void* location) : m_type(type), m_reference(true)
 
 Value::Value(Type type, const Value& castFrom) : m_type(type), m_reference(false)
 {
-    motor_assert(m_type.metaclass->isA(castFrom.type().metaclass)
-                     || castFrom.type().metaclass->isA(m_type.metaclass),
-                 "cannot cast from %s to %s" | castFrom.type().name() | m_type.name());
-    motor_assert(m_type.indirection != Type::Value || castFrom.type().isA(m_type),
-                 "cannot upcast value type from %s to %s" | castFrom.type().name() | m_type.name());
+    motor_assert_format(m_type.metaclass->isA(castFrom.type().metaclass)
+                            || castFrom.type().metaclass->isA(m_type.metaclass),
+                        "cannot cast from {0} to {1}", castFrom.type().name(), m_type.name());
+    motor_assert_format(m_type.indirection != Type::Value || castFrom.type().isA(m_type),
+                        "cannot upcast value type from {0} to {1}", castFrom.type().name(),
+                        m_type.name());
 
     m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
     m_ref.m_deallocate = (m_ref.m_pointer != 0);
@@ -74,10 +75,11 @@ Value& Value::operator=(const Value& v)
 {
     if(m_reference)
     {
-        motor_assert_recover(m_type.isA(v.m_type),
-                             "Value has type %s; unable to copy from type %s" | m_type | v.m_type,
-                             return *this);
-        motor_assert_recover(m_type.constness != Type::Const, "Value is const", return *this);
+        if(motor_assert_format(m_type.isA(v.m_type),
+                               "Value has type {0}; unable to copy from type {1}", m_type,
+                               v.m_type))
+            return *this;
+        if(motor_assert(m_type.constness != Type::Const, "Value is const")) return *this;
         void* mem = memory();
         m_type.destroy(mem);
         m_type.copy(v.memory(), mem);
@@ -93,7 +95,8 @@ Value& Value::operator=(const Value& v)
 void* Value::unpackAs(const Type& ti, ref< minitl::refcountable >& rptr,
                       weak< minitl::refcountable >& wptr, minitl::refcountable*& obj)
 {
-    motor_assert(m_type.isA(ti), "Value has type %s; unable to unbox to type %s" | m_type | ti);
+    motor_assert_format(m_type.isA(ti), "Value has type {0}; unable to unbox to type {1}", m_type,
+                        ti);
     void* mem = memory();
     switch(m_type.indirection)
     {
@@ -141,9 +144,10 @@ Value Value::operator()(Value params[], u32 paramCount)
 {
     static const istring callName("?call");
     Value                call = (*this)[callName];
-    motor_assert_recover(call, "Not a callable object: %s" | m_type, return Value());
-    motor_assert_recover(call.isA(motor_type< const Method* const >()),
-                         "Not a callable object: %s" | m_type, return Value());
+    if(motor_assert_format(call, "Not a callable object: {0}", m_type)) return Value();
+    if(motor_assert_format(call.isA(motor_type< const Method* const >()),
+                           "Not a callable object: {0}", m_type))
+        return Value();
     return call.as< const Method* const >()->doCall(params, paramCount);
 }
 

@@ -131,8 +131,9 @@ GLRenderer::Context::Context(PlatformData* data)
     , shaderext()
 {
     glXMakeCurrent(m_display, m_defaultWindow, m_glContext);
-    motor_info("Creating OpenGL %s (%s) on %s" | (const char*)glGetString(GL_VERSION)
-               | (const char*)glGetString(GL_VENDOR) | (const char*)glGetString(GL_RENDERER));
+    motor_info_format(Log::gl(), "Creating OpenGL {0} ({1}) on {2}",
+                      (const char*)glGetString(GL_VERSION), (const char*)glGetString(GL_VENDOR),
+                      (const char*)glGetString(GL_RENDERER));
     glXSwapInterval = (FGLXSwapInterval)glXGetProcAddress((const GLubyte*)"glXSwapIntervalMESA");
     if(!glXSwapInterval)
         glXSwapInterval = (FGLXSwapInterval)glXGetProcAddress((const GLubyte*)"glXSwapIntervalEXT");
@@ -224,7 +225,7 @@ GLWindow::GLWindow(weak< const RenderWindowDescription > renderwindow,
     : Windowing::Window(renderwindow, renderer)
     , m_context(scoped< Context >())
 {
-    motor_info("creating window %s" | renderwindow->title);
+    motor_info_format(Log::gl(), "creating window {0}", renderwindow->title);
 }
 
 GLWindow::~GLWindow()
@@ -252,7 +253,7 @@ void GLWindow::setCurrent() const
                      "render command on wrong thread");
         ::Window* w = (::Window*)getWindowHandle();
         if(!glXMakeCurrent(m_context->m_display, *w, m_context->m_glContext))
-            motor_error("Unable to set current context");
+            motor_error(Log::gl(), "Unable to set current context");
     }
 }
 
@@ -265,7 +266,7 @@ void GLWindow::clearCurrent() const
         weak< GLRenderer::Context > c
             = motor_checked_cast< const GLRenderer >(m_renderer)->m_context;
         if(!glXMakeCurrent(c->m_display, c->m_defaultWindow, c->m_glContext))
-            motor_error("Unable to clear current context");
+            motor_error(Log::gl(), "Unable to clear current context");
     }
 }
 

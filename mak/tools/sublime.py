@@ -65,7 +65,7 @@ class sublime3(Build.BuildContext):
             for tg in g:
                 if not isinstance(tg, TaskGen.task_gen):
                     continue
-                for node in tg.source_nodes:
+                for _, node in tg.source_nodes:
                     name = tg.name
                     path = node.path_from(self.srcnode).replace('\\', '/')
                     if node.is_child_of(extra_node):

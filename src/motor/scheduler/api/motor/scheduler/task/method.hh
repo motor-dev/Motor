@@ -36,8 +36,10 @@ public:
 
     virtual void run(u32 partIndex, u32 partCount) const override
     {
-        motor_assert(partIndex == 0, "MethodCaller called with invalid part index %d" | partIndex);
-        motor_assert(partCount == 1, "MethodCaller called with invalid part count %d" | partCount);
+        motor_assert_format(partIndex == 0, "MethodCaller called with invalid part index {0}",
+                            partIndex);
+        motor_assert_format(partCount == 1, "MethodCaller called with invalid part count {0}",
+                            partCount);
         (m_owner.operator->()->*Method)();
     }
 };
@@ -68,8 +70,10 @@ public:
 
     virtual void run(u32 partIndex, u32 partCount) const override
     {
-        motor_assert(partIndex == 0, "MethodCaller called with invalid part index %d" | partIndex);
-        motor_assert(partCount == 1, "MethodCaller called with invalid part count %d" | partCount);
+        motor_assert_format(partIndex == 0, "MethodCaller called with invalid part index {0}",
+                            partIndex);
+        motor_assert_format(partCount == 1, "MethodCaller called with invalid part count {1}",
+                            partCount);
         (*Procedure)();
     }
 };

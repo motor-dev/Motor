@@ -46,15 +46,15 @@ Value Method::Overload::getTag(raw< const Class > type) const
     return getTag(Type::makeType(type, Type::Value, Type::Const, Type::Const));
 }
 
-minitl::format< 1024u > Method::Overload::signature() const
+minitl::format_buffer< 1024u > Method::Overload::signature() const
 {
-    char  buffer[1023];
-    char* current = buffer;
-    char* end     = buffer + 1022;
-    *end          = 0;
+    minitl::format_buffer< 1024u > result;
+    char*                          current = result.buffer;
+    char*                          end     = result.buffer + 1023;
+    *end                                   = 0;
     for(u32 i = 0; i < params.count; ++i)
     {
-        minitl::format< 1024u > argType = params.elements[i].type.name();
+        minitl::format_buffer< 1024u > argType = params.elements[i].type.name();
         for(const char* arg = argType; *arg && current != end; ++arg, ++current)
             *current = *arg;
         if(current != end) *(current++) = ' ';
@@ -74,7 +74,7 @@ minitl::format< 1024u > Method::Overload::signature() const
         *(current - 2) = '.';
         *(current - 1) = '.';
     }
-    return minitl::format< 1024u >(buffer);
+    return result;
 }
 
 Value Method::doCall(Value* params, u32 nparams) const
@@ -94,7 +94,7 @@ Value Method::doCall(Value* params, u32 nparams) const
     }
     else
     {
-        motor_error("No overload can convert all parameters");
+        motor_error(Log::meta(), "No overload can convert all parameters");
         return Value();
     }
 }

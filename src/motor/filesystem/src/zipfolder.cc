@@ -13,7 +13,7 @@ ZipFolder::ZipFolder(void* handle, ipath path, Folder::ScanPolicy scanPolicy)
     : m_handle(handle)
     , m_path(path)
 {
-    motor_info("opening zip folder %s" | path);
+    motor_info_format(Log::fs(), "opening zip folder {0}", path);
     if(scanPolicy != Folder::ScanNone)
     {
         refresh(scanPolicy);
@@ -25,7 +25,7 @@ ZipFolder::ZipFolder(const ipath& zippath, Folder::ScanPolicy scanPolicy) : m_ha
     m_handle = unzOpen(zippath.str().name);
     if(!m_handle)
     {
-        motor_error("Could not open zip %s/" | zippath);
+        motor_error_format(Log::fs(), "Could not open zip {0}/", zippath);
     }
 
     if(scanPolicy != Folder::ScanNone)

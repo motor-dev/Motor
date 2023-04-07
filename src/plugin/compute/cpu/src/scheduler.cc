@@ -27,9 +27,10 @@ Scheduler::Scheduler(const Plugin::Context& context)
     for(i32 i = 0; i < s_cpuVariantCount; ++i)
     {
         if(*s_cpuVariants[i])
-            motor_info("registering optimised CPU kernel loader for %s" | s_cpuVariants[i]);
+            motor_info_format(Log::cpu(), "registering optimised CPU kernel loader for {0}",
+                              s_cpuVariants[i]);
         else
-            motor_info("registering unoptimised CPU kernel loader");
+            motor_info(Log::cpu(), "registering unoptimised CPU kernel loader");
         ref< CodeLoader > codeLoader
             = ref< CodeLoader >::create(Arena::task(), inamespace(s_cpuVariants[i]));
         m_cpuLoaders.push_back(ref< KernelLoader >::create(Arena::task(), codeLoader));

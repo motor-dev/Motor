@@ -48,7 +48,8 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy,
     m_handle.ptrHandle       = opendir(pathname.name);
     if(!m_handle.ptrHandle)
     {
-        motor_error("Could not open directory %s: %s" | diskpath | strerror(errno));
+        motor_error_format(Log::fs(), "Could not open directory {0}: {1}", diskpath,
+                           strerror(errno));
     }
     else
     {
@@ -92,8 +93,8 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
             stat(filename.name, &s);
             if(errno == 0)
             {
-                motor_error("could not stat file %s: %s(%d)" | filename.name | strerror(errno)
-                            | errno);
+                motor_error_format(Log::fs(), "could not stat file {0}: {1}({2})", filename.name,
+                                   strerror(errno), errno);
             }
             else if(s.st_mode & S_IFDIR)
             {
@@ -121,7 +122,8 @@ weak< File > DiskFolder::createFile(const istring& name)
     char* fullPath = realpath(m_path.str().name, fullPathBuffer);
     if(!fullPath)
     {
-        motor_error("could not get real path of %s: %s(%d)" | m_path | strerror(errno) | errno);
+        motor_error_format(Log::fs(), "could not get real path of {0}: {1}({2})", m_path,
+                           strerror(errno), errno);
         return ref< File >();
     }
     strcat(fullPath, "/");
@@ -129,13 +131,15 @@ weak< File > DiskFolder::createFile(const istring& name)
     FILE* f = fopen(fullPath, "w");
     if(f == 0)
     {
-        motor_error("could not create file %s: %s(%d)" | fullPath | strerror(errno) | errno);
+        motor_error_format(Log::fs(), "could not create file {0}: {1}({2})", fullPath,
+                           strerror(errno), errno);
         return ref< File >();
     }
     fclose(f);
     if(stat(fullPath, &s) != 0)
     {
-        motor_error("could not create file %s: %s(%d)" | fullPath | strerror(errno) | errno);
+        motor_error_format(Log::fs(), "could not create file {0}: {1}({2})", fullPath,
+                           strerror(errno), errno);
         return ref< File >();
     }
 
@@ -175,8 +179,8 @@ void DiskFolder::onChanged()
             int             result = stat(filename.name, &s);
             if(result != 0)
             {
-                motor_error("could not stat file %s: %s(%d)" | filename.name | strerror(errno)
-                            | errno);
+                motor_error_format(Log::fs(), "could not stat file {0}: {1}({2})", filename.name,
+                                   strerror(errno), errno);
             }
             else if(s.st_mode & S_IFDIR)
             {
@@ -195,7 +199,7 @@ void DiskFolder::onChanged()
                 }
                 if(!exists)
                 {
-                    motor_info("new folder: %s" | p);
+                    motor_info_format(Log::fs(), "new folder: {0}", p);
                     ref< DiskFolder > newFolder = ref< DiskFolder >::create(
                         Arena::filesystem(), p, Folder::ScanNone, Folder::CreateNone);
                     m_folders.push_back(minitl::make_tuple(name, newFolder));
@@ -218,7 +222,7 @@ void DiskFolder::onChanged()
                 }
                 if(!exists)
                 {
-                    motor_info("new file: %s" | p);
+                    motor_info_format(Log::fs(), "new file: {0}", p);
                     File::Media media(File::Media::Disk, s.st_dev, s.st_ino);
                     ref< File > newFile = ref< PosixFile >::create(Arena::filesystem(),
                                                                    ipath(m_path) + ifilename(name),

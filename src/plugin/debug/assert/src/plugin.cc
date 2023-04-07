@@ -18,7 +18,7 @@ public:
     AssertSetup(const Motor::Plugin::Context& /*context*/)
         : m_previousAssertionCallback(minitl::setAssertionCallback(&AssertionCallback))
     {
-        motor_debug("installed assert callback");
+        motor_debug(Log::system(), "installed assert callback");
     }
     ~AssertSetup()
     {

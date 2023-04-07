@@ -173,18 +173,20 @@ Value call(raw< const Method > method, CallInfo callInfo, const ArgInfo< T > arg
         for(; namedArguments[i].parameter != index; ++index, ++p)
         {
             motor_assert(p != callInfo.overload->params.end(), "too many arguments passed to call");
-            motor_assert(*(p->defaultValue),
-                         "Parameter %s does not have a default value" | p->name);
+            motor_assert_format(*(p->defaultValue), "Parameter {0} does not have a default value",
+                                p->name);
             new(static_cast< void* >(&v[index])) Value(Value::ByRef(*(p->defaultValue)));
         }
-        motor_assert(p->name == namedArguments[i].name,
-                     "Argument mismatch: %s expected, got %s" | p->name | namedArguments[i].name);
+        motor_assert_format(p->name == namedArguments[i].name,
+                            "Argument mismatch: {0} expected, got {1}", p->name,
+                            namedArguments[i].name);
         motor_assert(p != callInfo.overload->params.end(), "too many arguments passed to call");
         convert(namedArguments[i].type, static_cast< void* >(&v[index]), p->type);
     }
     for(; p != callInfo.overload->params.end(); ++p, ++index)
     {
-        motor_assert(p->defaultValue, "Parameter %s does not have a default value" | p->name);
+        motor_assert_format(p->defaultValue, "Parameter {0} does not have a default value",
+                            p->name);
         new(static_cast< void* >(&v[index])) Value(Value::ByRef(*(p->defaultValue)));
     }
     for(u32 i = argumentCount - callInfo.variadicCount; i < argumentCount; ++i, ++index)

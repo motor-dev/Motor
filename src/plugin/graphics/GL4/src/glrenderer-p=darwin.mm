@@ -46,7 +46,7 @@
 
 - (void) dealloc
 {
-    motor_info("destroying OpenGL view");
+    motor_info(Log::gl(), "destroying OpenGL view");
     [m_context release];
     [super dealloc];
 }
@@ -89,10 +89,10 @@ GLRenderer::Context::Context()
     GLint sync = 0;
     [m_context setValues:&sync forParameter:NSOpenGLCPSwapInterval];
     [m_context makeCurrentContext];
-    motor_info("Created OpenGL context %s (%s) on %s"
-        | (const char*)glGetString(GL_VERSION)
-        | (const char *)glGetString(GL_VENDOR)
-        | (const char*)glGetString(GL_RENDERER));
+    motor_info(Log::gl(), "Created OpenGL context {0} ({1}) on {2}"
+        , (const char*)glGetString(GL_VERSION)
+        , (const char *)glGetString(GL_VENDOR)
+        , (const char*)glGetString(GL_RENDERER));
 }
 
 GLRenderer::Context::~Context()
@@ -108,7 +108,7 @@ class GLWindow::Context : public minitl::refcountable
     friend class GLWindow;
 private:
     NSWindow*               m_window;
-    MotorOpenGLView*    m_view;
+    MotorOpenGLView*        m_view;
     CGLContextObj           m_context;
     u64                     m_threadId;
 public:
@@ -200,7 +200,7 @@ void GLWindow::setCurrent() const
 {
     if(m_context)
     {
-        motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread: Window belongs to thread %d, current thread: %d" | m_context->m_threadId | Thread::currentId());
+        motor_assert_format(Thread::currentId() == m_context->m_threadId, "render command on wrong thread: Window belongs to thread {0}, current thread: {1}", m_context->m_threadId, Thread::currentId());
         [m_context->m_view->m_context makeCurrentContext];
     }
 }
@@ -209,7 +209,7 @@ void GLWindow::clearCurrent() const
 {
     if(m_context)
     {
-        motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread: Window belongs to thread %d, current thread: %d" | m_context->m_threadId | Thread::currentId());
+        motor_assert_format(Thread::currentId() == m_context->m_threadId, "render command on wrong thread: Window belongs to thread {0}, current thread: {1}", m_context->m_threadId, Thread::currentId());
         [NSOpenGLContext clearCurrentContext];
     }
 }
@@ -218,7 +218,7 @@ void GLWindow::present() const
 {
     if(m_context)
     {
-        motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread: Window belongs to thread %d, current thread: %d" | m_context->m_threadId | Thread::currentId());
+        motor_assert_format(Thread::currentId() == m_context->m_threadId, "render command on wrong thread: Window belongs to thread {0}, current thread: {1}", m_context->m_threadId, Thread::currentId());
         CGLFlushDrawable(m_context->m_context);
     }
 }

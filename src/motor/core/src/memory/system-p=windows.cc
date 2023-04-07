@@ -16,9 +16,9 @@ u32 SystemAllocator::platformPageSize()
 
 byte* SystemAllocator::platformReserve(u32 size)
 {
-    motor_assert(size % platformPageSize() == 0,
-                 "size %d is not aligned on a page boundary (page size = %d)" | size
-                     | platformPageSize());
+    motor_assert_format(size % platformPageSize() == 0,
+                        "size {0} is not aligned on a page boundary (page size = {1})", size,
+                        platformPageSize());
     byte* result = (byte*)VirtualAlloc(0, size, MEM_RESERVE, PAGE_NOACCESS);
     motor_assert(result, "failed to reserve memory");
     return result;
@@ -26,40 +26,40 @@ byte* SystemAllocator::platformReserve(u32 size)
 
 void SystemAllocator::platformCommit(byte* ptr, u32 start, u32 stop)
 {
-    motor_assert((uintptr_t)ptr % platformPageSize() == 0,
-                 "pointer %p is not aligned on a page boundary (page size = %d)" | ptr
-                     | platformPageSize());
-    motor_assert(start % platformPageSize() == 0,
-                 "offset %d is not aligned on a page boundary (page size = %d)" | start
-                     | platformPageSize());
-    motor_assert(stop % platformPageSize() == 0,
-                 "offset %d is not aligned on a page boundary (page size = %d)" | stop
-                     | platformPageSize());
+    motor_assert_format((uintptr_t)ptr % platformPageSize() == 0,
+                        "pointer {0} is not aligned on a page boundary (page size = {1})", ptr,
+                        platformPageSize());
+    motor_assert_format(start % platformPageSize() == 0,
+                        "offset {0} is not aligned on a page boundary (page size = {1})", start,
+                        platformPageSize());
+    motor_assert_format(stop % platformPageSize() == 0,
+                        "offset {0} is not aligned on a page boundary (page size = {1})", stop,
+                        platformPageSize());
     VirtualAlloc(ptr + start, stop - start, MEM_COMMIT, PAGE_READWRITE);
 }
 
 void SystemAllocator::platformRelease(byte* ptr, u32 start, u32 stop)
 {
-    motor_assert((uintptr_t)ptr % platformPageSize() == 0,
-                 "pointer %p is not aligned on a page boundary (page size = %d)" | ptr
-                     | platformPageSize());
-    motor_assert(start % platformPageSize() == 0,
-                 "offset %d is not aligned on a page boundary (page size = %d)" | start
-                     | platformPageSize());
-    motor_assert(stop % platformPageSize() == 0,
-                 "offset %d is not aligned on a page boundary (page size = %d)" | stop
-                     | platformPageSize());
+    motor_assert_format((uintptr_t)ptr % platformPageSize() == 0,
+                        "pointer {0} is not aligned on a page boundary (page size = {1})", ptr,
+                        platformPageSize());
+    motor_assert_format(start % platformPageSize() == 0,
+                        "offset {0} is not aligned on a page boundary (page size = {1})", start,
+                        platformPageSize());
+    motor_assert_format(stop % platformPageSize() == 0,
+                        "offset {0} is not aligned on a page boundary (page size = {1})", stop,
+                        platformPageSize());
     VirtualFree(ptr + start, stop - start, MEM_DECOMMIT);
 }
 
 void SystemAllocator::platformFree(byte* ptr, u32 size)
 {
-    motor_assert((uintptr_t)ptr % platformPageSize() == 0,
-                 "pointer %p is not aligned on a page boundary (page size = %d)" | ptr
-                     | platformPageSize());
-    motor_assert(size % platformPageSize() == 0,
-                 "size %p is not aligned on a page boundary (page size = %d)" | size
-                     | platformPageSize());
+    motor_assert_format((uintptr_t)ptr % platformPageSize() == 0,
+                        "pointer {0} is not aligned on a page boundary (page size = {1})", ptr,
+                        platformPageSize());
+    motor_assert_format(size % platformPageSize() == 0,
+                        "size {0} is not aligned on a page boundary (page size = {1})", size,
+                        platformPageSize());
     VirtualFree(ptr, size, MEM_RELEASE);
 }
 

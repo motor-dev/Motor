@@ -21,9 +21,9 @@ static void completeGFlagsClass(Gtk3Plugin& plugin, Meta::Class* cls, GType type
 
 raw< const Meta::Class > getGFlagsClass(Gtk3Plugin& plugin, GType type)
 {
-    motor_assert(G_TYPE_FUNDAMENTAL(type) == G_TYPE_FLAGS,
-                 "expected GFlags type, got %s which is a %s" | g_type_name(type)
-                     | g_type_name(G_TYPE_FUNDAMENTAL(type)));
+    motor_assert_format(G_TYPE_FUNDAMENTAL(type) == G_TYPE_FLAGS,
+                        "expected GFlags type, got {0} which is a {1}", g_type_name(type),
+                        g_type_name(G_TYPE_FUNDAMENTAL(type)));
     Meta::Class* cls = static_cast< Meta::Class* >(g_type_get_qdata(type, plugin.quark()));
     if(!cls)
     {

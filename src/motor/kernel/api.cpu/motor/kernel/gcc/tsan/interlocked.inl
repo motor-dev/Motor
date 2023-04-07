@@ -94,10 +94,6 @@ struct InterlockedType< 8 >
                                                   const tagged_t::tag_t& condition);
 };
 
-}  // namespace knl
-
-namespace knl {
-
 InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch(const value_t* p)
 {
     return __tsan_atomic32_load(p, __tsan_memory_order_acquire);

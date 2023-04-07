@@ -66,8 +66,8 @@ static bool convertBooleanToValue(lua_State* state, int index, const Meta::Type&
     }
     else if(type.metaclass->type() == Meta::ClassType_Number)
     {
-        motor_warning("%s: - dubious cast: Lua bool to %s" | Context::getCallInfo(state)
-                      | type.metaclass->name);
+        motor_warning_format(Log::lua(), "{0}: - dubious cast: Lua bool to {1}",
+                             Context::getCallInfo(state), type.metaclass->name);
         switch(type.metaclass->index())
         {
         case Meta::ClassIndex_u8:
@@ -192,11 +192,12 @@ static bool convertTableToValue(lua_State* state, int index, const Meta::Type& t
 {
     if(type.metaclass->type() == Meta::ClassType_Array)
     {
-        motor_assert(type.metaclass->operators, "Array type %s does not implement operator methods"
-                                                    | type.metaclass->fullname());
-        motor_assert(type.metaclass->operators->arrayOperators,
-                     "Array type %s does not implement Array API methods"
-                         | type.metaclass->fullname());
+        motor_assert_format(type.metaclass->operators,
+                            "Array type {0} does not implement operator methods",
+                            type.metaclass->fullname());
+        motor_assert_format(type.metaclass->operators->arrayOperators,
+                            "Array type {0} does not implement Array API methods",
+                            type.metaclass->fullname());
         Meta::Type   arrayType  = type.metaclass->operators->arrayOperators->value_type;
         u32          count      = motor_checked_numcast< u32 >(luaL_len(state, index));
         Meta::Value* parameters = (Meta::Value*)malloca(
@@ -245,7 +246,7 @@ static bool convertTableToValue(lua_State* state, int index, const Meta::Type& t
     {
         motor_assert(type.indirection == Meta::Type::Value, "POD type can only be value");
         Meta::Type   valueType = Meta::Type::makeType(type.metaclass, Meta::Type::Value,
-                                                    Meta::Type::Mutable, Meta::Type::Mutable);
+                                                      Meta::Type::Mutable, Meta::Type::Mutable);
         Meta::Value* value     = new(buffer) Meta::Value(valueType, Meta::Value::Reserve);
         lua_pushnil(state);
         while(lua_next(state, index) != 0)

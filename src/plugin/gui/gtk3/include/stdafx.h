@@ -18,3 +18,9 @@
 
 #include <glib-object.h>
 #include <gtk/gtk.h>
+
+namespace Motor { namespace Log {
+
+weak< Logger > gtk();
+
+}}  // namespace Motor::Log

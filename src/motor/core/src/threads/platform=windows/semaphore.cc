@@ -35,6 +35,11 @@ Threads::Waitable::WaitResult Semaphore::wait()
     }
 }
 
+u32 Semaphore::flushPauseCount()
+{
+    return 0;
+}
+
 #else
 
 static i_u32 s_pauseCount;

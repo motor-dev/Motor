@@ -32,7 +32,7 @@ void Semaphore::release(int count)
     m_data.value += count;
     if(syscall(SYS_futex, &m_data.value, FUTEX_WAKE_PRIVATE, count) < 0)
     {
-        motor_error("Semaphore error: %d[%s]" | errno | strerror(errno));
+        motor_error_format(Log::thread(), "Semaphore error: {0}[{1}]", errno, strerror(errno));
         motor_notreached();
     }
 }
@@ -52,7 +52,8 @@ Threads::Waitable::WaitResult Semaphore::wait()
         result = syscall(SYS_futex, &m_data.value, FUTEX_WAIT_PRIVATE, count, NULL);
     } while(result == 0 || errno == EAGAIN);
 
-    motor_error("Semaphore error: %d-%d[%s]" | result | errno | strerror(errno));
+    motor_error_format(Log::thread(), "Semaphore error: {0}-{1}[{2}]", result, errno,
+                       strerror(errno));
     motor_notreached();
     return Abandoned;
 }
@@ -102,7 +103,8 @@ Threads::Waitable::WaitResult Semaphore::wait()
         result = _umtx_op(&m_data.value, UMTX_OP_WAIT, count, 0, 0);
     } while(result == 0 || errno == EINTR);
 
-    motor_error("Semaphore error: %d-%d[%s]" | result | errno | strerror(errno));
+    motor_error_format(Log::thread(), "Semaphore error: {0}-{1}[{2}]", result, errno,
+                       strerror(errno));
     motor_notreached();
     return Abandoned;
 }
@@ -120,7 +122,7 @@ Semaphore::Semaphore(int initialCount) : m_data()
     m_data.ptr = new sem_t;
     if(sem_init(reinterpret_cast< sem_t* >(m_data.ptr), 0, initialCount) != 0)
     {
-        motor_error("Could not initialize semaphore: %s" | strerror(errno));
+        motor_error_format(Log::thread(), "Could not initialize semaphore: {0}", strerror(errno));
     }
 }
 
@@ -128,7 +130,7 @@ Semaphore::~Semaphore()
 {
     if(sem_destroy(reinterpret_cast< sem_t* >(m_data.ptr)) != 0)
     {
-        motor_error("Could not initialize semaphore: %s" | strerror(errno));
+        motor_error_format(Log::thread(), "Could not destroy semaphore: {0}", strerror(errno));
     }
     delete reinterpret_cast< sem_t* >(m_data.ptr);
 }
@@ -139,7 +141,7 @@ void Semaphore::release(int count)
     {
         if(sem_post(reinterpret_cast< sem_t* >(m_data.ptr)) != 0)
         {
-            motor_error("Could not release semaphore: %s" | strerror(errno));
+            motor_error_format(Log::thread(), "Could not release semaphore: {0}", strerror(errno));
         }
     }
 }
@@ -155,7 +157,7 @@ Threads::Waitable::WaitResult Semaphore::wait()
     }
     else
     {
-        motor_info("Semaphore error: %s" | strerror(errno));
+        motor_info_format(Log::thread(), "Semaphore error: {0}", strerror(errno));
         motor_notreached();
         return Abandoned;
     }

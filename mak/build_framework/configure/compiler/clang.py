@@ -53,7 +53,7 @@ def get_msvc_build_tools(configuration_context):
 
 
 class Clang(Configure.ConfigurationContext.GnuCompiler):
-    DEFINES = ['__clang__', '__GNUC__', '__GNUG__']
+    DEFINES = []
     NAMES = ('Clang', )
     TOOLS = 'clang clangxx'
 

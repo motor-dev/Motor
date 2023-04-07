@@ -52,7 +52,7 @@ def thirdparty(bld, name, feature_list=[], path='', source_node=None, var='', us
                     export_cflags=env['check_%s_cflags' % var],
                     export_cxxflags=env['check_%s_cxxflags' % var],
                     export_linkflags=env['check_%s_ldflags' % var],
-                    source_nodes=[source_node],
+                    source_nodes=[('', source_node)],
                     use=[env.ENV_PREFIX % u for u in use],
                     private_use=[env.ENV_PREFIX % u for u in private_use],
                     project_name=name
@@ -117,7 +117,7 @@ def thirdparty(bld, name, feature_list=[], path='', source_node=None, var='', us
                 export_cflags=env['check_%s_cflags' % var],
                 export_cxxflags=env['check_%s_cxxflags' % var],
                 export_linkflags=env['check_%s_ldflags' % var],
-                source_nodes=[source_node],
+                source_nodes=[('', source_node)],
                 use=[env.ENV_PREFIX % u for u in use],
                 private_use=[env.ENV_PREFIX % u for u in private_use],
                 project_name=name

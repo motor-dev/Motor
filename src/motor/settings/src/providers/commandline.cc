@@ -50,7 +50,7 @@ CommandLineSettingsProvider::buildSettings(int argc, const char* argv[])
                 ++optionEnd;
             if(sep == nameBegin)
             {
-                motor_error("invalid command line option: %s" | nameBegin);
+                motor_error_format(Log::settings(), "invalid command line option: {0}", nameBegin);
                 continue;
             }
             else
@@ -63,7 +63,7 @@ CommandLineSettingsProvider::buildSettings(int argc, const char* argv[])
                 for(Meta::AST::MessageList::const_iterator it = errorList.begin();
                     it != errorList.end(); ++it)
                 {
-                    Logger::root()->log(logError, "<command line>", 0, it->message);
+                    Log::settings()->log(logError, "<command line>", 0, it->message);
                 }
                 if(errorList.empty()) addSetting(result, category, property, value);
             }
@@ -84,7 +84,7 @@ CommandLineSettingsProvider::~CommandLineSettingsProvider()
 
 void CommandLineSettingsProvider::log(const Meta::AST::Message& message) const
 {
-    Logger::root()->log(message.severity, "<command line>", 0, message.message);
+    Log::settings()->log(message.severity, "<command line>", 0, message.message);
 }
 
 }}  // namespace Motor::Settings

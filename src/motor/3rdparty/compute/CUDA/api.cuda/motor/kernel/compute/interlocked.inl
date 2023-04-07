@@ -67,12 +67,6 @@ struct InterlockedType<8>
                                        const tagged_t::tag_t& /*condition*/);
 };
 
-}
-
-
-namespace knl
-{
-
 __device InterlockedType<4>::value_t InterlockedType<4>::fetch_and_add(value_t *p, value_t incr)
 {
 #ifdef __CUDA_ARCH__

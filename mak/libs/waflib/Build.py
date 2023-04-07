@@ -250,10 +250,10 @@ class BuildContext(Context.Context):
 		try:
 			self.compile()
 		finally:
-			if self.progress_bar == 1 and sys.stdout.isatty():
+			if self.progress_bar >= 1 and sys.stdout.isatty():
 				c = self.producer.processed or 1
 				m = self.progress_line(c, c, Logs.colors.BLUE, Logs.colors.NORMAL)
-				Logs.info(m, extra={'stream': sys.stdout, 'c1': Logs.colors.cursor_off, 'c2' : Logs.colors.cursor_on})
+				self.set_status_line(m)
 			#Logs.info("Waf: Leaving directory `%s'", self.variant_dir)
 		try:
 			self.producer.bld = None
@@ -510,20 +510,24 @@ class BuildContext(Context.Context):
 			return ''
 
 		n = len(str(total))
-		timer = str(self.timer)
-		cols = Logs.get_term_cols() - 3 - len(timer) 
-		max_command_len = cols - n * 2 - 3
-		if len(self.cmd) > max_command_len:
-			command = self.cmd[max_command_len - 3] + '...'
-		else:
-			command = self.cmd
 
-		fs = "%s [%%%dd/%%d]%s" % (command, n, ' ' * (max_command_len - len(command)))
-		message = fs % (idx, total)
-		ratio = ((len(message) * idx) // total)
-		message = '\x1b[42m' + message[0:ratio] + '\x1b[49m' + message[ratio:]
+		Utils.rot_idx += 1
+		ind = Utils.rot_chr[Utils.rot_idx % 4]
 
-		return '\r%s[%s%s%s]' % (message, col1, self.timer, col2)
+		fs = "%s [%%%dd/%%d]" % (self.cmd, n)
+		left = fs % (idx, total)
+		right = '[%s%s%s]' % (col1, self.timer, col2)
+
+		cols = Logs.get_term_cols() - len(left) - len(right) + len(col1) + len(col2)
+		if cols < 7:
+			cols = 7
+
+		ratio = ((cols * idx) // total)
+
+		bar = ('\u2501' * (ratio)) + '\x1b[37m' + ('\u2501' * (cols - ratio))
+		msg = Logs.indicator % (left, bar, right)
+
+		return msg
 
 	def declare_chain(self, *k, **kw):
 		"""
@@ -1299,20 +1303,12 @@ class CleanContext(BuildContext):
 				if n in lst:
 					continue
 				n.delete()
-				if self.progress_bar == 1 and sys.stdout.isatty():
+				if self.progress_bar >= 1 and sys.stdout.isatty():
 					m = self.progress_line(i, c, Logs.colors.BLUE, Logs.colors.NORMAL)
-					Logs.info(
-						m,
-						extra={
-							'stream': sys.stdout,
-							'terminator': '',
-							'c1': Logs.colors.cursor_off,
-							'c2': Logs.colors.cursor_on
-						}
-					)
-			if self.progress_bar == 1 and sys.stdout.isatty():
+					self.set_status_line(m)
+			if self.progress_bar >= 1 and sys.stdout.isatty():
 				m = self.progress_line(c, c, Logs.colors.BLUE, Logs.colors.NORMAL)
-				Logs.info(m, extra={'stream': sys.stdout, 'c1': Logs.colors.cursor_off, 'c2': Logs.colors.cursor_on})
+				self.set_status_line(m)
 
 		self.root.children = {}
 

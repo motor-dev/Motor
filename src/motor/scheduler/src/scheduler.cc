@@ -44,7 +44,7 @@ void Scheduler::mainThreadJoin()
 void Scheduler::notifyEnd()
 {
     motor_assert(m_runningTasks == 0, "should not notify end when tasks remain to be done");
-    motor_info("no more tasks to run; exiting");
+    motor_info(Log::scheduler(), "no more tasks to run; exiting");
     m_taskScheduler->notifyEnd();
 }
 

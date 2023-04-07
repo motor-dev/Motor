@@ -16,7 +16,7 @@ bitset< BITS >::bitset()
 template < u32 BITS >
 typename bitset< BITS >::bit bitset< BITS >::operator[](u32 index)
 {
-    motor_assert(index < BITS, "bit index %d out of range (size: %d)" | index | BITS);
+    motor_assert_format(index < BITS, "bit index {0} out of range (size: {1})", index, BITS);
     bit result(*this, index);
     return result;
 }
@@ -24,7 +24,7 @@ typename bitset< BITS >::bit bitset< BITS >::operator[](u32 index)
 template < u32 BITS >
 bool bitset< BITS >::operator[](u32 index) const
 {
-    motor_assert(index < BITS, "bit index %d out of range (size: %d)" | index | BITS);
+    motor_assert_format(index < BITS, "bit index {0} out of range (size: {1})", index, BITS);
     return 1 & (m_bytes[index / 8] >> (index % 8));
 }
 

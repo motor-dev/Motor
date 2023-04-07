@@ -2,7 +2,7 @@
    see LICENSE for detail */
 #pragma once
 
-#include <motor/plugin.scripting.pythonlib/stdafx.h>
+#include <motor/plugin.scripting.python/stdafx.h>
 #include <motor/meta/tags/editor.meta.hh>
 #include <motor/script.hh>
 

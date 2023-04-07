@@ -167,19 +167,14 @@ def build_plugins(bld):
         conditions=['OpenGL', 'GUI'],
         uselib=['cxx14']
     )
-    bld.plugin(
-        'plugin.graphics.Dx9', ['motor', 'plugin.graphics.windowing'], ['motor.3rdparty.graphics.DirectX9'],
-        conditions=['DirectX9', 'GUI'],
-        uselib=['cxx14']
-    )
-    #bld.plugin('plugin.graphics.Dx10',
+    #bld.plugin('plugin.graphics.dx12',
     #           ['motor', 'plugin.graphics.windowing'],
-    #           ['motor.3rdparty.graphics.DirectX10'],
-    #           conditions=['DirectX10', 'GUI'])
-    #bld.plugin('plugin.graphics.Dx11',
+    #           ['motor.3rdparty.graphics.DirectX12'],
+    #           conditions=['DirectX12', 'GUI'])
+    #bld.plugin('plugin.graphics.vulkan',
     #           ['motor', 'plugin.graphics.windowing'],
-    #           ['motor.3rdparty.graphics.DirectX11'],
-    #           conditions=['DirectX11', 'GUI'])
+    #           ['motor.3rdparty.graphics.vulkan'],
+    #           conditions=['Vulkan', 'GUI'])
     bld.plugin(
         'plugin.graphics.GLES2', ['motor', 'plugin.graphics.windowing'], ['motor.3rdparty.graphics.OpenGLES2'],
         conditions=['OpenGLES2', 'GUI'],

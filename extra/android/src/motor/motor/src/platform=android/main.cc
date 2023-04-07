@@ -29,15 +29,15 @@ public:
     }
 
 protected:
-    virtual bool log(const Motor::istring& logname, Motor::LogLevel level, const char* filename,
+    virtual bool log(const Motor::inamespace& logname, Motor::LogLevel level, const char* filename,
                      int line, const char* thread, const char* msg) const
     {
         android_LogPriority s_motorToAndroid[logFatal + 1]
-            = {ANDROID_LOG_VERBOSE, ANDROID_LOG_DEBUG, ANDROID_LOG_INFO,
-               ANDROID_LOG_WARN,    ANDROID_LOG_ERROR, ANDROID_LOG_FATAL};
+            = {ANDROID_LOG_DEBUG, ANDROID_LOG_INFO, ANDROID_LOG_WARN, ANDROID_LOG_ERROR,
+               ANDROID_LOG_FATAL};
         android_LogPriority p = s_motorToAndroid[int(level)];
         __android_log_print(p, "Motor", "%s|%d: [%s:%s] %s", filename, line, thread,
-                            logname.c_str(), msg);
+                            logname.str().name, msg);
         return true;
     }
 };

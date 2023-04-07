@@ -13,3 +13,9 @@
 #else
 #    define MOTOR_API_SETTINGS
 #endif
+
+namespace Motor { namespace Log {
+
+motor_api(SETTINGS) weak< Logger > settings();
+
+}}  // namespace Motor::Log

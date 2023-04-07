@@ -245,13 +245,13 @@ const istring Class::nameOperatorGet()
 
 void Class::copy(const void* src, void* dst) const
 {
-    motor_assert_recover(copyconstructor, "no copy for type %s" | name, return );
+    if(motor_assert_format(copyconstructor, "no copy for type {0}", name)) return;
     (*copyconstructor)(src, dst);
 }
 
 void Class::destroy(void* src) const
 {
-    motor_assert_recover(destructor, "no destructor for type %s" | name, return );
+    if(motor_assert_format(destructor, "no destructor for type {0}", name)) return;
     (*destructor)(src);
 }
 

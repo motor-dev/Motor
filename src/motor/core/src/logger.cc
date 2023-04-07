@@ -9,8 +9,7 @@
 
 namespace Motor {
 
-static const char* s_logLevelNames[]
-    = {" SPAM  ", " DEBUG ", " INFO  ", "WARNING", " ERROR ", " FATAL "};
+static const char* s_logLevelNames[] = {" DEBUG ", " INFO  ", "WARNING", " ERROR ", " FATAL "};
 
 motor_api(CORE) const char* ILogListener::getLogLevelName(LogLevel level)
 {
@@ -20,15 +19,16 @@ motor_api(CORE) const char* ILogListener::getLogLevelName(LogLevel level)
         return "Unknown";
 }
 
-Logger::Logger() : m_listeners(Arena::debug()), m_children(Arena::debug()), m_name("all")
+Logger::Logger() : m_listeners(Arena::debug()), m_children(Arena::debug()), m_name()
 {
 }
 
-Logger::Logger(ref< Logger > parent, const istring& name)
+Logger::Logger(weak< Logger > parent, const istring& name, LogLevel minLogLevel)
     : m_listeners(Arena::debug())
     , m_children(Arena::debug())
     , m_parent(parent)
-    , m_name(name)
+    , m_name(parent ? m_parent->m_name + name : inamespace(name))
+    , m_logFilter(minLogLevel)
 {
 }
 
@@ -50,9 +50,9 @@ ref< Logger > Logger::getChild(const istring& name)
         return it->second;
 }
 
-ref< Logger > Logger::instance(const inamespace& name)
+weak< Logger > Logger::instance(const inamespace& name)
 {
-    ref< Logger > result = root();
+    weak< Logger > result = root();
 
     for(u32 i = 0; i < name.size(); ++i)
     {
@@ -67,11 +67,11 @@ ref< Logger > Logger::root()
     return s_rootLogger;
 }
 
-bool Logger::log(const inamespace& name, LogLevel level, const char* filename, int line,
-                 const char* msg)
-{
-    return instance(name)->log(level, filename, line, msg);
-}
+// bool Logger::log(const inamespace& name, LogLevel level, const char* filename, int line,
+//                  const char* msg)
+//{
+//     return instance(name)->log(level, filename, line, msg);
+// }
 
 void Logger::addListener(weak< ILogListener > listener)
 {
@@ -91,15 +91,10 @@ void Logger::removeListener(weak< ILogListener > listener)
             return;
         }
     }
-    motor_warning("unable to remove listener");
+    motor_warning(Log::system(), "unable to remove listener: listener not found in list");
 }
 
-bool Logger::log(LogLevel level, const char* filename, int line, const char* msg) const
-{
-    return doLog(level, m_name, filename, line, msg);
-}
-
-bool Logger::doLog(LogLevel level, istring logName, const char* filename, int line,
+bool Logger::doLog(LogLevel level, const inamespace& logName, const char* filename, int line,
                    const char* msg) const
 {
     ScopedCriticalSection _(m_cs);
@@ -117,5 +112,27 @@ bool Logger::doLog(LogLevel level, istring logName, const char* filename, int li
 
     return result;
 }
+
+namespace Log {
+
+weak< Logger > motor()
+{
+    static weak< Logger > logger = Logger::root()->getChild("motor");
+    return logger;
+}
+
+weak< Logger > system()
+{
+    static weak< Logger > logger = motor()->getChild("system");
+    return logger;
+}
+
+weak< Logger > thread()
+{
+    static weak< Logger > logger = system()->getChild("thread");
+    return logger;
+}
+
+}  // namespace Log
 
 }  // namespace Motor

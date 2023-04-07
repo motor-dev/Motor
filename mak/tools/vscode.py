@@ -192,7 +192,7 @@ class vscode(Build.BuildContext):
                                         'output': task.outputs[0].path_from(self.path)
                                     }
                                 )
-                            elif task.__class__.__name__ in ('cpuc'):
+                            elif task.__class__.__name__ in ('cxx', 'objcxx'):
                                 commands.append(
                                     {
                                         'directory': self.path.abspath(),
@@ -434,6 +434,7 @@ class vscode(Build.BuildContext):
 
 
 def create_vscode_kernels(task_gen, kernel_name, kernel_source, kernel_node, kernel_type):
+    return
     if 'vscode' in task_gen.env.PROJECTS:
         for kernel, kernel_source, kernel_path, kernel_ast in task_gen.kernels:
             kernel_type = 'parse'

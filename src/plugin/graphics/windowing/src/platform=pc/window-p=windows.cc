@@ -91,7 +91,7 @@ knl::uint2 Window::getDimensions() const
 
 void* Window::getWindowHandle() const
 {
-    motor_assert_recover(m_window, "no window implementation is created", return 0);
+    if(motor_assert(m_window, "no window implementation is created")) return 0;
     return (void*)&m_window->m_window;
 }
 

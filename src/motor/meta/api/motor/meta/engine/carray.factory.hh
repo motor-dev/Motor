@@ -18,8 +18,8 @@ struct ClassID< T[Count] >
     MOTOR_EXPORT static raw< const Meta::Class > klass();
     MOTOR_EXPORT static istring                  name()
     {
-        static const istring s_name(minitl::format< 2048u >("%s[%d]") | TypeID< T >::name()
-                                    | Count);
+        static const istring s_name(
+            minitl::format< 2048u >(FMT("{0}[{1}]"), TypeID< T >::name(), Count));
         return s_name;
     }
 };
@@ -30,8 +30,8 @@ struct ClassID< const T[Count] >
     MOTOR_EXPORT static raw< const Meta::Class > klass();
     MOTOR_EXPORT static istring                  name()
     {
-        static const istring s_name(minitl::format< 2048u >("%s[%d]") | TypeID< T >::name()
-                                    | Count);
+        static const istring s_name(
+            minitl::format< 2048u >(FMT("{0}[{1}]"), TypeID< T >::name(), Count));
         return s_name;
     }
 };

@@ -14,7 +14,19 @@
 #endif
 
 #ifndef MOTOR_COMPUTE
-namespace Motor { namespace Arena {
+namespace Motor {
+
+namespace Arena {
+
 motor_api(FILESYSTEM) minitl::Allocator& filesystem();
-}}  // namespace Motor::Arena
+
+}
+
+namespace Log {
+
+motor_api(FILESYSTEM) weak< Logger > fs();
+
+}
+
+}  // namespace Motor
 #endif

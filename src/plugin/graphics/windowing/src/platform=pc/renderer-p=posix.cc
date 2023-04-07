@@ -28,7 +28,7 @@ static GLXFBConfig selectGLXFbConfig(::Display* display, int screen)
 
     int          configCount;
     GLXFBConfig* configs = glXChooseFBConfig(display, screen, s_glxAttributes, &configCount);
-    motor_info("found %d configs" | configCount);
+    motor_info_format(Log::windowing(), "found {0} configs", configCount);
     GLXFBConfig fbConfig = configs[0];
     XFree(configs);
     return fbConfig;
@@ -88,17 +88,18 @@ static const char* s_messages[]
 
 int Renderer::PlatformRenderer::xError(::Display* /*display*/, XErrorEvent* event)
 {
-    const u32               size      = sizeof(s_messages) / sizeof(s_messages[0]);
-    minitl::format< 1024u > errorCode = minitl::format< 1024u >("%d") | event->error_code;
-    const char*             message
+    const u32                      size = sizeof(s_messages) / sizeof(s_messages[0]);
+    minitl::format_buffer< 1024u > errorCode
+        = minitl::format< 1024u >(FMT("{0}"), event->error_code);
+    const char* message
         = event->error_code < size ? s_messages[event->error_code] : errorCode.c_str();
-    motor_error("X11 error: %d (%s)" | event->error_code | message);
+    motor_error_format(Log::windowing(), "X11 error: {0} ({1})", event->error_code, message);
     return 0;
 }
 
 int Renderer::PlatformRenderer::ioError(::Display* /*display*/)
 {
-    motor_fatal("X11 IO error");
+    motor_fatal(Log::windowing(), "X11 IO error");
     return 0;
 }
 
@@ -159,17 +160,17 @@ void Renderer::flush()
         XNextEvent(display, &event);
         switch(event.type)
         {
-        case DestroyNotify: motor_info("destroy"); break;
+        case DestroyNotify: motor_info(Log::windowing(), "destroy"); break;
         case Expose:
             if(event.xexpose.count != 0) break;
-            motor_info("exposure");
+            motor_info(Log::windowing(), "exposure");
             break;
-        case ConfigureNotify: motor_info("configure"); break;
+        case ConfigureNotify: motor_info(Log::windowing(), "configure"); break;
         case ButtonPress: break;
         case KeyPress:
             if(XLookupKeysym(&event.xkey, 0) == XK_Escape)
             {
-                motor_info("Close request on window");
+                motor_info(Log::windowing(), "Close request on window");
                 XUnmapWindow(m_platformRenderer->m_platformData.display, event.xclient.window);
 
                 XEvent   ev;
@@ -183,7 +184,7 @@ void Renderer::flush()
                                                       SubstructureRedirectMask | SubstructureNotifyMask, &ev);
                 if(!result)
                 {
-                    motor_error("XSendEvent return error %d" | result);
+                    motor_error_format(Log::windowing(), "XSendEvent return error {0}", result);
                 }
             }
             break;
@@ -192,7 +193,7 @@ void Renderer::flush()
             {
                 if(event.xclient.data.l[0] == m_platformRenderer->m_platformData.wm_delete_window)
                 {
-                    motor_info("Close request on window");
+                    motor_info(Log::windowing(), "Close request on window");
                     XUnmapWindow(m_platformRenderer->m_platformData.display, event.xclient.window);
 
                     XEvent   ev;
@@ -206,14 +207,14 @@ void Renderer::flush()
                                                           SubstructureRedirectMask | SubstructureNotifyMask, &ev);
                     if(!result)
                     {
-                        motor_error("XSendEvent return error %d" | result);
+                        motor_error_format(Log::windowing(), "XSendEvent return error {0}", result);
                     }
                 }
             }
             else
             {
                 char* atom_name = ::XGetAtomName(display, event.xclient.message_type);
-                motor_info("Unhandled client message: %s" | atom_name);
+                motor_info_format(Log::windowing(), "Unhandled client message: {0}", atom_name);
                 XFree(atom_name);
             }
             break;

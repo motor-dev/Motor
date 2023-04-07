@@ -95,10 +95,6 @@ struct InterlockedType< 8 >
 };
 #endif
 
-}  // namespace knl
-
-namespace knl {
-
 InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch(const value_t* p)
 {
     return *p;

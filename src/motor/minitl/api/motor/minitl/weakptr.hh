@@ -63,14 +63,6 @@ struct hash< weak< T > >
     }
 };
 
-template < u16 SIZE >
-class format;
-template < typename T, u16 SIZE >
-const format< SIZE >& operator|(const format< SIZE >& format, weak< T > t)
-{
-    return format | t.operator->();
-}
-
 }  // namespace minitl
 
 #include <motor/minitl/inl/weakptr.inl>

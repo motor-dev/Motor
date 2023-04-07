@@ -22,8 +22,8 @@ ipath Environment::canonicalPath(const char* path, const char* pathSeparators)
 
     if(*path)
     {
-        motor_assert_recover(1 + strlen(pathSeparators) <= 4, "too many different path separators",
-                             return result);
+        if(motor_assert(1 + strlen(pathSeparators) <= 4, "too many different path separators"))
+            return result;
         char separators[4] = {0, 0, 0, 0};
         strcpy(separators, pathSeparators);
 

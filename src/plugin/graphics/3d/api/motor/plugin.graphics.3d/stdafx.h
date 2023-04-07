@@ -11,3 +11,10 @@
 #else
 #    define MOTOR_API_3D
 #endif
+
+namespace Motor { namespace Log {
+
+motor_api(3D) weak< Logger > graphics();
+motor_api(3D) weak< Logger > shader();
+
+}}  // namespace Motor::Log

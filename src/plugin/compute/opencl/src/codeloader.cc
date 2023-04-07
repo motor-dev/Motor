@@ -20,8 +20,8 @@ CodeLoader::~CodeLoader()
 void CodeLoader::load(weak< const Resource::IDescription > kernelDescription,
                       Resource::Resource&                  resource)
 {
-    motor_info("loading OpenCL kernel code %s"
-               | motor_checked_cast< const Code >(kernelDescription)->name());
+    motor_info_format(Log::opencl(), "loading OpenCL kernel code {0}",
+                      motor_checked_cast< const Code >(kernelDescription)->name());
     inamespace name
         = motor_checked_cast< const Code >(kernelDescription)->name() + inamespace("cl");
     resource.setRefHandle(ref< CodeObject >::create(Arena::task(), m_context, name));

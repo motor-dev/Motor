@@ -78,7 +78,8 @@ struct ClassID< Settings::Settings< T > >
     MOTOR_EXPORT static raw< const Meta::Class > klass();
     MOTOR_EXPORT static istring                  name()
     {
-        static const istring s_name(minitl::format< 2048u >("Settings<%s>") | TypeID< T >::name());
+        static const istring s_name(
+            minitl::format< 2048u >(FMT("Settings<{0}>"), TypeID< T >::name()));
         return s_name;
     }
 };
@@ -103,7 +104,7 @@ Settings_RTTIHelper< T >::trampoline_method_get_overload_0(raw< const Meta::Meth
                                                            Meta::Value* params, u32 paramCount)
 {
     motor_forceuse(method);
-    motor_assert(paramCount == 0, "expected no parameter; received %d" | paramCount);
+    motor_assert_format(paramCount == 0, "expected no parameter; received {0}", paramCount);
     motor_forceuse(params);
     return Meta::Value(Meta::Value::ByRef(Settings< T >::get()));
 }

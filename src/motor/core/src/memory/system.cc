@@ -94,7 +94,10 @@ void SystemAllocator::grow(u32 extraCapacity)
     }
     else
     {
-        motor_assert(pageSize % blockSize() == 0, "Page size should be a multiple of block size");
+        motor_assert_format(
+            pageSize % blockSize() == 0,
+            "Page size should be a multiple of block size; pageSize={0}, blockSize={1}", pageSize,
+            blockSize());
         u32 blocksPerPage = pageSize / blockSize();
         u32 pageCount     = extraCapacity / blocksPerPage;
         for(u32 i = 0; i < pageCount; ++i)

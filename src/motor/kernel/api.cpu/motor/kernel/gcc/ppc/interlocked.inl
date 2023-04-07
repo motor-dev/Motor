@@ -82,10 +82,6 @@ struct InterlockedType< 8 >
 };
 #endif
 
-}  // namespace knl
-
-namespace knl {
-
 InterlockedType< 4 >::tagged_t::tagged_t(value_t value) : m_value(value)
 {
 }

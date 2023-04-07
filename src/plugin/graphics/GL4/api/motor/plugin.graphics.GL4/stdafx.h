@@ -28,3 +28,9 @@
 #    include <GL4/glcorearb.h>
 #    include <GL4/glext.h>
 #endif
+
+namespace Motor { namespace Log {
+
+motor_api(GL4) weak< Logger > gl();
+
+}}  // namespace Motor::Log

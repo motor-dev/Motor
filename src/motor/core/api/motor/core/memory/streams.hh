@@ -10,11 +10,11 @@ class motor_api(CORE) MemoryStream
 {
 private:
     minitl::Allocator::Block< u8 > m_memory;
-    u64                            m_size;
-    u64                            m_capacity;
+    u32                            m_size;
+    u32                            m_capacity;
 
 public:
-    MemoryStream(minitl::Allocator & allocator, u64 size = 0);
+    MemoryStream(minitl::Allocator & allocator, u32 size = 0);
     ~MemoryStream();
 
     void* memory()
@@ -25,17 +25,17 @@ public:
     {
         return m_memory;
     }
-    u64 size() const
+    u32 size() const
     {
         return m_size;
     }
-    u64 capacity() const
+    u32 capacity() const
     {
         return m_capacity;
     }
-    void resize(u64 size);
-    void write(const void* buffer, u64 size);
-    void erase(u64 count);
+    void resize(u32 size);
+    void write(const void* buffer, u32 size);
+    void erase(u32 count);
 };
 
 }  // namespace Motor

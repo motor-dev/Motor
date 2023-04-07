@@ -45,7 +45,7 @@ LUA_SOURCES = [
 def deploy_lua_package(task_gen):
     if task_gen.env.PROJECTS:
         return
-    path = task_gen.source_nodes[0]
+    path = task_gen.source_nodes[0][1]
     lua_dest = 'lua-5.3.5-%s-multiarch-%s' % (task_gen.env.VALID_PLATFORMS[0], task_gen.env.COMPILER_ABI)
     src = path.make_node('src')
 

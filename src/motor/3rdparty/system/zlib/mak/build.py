@@ -29,7 +29,7 @@ def deploy_zlib_package(task_gen):
     if task_gen.env.PROJECTS:
         return
 
-    path = task_gen.source_nodes[0]
+    path = task_gen.source_nodes[0][1]
     zlib_dest = 'zlib-1.2.11-%s-multiarch-%s' % (task_gen.env.VALID_PLATFORMS[0], task_gen.env.COMPILER_ABI)
 
     def deploy_to(file, subdir):
@@ -62,7 +62,7 @@ def deploy_minizip_package(task_gen):
     if task_gen.env.PROJECTS:
         return
 
-    path = task_gen.source_nodes[0]
+    path = task_gen.source_nodes[0][1]
     minizip_dest = 'minizip-1.2.11-%s-multiarch-%s' % (task_gen.env.VALID_PLATFORMS[0], task_gen.env.COMPILER_ABI)
 
     def deploy_to(file, subdir):

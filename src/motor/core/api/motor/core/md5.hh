@@ -30,28 +30,39 @@ static inline MD5 digest(const minitl::Allocator::Block< T >& block)
 
 namespace minitl {
 
-static inline char hex(unsigned char value)
+template <>
+struct formatter< Motor::MD5 > : public format_details::default_partial_formatter< Motor::MD5 >
 {
-    return value >= 10 ? value - 10 + 'a' : value + '0';
-}
-
-template < u16 SIZE >
-static inline const format< SIZE >& operator|(const format< SIZE >& f, const Motor::MD5& value)
-{
-    char str[33];
-    for(int i = 0; i < 4; ++i)
+    static constexpr format_options DefaultOptions
+        = {0, 0, ' ', '<', ' ', 's', false, false, false};
+    static constexpr bool validate_options(const format_options& options)
     {
-        str[i * 8 + 0] = hex((unsigned char)(0xf & (value.hash[i] >> 4)));
-        str[i * 8 + 1] = hex((unsigned char)(0xf & (value.hash[i] >> 0)));
-        str[i * 8 + 2] = hex((unsigned char)(0xf & (value.hash[i] >> 12)));
-        str[i * 8 + 3] = hex((unsigned char)(0xf & (value.hash[i] >> 8)));
-        str[i * 8 + 4] = hex((unsigned char)(0xf & (value.hash[i] >> 20)));
-        str[i * 8 + 5] = hex((unsigned char)(0xf & (value.hash[i] >> 16)));
-        str[i * 8 + 6] = hex((unsigned char)(0xf & (value.hash[i] >> 28)));
-        str[i * 8 + 7] = hex((unsigned char)(0xf & (value.hash[i] >> 24)));
+        if(options.format != 's')
+            return format_details::invalid_format(
+                "MD5 formatter does not support specified format specifier");
+        return true;
     }
-    str[32] = 0;
-    return f | str;
-}
+    static constexpr u32 length(const Motor::MD5& value, const format_options& options)
+    {
+        motor_forceuse(value);
+        motor_forceuse(options);
+        return 32;
+    }
+    static u32 format_to(char* destination, const Motor::MD5& value, const format_options& options,
+                         u32 reservedLength)
+    {
+        motor_forceuse(options);
+        motor_forceuse(reservedLength);
+        u32 writtenLength
+            = format_details::format_hexadecimal(destination, value.hash[0], ' ', 0, 'A');
+        writtenLength
+            += format_details::format_hexadecimal(destination, value.hash[1], ' ', 0, 'A');
+        writtenLength
+            += format_details::format_hexadecimal(destination, value.hash[2], ' ', 0, 'A');
+        writtenLength
+            += format_details::format_hexadecimal(destination, value.hash[3], ' ', 0, 'A');
+        return writtenLength;
+    }
+};
 
 }  // namespace minitl
