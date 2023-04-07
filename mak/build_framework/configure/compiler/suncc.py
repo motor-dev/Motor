@@ -17,80 +17,34 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
         '__x86_64__': 'amd64',
     }
     TOOLS = 'suncc suncxx'
+    ARCH_FLAGS = {
+        'x86':
+            [
+                '-xarch=sse4_2', '-D__MMX__=1', '-DSSE__=1', '-DSSE2__=1', '-D__SSE3__=1', '-D__SSSE3__=1',
+                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1'
+            ],
+        'amd64':
+            [
+                '-xarch=sse4_2', '-D__MMX__=1', '-DSSE__=1', '-DSSE2__=1', '-D__SSE3__=1', '-D__SSSE3__=1',
+                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1'
+            ],
+    }
     VECTORIZED_FLAGS = {
         'x86':
             (
-                (
-                    '.sse3', [
-                        '-xarch=sse3', '-xarch=ssse3', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1',
-                        '-D__SSSE3__=1'
-                    ]
-                ),
-                (
-                    '.sse4', [
-                        '-xarch=sse4_1', '-xarch=sse4_2', '-D__MMX__=1', '-DSSE__=1', '-DSSE2__=1', '-D__SSE3__=1',
-                        '-D__SSSE3__=1', '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1'
-                    ]
-                ),
-                (
-                    '.avx', [
-                        '-xarch=avx', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1', '-D__SSSE3__=1',
-                        '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1', '-D___AVX__=1', '-D__XSAVE__=1'
-                    ]
-                ),
-                (
-                    '.avx2', [
-                        '-xarch=avx2',
-                        '-D__MMX__=1',
-                        '-D__SSE__=1',
-                        '-D__SSE2__=1',
-                        '-D__SSE3__=1',
-                        '-D__SSSE3__=1',
-                        '-D__SSE4_1__=1',
-                        '-D__SSE4_2__=1',
-                        '-D__POPCNT__=1',
-                        '-D__AVX__=1',
-                        '-D__XSAVE__=1',
-                        '-D__AVX2__=1',
-                    ]
-                ),
+                ('.avx', ['-xarch=sse4_2', '-xarch=avx', '-D__AVX__=1', '-D__XSAVE__=1']),
+                ('.avx2', ['-xarch=sse4_2', '-xarch=avx2', '-D__AVX__=1', '-D__XSAVE__=1', '-D__AVX2__=1']),
             ),
         'amd64':
             (
                 (
-                    '.sse3', [
-                        '-xarch=sse3', '-xarch=ssse3', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1',
-                        '-D__SSSE3__=1'
+                    '', [
+                        '-xarch=sse4_2', '-D__MMX__=1', '-DSSE__=1', '-DSSE2__=1', '-D__SSE3__=1', '-D__SSSE3__=1',
+                        '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1'
                     ]
                 ),
-                (
-                    '.sse4', [
-                        '-xarch=sse4_1', '-xarch=sse4_2', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1',
-                        '-D__SSSE3__=1', '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1'
-                    ]
-                ),
-                (
-                    '.avx', [
-                        '-xarch=avx', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1', '-D__SSSE3__=1',
-                        '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1', '-D___AVX__=1', '-D__XSAVE__=1'
-                    ]
-                ),
-                (
-                    '.avx2', [
-                        '-xarch=avx2',
-                        '-D__MMX__=1',
-                        '-D__SSE__=1',
-                        '-D__SSE2__=1',
-                        '-D__SSE3__=1',
-                        '-D__SSSE3__=1',
-                        '-D__SSE4_1__=1',
-                        '-D__SSE4_2__=1',
-                        '-D__POPCNT__=1',
-                        '-D__AVX__=1',
-                        '-D__XSAVE__=1',
-                        '-D__AVX2__=1',
-                    ]
-                ),
+                ('.avx', ['-xarch=sse4_2', '-xarch=avx', '-D__AVX__=1', '-D__XSAVE__=1']),
+                ('.avx2', ['-xarch=sse4_2', '-xarch=avx2', '-D__AVX__=1', '-D__XSAVE__=1', '-D__AVX2__=1']),
             ),
     }
 

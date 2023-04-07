@@ -14,15 +14,7 @@ if sys.platform == 'win32':
     HOME_DIRECTORY = os.path.join(os.getenv('APPDATA'), 'QtProject', 'qtcreator')
 else:
     HOME_DIRECTORY = os.path.join(os.path.expanduser('~'), '.config', 'QtProject', 'qtcreator')
-try:
-    import hashlib
-    createMd5 = hashlib.md5
-except:
-    import md5
-    createMd5 = md5.new
-
-if sys.hexversion >= 0x3000000:
-    unicode = str
+import hashlib
 
 VAR_PATTERN = '${%s}' if sys.platform != 'win32' else '%%%s%%'
 
@@ -77,7 +69,7 @@ def generateGUID(name):
     based on the MD5 signatures of the sln filename plus the name of
     the project.  It basically just needs to be unique, and not
     change with each invocation."""
-    d = _hexdigest(createMd5(str(name).encode()).digest()).upper()
+    d = _hexdigest(hashlib.md5(str(name).encode()).digest()).upper()
     # convert most of the signature to GUID form (discard the rest)
     d = "{" + d[:8] + "-" + d[8:12] + "-" + d[12:16] + "-" + d[16:20] + "-" + d[20:32] + "}"
     return d
@@ -97,6 +89,7 @@ def path_from(path, base_node):
 
 
 def write_value(node, value, key=''):
+
     def convert_value(v):
         if isinstance(v, bool):
             return 'bool', v and 'true' or 'false'
@@ -106,7 +99,7 @@ def write_value(node, value, key=''):
             return 'int', str(v)
         elif isinstance(v, bytearray):
             return 'QByteArray', str(v.decode('utf-8'))
-        elif isinstance(v, unicode) or isinstance(v, str):
+        elif isinstance(v, str):
             return 'QString', str(v)
         elif isinstance(v, tuple):
             return 'QVariantList', ''
@@ -180,6 +173,7 @@ def read_value(node):
 
 
 class QtObject:
+
     def load_from_node(self, xml_node):
         assert (xml_node.nodeName == 'valuemap')
         for node in xml_node.childNodes:
@@ -410,6 +404,7 @@ class QtDebugger(QtObject):
 
 
 class QtDevice(QtObject):
+
     def __init__(self):
         pass
 
@@ -753,6 +748,7 @@ class QtCreator(Build.BuildContext):
                     XmlNode(data, 'value', '1', [('type', 'int')])
 
     def gather_includes_defines(self, task_gen):
+
         def gather_includes_defines_recursive(task_gen):
             try:
                 return task_gen.bug_qtcreator_cache

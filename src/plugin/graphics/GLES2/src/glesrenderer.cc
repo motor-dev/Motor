@@ -43,7 +43,7 @@ GLESRenderer::create(weak< const ShaderProgramDescription > /*shaderDescription*
 
 knl::uint2 GLESRenderer::getScreenSize() const
 {
-    return knl::make_uint2(320, 200);
+    return knl::uint2 {320, 200};
 }
 
 }}  // namespace Motor::OpenGLES

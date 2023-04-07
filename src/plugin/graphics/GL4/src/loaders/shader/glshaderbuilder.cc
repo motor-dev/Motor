@@ -146,18 +146,18 @@ void GLShaderBuilder::doWrite(float value)
 
 void GLShaderBuilder::doWrite(knl::float2 value)
 {
-    write(minitl::format< 1024u >("vec2(%f, %f)") | value[0] | value[1]);
+    write(minitl::format< 1024u >("vec2(%f, %f)") | value._0 | value._1);
 }
 
 void GLShaderBuilder::doWrite(knl::float3 value)
 {
-    write(minitl::format< 1024u >("vec3(%f, %f, %f)") | value[0] | value[1] | value[2]);
+    write(minitl::format< 1024u >("vec3(%f, %f, %f)") | value._0 | value._1 | value._2);
 }
 
 void GLShaderBuilder::doWrite(knl::float4 value)
 {
-    write(minitl::format< 1024u >("vec4(%f, %f, %f, %f)") | value[0] | value[1] | value[2]
-          | value[3]);
+    write(minitl::format< 1024u >("vec4(%f, %f, %f, %f)") | value._0 | value._1 | value._2
+          | value._3);
 }
 
 void GLShaderBuilder::doWrite(int value)
@@ -167,17 +167,17 @@ void GLShaderBuilder::doWrite(int value)
 
 void GLShaderBuilder::doWrite(knl::int2 value)
 {
-    write(minitl::format< 1024u >("ivec2(%d, %d)") | value[0] | value[1]);
+    write(minitl::format< 1024u >("ivec2(%d, %d)") | value._0 | value._1);
 }
 
 void GLShaderBuilder::doWrite(knl::int3 value)
 {
-    write(minitl::format< 1024u >("ivec3(%d, %d)") | value[0] | value[1] | value[2]);
+    write(minitl::format< 1024u >("ivec3(%d, %d)") | value._0 | value._1 | value._2);
 }
 
 void GLShaderBuilder::doWrite(knl::int4 value)
 {
-    write(minitl::format< 1024u >("ivec4(%d, %d)") | value[0] | value[1] | value[2] | value[3]);
+    write(minitl::format< 1024u >("ivec4(%d, %d)") | value._0 | value._1 | value._2 | value._3);
 }
 
 void GLShaderBuilder::doWrite(bool value)

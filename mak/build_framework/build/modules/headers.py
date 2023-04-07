@@ -22,7 +22,7 @@ def headers(
     env=None
 ):
     if env is None:
-        bld.preprocess(name, path, root_namespace, 'motor', uselib=uselib)
+        bld.preprocess(name, path, root_namespace, 'motor', depends=depends, uselib=uselib)
         bld.multiarch(
             name, [
                 headers(

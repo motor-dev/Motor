@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #pragma once
 
+#include <stdafx.h>
 #include <motor/resource/description.hh>
 
 namespace Motor { namespace Gtk3 {

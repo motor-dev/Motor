@@ -8,7 +8,7 @@
 
 namespace Motor { namespace Meta { namespace AST {
 
-Float::Float(double value) : Node(), m_value(value)
+Float::Float(float value) : Node(), m_value(value)
 {
     motor_forceuse(m_value);
 }

@@ -7,29 +7,19 @@ import shlex
 class GnuCompiler(Configure.ConfigurationContext.Compiler):
     ALL_ARM_ARCHS = ('armv7a', 'armv7k', 'armv7s')
     ARCH_FLAGS = {
+        'x86': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2'],
+        'amd64': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2'],
         'arm': ['-march=armv7-a'],
     }
     VECTORIZED_FLAGS = {
-        'x86':
-            (
-                ('.sse3', ['-msse3', '-mssse3']),
-                ('.sse4', [
-                    '-msse4.1',
-                    '-msse4.2',
-                ]),
-                ('.avx', ['-mavx']),
-                ('.avx2', ['-mavx2']),
-            ),
-        'amd64':
-            (
-                ('.sse3', ['-msse3', '-mssse3']),
-                ('.sse4', [
-                    '-msse4.1',
-                    '-msse4.2',
-                ]),
-                ('.avx', ['-mavx']),
-                ('.avx2', ['-mavx2']),
-            ),
+        'x86': (
+            ('.avx', ['-mavx']),
+            ('.avx2', ['-mavx2']),
+        ),
+        'amd64': (
+            ('.avx', ['-mavx']),
+            ('.avx2', ['-mavx2']),
+        ),
         'ppc': (('.altivec', ['-maltivec']), ),
         'ppc64': (('.altivec', ['-maltivec']), ),
         'armv6': (('.neon', ['-mfpu=neon']), ),
@@ -390,13 +380,13 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         if result != 0:
             print('could not retrieve system includes: %s' % err)
         else:
-            out = out.split('\n')
+            out = err.split('\n') + out.split('\n')
             while out:
                 line = out.pop(0)
                 if line.startswith('#include <...>'):
                     while out:
                         path = out.pop(0).strip()
-                        if path[0] != ' ':
+                        if not os.path.isdir(path):
                             break
                         env.append_unique('SYSTEM_INCLUDES', [os.path.normpath(path)])
                 elif line.startswith('#define'):

@@ -77,7 +77,7 @@ void* Window::getWindowHandle() const
 
 knl::uint2 Window::getDimensions() const
 {
-    return knl::make_uint2(1920, 1200);
+    return knl::uint2 {1920, 1200};
 }
 
 }}  // namespace Motor::Windowing

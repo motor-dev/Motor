@@ -113,9 +113,9 @@ int Renderer::PlatformRenderer::ioError(::Display* /*display*/)
     attributes.event_mask  = ExposureMask | KeyPressMask | ButtonPressMask | StructureNotifyMask;
     int      attributeMask = CWBorderPixel | CWEventMask | CWOverrideRedirect | CWColormap;
     ::Window result        = XCreateWindow(
-               m_platformData.display, XRootWindow(m_platformData.display, m_platformData.visual->screen),
-               x, y, w, h, 1, m_platformData.visual->depth, InputOutput, m_platformData.visual->visual,
-               attributeMask, &attributes);
+        m_platformData.display, XRootWindow(m_platformData.display, m_platformData.visual->screen),
+        x, y, w, h, 1, m_platformData.visual->depth, InputOutput, m_platformData.visual->visual,
+        attributeMask, &attributes);
     if(result)
     {
         XMapRaised(m_platformData.display, result);
@@ -145,7 +145,7 @@ knl::uint2 Renderer::getScreenSize() const
 {
     Screen* s = XScreenOfDisplay(m_platformRenderer->m_platformData.display,
                                  XDefaultScreen(m_platformRenderer->m_platformData.display));
-    return knl::make_uint2(XWidthOfScreen(s), XHeightOfScreen(s));
+    return knl::uint2 {(u32)XWidthOfScreen(s), (u32)XHeightOfScreen(s)};
 }
 
 void Renderer::flush()

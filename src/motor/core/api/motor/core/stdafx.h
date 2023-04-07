@@ -84,4 +84,5 @@ using minitl::raw;
 using minitl::ref;
 using minitl::scoped;
 using minitl::weak;
+
 #endif

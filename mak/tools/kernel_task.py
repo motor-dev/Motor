@@ -2,11 +2,8 @@
 # encoding: utf-8
 
 from waflib import Task
-from waflib.TaskGen import extension
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+from waflib.TaskGen import task_gen
+import os
 
 TEMPLATE_CLASS_H = """
 %(Namespace)s
@@ -25,7 +22,7 @@ private:
         weak< const ::Motor::KernelScheduler::ProducerLoader > loader
     ) const override;
 
-published:
+public:
     %(argument_outs)s
     %(KernelName)sKernel(%(argument_params)s);
     ~%(KernelName)sKernel();
@@ -41,7 +38,6 @@ TEMPLATE_H = """
 #ifndef MOTOR_%(PLUGIN)s_%(NAME)s_META_HH_
 #define MOTOR_%(PLUGIN)s_%(NAME)s_META_HH_
 /**************************************************************************************************/
-%(pch)s
 #include    <motor/scheduler/kernel/kernel.meta.hh>
 #include    <motor/scheduler/task/itask.hh>
 #include    <motor/scheduler/kernel/product.hh>
@@ -106,7 +102,6 @@ ref< ::Motor::KernelScheduler::Producer::Runtime > %(KernelName)sKernel::createR
 """
 
 TEMPLATE_CC = """
-%(pch)s
 #include "%(header)s"
 
 
@@ -143,10 +138,7 @@ class kernel_task(Task.Task):
         return ([], [])
 
     def run(self):
-        with open(self.inputs[0].abspath(), 'rb') as input_file:
-            kernel_name, includes, source, kernel_methods = pickle.load(input_file)
-
-        kernel_namespace = ['Kernels'] + kernel_name.split('.')
+        kernel_namespace = ['Kernels'] + self.kernel_name
         kernel_name = kernel_namespace[-1]
         kernel_full_name = kernel_namespace[1:]
 
@@ -158,16 +150,15 @@ class kernel_task(Task.Task):
             'Name': kernel_name.capitalize(),
             'NAME': kernel_name.upper(),
             'kernel_full_name': '.'.join(kernel_full_name),
-            'pch': '#include <%s>\n' % self.generator.pchstop if self.generator.pchstop else '',
             'PLUGIN': self.generator.env.PLUGIN.upper(),
             'module': self.generator.env.PLUGIN,
             'plugin': self.generator.env.PLUGIN.replace('_', '.'),
-            'includes': '\n'.join(includes[0]),
-            'usings': '\n'.join(['using namespace %s;' % u for u in includes[1]]),
+            'includes': '\n'.join(self.kernel_includes),
+            'usings': '\n'.join(['using namespace %s;' % u for u in self.kernel_uses]),
         }
         tasks_cc = []
         tasks_h = []
-        for method, namespace, args in kernel_methods:
+        for method, namespace, args in self.kernel_functions:
             argument_assign = '\n    ,   '.join(
                 tuple('m_%s(%s)' % (arg[0], arg[0]) for arg in args) + tuple(
                     '%s(ref< const Motor::KernelScheduler::Product< Motor::KernelScheduler::ParamTypeToKernelType< %s >::Type > >::create(Motor::Arena::task(), this))'
@@ -250,12 +241,19 @@ class kernel_task(Task.Task):
             out.write(TEMPLATE_H % params)
 
 
-@extension('.ast')
-def kernel_generate(task_gen, ast_node):
-    outs = [ast_node.change_ext('task.cc'), ast_node.change_ext('task.meta.hh')]
-    task = task_gen.create_task('kernel_task', [ast_node], outs)
-    try:
-        task_gen.out_sources.append(outs[0])
-    except AttributeError:
-        task_gen.out_sources = [outs[0]]
+def make_kernel_task(task_gen, kernel_name, kernel_node, kernel_type, includes, uses, kernel_functions):
+    out_cc = task_gen.make_bld_node('src/kernels/', None, '%s-task.cc' % os.path.join(*kernel_name))
+    outs = [out_cc, out_cc.change_ext('.meta.hh')]
+    task_gen.create_task(
+        'kernel_task', [kernel_node],
+        outs,
+        kernel_name=kernel_name,
+        kernel_includes=includes,
+        kernel_uses=uses,
+        kernel_functions=kernel_functions
+    )
     task_gen.source.append(outs[1])
+
+
+def build(build_context):
+    pass

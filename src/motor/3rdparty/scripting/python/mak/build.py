@@ -13,7 +13,7 @@ def python_module(bld, name, depends, path, conditions, uselib=[]):
         if result is not None:
             result.env.cxxshlib_PATTERN = result.env.pymodule_PATTERN
 
-    bld.preprocess(name, path, 'Motor', name, uselib=uselib)
+    bld.preprocess(name, path, 'Motor', name, depends=depends, uselib=uselib)
     multiarch_module = bld.multiarch(name, [python_lib(env) for env in bld.multiarch_envs])
     if multiarch_module is not None:
         multiarch_module.env.cxxshlib_PATTERN = module.env.pymodule_PATTERN

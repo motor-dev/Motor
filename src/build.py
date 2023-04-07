@@ -147,7 +147,7 @@ def build_plugins(bld):
     #    ['motor.3rdparty.graphics.OpenGL', 'motor.3rdparty.compute.OpenCL'],
     #    features=['OpenGL', 'OpenCL', 'GUI']
     #)
-    bld.plugin('plugin.compute.cuda', ['motor'], ['motor.3rdparty.compute.CUDA'], conditions=['cuda'], uselib=['cxx14'])
+    bld.plugin('plugin.compute.cuda', ['motor'], ['motor.3rdparty.compute.CUDA'], conditions=['CUDA'], uselib=['cxx14'])
 
     bld.plugin(
         'plugin.graphics.nullrender', [

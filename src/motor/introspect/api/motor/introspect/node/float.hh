@@ -10,7 +10,7 @@ namespace Motor { namespace Meta { namespace AST {
 class motor_api(INTROSPECT) Float : public Node
 {
 private:
-    const double m_value;
+    const float m_value;
 
 protected:
     virtual ConversionCost distance(const Type& type) const override;
@@ -18,7 +18,7 @@ protected:
     virtual void           doVisit(Node::Visitor & visitor) const override;
 
 public:
-    Float(double value);
+    Float(float value);
     ~Float();
 };
 

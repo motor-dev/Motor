@@ -1,35 +1,45 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from waflib import Task, Errors
+from waflib import Task
 from waflib.TaskGen import extension, feature, before_method, after_method
-import os
 import sys
-try:
-    import cPickle
-except ImportError:
-    import pickle as cPickle
+import pickle
 
 
-def scan(self):
-    return ([], [])
+class metagen(Task.Task):
+    color = 'BLUE'
+    ext_in = ['.h', '.hh', '.hxx']
+    ext_out = ['.cc']
 
+    def run(self):
+        return self.exec_command(
+            [
+                sys.executable,
+                self.metagen.abspath(),
+                '-x',
+                'c++',
+                '--std',
+                'c++14',
+                '-D',
+                self.macros.abspath(),
+                '--module',
+                self.generator.env.PLUGIN,
+                '--root',
+                self.generator.root_namespace,
+                '--tmp',
+                self.generator.bld.bldnode.parent.abspath(),
+                self.inputs[0].path_from(self.generator.bld.bldnode),
+                self.inputs[0].path_from(self.generator.bld.srcnode),
+                self.outputs[0].path_from(self.generator.bld.bldnode),
+                self.outputs[1].path_from(self.generator.bld.bldnode),
+                self.outputs[2].path_from(self.generator.bld.bldnode),
+            ]
+        )
 
-metagen = """
-%s ${METAGEN}
--D ${MACROS_DEF}
--t ${TMPDIR}
---module ${PLUGIN}
---root ${ROOT_ALIAS}
--x c++
---std c++14
-${SRC[0].abspath()}
-${TGT[0].abspath()}
-${TGT[1].abspath()}
-${TGT[2].abspath()}
-""" % sys.executable.replace('\\', '/')
-cls = Task.task_factory('metagen', metagen, [], 'BLUE', ext_in='.h .hh .hxx', ext_out='.cc')
-cls.scan = scan
+    def scan(self):
+        return ([], [])
+
 
 namespace_register = 'MOTOR_REGISTER_NAMESPACE_%d_NAMED(%s, %s)\n'
 namespace_alias = 'MOTOR_REGISTER_ROOT_NAMESPACE(%s, %s, %s)\n'
@@ -57,11 +67,12 @@ class nsdef(Task.Task):
             namespace_file.write('#include <motor/meta/engine/namespace.hh>\n')
             for input in self.inputs:
                 with open(input.abspath(), 'rb') as in_file:
+                    plugin, root_namespace = pickle.load(in_file)
+                    root_namespace = root_namespace.split('::')
                     while True:
                         try:
-                            plugin, root_namespace, namespace = cPickle.load(in_file)
+                            namespace = pickle.load(in_file)
                             if (plugin, '.'.join(namespace)) not in seen:
-                                root_namespace = root_namespace.split('::')
                                 seen.add((plugin, '.'.join(namespace)))
                                 if namespace == root_namespace:
                                     line = namespace_alias % (
@@ -85,27 +96,21 @@ def datagen(self, node):
     outs.append(out_node.change_ext('.doc'))
     outs.append(out_node.change_ext('.namespaces'))
 
-    tsk = self.create_task('metagen', node, outs)
-    tsk.env.METAGEN = self.bld.motornode.find_node('mak/tools/bin/metagen.py').abspath()
-    tsk.env.MACROS_DEF = self.bld.motornode.find_node('mak/tools/macros_def.json').abspath()
-    tsk.env.TMPDIR = self.bld.bldnode.parent.parent.abspath()
-    tsk.env.PCH_HEADER = ['--pch']
-    tsk.env.PCH = self.pchstop and [self.pchstop] or []
-    tsk.env.ROOT_ALIAS = self.root_namespace
-    tsk.dep_nodes = [self.bld.motornode.find_node('mak/tools/bin/metagen.py')]
-    tsk.dep_nodes = [self.bld.motornode.find_node('mak/tools/macros_def.json')]
-    tsk.dep_nodes += self.bld.motornode.find_node('mak/libs/pyxx').ant_glob('**/*.py')
-    tsk.dep_nodes += self.bld.motornode.find_node('mak/libs/glrp').ant_glob('**/*.py')
+    tsk = self.create_task(
+        'metagen',
+        node,
+        outs,
+        metagen=self.bld.motornode.find_node('mak/tools/bin/metagen.py'),
+        macros=self.bld.motornode.find_node('mak/tools/macros_def.json'),
+    )
+    tsk.dep_nodes = self.bld.pyxx_nodes + [self.bld.motornode.find_node('mak/tools/bin/metagen.py')]
 
-    try:
-        self.out_sources += outs[:2]
-    except:
-        self.out_sources = outs[:2]
-    self.source.append(out_node.change_ext('.doc'))
-    self.out_sources.append(out_node.change_ext('.namespaces'))
+    self.out_sources.append(out_node)
+    self.source.append(outs[1])
+    self.source.append(outs[2])
 
 
-@feature('cxxshlib', 'cshlib', 'cxxprogram', 'cprogram')
+@feature('motor:module')
 @before_method('process_source')
 @after_method('static_dependencies')
 def nsgen(self):
@@ -123,7 +128,7 @@ def nsgen(self):
             pass
         else:
             y.post()
-            if 'cxxobjects' in y.features:
+            if 'motor:module' not in y.features:
                 use += getattr(y, 'use', [])
                 for s in y.source:
                     if s.name.endswith('.namespaces'):
@@ -132,20 +137,18 @@ def nsgen(self):
 
 @extension('.namespaces')
 def add_namespace_file(self, node):
-    if 'cobjects' in self.features:
-        return
-    if 'cxxobjects' in self.features:
+    if 'motor:module' not in self.features:
         return
     try:
         self.namespace_task.set_inputs([node])
     except AttributeError:
         out_node = self.make_bld_node('src', None, 'namespace_definition.cc')
-        self.source.append(out_node)
+        self.out_sources.append(out_node)
         self.namespace_task = self.create_task('nsdef', [node], [out_node])
 
 
 @extension('.doc')
-def docgen(self, node):
+def add_doc(self, node):
     if self.source_nodes[0].is_child_of(self.bld.motornode):
         out_node = self.bld.motornode
     else:
