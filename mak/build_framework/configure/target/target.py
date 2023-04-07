@@ -12,11 +12,15 @@ def configure(configuration_context):
     platforms = platforms.split(',') if platforms else []
     configuration_context.recurse('platform.py')
     for target in os.listdir(configuration_context.path.abspath()):
-        if not platforms or os.path.splitext(target)[0] in platforms:
-            configuration_context.recurse(target)
+        platform_name = os.path.splitext(target)[0]
+        if platform_name not in ('target', 'platform'):
+            configuration_context.env.append_unique('ALL_PLATFORMS', platform_name)
+            if not platforms or os.path.splitext(target)[0] in platforms:
+                configuration_context.recurse(target)
     for extra in configuration_context.motornode.make_node('extra').listdir():
-        if not platforms or extra in platforms:
-            if os.path.isfile(os.path.join(configuration_context.motornode.abspath(), 'extra', extra, 'wscript')):
+        if os.path.isfile(os.path.join(configuration_context.motornode.abspath(), 'extra', extra, 'wscript')):
+            configuration_context.env.append_unique('ALL_PLATFORMS', extra)
+            if not platforms or extra in platforms:
                 configuration_context.recurse(os.path.join(configuration_context.motornode.abspath(), 'extra', extra))
     for p in configuration_context.platforms:
         configuration_list = p.get_available_compilers(configuration_context, configuration_context.compilers)
@@ -24,7 +28,7 @@ def configure(configuration_context):
             pprint('BLUE', ' + configuring for platform %s' % p.NAME)
             for main_toolchain, sub_toolchains, platform in configuration_list:
                 platform.add_toolchain(configuration_context, main_toolchain, sub_toolchains)
-    configuration_context.env.store('.waf_toolchains.py')
+    configuration_context.env.store('./.waf_toolchains.py')
 
 
 if TYPE_CHECKING:

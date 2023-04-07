@@ -72,29 +72,4 @@ struct ComponentDouble
     double value;
 };
 
-struct ComponentDouble2
-{
-    knl::double2 value;
-};
-
-struct ComponentDouble3
-{
-    knl::double3 value;
-};
-
-struct ComponentDouble4
-{
-    knl::double4 value;
-};
-
-struct ComponentDouble8
-{
-    knl::double8 value;
-};
-
-struct ComponentDouble16
-{
-    knl::double16 value;
-};
-
 }}}}  // namespace Motor::Test::Compute::UnitTests

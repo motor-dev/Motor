@@ -25,7 +25,9 @@ def engine(
     if env is None:
         if getattr(bld, 'launcher', None) != None:
             raise Errors.WafError('Only one engine launcher can be defined')
-        p = bld.preprocess(name, path, root_namespace, 'motor', uselib=uselib)
+        p = bld.preprocess(
+            name, path, root_namespace, 'motor', depends=depends, uselib=uselib, extra_features=['motor:module']
+        )
         bld.launcher = bld.multiarch(
             name, [
                 engine(
@@ -38,7 +40,15 @@ def engine(
         if 'windows' in bld.env.VALID_PLATFORMS:
             if project_name is not None:
                 project_name = project_name + '.console'
-            bld.preprocess(name + '.console', p.source_nodes[0], root_namespace, 'motor', uselib=uselib)
+            bld.preprocess(
+                name + '.console',
+                p.source_nodes[0],
+                root_namespace,
+                'motor',
+                depends=depends,
+                uselib=uselib,
+                extra_features=['motor:module']
+            )
             bld.multiarch(
                 name + '.console', [
                     engine(

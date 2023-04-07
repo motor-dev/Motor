@@ -25,7 +25,7 @@ public:
     void       flush() override;
     knl::uint2 getScreenSize() const override
     {
-        return knl::make_uint2(1920, 1080);
+        return knl::uint2 {1920, 1080};
     }
 
 private:

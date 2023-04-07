@@ -19,7 +19,7 @@ union YYSTYPE
 {
     ParseResult< bool >                                                  bValue;
     ParseResult< i64 >                                                   iValue;
-    ParseResult< double >                                                fValue;
+    ParseResult< float >                                                 fValue;
     ParseResult< char >                                                  cValue;
     ParseResult< char* >                                                 sValue;
     ParseResult< ref< Motor::Meta::AST::Node >* >                        value;

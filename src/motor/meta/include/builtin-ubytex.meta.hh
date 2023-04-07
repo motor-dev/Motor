@@ -7,7 +7,7 @@
 #include <motor/meta/classinfo.meta.hh>
 
 #if 0
-namespace Motor
+namespace knl
 {
 
 motor_tag(Index(Motor::Meta::ClassType_Vector2

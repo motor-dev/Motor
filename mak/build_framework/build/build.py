@@ -45,13 +45,14 @@ def build(bld):
         )
     bld.env = bld.all_envs[bld.motor_variant]
     bld.package_env = bld.all_envs['packages']
-    bld.package_node = bld.bldnode.parent.parent.make_node('packages')
+    bld.package_node = bld.root.make_node(bld.out_dir)
+    bld.package_node = bld.package_node.make_node('packages')
     bld.platforms = []
 
     tool_dir = os.path.join(bld.motornode.abspath(), 'mak', 'tools')
     bld.load('cpp_parser', tooldir=[tool_dir])
-    bld.load('data', tooldir=[tool_dir])
-    bld.load('kernel_ast', tooldir=[tool_dir])
+    bld.load('metagen', tooldir=[tool_dir])
+    bld.load('kernel', tooldir=[tool_dir])
     bld.load('kernel_task', tooldir=[tool_dir])
     bld.load('bin2c', tooldir=[tool_dir])
     bld.load('clir', tooldir=[tool_dir])
@@ -60,7 +61,6 @@ def build(bld):
     bld.env.DYNAMIC = Options.options.dynamic
     if bld.env.STATIC and bld.env.DYNAMIC:
         raise Errors.WafError('Engine requested to be built both as static and dynamic')
-    bld.original_env = bld.env
     bld.common_env = bld.env
 
     bld.recurse('host/host.py')
@@ -196,6 +196,11 @@ def masterfiles_feature(task):
 
 @feature('motor:warnings:off', 'motor:nortc')
 def warning_feature(task):
+    pass
+
+
+@feature('motor:module')
+def module_feature(task):
     pass
 
 
@@ -359,15 +364,6 @@ def process_use(self):
                 self.uselib.append(k)
 
 
-@feature('motor:c', 'motor:cxx')
-@before_method('filter_sources')
-def gather_extra_source(self):
-    preprocess = getattr(self, 'preprocess', None)
-    if preprocess:
-        preprocess.post()
-        self.source += getattr(preprocess, 'out_sources', [])
-
-
 def _make_bld_node(self, node, category, path, name):
     node = node.make_node(category)
     if not path:
@@ -400,11 +396,14 @@ def _make_bld_node(self, node, category, path, name):
         else:
             for source_node in self.source_nodes:
                 if path.is_child_of(source_node):
-                    out_dir = path.path_from(source_node)
+                    for child in source_node.children.values():
+                        if path.is_child_of(child):
+                            out_dir = path.path_from(child)
+                            break
                     break
             else:
                 out_dir = path.path_from(self.path)
-            while out_dir[0] == '.':
+            while out_dir[0] == '.' and len(out_dir) > 2:
                 out_dir = out_dir[out_dir.find(os.path.sep) + 1:]
             node = node.make_node(out_dir)
             node = node.make_node(name)
@@ -438,6 +437,9 @@ def make_bld_node(self, category, path, name):
 @feature('*')
 @before_method('process_source')
 def filter_sources(self):
+    preprocess_step = getattr(self, 'preprocess', None)
+    if preprocess_step is not None:
+        self.source += preprocess_step.out_sources
     self.objc = False
     self.source = self.to_nodes(getattr(self, 'source', []))
     if self.env.PROJECTS:

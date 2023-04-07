@@ -114,7 +114,7 @@ knl::uint2 Renderer::getScreenSize() const
 {
     RECT rect;
     GetWindowRect(GetDesktopWindow(), &rect);
-    return knl::make_uint2(rect.right - rect.left, rect.bottom - rect.top);
+    return knl::uint2 {(u32)(rect.right - rect.left), (u32)(rect.bottom - rect.top)};
 }
 
 }}  // namespace Motor::Windowing

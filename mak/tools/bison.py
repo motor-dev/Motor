@@ -2,7 +2,6 @@
 # encoding: utf-8
 # John O'Meara, 2006
 # Thomas Nagy 2009
-
 "Bison processing"
 
 from waflib import Task, TaskGen
@@ -54,10 +53,7 @@ def big_bison(self, node):
     tsk.cwd = out_node.parent.abspath()
 
     # and the c/cxx file must be compiled too
-    try:
-        self.out_sources.append(outs[0])
-    except:
-        self.out_sources = [outs[0]]
+    self.out_sources.append(outs[0])
 
 
 def configure(conf):

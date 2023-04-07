@@ -6,6 +6,7 @@ def configure(configuration_context):
     # type: (Configure.ConfigurationContext) -> None
     "Recursively calls configure on host and all targets to create all available toolchains"
     configuration_context.recurse('host/host.py')
+    configuration_context.common_env = configuration_context.env
     extra = configuration_context.motornode.make_node('extra')
     for extra_platform in extra.listdir():
         directory = extra.make_node(extra_platform).abspath()

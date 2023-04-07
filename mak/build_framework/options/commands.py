@@ -1,10 +1,7 @@
 from waflib.Configure import conf
 from waflib import ConfigSet, Context, Build, Configure, Logs, Errors, Options, Utils
 import os
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+import pickle
 
 # cache option context to use in file chnage detection
 OPTION_CONTEXT = None
@@ -346,6 +343,14 @@ def add_build_command(toolchain, optimisation):
             motor_toolchain = toolchain
             motor_variant = toolchain + '.setup'
             variant = os.path.join(toolchain, optimisation)
+
+            def store(self):
+                # only keep metagen nodes in the common DB file, move rest to a separate DB file
+                super().store()
+
+            def restore(self):
+                super().restore()
+                # restore separate DB file
 
         c[command] = Command
 

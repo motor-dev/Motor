@@ -22,7 +22,15 @@ def game(
     env=None
 ):
     if env is None:
-        bld.preprocess(name, path, root_namespace, name, uselib=uselib)
+        bld.preprocess(
+            name,
+            path,
+            root_namespace,
+            name,
+            depends=depends,
+            uselib=uselib,
+            extra_features=(not bld.env.STATIC) and ['motor:module'] or []
+        )
         bld.multiarch(
             name, [
                 game(

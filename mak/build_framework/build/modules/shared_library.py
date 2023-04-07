@@ -22,7 +22,15 @@ def shared_library(
     env=None
 ):
     if env is None:
-        bld.preprocess(name, path, root_namespace, 'motor', uselib=uselib)
+        bld.preprocess(
+            name,
+            path,
+            root_namespace,
+            'motor',
+            depends=depends,
+            uselib=uselib,
+            extra_features=(not bld.env.STATIC) and ['motor:module'] or []
+        )
         bld.multiarch(
             name, [
                 shared_library(

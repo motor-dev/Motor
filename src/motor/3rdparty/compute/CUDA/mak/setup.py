@@ -140,12 +140,14 @@ def setup(configuration_context):
                 cuda_available = True
 
                 configuration_context.setenv(toolchain)
-                configuration_context.env.append_value('INCLUDES_cuda', include_paths)
-                configuration_context.env.append_value('STLIBPATH_cuda', lib_paths)
-                configuration_context.env.append_value('FEATURES', ['cuda'])
+                configuration_context.env.append_value('check_CUDA_cxxflags', include_paths)
+                configuration_context.env.append_value('check_CUDA_linkflags', lib_paths)
+                configuration_context.env.append_value('check_CUDA_stlib', ['cudart_static'])
+                configuration_context.env.append_value('FEATURES', ['CUDA'])
                 break
         if cuda_available:
             configuration_context.env.append_value('KERNEL_TOOLCHAINS', [('cuda', cuda_toolchain)])
+            configuration_context.env['check_CUDA'] = True
             configuration_context.end_msg('cuda {} [{}]'.format(version, ', '.join('{}.{}'.format(*a) for a in archs)))
         else:
             configuration_context.end_msg('not found', color='YELLOW')

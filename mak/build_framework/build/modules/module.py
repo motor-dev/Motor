@@ -41,82 +41,49 @@ def get_source_nodes(build_context, path, name):
 
 
 @conf
-def preprocess(build_context, name, path, root_namespace, plugin_name, uselib, extra_features=[]):
+def preprocess(build_context, name, path, root_namespace, plugin_name, depends, uselib, extra_features=[]):
     source_nodes = get_source_nodes(build_context, path, name)
 
     pp_env = build_context.common_env.derive()
     pp_env.PLUGIN = plugin_name.replace('.', '_')
 
     preprocess_sources = []
-    includes = [build_context.bldnode.make_node(name + '.pp')]
     if build_context.env.PROJECTS:
         globs = ['nothing']
     else:
         globs = ['src/**/*.yy', 'src/**/*.ll', 'src/**/*.plist', 'api/**/*.meta.hh', 'include/**/*.meta.hh']
     for source_node in source_nodes:
-        preprocess_sources += source_node.ant_glob(globs)
+        preprocess_sources += source_node.ant_glob(globs, excl=[])
 
-        include = source_node.find_node('api')
-        if include is not None:
-            includes.append(include)
-        include = source_node.find_node('include')
-        if include is not None:
-            includes.append(include)
-    pchstop = source_nodes[0].find_node('api/motor/%s/stdafx.h' % name)
-    if pchstop:
-        pchstop = pchstop.path_from(source_nodes[0].find_node('api'))
-    else:
-        pchstop = source_nodes[0].find_node('api/%s/stdafx.h' % name)
-        if pchstop:
-            pchstop = pchstop.path_from(source_nodes[0].find_node('api'))
-        else:
-            pchstop = source_nodes[0].find_node('include/stdafx.h')
-            if pchstop:
-                pchstop = pchstop.path_from(source_nodes[0].find_node('include'))
+    use = []
+    for d in depends:
+        d = build_context.get_tgen_by_name(d + '.preprocess')
+        use.append(d.target)
 
     preprocess = build_context(
         env=pp_env,
-        target=name + '.pp',
+        target=name + '.preprocess',
         parent=name,
         features=['motor:preprocess'] + extra_features,
-        pchstop=pchstop,
         source=preprocess_sources,
         kernels=[],
         kernels_cpu=[],
-        includes=includes,
+        plugin_name=plugin_name,
         source_nodes=source_nodes,
         root_namespace=root_namespace,
-        uselib=uselib
+        uselib=uselib,
+        out_sources=[],
+        generated_include_node=build_context.bldnode.make_node(name + '.preprocess/include'),
+        use=use
     )
 
     for source_node in source_nodes:
         if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
             kernelspath = source_node.make_node('kernels')
-            for kernel in kernelspath.ant_glob('**'):
+            for kernel in kernelspath.ant_glob('**', excl=[]):
                 kernel_name, kernel_ext = os.path.splitext(kernel.path_from(kernelspath))
                 kernel_name = re.split('[\\\\/]', kernel_name)
-                if kernel_ext in ('.cl', ):
-                    preprocess.kernels.append(
-                        (
-                            kernel_name, kernel, kernelspath,
-                            preprocess.make_bld_node('src/kernels', None, '%s.ast' % (os.path.join(*kernel_name)))
-                        )
-                    )
-                elif kernel_ext in (
-                    '.cc',
-                    '.cpp',
-                ):
-                    preprocess.kernels_cpu.append(
-                        (
-                            kernel_name, kernel, kernelspath,
-                            preprocess.make_bld_node('src/kernels', None, '%s.ast' % (os.path.join(*kernel_name)))
-                        )
-                    )
-                else:
-                    raise Errors.WafError(
-                        '%s: unknown kernel type. SUpported kernels are written in C++ (.cc, .cpp) or OpenCL-C++ (.cl)'
-                        % kernel
-                    )
+                preprocess.kernels.append((kernel_name, kernel))
 
     return preprocess
 
@@ -141,19 +108,19 @@ def module(
     if source_list is None:
         source_list = []
         for node in source_nodes:
-            source_list.append(node.ant_glob(source_filter))
+            source_list += node.ant_glob(source_filter, excl=[])
             for suffix in platform_specific:
                 if node.find_node('include%s' % suffix):
                     includes.append(node.find_node('include%s' % suffix))
                 if node.find_node('api%s' % suffix):
                     api.append(node.find_node('api%s' % suffix))
     elif source_list:
-        source_list = source_nodes[0].ant_glob(source_list)
+        source_list = source_nodes[0].ant_glob(source_list, excl=[])
     else:
         source_list = []
     if not build_context.env.PROJECTS:
-        preprocess = build_context.get_tgen_by_name('%s.pp' % name)
-        includes += preprocess.includes
+        preprocess = build_context.get_tgen_by_name('%s.preprocess' % name)
+        extra_includes = extra_includes + [preprocess.generated_include_node]
     else:
         preprocess = None
 
@@ -166,6 +133,7 @@ def module(
             pass
         elif path_node.is_child_of(build_context.motornode):
             module_path = path_node.path_from(build_context.motornode).replace('/', '.').replace('\\', '. ')
+
     task_gen = build_context(
         env=env.derive(),
         target=env.ENV_PREFIX % name,
@@ -196,13 +164,23 @@ def module(
         for source_node in source_nodes:
             if os.path.isdir(os.path.join(source_node.abspath(), 'tests')):
                 test_path = source_node.make_node('tests')
-                for test in test_path.ant_glob('**'):
+                for test in test_path.ant_glob('**', excl=[]):
                     test_name = os.path.splitext(test.path_from(test_path))[0]
                     test_name = re.split('[\\\\/]', test_name)
                     target_name = 'unittest.%s.%s' % (name, '.'.join(test_name))
+                    p = build_context.preprocess(
+                        target_name + '.preprocess',
+                        test_path,
+                        preprocess.root_namespace,
+                        preprocess.plugin_name,
+                        depends=[task_gen.target],
+                        uselib=uselib,
+                        extra_features=['motor:module']
+                    )
 
                     build_context(
                         env=env.derive(),
+                        preprocess=p,
                         target=env.ENV_PREFIX % target_name,
                         target_name=target_name,
                         safe_target_name=safe_name(test_name[-1]),

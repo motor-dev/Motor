@@ -5,6 +5,9 @@
 #include <motor/meta/stdafx.h>
 #include <motor/meta/builtin.hh>
 #include <motor/meta/classinfo.meta.hh>
+typedef bool   motor_bool;
+typedef float  motor_float;
+typedef double motor_double;
 
 #if 0
 

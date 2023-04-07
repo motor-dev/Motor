@@ -22,7 +22,15 @@ def library(
     env=None
 ):
     if env is None:
-        bld.preprocess(name, path, root_namespace, 'motor', uselib=uselib)
+        bld.preprocess(
+            name,
+            path,
+            root_namespace,
+            'motor',
+            depends=depends,
+            uselib=uselib,
+            extra_features=bld.env.DYNAMIC and ['motor:module'] or []
+        )
         bld.multiarch(
             name, [
                 library(

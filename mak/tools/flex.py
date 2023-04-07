@@ -2,7 +2,6 @@
 # encoding: utf-8
 # John O'Meara, 2006
 # Thomas Nagy 2009
-
 "flex processing"
 
 from waflib import Task, TaskGen
@@ -45,10 +44,7 @@ def big_flex(self, node):
     outs.append(out_node)
 
     tsk = self.create_task('flex', node, outs)
-    try:
-        self.out_sources.append(outs[0])
-    except:
-        self.out_sources = [outs[0]]
+    self.out_sources.append(outs[0])
 
 
 def configure(conf):
