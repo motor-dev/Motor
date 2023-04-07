@@ -173,7 +173,7 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
                 {
                     'x86': [],
                     'amd64': [],
-                    'armv7a': ['-fno-integrated-as', '-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'],
+                    'armv7a': ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'],
                     'arm64': [],
                 }
         }
@@ -244,11 +244,11 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         env.append_unique('JAVACFLAGS', ['-bootclasspath', os.path.join(self.sdk_path, 'android.jar')])
         env.append_unique('AAPTFLAGS', ['-I', os.path.join(self.sdk_path, 'android.jar')])
 
-        if not os.path.isfile(
-            os.path.
-            join(ndk_config.get_ndkroot(), 'prebuilt', 'android-%s' % env.ANDROID_ARCH, 'gdbserver', 'gdbserver')
-        ):
-            raise Errors.WafError('could not find gdbserver for architecture %s' % env.ANDROID_ARCH)
+        #if not os.path.isfile(
+        #    os.path.
+        #    join(ndk_config.get_ndkroot(), 'prebuilt', 'android-%s' % env.ANDROID_ARCH, 'gdbserver', 'gdbserver')
+        #):
+        #    raise Errors.WafError('could not find gdbserver for architecture %s' % env.ANDROID_ARCH)
 
         conf.env.append_value('CFLAGS', sysroot_options)
         conf.env.append_value('CXXFLAGS', sysroot_options)
@@ -289,9 +289,11 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
         sdk_build_tool_path = self.get_build_tool_path(Options.options.android_sdk_path)
         sdk_tools_paths = self.get_tools_paths(Options.options.android_sdk_path)
         conf.find_program('adb', path_list=sdk_tools_paths)
-        conf.env.DEX = os.path.join(sdk_build_tool_path, 'lib', 'dx.jar')
+        conf.env.DEX = os.path.join(sdk_build_tool_path, 'lib', 'd8.jar')
         if not os.path.isfile(conf.env.DEX):
-            raise Errors.WafError('Unable to locate dx.jar')
+            conf.env.DEX = os.path.join(sdk_build_tool_path, 'lib', 'dx.jar')
+            if not os.path.isfile(conf.env.DEX):
+                raise Errors.WafError('Unable to locate dx.jar')
         conf.find_program('zipalign', var='ZIPALIGN', path_list=sdk_tools_paths + [sdk_build_tool_path])
         conf.find_program('jarsigner', var='JARSIGNER', mandatory=False)
         conf.find_program('apksigner', var='APKSIGNER', path_list=[sdk_build_tool_path], mandatory=False)
@@ -309,9 +311,10 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
         sdk_tools_path = os.path.join(android_path, 'build-tools')
         if os.path.isdir(sdk_tools_path):
             sdk_tools = sorted(os.listdir(sdk_tools_path))
-            if sdk_tools:
-                sdk_tool = sdk_tools[-1]
-                return os.path.join(sdk_tools_path, sdk_tool)
+            while sdk_tools:
+                sdk_tool = sdk_tools.pop(-1)
+                if os.path.isdir(os.path.join(sdk_tools_path, sdk_tool, 'lib')):
+                    return os.path.join(sdk_tools_path, sdk_tool)
         raise Errors.WafError('Android build-tools not installed')
 
     def find_android_sdk(self, ndk_path, sdk_path, archs):
@@ -466,8 +469,11 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                 try:
                     targets = os.listdir(targets)
                 except FileNotFoundError:
-                    #print(targets)
-                    targets = []
+                    targets = os.path.normpath(os.path.join(c.compiler_c, '..', '..', 'sysroot', 'usr', 'lib'))
+                    try:
+                        targets = os.listdir(targets)
+                    except FileNotFoundError:
+                        targets = []
                 for target in targets:
                     extra_args = deepcopy(c.extra_args)
                     extra_args['c'] += ['-target', target]

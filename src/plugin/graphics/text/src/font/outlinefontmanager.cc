@@ -28,7 +28,7 @@ OutlineFontManager::~OutlineFontManager()
 void OutlineFontManager::load(weak< const Resource::IDescription > description,
                               Resource::Resource& /*resource*/)
 {
-    motor_info("loading outline font");
+    motor_info(Log::resource(), "loading outline font");
     if(motor_checked_cast< const OutlineFont >(description)->m_fontFile)
     {
         m_manager->addTicket(this, description,
@@ -46,7 +46,7 @@ void OutlineFontManager::reload(weak< const Resource::IDescription > /*oldDescri
                                 weak< const Resource::IDescription > newDescription,
                                 Resource::Resource& /*resource*/)
 {
-    motor_info("reloading outline font");
+    motor_info(Log::resource(), "reloading outline font");
     if(motor_checked_cast< const OutlineFont >(newDescription)->m_fontFile)
     {
         m_manager->addTicket(this, newDescription,
@@ -63,7 +63,7 @@ void OutlineFontManager::reload(weak< const Resource::IDescription > /*oldDescri
 void OutlineFontManager::unload(weak< const Resource::IDescription > /*description*/,
                                 Resource::Resource& resource)
 {
-    motor_info("unloading outline font");
+    motor_info(Log::resource(), "unloading outline font");
     resource.clearRefHandle();
 }
 
@@ -72,7 +72,7 @@ void OutlineFontManager::onTicketLoaded(weak< const Resource::IDescription > /*d
                                         const minitl::Allocator::Block< u8 >& buffer,
                                         LoadType /*type*/)
 {
-    motor_info("outline font file done loading");
+    motor_info(Log::resource(), "outline font file done loading");
     ref< FreetypeFace > face = ref< FreetypeFace >::create(Arena::game(), m_freetype, buffer);
     resource.clearRefHandle();
     resource.setRefHandle(face);

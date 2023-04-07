@@ -13,7 +13,7 @@ ZipFile::ZipFile(void* handle, const ifilename& filename, const unz_file_info& i
     , m_handle(handle)
     , m_filePos(filePos)
 {
-    motor_info("created zip file %s" | m_filename);
+    motor_info_format(Log::fs(), "created zip file {0}", m_filename);
 }
 
 ZipFile::~ZipFile()
@@ -34,9 +34,9 @@ void ZipFile::doFillBuffer(weak< File::Ticket > ticket) const
         s_fileOffset  = 0;
         unzCloseCurrentFile(m_handle);
         int result = unzGoToFilePos(m_handle, &filePos);
-        motor_assert(result == UNZ_OK, "could not go to file %s" | m_filename);
+        motor_assert_format(result == UNZ_OK, "could not go to file {0}", m_filename);
         result = unzOpenCurrentFile(m_handle);
-        motor_assert(result == UNZ_OK, "could not open file %s" | m_filename);
+        motor_assert_format(result == UNZ_OK, "could not open file {0}", m_filename);
         motor_forceuse(result);
     }
 
@@ -45,14 +45,14 @@ void ZipFile::doFillBuffer(weak< File::Ticket > ticket) const
         u8  buffer[4096];
         i64 bytesToRead = minitl::min< i64 >(4096, ticket->offset - s_fileOffset);
         i64 read        = unzReadCurrentFile(m_handle, buffer,
-                                      motor_checked_numcast< unsigned int >(bytesToRead));
+                                             motor_checked_numcast< unsigned int >(bytesToRead));
         s_fileOffset += read;
     }
 
-    motor_assert(ticket->buffer.byteCount() > ticket->total,
-                 "buffer is not long enough to read entire file; "
-                 "buffer size is %d, requires %d bytes"
-                     | ticket->buffer.byteCount() | ticket->total);
+    motor_assert_format(ticket->buffer.byteCount() > ticket->total,
+                        "buffer is not long enough to read entire file; "
+                        "buffer size is {0}, requires {1} bytes",
+                        ticket->buffer.byteCount(), ticket->total);
     u8* buffer = ticket->buffer.begin();
     while(!ticket->done())
     {
@@ -66,7 +66,8 @@ void ZipFile::doFillBuffer(weak< File::Ticket > ticket) const
         }
         else
         {
-            motor_error("error %d while reading from file %s" | bytesRead | m_filename);
+            motor_error_format(Log::fs(), "error {0} while reading from file {1}", bytesRead,
+                               m_filename);
         }
     }
 

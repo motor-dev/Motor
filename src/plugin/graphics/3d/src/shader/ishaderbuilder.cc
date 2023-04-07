@@ -44,7 +44,7 @@ void IShaderBuilder::write(const char* text)
     {
         for(int i = 0; i < m_indent; ++i)
             m_stream.write("  ", 2);
-        m_stream.write(text, strlen(text));
+        m_stream.write(text, motor_checked_numcast<u32>(strlen(text)));
     }
     m_stream.write("\0", 1);
 }
@@ -76,7 +76,7 @@ istring IShaderBuilder::referenceNode(weak< const Node > node)
             return (name->second.c_str());
         }
     }
-    motor_error("Undeclared object");
+    motor_error(Log::shader(), "Undeclared object");
     return istring("");
 }
 
@@ -94,7 +94,7 @@ void IShaderBuilder::addVarying(weak< const Node > node, Stage currentStage, Sta
 {
     if(currentStage == targetStage)
     {
-        istring name(minitl::format< 1024u >("b_varying%d") | m_currentVarying);
+        istring name(minitl::format< 1024u >(FMT("b_varying{0}"), m_currentVarying));
         if(m_namespaces.front().names.insert(node, name).second)
         {
             m_currentVarying++;
@@ -108,9 +108,9 @@ void IShaderBuilder::addAttribute(weak< const Node > node, Stage currentStage, S
 {
     if(VertexStage == targetStage)
     {
-        istring nameAttribute(minitl::format< 1024u >("b_attribute%d") | m_currentAttribute);
-        istring nameVarying(minitl::format< 1024u >("b_attributeToVarying%d")
-                            | m_currentAttributeToVarying);
+        istring nameAttribute(minitl::format< 1024u >(FMT("b_attribute{0}"), m_currentAttribute));
+        istring nameVarying(
+            minitl::format< 1024u >(FMT("b_attributeToVarying{0}"), m_currentAttributeToVarying));
         if(m_namespaces.front().names.insert(node, nameAttribute).second)
         {
             m_currentAttribute++;
@@ -129,8 +129,8 @@ void IShaderBuilder::addAttribute(weak< const Node > node, Stage currentStage, S
     }
     else if(currentStage == targetStage)
     {
-        istring nameVarying(minitl::format< 1024u >("b_attributeToVarying%d")
-                            | m_currentAttributeToVarying);
+        istring nameVarying(
+            minitl::format< 1024u >(FMT("b_attributeToVarying{0}"), m_currentAttributeToVarying));
         if(m_namespaces.front().names.insert(node, nameVarying).second)
         {
             m_currentAttributeToVarying++;
@@ -169,7 +169,7 @@ void IShaderBuilder::saveTo(Semantic semantic, weak< const Node > node)
 void IShaderBuilder::addOperator(weak< const Node > node, Operator op, ValueType type,
                                  weak< const Node > node1, weak< const Node > node2)
 {
-    istring var(minitl::format< 1024u >("temp_%d") | m_currentTemporary);
+    istring var(minitl::format< 1024u >(FMT("temp_{0}"), m_currentTemporary));
     if(m_namespaces.front().names.insert(node, var).second)
     {
         m_currentTemporary++;

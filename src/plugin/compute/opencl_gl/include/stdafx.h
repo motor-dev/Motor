@@ -6,3 +6,9 @@
 
 #include <motor/plugin.compute.opencl/stdafx.h>
 #include <motor/plugin.graphics.GL4/stdafx.h>
+
+namespace Log {
+
+motor_api(OPENCL) weak< Logger > opencl_gl();
+
+}

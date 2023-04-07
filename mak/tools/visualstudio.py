@@ -286,27 +286,27 @@ class VCproj:
                             command = getattr(task_gen, 'command', '')
                             if command:
                                 command = command % {'toolchain': toolchain, 'variant': variant}
-                                tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s %s %s' % (
+                                tool['BuildCommandLine'] = 'cd "$(SolutionDir)" && "%s" "%s" %s %s' % (
                                     sys.executable, sys.argv[0], command, ' '.join(options)
                                 )
                                 clean_command = getattr(task_gen, 'clean_command', '')
                                 if clean_command:
                                     clean_command = clean_command % {'toolchain': toolchain, 'variant': variant}
-                                    tool['CleanCommandLine'] = 'cd $(SolutionDir) && %s %s %s %s' % (
+                                    tool['CleanCommandLine'] = 'cd "$(SolutionDir)" && "%s" "%s" %s %s' % (
                                         sys.executable, sys.argv[0], clean_command, ' '.join(options)
                                     )
-                                    tool['ReBuildCommandLine'] = 'cd $(SolutionDir) && %s %s %s %s %s' % (
+                                    tool['ReBuildCommandLine'] = 'cd "$(SolutionDir)" && "%s" "%s" %s %s %s' % (
                                         sys.executable, sys.argv[0], clean_command, command, ' '.join(options)
                                     )
                             else:
-                                tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s build:%s:%s %s --targets=%s' % (
+                                tool['BuildCommandLine'] = 'cd "$(SolutionDir)" && "%s" "%s" build:%s:%s %s --targets=%s' % (
                                     sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target
                                 )
-                                tool['CleanCommandLine'] = 'cd $(SolutionDir) && %s %s clean:%s:%s %s --targets=%s' % (
+                                tool['CleanCommandLine'] = 'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s %s --targets=%s' % (
                                     sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target
                                 )
                                 tool['ReBuildCommandLine'
-                                     ] = 'cd $(SolutionDir) && %s %s clean:%s:%s build:%s:%s %s --targets=%s' % (
+                                     ] = 'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s build:%s:%s %s --targets=%s' % (
                                          sys.executable, sys.argv[0], toolchain, variant, toolchain, variant,
                                          ' '.join(options), task_gen.target
                                      )
@@ -354,7 +354,7 @@ class VCproj:
             XmlNode(project, 'References').close()
             with XmlNode(project, 'Files') as files:
                 n = VcprojNode('root')
-                for node in getattr(task_gen, 'source_nodes', []):
+                for _, node in getattr(task_gen, 'source_nodes', []):
                     if os.path.isdir(node.abspath()):
                         for sub_node in node.listdir():
                             n.add(node.make_node(sub_node))
@@ -509,33 +509,33 @@ class VCxproj:
                     command = command % {'toolchain': toolchain, 'variant': variant}
                     self.vcxproj._add(
                         properties, 'NMakeBuildCommandLine',
-                        'cd $(SolutionDir) && %s %s %s %s' % (sys.executable, sys.argv[0], command, ' '.join(options))
+                        'cd "$(SolutionDir)" && "%s" "%s" %s %s' % (sys.executable, sys.argv[0], command, ' '.join(options))
                     )
                     clean_command = getattr(task_gen, 'clean_command', '')
                     if clean_command:
                         clean_command = clean_command % {'toolchain': toolchain, 'variant': variant}
                         self.vcxproj._add(
-                            properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s %s %s %s' %
+                            properties, 'NMakeCleanCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" %s %s' %
                             (sys.executable, sys.argv[0], clean_command, ' '.join(options))
                         )
                         self.vcxproj._add(
-                            properties, 'NMakeReBuildCommandLine', 'cd $(SolutionDir) && %s %s %s %s %s' %
+                            properties, 'NMakeReBuildCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" %s %s %s' %
                             (sys.executable, sys.argv[0], clean_command, command, ' '.join(options))
                         )
                 else:
                     self.vcxproj._add(
-                        properties, 'NMakeBuildCommandLine', 'cd $(SolutionDir) && %s %s build:%s:%s %s --targets=%s' %
+                        properties, 'NMakeBuildCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" build:%s:%s %s --targets=%s' %
                         (sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target)
                     )
                     self.vcxproj._add(
                         properties, 'NMakeReBuildCommandLine',
-                        'cd $(SolutionDir) && %s %s clean:%s:%s build:%s:%s %s --targets=%s' % (
+                        'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s build:%s:%s %s --targets=%s' % (
                             sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), toolchain, variant,
                             task_gen.target
                         )
                     )
                     self.vcxproj._add(
-                        properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s %s clean:%s:%s %s --targets=%s' %
+                        properties, 'NMakeCleanCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s %s --targets=%s' %
                         (sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target)
                     )
                     if 'cxxprogram' in task_gen.features:
@@ -572,8 +572,8 @@ class VCxproj:
         files = self.vcxproj._add(project, 'ItemGroup')
 
         self.filters = {}
-        for node in getattr(task_gen, 'source_nodes', []):
-            self.add_node(task_gen.bld.srcnode, node, node, files)
+        for node_name, node in getattr(task_gen, 'source_nodes', []):
+            self.add_node(task_gen.bld.srcnode, node,node_name,  node, files)
         self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.targets'})
         for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
             env = task_gen.bld.all_envs[toolchain]
@@ -595,21 +595,32 @@ class VCxproj:
         self.vcxproj.write(nodes[0])
         self.vcxfilters.write(nodes[1])
 
-    def add_node(self, root_node, project_node, node, files):
+    def add_node(self, root_node, project_node, root_filter, node, files):
         path = node.abspath()
         if os.path.isdir(path):
-            if project_node != node:
-                path = node.path_from(root_node).replace('/', '\\')
+            rel_path = node.path_from(project_node).replace('/', '\\')
+            if root_filter:
+                rel_path = root_filter + '\\' + rel_path
                 try:
-                    filter = self.filters[path]
+                    filter = self.filters[root_filter]
                 except KeyError:
-                    filter = generateGUID(path)
+                    filter = generateGUID(root_filter)
                     n = self.vcxfilters._add(
-                        self.filter_nodes, 'Filter', {'Include': node.path_from(project_node).replace('/', '\\')}
+                        self.filter_nodes, 'Filter', {'Include': root_filter}
+                    )
+                    self.vcxfilters._add(n, 'UniqueIdentifier', filter)
+
+            if project_node != node:
+                try:
+                    filter = self.filters[rel_path]
+                except KeyError:
+                    filter = generateGUID(rel_path)
+                    n = self.vcxfilters._add(
+                        self.filter_nodes, 'Filter', {'Include': rel_path}
                     )
                     self.vcxfilters._add(n, 'UniqueIdentifier', filter)
             for subdir in node.listdir():
-                self.add_node(root_node, project_node, node.make_node(subdir), files)
+                self.add_node(root_node, project_node, root_filter, node.make_node(subdir), files)
         elif os.path.isfile(path):
             self.vcxproj._add(
                 files, 'None', {'Include': '$(SolutionDir)%s' % node.path_from(root_node).replace('/', '\\')}
@@ -617,7 +628,13 @@ class VCxproj:
             n = self.vcxfilters._add(
                 self.file_nodes, 'None', {'Include': '$(SolutionDir)%s' % node.path_from(root_node).replace('/', '\\')}
             )
-            self.vcxfilters._add(n, 'Filter', node.parent.path_from(project_node).replace('/', '\\'))
+            if node.parent == project_node:
+                rel_path = root_filter
+            else:
+                rel_path = node.parent.path_from(project_node).replace('/', '\\')
+                if root_filter:
+                    rel_path = root_filter + '\\' + rel_path
+            self.vcxfilters._add(n, 'Filter', rel_path)
 
 
 class PyProj:

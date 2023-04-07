@@ -3,6 +3,7 @@
 #pragma once
 
 #include <motor/minitl/iterator.hh>
+#include <motor/minitl/swap.hh>
 
 namespace minitl {
 

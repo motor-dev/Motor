@@ -16,6 +16,8 @@ class refcountable : public pointer
     friend class ref;
     template < typename T >
     friend class scoped;
+    template < typename T >
+    friend struct formatter;
 
 private: /* friend ref */
     mutable i_u32 m_refCount;
@@ -26,7 +28,8 @@ public:
     }
     inline virtual ~refcountable()
     {
-        motor_assert(m_refCount == 0, "object is destroyed but has %d references" | m_refCount);
+        motor_assert_format(m_refCount == 0, "object is destroyed but has {0} references",
+                            m_refCount);
     }
 
 private:

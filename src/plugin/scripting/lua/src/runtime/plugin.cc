@@ -3,13 +3,13 @@
 
 #include <stdafx.h>
 
-#include <context.hh>
 #include <motor/plugin/plugin.hh>
+#include <context.hh>
 #include <runtime/plugin.hh>
 
 namespace Motor { namespace Lua {
 
-extern "C" int pluginGC(lua_State* state)
+static int pluginGC(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Plugin");
     Plugin::Plugin< void >* userdata = (Plugin::Plugin< void >*)lua_touserdata(state, 1);
@@ -17,7 +17,7 @@ extern "C" int pluginGC(lua_State* state)
     return 0;
 }
 
-extern "C" int pluginToString(lua_State* state)
+static int pluginToString(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Plugin");
     Plugin::Plugin< void >* userdata = (Plugin::Plugin< void >*)lua_touserdata(state, 1);
@@ -25,7 +25,7 @@ extern "C" int pluginToString(lua_State* state)
     return 1;
 }
 
-extern "C" int pluginGet(lua_State* state)
+static int pluginGet(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Plugin");
     Context::checkArg(state, 2, LUA_TSTRING);

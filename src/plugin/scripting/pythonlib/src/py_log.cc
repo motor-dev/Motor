@@ -72,7 +72,7 @@ int PyMotorLog::init(PyObject* self, PyObject* args, PyObject* kwds)
 void PyMotorLog::dealloc(PyObject* self)
 {
     PyMotorLog* self_ = reinterpret_cast< PyMotorLog* >(self);
-    self_->logger.~ref();
+    self_->logger.~weak();
     self->py_type->tp_free(self);
 }
 
@@ -132,14 +132,14 @@ void PyMotorLog::registerType(PyObject* module)
     Py_INCREF(&s_pyType);
 
     PyMotorLog* ob = reinterpret_cast< PyMotorLog* >(s_pyType.tp_alloc(&s_pyType, 0));
-    new(&ob->logger) ref< Logger >(Logger::instance("scripting.python"));
+    new(&ob->logger) weak< Logger >(Log::python());
     ob->type = logTypeStdOut;
     result   = s_library->m_PySys_SetObject("stdout", (PyObject*)ob);
     motor_assert(result >= 0, "unable to register stdout");
     Py_DECREF(ob);
 
     ob = reinterpret_cast< PyMotorLog* >(s_pyType.tp_alloc(&s_pyType, 0));
-    new(&ob->logger) ref< Logger >(Logger::instance("scripting.python"));
+    new(&ob->logger) weak< Logger >(Log::python());
     ob->type = logTypeStdErr;
     result   = s_library->m_PySys_SetObject("stderr", (PyObject*)ob);
     motor_assert(result >= 0, "unable to register stderr");

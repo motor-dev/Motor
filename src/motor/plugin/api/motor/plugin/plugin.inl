@@ -150,7 +150,7 @@ Plugin< T >::Plugin(const inamespace& pluginName, const Context& context)
     if(*m_dynamicObject)
     {
         CreateFunction* create = m_dynamicObject->getSymbol< CreateFunction >("motor_createPlugin");
-        motor_assert_recover(create, "could not load method motor_createPlugin", return );
+        if(motor_assert(create, "could not load method motor_createPlugin")) return;
         m_interface = (*create)(context);
     }
 }

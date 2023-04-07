@@ -23,18 +23,19 @@ private:
     static minitl::AssertionResult onAssert(const char* file, int line, const char* expr,
                                             const char* message)
     {
-        motor_fatal("%s:%d Assertion failed: %s\n\t%s" | file | line | expr | message);
+        motor_fatal_format(Motor::Logger::root(), "{0}:{1} Assertion failed: {2}\n\t{3}", file,
+                           line, expr, message);
         return minitl::Break;
     }
 
 protected:
-    virtual bool log(const Motor::istring& logname, Motor::LogLevel level, const char* filename,
-                     int line, const char* thread, const char* msg) const
+    virtual bool log(const Motor::inamespace& logname, Motor::LogLevel level, const char* filename,
+                     int line, const char* thread, const char* msg) const override
     {
 #ifdef MOTOR_PLATFORM_WIN32
-        minitl::format< 1024u > message
-            = minitl::format< 1024u >("%s(%d): %s\t(%s) %s%s") | filename | line | logname.c_str()
-              | getLogLevelName(level) | msg | (msg[strlen(msg) - 1] == '\n' ? "" : "\n");
+        minitl::format_buffer< 1024u > message = minitl::format< 1024u >(
+            FMT("{0}({1}): {2}\t({3}) {4}{5}"), filename, line, logname, getLogLevelName(level),
+            msg, (msg[strlen(msg) - 1] == '\n' ? "" : "\n"));
         OutputDebugString(message);
 #    define isatty(x) 1
 #endif
@@ -56,13 +57,12 @@ protected:
         case Motor::logWarning: color = colors[4]; break;
         case Motor::logError: color = colors[5]; break;
         case Motor::logFatal: color = colors[6]; break;
-        case Motor::logSpam:
         default: break;
         }
 
         const char* normal = colors[0];
         fprintf(stdout, "[%s%s%s] %s%s(%s)%s: %s", color, getLogLevelName(level), normal, colors[1],
-                logname.c_str(), thread, normal,
+                logname.str().name, thread, normal,
                 // filename, line,
                 msg);
         fflush(stdout);
@@ -81,7 +81,7 @@ extern "C" MOTOR_EXPORT void initpy_motor()
     using namespace Motor::Python;
     /* python 2.x module initialisation */
     Environment::getEnvironment().init();
-    motor_info("loading module py_motor (Python 2)");
+    motor_info(Log::python(), "loading module py_motor (Python 2)");
     static ref< PythonLibrary > s_loadedLibrary
         = ref< PythonLibrary >::create(Arena::general(), (const char*)0);
     setCurrentContext(s_loadedLibrary);
@@ -97,7 +97,7 @@ extern "C" MOTOR_EXPORT Motor::Python::PyObject* PyInit_py_motor()
     static ref< PythonLibrary > s_loadedLibrary
         = ref< PythonLibrary >::create(Arena::general(), (const char*)0);
     setCurrentContext(s_loadedLibrary);
-    motor_info("loading module py_motor (Python 3)");
+    motor_info(Log::python(), "loading module py_motor (Python 3)");
     PyObject* module = init3_py_motor(false);
     return module;
 }

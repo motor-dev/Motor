@@ -49,8 +49,8 @@ IntrospectionHint::getCall(DbContext& context) const
     raw< const Meta::Method > result = cls->getMethod(Class::nameOperatorCall());
     if(result) return minitl::make_tuple(result, true);
     if(cls->getProperty(Class::nameOperatorCall()))
-        context.error(m_owner, Message::MessageType("call on object of type %s is dynamic")
-                                   | m_callInfo.overload->returnType.name());
+        context.error(m_owner, minitl::format< 512 >(FMT("call on object of type {0} is dynamic"),
+                                                     m_callInfo.overload->returnType.name()));
     return minitl::make_tuple(raw< const Method >::null(), false);
 }
 

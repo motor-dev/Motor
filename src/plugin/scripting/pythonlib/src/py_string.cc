@@ -24,56 +24,56 @@ PyTypeObject::Py3NumberMethods PyMotorString< T >::s_py3StringNumber
        0,         0};
 
 template < typename T >
-PyTypeObject PyMotorString< T >::s_pyType
-    = {{{0, 0}, 0},
-       istring(minitl::format< 128u >("py_motor.%s") | motor_type< T >().metaclass->name).c_str(),
-       sizeof(PyMotorString< T >),
-       0,
-       &PyMotorString< T >::dealloc,
-       0,
-       &PyMotorString< T >::getattr,
-       &PyMotorString< T >::setattr,
-       0,
-       &PyMotorString< T >::repr,
-       0,
-       0,
-       0,
-       0,
-       0,
-       &PyMotorString< T >::str,
-       0,
-       0,
-       0,
-       Py_TPFLAGS_MOTOR_DEFAULT,
-       "Wrapper class for the C++ Motor string types",
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       &PyMotorObject::s_pyType,
-       0,
-       0,
-       0,
-       0,
-       &PyMotorString< T >::init,
-       0,
-       &PyMotorString< T >::newinst,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0};
+PyTypeObject PyMotorString< T >::s_pyType = {
+    {{0, 0}, 0},
+    istring(minitl::format< 128u >(FMT("py_motor.{0}"), motor_type< T >().metaclass->name)).c_str(),
+    sizeof(PyMotorString< T >),
+    0,
+    &PyMotorString< T >::dealloc,
+    0,
+    &PyMotorString< T >::getattr,
+    &PyMotorString< T >::setattr,
+    0,
+    &PyMotorString< T >::repr,
+    0,
+    0,
+    0,
+    0,
+    0,
+    &PyMotorString< T >::str,
+    0,
+    0,
+    0,
+    Py_TPFLAGS_MOTOR_DEFAULT,
+    "Wrapper class for the C++ Motor string types",
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    &PyMotorObject::s_pyType,
+    0,
+    0,
+    0,
+    0,
+    &PyMotorString< T >::init,
+    0,
+    &PyMotorString< T >::newinst,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0};
 
 template < typename T >
 PyObject* PyMotorString< T >::stealValue(PyObject* owner, Meta::Value& value)
@@ -82,9 +82,9 @@ PyObject* PyMotorString< T >::stealValue(PyObject* owner, Meta::Value& value)
     motor_forceuse(t);
     motor_assert(value.type().metaclass->type() == Meta::ClassType_String,
                  "PyMotorString only accepts String types");
-    motor_assert(value.type().metaclass->index() == motor_type< T >().metaclass->index(),
-                 "expected %s; got %s" | motor_type< T >().metaclass->name
-                     | value.type().metaclass->name);
+    motor_assert_format(value.type().metaclass->index() == motor_type< T >().metaclass->index(),
+                        "expected {0}; got {1}", motor_type< T >().metaclass->name,
+                        value.type().metaclass->name);
     PyObject* result                             = s_pyType.tp_alloc(&s_pyType, 0);
     static_cast< PyMotorString* >(result)->owner = owner;
 
@@ -153,7 +153,8 @@ PyObject* PyMotorString< T >::repr(PyObject* self)
     typedef PyObject* (*toStringType)(const char* format, ...);
     toStringType toString = s_library->getVersion() >= 30 ? s_library->m_PyUnicode_FromFormat
                                                           : s_library->m_PyString_FromFormat;
-    return toString(minitl::format< 1024u >("[%s \"%s\"]") | v.type().name() | v.as< const T& >());
+    return toString(
+        minitl::format< 1024u >(FMT("[{0} \"{1}\"]"), v.type().name(), v.as< const T& >()));
 }
 
 const char* toCharPtr(const istring& t)

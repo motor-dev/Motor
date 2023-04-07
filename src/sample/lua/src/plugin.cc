@@ -2,8 +2,8 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <luasample.hh>
 #include <motor/application.hh>
 #include <motor/plugin/plugin.hh>
+#include <luasample.hh>
 
 MOTOR_PLUGIN_REGISTER(Motor::LuaSample);

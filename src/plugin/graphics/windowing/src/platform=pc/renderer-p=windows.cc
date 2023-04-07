@@ -39,7 +39,7 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 
 Renderer::PlatformRenderer::PlatformRenderer(weak< Renderer > renderer)
     : m_renderer(renderer)
-    , m_windowClassName(minitl::format< 128u >("__motor__%p__") | (const void*)renderer)
+    , m_windowClassName(minitl::format< 128u >(FMT("__motor__{0}__"), (const void*)renderer))
 {
     memset(&m_wndClassEx, 0, sizeof(WNDCLASSEX));
     m_wndClassEx.lpszClassName = m_windowClassName.c_str();

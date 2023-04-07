@@ -73,15 +73,15 @@ intrusive_list< T, INDEX >::item::operator=(const item& other)
 template < typename T, int INDEX >
 intrusive_list< T, INDEX >::item::~item()
 {
-    motor_assert_recover(m_next == this, "destroying item that is still in a list", unhook());
-    motor_assert_recover(m_previous == this, "destroying item that is still in a list", unhook());
+    if(motor_assert(m_next == this, "destroying item that is still in a list")) unhook();
+    if(motor_assert(m_previous == this, "destroying item that is still in a list")) unhook();
 }
 
 template < typename T, int INDEX >
 void intrusive_list< T, INDEX >::item::insert(const item* after) const
 {
-    motor_assert_recover(m_next == this, "list item already belongs to a list", return );
-    motor_assert_recover(m_previous == this, "list item already belongs to a list", return );
+    if(motor_assert(m_next == this, "list item already belongs to a list")) return;
+    if(motor_assert(m_previous == this, "list item already belongs to a list")) return;
     m_next             = after->m_next;
     m_previous         = after;
     after->m_next      = this;
@@ -97,8 +97,8 @@ bool intrusive_list< T, INDEX >::item::hooked() const
 template < typename T, int INDEX >
 void intrusive_list< T, INDEX >::item::unhook() const
 {
-    motor_assert_recover(m_next != this, "list item does not belong to a list", return );
-    motor_assert_recover(m_previous != this, "list item does not belong to a list", return );
+    if(motor_assert(m_next != this, "list item does not belong to a list")) return;
+    if(motor_assert(m_previous != this, "list item does not belong to a list")) return;
     m_next->m_previous = m_previous;
     m_previous->m_next = m_next;
     m_next             = this;

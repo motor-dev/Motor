@@ -66,13 +66,13 @@ void PackageLoader::runBuffer(weak< const Package > script, Resource::Resource& 
                               const minitl::Allocator::Block< u8 >& buffer)
 {
     MD5 md5 = digest(buffer);
-    motor_info("md5 sum of package: %s" | md5);
+    motor_info_format(Log::package(), "md5 sum of package: {0}", md5);
     ref< PackageBuilder::Nodes::Package > package
         = m_packageBuilder->createPackage(script->getScriptName(), buffer);
     for(Meta::AST::MessageList::const_iterator it = package->context().messages.begin();
         it != package->context().messages.end(); ++it)
     {
-        Logger::root()->log(it->severity, __FILE__, __LINE__, it->message.c_str());
+        Log::package()->log(it->severity, __FILE__, __LINE__, it->message.c_str());
     }
     if(package->success())
     {
@@ -86,7 +86,7 @@ void PackageLoader::reloadBuffer(weak< const Package > script, Resource::Resourc
                                  const minitl::Allocator::Block< u8 >& buffer)
 {
     MD5 md5 = digest(buffer);
-    motor_info("md5 sum of package: %s" | md5);
+    motor_info_format(Log::package(), "md5 sum of package: {0}", md5);
     ref< PackageBuilder::Nodes::Package > newPackage
         = m_packageBuilder->createPackage(script->getScriptName(), buffer);
     weak< PackageBuilder::Nodes::Package > oldPackage

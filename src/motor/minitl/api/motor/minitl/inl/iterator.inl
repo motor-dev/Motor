@@ -49,8 +49,8 @@ difference_type distance(T* t1, T* t2)
     const byte* ptr1 = reinterpret_cast< const byte* >(t1);
     const byte* ptr2 = reinterpret_cast< const byte* >(t2);
     ptrdiff_t   d    = ptr2 - ptr1;
-    motor_assert(d % minitl::align(sizeof(T), motor_alignof(T)) == 0,
-                 "distance between %p and %p is not a multiple of the size" | t1 | t2);
+    motor_assert_format(d % minitl::align(sizeof(T), motor_alignof(T)) == 0,
+                        "distance between {0} and {1} is not a multiple of the size", t1, t2);
     return d / minitl::align(sizeof(T), motor_alignof(T));
 }
 
@@ -60,8 +60,8 @@ difference_type distance(const T* t1, const T* t2)
     const byte* ptr1 = reinterpret_cast< const byte* >(t1);
     const byte* ptr2 = reinterpret_cast< const byte* >(t2);
     ptrdiff_t   d    = ptr2 - ptr1;
-    motor_assert(d % align(sizeof(T), motor_alignof(T)) == 0,
-                 "distance between %p and %p is not a multiple of the size" | t1 | t2);
+    motor_assert_format(d % align(sizeof(T), motor_alignof(T)) == 0,
+                        "distance between {0} and {1} is not a multiple of the size", t1, t2);
     return d / align(sizeof(T), motor_alignof(T));
 }
 

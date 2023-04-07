@@ -11,7 +11,7 @@ namespace Motor { namespace Python {
 PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     : m_pythonLibraryName(pythonLibraryName)
     , m_handle((m_pythonLibraryName && *m_pythonLibraryName)
-                   ? dlopen(minitl::format< 1024u >("lib%s.so") | m_pythonLibraryName,
+                   ? dlopen(minitl::format< 1024u >(FMT("lib{0}.so"), m_pythonLibraryName),
                             RTLD_LAZY | RTLD_GLOBAL)
                    : RTLD_DEFAULT)
     , m_status(dlerror() == 0)
@@ -20,7 +20,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
 {
     if(!m_status)
     {
-        motor_error("unable to load library %s: %s" | pythonLibraryName | dlerror());
+        motor_error_format(Log::python(), "unable to load library {0}: {1}", pythonLibraryName,
+                           dlerror());
     }
     else
     {
@@ -37,8 +38,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         motor_get_func_name_opt(f, dest);                                                          \
         if(!m_##dest)                                                                              \
         {                                                                                          \
-            motor_error("could not locate function %s in module %s" | #f                           \
-                        | (pythonLibraryName ? pythonLibraryName : "root"));                       \
+            motor_error_format(Log::python(), "could not locate function {0} in module {1}", #f,   \
+                               (pythonLibraryName ? pythonLibraryName : "root"));                  \
             m_status = false;                                                                      \
         }                                                                                          \
     } while(0)
@@ -199,8 +200,8 @@ void PythonLibrary::setupPath()
     ifilename programPath = Environment::getEnvironment().getProgramPath();
     programPath.pop_back();
     programPath.pop_back();
-    (*m_PyRun_SimpleString)(minitl::format< 4096 >("import sys; sys.path.append(\"%s/lib/\")")
-                            | programPath.str().name);
+    (*m_PyRun_SimpleString)(minitl::format< 4096 >(FMT("import sys; sys.path.append(\"{0}/lib/\")"),
+                                                   programPath.str().name));
 }
 
 }}  // namespace Motor::Python

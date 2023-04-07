@@ -157,7 +157,7 @@ public:
         motor_assert(m_refCount, "string's refcount already 0");
         m_refCount--;
     }
-    size_t size() const
+    u32 size() const
     {
         return m_length;
     }
@@ -234,10 +234,10 @@ StringInfo::StringInfoBuffer* StringInfo::StringInfoBufferCache::get(u32 index)
     }
     else
     {
-        motor_assert(
+        motor_assert_format(
             false,
-            "Asking for a buffer out of range; current buffer count: %d, requested buffer: %d"
-                | m_bufferCount | index);
+            "Asking for a buffer out of range; current buffer count: {0}, requested buffer: {1}",
+            m_bufferCount, index);
         return 0;
     }
 }
@@ -380,7 +380,7 @@ u32 istring::hash() const
     return (u32)(ptrdiff_t(m_index) & 0xFFFFFFFF);
 }
 
-size_t istring::size() const
+u32 istring::size() const
 {
     return StringInfo::getCache().resolve(m_index)->size();
 }
@@ -524,7 +524,7 @@ u32 igenericnamespace::size() const
 
 const istring& igenericnamespace::operator[](u32 index) const
 {
-    motor_assert(index < m_size, "index %d out of range %d" | index | m_size);
+    motor_assert_format(index < m_size, "index {0} out of range [0-{1}[", index, m_size);
     return m_namespace[index];
 }
 
@@ -539,7 +539,7 @@ void igenericnamespace::push_back(const istring& component)
 
 istring igenericnamespace::pop_back()
 {
-    motor_assert_recover(m_size >= 1, "pop_back called on an empty namespace", return istring());
+    if(motor_assert(m_size >= 1, "pop_back called on an empty namespace")) return istring();
     --m_size;
     istring result = m_namespace[m_size];
     m_namespace[m_size].~istring();
@@ -548,7 +548,7 @@ istring igenericnamespace::pop_back()
 
 istring igenericnamespace::pop_front()
 {
-    motor_assert_recover(m_size >= 1, "pop_front called on an empty namespace", return istring());
+    if(motor_assert(m_size >= 1, "pop_front called on an empty namespace")) return istring();
     istring result = m_namespace[0];
     for(u32 i = 1; i < m_size; ++i)
         m_namespace[i - 1] = m_namespace[i];

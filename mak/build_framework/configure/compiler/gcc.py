@@ -20,7 +20,7 @@ def gxx_modifier_platform(conf):
 
 
 class GCC(Configure.ConfigurationContext.GnuCompiler):
-    DEFINES = ['__GNUC__', '__GNUG__']
+    DEFINES = []
     NAMES = ('GCC', )
     TOOLS = 'gcc gxx'
 

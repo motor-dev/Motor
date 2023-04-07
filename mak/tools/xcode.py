@@ -510,7 +510,7 @@ class PBXProject(XCodeNode):
                     group = group.add_group(PBXGroup(name))
 
             source_nodes = getattr(p, 'source_nodes', [])
-            for source_node in source_nodes:
+            for _, source_node in source_nodes:
                 sources += group.add(bld.path, source_node)
 
         includes = set(getattr(p, 'includes', []))

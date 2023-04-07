@@ -84,13 +84,13 @@ ConversionCost Type::calculateConversion(const Type& other) const
         return ConversionCost::s_incompatible;
 }
 
-minitl::format< 1024u > Type::name() const
+minitl::format_buffer< 1024u > Type::name() const
 {
     static const char* constnessString[]   = {"=", ""};
     static const char* indirectionString[] = {"", "*", "!", "#"};
-    return minitl::format< 1024u >("%s%s%s%s")
-           | (indirection == Value ? "" : constnessString[constness])
-           | indirectionString[indirection] | constnessString[access] | metaclass->fullname();
+    return minitl::format< 1024u >(
+        FMT("{0}{1}{2}{3}"), (indirection == Value ? "" : constnessString[constness]),
+        indirectionString[indirection], constnessString[access], metaclass->fullname());
 }
 
 bool Type::isA(const Type& other) const

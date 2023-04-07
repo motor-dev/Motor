@@ -12,3 +12,9 @@
 #else
 #    define MOTOR_API_WINDOWING
 #endif
+
+namespace Motor { namespace Log {
+
+motor_api(WINDOWING) weak< Logger > windowing();
+
+}}  // namespace Motor::Log

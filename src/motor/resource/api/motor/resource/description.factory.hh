@@ -30,8 +30,8 @@ struct ClassID< Resource::Description< T > >
     }
     MOTOR_EXPORT static istring name()
     {
-        static const istring s_name(minitl::format< 2048u >("Description<%s>")
-                                    | TypeID< T >::name());
+        static const istring s_name(
+            minitl::format< 2048u >(FMT("Description<{0}>"), TypeID< T >::name()));
         return s_name;
     }
 };

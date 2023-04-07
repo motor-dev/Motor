@@ -25,9 +25,9 @@ static void setFilePointer(const char* debugName, HANDLE file, i64 wantedOffset)
     {
         offset.QuadPart = wantedOffset;
         SetFilePointerEx(file, offset, &setOffset, FILE_BEGIN);
-        motor_assert(setOffset.QuadPart == wantedOffset,
-                     "seek in file %s failed: position %d instead of %d" | debugName
-                         | setOffset.QuadPart | wantedOffset);
+        motor_assert_format(setOffset.QuadPart == wantedOffset,
+                            "seek in file {0} failed: position {1} instead of {2}", debugName,
+                            setOffset.QuadPart, wantedOffset);
     }
     else
     {
@@ -44,8 +44,9 @@ void Win32File::doFillBuffer(weak< File::Ticket > ticket) const
     if(h == INVALID_HANDLE_VALUE)
     {
         int errorCode = ::GetLastError();
-        motor_info("file %s (%s) could not be opened: CreateFile returned an error (%d)"
-                   | m_filename | pathname.name | errorCode);
+        motor_info_format(Log::fs(),
+                          "file {0} ({1}) could not be opened: CreateFile returned an error ({2})",
+                          m_filename, pathname.name, errorCode);
         ticket->error.set(true);
     }
     else
@@ -94,16 +95,18 @@ void Win32File::doFillBuffer(weak< File::Ticket > ticket) const
             ticket->processed += read;
             if(read == 0)
             {
-                motor_error("reached premature end of file in %s after reading %d bytes (offset %d)"
-                            | m_filename | ticket->processed | ticket->total);
+                motor_error_format(
+                    Log::fs(),
+                    "reached premature end of file in {0} after reading {1} bytes (offset {2})",
+                    m_filename, ticket->processed, ticket->total);
                 ticket->error.set(true);
             }
         }
         if(ticket->text && !ticket->error)
         {
-            motor_assert(processed + 1 <= ticket->buffer.count(),
-                         "buffer size is %s; bytes processed is %s" | ticket->buffer.count()
-                             | (processed + 1));
+            motor_assert_format(processed + 1 <= ticket->buffer.count(),
+                                "buffer size is {0}; bytes processed is {1}",
+                                ticket->buffer.count(), (processed + 1));
             // shrink buffer
             ticket->buffer.realloc(processed + 1);
             target[processed] = 0;
@@ -120,8 +123,9 @@ void Win32File::doWriteBuffer(weak< Ticket > ticket) const
     if(h == INVALID_HANDLE_VALUE)
     {
         int errorCode = ::GetLastError();
-        motor_info("file %s (%s) could not be opened: CreateFile returned an error (%d)"
-                   | m_filename | pathname.name | errorCode);
+        motor_info_format(Log::fs(),
+                          "file {0} ({1}) could not be opened: CreateFile returned an error ({2})",
+                          m_filename, pathname.name, errorCode);
         ticket->error.set(true);
     }
     else
@@ -140,10 +144,11 @@ void Win32File::doWriteBuffer(weak< Ticket > ticket) const
             ticket->processed += written;
             if(written == 0)
             {
-                motor_error(
-                    "could not write part of the buffer to file %s; failed after processing "
-                    "%d bytes out of %d"
-                    | m_filename | ticket->processed | ticket->total);
+                motor_error_format(
+                    Log::fs(),
+                    "could not write part of the buffer to file {0}; failed after processing "
+                    "{1} bytes out of {2}",
+                    m_filename, ticket->processed, ticket->total);
                 ticket->error.set(true);
             }
         }

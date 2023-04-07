@@ -149,7 +149,7 @@ def add_namespace_file(self, node):
 
 @extension('.doc')
 def add_doc(self, node):
-    if self.source_nodes[0].is_child_of(self.bld.motornode):
+    if self.source_nodes[0][1].is_child_of(self.bld.motornode):
         out_node = self.bld.motornode
     else:
         out_node = self.bld.srcnode

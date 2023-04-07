@@ -111,14 +111,15 @@ def setup(conf):
     found = False
     if conf.env.PROJECTS:
         found = setup_source_zlib(conf)
-    if not found and Options.options.zlib_package in ('best', 'pkgconfig'):
-        found = setup_pkgconfig_zlib(conf)
-    if not found and Options.options.zlib_package in ('best', 'system'):
-        found = setup_system_zlib(conf)
-    if not found and Options.options.zlib_package in ('best', 'prebuilt'):
-        found = setup_prebuilt_zlib(conf)
-    if not found and Options.options.zlib_package in ('best', 'source'):
-        found = setup_source_zlib(conf)
+    else:
+        if not found and Options.options.zlib_package in ('best', 'pkgconfig'):
+            found = setup_pkgconfig_zlib(conf)
+        if not found and Options.options.zlib_package in ('best', 'system'):
+            found = setup_system_zlib(conf)
+        if not found and Options.options.zlib_package in ('best', 'prebuilt'):
+            found = setup_prebuilt_zlib(conf)
+        if not found and Options.options.zlib_package in ('best', 'source'):
+            found = setup_source_zlib(conf)
     if not found:
         conf.end_msg('disabled', color='RED')
 
@@ -126,13 +127,14 @@ def setup(conf):
     found = False
     if conf.env.PROJECTS:
         found = setup_source_minizip(conf)
-    if not found and Options.options.minizip_package in ('best', 'pkgconfig'):
-        found = setup_pkgconfig_minizip(conf)
-    if not found and Options.options.minizip_package in ('best', 'system'):
-        found = setup_system_minizip(conf)
-    if not found and Options.options.minizip_package in ('best', 'prebuilt'):
-        found = setup_prebuilt_minizip(conf)
-    if not found and Options.options.minizip_package in ('best', 'source'):
-        found = setup_source_minizip(conf)
+    else:
+        if not found and Options.options.minizip_package in ('best', 'pkgconfig'):
+            found = setup_pkgconfig_minizip(conf)
+        if not found and Options.options.minizip_package in ('best', 'system'):
+            found = setup_system_minizip(conf)
+        if not found and Options.options.minizip_package in ('best', 'prebuilt'):
+            found = setup_prebuilt_minizip(conf)
+        if not found and Options.options.minizip_package in ('best', 'source'):
+            found = setup_source_minizip(conf)
     if not found:
         conf.end_msg('disabled', color='RED')

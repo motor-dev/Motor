@@ -29,11 +29,11 @@ ResourceManager::~ResourceManager()
 weak< ResourceManager::LoaderInfo >
 ResourceManager::getLoaderInfo(raw< const Meta::Class > classinfo)
 {
-    motor_assert(classinfo->operators,
-                 "Resource class %s does not have an operator table" | classinfo->fullname());
+    motor_assert_format(classinfo->operators, "Resource class {0} does not have an operator table",
+                        classinfo->fullname());
     raw< const Meta::Class > resourceType = classinfo->operators->templatedClass;
-    motor_assert(resourceType,
-                 "Resource class %s does not have a resource class" | classinfo->fullname());
+    motor_assert_format(resourceType, "Resource class {0} does not have a resource class",
+                        classinfo->fullname());
     for(minitl::vector< ref< LoaderInfo > >::iterator it = m_loaders.begin(); it != m_loaders.end();
         ++it)
     {
@@ -49,11 +49,11 @@ void ResourceManager::attach(raw< const Meta::Class > classinfo, weak< ILoader >
     for(minitl::vector< weak< ILoader > >::iterator it = info->loaders.begin();
         it != info->loaders.end(); ++it)
     {
-        motor_assert_recover(*it != loader,
-                             "registering twice the same loader for class %s" | classinfo->name,
-                             return );
+        if(motor_assert_format(*it != loader, "registering twice the same loader for class {0}",
+                               classinfo->name))
+            return;
     }
-    motor_info("registering loader for type %s" | classinfo->name);
+    motor_info_format(Log::resource(), "registering loader for type {0}", classinfo->name);
     info->loaders.push_back(loader);
     for(minitl::intrusive_list< const IDescription, 2 >::iterator resource
         = info->resources.begin();
@@ -81,7 +81,8 @@ void ResourceManager::detach(raw< const Meta::Class > classinfo, weak< const ILo
     {
         if(*it == loader)
         {
-            motor_info("unregistering loader for type %s" | classinfo->name);
+            motor_info_format(Log::resource(), "unregistering loader for type {0}",
+                              classinfo->name);
             for(minitl::intrusive_list< const IDescription, 2 >::iterator resource
                 = info->resources.begin();
                 resource != info->resources.end(); ++resource)
@@ -96,7 +97,8 @@ void ResourceManager::detach(raw< const Meta::Class > classinfo, weak< const ILo
             ++it;
         }
     }
-    motor_error("loader was not in the list of loaders for type %s" | classinfo->name);
+    motor_error_format(Log::resource(), "loader was not in the list of loaders for type {0}",
+                       classinfo->name);
 }
 
 void ResourceManager::load(raw< const Meta::Class >   classinfo,
@@ -165,7 +167,7 @@ size_t ResourceManager::updateTickets()
         {
             if(it->ticket->error)
             {
-                motor_error("resource loading error");
+                motor_error(Log::resource(), "resource loading error");
                 it = m_tickets.erase(it);
             }
             else if(it->ticket->done())
@@ -202,7 +204,7 @@ size_t ResourceManager::updateTickets()
         }
         else if(it->file->isDeleted())
         {
-            motor_info("todo: file deleted, remove resource");
+            motor_info(Log::resource(), "todo: file deleted, remove resource");
             it = m_watches.erase(it);
         }
         else if(it->file->getState() != it->fileState)

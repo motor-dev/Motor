@@ -155,8 +155,9 @@ PyObject* PyMotorEnum::str(PyObject* self)
     PyMotorEnum*              self_    = static_cast< PyMotorEnum* >(self);
     const Meta::Value&        v        = self_->value;
     raw< const Meta::Method > toString = self_->value[s_toString].as< raw< const Meta::Method > >();
-    minitl::format< 1024u >   format   = minitl::format< 1024u >("%s.%s") | v.type().name().c_str()
-                                     | toString->doCall(&self_->value, 1).as< const istring >();
+    minitl::format_buffer< 1024u > format
+        = minitl::format< 1024u >(FMT("{0}.{1}"), v.type().name().c_str(),
+                                  toString->doCall(&self_->value, 1).as< const istring >());
     if(s_library->getVersion() >= 30)
     {
         return s_library->m_PyUnicode_FromFormat(format);

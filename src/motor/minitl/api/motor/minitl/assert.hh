@@ -22,35 +22,36 @@ motor_api(MINITL) AssertionCallback_t setAssertionCallback(AssertionCallback_t c
 motor_api(MINITL) AssertionCallback_t getAssertionCallback();
 
 #if !(MOTOR_ENABLE_ASSERT)
-#    define motor_assert_impl_(cond, message, code) ((void)0)
+static inline bool assertCondition()
+{
+    return false;
+}
+#    define motor_assert_impl_(cond, msg) ::minitl::assertCondition()
 #else
-#    ifdef assert
-#        undef assert
-#    endif
-#    define motor_assert_impl_(cond, message, code)                                                \
-        do                                                                                         \
-        {                                                                                          \
-            static bool motor_ignore_ = false;                                                     \
-            if(!motor_ignore_ && !(cond))                                                          \
+#    define motor_assert_impl_(cond, msg)                                                          \
+        (!(cond) && [&]() {                                                                        \
+            static bool ignoreAll = false;                                                         \
+            if(!ignoreAll)                                                                         \
             {                                                                                      \
                 minitl::AssertionResult motor_r_;                                                  \
-                motor_r_ = minitl::getAssertionCallback()(__FILE__, __LINE__, #cond,               \
-                                                          (minitl::format< 4096 >)message);        \
+                motor_r_ = minitl::getAssertionCallback()(__FILE__, __LINE__, #cond, msg);         \
                 switch(motor_r_)                                                                   \
                 {                                                                                  \
                 case minitl::Abort: ::abort(); break;                                              \
-                case minitl::IgnoreAll: motor_ignore_ = true; break;                               \
+                case minitl::Ignore: break;                                                        \
+                case minitl::IgnoreAll: ignoreAll = true; break;                                   \
                 case minitl::Break: motor_break(); break;                                          \
                 default:;                                                                          \
                 }                                                                                  \
-                code;                                                                              \
             }                                                                                      \
-        } while(0)
+            return true;                                                                           \
+        }())
 #endif
 
-#define motor_assert(cond, message)               motor_assert_impl_(cond, message, ;)
-#define motor_assert_recover(cond, message, code) motor_assert_impl_(cond, message, code)
-#define motor_unimplemented()                     motor_assert_impl_(!"implemented", "not implemented", ;)
-#define motor_notreached()                        motor_assert_impl_(!"reached", "should not reach code", ;)
+#define motor_assert(cond, msg) motor_assert_impl_(cond, msg)
+#define motor_assert_format(cond, msg, ...)                                                        \
+    motor_assert_impl_(cond, minitl::format< 4096 >(FMT(msg), __VA_ARGS__))
+#define motor_unimplemented() motor_assert_impl_(!"implemented", "not implemented")
+#define motor_notreached()    motor_assert_impl_(!"reached", "should not reach code")
 
 }  // namespace minitl

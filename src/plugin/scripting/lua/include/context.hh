@@ -21,14 +21,14 @@ public:
     Context(const Plugin::Context& context);
     ~Context();
 
-    static minitl::format< 1024u > tostring(lua_State* state, int element);
-    static void                    printStack(lua_State* l);
+    static minitl::format_buffer< 1024u > tostring(lua_State* state, int element);
+    static void                           printStack(lua_State* l);
     static void typeError(lua_State* state, int narg, const char* expected, const char* got);
     static int  push(lua_State* state, const Meta::Value& v);
     static void checkArg(lua_State* state, int narg, int type);
     static void checkArg(lua_State* state, int narg, const char* userDataType);
     static void checkArg(lua_State* state, int narg, const Meta::Type& type);
-    static minitl::format< 1024u > getCallInfo(lua_State* state);
+    static minitl::format_buffer< 1024u > getCallInfo(lua_State* state);
 
 private:
     virtual void unload(weak< const Resource::IDescription > description,
