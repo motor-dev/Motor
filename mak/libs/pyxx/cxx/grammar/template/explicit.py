@@ -7,16 +7,15 @@ explicit-instantiation:
 """
 
 import glrp
-from ...parse import cxx98
+from typing import Any
+from ...parse import CxxParser, cxx98
 from ....ast.declarations import ExplicitSpecialization, ExplicitInstantiation
-from motor_typing import TYPE_CHECKING
 
 
 # amendment: @glrp.rule('explicit-specialization : "template" "<" ">" declaration')
 @glrp.rule('explicit-specialization : attribute-specifier-seq? begin-declaration "template" "<" "#>" declaration')
 @cxx98
-def explicit_specialization(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def explicit_specialization(self: CxxParser, p: glrp.Production) -> Any:
     # TODO: extern? not allowed
     # TODO: attribute-specifier-seq? not allowed
     return ExplicitSpecialization(p[5])
@@ -26,8 +25,7 @@ def explicit_specialization(self, p):
     'explicit-specialization : attribute-specifier-seq? begin-declaration decl-specifier-seq-continue "extern" "template" "<" "#>" declaration'
 )
 @cxx98
-def explicit_specialization_extern(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def explicit_specialization_extern(self: CxxParser, p: glrp.Production) -> Any:
     # TODO: extern? not allowed
     # TODO: attribute-specifier-seq? not allowed
     return ExplicitSpecialization(p[7])
@@ -36,8 +34,7 @@ def explicit_specialization_extern(self, p):
 # amendment: @glrp.rule('explicit-instantiation : "extern"? "template" declaration')
 @glrp.rule('explicit-instantiation : attribute-specifier-seq? begin-declaration "template" declaration')
 @cxx98
-def explicit_instantiation(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def explicit_instantiation(self: CxxParser, p: glrp.Production) -> Any:
     # TODO: attribute-specifier-seq? not allowed
     return ExplicitInstantiation(p[3], False)
 
@@ -46,12 +43,6 @@ def explicit_instantiation(self, p):
     'explicit-instantiation : attribute-specifier-seq? begin-declaration decl-specifier-seq-continue "extern" "template" declaration'
 )
 @cxx98
-def explicit_instantiation_extern(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def explicit_instantiation_extern(self: CxxParser, p: glrp.Production) -> Any:
     # TODO: attribute-specifier-seq? not allowed
     return ExplicitInstantiation(p[5], True)
-
-
-if TYPE_CHECKING:
-    from typing import Any
-    from ...parse import CxxParser

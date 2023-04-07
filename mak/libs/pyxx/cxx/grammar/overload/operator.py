@@ -11,15 +11,14 @@ operator: one of
 """
 
 import glrp
-from ...parse import cxx98, cxx20
+from typing import Any
+from ...parse import CxxParser, cxx98, cxx20
 from ....ast.reference import OperatorId
-from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('operator-function-id : "operator" overloadable-operator')
 @cxx98
-def operator_function_id(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def operator_function_id(self: CxxParser, p: glrp.Production) -> Any:
     return OperatorId(p[1])
 
 
@@ -61,42 +60,32 @@ def operator_function_id(self, p):
 @glrp.rule('overloadable-operator : "--"')
 @glrp.rule('overloadable-operator : ","')
 @cxx98
-def overloadable_operator(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def overloadable_operator(self: CxxParser, p: glrp.Production) -> Any:
     return p[0].text()
 
 
 @glrp.rule('overloadable-operator : ">>"')
 @cxx98
-def overloadable_operator_rshift(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def overloadable_operator_rshift(self: CxxParser, p: glrp.Production) -> Any:
     return p[0]
 
 
 @glrp.rule('overloadable-operator : "new"    [prec:left,1]"[" "]"')
 @glrp.rule('overloadable-operator : "delete" [prec:left,1]"[" "]"')
 @cxx98
-def overloadable_operator_array(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def overloadable_operator_array(self: CxxParser, p: glrp.Production) -> Any:
     return p[0].text() + '[]'
 
 
 @glrp.rule('overloadable-operator : "(" ")"')
 @glrp.rule('overloadable-operator : "[" "]"')
 @cxx98
-def overloadable_operator_bracket(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def overloadable_operator_bracket(self: CxxParser, p: glrp.Production) -> Any:
     return p[0].text() + p[1].text()
 
 
 @glrp.rule('overloadable-operator : "co_await"')
 @glrp.rule('overloadable-operator : "<=>"')
 @cxx20
-def overloadable_operator_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def overloadable_operator_cxx20(self: CxxParser, p: glrp.Production) -> Any:
     return p[0].text()
-
-
-if TYPE_CHECKING:
-    from typing import Any
-    from ...parse import CxxParser

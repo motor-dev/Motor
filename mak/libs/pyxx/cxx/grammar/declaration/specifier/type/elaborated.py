@@ -10,9 +10,9 @@ elaborated-enum-specifier:
 """
 
 import glrp
-from .....parse import cxx98
+from typing import Any
+from .....parse import CxxParser, cxx98
 from ......ast.type import ElaboratedClassTypeSpecifier, ElaboratedEnumTypeSpecifier
-from motor_typing import TYPE_CHECKING
 
 
 # amendment: make elaborated-type-specifier look like class-head
@@ -22,15 +22,13 @@ from motor_typing import TYPE_CHECKING
 #@glrp.rule('elaborated-type-specifier : class-key nested-name-specifier template? simple-template-id')
 @glrp.rule('elaborated-type-specifier : class-key attribute-specifier-seq? class-head-name [split:final_identifier]')
 @cxx98
-def elaborated_type_specifier_class(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def elaborated_type_specifier_class(self: CxxParser, p: glrp.Production) -> Any:
     return ElaboratedClassTypeSpecifier(p[0], p[1], p[2])
 
 
 @glrp.rule('elaborated-type-specifier : elaborated-enum-specifier')
 @cxx98
-def elaborated_type_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def elaborated_type_specifier(self: CxxParser, p: glrp.Production) -> Any:
     return p[0]
 
 
@@ -38,11 +36,5 @@ def elaborated_type_specifier(self, p):
 #@glrp.rule('elaborated-enum-specifier : enum attribute-specifier-seq? identifier')
 @glrp.rule('elaborated-enum-specifier : enum-key attribute-specifier-seq? enum-head-name')
 @cxx98
-def elaborated_enum_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def elaborated_enum_specifier(self: CxxParser, p: glrp.Production) -> Any:
     return ElaboratedEnumTypeSpecifier(p[0], p[1], p[2])
-
-
-if TYPE_CHECKING:
-    from typing import Any
-    from .....parse import CxxParser

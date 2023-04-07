@@ -10,14 +10,14 @@ qualified-namespace-specifier:
 """
 
 import glrp
-from ....parse import cxx98
+from typing import Any
+from ....parse import CxxParser, cxx98
 from .....ast.declarations import NamespaceAliasDeclaration
-from .....ast.reference import Reference, Id
-from motor_typing import TYPE_CHECKING
+from .....ast.reference import Reference, TemplateSpecifierId
 
 #@glrp.rule('namespace-alias : "identifier"')
 #@cxx98
-#def namespace_alias(self, p):
+#def namespace_alias(self: CxxParser, p: glrp.Production) -> Any:
 #    # type: (CxxParser, glrp.Production) -> Any
 #    pass
 
@@ -27,25 +27,20 @@ from motor_typing import TYPE_CHECKING
     'namespace-alias-definition : attribute-specifier-seq? begin-declaration "namespace" attribute-specifier-seq? "identifier" "=" qualified-namespace-specifier ";"'
 )
 @cxx98
-def namespace_alias_definition(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def namespace_alias_definition(self: CxxParser, p: glrp.Production) -> Any:
     return NamespaceAliasDeclaration(p[0], p[3], p[4].value, p[6])
 
 
 @glrp.rule('qualified-namespace-specifier : namespace-name')
 @cxx98
-def qualified_namespace_specifier(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    return Reference([(False, p[0])])
+def qualified_namespace_specifier(self: CxxParser, p: glrp.Production) -> Any:
+    return Reference([p[0]])
 
 
 @glrp.rule('qualified-namespace-specifier : nested-name-specifier template? namespace-name')
 @cxx98
-def qualified_namespace_specifier_nested(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    return Reference(p[0] + [(p[1], Id(p[2]))])
-
-
-if TYPE_CHECKING:
-    from typing import Any
-    from ....parse import CxxParser
+def qualified_namespace_specifier_nested(self: CxxParser, p: glrp.Production) -> Any:
+    id = p[2]
+    if p[1]:
+        id = TemplateSpecifierId(id)
+    return Reference(p[0] + [id])

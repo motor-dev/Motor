@@ -1,9 +1,19 @@
+class Declaration(object):
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        raise NotImplementedError
+
+
 from motor_typing import TYPE_CHECKING
 from .type import TypeSpecifierSeq
 
 
-class Declaration(object):
-    pass
+class ErrorDeclaration(Declaration):
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_error_declaration(self)
 
 
 class AmbiguousDeclaration(Declaration):
@@ -16,18 +26,47 @@ class AmbiguousDeclaration(Declaration):
         # type: (Visitor) -> None
         visitor.visit_ambiguous_declaration(self)
 
+    def accept_first(self, visitor):
+        # type: (Visitor) -> None
+        self._declarations[0].accept(visitor)
+
+    def accept_all(self, visitor):
+        # type: (Visitor) -> None
+        for declaration in self._declarations:
+            declaration.accept(visitor)
+
 
 class SimpleDeclaration(Declaration):
 
-    def __init__(self, attribute_specifier_seq, decl_specifier_seq, declarators):
-        # type: (List[Attribute], Optional[DeclSpecifierSeq], Optional[_InitDeclaratorList]) -> None
+    def __init__(self, attribute_specifier_seq, decl_specifier_seq, declarator_lists):
+        # type: (List[Attribute], Optional[DeclSpecifierSeq], List[List[_InitDeclarator]]) -> None
         self._attributes = attribute_specifier_seq
         self._decl_specifier_seq = decl_specifier_seq
-        self._declarators = declarators
+        if len(declarator_lists) == 1:
+            self._declarators = InitDeclaratorList(declarator_lists[0])                       # type: _InitDeclaratorList
+        else:
+            self._declarators = AmbiguousInitDeclaratorList(
+                [InitDeclaratorList(declarator_list) for declarator_list in declarator_lists]
+            )
 
     def accept(self, visitor):
         # type: (Visitor) -> None
         visitor.visit_simple_declaration(self)
+
+    def accept_attributes(self, visitor):
+        # type: (Visitor) -> None
+        for attribute in self._attributes:
+            attribute.accept(visitor)
+
+    def accept_decl_specifier_seq(self, visitor):
+        # type: (Visitor) -> None
+        if self._decl_specifier_seq is not None:
+            self._decl_specifier_seq.accept(visitor)
+
+    def accept_init_declarator_list(self, visitor):
+        # type: (Visitor) -> None
+        if self._declarators is not None:
+            self._declarators.accept(visitor)
 
 
 class StructuredBindingDeclaration(Declaration):
@@ -43,6 +82,15 @@ class StructuredBindingDeclaration(Declaration):
     def accept(self, visitor):
         # type: (Visitor) -> None
         visitor.visit_structured_binding_declaration(self)
+
+    def accept_attributes(self, visitor):
+        # type: (Visitor) -> None
+        for attribute in self._attributes:
+            attribute.accept(visitor)
+
+    def accept_initializer(self, visitor):
+        # type: (Visitor) -> None
+        self._initializer.accept(visitor)
 
 
 class StaticAssert(Declaration):
@@ -70,6 +118,11 @@ class AliasDeclaration(Declaration):
         # type: (Visitor) -> None
         visitor.visit_alias_declaration(self)
 
+    def accept_attributes(self, visitor):
+        # type: (Visitor) -> None
+        for attribute in self._attributes:
+            attribute.accept(visitor)
+
 
 class NamespaceDeclaration(Declaration):
 
@@ -77,7 +130,7 @@ class NamespaceDeclaration(Declaration):
         self, attribute_specifier_seq, attribute_specifier_seq_namespace, attribute_specifier_seq_namespace_identifier,
         inline, nested_name, namespace_name, declaration_seq
     ):
-        # type: (List[Attribute], List[Attribute], List[Attribute], bool, Optional[List[Tuple[bool, str]]], Optional[str], List[Declaration]) -> None
+        # type: (List[Attribute], List[Attribute], List[Attribute], bool, List[Tuple[bool, str]], Optional[str], List[Declaration]) -> None
         self._attributes = attribute_specifier_seq
         self._attributes_namespace = attribute_specifier_seq_namespace + attribute_specifier_seq_namespace_identifier
         self._inline = inline
@@ -89,11 +142,21 @@ class NamespaceDeclaration(Declaration):
         # type: (Visitor) -> None
         visitor.visit_namespace_declaration(self)
 
+    def accept_attributes(self, visitor):
+        # type: (Visitor) -> None
+        for attribute in self._attributes:
+            attribute.accept(visitor)
+
+    def accept_children(self, visitor):
+        # type: (Visitor) -> None
+        for decl in self._declaration_seq:
+            decl.accept(visitor)
+
 
 class NamespaceAliasDeclaration(Declaration):
 
     def __init__(self, attribute_specifier_seq, attribute_specifier_seq_namespace, alias_name, target_name):
-        # type: (List[Attribute], List[Attribute], str, Reference) -> None
+        # type: (List[Attribute], List[Attribute], str, AbstractReference) -> None
         self._attributes = attribute_specifier_seq
         self._attributes_namespace = attribute_specifier_seq_namespace
         self._alias_name = alias_name
@@ -103,11 +166,16 @@ class NamespaceAliasDeclaration(Declaration):
         # type: (Visitor) -> None
         visitor.visit_namespace_alias_declaration(self)
 
+    def accept_attributes(self, visitor):
+        # type: (Visitor) -> None
+        for attribute in self._attributes:
+            attribute.accept(visitor)
+
 
 class UsingDirective(Declaration):
 
     def __init__(self, attribute_specifier_seq, reference):
-        # type: (List[Attribute], Reference) -> None
+        # type: (List[Attribute], AbstractReference) -> None
         self._attributes = attribute_specifier_seq
         self._reference = reference
 
@@ -115,17 +183,31 @@ class UsingDirective(Declaration):
         # type: (Visitor) -> None
         visitor.visit_using_directive(self)
 
+    def accept_attributes(self, visitor):
+        # type: (Visitor) -> None
+        for attribute in self._attributes:
+            attribute.accept(visitor)
+
+    def accept_reference(self, visitor):
+        # type: (Visitor) -> None
+        self._reference.accept(visitor)
+
 
 class UsingDeclaration(Declaration):
 
     def __init__(self, attribute_specifier_seq, references):
-        # type: (List[Attribute], List[Tuple[bool, bool, Reference]]) -> None
+        # type: (List[Attribute], List[AbstractReference]) -> None
         self._attributes = attribute_specifier_seq
         self._references = references
 
     def accept(self, visitor):
         # type: (Visitor) -> None
         visitor.visit_using_declaration(self)
+
+    def accept_attributes(self, visitor):
+        # type: (Visitor) -> None
+        for attribute in self._attributes:
+            attribute.accept(visitor)
 
 
 class UsingEnumDeclaration(Declaration):
@@ -151,6 +233,11 @@ class AsmDeclaration(Declaration):
         # type: (Visitor) -> None
         visitor.visit_asm_declaration(self)
 
+    def accept_attributes(self, visitor):
+        # type: (Visitor) -> None
+        for attribute in self._attributes:
+            attribute.accept(visitor)
+
 
 class LinkageSpecification(Declaration):
 
@@ -164,11 +251,16 @@ class LinkageSpecification(Declaration):
         # type: (Visitor) -> None
         visitor.visit_linkage_specification(self)
 
+    def accept_attributes(self, visitor):
+        # type: (Visitor) -> None
+        for attribute in self._attributes:
+            attribute.accept(visitor)
+
 
 class OpaqueEnumDeclaration(Declaration):
 
     def __init__(self, name, decl_attributes, attributes, is_scoped, base_type):
-        # type: (Reference, List[Attribute], List[Attribute], bool, Optional[TypeSpecifierSeq]) -> None
+        # type: (AbstractReference, List[Attribute], List[Attribute], bool, Optional[TypeSpecifierSeq]) -> None
         self._name = name
         self._attributes = decl_attributes + attributes
         self._is_scoped = is_scoped
@@ -178,9 +270,17 @@ class OpaqueEnumDeclaration(Declaration):
         # type: (Visitor) -> None
         visitor.visit_opaque_enum_declaration(self)
 
+    def accept_attributes(self, visitor):
+        # type: (Visitor) -> None
+        for attribute in self._attributes:
+            attribute.accept(visitor)
+
 
 class _InitDeclarator(object):
-    pass
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        raise NotImplementedError
 
 
 class AmbiguousInitDeclarator(_InitDeclarator):
@@ -206,6 +306,11 @@ class InitDeclarator(_InitDeclarator):
         # type: (Visitor) -> None
         visitor.visit_init_declarator(self)
 
+    def accept_declarator(self, visitor):
+        # type: (Visitor) -> None
+        if self._declarator is not None:
+            self._declarator.accept(visitor)
+
 
 class MemberInitDeclarator(InitDeclarator):
 
@@ -226,32 +331,47 @@ class _InitDeclaratorList:
         # type: () -> None
         self._next = None  # type: Optional[_InitDeclarator]
 
-    def add(self, init_declarator):
-        # type: (_InitDeclarator) -> _InitDeclaratorList
-        return InitDeclaratorList(init_declarator, self)
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        raise NotImplementedError
 
 
 class InitDeclaratorList(_InitDeclaratorList):
 
-    def __init__(self, init_declarator, head=None):
-        # type: (_InitDeclarator, Optional[_InitDeclaratorList]) -> None
-        self._head = head
-        self._init_declarator = init_declarator
+    def __init__(self, init_declarators):
+        # type: (List[_InitDeclarator]) -> None
+        self._init_declarators = init_declarators
 
     def accept(self, visitor):
         # type: (Visitor) -> None
         visitor.visit_init_declarator_list(self)
 
+    def accept_init_declarators(self, visitor):
+        # type: (Visitor) -> None
+        for declarator in self._init_declarators:
+            declarator.accept(visitor)
+
 
 class AmbiguousInitDeclaratorList(_InitDeclaratorList):
 
     def __init__(self, ambigous_init_declarator_lists):
-        # type: (List[_InitDeclaratorList]) -> None
-        self._init_declarator_lists = ambigous_init_declarator_lists
+        # type: (List[InitDeclaratorList]) -> None
+        self._init_declarator_lists = list(
+            sorted(ambigous_init_declarator_lists, key=lambda x: len(x._init_declarators))
+        )
 
     def accept(self, visitor):
         # type: (Visitor) -> None
         visitor.visit_ambiguous_init_declarator_list(self)
+
+    def accept_best(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_init_declarator_list(self._init_declarator_lists[0])
+
+    def accept_all(self, visitor):
+        # type: (Visitor) -> None
+        for init_declarator_list in self._init_declarator_lists:
+            init_declarator_list.accept(visitor)
 
 
 class DeclSpecifierSeq(object):
@@ -264,7 +384,7 @@ class DeclSpecifierSeq(object):
 
     def add_decl_specifier(self, specifier):
         # type: (DeclarationSpecifier) -> None
-        self._decl_specifiers.insert(0, specifier)
+        self._decl_specifiers.append(specifier)
 
     def add_type_specifier(self, specifier):
         # type: (TypeSpecifier) -> None
@@ -273,12 +393,21 @@ class DeclSpecifierSeq(object):
         if self._has_defining_type_specifier and specifier._is_identifier:
             # Identifier is part of the declarator, kill this branch
             raise SyntaxError
-        self._has_defining_type_specifier = specifier._is_defining_type_specifier
+        self._has_defining_type_specifier |= specifier._is_defining_type_specifier
         self._type_specifier_seq.add(specifier)
 
     def accept(self, visitor):
         # type: (Visitor) -> None
         visitor.visit_decl_specifier_seq(self)
+
+    def accept_decl_specifiers(self, visitor):
+        # type: (Visitor) -> None
+        for decl_specifier in self._decl_specifiers:
+            decl_specifier.accept(visitor)
+
+    def accept_type_specifier_seq(self, visitor):
+        # type: (Visitor) -> None
+        self._type_specifier_seq.accept(visitor)
 
 
 class DeclarationSpecifier(object):
@@ -351,6 +480,16 @@ class FunctionSpecifiers(object):
     EXPLICIT = DeclarationSpecifier('explicit')
 
 
+class ErrorSpecifier(DeclarationSpecifier):
+
+    def __init__(self) -> None:
+        DeclarationSpecifier.__init__(self, '')
+
+    def accept(self, visitor):
+        # type: (Visitor) -> None
+        visitor.visit_error_specifier(self)
+
+
 class ExplicitSpecifier(DeclarationSpecifier):
 
     def __init__(self, value):
@@ -361,6 +500,11 @@ class ExplicitSpecifier(DeclarationSpecifier):
     def accept(self, visitor):
         # type: (Visitor) -> None
         visitor.visit_explicit_specifier(self)
+
+    def accept_expression(self, visitor):
+        # type: (Visitor) -> None
+        if self._value is not None:
+            self._value.accept(visitor)
 
 
 class ConceptDefinition(Declaration):
@@ -374,6 +518,10 @@ class ConceptDefinition(Declaration):
         # type: (Visitor) -> None
         visitor.visit_concept_definition(self)
 
+    def accept_constraint_expression(self, visitor):
+        # type: (Visitor) -> None
+        self._constraint_expression.accept(visitor)
+
 
 class ExplicitSpecialization(Declaration):
 
@@ -384,6 +532,10 @@ class ExplicitSpecialization(Declaration):
     def accept(self, visitor):
         # type: (Visitor) -> None
         visitor.visit_explicit_specialization(self)
+
+    def accept_declaration(self, visitor):
+        # type: (Visitor) -> None
+        self._declaration.accept(visitor)
 
 
 class ExplicitInstantiation(Declaration):
@@ -396,6 +548,10 @@ class ExplicitInstantiation(Declaration):
     def accept(self, visitor):
         # type: (Visitor) -> None
         visitor.visit_explicit_instantiation(self)
+
+    def accept_declaration(self, visitor):
+        # type: (Visitor) -> None
+        self._declaration.accept(visitor)
 
 
 class DeductionGuide(Declaration):
@@ -412,6 +568,11 @@ class DeductionGuide(Declaration):
         # type: (Visitor) -> None
         visitor.visit_deduction_guide(self)
 
+    def accept_attributes(self, visitor):
+        # type: (Visitor) -> None
+        for attribute in self._attributes:
+            attribute.accept(visitor)
+
 
 if TYPE_CHECKING:
     from typing import List, Optional, Tuple
@@ -419,7 +580,7 @@ if TYPE_CHECKING:
     from .attributes import Attribute
     from .type import Declarator, TypeSpecifier, RefQualifier, TypeId, ElaboratedEnumTypeSpecifier
     from .expressions import Expression
-    from .reference import Reference, TemplateId
+    from .reference import AbstractReference, TemplateId
     from .constraints import RequiresClause
     from .function import VirtSpecifier
     from .function import ParameterClause

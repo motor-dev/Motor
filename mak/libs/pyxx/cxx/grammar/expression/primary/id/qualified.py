@@ -12,40 +12,42 @@ nested-name-specifier:
 """
 
 import glrp
-from .....parse import cxx98, cxx11
-from ......ast.reference import Reference, Id, RootId, TemplateId
-from motor_typing import TYPE_CHECKING
+from typing import Any
+from .....parse import CxxParser, cxx98, cxx11
+from ......ast.reference import Id, RootId, TemplateId, TemplateSpecifierId, _Id
 
 
 @glrp.rule('qualified-id : nested-name-specifier "template"? unqualified-id')
 @cxx98
-def qualified_id(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def qualified_id(self: CxxParser, p: glrp.Production) -> Any:
     name_list = p[0]
-    name_list.append((p[1], p[2]))
+    id = p[2]  # type: _Id
+    if p[1]:
+        id = TemplateSpecifierId(id)
+    name_list.append(id)
     return name_list
 
 
 @glrp.rule('nested-name-specifier : "::"')
 @cxx98
-def nested_name_specifier_root(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def nested_name_specifier_root(self: CxxParser, p: glrp.Production) -> Any:
     return [(False, RootId())]
 
 
 @glrp.rule('nested-name-specifier : nested-name-specifier-element')
 @cxx98
-def nested_name_specifier_element(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    return [(False, p[0])]
+def nested_name_specifier_element(self: CxxParser, p: glrp.Production) -> Any:
+    return [p[0]]
 
 
 @glrp.rule('nested-name-specifier : nested-name-specifier "template"? "identifier" [prec:left,2]"::"')
 @cxx98
-def nested_name_specifier_identifier(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def nested_name_specifier_identifier(self: CxxParser, p: glrp.Production) -> Any:
     result = p[0]
-    result.append((p[1], Id(p[2].value)))
+    id = Id(p[2].value)    # type: _Id
+    if p[1]:
+        id = TemplateSpecifierId(id)
+    result.append(id)
     return result
 
 
@@ -53,10 +55,12 @@ def nested_name_specifier_identifier(self, p):
     'nested-name-specifier : nested-name-specifier "template"? template-name "<" template-argument-list? "#>" [prec:left,2]"::"'
 )
 @cxx98
-def nested_name_specifier_template(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def nested_name_specifier_template(self: CxxParser, p: glrp.Production) -> Any:
     result = p[0]
-    result.append((p[1], TemplateId(p[2], p[4])))
+    id = TemplateId(p[2], p[4])    # type: _Id
+    if p[1]:
+        id = TemplateSpecifierId(id)
+    result.append(id)
     return result
 
 
@@ -64,39 +68,29 @@ def nested_name_specifier_template(self, p):
 #@glrp.rule('nested-name-specifier-element : namespace-name [prec:left,2]"::"')
 @glrp.rule('nested-name-specifier-element : "identifier" [prec:left,2]"::"')
 @cxx98
-def nested_name_specifier_element_identifier(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def nested_name_specifier_element_identifier(self: CxxParser, p: glrp.Production) -> Any:
     return Id(p[0].value)
 
 
 @glrp.rule('nested-name-specifier-element : template-name "<" template-argument-list? "#>" [prec:left,2]"::"')
 @cxx98
-def nested_name_specifier_element_template(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def nested_name_specifier_element_template(self: CxxParser, p: glrp.Production) -> Any:
     return TemplateId(p[0], p[2])
 
 
 @glrp.rule('nested-name-specifier : decltype-specifier [prec:left,2]"::"')
 @cxx11
-def nested_name_specifier_cxx11(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    return [(False, p[0])]
+def nested_name_specifier_cxx11(self: CxxParser, p: glrp.Production) -> Any:
+    return [p[0]]
 
 
 @glrp.rule('"::"? : "::"')
 @cxx98
-def scope(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    return [(False, RootId())]
+def scope(self: CxxParser, p: glrp.Production) -> Any:
+    return [RootId()]
 
 
 @glrp.rule('"::"? : ')
 @cxx98
-def scope_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def scope_opt(self: CxxParser, p: glrp.Production) -> Any:
     return []
-
-
-if TYPE_CHECKING:
-    from typing import Any, List
-    from .....parse import CxxParser

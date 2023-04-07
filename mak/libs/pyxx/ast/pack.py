@@ -1,42 +1,41 @@
-from motor_typing import TYPE_CHECKING
-from .attributes import Attribute
 from .type import TypeId
+from . import Visitor
+from .attributes import Attribute
 from .expressions import Expression
+from .attributes import AttributeNamed
 
 
 class PackExpandType(TypeId):
 
-    def __init__(self, type):
-        # type: (TypeId) -> None
+    def __init__(self, type: TypeId) -> None:
         self._type = type
 
-    def accept(self, visitor):
-        # type: (Visitor) -> None
+    def accept(self, visitor: Visitor) -> None:
         visitor.visit_pack_expand_type(self)
+
+    def accept_type(self, visitor: Visitor) -> None:
+        self._type.accept(visitor)
 
 
 class PackExpandExpression(Expression):
 
-    def __init__(self, expression):
-        # type: (Expression) -> None
+    def __init__(self, expression: Expression) -> None:
         self._expression = expression
 
-    def accept(self, visitor):
-        # type: (Visitor) -> None
+    def accept(self, visitor: Visitor) -> None:
         visitor.visit_pack_expand_expression(self)
+
+    def accept_expression(self, visitor: Visitor) -> None:
+        self._expression.accept(visitor)
 
 
 class PackExpandAttributeNamed(Attribute):
 
-    def __init__(self, attribute):
-        # type: (AttributeNamed) -> None
+    def __init__(self, attribute: AttributeNamed) -> None:
         self._attribute = attribute
 
-    def accept(self, visitor):
-        # type: (Visitor) -> None
+    def accept(self, visitor: Visitor) -> None:
         visitor.visit_pack_expand_attribute_named(self)
 
-
-if TYPE_CHECKING:
-    from . import Visitor
-    from .attributes import AttributeNamed
+    def accept_attribute(self, visitor: Visitor) -> None:
+        self._attribute.accept(visitor)

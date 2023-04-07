@@ -1,18 +1,15 @@
 import glrp
 from . import lexer
-from .. import tables
-import os
-from motor_typing import Callable, TYPE_CHECKING, cast
+from ..messages import Logger
+from typing import Any, Callable, cast
 
 
 class CParser(glrp.Parser):
     Lexer = lexer.C89Lexer
 
-    def __init__(self, tmp_dir, mode=glrp.LOAD_CACHE):
-        # type: (str, int)->None
+    def __init__(self, logger: Logger, tmp_dir: str, mode: int = glrp.LOAD_CACHE) -> None:
         self.lexer = self.__class__.Lexer()
-        out_dir = os.path.dirname(tables.__file__)
-        glrp.Parser.__init__(self, self.lexer, 'translation-unit', tmp_dir, out_dir, mode)
+        glrp.Parser.__init__(self, self.lexer, 'translation-unit', tmp_dir, mode)
 
 
 class C89Parser(CParser):
@@ -35,32 +32,24 @@ class C23Parser(C17Parser):
     Lexer = lexer.C23Lexer
 
 
-def c89(func):
-    # type: (Callable[[CParser, glrp.Production], None]) -> Callable[[glrp.Parser, glrp.Production], None]
+def c89(func: Callable[[CParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(C89Parser, func.__name__, func)
-    return cast(Callable[[glrp.Parser, glrp.Production], None], func)
+    return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
-def c99(func):
-    # type: (Callable[[CParser, glrp.Production], None]) -> Callable[[glrp.Parser, glrp.Production], None]
+def c99(func: Callable[[CParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(C99Parser, func.__name__, func)
-    return cast(Callable[[glrp.Parser, glrp.Production], None], func)
+    return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
-def c11(func):
-    # type: (Callable[[CParser, glrp.Production], None]) -> Callable[[glrp.Parser, glrp.Production], None]
+def c11(func: Callable[[CParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(C11Parser, func.__name__, func)
-    return cast(Callable[[glrp.Parser, glrp.Production], None], func)
+    return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
-def c17(func):
-    # type: (Callable[[CParser, glrp.Production], None]) -> Callable[[glrp.Parser, glrp.Production], None]
+def c17(func: Callable[[CParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(C17Parser, func.__name__, func)
-    return cast(Callable[[glrp.Parser, glrp.Production], None], func)
+    return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
 from . import grammar
-
-from motor_typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from typing import Callable

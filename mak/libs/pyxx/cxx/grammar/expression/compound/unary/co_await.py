@@ -4,18 +4,12 @@ await-expression:
 """
 
 import glrp
-from .....parse import cxx20
+from typing import Any
+from .....parse import CxxParser, cxx20
 from ......ast.expressions import AwaitExpression
-from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('await-expression : "co_await" cast-expression')
 @cxx20
-def await_expression_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def await_expression_cxx20(self: CxxParser, p: glrp.Production) -> Any:
     return AwaitExpression(p[1])
-
-
-if TYPE_CHECKING:
-    from typing import Any
-    from .....parse import CxxParser
