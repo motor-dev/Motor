@@ -2,40 +2,46 @@ import sys
 import io
 import argparse
 import glrp
-from motor_typing import TypeVar, cast
+from typing import TypeVar, cast, Dict, Callable, Tuple, Union, Any, List
 
 T = TypeVar('T', bound='Callable[..., Dict[str, Any]]')
 
 
-def diagnostic(func):
-    # type: (T) -> T
-    def call(self, lexer, symbol, *args, **kw_args):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, Union[str, int], Union[str, int]) -> None
+def diagnostic(func: T) -> T:
+
+    def call(
+        self: 'Logger', lexer: glrp.Lexer, position: Tuple[int, int], *args: Union[str, int], **kw_args: Union[str, int]
+    ) -> None:
         if call in self._expected_diagnostics:
             self._expected_diagnostics.remove(cast(T, call))
-        format_values = func(self, symbol, *args, **kw_args)
+        format_values = func(self, lexer, position, *args, **kw_args)
         message = getattr(self.LANG, func.__name__, func.__doc__)
         assert isinstance(message, str)
-        self._msg_position('note', lexer, symbol, message.format(**format_values))
+        self._msg_position('note', lexer, position, message.format(**format_values))
 
     return cast(T, call)
 
 
-def warning(flag_name, enabled=False, enabled_in=[]):
-    # type: (str, bool, List[str]) -> Callable[[T], T]
-    def inner(func):
-        # type: (T) -> T
-        def call(self, lexer, symbol, *args, **kw_args):
-            # type: (Logger, glrp.Lexer, glrp.Symbol, *Union[str, int], **Union[str, int]) -> None
+def warning(flag_name: str, enabled: bool = False, enabled_in: List[str] = []) -> Callable[[T], T]:
+
+    def inner(func: T) -> T:
+
+        def call(
+            self: 'Logger', lexer: glrp.Lexer, position: Tuple[int, int], *args: Union[str, int], **kw_args: Union[str,
+                                                                                                                   int]
+        ) -> None:
             if not getattr(self._arguments, flag_name):
                 return
-            format_values = func(self, symbol, *args, **kw_args)
+            format_values = func(self, lexer, position, *args, **kw_args)
             self._warning_count += 1
             if self._warning_count == 1 and self._arguments.warn_error:
-                self.C0002(lexer, symbol)
+                self.C0002(lexer, position)
             message = getattr(self.LANG, func.__name__, func.__doc__)
             assert isinstance(message, str)
-            self._msg_position('warning', lexer, symbol, message.format(**format_values) + ' [-W{}]'.format(flag_name))
+            self._msg_position(
+                'warning', lexer, position,
+                message.format(**format_values) + ' [-W{}]'.format(flag_name)
+            )
 
         setattr(call, 'flag_name', flag_name)
         setattr(call, 'enabled_in', enabled_in)
@@ -45,15 +51,16 @@ def warning(flag_name, enabled=False, enabled_in=[]):
     return inner
 
 
-def error(func):
-    # type: (T) -> T
-    def call(self, lexer, symbol, *args, **kw_args):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, *Union[str, int], **Union[str, int]) -> None
+def error(func: T) -> T:
+
+    def call(
+        self: 'Logger', lexer: glrp.Lexer, position: Tuple[int, int], *args: Union[str, int], **kw_args: Union[str, int]
+    ) -> None:
         self._error_count += 1
-        format_values = func(self, symbol, *args, **kw_args)
+        format_values = func(self, lexer, position, *args, **kw_args)
         message = getattr(self.LANG, func.__name__, func.__doc__)
         assert isinstance(message, str)
-        self._msg_position('error', lexer, symbol, message.format(**format_values))
+        self._msg_position('error', lexer, position, message.format(**format_values))
 
     call.__name__ = func.__name__
     return cast(T, call)
@@ -72,8 +79,7 @@ class Logger(glrp.Logger):
     }
 
     @classmethod
-    def init_diagnostic_flags(self, group):
-        # type: (_ArgumentGroup) -> None
+    def init_diagnostic_flags(self, group: argparse._ArgumentGroup) -> None:
         group.add_argument(
             "-e",
             "--diagnostics-format",
@@ -91,8 +97,7 @@ class Logger(glrp.Logger):
                 group.add_argument('-W{}'.format(flag), dest=flag, help=argparse.SUPPRESS, action='store_true')
                 group.add_argument('-Wno-{}'.format(flag), dest=flag, help=argparse.SUPPRESS, action='store_false')
 
-    def __init__(self, arguments):
-        # type: (Namespace) -> None
+    def __init__(self, arguments: argparse.Namespace) -> None:
         glrp.Logger.__init__(self, io.open(sys.stderr.fileno(), 'w', encoding='utf-8', closefd=False))
         self._arguments = arguments
         self._warning_count = 0
@@ -100,8 +105,7 @@ class Logger(glrp.Logger):
         self._diagnostics_format = Logger.IDE_FORMAT[getattr(arguments, 'diagnostics_format')]
         self._expected_diagnostics = [] # type: List[Callable[..., Dict[str, Any]]]
 
-    def _msg_position(self, error_type, lexer, symbol, message):
-        # type: (str, glrp.Lexer,  glrp.Symbol, str) -> None
+    def _msg_position(self, error_type: str, lexer: glrp.Lexer, position: Tuple[int, int], message: str) -> None:
         if self._error_color:
             (color_error_type, color_filename, color_message, color_caret,
              color_off) = self.COLOR_PATTERN.get(error_type, self.DEFAULT_COLOR_PATTERN)
@@ -112,469 +116,47 @@ class Logger(glrp.Logger):
             color_caret = ''
             color_off = ''
 
-        filename = lexer._filename
-        (line, column), (end_line, end_column) = lexer.text_position(symbol)
-        context = lexer.context(symbol)
+        filename, (line, column), (end_line, end_column) = lexer.text_position(position)
+        context = lexer.context(position)
 
         self._out_file.write(self._diagnostics_format.format(**locals()))
         if len(context) == 1:
             self._out_file.write(context[0])
             self._out_file.write(
-                '\n%s%s%s%s\n' % (' ' * (column - 1), color_caret, '^' * (end_column - column), color_off)
+                '\n%s%s%s%s\n' % (' ' * (column - 1), color_caret, '^' + '~' * (end_column - column - 1), color_off)
             )
         else:
             for text in context[:-1]:
                 self._out_file.write(text)
                 self._out_file.write(
-                    '\n%s%s%s%s\n' % (' ' * (column - 1), color_caret, '^' * (len(text) - column + 1), color_off)
+                    '\n%s%s%s%s\n' % (' ' * (column - 1), color_caret, '^' + '~' * (len(text) - column), color_off)
                 )
                 column = 1
             self._out_file.write(context[-1])
             self._out_file.write('\n%s%s%s\n' % (color_caret, '^' * (end_column - 1), color_off))
 
-    def push_expected_diagnostics(self, diagnostics):
-        # type: (List[Callable[..., Dict[str, Any]]]) -> None
+    def push_expected_diagnostics(self, diagnostics: List[Callable[..., Dict[str, Any]]]) -> None:
         self._expected_diagnostics += diagnostics
 
-    def pop_expected_diagnostics(self):
-        # type: () -> bool
+    def pop_expected_diagnostics(self) -> bool:
         result = bool(self._expected_diagnostics)
         self._expected_diagnostics = []
         return result
 
-    #
-    # Indication of location
-    #
-    @diagnostic
-    def I0000(self, lexer, symbol):
-        # type: (glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """first declared here"""
-        return locals()
-
-    @diagnostic
-    def I0001(self, lexer, symbol):
-        # type: (glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """first defined here"""
-        return locals()
-
-    @diagnostic
-    def I0002(self, lexer, symbol, object_name):
-        # type: (glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """forward declaration of {object_name}"""
-        return locals()
-
-    @diagnostic
-    def I0003(self, lexer, symbol, match):
-        # type: (glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """partial specialization matches [{match}]"""
-        return locals()
-
-    @diagnostic
-    def I0004(self, lexer, symbol):
-        # type: (glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """template is declared here"""
-        return locals()
-
-    @diagnostic
-    def I0005(self, lexer, symbol, template_name, template_parameters, arguments):
-        # type: (glrp.Lexer, glrp.Symbol, str, str, str) -> Dict[str, Any]
-        """when instantiating template {template_name}<{template_parameters}> [with {arguments}]"""
-        return locals()
-
-    @diagnostic
-    def I0006(self, lexer, symbol, typedef_name, typedef_target):
-        # type: (glrp.Lexer, glrp.Symbol, str, str) -> Dict[str, Any]
-        """with {typedef_name} defined as {typedef_target}"""
-        return locals()
-
-    #
-    # High-level parse errors
-    #
     @error
-    def C0000(self, lexer, symbol, char):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """invalid character 'char' in input stream"""
+    def C0000(self, lexer: glrp.Lexer, position: Tuple[int, int], token: str) -> Dict[str, Any]:
+        """syntax error at token '{token}'"""
         return locals()
 
     @error
-    def C0001(self, lexer, symbol, option_context):
-        # type: (glrp.Lexer, glrp.Symbol, ArgumentParser) -> Dict[str, Any]
-        """invalid command line\n{usage}"""
-        usage = option_context.usage
+    def C0001(self, lexer: glrp.Lexer, position: Tuple[int, int], token: str, current_rules: str) -> Dict[str, Any]:
+        """syntax error at token '{token}' when trying to parse {current_rules}"""
         return locals()
 
     @error
-    def C0002(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
+    def C0002(self, lexer: glrp.Lexer, position: Tuple[int, int]) -> Dict[str, Any]:
         """warning treated as error"""
-        return locals()
-
-    @error
-    def C0003(self, lexer, symbol, ident):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """invalid #ident directive {ident}"""
-        return locals()
-
-    @error
-    def C0004(self, lexer, symbol, pragma):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """invalid #pragma directive {pragma}"""
-        return locals()
-
-    @error
-    def C0005(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """filename before line number in #line"""
-        return locals()
-
-    @error
-    def C0006(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """line number missing in #line"""
-        return locals()
-
-    @error
-    def C0007(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """invalid #line directive"""
-        return locals()
-
-    @error
-    def C0008(self, lexer, symbol, type):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """Invalid {type} constant"""
-        return locals()
-
-    @error
-    def C0009(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """Unmatched '"""
-        return locals()
-
-    @error
-    def C0010(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """string contains invalid escape code"""
-        return locals()
-
-    @error
-    def C0011(self, lexer, symbol, token):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """syntax error near token {token}"""
-        return locals()
-
-    @error
-    def C0012(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """unexpected end of file"""
-        return locals()
-
-    @error
-    def C0013(self, lexer, symbol, diagnostic):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """expected diagnostic {diagnostic} was not encountered"""
-        return locals()
-
-    @error
-    def C0014(self, lexer, symbol, specifier):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """cannot combine with previous '{specifier}' declaration specifier"""
-        return locals()
-
-    @error
-    def C0015(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """internal error"""
-        return locals()
-
-    @error
-    def C0016(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """expected unqualified id"""
-        return locals()
-
-    @error
-    def C0017(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """unexpected template specifier"""
-        return locals()
-
-    #
-    # Name clashing or name resolution issue
-    #
-    @error
-    def C0100(self, lexer, symbol, object_name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """redefinition of object {object_name}"""
-        return locals()
-
-    @error
-    def C0101(self, lexer, symbol, object_name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """{object_name} is not a class, namespace or enumeration"""
-        return locals()
-
-    @error
-    def C0102(self, lexer, symbol, object_name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """incomplete type '{object_name}' named in nested name specifier"""
-        return locals()
-
-    @error
-    def C0103(self, lexer, symbol, lookup, owner):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str, str) -> Dict[str, Any]
-        """no member named '{lookup}' in {owner}"""
-        return locals()
-
-    @error
-    def C0104(self, lexer, symbol, name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """'{name}' is not a template"""
-        return locals()
-
-    @error
-    def C0105(self, lexer, symbol, name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """template class '{name}' used without template arguments"""
-        return locals()
-
-    @error
-    def C0106(self, lexer, symbol, name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """need 'typename' before dependent scope name {name}"""
-        return locals()
-
-    @error
-    def C0107(self, lexer, symbol, name, argument_list):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str, str) -> Dict[str, Any]
-        """type/value mismatch in template parameter list for template<{argument_list}> class '{name}'"""
-        return locals()
-
-    @error
-    def C0108(self, lexer, symbol, name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """use of '{name}' with tag type that does not match previous declaration"""
-        return locals()
-
-    @error
-    def C0109(self, lexer, symbol, name, symbol_type, qualified_name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str, str, str) -> Dict[str, Any]
-        """no {symbol_type} named {name} in {qualified_name}"""
-        return locals()
-
-    @error
-    def C0110(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """expected class name"""
-        return locals()
-
-    @error
-    def C0111(self, lexer, symbol, name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """name '{name}' does not refer to a type"""
-        return locals()
-
-    @error
-    def C0112(self, lexer, symbol, name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """qualified name '{name}' does not refer to a method"""
-        return locals()
-
-    @error
-    def C0113(self, lexer, symbol, name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """name '{name}' does not refer to a method"""
-        return locals()
-
-    @error
-    def C0114(self, lexer, symbol, name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """{name} redeclared as different kind of symbol"""
-        return locals()
-
-    @error
-    def C0115(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """expected qualified name"""
-        return locals()
-
-    #
-    # Method and variable declaration/definition issue
-    #
-    @error
-    def C0200(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """functions that differ only by return type cannot be overloaded"""
-        return locals()
-
-    @error
-    def C0201(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """redefinition of default argument"""
-        return locals()
-
-    @error
-    def C0202(self, lexer, symbol, argument_name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """argument '{argument_name}' may not have void type"""
-        return locals()
-
-    @error
-    def C0203(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """expected the class name after '~' to name the enclosing class"""
-        return locals()
-
-    @error
-    def C0204(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """expected enclosing class name in constructor declaration"""
-        return locals()
-
-    @error
-    def C0205(self, lexer, symbol, method_name, namespace_name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str, str) -> Dict[str, Any]
-        """out-of-line definition of '{method_name}' does not match any declaration in {namespace_name}"""
-        return locals()
-
-    @error
-    def C0206(self, lexer, symbol, method_name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """'{method_name}' declared as an array of functions"""
-        return locals()
-
-    @error
-    def C0207(self, lexer, symbol, variable_name, type_new, type_original):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str, str, str) -> Dict[str, Any]
-        """redefinition of '{variable_name}}' with a different type: '{type_new}' vs '{type_original}'"""
-        return locals()
-
-    @error
-    def C0208(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """inline can only be used on functions"""
-        return locals()
-
-    @error
-    def C0209(self, lexer, symbol, variable_name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """'"""
-        return locals()
-
-    @error
-    def C0210(self, lexer, symbol, variable_name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """'"""
-        return locals()
-
-    #
-    # Type errors
-    #
-    @error
-    def C0300(self, lexer, symbol, from_type, to_type):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str, str) -> Dict[str, Any]
-        """type {from_type} is not compatible with {to_type}"""
-        return locals()
-
-    @error
-    def C0301(self, lexer, symbol, pretty_name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """too few template arguments for template {pretty_name}"""
-        return locals()
-
-    @error
-    def C0302(self, lexer, symbol, pretty_name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """too many template arguments for template {pretty_name}"""
-        return locals()
-
-    @error
-    def C0303(self, lexer, symbol, parameter_name):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """'template argument for template parameter {parameter_name} is incompatible'"""
-        return locals()
-
-    @error
-    def C0304(self, lexer, symbol, parameter_name, expected_type, got_type):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str, str, str) -> Dict[str, Any]
-        """invalid template argument for template parameter {parameter_name}; expected {expected_type}, got {got_type}"""
-        return locals()
-
-    @error
-    def C0305(self, lexer, symbol, from_type, to_type, qualifier):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str, str, str) -> Dict[str, Any]
-        """"invalid cast from {from_type} to {to_type}: cannot discard '{qualifier}' qualifier"""
-        return locals()
-
-    @error
-    def C0306(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """expected struct name"""
-        return locals()
-
-    @error
-    def C0307(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """unions cannot have a base class"""
-        return locals()
-
-    #
-    # Templates
-    #
-    def C0400(self, lexer, symbol, template_name, template_arguments):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str, str) -> Dict[str, Any]
-        """ambiguous partial specializations of {template_name}<{template_arguments}>"""
-        return locals()
-
-    @error
-    def C0401(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """extraneous 'template<>' in parameter declaration"""
-        return locals()
-
-    @error
-    def C0402(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """template specialization requires template<>"""
-        return locals()
-
-    @error
-    def C0403(self, lexer, symbol, type_1, type_2):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str, str) -> Dict[str, Any]
-        """template parameter mismatch: {type_1} vs {type_2}"""
-        return locals()
-
-    #
-    # Statements
-    #
-    def C1000(self, lexer, symbol, specifier):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str) -> Dict[str, Any]
-        """unexpected specifier: '{specifier}'"""
-        return locals()
-
-    #
-    # High-level parse warnings
-    #
-    @warning('c-type', enabled_in=['most', 'all'])
-    def W0000(self, lexer, symbol):
-        # type: (Logger, glrp.Lexer, glrp.Symbol) -> Dict[str, Any]
-        """C type used in CL kernel"""
-        return locals()
-
-    #
-    # Struct
-    #
-    @warning('mismatched-tags', enabled_in=['most', 'all'])
-    def W0100(self, lexer, symbol, struct_name, tag_old, tag_new):
-        # type: (Logger, glrp.Lexer, glrp.Symbol, str, str, str) -> Dict[str, Any]
-        """'{struct_name}' declared as {tag_new} here, but first declared as {tag_old}"""
         return locals()
 
 
 logger = None
-
-from motor_typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from typing import Dict, Callable, TypeVar, Union, Any, List, Tuple
-    import glrp
-    from argparse import ArgumentParser, Namespace, _ArgumentGroup

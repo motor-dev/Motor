@@ -1,26 +1,24 @@
 from ..symbol import Symbol
-from motor_typing import TYPE_CHECKING
+from typing import Any, List, Tuple
 
 
 class Token(Symbol):
 
-    def __init__(self, id, lexer, start_position, end_position, value, skipped_tokens):
-        # type: (int, Lexer, int, int, Any, List[Token]) -> None
-        Symbol.__init__(self, id, start_position, end_position)
+    def __init__(
+        self, id: int, lexer: "Lexer", position: Tuple[int, int], value: Any, skipped_tokens: List["Token"]
+    ) -> None:
+        Symbol.__init__(self, id, position)
         self.value = value
         self._skipped_tokens = skipped_tokens
         self._lexer = lexer
 
-    def duplicate(self):
-        # type: () -> Token
-        return Token(self._id, self._lexer, self._start_position, self._end_position, self.value, [])
+    def duplicate(self) -> "Token":
+        return Token(self._id, self._lexer, self.position, self.value, [])
 
-    def text(self):
-        # type: () -> str
+    def text(self) -> str:
         return self._lexer.text(self)
 
-    def debug_print(self, name_map, self_indent='', inner_indent=''):
-        # type: (List[str], str, str) -> None
+    def debug_print(self, name_map: List[str], self_indent: str = '', inner_indent: str = '') -> None:
         text = self.text()
         if text != name_map[self._id]:
             print('%s%s "%s"' % (self_indent, name_map[self._id], text))
@@ -28,6 +26,4 @@ class Token(Symbol):
             print('%s%s' % (self_indent, name_map[self._id]))
 
 
-if TYPE_CHECKING:
-    from motor_typing import Any, List
-    from .lexer import Lexer
+from .lexer import Lexer

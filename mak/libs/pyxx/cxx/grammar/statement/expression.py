@@ -4,21 +4,22 @@ expression-statement:
 """
 
 import glrp
-from ...parse import cxx98
-from ....ast.statements import ExpressionStatement, EmptyStatement
+from typing import Any
+from ...parse import CxxParser, cxx98
+from ....ast.statements import ExpressionStatement, EmptyStatement, ErrorStatement
 from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('expression-statement : expression? ";"')
 @cxx98
-def expression_statement(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def expression_statement(self: CxxParser, p: glrp.Production) -> Any:
     if p[0] is not None:
         return ExpressionStatement(p[0])
     else:
         return EmptyStatement()
 
 
-if TYPE_CHECKING:
-    from typing import Any
-    from ...parse import CxxParser
+@glrp.rule('expression-statement : "#error" ";"')
+@cxx98
+def expression_statement_error(self: CxxParser, p: glrp.Production) -> Any:
+    return ErrorStatement()

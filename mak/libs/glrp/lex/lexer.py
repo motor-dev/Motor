@@ -1,7 +1,7 @@
 from .token import Token
 from ..symbol import Symbol
 import re
-from motor_typing import TYPE_CHECKING, TypeVar
+from typing import TypeVar, Callable, Dict, Generator, List, Optional, Pattern, Tuple, Type
 
 F = TypeVar('F', bound='Lexer')
 
@@ -11,12 +11,13 @@ class Lexer:
 
     class State:
 
-        def __init__(self, regex_list):
-            # type: (List[Tuple[Pattern[str], List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str, bool, int]]]]]) -> None
+        def __init__(
+            self, regex_list: List[Tuple[Pattern[str], List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str,
+                                                                           bool, int]]]]]
+        ) -> None:
             self._regex = regex_list
 
-    def __init__(self):
-        # type: () -> None
+    def __init__(self) -> None:
         self._states = {}          # type: Dict[str, Lexer.State]
         self._state_stack = []     # type: List[Lexer.State]
         self._terminals = {'#eof': (0, False), '#mark': (1, False), '#start': (2, False), '#error': (3, False)}
@@ -34,71 +35,61 @@ class Lexer:
             if token_name not in self._terminals:
                 self._terminals[token_name] = (len(self._terminals), True)
 
-    def input(self, filename):
-        # type: (str) -> Generator[Token, None, None]
+    def input(self, filename: str, track_blanks: bool) -> Generator[Token, None, None]:
         self._filename = filename
         with open(filename, 'r') as file:
             self._lexdata = file.read()
             self._lexlen = len(self._lexdata)
-        return self._token()
+        return self._token(track_blanks)
 
-    def get_token_id(self, token_type):
-        # type: (str) -> int
+    def get_token_id(self, token_type: str) -> int:
         return self._terminals[token_type][0]
 
-    def set_token_type(self, token, type):
-        # type: (Token, str) -> Token
+    def set_token_type(self, token: Token, type: str) -> Token:
         token._id = self.get_token_id(type)
         return token
 
-    def push_state(self, state):
-        # type: (str) -> None
+    def push_state(self, state: str) -> None:
         self._state_stack.append(self._states[state])
 
-    def pop_state(self):
-        # type: () -> None
+    def pop_state(self) -> None:
         self._state_stack.pop(-1)
 
-    def text(self, symbol):
-        # type: (Symbol) -> str
-        return self._lexdata[symbol._start_position:symbol._end_position]
+    def text(self, symbol: Symbol) -> str:
+        return self._lexdata[symbol.position[0]:symbol.position[1]]
 
-    def text_position(self, symbol):
-        # type: (Symbol) -> Tuple[Tuple[int, int], Tuple[int, int]]
+    def text_position(self, position: Tuple[int, int]) -> Tuple[str, Tuple[int, int], Tuple[int, int]]:
         lexdata = self._lexdata
-        start_lineno = lexdata.count('\n', 0, symbol._start_position) + 1
-        line_count = lexdata.count('\n', symbol._start_position, symbol._end_position)
+        start_lineno = lexdata.count('\n', 0, position[0]) + 1
+        line_count = lexdata.count('\n', position[0], position[1])
         end_lineno = start_lineno + line_count
 
         if start_lineno:
-            start_column = symbol._start_position - lexdata.rfind('\n', 0, symbol._start_position)
+            start_column = position[0] - lexdata.rfind('\n', 0, position[0])
         else:
-            start_column = symbol._start_position
+            start_column = position[0]
 
         if line_count:
-            end_column = symbol._end_position - lexdata.rfind('\n', symbol._start_position, symbol._end_position)
+            end_column = position[1] - lexdata.rfind('\n', position[0], position[1])
         else:
-            end_column = start_column + symbol._end_position - symbol._start_position
+            end_column = start_column + position[1] - position[0]
 
-        return ((start_lineno, start_column), (end_lineno, end_column))
+        return (self._filename, (start_lineno, start_column), (end_lineno, end_column))
 
-    def context(self, symbol):
-        # type: (Symbol) -> List[str]
-        index_start = symbol._start_position
-        index_end = symbol._end_position
+    def context(self, position: Tuple[int, int]) -> List[str]:
+        index_start, index_end = position
         while index_start > 0:
             if self._lexdata[index_start - 1] == '\n':
                 break
             index_start -= 1
 
-        while index_end < len(self._lexdata) - 1:
-            if self._lexdata[index_end + 1] == '\n':
+        while index_end < len(self._lexdata):
+            if self._lexdata[index_end] == '\n':
                 break
             index_end += 1
-        return self._lexdata[index_start:index_end + 1].split('\n')
+        return self._lexdata[index_start:index_end].split('\n')
 
-    def _token(self, track_blanks=False):
-        # type: (bool) -> Generator[Token, None, None]
+    def _token(self, track_blanks: bool = False) -> Generator[Token, None, None]:
         lexpos = 0
         lexdata = self._lexdata
         lexlen = self._lexlen
@@ -119,7 +110,7 @@ class Lexer:
                 assert rule is not None
                 lexpos_end = m.end()
 
-                tok = Token(rule[3], self, lexpos, lexpos_end, None, skipped_tokens)
+                tok = Token(rule[3], self, (lexpos, lexpos_end), None, skipped_tokens)
                 lexpos = lexpos_end
 
                 new_token = rule[0](self, tok) # type: ignore
@@ -135,13 +126,17 @@ class Lexer:
             else:
                 raise SyntaxError("Illegal character '%s' at index %d" % (lexdata[lexpos], lexpos))
 
-        tok = Token(0, self, lexpos, lexpos, None, skipped_tokens)
+        tok = Token(0, self, (lexpos, lexpos), None, skipped_tokens)
         self._lexpos = lexpos
         yield tok
 
 
-def token(pattern, name=None, states=('INITIAL', ), warn=True):
-    # type: (str, Optional[str], Tuple[str,...], bool) -> Callable[[Callable[[F, Token], Optional[Token]]], Callable[[F, Token], Optional[Token]]]
+def token(
+    pattern: str,
+    name: Optional[str] = None,
+    states: Tuple[str, ...] = ('INITIAL', ),
+    warn: bool = True
+) -> Callable[[Callable[[F, Token], Optional[Token]]], Callable[[F, Token], Optional[Token]]]:
     if name is None:
         name = pattern
 
@@ -156,8 +151,9 @@ def token(pattern, name=None, states=('INITIAL', ), warn=True):
     return attach
 
 
-def _form_master_re(rule_list, start_index):
-    # type: (List[Tuple[str, str, Pattern[str], bool, Callable[[F, Token], Optional[Token]], str]], int) -> List[Tuple[Pattern[str], List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str, bool, int]]]]]
+def _form_master_re(
+    rule_list: List[Tuple[str, str, Pattern[str], bool, Callable[[F, Token], Optional[Token]], str]], start_index: int
+) -> List[Tuple[Pattern[str], List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str, bool, int]]]]]:
     if not rule_list:
         return []
 
@@ -179,9 +175,9 @@ def _form_master_re(rule_list, start_index):
         return _form_master_re(rule_list[:m], start_index) + _form_master_re(rule_list[m:], start_index + m)
 
 
-def _build_states(owner):
-    # type: (Type[Lexer]) -> Dict[str, Lexer.State]
-    rules = {}                                                                                # type: Dict[str, List[Tuple[str, str, Pattern[str], bool, Callable[[F, Token], Optional[Token]], str]]]
+def _build_states(owner: Type[Lexer]) -> Dict[str, Lexer.State]:
+    rules = {}     # type: Dict[str, List[Tuple[str, str, Pattern[str], bool, Callable[[F, Token], Optional[Token]], str]]]
+
     for action in dir(owner):
         for rule, name, states, warn in sorted(
             getattr(getattr(owner, action), 'patterns', []), key=lambda x: x[0], reverse=True
@@ -198,7 +194,3 @@ def _build_states(owner):
         result[state] = Lexer.State(_form_master_re(sorted(rule_list, key=lambda x: x[5], reverse=True), index))
         index += len(rule_list)
     return result
-
-
-if TYPE_CHECKING:
-    from typing import Callable, Dict, Generator, List, Optional, Pattern, Tuple, Type

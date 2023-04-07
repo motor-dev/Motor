@@ -1,6 +1,8 @@
 import glrp
 import decimal
-from motor_typing import TYPE_CHECKING
+from typing import List, Optional, Tuple, Generator
+import re
+import bisect
 
 decimal.getcontext().prec = 24
 
@@ -183,6 +185,14 @@ _keywords_reflection = ('reflexpr', )  # tupe: Tuple[str,...]
 
 _keywords_cxx23 = _keywords_transactional + _keywords_reflection
 
+REGEX_INCLUDE = re.compile(r'\#[ \t\v\r]*include[ \t\v\r]+?((?:"[^"]*")|(?:<[^>]*>))[ \t\v\r]*\n')
+REGEX_LINE = re.compile(
+    r'\#[ \t\v\r]*line(?:[ \t\v\r]+(\d+))(?:[ \t\v\r]+(\d+))?(?:[ \t\v\r]+(\d+))?(?:[ \t\v\r]+(\d+))?(?:[ \t\v\r]+"([^\n"]*)")?[ \t\v\r]*\n'
+)
+REGEX_LINE_2 = re.compile(
+    r'\#[ \t\v\r](\d+)(?:[ \t\v\r]+"([^\n"]*)")?(?:[ \t\v\r]+(\d+))?(?:[ \t\v\r]+(\d+))?(?:[ \t\v\r]+(\d+))?[ \t\v\r]*\n'
+)
+
 
 class Cxx98Lexer(glrp.Lexer):
     keywords = _keywords
@@ -194,9 +204,12 @@ class Cxx98Lexer(glrp.Lexer):
         'string-literal-macro', 'string-literal-macro-function', '%>'
     )
 
-    def __init__(self):
-        # type: () -> None
+    def __init__(self) -> None:
         glrp.Lexer.__init__(self)
+        self._locations = []       # type: List[int]
+        self._fileinfo = []        # type: List[Tuple[str, int, int]]
+        self._included_files = []  # type: List[str]
+
         self._macros = {
             '__alignof__': 'alignof-macro',
             '__attribute__': 'attribute-specifier-macro-function',
@@ -223,6 +236,7 @@ class Cxx98Lexer(glrp.Lexer):
             '__is_constructible': 'type-trait-macro-function',
             '__is_convertible': 'type-trait-macro-function',
             '__is_destructible': 'type-trait-macro-function',
+            '__is_enum': 'type-trait-macro-function',
             '__is_empty': 'type-trait-macro-function',
             '__is_final': 'type-trait-macro-function',
             '__is_floating_point': 'type-trait-macro-function',
@@ -262,8 +276,7 @@ class Cxx98Lexer(glrp.Lexer):
         }
 
     @glrp.token(r'[ \t\n]+', 'whitespace', warn=False)
-    def _00_skip(self, t):
-        # type: (glrp.Token) -> Optional[glrp.Token]
+    def _00_skip(self, t: glrp.Token) -> Optional[glrp.Token]:
         return None
 
     # arithmetic operators
@@ -291,15 +304,13 @@ class Cxx98Lexer(glrp.Lexer):
     @glrp.token(r'\]', ']')
     @glrp.token(r'\}', '}')
     @glrp.token(r'\)', ')')
-    def _01_tok(self, token):
-        # type: (glrp.Token) -> glrp.Token
+    def _01_tok(self, token: glrp.Token) -> Optional[glrp.Token]:
         return token
 
     @glrp.token(r'>')
-    def _01_angle_bracket(self, token):
-        # type: (glrp.Token) -> glrp.Token
+    def _01_angle_bracket(self, token: glrp.Token) -> Optional[glrp.Token]:
         try:
-            if self._lexdata[token._end_position] == '>':
+            if self._lexdata[token.position[1]] == '>':
                 self.set_token_type(token, '%>')
             return token
         except IndexError:
@@ -325,66 +336,70 @@ class Cxx98Lexer(glrp.Lexer):
     @glrp.token(r'->')
     @glrp.token(r'\.\*', '.*')
     @glrp.token(r'::')
-    def _02_tok(self, token):
-        # type: (glrp.Token) -> glrp.Token
+    def _02_tok(self, token: glrp.Token) -> Optional[glrp.Token]:
         return token
 
     @glrp.token(r'<<=')
     @glrp.token(r'>>=')
     @glrp.token(r'->\*', '->*')
     @glrp.token(r'\.\.\.', '...')
-    def _03_tok(self, token):
-        # type: (glrp.Token) -> glrp.Token
+    def _03_tok(self, token: glrp.Token) -> Optional[glrp.Token]:
         return token
 
     @glrp.token(r'\#(?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'preprocessor', warn=False)
-    def _03_preprocessor(self, t):
-        # type: (glrp.Token) -> Optional[glrp.Token]
+    def _03_preprocessor(self, t: glrp.Token) -> Optional[glrp.Token]:
         #if t.value.find('include') != -1:
         #    t.lexer.includes.append(t.value)
+        return None
+
+    @glrp.token(
+        r'\#[ \t\v\r]*include[ \t\v\r]+?(?:(?:"[^"]*")|(?:<[^>]*>))[ \t\v\r]*\n', 'preprocessor_include', warn=False
+    )
+    def _04_preprocessor_include(self, t: glrp.Token) -> Optional[glrp.Token]:
+        match = REGEX_INCLUDE.fullmatch(t.text())
+        assert match is not None
+        include = match.groups()[0]
+        self._included_files.append(include)
         return None
 
     @glrp.token(
         r'\#[ \t\v\r]*line(?:[ \t\v\r]+\d+)*(?:[ \t\v\r]+"[^\n"]*")?[ \t\v\r]*\n', 'preprocessor_line', warn=False
     )
-    def _04_preprocessor_line(self, t):
-        # type: (glrp.Token) -> Optional[glrp.Token]
-        #if t.value.find('include') != -1:
-        #    t.lexer.includes.append(t.value)
-        tokens = t.text()[1:].split()
-        self._lineno = 1 + int(tokens[1])
-        if len(tokens) > 2:
-            self._filename = tokens[-1][1:-1]
+    def _04_preprocessor_line(self, t: glrp.Token) -> Optional[glrp.Token]:
+        match = REGEX_LINE.fullmatch(t.text())
+        assert match is not None
+        lineno, _, _, _, filename = match.groups()
+        self._locations.append(t.position[1])
+        lineno = int(lineno)
+        if filename is None: filename = self._fileinfo[-1][0]
+        self._fileinfo.append((filename, lineno, 1))
         return None
 
     @glrp.token(
         r'\#[ \t\v\r]\d+(?:[ \t\v\r]+"[^\n"]*"(?:[ \t\v\r]+\d+)*)?[ \t\v\r]*\n', 'preprocessor_line_2', warn=False
     )
-    def _04_preprocessor_line_2(self, t):
-        # type: (glrp.Token) -> Optional[glrp.Token]
-        #if t.value.find('include') != -1:
-        #    t.lexer.includes.append(t.value)
-        tokens = t.text()[1:].split()
-        self._lineno = 1 + int(tokens[0])
-        if len(tokens) > 1:
-            self._filename = tokens[1][1:-1]
+    def _04_preprocessor_line_2(self, t: glrp.Token) -> Optional[glrp.Token]:
+        match = REGEX_LINE_2.fullmatch(t.text())
+        assert match is not None
+        lineno, filename, _, _, _ = match.groups()
+        self._locations.append(t.position[1])
+        lineno = int(lineno)
+        if filename is None: filename = self._fileinfo[-1][0]
+        self._fileinfo.append((filename, lineno, 1))
         return None
 
     @glrp.token(r'/\*[\!\*](.|\n)*?\*/', 'doxycomment-block')
     @glrp.token(r'//[/\!](?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'doxycomment-line')
-    def _05_documentation(self, token):
-        # type: (glrp.Token) -> glrp.Token
+    def _05_documentation(self, token: glrp.Token) -> Optional[glrp.Token]:
         return token
 
     @glrp.token(r'/\*(.|\n)*?\*/', 'block-comment', warn=False)
     @glrp.token(r'//(?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'line-comment', warn=False)
-    def _06_comment(self, t):
-        # type: (glrp.Token) -> Optional[glrp.Token]
+    def _06_comment(self, t: glrp.Token) -> Optional[glrp.Token]:
         return None
 
     @glrp.token(_identifier, '%identifier')
-    def _07_identifier(self, t):
-        # type: (glrp.Token) -> Optional[glrp.Token]
+    def _07_identifier(self, t: glrp.Token) -> Optional[glrp.Token]:
         t.value = self.text(t)
         if t.value in self.keywords:
             self.set_token_type(t, t.value)
@@ -398,30 +413,56 @@ class Cxx98Lexer(glrp.Lexer):
         return t
 
     @glrp.token(_integer_literal, 'integer-literal')
-    def _08_integer_literal(self, t):
-        # type: (glrp.Token) -> Optional[glrp.Token]
+    def _08_integer_literal(self, t: glrp.Token) -> Optional[glrp.Token]:
         t.value = t.text()
         return t
 
     @glrp.token(_floating_literal, 'floating-literal')
-    def _10_floating_literal(self, t):
-        # type: (glrp.Token) -> Optional[glrp.Token]
+    def _10_floating_literal(self, t: glrp.Token) -> Optional[glrp.Token]:
         t.value = t.text()
         return t
 
     @glrp.token(_string_literal, 'string-literal')
-    def _12_string_literal(self, t):
-        # type: (glrp.Token) -> Optional[glrp.Token]
+    def _12_string_literal(self, t: glrp.Token) -> Optional[glrp.Token]:
         text = self.text(t)
         t.value = text[1:-1]
         return t
 
     @glrp.token(_character_literal, 'character-literal')
-    def _12_character_literal(self, t):
-        # type: (glrp.Token) -> Optional[glrp.Token]
+    def _12_character_literal(self, t: glrp.Token) -> Optional[glrp.Token]:
         text = self.text(t)
         t.value = text[1:-1]
         return t
+
+    def text_position(self, position: Tuple[int, int]) -> Tuple[str, Tuple[int, int], Tuple[int, int]]:
+        lexdata = self._lexdata
+
+        index = bisect.bisect_right(self._locations, position[0])
+        assert index > 0
+        index -= 1
+        start_position = self._locations[index]
+        filename, lineno, column = self._fileinfo[index]
+
+        start_lineno = lexdata.count('\n', start_position, position[0]) + lineno
+        line_count = lexdata.count('\n', position[0], position[1])
+        end_lineno = start_lineno + line_count
+
+        if start_lineno != lineno:
+            start_column = position[0] - lexdata.rfind('\n', 0, position[0])
+        else:
+            start_column = column + position[0] - start_position
+
+        if line_count != 0:
+            end_column = position[1] - lexdata.rfind('\n', position[0], position[1])
+        else:
+            end_column = start_column + position[1] - position[0]
+
+        return (filename, (start_lineno, start_column), (end_lineno, end_column))
+
+    def input(self, filename: str, track_blanks: bool = False) -> Generator[glrp.Token, None, None]:
+        self._locations.append(0)
+        self._fileinfo.append((filename, 1, 1))
+        return glrp.Lexer.input(self, filename, track_blanks)
 
 
 class Cxx03Lexer(Cxx98Lexer):
@@ -432,8 +473,7 @@ class Cxx11Lexer(Cxx03Lexer):
     tokens = Cxx03Lexer.tokens + ('[[', ) + _keywords_cxx11
     keywords = Cxx03Lexer.keywords + _keywords_cxx11
 
-    def _token(self, track_blanks=False):
-        # type: (bool) -> Generator[glrp.Token, None, None]
+    def _token(self, track_blanks: bool = False) -> Generator[glrp.Token, None, None]:
         # override token to concatenate [ [ into [[
         # preserving comments and other items between the [ symbols
         queue = []     # type: List[glrp.Token]
@@ -464,26 +504,26 @@ class Cxx11Lexer(Cxx03Lexer):
                     yield token
 
     @glrp.token(_user_defined_integer_literal, 'user-defined-integer-literal')
-    def _09_user_integer_literal(self, t):
-        # type: (glrp.Token) -> Optional[glrp.Token]
+    def _09_user_integer_literal(self, t: glrp.Token) -> Optional[glrp.Token]:
         t.value = (self.text(t), '')   # TODO
         return t
 
     @glrp.token(_user_defined_floating_literal, 'user-defined-floating-literal')
-    def _11_user_floating_literal(self, t):
-        # type: (glrp.Token) -> Optional[glrp.Token]
+    def _11_user_floating_literal(self, t: glrp.Token) -> Optional[glrp.Token]:
         t.value = (self.text(t), '')   # TODO
         return t
 
     @glrp.token(_user_defined_character_literal, 'user-defined-character-literal')
-    def _13_user_defined_character_literal(self, t):
-        # type: (glrp.Token) -> Optional[glrp.Token]
-        t.value = (self.text(t), '')   # TODO
+    def _13_user_defined_character_literal(self, t: glrp.Token) -> Optional[glrp.Token]:
+        value = self.text(t)
+        end_string = value.rfind("'")
+        literal_id = value[end_string + 1:]
+        text = value[1:end_string]
+        t.value = (text, literal_id)
         return t
 
     @glrp.token(_user_defined_string_literal, 'user-defined-string-literal')
-    def _13_user_defined_string_literal(self, t):
-        # type: (glrp.Token) -> Optional[glrp.Token]
+    def _13_user_defined_string_literal(self, t: glrp.Token) -> Optional[glrp.Token]:
         value = self.text(t)
         end_string = value.rfind('"')
         literal_id = value[end_string + 1:]
@@ -505,15 +545,10 @@ class Cxx20Lexer(Cxx17Lexer):
     keywords = Cxx17Lexer.keywords + _keywords_cxx20
 
     @glrp.token(r'<=>')
-    def _03_tok_spaceship(self, token):
-        # type: (glrp.Token) -> glrp.Token
+    def _03_tok_spaceship(self, token: glrp.Token) -> Optional[glrp.Token]:
         return token
 
 
 class Cxx23Lexer(Cxx20Lexer):
     tokens = Cxx20Lexer.tokens + _keywords_cxx23
     keywords = Cxx20Lexer.keywords + _keywords_cxx23
-
-
-if TYPE_CHECKING:
-    from motor_typing import List, Optional, Tuple, Generator, Set

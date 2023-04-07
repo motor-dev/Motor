@@ -4,10 +4,10 @@ deduction-guide:
 """
 
 import glrp
-from ...parse import cxx17
-from ....ast.declarations import DeductionGuide
+from typing import Any
+from ...parse import CxxParser, cxx17
+from ....ast.declarations import DeductionGuide, ErrorDeclaration
 from ....ast.reference import TemplateId
-from motor_typing import TYPE_CHECKING
 
 
 # TODO: attribute-specifier-seq? should be empty
@@ -15,11 +15,22 @@ from motor_typing import TYPE_CHECKING
     'deduction-guide : attribute-specifier-seq? begin-decl-deduction-guide explicit-specifier? "identifier" "(" parameter-declaration-clause ")" "->" template-name "<" template-argument-list? "#>" ";"'
 )
 @cxx17
-def deduction_guide_explicit_cxx17(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    return DeductionGuide(p[0], p[3], p[2], p[5], TemplateId(p[8], p[10]))
+def deduction_guide_explicit_cxx17(self: CxxParser, p: glrp.Production) -> Any:
+    if p[5] is not None:
+        return DeductionGuide(p[0], p[3], p[2], p[5], TemplateId(p[8], p[10]))
+    else:
+        return ErrorDeclaration()
 
 
-if TYPE_CHECKING:
-    from typing import Any
-    from ...parse import CxxParser
+@glrp.rule(
+    'deduction-guide : attribute-specifier-seq? begin-decl-deduction-guide "#error" "(" parameter-declaration-clause ")" "->" template-name "<" template-argument-list? "#>" ";"'
+)
+@glrp.rule(
+    'deduction-guide : attribute-specifier-seq? begin-decl-deduction-guide explicit-specifier? "identifier" "(" parameter-declaration-clause ")" "#error" ";"'
+)
+@glrp.rule(
+    'deduction-guide : attribute-specifier-seq? begin-decl-deduction-guide "#error" "(" parameter-declaration-clause ")" "#error" ";"'
+)
+@cxx17
+def deduction_guide_explicit_error_cxx17(self: CxxParser, p: glrp.Production) -> Any:
+    return ErrorDeclaration()

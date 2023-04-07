@@ -19,16 +19,6 @@ class Parser1(glrp.Parser):
         # type: (glrp.Production) -> None
         pass
 
-    @glrp.merge('B')
-    def merged_B(self, ab):
-        # type: (Optional[int], Optional[int]) -> Optional[int]
-        return ab
-
-    @glrp.merge('A')
-    def merged_A(self, merged_B, b):
-        # type: (Optional[int], Optional[int]) -> Optional[int]
-        return b
-
     @glrp.rule("A : a B c")
     @glrp.rule("A : a a B c")
     def p_A(self, p):
@@ -44,7 +34,7 @@ class Parser1(glrp.Parser):
     def __init__(self):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
-        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.', mode=1)
+        glrp.Parser.__init__(self, self.lexer, 'prog', '.', mode=1)
 
 
 class Parser2(glrp.Parser):
@@ -97,7 +87,7 @@ class Parser2(glrp.Parser):
     def __init__(self):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
-        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.', mode=1)
+        glrp.Parser.__init__(self, self.lexer, 'prog', '.', mode=1)
 
 
 class Parser3(glrp.Parser):
@@ -141,7 +131,7 @@ class Parser3(glrp.Parser):
     def __init__(self):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
-        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.', mode=1)
+        glrp.Parser.__init__(self, self.lexer, 'prog', '.', mode=1)
 
 
 class Parser4(glrp.Parser):
@@ -173,7 +163,7 @@ class Parser4(glrp.Parser):
     def __init__(self):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
-        glrp.Parser.__init__(self, self.lexer, 's', '.', '.', mode=1)
+        glrp.Parser.__init__(self, self.lexer, 's', '.', mode=1)
 
 
 class Parser5(glrp.Parser):
@@ -252,7 +242,7 @@ class Parser5(glrp.Parser):
     def __init__(self):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
-        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.', mode=1)
+        glrp.Parser.__init__(self, self.lexer, 'prog', '.', mode=1)
 
 
 class Parser6(glrp.Parser):
@@ -299,7 +289,7 @@ class Parser6(glrp.Parser):
     def __init__(self):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
-        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.', mode=1)
+        glrp.Parser.__init__(self, self.lexer, 'prog', '.', mode=1)
 
 
 class Parser7(glrp.Parser):
@@ -355,7 +345,7 @@ class Parser7(glrp.Parser):
     def __init__(self):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
-        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.', mode=1)
+        glrp.Parser.__init__(self, self.lexer, 'prog', '.', mode=1)
 
 
 class Parser8(glrp.Parser):
@@ -396,7 +386,7 @@ class Parser8(glrp.Parser):
     def __init__(self):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
-        glrp.Parser.__init__(self, self.lexer, 'prog', '.', '.', mode=1)
+        glrp.Parser.__init__(self, self.lexer, 'prog', '.', mode=1)
 
 
 if TYPE_CHECKING:

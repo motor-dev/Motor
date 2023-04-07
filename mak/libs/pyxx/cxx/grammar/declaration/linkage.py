@@ -5,9 +5,9 @@ linkage-specification:
 """
 
 import glrp
-from ...parse import cxx98
+from typing import Any
+from ...parse import CxxParser, cxx98
 from ....ast.declarations import LinkageSpecification
-from motor_typing import TYPE_CHECKING
 
 
 # TODO: attribute-specifier-seq? not allowed
@@ -15,8 +15,7 @@ from motor_typing import TYPE_CHECKING
     'linkage-specification : attribute-specifier-seq? begin-declaration decl-specifier-seq-continue "extern" "string-literal" "{" declaration-seq? "}"'
 )
 @cxx98
-def linkage_specification_seq(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def linkage_specification_seq(self: CxxParser, p: glrp.Production) -> Any:
     return LinkageSpecification(p[0], p[4].value, p[6])
 
 
@@ -24,11 +23,5 @@ def linkage_specification_seq(self, p):
     'linkage-specification : attribute-specifier-seq? begin-declaration decl-specifier-seq-continue "extern" "string-literal" declaration'
 )
 @cxx98
-def linkage_specification(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def linkage_specification(self: CxxParser, p: glrp.Production) -> Any:
     return LinkageSpecification(p[0], p[4].value, [p[5]])
-
-
-if TYPE_CHECKING:
-    from typing import Any
-    from ...parse import CxxParser

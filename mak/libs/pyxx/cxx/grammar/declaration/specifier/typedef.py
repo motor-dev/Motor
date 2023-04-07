@@ -10,14 +10,14 @@ from motor_typing import TYPE_CHECKING
 
 #@glrp.rule('typedef-name : "identifier"')
 #@cxx98
-#def typedef_name(self, p):
+#def typedef_name(self: CxxParser, p: glrp.Production) -> Any:
 #    # type: (CxxParser, glrp.Production) -> Any
 #    pass
 #
 #
 #@glrp.rule('typedef-name : simple-template-id')
 #@cxx20
-#def typedef_name_cxx20(self, p):
+#def typedef_name_cxx20(self: CxxParser, p: glrp.Production) -> Any:
 #    # type: (CxxParser, glrp.Production) -> Any
 #    pass
 

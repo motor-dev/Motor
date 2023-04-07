@@ -4,28 +4,24 @@ using-directive:
 """
 
 import glrp
-from ....parse import cxx98
+from typing import Any
+from ....parse import CxxParser, cxx98
 from .....ast.declarations import UsingDirective
-from .....ast.reference import Reference, Id
-from motor_typing import TYPE_CHECKING
+from .....ast.reference import Reference, TemplateSpecifierId, _Id
 
 
 @glrp.rule('using-directive : attribute-specifier-seq? begin-declaration "using" "namespace" namespace-name ";"')
 @cxx98
-def using_directive(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    return UsingDirective(p[0], Reference([(False, Id(p[4]))]))
+def using_directive(self: CxxParser, p: glrp.Production) -> Any:
+    return UsingDirective(p[0], Reference([p[4]]))
 
 
 @glrp.rule(
     'using-directive : attribute-specifier-seq? begin-declaration "using" "namespace" nested-name-specifier template? namespace-name ";"'
 )
 @cxx98
-def using_directive_nested(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    return UsingDirective(p[0], Reference(p[4] + [(p[5], Id(p[6]))]))
-
-
-if TYPE_CHECKING:
-    from typing import Any
-    from ....parse import CxxParser
+def using_directive_nested(self: CxxParser, p: glrp.Production) -> Any:
+    id = p[6]  # type: _Id
+    if p[5]:
+        id = TemplateSpecifierId(id)
+    return UsingDirective(p[0], Reference(p[4] + [id]))

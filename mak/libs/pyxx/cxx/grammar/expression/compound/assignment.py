@@ -10,9 +10,9 @@ assignment-operator: one of
 """
 
 import glrp
-from ....parse import cxx98, cxx20
+from typing import Any
+from ....parse import CxxParser, cxx98, cxx20
 from .....ast.expressions import BinaryExpression
-from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('assignment-expression : conditional-expression')
@@ -24,8 +24,7 @@ from motor_typing import TYPE_CHECKING
 @glrp.rule('"assignment-expression#?" : "conditional-expression#"')
 @glrp.rule('"assignment-expression#?" : "throw-expression#"')
 @cxx98
-def assignment_expression_stop(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def assignment_expression_stop(self: CxxParser, p: glrp.Production) -> Any:
     return p[0]
 
 
@@ -34,8 +33,7 @@ def assignment_expression_stop(self, p):
 @glrp.rule('assignment-expression? : logical-or-expression assignment-operator initializer-clause')
 @glrp.rule('"assignment-expression#"? : "logical-or-expression#" assignment-operator "initializer-clause#"')
 @cxx98
-def assignment_expression(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def assignment_expression(self: CxxParser, p: glrp.Production) -> Any:
     return BinaryExpression(p[0], p[2], p[1].text())
 
 
@@ -44,16 +42,14 @@ def assignment_expression(self, p):
 @glrp.rule('assignment-expression? : yield-expression')
 @glrp.rule('"assignment-expression#"? : "yield-expression#"')
 @cxx20
-def assignment_expression_stop_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def assignment_expression_stop_cxx20(self: CxxParser, p: glrp.Production) -> Any:
     return p[0]
 
 
 @glrp.rule('assignment-expression? :')
 @glrp.rule('"assignment-expression#"? :')
 @cxx98
-def assignment_expression_opt(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def assignment_expression_opt(self: CxxParser, p: glrp.Production) -> Any:
     return None
 
 
@@ -69,11 +65,5 @@ def assignment_expression_opt(self, p):
 @glrp.rule('assignment-operator : "^="')
 @glrp.rule('assignment-operator : "|="')
 @cxx98
-def assignment_operator(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def assignment_operator(self: CxxParser, p: glrp.Production) -> Any:
     return p[0]
-
-
-if TYPE_CHECKING:
-    from typing import Any
-    from ....parse import CxxParser

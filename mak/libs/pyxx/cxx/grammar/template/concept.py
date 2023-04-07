@@ -7,24 +7,26 @@ concept-name:
 """
 
 import glrp
-from ...parse import cxx20
-from ....ast.declarations import ConceptDefinition
-from motor_typing import TYPE_CHECKING
+from typing import Any
+from ...parse import CxxParser, cxx20
+from ....ast.declarations import ConceptDefinition, ErrorDeclaration
 
 
 @glrp.rule('concept-definition : "concept" "identifier" "=" constraint-expression ";"')
 @cxx20
-def concept_definition_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def concept_definition_cxx20(self: CxxParser, p: glrp.Production) -> Any:
     return ConceptDefinition(p[1].text(), p[3])
+
+
+@glrp.rule('concept-definition : "concept" "#error" "=" constraint-expression ";"')
+@glrp.rule('concept-definition : "concept" "#error" ";"')
+@cxx20
+def concept_definition_errorcxx20(self: CxxParser, p: glrp.Production) -> Any:
+    return ErrorDeclaration()
 
 
 #@glrp.rule('concept-name : "identifier"')
 #@cxx20
-#def concept_name_cxx20(self, p):
+#def concept_name_cxx20(self: CxxParser, p: glrp.Production) -> Any:
 #    # type: (CxxParser, glrp.Production) -> Any
 #    pass
-
-if TYPE_CHECKING:
-    from typing import Any
-    from ...parse import CxxParser

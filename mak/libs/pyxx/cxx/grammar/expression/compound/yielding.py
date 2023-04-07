@@ -5,27 +5,20 @@ yield-expression:
 """
 
 import glrp
-from ....parse import cxx20
-from .....ast.expressions import YieldExpression, LiteralExpression
-from motor_typing import TYPE_CHECKING
+from typing import Any
+from ....parse import CxxParser, cxx20
+from .....ast.expressions import YieldExpression
 
 
 @glrp.rule('yield-expression : "co_yield" assignment-expression')
 @glrp.rule('"yield-expression#" : "co_yield" "assignment-expression#"')
 @cxx20
-def yield_expression_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
+def yield_expression_cxx20(self: CxxParser, p: glrp.Production) -> Any:
     return YieldExpression(p[1])
 
 
 @glrp.rule('yield-expression : "co_yield" braced-init-list')
 @glrp.rule('"yield-expression#" : "co_yield" braced-init-list')
 @cxx20
-def yield_expression_braced_init_list_cxx20(self, p):
-    # type: (CxxParser, glrp.Production) -> Any
-    return YieldExpression(LiteralExpression(p[1]))
-
-
-if TYPE_CHECKING:
-    from typing import Any
-    from ....parse import CxxParser
+def yield_expression_braced_init_list_cxx20(self: CxxParser, p: glrp.Production) -> Any:
+    return YieldExpression(p[1])

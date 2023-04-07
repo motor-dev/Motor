@@ -1,18 +1,16 @@
 import glrp
 from . import lex
-from .. import tables
-import os
-from motor_typing import Callable, TYPE_CHECKING, cast, Any
+from ..messages import Logger
+from typing import Callable, cast, Any
 
 
 class CxxParser(glrp.Parser):
     Lexer = lex.Cxx98Lexer
 
-    def __init__(self, tmp_dir, mode=glrp.LOAD_CACHE):
-        # type: (str, int)->None
+    def __init__(self, logger: Logger, tmp_dir: str, mode: int = glrp.LOAD_CACHE) -> None:
+        self.logger = logger
         self.lexer = self.__class__.Lexer()
-        out_dir = os.path.dirname(tables.__file__)
-        glrp.Parser.__init__(self, self.lexer, 'translation-unit', tmp_dir, out_dir, mode)
+        glrp.Parser.__init__(self, self.lexer, 'translation-unit', tmp_dir, mode)
 
 
 class Cxx98Parser(CxxParser):
@@ -43,131 +41,118 @@ class Cxx23Parser(Cxx20Parser):
     Lexer = lex.Cxx23Lexer
 
 
-def _empty_rule(parser, production):
-    # type: (glrp.Parser, glrp.Production) -> Any
+def _empty_rule(parser: glrp.Parser, production: glrp.Production) -> Any:
     pass
 
 
-def cxx98_merge(func):
-    # type: (Callable[..., Any]) -> Callable[..., Any]
+def cxx98_merge(func: Callable[..., Any]) -> Callable[..., Any]:
     setattr(Cxx98Parser, func.__name__, func)
     return func
 
 
-def cxx98(func):
-    # type: (Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]
+def cxx98(func: Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(Cxx98Parser, func.__name__, func)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
-def cxx03_merge(func):
-    # type: (Callable[..., Any]) -> Callable[..., Any]
+def cxx03_merge(func: Callable[..., Any]) -> Callable[..., Any]:
     setattr(Cxx03Parser, func.__name__, func)
     return func
 
 
-def cxx03(func):
-    # type: (Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]
+def cxx03(func: Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(Cxx03Parser, func.__name__, func)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
-def cxx11_merge(func):
-    # type: (Callable[..., Any]) -> Callable[..., Any]
+def cxx11_merge(func: Callable[..., Any]) -> Callable[..., Any]:
     setattr(Cxx11Parser, func.__name__, func)
     return func
 
 
-def cxx11(func):
-    # type: (Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]
+def cxx11(func: Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(Cxx11Parser, func.__name__, func)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
-def cxx14_merge(func):
-    # type: (Callable[..., Any]) -> Callable[..., Any]
+def cxx14_merge(func: Callable[..., Any]) -> Callable[..., Any]:
     setattr(Cxx14Parser, func.__name__, func)
     return func
 
 
-def cxx14(func):
-    # type: (Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]
+def cxx14(func: Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(Cxx14Parser, func.__name__, func)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
-def cxx17_merge(func):
-    # type: (Callable[..., Any]) -> Callable[..., Any]
+def cxx17_merge(func: Callable[..., Any]) -> Callable[..., Any]:
     setattr(Cxx17Parser, func.__name__, func)
     return func
 
 
-def cxx17(func):
-    # type: (Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]
+def cxx17(func: Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(Cxx17Parser, func.__name__, func)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
-def cxx20_merge(func):
-    # type: (Callable[..., Any]) -> Callable[..., Any]
+def cxx20_merge(func: Callable[..., Any]) -> Callable[..., Any]:
     setattr(Cxx20Parser, func.__name__, func)
     return func
 
 
-def cxx20(func):
-    # type: (Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]
+def cxx20(func: Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(Cxx20Parser, func.__name__, func)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
-def cxx23_merge(func):
-    # type: (Callable[..., Any]) -> Callable[..., Any]
+def cxx23_merge(func: Callable[..., Any]) -> Callable[..., Any]:
     setattr(Cxx23Parser, func.__name__, func)
     return func
 
 
-def cxx23(func):
-    # type: (Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]
+def cxx23(func: Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(Cxx23Parser, func.__name__, func)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
-def deprecated_cxx03(func):
-    # type: (Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]
+def deprecated_cxx03(func: Callable[..., Any]) -> Callable[..., Any]:
     setattr(Cxx03Parser, func.__name__, _empty_rule)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
-def deprecated_cxx11(func):
-    # type: (Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]
+def deprecated_cxx11(
+    func: Callable[[CxxParser, glrp.Production], Any]
+) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(Cxx11Parser, func.__name__, _empty_rule)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
-def deprecated_cxx14(func):
-    # type: (Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]
+def deprecated_cxx14(
+    func: Callable[[CxxParser, glrp.Production], Any]
+) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(Cxx14Parser, func.__name__, _empty_rule)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
-def deprecated_cxx17(func):
-    # type: (Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]
+def deprecated_cxx17(
+    func: Callable[[CxxParser, glrp.Production], Any]
+) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(Cxx17Parser, func.__name__, _empty_rule)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
-def deprecated_cxx20(func):
-    # type: (Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]
+def deprecated_cxx20(
+    func: Callable[[CxxParser, glrp.Production], Any]
+) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(Cxx20Parser, func.__name__, _empty_rule)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
-def deprecated_cxx23(func):
-    # type: (Callable[[CxxParser, glrp.Production], Any]) -> Callable[[glrp.Parser, glrp.Production], Any]
+def deprecated_cxx23(
+    func: Callable[[CxxParser, glrp.Production], Any]
+) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(Cxx23Parser, func.__name__, _empty_rule)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
 from . import grammar
-if TYPE_CHECKING:
-    from motor_typing import Any, List

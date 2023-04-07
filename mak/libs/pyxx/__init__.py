@@ -1,11 +1,11 @@
-from . import messages, parse
+from . import messages, parse, utils
+from typing import Any, List
 import argparse
 import glrp
 import json
 
 
-def init_arguments():
-    # type: () -> argparse.ArgumentParser
+def init_arguments() -> argparse.ArgumentParser:
     argument_context = argparse.ArgumentParser()
     argument_context.add_argument(
         "-o",
@@ -73,8 +73,7 @@ def init_arguments():
     return argument_context
 
 
-def run(arguments):
-    # type: (argparse.Namespace) -> List[Any]
+def run(arguments: argparse.Namespace) -> List[Any]:
     import os
     import sys
     import logging
@@ -86,7 +85,8 @@ def run(arguments):
         ExceptionType = SyntaxError
     try:
         mode = glrp.LOAD_OPTIMIZED if arguments.optimized else glrp.LOAD_CACHE
-        p = parse.parser(arguments.lang, os.path.splitext(arguments.input)[1], arguments.std)(arguments.tmp_dir, mode)
+        p = parse.parser(arguments.lang,
+                         os.path.splitext(arguments.input)[1], arguments.std)(logger, arguments.tmp_dir, mode)
         for macro_file in arguments.macro_file or []:
             with open(macro_file, 'r') as macro_file_content:
                 macros = json.load(macro_file_content)
@@ -102,8 +102,3 @@ def run(arguments):
     except (SyntaxError, ExceptionType) as exception:
         logging.exception(exception)
         sys.exit(255)
-
-
-from motor_typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from typing import Any, List
