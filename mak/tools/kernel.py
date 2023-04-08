@@ -25,7 +25,7 @@ class kernel(Task.Task):
                 '--name',
                 self.kernel_name,
                 '--tmp',
-                self.generator.bld.bldnode.parent.abspath(),
+                self.generator.bld.bldnode.parent.parent.abspath(),
                 '--module',
                 self.generator.parent,
                 self.inputs[0].path_from(self.generator.bld.bldnode),

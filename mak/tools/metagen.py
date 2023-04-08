@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from waflib import Task
+from waflib import Task, Errors
 from waflib.TaskGen import extension, feature, before_method, after_method
 import sys
 import pickle
@@ -28,7 +28,7 @@ class metagen(Task.Task):
                 '--root',
                 self.generator.root_namespace,
                 '--tmp',
-                self.generator.bld.bldnode.parent.abspath(),
+                self.generator.bld.bldnode.parent.parent.abspath(),
                 self.inputs[0].path_from(self.generator.bld.bldnode),
                 self.inputs[0].path_from(self.generator.bld.srcnode),
                 self.outputs[0].path_from(self.generator.bld.bldnode),
@@ -111,10 +111,17 @@ def datagen(self, node):
 
 
 @feature('motor:module')
+def dummy_feature_module(self):
+    pass
+
+
+@feature('motor:shared_lib', 'motor:launcher', 'motor:unit_test', 'motor:python_module')
 @before_method('process_source')
+@before_method('filter_sources')
 @after_method('static_dependencies')
 def nsgen(self):
     # gather all namespaces of dependencies
+    preprocess = getattr(self, 'preprocess')
     seen = set([])
     use = getattr(self, 'use', [])[:]
     while (use):
@@ -124,15 +131,17 @@ def nsgen(self):
         seen.add(x)
         try:
             y = self.bld.get_tgen_by_name(x)
-        except:
+        except Errors.WafError:
             pass
         else:
             y.post()
-            if 'motor:module' not in y.features:
-                use += getattr(y, 'use', [])
-                for s in y.source:
-                    if s.name.endswith('.namespaces'):
-                        self.add_namespace_file(s)
+            y_p = getattr(y, 'preprocess', None)
+            if y_p is not None:
+                if 'motor:module' not in y_p.features:
+                    use += getattr(y, 'use', [])
+                    for s in y_p.source:
+                        if s.name.endswith('.namespaces'):
+                            preprocess.add_namespace_file(s)
 
 
 @extension('.namespaces')

@@ -57,8 +57,12 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, depends, 
 
     use = []
     for d in depends:
-        d = build_context.get_tgen_by_name(d + '.preprocess')
-        use.append(d.target)
+        try:
+            d = build_context.get_tgen_by_name(d + '.preprocess')
+        except Errors.WafError:
+            pass
+        else:
+            use.append(d.target)
 
     preprocess = build_context(
         env=pp_env,
