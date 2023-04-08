@@ -45,10 +45,12 @@ class Namespace(MetaObject):
         super().dump_namespace(namespace, out)
 
 
-class Class(Namespace):
+class Class(MetaObject):
 
     def __init__(self, name: str, parent: MetaObject) -> None:
-        super().__init__(name, parent)
+        super().__init__(parent)
+        self._name = name
+        parent._children[name] = self
         self._fields = []
         self._methods = []
 
