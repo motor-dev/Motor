@@ -276,7 +276,7 @@ class vscode(Build.BuildContext):
             ), ('build[static]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--static', '-p'], False),
             ('build[dynamic]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--dynamic', '-p'], False),
             ('build[nomaster]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--nomaster', '-p'], False),
-            ('clean', ['clean:${input:motor-Toolchain}:${input:motor-Variant}'], False),
+            ('clean', ['clean:${input:motor-Toolchain}:${input:motor-Variant}', '-p'], False),
             (
                 'rebuild', [
                     'clean:${input:motor-Toolchain}:${input:motor-Variant}',
