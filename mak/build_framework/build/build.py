@@ -231,11 +231,6 @@ def warning_feature(task):
     pass
 
 
-@feature('motor:module')
-def module_feature(task):
-    pass
-
-
 @feature('motor:export_all')
 @before_method('process_source')
 def process_export_all_flag(self):
@@ -471,6 +466,7 @@ def make_bld_node(self, category, path, name):
 def filter_sources(self):
     preprocess_step = getattr(self, 'preprocess', None)
     if preprocess_step is not None:
+        preprocess_step.post()
         self.source += preprocess_step.out_sources
     self.objc = False
     self.source = self.to_nodes(getattr(self, 'source', []))
