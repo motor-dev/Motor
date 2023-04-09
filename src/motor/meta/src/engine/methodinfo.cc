@@ -26,7 +26,7 @@ Value Method::Parameter::getTag(const Type& tagType) const
 
 Value Method::Parameter::getTag(raw< const Class > tagType) const
 {
-    return getTag(Type::makeType(tagType, Type::Value, Type::Const, Type::Const));
+    return getTag(Type::makeType(tagType, Type::Indirection::Value, Type::Constness::Const, Type::Constness::Const));
 }
 
 Value Method::Overload::getTag(const Type& type) const
@@ -43,7 +43,7 @@ Value Method::Overload::getTag(const Type& type) const
 
 Value Method::Overload::getTag(raw< const Class > type) const
 {
-    return getTag(Type::makeType(type, Type::Value, Type::Const, Type::Const));
+    return getTag(Type::makeType(type, Type::Indirection::Value, Type::Constness::Const, Type::Constness::Const));
 }
 
 minitl::format_buffer< 1024u > Method::Overload::signature() const
@@ -54,7 +54,7 @@ minitl::format_buffer< 1024u > Method::Overload::signature() const
     *end                                   = 0;
     for(u32 i = 0; i < params.count; ++i)
     {
-        minitl::format_buffer< 1024u > argType = params.elements[i].type.name();
+        minitl::format_buffer< 1024u > argType = minitl::format<1024>(FMT("{0}"), params.elements[i].type);
         for(const char* arg = argType; *arg && current != end; ++arg, ++current)
             *current = *arg;
         if(current != end) *(current++) = ' ';

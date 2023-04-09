@@ -79,20 +79,20 @@ minitl::AssertionResult AssertionCallback(const char* file, int line, const char
                               ::GetLastError(), 0, (LPTSTR)&errorMessage, 0, NULL);
         (void)MessageBox(0, outmessage, "Failed to open assertion dialog", MB_ICONERROR | MB_OK);
         (void)LocalFree(errorMessage);
-        return minitl::Ignore;
+        return minitl::AssertionResult::Ignore;
     }
     else if(locr == IDC_BUTTONBREAK)
     {
-        return minitl::Break;
+        return minitl::AssertionResult::Break;
     }
     else if(locr == IDC_BUTTONIGNORE)
-        return minitl::Ignore;
+        return minitl::AssertionResult::Ignore;
     else if(locr == IDC_BUTTONIGNOREALL)
-        return minitl::IgnoreAll;
+        return minitl::AssertionResult::IgnoreAll;
     else if(locr == IDC_BUTTONABORT)
-        return minitl::Abort;
+        return minitl::AssertionResult::Abort;
     else
-        return minitl::Ignore;
+        return minitl::AssertionResult::Ignore;
 }
 
 }}  // namespace Motor::Debug

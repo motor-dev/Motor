@@ -37,21 +37,13 @@ private:
     text();
 };
 
-}  // namespace Motor
-
-namespace minitl {
-
-template <>
-struct formatter< Motor::text > : public formatter< const char* >
+static inline u32 format_length(const text& s, const minitl::format_options& options)
 {
-    static u32 length(const Motor::text& value, const format_options& options)
-    {
-        motor_forceuse(options);
-        return value.length();
-    }
-};
+    motor_forceuse(options);
+    return s.size();
+}
 
-}  // namespace minitl
+}  // namespace Motor
 
 /**************************************************************************************************/
 #endif

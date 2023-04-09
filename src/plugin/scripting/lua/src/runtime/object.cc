@@ -16,38 +16,7 @@ namespace Motor { namespace Lua {
 
 static int pushUserdataString(lua_State* L, Meta::Value* userdata)
 {
-    const char* constness
-        = (userdata->type().constness == Meta::Type::Const) ? "const " : "mutable ";
-    const char* reference;
-    const char* closing;
-    switch(userdata->type().indirection)
-    {
-    case Meta::Type::RefPtr:
-        reference = "ref<";
-        closing   = ">";
-        break;
-    case Meta::Type::WeakPtr:
-        reference = "weak<";
-        closing   = ">";
-        break;
-    case Meta::Type::RawPtr:
-        reference = "raw<";
-        closing   = ">";
-        break;
-    case Meta::Type::Value:
-        reference = "";
-        constness = "";
-        closing   = "";
-        break;
-    default:
-        reference = "??? <";
-        constness = "??? ";
-        closing   = ">";
-        break;
-    }
-    const char* access = (userdata->type().access == Meta::Type::Const) ? "const " : "";
-    lua_pushfstring(L, "[%s%s%s%s%s object @0x%p]", constness, reference, access,
-                    userdata->type().metaclass->name.c_str(), closing, userdata);
+    lua_pushstring(L, minitl::format<>(FMT("[{0} object {1}]"), userdata->type(), userdata));
     return 1;
 }
 
@@ -65,7 +34,7 @@ static int valueToString(lua_State* state)
     Context::checkArg(state, 1, "Motor.Object");
 
     Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, -1);
-    if(userdata->type().indirection == Meta::Type::Value)
+    if(userdata->type().indirection == Meta::Type::Indirection::Value)
     {
         raw< const Meta::Class > metaclass = userdata->type().metaclass;
         if(metaclass == motor_class< inamespace >())
@@ -163,18 +132,17 @@ static int valueSet(lua_State* state)
         {
             return error(state,
                          minitl::format< 4096u >(FMT("object of type {0} has no property {1}"),
-                                                 userdata->type().name().c_str(), name.c_str()));
+                                                 userdata->type(), name));
         }
-        else if(userdata->type().constness == Meta::Type::Const)
-        {
-            return error(state, minitl::format< 4096u >(FMT("object {0} is const"),
-                                                        userdata->type().name().c_str()));
-        }
-        else if(p->type.constness == Meta::Type::Const)
+        else if(userdata->type().constness == Meta::Type::Constness::Const)
         {
             return error(state,
-                         minitl::format< 4096u >(FMT("property {0}.{1} is const"),
-                                                 userdata->type().name().c_str(), name.c_str()));
+                         minitl::format< 4096u >(FMT("object {0} is const"), userdata->type()));
+        }
+        else if(p->type.constness == Meta::Type::Constness::Const)
+        {
+            return error(state, minitl::format< 4096u >(FMT("property {0}.{1} is const"),
+                                                        userdata->type(), name));
         }
         else
         {
@@ -192,8 +160,7 @@ static int valueSet(lua_State* state)
             {
                 return error(state, minitl::format< 4096u >(
                                         FMT("property {0}.{1} has incompatible type {2}"),
-                                        userdata->type().name().c_str(), name.c_str(),
-                                        p->type.name().c_str()));
+                                        userdata->type(), name, p->type));
             }
         }
     }
@@ -207,8 +174,8 @@ static int valueCall(lua_State* state)
     Meta::Value  value    = (*userdata)["?call"];
     if(!value)
     {
-        return error(state, minitl::format< 4096u >(FMT("object {0} is not callable"),
-                                                    userdata->type().name()));
+        return error(state,
+                     minitl::format< 4096u >(FMT("object {0} is not callable"), userdata->type()));
     }
     raw< const Meta::Method > method = value.as< raw< const Meta::Method > >();
     if(method)
@@ -219,7 +186,7 @@ static int valueCall(lua_State* state)
     {
         return error(state,
                      minitl::format< 4096u >(FMT("{0}.?call is of type {1}; expected a Method"),
-                                             userdata->type().name(), value.type().name()));
+                                             userdata->type(), value.type()));
     }
 }
 

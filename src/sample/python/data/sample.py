@@ -9,14 +9,14 @@ print(p.Motor.TestCases.Enum.Value3)
 def name(type):
     constness = int(type.constness) == 0 and 'const ' or ''
     access = int(type.access) == 0 and 'const ' or ''
-    if type.indirection == 0:
+    if type.indirection == Motor.Meta.Type.Indirection.Value:
         return '%s%s' % (access, type.metaclass.name)
     else:
-        if type.indirection == 1:
+        if type.indirection == Motor.Meta.Type.Indirection.RawPtr:
             ptr = 'raw'
-        elif type.indirection == 2:
+        elif type.indirection == Motor.Meta.Type.Indirection.WeakPtr:
             ptr = 'weak'
-        elif type.indirection == 3:
+        elif type.indirection == Motor.Meta.Type.Indirection.RefPtr:
             ptr = 'ref'
         else:
             ptr = '???'

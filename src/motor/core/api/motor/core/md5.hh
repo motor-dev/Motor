@@ -28,46 +28,14 @@ static inline MD5 digest(const minitl::Allocator::Block< T >& block)
     return digest(block.data(), block.byteCount());
 }
 
+motor_api(CORE) u32 format_length(const MD5& s, const minitl::format_options& options);
+motor_api(CORE) u32 format_arg(char* destination, const MD5& value,
+                               const minitl::format_options& options, u32 reservedLength);
+motor_api(CORE) u32
+    format_arg_partial(char* destination, const MD5& value, const minitl::format_options& options,
+                       u32 reservedLength, u32 maxCapacity);
+
 }  // namespace Motor
-
-namespace minitl {
-
-template <>
-struct formatter< Motor::MD5 > : public format_details::default_partial_formatter< Motor::MD5 >
-{
-    static constexpr format_options DefaultOptions
-        = {0, 0, ' ', '<', ' ', 's', false, false, false};
-    static constexpr bool validate_options(const format_options& options)
-    {
-        if(options.format != 's')
-            return format_details::invalid_format(
-                "MD5 formatter does not support specified format specifier");
-        return true;
-    }
-    static constexpr u32 length(const Motor::MD5& value, const format_options& options)
-    {
-        motor_forceuse(value);
-        motor_forceuse(options);
-        return 32;
-    }
-    static u32 format_to(char* destination, const Motor::MD5& value, const format_options& options,
-                         u32 reservedLength)
-    {
-        motor_forceuse(options);
-        motor_forceuse(reservedLength);
-        u32 writtenLength
-            = format_details::format_hexadecimal(destination, value.hash[0], ' ', 0, 'A');
-        writtenLength
-            += format_details::format_hexadecimal(destination, value.hash[1], ' ', 0, 'A');
-        writtenLength
-            += format_details::format_hexadecimal(destination, value.hash[2], ' ', 0, 'A');
-        writtenLength
-            += format_details::format_hexadecimal(destination, value.hash[3], ' ', 0, 'A');
-        return writtenLength;
-    }
-};
-
-}  // namespace minitl
 
 /**************************************************************************************************/
 #endif

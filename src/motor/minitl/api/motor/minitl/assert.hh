@@ -10,7 +10,7 @@
 
 namespace minitl {
 
-enum AssertionResult
+enum struct AssertionResult
 {
     Abort,
     Ignore,
@@ -20,7 +20,9 @@ enum AssertionResult
 
 typedef AssertionResult (*AssertionCallback_t)(const char* filename, int line, const char* expr,
                                                const char* message);
+
 motor_api(MINITL) AssertionCallback_t setAssertionCallback(AssertionCallback_t callback);
+
 motor_api(MINITL) AssertionCallback_t getAssertionCallback();
 
 #if !(MOTOR_ENABLE_ASSERT)
@@ -39,10 +41,10 @@ static inline bool assertCondition()
                 motor_r_ = minitl::getAssertionCallback()(__FILE__, __LINE__, #cond, msg);         \
                 switch(motor_r_)                                                                   \
                 {                                                                                  \
-                case minitl::Abort: ::abort(); break;                                              \
-                case minitl::Ignore: break;                                                        \
-                case minitl::IgnoreAll: ignoreAll = true; break;                                   \
-                case minitl::Break: motor_break(); break;                                          \
+                case minitl::AssertionResult::Abort: ::abort(); break;                             \
+                case minitl::AssertionResult::Ignore: break;                                       \
+                case minitl::AssertionResult::IgnoreAll: ignoreAll = true; break;                  \
+                case minitl::AssertionResult::Break: motor_break(); break;                         \
                 default:;                                                                          \
                 }                                                                                  \
             }                                                                                      \

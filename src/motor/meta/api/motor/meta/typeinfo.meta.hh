@@ -17,7 +17,7 @@ struct motor_api(META) Type
 {
     friend class Value;
 
-    enum Indirection
+    enum struct Indirection : u8
     {
         Value   = 0,
         RawPtr  = 1,
@@ -25,7 +25,7 @@ struct motor_api(META) Type
         RefPtr  = 3
     };
 
-    enum Constness
+    enum struct Constness : u8
     {
         Const   = 0,
         Mutable = 1
@@ -36,20 +36,20 @@ struct motor_api(META) Type
     };
 
     raw< const Class > metaclass;
-    u16                indirection;
-    u8                 access;
-    u8                 constness;
+    Indirection        indirection;
+    Constness          access;
+    Constness          constness;
 
     static inline Type makeType(raw< const Class > klass, Indirection indirection, Constness access,
                                 Constness constness)
     {
-        Type info = {klass, (u16)indirection, (u8)access, (u8)constness};
+        Type info = {klass, indirection, access, constness};
         return info;
     }
     static inline Type makeType(const Type& type, MakeConstType constify)
     {
         motor_forceuse(constify);
-        Type info = {type.metaclass, type.indirection, type.access, Const};
+        Type info = {type.metaclass, type.indirection, type.access, Constness::Const};
         return info;
     }
     u32            size() const;
@@ -58,11 +58,11 @@ struct motor_api(META) Type
 
 public:
     template < typename T >
-    bool                           isA() const;
-    minitl::format_buffer< 1024u > name() const;
-    bool                           isConst() const
+    bool isA() const;
+    bool isConst() const
     {
-        return indirection == Value ? (constness == 0) : (access == 0);
+        return indirection == Indirection::Value ? (constness == Constness::Const)
+                                                 : (access == Constness::Const);
     }
 
 private:

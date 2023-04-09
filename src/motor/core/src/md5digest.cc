@@ -25,4 +25,31 @@ MD5 digest(const void* buffer, u64 size)
     return result;
 }
 
+u32 format_length(const MD5& type, const minitl::format_options& options)
+{
+    motor_forceuse(type);
+    motor_forceuse(options);
+    return 0;
+}
+
+u32 format_arg(char* destination, const MD5& type, const minitl::format_options& options,
+               u32 reservedLength)
+{
+    motor_forceuse(destination);
+    motor_forceuse(type);
+    motor_forceuse(options);
+    motor_forceuse(reservedLength);
+    return 0;
+}
+
+u32 format_arg_partial(char* destination, const MD5& type, const minitl::format_options& options,
+                       u32 reservedLength, u32 maxCapacity)
+{
+    motor_forceuse(destination);
+    motor_forceuse(type);
+    motor_forceuse(options);
+    motor_forceuse(reservedLength);
+    motor_forceuse(maxCapacity);
+    return 0;
+}
 }  // namespace Motor

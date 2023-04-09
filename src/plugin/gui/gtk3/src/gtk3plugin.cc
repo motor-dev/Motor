@@ -227,8 +227,8 @@ Meta::Type Gtk3Plugin::fromGType(GType type)
     case G_TYPE_INTERFACE:
     {
         raw< const Meta::Class > cls = getGInterfaceClass(*this, type);
-        return Meta::Type::makeType(cls, Meta::Type::Value, Meta::Type::Mutable,
-                                    Meta::Type::Mutable);
+        return Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
+                                    Meta::Type::Constness::Mutable, Meta::Type::Constness::Mutable);
     }
     case G_TYPE_CHAR: return motor_type< i8 >();
     case G_TYPE_UCHAR: return motor_type< u8 >();
@@ -242,14 +242,14 @@ Meta::Type Gtk3Plugin::fromGType(GType type)
     case G_TYPE_ENUM:
     {
         raw< const Meta::Class > cls = getGEnumClass(*this, type);
-        return Meta::Type::makeType(cls, Meta::Type::Value, Meta::Type::Mutable,
-                                    Meta::Type::Mutable);
+        return Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
+                                    Meta::Type::Constness::Mutable, Meta::Type::Constness::Mutable);
     }
     case G_TYPE_FLAGS:
     {
         raw< const Meta::Class > cls = getGFlagsClass(*this, type);
-        return Meta::Type::makeType(cls, Meta::Type::Value, Meta::Type::Mutable,
-                                    Meta::Type::Mutable);
+        return Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
+                                    Meta::Type::Constness::Mutable, Meta::Type::Constness::Mutable);
     }
     case G_TYPE_FLOAT: return motor_type< float >();
     case G_TYPE_DOUBLE: return motor_type< double >();
@@ -257,14 +257,14 @@ Meta::Type Gtk3Plugin::fromGType(GType type)
     case G_TYPE_BOXED:
     {
         raw< const Meta::Class > cls = getGBoxedClass(*this, type);
-        return Meta::Type::makeType(cls, Meta::Type::Value, Meta::Type::Mutable,
-                                    Meta::Type::Mutable);
+        return Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
+                                    Meta::Type::Constness::Mutable, Meta::Type::Constness::Mutable);
     }
     case G_TYPE_OBJECT:
     {
         raw< const Meta::Class > cls = getGObjectClass(*this, type);
-        return Meta::Type::makeType(cls, Meta::Type::Value, Meta::Type::Mutable,
-                                    Meta::Type::Mutable);
+        return Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
+                                    Meta::Type::Constness::Mutable, Meta::Type::Constness::Mutable);
     }
     case G_TYPE_VARIANT: return motor_type< Meta::Value >();
     case G_TYPE_PARAM:
@@ -295,9 +295,10 @@ Meta::Value Gtk3Plugin::fromGValue(const GValue* value)
         raw< const Meta::Class > cls    = getGInterfaceClass(*this, type);
         GObjectWrapper           object = {reinterpret_cast< GObject* >(g_value_get_object(value))};
 
-        return Meta::Value(
-            Meta::Type::makeType(cls, Meta::Type::Value, Meta::Type::Mutable, Meta::Type::Mutable),
-            &object, Meta::Value::MakeCopy);
+        return Meta::Value(Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
+                                                Meta::Type::Constness::Mutable,
+                                                Meta::Type::Constness::Mutable),
+                           &object, Meta::Value::MakeCopy);
     }
     case G_TYPE_CHAR: return Meta::Value(g_value_get_schar(value));
     case G_TYPE_UCHAR: return Meta::Value(g_value_get_uchar(value));
@@ -312,17 +313,19 @@ Meta::Value Gtk3Plugin::fromGValue(const GValue* value)
     {
         raw< const Meta::Class > cls       = getGEnumClass(*this, type);
         GEnumWrapper             enumValue = {g_value_get_enum(value)};
-        return Meta::Value(
-            Meta::Type::makeType(cls, Meta::Type::Value, Meta::Type::Mutable, Meta::Type::Mutable),
-            &enumValue, Meta::Value::MakeCopy);
+        return Meta::Value(Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
+                                                Meta::Type::Constness::Mutable,
+                                                Meta::Type::Constness::Mutable),
+                           &enumValue, Meta::Value::MakeCopy);
     }
     case G_TYPE_FLAGS:
     {
         raw< const Meta::Class > cls        = getGFlagsClass(*this, type);
         GFlagsWrapper            flagsValue = {g_value_get_flags(value)};
-        return Meta::Value(
-            Meta::Type::makeType(cls, Meta::Type::Value, Meta::Type::Mutable, Meta::Type::Mutable),
-            &flagsValue, Meta::Value::MakeCopy);
+        return Meta::Value(Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
+                                                Meta::Type::Constness::Mutable,
+                                                Meta::Type::Constness::Mutable),
+                           &flagsValue, Meta::Value::MakeCopy);
     }
     case G_TYPE_FLOAT: return Meta::Value(g_value_get_float(value));
     case G_TYPE_DOUBLE: return Meta::Value(g_value_get_double(value));
@@ -332,17 +335,19 @@ Meta::Value Gtk3Plugin::fromGValue(const GValue* value)
         // raw< const Meta::Class > cls = getGBoxedClass(*this, type);
         raw< const Meta::Class > cls        = getGBoxedClass(*this, type);
         GBoxedWrapper            boxedValue = {g_value_get_boxed(value)};
-        return Meta::Value(
-            Meta::Type::makeType(cls, Meta::Type::Value, Meta::Type::Mutable, Meta::Type::Mutable),
-            &boxedValue, Meta::Value::MakeCopy);
+        return Meta::Value(Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
+                                                Meta::Type::Constness::Mutable,
+                                                Meta::Type::Constness::Mutable),
+                           &boxedValue, Meta::Value::MakeCopy);
     }
     case G_TYPE_OBJECT:
     {
         raw< const Meta::Class > cls    = getGObjectClass(*this, type);
         GObjectWrapper           object = {reinterpret_cast< GObject* >(g_value_get_object(value))};
-        return Meta::Value(
-            Meta::Type::makeType(cls, Meta::Type::Value, Meta::Type::Mutable, Meta::Type::Mutable),
-            &object, Meta::Value::MakeCopy);
+        return Meta::Value(Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
+                                                Meta::Type::Constness::Mutable,
+                                                Meta::Type::Constness::Mutable),
+                           &object, Meta::Value::MakeCopy);
     }
     case G_TYPE_VARIANT:
     case G_TYPE_PARAM:

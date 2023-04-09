@@ -5,7 +5,6 @@
 #define MOTOR_META_CLASSINFO_META_HH_
 /**************************************************************************************************/
 #include <motor/meta/stdafx.h>
-#include <motor/core/md5.hh>
 #include <motor/meta/engine/helper/staticarray.hh>
 
 namespace Motor {

@@ -43,10 +43,10 @@ Value::Value(Type type, const Value& castFrom) : m_type(type), m_reference(false
 {
     motor_assert_format(m_type.metaclass->isA(castFrom.type().metaclass)
                             || castFrom.type().metaclass->isA(m_type.metaclass),
-                        "cannot cast from {0} to {1}", castFrom.type().name(), m_type.name());
-    motor_assert_format(m_type.indirection != Type::Value || castFrom.type().isA(m_type),
-                        "cannot upcast value type from {0} to {1}", castFrom.type().name(),
-                        m_type.name());
+                        "cannot cast from {0} to {1}", castFrom.type(), m_type);
+    motor_assert_format(m_type.indirection != Type::Indirection::Value
+                            || castFrom.type().isA(m_type),
+                        "cannot upcast value type from {0} to {1}", castFrom.type(), m_type);
 
     m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
     m_ref.m_deallocate = (m_ref.m_pointer != 0);
@@ -79,7 +79,7 @@ Value& Value::operator=(const Value& v)
                                "Value has type {0}; unable to copy from type {1}", m_type,
                                v.m_type))
             return *this;
-        if(motor_assert(m_type.constness != Type::Const, "Value is const")) return *this;
+        if(motor_assert(m_type.constness != Type::Constness::Const, "Value is const")) return *this;
         void* mem = memory();
         m_type.destroy(mem);
         m_type.copy(v.memory(), mem);
@@ -100,20 +100,20 @@ void* Value::unpackAs(const Type& ti, ref< minitl::refcountable >& rptr,
     void* mem = memory();
     switch(m_type.indirection)
     {
-    case Type::RefPtr:
-        if(ti.indirection == Type::RefPtr) break;
+    case Type::Indirection::RefPtr:
+        if(ti.indirection == Type::Indirection::RefPtr) break;
         rptr = *(ref< minitl::refcountable >*)mem;
         wptr = rptr;
         mem  = (void*)&wptr;
         /* falls through */
-    case Type::WeakPtr:
-        if(ti.indirection == Type::WeakPtr) break;
+    case Type::Indirection::WeakPtr:
+        if(ti.indirection == Type::Indirection::WeakPtr) break;
         wptr = *(weak< minitl::refcountable >*)mem;
         obj  = wptr.operator->();
         mem  = (void*)&obj;
         /* falls through */
-    case Type::RawPtr:
-        if(ti.indirection == Type::RawPtr) break;
+    case Type::Indirection::RawPtr:
+        if(ti.indirection == Type::Indirection::RawPtr) break;
         mem = *(void**)mem;
         /* falls through */
     default: break;

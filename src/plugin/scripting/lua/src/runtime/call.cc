@@ -90,8 +90,9 @@ Meta::ConversionCost calculateConversion(const LuaParameterType& type, const Met
         switch(lua_type(type.state, index))
         {
         case LUA_TNIL:
-            return target.indirection >= Meta::Type::RawPtr ? Meta::ConversionCost()
-                                                            : Meta::ConversionCost::s_incompatible;
+            return target.indirection >= Meta::Type::Indirection::RawPtr
+                       ? Meta::ConversionCost()
+                       : Meta::ConversionCost::s_incompatible;
         case LUA_TSTRING:
             return target.metaclass->type() == Meta::ClassType_String
                        ? Meta::ConversionCost()
@@ -208,7 +209,7 @@ void convert(const LuaParameterType& type, void* buffer, const Meta::Type& targe
     LuaPop p(type.state, index, type.key != -1);
     bool   result = createValue(type.state, index, target, buffer);
     motor_assert_format(result, "could not convert lua value {0} to {1}",
-                        Context::tostring(type.state, index), target.name());
+                        Context::tostring(type.state, index), target);
     motor_forceuse(result);
 }
 
