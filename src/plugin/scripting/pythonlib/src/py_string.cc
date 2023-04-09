@@ -153,8 +153,7 @@ PyObject* PyMotorString< T >::repr(PyObject* self)
     typedef PyObject* (*toStringType)(const char* format, ...);
     toStringType toString = s_library->getVersion() >= 30 ? s_library->m_PyUnicode_FromFormat
                                                           : s_library->m_PyString_FromFormat;
-    return toString(
-        minitl::format< 1024u >(FMT("[{0} \"{1}\"]"), v.type().name(), v.as< const T& >()));
+    return toString(minitl::format< 1024u >(FMT("[{0} \"{1}\"]"), v.type(), v.as< const T& >()));
 }
 
 const char* toCharPtr(const istring& t)
@@ -212,7 +211,7 @@ int PyMotorString< T >::nonZero(PyObject* self)
     const Meta::Type t     = self_->value.type();
     motor_assert(t.metaclass->type() == Meta::ClassType_String,
                  "PyMotorString expected string value");
-    if(t.indirection == Meta::Type::Value)
+    if(t.indirection == Meta::Type::Indirection::Value)
     {
         return nonZeroString(self_->value.as< const T& >());
     }

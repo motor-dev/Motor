@@ -13,10 +13,10 @@ u32 Type::size() const
 {
     switch(indirection)
     {
-    case Value: return metaclass->size;
-    case RawPtr: return sizeof(raw< char >);
-    case RefPtr: return sizeof(ref< minitl::refcountable >);
-    case WeakPtr: return sizeof(weak< minitl::refcountable >);
+    case Indirection::Value: return metaclass->size;
+    case Indirection::RawPtr: return sizeof(raw< char >);
+    case Indirection::RefPtr: return sizeof(ref< minitl::refcountable >);
+    case Indirection::WeakPtr: return sizeof(weak< minitl::refcountable >);
     default: motor_notreached(); return 0;
     }
 }
@@ -25,10 +25,10 @@ void* Type::rawget(const void* data) const
 {
     switch(indirection)
     {
-    case Value: return (void*)data;
-    case RawPtr: return *(void**)data;
-    case RefPtr: return ((ref< minitl::refcountable >*)data)->operator->();
-    case WeakPtr: return ((weak< minitl::refcountable >*)data)->operator->();
+    case Indirection::Value: return (void*)data;
+    case Indirection::RawPtr: return *(void**)data;
+    case Indirection::RefPtr: return ((ref< minitl::refcountable >*)data)->operator->();
+    case Indirection::WeakPtr: return ((weak< minitl::refcountable >*)data)->operator->();
     default: motor_notreached(); return 0;
     }
 }
@@ -37,13 +37,13 @@ void Type::copy(const void* source, void* dest) const
 {
     switch(indirection)
     {
-    case Value: return metaclass->copy(source, dest);
-    case RawPtr: memcpy(dest, source, sizeof(void*)); return;
-    case RefPtr:
+    case Indirection::Value: return metaclass->copy(source, dest);
+    case Indirection::RawPtr: memcpy(dest, source, sizeof(void*)); return;
+    case Indirection::RefPtr:
         new(dest) const ref< const minitl::refcountable >(
             *(const ref< const minitl::refcountable >*)source);
         return;
-    case WeakPtr:
+    case Indirection::WeakPtr:
         new(dest) const weak< const minitl::refcountable >(
             *(const weak< const minitl::refcountable >*)source);
         return;
@@ -55,10 +55,10 @@ void Type::destroy(void* ptr) const
 {
     switch(indirection)
     {
-    case Value: return metaclass->destroy(ptr);
-    case RawPtr: return;
-    case RefPtr: ((ref< const minitl::refcountable >*)ptr)->~ref(); return;
-    case WeakPtr: ((weak< const minitl::refcountable >*)ptr)->~weak(); return;
+    case Indirection::Value: return metaclass->destroy(ptr);
+    case Indirection::RawPtr: return;
+    case Indirection::RefPtr: ((ref< const minitl::refcountable >*)ptr)->~ref(); return;
+    case Indirection::WeakPtr: ((weak< const minitl::refcountable >*)ptr)->~weak(); return;
     default: motor_notreached(); return;
     }
 }
@@ -68,15 +68,15 @@ ConversionCost Type::calculateConversion(const Type& other) const
     ConversionCost result;
 
     if(other.metaclass->type() == ClassType_Variant) return ConversionCost::s_variant;
-    if(other.indirection > 0 && access < other.access)
+    if(other.indirection > Indirection::Value && access < other.access)
         return ConversionCost::s_incompatible;
-    else if(other.indirection > 0)
-        result.qualification += access - other.access;
+    else if(other.indirection > Indirection::Value)
+        result.qualification += u16(access) - u16(other.access);
 
     if(indirection < other.indirection)
         return ConversionCost::s_incompatible;
     else
-        result.qualification += indirection - other.indirection;
+        result.qualification += u16(indirection) - u16(other.indirection);
 
     if(metaclass->distance(other.metaclass, result.promotion))
         return result;
@@ -84,18 +84,10 @@ ConversionCost Type::calculateConversion(const Type& other) const
         return ConversionCost::s_incompatible;
 }
 
-minitl::format_buffer< 1024u > Type::name() const
-{
-    static const char* constnessString[]   = {"=", ""};
-    static const char* indirectionString[] = {"", "*", "!", "#"};
-    return minitl::format< 1024u >(
-        FMT("{0}{1}{2}{3}"), (indirection == Value ? "" : constnessString[constness]),
-        indirectionString[indirection], constnessString[access], metaclass->fullname());
-}
-
 bool Type::isA(const Type& other) const
 {
-    return other.indirection <= indirection && indirection * other.access <= indirection * access
+    return other.indirection <= indirection
+           && u32(indirection) * u32(other.access) <= u32(indirection) * u32(access)
            && metaclass->isA(other.metaclass);
 }
 
@@ -109,6 +101,63 @@ bool operator<=(Type t1, Type t2)
 {
     return (t1.indirection <= t2.indirection) && t1.access <= t2.access
            && t2.metaclass->isA(t1.metaclass);
+}
+
+u32 format_length(const Type& type, const minitl::format_options& options)
+{
+    u32 result = format_length(type.metaclass->fullname(), options);
+    if(type.access == Type::Constness::Const) result += 6;
+    if(type.constness == Type::Constness::Const && type.indirection != Type::Indirection::Value)
+        result += 6;
+    if(type.indirection == Type::Indirection::RawPtr)
+        result += 5;
+    else if(type.indirection == Type::Indirection::WeakPtr)
+        result += 6;
+    else if(type.indirection == Type::Indirection::RefPtr)
+        result += 5;
+    return result;
+}
+
+u32 format_arg(char* destination, const Type& type, const minitl::format_options& options,
+               u32 reservedLength)
+{
+    u32 offset = 0;
+    if(type.access == Type::Constness::Const)
+    {
+        memcpy(destination + offset, "const ", 6);
+        offset += 6;
+    }
+    if(type.indirection == Type::Indirection::RawPtr)
+    {
+        memcpy(destination + offset, "raw<", 4);
+        offset += 4;
+    }
+    else if(type.indirection == Type::Indirection::WeakPtr)
+    {
+        memcpy(destination + offset, "weak<", 5);
+        offset += 5;
+    }
+    else if(type.indirection == Type::Indirection::RefPtr)
+    {
+        memcpy(destination + offset, "ref<", 4);
+        offset += 4;
+    }
+    if(type.constness == Type::Constness::Const && type.indirection != Type::Indirection::Value)
+    {
+        memcpy(destination + offset, "const ", 6);
+        offset += 6;
+    }
+    offset += format_arg(destination + offset, type.metaclass->fullname(), options, reservedLength);
+    if(type.indirection != Type::Indirection::Value) destination[offset++] = '>';
+
+    return offset;
+}
+
+u32 format_arg_partial(char* destination, const Type& type, const minitl::format_options& options,
+                       u32 reservedLength, u32 maxCapacity)
+{
+    return minitl::format_details::format_arg_partial_delegate(destination, type, options,
+                                                               reservedLength, maxCapacity);
 }
 
 }}  // namespace Motor::Meta

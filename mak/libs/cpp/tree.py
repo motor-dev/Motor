@@ -567,7 +567,7 @@ class EnumValue(Variable):
             definition.write('    static const ::Motor::Meta::ObjectInfo s%s_object_%s;\n' % (prefix, alias_cpp))
 
     def cpp_name(self, owner):
-        return '%s::%s' % ('::'.join(owner.cpp_name().split('::')[:-1]), self.name)
+        return '%s::%s' % (owner.cpp_name(), self.name)
 
     def write_object(self, owner, struct_owners, prefix, namespace, object_name, definition, instance):
         prefix = prefix + '_' + self.name
@@ -759,7 +759,7 @@ class Class(Container):
                 '{\n'
                 '    %s\n'
                 '    %s\n'
-                '    return istring(minitl::format<64u>(FMT("Unknown({0})"), (u32)v));\n'
+                '    return istring(minitl::format<64u>(FMT("Unknown({0})"), u32(v)));\n'
                 '}\n' % (
                     helper, self.cpp_name(), '\n    '.join(
                         ('static const ::Motor::istring s_%s = "%s";' % (o.name, o.name) for o in self.objects[::-1])

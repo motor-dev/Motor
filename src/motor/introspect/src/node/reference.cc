@@ -81,7 +81,7 @@ bool Reference::doResolve(DbContext& context)
                             context.error(this, minitl::format< 512 >(
                                                     FMT("when resolving {0}: object {1} of type "
                                                         "{2} does not have a property named {3}"),
-                                                    m_referenceName, current, t.name(), n));
+                                                    m_referenceName, current, t, n));
                             return false;
                         }
                         current.push_back(n);

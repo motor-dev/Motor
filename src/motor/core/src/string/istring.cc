@@ -756,4 +756,136 @@ ifilename::Filename ifilename::str(char separator) const
     return p;
 }
 
+u32 format_length(const istring& s, const minitl::format_options& options)
+{
+    motor_forceuse(options);
+    return s.size();
+}
+
+u32 format_arg(char* destination, const istring& value, const minitl::format_options& options,
+               u32 reservedLength)
+{
+    return minitl::format_details::string_format::format_arg(destination, value.c_str(), options,
+                                                             reservedLength);
+}
+
+u32 format_arg_partial(char* destination, const istring& value,
+                       const minitl::format_options& options, u32 reservedLength, u32 maxCapacity)
+{
+    return minitl::format_details::string_format::format_arg_partial(
+        destination, value.c_str(), options, reservedLength, maxCapacity);
+}
+
+u32 format_length(const igenericnamespace& n, const minitl::format_options& options)
+{
+    motor_forceuse(options);
+    if(n.size())
+    {
+        u32 result = n.size() - 1;
+        for(u32 i = 0; i < n.size(); ++i)
+            result += n[i].size();
+        return result;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+static inline u32 format_arg(char* destination, const igenericnamespace& value,
+                             const minitl::format_options& options, u32 reservedLength,
+                             char separator)
+{
+    motor_forceuse(reservedLength);
+    u32 offset = 0;
+    if(value.size())
+    {
+        u32 i;
+        for(i = 0; i < value.size() - 1; ++i)
+        {
+            offset += minitl::format_details::string_format::format_arg(
+                destination + offset, value[i].c_str(), options, value[i].size());
+            *(destination + offset++) = separator;
+        }
+        offset += minitl::format_details::string_format::format_arg(
+            destination + offset, value[i].c_str(), options, value[i].size());
+    }
+    return offset;
+}
+
+u32 format_arg_partial(char* destination, const igenericnamespace& value,
+                       const minitl::format_options& options, u32 reservedLength, u32 maxCapacity,
+                       char separator)
+{
+    motor_forceuse(reservedLength);
+    if(!motor_assert(value.size() > 0, "expected a non-empty value"))
+    {
+        return 0;
+    }
+    u32 size = 0;
+    for(u32 i = 0; i < value.size(); ++i)
+    {
+        if(size + value[i].size() < maxCapacity)
+        {
+            size += minitl::format_details::string_format::format_arg(
+                destination + size, value[i].c_str(), options, value.size());
+            if(size < maxCapacity)
+            {
+                *(destination + size) = separator;
+                size++;
+            }
+            else
+                break;
+        }
+        else if(size < maxCapacity)
+        {
+            size += minitl::format_details::string_format::format_arg_partial(
+                destination + size, value[i].c_str(), options, value.size(), maxCapacity);
+            break;
+        }
+        else
+            break;
+    }
+    return maxCapacity;
+}
+
+u32 format_arg(char* destination, const inamespace& value, const minitl::format_options& options,
+               u32 reservedLength)
+{
+    return format_arg(destination, value, options, reservedLength, value.Separator);
+}
+
+u32 format_arg_partial(char* destination, const inamespace& value,
+                       const minitl::format_options& options, u32 reservedLength, u32 maxCapacity)
+{
+    return format_arg_partial(destination, value, options, reservedLength, maxCapacity,
+                              value.Separator);
+}
+
+u32 format_arg(char* destination, const ipath& value, const minitl::format_options& options,
+               u32 reservedLength)
+{
+    return format_arg(destination, value, options, reservedLength, value.Separator);
+}
+
+u32 format_arg_partial(char* destination, const ipath& value, const minitl::format_options& options,
+                       u32 reservedLength, u32 maxCapacity)
+{
+    return format_arg_partial(destination, value, options, reservedLength, maxCapacity,
+                              value.Separator);
+}
+
+u32 format_arg(char* destination, const ifilename& value, const minitl::format_options& options,
+               u32 reservedLength)
+{
+    return format_arg(destination, value, options, reservedLength, value.Separator);
+}
+
+u32 format_arg_partial(char* destination, const ifilename& value,
+                       const minitl::format_options& options, u32 reservedLength, u32 maxCapacity)
+{
+    return format_arg_partial(destination, value, options, reservedLength, maxCapacity,
+                              value.Separator);
+}
+
 }  // namespace Motor

@@ -37,7 +37,7 @@ bool Property::doResolve(DbContext& context)
     if(!m_owner->getPropertyType(context, m_propertyName[0], m_type))
     {
         context.error(this, minitl::format< 512 >(FMT("type {0} does not have a member {1}"),
-                                                  m_owner->getType().name(), m_propertyName[0]));
+                                                  m_owner->getType(), m_propertyName[0]));
     }
     for(u32 i = 1; i < m_propertyName.size(); ++i)
     {
@@ -49,7 +49,7 @@ bool Property::doResolve(DbContext& context)
         else
         {
             context.error(this, minitl::format< 512 >(FMT("type {0} does not have a member {1}"),
-                                                      m_type.name(), m_propertyName[i]));
+                                                      m_type, m_propertyName[i]));
             return false;
         }
     }
@@ -62,13 +62,13 @@ void Property::doEval(const Type& expectedType, Value& result) const
     result = m_owner->eval(expectedType);
     Value temp;
     bool  found = m_owner->getPropertyValue(result, m_propertyName[0], temp);
-    motor_assert_format(found, "type {0} does not have a property {1}", result.type().name(),
+    motor_assert_format(found, "type {0} does not have a property {1}", result.type(),
                         m_propertyName[0]);
     result.swap(temp);
     for(u32 i = 1; i < m_propertyName.size(); ++i)
     {
         Value v = result.type().metaclass->get(result, m_propertyName[i], found);
-        motor_assert_format(found, "type {0} does not have a property {1}", result.type().name(),
+        motor_assert_format(found, "type {0} does not have a property {1}", result.type(),
                             m_propertyName[i]);
         result.swap(v);
     }

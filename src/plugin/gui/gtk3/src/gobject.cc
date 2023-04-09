@@ -93,8 +93,8 @@ static void completeGObjectClass(Gtk3Plugin& plugin, Meta::Class* cls, GType typ
         Meta::Method::Overload overloadTemplate
             = {{0},
                {constructorParameterCount, parameters},
-               Meta::Type::makeType(metaclass, Meta::Type::Value, Meta::Type::Mutable,
-                                    Meta::Type::Mutable),
+               Meta::Type::makeType(metaclass, Meta::Type::Indirection::Value,
+                                    Meta::Type::Constness::Mutable, Meta::Type::Constness::Mutable),
                false,
                &Constructor::call};
         new(overload) Meta::Method::Overload(overloadTemplate);

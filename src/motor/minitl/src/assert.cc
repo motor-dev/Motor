@@ -11,7 +11,7 @@ namespace minitl {
 AssertionResult defaultAssertionCallback(const char* /*file*/, int /*line*/, const char* /*expr*/,
                                          const char* /*message*/)
 {
-    return Break;
+    return AssertionResult::Break;
 }
 
 static AssertionCallback_t g_callback = defaultAssertionCallback;

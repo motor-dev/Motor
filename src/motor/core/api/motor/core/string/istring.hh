@@ -22,7 +22,7 @@ public:
     istring();
     istring(const char* str);
     template < u32 BUFFER_SIZE >
-    istring(const minitl::format_buffer< BUFFER_SIZE >& str) : m_index(init(str.buffer))
+    explicit istring(const minitl::format_buffer< BUFFER_SIZE >& str) : m_index(init(str.buffer))
     {
     }
     istring(const char* begin, const char* end);
@@ -46,10 +46,7 @@ public:
 class motor_api(CORE) igenericnamespace
 {
 private:
-    enum Constants
-    {
-        MaxNamespaceSize = 8
-    };
+    static constexpr u32 MaxNamespaceSize = 8;
 
 private:
     istring* m_namespace;
@@ -88,11 +85,9 @@ motor_api(CORE) bool operator<(const igenericnamespace& ns1, const igenericnames
 class motor_api(CORE) inamespace : public igenericnamespace
 {
 public:
-    enum
-    {
-        Separator     = '.',
-        MaxPathLength = 1024
-    };
+    static constexpr char Separator     = '.';
+    static constexpr u32  MaxPathLength = 1024;
+
     struct Path
     {
         char name[MaxPathLength];
@@ -123,11 +118,9 @@ class ipath;
 class motor_api(CORE) ifilename : public igenericnamespace
 {
 public:
-    enum
-    {
-        Separator         = '/',
-        MaxFilenameLength = 1024
-    };
+    static constexpr char Separator         = '/';
+    static constexpr u32  MaxFilenameLength = 1024;
+
     struct Filename
     {
         char name[MaxFilenameLength];
@@ -151,11 +144,9 @@ public:
 class motor_api(CORE) ipath : public igenericnamespace
 {
 public:
-    enum
-    {
-        Separator         = '/',
-        MaxFilenameLength = 1024
-    };
+    static constexpr char Separator         = '/';
+    static constexpr u32  MaxFilenameLength = 1024;
+
     struct Filename
     {
         char name[MaxFilenameLength];
@@ -180,6 +171,31 @@ public:
 motor_api(CORE) ipath     operator+(const ipath& path1, const ipath& path2);
 motor_api(CORE) ifilename operator+(const ipath& path, const ifilename& file);
 
+motor_api(CORE) u32 format_length(const istring& s, const minitl::format_options& options);
+motor_api(CORE) u32 format_arg(char* destination, const istring& value,
+                               const minitl::format_options& options, u32 reservedLength);
+motor_api(CORE) u32
+    format_arg_partial(char* destination, const istring& value,
+                       const minitl::format_options& options, u32 reservedLength, u32 maxCapacity);
+
+motor_api(CORE) u32
+    format_length(const igenericnamespace& n, const minitl::format_options& options);
+motor_api(CORE) u32 format_arg(char* destination, const inamespace& value,
+                               const minitl::format_options& options, u32 reservedLength);
+motor_api(CORE) u32 format_arg(char* destination, const ipath& value,
+                               const minitl::format_options& options, u32 reservedLength);
+motor_api(CORE) u32
+    format_arg_partial(char* destination, const inamespace& value,
+                       const minitl::format_options& options, u32 reservedLength, u32 maxCapacity);
+motor_api(CORE) u32
+    format_arg_partial(char* destination, const ipath& value, const minitl::format_options& options,
+                       u32 reservedLength, u32 maxCapacity);
+motor_api(CORE) u32 format_arg(char* destination, const ifilename& value,
+                               const minitl::format_options& options, u32 reservedLength);
+motor_api(CORE) u32
+    format_arg_partial(char* destination, const ifilename& value,
+                       const minitl::format_options& options, u32 reservedLength, u32 maxCapacity);
+
 }  // namespace Motor
 
 #include <motor/minitl/hash.hh>
@@ -196,128 +212,6 @@ struct hash< Motor::istring >
     inline int operator()(const Motor::istring& v1, const Motor::istring& v2)
     {
         return v1 == v2;
-    }
-};
-
-template <>
-struct formatter< Motor::istring > : public formatter< const char* >
-{
-    static u32 length(const Motor::istring& value, const format_options& options)
-    {
-        motor_forceuse(options);
-        return value.size();
-    }
-    static u32 format_to_partial(char* destination, const Motor::istring& value,
-                                 const format_options& options, u32 reservedLength,
-                                 u32 maximalLength)
-    {
-        return formatter< const char* >::format_to_partial(destination, value.c_str(), options,
-                                                           reservedLength, maximalLength);
-    }
-    static u32 format_to(char* destination, const Motor::istring& value,
-                         const format_options& options, u32 reservedLength)
-    {
-        return formatter< const char* >::format_to(destination, value.c_str(), options,
-                                                   reservedLength);
-    }
-};
-
-template <>
-struct formatter< Motor::inamespace > : public formatter< const char* >
-{
-    static u32 length(const Motor::inamespace& value, const format_options& options)
-    {
-        motor_forceuse(options);
-        u32 result = 0;
-
-        if(value.size())
-        {
-            result += value[0].size();
-            for(u32 i = 1; i < value.size(); ++i)
-            {
-                result += 1 + value[i].size();
-            }
-        }
-        return result;
-    }
-    static u32 format_to_partial(char* destination, const Motor::inamespace& value,
-                                 const format_options& options, u32 reservedLength,
-                                 u32 maximalLength)
-    {
-        return formatter< const char* >::format_to_partial(destination, value.str(), options,
-                                                           reservedLength, maximalLength);
-    }
-    static u32 format_to(char* destination, const Motor::inamespace& value,
-                         const format_options& options, u32 reservedLength)
-    {
-        return formatter< const char* >::format_to(destination, value.str(), options,
-                                                   reservedLength);
-    }
-};
-
-template <>
-struct formatter< Motor::ifilename > : public formatter< const char* >
-{
-    static u32 length(const Motor::ifilename& value, const format_options& options)
-    {
-        motor_forceuse(options);
-        u32 result = 0;
-
-        if(value.size())
-        {
-            result += value[0].size();
-            for(u32 i = 1; i < value.size(); ++i)
-            {
-                result += 1 + value[i].size();
-            }
-        }
-        return result;
-    }
-    static u32 format_to_partial(char* destination, const Motor::ifilename& value,
-                                 const format_options& options, u32 reservedLength,
-                                 u32 maximalLength)
-    {
-        return formatter< const char* >::format_to_partial(destination, value.str(), options,
-                                                           reservedLength, maximalLength);
-    }
-    static u32 format_to(char* destination, const Motor::ifilename& value,
-                         const format_options& options, u32 reservedLength)
-    {
-        return formatter< const char* >::format_to(destination, value.str(), options,
-                                                   reservedLength);
-    }
-};
-
-template <>
-struct formatter< Motor::ipath > : public formatter< const char* >
-{
-    static u32 length(const Motor::ipath& value, const format_options& options)
-    {
-        motor_forceuse(options);
-        u32 result = 0;
-
-        if(value.size())
-        {
-            result += value[0].size();
-            for(u32 i = 1; i < value.size(); ++i)
-            {
-                result += 1 + value[i].size();
-            }
-        }
-        return result;
-    }
-    static u32 format_to_partial(char* destination, const Motor::ipath& value,
-                                 const format_options& options, u32 reservedLength,
-                                 u32 maximalLength)
-    {
-        return formatter< const char* >::format_to_partial(destination, value.str(), options,
-                                                           reservedLength, maximalLength);
-    }
-    static u32 format_to(char* destination, const Motor::ipath& value,
-                         const format_options& options, u32 reservedLength)
-    {
-        return formatter< const char* >::format_to(destination, value.str(), options,
-                                                   reservedLength);
     }
 };
 

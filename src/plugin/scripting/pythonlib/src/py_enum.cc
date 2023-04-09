@@ -5,6 +5,7 @@
 #include <motor/meta/engine/methodinfo.meta.hh>
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <py_enum.hh>
+#include <py_number.hh>
 
 namespace Motor { namespace Python {
 
@@ -104,7 +105,7 @@ PyTypeObject PyMotorEnum::s_pyType = {{{0, 0}, 0},
                                       "Wrapper class for the C++ Motor Enum types",
                                       0,
                                       0,
-                                      0,
+                                      &PyMotorEnum::cmp,
                                       0,
                                       0,
                                       0,
@@ -155,9 +156,8 @@ PyObject* PyMotorEnum::str(PyObject* self)
     PyMotorEnum*              self_    = static_cast< PyMotorEnum* >(self);
     const Meta::Value&        v        = self_->value;
     raw< const Meta::Method > toString = self_->value[s_toString].as< raw< const Meta::Method > >();
-    minitl::format_buffer< 1024u > format
-        = minitl::format< 1024u >(FMT("{0}.{1}"), v.type().name().c_str(),
-                                  toString->doCall(&self_->value, 1).as< const istring >());
+    minitl::format_buffer< 1024u > format = minitl::format< 1024u >(
+        FMT("{0}.{1}"), v.type(), toString->doCall(&self_->value, 1).as< const istring >());
     if(s_library->getVersion() >= 30)
     {
         return s_library->m_PyUnicode_FromFormat(format);
@@ -166,6 +166,120 @@ PyObject* PyMotorEnum::str(PyObject* self)
     {
         return s_library->m_PyString_FromFormat(format);
     }
+}
+
+PyObject* PyMotorEnum::cmp(PyObject* self, PyObject* other, int operation)
+{
+    PyMotorEnum*              self_ = static_cast< PyMotorEnum* >(self);
+    raw< const Meta::Method > toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
+    i64                       value = toInt->doCall(&self_->value, 1).as< u32 >();
+    i64                       otherValue;
+
+
+    if(other->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS)
+    {
+        otherValue = s_library->m_PyInt_AsUnsignedLongMask(other);
+    }
+    else if(other->py_type->tp_flags & Py_TPFLAGS_LONG_SUBCLASS)
+    {
+        otherValue = s_library->m_PyLong_AsUnsignedLongLongMask(other);
+    }
+    else if(other->py_type == &PyMotorObject::s_pyType
+       || other->py_type->tp_base == &PyMotorObject::s_pyType)
+    {
+        PyMotorObject* other_ = static_cast< PyMotorObject* >(other);
+        if(other->py_type == &PyMotorEnum::s_pyType)
+        {
+            if(other_->value.type().metaclass != self_->value.type().metaclass)
+            {
+                s_library->m_PyErr_Format(
+                    *s_library->m_PyExc_TypeError,
+                    minitl::format<>(
+                        FMT("cannot compare value of enum type {0} with value of enum type {1}"),
+                        self_->value.type().metaclass->fullname(),
+                        other_->value.type().metaclass->fullname()));
+                return 0;
+            }
+            else
+            {
+                otherValue = toInt->doCall(&other_->value, 1).as< u32 >();
+            }
+        }
+        else if(other->py_type == &PyMotorNumber< i8 >::s_pyType)
+        {
+            otherValue = other_->value.as< i8 >();
+        }
+        else if(other->py_type == &PyMotorNumber< i16 >::s_pyType)
+        {
+            otherValue                   = other_->value.as< i16 >();
+        }
+        else if(other->py_type == &PyMotorNumber< i32 >::s_pyType)
+        {
+            otherValue                   = other_->value.as< i32 >();
+        }
+        else if(other->py_type == &PyMotorNumber< i64 >::s_pyType)
+        {
+            otherValue                   = other_->value.as< i64 >();
+        }
+        else if(other->py_type == &PyMotorNumber< u8 >::s_pyType)
+        {
+            otherValue                  = other_->value.as< u8 >();
+        }
+        else if(other->py_type == &PyMotorNumber< u16 >::s_pyType)
+        {
+            otherValue                   = other_->value.as< u16 >();
+        }
+        else if(other->py_type == &PyMotorNumber< u32 >::s_pyType)
+        {
+            otherValue                   = other_->value.as< u32 >();
+        }
+        else if(other->py_type == &PyMotorNumber< u64 >::s_pyType)
+        {
+            otherValue                   = i64(other_->value.as< u64 >());
+        }
+        else
+        {
+            s_library->m_PyErr_Format(
+                *s_library->m_PyExc_TypeError,
+                minitl::format<>(
+                    FMT("cannot compare value of enum type {0} with value of type {1}"),
+                    self_->value.type().metaclass->fullname(),
+                    other_->value.type().metaclass->fullname()));
+            return 0;
+        }
+    }
+    else
+    {
+        PyObject* result = s_library->m__Py_NotImplementedStruct;
+        Py_INCREF(result);
+        return result;
+    }
+    PyObject* result; 
+    switch(operation)
+    {
+    case PythonLibrary::Py_LT:
+        result = value < otherValue ? s_library->m__Py_TrueStruct : s_library->m__Py_FalseStruct;
+        break;
+    case PythonLibrary::Py_LE:
+        result = value <= otherValue ? s_library->m__Py_TrueStruct : s_library->m__Py_FalseStruct;
+        break;
+    case PythonLibrary::Py_EQ:
+        result = value == otherValue ? s_library->m__Py_TrueStruct : s_library->m__Py_FalseStruct;
+        break;
+    case PythonLibrary::Py_NE:
+        result = value != otherValue ? s_library->m__Py_TrueStruct : s_library->m__Py_FalseStruct;
+        break;
+    case PythonLibrary::Py_GT:
+        result = value > otherValue ? s_library->m__Py_TrueStruct : s_library->m__Py_FalseStruct;
+        break;
+    case PythonLibrary::Py_GE:
+        result = value >= otherValue ? s_library->m__Py_TrueStruct : s_library->m__Py_FalseStruct;
+        break;
+    default:
+        result = s_library->m__Py_NotImplementedStruct; break;
+    }
+    Py_INCREF(result);
+    return result;
 }
 
 PyObject* PyMotorEnum::toint(PyObject* self)
@@ -212,5 +326,4 @@ void PyMotorEnum::registerType(PyObject* module)
     motor_forceuse(result);
     Py_INCREF(&s_pyType);
 }
-
 }}  // namespace Motor::Python

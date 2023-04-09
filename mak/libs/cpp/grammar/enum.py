@@ -46,6 +46,21 @@ def p_enum_header(p):
         p[0] = AnonymousClass()
     p.parser.stack.append(p[0])
 
+def p_enum_header_struct(p):
+    """
+        enum_header : ENUM STRUCT enum_name_opt
+        enum_header : ENUM CLASS enum_name_opt
+        enum_header : ENUM STRUCT enum_name_opt COLON name
+        enum_header : ENUM CLASS enum_name_opt COLON name
+        enum_header : ENUM STRUCT enum_name_opt COLON type_builtin_list
+        enum_header : ENUM CLASS enum_name_opt COLON type_builtin_list
+    """
+    if p[3] and not p.parser.stack[-1].anonymous:
+        p[0] = Class(p.parser.stack[-1].name + [p[3]], p[1], [])
+    else:
+        p[0] = AnonymousClass()
+    p.parser.stack.append(p[0])
+
 
 def p_enum_definition(p):
     """
