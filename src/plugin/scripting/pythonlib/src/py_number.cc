@@ -200,7 +200,7 @@ PyObject* PyMotorNumber< T >::repr(PyObject* self)
     PyMotorObject*                 self_ = static_cast< PyMotorObject* >(self);
     const Meta::Value&             v     = self_->value;
     minitl::format_buffer< 1024u > format
-        = minitl::format< 1024u >(FMT("[{0} {1}]"), v.type().name().c_str(), v.as< const T >());
+        = minitl::format< 1024u >(FMT("[{0} {1}]"), v.type(), v.as< const T >());
     if(s_library->getVersion() >= 30)
     {
         return s_library->m_PyUnicode_FromFormat(format);
@@ -253,7 +253,7 @@ int PyMotorNumber< T >::nonZero(PyObject* self)
     const Meta::Type t     = self_->value.type();
     motor_assert(t.metaclass->type() == Meta::ClassType_Number,
                  "PyMotorNumber expected number value");
-    if(t.indirection == Meta::Type::Value)
+    if(t.indirection == Meta::Type::Indirection::Value)
     {
         return self_->value.template as< const T >() != 0;
     }

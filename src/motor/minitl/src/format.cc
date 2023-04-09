@@ -4,6 +4,7 @@
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/assert.hh>
 #include <motor/minitl/format.hh>
+#include <cstring>
 
 namespace minitl { namespace format_details {
 
@@ -16,6 +17,93 @@ bool invalid_format(const char* reason)
 #ifndef MOTOR_LITTLEENDIAN
 #    error Code currently only working on little endian!
 #endif
+
+u32 format_strncpy_align_left(char* destination, const char* value, const format_options& options,
+                              u32 reservedLength, u32 maximalLength)
+{
+    if(options.width <= reservedLength)
+    {
+        // string was too big for field, no padding
+        memcpy(destination, value, maximalLength);
+    }
+    else
+    {
+        u32 remaining = maximalLength;
+        if(reservedLength <= remaining)
+        {
+            memcpy(destination, value, reservedLength);
+            remaining -= reservedLength;
+            memset(destination + reservedLength, options.fill, remaining);
+        }
+        else
+        {
+            memcpy(destination, value, remaining);
+        }
+    }
+    return maximalLength;
+}
+
+u32 format_strncpy_align_center(char* destination, const char* value, const format_options& options,
+                                u32 reservedLength, u32 maximalLength)
+{
+    if(options.width <= reservedLength)
+    {
+        // string was too big for field, copy first X bytes
+        memcpy(destination, value, maximalLength);
+    }
+    else
+    {
+        u32 paddingSize = options.width - reservedLength;
+        u32 leftPadding = paddingSize / 2;
+        u32 remaining   = maximalLength;
+        if(leftPadding <= remaining)
+        {
+            memset(destination, options.fill, leftPadding);
+            remaining -= leftPadding;
+            if(reservedLength <= remaining)
+            {
+                memcpy(destination + leftPadding, value, reservedLength);
+                remaining -= reservedLength;
+                memset(destination + leftPadding + reservedLength, options.fill, remaining);
+            }
+            else
+            {
+                memcpy(destination + leftPadding, value, remaining);
+            }
+        }
+        else
+        {
+            memset(destination, options.fill, maximalLength);
+        }
+    }
+    return maximalLength;
+}
+
+u32 format_strncpy_align_right(char* destination, const char* value, const format_options& options,
+                               u32 reservedLength, u32 maximalLength)
+{
+    if(options.width <= reservedLength)
+    {
+        // string was too big for field, copy first X bytes
+        memcpy(destination, value, maximalLength);
+    }
+    else
+    {
+        u32 paddingSize = options.width - reservedLength;
+        u32 remaining   = maximalLength;
+        if(paddingSize <= remaining)
+        {
+            memset(destination, options.fill, paddingSize);
+            remaining -= paddingSize;
+            memcpy(destination + paddingSize, value, remaining);
+        }
+        else
+        {
+            memset(destination, options.fill, maximalLength);
+        }
+    }
+    return maximalLength;
+}
 
 static inline u64 formatBinary_8(u8 number)
 {
@@ -463,5 +551,33 @@ motor_api(MINITL) u32
 {
     return formatHexadecimalGeneric< 2 >(destination, number, sign, addSign, a);
 }
+
+namespace string_format {
+
+motor_api(MINITL) u32 format_arg(char* destination, bool_wrapper value,
+                                 const format_options& options, u32 reservedLength)
+{
+    motor_forceuse(options);
+    if(value)
+        memcpy(destination, "true", 4);
+    else
+        memcpy(destination, "false", 5);
+    return reservedLength;
+}
+
+motor_api(MINITL) u32
+    format_arg_partial(char* destination, bool_wrapper value, const format_options& options,
+                       u32 reservedLength, u32 maxCapacity)
+{
+    motor_forceuse(options);
+    motor_forceuse(reservedLength);
+    if(value)
+        memcpy(destination, "true", maxCapacity);
+    else
+        memcpy(destination, "false", maxCapacity);
+    return maxCapacity;
+}
+
+}  // namespace string_format
 
 }}  // namespace minitl::format_details

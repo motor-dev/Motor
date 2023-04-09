@@ -8,31 +8,16 @@
 #include <motor/meta/typeinfo.meta.hh>
 #include <motor/minitl/format.hh>
 
-namespace minitl {
+namespace Motor { namespace Meta {
 
-template <>
-struct formatter< Motor::Meta::Type > : public formatter< const char* >
-{
-    static u32 length(const Motor::Meta::Type& value, const format_options& options)
-    {
-        return formatter< const char* >::length(value.name(), options);
-    }
-    static u32 format_to_partial(char* destination, const Motor::Meta::Type& value,
-                                 const format_options& options, u32 reservedLength,
-                                 u32 maximalLength)
-    {
-        return formatter< const char* >::format_to_partial(destination, value.name(), options,
-                                                           reservedLength, maximalLength);
-    }
-    static u32 format_to(char* destination, const Motor::Meta::Type& value,
-                         const format_options& options, u32 reservedLength)
-    {
-        return formatter< const char* >::format_to(destination, value.name(), options,
-                                                   reservedLength);
-    }
-};
+motor_api(META) u32 format_length(const Type& type, const minitl::format_options& options);
+motor_api(META) u32 format_arg(char* destination, const Type& type,
+                               const minitl::format_options& options, u32 reservedLength);
+motor_api(META) u32
+    format_arg_partial(char* destination, const Type& type, const minitl::format_options& options,
+                       u32 reservedLength, u32 maxCapacity);
 
-}  // namespace minitl
+}}  // namespace Motor::Meta
 
 /**************************************************************************************************/
 #endif

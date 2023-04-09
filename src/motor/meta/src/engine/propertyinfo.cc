@@ -44,7 +44,8 @@ Value Property::getTag(const Type& tagType) const
 
 Value Property::getTag(raw< const Class > tagType) const
 {
-    return getTag(Type::makeType(tagType, Type::Value, Type::Const, Type::Const));
+    return getTag(Type::makeType(tagType, Type::Indirection::Value, Type::Constness::Const,
+                                 Type::Constness::Const));
 }
 
 }}  // namespace Motor::Meta

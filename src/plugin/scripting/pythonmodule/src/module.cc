@@ -25,7 +25,7 @@ private:
     {
         motor_fatal_format(Motor::Logger::root(), "{0}:{1} Assertion failed: {2}\n\t{3}", file,
                            line, expr, message);
-        return minitl::Break;
+        return minitl::AssertionResult::Break;
     }
 
 protected:

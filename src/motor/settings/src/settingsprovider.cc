@@ -68,8 +68,8 @@ SettingsProvider::SettingsRegistration::getSettingsList()
 
 void SettingsProvider::apply(SettingsBase& settings) const
 {
-    Meta::Type  type          = Meta::Type::makeType(settings.m_settingsClass, Meta::Type::Value,
-                                                     Meta::Type::Mutable, Meta::Type::Mutable);
+    Meta::Type  type          = Meta::Type::makeType(settings.m_settingsClass, Meta::Type::Indirection::Value,
+                               Meta::Type::Constness::Mutable, Meta::Type::Constness::Mutable);
     Meta::Value settingsValue = Meta::Value(type, &settings);
     for(SettingsCategoryMap::const_iterator it = m_settings.begin(); it != m_settings.end(); ++it)
     {

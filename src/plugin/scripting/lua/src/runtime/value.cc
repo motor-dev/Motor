@@ -15,7 +15,7 @@ static bool convertNilToValue(lua_State* state, int index, const Meta::Type& typ
 {
     motor_forceuse(state);
     motor_forceuse(index);
-    if(type.indirection >= Meta::Type::RawPtr)
+    if(type.indirection >= Meta::Type::Indirection::RawPtr)
     {
         Meta::Value* value = new(buffer) Meta::Value(type, Meta::Value::Reserve);
         *static_cast< void** >(value->memory()) = 0;
@@ -244,10 +244,12 @@ static bool convertTableToValue(lua_State* state, int index, const Meta::Type& t
     }
     else if(type.metaclass->type() == Meta::ClassType_Pod)
     {
-        motor_assert(type.indirection == Meta::Type::Value, "POD type can only be value");
-        Meta::Type   valueType = Meta::Type::makeType(type.metaclass, Meta::Type::Value,
-                                                      Meta::Type::Mutable, Meta::Type::Mutable);
-        Meta::Value* value     = new(buffer) Meta::Value(valueType, Meta::Value::Reserve);
+        motor_assert(type.indirection == Meta::Type::Indirection::Value,
+                     "POD type can only be value");
+        Meta::Type valueType
+            = Meta::Type::makeType(type.metaclass, Meta::Type::Indirection::Value,
+                                   Meta::Type::Constness::Mutable, Meta::Type::Constness::Mutable);
+        Meta::Value* value = new(buffer) Meta::Value(valueType, Meta::Value::Reserve);
         lua_pushnil(state);
         while(lua_next(state, index) != 0)
         {

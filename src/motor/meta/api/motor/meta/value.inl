@@ -62,7 +62,7 @@ Value& Value::operator=(const T& t)
                                "Value has type {0}; unable to copy from type {1}", m_type,
                                motor_type< T >()))
             return *this;
-        if(motor_assert(m_type.constness != Type::Const, "Value is const")) return *this;
+        if(motor_assert(m_type.constness != Type::Constness::Const, "Value is const")) return *this;
         void* mem = memory();
         m_type.destroy(mem);
         m_type.copy(&t, mem);
@@ -141,7 +141,7 @@ const void* Value::memory() const
 
 bool Value::isConst() const
 {
-    return m_type.access == Type::Const;
+    return m_type.access == Type::Constness::Const;
 }
 
 Value::operator const void*() const

@@ -105,45 +105,14 @@ PyObject* PyMotorArray::repr(PyObject* self)
     PyMotorObject*     self_ = static_cast< PyMotorObject* >(self);
     const Meta::Value& v     = self_->value;
 
-    const char* constness = (v.type().constness == Meta::Type::Const) ? "const " : "mutable ";
-    const char* reference;
-    const char* closing;
-    switch(v.type().indirection)
-    {
-    case Meta::Type::RefPtr:
-        reference = "ref<";
-        closing   = ">";
-        break;
-    case Meta::Type::WeakPtr:
-        reference = "weak<";
-        closing   = ">";
-        break;
-    case Meta::Type::RawPtr:
-        reference = "raw<";
-        closing   = ">";
-        break;
-    case Meta::Type::Value:
-        reference = "";
-        constness = "";
-        closing   = "";
-        break;
-    default:
-        reference = "??? <";
-        constness = "??? ";
-        closing   = ">";
-        break;
-    }
-    const char* access = (v.type().access == Meta::Type::Const) ? "const " : "";
-
     if(s_library->getVersion() >= 30)
     {
-        return s_library->m_PyUnicode_FromFormat("[%s%s%s%s%s ]", constness, reference, access,
-                                                 v.type().metaclass->name.c_str(), closing, &v);
+        return s_library->m_PyUnicode_FromString(
+            minitl::format<>(FMT("[{0} {1:p}]"), v.type(), &v));
     }
     else
     {
-        return s_library->m_PyString_FromFormat("[%s%s%s%s%s ]", constness, reference, access,
-                                                v.type().metaclass->name.c_str(), closing, &v);
+        return s_library->m_PyString_FromFormat(minitl::format<>(FMT("[{0} {1:p}]"), v.type(), &v));
     }
 }
 
@@ -186,15 +155,17 @@ int PyMotorArray::setItem(PyObject* self, Py_ssize_t index, PyObject* value)
     raw< const Meta::ArrayOperatorTable > arrayApi = t.metaclass->operators->arrayOperators;
     if(t.isConst())
     {
-        s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError, "instance of %s is const",
-                                  self_->value.type().name().c_str());
+        s_library->m_PyErr_Format(
+            *s_library->m_PyExc_TypeError,
+            minitl::format< 1024 >(FMT("instance of {0} is const"), self_->value.type()));
         return -1;
     }
     else if(distance(value, arrayApi->value_type) >= Meta::ConversionCost::s_incompatible)
     {
-        s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,
-                                  "Cannot convert to array value_type %s",
-                                  arrayApi->value_type.name().c_str());
+        s_library->m_PyErr_Format(
+            *s_library->m_PyExc_TypeError,
+            minitl::format< 1024 >(FMT("Cannot convert to array value_type {0}"),
+                                   arrayApi->value_type));
         return -1;
     }
     else

@@ -7,7 +7,7 @@
 #include <motor/kernel/interlocked.hh>
 #include <motor/minitl/type_traits.hh>
 #include <motor/minitl/utility.hh>
-#include <string.h>
+#include <cstring>
 
 namespace minitl {
 
@@ -33,20 +33,65 @@ struct format_options
     char fill;
     char align;
     char sign;
-    char format;
     bool locale;
     bool alternate;
     bool signPadding;
 };
 
-template < typename T >
+template < char FORMAT_TYPE >
 struct formatter;
 
-template < u32 SIZE, typename T, typename... Args >
-format_buffer< SIZE > format(const T pattern, Args&&... arguments);
+/* string-like formatter */
+template <>
+struct formatter< 's' >;
+
+/* char-like formatter */
+template <>
+struct formatter< 'c' >;
+
+/* decimal integer formatter */
+template <>
+struct formatter< 'd' >;
+
+/* binary number formatters */
+template <>
+struct formatter< 'b' >;
+template <>
+struct formatter< 'B' >;
+
+/* octal number formatter */
+template <>
+struct formatter< 'o' >;
+
+/* hexadecimal number formatter */
+template <>
+struct formatter< 'x' >;
+template <>
+struct formatter< 'X' >;
+
+/* pointer formatter */
+template <>
+struct formatter< 'p' >;
+
+/* floating point number formatters */
+template <>
+struct formatter< 'e' >;
+template <>
+struct formatter< 'E' >;
+template <>
+struct formatter< 'f' >;
+template <>
+struct formatter< 'F' >;
+template <>
+struct formatter< 'g' >;
+template <>
+struct formatter< 'G' >;
 
 template < u32 SIZE, typename T, typename... Args >
-u32 format_to(char* destination, u32 length, const T pattern, Args&&... arguments);
+format_buffer< SIZE > format(T format, Args&&... arguments);
+
+template < u32 SIZE, typename T, typename... Args >
+u32 format_to(char* destination, u32 length, T format, Args&&... arguments);
 
 #define FMT(x)                                                                                     \
     []() {                                                                                         \
@@ -67,4 +112,3 @@ u32 format_to(char* destination, u32 length, const T pattern, Args&&... argument
 }  // namespace minitl
 
 #include <motor/minitl/inl/format.inl>
-#include <motor/minitl/inl/formatter.inl>

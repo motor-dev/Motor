@@ -158,17 +158,19 @@ PyObject* PyMotorObject::stealValue(PyObject* owner, Meta::Value& value)
         Py_INCREF(result);
         return result;
     }
-    else if(t.indirection != Meta::Type::Value && value.as< const void* const >() == 0)
+    else if(t.indirection != Meta::Type::Indirection::Value && value.as< const void* const >() == 0)
     {
         PyObject* result = s_library->m__Py_NoneStruct;
         Py_INCREF(result);
         return result;
     }
-    else if(t.indirection == Meta::Type::Value && t.metaclass->type() == Meta::ClassType_Number)
+    else if(t.indirection == Meta::Type::Indirection::Value
+            && t.metaclass->type() == Meta::ClassType_Number)
     {
         return s_createPyNumber[t.metaclass->index()](owner, value);
     }
-    else if(t.indirection == Meta::Type::Value && t.metaclass->type() == Meta::ClassType_String
+    else if(t.indirection == Meta::Type::Indirection::Value
+            && t.metaclass->type() == Meta::ClassType_String
             && t.metaclass->index() == Meta::ClassIndex_text)
     {
         return createPyString(owner, value);
@@ -234,40 +236,43 @@ PyObject* PyMotorObject::getattr(PyObject* self, const char* name)
         PyObject* result = PyBoundMethod::create(m, self_);
         return result;
     }
-    s_library->m_PyErr_Format(*s_library->m_PyExc_AttributeError, "%s object has no attribute %s",
-                              self_->value.type().name().c_str(), name);
+    s_library->m_PyErr_Format(
+        *s_library->m_PyExc_AttributeError,
+        minitl::format<>(FMT("{0} object has no attribute {1}"), self_->value.type(), name));
     return NULL;
 }
 
 int PyMotorObject::setattr(PyObject* self, const char* name, PyObject* value)
 {
     PyMotorObject* self_ = static_cast< PyMotorObject* >(self);
-    if(self_->value.type().access == Meta::Type::Const)
+    if(self_->value.type().access == Meta::Type::Constness::Const)
     {
-        s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError, "instance of %s is const",
-                                  self_->value.type().name().c_str());
+        s_library->m_PyErr_Format(
+            *s_library->m_PyExc_TypeError,
+            minitl::format<>(FMT("instance of {0} is const"), self_->value.type()));
         return -1;
     }
     raw< const Meta::Property > prop = self_->value.type().metaclass->getProperty(name);
     if(!prop)
     {
-        s_library->m_PyErr_Format(*s_library->m_PyExc_AttributeError,
-                                  "%s object has no attribute %s",
-                                  self_->value.type().name().c_str(), name);
+        s_library->m_PyErr_Format(
+            *s_library->m_PyExc_AttributeError,
+            minitl::format<>(FMT("{0} object has no attribute {1}"), self_->value.type(), name));
         return -1;
     }
-    if(prop->type.access == Meta::Type::Const)
+    if(prop->type.access == Meta::Type::Constness::Const)
     {
-        s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError, "property %s.%s is const",
-                                  self_->value.type().name().c_str(), name);
+        s_library->m_PyErr_Format(
+            *s_library->m_PyExc_TypeError,
+            minitl::format<>(FMT("property ({0}).{1} is const"), self_->value.type(), name));
         return -1;
     }
     Meta::ConversionCost c = distance(value, prop->type);
     if(c >= Meta::ConversionCost::s_incompatible)
     {
-        s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError, "%s.%s is of type %s",
-                                  self_->value.type().name().c_str(), name,
-                                  prop->type.name().c_str());
+        s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,
+                                  minitl::format<>(FMT("({0}).{1} is of type {2}"),
+                                                   self_->value.type(), name, prop->type));
         return -1;
     }
     Meta::Value* v = (Meta::Value*)malloca(sizeof(Meta::Value));
@@ -284,11 +289,12 @@ PyObject* PyMotorObject::repr(PyObject* self)
     const Meta::Value& v     = self_->value;
     if(s_library->getVersion() >= 30)
     {
-        return s_library->m_PyUnicode_FromFormat("[%s @0x%p]", v.type().name().c_str(), &v);
+        return s_library->m_PyUnicode_FromString(
+            minitl::format<>(FMT("[{0} {1:p}]"), v.type(), &v));
     }
     else
     {
-        return s_library->m_PyString_FromFormat("[%s @0x%p]", v.type().name().c_str(), &v);
+        return s_library->m_PyString_FromString(minitl::format<>(FMT("[{0} {1:p}]"), v.type(), &v));
     }
 }
 
@@ -310,8 +316,9 @@ PyObject* PyMotorObject::call(PyObject* self, PyObject* args, PyObject* kwds)
     Meta::Value          v(self_->value[callName]);
     if(!v)
     {
-        s_library->m_PyErr_Format(*s_library->m_PyExc_Exception, "%s object is not callable",
-                                  self_->value.type().name().c_str());
+        s_library->m_PyErr_Format(
+            *s_library->m_PyExc_Exception,
+            minitl::format<>(FMT("{0} object is not callable"), self_->value.type()));
         return 0;
     }
     else
@@ -319,8 +326,9 @@ PyObject* PyMotorObject::call(PyObject* self, PyObject* args, PyObject* kwds)
         raw< const Meta::Method > method = v.as< raw< const Meta::Method > >();
         if(!method)
         {
-            s_library->m_PyErr_Format(*s_library->m_PyExc_Exception, "%s object is not callable",
-                                      self_->value.type().name().c_str());
+            s_library->m_PyErr_Format(
+                *s_library->m_PyExc_Exception,
+                minitl::format<>(FMT("{0} object is not callable"), self_->value.type()));
             return 0;
         }
         return Python::call(method, NULL, args, kwds);
@@ -331,7 +339,7 @@ int PyMotorObject::nonZero(PyObject* self)
 {
     PyMotorObject*   self_ = static_cast< PyMotorObject* >(self);
     const Meta::Type t     = self_->value.type();
-    if(t.indirection == Meta::Type::Value)
+    if(t.indirection == Meta::Type::Indirection::Value)
     {
         return 1;
     }
@@ -697,8 +705,9 @@ Meta::ConversionCost PyMotorObject::distance(PyObject* object, const Meta::Type&
     }
     else if(object == s_library->m__Py_NoneStruct)
     {
-        return desiredType.indirection >= Meta::Type::RawPtr ? Meta::ConversionCost()
-                                                             : Meta::ConversionCost::s_incompatible;
+        return desiredType.indirection >= Meta::Type::Indirection::RawPtr
+                   ? Meta::ConversionCost()
+                   : Meta::ConversionCost::s_incompatible;
     }
     else if(object->py_type == s_library->m_PyFloat_Type)
     {
@@ -722,7 +731,7 @@ void PyMotorObject::unpack(PyObject* object, const Meta::Type& desiredType, void
         PyMotorObject* object_ = static_cast< PyMotorObject* >(object);
         motor_assert_format(desiredType <= object_->value.type(),
                             "incompatible types: {0} is not compatible with {1}",
-                            object_->value.type().name().c_str(), desiredType.name().c_str());
+                            object_->value.type(), desiredType);
         new(buffer) Meta::Value(Meta::Value::ByRef(object_->value));
     }
     else if(object->py_type->tp_flags & (Py_TPFLAGS_INT_SUBCLASS | Py_TPFLAGS_LONG_SUBCLASS))

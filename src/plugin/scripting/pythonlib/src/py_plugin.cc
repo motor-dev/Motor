@@ -91,9 +91,10 @@ PyObject* PyMotorPlugin::getattr(PyObject* self, const char* name)
     }
     else
     {
-        s_library->m_PyErr_Format(*s_library->m_PyExc_Exception,
-                                  "while retrieving property %s: plugin %s failed to load", name,
-                                  self_->value.name().str().name);
+        s_library->m_PyErr_Format(
+            *s_library->m_PyExc_Exception,
+            minitl::format<>(FMT("while retrieving property {0}: plugin {1} failed to load"), name,
+                             self_->value.name()));
         return 0;
     }
 }
@@ -111,12 +112,13 @@ PyObject* PyMotorPlugin::repr(PyObject* self)
     PyMotorPlugin* self_ = reinterpret_cast< PyMotorPlugin* >(self);
     if(s_library->getVersion() >= 30)
     {
-        PyUnicode_FromFormatType f = s_library->m_PyUnicode_FromFormat;
-        return f("[plugin %s]", self_->value.name().str().name);
+        return s_library->m_PyUnicode_FromString(
+            minitl::format<>(FMT("[plugin {0}]"), self_->value.name()));
     }
     else
     {
-        return s_library->m_PyString_FromFormat("[plugin %s]", self_->value.name().str().name);
+        return s_library->m_PyString_FromString(
+            minitl::format<>(FMT("[plugin {0}]"), self_->value.name()));
     }
 }
 

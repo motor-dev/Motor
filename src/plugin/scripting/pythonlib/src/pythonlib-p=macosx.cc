@@ -94,6 +94,9 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         motor_get_func(PyRun_SimpleString);
         motor_get_func(PyRun_InteractiveLoopFlags);
         motor_get_func(_Py_NoneStruct);
+        motor_get_func(_Py_TrueStruct);
+        motor_get_func(_Py_FalseStruct);
+        motor_get_func(_Py_NotImplementedStruct);
         motor_get_func(PyObject_SetAttrString);
         motor_get_func(PyObject_GetAttrString);
         motor_get_func(_PyArg_ParseTuple_SizeT);

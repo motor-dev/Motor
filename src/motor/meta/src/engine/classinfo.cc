@@ -421,7 +421,7 @@ Value Class::getTag(const Type& type) const
 
 Value Class::getTag(raw< const Class > type) const
 {
-    return getTag(Type::makeType(type, Type::Value, Type::Const, Type::Const));
+    return getTag(Type::makeType(type, Type::Indirection::Value, Type::Constness::Const, Type::Constness::Const));
 }
 
 bool Class::distance(raw< const Class > other, u16& result) const

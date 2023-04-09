@@ -47,6 +47,14 @@ void Context::typeError(lua_State* state, int narg, const char* expected, const 
     luaL_argerror(state, narg, msg);
 }
 
+void Context::typeError(lua_State* state, int narg, const Meta::Type& expected, const char* got)
+{
+    Context::printStack(state);
+    const char* msg = lua_pushfstring(state, "%s expected, got %s",
+                                      minitl::format< 1024 >(FMT("{0}"), expected), got);
+    luaL_argerror(state, narg, msg);
+}
+
 void Context::checkArg(lua_State* state, int narg, int type)
 {
     if(lua_type(state, narg) != type)
@@ -86,7 +94,7 @@ void Context::checkArg(lua_State* state, int narg, const Meta::Type& type)
 {
     if(lua_type(state, narg) != LUA_TUSERDATA)
     {
-        typeError(state, narg, type.name().c_str(), luaL_typename(state, narg));
+        typeError(state, narg, type, luaL_typename(state, narg));
     }
     lua_getmetatable(state, narg);
     luaL_getmetatable(state, "Motor.Object");
@@ -104,13 +112,13 @@ void Context::checkArg(lua_State* state, int narg, const Meta::Type& type)
             lua_pop(state, 1);
         }
         lua_pop(state, 1);
-        typeError(state, narg, type.name().c_str(), typeName);
+        typeError(state, narg, type, typeName);
     }
     lua_pop(state, 2);
     Meta::Value* value = (Meta::Value*)lua_touserdata(state, narg);
     if(!value->type().isA(type))
     {
-        typeError(state, narg, type.name().c_str(), value->type().name().c_str());
+        typeError(state, narg, type, minitl::format<>(FMT("{0}"), value->type()));
     }
 }
 
@@ -121,7 +129,8 @@ int Context::push(lua_State* state, const Meta::Value& v)
     {
         return 0;
     }
-    else if(v.type().indirection >= Meta::Type::RawPtr && v.as< const void* const >() == 0)
+    else if(v.type().indirection >= Meta::Type::Indirection::RawPtr
+            && v.as< const void* const >() == 0)
     {
         lua_pushnil(state);
         return 1;
@@ -176,39 +185,8 @@ minitl::format_buffer< 1024u > Context::tostring(lua_State* state, int element)
         {
             lua_pop(state, 2);
             Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, element);
-            const char*  constness
-                = (userdata->type().constness == Meta::Type::Const) ? "const " : "mutable ";
-            const char* reference;
-            const char* closing;
-            switch(userdata->type().indirection)
-            {
-            case Meta::Type::RefPtr:
-                reference = "ref<";
-                closing   = ">";
-                break;
-            case Meta::Type::WeakPtr:
-                reference = "weak<";
-                closing   = ">";
-                break;
-            case Meta::Type::RawPtr:
-                reference = "raw<";
-                closing   = ">";
-                break;
-            case Meta::Type::Value:
-                reference = "";
-                constness = "";
-                closing   = "";
-                break;
-            default:
-                motor_notreached();
-                reference = "??? <";
-                closing   = ">";
-                break;
-            }
-            const char* access = (userdata->type().access == Meta::Type::Const) ? "const " : "";
-            return minitl::format< 1024u >(FMT("{0}{1}{2}{3}{4}[@0x{5}]"), constness, reference,
-                                           access, userdata->type().metaclass->name.c_str(),
-                                           closing, userdata);
+            return minitl::format<>(FMT("({0}[{1}]"), userdata->type().metaclass->name.c_str(),
+                                    userdata);
         }
         lua_pop(state, 1);
         luaL_getmetatable(state, "Motor.Plugin");
@@ -236,7 +214,7 @@ minitl::format_buffer< 1024u > Context::tostring(lua_State* state, int element)
         else
         {
             lua_pop(state, 2);
-            return minitl::format< 1024u >(FMT("lua_userdata[@0x{0}]"),
+            return minitl::format< 1024u >(FMT("lua_userdata[{0}]"),
                                            lua_touserdata(state, element));
         }
     }

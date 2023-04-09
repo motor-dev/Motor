@@ -160,6 +160,9 @@ typedef unsigned long long (*PyLong_AsUnsignedLongLongMaskType)(PyObject* longob
 typedef PyObject* (*PyFloat_FromDoubleType)(double value);
 typedef double (*PyFloat_AsDoubleType)(PyObject* doubleobject);
 typedef PyObject* _Py_NoneStructType;
+typedef PyObject* _Py_TrueStructType;
+typedef PyObject* _Py_FalseStructType;
+typedef PyObject* _Py_NotImplementedStructType;
 
 typedef void (*PyErr_PrintType)();
 typedef void (*PyErr_SetStringType)(PyTypeObject* errorType, const char* message);
