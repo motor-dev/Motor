@@ -98,7 +98,7 @@ void Application::updateResources()
         m_forceContinue
             = Task::ITask::CallbackConnection(m_updateTask, m_updateTask->startCallback());
     }
-    m_resourceLoadingCount = resourceCount;
+    m_resourceLoadingCount = motor_checked_numcast<u32>(resourceCount);
     if(!m_runLoop)
     {
         motor_info_format(Log::system(),

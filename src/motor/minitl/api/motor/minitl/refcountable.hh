@@ -16,7 +16,7 @@ class refcountable : public pointer
     friend class ref;
     template < typename T >
     friend class scoped;
-    template < typename T >
+    template < char >
     friend struct formatter;
 
 private: /* friend ref */

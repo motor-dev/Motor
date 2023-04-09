@@ -90,6 +90,9 @@ public:
     PyImport_AppendInittab2Type    m_PyImport_AppendInittab2;
     PyImport_AppendInittab3Type    m_PyImport_AppendInittab3;
     _Py_NoneStructType             m__Py_NoneStruct;
+    _Py_TrueStructType             m__Py_TrueStruct;
+    _Py_FalseStructType            m__Py_FalseStruct;
+    _Py_NotImplementedStructType   m__Py_NotImplementedStruct;
 
     PyObject_SetAttrStringType             m_PyObject_SetAttrString;
     PyObject_GetAttrStringType             m_PyObject_GetAttrString;
@@ -163,6 +166,13 @@ public:
 
     PySys_GetObjectType m_PySys_GetObject;
     PySys_SetObjectType m_PySys_SetObject;
+
+    constexpr static int Py_LT = 0;
+    constexpr static int Py_LE = 1;
+    constexpr static int Py_EQ = 2;
+    constexpr static int Py_NE = 3;
+    constexpr static int Py_GT = 4;
+    constexpr static int Py_GE = 5;
 };
 
 extern tls< PythonLibrary > s_library;

@@ -23,7 +23,7 @@ struct functionhelper< T, Value, Value*, u32 >
         motor_forceuse(m);
         if(motor_assert_format(motor_type< T* >() <= params[0].type(),
                                "expected parameter of type {0}; got {1}", motor_type< T* >().name(),
-                               params[0].type().name()))
+                               params[0].type()))
             return Value();
         return (params[0].as< T& >().*method)(params + 1, paramCount - 1);
     }
@@ -33,7 +33,7 @@ struct functionhelper< T, Value, Value*, u32 >
         motor_forceuse(m);
         if(motor_assert_format(motor_type< const T* >() <= params[0].type(),
                                "expected parameter of type {0}; got {1}",
-                               motor_type< const T* >().name(), params[0].type().name()))
+                               motor_type< const T* >().name(), params[0].type()))
             return Value();
         return (params[0].as< const T& >().*method)(params + 1, paramCount - 1);
     }

@@ -48,7 +48,7 @@ private:
     Plugin::Plugin< KernelScheduler::IKernelScheduler > m_cpuKernelScheduler;
     minitl::vector< UpdateTask >                        m_tasks;
     Task::ITask::CallbackConnection                     m_forceContinue;
-    size_t                                              m_resourceLoadingCount;
+    u32                                                 m_resourceLoadingCount;
     i_bool                                              m_runLoop;
 
 private:

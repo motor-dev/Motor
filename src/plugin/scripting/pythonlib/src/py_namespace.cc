@@ -111,7 +111,7 @@ int PyMotorNamespace::setattr(PyObject* self, const char* name, PyObject* value)
     {
         if(ob->name == name_)
         {
-            if(ob->value.type().access != Meta::Type::Const)
+            if(ob->value.type().access != Meta::Type::Constness::Const)
             {
                 Meta::ConversionCost c = distance(value, ob->value.type());
                 if(c < Meta::ConversionCost::s_incompatible)
@@ -125,22 +125,25 @@ int PyMotorNamespace::setattr(PyObject* self, const char* name, PyObject* value)
                 }
                 else
                 {
-                    s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError, "%s.%s is of type %s",
-                                              self_->value.type().name().c_str(), name,
-                                              ob->value.type().name().c_str());
+                    s_library->m_PyErr_Format(
+                        *s_library->m_PyExc_TypeError,
+                        minitl::format< 1024 >(FMT("({0}).{1} is of type {2}"), self_->value.type(),
+                                               name, ob->value.type()));
                     return -1;
                 }
             }
             else
             {
-                s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError, "%s.%s is const",
-                                          self_->value.type().name().c_str(), name);
+                s_library->m_PyErr_Format(
+                    *s_library->m_PyExc_TypeError,
+                    minitl::format< 1024u >(FMT("{0}.{1} is const"), self_->value.type(), name));
                 return -1;
             }
         }
     }
-    s_library->m_PyErr_Format(*s_library->m_PyExc_AttributeError, "%s object has no attribute %s",
-                              self_->value.type().name().c_str(), name);
+    s_library->m_PyErr_Format(
+        *s_library->m_PyExc_AttributeError,
+        minitl::format< 1024 >(FMT("{0} object has no attribute {1}"), self_->value.type(), name));
     return -1;
 }
 

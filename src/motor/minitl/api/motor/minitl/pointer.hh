@@ -40,7 +40,7 @@ class pointer
     friend class weak;
     template < typename T >
     friend class scoped;
-    template < typename T >
+    template < char >
     friend struct formatter;
 
 private:
