@@ -215,6 +215,7 @@ class vscode(Build.BuildContext):
                             tg_defines += getattr(tg, 'extra_defines', [])
                             tg_defines += tg.env.DEFINES
                             with open(resp_file_name, 'w') as response_file:
+                                response_file.write('-std=c++14%s\n')
                                 for i in env.SYSTEM_INCLUDES + env.INCLUDES:
                                     response_file.write('-isystem\n%s\n' % i)
                                 for i in tg_includes + tg.env.INCPATHS:

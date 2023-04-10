@@ -59,6 +59,7 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
 
     def __init__(self, clang, clangxx, extra_args={}, extra_env={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, clang, clangxx, extra_args, extra_env)
+        self.targets.append('llvm')
 
     def has_arch_flag(self):
         # if clang manages to compile, then the -arch keyword was ignored
