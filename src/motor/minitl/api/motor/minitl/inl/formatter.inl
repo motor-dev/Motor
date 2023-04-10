@@ -211,15 +211,15 @@ motor_api(MINITL) u32
 template <>
 struct formatter< '{' >
 {
-    static constexpr format_options default_format_options {0,   0,     ' ',   '<',
-                                                            '-', false, false, false};
+    static constexpr format_options default_format_options {0,     0,     ' ',   '<', '-',
+                                                            false, false, false, '{'};
 };
 
 template <>
 struct formatter< 's' >
 {
-    static constexpr format_options default_format_options {0,   0,     ' ',   '<',
-                                                            '-', false, false, false};
+    static constexpr format_options default_format_options {0,     0,     ' ',   '<', '-',
+                                                            false, false, false, 's'};
     typedef formatter< 's' >        formatter_alternate;
     typedef format_details::direct_formatter_left_aligned< formatter< 's' > >
         formatter_left_aligned;
@@ -253,8 +253,8 @@ struct formatter< 's' >
 template <>
 struct formatter< 'c' >
 {
-    static constexpr format_options default_format_options {0,   0,     ' ',   '<',
-                                                            '-', false, false, false};
+    static constexpr format_options default_format_options {0,     0,     ' ',   '<', '-',
+                                                            false, false, false, 'c'};
     typedef formatter< 'c' >        formatter_alternate;
     typedef format_details::direct_formatter_left_aligned< formatter< 'c' > >
         formatter_left_aligned;
@@ -292,8 +292,50 @@ struct formatter< 'c' >
 template <>
 struct formatter< 'd' >
 {
-    static constexpr format_options default_format_options {0,   0,     ' ',   '<',
-                                                            '-', false, false, false};
+    static constexpr format_options default_format_options {0,     0,     ' ',   '<', '-',
+                                                            false, false, false, 'd'};
+    typedef formatter< 'g' >        formatter_alternate;
+    typedef format_details::direct_formatter_left_aligned< formatter< 'd' > >
+        formatter_left_aligned;
+    typedef format_details::direct_formatter_right_aligned< formatter< 'd' > >
+                                                                          formatter_right_aligned;
+    typedef format_details::direct_formatter_centered< formatter< 'd' > > formatter_centered;
+
+    template < typename T >
+    static inline u32 length(T&& value, const format_options& options)
+    {
+        motor_forceuse(value);
+        motor_forceuse(options);
+        return 0;
+    }
+    template < typename T >
+    static inline u32 write(char* destination, T&& value, const format_options& options,
+                            u32 reservedLength)
+    {
+        motor_forceuse(destination);
+        motor_forceuse(value);
+        motor_forceuse(options);
+        motor_forceuse(reservedLength);
+        return 0;
+    }
+    template < typename T >
+    static inline u32 write_partial(char* destination, T&& value, const format_options& options,
+                                    u32 reservedLength, u32 maxCapacity)
+    {
+        motor_forceuse(destination);
+        motor_forceuse(value);
+        motor_forceuse(options);
+        motor_forceuse(reservedLength);
+        motor_forceuse(maxCapacity);
+        return 0;
+    }
+};
+
+template <>
+struct formatter< 'x' >
+{
+    static constexpr format_options default_format_options {0,     0,     ' ',   '<', '-',
+                                                            false, false, false, 'x'};
     typedef formatter< 'g' >        formatter_alternate;
     typedef format_details::direct_formatter_left_aligned< formatter< 'd' > >
         formatter_left_aligned;
@@ -334,8 +376,8 @@ struct formatter< 'd' >
 template <>
 struct formatter< 'p' >
 {
-    static constexpr format_options default_format_options {0,   0,     ' ',   '<',
-                                                            '-', false, false, false};
+    static constexpr format_options default_format_options {0,     0,     ' ',   '<', '-',
+                                                            false, false, false, 'p'};
     typedef formatter< 'g' >        formatter_alternate;
     typedef format_details::direct_formatter_left_aligned< formatter< 'p' > >
         formatter_left_aligned;
@@ -376,8 +418,8 @@ struct formatter< 'p' >
 template <>
 struct formatter< 'g' >
 {
-    static constexpr format_options default_format_options {0,   0,     ' ',   '<',
-                                                            '-', false, false, false};
+    static constexpr format_options default_format_options {0,     0,     ' ',   '<', '-',
+                                                            false, false, false, 'g'};
     typedef formatter< 'g' >        formatter_alternate;
     typedef format_details::direct_formatter_left_aligned< formatter< 'g' > >
         formatter_left_aligned;
@@ -405,48 +447,6 @@ struct formatter< 'g' >
     template < typename T >
     static inline u32 write_partial(char* destination, T&& value, const format_options& options,
                                     u32 reservedLength, u32 maxCapacity)
-    {
-        motor_forceuse(destination);
-        motor_forceuse(value);
-        motor_forceuse(options);
-        motor_forceuse(reservedLength);
-        motor_forceuse(maxCapacity);
-        return 0;
-    }
-};
-
-template <>
-struct formatter< 'x' >
-{
-    static constexpr format_options default_format_options {0,   0,     ' ',   '<',
-                                                            '-', false, false, false};
-    typedef formatter< 'g' >        formatter_alternate;
-    typedef format_details::direct_formatter_left_aligned< formatter< 'g' > >
-        formatter_left_aligned;
-    typedef format_details::direct_formatter_right_aligned< formatter< 'g' > >
-                                                                          formatter_right_aligned;
-    typedef format_details::direct_formatter_centered< formatter< 'g' > > formatter_centered;
-
-    template < typename T >
-    static inline u32 length(T&& value, const format_options& options)
-    {
-        motor_forceuse(value);
-        motor_forceuse(options);
-        return 0;
-    }
-    template < typename T >
-    static inline u32 format_to(char* destination, T&& value, const format_options& options,
-                                u32 reservedLength)
-    {
-        motor_forceuse(destination);
-        motor_forceuse(value);
-        motor_forceuse(options);
-        motor_forceuse(reservedLength);
-        return 0;
-    }
-    template < typename T >
-    static inline u32 format_to_partial(char* destination, T&& value, const format_options& options,
-                                        u32 reservedLength, u32 maxCapacity)
     {
         motor_forceuse(destination);
         motor_forceuse(value);
