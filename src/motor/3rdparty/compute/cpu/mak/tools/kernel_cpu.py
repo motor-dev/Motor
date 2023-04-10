@@ -122,7 +122,7 @@ def create_cpu_kernel(task_gen, kernel_name, kernel_source, kernel_node, kernel_
         if kernel_type != 'cpu':
             continue
         kernel_env = task_gen.bld.all_envs[toolchain]
-        for variant in [''] + kernel_env.VECTOR_OPTIM_VARIANTS:
+        for variant in kernel_env.VECTOR_OPTIM_VARIANTS:
             tgen = task_gen.bld.get_tgen_by_name(task_gen.name)
             target_suffix = '.'.join([kernel_type] + ([variant[1:]] if variant else []))
             kernel_target = task_gen.target_name + '.' + '.'.join(kernel_name) + '.' + target_suffix
