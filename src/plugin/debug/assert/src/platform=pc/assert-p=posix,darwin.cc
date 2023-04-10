@@ -26,7 +26,7 @@ minitl::AssertionResult AssertionCallback(const char* file, int line, const char
         fprintf(stderr, "  [%lX]\n", a->address());
     }
 
-    return minitl::Break;
+    return minitl::AssertionResult::Break;
 }
 
 }}  // namespace Motor::Debug
