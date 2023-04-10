@@ -36,6 +36,7 @@ struct format_options
     bool locale;
     bool alternate;
     bool signPadding;
+    char formatter;
 };
 
 template < char FORMAT_TYPE >
