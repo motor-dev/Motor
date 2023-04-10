@@ -358,14 +358,6 @@ def add_build_command(toolchain, optimisation):
                     self.clear_status_line()
                 return result
 
-            def store(self):
-                # only keep metagen nodes in the common DB file, move rest to a separate DB file
-                super().store()
-
-            def restore(self):
-                super().restore()
-                # restore separate DB file
-
         c[command] = Command
 
 
