@@ -14,7 +14,7 @@ minitl::AssertionResult AssertionCallback(const char* file, int line, const char
     fprintf(stderr, "%s:%d Assertion failed: %s\n\t", file, line, expr);
     fprintf(stderr, "%s\n", message);
 
-    return minitl::Break;
+    return minitl::AssertionResult::Break;
 }
 
 }}  // namespace Motor::Debug
