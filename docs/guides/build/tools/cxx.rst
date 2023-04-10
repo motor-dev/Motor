@@ -70,7 +70,7 @@ program. Moreover, *Pyxx* is built to not run the preprocessing step even if it 
 semantic information. *Pyxx* will only run the lexical, syntax and part of the semantic analysis.
 
 While this theoretical breakdown of the first few stages of a compilation process seems to show that
-the steps can be run sequencially and independently, the convolution of the C++ grammar actually
+the steps can be run sequentially and independently, the convolution of the C++ grammar actually
 causes some of these steps to become interdependent. For instance, the C++ language was changed in
 2011 to allow the ``>>`` token to be broken down into two ``>`` tokens to serve as template
 brackets. The operation of breaking down the token is dependent on the previous tokens encountered,
@@ -79,7 +79,7 @@ which holds the information about template parameter lists, and the lexical anal
 have the information about the current state of parsing.
 
 *Pyxx* is the frontend tool that will drive the different analysis steps. Under the hood, it uses
-the *glrp* library which is a parser generator. *glrp* uses a fromal grammar description with
+the *glrp* library which is a parser generator. *glrp* uses a formal grammar description with
 annotations in order to generate a state machine that will be used by the lexical and syntactic
 analyzers.
 
@@ -98,8 +98,8 @@ encountering a token. There are several causes as to why conflicts happen, for i
 
       int i = 1 + 2 * 3; // (1+2) * 3 or 1 + (2*3)?
 
-   The grammar described in the C++ standard explicitely disambiguates all expressions in order not
-   to generate such conflicts. It does not however disambiguate the
+   The grammar described in the C++ standard explicitly avoid all ambiguities in the expression rules
+   in order to avoid generating such conflicts. It does not however disambiguate the
    `dangling else <https://en.wikipedia.org/wiki/Dangling_else>`_ construction.
 
    These conflicts are usually solved by assigning priority and associativity to the tokens
@@ -157,7 +157,7 @@ encountering a token. There are several causes as to why conflicts happen, for i
    disambiguation is not bounded, i.e. for any parser using *k* tokens in its lookahead list, one
    can find an input text where the disambiguation is found in token *k+1* or beyond.
 
-   A common solution employed to resolve those conflcits is to increase the overlap between the
+   A common solution employed to resolve those conflicts is to increase the overlap between the
    conflicting rules. For instance, one could change the grammar above to allow an optional 
    *attribute-specifier-seq* in front of an inline namespace. There is now no conflict anymore;
    when the ``inline`` token is encountered, the parser can shift an empty
@@ -329,7 +329,7 @@ without an *else* clause because another rule allows a *selection-statement* to 
 People who have looked at a few grammars can now understand that there is a possibility that the
 *compound-statement* that is inside the *selection-statement* is a *selection-statement* itself.
 The consequence is that it is unclear which one the ``else`` token is for: is it introducing the
-else clause of the inner *selection-statememt* or the else clause of the outer
+else clause of the inner *selection-statement* or the else clause of the outer
 *selection-statement*?
 
 This is a fairly simple, well known example of conflict, so it is relatively easy to discover what
@@ -465,7 +465,7 @@ solve the conflict.
 Rule tweaks
 ^^^^^^^^^^^
 
-This section lists all amendements to the rules that were applied in order to simplify the grammar.
+This section lists all amendments to the rules that were applied in order to simplify the grammar.
 In all cases, the resulting grammar is either equivalent or more permissive than the official C++
 grammar described in the C++ standard. The rule modifications allow conflicts to be
 simplified away without applying any priority changes or dynamic conflict resolution.
@@ -892,7 +892,7 @@ In order to support opaque enum declarations properly, the parser will discard
 *enum-base* / bitfield specifier
 """"""""""""""""""""""""""""""""
 
-In a member declaration, ``:`` token can introduce either a bitifiel specifier of a member, or a
+In a member declaration, ``:`` token can introduce either a bitfield specifier of a member, or a
 *enum-base* of an *opaque-enum-declaration*.
 
 .. container:: toggle
@@ -1081,7 +1081,7 @@ conflict between matching the *initializer-clause* to the *expression* or to the
       ╰╴
 
 The conflict is resolved in the C++ standard in section 11.4.1\ [#]_ by assigning a priority to
-shifing into the *brace-init-list*.
+shifting into the *brace-init-list*.
 
 .. [#] In a *member-declarator* for a bit-field, the *constant-expression* is parsed as the longest
    sequence of tokens that could syntactically form a *constant-expression*.
@@ -1577,7 +1577,7 @@ succeed parsing a *delete-expression* of the result of a *lambda-expression* pro
 When using a *conversion-function-id* as an *unqualified-id* in an expression, the parser encounters
 a conflict when encountering tokens that are used either as *ptr-operator*\ s or binary operators
 (``&``, ``&&``, ``*``). The token can be interpreted as either continuing the *conversion-type-id*,
-or starting a binary operation using the shorter version of the *conmversion-type-id*.
+or starting a binary operation using the shorter version of the *conversion-type-id*.
 
 .. container:: toggle
 
@@ -1834,7 +1834,7 @@ The conflict is resolved in the C++ standard in section 7.6.2.2\ [#]_ by priorit
 In the grammar, a function declaration can sometimes only consist of a *declarator* without return
 type in order to allow constructors, destructors and cast operators. The grammar is very generic
 and allows the rule ``function-definition : declarator function-body``. It means the sequence
-``&& identifier { }`` is gramatically correct but is rejected during the semantic analysis.
+``&& identifier { }`` is grammatically correct but is rejected during the semantic analysis.
 
 A function declaration/definition can also appear in a *template-declaration* and have constraints
 attached to it, which can use the ``&&`` operator.
@@ -1943,8 +1943,8 @@ In places allowing a requirement, the ``requires`` keyword leads to two possible
 could introduce a *requirement-expression* as part of a *simple-requirement*, or it could start a
 *nested-requirement*. The possible expansions lead to conflicts after a few tokens have been parsed.
 The standard indicates that the ``requires`` keyword in this situation always introduces a
-*nested-requirement*. It is therefore possible to resolve all conflicts by prefering the
-*nested-requirement* option. This would lead to a lot of annotations spread accross the grammar.
+*nested-requirement*. It is therefore possible to resolve all conflicts by preferring the
+*nested-requirement* option. This would lead to a lot of annotations spread across the grammar.
 
 In order to simplify the grammar, it is modified to introduce an earlier conflict, an empty
 production before the ``requires`` keyword. This empty production causes a shift-reduce conflict
@@ -2008,7 +2008,7 @@ The C++ grammar rules list three valid template arguments:
 - a *type-id*
 - an *id-expression*
 
-Comstant expressions are not only constant values; these are expressions that can be computed and
+Constant expressions are not only constant values; these are expressions that can be computed and
 reduced to a constant. For instance, ``1 + 1`` is a constant expression in C++. This computation is
 actually performed during semantic analysis; the grammar does not yet differentiate *expression*\ s
 from *constant-expression*\ s. At the grammar level, ``1 + x`` is a *constant-expression*. During
