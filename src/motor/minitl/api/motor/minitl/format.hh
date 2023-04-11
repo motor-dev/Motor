@@ -88,10 +88,10 @@ struct formatter< 'g' >;
 template <>
 struct formatter< 'G' >;
 
-template < u32 SIZE, typename T, typename... Args >
+template < u32 SIZE = 1024, typename T, typename... Args >
 format_buffer< SIZE > format(T format, Args&&... arguments);
 
-template < u32 SIZE, typename T, typename... Args >
+template < typename T, typename... Args >
 u32 format_to(char* destination, u32 length, T format, Args&&... arguments);
 
 #define FMT(x)                                                                                     \

@@ -535,7 +535,7 @@ formatter< '{' > format_as(format_details::brace_format);
 
 }  // namespace format_details
 
-template < u32 SIZE = 1024, typename T, typename... Args >
+template < u32 SIZE, typename T, typename... Args >
 format_buffer< SIZE > format(T format, Args&&... arguments)
 {
     motor_forceuse(format);
