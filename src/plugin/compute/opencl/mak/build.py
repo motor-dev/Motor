@@ -1,4 +1,4 @@
-from waflib import Task
+from waflib import Task, Errors
 from waflib.TaskGen import task_gen, feature, before_method, extension
 import pickle
 
@@ -40,41 +40,46 @@ def create_cl_kernel(task_gen, kernel_name, kernel_source, kernel_node, kernel_t
     if kernel_type == 'cpu':
         return
 
-    kernel_gens = []
     kernel_target = '.'.join([task_gen.name, '.'.join(kernel_name), 'cl'])
-    for env in task_gen.bld.multiarch_envs:
-        for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
-            if kernel_type != 'opencl':
-                continue
-            kernel_env = task_gen.bld.all_envs[toolchain]
-            tgen = task_gen.bld.get_tgen_by_name(env.ENV_PREFIX % task_gen.name)
 
-            kernel_task_gen = task_gen.bld(
-                env=kernel_env.derive(),
-                bld_env=env,
-                target=env.ENV_PREFIX % kernel_target,
-                target_name=env.ENV_PREFIX % task_gen.name,
-                safe_target_name=kernel_target.replace('.', '_').replace('-', '_'),
-                kernel_source=kernel_source,
-                kernel_node=kernel_node,
-                kernel_name=kernel_name,
-                features=[
-                    'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel',
-                    'motor:kernel_create', 'motor:cl:kernel_create'
-                ],
-                defines=tgen.defines + [
-                    'MOTOR_KERNEL_ID=%s_%s' % (task_gen.name.replace('.', '_'), kernel_target.replace('.', '_')),
-                    'MOTOR_KERNEL_NAME=%s' % (kernel_target),
-                    'MOTOR_KERNEL_TARGET=%s' % kernel_type,
-                ],
-                includes=tgen.includes,
-                use=tgen.use + [env.ENV_PREFIX % 'plugin.compute.opencl'],
-                uselib=tgen.uselib,
-                source_nodes=tgen.source_nodes
-            )
-            kernel_task_gen.env.PLUGIN = kernel_task_gen.env.plugin_name
-            kernel_gens.append(kernel_task_gen)
-    task_gen.bld.multiarch(kernel_target, kernel_gens)
+    env = task_gen.env
+    for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
+        if kernel_type != 'opencl':
+            continue
+        kernel_env = task_gen.bld.all_envs[toolchain]
+
+        kernel_task_gen = task_gen.bld(
+            env=kernel_env.derive(),
+            bld_env=env,
+            target=env.ENV_PREFIX % kernel_target,
+            target_name=env.ENV_PREFIX % task_gen.name,
+            safe_target_name=kernel_target.replace('.', '_').replace('-', '_'),
+            kernel_source=kernel_source,
+            kernel_node=kernel_node,
+            kernel_name=kernel_name,
+            features=[
+                'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel',
+                'motor:kernel_create', 'motor:cl:kernel_create'
+            ],
+            defines=task_gen.defines + [
+                'MOTOR_KERNEL_ID=%s_%s' % (task_gen.name.replace('.', '_'), kernel_target.replace('.', '_')),
+                'MOTOR_KERNEL_NAME=%s' % kernel_target,
+                'MOTOR_KERNEL_TARGET=%s' % kernel_type,
+            ],
+            includes=task_gen.includes,
+            use=task_gen.use + [env.ENV_PREFIX % 'plugin.compute.opencl'],
+            uselib=task_gen.uselib,
+            source_nodes=task_gen.source_nodes
+        )
+        kernel_task_gen.env.PLUGIN = kernel_task_gen.env.plugin_name
+
+        if task_gen.name != task_gen.target_name:
+            try:
+                multiarch = task_gen.bld.get_tgen_by_name(kernel_target)
+            except Errors.WafError:
+                task_gen.bld.multiarch(kernel_target, [kernel_task_gen])
+            else:
+                multiarch.use.append(kernel_task_gen.target)
 
 
 @feature('motor:cl:kernel_create')
