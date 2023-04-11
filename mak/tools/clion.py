@@ -169,8 +169,9 @@ class CLion(Build.BuildContext):
                 'set(CMAKE_CXX_STANDARD 14)\n'
                 'set(CMAKE_CXX_STANDARD_REQUIRED ON)\n'
                 'set(CMAKE_CXX_EXTENSIONS OFF)\n'
+                'set_property(GLOBAL PROPERTY TARGET_MESSAGES OFF)\n'
+                'set_property(GLOBAL PROPERTY RULE_MESSAGES OFF)\n'
                 '%s\n'
-                'set_property(GLOBAL PROPERTY RULE_MESSAGES OFF)\n\n'
                 '\n' % (appname, ';'.join(configurations), '\n'.join(files))
             )
 
@@ -322,9 +323,9 @@ class CLion(Build.BuildContext):
                         '    COMMAND "%s" "%s" build:%s:%s\n'
                         '    WORKING_DIRECTORY "%s"\n'
                         '    USES_TERMINAL\n'
-                        '    DEPENDS always_build\n'
                         ')\n\n'
-                        'add_custom_command(OUTPUT always_build COMMAND cmake -E echo)\n'
+                        'add_custom_target(prepare COMMAND cmake -E touch_nocreate main.cpp)\n'
+                        'add_dependencies(motor.launcher prepare)\n'
                         'endif()\n' % (
                             self.launcher.target, dir_node.make_node('main.cpp').path_from(
                                 self.path
