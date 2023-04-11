@@ -11,10 +11,10 @@ jobs:
       - checkout
       - run:
           name: Configure
-          command: "C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python39_64/python" waf configure
+          command: C:/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/Shared/Python39_64/python waf configure
       - run:
           name: Build Android Nougat Clang
-          command: "C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python39_64/python" waf build:android_nougat_7.1-clang-5.0.300080:debug
+          command: C:/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/Shared/Python39_64/python waf build:android_nougat_7.1-clang-5.0.300080:debug
 
   windows:
     executor:
@@ -23,19 +23,19 @@ jobs:
       - checkout
       - run:
           name: Configure
-          command: "C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python39_64/python" waf configure
+          command: C:/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/Shared/Python39_64/python waf configure
       - run:
           name: Build Windows MSVC 16.11 x64
-          command: "C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python39_64/python" waf build:windows_amd64-community_x64-16.11:debug --tests
+          command: C:/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/Shared/Python39_64/python waf build:windows_amd64-community_x64-16.11:debug --tests
       - run:
           name: Build Windows MSVC 16.11 x86
-          command: "C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python39_64/python" waf build:windows_x86-community_x86-16.11:debug
+          command: C:/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/Shared/Python39_64/python waf build:windows_x86-community_x86-16.11:debug
       - run:
           name: Build Windows MSVC 16.11 ARM
-          command: "C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python39_64/python" waf build:windows_armv7a-community_amd64_arm-16.11:debug
+          command: C:/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/Shared/Python39_64/python waf build:windows_armv7a-community_amd64_arm-16.11:debug
       - run:
           name: Build Windows MSVC 16.11 ARM64
-          command: "C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python39_64/python" waf build:windows_arm64-community_amd64_arm64-16.11:debug
+          command: C:/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/Shared/Python39_64/python waf build:windows_arm64-community_amd64_arm64-16.11:debug
 
   macOS:
     macos:
