@@ -92,6 +92,8 @@ typedef u8               byte;
 #pragma warning(disable : 4359)
 // structure was padded due to alignment specifier
 #pragma warning(disable : 4324)
+// attribute is not recognized
+#pragma warning(disable : 5030)
 
 #define MOTOR_NOINLINE     __declspec(noinline)
 #define MOTOR_ALWAYSINLINE __forceinline
