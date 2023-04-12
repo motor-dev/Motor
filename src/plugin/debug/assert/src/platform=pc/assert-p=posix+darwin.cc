@@ -23,7 +23,9 @@ minitl::AssertionResult AssertionCallback(const char* file, int line, const char
     fprintf(stderr, "Callstack:\n");
     for(Runtime::Callstack::Address* a = address; a < address + result; ++a)
     {
-        fprintf(stderr, "  [%lX]\n", a->address());
+        char buffer[4096];
+        minitl::format_to(buffer, sizeof(buffer), FMT("[{0: #x}]\r\n"), a->address());
+        fprintf(stderr, "%s", minitl::format<>(FMT("  [{0: #x}]\n"), a->address()).c_str());
     }
 
     return minitl::AssertionResult::Break;
