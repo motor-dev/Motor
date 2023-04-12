@@ -26,21 +26,13 @@ struct PyMotorNumber : public PyMotorObject
     static PyTypeObject::Py3NumberMethods s_py3NumberNumber;
 };
 
-template <>
-PyTypeObject PyMotorNumber< i8 >::s_pyType;
-template <>
-PyTypeObject PyMotorNumber< i16 >::s_pyType;
-template <>
-PyTypeObject PyMotorNumber< i32 >::s_pyType;
-template <>
-PyTypeObject PyMotorNumber< i64 >::s_pyType;
-template <>
-PyTypeObject PyMotorNumber< u8 >::s_pyType;
-template <>
-PyTypeObject PyMotorNumber< u16 >::s_pyType;
-template <>
-PyTypeObject PyMotorNumber< u32 >::s_pyType;
-template <>
-PyTypeObject PyMotorNumber< u64 >::s_pyType;
+extern template struct PyMotorNumber< i8 >;
+extern template struct PyMotorNumber< i16 >;
+extern template struct PyMotorNumber< i32 >;
+extern template struct PyMotorNumber< i64 >;
+extern template struct PyMotorNumber< u8 >;
+extern template struct PyMotorNumber< u16 >;
+extern template struct PyMotorNumber< u32 >;
+extern template struct PyMotorNumber< u64 >;
 
 }}  // namespace Motor::Python
