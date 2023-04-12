@@ -195,7 +195,9 @@ def _find_counterexamples(conflict_list):
     return conflict_paths
 
 
-def create_parser_table(productions, start_id, name_map, terminal_count, show_merges, sm_log, conflict_log, error_log):
+def create_parser_table(
+    productions, start_id, name_map, terminal_count, show_merges, sm_log, conflict_log, error_log, show_progress=False
+):
     # type: (Dict[int, Grammar.Production], int, List[str], int, bool, Logger, Logger, Logger) -> LALRTable
     cidhash = {}       # type: Dict[int, int]
     goto_cache = {}    # type: Dict[Tuple[int, int], Optional[LR0ItemSet]]
@@ -494,12 +496,14 @@ def create_parser_table(productions, start_id, name_map, terminal_count, show_me
         # Loop over each production
         completed = int(bar_size * (1 + st) / len(states))
         remaining = bar_size - completed
-        if sys.version_info >= (3, ):
-            sys.stdout.write('\r[\x1b[32m%s\x1b[37m%s\x1b[0m]' % ('\u2501' * completed, '\u2501' * remaining))
-        else:
-            sys.stdout.write(
-                (u'\r[\x1b[32m%s\x1b[37m%s\x1b[0m]' % (u'\u2501' * completed, u'\u2501' * remaining)).encode('utf-8')
-            )
+        if show_progress:
+            if sys.version_info >= (3, ):
+                sys.stdout.write('\r[\x1b[32m%s\x1b[37m%s\x1b[0m]' % ('\u2501' * completed, '\u2501' * remaining))
+            else:
+                sys.stdout.write(
+                    (u'\r[\x1b[32m%s\x1b[37m%s\x1b[0m]' %
+                     (u'\u2501' * completed, u'\u2501' * remaining)).encode('utf-8')
+                )
         action_map = {}    # type: Dict[int, List[Tuple[int, LR0Item]]]
         st_action = {}     # type: Dict[int, Tuple[Tuple[int, Optional[str]],...]]
         st_goto = {}       # type: Dict[int, int]
