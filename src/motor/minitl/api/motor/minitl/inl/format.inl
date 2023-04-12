@@ -523,7 +523,7 @@ u32 format(char* destination, u32 destinationLength, index_sequence< PATTERN_IND
                get< patterns[PATTERN_INDICES].argumentIndex >(arguments..., brace_format {}))...};
     motor_forceuse(offsets);
 
-    u32 maxSize       = length - offset;
+    u32 maxSize       = destinationLength - offset;
     u32 segmentLength = format.size() - patterns[patternCount - 1].patternEnd;
     segmentLength     = (segmentLength > maxSize) ? maxSize : segmentLength;
     memcpy(destination + offset, &format[patterns[patternCount - 1].patternEnd], segmentLength);
@@ -547,15 +547,10 @@ formatter< '{' > format_as(format_details::brace_format);
 }  // namespace format_details
 
 template < u32 SIZE, typename T, typename... Args >
-format_buffer< SIZE > format(T format, Args&&... arguments)
+format_buffer< SIZE > format(T formatString, Args&&... arguments)
 {
-    motor_forceuse(format);
     format_buffer< SIZE > result;
-    constexpr u32         patternCount = format_details::count_patterns(T {});
-
-    format_details::format< T >(result.buffer, SIZE, make_index_sequence< patternCount >(),
-                                make_index_sequence< sizeof...(Args) >(),
-                                minitl::forward< Args >(arguments)...);
+    format_to(result.buffer, SIZE, formatString, minitl::forward< Args >(arguments)...);
     return result;
 }
 
@@ -566,7 +561,7 @@ u32 format_to(char* destination, u32 length, T format, Args&&... arguments)
     constexpr u32 patternCount = format_details::count_patterns(T {});
 
     return format_details::format< T >(destination, length, make_index_sequence< patternCount >(),
-                                       make_index_sequence< sizeof...(Args) >,
+                                       make_index_sequence< sizeof...(Args) >(),
                                        minitl::forward< Args >(arguments)...);
 }
 
