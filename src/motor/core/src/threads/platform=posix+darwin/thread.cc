@@ -69,7 +69,7 @@ Thread::ThreadParams::ThreadParams(const istring& name, ThreadFunction f, intptr
     , m_param2(p2)
     , m_result(0)
 {
-    motor_info_format(Log::thread(), "starting thread {0}", name);
+    // motor_info_format(Log::thread(), "starting thread {0}", name);
 #ifdef MOTOR_PLATFORM_INUX
     m_id = getttid();
 #endif
@@ -92,7 +92,7 @@ void* Thread::ThreadParams::threadWrapper(void* params)
 #endif
     motor_debug_format(Log::thread(), "started thread {0}", p->m_name);
     p->m_result = (*p->m_function)(p->m_param1, p->m_param2);
-    motor_info_format(Log::thread(), "stopped thread {0}", p->m_name);
+    // motor_info_format(Log::thread(), "stopped thread {0}", p->m_name);
     return 0;
 }
 

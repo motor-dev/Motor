@@ -461,6 +461,53 @@ def make_bld_node(self, category, path, name):
 
 
 @taskgen_method
+def apply_source_filter(self, env, file):
+    basename, _ = os.path.splitext(file.name)
+    add_platform = True
+    add_arch = True
+    add_compiler = True
+    had_filter = True
+    platform = file.name.find('-p=')
+    if platform != -1:
+        add_platform = False
+        platforms = basename[platform + 3:].split('+')
+        for p in platforms:
+            add_platform = add_platform or p in env.VALID_PLATFORMS
+    arch = file.name.find('-a=')
+    if arch != -1:
+        add_arch = False
+        architectures = basename[arch + 3:].split('+')
+        for a in architectures:
+            add_arch = add_arch or a in env.VALID_ARCHITECTURES
+    compiler = file.name.find('-c=')
+    if compiler != -1:
+        add_compiler = False
+        compilers = basename[compiler + 3:].split('+')
+        for c in compilers:
+            add_compiler = add_compiler or c == env.COMPILER_NAME
+    node = file.parent
+    while add_platform and add_arch and add_compiler and node and node != self.path and node != self.bld.srcnode:
+        if node.name.startswith('platform='):
+            add_platform = False
+            platforms = node.name[9:].split('+')
+            for p in platforms:
+                add_platform = add_platform or p in self.bld.env.VALID_PLATFORMS
+        elif node.name.startswith('arch='):
+            add_arch = False
+            architectures = node.name[5:].split('+')
+            for a in architectures:
+                add_arch = add_arch or a in env.VALID_ARCHITECTURES
+        elif node.name.startswith('compiler='):
+            add_compiler = False
+            compilers = node.name[9:].split('+')
+            for c in compilers:
+                add_compiler = add_compiler or c == env.COMPILER_NAME
+        elif node.parent.name == 'extra' and node.parent.parent == self.bld.motornode:
+            add_platform = node.name in self.bld.env.VALID_PLATFORMS
+        node = node.parent
+    return add_platform and add_arch and add_compiler, had_filter
+
+
 @feature('*')
 @before_method('process_source')
 def filter_sources(self):
@@ -474,52 +521,12 @@ def filter_sources(self):
         return
     sources = []
     for file in self.source:
-        basename, ext = os.path.splitext(file.name)
-        add_platform = True
-        add_arch = True
-        add_compiler = True
-        platform = file.name.find('-p=')
-        if platform != -1:
-            add_platform = False
-            platforms = basename[platform + 3:].split(',')
-            for p in platforms:
-                add_platform = add_platform or p in self.env.VALID_PLATFORMS
-        arch = file.name.find('-a=')
-        if arch != -1:
-            add_arch = False
-            architectures = basename[arch + 3:].split(',')
-            for a in architectures:
-                add_arch = add_arch or a in self.env.VALID_ARCHITECTURES
-        compiler = file.name.find('-c=')
-        if compiler != -1:
-            add_compiler = False
-            compilers = basename[compiler + 3:].split(',')
-            for c in compilers:
-                add_compiler = add_compiler or c == self.env.COMPILER_NAME
-        node = file.parent
-        while add_platform and add_arch and add_compiler and node and node != self.path and node != self.bld.srcnode:
-            if node.name.startswith('platform='):
-                add_platform = False
-                platforms = node.name[9:].split(',')
-                for p in platforms:
-                    add_platform = add_platform or p in self.bld.env.VALID_PLATFORMS
-            elif node.name.startswith('arch='):
-                add_arch = False
-                architectures = node.name[5:].split(',')
-                for a in architectures:
-                    add_arch = add_arch or a in self.env.VALID_ARCHITECTURES
-            elif node.name.startswith('compiler='):
-                add_compiler = False
-                compilers = node.name[9:].split(',')
-                for c in compilers:
-                    add_compiler = add_compiler or c == self.env.COMPILER_NAME
-            elif node.parent.name == 'extra' and node.parent.parent == self.bld.motornode:
-                add_platform = node.name in self.bld.env.VALID_PLATFORMS
-            node = node.parent
-        if add_platform and add_arch and add_compiler:
+        if self.apply_source_filter(self.env, file)[0]:
             sources.append(file)
+            _, ext = os.path.splitext(file.name)
             if ext in ['.m', '.mm']:
                 self.objc = True
+
     self.source = sources
 
 
