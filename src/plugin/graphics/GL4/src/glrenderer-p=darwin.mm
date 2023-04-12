@@ -46,7 +46,7 @@
 
 - (void) dealloc
 {
-    motor_info(Log::gl(), "destroying OpenGL view");
+    motor_info(Motor::Log::gl(), "destroying OpenGL view");
     [m_context release];
     [super dealloc];
 }
@@ -89,7 +89,7 @@ GLRenderer::Context::Context()
     GLint sync = 0;
     [m_context setValues:&sync forParameter:NSOpenGLCPSwapInterval];
     [m_context makeCurrentContext];
-    motor_info(Log::gl(), "Created OpenGL context {0} ({1}) on {2}"
+    motor_info_format(Motor::Log::gl(), "Created OpenGL context {0} ({1}) on {2}"
         , (const char*)glGetString(GL_VERSION)
         , (const char *)glGetString(GL_VENDOR)
         , (const char*)glGetString(GL_RENDERER));
