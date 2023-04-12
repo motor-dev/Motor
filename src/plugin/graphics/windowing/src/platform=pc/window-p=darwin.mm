@@ -56,7 +56,7 @@ Window::~Window()
 void Window::load(weak<const Resource::IDescription> /*renderWindowDescription*/)
 {
     knl::uint2 dimensions = knl::uint2{800, 600}; //motor_checked_cast<const RenderWindow>(resource)->dimensions;
-    m_window.reset(scoped<PlatformWindow>::create(m_renderer->arena(), dimensions[0], dimensions[1]));
+    m_window.reset(scoped<PlatformWindow>::create(m_renderer->arena(), dimensions._0, dimensions._1));
 }
 
 void Window::unload()
