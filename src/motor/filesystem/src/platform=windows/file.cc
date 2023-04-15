@@ -6,16 +6,19 @@
 
 #include <cstdio>
 
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#    define NOMINMAX
+#endif
+#include <windows.h>
+
 namespace Motor {
 
-Win32File::Win32File(ifilename filename, Media media, u64 size, u64 timestamp)
-    : File(filename, media, size, timestamp)
+Win32File::Win32File(ifilename filename, u64 size, u64 timestamp) : File(filename, size, timestamp)
 {
 }
 
-Win32File::~Win32File()
-{
-}
+Win32File::~Win32File() = default;
 
 static void setFilePointer(const char* debugName, HANDLE file, i64 wantedOffset)
 {
@@ -40,10 +43,11 @@ void Win32File::doFillBuffer(weak< File::Ticket > ticket) const
 {
     motor_assert(ticket->file == this, "trying to read wrong file");
     ifilename::Filename pathname = m_filename.str('\\');
-    HANDLE h = CreateFileA(pathname.name, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+    HANDLE              h
+        = CreateFileA(pathname.name, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, 0);
     if(h == INVALID_HANDLE_VALUE)
     {
-        int errorCode = ::GetLastError();
+        DWORD errorCode = ::GetLastError();
         motor_info_format(Log::fs(),
                           "file {0} ({1}) could not be opened: CreateFile returned an error ({2})",
                           m_filename, pathname.name, errorCode);
@@ -65,11 +69,11 @@ void Win32File::doFillBuffer(weak< File::Ticket > ticket) const
                 {
                     ReadFile(h, buffer,
                              motor_checked_numcast< u32 >(ticket->total - ticket->processed), &read,
-                             0);
+                             nullptr);
                 }
                 else
                 {
-                    ReadFile(h, buffer, s_bufferSize, &read, 0);
+                    ReadFile(h, buffer, s_bufferSize, &read, nullptr);
                 }
                 for(u32 i = 0; i < read; ++i)
                 {
@@ -85,11 +89,11 @@ void Win32File::doFillBuffer(weak< File::Ticket > ticket) const
                 {
                     ReadFile(h, target + ticket->processed,
                              motor_checked_numcast< u32 >(ticket->total - ticket->processed), &read,
-                             0);
+                             nullptr);
                 }
                 else
                 {
-                    ReadFile(h, target + ticket->processed, s_bufferSize, &read, 0);
+                    ReadFile(h, target + ticket->processed, s_bufferSize, &read, nullptr);
                 }
             }
             ticket->processed += read;
@@ -119,10 +123,10 @@ void Win32File::doWriteBuffer(weak< Ticket > ticket) const
 {
     motor_assert(ticket->file == this, "trying to read wrong file");
     ifilename::Filename pathname = m_filename.str('\\');
-    HANDLE              h = CreateFileA(pathname.name, GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
+    HANDLE h = CreateFileA(pathname.name, GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, 0);
     if(h == INVALID_HANDLE_VALUE)
     {
-        int errorCode = ::GetLastError();
+        DWORD errorCode = ::GetLastError();
         motor_info_format(Log::fs(),
                           "file {0} ({1}) could not be opened: CreateFile returned an error ({2})",
                           m_filename, pathname.name, errorCode);
@@ -138,9 +142,10 @@ void Win32File::doWriteBuffer(weak< Ticket > ticket) const
             if(ticket->processed + s_bufferSize > ticket->total)
                 WriteFile(h, ticket->buffer.data() + ticket->processed,
                           motor_checked_numcast< u32 >(ticket->total - ticket->processed), &written,
-                          0);
+                          nullptr);
             else
-                WriteFile(h, ticket->buffer.data() + ticket->processed, s_bufferSize, &written, 0);
+                WriteFile(h, ticket->buffer.data() + ticket->processed, s_bufferSize, &written,
+                          nullptr);
             ticket->processed += written;
             if(written == 0)
             {
@@ -154,11 +159,6 @@ void Win32File::doWriteBuffer(weak< Ticket > ticket) const
         }
         CloseHandle(h);
     }
-}
-
-void Win32File::refresh(u64 size, u64 timestamp)
-{
-    File::refresh(size, timestamp);
 }
 
 }  // namespace Motor

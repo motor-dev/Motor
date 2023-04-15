@@ -74,25 +74,25 @@ public:
     static void               showList();
 };
 
-#    define _MOTOR_PLUGIN_EXPORT_VAR(var, value) static var = value;
-#    define _MOTOR_PLUGIN_EXPORT                 static
-#    define _MOTOR_REGISTER_PLUGIN_(id, name)                                                      \
+#    define MOTOR_PLUGIN_EXPORT_VAR(var, value) static var = value;
+#    define MOTOR_PLUGIN_EXPORT                 static
+#    define MOTOR_REGISTER_PLUGIN_1(id, name)                                                      \
         MOTOR_EXPORT Motor::Plugin::DynamicObjectList s_plugin_##id(#name);
-#    define _MOTOR_REGISTER_PLUGIN(id, name) _MOTOR_REGISTER_PLUGIN_(id, name)
-#    define _MOTOR_REGISTER_METHOD_(id, x, name)                                                   \
+#    define MOTOR_REGISTER_PLUGIN(id, name) MOTOR_REGISTER_PLUGIN_1(id, name)
+#    define MOTOR_REGISTER_METHOD_1(id, x, name)                                                   \
         MOTOR_EXPORT bool s_symbol_##id##_##x = s_plugin_##id.registerSymbol(&x, #name);
-#    define _MOTOR_REGISTER_METHOD(id, x)             _MOTOR_REGISTER_METHOD_(id, x, x)
-#    define _MOTOR_REGISTER_METHOD_NAMED(id, x, name) _MOTOR_REGISTER_METHOD_(id, x, name)
+#    define MOTOR_REGISTER_METHOD(id, x)             MOTOR_REGISTER_METHOD_1(id, x, x)
+#    define MOTOR_REGISTER_METHOD_NAMED(id, x, name) MOTOR_REGISTER_METHOD_1(id, x, name)
 
 #else
 
-#    define _MOTOR_PLUGIN_EXPORT_VAR(var, value)                                                   \
-        _MOTOR_PLUGIN_EXPORT var;                                                                  \
+#    define MOTOR_PLUGIN_EXPORT_VAR(var, value)                                                    \
+        MOTOR_PLUGIN_EXPORT var;                                                                   \
         var = value;
-#    define _MOTOR_PLUGIN_EXPORT extern "C" MOTOR_EXPORT
-#    define _MOTOR_REGISTER_PLUGIN(id, name)
-#    define _MOTOR_REGISTER_METHOD(id, x)
-#    define _MOTOR_REGISTER_METHOD_NAMED(id, x, name)
+#    define MOTOR_PLUGIN_EXPORT extern "C" MOTOR_EXPORT
+#    define MOTOR_REGISTER_PLUGIN(id, name)
+#    define MOTOR_REGISTER_METHOD(id, x)
+#    define MOTOR_REGISTER_METHOD_NAMED(id, x, name)
 
 #endif
 

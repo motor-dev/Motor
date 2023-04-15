@@ -28,7 +28,7 @@ public:
     template < typename ITERATOR >
     inline array(Allocator& allocator, ITERATOR begin, ITERATOR end);
     inline array(const array& other);
-    inline array(array&& other);
+    inline array(array&& other) noexcept;
     inline ~array();
 
     inline void swap(array& other);

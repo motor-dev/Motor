@@ -213,7 +213,7 @@ void PythonLibrary::platformInitialize()
     }
 }
 
-void PythonLibrary::setupPath()
+void PythonLibrary::setupPath() const
 {
     ifilename programPath = Environment::getEnvironment().getProgramPath();
     programPath.pop_back();

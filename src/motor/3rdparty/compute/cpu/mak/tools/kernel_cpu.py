@@ -37,7 +37,7 @@ class cpuc(Task.Task):
                 '    void* end;\n'
                 '};\n'
                 '\n'
-                '_MOTOR_REGISTER_PLUGIN(MOTOR_KERNEL_ID, MOTOR_KERNEL_NAME);\n' % self.generator.kernel_source
+                'MOTOR_REGISTER_PLUGIN(MOTOR_KERNEL_ID, MOTOR_KERNEL_NAME);\n' % self.generator.kernel_source
             )
 
             def write_kernels(ns, container):
@@ -61,7 +61,7 @@ class cpuc(Task.Task):
                             ', '.join(['arg_type_%d(0, 0, 0)' % i for i, _ in enumerate(arguments[2:])])
                     }
                     out.write(
-                        '_MOTOR_PLUGIN_EXPORT void _%(kernelname)s%(static_variant)s(const u32 index, const u32 total,\n'
+                        'MOTOR_PLUGIN_EXPORT void _%(kernelname)s%(static_variant)s(const u32 index, const u32 total,\n'
                         '        const minitl::array<\n'
                         '        minitl::weak< const Motor::KernelScheduler::IMemoryBuffer > >& /*argv*/)\n'
                         '{\n'
@@ -69,7 +69,7 @@ class cpuc(Task.Task):
                         '    %(typedef)s'
                         '    %(kernelname)s(index, total, %(arguments)s);\n'
                         '}\n'
-                        '_MOTOR_REGISTER_METHOD_NAMED(MOTOR_KERNEL_ID, _%(kernelname)s%(static_variant)s, _%(kernelname)s);\n'
+                        'MOTOR_REGISTER_METHOD_NAMED(MOTOR_KERNEL_ID, _%(kernelname)s%(static_variant)s, _%(kernelname)s);\n'
                         % args
                     )
 

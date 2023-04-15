@@ -17,19 +17,15 @@ private:
     struct node : public knl::istack< node >::node
     {
     };
-    enum
-    {
-        ElementSize = sizeof(T)
-    };
     knl::istack< node >   m_items;
     Allocator::Block< T > m_pool;
     T*                    m_end;
 
 public:
     pool(Allocator& allocator, u64 capacity, u64 alignment = motor_alignof(T));
-    pool(pool&& other)            = default;
-    pool& operator=(pool&& other) = default;
-    ~pool()                       = default;
+    pool(pool&& other) noexcept            = default;
+    pool& operator=(pool&& other) noexcept = default;
+    ~pool()                                = default;
 
     pool(const pool& other)            = delete;
     pool& operator=(const pool& other) = delete;

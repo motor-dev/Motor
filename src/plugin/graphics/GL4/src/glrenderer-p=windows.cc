@@ -255,7 +255,7 @@ const ShaderExtensions& GLRenderer::shaderext() const
 
 bool GLRenderer::success() const
 {
-    return Windowing::Renderer::success() && (m_context != 0);
+    return hasPlatformRenderer() && m_context != 0;
 }
 
 //------------------------------------------------------------------------
@@ -264,10 +264,6 @@ GLWindow::GLWindow(weak< const RenderWindowDescription > renderwindow,
                    weak< const GLRenderer >              renderer)
     : Windowing::Window(renderwindow, renderer)
     , m_context(scoped< Context >())
-{
-}
-
-GLWindow::~GLWindow()
 {
 }
 

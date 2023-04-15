@@ -5,12 +5,16 @@
 #include <motor/minitl/assert.hh>
 #include <motor/plugin.debug.runtime/callstack.hh>
 
-#include <malloc.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 #include <resource.h>
+
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#    define NOMINMAX
+#endif
+#include <windows.h>
 
 namespace Motor { namespace Debug {
 HINSTANCE hDllInstance;
@@ -22,10 +26,10 @@ static INT_PTR CALLBACK AssertionDialogProc(HWND hwndDlg, UINT message, WPARAM w
     {
     case WM_INITDIALOG:
     {
-        const char** displayedtext = (const char**)lParam;
-        (void)SendDlgItemMessage(hwndDlg, IDC_STATIC, WM_SETTEXT, 0, (LPARAM)displayedtext[0]);
+        const char** displayedText = (const char**)lParam;
+        (void)SendDlgItemMessage(hwndDlg, IDC_STATIC, WM_SETTEXT, 0, (LPARAM)displayedText[0]);
         (void)SendDlgItemMessage(hwndDlg, IDC_EDITCALLSTACK, WM_SETTEXT, 0,
-                                 (LPARAM)displayedtext[1]);
+                                 (LPARAM)displayedText[1]);
     }
         return TRUE;
     case WM_COMMAND:
@@ -42,22 +46,22 @@ static INT_PTR CALLBACK AssertionDialogProc(HWND hwndDlg, UINT message, WPARAM w
 }
 
 static const int        BUFFER_SIZE = 4096 * 128;
-static char             outmessage[BUFFER_SIZE];
+static char             outMessage[BUFFER_SIZE];
 static char             callstack[BUFFER_SIZE];
 static char             buffer[BUFFER_SIZE];
 minitl::AssertionResult AssertionCallback(const char* file, int line, const char* expr,
                                           const char* message)
 {
     {
-        (void)_snprintf(outmessage, BUFFER_SIZE - 1, "%s:%d : Assertion %s failed - %s\r\n", file,
+        (void)_snprintf(outMessage, BUFFER_SIZE - 1, "%s:%d : Assertion %s failed - %s\r\n", file,
                         line, expr, message);
-        outmessage[BUFFER_SIZE - 1] = 0;
-        OutputDebugString(outmessage);
+        outMessage[BUFFER_SIZE - 1] = 0;
+        OutputDebugString(outMessage);
     }
 
     *callstack = 0;
 
-    char* dlgParams[2] = {outmessage, callstack};
+    char* dlgParams[2] = {outMessage, callstack};
 
     {
         Runtime::Callstack::Address address[128];
@@ -70,14 +74,15 @@ minitl::AssertionResult AssertionCallback(const char* file, int line, const char
         }
     }
 
-    INT_PTR locr = DialogBoxParam(hDllInstance, MAKEINTRESOURCE(IDD_ASSERTDIALOG), 0,
+    INT_PTR locr = DialogBoxParam(hDllInstance, MAKEINTRESOURCE(IDD_ASSERTDIALOG), nullptr,
                                   AssertionDialogProc, (LPARAM)&dlgParams[0]);
     if(locr == -1)
     {
         char* errorMessage;
-        (void)::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL,
-                              ::GetLastError(), 0, (LPTSTR)&errorMessage, 0, NULL);
-        (void)MessageBox(0, outmessage, "Failed to open assertion dialog", MB_ICONERROR | MB_OK);
+        (void)::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr,
+                              ::GetLastError(), 0, (LPTSTR)&errorMessage, 0, nullptr);
+        (void)MessageBox(nullptr, outMessage, "Failed to open assertion dialog",
+                         MB_ICONERROR | MB_OK);
         (void)LocalFree(errorMessage);
         return minitl::AssertionResult::Ignore;
     }
@@ -85,8 +90,6 @@ minitl::AssertionResult AssertionCallback(const char* file, int line, const char
     {
         return minitl::AssertionResult::Break;
     }
-    else if(locr == IDC_BUTTONIGNORE)
-        return minitl::AssertionResult::Ignore;
     else if(locr == IDC_BUTTONIGNOREALL)
         return minitl::AssertionResult::IgnoreAll;
     else if(locr == IDC_BUTTONABORT)
@@ -97,7 +100,7 @@ minitl::AssertionResult AssertionCallback(const char* file, int line, const char
 
 }}  // namespace Motor::Debug
 
-BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD /*reason*/, LPVOID /*reserved*/)
+BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD /*reason*/, LPVOID /*reserved*/)  // NOLINT(unused)
 {
     Motor::Debug::hDllInstance = hInstance;
     return TRUE;

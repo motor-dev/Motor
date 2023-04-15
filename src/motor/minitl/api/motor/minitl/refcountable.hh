@@ -33,12 +33,11 @@ public:
     }
 
 private:
-    void  operator&() const;
-    void* operator new(size_t size)
+    static void* operator new(size_t size)
     {
         return ::operator new(size);
     }
-    void* operator new(size_t size, void* where)
+    static void* operator new(size_t size, void* where)
     {
         return ::operator new(size, where);
     }
@@ -54,11 +53,11 @@ protected:
     {
         return ref< const T >(motor_checked_cast< const T >(this));
     }
-    void operator delete(void* memory)
+    static void operator delete(void* memory)
     {
         return ::operator delete(memory);
     }
-    void operator delete(void* memory, void* where)
+    static void operator delete(void* memory, void* where)
     {
         ::operator delete(memory, where);
     }

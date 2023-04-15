@@ -28,7 +28,7 @@ private:
     WNDCLASSEX       m_wndClassEx;
 
 public:
-    PlatformRenderer(weak< Renderer > renderer);
+    PlatformRenderer(const weak< Renderer >& renderer);
     ~PlatformRenderer();
 
     HWND           createWindowImplementation(const WindowCreationFlags& flags) const;

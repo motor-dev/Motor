@@ -9,14 +9,12 @@
 
 namespace Motor {
 
-PosixFile::PosixFile(ifilename filename, Media media, u64 size, time_t modifiedTime)
-    : File(filename, media, size, modifiedTime)
+PosixFile::PosixFile(const ifilename& filename, u64 size, time_t modifiedTime)
+    : File(filename, size, modifiedTime)
 {
 }
 
-PosixFile::~PosixFile()
-{
-}
+PosixFile::~PosixFile() = default;
 
 void PosixFile::doFillBuffer(weak< File::Ticket > ticket) const
 {
@@ -37,16 +35,16 @@ void PosixFile::doFillBuffer(weak< File::Ticket > ticket) const
     {
         if(ticket->offset > 0)
         {
-            fseek(f, ticket->offset, SEEK_SET);
+            fseek(f, (long)ticket->offset, SEEK_SET);
         }
         else if(ticket->offset < 0)
         {
-            fseek(f, ticket->offset + 1, SEEK_END);
+            fseek(f, (long)ticket->offset + 1, SEEK_END);
         }
         u8* data = ticket->buffer.data();
         for(ticket->processed.set(0); !ticket->done();)
         {
-            int read
+            size_t read
                 = (ticket->processed + g_bufferSize > ticket->total)
                       ? fread(data, 1,
                               motor_checked_numcast< u32 >(ticket->total - ticket->processed), f)
@@ -85,16 +83,16 @@ void PosixFile::doWriteBuffer(weak< Ticket > ticket) const
     {
         if(ticket->offset > 0)
         {
-            fseek(f, ticket->offset, SEEK_SET);
+            fseek(f, (long)ticket->offset, SEEK_SET);
         }
         else if(ticket->offset < 0)
         {
-            fseek(f, ticket->offset + 1, SEEK_END);
+            fseek(f, (long)ticket->offset + 1, SEEK_END);
         }
         u8* data = ticket->buffer.data();
         for(ticket->processed.set(0); !ticket->done();)
         {
-            int written
+            size_t written
                 = (ticket->processed + g_bufferSize > ticket->total)
                       ? fwrite(data, 1,
                                motor_checked_numcast< u32 >(ticket->total - ticket->processed), f)

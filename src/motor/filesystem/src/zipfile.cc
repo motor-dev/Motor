@@ -8,22 +8,19 @@ namespace Motor {
 
 ZipFile::ZipFile(void* handle, const ifilename& filename, const unz_file_info& info,
                  const unz_file_pos& filePos)
-    : File(filename, File::Media(File::Media::Package, 0, 0), u64(info.uncompressed_size),
-           u64(info.dosDate))
+    : File(filename, u64(info.uncompressed_size), u64(info.dosDate))
     , m_handle(handle)
     , m_filePos(filePos)
 {
     motor_info_format(Log::fs(), "created zip file {0}", m_filename);
 }
 
-ZipFile::~ZipFile()
-{
-}
+ZipFile::~ZipFile() = default;
 
 void ZipFile::doFillBuffer(weak< File::Ticket > ticket) const
 {
     /* state of the previous read */
-    static const unz_file_pos* s_currentFile = 0;
+    static const unz_file_pos* s_currentFile = nullptr;
     static i64                 s_fileOffset  = 0;
     unz_file_pos               filePos       = m_filePos;
 

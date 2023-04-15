@@ -18,6 +18,16 @@
 #include <cstdlib>
 #include <unistd.h>
 
+#ifdef MOTOR_PLATFORM_WIN32
+/* todo: move to separate file */
+#    define WIN32_LEAN_AND_MEAN
+#    ifndef NOMINMAX
+#        define NOMINMAX
+#    endif
+#    include <windows.h>
+
+#endif
+
 namespace {
 
 class FileLogListener : public Motor::ILogListener

@@ -3,8 +3,6 @@
 
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/assert.hh>
-#include <stdarg.h>
-#include <stdio.h>
 
 namespace minitl {
 

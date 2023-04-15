@@ -21,7 +21,7 @@ static inline void** st_next(void** stack_pointer)
     return nextStackPointer;
 }
 
-MOTOR_NOINLINE size_t Callstack::backtrace(Address* buffer, size_t count, size_t skip)
+MOTOR_NEVER_INLINE size_t Callstack::backtrace(Address* buffer, size_t count, size_t skip)
 {
     void** stackPointer;
 //    stackPointer = (void**)(&buffer)-2;

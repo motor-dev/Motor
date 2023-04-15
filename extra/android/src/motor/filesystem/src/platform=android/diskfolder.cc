@@ -8,9 +8,9 @@
 #include <watchpoint.hh>
 #include <zipfile.hh>
 
+#include <cerrno>
+#include <cstdio>
 #include <dirent.h>
-#include <errno.h>
-#include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unzip.h>
@@ -41,6 +41,7 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
 DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy,
                        Folder::CreatePolicy createPolicy)
     : m_path(diskpath)
+    , m_handle()
     , m_index(m_path[0] == "apk:" ? 1 : 0)
     , m_watch()
 {
@@ -62,7 +63,7 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy,
     {
         ipath package_path = m_path;
         package_path.pop_front();
-        zlib_filefunc_def_s defs;
+        zlib_filefunc_def_s defs {};
         fill_fopen_filefunc(&defs);
         m_handle.ptrHandle = unzOpen2(s_packagePath, &defs);
         if(!m_handle.ptrHandle)
@@ -85,7 +86,7 @@ DiskFolder::~DiskFolder()
         if(m_handle.ptrHandle)
         {
             closedir((DIR*)m_handle.ptrHandle);
-            m_handle.ptrHandle = 0;
+            m_handle.ptrHandle = nullptr;
         }
     }
     else
@@ -93,7 +94,7 @@ DiskFolder::~DiskFolder()
         if(m_handle.ptrHandle)
         {
             unzClose(m_handle.ptrHandle);
-            m_handle.ptrHandle = 0;
+            m_handle.ptrHandle = nullptr;
         }
     }
 }
@@ -117,7 +118,9 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                 ipath   p    = m_path;
                 p.push_back(name);
                 ipath::Filename filename = p.str();
-                struct stat     s;
+                struct stat     s
+                {
+                };
                 stat(filename.name, &s);
                 if(errno == 0)
                 {
@@ -132,10 +135,9 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                 }
                 else
                 {
-                    File::Media media(File::Media::Disk, s.st_dev, s.st_ino);
                     ref< File > newFile = ref< PosixFile >::create(Arena::filesystem(),
                                                                    ipath(m_path) + ifilename(name),
-                                                                   media, s.st_size, s.st_mtime);
+                                                                   s.st_size, s.st_mtime);
                     m_files.push_back(minitl::make_tuple(name, newFile));
                 }
             }
@@ -151,8 +153,8 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                 {
                     unz_file_info info;
                     char          filepath[4096];
-                    unzGetCurrentFileInfo(m_handle.ptrHandle, &info, filepath, sizeof(filepath), 0,
-                                          0, 0, 0);
+                    unzGetCurrentFileInfo(m_handle.ptrHandle, &info, filepath, sizeof(filepath),
+                                          nullptr, 0, nullptr, 0);
                     ipath   path(filepath);
                     istring filename = path.pop_back();
                     if(path == relativePath)
@@ -198,12 +200,14 @@ weak< File > DiskFolder::createFile(const istring& name)
     {
         if(motor_assert(m_path[0] != istring("apk:"),
                         "can't create a file in the Package directory"))
-            return weak< File >();
+            return {};
         ifilename::Filename path = (m_path + ifilename(name)).str();
-        struct stat         s;
+        struct stat         s
+        {
+        };
         errno   = 0;
         FILE* f = fopen(path.name, "w");
-        if(f == 0)
+        if(f == nullptr)
         {
             motor_error_format(Log::fs(), "could not create file {0}: {1}({2})", path.name,
                                strerror(errno), errno);
@@ -218,16 +222,14 @@ weak< File > DiskFolder::createFile(const istring& name)
         }
 
         ScopedCriticalSection lock(m_lock);
-        ref< File >           result = ref< PosixFile >::create(
-            Arena::filesystem(), m_path + ifilename(name),
-            File::Media(File::Media::Disk, s.st_dev, s.st_ino), s.st_size, s.st_mtime);
+        ref< File > result = ref< PosixFile >::create(Arena::filesystem(), m_path + ifilename(name),
+                                                      s.st_size, s.st_mtime);
 
-        for(minitl::vector< minitl::tuple< istring, ref< File > > >::iterator it = m_files.begin();
-            it != m_files.end(); ++it)
+        for(auto& m_file: m_files)
         {
-            if(it->first == name)
+            if(m_file.first == name)
             {
-                it->second = result;
+                m_file.second = result;
                 return result;
             }
         }
@@ -237,7 +239,7 @@ weak< File > DiskFolder::createFile(const istring& name)
     else
     {
         motor_error(Log::fs(), "can't create new file: read-only APK filesystem");
-        return weak< File >();
+        return {};
     }
 }
 

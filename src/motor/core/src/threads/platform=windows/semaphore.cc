@@ -4,6 +4,12 @@
 #include <motor/core/stdafx.h>
 #include <motor/core/threads/semaphore.hh>
 
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#    define NOMINMAX
+#endif
+#include <windows.h>
+
 namespace Motor {
 
 #if 0

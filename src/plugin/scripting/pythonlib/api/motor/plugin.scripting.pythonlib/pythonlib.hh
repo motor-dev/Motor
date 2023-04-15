@@ -12,10 +12,10 @@ namespace Motor { namespace Python {
 class motor_api(PYTHONLIB) PythonLibrary : public minitl::refcountable
 {
 public:
-    PythonLibrary(const char* pythonLibraryName);
-    ~PythonLibrary();
+    explicit PythonLibrary(const char* pythonLibraryName);
+    ~PythonLibrary() override;
 
-    operator const void*() const
+    operator const void*() const  // NOLINT(google-explicit-constructor
     {
         return (const void*)m_status;
     }
@@ -45,7 +45,7 @@ public:
 
 private:
     void platformInitialize();
-    void setupPath();
+    void setupPath() const;
 
 private:
     friend struct ThreadLock;
@@ -176,12 +176,11 @@ public:
 };
 
 extern tls< PythonLibrary > s_library;
-extern PyObject*            s_moduleObject;
 
 motor_api(PYTHONLIB) PyObject* init2_py_motor(bool registerLog);
 motor_api(PYTHONLIB) PyObject* init3_py_motor(bool registerLog);
 motor_api(PYTHONLIB) ref< PythonLibrary > loadPython(const char* pythonPath);
-motor_api(PYTHONLIB) void setCurrentContext(weak< PythonLibrary > library);
+motor_api(PYTHONLIB) void setCurrentContext(const weak< PythonLibrary >& library);
 motor_api(PYTHONLIB) void clearCurrentContext();
 
 }}  // namespace Motor::Python

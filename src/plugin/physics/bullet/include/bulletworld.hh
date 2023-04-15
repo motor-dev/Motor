@@ -19,8 +19,8 @@ namespace Motor { namespace Physics { namespace Bullet {
 class BulletWorld : public minitl::refcountable
 {
 public:
-    BulletWorld(const Plugin::Context& context);
-    ~BulletWorld();
+    explicit BulletWorld(const Plugin::Context& context);
+    ~BulletWorld() override;
 
     void step();
 
@@ -29,11 +29,11 @@ public:
     {
         return ::operator new(size, where);
     }
-    void operator delete(void* memory, void* where)
+    static void operator delete(void* memory, void* where)
     {
         ::operator delete(memory, where);
     }
-    void operator delete(void* memory)
+    static void operator delete(void* memory)
     {
         motor_notreached();
         ::operator delete(memory);

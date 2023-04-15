@@ -95,8 +95,8 @@ typedef u8               byte;
 // attribute is not recognized
 #pragma warning(disable : 5030)
 
-#define MOTOR_NOINLINE     __declspec(noinline)
-#define MOTOR_ALWAYSINLINE __forceinline
+#define MOTOR_NEVER_INLINE  __declspec(noinline)
+#define MOTOR_ALWAYS_INLINE __forceinline
 #ifdef _CPPUNWIND
 #    define MOTOR_SUPPORTS_EXCEPTIONS 1
 #else

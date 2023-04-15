@@ -39,7 +39,7 @@ array< T >::array(const array< T >& other) : m_array(other.m_array.arena(), othe
 }
 
 template < typename T >
-array< T >::array(array< T >&& other) : m_array(move(other.m_array))
+array< T >::array(array< T >&& other) noexcept : m_array(move(other.m_array))
 {
 }
 

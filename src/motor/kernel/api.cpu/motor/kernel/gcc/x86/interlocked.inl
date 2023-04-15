@@ -4,6 +4,8 @@
 
 #include <motor/kernel/stdafx.h>
 
+// NOLINTBEGIN(readability-non-const-parameter)
+
 namespace knl {
 
 template < unsigned size >
@@ -23,14 +25,13 @@ struct InterlockedType< 4 >
         {
             counter_t        tag;
             volatile value_t value;
-        } taggedvalue;
+        } tagged_value;
 
-        inline tagged_t(value_t value = 0);
-        inline tagged_t(counter_t tag, value_t value);
-        inline tagged_t(const tagged_t& other);
-        inline tagged_t& operator=(const tagged_t& other);
-        inline value_t   value();
-        inline bool      operator==(tagged_t& other);
+        inline explicit tagged_t(value_t value = nullptr);
+        inline tagged_t(const tagged_t& other)            = default;
+        inline tagged_t& operator=(const tagged_t& other) = default;
+        inline value_t   value() const;
+        inline bool      operator==(tagged_t& other) const;
     };
 
     static inline value_t fetch(const value_t* p);
@@ -71,14 +72,13 @@ struct InterlockedType< 8 >
         {
             counter_t tag;
             value_t   value;
-        } taggedvalue;
+        } tagged_value;
 
-        inline tagged_t(value_t value = 0);
-        inline tagged_t(counter_t tag, value_t value);
-        inline tagged_t(const tagged_t& other);
-        inline tagged_t& operator=(const tagged_t& other);
-        inline value_t   value();
-        inline bool      operator==(tagged_t& other);
+        inline explicit tagged_t(value_t value = nullptr);
+        inline tagged_t(const tagged_t& other)            = default;
+        inline tagged_t& operator=(const tagged_t& other) = default;
+        inline value_t   value() const;
+        inline bool      operator==(tagged_t& other) const;
     };
 
     static inline value_t fetch(const value_t* p);
@@ -152,85 +152,43 @@ bool InterlockedType< 4 >::set_conditional(tagged_t* p, tagged_t::value_t v,
                          "       setz %1\n\t"
                          "       pop %%ebx\n\t"
                          : "=m"(*p), "=a"(result), "=d"(unused)
-                         : "S"(p), "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value),
+                         : "S"(p), "a"(condition.tagged_value.tag), "d"(condition.tagged_value.value),
                            "c"(v)
                          : "memory", "cc");
     motor_forceuse(unused);
     return result;
 }
 
-InterlockedType< 4 >::tagged_t::tagged_t(value_t value)
+InterlockedType< 4 >::tagged_t::tagged_t(value_t value) : tagged_value {0, value}
 {
-    taggedvalue.tag   = 0;
-    taggedvalue.value = value;
 }
 
-InterlockedType< 4 >::tagged_t::tagged_t(counter_t tag, value_t value)
+InterlockedType< 4 >::tagged_t::value_t InterlockedType< 4 >::tagged_t::value() const
 {
-    taggedvalue.tag   = tag;
-    taggedvalue.value = value;
+    return tagged_value.value;
 }
 
-InterlockedType< 4 >::tagged_t::tagged_t(const tagged_t& other)
+bool InterlockedType< 4 >::tagged_t::operator==(tagged_t& other) const
 {
-    taggedvalue.tag   = other.taggedvalue.tag;
-    taggedvalue.value = other.taggedvalue.value;
-}
-
-InterlockedType< 4 >::tagged_t& InterlockedType< 4 >::tagged_t::operator=(const tagged_t& other)
-{
-    taggedvalue.tag   = other.taggedvalue.tag;
-    taggedvalue.value = other.taggedvalue.value;
-    return *this;
-}
-
-InterlockedType< 4 >::tagged_t::value_t InterlockedType< 4 >::tagged_t::value()
-{
-    return taggedvalue.value;
-}
-
-bool InterlockedType< 4 >::tagged_t::operator==(tagged_t& other)
-{
-    return (taggedvalue.tag == other.taggedvalue.tag)
-           && (taggedvalue.value == other.taggedvalue.value);
+    return (tagged_value.tag == other.tagged_value.tag)
+           && (tagged_value.value == other.tagged_value.value);
 }
 
 #ifdef _AMD64
 
-InterlockedType< 8 >::tagged_t::tagged_t(value_t value)
+InterlockedType< 8 >::tagged_t::tagged_t(value_t value) : tagged_value {0, value}
 {
-    taggedvalue.tag   = 0;
-    taggedvalue.value = value;
 }
 
-InterlockedType< 8 >::tagged_t::tagged_t(counter_t tag, value_t value)
+InterlockedType< 8 >::tagged_t::value_t InterlockedType< 8 >::tagged_t::value() const
 {
-    taggedvalue.tag   = tag;
-    taggedvalue.value = value;
+    return tagged_value.value;
 }
 
-InterlockedType< 8 >::tagged_t::tagged_t(const tagged_t& other)
+bool InterlockedType< 8 >::tagged_t::operator==(tagged_t& other) const
 {
-    taggedvalue.tag   = other.taggedvalue.tag;
-    taggedvalue.value = other.taggedvalue.value;
-}
-
-InterlockedType< 8 >::tagged_t& InterlockedType< 8 >::tagged_t::operator=(const tagged_t& other)
-{
-    taggedvalue.tag   = other.taggedvalue.tag;
-    taggedvalue.value = other.taggedvalue.value;
-    return *this;
-}
-
-InterlockedType< 8 >::tagged_t::value_t InterlockedType< 8 >::tagged_t::value()
-{
-    return taggedvalue.value;
-}
-
-bool InterlockedType< 8 >::tagged_t::operator==(tagged_t& other)
-{
-    return (taggedvalue.tag == other.taggedvalue.tag)
-           && (taggedvalue.value == other.taggedvalue.value);
+    return (tagged_value.tag == other.tagged_value.tag)
+           && (tagged_value.value == other.tagged_value.value);
 }
 
 InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch(const value_t* p)
@@ -264,11 +222,9 @@ InterlockedType< 8 >::value_t InterlockedType< 8 >::set_conditional(value_t* p, 
         i64 asI64;
         i32 asI32[2];
     };
-    split dst;
-    split result;
-    dst.asI64 = v;
-    split src;
-    src.asI64 = condition;
+    split dst {v};
+    split src {condition};
+    split result {0};
 
     __asm__ __volatile__("lock;  cmpxchg8b %2\n\t"
                          : "=a"(result.asI32[0]), "=d"(result.asI32[1]), "=m"(*p)
@@ -299,10 +255,10 @@ bool InterlockedType< 8 >::set_conditional(tagged_t* p, tagged_t::value_t v,
     __asm__ __volatile__("\tmov %4,%%r8\n"
                          "\t.byte 0xF0,0x49,0x0F,0xC7,0x08\n"
                          "\tsetz %0\n"
-                         : "=r"(result), "=m"(*p), "=d"(dummy.taggedvalue.value),
-                           "=a"(dummy.taggedvalue.tag)
-                         : "r"(p), "c"(v), "b"(condition.taggedvalue.tag + 1),
-                           "d"(condition.taggedvalue.value), "a"(condition.taggedvalue.tag)
+                         : "=r"(result), "=m"(*p), "=d"(dummy.tagged_value.value),
+                           "=a"(dummy.tagged_value.tag)
+                         : "r"(p), "c"(v), "b"(condition.tagged_value.tag + 1),
+                           "d"(condition.tagged_value.value), "a"(condition.tagged_value.tag)
                          : "memory", "cc", "r8");
     return result;
 }
@@ -310,3 +266,5 @@ bool InterlockedType< 8 >::set_conditional(tagged_t* p, tagged_t::value_t v,
 #endif
 
 }  // namespace knl
+
+// NOLINTEND(readability-non-const-parameter)

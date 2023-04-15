@@ -333,7 +333,7 @@ intrusive_list< T, INDEX >::~intrusive_list()
 }
 
 template < typename T, int INDEX >
-intrusive_list< T, INDEX >::intrusive_list(intrusive_list&& other) : m_root()
+intrusive_list< T, INDEX >::intrusive_list(intrusive_list&& other) noexcept : m_root()
 {
     other.m_root.m_next->m_previous = &m_root;
     other.m_root.m_previous->m_next = &m_root;
@@ -344,7 +344,7 @@ intrusive_list< T, INDEX >::intrusive_list(intrusive_list&& other) : m_root()
 }
 
 template < typename T, int INDEX >
-intrusive_list< T, INDEX >& intrusive_list< T, INDEX >::operator=(intrusive_list&& other)
+intrusive_list< T, INDEX >& intrusive_list< T, INDEX >::operator=(intrusive_list&& other) noexcept
 {
     other.m_root.m_next->m_previous = &m_root;
     other.m_root.m_previous->m_next = &m_root;

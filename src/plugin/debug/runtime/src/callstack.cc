@@ -45,7 +45,7 @@ u64 Callstack::Address::address() const
     return m_address;
 }
 
-MOTOR_NOINLINE Callstack::Address Callstack::backtrace(size_t depth)
+MOTOR_NEVER_INLINE Callstack::Address Callstack::backtrace(size_t depth)
 {
     Address result;
     backtrace(&result, 1, depth + 1);

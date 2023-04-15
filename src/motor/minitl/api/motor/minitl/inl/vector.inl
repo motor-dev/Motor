@@ -27,22 +27,40 @@ public:
     typename POLICY::pointer m_iterator;
 
 private:
-    base_iterator(const vector< T >* owner, typename POLICY::pointer it);
+    base_iterator(const vector< T >* owner, typename POLICY::pointer it)
+        : m_owner(owner)
+        , m_iterator(it)
+    {
+    }
 
 public:
-    base_iterator();
+    base_iterator() : m_owner(0), m_iterator(0)
+    {
+    }
+
     template < typename OTHERPOLICY >
-    base_iterator(const base_iterator< OTHERPOLICY >& other);
-    base_iterator(const base_iterator& other) = default;
-    base_iterator(base_iterator&& other)      = default;
-    ~base_iterator()                          = default;
+    base_iterator(const base_iterator< OTHERPOLICY >& other)  // NOLINT(google-explicit-constructor)
+        : m_owner(other.m_owner)
+        , m_iterator(other.m_iterator)
+    {
+    }
+
+    base_iterator(const base_iterator& other)     = default;
+    base_iterator(base_iterator&& other) noexcept = default;
+    ~base_iterator()                              = default;
 
 public:
-    bool operator==(const base_iterator< POLICY >& other);
-    bool operator!=(const base_iterator< POLICY >& other);
+    bool operator==(const base_iterator< POLICY >& other)
+    {
+        return m_iterator == other.m_iterator;
+    }
 
-    base_iterator< POLICY >& operator=(const base_iterator< POLICY >& other) = default;
-    base_iterator< POLICY >& operator=(base_iterator< POLICY >&& other)      = default;
+    bool operator!=(const base_iterator< POLICY >& other)
+    {
+        return m_iterator != other.m_iterator;
+    }
+    base_iterator< POLICY >& operator=(const base_iterator< POLICY >& other)     = default;
+    base_iterator< POLICY >& operator=(base_iterator< POLICY >&& other) noexcept = default;
 
     base_iterator< POLICY > operator+(typename POLICY::difference_type offset) const
     {
@@ -65,7 +83,7 @@ public:
         m_iterator = POLICY::advance(m_iterator, 1);
         return *this;
     }
-    base_iterator< POLICY > operator++(int)
+    const base_iterator< POLICY > operator++(int)  // NOLINT(readability-const-return-type)
     {
         base_iterator< POLICY > p = *this;
         m_iterator                = POLICY::advance(m_iterator, 1);
@@ -81,7 +99,7 @@ public:
         m_iterator = POLICY::advance(m_iterator, -1);
         return *this;
     }
-    base_iterator< POLICY > operator--(int)
+    const base_iterator< POLICY > operator--(int)  // NOLINT(readability-const-return-type)
     {
         base_iterator< POLICY > p = *this;
         m_iterator                = POLICY::advance(m_iterator, -1);
@@ -92,62 +110,16 @@ public:
         m_iterator = POLICY::advance(m_iterator, -size);
         return *this;
     }
-    typename POLICY::pointer   operator->() const;
-    typename POLICY::reference operator*() const;
+    typename POLICY::pointer operator->() const
+    {
+        return m_iterator;
+    }
+
+    typename POLICY::reference operator*() const
+    {
+        return *m_iterator;
+    }
 };
-
-template < typename T >
-template < typename POLICY >
-vector< T >::base_iterator< POLICY >::base_iterator() : m_owner(0)
-                                                      , m_iterator(0)
-{
-}
-
-template < typename T >
-template < typename POLICY >
-vector< T >::base_iterator< POLICY >::base_iterator(const vector< T >*       owner,
-                                                    typename POLICY::pointer it)
-    : m_owner(owner)
-    , m_iterator(it)
-{
-}
-
-template < typename T >
-template < typename POLICY >
-template < typename OTHERPOLICY >
-vector< T >::base_iterator< POLICY >::base_iterator(const base_iterator< OTHERPOLICY >& other)
-    : m_owner(other.m_owner)
-    , m_iterator(other.m_iterator)
-{
-}
-
-template < typename T >
-template < typename POLICY >
-bool vector< T >::base_iterator< POLICY >::operator==(const base_iterator< POLICY >& other)
-{
-    return m_iterator == other.m_iterator;
-}
-
-template < typename T >
-template < typename POLICY >
-bool vector< T >::base_iterator< POLICY >::operator!=(const base_iterator< POLICY >& other)
-{
-    return m_iterator != other.m_iterator;
-}
-
-template < typename T >
-template < typename POLICY >
-typename POLICY::pointer vector< T >::base_iterator< POLICY >::operator->() const
-{
-    return m_iterator;
-}
-
-template < typename T >
-template < typename POLICY >
-typename POLICY::reference vector< T >::base_iterator< POLICY >::operator*() const
-{
-    return *m_iterator;
-}
 
 template < typename T >
 struct vector< T >::iterator_policy
@@ -237,8 +209,9 @@ vector< T >::vector(const vector& other)
 }
 
 template < typename T >
-vector< T >::vector(vector&& other) : m_memory(minitl::move(other.m_memory))
-                                    , m_end(other.m_end)
+vector< T >::vector(vector&& other) noexcept
+    : m_memory(minitl::move(other.m_memory))
+    , m_end(other.m_end)
 {
     other.m_end = nullptr;
 }
@@ -255,8 +228,11 @@ vector< T >::vector(Allocator& allocator, ITERATOR first, ITERATOR last)
 template < typename T >
 vector< T >& vector< T >::operator=(const vector< T >& other)
 {
-    clear();
-    push_back(other.begin(), other.end());
+    if(this != &other)
+    {
+        clear();
+        push_back(other.begin(), other.end());
+    }
     return *this;
 }
 
@@ -514,17 +490,17 @@ void vector< T >::resize(size_type size)
     if(size > s)
     {
         ensure(size);
-        pointer newend = advance_ptr(m_memory.data(), size);
-        for(pointer t = m_end; t != newend; ++t)
+        pointer newEnd = advance_ptr(m_memory.data(), size);
+        for(pointer t = m_end; t != newEnd; ++t)
             new((void*)t) T;
-        m_end = newend;
+        m_end = newEnd;
     }
     else
     {
-        pointer newend = advance_ptr(m_memory.data(), size);
-        for(pointer t = newend; t != m_end; ++t)
+        pointer newEnd = advance_ptr(m_memory.data(), size);
+        for(pointer t = newEnd; t != m_end; ++t)
             t->~T();
-        m_end = newend;
+        m_end = newEnd;
     }
 }
 
@@ -548,7 +524,7 @@ void vector< T >::ensure(size_type size)
         size = size >> 4 | size;
         size = size >> 8 | size;
         size = size >> 16 | size;
-        size = size >> (sizeof(size_type) == 64 ? 32 : 0) | size;
+        size = size >> (sizeof(size_type) == 8 ? 32 : 0) | size;  // NOLINT
         size++;
         reserve(size);
     }
@@ -566,7 +542,7 @@ typename vector< T >::iterator vector< T >::ensure(const_iterator location, size
         size = size >> 4 | size;
         size = size >> 8 | size;
         size = size >> 16 | size;
-        size = size >> (sizeof(size_type) == 64 ? 32 : 0) | size;
+        size = size >> (sizeof(size_type) == 8 ? 32 : 0) | size;  // NOLINT
         size++;
 
         Allocator::Block< T > block(m_memory.arena(), size);

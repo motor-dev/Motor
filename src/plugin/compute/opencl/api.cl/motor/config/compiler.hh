@@ -17,8 +17,8 @@ typedef u8             byte;
 
 #define motor_break()
 #define override
-#define MOTOR_NOINLINE
-#define MOTOR_ALWAYSINLINE
+#define MOTOR_NEVER_INLINE
+#define MOTOR_ALWAYS_INLINE
 #define MOTOR_SUPPORTS_EXCEPTIONS 0
 #define MOTOR_EXPORT
 #define MOTOR_IMPORT

@@ -15,17 +15,17 @@ static minitl::Allocator& bullet()
 
 namespace Motor { namespace Physics { namespace Bullet {
 
-static MOTOR_NOINLINE void* allocate(size_t size)
+static MOTOR_NEVER_INLINE void* allocate(size_t size)
 {
     return Arena::bullet().alloc(size, 16);
 }
 
-static MOTOR_NOINLINE void* allocate(size_t size, int align)
+static MOTOR_NEVER_INLINE void* allocate(size_t size, int align)
 {
     return Arena::bullet().alloc(size, align);
 }
 
-static MOTOR_NOINLINE void free(void* block)
+static MOTOR_NEVER_INLINE void free(void* block)
 {
     return Arena::bullet().free(block);
 }

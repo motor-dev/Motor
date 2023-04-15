@@ -44,10 +44,10 @@ private:
     struct item : public empty_item
     {
         value_type value;
-        item(const value_type& value) : value(value)
+        explicit item(const value_type& value) : value(value)
         {
         }
-        item(value_type&& value) : value(move(value))
+        explicit item(value_type&& value) : value(move(value))
         {
         }
     };
@@ -66,12 +66,12 @@ private:
     void grow(u32 size);
 
 public:
-    hashmap(Allocator& allocator, u32 reserved = 0);
+    explicit hashmap(Allocator& allocator, u32 reserved = 0);
     ~hashmap();
     hashmap(const hashmap& other);
-    hashmap(hashmap&& other) = default;
+    hashmap(hashmap&& other) noexcept = default;
     hashmap(Allocator& allocator, const hashmap& other);
-    hashmap& operator=(hashmap&& other) = default;
+    hashmap& operator=(hashmap&& other) noexcept = default;
     hashmap& operator=(hashmap other);
 
     void reserve(u32 size);
@@ -90,7 +90,7 @@ public:
     const_iterator find(const Key& key) const;
 
     iterator erase(iterator it);
-    void     erase(const Key& key);
+    void erase(const Key& key);
 
     tuple< iterator, bool > insert(Key&& k, Value&& value);
     tuple< iterator, bool > insert(Key&& k, const Value& value);

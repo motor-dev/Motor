@@ -13,7 +13,7 @@ struct integral_constant
     using value_type         = T;
     using type               = integral_constant;
 
-    constexpr operator value_type() const noexcept
+    constexpr operator value_type() const noexcept  // NOLINT(google-explicit-constructor)
     {
         return value;
     }
@@ -148,7 +148,7 @@ class reference_wrapper
 public:
     typedef T type;
 
-    constexpr reference_wrapper(T&& t) noexcept : m_ptr(&t)
+    constexpr reference_wrapper(T&& t) noexcept : m_ptr(&t)  // NOLINT(google-explicit-constructor)
     {
     }
 
@@ -156,7 +156,7 @@ public:
 
     reference_wrapper& operator=(const reference_wrapper& x) noexcept = default;
 
-    constexpr operator T&() const noexcept
+    constexpr operator T&() const noexcept  // NOLINT(google-explicit-constructor)
     {
         return *m_ptr;
     }

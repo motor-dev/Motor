@@ -9,7 +9,6 @@
 
 namespace Motor { namespace Windowing {
 
-namespace {
 static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch(msg)
@@ -24,20 +23,19 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 
     case WM_PAINT:
     {
-        ValidateRect(hWnd, NULL);
+        ValidateRect(hWnd, nullptr);
         break;
     }
 
-    case WM_SETFOCUS: break;
+    case WM_SETFOCUS:
     case WM_KILLFOCUS: break;
     default: return DefWindowProc(hWnd, msg, wParam, lParam);
     }
 
     return 0;
 }
-}  // namespace
 
-Renderer::PlatformRenderer::PlatformRenderer(weak< Renderer > renderer)
+Renderer::PlatformRenderer::PlatformRenderer(const weak< Renderer >& renderer)
     : m_renderer(renderer)
     , m_windowClassName(minitl::format< 128u >(FMT("__motor__{0}__"), (const void*)renderer))
 {
@@ -46,12 +44,12 @@ Renderer::PlatformRenderer::PlatformRenderer(weak< Renderer > renderer)
     m_wndClassEx.cbSize        = sizeof(WNDCLASSEX);
     m_wndClassEx.style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     m_wndClassEx.lpfnWndProc   = WindowProc;
-    m_wndClassEx.hInstance     = (HINSTANCE)::GetModuleHandle(0);
-    m_wndClassEx.hIcon         = 0;
-    m_wndClassEx.hIconSm       = 0;
-    m_wndClassEx.hCursor       = LoadCursor(0, (LPCTSTR)IDC_ARROW);
-    m_wndClassEx.hbrBackground = NULL;
-    m_wndClassEx.lpszMenuName  = NULL;
+    m_wndClassEx.hInstance     = (HINSTANCE)::GetModuleHandle(nullptr);
+    m_wndClassEx.hIcon         = nullptr;
+    m_wndClassEx.hIconSm       = nullptr;
+    m_wndClassEx.hCursor       = LoadCursor(nullptr, (LPCTSTR)IDC_ARROW);
+    m_wndClassEx.hbrBackground = nullptr;
+    m_wndClassEx.lpszMenuName  = nullptr;
     m_wndClassEx.cbClsExtra    = 0;
     m_wndClassEx.cbWndExtra    = sizeof(Window*);
 
@@ -60,7 +58,7 @@ Renderer::PlatformRenderer::PlatformRenderer(weak< Renderer > renderer)
 
 Renderer::PlatformRenderer::~PlatformRenderer()
 {
-    UnregisterClass(m_windowClassName.c_str(), (HINSTANCE)::GetModuleHandle(0));
+    UnregisterClass(m_windowClassName.c_str(), (HINSTANCE)::GetModuleHandle(nullptr));
 }
 
 HWND Renderer::PlatformRenderer::createWindowImplementation(const WindowCreationFlags& flags) const
@@ -68,7 +66,7 @@ HWND Renderer::PlatformRenderer::createWindowImplementation(const WindowCreation
     HWND hWnd = CreateWindowEx(
         flags.fullscreen ? WS_EX_TOPMOST : 0, m_windowClassName.c_str(), flags.title, flags.flags,
         flags.x, flags.y, flags.size.right - flags.size.left, flags.size.bottom - flags.size.top,
-        NULL, NULL, (HINSTANCE)::GetModuleHandle(0), NULL);
+        nullptr, nullptr, (HINSTANCE)::GetModuleHandle(nullptr), nullptr);
     return hWnd;
 }
 
@@ -84,30 +82,27 @@ void Renderer::PlatformRenderer::destroyWindowImplementation(HWND hWnd)
 
 //-----------------------------------------------------------------------------
 
-Renderer::Renderer(minitl::Allocator& allocator, weak< Resource::ResourceManager > manager)
+Renderer::Renderer(minitl::Allocator& allocator, const weak< Resource::ResourceManager >& manager)
     : IRenderer(allocator, manager, Scheduler::MainThread)
     , m_platformRenderer(scoped< PlatformRenderer >::create(allocator, this))
 {
 }
 
-Renderer::~Renderer()
-{
-}
-
-bool Renderer::success() const
-{
-    return true;
-}
+Renderer::~Renderer() = default;
 
 void Renderer::flush()
 {
     IRenderer::flush();
     MSG msg;
-    while(::PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+    while(::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
     {
         DispatchMessage(&msg);
     }
-    return;
+}
+
+bool Renderer::hasPlatformRenderer() const
+{
+    return m_platformRenderer;
 }
 
 knl::uint2 Renderer::getScreenSize() const

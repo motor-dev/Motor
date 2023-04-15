@@ -78,7 +78,6 @@ inline u32 getFirstBit(u32 bitMask)
 
 using minitl::motor_checked_cast;
 using minitl::motor_checked_numcast;
-using minitl::motor_const_cast;
 using minitl::motor_function_cast;
 using minitl::raw;
 using minitl::ref;

@@ -15,8 +15,6 @@ class weak
 {
     template < typename U, typename V >
     friend weak< U > motor_checked_cast(weak< V > v);
-    template < typename U, typename V >
-    friend weak< U > motor_const_cast(weak< V > v);
 
 private:
     T* m_ptr;
@@ -26,14 +24,14 @@ private:
 
 public:
     inline weak();
-    inline weak(T* p);
+    inline weak(T* p);                      // NOLINT(google-explicit-constructor)
     template < typename U >
-    inline weak(ref< U > other);
+    inline weak(ref< U > other);            // NOLINT(google-explicit-constructor)
     template < typename U >
-    inline weak(const scoped< U >& other);
+    inline weak(const scoped< U >& other);  // NOLINT(google-explicit-constructor)
     inline weak(const weak& other);
     template < typename U >
-    inline weak(const weak< U >& other);
+    inline weak(const weak< U >& other);  // NOLINT(google-explicit-constructor)
     inline ~weak();
 
     inline weak& operator=(const weak& other);
@@ -42,8 +40,8 @@ public:
     template < typename U >
     inline weak& operator=(U* other);
 
-    inline T*   operator->() const;
-    inline      operator const void*() const;
+    inline T* operator->() const;
+    inline operator const void*() const;  // NOLINT(google-explicit-constructor)
     inline bool operator!() const;
     inline T&   operator*();
 

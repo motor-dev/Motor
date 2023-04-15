@@ -8,7 +8,7 @@
 #define MOTOR_PLATFORM_POSIX   1
 #define MOTOR_PLATFORM_PC      1
 
-#include <stdlib.h>
+#include <cstdlib>
 #define malloca  alloca
 #define freea(p) (void)p
 #define DIRENT_H <dirent.h>

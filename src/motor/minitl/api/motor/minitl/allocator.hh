@@ -5,7 +5,6 @@
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/swap.hh>
 #include <cstring>
-#include <string.h>
 
 namespace minitl {
 
@@ -29,7 +28,7 @@ public:
             , m_data(count ? (T*)allocator.alloc(align(sizeof(T), motor_alignof(T)) * count,
                                                  max< u64 >(blockAlignment, motor_alignof(T)))
                            : 0) {};
-        Block(Block&& other)
+        Block(Block&& other) noexcept
             : m_allocator(other.m_allocator)
             , m_count(other.m_count)
             , m_data(other.m_data)
@@ -37,7 +36,7 @@ public:
             other.m_count = 0;
             other.m_data  = nullptr;
         }
-        Block& operator=(Block&& other)
+        Block& operator=(Block&& other) noexcept
         {
             m_allocator->free(m_data);
             m_allocator   = other.m_allocator;
@@ -63,11 +62,11 @@ public:
         {
             return m_data;
         }
-        operator T*()
+        operator T*()  // NOLINT(google-explicit-constructor)
         {
             return m_data;
         }
-        operator const T*() const
+        operator const T*() const  // NOLINT(google-explicit-constructor)
         {
             return m_data;
         }
@@ -142,9 +141,7 @@ protected:
     virtual bool  internalResize(void* ptr, u64 size)                 = 0;
     virtual void* internalRealloc(void* ptr, u64 size, u64 alignment) = 0;
     virtual void  internalFree(const void* pointer)                   = 0;
-    virtual ~Allocator()
-    {
-    }
+    virtual ~Allocator()                                              = default;
 
 public:
     inline void* alloc(u64 size, u64 alignment = 4);

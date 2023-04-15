@@ -4,6 +4,12 @@
 #include <motor/core/stdafx.h>
 #include <motor/core/threads/criticalsection.hh>
 
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#    define NOMINMAX
+#endif
+#include <windows.h>
+
 namespace Motor {
 
 CriticalSection::CriticalSection() : m_data(new CRITICAL_SECTION)

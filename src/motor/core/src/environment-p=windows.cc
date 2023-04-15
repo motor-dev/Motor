@@ -4,7 +4,13 @@
 #include <motor/core/stdafx.h>
 #include <motor/core/environment.hh>
 
-#include <stdlib.h>
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#    define NOMINMAX
+#endif
+#include <windows.h>
+
+#include <cstdlib>
 
 typedef BOOL(WINAPI* GetUserProfileDirectoryFunction)(HANDLE hToken, LPSTR lpProfileDir,
                                                       LPDWORD lpcchSize);

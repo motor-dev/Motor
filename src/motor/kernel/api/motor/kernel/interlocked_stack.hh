@@ -19,16 +19,17 @@ private:
     type_t m_value;
 
 public:
-    itaggedptr(T* t) : m_value((typename type_t::value_t)(t))
+    itaggedptr(T* t)  // NOLINT(google-explicit-constructor)
+        : m_value((typename type_t::value_t)(t))
     {
     }
     typedef typename type_t::tag_t ticket_t;
 
-    operator const T*() const
+    operator const T*() const  // NOLINT(google-explicit-constructor)
     {
         return static_cast< T* >(m_value.value());
     }
-    operator T*()
+    operator T*()  // NOLINT(google-explicit-constructor)
     {
         return static_cast< T* >(m_value.value());
     }
@@ -71,15 +72,15 @@ private:
 
 public:
     istack();
-    istack(istack&& other)            = default;
-    istack& operator=(istack&& other) = default;
-    ~istack()                         = default;
+    istack(istack&& other) noexcept            = default;
+    istack& operator=(istack&& other) noexcept = default;
+    ~istack()                                  = default;
 
     istack(const istack& other)            = delete;
     istack& operator=(const istack& other) = delete;
 
-    void push(T* t);
-    void pushList(T* h, T* t);
+    void push(T* item);
+    void pushList(T* head, T* tail);
     T*   pop();
     T*   popAll();
 };
@@ -90,25 +91,20 @@ istack< T >::istack() : m_head(0)
 }
 
 template < typename T >
-void istack< T >::push(T* t)
+void istack< T >::push(T* item)
 {
-    typename itaggedptr< node >::ticket_t ticket;
-    do
-    {
-        ticket  = m_head.getTicket();
-        t->next = static_cast< T* >(ticket.value());
-    } while(!m_head.setConditional(t, ticket));
+    return pushList(item, item);
 }
 
 template < typename T >
-void istack< T >::pushList(T* h, T* t)
+void istack< T >::pushList(T* head, T* tail)
 {
     typename itaggedptr< node >::ticket_t ticket;
     do
     {
-        ticket  = m_head.getTicket();
-        t->next = static_cast< T* >(ticket.value());
-    } while(!m_head.setConditional(h, ticket));
+        ticket     = m_head.getTicket();
+        tail->next = static_cast< T* >(ticket.value());
+    } while(!m_head.setConditional(head, ticket));
 }
 
 template < typename T >

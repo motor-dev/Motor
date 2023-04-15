@@ -3,7 +3,6 @@
 
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>
-#include <motor/plugin/plugin.hh>
 #include <py_array.hh>
 #include <py_class.hh>
 #include <py_enum.hh>
@@ -17,21 +16,21 @@
 namespace Motor { namespace Python {
 
 tls< PythonLibrary > s_library;
-PyObject*            s_moduleObject;
 
 static PyObject* run(PyObject* self, PyObject* args)
 {
     motor_forceuse(self);
     motor_forceuse(args);
-    s_library->m_PyRun_InteractiveLoopFlags(stdin, "<interactive>", 0);
+    s_library->m_PyRun_InteractiveLoopFlags(stdin, "<interactive>", nullptr);
     Py_INCREF(s_library->m__Py_NoneStruct);
     return s_library->m__Py_NoneStruct;
 }
 
-static PyMethodDef s_methods[] = {{"run", &run, METH_NOARGS, NULL}, {NULL, NULL, 0, NULL}};
+static PyMethodDef s_methods[]
+    = {{"run", &run, METH_NOARGS, nullptr}, {nullptr, nullptr, 0, nullptr}};
 
 static PyModuleDef s_module
-    = {PyModuleDef_HEAD_INIT, "py_motor", "", 0, s_methods, NULL, NULL, NULL, NULL};
+    = {PyModuleDef_HEAD_INIT, "py_motor", "", 0, s_methods, nullptr, nullptr, nullptr, nullptr};
 
 static void setupModule(PyObject* module, bool registerLog)
 {
@@ -60,7 +59,6 @@ static void setupModule(PyObject* module, bool registerLog)
     PyMotorArray::registerType(module);
     PyMotorNamespace::registerType(module);
     PyMotorClass::registerType(module);
-    s_moduleObject = module;
 }
 
 PyObject* init2_py_motor(bool registerLog)
@@ -70,19 +68,19 @@ PyObject* init2_py_motor(bool registerLog)
     if(s_library->m_Py_InitModule4)
     {
         motor_assert(sizeof(minitl::size_type) == 4, "Python is 32bits but Motor is 64bits");
-        module
-            = (*s_library->m_Py_InitModule4)("py_motor", s_methods, "", NULL, s_library->getApi());
+        module = (*s_library->m_Py_InitModule4)("py_motor", s_methods, "", nullptr,
+                                                s_library->getApi());
     }
     else if(s_library->m_Py_InitModule4_64)
     {
         motor_assert(sizeof(minitl::size_type) == 8, "Python is 64bits but Motor is 32bits");
-        module = (*s_library->m_Py_InitModule4_64)("py_motor", s_methods, "", NULL,
+        module = (*s_library->m_Py_InitModule4_64)("py_motor", s_methods, "", nullptr,
                                                    s_library->getApi());
     }
     else
     {
         motor_unimplemented();
-        return 0;
+        return nullptr;
     }
     setupModule(module, registerLog);
     return module;
@@ -134,14 +132,14 @@ ref< PythonLibrary > loadPython(const char* pythonPath)
     return library;
 }
 
-void setCurrentContext(weak< PythonLibrary > library)
+void setCurrentContext(const weak< PythonLibrary >& library)
 {
     s_library = library;
 }
 
 void clearCurrentContext()
 {
-    s_library = 0;
+    s_library = nullptr;
 }
 
 }}  // namespace Motor::Python

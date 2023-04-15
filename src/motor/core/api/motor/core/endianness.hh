@@ -11,7 +11,7 @@ enum Endianness
     Endianness_Little,
     Endianness_Big,
     Endianness_Self =
-#ifndef MOTOR_BIGENDIAN
+#ifndef MOTOR_BIG_ENDIAN
         Endianness_Little
 #else
         Endianness_Big

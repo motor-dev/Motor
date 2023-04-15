@@ -3,7 +3,7 @@
 #pragma once
 
 #include <motor/minitl/stdafx.h>
-#include <stddef.h>
+#include <cstddef>
 
 //! \addtogroup minitl
 //! @{
@@ -13,9 +13,6 @@ typedef size_t    size_type;
 typedef ptrdiff_t difference_type;
 
 struct input_iterator_tag
-{
-};
-struct output_iterator_tag
 {
 };
 struct forward_iterator_tag : public input_iterator_tag
@@ -30,11 +27,6 @@ struct random_access_iterator_tag : public bidirectional_iterator_tag
 
 template < typename T, typename DIFF = ::minitl::difference_type >
 struct input_iterator
-{
-};
-
-template < typename T, typename DIFF = ::minitl::difference_type >
-struct output_iterator
 {
 };
 

@@ -503,18 +503,6 @@ u32 format(char* destination, u32 destinationLength, index_sequence< PATTERN_IND
             .length(get< patterns[PATTERN_INDICES].argumentIndex >(arguments..., brace_format {}),
                     patterns[PATTERN_INDICES].options)...};
 
-    u32 length = 0;
-    for(u32 i = 0; i < patternCount; ++i)
-    {
-        length += patterns[i].patternStart - patterns[i].blockStart;
-        length += (lengths[i] < patterns[i].options.width) ? patterns[i].options.width : lengths[i];
-    }
-    if(patternCount >= 1
-       && format.size() - patterns[patternCount - 1].patternStart < g_minimumWriteSize)
-        length += g_minimumWriteSize;
-    else
-        length += format.size() - patterns[patternCount - 1].patternEnd;
-
     u32 offset = 0;
     u32 offsets[]
         = {offset = fill_buffer< T >(

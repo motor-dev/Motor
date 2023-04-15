@@ -14,13 +14,13 @@ namespace format_details {
 
 struct bool_wrapper
 {
-    bool_wrapper(bool value) : value(value)
+    bool_wrapper(bool value) : value(value)  // NOLINT(google-explicit-constructor)
     {
     }
 
     const bool value;
 
-    operator bool() const
+    operator bool() const  // NOLINT(google-explicit-constructor)
     {
         return value;
     }

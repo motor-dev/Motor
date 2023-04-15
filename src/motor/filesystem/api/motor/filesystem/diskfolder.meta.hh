@@ -30,9 +30,10 @@ private:
     void doRefresh(Folder::ScanPolicy scanPolicy) override;
     void onChanged() override;
 published:
-    DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy = Folder::ScanRecursive,
-               Folder::CreatePolicy createPolicy = Folder::CreateOne);
-    ~DiskFolder();
+    explicit DiskFolder(const ipath&         diskpath,
+                        Folder::ScanPolicy   scanPolicy   = Folder::ScanRecursive,
+                        Folder::CreatePolicy createPolicy = Folder::CreateOne);
+    ~DiskFolder() override;
 
     weak< File > createFile(const istring& name);
 };

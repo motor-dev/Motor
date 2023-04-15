@@ -6,6 +6,12 @@
 #include <watchpoint.hh>
 #include <windows/file.hh>
 
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#    define NOMINMAX
+#endif
+#include <windows.h>
+
 namespace Motor {
 
 static u64 getTimeStamp(FILETIME time)
@@ -23,9 +29,9 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
         createDirectory(parent, policy);
     }
     ipath::Filename pathname = path.str('\\');
-    if(!CreateDirectoryA(pathname.name, 0))
+    if(!CreateDirectoryA(pathname.name, nullptr))
     {
-        int err = GetLastError();
+        DWORD err = GetLastError();
         if(err == ERROR_ALREADY_EXISTS)
         {
             return;
@@ -43,6 +49,7 @@ static i_u32 s_diskIndex = i_u32::create(0);
 DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy,
                        Folder::CreatePolicy createPolicy)
     : m_path(diskpath)
+    , m_handle()
     , m_index(s_diskIndex++)
     , m_watch()
 {
@@ -52,11 +59,11 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy,
     }
     ipath::Filename pathname = m_path.str('\\');
     m_handle.ptrHandle       = CreateFileA(pathname.name, GENERIC_READ,
-                                           FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, 0,
-                                           OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
+                                           FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                                           nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
     if(m_handle.ptrHandle == INVALID_HANDLE_VALUE)
     {
-        int errorCode = ::GetLastError();
+        DWORD errorCode = ::GetLastError();
         motor_info_format(Log::fs(), "Directory {0} could not be opened: ({1})", pathname.name,
                           errorCode);
     }
@@ -94,11 +101,9 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                 istring name = data.cFileName;
                 if(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 {
-                    for(minitl::vector< minitl::tuple< istring, ref< Folder > > >::iterator it
-                        = m_folders.begin();
-                        it != m_folders.end(); ++it)
+                    for(auto& m_folder: m_folders)
                     {
-                        if(it->first == name)
+                        if(m_folder.first == name)
                         {
                             continue;
                         }
@@ -114,8 +119,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                     size += data.nFileSizeLow;
                     ref< Win32File > newFile
                         = ref< Win32File >::create(Arena::filesystem(), m_path + ifilename(name),
-                                                   File::Media(File::Media::Disk, m_index, 0), size,
-                                                   getTimeStamp(data.ftLastWriteTime));
+                                                   size, getTimeStamp(data.ftLastWriteTime));
                     m_files.push_back(minitl::make_tuple(name, newFile));
                 }
             } while(FindNextFile(h, &data));
@@ -127,14 +131,14 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 weak< File > DiskFolder::createFile(const istring& name)
 {
     const ifilename::Filename path = (m_path + ifilename(name)).str('\\');
-    HANDLE                    h = CreateFileA(path.name, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
+    HANDLE h = CreateFileA(path.name, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, nullptr);
     if(h == INVALID_HANDLE_VALUE)
     {
-        int errorCode = ::GetLastError();
+        DWORD errorCode = ::GetLastError();
         motor_info_format(Log::fs(),
                           "file {0} ({1}) could not be opened: CreateFile returned an error ({2})",
                           m_path, path.name, errorCode);
-        return weak< File >();
+        return {};
     }
     else
     {
@@ -143,22 +147,20 @@ weak< File > DiskFolder::createFile(const istring& name)
         h = FindFirstFile(path.name, &data);
         if(h == INVALID_HANDLE_VALUE)
         {
-            int errorCode = ::GetLastError();
+            DWORD errorCode = ::GetLastError();
             motor_info_format(
                 Log::fs(), "file {0} ({1}) could not be opened: CreateFile returned an error ({2})",
                 m_path, path.name, errorCode);
-            return weak< File >();
+            return {};
         }
         FindClose(h);
         ref< File > result = ref< Win32File >::create(Arena::filesystem(), m_path + ifilename(name),
-                                                      File::Media(File::Media::Disk, m_index, 0), 0,
-                                                      getTimeStamp(data.ftLastWriteTime));
-        for(minitl::vector< minitl::tuple< istring, ref< File > > >::iterator it = m_files.begin();
-            it != m_files.end(); ++it)
+                                                      0, getTimeStamp(data.ftLastWriteTime));
+        for(auto& m_file: m_files)
         {
-            if(it->first == name)
+            if(m_file.first == name)
             {
-                it->second = result;
+                m_file.second = result;
                 return result;
             }
         }
@@ -185,11 +187,9 @@ void DiskFolder::onChanged()
                 if(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 {
                     bool exists = false;
-                    for(minitl::vector< minitl::tuple< istring, ref< Folder > > >::iterator it
-                        = m_folders.begin();
-                        it != m_folders.end(); ++it)
+                    for(auto& m_folder: m_folders)
                     {
-                        if(it->first == name)
+                        if(m_folder.first == name)
                         {
                             exists = true;
                             break;
@@ -206,17 +206,15 @@ void DiskFolder::onChanged()
                 else
                 {
                     bool exists = false;
-                    for(minitl::vector< minitl::tuple< istring, ref< File > > >::iterator it
-                        = m_files.begin();
-                        it != m_files.end(); ++it)
+                    for(auto& m_file: m_files)
                     {
-                        if(it->first == name)
+                        if(m_file.first == name)
                         {
                             exists   = true;
                             u64 size = data.nFileSizeHigh;
                             size <<= 32;
                             size += data.nFileSizeLow;
-                            motor_checked_cast< Win32File >(it->second)
+                            motor_checked_cast< Win32File >(m_file.second)
                                 ->refresh(size, getTimeStamp(data.ftLastWriteTime));
                             break;
                         }
@@ -227,8 +225,7 @@ void DiskFolder::onChanged()
                         size <<= 32;
                         size += data.nFileSizeLow;
                         ref< Win32File > newFile = ref< Win32File >::create(
-                            Arena::filesystem(), m_path + ifilename(name),
-                            File::Media(File::Media::Disk, m_index, 0), size,
+                            Arena::filesystem(), m_path + ifilename(name), size,
                             getTimeStamp(data.ftLastWriteTime));
                         m_files.push_back(minitl::make_tuple(name, newFile));
                     }

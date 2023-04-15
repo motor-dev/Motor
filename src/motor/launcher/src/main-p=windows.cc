@@ -3,9 +3,14 @@
 
 #include <stdafx.h>
 #include <motor/main.hh>
+#include <cstdio>
 #include <fcntl.h>
+
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#    define NOMINMAX
+#endif
 #include <io.h>
-#include <stdio.h>
 #include <windows.h>
 
 MOTOR_EXPORT int forceExport;

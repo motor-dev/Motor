@@ -23,16 +23,16 @@ class embed_cl(Task.Task):
                 'extern const unsigned char s_%(kernel_name)scldata64[];\n'
                 'extern const unsigned long s_%(kernel_name)scldata64_size;\n'
                 '\n'
-                '_MOTOR_PLUGIN_EXPORT_VAR(const unsigned char* s_clKernel32, s_%(kernel_name)scldata32);\n'
-                '_MOTOR_PLUGIN_EXPORT_VAR(const u64 s_clKernel32Size, s_%(kernel_name)scldata32_size);\n'
-                '_MOTOR_PLUGIN_EXPORT_VAR(const unsigned char* s_clKernel64, s_%(kernel_name)scldata64);\n'
-                '_MOTOR_PLUGIN_EXPORT_VAR(const u64 s_clKernel64Size, s_%(kernel_name)scldata64_size);\n'
+                'MOTOR_PLUGIN_EXPORT_VAR(const unsigned char* s_clKernel32, s_%(kernel_name)scldata32);\n'
+                'MOTOR_PLUGIN_EXPORT_VAR(const u64 s_clKernel32Size, s_%(kernel_name)scldata32_size);\n'
+                'MOTOR_PLUGIN_EXPORT_VAR(const unsigned char* s_clKernel64, s_%(kernel_name)scldata64);\n'
+                'MOTOR_PLUGIN_EXPORT_VAR(const u64 s_clKernel64Size, s_%(kernel_name)scldata64_size);\n'
                 '\n'
-                '_MOTOR_REGISTER_PLUGIN(MOTOR_KERNEL_ID, MOTOR_KERNEL_NAME);\n'
-                '_MOTOR_REGISTER_METHOD(MOTOR_KERNEL_ID, s_clKernel32);\n'
-                '_MOTOR_REGISTER_METHOD(MOTOR_KERNEL_ID, s_clKernel32Size);\n'
-                '_MOTOR_REGISTER_METHOD(MOTOR_KERNEL_ID, s_clKernel64);\n'
-                '_MOTOR_REGISTER_METHOD(MOTOR_KERNEL_ID, s_clKernel64Size);' % params
+                'MOTOR_REGISTER_PLUGIN(MOTOR_KERNEL_ID, MOTOR_KERNEL_NAME);\n'
+                'MOTOR_REGISTER_METHOD(MOTOR_KERNEL_ID, s_clKernel32);\n'
+                'MOTOR_REGISTER_METHOD(MOTOR_KERNEL_ID, s_clKernel32Size);\n'
+                'MOTOR_REGISTER_METHOD(MOTOR_KERNEL_ID, s_clKernel64);\n'
+                'MOTOR_REGISTER_METHOD(MOTOR_KERNEL_ID, s_clKernel64Size);' % params
             )
 
 

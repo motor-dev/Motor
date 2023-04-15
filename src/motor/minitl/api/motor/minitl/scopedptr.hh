@@ -19,23 +19,23 @@ private:
     T* m_ptr;
 
 private:
-    scoped(T* value, Allocator& deleter);
+    scoped(T* value, Allocator& allocator);
+
+public:
     scoped(const scoped& other) = delete;
     template < typename U >
     inline scoped(const scoped< U >& other) = delete;
     template < typename U >
     scoped& operator=(const scoped< U >& other) = delete;
     scoped& operator=(const scoped& other)      = delete;
-
-public:
     inline scoped();
     inline ~scoped();
-    inline scoped(scoped&& other);
+    inline scoped(scoped&& other) noexcept;
     template < typename U >
-    inline scoped(scoped< U >&& other);
+    inline scoped(scoped< U >&& other);  // NOLINT(google-explicit-constructor)
 
-    inline T*   operator->() const;
-    inline      operator const void*() const;
+    inline T* operator->() const;
+    inline operator const void*() const;  // NOLINT(google-explicit-constructor)
     inline bool operator!() const;
     inline T&   operator*();
 

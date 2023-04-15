@@ -27,7 +27,7 @@ template < typename T >
 weak< T >::weak(T* p) : m_ptr(p)
 {
 #if MOTOR_ENABLE_WEAKCHECK
-    if(m_ptr) m_ptr->addweak();
+    if(m_ptr) m_ptr->addWeak();
 #endif
 }
 
@@ -36,7 +36,7 @@ template < typename U >
 weak< T >::weak(ref< U > other) : m_ptr(checkIsA< T >(other.operator->()))
 {
 #if MOTOR_ENABLE_WEAKCHECK
-    if(m_ptr) m_ptr->addweak();
+    if(m_ptr) m_ptr->addWeak();
 #endif
 }
 
@@ -45,7 +45,7 @@ template < typename U >
 weak< T >::weak(const scoped< U >& other) : m_ptr(checkIsA< T >(other.operator->()))
 {
 #if MOTOR_ENABLE_WEAKCHECK
-    if(m_ptr) m_ptr->addweak();
+    if(m_ptr) m_ptr->addWeak();
 #endif
 }
 
@@ -53,7 +53,7 @@ template < typename T >
 weak< T >::weak(const weak& other) : m_ptr(other.operator->())
 {
 #if MOTOR_ENABLE_WEAKCHECK
-    if(m_ptr) m_ptr->addweak();
+    if(m_ptr) m_ptr->addWeak();
 #endif
 }
 
@@ -62,7 +62,7 @@ template < typename U >
 weak< T >::weak(const weak< U >& other) : m_ptr(checkIsA< T >(other.operator->()))
 {
 #if MOTOR_ENABLE_WEAKCHECK
-    if(m_ptr) m_ptr->addweak();
+    if(m_ptr) m_ptr->addWeak();
 #endif
 }
 
@@ -70,14 +70,17 @@ template < typename T >
 weak< T >::~weak()
 {
 #if MOTOR_ENABLE_WEAKCHECK
-    if(m_ptr) m_ptr->decweak();
+    if(m_ptr) m_ptr->decWeak();
 #endif
 }
 
 template < typename T >
 weak< T >& weak< T >::operator=(const weak& other)
 {
-    weak(other).swap(*this);
+    if(this != &other)
+    {
+        weak(other).swap(*this);
+    }
     return *this;
 }
 
@@ -125,7 +128,7 @@ template < typename T >
 void weak< T >::clear()
 {
 #if MOTOR_ENABLE_WEAKCHECK
-    if(m_ptr) m_ptr->decweak();
+    if(m_ptr) m_ptr->decWeak();
 #endif
     m_ptr = 0;
 }

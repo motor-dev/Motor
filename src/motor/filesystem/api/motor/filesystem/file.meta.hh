@@ -19,36 +19,16 @@ public:
     class Ticket;
     friend class Ticket;
 
-public:
-    struct Media
-    {
-        enum Type
-        {
-            Disk,
-            Network,
-            Dvd,
-            Package,
-            Unknown
-        };
-        Type type;
-        u32  index;
-        u64  offset;
-        Media(Type t, u32 i, u64 o) : type(t), index(i), offset(o)
-        {
-        }
-    };
-
 protected:
     const ifilename m_filename;
-    const Media     m_media;
     u64             m_size;
     u64             m_state;
 
 protected:
-    File(ifilename filename, Media media, u64 size, u64 state);
+    File(const ifilename& filename, u64 size, u64 state);
 
 public:
-    ~File();
+    ~File() override;
 
 public:
     class Ticket : public minitl::refcountable
@@ -76,10 +56,11 @@ public:
         }
 
     public:
-        Ticket(minitl::Allocator& arena, weak< const File > file, i64 offset, u32 size, bool text);
-        Ticket(minitl::Allocator& arena, weak< const File > file, i64 offset, u32 size, bool text,
-               const void* data);
-        ~Ticket();
+        Ticket(minitl::Allocator& arena, const weak< const File >& file, i64 offset, u32 size,
+               bool text);
+        Ticket(minitl::Allocator& arena, const weak< const File >& file, i64 offset, u32 size,
+               bool text, const void* data);
+        ~Ticket() override;
 
     private:
         Ticket(const Ticket&);
@@ -90,12 +71,12 @@ public:
                                   minitl::Allocator& arena = Arena::temporary()) const;
     ref< const Ticket > beginWrite(const void* data, u32 size, i64 offset = -1);
 
-    void fillBuffer(weak< Ticket > ticket) const;
-    void writeBuffer(weak< Ticket > ticket) const;
+    void fillBuffer(const weak< Ticket >& ticket) const;
+    void writeBuffer(const weak< Ticket >& ticket) const;
 
     u64  getState() const;
     bool isDeleted() const;
-    bool isReloadable() const;
+    void refresh(u64 fileSize, u64 state);
 
     ifilename getFileName() const
     {
@@ -105,9 +86,6 @@ public:
 private:
     virtual void doFillBuffer(weak< Ticket > ticket) const  = 0;
     virtual void doWriteBuffer(weak< Ticket > ticket) const = 0;
-
-protected:
-    void refresh(u64 fileSize, u64 state);
 };
 
 }  // namespace Motor
