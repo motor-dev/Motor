@@ -12,7 +12,7 @@ static minitl::Allocator& ticketPool()
     return Arena::filesystem();  // TODO
 }
 
-File::Ticket::Ticket(minitl::Allocator& arena, weak< const File > file, i64 offset, u32 size,
+File::Ticket::Ticket(minitl::Allocator& arena, const weak< const File >& file, i64 offset, u32 size,
                      bool text)
     : action(Read)
     , file(file)
@@ -26,7 +26,7 @@ File::Ticket::Ticket(minitl::Allocator& arena, weak< const File > file, i64 offs
     file->addref();
 }
 
-File::Ticket::Ticket(minitl::Allocator& arena, weak< const File > file, i64 offset, u32 size,
+File::Ticket::Ticket(minitl::Allocator& arena, const weak< const File >& file, i64 offset, u32 size,
                      bool text, const void* data)
     : action(Write)
     , file(file)
@@ -48,17 +48,14 @@ File::Ticket::~Ticket()
     f->decref();
 }
 
-File::File(ifilename filename, Media media, u64 size, u64 fileState)
+File::File(const ifilename& filename, u64 size, u64 fileState)
     : m_filename(filename)
-    , m_media(media)
     , m_size(size)
     , m_state(fileState)
 {
 }
 
-File::~File()
-{
-}
+File::~File() = default;
 
 ref< const File::Ticket > File::beginRead(u32 size, i64 offset, bool text,
                                           minitl::Allocator& arena) const
@@ -93,13 +90,13 @@ ref< const File::Ticket > File::beginWrite(const void* data, u32 size, i64 offse
     return t;
 }
 
-void File::fillBuffer(weak< Ticket > ticket) const
+void File::fillBuffer(const weak< Ticket >& ticket) const
 {
     motor_assert(ticket->file == this, "trying to fill buffer of another file");
     doFillBuffer(ticket);
 }
 
-void File::writeBuffer(weak< Ticket > ticket) const
+void File::writeBuffer(const weak< Ticket >& ticket) const
 {
     motor_assert(ticket->file == this, "trying to fill buffer of another file");
     doWriteBuffer(ticket);

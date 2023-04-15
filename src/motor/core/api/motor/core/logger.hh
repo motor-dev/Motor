@@ -106,16 +106,17 @@ public:
 #define motor_log(logger, level, msg)                                                              \
     do                                                                                             \
     {                                                                                              \
-        const weak< ::Motor::Logger >& l = logger;                                                 \
-        if(l->willLog(level)) l->log(level, __FILE__, __LINE__, msg);                              \
+        const weak< ::Motor::Logger >& motor_log_ll = logger;                                      \
+        if(motor_log_ll->willLog(level)) motor_log_ll->log(level, __FILE__, __LINE__, msg);        \
     } while(0)
 
 #define motor_log_format(logger, level, msg, ...)                                                  \
     do                                                                                             \
     {                                                                                              \
-        const weak< ::Motor::Logger >& l = logger;                                                 \
-        if(l->willLog(level))                                                                      \
-            l->log(level, __FILE__, __LINE__, minitl::format< 4096 >(FMT(msg), __VA_ARGS__));      \
+        const weak< ::Motor::Logger >& motor_log_ll = logger;                                      \
+        if(motor_log_ll->willLog(level))                                                           \
+            motor_log_ll->log(level, __FILE__, __LINE__,                                           \
+                              minitl::format< 4096 >(FMT(msg), __VA_ARGS__));                      \
     } while(0)
 
 #if defined(_DEBUG)
@@ -123,8 +124,8 @@ public:
 #    define motor_debug_format(logger, msg, ...)                                                   \
         motor_log_format(logger, ::Motor::logDebug, msg, __VA_ARGS__)
 #else
-#    define motor_debug(logger, msg)
-#    define motor_debug_format(logger, msg, ...)
+#    define motor_debug(logger, msg)             (void)0
+#    define motor_debug_format(logger, msg, ...) (void)0
 #endif
 
 #define motor_info(logger, msg) motor_log(logger, ::Motor::logInfo, msg)

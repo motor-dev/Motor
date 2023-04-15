@@ -47,8 +47,8 @@ extern "C" void* __builtin_alloca(size_t);
 #    include <errno.h>
 #endif
 
-#define MOTOR_NOINLINE
-#define MOTOR_ALWAYSINLINE inline
+#define MOTOR_NEVER_INLINE
+#define MOTOR_ALWAYS_INLINE inline
 
 #define MOTOR_EXPORT __global
 #define MOTOR_IMPORT

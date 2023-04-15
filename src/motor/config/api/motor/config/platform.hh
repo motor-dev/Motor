@@ -10,9 +10,9 @@
 
 /* POWERPC ********************/
 #    if defined _LITTLE_ENDIAN
-#        define MOTOR_LITTLEENDIAN
+#        define MOTOR_LITTLE_ENDIAN
 #    else
-#        define MOTOR_BIGENDIAN
+#        define MOTOR_BIG_ENDIAN
 #    endif
 #    ifdef _PPC64
 #        define MOTOR_64
@@ -24,29 +24,29 @@
 
 /* ARM Big and little endian **/
 #    if defined(_ARMEB)
-#        define MOTOR_BIGENDIAN
+#        define MOTOR_BIG_ENDIAN
 #    elif defined(__ARMEB__)
-#        define MOTOR_BIGENDIAN
+#        define MOTOR_BIG_ENDIAN
 #    else
-#        define MOTOR_LITTLEENDIAN
+#        define MOTOR_LITTLE_ENDIAN
 #    endif
 
 #elif defined(_X86)
 
 /* x86 ************************/
 #    define MOTOR_32
-#    define MOTOR_LITTLEENDIAN
+#    define MOTOR_LITTLE_ENDIAN
 
 #elif defined(_AMD64)
 
 /* amd64 **********************/
 #    define MOTOR_64
-#    define MOTOR_LITTLEENDIAN
+#    define MOTOR_LITTLE_ENDIAN
 
 /* ARM 64bits *****************/
 #elif defined(_ARM64)
 #    define MOTOR_64
-#    define MOTOR_LITTLEENDIAN
+#    define MOTOR_LITTLE_ENDIAN
 
 #else
 #    error "unknown arch"
@@ -56,12 +56,12 @@
 #    error "Unknown platform: you need to define MOTOR_PLATFORM"
 #else
 // clang-format off
-#    define MOTOR_PLATFORM_INCLUDE_ motor/config/platforms/MOTOR_PLATFORM.hh
+#    define MOTOR_PLATFORM_INCLUDE motor/config/platforms/MOTOR_PLATFORM.hh
 // clang-format on
-#    define MOTOR_STRINGIZE__(x) #x
-#    define MOTOR_STRINGIZE_(x)  MOTOR_STRINGIZE__(x)
-#    include MOTOR_STRINGIZE_(MOTOR_PLATFORM_INCLUDE_)
-#    undef MOTOR_PLATFORM_INCLUDE_
-#    undef MOTOR_STRINGIZE_
-#    undef MOTOR_STRINGIZE__
+#    define MOTOR_MAKE_STRING_2(x) #x
+#    define MOTOR_MAKE_STRING_1(x)  MOTOR_MAKE_STRING_2(x)
+#    include MOTOR_MAKE_STRING_1(MOTOR_PLATFORM_INCLUDE)
+#    undef MOTOR_PLATFORM_INCLUDE
+#    undef MOTOR_MAKE_STRING_1
+#    undef MOTOR_MAKE_STRING_2
 #endif

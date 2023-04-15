@@ -31,7 +31,7 @@ namespace minitl {
 template < typename T >
 inline T align(T value, size_t alignment)
 {
-    size_t v = (size_t)(value);
+    auto v = (size_t)(value);
     return (T)(alignment == v ? v : ((v + alignment - 1) & ~(alignment - 1)));
 }
 

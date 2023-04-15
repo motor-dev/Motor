@@ -16,7 +16,7 @@ struct format_buffer
 {
     char buffer[SIZE];
 
-    operator const char*() const
+    operator const char*() const  // NOLINT(google-explicit-constructor)
     {
         return buffer;
     }

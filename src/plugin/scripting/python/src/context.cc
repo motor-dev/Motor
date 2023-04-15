@@ -6,7 +6,7 @@
 
 namespace Motor { namespace Python {
 
-Context::Context(const Plugin::Context& context, ref< PythonLibrary > library)
+Context::Context(const Plugin::Context& context, const ref< PythonLibrary >& library)
     : ScriptEngine< PythonScript >(Arena::python(), context.resourceManager)
     , m_library(library)
     , m_pythonState(library->createThread())
@@ -39,23 +39,23 @@ void Context::reloadBuffer(weak< const PythonScript > script, Resource::Resource
 void Context::runCode(const char* buffer, const ifilename& filename)
 {
     PythonLibrary::ThreadLock lock(m_library, m_pythonState);
-    PyCodeObject*             code = 0;
+    PyCodeObject*             code;
     if(m_library->m_Py_CompileStringExFlags)
     {
         code = (*m_library->m_Py_CompileStringExFlags)(buffer, filename.str().name, Py_file_input,
-                                                       NULL, -1);
+                                                       nullptr, -1);
     }
     else
     {
         code = (*m_library->m_Py_CompileStringFlags)(buffer, filename.str().name, Py_file_input,
-                                                     NULL);
+                                                     nullptr);
     }
     if(code)
     {
-        PyObject* m = (*m_library->m_PyImport_AddModule)("__main__");
-        PyObject* d = (*m_library->m_PyModule_GetDict)(m);
-        PyObject* result
-            = (*m_library->m_PyEval_EvalCodeEx)(code, d, d, NULL, 0, NULL, 0, NULL, 0, NULL);
+        PyObject* m      = (*m_library->m_PyImport_AddModule)("__main__");
+        PyObject* d      = (*m_library->m_PyModule_GetDict)(m);
+        PyObject* result = (*m_library->m_PyEval_EvalCodeEx)(code, d, d, nullptr, 0, nullptr, 0,
+                                                             nullptr, 0, nullptr);
         if(!result)
         {
             (*m_library->m_PyErr_Print)();

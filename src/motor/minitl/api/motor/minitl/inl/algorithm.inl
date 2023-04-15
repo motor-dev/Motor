@@ -14,7 +14,7 @@ struct SortPredicate
 {
     ITERATOR m_iterator;
     COMPARE  m_compare;
-    SortPredicate(ITERATOR it) : m_iterator(it)
+    explicit SortPredicate(ITERATOR it) : m_iterator(it)
     {
     }
     bool operator()(const ITERATOR& r)

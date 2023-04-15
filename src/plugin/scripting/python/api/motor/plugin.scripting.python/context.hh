@@ -16,7 +16,7 @@ namespace Motor { namespace Python {
 class motor_api(PYTHON) Context : public ScriptEngine< PythonScript >
 {
 public:
-    Context(const Plugin::Context& context, ref< PythonLibrary > library);
+    Context(const Plugin::Context& context, const ref< PythonLibrary >& library);
     ~Context();
 
 private:

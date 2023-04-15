@@ -10,30 +10,25 @@ namespace details {
 
 template < int INDEX, typename T, typename... TAIL >
 struct tuple_helper;
-template < u32 INDEX, typename T, typename... TAIL >
-struct tuple_type_at_index;
 
 }  // namespace details
 
 template < typename... T >
 struct tuple : public details::tuple_helper< 0, T... >
 {
-    template < u32 INDEX >
-    using member_type_t = typename details::tuple_type_at_index< INDEX, T... >::type;
-
     constexpr tuple() = default;
-    constexpr tuple(const T&... args);
+    constexpr explicit tuple(const T&... args);
     template < typename... Args >
-    constexpr tuple(Args&&... args);
-    constexpr tuple(const tuple&) = default;
-    constexpr tuple(tuple&&)      = default;
+    constexpr explicit tuple(Args&&... args);
+    constexpr tuple(const tuple&)     = default;
+    constexpr tuple(tuple&&) noexcept = default;
     template < typename... T1 >
-    constexpr tuple(const tuple< T1... >& other);
+    constexpr tuple(const tuple< T1... >& other);  // NOLINT(google-explicit-constructor)
     template < typename... T1 >
-    constexpr tuple(tuple< T1... >&& other);
+    constexpr tuple(tuple< T1... >&& other);       // NOLINT(google-explicit-constructor)
 
-    tuple& operator=(const tuple&) = default;
-    tuple& operator=(tuple&&)      = default;
+    tuple& operator=(const tuple&)     = default;
+    tuple& operator=(tuple&&) noexcept = default;
     template < typename... T1 >
     tuple& operator=(const tuple< T1... >& other);
 };

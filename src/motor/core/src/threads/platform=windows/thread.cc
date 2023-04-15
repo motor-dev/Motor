@@ -4,6 +4,12 @@
 #include <motor/core/stdafx.h>
 #include <motor/core/threads/thread.hh>
 
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#    define NOMINMAX
+#endif
+#include <windows.h>
+
 namespace Motor {
 
 #define MS_VC_EXCEPTION 0x406D1388

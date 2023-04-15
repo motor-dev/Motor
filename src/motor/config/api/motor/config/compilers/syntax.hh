@@ -26,8 +26,8 @@ typedef unsigned long int intptr_t;
 #    define motor_restrict __restrict
 #endif
 
-#define MOTOR_NOINLINE
-#define MOTOR_ALWAYSINLINE        inline
+#define MOTOR_NEVER_INLINE
+#define MOTOR_ALWAYS_INLINE       inline
 #define MOTOR_SUPPORTS_EXCEPTIONS 1
 
 #define MOTOR_EXPORT

@@ -25,7 +25,7 @@ template < typename ITERATOR, typename PREDICATE >
 ITERATOR partition(ITERATOR first, ITERATOR last, PREDICATE p);
 
 template < typename ITERATOR, typename COMPARE >
-void sort(ITERATOR first, ITERATOR last, COMPARE f);
+void sort(ITERATOR first, ITERATOR last, COMPARE s);
 
 template < typename ITERATOR, typename T >
 ITERATOR find(const T& t, ITERATOR begin, ITERATOR end);

@@ -24,17 +24,14 @@ private:
 
 protected:
     void flush() override;
-
-protected:
-    void* createDummyHandle();
+    bool hasPlatformRenderer() const;
 
 public:
-    Renderer(minitl::Allocator & allocator, weak< Resource::ResourceManager > manager);
-    ~Renderer();
+    Renderer(minitl::Allocator & allocator, const weak< Resource::ResourceManager >& manager);
+    ~Renderer() override;
 
     knl::uint2 getScreenSize() const override;
     void*      getPlatformData();
-    bool       success() const;
 };
 
 }}  // namespace Motor::Windowing

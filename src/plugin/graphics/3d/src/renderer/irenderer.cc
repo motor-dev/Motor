@@ -2,18 +2,16 @@
    see LICENSE for detail */
 
 #include <motor/plugin.graphics.3d/stdafx.h>
-#include <motor/plugin.graphics.3d/mesh/mesh.meta.hh>
 #include <motor/plugin.graphics.3d/renderer/irenderer.hh>
 #include <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.hh>
 #include <motor/plugin.graphics.3d/shader/shader.meta.hh>
-#include <motor/plugin.graphics.3d/texture/texture.meta.hh>
 #include <motor/scheduler/kernel/kernel.meta.hh>
 #include <motor/scheduler/task/method.hh>
 #include <gpuresourceloader.hh>
 
 namespace Motor {
 
-IRenderer::IRenderer(minitl::Allocator& allocator, weak< Resource::ResourceManager > manager,
+IRenderer::IRenderer(minitl::Allocator& allocator, const weak< Resource::ResourceManager >& manager,
                      Scheduler::Affinity affinity)
     : m_allocator(allocator)
     , m_resourceManager(manager)
@@ -66,19 +64,19 @@ void IRenderer::flush()
 }
 
 weak< IGPUResource >
-IRenderer::getRenderSurface(weak< const Resource::IDescription > description) const
+IRenderer::getRenderSurface(const weak< const Resource::IDescription >& description) const
 {
     return description->getResource(m_renderSurfaceLoader).getRefHandle< IGPUResource >();
 }
 
 weak< IGPUResource >
-IRenderer::getRenderWindow(weak< const Resource::IDescription > description) const
+IRenderer::getRenderWindow(const weak< const Resource::IDescription >& description) const
 {
     return description->getResource(m_renderWindowLoader).getRefHandle< IGPUResource >();
 }
 
 weak< IGPUResource >
-IRenderer::getShaderProgram(weak< const Resource::IDescription > description) const
+IRenderer::getShaderProgram(const weak< const Resource::IDescription >& description) const
 {
     return description->getResource(m_shaderProgramLoader).getRefHandle< IGPUResource >();
 }

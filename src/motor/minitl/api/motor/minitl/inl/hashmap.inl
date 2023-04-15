@@ -28,10 +28,10 @@ public:
         , m_current(l)
     {
     }
-    iterator_base(const iterator_base& other)            = default;
-    iterator_base(iterator_base&& other)                 = default;
-    iterator_base& operator=(const iterator_base& other) = default;
-    iterator_base& operator=(iterator_base&& other)      = default;
+    iterator_base(const iterator_base& other)                = default;
+    iterator_base(iterator_base&& other) noexcept            = default;
+    iterator_base& operator=(const iterator_base& other)     = default;
+    iterator_base& operator=(iterator_base&& other) noexcept = default;
 
     template < typename OTHER_POLICY >
     bool operator==(const iterator_base< OTHER_POLICY >& other) const
@@ -57,17 +57,17 @@ public:
         do
         {
             ++m_current;
-        } while((char*)m_current.   operator->() >= (char*)m_owner->m_index.begin()
+        } while((char*)m_current.operator->() >= (char*)m_owner->m_index.begin()
                 && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
         return *this;
     }
-    iterator_base operator++(int)
+    const iterator_base operator++(int)  // NOLINT(readability-const-return-type)
     {
         iterator_base copy = *this;
         do
         {
             ++m_current;
-        } while((char*)m_current.   operator->() >= (char*)m_owner->m_index.begin()
+        } while((char*)m_current.operator->() >= (char*)m_owner->m_index.begin()
                 && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
         return copy;
     }
@@ -76,17 +76,17 @@ public:
         do
         {
             --m_current;
-        } while((char*)m_current.   operator->() >= (char*)m_owner->m_index.begin()
+        } while((char*)m_current.operator->() >= (char*)m_owner->m_index.begin()
                 && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
         return *this;
     }
-    iterator_base operator--(int)
+    const iterator_base operator--(int)  // NOLINT(readability-const-return-type)
     {
         iterator_base copy = *this;
         do
         {
             --m_current;
-        } while((char*)m_current.   operator->() >= (char*)m_owner->m_index.begin()
+        } while((char*)m_current.operator->() >= (char*)m_owner->m_index.begin()
                 && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
         return copy;
     }
@@ -336,7 +336,7 @@ hashmap< Key, Value, Hash >::find(const Key& key) const
 }
 
 template < typename Key, typename Value, typename Hash >
-typename hashmap< Key, Value, Hash >::iterator hashmap< Key, Value, Hash >::erase(iterator it)
+auto hashmap< Key, Value, Hash >::erase(iterator it) -> iterator
 {
     m_count--;
     item*         i = static_cast< item* >(it.m_current.operator->());

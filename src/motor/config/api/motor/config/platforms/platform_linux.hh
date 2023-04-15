@@ -8,10 +8,8 @@
 #define MOTOR_PLATFORM_PC    1
 
 #include <alloca.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <strings.h>
-#define stricmp  strcasecmp
-#define strnicmp strncasecmp
 #define malloca  alloca
 #define freea(p) (void)p
 #define DIRENT_H <dirent.h>

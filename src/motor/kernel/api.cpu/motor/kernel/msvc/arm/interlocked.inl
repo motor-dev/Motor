@@ -62,40 +62,29 @@ struct InterlockedType< 4 >
         typedef tagged_t tag_t;
         union
         {
-            __declspec(align(8)) struct _taggedvalue
+            __declspec(align(8)) struct
             {
                 volatile counter_t tag;
                 volatile value_t   value;
-            } taggedvalue;
+            } tagged_value;
             __declspec(align(8)) volatile long long asLongLong;
         };
         tagged_t(long long value) : asLongLong(value)
         {
         }
-        tagged_t(value_t value = 0)
-        {
-            taggedvalue.tag   = 0;
-            taggedvalue.value = value;
-        }
-        tagged_t(counter_t tag, value_t value)
-        {
-            taggedvalue.tag   = tag;
-            taggedvalue.value = value;
-        }
-        tagged_t(const tagged_t& other) : asLongLong(other.asLongLong)
+        tagged_t(value_t value = 0) : tagged_value {0, value}
         {
         }
+        tagged_t(counter_t tag, value_t value) : tagged_value {tag, value}
+        {
+        }
+        tagged_t(const tagged_t& other) = default;
         inline value_t value()
         {
-            return taggedvalue.value;
+            return tagged_value.value;
         }
-        tagged_t& operator=(const tagged_t& other)
-        {
-            taggedvalue.tag   = other.taggedvalue.tag;
-            taggedvalue.value = other.taggedvalue.value;
-            return *this;
-        }
-        inline bool operator==(tagged_t& other)
+        tagged_t&   operator=(const tagged_t& other) = default;
+        inline bool operator==(const tagged_t& other) const
         {
             return asLongLong == other.asLongLong;
         }
@@ -107,7 +96,7 @@ struct InterlockedType< 4 >
     static inline bool set_conditional(tagged_t* p, tagged_t::value_t v,
                                        const tagged_t::tag_t& condition)
     {
-        tagged_t r(condition.taggedvalue.tag + 1, v);
+        tagged_t r(condition.tagged_value.tag + 1, v);
         return _InterlockedCompareExchange64(&(p->asLongLong), r.asLongLong, condition.asLongLong)
                == condition.asLongLong;
     }

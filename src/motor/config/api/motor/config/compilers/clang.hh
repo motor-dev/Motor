@@ -53,8 +53,8 @@ typedef u8       byte;
 #        pragma clang diagnostic ignored "-Wc++11-extensions"
 #    endif
 #endif
-#define MOTOR_NOINLINE     __attribute__((noinline))
-#define MOTOR_ALWAYSINLINE __attribute__((always_inline))
+#define MOTOR_NEVER_INLINE  __attribute__((noinline))
+#define MOTOR_ALWAYS_INLINE __attribute__((always_inline)) inline
 #ifdef __EXCEPTIONS
 #    define MOTOR_SUPPORTS_EXCEPTIONS 1
 #else

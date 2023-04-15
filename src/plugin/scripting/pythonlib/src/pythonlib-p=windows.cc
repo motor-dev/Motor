@@ -3,7 +3,13 @@ see LICENSE for detail */
 
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>
-#include <string.h>
+#include <cstring>
+
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#    define NOMINMAX
+#endif
+#include <windows.h>
 
 namespace Motor { namespace Python {
 
@@ -11,9 +17,9 @@ static HMODULE getPythonModuleHandle()
 {
     typedef BOOL(WINAPI * EnumProcessModulesFunc)(HANDLE hProcess, HMODULE * lphModule, DWORD cb,
                                                   LPDWORD lpcbNeeded);
-    EnumProcessModulesFunc EnumProcessModules = 0;
+    EnumProcessModulesFunc EnumProcessModules = nullptr;
     HMODULE                h                  = LoadLibraryA("Psapi.dll");
-    if(h != 0)
+    if(h != nullptr)
     {
         EnumProcessModules = motor_function_cast< EnumProcessModulesFunc >(
             GetProcAddress(h, "EnumProcessModules"));
@@ -32,14 +38,14 @@ static HMODULE getPythonModuleHandle()
         if(!(*EnumProcessModules)(GetCurrentProcess(), 0, 0, &needed))
         {
             motor_error(Log::python(), "Could not locate python: EnumProcessModules failed");
-            return (HMODULE)NULL;
+            return (HMODULE) nullptr;
         }
         minitl::Allocator::Block< HMODULE > modules(Arena::temporary(), needed / sizeof(HMODULE));
         if(!(*EnumProcessModules)(GetCurrentProcess(), modules.data(), (DWORD)modules.byteCount(),
                                   &needed))
         {
             motor_error(Log::python(), "Could not locate python: EnumProcessModules failed");
-            return (HMODULE)NULL;
+            return (HMODULE) nullptr;
         }
         FreeLibrary(h);
 
@@ -55,7 +61,7 @@ static HMODULE getPythonModuleHandle()
         }
         motor_error(Log::python(),
                     "Could not locate python: could not locate module with Py_InitializeEx");
-        return NULL;
+        return nullptr;
     }
     else
     {
@@ -63,7 +69,7 @@ static HMODULE getPythonModuleHandle()
         motor_error(Log::python(),
                     "Could not locate python: could not locate procedure \"EnumProcessModules\" in "
                     "Psapi.dll or Kernel32.dll");
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -72,7 +78,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     , m_handle(m_pythonLibraryName
                    ? LoadLibraryA(minitl::format< 1024u >(FMT("{0}.dll"), m_pythonLibraryName))
                    : getPythonModuleHandle())
-    , m_status(m_handle != 0)
+    , m_status(m_handle != nullptr)
     , m_api(1013)
     , m_version(0)
 {
@@ -118,8 +124,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         }
         else
         {
-            m_Py_InitModule4    = 0;
-            m_Py_InitModule4_64 = 0;
+            m_Py_InitModule4    = nullptr;
+            m_Py_InitModule4_64 = nullptr;
             motor_get_func_opt(Py_InitModule4);
             motor_get_func_opt(Py_InitModule4_64);
             motor_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab2);
@@ -127,12 +133,12 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         }
         if(m_version >= 32)
         {
-            m_Py_CompileStringFlags = 0;
+            m_Py_CompileStringFlags = nullptr;
             motor_get_func(Py_CompileStringExFlags);
         }
         else
         {
-            m_Py_CompileStringExFlags = 0;
+            m_Py_CompileStringExFlags = nullptr;
             motor_get_func(Py_CompileStringFlags);
         }
         motor_get_func(PyEval_EvalCodeEx);
@@ -270,7 +276,7 @@ void PythonLibrary::platformInitialize()
     }
 }
 
-void PythonLibrary::setupPath()
+void PythonLibrary::setupPath() const
 {
     ifilename programPath = Environment::getEnvironment().getProgramPath();
     programPath.pop_back();

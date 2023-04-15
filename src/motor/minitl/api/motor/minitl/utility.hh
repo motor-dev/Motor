@@ -8,21 +8,21 @@
 namespace minitl {
 
 template < class T >
-constexpr remove_reference_t< T >&& move(T&& t) noexcept;
+MOTOR_ALWAYS_INLINE constexpr remove_reference_t< T >&& move(T&& t) noexcept;
 
 template < class T >
-constexpr T&& forward(remove_reference_t< T >& t) noexcept;
+MOTOR_ALWAYS_INLINE constexpr T&& forward(remove_reference_t< T >& t) noexcept;
 template < class T >
-constexpr T&& forward(remove_reference_t< T >&& t) noexcept;
+MOTOR_ALWAYS_INLINE constexpr T&& forward(remove_reference_t< T >&& t) noexcept;
 
 template < int GET, typename T, typename... TAIL, enable_if_t< GET == 0, bool > = false >
-const T& get(const T& t, const TAIL&... )
+MOTOR_ALWAYS_INLINE const T& get(const T& t, const TAIL&...)
 {
     return t;
 }
 
 template < int GET, typename T, typename... TAIL, enable_if_t< GET != 0, bool > = false >
-const auto& get(const T& t, const TAIL&... tail)
+MOTOR_ALWAYS_INLINE const auto& get(const T& t, const TAIL&... tail)
 {
     motor_forceuse(t);
     return get< GET - 1, TAIL... >(tail...);

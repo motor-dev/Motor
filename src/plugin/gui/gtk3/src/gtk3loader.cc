@@ -43,4 +43,4 @@ void Gtk3Loader::unload(weak< const Resource::IDescription > /*description*/,
 
 }}  // namespace Motor::Gtk3
 
-MOTOR_PLUGIN_REGISTER(Motor::Gtk3::Gtk3Loader);
+MOTOR_PLUGIN_REGISTER(Motor::Gtk3::Gtk3Loader)

@@ -6,7 +6,8 @@
 
 namespace Motor { namespace Runtime {
 
-MOTOR_NOINLINE size_t Callstack::backtrace(Address* /*buffer*/, size_t /*count*/, size_t /*skip*/)
+MOTOR_NEVER_INLINE size_t Callstack::backtrace(Address* /*buffer*/, size_t /*count*/,
+                                               size_t /*skip*/)
 {
     motor_warning("backtrace not implemented for MIPS");
     return 0;

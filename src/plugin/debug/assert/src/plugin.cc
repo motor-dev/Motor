@@ -15,6 +15,9 @@ private:
     minitl::AssertionCallback_t m_previousAssertionCallback;
 
 public:
+    AssertSetup(const AssertSetup& other)            = delete;
+    AssertSetup& operator=(const AssertSetup& other) = delete;
+
     AssertSetup(const Motor::Plugin::Context& /*context*/)
         : m_previousAssertionCallback(minitl::setAssertionCallback(&AssertionCallback))
     {
@@ -24,12 +27,8 @@ public:
     {
         minitl::setAssertionCallback(m_previousAssertionCallback);
     }
-
-private:
-    AssertSetup(const AssertSetup& other);
-    AssertSetup& operator=(const AssertSetup& other);
 };
 
 }}  // namespace Motor::Debug
 
-MOTOR_PLUGIN_REGISTER(Motor::Debug::AssertSetup);
+MOTOR_PLUGIN_REGISTER(Motor::Debug::AssertSetup)

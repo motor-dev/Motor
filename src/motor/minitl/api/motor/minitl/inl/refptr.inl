@@ -48,7 +48,7 @@ ref< T >::ref(const ref& other) : m_ptr(other.operator->())
 
 template < typename T >
 template < typename U >
-ref< T >::ref(const ref< U > other) : m_ptr(checkIsA< T >(other.operator->()))
+ref< T >::ref(const ref< U >& other) : m_ptr(checkIsA< T >(other.operator->()))
 {
     if(m_ptr) m_ptr->addref();
 }
@@ -64,7 +64,10 @@ ref< T >::ref(scoped< U >&& other) : m_ptr(checkIsA< T >(other.operator->()))
 template < typename T >
 ref< T >& ref< T >::operator=(const ref< T >& other)
 {
-    ref(other).swap(*this);
+    if(this != &other)
+    {
+        ref(other).swap(*this);
+    }
     return *this;
 }
 

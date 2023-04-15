@@ -181,9 +181,9 @@ GLWindow::Context::~Context()
 
 GLRenderer::GLRenderer(const Plugin::Context& context)
     : Windowing::Renderer(Arena::general(), context.resourceManager)
-    , m_context(Windowing::Renderer::success() ? scoped< Context >::create(
+    , m_context(hasPlatformRenderer() ? scoped< Context >::create(
                     Arena::general(), static_cast< PlatformData* >(getPlatformData()))
-                                               : scoped< Context >())
+                                      : scoped< Context >())
     , m_openGLMemoryHost(scoped< GLMemoryHost >::create(Arena::general()))
     , m_openCLScheduler("plugin.compute.opencl_gl", context)
 {
@@ -215,7 +215,7 @@ const ShaderExtensions& GLRenderer::shaderext() const
 
 bool GLRenderer::success() const
 {
-    return Windowing::Renderer::success() && (m_context != 0);
+    return hasPlatformRenderer() && m_context != 0;
 }
 
 //------------------------------------------------------------------------
@@ -226,10 +226,6 @@ GLWindow::GLWindow(weak< const RenderWindowDescription > renderwindow,
     , m_context(scoped< Context >())
 {
     motor_info_format(Log::gl(), "creating window {0}", renderwindow->title);
-}
-
-GLWindow::~GLWindow()
-{
 }
 
 void GLWindow::load(weak< const Resource::IDescription > description)

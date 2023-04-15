@@ -59,37 +59,21 @@ struct InterlockedType< 4 >
         {
             counter_t tag;
             value_t   value;
-        } taggedvalue;
+        } tagged_value;
 
-        tagged_t(value_t value = 0)
+        tagged_t(value_t value = 0) : tagged_value{0, value}
         {
-            taggedvalue.tag   = 0;
-            taggedvalue.value = value;
         }
-        tagged_t(counter_t tag, value_t value)
-        {
-            taggedvalue.tag   = tag;
-            taggedvalue.value = value;
-        }
-        tagged_t(const tagged_t& other)
-        {
-            taggedvalue.tag   = other.taggedvalue.tag;
-            taggedvalue.value = other.taggedvalue.value;
-        }
-        tagged_t& operator=(const tagged_t& other)
-        {
-            taggedvalue.tag   = other.taggedvalue.tag;
-            taggedvalue.value = other.taggedvalue.value;
-            return *this;
-        }
+        tagged_t(const tagged_t& other) = default;
+        tagged_t& operator=(const tagged_t& other) = default;
         inline value_t value()
         {
-            return taggedvalue.value;
+            return tagged_value.value;
         }
         inline bool operator==(tagged_t& other)
         {
-            return (taggedvalue.tag == other.taggedvalue.tag)
-                   && (taggedvalue.value == other.taggedvalue.value);
+            return (tagged_value.tag == other.tagged_value.tag)
+                   && (tagged_value.value == other.tagged_value.value);
         }
     };
 #pragma struct_align 8(tagged_t)
@@ -157,37 +141,21 @@ struct InterlockedType< 8 >
         {
             counter_t tag;
             value_t   value;
-        } taggedvalue;
+        } tagged_value;
 
-        tagged_t(value_t value = 0)
+        tagged_t(value_t value = 0) : tagged_value{0, value}
         {
-            taggedvalue.tag   = 0;
-            taggedvalue.value = value;
         }
-        tagged_t(counter_t tag, value_t value)
-        {
-            taggedvalue.tag   = tag;
-            taggedvalue.value = value;
-        }
-        tagged_t(const tagged_t& other)
-        {
-            taggedvalue.tag   = other.taggedvalue.tag;
-            taggedvalue.value = other.taggedvalue.value;
-        }
-        tagged_t& operator=(const tagged_t& other)
-        {
-            taggedvalue.tag   = other.taggedvalue.tag;
-            taggedvalue.value = other.taggedvalue.value;
-            return *this;
-        }
+        tagged_t(const tagged_t& other) = default;
+        tagged_t& operator=(const tagged_t& other) = default;
         inline value_t value()
         {
-            return taggedvalue.value;
+            return tagged_value.value;
         }
         inline bool operator==(tagged_t& other)
         {
-            return (taggedvalue.tag == other.taggedvalue.tag)
-                   && (taggedvalue.value == other.taggedvalue.value);
+            return (tagged_value.tag == other.tagged_value.tag)
+                   && (tagged_value.value == other.tagged_value.value);
         }
     };
 #    pragma struct_align 16(tagged_t)
@@ -198,8 +166,8 @@ struct InterlockedType< 8 >
     static inline bool set_conditional(tagged_t* p, tagged_t::value_t v,
                                        const tagged_t::tag_t& condition)
     {
-        return set_conditional_128((i64*)p, (i64)v, condition.taggedvalue.tag,
-                                   (i64)condition.taggedvalue.value);
+        return set_conditional_128((i64*)p, (i64)v, condition.tagged_value.tag,
+                                   (i64)condition.tagged_value.value);
     }
 };
 #endif

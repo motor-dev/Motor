@@ -31,8 +31,8 @@ private:
     Plugin::Plugin< IKernelScheduler > m_openCLScheduler;
 
 public:
-    GLRenderer(const Plugin::Context& context);
-    ~GLRenderer();
+    explicit GLRenderer(const Plugin::Context& context);
+    ~GLRenderer() override;
 
     u32 getMaxSimultaneousRenderTargets() const override
     {

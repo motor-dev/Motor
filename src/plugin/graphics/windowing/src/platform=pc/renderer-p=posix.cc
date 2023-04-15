@@ -126,7 +126,7 @@ int Renderer::PlatformRenderer::ioError(::Display* /*display*/)
     return result;
 }
 
-Renderer::Renderer(minitl::Allocator& arena, weak< Resource::ResourceManager > manager)
+Renderer::Renderer(minitl::Allocator& arena, const weak< Resource::ResourceManager >& manager)
     : IRenderer(arena, manager, Scheduler::MainThread)
     , m_platformRenderer(scoped< PlatformRenderer >::create(arena))
 {
@@ -137,9 +137,9 @@ Renderer::~Renderer()
     flush();
 }
 
-bool Renderer::success() const
+bool Renderer::hasPlatformRenderer() const
 {
-    return m_platformRenderer->m_platformData.display != 0;
+    return m_platformRenderer->m_platformData.display != nullptr;
 }
 
 knl::uint2 Renderer::getScreenSize() const

@@ -6,14 +6,14 @@
 #define motor_break()    /*__asm("int $3")*/
 #define motor_pause()    _mm_pause()
 
-#pragma warning disable 111  // statement is unreachable
-#pragma warning disable 161  // unknown pragma
-#pragma warning disable 193  // zero used for undefined preprocessing identifier
-#pragma warning disable 279  // controlling expression is constant
-#pragma warning disable 383  // reference to copy
-#pragma warning disable 424  // extra ;
-#pragma warning disable 177  // variable was declared but never used
-#pragma warning disable 593  // variable was set but never used
+#pragma warning disable 111   // statement is unreachable
+#pragma warning disable 161   // unknown pragma
+#pragma warning disable 193   // zero used for undefined preprocessing identifier
+#pragma warning disable 279   // controlling expression is constant
+#pragma warning disable 383   // reference to copy
+#pragma warning disable 424   // extra ;
+#pragma warning disable 177   // variable was declared but never used
+#pragma warning disable 593   // variable was set but never used
 #pragma warning disable 981
 #pragma warning disable 1418  // external function definition with no prior declaration
 #pragma warning disable 2259
@@ -68,8 +68,8 @@ typedef unsigned __int64 u64;
 typedef u8               byte;
 
 #    define override
-#    define MOTOR_NOINLINE     __attribute__((noinline))
-#    define MOTOR_ALWAYSINLINE __attribute__((always_inline))
+#    define MOTOR_NEVER_INLINE  __attribute__((noinline))
+#    define MOTOR_ALWAYS_INLINE __attribute__((always_inline)) inline
 
 #    ifndef MOTOR_STATIC
 #        define MOTOR_EXPORT __attribute__((visibility("default")))
@@ -95,10 +95,10 @@ typedef unsigned __int32 u32;
 typedef unsigned __int64 u64;
 typedef u8               byte;
 
-#    define MOTOR_EXPORT       __declspec(dllexport)
-#    define MOTOR_IMPORT       __declspec(dllimport)
-#    define MOTOR_NOINLINE     __declspec(noinline)
-#    define MOTOR_ALWAYSINLINE inline
+#    define MOTOR_EXPORT        __declspec(dllexport)
+#    define MOTOR_IMPORT        __declspec(dllimport)
+#    define MOTOR_NEVER_INLINE  __declspec(noinline)
+#    define MOTOR_ALWAYS_INLINE __forceinline
 #    ifdef _CPPUNWIND
 #        define MOTOR_SUPPORTS_EXCEPTIONS 1
 #    else
@@ -107,16 +107,16 @@ typedef u8               byte;
 
 #    pragma warning(disable : 4275)
 #    ifdef NDEBUG
-#        pragma warning(error : 4541)  // 'dynamic_cast' used on polymorphic type with '/GR-'
-#        pragma warning(                                                                           \
-            disable : 4530)  // C++ exception handler used, but unwind semantics are not enabled
+#        pragma warning(error : 4541)    // 'dynamic_cast' used on polymorphic type with '/GR-'
+#        pragma warning(disable : 4530)  // C++ exception handler used, but unwind semantics are not
+                                         // enabled
 #        pragma warning(disable : 4100)  // unreferenced formal parameter
 #    endif
 #    pragma warning(disable : 4251)
 #    pragma warning(disable : 4355)  // this used in base member initialization list
-#    pragma warning(                                                                               \
-        disable : 4290)  // C++ exception specification ignored except to indicate a function is not
-                         // __declspec(nothrow)
+#    pragma warning(disable : 4290)  // C++ exception specification ignored except to indicate a
+                                     // function is not
+                                     // __declspec(nothrow)
 #    pragma warning(disable : 4127)
 
 #    ifndef _CRT_SECURE_NO_WARNINGS

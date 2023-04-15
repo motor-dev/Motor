@@ -42,9 +42,9 @@ private:
 
 public:
     intrusive_list();
-    intrusive_list(intrusive_list&& other);
+    intrusive_list(intrusive_list&& other) noexcept;
     intrusive_list(const intrusive_list& other) = delete;
-    intrusive_list& operator=(intrusive_list&& other);
+    intrusive_list& operator=(intrusive_list&& other) noexcept;
     intrusive_list& operator=(const intrusive_list& other) = delete;
     ~intrusive_list();
 
@@ -64,7 +64,7 @@ public:
     void     push_back(const_reference r);
     iterator insert(iterator after, const_reference r);
     iterator erase(iterator it);
-    iterator erase(iterator begin, iterator end);
+    iterator erase(iterator first, iterator last);
 
     reference       front();
     reference       back();

@@ -1,5 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+// NOLINTBEGIN(
 #pragma once
 
 #include <motor/kernel/stdafx.h>
@@ -18,6 +19,10 @@
 #    else
 #        error Architecture not implemented on MSVC
 #    endif
+#elif defined(MOTOR_COMPILER_SUNCC)
+#    include <motor/kernel/suncc/interlocked.inl>
+#elif defined(MOTOR_COMPUTE)
+#    include <motor/kernel/compute/interlocked.inl>
 #elif defined(MOTOR_COMPILER_INTEL) || defined(MOTOR_COMPILER_GCC) || defined(MOTOR_COMPILER_CLANG)
 #    if defined(BE_THREAD_SANITIZER)
 #        include <motor/kernel/gcc/tsan/interlocked.inl>
@@ -34,10 +39,6 @@
 #    else
 #        error Architecture not implemented on GCC
 #    endif
-#elif defined(MOTOR_COMPILER_SUNCC)
-#    include <motor/kernel/suncc/interlocked.inl>
-#elif defined(MOTOR_COMPUTE)
-#    include <motor/kernel/compute/interlocked.inl>
 #else
 #    error Compiler not implemented
 #endif
@@ -62,7 +63,7 @@ public:
         return result;
     }
 
-    __host __device operator T() const
+    __host __device operator T() const  // NOLINT(google-explicit-constructor)
     {
         return static_cast< T >(impl::fetch(&m_value));
     }
@@ -83,7 +84,7 @@ public:
     {
         return static_cast< T >(impl::fetch_and_add(&m_value, 1) + 1);
     }
-    __host __device T operator++(int)
+    __host __device const T operator++(int)  // NOLINT(readability-const-return-type)
     {
         return static_cast< T >(impl::fetch_and_add(&m_value, 1));
     }
@@ -95,7 +96,7 @@ public:
     {
         return static_cast< T >(impl::fetch_and_sub(&m_value, 1) - 1);
     }
-    __host __device T operator--(int)
+    __host __device const T operator--(int)  // NOLINT(readability-const-return-type)
     {
         return static_cast< T >(impl::fetch_and_sub(&m_value, 1));
     }
@@ -121,14 +122,14 @@ private:
     value_t m_value;
 
 public:
-    __host __device iptr(T* t) : m_value((typename impl::value_t)(t))
+    __host __device explicit iptr(T* t) : m_value((typename impl::value_t)(t))
     {
     }
-    __host __device operator const T*() const
+    __host __device operator const T*() const  // NOLINT(google-explicit-constructor)
     {
         return static_cast< T >(impl::load(&m_value));
     }
-    __host __device operator T*()
+    __host __device operator T*()  // NOLINT(google-explicit-constructor)
     {
         return reinterpret_cast< T* >(impl::fetch_and_add(&m_value, 0));
     }
@@ -141,9 +142,10 @@ public:
         return reinterpret_cast< T* >(impl::fetch_and_add(&m_value, 0));
     }
 
-    __host __device T* operator=(T* value)
+    __host __device iptr<T>& operator=(T* value)
     {
-        return reinterpret_cast< T* >(impl::set_and_fetch((value_t*)&m_value, (value_t)value));
+        impl::set_and_fetch((value_t*)&m_value, (value_t)value);
+        return *this;
     }
     __host __device T* exchange(T* value)
     {

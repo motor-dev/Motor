@@ -7,10 +7,10 @@
 #include <sys/types.h>
 #include <watchpoint.hh>
 #include DIRENT_H
-#include <errno.h>
-#include <limits.h>
+#include <cerrno>
+#include <climits>
+#include <cstdio>
 #include <posix/file.hh>
-#include <stdio.h>
 
 namespace Motor {
 
@@ -36,6 +36,7 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
 DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy,
                        Folder::CreatePolicy createPolicy)
     : m_path(diskpath)
+    , m_handle()
     , m_index(0)
     , m_watch()
 {
@@ -68,7 +69,7 @@ DiskFolder::~DiskFolder()
     if(m_handle.ptrHandle)
     {
         closedir((DIR*)m_handle.ptrHandle);
-        m_handle.ptrHandle = 0;
+        m_handle.ptrHandle = nullptr;
     }
 }
 
@@ -89,7 +90,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
             ipath   p    = m_path;
             p.push_back(name);
             ipath::Filename filename = p.str();
-            struct stat     s;
+            struct stat     s        = {};
             stat(filename.name, &s);
             if(errno == 0)
             {
@@ -104,10 +105,8 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
             }
             else
             {
-                File::Media media(File::Media::Disk, s.st_dev, s.st_ino);
-                ref< File > newFile
-                    = ref< PosixFile >::create(Arena::filesystem(), ipath(m_path) + ifilename(name),
-                                               media, s.st_size, s.st_mtime);
+                ref< File > newFile = ref< PosixFile >::create(
+                    Arena::filesystem(), ipath(m_path) + ifilename(name), s.st_size, s.st_mtime);
                 m_files.push_back(minitl::make_tuple(name, newFile));
             }
         }
@@ -116,8 +115,8 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 
 weak< File > DiskFolder::createFile(const istring& name)
 {
-    struct stat s;
-    errno = 0;
+    struct stat s = {};
+    errno         = 0;
     char  fullPathBuffer[PATH_MAX];
     char* fullPath = realpath(m_path.str().name, fullPathBuffer);
     if(!fullPath)
@@ -129,7 +128,7 @@ weak< File > DiskFolder::createFile(const istring& name)
     strcat(fullPath, "/");
     strcat(fullPath, name.c_str());
     FILE* f = fopen(fullPath, "w");
-    if(f == 0)
+    if(f == nullptr)
     {
         motor_error_format(Log::fs(), "could not create file {0}: {1}({2})", fullPath,
                            strerror(errno), errno);
@@ -144,16 +143,14 @@ weak< File > DiskFolder::createFile(const istring& name)
     }
 
     ScopedCriticalSection lock(m_lock);
-    ref< File >           result = ref< PosixFile >::create(
-        Arena::filesystem(), m_path + ifilename(name),
-        File::Media(File::Media::Disk, s.st_dev, s.st_ino), s.st_size, s.st_mtime);
+    ref< File > result = ref< PosixFile >::create(Arena::filesystem(), m_path + ifilename(name),
+                                                  s.st_size, s.st_mtime);
 
-    for(minitl::vector< minitl::tuple< istring, ref< File > > >::iterator it = m_files.begin();
-        it != m_files.end(); ++it)
+    for(auto& m_file: m_files)
     {
-        if(it->first == name)
+        if(m_file.first == name)
         {
-            it->second = result;
+            m_file.second = result;
             return result;
         }
     }
@@ -175,8 +172,8 @@ void DiskFolder::onChanged()
             ipath   p    = m_path;
             p.push_back(name);
             ipath::Filename filename = p.str();
-            struct stat     s;
-            int             result = stat(filename.name, &s);
+            struct stat     s        = {};
+            int             result   = stat(filename.name, &s);
             if(result != 0)
             {
                 motor_error_format(Log::fs(), "could not stat file {0}: {1}({2})", filename.name,
@@ -187,11 +184,9 @@ void DiskFolder::onChanged()
                 /* TODO: deleted folder */
                 bool exists = false;
 
-                for(minitl::vector< minitl::tuple< istring, ref< Folder > > >::iterator it
-                    = m_folders.begin();
-                    it != m_folders.end(); ++it)
+                for(auto& m_folder: m_folders)
                 {
-                    if(it->first == name)
+                    if(m_folder.first == name)
                     {
                         exists = true;
                         break;
@@ -210,23 +205,21 @@ void DiskFolder::onChanged()
                 /* TODO: deleted file */
                 bool exists = false;
 
-                for(minitl::vector< minitl::tuple< istring, ref< File > > >::iterator it
-                    = m_files.begin();
-                    it != m_files.end(); ++it)
+                for(auto& m_file: m_files)
                 {
-                    if(it->first == name)
+                    if(m_file.first == name)
                     {
-                        motor_checked_cast< PosixFile >(it->second)->refresh(s.st_size, s.st_mtime);
+                        motor_checked_cast< PosixFile >(m_file.second)
+                            ->refresh(s.st_size, s.st_mtime);
                         exists = true;
                     }
                 }
                 if(!exists)
                 {
                     motor_info_format(Log::fs(), "new file: {0}", p);
-                    File::Media media(File::Media::Disk, s.st_dev, s.st_ino);
                     ref< File > newFile = ref< PosixFile >::create(Arena::filesystem(),
                                                                    ipath(m_path) + ifilename(name),
-                                                                   media, s.st_size, s.st_mtime);
+                                                                   s.st_size, s.st_mtime);
                     m_files.push_back(minitl::make_tuple(name, newFile));
                 }
             }

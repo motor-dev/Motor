@@ -13,8 +13,6 @@ class ref
 {
     template < typename U, typename V >
     friend ref< U > motor_checked_cast(ref< V > v);
-    template < typename U, typename V >
-    friend ref< U > motor_const_cast(ref< V > v);
     friend class refcountable;
 
 private:
@@ -24,16 +22,16 @@ private:
     inline void swap(ref& other);
 
 private:
-    inline ref(T* value);
+    inline explicit ref(T* value);
     inline ref(T* value, Allocator& deleter);
 
 public:
     inline ref();
     inline ref(const ref& other);
     template < typename U >
-    inline ref(const ref< U > other);
+    inline ref(const ref< U >& other);  // NOLINT(google-explicit-constructor)
     template < typename U >
-    inline ref(scoped< U >&& other);
+    inline explicit ref(scoped< U >&& other);
 
     inline ref& operator=(const ref& other);
     template < typename U >
@@ -41,8 +39,8 @@ public:
 
     inline ~ref();
 
-    inline T*   operator->() const;
-    inline      operator const void*() const;
+    inline T* operator->() const;
+    inline operator const void*() const;  // NOLINT(google-explicit-constructor)
     inline bool operator!() const;
     inline T&   operator*();
 

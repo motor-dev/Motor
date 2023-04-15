@@ -28,13 +28,13 @@ private:
     void unload() override;
 
 public:
-    virtual void begin(ClearMode clear) const override;
-    virtual void end(PresentMode present) const override;
+    void begin(ClearMode clear) const override;
+    void end(PresentMode present) const override;
 
 public:
     GLWindow(weak< const RenderWindowDescription > windowDescription,
              weak< const GLRenderer >              renderer);
-    ~GLWindow();
+    ~GLWindow() override = default;
 };
 
 }}  // namespace Motor::OpenGL

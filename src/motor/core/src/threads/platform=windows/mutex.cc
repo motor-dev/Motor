@@ -4,6 +4,12 @@
 #include <motor/core/stdafx.h>
 #include <motor/core/threads/mutex.hh>
 
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#    define NOMINMAX
+#endif
+#include <windows.h>
+
 namespace Motor {
 
 Mutex::Mutex() : m_data(CreateMutex(0, FALSE, 0))

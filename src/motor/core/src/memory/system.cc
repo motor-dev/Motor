@@ -7,7 +7,7 @@
 namespace Motor {
 
 SystemAllocator::SystemAllocator(BlockSize size, u32 initialCount)
-    : m_head(0)
+    : m_head(nullptr)
     , m_capacity(i_u32::create(0))
     , m_used(i_u32::create(0))
     , m_blockSize(size)
@@ -80,7 +80,7 @@ u32 SystemAllocator::blockSize() const
 
 void SystemAllocator::grow(u32 extraCapacity)
 {
-    Block*    head     = 0;
+    Block*    head     = nullptr;
     const u32 pageSize = platformPageSize();
     if(blockSize() > pageSize)
     {

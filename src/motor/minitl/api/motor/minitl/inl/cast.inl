@@ -41,18 +41,6 @@ inline weak< U > motor_checked_cast(weak< T > value)
 }
 
 template < typename U, typename T >
-inline weak< U > motor_const_cast(weak< T > value)
-{
-    return weak< U >(const_cast< U* >(value.operator->()));
-}
-
-template < typename U, typename T >
-inline ref< U > motor_const_cast(ref< T > value)
-{
-    return ref< U >(const_cast< U* >(value.operator->()));
-}
-
-template < typename U, typename T >
 inline U motor_function_cast(T value)
 {
     typedef void (*GenericFunction)();

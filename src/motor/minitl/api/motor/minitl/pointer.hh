@@ -50,7 +50,7 @@ private:
 #endif
 public:
     pointer()
-        : m_allocator(0)
+        : m_allocator(nullptr)
 #if MOTOR_ENABLE_WEAKCHECK
         , m_weakCount(i_u32::create(0))
 #endif
@@ -65,23 +65,26 @@ public:
     }
 
 public:
-    void operator delete(void* memory)
+    static void operator delete(void* memory)
     {
         return ::operator delete(memory);
     }
-    void operator delete(void* memory, void* where)
+    static void operator delete(void* memory, void* where)
     {
         ::operator delete(memory, where);
     }
 
-private:  // entity behavior
-    pointer(const pointer& other)            = delete;
-    pointer& operator=(const pointer& other) = delete;
-    void     operator&() const               = delete;
-    void*    operator new(size_t size)       = delete;
+public:  // entity behavior
+    pointer(const pointer& other)                = delete;
+    pointer&     operator=(const pointer& other) = delete;
+    void         operator&() const               = delete;  // NOLINT(google-runtime-operator)
+    static void* operator new(size_t size)
+    {
+        return ::operator new(size);
+    }
 
-private:  // friend scopedptr/refptr
-    void* operator new(size_t size, void* where)
+private:  // friend scoped/ref
+    static void* operator new(size_t size, void* where)
     {
         return ::operator new(size, where);
     }
@@ -94,11 +97,11 @@ protected:
         d->free(this);
     }
 #if MOTOR_ENABLE_WEAKCHECK
-    inline void addweak() const
+    inline void addWeak() const
     {
         ++m_weakCount;
     }
-    inline void decweak() const
+    inline void decWeak() const
     {
         motor_assert(m_weakCount, "object has no weak reference; cannot dereference it again");
         --m_weakCount;

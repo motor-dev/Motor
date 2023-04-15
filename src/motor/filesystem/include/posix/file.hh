@@ -12,14 +12,14 @@ namespace Motor {
 class PosixFile : public File
 {
 public:
-    PosixFile(ifilename file, File::Media media, u64 size, time_t modifiedTime);
-    ~PosixFile();
+    PosixFile(const ifilename& file, u64 size, time_t modifiedTime);
+    ~PosixFile() override;
 
     void refresh(u64 size, time_t modifiedTime);
 
 private:
-    virtual void doFillBuffer(weak< File::Ticket > ticket) const override;
-    virtual void doWriteBuffer(weak< Ticket > ticket) const override;
+    void doFillBuffer(weak< File::Ticket > ticket) const override;
+    void doWriteBuffer(weak< Ticket > ticket) const override;
 };
 
 }  // namespace Motor

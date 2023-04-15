@@ -29,8 +29,8 @@
 #    define motor_pause()
 #endif
 
-#include <stdint.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdlib>
 typedef int8_t   i8;
 typedef int16_t  i16;
 typedef int32_t  i32;
@@ -41,8 +41,8 @@ typedef uint32_t u32;
 typedef uint64_t u64;
 typedef u8       byte;
 
-#define MOTOR_NOINLINE     __attribute__((noinline))
-#define MOTOR_ALWAYSINLINE __attribute__((always_inline))
+#define MOTOR_NEVER_INLINE  __attribute__((noinline))
+#define MOTOR_ALWAYS_INLINE __attribute__((always_inline)) inline
 #ifdef __EXCEPTIONS
 #    define MOTOR_SUPPORTS_EXCEPTIONS 1
 #else

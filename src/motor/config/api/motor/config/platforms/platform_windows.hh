@@ -2,12 +2,6 @@
    see LICENSE for detail */
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#    define NOMINMAX
-#endif
-#include <windows.h>
-
 #ifdef _AMD64
 #    define MOTOR_PLATFORM_NAME  Win64
 #    define MOTOR_PLATFORM_WIN64 1
@@ -17,11 +11,11 @@
 #define MOTOR_PLATFORM_WIN32 1
 #define MOTOR_PLATFORM_PC    1
 
-#include <stdlib.h>
+#include <cstdlib>
 #ifdef _MSC_VER
 #    include <malloc.h>
-#    define malloca  _alloca
-#    define freea(p) (void)p
+#    define malloca  _malloca
+#    define freea(p) _freea(p)
 #else
 #    include <malloc.h>
 #    define malloca  alloca

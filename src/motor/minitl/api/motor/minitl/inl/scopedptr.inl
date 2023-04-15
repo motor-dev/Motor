@@ -31,7 +31,7 @@ scoped< T >::~scoped()
 }
 
 template < typename T >
-scoped< T >::scoped(scoped&& other) : m_ptr(other.m_ptr)
+scoped< T >::scoped(scoped&& other) noexcept : m_ptr(other.m_ptr)
 {
     other.m_ptr = 0;
 }

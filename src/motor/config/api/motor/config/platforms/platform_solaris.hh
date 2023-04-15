@@ -9,9 +9,9 @@
 
 #include <alloca.h>
 #include <malloc.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #define malloca  alloca
 #define freea(p) (void)p
 #define DIRENT_H <dirent.h>

@@ -5,6 +5,12 @@
 #include <diskwatch.hh>
 #include <watchpoint.hh>
 
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#    define NOMINMAX
+#endif
+#include <windows.h>
+
 namespace Motor { namespace FileSystem {
 
 #define MS_VC_EXCEPTION 0x406D1388

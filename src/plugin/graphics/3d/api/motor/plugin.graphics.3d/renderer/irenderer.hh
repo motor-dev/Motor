@@ -42,7 +42,7 @@ protected:
     scoped< KernelScheduler::Kernel >                       m_kernelRender;
 
 protected:
-    IRenderer(minitl::Allocator & allocator, weak< Resource::ResourceManager > manager,
+    IRenderer(minitl::Allocator & allocator, const weak< Resource::ResourceManager >& manager,
               Scheduler::Affinity affinity = Scheduler::WorkerThread);
     virtual ~IRenderer();
 
@@ -57,9 +57,12 @@ protected:
     virtual ref< IGPUResource > create(weak< const ShaderProgramDescription > shader) const = 0;
     // virtual ref<IGPUResource>   create(weak<const Texture> texture) = 0;
 public:
-    weak< IGPUResource > getRenderSurface(weak< const Resource::IDescription > description) const;
-    weak< IGPUResource > getRenderWindow(weak< const Resource::IDescription > description) const;
-    weak< IGPUResource > getShaderProgram(weak< const Resource::IDescription > description) const;
+    weak< IGPUResource > getRenderSurface(const weak< const Resource::IDescription >& description)
+        const;
+    weak< IGPUResource > getRenderWindow(const weak< const Resource::IDescription >& description)
+        const;
+    weak< IGPUResource > getShaderProgram(const weak< const Resource::IDescription >& description)
+        const;
 
     minitl::Allocator&  arena() const;
     weak< Task::ITask > syncTask() const;

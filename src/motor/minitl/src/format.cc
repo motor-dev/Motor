@@ -14,7 +14,7 @@ bool invalid_format(const char* reason)
     return false;
 }
 
-#ifndef MOTOR_LITTLEENDIAN
+#ifndef MOTOR_LITTLE_ENDIAN
 #    error Code currently only working on little endian!
 #endif
 
@@ -559,9 +559,9 @@ motor_api(MINITL) u32 format_arg(char* destination, bool_wrapper value,
 {
     motor_forceuse(options);
     if(value)
-        memcpy(destination, "true", 4);
+        memcpy(destination, "true", 4);   // NOLINT(bugprone-not-null-terminated-result)
     else
-        memcpy(destination, "false", 5);
+        memcpy(destination, "false", 5);  // NOLINT(bugprone-not-null-terminated-result)
     return reservedLength;
 }
 

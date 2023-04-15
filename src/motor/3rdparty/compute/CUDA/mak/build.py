@@ -4,13 +4,13 @@ from waflib.Tools import c_preproc, ccroot
 import pickle
 
 template_kernel = """
-_MOTOR_PLUGIN_EXPORT void _%(kernel)s(const u32 index, const u32 total,
+MOTOR_PLUGIN_EXPORT void _%(kernel)s(const u32 index, const u32 total,
                               const minitl::array< minitl::weak<const Motor::KernelScheduler::IMemoryBuffer> >& /*argv*/)
 {
     motor_forceuse(index);
     motor_forceuse(total);
 }
-_MOTOR_REGISTER_METHOD_NAMED(MOTOR_KERNEL_ID, _%(kernel)s, _%(kernel)s);
+MOTOR_REGISTER_METHOD_NAMED(MOTOR_KERNEL_ID, _%(kernel)s, _%(kernel)s);
 """
 
 template_cpp = """
@@ -24,7 +24,7 @@ template_cpp = """
 
 using namespace knl;
 
-_MOTOR_REGISTER_PLUGIN(MOTOR_KERNEL_ID, MOTOR_KERNEL_NAME);
+MOTOR_REGISTER_PLUGIN(MOTOR_KERNEL_ID, MOTOR_KERNEL_NAME);
 
 %(kernels)s
 
@@ -82,7 +82,7 @@ class cudac(Task.Task):
                 '\n'
                 'using namespace knl;\n'
                 '\n'
-                '_MOTOR_REGISTER_PLUGIN(MOTOR_KERNEL_ID, MOTOR_KERNEL_NAME);\n'
+                'MOTOR_REGISTER_PLUGIN(MOTOR_KERNEL_ID, MOTOR_KERNEL_NAME);\n'
             )
 
             def write_kernels(ns, container):
@@ -104,14 +104,14 @@ class cudac(Task.Task):
                             ', '.join(['arg_type_%d(0, 0, 0)' % i for i, _ in enumerate(arguments[2:])])
                     }
                     out.write(
-                        '_MOTOR_PLUGIN_EXPORT void _%(kernelname)s(const u32 index, const u32 total,\n'
+                        'MOTOR_PLUGIN_EXPORT void _%(kernelname)s(const u32 index, const u32 total,\n'
                         '        const minitl::array<\n'
                         '        minitl::weak< const Motor::KernelScheduler::IMemoryBuffer > >& /*argv*/)\n'
                         '{\n'
                         '    motor_forceuse(index);\n'
                         '    motor_forceuse(total);\n'
                         '}\n'
-                        '_MOTOR_REGISTER_METHOD_NAMED(MOTOR_KERNEL_ID, _%(kernelname)s, _%(kernelname)s);\n' % args
+                        'MOTOR_REGISTER_METHOD_NAMED(MOTOR_KERNEL_ID, _%(kernelname)s, _%(kernelname)s);\n' % args
                     )
 
             write_kernels([], namespace)

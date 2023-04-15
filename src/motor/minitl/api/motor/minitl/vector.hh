@@ -56,7 +56,7 @@ private:
 public:
     explicit vector(Allocator& allocator, size_type initialCapacity = 0);
     vector(const vector< T >& other);
-    vector(vector< T >&& other);
+    vector(vector< T >&& other) noexcept;
     vector& operator=(const vector< T >& other);
     template < typename ITERATOR >
     vector(Allocator& allocator, ITERATOR first, ITERATOR last);
@@ -89,19 +89,19 @@ public:
     iterator insert(const_iterator location, ITERATOR first, ITERATOR last);
 
     template < class... Args >
-    iterator emplace(const_iterator pos, Args&&... args);
+    iterator emplace(const_iterator location, Args&&... args);
     template < class... Args >
     iterator emplace_back(Args&&... args);
 
     iterator erase(iterator it);
-    iterator erase(iterator begin, iterator end);
+    iterator erase(iterator first, iterator last);
 
     reference       front();
     reference       back();
     const_reference front() const;
     const_reference back() const;
 
-    void reserve(size_type capacity);
+    void reserve(size_type size);
     void resize(size_type size);
     void clear();
 };

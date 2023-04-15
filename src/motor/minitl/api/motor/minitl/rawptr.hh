@@ -9,24 +9,18 @@ namespace minitl {
 template < typename T >
 class raw
 {
-private:
-    union Tstruct
-    {
-        T t;
-    };
-
 public:
     T* m_ptr;
 
 public:
-    inline T*       operator->() const;
-    inline          operator const void*() const;
+    inline T* operator->() const;
+    inline operator const void*() const;  // NOLINT(google-explicit-constructor)
     inline bool     operator!() const;
     inline T&       operator*();
     inline const T& operator*() const;
 
     template < typename U >
-    operator raw< U >() const
+    operator raw< U >() const  // NOLINT(google-explicit-constructor)
     {
         raw< U > result = {m_ptr};
         return result;
