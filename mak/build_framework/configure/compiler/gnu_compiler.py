@@ -20,27 +20,27 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
             ('.avx', ['-mavx']),
             ('.avx2', ['-mavx2']),
         ),
-        'ppc': (('.altivec', ['-maltivec']), ),
-        'ppc64': (('.altivec', ['-maltivec']), ),
-        'armv6': (('.neon', ['-mfpu=neon']), ),
-        'armv7a': (('.neon', ['-mfpu=neon']), ),
-        'armv7s': (('.neon', ['-mfpu=neon']), ),
-        'armv7k': (('.neon', ['-mfpu=neon']), ),
-        'armv7l': (('.neon', ['-mfpu=neon']), ),
-        'arm64': (('.neon', []), ),
-        'arm64e': (('.neon', []), ),
-        'aarch32': (('.neon', []), ),
+        'ppc': (('.altivec', ['-maltivec']),),
+        'ppc64': (('.altivec', ['-maltivec']),),
+        'armv6': (('.neon', ['-mfpu=neon']),),
+        'armv7a': (('.neon', ['-mfpu=neon']),),
+        'armv7s': (('.neon', ['-mfpu=neon']),),
+        'armv7k': (('.neon', ['-mfpu=neon']),),
+        'armv7l': (('.neon', ['-mfpu=neon']),),
+        'arm64': (('.neon', []),),
+        'arm64e': (('.neon', []),),
+        'aarch32': (('.neon', []),),
     }
     MULTILIBS = {
-        'x86': ((['-m64'], 'amd64'), ),
-        'amd64': ((['-m32'], 'x86'), ),
-        'ppc': ((['-m64'], 'ppc64'), ),
-        'ppc64': ((['-m32'], 'ppc'), ),
-        'ppc64le': ((['-m32'], 'ppc'), ),
+        'x86': ((['-m64'], 'amd64'),),
+        'amd64': ((['-m32'], 'x86'),),
+        'ppc': ((['-m64'], 'ppc64'),),
+        'ppc64': ((['-m32'], 'ppc'),),
+        'ppc64le': ((['-m32'], 'ppc'),),
         'arm': [(['-march=%s' % a], a) for a in ALL_ARM_ARCHS],
-                                                                            #'armv4':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-                                                                            #'armv5':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-                                                                            #'armv7':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        # 'armv4':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        # 'armv5':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        # 'armv7':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
         'armv7a': [(['-march=%s' % a], a) for a in ALL_ARM_ARCHS],
         'armv7k': [(['-march=%s' % a], a) for a in ALL_ARM_ARCHS],
         'armv7l': [(['-march=%s' % a], a) for a in ALL_ARM_ARCHS],
@@ -53,23 +53,23 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         ('x86_64', '-m32', ['i386', 'i486', 'i586', 'i686']),
     )
     MACRO_ARCHS = (
-        (('__x86_64__', ), 'amd64'),
-        (('__i386__', ), 'x86'),
-        (('__i486__', ), 'x86'),
-        (('__i586__', ), 'x86'),
-        (('__i686__', ), 'x86'),
-        (('__powerpc__', ), 'ppc'),
-        (('__POWERPC__', ), 'ppc'),
+        (('__x86_64__',), 'amd64'),
+        (('__i386__',), 'x86'),
+        (('__i486__',), 'x86'),
+        (('__i586__',), 'x86'),
+        (('__i686__',), 'x86'),
+        (('__powerpc__',), 'ppc'),
+        (('__POWERPC__',), 'ppc'),
         (('__powerpc__', '__powerpc64__', '__BIG_ENDIAN__'), 'ppc64'),
         (('__POWERPC__', '__ppc64__', '__BIG_ENDIAN__'), 'ppc64'),
         (('__powerpc__', '__powerpc64__', '__LITTLE_ENDIAN__'), 'ppc64le'),
         (('__POWERPC__', '__ppc64__', '__LITTLE_ENDIAN__'), 'ppc64le'),
-        (('__arm64e__', ), 'arm64e'),
+        (('__arm64e__',), 'arm64e'),
         (('__aarch64__', '__ILP32__'), 'arm64_32'),
-        (('__aarch64__', ), 'aarch64'),
-        (('__aarch64', ), 'aarch64'),
-        (('__aarch32__', ), 'aarch32'),
-        (('__arm__', ), 'armv4'),
+        (('__aarch64__',), 'aarch64'),
+        (('__aarch64',), 'aarch64'),
+        (('__aarch32__',), 'aarch32'),
+        (('__arm__',), 'armv4'),
         (('__arm__', '__ARM_ARCH_5__'), 'armv5'),
         (('__arm__', '__ARM_ARCH_6__'), 'armv6'),
         (('__arm__', '__ARM_ARCH_6K__'), 'armv6'),
@@ -81,6 +81,8 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         (('__arm__', '__ARM_ARCH_7A__'), 'armv7a'),
     )
     ARCHIVER = 'ar'
+    DEFINES = ['_WIN32', '_WIN64', '_M_AMD64', '_M_ARM', '_M_ARM_ARMV7VE', '_M_ARM_FP', '_M_ARM64', '_M_ARM64EC',
+               '_M_IX86', '_M_IX86_FP', '_M_X64']
 
     def __init__(self, compiler_c, compiler_cxx, extra_args={}, extra_env={}):
         extra_env = dict(extra_env)
@@ -93,7 +95,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
             self, compiler_c, compiler_cxx, version, platform, arch, extra_args, extra_env
         )
         target = self.target.split('-')
-        #for t in self.targets:
+        # for t in self.targets:
         #    target_dir = os.path.normpath(os.path.join(self.directories[0], '..', t, 'bin'))
         #    if os.path.isdir(target_dir):
         #        self.directories.append(target_dir)
@@ -172,7 +174,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
                 if line.find('%s version ' % name.lower()) != -1:
                     words = line.split()
                     if 'Apple' in words:
-                        self.NAMES = ('Apple' + self.NAMES[0], ) + self.NAMES
+                        self.NAMES = ('Apple' + self.NAMES[0],) + self.NAMES
                     while words[0] != name.lower() and words[1] != 'version':
                         words.pop(0)
                     version = words[2].split('-')[0]
@@ -181,7 +183,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
                 while words[0] != 'Apple' and words[1] != 'LLVM' and words[2] != 'version':
                     words.pop(0)
                 version = words[3].split('-')[0]
-                self.NAMES = ('Apple' + self.NAMES[0], ) + self.NAMES
+                self.NAMES = ('Apple' + self.NAMES[0],) + self.NAMES
             if line.startswith('#define'):
                 macro = line.split()[1].strip()
                 macros.add(macro)
@@ -189,7 +191,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
             if sysroot != -1:
                 sysroot = shlex.split(line[sysroot:].replace('\\', '\\\\'))[1]
                 self.sysroot = os.path.normpath(sysroot)
-                self.NAMES = ('cross_' + self.NAMES[0], ) + self.NAMES
+                self.NAMES = ('cross_' + self.NAMES[0],) + self.NAMES
 
         best = 0
         for values, a in self.MACRO_ARCHS:
@@ -224,7 +226,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
                     )
                     result.append(c)
                 except Exception as e:
-                    #print(e)
+                    # print(e)
                     pass
             return result
 
@@ -235,7 +237,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         try:
             result, out, err = self.run_cxx([node.abspath(), '-std=c++14', '-c', '-o', tgtnode.abspath()] + extra_flags)
         except Exception as e:
-            #print(e)
+            # print(e)
             return False
         finally:
             node.delete()
@@ -248,7 +250,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
             v.append_unique('CXXFLAGS_debug', ['-fno-threadsafe-statics'])
             v.append_unique('CXXFLAGS_profile', ['-fno-threadsafe-statics'])
             v.append_unique('CXXFLAGS_final', ['-fno-threadsafe-statics'])
-        if 'GCC' in self.NAMES and self.version_number >= (4, ):
+        if 'GCC' in self.NAMES and self.version_number >= (4,):
             v.append_unique('CXXFLAGS_debug', ['-fno-threadsafe-statics'])
             v.append_unique('CXXFLAGS_profile', ['-fno-threadsafe-statics'])
             v.append_unique('CXXFLAGS_final', ['-fno-threadsafe-statics'])
@@ -262,8 +264,9 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         v.CPPFLAGS_profile = ['-DNDEBUG'] + v.CPPFLAGS_profile
         v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.CFLAGS_profile
         v.CXXFLAGS_profile = [
-            '-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions'
-        ] + v.CXXFLAGS_profile
+                                 '-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti',
+                                 '-fno-exceptions'
+                             ] + v.CXXFLAGS_profile
         v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.ASFLAGS_profile
         v.LINKFLAGS_profile = ['-pipe', '-g'] + v.LINKFLAGS_profile
 
@@ -273,8 +276,8 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         v.CPPFLAGS_final = ['-DNDEBUG'] + v.CPPFLAGS_final
         v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.CFLAGS_final
         v.CXXFLAGS_final = [
-            '-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions'
-        ] + v.CXXFLAGS_final
+                               '-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions'
+                           ] + v.CXXFLAGS_final
         v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.ASFLAGS_final
         v.LINKFLAGS_final = ['-pipe', '-g'] + v.LINKFLAGS_final
 
@@ -283,14 +286,14 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         v.CFLAGS_warnnone = ['-w'] + v.CFLAGS_warnnone
         v.CXXFLAGS_warnnone = ['-w'] + v.CXXFLAGS_warnnone
         if 'Clang' in self.NAMES or 'GCC' in self.NAMES and self.version_number >= (
-            3,
-            4,
+                3,
+                4,
         ):
             extra_flags_c = ['-Wextra']
             extra_flags_cxx = ['-Wextra', '-Wno-invalid-offsetof']
         else:
             extra_flags_c = extra_flags_cxx = []
-        if 'GCC' in self.NAMES and self.version_number >= (12, ):
+        if 'GCC' in self.NAMES and self.version_number >= (12,):
             extra_flags_cxx.append('-Wno-attributes=motor::')
         elif 'Clang' in self.NAMES:
             extra_flags_cxx.append('-Wno-unknown-attributes')

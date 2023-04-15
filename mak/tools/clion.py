@@ -227,7 +227,7 @@ class CLion(Build.BuildContext):
                             )
 
                         with open(
-                            run_configs_dir.make_node('%s.completion.xml' % tg.name).path_from(self.path), 'w'
+                                run_configs_dir.make_node('%s.completion.xml' % tg.name).path_from(self.path), 'w'
                         ) as run_file:
                             run_file.write(
                                 '<component name="ProjectRunConfigurationManager">\n'
@@ -338,39 +338,42 @@ class CLion(Build.BuildContext):
 
         for env_name in self.env.ALL_TOOLCHAINS:
             for variant in self.env.ALL_VARIANTS:
-                build_filename = run_configs_dir.make_node('build_%s_%s.xml' % (env_name, variant)).abspath()
-                with open(build_filename, 'w') as run_config:
-                    run_config.write(
-                        '<component name="ProjectRunConfigurationManager">\n'
-                        '  <configuration default="false" name="build:%(toolchain)s:%(variant)s"'
-                        ' type="PythonConfigurationType" factoryName="Python" folderName="build">\n'
-                        '    <module name="motor" />\n'
-                        '    <option name="INTERPRETER_OPTIONS" value="" />\n'
-                        '    <option name="PARENT_ENVS" value="true" />\n'
-                        '    <envs>\n'
-                        '      <env name="PYTHONUNBUFFERED" value="1" />\n'
-                        '    </envs>\n'
-                        '    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />\n'
-                        '    <option name="IS_MODULE_SDK" value="true" />\n'
-                        '    <option name="ADD_CONTENT_ROOTS" value="true" />\n'
-                        '    <option name="ADD_SOURCE_ROOTS" value="true" />\n'
-                        '    <option name="SCRIPT_NAME" value="%(waf)s" />\n'
-                        '    <option name="PARAMETERS" value="build:%(toolchain)s:%(variant)s" />\n'
-                        '    <option name="SHOW_COMMAND_LINE" value="false" />\n'
-                        '    <option name="EMULATE_TERMINAL" value="false" />\n'
-                        '    <option name="MODULE_MODE" value="false" />\n'
-                        '    <option name="REDIRECT_INPUT" value="false" />\n'
-                        '    <option name="INPUT_FILE" value="" />\n'
-                        '    <method v="2" />\n'
-                        '  </configuration>\n'
-                        '</component>\n' % {
-                            'toolchain': env_name,
-                            'variant': variant,
-                            'waf': sys.argv[0]
-                        }
-                    )
+                for arg in ['', 'nomaster', 'static', 'dynamic']:
+                    build_filename = run_configs_dir.make_node('build_%s_%s%s.xml' % (env_name, variant, arg)).abspath()
+                    with open(build_filename, 'w') as run_config:
+                        run_config.write(
+                            '<component name="ProjectRunConfigurationManager">\n'
+                            '  <configuration default="false" name="build:%(toolchain)s:%(variant)s%(type)s"'
+                            ' type="PythonConfigurationType" factoryName="Python" folderName="build%(type)s">\n'
+                            '    <module name="motor" />\n'
+                            '    <option name="INTERPRETER_OPTIONS" value="" />\n'
+                            '    <option name="PARENT_ENVS" value="true" />\n'
+                            '    <envs>\n'
+                            '      <env name="PYTHONUNBUFFERED" value="1" />\n'
+                            '    </envs>\n'
+                            '    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />\n'
+                            '    <option name="IS_MODULE_SDK" value="true" />\n'
+                            '    <option name="ADD_CONTENT_ROOTS" value="true" />\n'
+                            '    <option name="ADD_SOURCE_ROOTS" value="true" />\n'
+                            '    <option name="SCRIPT_NAME" value="%(waf)s" />\n'
+                            '    <option name="PARAMETERS" value="build:%(toolchain)s:%(variant)s %(arg)s" />\n'
+                            '    <option name="SHOW_COMMAND_LINE" value="false" />\n'
+                            '    <option name="EMULATE_TERMINAL" value="false" />\n'
+                            '    <option name="MODULE_MODE" value="false" />\n'
+                            '    <option name="REDIRECT_INPUT" value="false" />\n'
+                            '    <option name="INPUT_FILE" value="" />\n'
+                            '    <method v="2" />\n'
+                            '  </configuration>\n'
+                            '</component>\n' % {
+                                'toolchain': env_name,
+                                'variant': variant,
+                                'type': arg and ('[%s]' % arg) or '',
+                                'arg': arg and ('--%s' % arg) or '',
+                                'waf': sys.argv[0]
+                            }
+                        )
                 with open(
-                    run_configs_dir.make_node('clean_%s_%s.xml' % (env_name, variant)).abspath(), 'w'
+                        run_configs_dir.make_node('clean_%s_%s.xml' % (env_name, variant)).abspath(), 'w'
                 ) as run_config:
                     run_config.write(
                         '<component name="ProjectRunConfigurationManager">\n'
@@ -438,7 +441,7 @@ class CLion(Build.BuildContext):
                 '    <envs>\n'
                 '      <env name="PYTHONUNBUFFERED" value="1" />\n'
                 '    </envs>\n'
-                '    <option name="WORKING_DIRECTORY" value="" />\n'
+                '    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />\n'
                 '    <option name="IS_MODULE_SDK" value="true" />\n'
                 '    <option name="ADD_CONTENT_ROOTS" value="true" />\n'
                 '    <option name="ADD_SOURCE_ROOTS" value="true" />\n'
