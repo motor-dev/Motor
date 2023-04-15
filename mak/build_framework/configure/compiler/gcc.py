@@ -20,8 +20,8 @@ def gxx_modifier_platform(conf):
 
 
 class GCC(Configure.ConfigurationContext.GnuCompiler):
-    DEFINES = []
-    NAMES = ('GCC', )
+    DEFINES = [] + Configure.ConfigurationContext.GnuCompiler.DEFINES
+    NAMES = ('GCC',)
     TOOLS = 'gcc gxx'
 
     def __init__(self, gcc, gxx, extra_args={}, extra_env={}):
@@ -44,7 +44,7 @@ class GCC(Configure.ConfigurationContext.GnuCompiler):
         v.append_unique('CFLAGS', ['-static-libgcc'])
         v.append_unique('CXXFLAGS', ['-static-libgcc'])
         v.append_unique('LINKFLAGS', ['-static-libgcc'])
-        if self.version_number >= (4, ):
+        if self.version_number >= (4,):
             if platform.NAME != 'windows':
                 v.append_unique('CFLAGS', ['-fvisibility=hidden'])
                 v.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
@@ -53,7 +53,7 @@ class GCC(Configure.ConfigurationContext.GnuCompiler):
 
 
 class LLVM(GCC):
-    DEFINES = ['__GNUC__', '__GNUG__']
+    DEFINES = ['__GNUC__', '__GNUG__'] + GCC.DEFINES
     NAMES = ('LLVM', 'GCC')
 
     def __init__(self, gcc, gxx, extra_args={}):
@@ -101,7 +101,7 @@ def detect_gcc_version(conf, bindir, version, target, seen):
             try:
                 c = cls(cc, cxx)
             except Exception as e:
-                #Logs.pprint('YELLOW', '%s: %s' % (cc, e))
+                # Logs.pprint('YELLOW', '%s: %s' % (cc, e))
                 pass
             else:
                 if not c.is_valid(conf):

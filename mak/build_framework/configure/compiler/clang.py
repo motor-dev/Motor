@@ -29,7 +29,7 @@ def get_msvc_build_tools(configuration_context):
                 stderr=Utils.subprocess.PIPE
             )
         except Exception as e:
-            #print(e)
+            # print(e)
             pass
         else:
             out, err = p.communicate()
@@ -40,7 +40,7 @@ def get_msvc_build_tools(configuration_context):
         vs_path = product['installationPath']
         try:
             with open(
-                os.path.join(vs_path, 'VC', 'Auxiliary', 'Build', 'Microsoft.VCToolsVersion.default.txt'), 'r'
+                    os.path.join(vs_path, 'VC', 'Auxiliary', 'Build', 'Microsoft.VCToolsVersion.default.txt'), 'r'
             ) as prop_file:
                 version = prop_file.read().strip()
         except OSError:
@@ -53,8 +53,8 @@ def get_msvc_build_tools(configuration_context):
 
 
 class Clang(Configure.ConfigurationContext.GnuCompiler):
-    DEFINES = []
-    NAMES = ('Clang', )
+    DEFINES = [] + Configure.ConfigurationContext.GnuCompiler.DEFINES
+    NAMES = ('Clang',)
     TOOLS = 'clang clangxx'
 
     def __init__(self, clang, clangxx, extra_args={}, extra_env={}):
@@ -113,12 +113,12 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                     }
                 )
             except Exception as e:
-                #print(e)
+                # print(e)
                 pass
             else:
                 result.append(c)
                 result += Configure.ConfigurationContext.GnuCompiler.get_multilib_compilers(c)
-            if c.version_number >= (5, ):
+            if c.version_number >= (5,):
                 for product, path in vs_install_paths:
                     try:
                         c = self.__class__(
@@ -133,10 +133,10 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                     except Exception as e:
                         pass
                     else:
-                        c.NAMES = ('clang_%s' % product, ) + c.NAMES
+                        c.NAMES = ('clang_%s' % product,) + c.NAMES
                         result.append(c)
                         for c in Configure.ConfigurationContext.GnuCompiler.get_multilib_compilers(c):
-                            c.NAMES = ('clang_%s' % product, ) + c.NAMES
+                            c.NAMES = ('clang_%s' % product,) + c.NAMES
                             result.append(c)
             else:
                 result.append(self)
@@ -308,7 +308,7 @@ def detect_clang(conf):
                 try:
                     c = Clang(clang, clangxx)
                 except Exception as e:
-                    #print(e)
+                    # print(e)
                     pass
                 else:
                     if not c.is_valid(conf):
