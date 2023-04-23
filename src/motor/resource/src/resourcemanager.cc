@@ -43,12 +43,14 @@ ResourceManager::getLoaderInfo(raw< const Meta::Class > classinfo)
 void ResourceManager::attach(raw< const Meta::Class > classinfo, const weak< ILoader >& loader)
 {
     weak< LoaderInfo > info = getLoaderInfo(classinfo);
+#if MOTOR_ENABLE_ASSERT
     for(auto& it: info->loaders)
     {
         if(motor_assert_format(it != loader, "registering twice the same loader for class {0}",
                                classinfo->name))
             return;
     }
+#endif
     motor_info_format(Log::resource(), "registering loader for type {0}", classinfo->name);
     info->loaders.push_back(loader);
     for(const auto& resource: info->resources)
