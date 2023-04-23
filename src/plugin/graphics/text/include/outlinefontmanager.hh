@@ -18,18 +18,19 @@ private:
     weak< const FontList >            m_fontList;
 
 public:
-    OutlineFontManager(weak< Resource::ResourceManager > manager, weak< FreetypeLibrary > freetype,
-                       weak< const FontList > fontList);
-    ~OutlineFontManager();
+    OutlineFontManager(const weak< Resource::ResourceManager >& manager,
+                       const weak< FreetypeLibrary >&           freetype,
+                       const weak< const FontList >&            fontList);
+    ~OutlineFontManager() override;
 
-    void load(weak< const Resource::IDescription > description,
-              Resource::Resource&                  resource) override;
-    void reload(weak< const Resource::IDescription > oldDescription,
-                weak< const Resource::IDescription > newDescription,
-                Resource::Resource&                  resource) override;
-    void unload(weak< const Resource::IDescription > description,
-                Resource::Resource&                  resource) override;
-    void onTicketLoaded(weak< const Resource::IDescription > description,
+    void load(const weak< const Resource::IDescription >& description,
+              Resource::Resource&                         resource) override;
+    void reload(const weak< const Resource::IDescription >& oldDescription,
+                const weak< const Resource::IDescription >& newDescription,
+                Resource::Resource&                         resource) override;
+    void unload(const weak< const Resource::IDescription >& description,
+                Resource::Resource&                         resource) override;
+    void onTicketLoaded(const weak< const Resource::IDescription >& description,
                         Resource::Resource& resource, const minitl::Allocator::Block< u8 >& buffer,
                         LoadType type) override;
 };

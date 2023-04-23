@@ -20,8 +20,8 @@ private:
     ref< const Package > const                        m_mainPackage;
 
 public:
-    GtkSample(const Plugin::Context& context);
-    ~GtkSample();
+    explicit GtkSample(const Plugin::Context& context);
+    ~GtkSample() override;
 };
 
 }  // namespace Motor

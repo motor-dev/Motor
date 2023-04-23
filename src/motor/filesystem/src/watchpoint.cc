@@ -9,7 +9,7 @@ namespace Motor { namespace FileSystem {
 
 static CriticalSection s_lock;
 
-WatchPoint::WatchPoint(weak< WatchPoint > parent)
+WatchPoint::WatchPoint(const weak< WatchPoint >& parent)
     : m_watches(Arena::filesystem())
     , m_children(Arena::filesystem())
     , m_parent(parent)
@@ -25,9 +25,7 @@ WatchPoint::WatchPoint()
 {
 }
 
-WatchPoint::~WatchPoint()
-{
-}
+WatchPoint::~WatchPoint() = default;
 
 ref< WatchPoint > WatchPoint::getWatchPointOrCreate(const ipath& path)
 {
@@ -36,12 +34,11 @@ ref< WatchPoint > WatchPoint::getWatchPointOrCreate(const ipath& path)
     {
         ref< WatchPoint >     nextChild;
         ScopedCriticalSection lock(s_lock);
-        for(ChildrenVector::iterator it = result->m_children.begin();
-            it != result->m_children.end(); ++it)
+        for(auto& it: result->m_children)
         {
-            if(it->first == path[i])
+            if(it.first == path[i])
             {
-                nextChild = it->second;
+                nextChild = it.second;
                 break;
             }
         }
@@ -63,12 +60,11 @@ ref< WatchPoint > WatchPoint::getWatchPoint(const ipath& path)
     {
         ref< WatchPoint >     nextChild;
         ScopedCriticalSection lock(s_lock);
-        for(ChildrenVector::iterator it = result->m_children.begin();
-            it != result->m_children.end(); ++it)
+        for(auto& it: result->m_children)
         {
-            if(it->first == path[i])
+            if(it.first == path[i])
             {
-                nextChild = it->second;
+                nextChild = it.second;
                 break;
             }
         }
@@ -84,7 +80,7 @@ ref< WatchPoint > WatchPoint::getWatchPoint(const ipath& path)
     return result;
 }
 
-void WatchPoint::addWatch(weak< Folder::Watch > watch)
+void WatchPoint::addWatch(const weak< Folder::Watch >& watch)
 {
     ScopedCriticalSection lock(s_lock);
     m_watches.push_back(watch);
@@ -95,7 +91,7 @@ void WatchPoint::addWatch(weak< Folder::Watch > watch)
     }
 }
 
-void WatchPoint::removeWatch(weak< Folder::Watch > watch)
+void WatchPoint::removeWatch(const weak< Folder::Watch >& watch)
 {
     ScopedCriticalSection lock(s_lock);
     for(WatchVector::iterator it = m_watches.begin(); it != m_watches.end(); ++it)
@@ -122,9 +118,9 @@ void WatchPoint::signalDirty()
         ScopedCriticalSection lock(s_lock);
         v = m_watches;
     }
-    for(WatchVector::iterator it = v.begin(); it != v.end(); ++it)
+    for(auto& it: v)
     {
-        (*it)->signal();
+        it->signal();
     }
 }
 

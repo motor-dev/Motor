@@ -18,8 +18,9 @@ struct PyMotorNamespace : public PyMotorObject
     static PyObject* dir(PyObject* self, PyObject* args);
     static PyObject* repr(PyObject* self);
 
-    static PyTypeObject s_pyType;
-    static PyMethodDef  s_methods[];
+    static PyTypeObject           s_pyType;
+    static PyMethodDef            s_methodArray[];
+    static constexpr PyMethodDef* s_methods {s_methodArray};
 };
 
 }}  // namespace Motor::Python

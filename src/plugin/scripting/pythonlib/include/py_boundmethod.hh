@@ -12,8 +12,8 @@ struct PyMotorObject;
 struct PyBoundMethod
 {
     PyObject                  py_object;
-    raw< const Meta::Method > method;
-    PyObject*                 value;
+    raw< const Meta::Method > method {};
+    PyObject*                 value {};
 
     static void registerType(PyObject* module);
 

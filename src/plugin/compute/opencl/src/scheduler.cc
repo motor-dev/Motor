@@ -7,7 +7,7 @@
 #include <motor/resource/resourcemanager.hh>
 #include <motor/scheduler/kernel/kernel.meta.hh>
 #include <motor/scheduler/scheduler.hh>
-#include <motor/scheduler/task/itask.hh>
+#include <motor/scheduler/task/kerneltask.hh>
 #include <codeloader.hh>
 #include <context.hh>
 #include <kernelloader.hh>
@@ -22,7 +22,7 @@ static const int s_profilingMode =
 #endif
     ;
 
-Scheduler::Scheduler(const Plugin::Context& pluginContext, ref< Context > clContext)
+Scheduler::Scheduler(const Plugin::Context& pluginContext, const ref< Context >& clContext)
     : IScheduler("OpenCL", pluginContext.scheduler, GPUType)
     , m_context(clContext)
     , m_resourceManager(pluginContext.resourceManager)

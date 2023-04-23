@@ -14,6 +14,8 @@ class ref
     template < typename U, typename V >
     friend ref< U > motor_checked_cast(ref< V > v);
     friend class refcountable;
+    template < typename U >
+    friend class ref;
 
 private:
     T* m_ptr;
@@ -31,11 +33,17 @@ public:
     template < typename U >
     inline ref(const ref< U >& other);  // NOLINT(google-explicit-constructor)
     template < typename U >
-    inline explicit ref(scoped< U >&& other);
+    inline explicit ref(scoped< U >&& other) noexcept;
+    inline ref(ref&& other) noexcept;
+    template < typename U >
+    explicit inline ref(ref< U >&& other) noexcept;
 
     inline ref& operator=(const ref& other);
     template < typename U >
     inline ref& operator=(const ref< U >& other);
+    inline ref& operator=(ref&& other) noexcept;
+    template < typename U >
+    inline ref& operator=(ref< U >&& other) noexcept;
 
     inline ~ref();
 

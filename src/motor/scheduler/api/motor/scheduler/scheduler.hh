@@ -22,7 +22,6 @@ class IScheduler;
 
 class motor_api(SCHEDULER) Scheduler : public minitl::pointer
 {
-    MOTOR_NOCOPY(Scheduler);
     friend class Task::TaskGroup;
     friend class Task::TaskScheduler;
 
@@ -37,7 +36,7 @@ private:
     struct WorkItem
     {
         weak< Scheduler > scheduler;
-        WorkItem(weak< Scheduler > scheduler_) : scheduler(scheduler_)
+        explicit WorkItem(const weak< Scheduler >& scheduler) : scheduler(scheduler)
         {
             scheduler->m_runningTasks++;
         }
@@ -58,17 +57,13 @@ private:
     void notifyEnd();
 
 public:
-    void queueTask(weak< const Task::ITask > task, weak< const Task::IExecutor > executor,
-                   u32 breakdownCount);
-    void queueKernel(weak< const Task::KernelTask > task);
-    template < typename T >
-    inline void* allocateTask();
-    template < typename T >
-    inline void releaseTask(T * t);
+    void queueTask(const weak< const Task::ITask >&     task,
+                   const weak< const Task::IExecutor >& executor, u32 breakdownCount);
+    void queueKernel(const weak< const Task::KernelTask >& task);
 
 public:
     Scheduler();
-    ~Scheduler();
+    ~Scheduler() override;
 
     void mainThreadJoin();
     u32  workerCount() const;

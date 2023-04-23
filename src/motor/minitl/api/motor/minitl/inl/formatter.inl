@@ -4,7 +4,6 @@
 
 #include <motor/minitl/stdafx.h>
 #include <motor/kernel/interlocked.hh>
-#include <motor/minitl/format.hh>
 #include <cstdio>
 #include <cstring>
 

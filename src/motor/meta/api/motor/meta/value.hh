@@ -72,7 +72,7 @@ public:
     explicit Value(T t, MakeConstType constify);
     Value(const Value& other);
     template < typename T >
-    Value(ByRefType< T > t);
+    explicit Value(ByRefType< T > t);
     Value(Type typeinfo, void* location);
     Value(Type typeinfo, const void* location, MakeCopyType);
     Value(Type typeinfo, const Value& castedFrom);
@@ -101,7 +101,7 @@ public:
     }
     inline bool isConst() const;
 
-    inline      operator const void*() const;
+    inline operator const void*() const;  // NOLINT(google-explicit-constructor)
     inline bool operator!() const;
 
     Value operator[](const istring& name);

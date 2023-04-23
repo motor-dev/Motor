@@ -9,12 +9,8 @@ namespace Motor { namespace Threads {
 class motor_api(CORE) Waitable
 {
 public:
-    Waitable()
-    {
-    }
-    virtual ~Waitable()
-    {
-    }
+    Waitable()          = default;
+    virtual ~Waitable() = default;
 
     enum WaitResult
     {

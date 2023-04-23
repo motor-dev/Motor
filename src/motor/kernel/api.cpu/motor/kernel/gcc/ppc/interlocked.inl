@@ -21,11 +21,11 @@ struct InterlockedType< 4 >
 
         __attribute__((aligned(4))) value_t m_value;
 
-        inline tagged_t(value_t value = 0);
-        inline tagged_t(const tagged_t& other);
-        inline tagged_t& operator=(const tagged_t& other);
-        inline value_t   value();
-        inline bool      operator==(tagged_t& other);
+        inline explicit tagged_t(value_t value = nullptr);
+        inline tagged_t(const tagged_t& other)            = default;
+        inline tagged_t& operator=(const tagged_t& other) = default;
+        inline value_t   value() const;
+        inline bool      operator==(tagged_t& other) const;
     };
 
     static inline value_t         fetch(const value_t* p);
@@ -62,11 +62,11 @@ struct InterlockedType< 8 >
 
         __attribute__((aligned(8))) value_t m_value;
 
-        inline tagged_t(value_t value = 0);
-        inline tagged_t(const tagged_t& other);
-        inline tagged_t& operator=(const tagged_t& other);
-        inline value_t   value();
-        inline bool      operator==(tagged_t& other);
+        inline explicit tagged_t(value_t value = nullptr);
+        inline tagged_t(const tagged_t& other)            = default;
+        inline tagged_t& operator=(const tagged_t& other) = default;
+        inline value_t   value() const;
+        inline bool      operator==(tagged_t& other) const;
     };
 
     static inline value_t fetch(const value_t* p);
@@ -86,22 +86,12 @@ InterlockedType< 4 >::tagged_t::tagged_t(value_t value) : m_value(value)
 {
 }
 
-InterlockedType< 4 >::tagged_t::tagged_t(const tagged_t& other) : m_value(other.m_value)
-{
-}
-
-InterlockedType< 4 >::tagged_t& InterlockedType< 4 >::tagged_t::operator=(const tagged_t& other)
-{
-    m_value = other.m_value;
-    return *this;
-}
-
-InterlockedType< 4 >::tagged_t::value_t InterlockedType< 4 >::tagged_t::value()
+InterlockedType< 4 >::tagged_t::value_t InterlockedType< 4 >::tagged_t::value() const
 {
     return m_value;
 }
 
-bool InterlockedType< 4 >::tagged_t::operator==(tagged_t& other)
+bool InterlockedType< 4 >::tagged_t::operator==(tagged_t& other) const
 {
     return m_value == other.m_value;
 }
@@ -117,7 +107,9 @@ InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch(const value_t* p)
     return result;
 }
 
-InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_add(value_t* p, value_t incr)
+InterlockedType< 4 >::value_t
+InterlockedType< 4 >::fetch_and_add(value_t* p,  // NOLINT(readability-non-const-parameter)
+                                    value_t  incr)
 {
     value_t old = 0;
     value_t temp;
@@ -139,7 +131,9 @@ InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_sub(value_t* p, va
     return fetch_and_add(p, -incr);
 }
 
-InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_set(value_t* p, value_t v)
+InterlockedType< 4 >::value_t
+InterlockedType< 4 >::fetch_and_set(value_t* p,  // NOLINT(readability-non-const-parameter)
+                                    value_t  v)
 {
     value_t prev;
     __asm__ __volatile__(" lwsync\n"
@@ -154,8 +148,9 @@ InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_set(value_t* p, va
     return prev;
 }
 
-InterlockedType< 4 >::value_t InterlockedType< 4 >::set_conditional(value_t* p, value_t v,
-                                                                    value_t condition)
+InterlockedType< 4 >::value_t
+InterlockedType< 4 >::set_conditional(value_t* p,  // NOLINT(readability-non-const-parameter)
+                                      value_t v, value_t condition)
 {
     value_t result;
     __asm__ __volatile__(" lwsync\n"
@@ -213,22 +208,12 @@ InterlockedType< 8 >::tagged_t::tagged_t(value_t value) : m_value(value)
 {
 }
 
-InterlockedType< 8 >::tagged_t::tagged_t(const tagged_t& other) : m_value(other.m_value)
-{
-}
-
-InterlockedType< 8 >::tagged_t& InterlockedType< 8 >::tagged_t::operator=(const tagged_t& other)
-{
-    m_value = other.m_value;
-    return *this;
-}
-
-InterlockedType< 8 >::tagged_t::value_t InterlockedType< 8 >::tagged_t::value()
+InterlockedType< 8 >::tagged_t::value_t InterlockedType< 8 >::tagged_t::value() const
 {
     return m_value;
 }
 
-bool InterlockedType< 8 >::tagged_t::operator==(tagged_t& other)
+bool InterlockedType< 8 >::tagged_t::operator==(tagged_t& other) const
 {
     return m_value == other.m_value;
 }
@@ -244,7 +229,9 @@ InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch(const value_t* p)
     return result;
 }
 
-InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_add(value_t* p, value_t incr)
+InterlockedType< 8 >::value_t
+InterlockedType< 8 >::fetch_and_add(value_t* p,  // NOLINT(readability-non-const-parameter)
+                                    value_t  incr)
 {
     value_t old = 0;
     value_t temp;
@@ -266,7 +253,9 @@ InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_sub(value_t* p, va
     return fetch_and_add(p, -incr);
 }
 
-InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_set(value_t* p, value_t v)
+InterlockedType< 8 >::value_t
+InterlockedType< 8 >::fetch_and_set(value_t* p,  // NOLINT(readability-non-const-parameter)
+                                    value_t  v)
 {
     value_t prev;
     __asm__ __volatile__(" lwsync\n"
@@ -281,8 +270,9 @@ InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_set(value_t* p, va
     return prev;
 }
 
-InterlockedType< 8 >::value_t InterlockedType< 8 >::set_conditional(value_t* p, value_t v,
-                                                                    value_t condition)
+InterlockedType< 8 >::value_t
+InterlockedType< 8 >::set_conditional(value_t* p,  // NOLINT(readability-non-const-parameter)
+                                      value_t v, value_t condition)
 {
     value_t result;
     __asm__ __volatile__(" lwsync\n"
@@ -308,7 +298,7 @@ InterlockedType< 8 >::value_t InterlockedType< 8 >::set_and_fetch(value_t* p, va
 
 InterlockedType< 8 >::tagged_t::tag_t InterlockedType< 8 >::get_ticket(const tagged_t& p)
 {
-    tagged_t::value_t result;
+    tagged_t::tag_t result;
     __asm__ __volatile__("  lwsync\n"
                          "  ldarx %0, 0, %1\n"
                          : "=r"(result)

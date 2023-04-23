@@ -9,11 +9,9 @@ namespace Motor { namespace Input {
 
 class Wincontrol : public Controller
 {
-    MOTOR_NOCOPY(Wincontrol);
-
 public:
     Wincontrol();
-    ~Wincontrol();
+    ~Wincontrol() override;
 };
 
 }}  // namespace Motor::Input

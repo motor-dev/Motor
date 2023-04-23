@@ -14,8 +14,8 @@ class motor_api(PACKAGE) Package : public Script< Package >
 {
     friend class PackageLoader;
 published:
-    Package(weak< const File > file);
-    ~Package();
+    explicit Package(const weak< const File >& file);
+    ~Package() override;
 };
 
 }  // namespace Motor

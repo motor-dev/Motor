@@ -18,8 +18,8 @@ private:
     ref< const Package > const                m_mainPackage;
 
 public:
-    UnitTestsApplication(const Plugin::Context& context);
-    ~UnitTestsApplication();
+    explicit UnitTestsApplication(const Plugin::Context& context);
+    ~UnitTestsApplication() override;
 };
 
 }}}}  // namespace Motor::Test::Compute::UnitTests

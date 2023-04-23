@@ -11,8 +11,10 @@ namespace Motor {
 class LuaScript : public Script< LuaScript >
 {
     friend class PackageLoader;
-    published : LuaScript(motor_tag(EditHint::Extension(".lua")) weak< const File > script);
-    ~LuaScript();
+    published
+        : explicit LuaScript(motor_tag(EditHint::Extension(".lua"))
+                                 const weak< const File >& script);
+    ~LuaScript() override;
 };
 
 }  // namespace Motor

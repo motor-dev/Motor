@@ -12,11 +12,12 @@ class GLRenderer;
 class GLMesh : public IGPUResource
 {
 public:
-    GLMesh(weak< const Resource::IDescription > meshDescription, weak< GLRenderer > renderer);
-    ~GLMesh();
+    GLMesh(const weak< const Resource::IDescription >& meshDescription,
+           const weak< GLRenderer >&                   renderer);
+    ~GLMesh() override;
 
-    virtual void load(weak< const Resource::IDescription > meshDescription) override;
-    virtual void unload() override;
+    void load(const weak< const Resource::IDescription >& meshDescription) override;
+    void unload() override;
 };
 
 }}  // namespace Motor::OpenGL

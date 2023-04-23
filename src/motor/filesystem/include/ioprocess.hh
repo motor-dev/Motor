@@ -36,9 +36,9 @@ private:
 
 public:
     IOContext();
-    ~IOContext();
+    ~IOContext() override;
 
-    static void pushTicket(ref< File::Ticket > ticket);
+    static void pushTicket(const ref< File::Ticket >& ticket);
     static void begin();
     static void end();
 };

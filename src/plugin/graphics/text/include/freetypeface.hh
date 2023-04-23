@@ -14,8 +14,9 @@ class FreetypeLibrary;
 class FreetypeFace : public minitl::refcountable
 {
 public:
-    FreetypeFace(weak< FreetypeLibrary > freetype, const minitl::Allocator::Block< u8 >& buffer);
-    ~FreetypeFace();
+    FreetypeFace(const weak< FreetypeLibrary >&        freetype,
+                 const minitl::Allocator::Block< u8 >& buffer);
+    ~FreetypeFace() override;
 };
 
 }  // namespace Motor

@@ -16,8 +16,8 @@ private:
     ref< const Package > const                m_mainPackage;
 
 public:
-    WorldTestApplication(const Plugin::Context& context);
-    ~WorldTestApplication();
+    explicit WorldTestApplication(const Plugin::Context& context);
+    ~WorldTestApplication() override;
 };
 
 }}}  // namespace Motor::Test::World

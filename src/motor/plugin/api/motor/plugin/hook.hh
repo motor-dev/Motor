@@ -18,15 +18,15 @@ typedef minitl::intrusive_list< Motor::Plugin::IPluginHook > HookList;
 class motor_api(PLUGIN) IPluginHook : public minitl::intrusive_list< IPluginHook >::item
 {
 protected:
-    IPluginHook(HookList & owner)
+    explicit IPluginHook(HookList & owner)
     {
         owner.push_back(*this);
     }
     virtual ~IPluginHook();
 
 public:
-    virtual void onload(const Context& context)                      = 0;
-    virtual void onunload(weak< Resource::ResourceManager > manager) = 0;
+    virtual void onload(const Context& context)                             = 0;
+    virtual void onunload(const weak< Resource::ResourceManager >& manager) = 0;
 };
 
 template < typename T >
@@ -39,14 +39,13 @@ public:
     PluginHook(HookList& list, const T& t) : IPluginHook(list), m_hook(t)
     {
     }
-    ~PluginHook()
-    {
-    }
-    virtual void onload(const Context& context) override
+    ~PluginHook() override
+    = default;
+    void onload(const Context& context) override
     {
         m_hook.onload(context);
     }
-    virtual void onunload(weak< Resource::ResourceManager > manager) override
+    void onunload(const weak< Resource::ResourceManager >& manager) override
     {
         m_hook.onunload(manager);
     }

@@ -12,8 +12,8 @@ struct staticarray
     u32 const count;
     T* const  elements;
 
-    inline T&       operator[](const u32 index);
-    inline const T& operator[](const u32 index) const;
+    inline T&       operator[](u32 index);
+    inline const T& operator[](u32 index) const;
 
     inline T*       begin();
     inline const T* begin() const;

@@ -75,9 +75,7 @@ GLShaderBuilder::GLShaderBuilder(GLenum shaderType) : m_shaderType(shaderType)
     motor_forceuse(m_shaderType);
 }
 
-GLShaderBuilder::~GLShaderBuilder()
-{
-}
+GLShaderBuilder::~GLShaderBuilder() = default;
 
 void GLShaderBuilder::doAddUniformDeclaration(const istring&     name, Shaders::Stage /*stage*/,
                                               Shaders::ValueType type)

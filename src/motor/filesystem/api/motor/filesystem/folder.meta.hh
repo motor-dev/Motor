@@ -25,8 +25,8 @@ public:
         weak< Folder > m_folder;
 
     public:
-        Watch(weak< Folder > folder);
-        ~Watch();
+        explicit Watch(const weak< Folder >& folder);
+        ~Watch() override;
 
         void signal();
     };
@@ -34,7 +34,7 @@ public:
 
 protected:
     Folder();
-    ~Folder();
+    ~Folder() override;
 published:
     enum CreatePolicy
     {
@@ -60,11 +60,11 @@ protected:
     weak< Folder > openFolderNoLock(ipath name);
 published:
     weak< File >   openFile(istring name);
-    weak< File >   openFile(ifilename name);
+    weak< File >   openFile(const ifilename& name);
     weak< Folder > openFolder(istring name);
-    weak< Folder > openFolder(ipath name);
+    weak< Folder > openFolder(const ipath& name);
     void           mount(istring name, ref< Folder > folder);
-    void           mount(ipath name, ref< Folder > folder);
+    void           mount(ipath name, const ref< Folder >& folder);
     void           umount(istring name);
     void           umount(ipath name);
 };

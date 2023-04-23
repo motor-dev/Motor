@@ -8,7 +8,8 @@
 
 namespace Motor {
 
-DiskFolder::Watch::Watch(weak< DiskFolder > folder, weak< FileSystem::WatchPoint > watchPoint)
+DiskFolder::Watch::Watch(const weak< DiskFolder >&             folder,
+                         const weak< FileSystem::WatchPoint >& watchPoint)
     : Folder::Watch(folder)
     , m_watchPoint(watchPoint)
 {

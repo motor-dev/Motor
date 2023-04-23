@@ -15,7 +15,7 @@ minitl::Allocator& python()
 
 namespace Motor { namespace Python {
 
-PythonLibrary::ThreadLock::ThreadLock(weak< PythonLibrary > library, PyThreadState* thread)
+PythonLibrary::ThreadLock::ThreadLock(const weak< PythonLibrary >& library, PyThreadState* thread)
     : m_library(library)
     , m_thread(thread)
 {

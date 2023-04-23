@@ -3,7 +3,7 @@
 #pragma once
 
 #include <motor/scheduler/stdafx.h>
-#include <motor/scheduler/kernel/iproduct.meta.hh>
+#include <motor/scheduler/kernel/producer.meta.hh>
 
 namespace Motor { namespace KernelScheduler {
 

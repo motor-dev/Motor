@@ -7,39 +7,37 @@
 
 namespace Motor {
 
-BitmapFontManager::BitmapFontManager(weak< Resource::ResourceManager > manager,
-                                     weak< FreetypeLibrary >           freetype,
-                                     weak< const FontList >            fontList)
+BitmapFontManager::BitmapFontManager(const weak< Resource::ResourceManager >& manager,
+                                     const weak< FreetypeLibrary >&           freetype,
+                                     const weak< const FontList >&            fontList)
     : m_manager(manager)
     , m_freetype(freetype)
     , m_fontList(fontList)
 {
 }
 
-BitmapFontManager::~BitmapFontManager()
-{
-}
+BitmapFontManager::~BitmapFontManager() = default;
 
-void BitmapFontManager::load(weak< const Resource::IDescription > /*description*/,
+void BitmapFontManager::load(const weak< const Resource::IDescription >& /*description*/,
                              Resource::Resource& /*resource*/)
 {
     motor_info(Log::resource(), "loading bitmap font");
 }
 
-void BitmapFontManager::reload(weak< const Resource::IDescription > /*oldDescription*/,
-                               weak< const Resource::IDescription > /*newDescription*/,
+void BitmapFontManager::reload(const weak< const Resource::IDescription >& /*oldDescription*/,
+                               const weak< const Resource::IDescription >& /*newDescription*/,
                                Resource::Resource& /*resource*/)
 {
     motor_info(Log::resource(), "reloading bitmap font");
 }
 
-void BitmapFontManager::unload(weak< const Resource::IDescription > /*description*/,
+void BitmapFontManager::unload(const weak< const Resource::IDescription >& /*description*/,
                                Resource::Resource& /*resource*/)
 {
     motor_info(Log::resource(), "unloading bitmap font");
 }
 
-void BitmapFontManager::onTicketLoaded(weak< const Resource::IDescription > /*description*/,
+void BitmapFontManager::onTicketLoaded(const weak< const Resource::IDescription >& /*description*/,
                                        Resource::Resource& /*resource*/,
                                        const minitl::Allocator::Block< u8 >& /*buffer*/,
                                        LoadType /*type*/)

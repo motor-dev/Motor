@@ -13,12 +13,12 @@ class NullRenderer;
 class NullShaderProgram : public IGPUResource
 {
 public:
-    NullShaderProgram(weak< const ShaderProgramDescription > shaderDescription,
-                      weak< const NullRenderer >             renderer);
-    ~NullShaderProgram();
+    NullShaderProgram(const weak< const ShaderProgramDescription >& shaderDescription,
+                      const weak< const NullRenderer >&             renderer);
+    ~NullShaderProgram() override;
 
 private:
-    void load(weak< const Resource::IDescription > shaderDescription) override;
+    void load(const weak< const Resource::IDescription >& shaderDescription) override;
     void unload() override;
 };
 

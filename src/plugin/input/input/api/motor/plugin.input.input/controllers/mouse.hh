@@ -9,11 +9,9 @@ namespace Motor { namespace Input {
 
 class Mouse : public Controller
 {
-    MOTOR_NOCOPY(Mouse);
-
 public:
     Mouse();
-    ~Mouse();
+    ~Mouse() override;
 };
 
 }}  // namespace Motor::Input

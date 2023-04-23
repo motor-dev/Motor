@@ -14,7 +14,6 @@ class motor_api(RESOURCE) ILoader : public minitl::refcountable
 {
     friend class ResourceManager;
     friend class IDescription;
-    MOTOR_NOCOPY(ILoader);
 
 public:
     enum FileType
@@ -33,25 +32,25 @@ protected:
 
 protected:
     ILoader();
-    ~ILoader();
+    ~ILoader() override;
 
-    virtual void load(weak< const IDescription > description, Resource & resource)   = 0;
-    virtual void unload(weak< const IDescription > description, Resource & resource) = 0;
-    virtual void reload(weak< const IDescription > oldDescription,
-                        weak< const IDescription > newDescription, Resource & resource)
+    virtual void load(const weak< const IDescription >& description, Resource& resource)   = 0;
+    virtual void unload(const weak< const IDescription >& description, Resource& resource) = 0;
+    virtual void reload(const weak< const IDescription >& oldDescription,
+                        const weak< const IDescription >& newDescription, Resource& resource)
     {
         unload(oldDescription, resource);
         load(newDescription, resource);
     }
 
-    virtual void onTicketUpdated(weak< const IDescription > /*description*/, Resource& /*resource*/,
-                                 const minitl::Allocator::Block< u8 >& /*buffer*/, u32 /*progress*/,
-                                 LoadType /*loadType*/)
+    virtual void onTicketUpdated(
+        const weak< const IDescription >& /*description*/, Resource& /*resource*/,
+        const minitl::Allocator::Block< u8 >& /*buffer*/, u32 /*progress*/, LoadType /*loadType*/)
     {
     }
-    virtual void onTicketLoaded(weak< const IDescription > /*description*/, Resource& /*resource*/,
-                                const minitl::Allocator::Block< u8 >& /*buffer*/,
-                                LoadType /*loadType*/)
+    virtual void onTicketLoaded(
+        const weak< const IDescription >& /*description*/, Resource& /*resource*/,
+        const minitl::Allocator::Block< u8 >& /*buffer*/, LoadType /*loadType*/)
     {
         motor_notreached();
     }

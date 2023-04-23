@@ -2,8 +2,6 @@
    see LICENSE for detail */
 #pragma once
 
-#include <motor/minitl/swap.hh>
-
 namespace minitl {
 
 template < typename T >

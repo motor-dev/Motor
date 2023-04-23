@@ -11,12 +11,12 @@ static inline void** st_next(void** stack_pointer)
     void** nextStackPointer = reinterpret_cast< void** >(*stack_pointer);
     if(nextStackPointer <= stack_pointer)
     {
-        return 0;
+        return nullptr;
     }
     if(reinterpret_cast< char* >(stack_pointer) - reinterpret_cast< char* >(nextStackPointer)
        > 2 * 1024 * 1024)
     {
-        return 0;
+        return nullptr;
     }
     return nextStackPointer;
 }

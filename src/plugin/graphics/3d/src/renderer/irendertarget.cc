@@ -10,15 +10,13 @@
 
 namespace Motor {
 
-IRenderTarget::IRenderTarget(weak< const RenderTargetDescription > rendertarget,
-                             weak< const IRenderer >               renderer)
+IRenderTarget::IRenderTarget(const weak< const RenderTargetDescription >& rendertarget,
+                             const weak< const IRenderer >&               renderer)
     : IGPUResource(rendertarget, renderer)
 {
 }
 
-IRenderTarget::~IRenderTarget()
-{
-}
+IRenderTarget::~IRenderTarget() = default;
 
 weak< Task::ITask > IRenderTarget::syncTask() const
 {

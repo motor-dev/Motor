@@ -15,14 +15,14 @@ private:
     weak< File >    m_file;
 
 protected:
-    virtual ConversionCost distance(const Type& type) const override;
-    virtual bool           doResolve(DbContext & context) override;
-    virtual void           doEval(const Type& expectedType, Value& result) const override;
-    virtual void           doVisit(Node::Visitor & visitor) const override;
+    ConversionCost distance(const Type& type) const override;
+    bool           doResolve(DbContext & context) override;
+    void           doEval(const Type& expectedType, Value& result) const override;
+    void           doVisit(Node::Visitor & visitor) const override;
 
 public:
-    FileName(const ifilename& value);
-    ~FileName();
+    explicit FileName(const ifilename& value);
+    ~FileName() override;
 };
 
 }}}  // namespace Motor::Meta::AST

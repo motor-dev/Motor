@@ -41,7 +41,7 @@ void Application::unregisterInterruptions()
     {
         SetConsoleCtrlHandler(&HandleControlEvent, FALSE);
     }
-    s_application = 0;
+    s_application = nullptr;
 }
 
 }  // namespace Motor

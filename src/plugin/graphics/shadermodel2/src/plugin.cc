@@ -5,4 +5,4 @@
 #include <motor/meta/engine/namespace.hh>
 #include <motor/plugin/plugin.hh>
 
-MOTOR_PLUGIN_NAMESPACE_REGISTER();
+MOTOR_PLUGIN_NAMESPACE_REGISTER()

@@ -16,21 +16,19 @@ void NullWindow::end(PresentMode /*presentMode*/) const
 {
 }
 
-NullWindow::NullWindow(weak< const RenderWindowDescription > windowDescription,
-                       weak< const NullRenderer >            renderer)
+NullWindow::NullWindow(const weak< const RenderWindowDescription >& windowDescription,
+                       const weak< const NullRenderer >&            renderer)
     : IRenderTarget(windowDescription, renderer)
 {
 }
 
-NullWindow::~NullWindow()
-{
-}
+NullWindow::~NullWindow() = default;
 
 void NullWindow::present() const
 {
 }
 
-void NullWindow::load(weak< const Resource::IDescription > /*windowDescription*/)
+void NullWindow::load(const weak< const Resource::IDescription >& /*windowDescription*/)
 {
 }
 

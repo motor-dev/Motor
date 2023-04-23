@@ -13,9 +13,7 @@ Bool::Bool(bool value) : Node(), m_value(value)
     motor_forceuse(m_value);
 }
 
-Bool::~Bool()
-{
-}
+Bool::~Bool() = default;
 
 ConversionCost Bool::distance(const Type& type) const
 {

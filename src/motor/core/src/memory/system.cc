@@ -7,7 +7,7 @@
 namespace Motor {
 
 SystemAllocator::SystemAllocator(BlockSize size, u32 initialCount)
-    : m_head(nullptr)
+    : m_head()
     , m_capacity(i_u32::create(0))
     , m_used(i_u32::create(0))
     , m_blockSize(size)
@@ -86,7 +86,7 @@ void SystemAllocator::grow(u32 extraCapacity)
     {
         for(u32 i = 0; i < extraCapacity; ++i)
         {
-            Block* block = (Block*)platformReserve(blockSize());
+            auto* block = (Block*)platformReserve(blockSize());
             platformCommit((byte*)block, 0, blockSize());
             block->next = head;
             head        = block;
@@ -102,7 +102,7 @@ void SystemAllocator::grow(u32 extraCapacity)
         u32 pageCount     = extraCapacity / blocksPerPage;
         for(u32 i = 0; i < pageCount; ++i)
         {
-            Block* block = (Block*)platformReserve(pageSize);
+            auto* block = (Block*)platformReserve(pageSize);
             platformCommit((byte*)block, 0, pageSize);
             for(u32 j = 0; j < blocksPerPage; ++j)
             {

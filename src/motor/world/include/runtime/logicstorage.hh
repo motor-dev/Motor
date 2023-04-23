@@ -4,7 +4,6 @@
 
 #include <motor/world/stdafx.h>
 
-#include <motor/scheduler/kernel/iproduct.meta.hh>
 #include <motor/scheduler/kernel/producer.meta.hh>
 
 #include <motor/world/componentregistry.meta.hh>
@@ -20,9 +19,9 @@ private:
     weak< ComponentRegistry::Runtime > m_registryRuntime;
 
 public:
-    LogicStorage(raw< const Meta::Class >           componentClass,
-                 weak< ComponentRegistry::Runtime > registryRuntime);
-    ~LogicStorage();
+    LogicStorage(raw< const Meta::Class >                  componentClass,
+                 const weak< ComponentRegistry::Runtime >& registryRuntime);
+    ~LogicStorage() override;
 };
 
 }}  // namespace Motor::World

@@ -15,17 +15,14 @@ class GLESRenderer : public IRenderer
     friend class GLESWindow;
 
 public:
-    GLESRenderer(const Plugin::Context& context);
-    ~GLESRenderer();
+    explicit GLESRenderer(const Plugin::Context& context);
+    ~GLESRenderer() override;
 
     u32 getMaxSimultaneousRenderTargets() const override
     {
         return 1;
     }
     void flush() override;
-
-private:
-    void attachWindow(weak< GLESWindow > w) const;
 
 private:
     ref< IGPUResource >

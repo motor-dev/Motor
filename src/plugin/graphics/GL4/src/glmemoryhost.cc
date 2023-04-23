@@ -10,11 +10,9 @@ GLMemoryHost::GLMemoryHost() : IMemoryHost("OpenGL")
 {
 }
 
-GLMemoryHost::~GLMemoryHost()
-{
-}
+GLMemoryHost::~GLMemoryHost() = default;
 
-void GLMemoryHost::release(weak< KernelScheduler::IMemoryBuffer > buffer)
+void GLMemoryHost::release(const weak< KernelScheduler::IMemoryBuffer >& buffer)
 {
     motor_forceuse(buffer);
 }

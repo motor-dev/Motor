@@ -46,7 +46,7 @@ public:
     bool                    success() const;
 
 private:
-    void attachWindow(weak< GLWindow > w) const;
+    void attachWindow(const weak< GLWindow >& w) const;
 
 private:
     ref< IGPUResource > create(weak< const RenderSurfaceDescription > rendersurface) const override;

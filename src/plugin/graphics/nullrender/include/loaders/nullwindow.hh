@@ -13,12 +13,12 @@ class NullRenderer;
 class NullWindow : public IRenderTarget
 {
 public:
-    NullWindow(weak< const RenderWindowDescription > windowDescription,
-               weak< const NullRenderer >            renderer);
-    ~NullWindow();
+    NullWindow(const weak< const RenderWindowDescription >& windowDescription,
+               const weak< const NullRenderer >&            renderer);
+    ~NullWindow() override;
 
 private:
-    void load(weak< const Resource::IDescription > windowDescription) override;
+    void load(const weak< const Resource::IDescription >& windowDescription) override;
     void unload() override;
 
     void begin(ClearMode clear) const override;

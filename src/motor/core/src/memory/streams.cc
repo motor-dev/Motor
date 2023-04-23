@@ -13,9 +13,7 @@ MemoryStream::MemoryStream(minitl::Allocator& allocator, u32 size)
 {
 }
 
-MemoryStream::~MemoryStream()
-{
-}
+MemoryStream::~MemoryStream() = default;
 
 void MemoryStream::resize(u32 size)
 {

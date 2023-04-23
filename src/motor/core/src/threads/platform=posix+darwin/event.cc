@@ -4,17 +4,14 @@
 #include <motor/core/stdafx.h>
 #include <motor/core/threads/event.hh>
 
-#include <motor/core/timer.hh>
-
-#include <cerrno>
 #include <pthread.h>
 
 namespace Motor {
 
 Event::Event() : m_data(new pthread_cond_t), m_lock(new pthread_mutex_t)
 {
-    pthread_cond_init(reinterpret_cast< pthread_cond_t* >(m_data), 0);
-    pthread_mutex_init(reinterpret_cast< pthread_mutex_t* >(m_lock), 0);
+    pthread_cond_init(reinterpret_cast< pthread_cond_t* >(m_data), nullptr);
+    pthread_mutex_init(reinterpret_cast< pthread_mutex_t* >(m_lock), nullptr);
 }
 
 Event::~Event()
@@ -49,10 +46,14 @@ Threads::Waitable::WaitResult Event::wait()
 {
     int result = pthread_cond_wait(reinterpret_cast< pthread_cond_t* >(m_data),
                                    reinterpret_cast< pthread_mutex_t* >(m_lock));
-    switch(result)
+    if(result == 0)
     {
-    case 0: return Finished;
-    default: motor_notreached(); return Abandoned;
+        return Finished;
+    }
+    else
+    {
+        motor_notreached();
+        return Abandoned;
     }
 }
 

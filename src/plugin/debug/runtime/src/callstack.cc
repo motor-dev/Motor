@@ -11,11 +11,7 @@ Callstack::Address::Address() : m_address(0)
 }
 
 Callstack::Address::Address(const void* address)
-#ifdef _LP64
-    : m_address(reinterpret_cast< u64 >(address))
-#else
-    : m_address(reinterpret_cast< u32 >(address))
-#endif
+    : m_address(reinterpret_cast< decltype(m_address) >(address))
 {
 }
 
@@ -23,9 +19,7 @@ Callstack::Address::Address(u64 address) : m_address(address)
 {
 }
 
-Callstack::Address::Address(const Address& other) : m_address(other.m_address)
-{
-}
+Callstack::Address::Address(const Address& other) = default;
 
 Callstack::Address& Callstack::Address::operator=(const Address& other)
 {
@@ -36,9 +30,7 @@ Callstack::Address& Callstack::Address::operator=(const Address& other)
     return *this;
 }
 
-Callstack::Address::~Address()
-{
-}
+Callstack::Address::~Address() = default;
 
 u64 Callstack::Address::address() const
 {

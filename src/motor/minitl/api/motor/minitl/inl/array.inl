@@ -3,7 +3,6 @@
 #pragma once
 
 #include <motor/minitl/algorithm.hh>
-#include <motor/minitl/array.hh>
 #include <motor/minitl/assert.hh>
 #include <motor/minitl/cast.hh>
 

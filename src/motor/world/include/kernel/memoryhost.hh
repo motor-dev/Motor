@@ -15,9 +15,9 @@ private:
 
 public:
     explicit MemoryHost(const SystemAllocator& pageAllocator);
-    ~MemoryHost();
+    ~MemoryHost() override;
 
-    void release(weak< KernelScheduler::IMemoryBuffer > buffer);
+    void release(const weak< KernelScheduler::IMemoryBuffer >& buffer) override;
 };
 
 }}  // namespace Motor::World

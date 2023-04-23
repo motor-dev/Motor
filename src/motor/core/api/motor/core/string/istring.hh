@@ -2,7 +2,6 @@
    see LICENSE for detail */
 #pragma once
 
-#include <motor/core/stdafx.h>
 #include <motor/minitl/format.hh>
 
 namespace Motor {
@@ -13,8 +12,8 @@ private:
     u32 m_index;
 
 private:
-    u32 init(const char* str);
-    u32 init(const char* begin, const char* end);
+    static u32 init(const char* str);
+    static u32 init(const char* begin, const char* end);
 
 public:
     istring();
@@ -24,13 +23,13 @@ public:
     {
     }
     istring(const char* begin, const char* end);
-    istring(istring && other);
-    istring(const istring& other);
+    istring(istring && other) noexcept = default;
+    istring(const istring& other)      = default;
 
-    ~istring();
+    ~istring() = default;
 
-    istring& operator=(const istring& other);
-    istring& operator=(istring&& other);
+    istring& operator=(const istring& other)     = default;
+    istring& operator=(istring&& other) noexcept = default;
 
     const char* c_str() const;
     u32         size() const;

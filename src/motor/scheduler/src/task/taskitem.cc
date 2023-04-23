@@ -7,7 +7,8 @@
 
 namespace Motor { namespace Task {
 
-TaskItem::TaskItem(weak< const ITask > owner, weak< const IExecutor > executor, u32 taskCount)
+TaskItem::TaskItem(const weak< const ITask >& owner, const weak< const IExecutor >& executor,
+                   u32 taskCount)
     : m_owner(owner)
     , m_executor(executor)
     , m_started(i_u32::create(0))
@@ -16,8 +17,6 @@ TaskItem::TaskItem(weak< const ITask > owner, weak< const IExecutor > executor, 
 {
 }
 
-TaskItem::~TaskItem()
-{
-}
+TaskItem::~TaskItem() = default;
 
 }}  // namespace Motor::Task

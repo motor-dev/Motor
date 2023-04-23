@@ -21,11 +21,11 @@ private:
 public:
     ZipFile(void* handle, const ifilename& filename, const unz_file_info& fileInfo,
             const unz_file_pos& filePos);
-    ~ZipFile();
+    ~ZipFile() override;
 
 private:
-    virtual void doFillBuffer(weak< File::Ticket > ticket) const override;
-    virtual void doWriteBuffer(weak< Ticket > ticket) const override;
+    void doFillBuffer(const weak< File::Ticket >& ticket) const override;
+    void doWriteBuffer(const weak< Ticket >& ticket) const override;
 };
 
 }  // namespace Motor

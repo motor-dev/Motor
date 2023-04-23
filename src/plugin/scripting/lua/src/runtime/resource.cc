@@ -12,15 +12,14 @@ namespace Motor { namespace Lua {
 struct ResourceToken
 {
     weak< Resource::ResourceManager >    manager;
-    raw< const Meta::Class >             type;
+    raw< const Meta::Class >             type {};
     weak< const Resource::IDescription > description;
 };
 
 static int resourceLoaderGC(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.ResourceManager");
-    weak< Resource::ResourceManager >* userdata
-        = (weak< Resource::ResourceManager >*)lua_touserdata(state, 1);
+    auto* userdata = (weak< Resource::ResourceManager >*)lua_touserdata(state, 1);
     userdata->~weak();
     return 0;
 }
@@ -28,8 +27,7 @@ static int resourceLoaderGC(lua_State* state)
 static int resourceLoaderToString(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.ResourceManager");
-    weak< Resource::ResourceManager >* userdata
-        = (weak< Resource::ResourceManager >*)lua_touserdata(state, 1);
+    auto* userdata = (weak< Resource::ResourceManager >*)lua_touserdata(state, 1);
     lua_pushfstring(state, "resourcemanager[%p]", userdata->operator->());
     return 1;
 }
@@ -41,10 +39,10 @@ static int resourceLoaderLoad(lua_State* state)
 
     weak< Resource::ResourceManager > userdata
         = *(weak< Resource::ResourceManager >*)lua_touserdata(state, 1);
-    Meta::Value*                         v = (Meta::Value*)lua_touserdata(state, 2);
+    auto*                                v = (Meta::Value*)lua_touserdata(state, 2);
     weak< const Resource::IDescription > description
         = v->as< weak< const Resource::IDescription > >();
-    ResourceToken* resourceToken = (ResourceToken*)lua_newuserdata(state, sizeof(ResourceToken));
+    auto* resourceToken = (ResourceToken*)lua_newuserdata(state, sizeof(ResourceToken));
     new((void*)resourceToken) ResourceToken;
     resourceToken->description = description;
     resourceToken->manager     = userdata;
@@ -58,12 +56,12 @@ static int resourceLoaderLoad(lua_State* state)
 const luaL_Reg s_resourceLoaderMetaTable[] = {{"__gc", resourceLoaderGC},
                                               {"__tostring", resourceLoaderToString},
                                               {"load", resourceLoaderLoad},
-                                              {0, 0}};
+                                              {nullptr, nullptr}};
 
 static int resourceGC(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Resource");
-    ResourceToken* userdata = (ResourceToken*)lua_touserdata(state, 1);
+    auto* userdata = (ResourceToken*)lua_touserdata(state, 1);
     userdata->manager->unload(userdata->type, userdata->description);
     userdata->~ResourceToken();
     return 0;
@@ -72,13 +70,13 @@ static int resourceGC(lua_State* state)
 static int resourceToString(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Resource");
-    ResourceToken* userdata = (ResourceToken*)lua_touserdata(state, 1);
+    auto* userdata = (ResourceToken*)lua_touserdata(state, 1);
     lua_pushfstring(state, "Resource<%s>[%p]", userdata->type->fullname().str().name,
                     userdata->description.operator->());
     return 1;
 }
 
 const luaL_Reg s_resourceMetaTable[]
-    = {{"__gc", resourceGC}, {"__tostring", resourceToString}, {0, 0}};
+    = {{"__gc", resourceGC}, {"__tostring", resourceToString}, {nullptr, nullptr}};
 
 }}  // namespace Motor::Lua

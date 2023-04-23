@@ -6,12 +6,8 @@
 
 namespace Motor { namespace Input {
 
-Controller::Controller()
-{
-}
+Controller::Controller() = default;
 
-Controller::~Controller()
-{
-}
+Controller::~Controller() = default;
 
 }}  // namespace Motor::Input

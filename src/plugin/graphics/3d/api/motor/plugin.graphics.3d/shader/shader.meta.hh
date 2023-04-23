@@ -26,14 +26,12 @@ enum Stage
 class motor_api(3D) ShaderProgramDescription
     : public Resource::Description< ShaderProgramDescription >
 {
-    MOTOR_NOCOPY(ShaderProgramDescription);
-
 private:
     minitl::vector< ref< Shaders::Output > > m_outputs;
 
 protected:
-    ShaderProgramDescription(minitl::vector< ref< Shaders::Output > > outputs);
-    ~ShaderProgramDescription();
+    explicit ShaderProgramDescription(minitl::vector< ref< Shaders::Output > > outputs);
+    ~ShaderProgramDescription() override;
 
 public:
     virtual void buildSource(Shaders::IShaderBuilder & builder) const;

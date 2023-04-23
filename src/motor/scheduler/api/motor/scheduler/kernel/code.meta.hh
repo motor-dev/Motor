@@ -13,8 +13,8 @@ protected:
     const inamespace m_name;
 
 public:
-    Code(const inamespace& name);
-    ~Code();
+    explicit Code(const inamespace& name);
+    ~Code() override;
 
     inamespace name() const
     {

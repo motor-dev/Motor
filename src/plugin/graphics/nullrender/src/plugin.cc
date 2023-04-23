@@ -5,4 +5,4 @@
 #include <motor/plugin/plugin.hh>
 #include <nullrenderer.hh>
 
-MOTOR_PLUGIN_REGISTER(Motor::Null::NullRenderer);
+MOTOR_PLUGIN_REGISTER(Motor::Null::NullRenderer)

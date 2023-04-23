@@ -35,7 +35,7 @@ class GtkResourceDescription : public Resource::Description< GtkResourceDescript
 {
 protected:
     GtkResourceDescription();
-    ~GtkResourceDescription();
+    ~GtkResourceDescription() override;
 };
 
 }}  // namespace Motor::Gtk3

@@ -8,12 +8,10 @@
 
 namespace Motor { namespace KernelScheduler {
 
-IKernelLoader::IKernelLoader(ref< ICodeLoader > codeLoader) : m_codeLoader(codeLoader)
+IKernelLoader::IKernelLoader(const ref< ICodeLoader >& codeLoader) : m_codeLoader(codeLoader)
 {
 }
 
-IKernelLoader::~IKernelLoader()
-{
-}
+IKernelLoader::~IKernelLoader() = default;
 
 }}  // namespace Motor::KernelScheduler

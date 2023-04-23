@@ -6,12 +6,8 @@
 
 namespace Motor { namespace Shaders {
 
-Node::Node()
-{
-}
+Node::Node() = default;
 
-Node::~Node()
-{
-}
+Node::~Node() = default;
 
 }}  // namespace Motor::Shaders

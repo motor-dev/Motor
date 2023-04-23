@@ -23,10 +23,10 @@ private:
     KernelMain* m_entryPoint;
 
 public:
-    KernelObject(weak< const CodeObject > code, const istring name);
-    ~KernelObject();
+    KernelObject(const weak< const CodeObject >& code, istring name);
+    ~KernelObject() override;
 
-    virtual void run(u32 partIndex, u32 partCount) const override;
+    void run(u32 partIndex, u32 partCount) const override;
 };
 
 }}}  // namespace Motor::KernelScheduler::CPU

@@ -20,7 +20,7 @@ private:
     ifilename m_programPath;
 
 private:
-    ipath canonicalPath(const char* path, const char* pathSeparators);
+    static ipath canonicalPath(const char* path, const char* pathSeparators);
 
 public:
     static Environment& getEnvironment();
@@ -32,7 +32,7 @@ public:
     {
         return m_homeDirectory;
     }
-    const ipath getGameHomeDirectory() const
+    ipath getGameHomeDirectory() const
     {
         return m_homeDirectory + ipath(m_game);
     }
@@ -52,8 +52,8 @@ public:
     {
         return m_programPath;
     }
-    const char* getEnvironmentVariable(const char* variable) const;
-    size_t      getProcessorCount() const;
+    static const char* getEnvironmentVariable(const char* variable);
+    static size_t      getProcessorCount();
 };
 
 }  // namespace Motor

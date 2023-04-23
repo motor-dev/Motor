@@ -13,12 +13,12 @@ class Platform : public minitl::refcountable
     friend class Context;
 
 private:
-    const cl_platform_id             m_platformId;
+    cl_platform_id                   m_platformId;
     minitl::vector< ref< Context > > m_contexts;
 
 public:
-    Platform(cl_platform_id platformId);
-    ~Platform();
+    explicit Platform(cl_platform_id platformId);
+    ~Platform() override;
 
 public:
     static minitl::vector< ref< Platform > >         loadPlatforms();

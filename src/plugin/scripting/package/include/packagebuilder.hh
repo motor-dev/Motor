@@ -9,14 +9,12 @@ namespace Motor { namespace PackageBuilder {
 
 class PackageBuilder : public minitl::pointer
 {
-    MOTOR_NOCOPY(PackageBuilder);
-
 private:
     ref< Folder > m_dataFolder;
 
 public:
-    PackageBuilder(ref< Folder > dataFolder);
-    ~PackageBuilder();
+    explicit PackageBuilder(const ref< Folder >& dataFolder);
+    ~PackageBuilder() override;
 
 public:
     ref< Nodes::Package > createPackage(const ifilename&                      filename,

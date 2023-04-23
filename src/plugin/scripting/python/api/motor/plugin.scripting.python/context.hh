@@ -17,16 +17,15 @@ class motor_api(PYTHON) Context : public ScriptEngine< PythonScript >
 {
 public:
     Context(const Plugin::Context& context, const ref< PythonLibrary >& library);
-    ~Context();
+    ~Context() override;
 
 private:
-    virtual void unload(weak< const Resource::IDescription > description,
-                        Resource::Resource & handle) override;
-    virtual void runBuffer(weak< const PythonScript > script, Resource::Resource & resource,
-                           const minitl::Allocator::Block< u8 >& buffer) override;
-    virtual void reloadBuffer(weak< const PythonScript > script, Resource::Resource & resource,
-                              const minitl::Allocator::Block< u8 >& buffer) override;
-    static void  pythonInitialise();
+    void unload(const weak< const Resource::IDescription >& description, Resource::Resource& handle)
+        override;
+    void runBuffer(const weak< const PythonScript >& script, Resource::Resource& resource,
+                   const minitl::Allocator::Block< u8 >& buffer) override;
+    void reloadBuffer(const weak< const PythonScript >& script, Resource::Resource& resource,
+                      const minitl::Allocator::Block< u8 >& buffer) override;
 
 private:
     void runCode(const char* buffer, const ifilename& filename);

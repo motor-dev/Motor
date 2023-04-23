@@ -2,7 +2,6 @@
    see LICENSE for detail */
 #pragma once
 
-#include <motor/core/stdafx.h>
 #include <motor/minitl/format.hh>
 
 namespace Motor {
@@ -30,9 +29,7 @@ public:
         return begin();
     }
 
-private:
-    text& operator=(const text& other);
-    text();
+    text& operator=(const text& other) = delete;
 };
 
 static inline u32 format_length(const text& s, const minitl::format_options& options)

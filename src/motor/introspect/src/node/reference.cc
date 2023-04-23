@@ -14,9 +14,7 @@ Reference::Reference(const inamespace& name) : Node(), m_referenceName(name)
 {
 }
 
-Reference::~Reference()
-{
-}
+Reference::~Reference() = default;
 
 bool Reference::doResolve(DbContext& context)
 {

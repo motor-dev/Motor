@@ -22,7 +22,7 @@ private:
 
 public:
     PlatformWindow(::Display* display, ::Window window);
-    ~PlatformWindow();
+    ~PlatformWindow() override;
 };
 
 Window::PlatformWindow::PlatformWindow(::Display* display, ::Window window)
@@ -36,18 +36,16 @@ Window::PlatformWindow::~PlatformWindow()
     XDestroyWindow(m_display, m_window);
 }
 
-Window::Window(weak< const RenderWindowDescription > renderWindowDescription,
-               weak< const Renderer >                renderer)
+Window::Window(const weak< const RenderWindowDescription >& renderWindowDescription,
+               const weak< const Renderer >&                renderer)
     : IRenderTarget(renderWindowDescription, renderer)
     , m_window()
 {
 }
 
-Window::~Window()
-{
-}
+Window::~Window() = default;
 
-void Window::load(weak< const Resource::IDescription > /*renderWindowDescription*/)
+void Window::load(const weak< const Resource::IDescription >& /*renderWindowDescription*/)
 {
     m_window.reset(
         scoped< PlatformWindow >::create(m_renderer->arena(),
@@ -61,7 +59,8 @@ void Window::load(weak< const Resource::IDescription > /*renderWindowDescription
             ->m_platformRenderer->m_platformData.display,
         m_window->m_window,
         motor_checked_cast< const Renderer >(m_renderer)->m_platformRenderer->m_windowProperty,
-        XA_INTEGER, 8, PropModeReplace, (unsigned char*)&w, sizeof(w));
+        XA_INTEGER, 8, PropModeReplace, (unsigned char*)&w,
+        (int)sizeof(w));  // NOLINT(bugprone-sizeof-expression)
 }
 
 void Window::unload()
@@ -71,12 +70,13 @@ void Window::unload()
 
 void* Window::getWindowHandle() const
 {
-    if(motor_assert(m_window, "no window implementation is created")) return 0;
+    if(motor_assert(m_window, "no window implementation is created")) return nullptr;
     return (void*)&m_window->m_window;
 }
 
 knl::uint2 Window::getDimensions() const
 {
+    motor_forceuse(this);
     return knl::uint2 {1920, 1200};
 }
 

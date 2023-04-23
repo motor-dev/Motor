@@ -4,6 +4,7 @@
 
 #include <motor/scheduler/stdafx.h>
 #include <motor/resource/loader.hh>
+#include <motor/scheduler/kernel/icodeloader.hh>
 
 namespace Motor { namespace KernelScheduler {
 
@@ -11,14 +12,12 @@ class ICodeLoader;
 
 class motor_api(SCHEDULER) IKernelLoader : public Resource::ILoader
 {
-    MOTOR_NOCOPY(IKernelLoader);
-
 protected:
     const ref< ICodeLoader > m_codeLoader;
 
 protected:
-    IKernelLoader(ref< ICodeLoader > codeLoader);
-    ~IKernelLoader();
+    explicit IKernelLoader(const ref< ICodeLoader >& codeLoader);
+    ~IKernelLoader() override;
 
 public:
     weak< const ICodeLoader > codeLoader() const

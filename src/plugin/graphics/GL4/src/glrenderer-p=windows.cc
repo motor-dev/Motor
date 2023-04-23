@@ -10,12 +10,7 @@
 #include <motor/plugin.graphics.3d/mesh/mesh.meta.hh>
 #include <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.hh>
 #include <motor/plugin.graphics.3d/shader/shader.meta.hh>
-#include <motor/plugin.graphics.3d/texture/texture.meta.hh>
-#include <loaders/mesh/glmesh.hh>
-#include <loaders/rendertarget/glsurface.hh>
 #include <loaders/rendertarget/glwindow.hh>
-#include <loaders/shader/glshader.hh>
-#include <loaders/texture/gltexture.hh>
 
 #include <GL4/wglext.h>
 
@@ -52,7 +47,6 @@ static const PIXELFORMATDESCRIPTOR s_pfd
 class GLRenderer::Context : public minitl::refcountable
 {
     friend class GLRenderer;
-    MOTOR_NOCOPY(Context);
 
 private:
     HWND                            m_dummyHwnd;
@@ -65,38 +59,38 @@ public:
     const ShaderExtensions shaderext;
 
 public:
-    Context(weak< const GLRenderer > renderer);
-    ~Context();
+    explicit Context(const weak< const GLRenderer >& renderer);
+    ~Context() override;
 };
 
-static HWND createDummyWnd(weak< const GLRenderer > renderer)
+static HWND createDummyWnd(const weak< const GLRenderer >& renderer)
 {
     minitl::format_buffer< 128u > classname
         = minitl::format< 128u >(FMT("__motor__{0}__"), (const void*)renderer);
-    HWND hWnd = CreateWindowEx(0, classname.c_str(), "", WS_POPUP, 0, 0, 1, 1, 0, 0,
-                               (HINSTANCE)::GetModuleHandle(0), 0);
+    HWND hWnd = CreateWindowEx(0, classname.c_str(), "", WS_POPUP, 0, 0, 1, 1, nullptr, nullptr,
+                               (HINSTANCE)::GetModuleHandle(nullptr), nullptr);
     if(!hWnd)
     {
         char* errorMessage;
-        ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL,
-                        ::GetLastError(), 0, reinterpret_cast< LPTSTR >(&errorMessage), 0, NULL);
+        ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr,
+                        ::GetLastError(), 0, reinterpret_cast< LPTSTR >(&errorMessage), 0, nullptr);
         motor_error(Log::gl(), errorMessage);
         ::LocalFree(errorMessage);
     }
     return hWnd;
 }
 
-static HGLRC createGLContext(weak< const GLRenderer > renderer, HDC hdc)
+static HGLRC createGLContext(const weak< const GLRenderer >& renderer, HDC hdc)
 {
-    GLuint pixelFormat = ChoosePixelFormat(hdc, &s_pfd);
+    auto pixelFormat = ChoosePixelFormat(hdc, &s_pfd);
     SetPixelFormat(hdc, pixelFormat, &s_pfd);
 
     PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
 
     {
-        HWND   hwnd = createDummyWnd(renderer);
-        HDC    dc   = GetDC(hwnd);
-        GLuint pf   = ChoosePixelFormat(hdc, &s_pfd);
+        HWND hwnd = createDummyWnd(renderer);
+        HDC  dc   = GetDC(hwnd);
+        auto pf   = ChoosePixelFormat(hdc, &s_pfd);
         SetPixelFormat(dc, pf, &s_pfd);
 
         // phony context to get the context creation method
@@ -106,12 +100,12 @@ static HGLRC createGLContext(weak< const GLRenderer > renderer, HDC hdc)
         wglCreateContextAttribsARB = motor_function_cast< PFNWGLCREATECONTEXTATTRIBSARBPROC >(
             wglGetProcAddress("wglCreateContextAttribsARB"));
 
-        wglMakeCurrent(0, 0);
+        wglMakeCurrent(nullptr, nullptr);
         wglDeleteContext(glrc);
         ReleaseDC(hwnd, dc);
         DestroyWindow(hwnd);
     }
-    HGLRC rc = 0;
+    HGLRC rc = nullptr;
     if(wglCreateContextAttribsARB)
     {
         int attribs[] = {WGL_CONTEXT_MAJOR_VERSION_ARB,
@@ -123,24 +117,24 @@ static HGLRC createGLContext(weak< const GLRenderer > renderer, HDC hdc)
                          WGL_CONTEXT_FLAGS_ARB,
                          WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
                          0};
-        rc            = wglCreateContextAttribsARB(hdc, 0, attribs);
+        rc            = wglCreateContextAttribsARB(hdc, nullptr, attribs);
         if(!rc)
         {
             attribs[1] = 3;
             attribs[3] = 2;
-            rc         = wglCreateContextAttribsARB(hdc, 0, attribs);
+            rc         = wglCreateContextAttribsARB(hdc, nullptr, attribs);
         }
         if(!rc)
         {
             attribs[1] = 3;
             attribs[3] = 0;
-            rc         = wglCreateContextAttribsARB(hdc, 0, attribs);
+            rc         = wglCreateContextAttribsARB(hdc, nullptr, attribs);
         }
         if(!rc)
         {
             attribs[1] = 2;
             attribs[3] = 0;
-            rc         = wglCreateContextAttribsARB(hdc, 0, attribs);
+            rc         = wglCreateContextAttribsARB(hdc, nullptr, attribs);
         }
     }
 
@@ -163,7 +157,7 @@ static HGLRC createGLContext(weak< const GLRenderer > renderer, HDC hdc)
     return rc;
 }
 
-GLRenderer::Context::Context(weak< const GLRenderer > renderer)
+GLRenderer::Context::Context(const weak< const GLRenderer >& renderer)
     : m_dummyHwnd(createDummyWnd(renderer))
     , m_dummyDC(GetDC(m_dummyHwnd))
     , m_glContext(createGLContext(renderer, m_dummyDC))
@@ -176,7 +170,7 @@ GLRenderer::Context::Context(weak< const GLRenderer > renderer)
 
 GLRenderer::Context::~Context()
 {
-    wglMakeCurrent(0, 0);
+    wglMakeCurrent(nullptr, nullptr);
     if(m_glContext) wglDeleteContext(m_glContext);
     ReleaseDC(m_dummyHwnd, m_dummyDC);
     DestroyWindow(m_dummyHwnd);
@@ -185,7 +179,6 @@ GLRenderer::Context::~Context()
 class GLWindow::Context : public minitl::refcountable
 {
     friend class GLWindow;
-    MOTOR_NOCOPY(Context);
 
 private:
     HGLRC m_glContext;
@@ -196,7 +189,7 @@ private:
 
 public:
     Context(HGLRC rc, HWND hwnd, HDC defaultDc, u64 threadId);
-    ~Context();
+    ~Context() override;
 };
 
 GLWindow::Context::Context(HGLRC rc, HWND hwnd, HDC defaultDc, u64 threadId)
@@ -206,7 +199,7 @@ GLWindow::Context::Context(HGLRC rc, HWND hwnd, HDC defaultDc, u64 threadId)
     , m_defaultDc(defaultDc)
     , m_threadId(threadId)
 {
-    GLuint pixelFormat = ChoosePixelFormat(m_dc, &s_pfd);
+    auto pixelFormat = ChoosePixelFormat(m_dc, &s_pfd);
     SetPixelFormat(m_dc, pixelFormat, &s_pfd);
 }
 
@@ -235,7 +228,7 @@ GLRenderer::~GLRenderer()
     flush();
 }
 
-void GLRenderer::attachWindow(weak< GLWindow > w) const
+void GLRenderer::attachWindow(const weak< GLWindow >& w) const
 {
     motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     HWND wnd = *(HWND*)w->getWindowHandle();
@@ -255,19 +248,19 @@ const ShaderExtensions& GLRenderer::shaderext() const
 
 bool GLRenderer::success() const
 {
-    return hasPlatformRenderer() && m_context != 0;
+    return hasPlatformRenderer() && m_context != nullptr;
 }
 
 //------------------------------------------------------------------------
 
-GLWindow::GLWindow(weak< const RenderWindowDescription > renderwindow,
-                   weak< const GLRenderer >              renderer)
+GLWindow::GLWindow(const weak< const RenderWindowDescription >& renderwindow,
+                   const weak< const GLRenderer >&              renderer)
     : Windowing::Window(renderwindow, renderer)
     , m_context(scoped< Context >())
 {
 }
 
-void GLWindow::load(weak< const Resource::IDescription > description)
+void GLWindow::load(const weak< const Resource::IDescription >& description)
 {
     Window::load(description);
     motor_checked_cast< const GLRenderer >(m_renderer)->attachWindow(this);
@@ -286,8 +279,8 @@ void GLWindow::setCurrent() const
     if(!wglMakeCurrent(m_context->m_dc, m_context->m_glContext))
     {
         char* errorMessage;
-        ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL,
-                        ::GetLastError(), 0, reinterpret_cast< LPTSTR >(&errorMessage), 0, NULL);
+        ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr,
+                        ::GetLastError(), 0, reinterpret_cast< LPTSTR >(&errorMessage), 0, nullptr);
         motor_error(Log::gl(), errorMessage);
         ::LocalFree(errorMessage);
     }
@@ -299,8 +292,8 @@ void GLWindow::clearCurrent() const
     if(!wglMakeCurrent(m_context->m_defaultDc, m_context->m_glContext))
     {
         char* errorMessage;
-        ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL,
-                        ::GetLastError(), 0, reinterpret_cast< LPTSTR >(&errorMessage), 0, NULL);
+        ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr,
+                        ::GetLastError(), 0, reinterpret_cast< LPTSTR >(&errorMessage), 0, nullptr);
         motor_error(Log::gl(), errorMessage);
         ::LocalFree(errorMessage);
     }

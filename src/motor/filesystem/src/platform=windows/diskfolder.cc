@@ -108,9 +108,9 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                             continue;
                         }
                     }
-                    m_folders.push_back(minitl::make_tuple(
+                    m_folders.emplace_back(
                         name, ref< DiskFolder >::create(Arena::filesystem(), m_path + ipath(name),
-                                                        scanPolicy, Folder::CreateNone)));
+                                                        scanPolicy, Folder::CreateNone));
                 }
                 else
                 {
@@ -120,7 +120,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                     ref< Win32File > newFile
                         = ref< Win32File >::create(Arena::filesystem(), m_path + ifilename(name),
                                                    size, getTimeStamp(data.ftLastWriteTime));
-                    m_files.push_back(minitl::make_tuple(name, newFile));
+                    m_files.emplace_back(name, newFile);
                 }
             } while(FindNextFile(h, &data));
             FindClose(h);
@@ -131,7 +131,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 weak< File > DiskFolder::createFile(const istring& name)
 {
     const ifilename::Filename path = (m_path + ifilename(name)).str('\\');
-    HANDLE h = CreateFileA(path.name, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, nullptr);
+    HANDLE h = CreateFileA(path.name, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, 0, nullptr);
     if(h == INVALID_HANDLE_VALUE)
     {
         DWORD errorCode = ::GetLastError();
@@ -197,10 +197,9 @@ void DiskFolder::onChanged()
                     }
                     if(!exists)
                     {
-                        m_folders.push_back(minitl::make_tuple(
-                            name,
-                            ref< DiskFolder >::create(Arena::filesystem(), m_path + ipath(name),
-                                                      Folder::ScanNone, Folder::CreateNone)));
+                        m_folders.emplace_back(name, ref< DiskFolder >::create(
+                                                         Arena::filesystem(), m_path + ipath(name),
+                                                         Folder::ScanNone, Folder::CreateNone));
                     }
                 }
                 else
@@ -227,7 +226,7 @@ void DiskFolder::onChanged()
                         ref< Win32File > newFile = ref< Win32File >::create(
                             Arena::filesystem(), m_path + ifilename(name), size,
                             getTimeStamp(data.ftLastWriteTime));
-                        m_files.push_back(minitl::make_tuple(name, newFile));
+                        m_files.emplace_back(name, newFile);
                     }
                 }
             } while(FindNextFile(h, &data));

@@ -13,12 +13,12 @@ BitmapFont::BitmapFont(const istring& fontSystemName)
 {
 }
 
-BitmapFont::BitmapFont(weak< const File > fontFile) : m_fontSystemName(""), m_fontFile(fontFile)
+BitmapFont::BitmapFont(const weak< const File >& fontFile)
+    : m_fontSystemName("")
+    , m_fontFile(fontFile)
 {
 }
 
-BitmapFont::~BitmapFont()
-{
-}
+BitmapFont::~BitmapFont() = default;
 
 }  // namespace Motor

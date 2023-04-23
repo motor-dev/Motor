@@ -9,7 +9,7 @@
 namespace Motor {
 
 text::text(const char* str)
-    : m_text(str ? Arena::general().strdup(str) : 0)
+    : m_text(str ? Arena::general().strdup(str) : nullptr)
     , m_length(str ? motor_checked_numcast< u32 >(strlen(str)) : 0)
 {
 }
@@ -21,7 +21,7 @@ text::text(const char* begin, const char* end)
 }
 
 text::text(const text& other)
-    : m_text(other.m_text ? Arena::general().strdup(other.begin(), other.end()) : 0)
+    : m_text(other.m_text ? Arena::general().strdup(other.begin(), other.end()) : nullptr)
     , m_length(other.m_length)
 {
 }

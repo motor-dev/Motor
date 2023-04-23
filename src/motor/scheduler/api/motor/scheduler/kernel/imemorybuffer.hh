@@ -13,8 +13,8 @@ protected:
     weak< const IMemoryHost > const m_host;
 
 protected:
-    IMemoryBuffer(weak< const IMemoryHost > host);
-    ~IMemoryBuffer();
+    explicit IMemoryBuffer(const weak< const IMemoryHost >& host);
+    ~IMemoryBuffer() override;
 
 public:
     weak< const IMemoryHost > getHost() const

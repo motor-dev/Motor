@@ -6,4 +6,4 @@
 #include <motor/plugin/plugin.hh>
 #include <luasample.hh>
 
-MOTOR_PLUGIN_REGISTER(Motor::LuaSample);
+MOTOR_PLUGIN_REGISTER(Motor::LuaSample)

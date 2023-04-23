@@ -39,12 +39,11 @@ private:
     Mutex                    m_allocLock;
 
 private:
-    u32   platformPageSize();
-    byte* platformReserve(u32 size);
-    void  platformCommit(byte * ptr, u32 start, u32 stop);
-    void  platformRelease(byte * ptr, u32 start, u32 stop);
-    void  platformFree(byte * ptr, u32 size);
-    void  grow(u32 extraCapacity);
+    static u32   platformPageSize();
+    static byte* platformReserve(u32 size);
+    static void  platformCommit(byte * ptr, u32 start, u32 stop);
+    static void  platformFree(byte * ptr, u32 size);
+    void         grow(u32 extraCapacity);
 
 public:
     SystemAllocator(BlockSize size, u32 initialCount);

@@ -18,12 +18,12 @@ public:
     AssertSetup(const AssertSetup& other)            = delete;
     AssertSetup& operator=(const AssertSetup& other) = delete;
 
-    AssertSetup(const Motor::Plugin::Context& /*context*/)
+    explicit AssertSetup(const Motor::Plugin::Context& /*context*/)
         : m_previousAssertionCallback(minitl::setAssertionCallback(&AssertionCallback))
     {
         motor_debug(Log::system(), "installed assert callback");
     }
-    ~AssertSetup()
+    ~AssertSetup() override
     {
         minitl::setAssertionCallback(m_previousAssertionCallback);
     }

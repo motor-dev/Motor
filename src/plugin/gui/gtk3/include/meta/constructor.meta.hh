@@ -12,7 +12,7 @@ struct Constructor
     Meta::Method metaMethod;
 
 public:
-    const GType type;
+    const GType type {};
 
     static Meta::Value call(raw< const Meta::Method > method, Meta::Value* params, u32 nparams);
 };

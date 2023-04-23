@@ -8,7 +8,7 @@
 
 namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
-CodeObject::CodeObject(weak< const Context > context, const inamespace& name)
+CodeObject::CodeObject(const weak< const Context >& context, const inamespace& name)
     : m_kernel(name, ipath("kernel"))
     , m_program(loadProgram(context))
 {
@@ -19,7 +19,7 @@ CodeObject::~CodeObject()
     if(m_program) clReleaseProgram(m_program);
 }
 
-cl_program CodeObject::loadProgram(weak< const Context > context)
+cl_program CodeObject::loadProgram(const weak< const Context >& context)
 {
     if(m_kernel)
     {
@@ -30,7 +30,7 @@ cl_program CodeObject::loadProgram(weak< const Context > context)
         return context->buildProgram(kernelSourceSize, kernelSource);
     }
     else
-        return 0;
+        return nullptr;
 }
 
 }}}  // namespace Motor::KernelScheduler::OpenCL

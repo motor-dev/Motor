@@ -21,8 +21,6 @@ namespace Task {
 
 class TaskScheduler : public minitl::pointer
 {
-    MOTOR_NOCOPY(TaskScheduler);
-
 public:
     class Worker;
 
@@ -32,7 +30,7 @@ private:
 
     struct TaskPool
     {
-        TaskPool(u32 workerCount);
+        explicit TaskPool(u32 workerCount);
         ~TaskPool();
 
         void      push(TaskItem* item, u32 count);
@@ -59,8 +57,8 @@ private:
     Semaphore                 m_taskItemAvailable;
 
 public:
-    TaskScheduler(weak< Scheduler > scheduler);
-    ~TaskScheduler();
+    explicit TaskScheduler(const weak< Scheduler >& scheduler);
+    ~TaskScheduler() override;
 
     void queue(weak< const ITask > task, weak< const IExecutor > executor, u32 breakdownCount);
 

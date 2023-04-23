@@ -6,12 +6,8 @@
 
 namespace Motor {
 
-Text::Text()
-{
-}
+Text::Text() = default;
 
-Text::~Text()
-{
-}
+Text::~Text() = default;
 
 }  // namespace Motor

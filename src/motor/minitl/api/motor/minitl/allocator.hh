@@ -14,8 +14,6 @@ public:
     template < typename T >
     class Block
     {
-        MOTOR_NOCOPY(Block);
-
     private:
         Allocator* m_allocator;
         u64        m_count;
@@ -46,6 +44,8 @@ public:
             other.m_data  = nullptr;
             return *this;
         }
+        Block(const Block&)            = delete;
+        Block& operator=(const Block&) = delete;
         ~Block()
         {
             m_allocator->free(m_data);

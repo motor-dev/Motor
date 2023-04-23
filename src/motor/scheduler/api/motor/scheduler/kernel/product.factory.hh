@@ -3,7 +3,6 @@
 #pragma once
 
 #include <motor/scheduler/stdafx.h>
-#include <motor/scheduler/kernel/iproduct.meta.hh>
 
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>

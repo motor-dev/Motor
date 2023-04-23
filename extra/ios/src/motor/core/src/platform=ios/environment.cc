@@ -52,12 +52,12 @@ Environment::~Environment()
 {
 }
 
-size_t Environment::getProcessorCount() const
+size_t Environment::getProcessorCount()
 {
     return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
-const char* Environment::getEnvironmentVariable(const char* variable) const
+const char* Environment::getEnvironmentVariable(const char* variable)
 {
     return getenv(variable);
 }

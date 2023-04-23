@@ -89,7 +89,6 @@ def path_from(path, base_node):
 
 
 def write_value(node, value, key=''):
-
     def convert_value(v):
         if isinstance(v, bool):
             return 'bool', v and 'true' or 'false'
@@ -292,7 +291,7 @@ class QtToolchain(QtObject):
                         flags.append(f)
             if isinstance(compiler, list):
                 compiler = compiler[0]
-            for define in env.DEFINES + env.SYSTEM_DEFINES:
+            for define in env.DEFINES + env.COMPILER_DEFINES:
                 flags.append(env.DEFINES_ST % define)
 
             if env.COMPILER_NAME == 'gcc':
@@ -350,7 +349,7 @@ class QtToolchain(QtObject):
                 self.ProjectExplorer_CustomToolChain_ErrorPattern = ''
                 self.ProjectExplorer_CustomToolChain_FileNameCap = 1
                 self.ProjectExplorer_CustomToolChain_HeaderPaths = tuple(
-                    i.replace('\\', '/') for i in env.INCLUDES + env.SYSTEM_INCLUDES
+                    i.replace('\\', '/') for i in env.INCLUDES + env.COMPILER_INCLUDES
                 )
                 self.ProjectExplorer_CustomToolChain_LineNumberCap = 2
                 self.ProjectExplorer_CustomToolChain_MakePath = ''
@@ -360,7 +359,7 @@ class QtToolchain(QtObject):
                 toolchain_id = 'ProjectExplorer.ToolChain.Custom:%s' % generateGUID(
                     'Motor:toolchain:%s:%d' % (env_name, language)
                 )
-                self.ProjectExplorer_CustomToolChain_PredefinedMacros = tuple(env.DEFINES + env.SYSTEM_DEFINES)
+                self.ProjectExplorer_CustomToolChain_PredefinedMacros = tuple(env.DEFINES + env.COMPILER_DEFINES)
                 self.ProjectExplorer_CustomToolChain_TargetAbi = abi
             self.ProjectExplorer_ToolChain_Language = language
             self.ProjectExplorer_ToolChain_Autodetect = False
@@ -691,7 +690,7 @@ class QtCreator(Build.BuildContext):
         if not os.path.exists(HOME_DIRECTORY):
             os.makedirs(HOME_DIRECTORY)
         with XmlDocument(
-            open(os.path.join(HOME_DIRECTORY, 'profiles.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorProfiles')]
+                open(os.path.join(HOME_DIRECTORY, 'profiles.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorProfiles')]
         ) as document:
             with XmlNode(document, 'qtcreator') as creator:
                 profile_index = 0
@@ -712,7 +711,7 @@ class QtCreator(Build.BuildContext):
                     XmlNode(data, 'value', '1', [('type', 'int')])
 
         with XmlDocument(
-            open(os.path.join(HOME_DIRECTORY, 'debuggers.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorDebugger')]
+                open(os.path.join(HOME_DIRECTORY, 'debuggers.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorDebugger')]
         ) as document:
             with XmlNode(document, 'qtcreator') as creator:
                 debugger_index = 0
@@ -730,7 +729,7 @@ class QtCreator(Build.BuildContext):
                     XmlNode(data, 'value', '1', [('type', 'int')])
 
         with XmlDocument(
-            open(os.path.join(HOME_DIRECTORY, 'toolchains.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorToolChains')]
+                open(os.path.join(HOME_DIRECTORY, 'toolchains.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorToolChains')]
         ) as document:
             with XmlNode(document, 'qtcreator') as creator:
                 toolchain_index = 0
@@ -1156,60 +1155,63 @@ class QtCreator(Build.BuildContext):
 
                         write_value(
                             data, [
-                                ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', env_name),
-                                ('ProjectExplorer.ProjectConfiguration.DisplayName', env_name),
-                                ('ProjectExplorer.ProjectConfiguration.Id', self.get_platform_guid(env_name)),
-                                ('ProjectExplorer.Target.ActiveBuildConfiguration', 0),
-                                ('ProjectExplorer.Target.ActiveDeployConfiguration', 0),
-                                ('ProjectExplorer.Target.ActiveRunConfiguration', 0),
-                            ] + build_configurations + [
-                                ('ProjectExplorer.Target.BuildConfigurationCount', len(build_configurations)),
-                                (
-                                    'ProjectExplorer.Target.DeployConfiguration.0', [
-                                        (
-                                            'ProjectExplorer.BuildConfiguration.BuildStepList.0', [
-                                                (
-                                                    'ProjectExplorer.BuildStepList.Step.0', [
-                                                        ('ProjectExplorer.BuildStep.Enabled', True),
-                                                        (
-                                                            'ProjectExplorer.ProcessStep.Arguments', '%s deploy:%s:%s' %
-                                                            (sys.argv[0], to_var('Toolchain'), to_var('Variant'))
-                                                        ),
-                                                        ('ProjectExplorer.ProcessStep.Command', sys.executable),
-                                                        (
-                                                            'ProjectExplorer.ProcessStep.WorkingDirectory',
-                                                            self.srcnode.abspath()
-                                                        ),
-                                                        (
-                                                            'ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
-                                                            'Custom Process Step'
-                                                        ),
-                                                        ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                                        (
-                                                            'ProjectExplorer.ProjectConfiguration.Id',
-                                                            'ProjectExplorer.ProcessStep'
-                                                        ),
-                                                    ]
-                                                ),
-                                                ('ProjectExplorer.BuildStepList.StepsCount', 1),
-                                                ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Deploy'),
-                                                ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                                (
-                                                    'ProjectExplorer.ProjectConfiguration.Id',
-                                                    'ProjectExplorer.BuildSteps.Deploy'
-                                                ),
-                                            ]
-                                        ),
-                                        ('ProjectExplorer.BuildConfiguration.BuildStepListCount', 1),
-                                        ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Deploy locally'),
-                                        ('ProjectExplorer.ProjectConfiguration.DisplayName', 'Qbs Install'),
-                                        ('ProjectExplorer.ProjectConfiguration.Id', 'Qbs.Deploy'),
-                                    ]
-                                ), ('ProjectExplorer.Target.DeployConfigurationCount', 1),
-                                ('ProjectExplorer.Target.PluginSettings', [])
-                            ] + run_configurations + [
-                                ('ProjectExplorer.Target.RunConfigurationCount', len(run_configurations)),
-                            ]
+                                      ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', env_name),
+                                      ('ProjectExplorer.ProjectConfiguration.DisplayName', env_name),
+                                      ('ProjectExplorer.ProjectConfiguration.Id', self.get_platform_guid(env_name)),
+                                      ('ProjectExplorer.Target.ActiveBuildConfiguration', 0),
+                                      ('ProjectExplorer.Target.ActiveDeployConfiguration', 0),
+                                      ('ProjectExplorer.Target.ActiveRunConfiguration', 0),
+                                  ] + build_configurations + [
+                                      ('ProjectExplorer.Target.BuildConfigurationCount', len(build_configurations)),
+                                      (
+                                          'ProjectExplorer.Target.DeployConfiguration.0', [
+                                              (
+                                                  'ProjectExplorer.BuildConfiguration.BuildStepList.0', [
+                                                      (
+                                                          'ProjectExplorer.BuildStepList.Step.0', [
+                                                              ('ProjectExplorer.BuildStep.Enabled', True),
+                                                              (
+                                                                  'ProjectExplorer.ProcessStep.Arguments',
+                                                                  '%s deploy:%s:%s' %
+                                                                  (sys.argv[0], to_var('Toolchain'), to_var('Variant'))
+                                                              ),
+                                                              ('ProjectExplorer.ProcessStep.Command', sys.executable),
+                                                              (
+                                                                  'ProjectExplorer.ProcessStep.WorkingDirectory',
+                                                                  self.srcnode.abspath()
+                                                              ),
+                                                              (
+                                                                  'ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                                                  'Custom Process Step'
+                                                              ),
+                                                              ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                                              (
+                                                                  'ProjectExplorer.ProjectConfiguration.Id',
+                                                                  'ProjectExplorer.ProcessStep'
+                                                              ),
+                                                          ]
+                                                      ),
+                                                      ('ProjectExplorer.BuildStepList.StepsCount', 1),
+                                                      ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                                       'Deploy'),
+                                                      ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                                      (
+                                                          'ProjectExplorer.ProjectConfiguration.Id',
+                                                          'ProjectExplorer.BuildSteps.Deploy'
+                                                      ),
+                                                  ]
+                                              ),
+                                              ('ProjectExplorer.BuildConfiguration.BuildStepListCount', 1),
+                                              ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                               'Deploy locally'),
+                                              ('ProjectExplorer.ProjectConfiguration.DisplayName', 'Qbs Install'),
+                                              ('ProjectExplorer.ProjectConfiguration.Id', 'Qbs.Deploy'),
+                                          ]
+                                      ), ('ProjectExplorer.Target.DeployConfigurationCount', 1),
+                                      ('ProjectExplorer.Target.PluginSettings', [])
+                                  ] + run_configurations + [
+                                      ('ProjectExplorer.Target.RunConfigurationCount', len(run_configurations)),
+                                  ]
                         )
                         target_index += 1
                 with XmlNode(qtcreator, 'data') as data:
@@ -1368,7 +1370,7 @@ class Qbs(QtCreator):
 
                 project_file.write('%s    name: "%s"\n' % (indent, p.name))
                 project_file.write('%s    targetName: "%s"\n' % (indent, p.name.split('.')[-1]))
-                project_file.write('%s    cpp._skipAllChecks: true\n' % (indent, ))
+                project_file.write('%s    cpp._skipAllChecks: true\n' % (indent,))
                 project_file.write('%s    cpp.includePaths: [\n' % (indent))
                 for include in includes:
                     project_file.write('%s        "%s",\n' % (indent, include.replace('\\', '/')))

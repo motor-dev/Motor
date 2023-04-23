@@ -12,12 +12,12 @@ OutlineFont::OutlineFont(const istring& fontSystemName)
 {
 }
 
-OutlineFont::OutlineFont(weak< const File > fontFile) : m_fontSystemName(""), m_fontFile(fontFile)
+OutlineFont::OutlineFont(const weak< const File >& fontFile)
+    : m_fontSystemName("")
+    , m_fontFile(fontFile)
 {
 }
 
-OutlineFont::~OutlineFont()
-{
-}
+OutlineFont::~OutlineFont() = default;
 
 }  // namespace Motor

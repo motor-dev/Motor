@@ -9,8 +9,8 @@
 
 namespace Motor { namespace Plugin {
 
-Context::Context(weak< Resource::ResourceManager > manager, ref< Folder > folder,
-                 weak< Scheduler > scheduler)
+Context::Context(const weak< Resource::ResourceManager >& manager, const ref< Folder >& folder,
+                 const weak< Scheduler >& scheduler)
     : resourceManager(manager)
     , dataFolder(folder)
     , scheduler(scheduler)

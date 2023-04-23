@@ -13,12 +13,12 @@ class NullRenderer;
 class NullSurface : public IRenderTarget
 {
 public:
-    NullSurface(weak< const RenderSurfaceDescription > resource,
-                weak< const NullRenderer >             renderer);
-    ~NullSurface();
+    NullSurface(const weak< const RenderSurfaceDescription >& resource,
+                const weak< const NullRenderer >&             renderer);
+    ~NullSurface() override;
 
 private:
-    void load(weak< const Resource::IDescription > surfaceDescription) override;
+    void load(const weak< const Resource::IDescription >& surfaceDescription) override;
     void unload() override;
 
     void begin(ClearMode clear) const override;

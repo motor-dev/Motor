@@ -5,8 +5,6 @@
 #define MOTOR_MINITL_FORMAT_INL_
 /**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
-#include <motor/minitl/assert.hh>
-#include <motor/minitl/format.hh>
 #include <motor/minitl/tuple.hh>
 #include <motor/minitl/utility.hh>
 
@@ -31,9 +29,6 @@ formatter< 'd' > format_as(unsigned long long int);
 formatter< 'p' > format_as(const void*);
 formatter< 'g' > format_as(double);
 
-/* allways allows dumping 8 bytes at once in a pattern */
-static constexpr u32 g_minimumWriteSize = 8;
-
 motor_api(MINITL) bool invalid_format(const char* reason);
 
 struct format_pattern_info
@@ -54,15 +49,6 @@ struct pattern_range
 {
     u32 blockStart;
     u32 patternStart;
-};
-
-template < typename T >
-struct extract_format_type;
-
-template < char FORMAT_TYPE >
-struct extract_format_type< formatter< FORMAT_TYPE > >
-{
-    static constexpr char format_type = FORMAT_TYPE;
 };
 
 template < typename T >
@@ -476,7 +462,7 @@ template < typename T, typename... Args, u32... PATTERN_INDICES, u32... ARGUMENT
 u32 format(char* destination, u32 destinationLength, index_sequence< PATTERN_INDICES... >,
            index_sequence< ARGUMENT_INDICES... >, Args&&... arguments)
 {
-    constexpr T                   format;
+    constexpr T                   format {};
     constexpr u32                 patternCount           = sizeof...(PATTERN_INDICES);
     constexpr format_pattern_info patterns[patternCount] = {
         get_format_info< T, PATTERN_INDICES,

@@ -17,8 +17,8 @@ public:
     u16 promotion;
     u16 qualification;
 
-    ConversionCost(u16 qualification = 0, u16 promotion = 0, u16 conversion = 0, u8 variant = 0,
-                   u8 incompatible = 0)
+    explicit ConversionCost(u16 qualification = 0, u16 promotion = 0, u16 conversion = 0,
+                            u8 variant = 0, u8 incompatible = 0)
         : incompatible(incompatible)
         , variant(variant)
         , conversion(conversion)

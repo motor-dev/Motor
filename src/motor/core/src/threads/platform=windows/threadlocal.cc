@@ -20,19 +20,19 @@ void* ThreadLocal::tlsAlloc()
 
 void ThreadLocal::tlsFree(void* key)
 {
-    DWORD k = static_cast< DWORD >((uintptr_t)key);
+    auto k = static_cast< DWORD >((uintptr_t)key);
     TlsFree(k);
 }
 
 void* ThreadLocal::tlsGet(void* key)
 {
-    DWORD k = static_cast< DWORD >((uintptr_t)key);
+    auto k = static_cast< DWORD >((uintptr_t)key);
     return TlsGetValue(k);
 }
 
 void ThreadLocal::tlsSet(void* key, void* value)
 {
-    DWORD k = static_cast< DWORD >((uintptr_t)key);
+    auto k = static_cast< DWORD >((uintptr_t)key);
     TlsSetValue(k, value);
 }
 

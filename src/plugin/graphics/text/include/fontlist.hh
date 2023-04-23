@@ -11,7 +11,7 @@ class FontList : public minitl::pointer
 {
 public:
     FontList();
-    ~FontList();
+    ~FontList() override;
 };
 
 }  // namespace Motor

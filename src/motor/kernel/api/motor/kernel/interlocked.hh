@@ -1,6 +1,5 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-// NOLINTBEGIN(
 #pragma once
 
 #include <motor/kernel/stdafx.h>
@@ -142,7 +141,7 @@ public:
         return reinterpret_cast< T* >(impl::fetch_and_add(&m_value, 0));
     }
 
-    __host __device iptr<T>& operator=(T* value)
+    __host __device iptr< T >& operator=(T* value)
     {
         impl::set_and_fetch((value_t*)&m_value, (value_t)value);
         return *this;

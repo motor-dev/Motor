@@ -29,7 +29,7 @@ static inline u32 nextPowerOf2(u32 number)
 TaskScheduler::TaskPool::TaskPool(u32 workerCount)
     : m_workerCount(workerCount)
     , m_poolSignal(0)
-    , m_poolLock(workerCount)
+    , m_poolLock((int)workerCount)
     , m_taskPool(static_cast< TaskItem** >(Arena::task().alloc(
           nextPowerOf2(s_maxConcurrentTasks * s_breakdownPerThread * m_workerCount)
           * sizeof(TaskItem*))))
@@ -63,7 +63,7 @@ void TaskScheduler::TaskPool::push(TaskItem* item, u32 count)
     while(m_lastQueued != poolStart)
         motor_pause();
     m_lastQueued.set(poolEnd);
-    m_poolSignal.release(count);
+    m_poolSignal.release((int)count);
 }
 
 TaskItem* TaskScheduler::TaskPool::pop()
@@ -83,37 +83,37 @@ void TaskScheduler::TaskPool::resize(u32 workerCount)
     /* do resizing */
 
     if(s_worker)
-        m_poolLock.release(workerCount - 1);
+        m_poolLock.release((int)workerCount - 1);
     else
-        m_poolLock.release(workerCount);
+        m_poolLock.release((int)workerCount);
 }
 
 class TaskScheduler::Worker
 {
-    MOTOR_NOCOPY(Worker);
-
 private:
     Thread m_workThread;
 
 public:
-    Worker(weak< TaskScheduler > scheduler, u32 workerId);
+    Worker(const weak< TaskScheduler >& scheduler, u32 workerId);
     ~Worker();
+    Worker(const Worker&)            = delete;
+    Worker(Worker&&)                 = delete;
+    Worker& operator=(const Worker&) = delete;
+    Worker& operator=(Worker&&)      = delete;
 
-    bool doWork(const weak< TaskScheduler >& sc);
+    static bool doWork(const weak< TaskScheduler >& sc);
 
     static intptr_t work(intptr_t p1, intptr_t p2);
 };
 
-TaskScheduler::Worker::Worker(weak< TaskScheduler > scheduler, u32 workerId)
+TaskScheduler::Worker::Worker(const weak< TaskScheduler >& scheduler, u32 workerId)
     : m_workThread(istring(minitl::format< 128u >(FMT("worker {0}"), workerId)),
                    &TaskScheduler::Worker::work, reinterpret_cast< intptr_t >(this),
                    reinterpret_cast< intptr_t >(scheduler.operator->()), Thread::BelowNormal)
 {
 }
 
-TaskScheduler::Worker::~Worker()
-{
-}
+TaskScheduler::Worker::~Worker() = default;
 
 bool TaskScheduler::Worker::doWork(const weak< TaskScheduler >& sc)
 {
@@ -142,9 +142,9 @@ bool TaskScheduler::Worker::doWork(const weak< TaskScheduler >& sc)
 
 intptr_t TaskScheduler::Worker::work(intptr_t p1, intptr_t p2)
 {
-    Worker* w         = reinterpret_cast< Worker* >(p1);
-    s_worker          = w;
-    TaskScheduler* sc = reinterpret_cast< TaskScheduler* >(p2);
+    auto* w  = reinterpret_cast< Worker* >(p1);
+    s_worker = w;
+    auto* sc = reinterpret_cast< TaskScheduler* >(p2);
     while(sc->isRunning())
     {
         if(sc->m_workerTaskPool.m_poolSignal.wait() == Threads::Waitable::Finished)
@@ -161,13 +161,13 @@ intptr_t TaskScheduler::Worker::work(intptr_t p1, intptr_t p2)
     return 0;
 }
 
-TaskScheduler::TaskScheduler(weak< Scheduler > scheduler)
+TaskScheduler::TaskScheduler(const weak< Scheduler >& scheduler)
     : m_workers(Arena::task())
     , m_scheduler(scheduler)
-    , m_workerCount(i_u32::create(
-          SchedulerSettings::Scheduler::get().ThreadCount > 0
-              ? SchedulerSettings::Scheduler::get().ThreadCount
-              : size_t(minitl::max(1, i32(Environment::getEnvironment().getProcessorCount())))))
+    , m_workerCount(
+          i_u32::create(SchedulerSettings::Scheduler::get().ThreadCount > 0
+                            ? SchedulerSettings::Scheduler::get().ThreadCount
+                            : size_t(minitl::max(1, i32(Environment::getProcessorCount())))))
     , m_mainThreadPool(1)
     , m_workerTaskPool(m_workerCount)
     , m_taskItemPool(Arena::task(), s_maxConcurrentTasks)
@@ -182,9 +182,9 @@ TaskScheduler::TaskScheduler(weak< Scheduler > scheduler)
 
 TaskScheduler::~TaskScheduler()
 {
-    m_workerTaskPool.push(0, static_cast< u32 >(m_workers.size()));
-    for(u32 i = 0; i < m_workers.size(); ++i)
-        delete m_workers[i];
+    m_workerTaskPool.push(nullptr, static_cast< u32 >(m_workers.size()));
+    for(auto& m_worker: m_workers)
+        delete m_worker;
 }
 
 void TaskScheduler::queue(weak< const ITask > task, weak< const IExecutor > executor,
@@ -241,7 +241,7 @@ bool TaskScheduler::taskDone()
 
 void TaskScheduler::notifyEnd()
 {
-    m_mainThreadPool.push(0, 1);
+    m_mainThreadPool.push(nullptr, 1);
 }
 
 bool TaskScheduler::isRunning() const

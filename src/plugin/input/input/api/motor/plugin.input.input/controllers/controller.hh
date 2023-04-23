@@ -8,11 +8,9 @@ namespace Motor { namespace Input {
 
 class motor_api(INPUT) Controller : public minitl::refcountable
 {
-    MOTOR_NOCOPY(Controller);
-
 protected:
     Controller();
-    ~Controller();
+    ~Controller() override;
 };
 
 }}  // namespace Motor::Input

@@ -12,7 +12,6 @@ struct PyMotorEnum : public PyMotorObject
     static void registerType(PyObject* module);
 
     static PyObject* stealValue(PyObject* owner, Meta::Value& value);
-    static PyObject* repr(PyObject* self);
     static PyObject* str(PyObject* self);
     static PyObject* cmp(PyObject* self, PyObject* other, int operation);
     static PyObject* toint(PyObject* self);

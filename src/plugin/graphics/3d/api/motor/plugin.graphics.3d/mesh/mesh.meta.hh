@@ -10,8 +10,8 @@ namespace Motor {
 class motor_api(3D) MeshDescription : public Resource::Description< MeshDescription >
 {
 public:
-    MeshDescription();
-    ~MeshDescription();
+    MeshDescription()           = default;
+    ~MeshDescription() override = default;
 };
 
 }  // namespace Motor

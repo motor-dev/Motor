@@ -14,8 +14,6 @@ KernelObject::KernelObject(const inamespace& name)
     motor_debug_format(Log::cuda(), "kernel entry point: {0}", (void*)m_entryPoint);
 }
 
-KernelObject::~KernelObject()
-{
-}
+KernelObject::~KernelObject() = default;
 
 }}}  // namespace Motor::KernelScheduler::Cuda

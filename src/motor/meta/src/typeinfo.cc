@@ -29,7 +29,7 @@ void* Type::rawget(const void* data) const
     case Indirection::RawPtr: return *(void**)data;
     case Indirection::RefPtr: return ((ref< minitl::refcountable >*)data)->operator->();
     case Indirection::WeakPtr: return ((weak< minitl::refcountable >*)data)->operator->();
-    default: motor_notreached(); return 0;
+    default: motor_notreached(); return nullptr;
     }
 }
 
@@ -109,12 +109,11 @@ u32 format_length(const Type& type, const minitl::format_options& options)
     if(type.access == Type::Constness::Const) result += 6;
     if(type.constness == Type::Constness::Const && type.indirection != Type::Indirection::Value)
         result += 6;
-    if(type.indirection == Type::Indirection::RawPtr)
+    if(type.indirection == Type::Indirection::RawPtr
+       || type.indirection == Type::Indirection::RefPtr)
         result += 5;
     else if(type.indirection == Type::Indirection::WeakPtr)
         result += 6;
-    else if(type.indirection == Type::Indirection::RefPtr)
-        result += 5;
     return result;
 }
 
@@ -124,27 +123,27 @@ u32 format_arg(char* destination, const Type& type, const minitl::format_options
     u32 offset = 0;
     if(type.access == Type::Constness::Const)
     {
-        memcpy(destination + offset, "const ", 6);
+        memcpy(destination + offset, "const ", 6);  // NOLINT(bugprone-not-null-terminated-result)
         offset += 6;
     }
     if(type.indirection == Type::Indirection::RawPtr)
     {
-        memcpy(destination + offset, "raw<", 4);
+        memcpy(destination + offset, "raw<", 4);  // NOLINT(bugprone-not-null-terminated-result)
         offset += 4;
     }
     else if(type.indirection == Type::Indirection::WeakPtr)
     {
-        memcpy(destination + offset, "weak<", 5);
+        memcpy(destination + offset, "weak<", 5);  // NOLINT(bugprone-not-null-terminated-result)
         offset += 5;
     }
     else if(type.indirection == Type::Indirection::RefPtr)
     {
-        memcpy(destination + offset, "ref<", 4);
+        memcpy(destination + offset, "ref<", 4);  // NOLINT(bugprone-not-null-terminated-result)
         offset += 4;
     }
     if(type.constness == Type::Constness::Const && type.indirection != Type::Indirection::Value)
     {
-        memcpy(destination + offset, "const ", 6);
+        memcpy(destination + offset, "const ", 6);  // NOLINT(bugprone-not-null-terminated-result)
         offset += 6;
     }
     offset += format_arg(destination + offset, type.metaclass->fullname(), options, reservedLength);

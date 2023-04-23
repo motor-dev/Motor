@@ -8,8 +8,9 @@
 
 namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
-KernelObject::KernelObject(weak< const CodeObject > code, const istring name)
-    : m_kernel(clCreateKernel(code->m_program, minitl::format< 128u >(FMT("{0}_spir"), name), 0))
+KernelObject::KernelObject(const weak< const CodeObject >& code, const istring name)
+    : m_kernel(
+        clCreateKernel(code->m_program, minitl::format< 128u >(FMT("{0}_spir"), name), nullptr))
 {
     motor_info_format(Log::opencl(), "OpenCL kernel entry point: {0}", m_kernel);
 }

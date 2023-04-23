@@ -19,13 +19,11 @@ minitl::Allocator& packageBuilder()
 
 namespace PackageBuilder {
 
-PackageBuilder::PackageBuilder(ref< Folder > dataFolder) : m_dataFolder(dataFolder)
+PackageBuilder::PackageBuilder(const ref< Folder >& dataFolder) : m_dataFolder(dataFolder)
 {
 }
 
-PackageBuilder::~PackageBuilder()
-{
-}
+PackageBuilder::~PackageBuilder() = default;
 
 ref< Nodes::Package > PackageBuilder::createPackage(const ifilename&                      filename,
                                                     const minitl::Allocator::Block< u8 >& buffer)

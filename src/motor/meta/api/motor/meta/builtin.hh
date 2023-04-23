@@ -3,7 +3,6 @@
 #pragma once
 
 #include <motor/meta/stdafx.h>
-#include <motor/meta/classinfo.meta.hh>
 
 namespace Motor { namespace Meta {
 

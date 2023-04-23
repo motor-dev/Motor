@@ -19,72 +19,131 @@
 
 namespace Motor { namespace Python {
 
-PyMethodDef PyMotorObject::s_methods[]
-    = {{"__dir__", &PyMotorObject::dir, METH_NOARGS, NULL}, {NULL, NULL, 0, NULL}};
+PyMethodDef PyMotorObject::s_methodArray[]
+    = {{"__dir__", &PyMotorObject::dir, METH_NOARGS, nullptr}, {nullptr, nullptr, 0, nullptr}};
 
-static PyTypeObject::Py2NumberMethods s_py2ObjectNumber
-    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, 0, &PyMotorObject::nonZero,
-       0,         0, 0, 0, 0, 0, 0, 0, 0,
-       0,         0, 0, 0, 0, 0, 0, 0, 0,
-       0,         0, 0, 0, 0, 0, 0, 0, 0,
-       0};
+static PyTypeObject::Py2NumberMethods s_py2ObjectNumber = {{nullptr, nullptr, nullptr},
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           &PyMotorObject::nonZero,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr};
 
-static PyTypeObject::Py3NumberMethods s_py3ObjectNumber
-    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, &PyMotorObject::nonZero,
-       0,         0, 0, 0, 0, 0, 0, 0,
-       0,         0, 0, 0, 0, 0, 0, 0,
-       0,         0, 0, 0, 0, 0, 0, 0,
-       0,         0};
+static PyTypeObject::Py3NumberMethods s_py3ObjectNumber = {{nullptr, nullptr, nullptr},
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           &PyMotorObject::nonZero,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr};
 
-PyTypeObject PyMotorObject::s_pyType = {{{0, 0}, 0},
+PyTypeObject PyMotorObject::s_pyType = {{{0, nullptr}, 0},
                                         "py_motor.Value",
                                         sizeof(PyMotorObject),
                                         0,
                                         &PyMotorObject::dealloc,
-                                        0,
+                                        nullptr,
                                         &PyMotorObject::getattr,
                                         &PyMotorObject::setattr,
-                                        0,
+                                        nullptr,
                                         &PyMotorObject::repr,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
                                         &PyMotorObject::call,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
                                         Py_TPFLAGS_MOTOR_DEFAULT | Py_TPFLAGS_IS_ABSTRACT,
                                         "Wrapper class for the C++ class Motor::Meta::Value",
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
                                         0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
+                                        nullptr,
+                                        nullptr,
                                         PyMotorObject::s_methods,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
                                         0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
+                                        nullptr,
+                                        nullptr,
                                         &PyMotorObject::newinst,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
                                         0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0};
+                                        nullptr,
+                                        nullptr};
 
 typedef PyObject* (*CreateMethod)(PyObject* owner, Meta::Value& value);
 
@@ -92,7 +151,7 @@ template < typename T >
 PyObject* createPyNumeric(PyObject* owner, Meta::Value& value)
 {
     motor_forceuse(owner);
-    unsigned long long v = static_cast< unsigned long long >(value.as< T >());
+    auto v = static_cast< unsigned long long >(value.as< T >());  // NOLINT
     return s_library->m_PyLong_FromUnsignedLongLong(v);
 }
 
@@ -108,7 +167,7 @@ template <>
 PyObject* createPyNumeric< float >(PyObject* owner, Meta::Value& value)
 {
     motor_forceuse(owner);
-    double v = static_cast< double >(value.as< float >());
+    auto v = static_cast< double >(value.as< float >());
     return s_library->m_PyFloat_FromDouble(v);
 }
 
@@ -116,7 +175,7 @@ template <>
 PyObject* createPyNumeric< double >(PyObject* owner, Meta::Value& value)
 {
     motor_forceuse(owner);
-    double v = value.as< double >();
+    auto v = value.as< double >();
     return s_library->m_PyFloat_FromDouble(v);
 }
 
@@ -158,7 +217,8 @@ PyObject* PyMotorObject::stealValue(PyObject* owner, Meta::Value& value)
         Py_INCREF(result);
         return result;
     }
-    else if(t.indirection != Meta::Type::Indirection::Value && value.as< const void* const >() == 0)
+    else if(t.indirection != Meta::Type::Indirection::Value
+            && value.as< const void* const >() == nullptr)
     {
         PyObject* result = s_library->m__Py_NoneStruct;
         Py_INCREF(result);
@@ -184,7 +244,7 @@ PyObject* PyMotorObject::stealValue(PyObject* owner, Meta::Value& value)
         case Meta::ClassType_Array: return PyMotorArray::stealValue(owner, value);
         case Meta::ClassType_Namespace:
         {
-            const Meta::Class& cls = value.as< const Meta::Class& >();
+            const auto& cls = value.as< const Meta::Class& >();
             if(cls.constructor)
             {
                 return PyMotorClass::stealValue(owner, value);
@@ -213,15 +273,15 @@ PyObject* PyMotorObject::newinst(PyTypeObject* type, PyObject* args, PyObject* k
 {
     motor_forceuse(args);
     motor_forceuse(kwds);
-    PyMotorObject* inst = static_cast< PyMotorObject* >(type->tp_alloc(type, 0));
-    inst->owner         = 0;
+    auto* inst  = static_cast< PyMotorObject* >(type->tp_alloc(type, 0));
+    inst->owner = nullptr;
     new(&inst->value) Meta::Value();
     return inst;
 }
 
 PyObject* PyMotorObject::getattr(PyObject* self, const char* name)
 {
-    PyMotorObject*              self_     = static_cast< PyMotorObject* >(self);
+    auto*                       self_     = static_cast< PyMotorObject* >(self);
     raw< const Meta::Class >    metaclass = self_->value.type().metaclass;
     istring                     name_(name);
     raw< const Meta::Property > p = metaclass->getProperty(name_);
@@ -239,12 +299,12 @@ PyObject* PyMotorObject::getattr(PyObject* self, const char* name)
     s_library->m_PyErr_Format(
         *s_library->m_PyExc_AttributeError,
         minitl::format<>(FMT("{0} object has no attribute {1}"), self_->value.type(), name));
-    return NULL;
+    return nullptr;
 }
 
 int PyMotorObject::setattr(PyObject* self, const char* name, PyObject* value)
 {
-    PyMotorObject* self_ = static_cast< PyMotorObject* >(self);
+    auto* self_ = static_cast< PyMotorObject* >(self);
     if(self_->value.type().access == Meta::Type::Constness::Const)
     {
         s_library->m_PyErr_Format(
@@ -275,7 +335,7 @@ int PyMotorObject::setattr(PyObject* self, const char* name, PyObject* value)
                                                    self_->value.type(), name, prop->type));
         return -1;
     }
-    Meta::Value* v = (Meta::Value*)malloca(sizeof(Meta::Value));
+    auto* v = (Meta::Value*)malloca(sizeof(Meta::Value));
     unpack(value, prop->type, v);
     prop->set(self_->value, *v);
     v->~Value();
@@ -285,7 +345,7 @@ int PyMotorObject::setattr(PyObject* self, const char* name, PyObject* value)
 
 PyObject* PyMotorObject::repr(PyObject* self)
 {
-    PyMotorObject*     self_ = static_cast< PyMotorObject* >(self);
+    auto*              self_ = static_cast< PyMotorObject* >(self);
     const Meta::Value& v     = self_->value;
     if(s_library->getVersion() >= 30)
     {
@@ -300,7 +360,7 @@ PyObject* PyMotorObject::repr(PyObject* self)
 
 void PyMotorObject::dealloc(PyObject* self)
 {
-    PyMotorObject* self_ = static_cast< PyMotorObject* >(self);
+    auto* self_ = static_cast< PyMotorObject* >(self);
     if(self_->owner)
     {
         Py_DECREF(self_->owner);
@@ -311,7 +371,7 @@ void PyMotorObject::dealloc(PyObject* self)
 
 PyObject* PyMotorObject::call(PyObject* self, PyObject* args, PyObject* kwds)
 {
-    PyMotorObject*       self_ = static_cast< PyMotorObject* >(self);
+    auto*                self_ = static_cast< PyMotorObject* >(self);
     static const istring callName("?call");
     Meta::Value          v(self_->value[callName]);
     if(!v)
@@ -319,7 +379,7 @@ PyObject* PyMotorObject::call(PyObject* self, PyObject* args, PyObject* kwds)
         s_library->m_PyErr_Format(
             *s_library->m_PyExc_Exception,
             minitl::format<>(FMT("{0} object is not callable"), self_->value.type()));
-        return 0;
+        return nullptr;
     }
     else
     {
@@ -329,15 +389,15 @@ PyObject* PyMotorObject::call(PyObject* self, PyObject* args, PyObject* kwds)
             s_library->m_PyErr_Format(
                 *s_library->m_PyExc_Exception,
                 minitl::format<>(FMT("{0} object is not callable"), self_->value.type()));
-            return 0;
+            return nullptr;
         }
-        return Python::call(method, NULL, args, kwds);
+        return Python::call(method, nullptr, args, kwds);
     }
 }
 
 int PyMotorObject::nonZero(PyObject* self)
 {
-    PyMotorObject*   self_ = static_cast< PyMotorObject* >(self);
+    auto*            self_ = static_cast< PyMotorObject* >(self);
     const Meta::Type t     = self_->value.type();
     if(t.indirection == Meta::Type::Indirection::Value)
     {
@@ -345,7 +405,7 @@ int PyMotorObject::nonZero(PyObject* self)
     }
     else
     {
-        return self_->value.as< const void* const >() != 0;
+        return self_->value.as< const void* const >() != nullptr;
     }
 }
 
@@ -444,13 +504,13 @@ static inline void unpackNumber(PyObject* arg, const Meta::Type& type, void* buf
     }
     case Meta::ClassIndex_float:
     {
-        float v = (float)value;
+        auto v = (float)value;
         new(buffer) Meta::Value(v);
         break;
     }
     case Meta::ClassIndex_double:
     {
-        double v = (double)value;
+        auto v = (double)value;
         new(buffer) Meta::Value(v);
         break;
     }
@@ -469,7 +529,7 @@ static inline void unpackFloat(PyObject* arg, const Meta::Type& type, void* buff
     {
     case 0:
     {
-        bool v = value ? true : false;
+        bool v = value != 0 ? true : false;
         new(buffer) Meta::Value(v);
         break;
     }
@@ -523,13 +583,13 @@ static inline void unpackFloat(PyObject* arg, const Meta::Type& type, void* buff
     }
     case 9:
     {
-        float v = (float)value;
+        auto v = (float)value;
         new(buffer) Meta::Value(v);
         break;
     }
     case 10:
     {
-        double v = (double)value;
+        auto v = (double)value;
         new(buffer) Meta::Value(v);
         break;
     }
@@ -544,7 +604,7 @@ static inline void unpackString(PyObject* arg, const Meta::Type& type, void* buf
                         "expected to unpack Python String into Meta::ClassType_String, got {0}",
                         type.metaclass->name);
     char*     string;
-    PyObject* decodedUnicode = 0;
+    PyObject* decodedUnicode = nullptr;
     if(arg->py_type->tp_flags & Py_TPFLAGS_UNICODE_SUBCLASS)
     {
         if(s_library->getVersion() >= 33)
@@ -582,16 +642,16 @@ static inline void unpackPod(PyObject* arg, const Meta::Type& type, void* buffer
                         "expected to unpack Python Dict into Meta::ClassType_Pod, got {0}",
                         type.metaclass->name);
 
-    Meta::Value* result = new(buffer) Meta::Value(type, Meta::Value::Reserve);
-    Meta::Value* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
+    auto* result = new(buffer) Meta::Value(type, Meta::Value::Reserve);
+    auto* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
     for(raw< const Meta::Class > c = type.metaclass; c; c = c->parent)
     {
-        for(const Meta::Property* p = c->properties.begin(); p != c->properties.end(); ++p)
+        for(const auto& propertie: c->properties)
         {
-            PyObject* value = s_library->m_PyDict_GetItemString(arg, p->name.c_str());
+            PyObject* value = s_library->m_PyDict_GetItemString(arg, propertie.name.c_str());
 
-            PyMotorObject::unpack(value, p->type, v);
-            p->set(*result, *v);
+            PyMotorObject::unpack(value, propertie.type, v);
+            propertie.set(*result, *v);
             v->~Value();
         }
     }
@@ -618,7 +678,7 @@ Meta::ConversionCost PyMotorObject::distance(PyObject* object, const Meta::Type&
             || object->py_type->tp_base == &PyMotorObject::s_pyType
             || object->py_type->tp_base->tp_base == &PyMotorObject::s_pyType)
     {
-        PyMotorObject* object_ = static_cast< PyMotorObject* >(object);
+        auto* object_ = static_cast< PyMotorObject* >(object);
         return object_->value.type().calculateConversion(desiredType);
     }
     else if(object->py_type == s_library->m_PyBool_Type)
@@ -643,12 +703,12 @@ Meta::ConversionCost PyMotorObject::distance(PyObject* object, const Meta::Type&
             motor_assert_format(desiredType.metaclass->operators->arrayOperators,
                                 "Array type {0} does not implement Array API methods",
                                 desiredType.metaclass->fullname());
-            PyTuple_SizeType    size = object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS)
-                                           ? s_library->m_PyList_Size
-                                           : s_library->m_PyTuple_Size;
-            PyTuple_GetItemType get  = object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS)
-                                           ? s_library->m_PyList_GetItem
-                                           : s_library->m_PyTuple_GetItem;
+            Type_PyTuple_Size    size = object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS)
+                                            ? s_library->m_PyList_Size
+                                            : s_library->m_PyTuple_Size;
+            Type_PyTuple_GetItem get  = object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS)
+                                            ? s_library->m_PyList_GetItem
+                                            : s_library->m_PyTuple_GetItem;
             if(size(object) != 0)
             {
                 raw< const Meta::ArrayOperatorTable > api
@@ -680,14 +740,15 @@ Meta::ConversionCost PyMotorObject::distance(PyObject* object, const Meta::Type&
             u32 i = 0;
             for(raw< const Meta::Class > c = desiredType.metaclass; c; c = c->parent)
             {
-                for(const Meta::Property* p = c->properties.begin(); p != c->properties.end(); ++p)
+                for(const auto& propertie: c->properties)
                 {
-                    PyObject* value = s_library->m_PyDict_GetItemString(object, p->name.c_str());
+                    PyObject* value
+                        = s_library->m_PyDict_GetItemString(object, propertie.name.c_str());
                     if(!value)
                     {
                         return Meta::ConversionCost::s_incompatible;
                     }
-                    if(distance(value, p->type) >= Meta::ConversionCost::s_incompatible)
+                    if(distance(value, propertie.type) >= Meta::ConversionCost::s_incompatible)
                     {
                         return Meta::ConversionCost::s_incompatible;
                     }
@@ -728,7 +789,7 @@ void PyMotorObject::unpack(PyObject* object, const Meta::Type& desiredType, void
     else if(object->py_type == &PyMotorObject::s_pyType
             || object->py_type->tp_base == &PyMotorObject::s_pyType)
     {
-        PyMotorObject* object_ = static_cast< PyMotorObject* >(object);
+        auto* object_ = static_cast< PyMotorObject* >(object);
         motor_assert_format(desiredType <= object_->value.type(),
                             "incompatible types: {0} is not compatible with {1}",
                             object_->value.type(), desiredType);
@@ -759,7 +820,7 @@ void PyMotorObject::unpack(PyObject* object, const Meta::Type& desiredType, void
     }
     else if(object == s_library->m__Py_NoneStruct)
     {
-        void* ptr = 0;
+        void* ptr = nullptr;
         new(buffer) Meta::Value(desiredType, &ptr);
     }
     else
@@ -772,10 +833,10 @@ void PyMotorObject::unpack(PyObject* object, const Meta::Type& desiredType, void
 PyObject* PyMotorObject::dir(raw< const Meta::Class > metaclass)
 {
     PyObject* result = s_library->m_PyList_New(0);
-    if(!result) return NULL;
-    PyString_FromStringAndSizeType fromString = s_library->getVersion() >= 30
-                                                    ? s_library->m_PyUnicode_FromStringAndSize
-                                                    : s_library->m_PyString_FromStringAndSize;
+    if(!result) return nullptr;
+    Type_PyString_FromStringAndSize fromString = s_library->getVersion() >= 30
+                                                     ? s_library->m_PyUnicode_FromStringAndSize
+                                                     : s_library->m_PyString_FromStringAndSize;
 
     for(raw< const Meta::ObjectInfo > o = metaclass->objects; o; o = o->next)
     {
@@ -783,47 +844,47 @@ PyObject* PyMotorObject::dir(raw< const Meta::Class > metaclass)
         if(!str)
         {
             Py_DECREF(result);
-            return NULL;
+            return nullptr;
         }
         if(s_library->m_PyList_Append(result, str) == -1)
         {
             Py_DECREF(str);
             Py_DECREF(result);
-            return NULL;
+            return nullptr;
         }
         Py_DECREF(str);
     }
     for(raw< const Meta::Class > cls = metaclass; cls; cls = cls->parent)
     {
-        for(const Meta::Property* p = cls->properties.begin(); p != cls->properties.end(); ++p)
+        for(const auto& propertie: cls->properties)
         {
-            PyObject* str = fromString(p->name.c_str(), p->name.size());
+            PyObject* str = fromString(propertie.name.c_str(), propertie.name.size());
             if(!str)
             {
                 Py_DECREF(result);
-                return NULL;
+                return nullptr;
             }
             if(s_library->m_PyList_Append(result, str) == -1)
             {
                 Py_DECREF(str);
                 Py_DECREF(result);
-                return NULL;
+                return nullptr;
             }
             Py_DECREF(str);
         }
-        for(const Meta::Method* m = cls->methods.begin(); m != cls->methods.end(); ++m)
+        for(const auto& method: cls->methods)
         {
-            PyObject* str = fromString(m->name.c_str(), m->name.size());
+            PyObject* str = fromString(method.name.c_str(), method.name.size());
             if(!str)
             {
                 Py_DECREF(result);
-                return NULL;
+                return nullptr;
             }
             if(s_library->m_PyList_Append(result, str) == -1)
             {
                 Py_DECREF(str);
                 Py_DECREF(result);
-                return NULL;
+                return nullptr;
             }
             Py_DECREF(str);
         }
@@ -842,7 +903,7 @@ void PyMotorObject::unpackAny(PyObject* object, void* buffer)
     if(object->py_type == &PyMotorObject::s_pyType
        || object->py_type->tp_base == &PyMotorObject::s_pyType)
     {
-        PyMotorObject* object_ = static_cast< PyMotorObject* >(object);
+        auto* object_ = static_cast< PyMotorObject* >(object);
         new(buffer) Meta::Value(object_->value);
     }
     else if(object->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS)
@@ -859,7 +920,7 @@ void PyMotorObject::unpackAny(PyObject* object, void* buffer)
     }
     else if(object == s_library->m__Py_NoneStruct)
     {
-        new(buffer) Meta::Value((const void*)0);
+        new(buffer) Meta::Value((const void*)nullptr);
     }
     else
     {

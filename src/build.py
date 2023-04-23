@@ -99,7 +99,7 @@ def build_plugins(bld):
         uselib=['cxx14']
     )
 
-    #bld.plugin('plugin.audio.AL',
+    # bld.plugin('plugin.audio.AL',
     #           ['motor'],
     #           ['motor.3rdparty.audio.OpenAL'])
 
@@ -116,11 +116,10 @@ def build_plugins(bld):
         uselib=['cxx14']
     )
     if bld.env.PROJECTS:
-        python_deps = [
-            'motor.3rdparty.scripting.python%s' % version.replace('.', '') for version in bld.env.PYTHON_VERSIONS
-        ]
         bld.plugin(
-            'plugin.scripting.pythonbinding', ['motor', 'plugin.scripting.pythonlib'] + python_deps, uselib=['cxx14']
+            'plugin.scripting.python3', ['motor', 'plugin.scripting.python'],
+            extra_defines=['PYTHON_LIBRARY=python3'],
+            path=bld.path.find_node('plugin/scripting/pythonbinding'), uselib=['cxx14']
         )
     else:
         for version in bld.env.PYTHON_VERSIONS:
@@ -133,7 +132,7 @@ def build_plugins(bld):
                 uselib=['cxx14']
             )
 
-    bld.plugin('plugin.compute.cpu', ['motor'], features=['motor:cpu:variants'], uselib=['cxx14'])
+    bld.plugin('plugin.compute.cpu', ['motor'], uselib=['cxx14'])
     bld.plugin(
         'plugin.compute.opencl', ['motor', 'plugin.compute.cpu'], ['motor.3rdparty.compute.OpenCL'],
         conditions=['OpenCL'],
@@ -141,12 +140,12 @@ def build_plugins(bld):
         extra_public_defines=['CL_TARGET_OPENCL_VERSION=120'],
         uselib=['cxx14']
     )
-    #bld.plugin(
+    # bld.plugin(
     #    'plugin.compute.opencl_gl',
     #    ['motor', 'plugin.graphics.GL4', 'plugin.compute.opencl', 'plugin.compute.cpu'],
     #    ['motor.3rdparty.graphics.OpenGL', 'motor.3rdparty.compute.OpenCL'],
     #    features=['OpenGL', 'OpenCL', 'GUI']
-    #)
+    # )
     bld.plugin('plugin.compute.cuda', ['motor'], ['motor.3rdparty.compute.CUDA'], conditions=['CUDA'], uselib=['cxx14'])
 
     bld.plugin(
@@ -167,11 +166,11 @@ def build_plugins(bld):
         conditions=['OpenGL', 'GUI'],
         uselib=['cxx14']
     )
-    #bld.plugin('plugin.graphics.dx12',
+    # bld.plugin('plugin.graphics.dx12',
     #           ['motor', 'plugin.graphics.windowing'],
     #           ['motor.3rdparty.graphics.DirectX12'],
     #           conditions=['DirectX12', 'GUI'])
-    #bld.plugin('plugin.graphics.vulkan',
+    # bld.plugin('plugin.graphics.vulkan',
     #           ['motor', 'plugin.graphics.windowing'],
     #           ['motor.3rdparty.graphics.vulkan'],
     #           conditions=['Vulkan', 'GUI'])

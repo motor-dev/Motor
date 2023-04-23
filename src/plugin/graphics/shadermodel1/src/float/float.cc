@@ -11,9 +11,7 @@ Constant::Constant(float value) : value(value)
 {
 }
 
-Constant::~Constant()
-{
-}
+Constant::~Constant() = default;
 
 void Constant::buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage,
                                  Shaders::Stage targetStage) const
@@ -29,13 +27,9 @@ void Constant::buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage 
     stream.write(value);
 }
 
-Varying::Varying()
-{
-}
+Varying::Varying() = default;
 
-Varying::~Varying()
-{
-}
+Varying::~Varying() = default;
 
 void Varying::buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage,
                                 Shaders::Stage targetStage) const
@@ -55,11 +49,10 @@ void Varying::buildDefinitions(Shaders::IShaderBuilder& stream, Shaders::Stage c
 
 Uniform::Uniform(istring name) : name(name)
 {
+    motor_forceuse(this->name);
 }
 
-Uniform::~Uniform()
-{
-}
+Uniform::~Uniform() = default;
 
 void Uniform::buildDeclarations(Shaders::IShaderBuilder& stream, Shaders::Stage currentStage,
                                 Shaders::Stage targetStage) const

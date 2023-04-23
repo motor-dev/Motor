@@ -13,13 +13,13 @@ private:
     const float m_value;
 
 protected:
-    virtual ConversionCost distance(const Type& type) const override;
-    virtual void           doEval(const Type& expectedType, Value& result) const override;
-    virtual void           doVisit(Node::Visitor & visitor) const override;
+    ConversionCost distance(const Type& type) const override;
+    void           doEval(const Type& expectedType, Value& result) const override;
+    void           doVisit(Node::Visitor & visitor) const override;
 
 public:
-    Float(float value);
-    ~Float();
+    explicit Float(float value);
+    ~Float() override;
 };
 
 }}}  // namespace Motor::Meta::AST

@@ -3,7 +3,6 @@
 #pragma once
 
 #include <motor/world/stdafx.h>
-#include <motor/world/event/event.hh>
 
 #include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/typeinfo.hh>
@@ -30,16 +29,16 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< World::Event< T1, T2, T3, T4 > >:
                                         /* .size */ u32(sizeof(World::Event< T1, T2, T3, T4 >)),
                                         /* .offset */ 0,
                                         /* .id */ Meta::ClassType_Struct,
-                                        /* .owner */ {0},
+                                        /* .owner */ {nullptr},
                                         /* .parent */ {motor_class< void >().m_ptr},
-                                        /* .objects */ {0},
-                                        /* .tags */ {0},
-                                        /* .properties */ {0, 0},
-                                        /* .methods */ {0, 0},
-                                        /* .constructor */ {0},
+                                        /* .objects */ {nullptr},
+                                        /* .tags */ {nullptr},
+                                        /* .properties */ {0, nullptr},
+                                        /* .methods */ {0, nullptr},
+                                        /* .constructor */ {nullptr},
                                         /* .operators */ Meta::OperatorTable::s_emptyTable,
-                                        /* .copyconstructor */ 0,
-                                        /* .destructor */ 0};
+                                        /* .copyconstructor */ nullptr,
+                                        /* .destructor */ nullptr};
 
     raw< const Meta::Class > result = {&s_class};
     return result;

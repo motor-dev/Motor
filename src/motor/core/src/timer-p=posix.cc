@@ -4,7 +4,7 @@
 #include <motor/core/stdafx.h>
 #include <motor/core/timer.hh>
 
-#include <time.h>
+#include <ctime>
 
 namespace Motor {
 
@@ -40,7 +40,7 @@ u64 Timer::tick()
     return ((u64)t.tv_sec * 1000000000 + (u64)t.tv_nsec);
 #    endif
 #else
-    timespec t;
+    timespec t {};
     clock_gettime(CLOCK_REALTIME, &t);
     return ((u64)t.tv_sec * 1000000000 + (u64)t.tv_nsec);
 #endif
@@ -48,7 +48,7 @@ u64 Timer::tick()
 
 float Timer::now()
 {
-    timespec t;
+    timespec t {};
     clock_gettime(CLOCK_REALTIME, &t);
     static time_t s_start = t.tv_sec;
     return (float)(t.tv_sec - s_start) * 1000.0f + (float)t.tv_nsec / 1000000.0f;

@@ -18,22 +18,20 @@ private:
 
 public:
     Mutex();
-    ~Mutex();
+    ~Mutex() override;
 
 private:
-    void                         release();
-    virtual Waitable::WaitResult wait() override;
+    void                 release();
+    Waitable::WaitResult wait() override;
 };
 
 class ScopedMutexLock
 {
-    MOTOR_NOCOPY(ScopedMutexLock);
-
 private:
     Mutex& m_mutex;
 
 public:
-    inline ScopedMutexLock(Mutex& m) : m_mutex(m)
+    inline explicit ScopedMutexLock(Mutex& m) : m_mutex(m)
     {
         m_mutex.wait();
     }
@@ -41,6 +39,11 @@ public:
     {
         m_mutex.release();
     }
+
+    ScopedMutexLock(const ScopedMutexLock&)            = delete;
+    ScopedMutexLock& operator=(const ScopedMutexLock&) = delete;
+    ScopedMutexLock(ScopedMutexLock&&)                 = delete;
+    ScopedMutexLock& operator=(ScopedMutexLock&&)      = delete;
 };
 
 }  // namespace Motor

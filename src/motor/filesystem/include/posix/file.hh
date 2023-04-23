@@ -18,8 +18,8 @@ public:
     void refresh(u64 size, time_t modifiedTime);
 
 private:
-    void doFillBuffer(weak< File::Ticket > ticket) const override;
-    void doWriteBuffer(weak< Ticket > ticket) const override;
+    void doFillBuffer(const weak< File::Ticket >& ticket) const override;
+    void doWriteBuffer(const weak< Ticket >& ticket) const override;
 };
 
 }  // namespace Motor

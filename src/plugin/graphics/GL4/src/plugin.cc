@@ -16,4 +16,4 @@ static minitl::ref< Motor::OpenGL::GLRenderer > create(const Motor::Plugin::Cont
     return renderer;
 }
 
-MOTOR_PLUGIN_REGISTER_CREATE(&create);
+MOTOR_PLUGIN_REGISTER_CREATE(&create)

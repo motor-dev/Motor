@@ -6,7 +6,7 @@
 
 namespace Motor {
 
-FreetypeLibrary::FreetypeLibrary()
+FreetypeLibrary::FreetypeLibrary() : library {}
 {
     FT_Error error = FT_Init_FreeType(&library);
     motor_forceuse(error);

@@ -36,16 +36,14 @@ private:
     weak< Motor::File > m_logFile;
 
 public:
-    explicit FileLogListener(weak< Motor::File > file) : m_logFile(file)
+    explicit FileLogListener(const weak< Motor::File >& file) : m_logFile(file)
     {
     }
-    ~FileLogListener()
-    {
-    }
+    ~FileLogListener() override = default;
 
 protected:
-    virtual bool log(const Motor::inamespace& logname, Motor::LogLevel level, const char* filename,
-                     int line, const char* thread, const char* msg) const override
+    bool log(const Motor::inamespace& logname, Motor::LogLevel level, const char* filename,
+             int line, const char* thread, const char* msg) const override
     {
         if(Motor::MainSettings::Log::get().enableFileLog)
         {
@@ -66,16 +64,15 @@ private:
     Motor::LogLevel m_minimumLogLevel;
 
 public:
-    ConsoleLogListener(Motor::LogLevel miniminLogLevel) : m_minimumLogLevel(miniminLogLevel)
+    explicit ConsoleLogListener(Motor::LogLevel minimumLogLevel)
+        : m_minimumLogLevel(minimumLogLevel)
     {
     }
-    ~ConsoleLogListener()
-    {
-    }
+    ~ConsoleLogListener() override = default;
 
 protected:
-    virtual bool log(const Motor::inamespace& logname, Motor::LogLevel level, const char* filename,
-                     int line, const char* thread, const char* msg) const override
+    bool log(const Motor::inamespace& logname, Motor::LogLevel level, const char* filename,
+             int line, const char* thread, const char* msg) const override
     {
         if(level >= m_minimumLogLevel)
         {
@@ -89,8 +86,7 @@ protected:
                 OutputDebugString(message);
 #    define isatty(x) 1
 #endif
-                static const char* term
-                    = Environment::getEnvironment().getEnvironmentVariable("TERM");
+                static const char* term = Environment::getEnvironmentVariable("TERM");
                 static const char* colors[]
                     = {isatty(1) && term ? "\x1b[0m" : "",   isatty(1) && term ? "\x1b[01;1m" : "",
                        isatty(1) && term ? "\x1b[36m" : "",  isatty(1) && term ? "\x1b[32m" : "",

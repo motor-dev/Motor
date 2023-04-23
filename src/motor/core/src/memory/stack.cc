@@ -6,13 +6,9 @@
 
 namespace Motor {
 
-StackAllocator::StackAllocator()
-{
-}
+StackAllocator::StackAllocator() = default;
 
-StackAllocator::~StackAllocator()
-{
-}
+StackAllocator::~StackAllocator() = default;
 
 void* StackAllocator::internalAlloc(u64 size, u64 alignment)
 {

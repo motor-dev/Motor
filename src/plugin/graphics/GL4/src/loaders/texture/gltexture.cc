@@ -8,17 +8,15 @@
 
 namespace Motor { namespace OpenGL {
 
-GLTexture::GLTexture(weak< const Resource::IDescription > textureDescription,
-                     weak< GLRenderer >                   renderer)
+GLTexture::GLTexture(const weak< const Resource::IDescription >& textureDescription,
+                     const weak< GLRenderer >&                   renderer)
     : IGPUResource(textureDescription, renderer)
 {
 }
 
-GLTexture::~GLTexture()
-{
-}
+GLTexture::~GLTexture() = default;
 
-void GLTexture::load(weak< const Resource::IDescription > /*textureDescription*/)
+void GLTexture::load(const weak< const Resource::IDescription >& /*textureDescription*/)
 {
 }
 

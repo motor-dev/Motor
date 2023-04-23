@@ -9,13 +9,11 @@
 namespace Motor {
 
 ShaderProgramDescription::ShaderProgramDescription(minitl::vector< ref< Shaders::Output > > outputs)
-    : m_outputs(outputs)
+    : m_outputs(minitl::move(outputs))
 {
 }
 
-ShaderProgramDescription::~ShaderProgramDescription()
-{
-}
+ShaderProgramDescription::~ShaderProgramDescription() = default;
 
 void ShaderProgramDescription::buildSource(Shaders::IShaderBuilder& /*builder*/) const
 {

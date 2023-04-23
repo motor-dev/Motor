@@ -19,8 +19,8 @@ private:
     ref< const Package > const                m_mainPackage;
 
 public:
-    PythonSample(const Plugin::Context& context);
-    ~PythonSample();
+    explicit PythonSample(const Plugin::Context& context);
+    ~PythonSample() override;
 };
 
 }  // namespace Motor

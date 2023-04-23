@@ -16,10 +16,10 @@ CommandLineSettingsProvider::buildSettings(int argc, const char* argv[])
     {
         if(argv[i][0] == '-')
         {
-            const char* nameBegin   = argv[i] + 1;
-            const char* sep         = nameBegin;
-            const char* nameEnd     = nameBegin;
-            const char* optionBegin = 0;
+            const char* nameBegin = argv[i] + 1;
+            const char* sep       = nameBegin;
+            const char* nameEnd   = nameBegin;
+            const char* optionBegin;
             while(*nameEnd && *nameEnd != '=')
             {
                 if(*nameEnd == '.') sep = nameEnd;
@@ -73,14 +73,12 @@ CommandLineSettingsProvider::buildSettings(int argc, const char* argv[])
 }
 
 CommandLineSettingsProvider::CommandLineSettingsProvider(int argc, const char* argv[],
-                                                         ref< Folder > folder)
+                                                         const ref< Folder >& folder)
     : SettingsProvider(buildSettings(argc, argv), folder)
 {
 }
 
-CommandLineSettingsProvider::~CommandLineSettingsProvider()
-{
-}
+CommandLineSettingsProvider::~CommandLineSettingsProvider() = default;
 
 void CommandLineSettingsProvider::log(const Meta::AST::Message& message) const
 {

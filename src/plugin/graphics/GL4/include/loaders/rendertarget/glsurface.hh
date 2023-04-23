@@ -16,12 +16,12 @@ private:
     void clearCurrent() const;
 
 public:
-    GLSurface(weak< const RenderSurfaceDescription > surfaceDescription,
-              weak< GLRenderer >                     renderer);
-    ~GLSurface();
+    GLSurface(const weak< const RenderSurfaceDescription >& surfaceDescription,
+              const weak< GLRenderer >&                     renderer);
+    ~GLSurface() override;
 
-    virtual void load(weak< const Resource::IDescription > surfaceDescription) override;
-    virtual void unload() override;
+    void load(const weak< const Resource::IDescription >& surfaceDescription) override;
+    void unload() override;
 
     void begin(ClearMode clear) const override;
     void end(PresentMode present) const override;

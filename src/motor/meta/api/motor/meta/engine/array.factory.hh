@@ -120,7 +120,7 @@ Meta::Value ClassID< minitl::array< T > >::trampoline_method_array_overload_0(
 
 template < typename T >
 const Meta::ObjectInfo ClassID< minitl::array< T > >::s_prop_value_type_object_value_type
-    = {{0}, {0}, istring(istring("value_type")), Meta::Value(value_type)};
+    = {{nullptr}, {nullptr}, istring(istring("value_type")), Meta::Value(value_type)};
 
 template < typename T >
 const Meta::Method::Overload ClassID< minitl::array< T > >::s_method_array_overloads[] = {
@@ -131,7 +131,7 @@ const Meta::Method::Parameter ClassID< minitl::array< T > >::s_method_size_overl
     = {{{0},
         istring("this"),
         motor_type< const minitl::array< T >& >(),
-        {&Meta::Method::Parameter::s_noDefaultValue}}};
+        Meta::Method::Parameter::noDefaultValue}};
 
 template < typename T >
 const Meta::Method::Overload ClassID< minitl::array< T > >::s_method_size_overloads[]
@@ -146,16 +146,16 @@ const Meta::Method::Parameter ClassID< minitl::array< T > >::s_method_Index_over
     = {{{0},
         istring("this"),
         motor_type< const minitl::array< T >& >(),
-        {&Meta::Method::Parameter::s_noDefaultValue}},
-       {{0}, istring("index"), motor_type< u32 >(), {&Meta::Method::Parameter::s_noDefaultValue}}};
+        Meta::Method::Parameter::noDefaultValue},
+       {{0}, istring("index"), motor_type< u32 >(), Meta::Method::Parameter::noDefaultValue}};
 
 template < typename T >
 const Meta::Method::Parameter ClassID< minitl::array< T > >::s_method_Index_overload_1_params[]
     = {{{0},
         istring("this"),
         motor_type< minitl::array< T >& >(),
-        {&Meta::Method::Parameter::s_noDefaultValue}},
-       {{0}, istring("index"), motor_type< u32 >(), {&Meta::Method::Parameter::s_noDefaultValue}}};
+        Meta::Method::Parameter::noDefaultValue},
+       {{0}, istring("index"), motor_type< u32 >(), Meta::Method::Parameter::noDefaultValue}};
 
 template < typename T >
 const Meta::Method::Overload ClassID< minitl::array< T > >::s_method_Index_overloads[]
@@ -176,7 +176,7 @@ const Meta::ArrayOperatorTable ClassID< minitl::array< T > >::scriptingArrayAPI
 
 template < typename T >
 const Meta::OperatorTable ClassID< minitl::array< T > >::scriptingAPI
-    = {{&scriptingArrayAPI}, {0, 0}, {0}};
+    = {{&scriptingArrayAPI}, {0, nullptr}, {nullptr}};
 
 template < typename T >
 MOTOR_EXPORT raw< const Meta::Class > ClassID< minitl::array< T > >::klass()

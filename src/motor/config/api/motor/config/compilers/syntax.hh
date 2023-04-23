@@ -6,20 +6,17 @@
 #define motor_break()
 #define motor_pause()
 
-typedef signed char       i8;
-typedef signed short      i16;
-typedef signed int        i32;
-typedef signed long int   i64;
-typedef unsigned char     u8;
-typedef unsigned short    u16;
-typedef unsigned int      u32;
-typedef unsigned long int u64;
-typedef u8                byte;
-
-typedef unsigned long int size_t;
-typedef unsigned long int ptrdiff_t;
-typedef unsigned long int intptr_t;
-
+#include <cstdint>
+#include <cstdlib>
+typedef int8_t   i8;
+typedef int16_t  i16;
+typedef int32_t  i32;
+typedef int64_t  i64;
+typedef uint8_t  u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+typedef u8       byte;
 #ifndef __cplusplus
 #    define motor_restrict restrict
 #else

@@ -24,7 +24,7 @@ raw< const Meta::Class > getGEnumClass(Gtk3Plugin& plugin, GType type)
     motor_assert_format(G_TYPE_FUNDAMENTAL(type) == G_TYPE_ENUM,
                         "expected GEnum type, got {0} which is a {1}", g_type_name(type),
                         g_type_name(G_TYPE_FUNDAMENTAL(type)));
-    Meta::Class* cls = static_cast< Meta::Class* >(g_type_get_qdata(type, plugin.quark()));
+    auto* cls = static_cast< Meta::Class* >(g_type_get_qdata(type, plugin.quark()));
     if(!cls)
     {
         GType parent = g_type_parent(type);
@@ -36,13 +36,13 @@ raw< const Meta::Class > getGEnumClass(Gtk3Plugin& plugin, GType type)
                                    parentClass->size,
                                    0,
                                    Meta::ClassType_Enum,
-                                   {0},
+                                   {nullptr},
                                    parentClass,
-                                   {0},
-                                   {0},
-                                   {0, 0},
-                                   {0, 0},
-                                   {0},
+                                   {nullptr},
+                                   {nullptr},
+                                   {0, nullptr},
+                                   {0, nullptr},
+                                   {nullptr},
                                    Meta::OperatorTable::s_emptyTable,
                                    parentClass->copyconstructor,
                                    parentClass->destructor};

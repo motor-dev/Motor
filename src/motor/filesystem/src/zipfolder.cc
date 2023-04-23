@@ -9,7 +9,7 @@
 
 namespace Motor {
 
-ZipFolder::ZipFolder(void* handle, ipath path, Folder::ScanPolicy scanPolicy)
+ZipFolder::ZipFolder(void* handle, const ipath& path, Folder::ScanPolicy scanPolicy)
     : m_handle(handle)
     , m_path(path)
 {
@@ -20,7 +20,9 @@ ZipFolder::ZipFolder(void* handle, ipath path, Folder::ScanPolicy scanPolicy)
     }
 }
 
-ZipFolder::ZipFolder(const ipath& zippath, Folder::ScanPolicy scanPolicy) : m_handle(0), m_path("")
+ZipFolder::ZipFolder(const ipath& zippath, Folder::ScanPolicy scanPolicy)
+    : m_handle(nullptr)
+    , m_path("")
 {
     m_handle = unzOpen(zippath.str().name);
     if(!m_handle)
@@ -40,7 +42,7 @@ ZipFolder::~ZipFolder()
     if(m_handle)
     {
         unzClose(m_handle);
-        m_handle = 0;
+        m_handle = nullptr;
     }
 }
 
@@ -59,7 +61,8 @@ void ZipFolder::doRefresh(Folder::ScanPolicy scanPolicy)
             {
                 unz_file_info info;
                 char          filepath[4096];
-                unzGetCurrentFileInfo(m_handle, &info, filepath, sizeof(filepath), 0, 0, 0, 0);
+                unzGetCurrentFileInfo(m_handle, &info, filepath, sizeof(filepath), nullptr, 0,
+                                      nullptr, 0);
                 ipath   path(filepath);
                 istring filename = path.pop_back();
                 if(path == m_path)
@@ -67,9 +70,9 @@ void ZipFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                     unz_file_pos filePos;
                     unzGetFilePos(m_handle, &filePos);
                     ifilename fullFilePath = path + ifilename(filename);
-                    m_files.push_back(minitl::make_tuple(
-                        filename, ref< ZipFile >::create(Arena::filesystem(), m_handle,
-                                                         fullFilePath, info, filePos)));
+                    m_files.emplace_back(filename,
+                                         ref< ZipFile >::create(Arena::filesystem(), m_handle,
+                                                                fullFilePath, info, filePos));
                 }
                 else if(path.size() >= 1)
                 {
@@ -88,9 +91,9 @@ void ZipFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                 {
                     ipath path = m_path;
                     path.push_back(*it);
-                    m_folders.push_back(minitl::make_tuple(
+                    m_folders.emplace_back(
                         *it,
-                        ref< ZipFolder >::create(Arena::filesystem(), m_handle, path, newPolicy)));
+                        ref< ZipFolder >::create(Arena::filesystem(), m_handle, path, newPolicy));
                 }
             }
         }

@@ -14,13 +14,13 @@ private:
     const knl::float4 m_value;
 
 protected:
-    virtual ConversionCost distance(const Type& type) const override;
-    virtual void           doEval(const Type& expectedType, Value& result) const override;
-    virtual void           doVisit(Node::Visitor & visitor) const override;
+    ConversionCost distance(const Type& type) const override;
+    void           doEval(const Type& expectedType, Value& result) const override;
+    void           doVisit(Node::Visitor & visitor) const override;
 
 public:
-    Float4(knl::float4 value);
-    ~Float4();
+    explicit Float4(knl::float4 value);
+    ~Float4() override;
 };
 
 }}}  // namespace Motor::Meta::AST

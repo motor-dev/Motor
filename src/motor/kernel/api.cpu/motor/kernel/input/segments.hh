@@ -110,13 +110,15 @@ public:
         iterator operator+(u32 count)
         {
             iterator result = *this;
-            return result += count;
+            result += count;
+            return result;
         }
 
         iterator operator-(u32 count)
         {
             iterator result = *this;
-            return result -= count;
+            result -= count;
+            return result;
         }
 
         T* operator->() const

@@ -4,13 +4,11 @@
 #include <motor/meta/stdafx.h>
 #include <motor/meta/value.hh>
 
-#include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
-#include <motor/meta/typeinfo.inl>
 
 namespace Motor { namespace Meta {
 
-Value::Value(const Value& other) : m_type(other.m_type), m_reference(other.m_reference)
+Value::Value(const Value& other) : m_type(other.m_type), m_ref(), m_reference(other.m_reference)
 {
     if(m_reference)
     {
@@ -20,26 +18,30 @@ Value::Value(const Value& other) : m_type(other.m_type), m_reference(other.m_ref
     else
     {
         m_ref.m_pointer
-            = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
-        m_ref.m_deallocate = (m_ref.m_pointer != 0);
+            = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : nullptr;
+        m_ref.m_deallocate = (m_ref.m_pointer != nullptr);
         m_type.copy(other.memory(), memory());
     }
 }
 
-Value::Value(Type type, const void* location, MakeCopyType) : m_type(type), m_reference(false)
+Value::Value(Type type, const void* location, MakeCopyType)
+    : m_type(type)
+    , m_ref()
+    , m_reference(false)
 {
-    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
-    m_ref.m_deallocate = m_ref.m_pointer != 0;
+    m_ref.m_pointer
+        = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : nullptr;
+    m_ref.m_deallocate = m_ref.m_pointer != nullptr;
     m_type.copy(location, memory());
 }
 
-Value::Value(Type type, void* location) : m_type(type), m_reference(true)
+Value::Value(Type type, void* location) : m_type(type), m_ref(), m_reference(true)
 {
     m_ref.m_pointer    = location;
     m_ref.m_deallocate = false;
 }
 
-Value::Value(Type type, const Value& castFrom) : m_type(type), m_reference(false)
+Value::Value(Type type, const Value& castFrom) : m_type(type), m_ref(), m_reference(false)
 {
     motor_assert_format(m_type.metaclass->isA(castFrom.type().metaclass)
                             || castFrom.type().metaclass->isA(m_type.metaclass),
@@ -48,15 +50,17 @@ Value::Value(Type type, const Value& castFrom) : m_type(type), m_reference(false
                             || castFrom.type().isA(m_type),
                         "cannot upcast value type from {0} to {1}", castFrom.type(), m_type);
 
-    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
-    m_ref.m_deallocate = (m_ref.m_pointer != 0);
+    m_ref.m_pointer
+        = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : nullptr;
+    m_ref.m_deallocate = (m_ref.m_pointer != nullptr);
     m_type.copy(castFrom.memory(), memory());
 }
 
-Value::Value(Type type, ReserveType) : m_type(type), m_reference(false)
+Value::Value(Type type, ReserveType) : m_type(type), m_ref(), m_reference(false)
 {
-    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
-    m_ref.m_deallocate = m_ref.m_pointer != 0;
+    m_ref.m_pointer
+        = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : nullptr;
+    m_ref.m_deallocate = m_ref.m_pointer != nullptr;
 }
 
 Value::~Value()
@@ -123,8 +127,9 @@ void* Value::unpackAs(const Type& ti, ref< minitl::refcountable >& rptr,
 
 void Value::store(const void* src)
 {
-    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
-    m_ref.m_deallocate = m_ref.m_pointer != 0;
+    m_ref.m_pointer
+        = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : nullptr;
+    m_ref.m_deallocate = m_ref.m_pointer != nullptr;
     m_type.copy(src, memory());
 }
 
@@ -144,10 +149,10 @@ Value Value::operator()(Value params[], u32 paramCount)
 {
     static const istring callName("?call");
     Value                call = (*this)[callName];
-    if(motor_assert_format(call, "Not a callable object: {0}", m_type)) return Value();
+    if(motor_assert_format(call, "Not a callable object: {0}", m_type)) return {};
     if(motor_assert_format(call.isA(motor_type< const Method* const >()),
                            "Not a callable object: {0}", m_type))
-        return Value();
+        return {};
     return call.as< const Method* const >()->doCall(params, paramCount);
 }
 

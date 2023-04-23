@@ -6,12 +6,10 @@
 
 namespace Motor {
 
-PythonScript::PythonScript(weak< const File > file) : Script< PythonScript >(file)
+PythonScript::PythonScript(const weak< const File >& file) : Script< PythonScript >(file)
 {
 }
 
-PythonScript::~PythonScript()
-{
-}
+PythonScript::~PythonScript() = default;
 
 }  // namespace Motor

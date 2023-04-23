@@ -22,23 +22,25 @@
 #    define MOTOR_COMPILER_SUNCC 1
 #    define MOTOR_COMPILER_NAME  "suncc"
 #    include <motor/config/compilers/suncc.hh>
+#elif defined(__clang_analyzer__)
+#    include <motor/config/compilers/syntax.hh>
 #else
-//# error unsupported compiler
+#    error unsupported compiler
 #    include <motor/config/compilers/syntax.hh>
 #endif
 
 #ifdef __host
 #    undef __host
 #endif
-#define __host
+#define __host  // NOLINT
 #ifdef __device
 #    undef __device
 #endif
-#define __device inline
+#define __device inline  // NOLINT
 #ifdef __kernel
 #    undef __kernel
 #endif
-#define __kernel inline
+#define __kernel inline  // NOLINT
 
 #define kernel_constant const
 #define kernel_global

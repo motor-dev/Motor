@@ -9,128 +9,128 @@
 
 namespace Motor { namespace Python {
 
-PyTypeObject::Py2NumberMethods PyMotorEnum::s_py2EnumNumber = {{0, 0, 0},
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
+PyTypeObject::Py2NumberMethods PyMotorEnum::s_py2EnumNumber = {{nullptr, nullptr, nullptr},
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
                                                                &PyMotorEnum::nonZero,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
                                                                &PyMotorEnum::toint,
                                                                &PyMotorEnum::tolong,
                                                                &PyMotorEnum::tofloat,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0};
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr};
 
-PyTypeObject::Py3NumberMethods PyMotorEnum::s_py3EnumNumber = {{0, 0, 0},
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
+PyTypeObject::Py3NumberMethods PyMotorEnum::s_py3EnumNumber = {{nullptr, nullptr, nullptr},
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
                                                                &PyMotorEnum::nonZero,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
                                                                &PyMotorEnum::tolong,
-                                                               0,
+                                                               nullptr,
                                                                &PyMotorEnum::tofloat,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               0};
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr,
+                                                               nullptr};
 
-PyTypeObject PyMotorEnum::s_pyType = {{{0, 0}, 0},
+PyTypeObject PyMotorEnum::s_pyType = {{{0, nullptr}, 0},
                                       "py_motor.Enum",
                                       sizeof(PyMotorEnum),
                                       0,
                                       PyMotorEnum::dealloc,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
                                       &PyMotorEnum::str,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
                                       &PyMotorEnum::str,
-                                      0,
-                                      0,
-                                      0,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
                                       Py_TPFLAGS_MOTOR_DEFAULT | Py_TPFLAGS_IS_ABSTRACT,
                                       "Wrapper class for the C++ Motor Enum types",
-                                      0,
-                                      0,
+                                      nullptr,
+                                      nullptr,
                                       &PyMotorEnum::cmp,
                                       0,
-                                      0,
-                                      0,
+                                      nullptr,
+                                      nullptr,
                                       PyMotorObject::s_methods,
+                                      nullptr,
+                                      nullptr,
+                                      PyMotorObject::s_pyTypePtr,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
                                       0,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
                                       0,
-                                      &PyMotorObject::s_pyType,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0,
-                                      0};
+                                      nullptr,
+                                      nullptr};
 
 PyObject* PyMotorEnum::stealValue(PyObject* owner, Meta::Value& value)
 {
@@ -153,7 +153,7 @@ static istring s_toInt    = istring("toInt");
 
 PyObject* PyMotorEnum::str(PyObject* self)
 {
-    PyMotorEnum*              self_    = static_cast< PyMotorEnum* >(self);
+    auto*                     self_    = static_cast< PyMotorEnum* >(self);
     const Meta::Value&        v        = self_->value;
     raw< const Meta::Method > toString = self_->value[s_toString].as< raw< const Meta::Method > >();
     minitl::format_buffer< 1024u > format = minitl::format< 1024u >(
@@ -170,24 +170,23 @@ PyObject* PyMotorEnum::str(PyObject* self)
 
 PyObject* PyMotorEnum::cmp(PyObject* self, PyObject* other, int operation)
 {
-    PyMotorEnum*              self_ = static_cast< PyMotorEnum* >(self);
+    auto*                     self_ = static_cast< PyMotorEnum* >(self);
     raw< const Meta::Method > toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
     i64                       value = toInt->doCall(&self_->value, 1).as< u32 >();
     i64                       otherValue;
 
-
     if(other->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS)
     {
-        otherValue = s_library->m_PyInt_AsUnsignedLongMask(other);
+        otherValue = (i64)s_library->m_PyInt_AsUnsignedLongMask(other);
     }
     else if(other->py_type->tp_flags & Py_TPFLAGS_LONG_SUBCLASS)
     {
-        otherValue = s_library->m_PyLong_AsUnsignedLongLongMask(other);
+        otherValue = (i64)s_library->m_PyLong_AsUnsignedLongLongMask(other);
     }
     else if(other->py_type == &PyMotorObject::s_pyType
-       || other->py_type->tp_base == &PyMotorObject::s_pyType)
+            || other->py_type->tp_base == &PyMotorObject::s_pyType)
     {
-        PyMotorObject* other_ = static_cast< PyMotorObject* >(other);
+        auto* other_ = static_cast< PyMotorObject* >(other);
         if(other->py_type == &PyMotorEnum::s_pyType)
         {
             if(other_->value.type().metaclass != self_->value.type().metaclass)
@@ -198,7 +197,7 @@ PyObject* PyMotorEnum::cmp(PyObject* self, PyObject* other, int operation)
                         FMT("cannot compare value of enum type {0} with value of enum type {1}"),
                         self_->value.type().metaclass->fullname(),
                         other_->value.type().metaclass->fullname()));
-                return 0;
+                return nullptr;
             }
             else
             {
@@ -207,35 +206,35 @@ PyObject* PyMotorEnum::cmp(PyObject* self, PyObject* other, int operation)
         }
         else if(other->py_type == &PyMotorNumber< i8 >::s_pyType)
         {
-            otherValue = other_->value.as< i8 >();
+            otherValue = other_->value.as< i8 >();  // NOLINT
         }
         else if(other->py_type == &PyMotorNumber< i16 >::s_pyType)
         {
-            otherValue                   = other_->value.as< i16 >();
+            otherValue = other_->value.as< i16 >();
         }
         else if(other->py_type == &PyMotorNumber< i32 >::s_pyType)
         {
-            otherValue                   = other_->value.as< i32 >();
+            otherValue = other_->value.as< i32 >();
         }
         else if(other->py_type == &PyMotorNumber< i64 >::s_pyType)
         {
-            otherValue                   = other_->value.as< i64 >();
+            otherValue = other_->value.as< i64 >();
         }
         else if(other->py_type == &PyMotorNumber< u8 >::s_pyType)
         {
-            otherValue                  = other_->value.as< u8 >();
+            otherValue = other_->value.as< u8 >();
         }
         else if(other->py_type == &PyMotorNumber< u16 >::s_pyType)
         {
-            otherValue                   = other_->value.as< u16 >();
+            otherValue = other_->value.as< u16 >();
         }
         else if(other->py_type == &PyMotorNumber< u32 >::s_pyType)
         {
-            otherValue                   = other_->value.as< u32 >();
+            otherValue = other_->value.as< u32 >();
         }
         else if(other->py_type == &PyMotorNumber< u64 >::s_pyType)
         {
-            otherValue                   = i64(other_->value.as< u64 >());
+            otherValue = i64(other_->value.as< u64 >());
         }
         else
         {
@@ -245,7 +244,7 @@ PyObject* PyMotorEnum::cmp(PyObject* self, PyObject* other, int operation)
                     FMT("cannot compare value of enum type {0} with value of type {1}"),
                     self_->value.type().metaclass->fullname(),
                     other_->value.type().metaclass->fullname()));
-            return 0;
+            return nullptr;
         }
     }
     else
@@ -254,7 +253,7 @@ PyObject* PyMotorEnum::cmp(PyObject* self, PyObject* other, int operation)
         Py_INCREF(result);
         return result;
     }
-    PyObject* result; 
+    PyObject* result;
     switch(operation)
     {
     case PythonLibrary::Py_LT:
@@ -275,8 +274,7 @@ PyObject* PyMotorEnum::cmp(PyObject* self, PyObject* other, int operation)
     case PythonLibrary::Py_GE:
         result = value >= otherValue ? s_library->m__Py_TrueStruct : s_library->m__Py_FalseStruct;
         break;
-    default:
-        result = s_library->m__Py_NotImplementedStruct; break;
+    default: result = s_library->m__Py_NotImplementedStruct; break;
     }
     Py_INCREF(result);
     return result;
@@ -284,7 +282,7 @@ PyObject* PyMotorEnum::cmp(PyObject* self, PyObject* other, int operation)
 
 PyObject* PyMotorEnum::toint(PyObject* self)
 {
-    PyMotorObject*            self_ = static_cast< PyMotorObject* >(self);
+    auto*                     self_ = static_cast< PyMotorObject* >(self);
     raw< const Meta::Method > toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
     long                      value = (long)toInt->doCall(&self_->value, 1).as< u32 >();
     return s_library->m_PyInt_FromLong(value);
@@ -292,7 +290,7 @@ PyObject* PyMotorEnum::toint(PyObject* self)
 
 PyObject* PyMotorEnum::tolong(PyObject* self)
 {
-    PyMotorObject*            self_ = static_cast< PyMotorObject* >(self);
+    auto*                     self_ = static_cast< PyMotorObject* >(self);
     raw< const Meta::Method > toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
     unsigned long long value = (unsigned long long)toInt->doCall(&self_->value, 1).as< u32 >();
     return s_library->m_PyLong_FromUnsignedLongLong(value);
@@ -300,7 +298,7 @@ PyObject* PyMotorEnum::tolong(PyObject* self)
 
 PyObject* PyMotorEnum::tofloat(PyObject* self)
 {
-    PyMotorObject*            self_ = static_cast< PyMotorObject* >(self);
+    auto*                     self_ = static_cast< PyMotorObject* >(self);
     raw< const Meta::Method > toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
     double                    value = (double)toInt->doCall(&self_->value, 1).as< u32 >();
     return s_library->m_PyFloat_FromDouble(value);
@@ -308,7 +306,7 @@ PyObject* PyMotorEnum::tofloat(PyObject* self)
 
 int PyMotorEnum::nonZero(PyObject* self)
 {
-    PyMotorObject*            self_ = static_cast< PyMotorObject* >(self);
+    auto*                     self_ = static_cast< PyMotorObject* >(self);
     raw< const Meta::Method > toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
     return toInt->doCall(&self_->value, 1).as< u32 >() != 0;
 }

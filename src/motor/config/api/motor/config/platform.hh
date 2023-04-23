@@ -56,10 +56,11 @@
 #    error "Unknown platform: you need to define MOTOR_PLATFORM"
 #else
 // clang-format off
+// NOLINTNEXTLINE(bugprone-macro-parentheses)
 #    define MOTOR_PLATFORM_INCLUDE motor/config/platforms/MOTOR_PLATFORM.hh
 // clang-format on
 #    define MOTOR_MAKE_STRING_2(x) #x
-#    define MOTOR_MAKE_STRING_1(x)  MOTOR_MAKE_STRING_2(x)
+#    define MOTOR_MAKE_STRING_1(x) MOTOR_MAKE_STRING_2(x)
 #    include MOTOR_MAKE_STRING_1(MOTOR_PLATFORM_INCLUDE)
 #    undef MOTOR_PLATFORM_INCLUDE
 #    undef MOTOR_MAKE_STRING_1

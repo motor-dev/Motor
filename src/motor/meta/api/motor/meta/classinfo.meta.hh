@@ -3,6 +3,7 @@
 #pragma once
 
 #include <motor/meta/stdafx.h>
+#include <motor/meta/builtin.hh>
 #include <motor/meta/engine/helper/staticarray.hh>
 
 namespace Motor {
@@ -41,44 +42,44 @@ motor_tag(Index(ClassType_Namespace)) struct motor_api(META) Class
     friend struct Type;
     friend class Value;
 published:
-    static const istring nameConstructor();
-    static const istring nameDestructor();
-    static const istring nameOperatorCall();
-    static const istring nameOperatorIndex();
-    static const istring nameOperatorLessThan();
-    static const istring nameOperatorGreaterThan();
-    static const istring nameOperatorLessThanOrEqual();
-    static const istring nameOperatorGreaterThanOrEqual();
-    static const istring nameOperatorMultiply();
-    static const istring nameOperatorDivide();
-    static const istring nameOperatorModulo();
-    static const istring nameOperatorAdd();
-    static const istring nameOperatorSubstract();
-    static const istring nameOperatorShiftLeft();
-    static const istring nameOperatorShiftRight();
-    static const istring nameOperatorBitwiseAnd();
-    static const istring nameOperatorBitwiseOr();
-    static const istring nameOperatorBitwiseXor();
-    static const istring nameOperatorBitwiseNot();
-    static const istring nameOperatorLogicalAnd();
-    static const istring nameOperatorLogicalOr();
-    static const istring nameOperatorLogicalNot();
-    static const istring nameOperatorEqual();
-    static const istring nameOperatorNotEqual();
-    static const istring nameOperatorAssign();
-    static const istring nameOperatorMultiplyAssign();
-    static const istring nameOperatorDivideAssign();
-    static const istring nameOperatorModuloAssign();
-    static const istring nameOperatorAddAssign();
-    static const istring nameOperatorSubstractAssign();
-    static const istring nameOperatorShiftLeftAssign();
-    static const istring nameOperatorShiftRightAssign();
-    static const istring nameOperatorAndAssign();
-    static const istring nameOperatorOrAssign();
-    static const istring nameOperatorXorAssign();
-    static const istring nameOperatorIncrement();
-    static const istring nameOperatorDecrement();
-    static const istring nameOperatorGet();
+    static istring nameConstructor();
+    static istring nameDestructor();
+    static istring nameOperatorCall();
+    static istring nameOperatorIndex();
+    static istring nameOperatorLessThan();
+    static istring nameOperatorGreaterThan();
+    static istring nameOperatorLessThanOrEqual();
+    static istring nameOperatorGreaterThanOrEqual();
+    static istring nameOperatorMultiply();
+    static istring nameOperatorDivide();
+    static istring nameOperatorModulo();
+    static istring nameOperatorAdd();
+    static istring nameOperatorSubstract();
+    static istring nameOperatorShiftLeft();
+    static istring nameOperatorShiftRight();
+    static istring nameOperatorBitwiseAnd();
+    static istring nameOperatorBitwiseOr();
+    static istring nameOperatorBitwiseXor();
+    static istring nameOperatorBitwiseNot();
+    static istring nameOperatorLogicalAnd();
+    static istring nameOperatorLogicalOr();
+    static istring nameOperatorLogicalNot();
+    static istring nameOperatorEqual();
+    static istring nameOperatorNotEqual();
+    static istring nameOperatorAssign();
+    static istring nameOperatorMultiplyAssign();
+    static istring nameOperatorDivideAssign();
+    static istring nameOperatorModuloAssign();
+    static istring nameOperatorAddAssign();
+    static istring nameOperatorSubstractAssign();
+    static istring nameOperatorShiftLeftAssign();
+    static istring nameOperatorShiftRightAssign();
+    static istring nameOperatorAndAssign();
+    static istring nameOperatorOrAssign();
+    static istring nameOperatorXorAssign();
+    static istring nameOperatorIncrement();
+    static istring nameOperatorDecrement();
+    static istring nameOperatorGet();
 published:
     istring const                                 name;
     u32 const                                     size;
@@ -133,7 +134,6 @@ public:
     };
     void enumerateObjects(EnumerateRecursion recursion, EnumerateCallback callback) const;
     bool distance(raw< const Class > other, u16 & result) const;
-    const ObjectInfo* addObject(const istring& s, const ObjectInfo* ob);
 
 private:  // friend Value
     void copy(const void* src, void* dst) const;

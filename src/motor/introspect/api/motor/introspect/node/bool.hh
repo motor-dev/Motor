@@ -13,13 +13,13 @@ private:
     const bool m_value;
 
 protected:
-    virtual ConversionCost distance(const Type& type) const override;
-    virtual void           doEval(const Type& expectedType, Value& result) const override;
-    virtual void           doVisit(Node::Visitor & visitor) const override;
+    ConversionCost distance(const Type& type) const override;
+    void           doEval(const Type& expectedType, Value& result) const override;
+    void           doVisit(Node::Visitor & visitor) const override;
 
 public:
-    Bool(bool value);
-    ~Bool();
+    explicit Bool(bool value);
+    ~Bool() override;
 };
 
 }}}  // namespace Motor::Meta::AST

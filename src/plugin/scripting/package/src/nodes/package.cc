@@ -10,7 +10,7 @@ namespace Motor { namespace PackageBuilder { namespace Nodes {
 
 static const istring s_name("name");
 
-Package::Package(const ifilename& filename, ref< Folder > dataFolder)
+Package::Package(const ifilename& filename, const ref< Folder >& dataFolder)
     : m_filename(filename)
     , m_context(Arena::packageBuilder(), dataFolder)
     , m_plugins(Arena::packageBuilder())
@@ -19,11 +19,9 @@ Package::Package(const ifilename& filename, ref< Folder > dataFolder)
     m_context.rootNamespace->add(inamespace("motor"), Meta::Value(motor_motor_Namespace()));
 }
 
-Package::~Package()
-{
-}
+Package::~Package() = default;
 
-void Package::loadPlugin(inamespace plugin, inamespace name)
+void Package::loadPlugin(const inamespace& plugin, const inamespace& name)
 {
     Plugin::Plugin< void* > p(plugin, Plugin::Plugin< void* >::Preload);
     if(!p)
@@ -37,12 +35,11 @@ void Package::loadPlugin(inamespace plugin, inamespace name)
     }
 }
 
-void Package::insertNode(const istring name, ref< Meta::AST::Node > object)
+void Package::insertNode(istring name, const ref< Meta::AST::Node >& object)
 {
-    for(minitl::vector< ref< Meta::AST::Node > >::iterator it = m_nodes.begin();
-        it != m_nodes.end(); ++it)
+    for(auto& m_node: m_nodes)
     {
-        if(*it == object)
+        if(m_node == object)
         {
             motor_error(Log::package(), "Object added twice");
             return;
@@ -53,7 +50,7 @@ void Package::insertNode(const istring name, ref< Meta::AST::Node > object)
     m_context.rootNamespace->add(inamespace(name), object);
 }
 
-void Package::removeNode(ref< Meta::AST::Node > object)
+void Package::removeNode(const ref< Meta::AST::Node >& object)
 {
     istring name = object->getMetadata(s_name).as< const istring >();
     m_context.rootNamespace->remove(inamespace(name), object);
@@ -76,8 +73,8 @@ ref< Meta::AST::Node > Package::findByName(istring name) const
     return m_context.rootNamespace->getNode(name);
 }
 
-void Package::createObjects(weak< Resource::ResourceManager > manager,
-                            minitl::vector< Meta::Value >&    values)
+void Package::createObjects(const weak< Resource::ResourceManager >& manager,
+                            minitl::vector< Meta::Value >&           values)
 {
     values.resize(m_nodes.size());
     for(size_t i = 0; i < m_nodes.size(); ++i)
@@ -91,9 +88,10 @@ void Package::createObjects(weak< Resource::ResourceManager > manager,
     }
 }
 
-void Package::diffFromPackage(weak< Package > /*previous*/,
-                              weak< Resource::ResourceManager > /*manager*/)
+void Package::diffFromPackage(const weak< Package >& /*previous*/,
+                              const weak< Resource::ResourceManager >& /*manager*/)
 {
+    motor_forceuse(this);
     motor_unimplemented();
     // minitl::swap(previous->m_values, m_values);
     // for(size_t i = 0; i < m_nodes.size(); ++i)

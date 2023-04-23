@@ -21,8 +21,8 @@ private:
     u32     m_bufferCount;
 
 public:
-    MemoryBuffer(weak< const MemoryHost > provider);
-    ~MemoryBuffer();
+    explicit MemoryBuffer(const weak< const MemoryHost >& provider);
+    ~MemoryBuffer() override;
 
     Buffer* buffers() const
     {

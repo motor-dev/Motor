@@ -44,7 +44,7 @@ protected:
 protected:
     IRenderer(minitl::Allocator & allocator, const weak< Resource::ResourceManager >& manager,
               Scheduler::Affinity affinity = Scheduler::WorkerThread);
-    virtual ~IRenderer();
+    ~IRenderer() override;
 
 protected:
     virtual void flush();

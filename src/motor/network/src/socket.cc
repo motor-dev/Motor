@@ -6,12 +6,8 @@
 
 namespace Motor { namespace Network {
 
-Socket::Socket()
-{
-}
+Socket::Socket() = default;
 
-Socket::~Socket()
-{
-}
+Socket::~Socket() = default;
 
 }}  // namespace Motor::Network

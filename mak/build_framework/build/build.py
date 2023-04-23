@@ -198,7 +198,7 @@ def static_dependencies(self):
                 if not isinstance(task_gen, TaskGen.task_gen):
                     continue
                 if (
-                    'motor:kernel' in task_gen.features or 'motor:plugin' in task_gen.features
+                        'motor:kernel' in task_gen.features or 'motor:plugin' in task_gen.features
                 ) and 'cxx' in task_gen.features:
                     task_gen.post()
                     if task_gen.env.TOOLCHAIN == self.env.TOOLCHAIN:
@@ -399,9 +399,9 @@ def _make_bld_node(self, node, category, path, name):
         if path.is_child_of(self.bld.bldnode):
             out_dir = path.path_from(self.bld.bldnode)
             # skip variant
-            #out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+            # out_dir = out_dir[out_dir.find(os.path.sep)+1:]
             # skip optim
-            #out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+            # out_dir = out_dir[out_dir.find(os.path.sep)+1:]
             # skip target
             out_dir = out_dir[out_dir.find(os.path.sep) + 1:]
             # skip category
@@ -411,9 +411,9 @@ def _make_bld_node(self, node, category, path, name):
         elif path.is_child_of(self.bld.bldnode.parent.parent):
             out_dir = path.path_from(self.bld.bldnode.parent.parent)
             # skip variant
-            #out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+            # out_dir = out_dir[out_dir.find(os.path.sep)+1:]
             # skip optim
-            #out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+            # out_dir = out_dir[out_dir.find(os.path.sep)+1:]
             # skip target
             out_dir = out_dir[out_dir.find(os.path.sep) + 1:]
             # skip category
@@ -466,21 +466,25 @@ def apply_source_filter(self, env, file):
     add_platform = True
     add_arch = True
     add_compiler = True
-    had_filter = True
+    had_filter = False
+
     platform = file.name.find('-p=')
     if platform != -1:
+        had_filter = True
         add_platform = False
         platforms = basename[platform + 3:].split('+')
         for p in platforms:
             add_platform = add_platform or p in env.VALID_PLATFORMS
     arch = file.name.find('-a=')
     if arch != -1:
+        had_filter = True
         add_arch = False
         architectures = basename[arch + 3:].split('+')
         for a in architectures:
             add_arch = add_arch or a in env.VALID_ARCHITECTURES
     compiler = file.name.find('-c=')
     if compiler != -1:
+        had_filter = True
         add_compiler = False
         compilers = basename[compiler + 3:].split('+')
         for c in compilers:
@@ -488,22 +492,26 @@ def apply_source_filter(self, env, file):
     node = file.parent
     while add_platform and add_arch and add_compiler and node and node != self.path and node != self.bld.srcnode:
         if node.name.startswith('platform='):
+            had_filter = True
             add_platform = False
             platforms = node.name[9:].split('+')
             for p in platforms:
-                add_platform = add_platform or p in self.bld.env.VALID_PLATFORMS
+                add_platform = add_platform or p in env.VALID_PLATFORMS
         elif node.name.startswith('arch='):
+            had_filter = True
             add_arch = False
             architectures = node.name[5:].split('+')
             for a in architectures:
                 add_arch = add_arch or a in env.VALID_ARCHITECTURES
         elif node.name.startswith('compiler='):
+            had_filter = True
             add_compiler = False
             compilers = node.name[9:].split('+')
             for c in compilers:
                 add_compiler = add_compiler or c == env.COMPILER_NAME
         elif node.parent.name == 'extra' and node.parent.parent == self.bld.motornode:
-            add_platform = node.name in self.bld.env.VALID_PLATFORMS
+            had_filter = True
+            add_platform = add_platform and node.name in env.VALID_PLATFORMS
         node = node.parent
     return add_platform and add_arch and add_compiler, had_filter
 
@@ -663,7 +671,7 @@ def cc_hook(self, node):
             except KeyError:
                 output = self.make_bld_node(
                     'src', None, 'master-c-%s-%d.%s' %
-                    (node.parent.name, len(self.mastertasks_cxx_folders), self.objc and 'mm' or 'cc')
+                                 (node.parent.name, len(self.mastertasks_cxx_folders), self.objc and 'mm' or 'cc')
                 )
                 mastertask_cxx = self.create_task('master', [node], [output])
                 self.mastertasks_cxx_folders[node.parent] = mastertask_cxx
@@ -710,7 +718,7 @@ def incpath_master(self):
 @after_method('process_source')
 def apply_link(self):
     for x in self.features:
-        if x == 'cprogram' and 'cxx' in self.features: # limited compat
+        if x == 'cprogram' and 'cxx' in self.features:  # limited compat
             x = 'cxxprogram'
         elif x == 'cshlib' and 'cxx' in self.features:
             x = 'cxxshlib'

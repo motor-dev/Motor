@@ -36,11 +36,9 @@ PackageLoader::PackageLoader(const Plugin::Context& context)
 {
 }
 
-PackageLoader::~PackageLoader()
-{
-}
+PackageLoader::~PackageLoader() = default;
 
-void PackageLoader::unload(weak< const Resource::IDescription > /*description*/,
+void PackageLoader::unload(const weak< const Resource::IDescription >& /*description*/,
                            Resource::Resource& handle)
 {
     {
@@ -62,7 +60,7 @@ void PackageLoader::unload(weak< const Resource::IDescription > /*description*/,
     handle.clearRefHandle();
 }
 
-void PackageLoader::runBuffer(weak< const Package > script, Resource::Resource& resource,
+void PackageLoader::runBuffer(const weak< const Package >& script, Resource::Resource& resource,
                               const minitl::Allocator::Block< u8 >& buffer)
 {
     MD5 md5 = digest(buffer);
@@ -82,7 +80,7 @@ void PackageLoader::runBuffer(weak< const Package > script, Resource::Resource& 
     }
 }
 
-void PackageLoader::reloadBuffer(weak< const Package > script, Resource::Resource& resource,
+void PackageLoader::reloadBuffer(const weak< const Package >& script, Resource::Resource& resource,
                                  const minitl::Allocator::Block< u8 >& buffer)
 {
     MD5 md5 = digest(buffer);
@@ -92,7 +90,7 @@ void PackageLoader::reloadBuffer(weak< const Package > script, Resource::Resourc
     weak< PackageBuilder::Nodes::Package > oldPackage
         = resource.getRefHandle< PackageBuilder::Nodes::Package >();
     newPackage->diffFromPackage(oldPackage, m_manager);
-    oldPackage = weak< PackageBuilder::Nodes::Package >();
+    oldPackage.clear();
     resource.clearRefHandle();
     resource.setRefHandle(newPackage);
 }

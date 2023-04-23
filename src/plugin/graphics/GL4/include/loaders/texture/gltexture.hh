@@ -12,11 +12,12 @@ class GLRenderer;
 class GLTexture : public IGPUResource
 {
 public:
-    GLTexture(weak< const Resource::IDescription > textureDescription, weak< GLRenderer > renderer);
-    ~GLTexture();
+    GLTexture(const weak< const Resource::IDescription >& textureDescription,
+              const weak< GLRenderer >&                   renderer);
+    ~GLTexture() override;
 
-    virtual void load(weak< const Resource::IDescription > textureDescription) override;
-    virtual void unload() override;
+    void load(const weak< const Resource::IDescription >& textureDescription) override;
+    void unload() override;
 };
 
 }}  // namespace Motor::OpenGL

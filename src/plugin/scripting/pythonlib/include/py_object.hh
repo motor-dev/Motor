@@ -29,8 +29,10 @@ struct PyMotorObject : public PyObject
     static PyObject* call(PyObject* self, PyObject* args, PyObject* kwds);
     static int       nonZero(PyObject* self);
 
-    static PyTypeObject s_pyType;
-    static PyMethodDef  s_methods[];
+    static PyTypeObject            s_pyType;
+    static PyMethodDef             s_methodArray[];
+    static constexpr PyTypeObject* s_pyTypePtr {&s_pyType};
+    static constexpr PyMethodDef*  s_methods {s_methodArray};
 };
 
 }}  // namespace Motor::Python

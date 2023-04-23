@@ -25,16 +25,16 @@ public:
         SystemAllocator m_allocator256k;
 
     public:
-        Runtime(ref< Task::ITask > task, u32 parameterCount);
+        Runtime(const ref< Task::ITask >& task, u32 parameterCount);
     };
-    weak< Runtime > getRuntime(weak< const KernelScheduler::ProducerLoader > loader) const;
+    weak< Runtime > getRuntime(const weak< const KernelScheduler::ProducerLoader >& loader) const;
 
 public:
     void addComponentStorage();
 
 published:
     ComponentRegistry();
-    ~ComponentRegistry();
+    ~ComponentRegistry() override;
 };
 
 }}  // namespace Motor::World

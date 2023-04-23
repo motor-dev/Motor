@@ -6,4 +6,4 @@
 #include <motor/plugin/plugin.hh>
 #include <packageloader.hh>
 
-MOTOR_PLUGIN_REGISTER(Motor::PackageManager::PackageLoader);
+MOTOR_PLUGIN_REGISTER(Motor::PackageManager::PackageLoader)

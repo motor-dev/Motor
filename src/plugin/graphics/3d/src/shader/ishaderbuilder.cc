@@ -6,7 +6,9 @@
 
 namespace Motor { namespace Shaders {
 
-IShaderBuilder::Namespace::Namespace() : names(Arena::temporary()) {};
+IShaderBuilder::Namespace::Namespace() : names(Arena::temporary())
+{
+}
 
 IShaderBuilder::IShaderBuilder()
     : m_namespaces(Arena::temporary())
@@ -18,13 +20,11 @@ IShaderBuilder::IShaderBuilder()
     , m_stream(Arena::temporary(), 10000)
     , m_indent(0)
 {
-    m_namespaces.push_back(Namespace());
+    m_namespaces.emplace_back();
     m_stream.write("\0", 1);
 }
 
-IShaderBuilder::~IShaderBuilder()
-{
-}
+IShaderBuilder::~IShaderBuilder() = default;
 
 void IShaderBuilder::indent()
 {
@@ -44,7 +44,7 @@ void IShaderBuilder::write(const char* text)
     {
         for(int i = 0; i < m_indent; ++i)
             m_stream.write("  ", 2);
-        m_stream.write(text, motor_checked_numcast<u32>(strlen(text)));
+        m_stream.write(text, motor_checked_numcast< u32 >(strlen(text)));
     }
     m_stream.write("\0", 1);
 }
@@ -65,7 +65,7 @@ i64 IShaderBuilder::textSize() const
     return m_stream.size();
 }
 
-istring IShaderBuilder::referenceNode(weak< const Node > node)
+istring IShaderBuilder::referenceNode(const weak< const Node >& node)
 {
     for(minitl::vector< Namespace >::const_reverse_iterator it = m_namespaces.rbegin();
         it != m_namespaces.rend(); ++it)
@@ -77,10 +77,10 @@ istring IShaderBuilder::referenceNode(weak< const Node > node)
         }
     }
     motor_error(Log::shader(), "Undeclared object");
-    return istring("");
+    return {""};
 }
 
-void IShaderBuilder::addUniform(weak< const Node > node, Stage stage, const istring& name,
+void IShaderBuilder::addUniform(const weak< const Node >& node, Stage stage, const istring& name,
                                 ValueType type)
 {
     if(m_namespaces.front().names.insert(node, name).second)
@@ -89,8 +89,8 @@ void IShaderBuilder::addUniform(weak< const Node > node, Stage stage, const istr
     }
 }
 
-void IShaderBuilder::addVarying(weak< const Node > node, Stage currentStage, Stage targetStage,
-                                ValueType type)
+void IShaderBuilder::addVarying(const weak< const Node >& node, Stage currentStage,
+                                Stage targetStage, ValueType type)
 {
     if(currentStage == targetStage)
     {
@@ -103,8 +103,8 @@ void IShaderBuilder::addVarying(weak< const Node > node, Stage currentStage, Sta
     }
 }
 
-void IShaderBuilder::addAttribute(weak< const Node > node, Stage currentStage, Stage targetStage,
-                                  ValueType type)
+void IShaderBuilder::addAttribute(const weak< const Node >& node, Stage currentStage,
+                                  Stage targetStage, ValueType type)
 {
     if(VertexStage == targetStage)
     {
@@ -151,7 +151,7 @@ void IShaderBuilder::forwardAttributes()
 
 void IShaderBuilder::beginMethodDefinition(const istring& name)
 {
-    m_namespaces.push_back(Namespace());
+    m_namespaces.emplace_back();
     doAddMethod(name);
 }
 
@@ -161,13 +161,13 @@ void IShaderBuilder::end()
     doEndMethod();
 }
 
-void IShaderBuilder::saveTo(Semantic semantic, weak< const Node > node)
+void IShaderBuilder::saveTo(Semantic semantic, const weak< const Node >& node)
 {
     doSaveTo(semantic, referenceNode(node));
 }
 
-void IShaderBuilder::addOperator(weak< const Node > node, Operator op, ValueType type,
-                                 weak< const Node > node1, weak< const Node > node2)
+void IShaderBuilder::addOperator(const weak< const Node >& node, Operator op, ValueType type,
+                                 const weak< const Node >& node1, const weak< const Node >& node2)
 {
     istring var(minitl::format< 1024u >(FMT("temp_{0}"), m_currentTemporary));
     if(m_namespaces.front().names.insert(node, var).second)

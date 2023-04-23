@@ -25,8 +25,8 @@ private:
     scoped< BitmapFontManager >       m_bitmapFontManager;
 
 public:
-    TextPlugin(const Plugin::Context& pluginContext);
-    ~TextPlugin();
+    explicit TextPlugin(const Plugin::Context& pluginContext);
+    ~TextPlugin() override;
 };
 
 }  // namespace Motor

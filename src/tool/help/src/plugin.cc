@@ -6,4 +6,4 @@
 #include <motor/application.hh>
 #include <motor/plugin/plugin.hh>
 
-MOTOR_PLUGIN_REGISTER(Motor::Help);
+MOTOR_PLUGIN_REGISTER(Motor::Help)

@@ -15,13 +15,13 @@ void SettingsProvider::addSetting(minitl::hashmap< istring, SettingsList >& cont
 {
     minitl::hashmap< istring, SettingsList >::iterator where;
     where = container.insert(category, SettingsList(Arena::general())).first;
-    for(SettingsList::iterator it = where->second.begin(); it != where->second.end(); ++it)
+    for(auto& it: where->second)
     {
-        if(it->first == name)
+        if(it.first == name)
         {
             motor_warning_format(Log::settings(), "setting {0}.{1} overriden; first value ignored",
                                  category, name);
-            it->third = value;
+            it.third = value;
             return;
         }
     }
@@ -32,7 +32,7 @@ void SettingsProvider::addSetting(minitl::hashmap< istring, SettingsList >& cont
 }
 
 SettingsProvider::SettingsProvider(const minitl::hashmap< istring, SettingsList >& initialSettings,
-                                   ref< Folder >                                   folder)
+                                   const ref< Folder >&                            folder)
     : m_settings(Arena::general(), initialSettings)
     , m_folder(folder)
 {
@@ -48,16 +48,13 @@ SettingsProvider::~SettingsProvider()
 SettingsProvider::SettingsRegistration::SettingsRegistration(SettingsBase& settings)
 {
     const minitl::intrusive_list< SettingsProvider >& providers = getSettingsList();
-    for(minitl::intrusive_list< SettingsProvider >::const_iterator it = providers.begin();
-        it != providers.end(); ++it)
+    for(const auto& provider: providers)
     {
-        it->apply(settings);
+        provider.apply(settings);
     }
 }
 
-SettingsProvider::SettingsRegistration::~SettingsRegistration()
-{
-}
+SettingsProvider::SettingsRegistration::~SettingsRegistration() = default;
 
 minitl::intrusive_list< SettingsProvider >&
 SettingsProvider::SettingsRegistration::getSettingsList()
@@ -68,7 +65,8 @@ SettingsProvider::SettingsRegistration::getSettingsList()
 
 void SettingsProvider::apply(SettingsBase& settings) const
 {
-    Meta::Type  type          = Meta::Type::makeType(settings.m_settingsClass, Meta::Type::Indirection::Value,
+    Meta::Type type
+        = Meta::Type::makeType(settings.m_settingsClass, Meta::Type::Indirection::Value,
                                Meta::Type::Constness::Mutable, Meta::Type::Constness::Mutable);
     Meta::Value settingsValue = Meta::Value(type, &settings);
     for(SettingsCategoryMap::const_iterator it = m_settings.begin(); it != m_settings.end(); ++it)

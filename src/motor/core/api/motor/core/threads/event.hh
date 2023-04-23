@@ -15,13 +15,13 @@ private:
 
 public:
     Event();
-    ~Event();
+    ~Event() override;
 
-    void                         set();
-    void                         pulse();
-    void                         lock();
-    void                         unlock();
-    virtual Waitable::WaitResult wait() override;
+    void                 set();
+    void                 pulse();
+    void                 lock();
+    void                 unlock();
+    Waitable::WaitResult wait() override;
 };
 
 }  // namespace Motor

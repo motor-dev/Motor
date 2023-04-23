@@ -14,7 +14,7 @@ namespace Motor {
 
 CriticalSection::CriticalSection() : m_data(new CRITICAL_SECTION)
 {
-    CRITICAL_SECTION* s = (CRITICAL_SECTION*)m_data;
+    auto* s = (CRITICAL_SECTION*)m_data;
     InitializeCriticalSection(s);
 }
 

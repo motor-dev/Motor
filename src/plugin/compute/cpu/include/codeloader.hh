@@ -13,13 +13,13 @@ private:
     const inamespace m_cpuVariant;
 
 public:
-    CodeLoader(const inamespace& cpuVariant);
-    ~CodeLoader();
+    explicit CodeLoader(const inamespace& cpuVariant);
+    ~CodeLoader() override;
 
-    virtual void load(weak< const Resource::IDescription > codeDescription,
-                      Resource::Resource&                  resource) override;
-    virtual void unload(weak< const Resource::IDescription > scodeDescription,
-                        Resource::Resource&                  resource) override;
+    void load(const weak< const Resource::IDescription >& codeDescription,
+              Resource::Resource&                         resource) override;
+    void unload(const weak< const Resource::IDescription >& scodeDescription,
+                Resource::Resource&                         resource) override;
 };
 
 }}}  // namespace Motor::KernelScheduler::CPU

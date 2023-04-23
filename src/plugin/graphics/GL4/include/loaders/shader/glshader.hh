@@ -19,16 +19,16 @@ private:
     GLhandleARB m_fragmentShader;
 
 private:
-    GLhandleARB build(weak< const ShaderProgramDescription > program) const;
+    GLhandleARB build(const weak< const ShaderProgramDescription >& program) const;
     void        attach();
 
 public:
-    GLShaderProgram(weak< const Resource::IDescription > shaderDescription,
-                    weak< const GLRenderer >             renderer);
-    ~GLShaderProgram();
+    GLShaderProgram(const weak< const Resource::IDescription >& shaderDescription,
+                    const weak< const GLRenderer >&             renderer);
+    ~GLShaderProgram() override;
 
-    virtual void load(weak< const Resource::IDescription > shaderDescription) override;
-    virtual void unload() override;
+    void load(const weak< const Resource::IDescription >& shaderDescription) override;
+    void unload() override;
 };
 
 }}  // namespace Motor::OpenGL

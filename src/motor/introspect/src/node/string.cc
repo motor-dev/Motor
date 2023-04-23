@@ -12,9 +12,7 @@ String::String(const char* value) : Node(), m_value(Arena::script().strdup(value
 {
 }
 
-String::~String()
-{
-}
+String::~String() = default;
 
 ConversionCost String::distance(const Type& type) const
 {

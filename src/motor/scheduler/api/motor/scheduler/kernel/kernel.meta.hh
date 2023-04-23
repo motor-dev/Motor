@@ -21,8 +21,8 @@ private:
     const istring     m_name;
 
 public:
-    Kernel(ref< const Code > code, const istring& name);
-    ~Kernel();
+    Kernel(const ref< const Code >& code, const istring& name);
+    ~Kernel() override;
 
     istring name() const
     {

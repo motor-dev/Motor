@@ -15,7 +15,6 @@ class motor_api(WINDOWING) Renderer : public IRenderer
 {
     friend class Window;
     friend class Window::PlatformWindow;
-    MOTOR_NOCOPY(Renderer);
 
 private:
     class PlatformRenderer;

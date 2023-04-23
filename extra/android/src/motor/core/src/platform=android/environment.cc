@@ -24,9 +24,7 @@ Environment::Environment()
     m_homeDirectory.push_back(".motor");
 }
 
-Environment::~Environment()
-{
-}
+Environment::~Environment() = default;
 
 void Environment::init(int argc, const char* argv[])
 {
@@ -60,15 +58,15 @@ void Environment::init(int argc, const char* argv[])
     }
 }
 
-size_t Environment::getProcessorCount() const
+size_t Environment::getProcessorCount()
 {
     return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
-const char* Environment::getEnvironmentVariable(const char* variable) const
+const char* Environment::getEnvironmentVariable(const char* variable)
 {
     motor_forceuse(variable);
-    return NULL;
+    return nullptr;
 }
 
 }  // namespace Motor

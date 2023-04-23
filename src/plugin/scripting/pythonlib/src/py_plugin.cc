@@ -8,67 +8,67 @@
 
 namespace Motor { namespace Python {
 
-static PyTypeObject s_motorPluginType = {{{0, 0}, 0},
+static PyTypeObject s_motorPluginType = {{{0, nullptr}, 0},
                                          "py_motor.Plugin",
                                          sizeof(PyMotorPlugin),
                                          0,
                                          &PyMotorPlugin::dealloc,
-                                         0,
+                                         nullptr,
                                          &PyMotorPlugin::getattr,
                                          &PyMotorPlugin::setattr,
-                                         0,
+                                         nullptr,
                                          &PyMotorPlugin::repr,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
                                          Py_TPFLAGS_MOTOR_DEFAULT,
                                          "Wrapper class for the C++ class Motor::Plugin::Plugin",
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
                                          0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
                                          0,
                                          &PyMotorPlugin::init,
-                                         0,
+                                         nullptr,
                                          &PyMotorPlugin::create,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
                                          0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0,
-                                         0};
+                                         nullptr,
+                                         nullptr};
 
 PyObject* PyMotorPlugin::create(PyTypeObject* type, PyObject* /*args*/, PyObject* /*kwds*/)
 {
-    PyMotorPlugin* self = reinterpret_cast< PyMotorPlugin* >(type->tp_alloc(type, 0));
+    auto* self = reinterpret_cast< PyMotorPlugin* >(type->tp_alloc(type, 0));
     new(&self->value) Plugin::Plugin< void >();
     return reinterpret_cast< PyObject* >(self);
 }
 
 int PyMotorPlugin::init(PyObject* self, PyObject* args, PyObject* /*kwds*/)
 {
-    PyMotorPlugin* self_ = reinterpret_cast< PyMotorPlugin* >(self);
-    const char*    name  = 0;
+    auto*       self_ = reinterpret_cast< PyMotorPlugin* >(self);
+    const char* name  = nullptr;
     if(s_library->m__PyArg_ParseTuple_SizeT(args, "s", &name))
     {
         self_->value = Plugin::Plugin< void >(name, Plugin::Plugin< void >::Preload);
@@ -82,7 +82,7 @@ int PyMotorPlugin::init(PyObject* self, PyObject* args, PyObject* /*kwds*/)
 
 PyObject* PyMotorPlugin::getattr(PyObject* self, const char* name)
 {
-    PyMotorPlugin* self_ = reinterpret_cast< PyMotorPlugin* >(self);
+    auto* self_ = reinterpret_cast< PyMotorPlugin* >(self);
     if(self_->value)
     {
         Meta::Value v(self_->value.pluginNamespace());
@@ -95,7 +95,7 @@ PyObject* PyMotorPlugin::getattr(PyObject* self, const char* name)
             *s_library->m_PyExc_Exception,
             minitl::format<>(FMT("while retrieving property {0}: plugin {1} failed to load"), name,
                              self_->value.name()));
-        return 0;
+        return nullptr;
     }
 }
 
@@ -109,7 +109,7 @@ int PyMotorPlugin::setattr(PyObject* self, const char* name, PyObject* value)
 
 PyObject* PyMotorPlugin::repr(PyObject* self)
 {
-    PyMotorPlugin* self_ = reinterpret_cast< PyMotorPlugin* >(self);
+    auto* self_ = reinterpret_cast< PyMotorPlugin* >(self);
     if(s_library->getVersion() >= 30)
     {
         return s_library->m_PyUnicode_FromString(
@@ -124,7 +124,7 @@ PyObject* PyMotorPlugin::repr(PyObject* self)
 
 void PyMotorPlugin::dealloc(PyObject* self)
 {
-    PyMotorPlugin* self_ = reinterpret_cast< PyMotorPlugin* >(self);
+    auto* self_ = reinterpret_cast< PyMotorPlugin* >(self);
     self_->value.~Plugin();
     self->py_type->tp_free(self);
 }

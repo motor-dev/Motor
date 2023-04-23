@@ -17,8 +17,8 @@ private:
     weak< FileSystem::WatchPoint > m_watchPoint;
 
 public:
-    Watch(weak< DiskFolder > folder, weak< FileSystem::WatchPoint > watchPoint);
-    ~Watch();
+    Watch(const weak< DiskFolder >& folder, const weak< FileSystem::WatchPoint >& watchPoint);
+    ~Watch() override;
 };
 
 }  // namespace Motor

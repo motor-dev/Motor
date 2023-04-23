@@ -24,9 +24,7 @@ Namespace::Namespace(minitl::Allocator& allocator, const Value& value)
 {
 }
 
-Namespace::~Namespace()
-{
-}
+Namespace::~Namespace() = default;
 
 void Namespace::add(const inamespace& name, const Value& value)
 {
@@ -46,7 +44,7 @@ void Namespace::add(const inamespace& name, const Value& value)
     current->m_value = value;
 }
 
-void Namespace::add(const inamespace& name, ref< Namespace > ns)
+void Namespace::add(const inamespace& name, const ref< Namespace >& ns)
 {
     weak< Namespace > current = this;
     if(name.size())
@@ -66,7 +64,7 @@ void Namespace::add(const inamespace& name, ref< Namespace > ns)
     }
 }
 
-void Namespace::add(const inamespace& name, ref< Node > node)
+void Namespace::add(const inamespace& name, const ref< Node >& node)
 {
     weak< Namespace > current = this;
     if(name.size())
@@ -86,7 +84,7 @@ void Namespace::add(const inamespace& name, ref< Node > node)
     }
 }
 
-void Namespace::remove(const inamespace& name, ref< Node > node)
+void Namespace::remove(const inamespace& name, const ref< Node >& node)
 {
     weak< Namespace > current = this;
     if(name.size())
@@ -105,22 +103,22 @@ void Namespace::remove(const inamespace& name, ref< Node > node)
     }
 }
 
-ref< Namespace > Namespace::getChild(const istring name) const
+ref< Namespace > Namespace::getChild(istring name) const
 {
-    minitl::hashmap< istring, ref< Namespace > >::const_iterator it = m_children.find(name);
+    minitl::hashmap< istring, ref< Namespace > >::const_iterator it = this->m_children.find(name);
     if(it != m_children.end())
     {
         return it->second;
     }
     else
     {
-        return ref< Namespace >();
+        return {};
     }
 }
 
-ref< Node > Namespace::getNode(const istring name) const
+ref< Node > Namespace::getNode(istring name) const
 {
-    minitl::hashmap< istring, ref< Node > >::const_iterator it = m_nodes.find(name);
+    minitl::hashmap< istring, ref< Node > >::const_iterator it = this->m_nodes.find(name);
     if(it != m_nodes.end())
     {
         return it->second;

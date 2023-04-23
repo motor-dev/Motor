@@ -18,9 +18,9 @@ private:
     istring const            m_fontSystemName;
     weak< const File > const m_fontFile;
 published:
-    BitmapFont(const istring& fontSystemName);
-    BitmapFont(weak< const File > fontFile);
-    ~BitmapFont();
+    explicit BitmapFont(const istring& fontSystemName);
+    explicit BitmapFont(const weak< const File >& fontFile);
+    ~BitmapFont() override;
 };
 
 }  // namespace Motor

@@ -12,7 +12,6 @@ class GLRenderer;
 class GLWindow : public Windowing::Window
 {
     friend class GLRenderer;
-    MOTOR_NOCOPY(GLWindow);
 
 private:
     class Context;
@@ -24,7 +23,7 @@ private:
     void present() const;
 
 private:
-    void load(weak< const Resource::IDescription > windowDescription) override;
+    void load(const weak< const Resource::IDescription >& windowDescription) override;
     void unload() override;
 
 public:
@@ -32,8 +31,8 @@ public:
     void end(PresentMode present) const override;
 
 public:
-    GLWindow(weak< const RenderWindowDescription > windowDescription,
-             weak< const GLRenderer >              renderer);
+    GLWindow(const weak< const RenderWindowDescription >& windowDescription,
+             const weak< const GLRenderer >&              renderer);
     ~GLWindow() override = default;
 };
 

@@ -14,16 +14,14 @@ struct MethodCaller : public IExecutor
 private:
     Ptr< Owner > const m_owner;
 
-private:
-    MethodCaller& operator=(const MethodCaller& other);
+public:
+    MethodCaller& operator=(const MethodCaller& other) = delete;
 
 public:
-    MethodCaller(Ptr< Owner > owner) : m_owner(owner)
+    explicit MethodCaller(Ptr< Owner > owner) : m_owner(owner)
     {
     }
-    ~MethodCaller()
-    {
-    }
+    ~MethodCaller() override = default;
     MethodCaller(const MethodCaller& other) : m_owner(other.m_owner)
     {
     }
@@ -34,7 +32,7 @@ public:
         return 1;
     }
 
-    virtual void run(u32 partIndex, u32 partCount) const override
+    void run(u32 partIndex, u32 partCount) const override
     {
         motor_assert_format(partIndex == 0, "MethodCaller called with invalid part index {0}",
                             partIndex);
@@ -47,16 +45,12 @@ public:
 template < void (*Procedure)() >
 struct ProcedureCaller : public IExecutor
 {
-private:
-    ProcedureCaller& operator=(const ProcedureCaller& other);
+public:
+    ProcedureCaller& operator=(const ProcedureCaller& other) = delete;
 
 public:
-    ProcedureCaller()
-    {
-    }
-    ~ProcedureCaller()
-    {
-    }
+    ProcedureCaller()           = default;
+    ~ProcedureCaller() override = default;
     ProcedureCaller(const ProcedureCaller& other)
     {
         motor_forceuse(other);
@@ -68,11 +62,11 @@ public:
         return 1;
     }
 
-    virtual void run(u32 partIndex, u32 partCount) const override
+    void run(u32 partIndex, u32 partCount) const override
     {
         motor_assert_format(partIndex == 0, "MethodCaller called with invalid part index {0}",
                             partIndex);
-        motor_assert_format(partCount == 1, "MethodCaller called with invalid part count {1}",
+        motor_assert_format(partCount == 1, "MethodCaller called with invalid part count {0}",
                             partCount);
         (*Procedure)();
     }

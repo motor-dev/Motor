@@ -35,7 +35,7 @@ static HMODULE getPythonModuleHandle()
     if(EnumProcessModules)
     {
         DWORD needed = 0;
-        if(!(*EnumProcessModules)(GetCurrentProcess(), 0, 0, &needed))
+        if(!(*EnumProcessModules)(GetCurrentProcess(), nullptr, 0, &needed))
         {
             motor_error(Log::python(), "Could not locate python: EnumProcessModules failed");
             return (HMODULE) nullptr;
@@ -92,7 +92,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     do                                                                                             \
     {                                                                                              \
         void* tmp = (void*)(GetProcAddress((HMODULE)m_handle, #f));                                \
-        if(tmp) memcpy(&m_##dest, &tmp, sizeof(dest##Type));                                       \
+        if(tmp) memcpy(&m_##dest, &tmp, sizeof(Type_##dest));                                      \
     } while(0)
 #define motor_get_func_opt(f) motor_get_func_name_opt(f, f)
 #define motor_get_func_name(f, dest)                                                               \

@@ -57,29 +57,28 @@ protected:
 public:
     struct motor_api(INTROSPECT) Visitor
     {
-        virtual ~Visitor()
-        {
-        }
-        virtual void accept(weak< const Array >                         arrayNode,
+        virtual ~Visitor() = default;
+        virtual void accept(const weak< const Array >&                  arrayNode,
                             const minitl::vector< weak< const Node > >& arrayValue);
-        virtual void accept(weak< const Bool > boolValue);
-        virtual void accept(weak< const FileName > filenameValue);
-        virtual void accept(weak< const Float > floatValue);
-        virtual void accept(weak< const Float2 > float2Value);
-        virtual void accept(weak< const Float3 > float3Value);
-        virtual void accept(weak< const Float4 > float4Value);
-        virtual void accept(weak< const Integer > integerValue);
-        virtual void accept(weak< const Int2 > int2Value);
-        virtual void accept(weak< const Int3 > int3Value);
-        virtual void accept(weak< const Int4 > int4Value);
-        virtual void accept(weak< const Object > objectValue);
-        virtual void accept(weak< const Parameter > parameter, istring name,
-                            weak< const Node > value);
-        virtual void accept(weak< const Property > propertyValue);
-        virtual void accept(weak< const Reference > referenceValue, const Value& referencedValue);
-        virtual void accept(weak< const Reference > referenceValue,
-                            weak< const Node >      referencedNode);
-        virtual void accept(weak< const String > stringValue);
+        virtual void accept(const weak< const Bool >& boolValue);
+        virtual void accept(const weak< const FileName >& filenameValue);
+        virtual void accept(const weak< const Float >& floatValue);
+        virtual void accept(const weak< const Float2 >& float2Value);
+        virtual void accept(const weak< const Float3 >& float3Value);
+        virtual void accept(const weak< const Float4 >& float4Value);
+        virtual void accept(const weak< const Integer >& integerValue);
+        virtual void accept(const weak< const Int2 >& int2Value);
+        virtual void accept(const weak< const Int3 >& int3Value);
+        virtual void accept(const weak< const Int4 >& int4Value);
+        virtual void accept(const weak< const Object >& objectValue);
+        virtual void accept(const weak< const Parameter >& parameter, istring name,
+                            const weak< const Node >& value);
+        virtual void accept(const weak< const Property >& propertyValue);
+        virtual void accept(const weak< const Reference >& referenceValue,
+                            const Value&                   referencedValue);
+        virtual void accept(const weak< const Reference >& referenceValue,
+                            const weak< const Node >&      referencedNode);
+        virtual void accept(const weak< const String >& stringValue);
     };
 
     virtual ConversionCost distance(const Type& type) const = 0;
@@ -92,20 +91,18 @@ public:
     template < typename T >
     void setMetadata(const istring name, T value)
     {
-        for(minitl::vector< minitl::tuple< const istring, Meta::Value > >::iterator it
-            = m_metadata.begin();
-            it != m_metadata.end(); ++it)
+        for(auto& it: m_metadata)
         {
-            if(it->first == name)
+            if(it.first == name)
             {
-                it->second = value;
+                it.second = value;
                 return;
             }
         }
-        m_metadata.push_back(minitl::make_tuple(name, Meta::Value()));
+        m_metadata.emplace_back(name, Meta::Value());
         m_metadata.rbegin()->second = value;
     }
-    const Value& getMetadata(const istring name) const;
+    const Value& getMetadata(istring name) const;
 
     void visit(Visitor & visitor) const;
 };

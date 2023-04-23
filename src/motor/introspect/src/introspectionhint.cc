@@ -12,7 +12,7 @@
 
 namespace Motor { namespace Meta { namespace AST {
 
-IntrospectionHint::IntrospectionHint(weak< const Object > owner, raw< const Method > method,
+IntrospectionHint::IntrospectionHint(const weak< const Object >& owner, raw< const Method > method,
                                      const CallInfo& callInfo, u32 argumentThis)
     : m_owner(owner)
     , m_method(method)
@@ -21,9 +21,7 @@ IntrospectionHint::IntrospectionHint(weak< const Object > owner, raw< const Meth
 {
 }
 
-IntrospectionHint::~IntrospectionHint()
-{
-}
+IntrospectionHint::~IntrospectionHint() = default;
 
 ConversionCost IntrospectionHint::calculateConversion(const Type& targetType) const
 {
@@ -66,8 +64,7 @@ bool IntrospectionHint::getPropertyValue(Value& value, const istring& propertyNa
     result = value.type().metaclass->get(value, propertyName, found);
     return found;
 }
-bool IntrospectionHint::getPropertyType(DbContext& context, const istring name,
-                                        Type& propertyType) const
+bool IntrospectionHint::getPropertyType(DbContext& context, istring name, Type& propertyType) const
 {
     motor_forceuse(context);
     const Type&                 type     = m_callInfo.overload->returnType;

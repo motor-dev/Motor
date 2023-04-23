@@ -38,8 +38,9 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 Renderer::PlatformRenderer::PlatformRenderer(const weak< Renderer >& renderer)
     : m_renderer(renderer)
     , m_windowClassName(minitl::format< 128u >(FMT("__motor__{0}__"), (const void*)renderer))
+    , m_wndClassEx {}
 {
-    memset(&m_wndClassEx, 0, sizeof(WNDCLASSEX));
+    // memset(&m_wndClassEx, 0, sizeof(WNDCLASSEX));
     m_wndClassEx.lpszClassName = m_windowClassName.c_str();
     m_wndClassEx.cbSize        = sizeof(WNDCLASSEX);
     m_wndClassEx.style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
@@ -77,6 +78,7 @@ const istring& Renderer::PlatformRenderer::getWindowClassName() const
 
 void Renderer::PlatformRenderer::destroyWindowImplementation(HWND hWnd)
 {
+    motor_forceuse(this);
     DestroyWindow(hWnd);
 }
 

@@ -23,18 +23,19 @@ private:
     minitl::vector< ref< Meta::AST::Node > >  m_nodes;
 
 public:
-    Package(const ifilename& filename, ref< Folder > dataFolder);
-    ~Package();
+    Package(const ifilename& filename, const ref< Folder >& dataFolder);
+    ~Package() override;
 
-    void                   insertNode(const istring name, ref< Meta::AST::Node > object);
-    void                   removeNode(ref< Meta::AST::Node > object);
+    void                   insertNode(istring name, const ref< Meta::AST::Node >& object);
+    void                   removeNode(const ref< Meta::AST::Node >& object);
     ref< Meta::AST::Node > findByName(istring name) const;
 
-    void loadPlugin(inamespace plugin, inamespace name);
+    void loadPlugin(const inamespace& plugin, const inamespace& name);
 
-    void createObjects(weak< Resource::ResourceManager > manager,
-                       minitl::vector< Meta::Value >&    values);
-    void diffFromPackage(weak< Package > previous, weak< Resource::ResourceManager > manager);
+    void createObjects(const weak< Resource::ResourceManager >& manager,
+                       minitl::vector< Meta::Value >&           values);
+    void diffFromPackage(const weak< Package >&                   previous,
+                         const weak< Resource::ResourceManager >& manager);
 
     void resolve();
 

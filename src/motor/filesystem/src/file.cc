@@ -78,7 +78,7 @@ ref< const File::Ticket > File::beginRead(u32 size, i64 offset, bool text,
     return t;
 }
 
-ref< const File::Ticket > File::beginWrite(const void* data, u32 size, i64 offset)
+ref< const File::Ticket > File::beginWrite(const void* data, u32 size, i64 offset) const
 {
     if(offset > 0)
         motor_assert((u64)offset <= m_size, "writing past end of file");

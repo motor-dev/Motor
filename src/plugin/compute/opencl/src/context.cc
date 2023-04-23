@@ -9,20 +9,20 @@ namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
 static CLStringInfo getDeviceInfo(cl_device_id device, cl_device_info name)
 {
-    CLStringInfo result;
+    CLStringInfo result {};
     size_t       size = CLStringInfo::InfoLogSize;
-    checkResult(clGetDeviceInfo(device, name, size, result.info, 0));
+    checkResult(clGetDeviceInfo(device, name, size, result.info, nullptr));
     return result;
 }
 
 static u32 getDevicePointerSize(cl_device_id device)
 {
     u32 result;
-    checkResult(clGetDeviceInfo(device, CL_DEVICE_ADDRESS_BITS, sizeof(result), &result, 0));
+    checkResult(clGetDeviceInfo(device, CL_DEVICE_ADDRESS_BITS, sizeof(result), &result, nullptr));
     return result;
 }
 
-Context::Context(weak< Platform > platform, cl_device_id device, cl_context context)
+Context::Context(const weak< Platform >& platform, cl_device_id device, cl_context context)
     : m_platform(platform)
     , m_device(device)
     , m_context(context)
@@ -35,12 +35,12 @@ Context::Context(weak< Platform > platform, cl_device_id device, cl_context cont
                       getDeviceInfo(m_device, CL_DEVICE_VENDOR).info,
                       getDeviceInfo(m_device, CL_DRIVER_VERSION).info);
     size_t size = 0;
-    checkResult(clGetDeviceInfo(m_device, CL_DEVICE_EXTENSIONS, 0, 0, &size));
+    checkResult(clGetDeviceInfo(m_device, CL_DEVICE_EXTENSIONS, 0, nullptr, &size));
 
     char* deviceExtensions         = (char*)malloca(size + 1);
     char* deviceExtensionsIterator = deviceExtensions;
     deviceExtensions[size]         = 0;
-    checkResult(clGetDeviceInfo(m_device, CL_DEVICE_EXTENSIONS, size, deviceExtensions, 0));
+    checkResult(clGetDeviceInfo(m_device, CL_DEVICE_EXTENSIONS, size, deviceExtensions, nullptr));
     while(size > 100)
     {
         char* nextLine = deviceExtensionsIterator + 100;
@@ -64,9 +64,9 @@ Context::~Context()
     clReleaseContext(m_context);
 }
 
-cl_program Context::buildProgram(const u64 size, const char* code) const
+cl_program Context::buildProgram(u64 size, const char* code) const
 {
-    size_t     codeSize  = motor_checked_numcast< size_t >(size);
+    auto       codeSize  = motor_checked_numcast< size_t >(size);
     cl_int     errorCode = 0;
     cl_program program   = clCreateProgramWithSource(m_context, 1, &code, &codeSize, &errorCode);
     if(errorCode != CL_SUCCESS)
@@ -78,11 +78,11 @@ cl_program Context::buildProgram(const u64 size, const char* code) const
         return program;
     }
 
-    errorCode = clBuildProgram(program, 1, &m_device, "", 0, 0);
+    errorCode = clBuildProgram(program, 1, &m_device, "", nullptr, nullptr);
     cl_program_build_info info;
     size_t                len = 0;
     clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_STATUS, sizeof(info), &info, &len);
-    clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG, 0, 0, &len);
+    clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG, 0, nullptr, &len);
     if(len > 2)
     {
         minitl::Allocator::Block< char > buffer(Arena::temporary(), len + 1);
@@ -99,7 +99,7 @@ cl_program Context::buildProgram(const u64 size, const char* code) const
     }
 #if CL_VERSION_1_2
     {
-        checkResult(clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, 0, 0, &len));
+        checkResult(clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, 0, nullptr, &len));
         minitl::Allocator::Block< char > buffer(Arena::temporary(), len + 1);
         clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, (len + 1), buffer.data(), &len);
         motor_info_format(Log::opencl(), "list of kernels: {0}", buffer.data());

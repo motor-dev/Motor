@@ -3,7 +3,6 @@
 #pragma once
 
 #include <motor/stdafx.h>
-#include <motor/scriptengine.hh>
 
 #include <motor/resource/resourcemanager.hh>
 
@@ -25,7 +24,7 @@ ScriptEngine< T >::~ScriptEngine()
 }
 
 template < typename T >
-void ScriptEngine< T >::load(weak< const Resource::IDescription > script,
+void ScriptEngine< T >::load(const weak< const Resource::IDescription >& script,
                              Resource::Resource& /*resource*/)
 {
     motor_assert(motor_checked_cast< const Script< T > >(script)->m_file,
@@ -35,8 +34,8 @@ void ScriptEngine< T >::load(weak< const Resource::IDescription > script,
 }
 
 template < typename T >
-void ScriptEngine< T >::reload(weak< const Resource::IDescription > /*oldScript*/,
-                               weak< const Resource::IDescription > newScript,
+void ScriptEngine< T >::reload(const weak< const Resource::IDescription >& /*oldScript*/,
+                               const weak< const Resource::IDescription >& newScript,
                                Resource::Resource& /*resource*/)
 {
     motor_assert(motor_checked_cast< const Script< T > >(newScript)->m_file,
@@ -47,10 +46,10 @@ void ScriptEngine< T >::reload(weak< const Resource::IDescription > /*oldScript*
 }
 
 template < typename T >
-void ScriptEngine< T >::onTicketLoaded(weak< const Resource::IDescription >  script,
-                                       Resource::Resource&                   resource,
-                                       const minitl::Allocator::Block< u8 >& buffer,
-                                       ILoader::LoadType                     type)
+void ScriptEngine< T >::onTicketLoaded(const weak< const Resource::IDescription >& script,
+                                       Resource::Resource&                         resource,
+                                       const minitl::Allocator::Block< u8 >&       buffer,
+                                       ILoader::LoadType                           type)
 {
     if(type == ILoader::LoadReload)
     {

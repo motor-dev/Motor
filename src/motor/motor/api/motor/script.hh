@@ -21,12 +21,10 @@ private:
     weak< const File > m_file;
 
 protected:
-    Script(weak< const File > file) : m_file(file)
+    explicit Script(const weak< const File >& file) : m_file(file)
     {
     }
-    ~Script()
-    {
-    }
+    ~Script() = default;
 
 public:
     ifilename getScriptName() const

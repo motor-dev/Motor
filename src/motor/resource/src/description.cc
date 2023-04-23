@@ -24,17 +24,17 @@ IDescription::~IDescription()
     }
 }
 
-void IDescription::load(weak< ILoader > loader) const
+void IDescription::load(const weak< ILoader >& loader) const
 {
     Resource* resources = getResourceBuffer();
     if(++m_resourceCount > MaxResourceCount)
     {
-        u64       bufferSize     = m_resourceCount * sizeof(Resource);
-        Resource* resourceBuffer = static_cast< Resource* >(Arena::resource().alloc(bufferSize));
+        u64   bufferSize     = m_resourceCount * sizeof(Resource);
+        auto* resourceBuffer = static_cast< Resource* >(Arena::resource().alloc(bufferSize));
         for(u32 i = 0; i < m_resourceCount - 1; ++i)
         {
             new(&resourceBuffer[i]) Resource(resources[i]);
-            resources[i].m_handle.id.ptrId = 0;
+            resources[i].m_handle.id.ptrId = nullptr;
             resources[i].m_handle.owner    = 0;
             resources[i].~Resource();
         }
@@ -49,7 +49,7 @@ void IDescription::load(weak< ILoader > loader) const
     loader->load(this, resources[m_resourceCount - 1]);
 }
 
-void IDescription::unload(weak< ILoader > loader) const
+void IDescription::unload(const weak< ILoader >& loader) const
 {
     Resource* resources = getResourceBuffer();
     for(u32 i = 0; i < m_resourceCount; ++i)
@@ -58,7 +58,7 @@ void IDescription::unload(weak< ILoader > loader) const
         {
             loader->unload(this, resources[i]);
             resources[i]                                     = resources[m_resourceCount - 1];
-            resources[m_resourceCount - 1].m_handle.id.ptrId = 0;
+            resources[m_resourceCount - 1].m_handle.id.ptrId = nullptr;
             resources[m_resourceCount - 1].m_handle.owner    = 0;
             resources[m_resourceCount - 1].~Resource();
             --m_resourceCount;
@@ -68,7 +68,7 @@ void IDescription::unload(weak< ILoader > loader) const
                 for(u32 j = 0; j < m_resourceCount; ++j)
                 {
                     new(&newBuffer[j]) Resource(resources[j]);
-                    resources[j].m_handle.id.ptrId = 0;
+                    resources[j].m_handle.id.ptrId = nullptr;
                     resources[j].m_handle.owner    = 0;
                     resources[j].~Resource();
                 }
@@ -80,7 +80,7 @@ void IDescription::unload(weak< ILoader > loader) const
     motor_notreached();
 }
 
-Resource& IDescription::getResourceForWriting(weak< const ILoader > owner) const
+Resource& IDescription::getResourceForWriting(const weak< const ILoader >& owner) const
 {
     Resource* resources = getResourceBuffer();
     for(u32 i = 0; i < m_resourceCount; ++i)
@@ -93,7 +93,7 @@ Resource& IDescription::getResourceForWriting(weak< const ILoader > owner) const
     return Resource::null();
 }
 
-const Resource& IDescription::getResource(weak< const ILoader > owner) const
+const Resource& IDescription::getResource(const weak< const ILoader >& owner) const
 {
     Resource* resources = getResourceBuffer();
     for(u32 i = 0; i < m_resourceCount; ++i)

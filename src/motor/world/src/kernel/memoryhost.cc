@@ -13,11 +13,9 @@ MemoryHost::MemoryHost(const SystemAllocator& pageAllocator)
     motor_forceuse(m_allocator);
 }
 
-MemoryHost::~MemoryHost()
-{
-}
+MemoryHost::~MemoryHost() = default;
 
-void MemoryHost::release(weak< KernelScheduler::IMemoryBuffer > buffer)
+void MemoryHost::release(const weak< KernelScheduler::IMemoryBuffer >& buffer)
 {
     motor_forceuse(buffer);
 }

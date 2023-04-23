@@ -7,12 +7,8 @@
 
 namespace Motor { namespace World {
 
-SubWorld::SubWorld()
-{
-}
+SubWorld::SubWorld() = default;
 
-SubWorld::~SubWorld()
-{
-}
+SubWorld::~SubWorld() = default;
 
 }}  // namespace Motor::World

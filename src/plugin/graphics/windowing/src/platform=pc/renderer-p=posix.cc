@@ -12,7 +12,6 @@
 
 namespace Motor { namespace Windowing {
 
-namespace {
 static GLXFBConfig selectGLXFbConfig(::Display* display, int screen)
 {
     static int s_glxAttributes[]
@@ -33,19 +32,18 @@ static GLXFBConfig selectGLXFbConfig(::Display* display, int screen)
     XFree(configs);
     return fbConfig;
 }
-}  // namespace
 
 PlatformData::PlatformData(::Display* display)
     : display(display)
-    , fbConfig(display ? selectGLXFbConfig(display, XDefaultScreen(display)) : 0)
-    , visual(display ? glXGetVisualFromFBConfig(display, fbConfig) : 0)
+    , fbConfig(display ? selectGLXFbConfig(display, XDefaultScreen(display)) : nullptr)
+    , visual(display ? glXGetVisualFromFBConfig(display, fbConfig) : nullptr)
     , wm_protocols(XInternAtom(display, "WM_PROTOCOLS", False))
     , wm_delete_window(XInternAtom(display, "WM_DELETE_WINDOW", False))
 {
 }
 
 Renderer::PlatformRenderer::PlatformRenderer()
-    : m_platformData(XOpenDisplay(0))
+    : m_platformData(XOpenDisplay(nullptr))
     , m_windowProperty(
           m_platformData.display ? XInternAtom(m_platformData.display, "MOTOR_WINDOW", False) : 0)
 {
@@ -68,11 +66,12 @@ Renderer::PlatformRenderer::~PlatformRenderer()
 
 weak< Window > Renderer::PlatformRenderer::getWindowFromXWindow(::Window w)
 {
+    motor_forceuse(this);
     ::Atom         type;
     int            format;
     unsigned long  nbItems;
     unsigned long  leftBytes;
-    unsigned char* property = 0;
+    unsigned char* property = nullptr;
     XGetWindowProperty(m_platformData.display, w, m_windowProperty, 0, sizeof(Window*) / 4, False,
                        AnyPropertyType, &type, &format, &nbItems, &leftBytes, &property);
     motor_assert(property, "could not retrieve engine window handle from X11 window");
@@ -134,7 +133,7 @@ Renderer::Renderer(minitl::Allocator& arena, const weak< Resource::ResourceManag
 
 Renderer::~Renderer()
 {
-    flush();
+    Renderer::flush();
 }
 
 bool Renderer::hasPlatformRenderer() const

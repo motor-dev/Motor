@@ -25,8 +25,10 @@ published:
         Value getTag(const Type& type) const;
         Value getTag(raw< const Class > type) const;
 
-    public:
         static const Value s_noDefaultValue;
+
+    public:
+        static constexpr raw< const Value > noDefaultValue {&s_noDefaultValue};
     };
     struct motor_api(META) Overload
     {
@@ -41,7 +43,7 @@ published:
 
     public:
         minitl::format_buffer< 1024u > signature() const;
-        Value (*call)(raw< const Method > method, Value * params, u32 nparams);
+        Value (*call)(raw< const Method > method, Value * params, u32 paramCount);
     };
 
 published:

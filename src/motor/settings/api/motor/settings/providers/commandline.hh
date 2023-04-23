@@ -10,14 +10,14 @@ namespace Motor { namespace Settings {
 class motor_api(SETTINGS) CommandLineSettingsProvider : public SettingsProvider
 {
 private:
-    minitl::hashmap< istring, SettingsProvider::SettingsList > buildSettings(int         argc,
-                                                                             const char* argv[]);
+    static minitl::hashmap< istring, SettingsProvider::SettingsList > buildSettings(
+        int argc, const char* argv[]);
 
-    virtual void log(const Meta::AST::Message& message) const override;
+    void log(const Meta::AST::Message& message) const override;
 
 public:
-    CommandLineSettingsProvider(int argc, const char* argv[], ref< Folder > folder);
-    ~CommandLineSettingsProvider();
+    CommandLineSettingsProvider(int argc, const char* argv[], const ref< Folder >& folder);
+    ~CommandLineSettingsProvider() override;
 };
 
 }}  // namespace Motor::Settings

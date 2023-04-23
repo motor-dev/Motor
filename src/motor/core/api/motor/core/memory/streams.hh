@@ -14,7 +14,7 @@ private:
     u32                            m_capacity;
 
 public:
-    MemoryStream(minitl::Allocator & allocator, u32 size = 0);
+    explicit MemoryStream(minitl::Allocator & allocator, u32 size = 0);
     ~MemoryStream();
 
     void* memory()

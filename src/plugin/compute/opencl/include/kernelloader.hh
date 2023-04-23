@@ -12,13 +12,13 @@ class CodeLoader;
 class KernelLoader : public IKernelLoader
 {
 public:
-    KernelLoader(ref< CodeLoader > codeLoader);
-    ~KernelLoader();
+    explicit KernelLoader(const ref< CodeLoader >& codeLoader);
+    ~KernelLoader() override;
 
-    virtual void load(weak< const Resource::IDescription > kernelDescription,
-                      Resource::Resource&                  resource) override;
-    virtual void unload(weak< const Resource::IDescription > kernelDescription,
-                        Resource::Resource&                  resource) override;
+    void load(const weak< const Resource::IDescription >& kernelDescription,
+              Resource::Resource&                         resource) override;
+    void unload(const weak< const Resource::IDescription >& kernelDescription,
+                Resource::Resource&                         resource) override;
 };
 
 }}}  // namespace Motor::KernelScheduler::OpenCL

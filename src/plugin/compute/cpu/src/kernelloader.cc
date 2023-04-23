@@ -11,16 +11,14 @@
 
 namespace Motor { namespace KernelScheduler { namespace CPU {
 
-KernelLoader::KernelLoader(ref< CodeLoader > codeLoader) : IKernelLoader(codeLoader)
+KernelLoader::KernelLoader(const ref< CodeLoader >& codeLoader) : IKernelLoader(codeLoader)
 {
 }
 
-KernelLoader::~KernelLoader()
-{
-}
+KernelLoader::~KernelLoader() = default;
 
-void KernelLoader::load(weak< const Resource::IDescription > kernelDescription,
-                        Resource::Resource&                  resource)
+void KernelLoader::load(const weak< const Resource::IDescription >& kernelDescription,
+                        Resource::Resource&                         resource)
 {
     weak< const Kernel > kernel = motor_checked_cast< const Kernel >(kernelDescription);
     weak< CodeObject >   code
@@ -28,7 +26,7 @@ void KernelLoader::load(weak< const Resource::IDescription > kernelDescription,
     resource.setRefHandle(ref< KernelObject >::create(Arena::task(), code, kernel->name()));
 }
 
-void KernelLoader::unload(weak< const Resource::IDescription > /*kernelDescription*/,
+void KernelLoader::unload(const weak< const Resource::IDescription >& /*kernelDescription*/,
                           Resource::Resource& resource)
 {
     resource.clearRefHandle();

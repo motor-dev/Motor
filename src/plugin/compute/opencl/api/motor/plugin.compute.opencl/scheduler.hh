@@ -24,9 +24,9 @@ private:
     cl_command_queue                  m_commandQueue;
 
 public:
-    Scheduler(const Plugin::Context& pluginContext, ref< Context > clContext);
-    ~Scheduler();
-    virtual void run(weak< const Task::KernelTask > task) override;
+    Scheduler(const Plugin::Context& pluginContext, const ref< Context >& clContext);
+    ~Scheduler() override;
+    void run(weak< const Task::KernelTask > task) override;
 };
 
 }}}  // namespace Motor::KernelScheduler::OpenCL

@@ -12,7 +12,7 @@
 
 namespace Motor {
 
-Mutex::Mutex() : m_data(CreateMutex(0, FALSE, 0))
+Mutex::Mutex() : m_data(CreateMutex(nullptr, FALSE, nullptr))
 {
 }
 

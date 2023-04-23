@@ -13,18 +13,14 @@
 
 namespace Motor { namespace World {
 
-WorldRuntime::SubWorldResource::SubWorldResource()
-{
-}
+WorldRuntime::SubWorldResource::SubWorldResource() = default;
 
-WorldRuntime::SubWorldResource::~SubWorldResource()
-{
-}
+WorldRuntime::SubWorldResource::~SubWorldResource() = default;
 
-WorldRuntime::WorldRuntime(weak< const KernelScheduler::ProducerLoader >            producerLoader,
-                           const Plugin::Context&                                   context,
-                           minitl::array< weak< const KernelScheduler::IProduct > > products,
-                           weak< ComponentRegistry::Runtime >                       registryRuntime)
+WorldRuntime::WorldRuntime(const weak< const KernelScheduler::ProducerLoader >& producerLoader,
+                           const Plugin::Context&                               context,
+                           const minitl::array< weak< const KernelScheduler::IProduct > >& products,
+                           const weak< ComponentRegistry::Runtime >& registryRuntime)
     : m_resourceManager(scoped< Resource::ResourceManager >::create(Arena::game()))
     , m_context(m_resourceManager, context.dataFolder, context.scheduler)
     , m_logicComponentStorage(Arena::game())
@@ -43,17 +39,13 @@ WorldRuntime::WorldRuntime(weak< const KernelScheduler::ProducerLoader >        
     , m_productEnds(Arena::task(), products.size() + 1)
 {
     m_resourceManager->attach< SubWorld >(this);
-    m_productEnds.push_back(Task::ITask::CallbackConnection(
-        m_updateTask, producerLoader->startTask()->startCallback()));
-    m_productEnds.push_back(
-        Task::ITask::CallbackConnection(producerLoader->startTask(), m_eventTask->startCallback()));
+    m_productEnds.emplace_back(m_updateTask, producerLoader->startTask()->startCallback());
+    m_productEnds.emplace_back(producerLoader->startTask(), m_eventTask->startCallback());
 
-    for(minitl::array< weak< const KernelScheduler::IProduct > >::const_iterator product
-        = products.begin();
-        product != products.end(); ++product)
+    for(const auto& product: products)
     {
-        m_productEnds.push_back(Task::ITask::CallbackConnection(
-            (*product)->producer()->getTask(producerLoader), m_eventTask->startCallback()));
+        m_productEnds.emplace_back(product->producer()->getTask(producerLoader),
+                                   m_eventTask->startCallback());
     }
 }
 
@@ -80,14 +72,15 @@ void WorldRuntime::processEvents()
 {
 }
 
-void WorldRuntime::load(weak< const Resource::IDescription > subworld, Resource::Resource& resource)
+void WorldRuntime::load(const weak< const Resource::IDescription >& subworld,
+                        Resource::Resource&                         resource)
 {
     motor_forceuse(subworld);
     resource.setRefHandle(ref< SubWorldResource >::create(Arena::game()));
 }
 
-void WorldRuntime::unload(weak< const Resource::IDescription > subworld,
-                          Resource::Resource&                  resource)
+void WorldRuntime::unload(const weak< const Resource::IDescription >& subworld,
+                          Resource::Resource&                         resource)
 {
     motor_forceuse(subworld);
     resource.clearRefHandle();
@@ -99,7 +92,7 @@ void WorldRuntime::addLogicComponentType(raw< const Meta::Class > type)
         ref< LogicStorage >::create(Arena::game(), type, m_registryRuntime));
 }
 
-void WorldRuntime::spawn(weak< const SubWorld > subworld, u32 parentId,
+void WorldRuntime::spawn(const weak< const SubWorld >& subworld, u32 parentId,
                          Meta::Value spawnParameters[])
 {
     motor_forceuse(parentId);

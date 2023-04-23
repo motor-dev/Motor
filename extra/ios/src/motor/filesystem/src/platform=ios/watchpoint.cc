@@ -6,10 +6,11 @@
 
 namespace Motor { namespace FileSystem {
 
-ref< Folder::Watch > WatchPoint::addWatch(weak< DiskFolder > /*folder*/,
+ref< Folder::Watch > WatchPoint::addWatch(const weak< DiskFolder >& /*folder*/,
                                           const Motor::ipath& /*path*/)
 {
-    return ref< Folder::Watch >();
+    motor_forceuse(this);
+    return {};
 }
 
 }}  // namespace Motor::FileSystem

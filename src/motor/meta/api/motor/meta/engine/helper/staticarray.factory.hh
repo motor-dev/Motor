@@ -100,26 +100,20 @@ Meta::Value ClassID< Meta::staticarray< T > >::callStaticArrayOperatorIndexConst
 }
 
 template < typename T >
-const Meta::Method::Parameter ClassID< Meta::staticarray< T > >::s_index_0_params[2]
-    = {{{0},
-        istring("this"),
-        motor_type< Meta::staticarray< T >& >(),
-        {&::Motor::Meta::Method::Parameter::s_noDefaultValue}},
-       {{0},
-        istring("index"),
-        motor_type< u32 >(),
-        {&::Motor::Meta::Method::Parameter::s_noDefaultValue}}};
+const Meta::Method::Parameter ClassID< Meta::staticarray< T > >::s_index_0_params[2] = {
+    {{0},
+     istring("this"),
+     motor_type< Meta::staticarray< T >& >(),
+     ::Motor::Meta::Method::Parameter::noDefaultValue},
+    {{0}, istring("index"), motor_type< u32 >(), ::Motor::Meta::Method::Parameter::noDefaultValue}};
 
 template < typename T >
-const Meta::Method::Parameter ClassID< Meta::staticarray< T > >::s_index_1_params[2]
-    = {{{0},
-        istring("this"),
-        motor_type< const Meta::staticarray< T >& >(),
-        {&::Motor::Meta::Method::Parameter::s_noDefaultValue}},
-       {{0},
-        istring("index"),
-        motor_type< u32 >(),
-        {&::Motor::Meta::Method::Parameter::s_noDefaultValue}}};
+const Meta::Method::Parameter ClassID< Meta::staticarray< T > >::s_index_1_params[2] = {
+    {{0},
+     istring("this"),
+     motor_type< const Meta::staticarray< T >& >(),
+     ::Motor::Meta::Method::Parameter::noDefaultValue},
+    {{0}, istring("index"), motor_type< u32 >(), ::Motor::Meta::Method::Parameter::noDefaultValue}};
 
 template < typename T >
 const Meta::Method::Overload ClassID< Meta::staticarray< T > >::s_method_index_overloads[2]
@@ -135,7 +129,7 @@ const Meta::Method::Parameter ClassID< Meta::staticarray< T > >::s_size_params[1
     = {{{0},
         istring("this"),
         motor_type< const Meta::staticarray< T >& >(),
-        {&::Motor::Meta::Method::Parameter::s_noDefaultValue}}};
+        ::Motor::Meta::Method::Parameter::noDefaultValue}};
 
 template < typename T >
 const Meta::Method::Overload ClassID< Meta::staticarray< T > >::s_method_size_overloads[1]

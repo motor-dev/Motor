@@ -9,7 +9,7 @@
 
 namespace Motor { namespace Meta { namespace AST {
 
-Property::Property(ref< const Object > owner, const inamespace& propertyName)
+Property::Property(const ref< const Object >& owner, const inamespace& propertyName)
     : Node()
     , m_owner(owner)
     , m_propertyName(propertyName)
@@ -17,9 +17,7 @@ Property::Property(ref< const Object > owner, const inamespace& propertyName)
 {
 }
 
-Property::~Property()
-{
-}
+Property::~Property() = default;
 
 ConversionCost Property::distance(const Type& type) const
 {

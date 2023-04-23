@@ -12,8 +12,9 @@ class motor_api(TEXT) OutlineShader : public ShaderProgramDescription
 {
     friend class OutlineShaderManager;
 published:
-    OutlineShader(weak< Shaders::Float4 > textColor, weak< Shaders::Float4 > backgroundColor);
-    ~OutlineShader();
+    OutlineShader(const weak< Shaders::Float4 >& textColor,
+                  const weak< Shaders::Float4 >& backgroundColor);
+    ~OutlineShader() override;
 };
 
 }  // namespace Motor

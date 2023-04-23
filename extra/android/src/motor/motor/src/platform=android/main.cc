@@ -9,9 +9,9 @@
 #include <android/log.h>
 #include <jni.h>
 
-MOTOR_EXPORT const char* s_packagePath   = 0;
-MOTOR_EXPORT const char* s_dataDirectory = 0;
-MOTOR_EXPORT const char* s_plugin        = 0;
+MOTOR_EXPORT const char* s_packagePath   = nullptr;
+MOTOR_EXPORT const char* s_dataDirectory = nullptr;
+MOTOR_EXPORT const char* s_plugin        = nullptr;
 
 int beMain(int argc, const char* argv[]);
 
@@ -20,17 +20,13 @@ namespace Motor { namespace Android {
 class AndroidLogListener : public Motor::ILogListener
 {
 public:
-    AndroidLogListener()
-    {
-    }
+    AndroidLogListener() = default;
 
-    ~AndroidLogListener()
-    {
-    }
+    ~AndroidLogListener() override = default;
 
 protected:
-    virtual bool log(const Motor::inamespace& logname, Motor::LogLevel level, const char* filename,
-                     int line, const char* thread, const char* msg) const
+    bool log(const Motor::inamespace& logname, Motor::LogLevel level, const char* filename,
+             int line, const char* thread, const char* msg) const override
     {
         android_LogPriority s_motorToAndroid[logFatal + 1]
             = {ANDROID_LOG_DEBUG, ANDROID_LOG_INFO, ANDROID_LOG_WARN, ANDROID_LOG_ERROR,
@@ -48,7 +44,7 @@ static intptr_t android_main(intptr_t /*width*/, intptr_t /*height*/)
         scoped< AndroidLogListener >::create(Motor::Arena::debug()));
     Motor::Plugin::DynamicObjectList::showList();
     const char* args[] = {"Motor", s_plugin};
-    return beMain(1 + (s_plugin != 0), args);
+    return beMain(1 + (s_plugin != nullptr), args);
 }
 
 }}  // namespace Motor::Android
@@ -68,9 +64,9 @@ JNIEXPORT void JNICALL Java_com_motor_MotorLib_setPaths(JNIEnv* env, jclass /*cl
                                                         jstring packagePath, jstring dataDirectory,
                                                         jstring plugin)
 {
-    s_packagePath   = env->GetStringUTFChars(packagePath, 0);
-    s_dataDirectory = env->GetStringUTFChars(dataDirectory, 0);
-    s_plugin        = env->GetStringUTFChars(plugin, 0);
+    s_packagePath   = env->GetStringUTFChars(packagePath, nullptr);
+    s_dataDirectory = env->GetStringUTFChars(dataDirectory, nullptr);
+    s_plugin        = env->GetStringUTFChars(plugin, nullptr);
 }
 
 JNIEXPORT void JNICALL Java_com_motor_MotorLib_init(JNIEnv* /*env*/, jclass /*cls*/, jint width,
@@ -81,4 +77,5 @@ JNIEXPORT void JNICALL Java_com_motor_MotorLib_init(JNIEnv* /*env*/, jclass /*cl
 
 JNIEXPORT void JNICALL Java_com_motor_MotorLib_step(JNIEnv* /*env*/, jclass /*cls*/)
 {
+    motor_forceuse(s_mainThread);
 }

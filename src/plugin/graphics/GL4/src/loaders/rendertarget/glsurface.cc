@@ -9,17 +9,15 @@
 
 namespace Motor { namespace OpenGL {
 
-GLSurface::GLSurface(weak< const RenderSurfaceDescription > surfaceDescription,
-                     weak< GLRenderer >                     renderer)
+GLSurface::GLSurface(const weak< const RenderSurfaceDescription >& surfaceDescription,
+                     const weak< GLRenderer >&                     renderer)
     : IRenderTarget(surfaceDescription, renderer)
 {
 }
 
-GLSurface::~GLSurface()
-{
-}
+GLSurface::~GLSurface() = default;
 
-void GLSurface::load(weak< const Resource::IDescription > /*surfaceDescription*/)
+void GLSurface::load(const weak< const Resource::IDescription >& /*surfaceDescription*/)
 {
 }
 

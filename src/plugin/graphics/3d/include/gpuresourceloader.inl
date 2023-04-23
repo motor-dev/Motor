@@ -4,25 +4,22 @@
 
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/plugin.graphics.3d/renderer/igpuresource.hh>
-#include <gpuresourceloader.hh>
 
 namespace Motor {
 
 template < typename R >
-GPUResourceLoader< R >::GPUResourceLoader(weak< const IRenderer > renderer)
+GPUResourceLoader< R >::GPUResourceLoader(const weak< const IRenderer >& renderer)
     : m_renderer(renderer)
     , m_deleted(Arena::resource())
 {
 }
 
 template < typename R >
-GPUResourceLoader< R >::~GPUResourceLoader()
-{
-}
+GPUResourceLoader< R >::~GPUResourceLoader() = default;
 
 template < typename R >
-void GPUResourceLoader< R >::load(weak< const Resource::IDescription > description,
-                                  Resource::Resource&                  resource)
+void GPUResourceLoader< R >::load(const weak< const Resource::IDescription >& description,
+                                  Resource::Resource&                         resource)
 {
     ref< IGPUResource > handle = m_renderer->create(motor_checked_cast< const R >(description));
     resource.setRefHandle(handle);
@@ -30,9 +27,10 @@ void GPUResourceLoader< R >::load(weak< const Resource::IDescription > descripti
 }
 
 template < typename R >
-void GPUResourceLoader< R >::unload(weak< const Resource::IDescription > /*description*/,
-                                    Resource::Resource& resource)
+void GPUResourceLoader< R >::unload(const weak< const Resource::IDescription >& description,
+                                    Resource::Resource&                         resource)
 {
+    motor_forceuse(description);
     weak< IGPUResource > gpuResource = resource.getRefHandle< IGPUResource >();
     gpuResource->m_resource.clear();
     gpuResource->addref();

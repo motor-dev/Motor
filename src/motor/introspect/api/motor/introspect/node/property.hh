@@ -16,16 +16,15 @@ private:
     Meta::Type                m_type;
 
 protected:
-    virtual minitl::tuple< raw< const Meta::Method >, bool > getCall(DbContext & context)
-        const override;
-    virtual ConversionCost distance(const Type& type) const override;
-    virtual bool           doResolve(DbContext & context) override;
-    virtual void           doEval(const Type& expectedType, Value& result) const override;
-    virtual void           doVisit(Node::Visitor & visitor) const override;
+    minitl::tuple< raw< const Meta::Method >, bool > getCall(DbContext & context) const override;
+    ConversionCost                                   distance(const Type& type) const override;
+    bool                                             doResolve(DbContext & context) override;
+    void doEval(const Type& expectedType, Value& result) const override;
+    void doVisit(Node::Visitor & visitor) const override;
 
 public:
-    Property(ref< const Object > owner, const inamespace& propertyName);
-    ~Property();
+    Property(const ref< const Object >& owner, const inamespace& propertyName);
+    ~Property() override;
 };
 
 }}}  // namespace Motor::Meta::AST

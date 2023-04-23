@@ -6,4 +6,4 @@
 #include <motor/plugin/plugin.hh>
 #include <scheduler.hh>
 
-MOTOR_PLUGIN_REGISTER(Motor::KernelScheduler::Cuda::Scheduler);
+MOTOR_PLUGIN_REGISTER(Motor::KernelScheduler::Cuda::Scheduler)

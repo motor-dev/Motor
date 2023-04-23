@@ -16,12 +16,10 @@ protected:
     const istring m_name;
 
 protected:
-    IMemoryHost(const istring& name);
-    ~IMemoryHost();
+    explicit IMemoryHost(const istring& name);
+    ~IMemoryHost() override;
 
-    virtual void release(weak< IMemoryBuffer > buffer) = 0;
+    virtual void release(const weak< IMemoryBuffer >& buffer) = 0;
 };
 
 }}  // namespace Motor::KernelScheduler
-
-#include <motor/scheduler/kernel/imemorybuffer.hh>

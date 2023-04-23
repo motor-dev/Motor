@@ -127,7 +127,7 @@ const Meta::Method::Parameter carray_RTTIHelper< T, Count >::s_method_size_overl
     = {{{0},
         istring("this"),
         motor_type< const ArrayType& >(),
-        {&Meta::Method::Parameter::s_noDefaultValue}}};
+        Meta::Method::Parameter::noDefaultValue}};
 
 template < typename T, u32 Count >
 const Meta::Method::Overload carray_RTTIHelper< T, Count >::s_method_size_overloads[]
@@ -143,16 +143,13 @@ const Meta::Method::Parameter carray_RTTIHelper< T, Count >::s_method_Index_over
     = {{{0},
         istring("this"),
         motor_type< const ArrayType& >(),
-        {&Meta::Method::Parameter::s_noDefaultValue}},
-       {{0}, istring("index"), motor_type< u32 >(), {&Meta::Method::Parameter::s_noDefaultValue}}};
+        Meta::Method::Parameter::noDefaultValue},
+       {{0}, istring("index"), motor_type< u32 >(), Meta::Method::Parameter::noDefaultValue}};
 
 template < typename T, u32 Count >
 const Meta::Method::Parameter carray_RTTIHelper< T, Count >::s_method_Index_overload_1_params[]
-    = {{{0},
-        istring("this"),
-        motor_type< ArrayType& >(),
-        {&Meta::Method::Parameter::s_noDefaultValue}},
-       {{0}, istring("index"), motor_type< u32 >(), {&Meta::Method::Parameter::s_noDefaultValue}}};
+    = {{{0}, istring("this"), motor_type< ArrayType& >(), Meta::Method::Parameter::noDefaultValue},
+       {{0}, istring("index"), motor_type< u32 >(), Meta::Method::Parameter::noDefaultValue}};
 
 template < typename T, u32 Count >
 const Meta::Method::Overload carray_RTTIHelper< T, Count >::s_method_Index_overloads[]

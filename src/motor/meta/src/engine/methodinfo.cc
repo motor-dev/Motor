@@ -16,45 +16,48 @@ Value Method::Parameter::getTag(const Type& tagType) const
 {
     if(tags)
     {
-        for(const Tag* tag = tags->begin(); tag != tags->end(); ++tag)
+        for(const auto& tag: *tags)
         {
-            if(tagType <= tag->tag.type()) return Value(Value::ByRef(tag->tag));
+            if(tagType <= tag.tag.type()) return Value(Value::ByRef(tag.tag));
         }
     }
-    return Value();
+    return {};
 }
 
 Value Method::Parameter::getTag(raw< const Class > tagType) const
 {
-    return getTag(Type::makeType(tagType, Type::Indirection::Value, Type::Constness::Const, Type::Constness::Const));
+    return this->getTag(Type::makeType(tagType, Type::Indirection::Value, Type::Constness::Const,
+                                 Type::Constness::Const));
 }
 
 Value Method::Overload::getTag(const Type& type) const
 {
     if(tags)
     {
-        for(const Tag* tag = tags->begin(); tag != tags->end(); ++tag)
+        for(const auto& tag: *tags)
         {
-            if(type <= tag->tag.type()) return Value(Value::ByRef(tag->tag));
+            if(type <= tag.tag.type()) return Value(Value::ByRef(tag.tag));
         }
     }
-    return Value();
+    return {};
 }
 
 Value Method::Overload::getTag(raw< const Class > type) const
 {
-    return getTag(Type::makeType(type, Type::Indirection::Value, Type::Constness::Const, Type::Constness::Const));
+    return getTag(Type::makeType(type, Type::Indirection::Value, Type::Constness::Const,
+                                 Type::Constness::Const));
 }
 
 minitl::format_buffer< 1024u > Method::Overload::signature() const
 {
-    minitl::format_buffer< 1024u > result;
+    minitl::format_buffer< 1024u > result {};
     char*                          current = result.buffer;
     char*                          end     = result.buffer + 1023;
     *end                                   = 0;
     for(u32 i = 0; i < params.count; ++i)
     {
-        minitl::format_buffer< 1024u > argType = minitl::format<1024>(FMT("{0}"), params.elements[i].type);
+        minitl::format_buffer< 1024u > argType
+            = minitl::format< 1024 >(FMT("{0}"), params.elements[i].type);
         for(const char* arg = argType; *arg && current != end; ++arg, ++current)
             *current = *arg;
         if(current != end) *(current++) = ' ';
@@ -77,25 +80,22 @@ minitl::format_buffer< 1024u > Method::Overload::signature() const
     return result;
 }
 
-Value Method::doCall(Value* params, u32 nparams) const
+Value Method::doCall(Value* params, u32 paramCount) const
 {
-    ArgInfo< Type >* args
-        = static_cast< ArgInfo< Type >* >(malloca(sizeof(ArgInfo< Type >) * nparams));
-    for(u32 i = 0; i < nparams; ++i)
+    auto* args = static_cast< ArgInfo< Type >* >(malloca(sizeof(ArgInfo< Type >) * paramCount));
+    for(u32 i = 0; i < paramCount; ++i)
     {
         new(&args[i]) ArgInfo< Type >(params[i].type());
     }
-    raw< const Method > thisPtr = {this};
-    CallInfo            c       = resolve(thisPtr, args, nparams);
+    CallInfo c = resolve({this}, args, paramCount);
     if(c.conversion < ConversionCost::s_incompatible)
     {
-        raw< const Method > this_ = {this};
-        return c.overload->call(this_, params, nparams);
+        return c.overload->call({this}, params, paramCount);
     }
     else
     {
         motor_error(Log::meta(), "No overload can convert all parameters");
-        return Value();
+        return {};
     }
 }
 

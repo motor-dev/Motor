@@ -17,7 +17,7 @@ ZipFile::ZipFile(void* handle, const ifilename& filename, const unz_file_info& i
 
 ZipFile::~ZipFile() = default;
 
-void ZipFile::doFillBuffer(weak< File::Ticket > ticket) const
+void ZipFile::doFillBuffer(const weak< File::Ticket >& ticket) const
 {
     /* state of the previous read */
     static const unz_file_pos* s_currentFile = nullptr;
@@ -69,10 +69,10 @@ void ZipFile::doFillBuffer(weak< File::Ticket > ticket) const
     }
 
     s_fileOffset  = 0;
-    s_currentFile = 0;
+    s_currentFile = nullptr;
 }
 
-void ZipFile::doWriteBuffer(weak< Ticket > ticket) const
+void ZipFile::doWriteBuffer(const weak< Ticket >& ticket) const
 {
     motor_forceuse(ticket);
     motor_notreached();

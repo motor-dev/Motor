@@ -2,8 +2,6 @@
    see LICENSE for detail */
 #pragma once
 
-#include <motor/core/stdafx.h>
-
 namespace Motor {
 
 class ScopedCriticalSection;
@@ -26,20 +24,22 @@ private:
 
 class ScopedCriticalSection
 {
-    MOTOR_NOCOPY(ScopedCriticalSection);
-
 private:
     const CriticalSection& m_section;
 
 public:
-    inline ScopedCriticalSection(const CriticalSection& s) : m_section(s)
+    inline explicit ScopedCriticalSection(const CriticalSection& s) : m_section(s)
     {
-        m_section.enter();
+        this->m_section.enter();
     }
     inline ~ScopedCriticalSection()
     {
-        m_section.leave();
+        this->m_section.leave();
     }
+    ScopedCriticalSection(const ScopedCriticalSection&)            = delete;
+    ScopedCriticalSection& operator=(const ScopedCriticalSection&) = delete;
+    ScopedCriticalSection(ScopedCriticalSection&&)                 = delete;
+    ScopedCriticalSection& operator=(ScopedCriticalSection&&)      = delete;
 };
 
 }  // namespace Motor

@@ -9,57 +9,57 @@ namespace Motor { namespace Python {
 
 static PyMethodDef s_logMethods[] = {{"write", &PyMotorLog::write, METH_VARARGS, "sys.std*.write"},
                                      {"flush", &PyMotorLog::flush, METH_VARARGS, "sys.std*.flush"},
-                                     {0, 0, 0, 0}};
+                                     {nullptr, nullptr, 0, nullptr}};
 
-PyTypeObject PyMotorLog::s_pyType = {{{0, 0}, 0},
+PyTypeObject PyMotorLog::s_pyType = {{{0, nullptr}, 0},
                                      "py_motor.Log",
                                      sizeof(PyMotorLog),
                                      0,
                                      &PyMotorLog::dealloc,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
                                      Py_TPFLAGS_MOTOR_DEFAULT | Py_TPFLAGS_IS_ABSTRACT,
                                      "Motor logging",
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
                                      0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
+                                     nullptr,
+                                     nullptr,
                                      s_logMethods,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
                                      0,
                                      &PyMotorLog::init,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
                                      0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0,
-                                     0};
+                                     nullptr,
+                                     nullptr};
 
 int PyMotorLog::init(PyObject* self, PyObject* args, PyObject* kwds)
 {
@@ -71,7 +71,7 @@ int PyMotorLog::init(PyObject* self, PyObject* args, PyObject* kwds)
 
 void PyMotorLog::dealloc(PyObject* self)
 {
-    PyMotorLog* self_ = reinterpret_cast< PyMotorLog* >(self);
+    auto* self_ = reinterpret_cast< PyMotorLog* >(self);
     self_->logger.~weak();
     self->py_type->tp_free(self);
 }
@@ -80,9 +80,9 @@ static char  logBuffer[65535];
 static char* logCurrent = logBuffer;
 PyObject*    PyMotorLog::write(PyObject* self, PyObject* args)
 {
-    PyMotorLog* log = reinterpret_cast< PyMotorLog* >(self);
-    char*       str;
-    LogLevel    level = log->type == logTypeStdOut ? logInfo : logError;
+    auto*    log = reinterpret_cast< PyMotorLog* >(self);
+    char*    str;
+    LogLevel level = log->type == logTypeStdOut ? logInfo : logError;
     if(s_library->m__PyArg_ParseTuple_SizeT(args, "s", &str))
     {
         u32 written = 0;
@@ -113,7 +113,7 @@ PyObject*    PyMotorLog::write(PyObject* self, PyObject* args)
     }
     else
     {
-        return 0;
+        return nullptr;
     }
 }
 
@@ -131,7 +131,7 @@ void PyMotorLog::registerType(PyObject* module)
     motor_assert(result >= 0, "unable to register type");
     Py_INCREF(&s_pyType);
 
-    PyMotorLog* ob = reinterpret_cast< PyMotorLog* >(s_pyType.tp_alloc(&s_pyType, 0));
+    auto* ob = reinterpret_cast< PyMotorLog* >(s_pyType.tp_alloc(&s_pyType, 0));
     new(&ob->logger) weak< Logger >(Log::python());
     ob->type = logTypeStdOut;
     result   = s_library->m_PySys_SetObject("stdout", (PyObject*)ob);

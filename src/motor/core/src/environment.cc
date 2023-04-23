@@ -42,11 +42,7 @@ ipath Environment::canonicalPath(const char* path, const char* pathSeparators)
                 sep++;
             if(sep != path)
             {
-                if(sep - path == 1 && path[0] == '.')
-                {
-                    // skip
-                }
-                else if(sep == path)
+                if((sep - path == 1 && path[0] == '.') || sep == path)
                 {
                     // skip
                 }

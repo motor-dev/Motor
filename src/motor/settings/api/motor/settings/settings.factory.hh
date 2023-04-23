@@ -29,10 +29,10 @@ private:
     raw< const Meta::Class > const m_settingsClass;
 
 private:
-    static void onProviderAdded(weak< const SettingsProvider > provider);
+    static void onProviderAdded(const weak< const SettingsProvider >& provider);
 
 protected:
-    SettingsBase(raw< const Meta::Class > settingsClass);
+    explicit SettingsBase(raw< const Meta::Class > settingsClass);
     ~SettingsBase();
 };
 
@@ -99,13 +99,12 @@ struct MOTOR_EXPORT Settings_RTTIHelper
 };
 
 template < typename T >
-Meta::Value
-Settings_RTTIHelper< T >::trampoline_method_get_overload_0(raw< const Meta::Method > method,
-                                                           Meta::Value* params, u32 paramCount)
+Meta::Value Settings_RTTIHelper< T >::trampoline_method_get_overload_0(
+    raw< const Meta::Method > method, Meta::Value* parameters, u32 parameterCount)
 {
     motor_forceuse(method);
-    motor_assert_format(paramCount == 0, "expected no parameter; received {0}", paramCount);
-    motor_forceuse(params);
+    motor_assert_format(parameterCount == 0, "expected no parameter; received {0}", parameterCount);
+    motor_forceuse(parameters);
     return Meta::Value(Meta::Value::ByRef(Settings< T >::get()));
 }
 

@@ -18,9 +18,9 @@ private:
     istring const            m_fontSystemName;
     weak< const File > const m_fontFile;
 published:
-    OutlineFont(const istring& fontSystemName);
-    OutlineFont(weak< const File > fontFile);
-    ~OutlineFont();
+    explicit OutlineFont(const istring& fontSystemName);
+    explicit OutlineFont(const weak< const File >& fontFile);
+    ~OutlineFont() override;
 };
 
 }  // namespace Motor

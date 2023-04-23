@@ -8,7 +8,7 @@
 
 namespace Motor { namespace World {
 
-ComponentRegistry::Runtime::Runtime(ref< Task::ITask > task, u32 parameterCount)
+ComponentRegistry::Runtime::Runtime(const ref< Task::ITask >& task, u32 parameterCount)
     : KernelScheduler::Producer::Runtime(task, parameterCount)
     , m_allocator4k(SystemAllocator::BlockSize_4k, 64)
     , m_allocator16k(SystemAllocator::BlockSize_16k, 8)
@@ -17,13 +17,9 @@ ComponentRegistry::Runtime::Runtime(ref< Task::ITask > task, u32 parameterCount)
 {
 }
 
-ComponentRegistry::ComponentRegistry()
-{
-}
+ComponentRegistry::ComponentRegistry() = default;
 
-ComponentRegistry::~ComponentRegistry()
-{
-}
+ComponentRegistry::~ComponentRegistry() = default;
 
 ref< KernelScheduler::Producer::Runtime >
 ComponentRegistry::createRuntime(weak< const KernelScheduler::ProducerLoader > loader) const
@@ -33,9 +29,13 @@ ComponentRegistry::createRuntime(weak< const KernelScheduler::ProducerLoader > l
 }
 
 weak< ComponentRegistry::Runtime >
-ComponentRegistry::getRuntime(weak< const KernelScheduler::ProducerLoader > loader) const
+ComponentRegistry::getRuntime(const weak< const KernelScheduler::ProducerLoader >& loader) const
 {
-    return getResource(loader).getRefHandle< Runtime >();
+    return this->getResource(loader).getRefHandle< Runtime >();
+}
+
+void ComponentRegistry::addComponentStorage()
+{
 }
 
 }}  // namespace Motor::World

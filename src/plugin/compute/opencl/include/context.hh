@@ -15,20 +15,20 @@ class Context : public minitl::refcountable
 
 private:
     const weak< Platform > m_platform;
-    const cl_device_id     m_device;
-    const cl_context       m_context;
+    cl_device_id           m_device;
+    cl_context             m_context;
     const u32              m_pointerSize;
 
 public:
-    Context(weak< Platform > platform, cl_device_id device, cl_context context);
-    ~Context();
+    Context(const weak< Platform >& platform, cl_device_id device, cl_context context);
+    ~Context() override;
 
     inline u32 getPointerSize() const
     {
         return m_pointerSize;
     }
 
-    cl_program buildProgram(const u64 size, const char* code) const;
+    cl_program buildProgram(u64 size, const char* code) const;
 };
 
 }}}  // namespace Motor::KernelScheduler::OpenCL

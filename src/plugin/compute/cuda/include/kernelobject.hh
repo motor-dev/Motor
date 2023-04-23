@@ -26,8 +26,8 @@ private:
     KernelMain*           m_entryPoint;
 
 public:
-    KernelObject(const inamespace& name);
-    ~KernelObject();
+    explicit KernelObject(const inamespace& name);
+    ~KernelObject() override;
 };
 
 }}}  // namespace Motor::KernelScheduler::Cuda

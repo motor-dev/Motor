@@ -6,7 +6,9 @@ CL_ICD_BINARIES = 'https://github.com/motor-dev/Motor/releases/download/prebuilt
 
 
 def setup(conf):
-    if not conf.env.PROJECTS:
+    if conf.env.PROJECTS:
+        conf.env.OPENCL_SOURCE = conf.path.path_from(conf.package_node)
+    else:
         conf.start_msg_setup()
         if conf.env.CLC_CXX:
             if 'posix' in conf.env.VALID_PLATFORMS:
@@ -25,12 +27,12 @@ def setup(conf):
             try:
                 cl_node = conf.pkg_unpack('cl_bin_%(platform)s', CL_ICD_BINARIES)
                 if not conf.check_package(
-                    'OpenCL',
-                    cl_node,
-                    var='OpenCL',
-                    includepath=[conf.path.parent.make_node('api').abspath()],
-                    includes=['CL/cl.h'],
-                    functions=['clCreateKernel']
+                        'OpenCL',
+                        cl_node,
+                        var='OpenCL',
+                        includepath=[conf.path.parent.make_node('api').abspath()],
+                        includes=['CL/cl.h'],
+                        functions=['clCreateKernel']
                 ):
                     raise WafError('no OpenCL')
                 conf.env.OPENCL_BINARY = cl_node.path_from(conf.package_node)

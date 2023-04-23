@@ -14,7 +14,6 @@ template < typename R >
 class GPUResourceLoader : public Resource::ILoader
 {
     friend class IRenderer;
-    MOTOR_NOCOPY(GPUResourceLoader);
 
 private:
     weak< const IRenderer >                m_renderer;
@@ -23,15 +22,15 @@ private:
     minitl::vector< weak< IGPUResource > > m_deleted;
 
 public:
-    GPUResourceLoader(weak< const IRenderer > renderer);
-    ~GPUResourceLoader();
+    explicit GPUResourceLoader(const weak< const IRenderer >& renderer);
+    ~GPUResourceLoader() override;
 
 protected:
-    virtual void load(weak< const Resource::IDescription > description,
-                      Resource::Resource&                  resource) override;
-    virtual void unload(weak< const Resource::IDescription > description,
-                        Resource::Resource&                  handle) override;
-    void         flush();
+    void load(const weak< const Resource::IDescription >& description,
+              Resource::Resource&                         resource) override;
+    void unload(const weak< const Resource::IDescription >& description,
+                Resource::Resource&                         resource) override;
+    void flush();
 };
 
 }  // namespace Motor

@@ -17,7 +17,8 @@
 
 namespace Motor { namespace Meta { namespace AST {
 
-Object::Object(ref< Reference > className, const minitl::vector< ref< Parameter > >& parameters)
+Object::Object(const ref< Reference >&                   className,
+               const minitl::vector< ref< Parameter > >& parameters)
     : Node()
     , m_className(className)
     , m_parameters(parameters)
@@ -25,9 +26,7 @@ Object::Object(ref< Reference > className, const minitl::vector< ref< Parameter 
 {
 }
 
-Object::~Object()
-{
-}
+Object::~Object() = default;
 
 ConversionCost Object::distance(const Type& type) const
 {
@@ -74,10 +73,9 @@ bool Object::resolveInternal(DbContext& context)
 {
     bool result = m_className->resolve(context);
 
-    for(minitl::vector< ref< Parameter > >::const_iterator it = m_parameters.begin();
-        it != m_parameters.end(); ++it)
+    for(const auto& m_parameter: m_parameters)
     {
-        result &= (*it)->resolve(context);
+        result &= m_parameter->resolve(context);
     }
     if(result)
     {
@@ -103,8 +101,9 @@ bool Object::resolveInternal(DbContext& context)
                     m_parameters[currentArg]->name(), m_parameters[currentArg]);
             }
 
-            IntrospectionHint::ArgInfo* arguments = m_arguments.empty() ? 0 : &m_arguments.front();
-            CallInfo                    callInfo
+            IntrospectionHint::ArgInfo* arguments
+                = m_arguments.empty() ? nullptr : &m_arguments.front();
+            CallInfo callInfo
                 = Meta::resolve(method.first, arguments, argumentThis, arguments + argumentThis,
                                 motor_checked_numcast< u32 >(m_parameters.size()));
             if(callInfo.overload)
@@ -112,8 +111,8 @@ bool Object::resolveInternal(DbContext& context)
                 Meta::Value policyTag = callInfo.overload->getTag(motor_class< Policy >());
                 if(policyTag)
                 {
-                    const Policy& policy     = policyTag.as< const Policy& >();
-                    u32           errorCount = context.errorCount;
+                    const auto& policy     = policyTag.as< const Policy& >();
+                    u32         errorCount = context.errorCount;
                     m_introspectionHint
                         = policy.verify(context, this, method.first, callInfo, argumentThis);
                     result = errorCount == context.errorCount;
@@ -141,7 +140,8 @@ bool Object::resolveInternal(DbContext& context)
 void Object::doEval(const Type& expectedType, Value& result) const
 {
     motor_forceuse(expectedType);
-    const IntrospectionHint::ArgInfo* arguments = m_arguments.empty() ? 0 : &m_arguments.front();
+    const IntrospectionHint::ArgInfo* arguments
+        = m_arguments.empty() ? nullptr : &m_arguments.front();
     result = m_introspectionHint->call(arguments, motor_checked_numcast< u32 >(m_arguments.size()));
 }
 
@@ -150,13 +150,12 @@ Type Object::getType() const
     return m_introspectionHint->getType();
 }
 
-bool Object::getPropertyValue(Value& value, const istring propertyName, Value& result) const
+bool Object::getPropertyValue(Value& value, istring propertyName, Value& result) const
 {
     return m_introspectionHint->getPropertyValue(value, propertyName, result);
 }
 
-bool Object::getPropertyType(DbContext& context, const istring propertyName,
-                             Type& propertyType) const
+bool Object::getPropertyType(DbContext& context, istring propertyName, Type& propertyType) const
 {
     return m_introspectionHint->getPropertyType(context, propertyName, propertyType);
 }
@@ -169,12 +168,11 @@ ref< Node > Object::getProperty(DbContext& context, const inamespace& propertyNa
 
 weak< const Parameter > Object::getParameter(istring parameterName) const
 {
-    for(minitl::vector< ref< Parameter > >::const_iterator it = m_parameters.begin();
-        it != m_parameters.end(); ++it)
+    for(const auto& m_parameter: m_parameters)
     {
-        if((*it)->name() == parameterName) return *it;
+        if(m_parameter->name() == parameterName) return m_parameter;
     }
-    return weak< const Parameter >();
+    return {};
 }
 
 void Object::doVisit(Node::Visitor& visitor) const

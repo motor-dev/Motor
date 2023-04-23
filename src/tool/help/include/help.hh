@@ -18,8 +18,8 @@ private:
     ref< const Package > const                m_mainPackage;
 
 public:
-    Help(const Plugin::Context& context);
-    ~Help();
+    explicit Help(const Plugin::Context& context);
+    ~Help() override;
 };
 
 }  // namespace Motor

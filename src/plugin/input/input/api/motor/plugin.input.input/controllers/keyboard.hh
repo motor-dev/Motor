@@ -9,11 +9,9 @@ namespace Motor { namespace Input {
 
 class Keyboard : public Controller
 {
-    MOTOR_NOCOPY(Keyboard);
-
 public:
     Keyboard();
-    ~Keyboard();
+    ~Keyboard() override;
 };
 
 }}  // namespace Motor::Input

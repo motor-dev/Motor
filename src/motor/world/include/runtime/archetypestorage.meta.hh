@@ -7,7 +7,6 @@
 
 #include <motor/introspect/introspectionhint.meta.hh>
 #include <motor/introspect/policy.meta.hh>
-#include <motor/scheduler/kernel/iproduct.meta.hh>
 
 #include <motor/world/componentregistry.meta.hh>
 
@@ -18,11 +17,11 @@ class ArchetypeStorage : published KernelScheduler::Producer
     published : struct Policy : public Meta::AST::Policy
     {
     private:
-        virtual ref< Meta::AST::IntrospectionHint > verify(Meta::AST::DbContext&           context,
-                                                           weak< const Meta::AST::Object > object,
-                                                           raw< const Meta::Method >       method,
-                                                           const Meta::CallInfo&           callInfo,
-                                                           u32 argumentThis) const override;
+        ref< Meta::AST::IntrospectionHint > verify(Meta::AST::DbContext&           context,
+                                                   weak< const Meta::AST::Object > object,
+                                                   raw< const Meta::Method >       method,
+                                                   const Meta::CallInfo&           callInfo,
+                                                   u32 argumentThis) const override;
     };
 
 private:
@@ -36,10 +35,10 @@ private:
 
     published
         : motor_tag(Policy()) ArchetypeStorage(
-              weak< ComponentRegistry >                                         registry,
+              const weak< ComponentRegistry >&                                  registry,
               const minitl::array< raw< const Meta::Class > >&                  componentClasses,
               const minitl::array< minitl::array< raw< const Meta::Class > > >& archetypes);
-    ~ArchetypeStorage();
+    ~ArchetypeStorage() override;
 
 public:
     ref< KernelScheduler::IProduct > getProduct(u32 index) const;

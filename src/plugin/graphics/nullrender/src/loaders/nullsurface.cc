@@ -16,21 +16,19 @@ void NullSurface::end(PresentMode /*presentMode*/) const
 {
 }
 
-NullSurface::NullSurface(weak< const RenderSurfaceDescription > surfaceDescription,
-                         weak< const NullRenderer >             renderer)
+NullSurface::NullSurface(const weak< const RenderSurfaceDescription >& surfaceDescription,
+                         const weak< const NullRenderer >&             renderer)
     : IRenderTarget(surfaceDescription, renderer)
 {
 }
 
-NullSurface::~NullSurface()
-{
-}
+NullSurface::~NullSurface() = default;
 
 void NullSurface::present() const
 {
 }
 
-void NullSurface::load(weak< const Resource::IDescription > /*surfaceDescription*/)
+void NullSurface::load(const weak< const Resource::IDescription >& /*surfaceDescription*/)
 {
 }
 

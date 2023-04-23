@@ -16,13 +16,11 @@ namespace Motor { namespace Resource {
 
 class motor_api(RESOURCE) ResourceManager : public minitl::pointer
 {
-    MOTOR_NOCOPY(ResourceManager);
-
 private:
     class LoaderInfo : public minitl::refcountable
     {
     public:
-        LoaderInfo(raw< const Meta::Class > classinfo);
+        explicit LoaderInfo(raw< const Meta::Class > classinfo);
 
         raw< const Meta::Class > const                  classinfo;
         minitl::vector< weak< ILoader > >               loaders;
@@ -52,12 +50,12 @@ private:
 
 public:
     ResourceManager();
-    ~ResourceManager();
+    ~ResourceManager() override;
 
-    void attach(raw< const Meta::Class > classinfo, weak< ILoader > loader);
-    void detach(raw< const Meta::Class > classinfo, weak< const ILoader > loader);
-    void load(raw< const Meta::Class > classinfo, weak< const IDescription > resource);
-    void unload(raw< const Meta::Class > classinfo, weak< const IDescription > resource);
+    void attach(raw< const Meta::Class > classinfo, const weak< ILoader >& loader);
+    void detach(raw< const Meta::Class > classinfo, const weak< const ILoader >& loader);
+    void load(raw< const Meta::Class > classinfo, const weak< const IDescription >& resource);
+    void unload(raw< const Meta::Class > classinfo, const weak< const IDescription >& resource);
 
     template < typename T >
     void attach(weak< ILoader > loader)
@@ -90,8 +88,9 @@ public:
         unload(motor_class< T >(), resource);
     }
 
-    void   addTicket(weak< ILoader > loader, weak< const IDescription > description,
-                     weak< const File > file, ILoader::FileType fileType, ILoader::LoadType loadType);
+    void   addTicket(const weak< ILoader >& loader, const weak< const IDescription >& description,
+                     const weak< const File >& file, ILoader::FileType fileType,
+                     ILoader::LoadType loadType);
     size_t updateTickets();
 };
 

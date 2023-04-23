@@ -9,32 +9,31 @@ class PythonVersion : public minitl::refcountable
     Motor::Plugin::Plugin< minitl::refcountable > m_pyPlugin;
 
 public:
-    PythonVersion(const Motor::Plugin::Plugin< minitl::refcountable >& plugin) : m_pyPlugin(plugin)
+    explicit PythonVersion(const Motor::Plugin::Plugin< minitl::refcountable >& plugin)
+        : m_pyPlugin(plugin)
     {
     }
 
-    ~PythonVersion()
-    {
-    }
+    ~PythonVersion() override = default;
 };
 
 static ref< PythonVersion > create(const Motor::Plugin::Context& context)
 {
     static const char* versions[]
         = {"310", "39", "38", "37", "36", "35", "34", "33", "32", "31", "30", "27", "26"};
-    for(size_t i = 0; i < sizeof(versions) / sizeof(versions[0]); ++i)
+    for(auto& version: versions)
     {
         minitl::format_buffer< 1024u > pluginName
-            = minitl::format< 1024u >(FMT("plugin.scripting.python{0}"), versions[i]);
+            = minitl::format< 1024u >(FMT("plugin.scripting.python{0}"), version);
         Motor::Plugin::Plugin< minitl::refcountable > p
             = Motor::Plugin::Plugin< minitl::refcountable >(pluginName.c_str(), context);
         if(p)
         {
-            motor_info_format(Motor::Log::python(), "Loaded Python version {0}", versions[i]);
+            motor_info_format(Motor::Log::python(), "Loaded Python version {0}", version);
             return ref< PythonVersion >::create(Motor::Arena::general(), p);
         }
     }
-    return ref< PythonVersion >();
+    return {};
 }
 
-MOTOR_PLUGIN_REGISTER_CREATE(&create);
+MOTOR_PLUGIN_REGISTER_CREATE(&create)

@@ -28,7 +28,7 @@ def configure(configuration_context):
             pprint('BLUE', ' + configuring for platform %s' % p.NAME)
             for main_toolchain, sub_toolchains, platform in configuration_list:
                 platform.add_toolchain(configuration_context, main_toolchain, sub_toolchains)
-    configuration_context.env.store('./.waf_toolchains.py')
+    configuration_context.env.store('./.waf_toolchains.cache')
 
 
 if TYPE_CHECKING:

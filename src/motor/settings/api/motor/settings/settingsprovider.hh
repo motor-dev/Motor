@@ -25,7 +25,7 @@ private:
     struct motor_api(SETTINGS) SettingsRegistration
     {
         static minitl::intrusive_list< SettingsProvider >& getSettingsList();
-        SettingsRegistration(SettingsBase & settings);
+        explicit SettingsRegistration(SettingsBase & settings);
         ~SettingsRegistration();
     };
     friend struct SettingsRegistration;
@@ -41,8 +41,8 @@ private:
     ref< Folder >       m_folder;
 
 protected:
-    SettingsProvider(const SettingsCategoryMap& initialSettings, ref< Folder > folder);
-    virtual ~SettingsProvider();
+    SettingsProvider(const SettingsCategoryMap& initialSettings, const ref< Folder >& folder);
+    ~SettingsProvider() override;
 
     static void  addSetting(SettingsCategoryMap & container, istring category, istring name,
                             ref< Meta::AST::Node > value);

@@ -22,9 +22,7 @@ ResourceManager::ResourceManager()
 {
 }
 
-ResourceManager::~ResourceManager()
-{
-}
+ResourceManager::~ResourceManager() = default;
 
 weak< ResourceManager::LoaderInfo >
 ResourceManager::getLoaderInfo(raw< const Meta::Class > classinfo)
@@ -34,45 +32,42 @@ ResourceManager::getLoaderInfo(raw< const Meta::Class > classinfo)
     raw< const Meta::Class > resourceType = classinfo->operators->templatedClass;
     motor_assert_format(resourceType, "Resource class {0} does not have a resource class",
                         classinfo->fullname());
-    for(minitl::vector< ref< LoaderInfo > >::iterator it = m_loaders.begin(); it != m_loaders.end();
-        ++it)
+    for(auto& m_loader: m_loaders)
     {
-        if(resourceType == (*it)->classinfo) return *it;
+        if(resourceType == m_loader->classinfo) return m_loader;
     }
     m_loaders.push_back(ref< LoaderInfo >::create(Arena::resource(), resourceType));
     return m_loaders.back();
 }
 
-void ResourceManager::attach(raw< const Meta::Class > classinfo, weak< ILoader > loader)
+void ResourceManager::attach(raw< const Meta::Class > classinfo, const weak< ILoader >& loader)
 {
     weak< LoaderInfo > info = getLoaderInfo(classinfo);
-    for(minitl::vector< weak< ILoader > >::iterator it = info->loaders.begin();
-        it != info->loaders.end(); ++it)
+    for(auto& it: info->loaders)
     {
-        if(motor_assert_format(*it != loader, "registering twice the same loader for class {0}",
+        if(motor_assert_format(it != loader, "registering twice the same loader for class {0}",
                                classinfo->name))
             return;
     }
     motor_info_format(Log::resource(), "registering loader for type {0}", classinfo->name);
     info->loaders.push_back(loader);
-    for(minitl::intrusive_list< const IDescription, 2 >::iterator resource
-        = info->resources.begin();
-        resource != info->resources.end(); ++resource)
+    for(const auto& resource: info->resources)
     {
-        resource->load(loader);
+        resource.load(loader);
     }
 }
 
-void ResourceManager::detach(raw< const Meta::Class > classinfo, weak< const ILoader > loader)
+void ResourceManager::detach(raw< const Meta::Class >     classinfo,
+                             const weak< const ILoader >& loader)
 {
-    for(minitl::vector< Ticket >::iterator it = m_watches.begin(); it != m_watches.end(); ++it)
+    for(auto& m_watch: m_watches)
     {
-        if(it->loader == loader)
+        if(m_watch.loader == loader)
         {
-            it->expired  = true;
-            it->file     = weak< const File >();
-            it->resource = weak< const IDescription >();
-            it->loader   = weak< ILoader >();
+            m_watch.expired  = true;
+            m_watch.file     = weak< const File >();
+            m_watch.resource = weak< const IDescription >();
+            m_watch.loader   = weak< ILoader >();
         }
     }
     weak< LoaderInfo > info = getLoaderInfo(classinfo);
@@ -83,13 +78,11 @@ void ResourceManager::detach(raw< const Meta::Class > classinfo, weak< const ILo
         {
             motor_info_format(Log::resource(), "unregistering loader for type {0}",
                               classinfo->name);
-            for(minitl::intrusive_list< const IDescription, 2 >::iterator resource
-                = info->resources.begin();
-                resource != info->resources.end(); ++resource)
+            for(const auto& resource: info->resources)
             {
-                resource->unload(*it);
+                resource.unload(*it);
             }
-            it = info->loaders.erase(it);
+            info->loaders.erase(it);
             return;
         }
         else
@@ -101,8 +94,8 @@ void ResourceManager::detach(raw< const Meta::Class > classinfo, weak< const ILo
                        classinfo->name);
 }
 
-void ResourceManager::load(raw< const Meta::Class >   classinfo,
-                           weak< const IDescription > description)
+void ResourceManager::load(raw< const Meta::Class >          classinfo,
+                           const weak< const IDescription >& description)
 {
     weak< LoaderInfo > info = getLoaderInfo(classinfo);
     for(minitl::vector< weak< ILoader > >::const_iterator it = info->loaders.begin();
@@ -113,8 +106,8 @@ void ResourceManager::load(raw< const Meta::Class >   classinfo,
     info->resources.push_back(*description.operator->());
 }
 
-void ResourceManager::unload(raw< const Meta::Class >   classinfo,
-                             weak< const IDescription > description)
+void ResourceManager::unload(raw< const Meta::Class >          classinfo,
+                             const weak< const IDescription >& description)
 {
     description->unhook();
     weak< LoaderInfo > info = getLoaderInfo(classinfo);
@@ -124,20 +117,21 @@ void ResourceManager::unload(raw< const Meta::Class >   classinfo,
         description->unload(*it);
     }
 
-    for(minitl::vector< Ticket >::iterator it = m_watches.begin(); it != m_watches.end(); ++it)
+    for(auto& m_watche: m_watches)
     {
-        if(it->resource == description)
+        if(m_watche.resource == description)
         {
-            it->expired  = true;
-            it->file     = weak< const File >();
-            it->resource = weak< const IDescription >();
-            it->loader   = weak< ILoader >();
+            m_watche.expired  = true;
+            m_watche.file     = weak< const File >();
+            m_watche.resource = weak< const IDescription >();
+            m_watche.loader   = weak< ILoader >();
         }
     }
 }
 
-void ResourceManager::addTicket(weak< ILoader > loader, weak< const IDescription > description,
-                                weak< const File > file, ILoader::FileType fileType,
+void ResourceManager::addTicket(const weak< ILoader >&            loader,
+                                const weak< const IDescription >& description,
+                                const weak< const File >& file, ILoader::FileType fileType,
                                 ILoader::LoadType loadType)
 {
     Ticket ticket;
@@ -192,7 +186,7 @@ size_t ResourceManager::updateTickets()
                 ++it;
             }
         }
-    } while(m_pendingTickets.size() > 0);
+    } while(!m_pendingTickets.empty());
 
     minitl::vector< Ticket > updatedTickets(Arena::temporary());
     for(minitl::vector< Ticket >::iterator it = m_watches.begin(); it != m_watches.end();
@@ -218,11 +212,11 @@ size_t ResourceManager::updateTickets()
         }
     }
 
-    for(minitl::vector< Ticket >::iterator it = updatedTickets.begin(); it != updatedTickets.end();
-        ++it)
+    for(auto& updatedTicket: updatedTickets)
     {
-        it->loader->reload(it->resource, it->resource,
-                           it->resource->getResourceForWriting(it->loader));
+        updatedTicket.loader->reload(
+            updatedTicket.resource, updatedTicket.resource,
+            updatedTicket.resource->getResourceForWriting(updatedTicket.loader));
     }
 
     return ticketCount;

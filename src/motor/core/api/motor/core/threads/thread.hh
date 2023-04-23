@@ -15,8 +15,8 @@ private:
 
 private:
     ThreadParams* m_params;
-    void*         m_data;
     unsigned long m_id;
+    void*         m_data;
 
 public:
     typedef intptr_t (*ThreadFunction)(intptr_t, intptr_t);

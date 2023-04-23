@@ -14,16 +14,16 @@ private:
     weak< Resource::ResourceManager > m_resourceManager;
 
 public:
-    Gtk3Loader(const Plugin::Context& pluginContext);
-    ~Gtk3Loader();
+    explicit Gtk3Loader(const Plugin::Context& pluginContext);
+    ~Gtk3Loader() override;
 
-    virtual void load(weak< const Resource::IDescription > script,
-                      Resource::Resource&                  resource) override;
-    virtual void reload(weak< const Resource::IDescription > oldScript,
-                        weak< const Resource::IDescription > newScript,
-                        Resource::Resource&                  resource) override;
-    virtual void unload(weak< const Resource::IDescription > description,
-                        Resource::Resource&                  resource) override;
+    void load(const weak< const Resource::IDescription >& script,
+              Resource::Resource&                         resource) override;
+    void reload(const weak< const Resource::IDescription >& oldScript,
+                const weak< const Resource::IDescription >& newScript,
+                Resource::Resource&                         resource) override;
+    void unload(const weak< const Resource::IDescription >& description,
+                Resource::Resource&                         resource) override;
 };
 
 }}  // namespace Motor::Gtk3

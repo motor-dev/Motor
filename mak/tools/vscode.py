@@ -216,11 +216,11 @@ class vscode(Build.BuildContext):
                             tg_defines += tg.env.DEFINES
                             with open(resp_file_name, 'w') as response_file:
                                 response_file.write('-std=c++14%s\n')
-                                for i in env.SYSTEM_INCLUDES + env.INCLUDES:
+                                for i in env.COMPILER_INCLUDES + env.INCLUDES:
                                     response_file.write('-isystem\n%s\n' % i)
                                 for i in tg_includes + tg.env.INCPATHS:
                                     response_file.write('-I%s\n' % i)
-                                for d in env.SYSTEM_DEFINES + env.DEFINES + tg_defines:
+                                for d in env.COMPILER_DEFINES + env.DEFINES + tg_defines:
                                     response_file.write('-D%s\n' % d)
 
                             include_paths += tg_includes
@@ -272,18 +272,18 @@ class vscode(Build.BuildContext):
         for action, command, is_default in [
             ('build', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '-p'], True),
             (
-                'build[fail-tests=no]',
-                ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--no-fail-on-tests', '-p'], False
+                    'build[fail-tests=no]',
+                    ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--no-fail-on-tests', '-p'], False
             ), ('build[static]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--static', '-p'], False),
             ('build[dynamic]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--dynamic', '-p'], False),
             ('build[nomaster]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--nomaster', '-p'], False),
             ('build[single]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '-j', '1', '-p'], False),
             ('clean', ['clean:${input:motor-Toolchain}:${input:motor-Variant}', '-p'], False),
             (
-                'rebuild', [
-                    'clean:${input:motor-Toolchain}:${input:motor-Variant}',
-                    'build:${input:motor-Toolchain}:${input:motor-Variant}', '-p'
-                ], False
+                    'rebuild', [
+                        'clean:${input:motor-Toolchain}:${input:motor-Variant}',
+                        'build:${input:motor-Toolchain}:${input:motor-Variant}', '-p'
+                    ], False
             ), ('setup', ['setup:${input:motor-Toolchain}'], False), ('reconfigure', ['reconfigure'], False),
             (self.cmd, [self.cmd], False)
         ]:
@@ -415,8 +415,9 @@ class vscode(Build.BuildContext):
                     )
 
         for input in (
-            'Toolchain', 'Variant', 'Prefix', 'Deploy_RunBinDir', 'Deploy_BinDir', 'Launcher', 'Python', 'DebuggerPath',
-            'DebuggerMode', 'TmpDir'
+                'Toolchain', 'Variant', 'Prefix', 'Deploy_RunBinDir', 'Deploy_BinDir', 'Launcher', 'Python',
+                'DebuggerPath',
+                'DebuggerMode', 'TmpDir'
         ):
             launch_configs['inputs'].append(
                 {

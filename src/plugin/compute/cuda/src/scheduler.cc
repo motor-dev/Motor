@@ -6,11 +6,8 @@
 #include <memoryhost.hh>
 #include <scheduler.hh>
 
-#include <motor/resource/resourcemanager.hh>
 #include <motor/scheduler/kernel/kernel.meta.hh>
-#include <motor/scheduler/scheduler.hh>
-#include <motor/scheduler/task/itask.hh>
-#include <kernelobject.hh>
+#include <motor/scheduler/task/kerneltask.hh>
 
 namespace Motor { namespace KernelScheduler { namespace Cuda {
 

@@ -13,16 +13,14 @@ private:
     const minitl::vector< ref< Node > > m_value;
 
 protected:
-    virtual ConversionCost distance(const Type& type) const override;
-    virtual bool           doResolve(DbContext & context) override;
-    virtual void           doEval(const Type& expectedType, Value& result) const override;
-    virtual void           doVisit(Node::Visitor & visitor) const override;
+    ConversionCost distance(const Type& type) const override;
+    bool           doResolve(DbContext & context) override;
+    void           doEval(const Type& expectedType, Value& result) const override;
+    void           doVisit(Node::Visitor & visitor) const override;
 
 public:
-    Array(const minitl::vector< ref< Node > >& value);
-    ~Array();
-
-    void visitChildren(Node::Visitor & visitor) const;
+    explicit Array(const minitl::vector< ref< Node > >& value);
+    ~Array() override;
 };
 
 }}}  // namespace Motor::Meta::AST
