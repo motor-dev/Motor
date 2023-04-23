@@ -50,8 +50,7 @@ private:
     i_bool                                              m_runLoop;
 
 private:
-    static void frameUpdate();
-    void        updateResources();
+    void updateResources();
 
 private:
     void        registerInterruptions();
@@ -76,8 +75,9 @@ protected:
 public:
     ~Application() override;
 
-    int  run();
-    void finish();
+    int         run();
+    void        finish();
+    static void frameUpdate();
 };
 
 }  // namespace Motor
