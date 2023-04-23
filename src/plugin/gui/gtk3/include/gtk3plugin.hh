@@ -15,7 +15,7 @@ private:
 
 private:
     SystemAllocator               m_allocator;
-    Page*                         m_firstPage;
+    Page*                         m_firstPage {};
     GQuark                        m_motorQuark;
     raw< const Meta::ObjectInfo > m_objectPtr;
     weak< Logger >                m_logger;

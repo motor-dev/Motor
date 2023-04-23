@@ -36,7 +36,7 @@ static inline bool assertCondition()
             if(!ignoreAll)                                                                         \
             {                                                                                      \
                 minitl::AssertionResult motor_r_;                                                  \
-                motor_r_ = minitl::getAssertionCallback()(__FILE__, __LINE__, #cond, msg);         \
+                motor_r_ = minitl::getAssertionCallback()(MOTOR_FILE, MOTOR_LINE, #cond, msg);     \
                 switch(motor_r_)                                                                   \
                 {                                                                                  \
                 case minitl::AssertionResult::Abort: ::abort(); break;                             \

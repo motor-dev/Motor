@@ -6,9 +6,7 @@
 
 namespace Motor { namespace Gtk3 {
 
-GtkResourceDescription::GtkResourceDescription() : Description()
-{
-}
+GtkResourceDescription::GtkResourceDescription() = default;
 
 GtkResourceDescription::~GtkResourceDescription() = default;
 

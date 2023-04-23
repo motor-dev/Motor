@@ -47,3 +47,11 @@
 #define kernel_local
 #define kernel_private
 #define kernel_generic
+
+#if defined(__clang_analyzer__)
+#    define MOTOR_FILE "dummy"
+#    define MOTOR_LINE 0
+#else
+#    define MOTOR_FILE __FILE__
+#    define MOTOR_LINE __LINE__
+#endif

@@ -9,9 +9,6 @@
 #    include <motor/minitl/stdafx.h>
 
 #    include <motor/core/preproc.hh>
-
-#    define MOTOR_FILE __FILE__
-#    define MOTOR_LINE __LINE__
 #    ifdef _MSC_VER
 #        define MOTOR_FUNCTION __FUNCSIG__
 #    elif defined(__GNUC__)

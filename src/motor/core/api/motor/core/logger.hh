@@ -103,7 +103,7 @@ public:
     do                                                                                             \
     {                                                                                              \
         const weak< ::Motor::Logger >& motor_log_ll = logger;                                      \
-        if(motor_log_ll->willLog(level)) motor_log_ll->log(level, __FILE__, __LINE__, msg);        \
+        if(motor_log_ll->willLog(level)) motor_log_ll->log(level, "", MOTOR_LINE, msg);            \
     } while(0)
 
 #define motor_log_format(logger, level, msg, ...)                                                  \
@@ -111,7 +111,7 @@ public:
     {                                                                                              \
         const weak< ::Motor::Logger >& motor_log_ll = logger;                                      \
         if(motor_log_ll->willLog(level))                                                           \
-            motor_log_ll->log(level, __FILE__, __LINE__,                                           \
+            motor_log_ll->log(level, MOTOR_FILE, MOTOR_LINE,                                       \
                               minitl::format< 4096 >(FMT(msg), __VA_ARGS__));                      \
     } while(0)
 
