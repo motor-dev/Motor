@@ -117,7 +117,7 @@ void Gtk3Plugin::registerValue(const istring& name, const Meta::Value& value)
 {
     Meta::ObjectInfo objectTemplate
         = {motor_plugin_gui_gtk3_Namespace()->objects, {nullptr}, name, Meta::Value()};
-    void* memory  = allocate< Meta::ObjectInfo >();
+    void* memory  = this->allocate< Meta::ObjectInfo >();
     auto* object  = new(memory) Meta::ObjectInfo(objectTemplate);
     object->value = value;
 
@@ -183,7 +183,7 @@ void Gtk3Plugin::unregisterInterface(GType type)
     GType* children = g_type_children(type, &childrenCount);
     for(guint i = 0; i < childrenCount; ++i)
     {
-        unregisterClass(children[i]);
+        unregisterInterface(children[i]);
     }
     g_free(children);
     g_type_set_qdata(type, m_motorQuark, nullptr);
@@ -217,6 +217,7 @@ void Gtk3Plugin::unregisterClass(GType type)
 
 Meta::Type Gtk3Plugin::fromGType(GType type)
 {
+    motor_forceuse(this);
     if(G_TYPE_FUNDAMENTAL(type) == G_TYPE_GTYPE)
     {
         return motor_type< raw< const Meta::Class > >();
@@ -280,6 +281,7 @@ Meta::Type Gtk3Plugin::fromGType(GType type)
 
 Meta::Value Gtk3Plugin::fromGValue(const GValue* value)
 {
+    motor_forceuse(this);
     motor_assert(value != nullptr, "NULL value");
     GType type = G_VALUE_TYPE(value);
     if(G_TYPE_FUNDAMENTAL(type) == G_TYPE_GTYPE)

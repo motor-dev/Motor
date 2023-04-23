@@ -70,7 +70,7 @@ void PackageLoader::runBuffer(const weak< const Package >& script, Resource::Res
     for(Meta::AST::MessageList::const_iterator it = package->context().messages.begin();
         it != package->context().messages.end(); ++it)
     {
-        Log::package()->log(it->severity, __FILE__, __LINE__, it->message.c_str());
+        Log::package()->log(it->severity, MOTOR_FILE, MOTOR_LINE, it->message.c_str());
     }
     if(package->success())
     {

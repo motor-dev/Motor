@@ -17,6 +17,7 @@ Gtk3Loader::Gtk3Loader(const Plugin::Context& pluginContext)
 
 Gtk3Loader::~Gtk3Loader()
 {
+    motor_forceuse(this);
     m_resourceManager->detach(motor_class< GtkResourceDescription >(), this);
 }
 
