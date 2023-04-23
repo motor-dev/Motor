@@ -68,12 +68,12 @@ public:
         return *this;
     }
 
-    operator T*()
+    operator T*()  // NOLINT(google-explicit-constructor)
     {
         return reinterpret_cast< T* >(Motor::ThreadLocal::tlsGet(m_tlsKey));
     }
 
-    operator const T*() const
+    operator const T*() const  // NOLINT(google-explicit-constructor)
     {
         return reinterpret_cast< const T* >(Motor::ThreadLocal::tlsGet(m_tlsKey));
     }
@@ -88,13 +88,13 @@ public:
         return reinterpret_cast< const T* >(Motor::ThreadLocal::tlsGet(m_tlsKey));
     }
 
-    operator const void*() const
+    operator const void*() const  // NOLINT(google-explicit-constructor)
     {
         return Motor::ThreadLocal::tlsGet(m_tlsKey);
     }
 
     bool operator!() const
     {
-        return Motor::ThreadLocal::tlsGet(m_tlsKey) == 0;
+        return Motor::ThreadLocal::tlsGet(m_tlsKey) == nullptr;
     }
 };

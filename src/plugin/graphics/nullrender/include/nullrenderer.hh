@@ -11,11 +11,9 @@ namespace Motor { namespace Null {
 
 class NullRenderer : public IRenderer
 {
-    MOTOR_NOCOPY(NullRenderer);
-
 public:
-    NullRenderer(const Plugin::Context& context);
-    ~NullRenderer();
+    explicit NullRenderer(const Plugin::Context& context);
+    ~NullRenderer() override;
 
     u32 getMaxSimultaneousRenderTargets() const override
     {

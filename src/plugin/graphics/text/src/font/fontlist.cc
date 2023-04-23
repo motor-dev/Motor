@@ -6,12 +6,8 @@
 
 namespace Motor {
 
-FontList::FontList()
-{
-}
+FontList::FontList() = default;
 
-FontList::~FontList()
-{
-}
+FontList::~FontList() = default;
 
 }  // namespace Motor

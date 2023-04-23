@@ -32,8 +32,8 @@
 #    define motor_pause()
 #endif
 
-#include <stdint.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdlib>
 typedef int8_t   i8;
 typedef int16_t  i16;
 typedef int32_t  i32;

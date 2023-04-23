@@ -11,9 +11,9 @@ class MemoryHost : public IMemoryHost
 {
 public:
     MemoryHost();
-    ~MemoryHost();
+    ~MemoryHost() override;
 
-    void release(weak< KernelScheduler::IMemoryBuffer > buffer);
+    void release(const weak< KernelScheduler::IMemoryBuffer >& buffer) override;
 };
 
 }}}  // namespace Motor::KernelScheduler::OpenCL

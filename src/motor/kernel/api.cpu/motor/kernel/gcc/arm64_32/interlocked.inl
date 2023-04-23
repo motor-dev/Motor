@@ -50,7 +50,7 @@ struct InterlockedType< 4 >
     }
     static inline value_t fetch_and_add(value_t* p, value_t incr)
     {
-        value_t old = 0;
+        value_t old;
         value_t temp, flag;
         __asm__ __volatile__(AO_THUMB_GO_ARM "       dmb sy\n"
                                              "1:     ldaxr   %w0, %5\n"
@@ -92,7 +92,7 @@ struct InterlockedType< 4 >
                              "       bne             2f\n"           /* if not, end */
                              "       stxr            %w0, %w5, %3\n" /* store new one if matched */
                              "       cmp             %w0, #1\n"
-                             "       beq             1b\n" /* if update failed, repeat */
+                             "       beq             1b\n"           /* if update failed, repeat */
                              "2:     dmb st\n" AO_THUMB_RESTORE_MODE
                              : "=&r"(result), "=&r"(old), "+m"(*p)
                              : "Q"(*p), "r"(condition), "r"(v)
@@ -171,9 +171,9 @@ struct InterlockedType< 8 >
                              : AO_THUMB_SWITCH_CLOBBERS "cc");
         return result;
     }
-    static inline value_t fetch_and_add(value_t* p, value_t incr)
+    static inline value_t fetch_and_add(value_t* p, value_t incr)  // NOLINT
     {
-        value_t old = 0;
+        value_t old;
         value_t temp, flag;
         __asm__ __volatile__(AO_THUMB_GO_ARM "       dmb sy\n"
                                              "1:     ldaxr   %x0, %5\n"
@@ -187,7 +187,7 @@ struct InterlockedType< 8 >
                              : AO_THUMB_SWITCH_CLOBBERS "cc");
         return old;
     }
-    static inline value_t fetch_and_sub(value_t* p, value_t incr)
+    static inline value_t fetch_and_sub(value_t* p, value_t incr)  // NOLINT
     {
         return fetch_and_add(p, -incr);
     }
@@ -210,8 +210,8 @@ struct InterlockedType< 8 >
         value_t result, old;
         __asm__ __volatile__(AO_THUMB_GO_ARM
                              "       dmb sy\n"
-                             "1:     ldaxr    %x1, %3\n"  /* get original */
-                             "       cmp      %x1, %x4\n" /* see if match */
+                             "1:     ldaxr    %x1, %3\n"      /* get original */
+                             "       cmp      %x1, %x4\n"     /* see if match */
                              "       b.ne     2f\n"
                              "       stlxr    %w0, %x5, %3\n" /* store new one if matched */
                              "       cbnz     %w0, 1b\n"      /* if update failed, repeat */

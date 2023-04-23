@@ -28,11 +28,11 @@ DynamicObject::Handle DynamicObject::load(const inamespace& pluginName, const ip
     HANDLE h = LoadLibrary(fullPath.name);
     if(!h)
     {
-        char* errorMessage = 0;
-        int   errorCode    = ::GetLastError();
-        FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, errorCode,
-                      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                      reinterpret_cast< LPSTR >(&errorMessage), 0, NULL);
+        char* errorMessage = nullptr;
+        DWORD errorCode    = ::GetLastError();
+        FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr,
+                      errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                      reinterpret_cast< LPSTR >(&errorMessage), 0, nullptr);
         motor_error_format(Log::plugin(), "Error loading dynamic object {0}: {1}", pluginName,
                            errorMessage);
         ::LocalFree(errorMessage);

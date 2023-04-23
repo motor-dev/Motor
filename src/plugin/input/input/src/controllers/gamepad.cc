@@ -6,12 +6,8 @@
 
 namespace Motor { namespace Input {
 
-Gamepad::Gamepad()
-{
-}
+Gamepad::Gamepad() = default;
 
-Gamepad::~Gamepad()
-{
-}
+Gamepad::~Gamepad() = default;
 
 }}  // namespace Motor::Input

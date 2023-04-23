@@ -24,16 +24,16 @@ private:
     u32                                           m_worldCount;
 
 private:
-    virtual void load(weak< const Resource::IDescription > world, Resource::Resource & resource)
+    void load(const weak< const Resource::IDescription >& world, Resource::Resource& resource)
         override;
-    virtual void unload(weak< const Resource::IDescription > world, Resource::Resource & resource)
+    void unload(const weak< const Resource::IDescription >& world, Resource::Resource& resource)
         override;
 
 public:
-    WorldLoader(weak< Task::ITask >                     loopTask,
-                weak< KernelScheduler::ProducerLoader > producerLoader,
-                const Plugin::Context&                  pluginContext);
-    ~WorldLoader();
+    WorldLoader(const weak< Task::ITask >&                     loopTask,
+                const weak< KernelScheduler::ProducerLoader >& producerLoader,
+                Plugin::Context                                pluginContext);
+    ~WorldLoader() override;
 
     void disconnectWorlds();
     u32  worldCount() const

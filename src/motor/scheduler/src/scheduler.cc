@@ -25,14 +25,15 @@ Scheduler::~Scheduler()
     m_running.set(false);
 }
 
-void Scheduler::queueTask(weak< const Task::ITask > task, weak< const Task::IExecutor > executor,
-                          u32 breakdownCount)
+void Scheduler::queueTask(const weak< const Task::ITask >&     task,
+                          const weak< const Task::IExecutor >& executor, u32 breakdownCount)
 {
     m_taskScheduler->queue(task, executor, breakdownCount);
 }
 
-void Scheduler::queueKernel(weak< const Task::KernelTask > task)
+void Scheduler::queueKernel(const weak< const Task::KernelTask >& task)
 {
+    motor_forceuse(this);
     task->m_targetScheduler->run(task);
 }
 

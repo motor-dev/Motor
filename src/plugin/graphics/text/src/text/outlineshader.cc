@@ -8,7 +8,8 @@
 namespace Motor {
 
 minitl::vector< ref< Shaders::Output > >
-createOutlineShader(weak< Shaders::Float4 > textColor, weak< Shaders::Float4 > backgroundColor)
+createOutlineShader(const weak< Shaders::Float4 >& textColor,
+                    const weak< Shaders::Float4 >& backgroundColor)
 {
     motor_forceuse(textColor);
     motor_forceuse(backgroundColor);
@@ -18,14 +19,12 @@ createOutlineShader(weak< Shaders::Float4 > textColor, weak< Shaders::Float4 > b
     return result;
 }
 
-OutlineShader::OutlineShader(weak< Shaders::Float4 > textColor,
-                             weak< Shaders::Float4 > backgroundColor)
+OutlineShader::OutlineShader(const weak< Shaders::Float4 >& textColor,
+                             const weak< Shaders::Float4 >& backgroundColor)
     : ShaderProgramDescription(createOutlineShader(textColor, backgroundColor))
 {
 }
 
-OutlineShader::~OutlineShader()
-{
-}
+OutlineShader::~OutlineShader() = default;
 
 }  // namespace Motor

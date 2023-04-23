@@ -45,7 +45,7 @@ private:
     const SymbolPointer* findSymbolInternal(const char* name) const;
 
 public:
-    DynamicObjectList(const char* name);
+    explicit DynamicObjectList(const char* name);
     ~DynamicObjectList();
 
     template < typename SYMBOL >
@@ -80,7 +80,7 @@ public:
         MOTOR_EXPORT Motor::Plugin::DynamicObjectList s_plugin_##id(#name);
 #    define MOTOR_REGISTER_PLUGIN(id, name) MOTOR_REGISTER_PLUGIN_1(id, name)
 #    define MOTOR_REGISTER_METHOD_1(id, x, name)                                                   \
-        MOTOR_EXPORT bool s_symbol_##id##_##x = s_plugin_##id.registerSymbol(&x, #name);
+        MOTOR_EXPORT bool s_symbol_##id##_##x = s_plugin_##id.registerSymbol(&(x), #name);
 #    define MOTOR_REGISTER_METHOD(id, x)             MOTOR_REGISTER_METHOD_1(id, x, x)
 #    define MOTOR_REGISTER_METHOD_NAMED(id, x, name) MOTOR_REGISTER_METHOD_1(id, x, name)
 
@@ -88,7 +88,7 @@ public:
 
 #    define MOTOR_PLUGIN_EXPORT_VAR(var, value)                                                    \
         MOTOR_PLUGIN_EXPORT var;                                                                   \
-        var = value;
+        var = value;  // NOLINT
 #    define MOTOR_PLUGIN_EXPORT extern "C" MOTOR_EXPORT
 #    define MOTOR_REGISTER_PLUGIN(id, name)
 #    define MOTOR_REGISTER_METHOD(id, x)

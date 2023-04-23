@@ -13,9 +13,7 @@ Int4::Int4(knl::bigint4 value) : Node(), m_value(value)
     motor_forceuse(m_value);
 }
 
-Int4::~Int4()
-{
-}
+Int4::~Int4() = default;
 
 ConversionCost Int4::distance(const Type& type) const
 {

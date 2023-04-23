@@ -15,7 +15,7 @@ public:
 
 public:
     FreetypeLibrary();
-    ~FreetypeLibrary();
+    ~FreetypeLibrary() override;
 };
 
 }  // namespace Motor

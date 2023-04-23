@@ -2,13 +2,11 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <gobject.hh>
-
-#include <gtkresourcedescription.meta.hh>
-#include <gvalue.hh>
 #include <meta/constructor.meta.hh>
 
 #include <motor/meta/value.hh>
+#include <gtkresourcedescription.meta.hh>
+#include <gvalue.hh>
 
 namespace Motor { namespace Gtk3 {
 
@@ -18,17 +16,17 @@ Meta::Value Constructor::call(raw< const Meta::Method > method, Meta::Value* par
 
     raw< const Constructor > constructor
         = {reinterpret_cast< const Constructor* >(method.operator->())};
-    GType         type        = constructor->type;
-    GObjectClass* objectClass = static_cast< GObjectClass* >(g_type_class_ref(type));
-    guint         paramSpecCount;
-    GParamSpec**  paramSpecs = g_object_class_list_properties(objectClass, &paramSpecCount);
+    GType        type        = constructor->type;
+    auto*        objectClass = static_cast< GObjectClass* >(g_type_class_ref(type));
+    guint        paramSpecCount;
+    GParamSpec** paramSpecs = g_object_class_list_properties(objectClass, &paramSpecCount);
 
     u32    actualParamCount = 0;
     GValue zeroValue        = G_VALUE_INIT;
 
 #ifdef GLIB_VERSION_2_54
     const char** names  = static_cast< const char** >(malloca(nparams * sizeof(char*)));
-    GValue*      values = static_cast< GValue* >(malloca(nparams * sizeof(GValue)));
+    auto*        values = static_cast< GValue* >(malloca(nparams * sizeof(GValue)));
 #else
     GParameter* gparams = static_cast< GParameter* >(malloca(nparams * sizeof(GParameter)));
 #endif

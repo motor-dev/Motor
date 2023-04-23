@@ -15,229 +15,229 @@ namespace Meta {
 
 motor_api(META) char s_zero[] = {0, 0, 0, 0};
 
-const istring Class::nameConstructor()
+istring Class::nameConstructor()
 {
     static const istring result = "?new";
     return result;
 }
 
-const istring Class::nameDestructor()
+istring Class::nameDestructor()
 {
     static const istring result = "?del";
     return result;
 }
 
-const istring Class::nameOperatorCall()
+istring Class::nameOperatorCall()
 {
     static const istring result = "?call";
     return result;
 }
 
-const istring Class::nameOperatorIndex()
+istring Class::nameOperatorIndex()
 {
     static const istring result = "?[]";
     return result;
 }
 
-const istring Class::nameOperatorLessThan()
+istring Class::nameOperatorLessThan()
 {
     static const istring result = "?<";
     return result;
 }
 
-const istring Class::nameOperatorGreaterThan()
+istring Class::nameOperatorGreaterThan()
 {
     static const istring result = "?>";
     return result;
 }
 
-const istring Class::nameOperatorLessThanOrEqual()
+istring Class::nameOperatorLessThanOrEqual()
 {
     static const istring result = "?<=";
     return result;
 }
 
-const istring Class::nameOperatorGreaterThanOrEqual()
+istring Class::nameOperatorGreaterThanOrEqual()
 {
     static const istring result = "?>=";
     return result;
 }
 
-const istring Class::nameOperatorMultiply()
+istring Class::nameOperatorMultiply()
 {
     static const istring result = "?*";
     return result;
 }
 
-const istring Class::nameOperatorDivide()
+istring Class::nameOperatorDivide()
 {
     static const istring result = "?*";
     return result;
 }
 
-const istring Class::nameOperatorModulo()
+istring Class::nameOperatorModulo()
 {
     static const istring result = "?%";
     return result;
 }
 
-const istring Class::nameOperatorAdd()
+istring Class::nameOperatorAdd()
 {
     static const istring result = "?+";
     return result;
 }
 
-const istring Class::nameOperatorSubstract()
+istring Class::nameOperatorSubstract()
 {
     static const istring result = "?-";
     return result;
 }
 
-const istring Class::nameOperatorShiftLeft()
+istring Class::nameOperatorShiftLeft()
 {
     static const istring result = "?<<";
     return result;
 }
 
-const istring Class::nameOperatorShiftRight()
+istring Class::nameOperatorShiftRight()
 {
     static const istring result = "?>>";
     return result;
 }
 
-const istring Class::nameOperatorBitwiseAnd()
+istring Class::nameOperatorBitwiseAnd()
 {
     static const istring result = "?&";
     return result;
 }
 
-const istring Class::nameOperatorBitwiseOr()
+istring Class::nameOperatorBitwiseOr()
 {
     static const istring result = "?|";
     return result;
 }
 
-const istring Class::nameOperatorBitwiseXor()
+istring Class::nameOperatorBitwiseXor()
 {
     static const istring result = "?^";
     return result;
 }
 
-const istring Class::nameOperatorBitwiseNot()
+istring Class::nameOperatorBitwiseNot()
 {
     static const istring result = "?~";
     return result;
 }
 
-const istring Class::nameOperatorLogicalAnd()
+istring Class::nameOperatorLogicalAnd()
 {
     static const istring result = "?&&";
     return result;
 }
 
-const istring Class::nameOperatorLogicalOr()
+istring Class::nameOperatorLogicalOr()
 {
     static const istring result = "?||";
     return result;
 }
 
-const istring Class::nameOperatorLogicalNot()
+istring Class::nameOperatorLogicalNot()
 {
     static const istring result = "?!";
     return result;
 }
 
-const istring Class::nameOperatorEqual()
+istring Class::nameOperatorEqual()
 {
     static const istring result = "?==";
     return result;
 }
 
-const istring Class::nameOperatorNotEqual()
+istring Class::nameOperatorNotEqual()
 {
     static const istring result = "?!=";
     return result;
 }
 
-const istring Class::nameOperatorAssign()
+istring Class::nameOperatorAssign()
 {
     static const istring result = "?=";
     return result;
 }
 
-const istring Class::nameOperatorMultiplyAssign()
+istring Class::nameOperatorMultiplyAssign()
 {
     static const istring result = "?*=";
     return result;
 }
 
-const istring Class::nameOperatorDivideAssign()
+istring Class::nameOperatorDivideAssign()
 {
     static const istring result = "?/=";
     return result;
 }
 
-const istring Class::nameOperatorModuloAssign()
+istring Class::nameOperatorModuloAssign()
 {
     static const istring result = "?%=";
     return result;
 }
 
-const istring Class::nameOperatorAddAssign()
+istring Class::nameOperatorAddAssign()
 {
     static const istring result = "?+=";
     return result;
 }
 
-const istring Class::nameOperatorSubstractAssign()
+istring Class::nameOperatorSubstractAssign()
 {
     static const istring result = "?-=";
     return result;
 }
 
-const istring Class::nameOperatorShiftLeftAssign()
+istring Class::nameOperatorShiftLeftAssign()
 {
     static const istring result = "?<<=";
     return result;
 }
 
-const istring Class::nameOperatorShiftRightAssign()
+istring Class::nameOperatorShiftRightAssign()
 {
     static const istring result = "?>>=";
     return result;
 }
 
-const istring Class::nameOperatorAndAssign()
+istring Class::nameOperatorAndAssign()
 {
     static const istring result = "?&=";
     return result;
 }
 
-const istring Class::nameOperatorOrAssign()
+istring Class::nameOperatorOrAssign()
 {
     static const istring result = "?|=";
     return result;
 }
 
-const istring Class::nameOperatorXorAssign()
+istring Class::nameOperatorXorAssign()
 {
     static const istring result = "?^=";
     return result;
 }
 
-const istring Class::nameOperatorIncrement()
+istring Class::nameOperatorIncrement()
 {
     static const istring result = "?++";
     return result;
 }
 
-const istring Class::nameOperatorDecrement()
+istring Class::nameOperatorDecrement()
 {
     static const istring result = "?--";
     return result;
 }
 
-const istring Class::nameOperatorGet()
+istring Class::nameOperatorGet()
 {
     static const istring result = "?->";
     return result;
@@ -272,7 +272,7 @@ void Class::enumerateObjects(EnumerateRecursion recursion, EnumerateCallback cal
 
 raw< const Property > Class::getProperty(istring propertyName) const
 {
-    raw< const Class > thisCls = {this};
+    raw< const Class > thisCls {this};
     for(raw< const Class > cls = thisCls; cls; cls = cls->parent)
     {
         for(const Property* p = cls->properties.begin(); p != cls->properties.end(); ++p)
@@ -284,7 +284,7 @@ raw< const Property > Class::getProperty(istring propertyName) const
             }
         }
     }
-    return raw< const Property >();
+    return {};
 }
 
 raw< const Method > Class::getMethod(istring methodName) const
@@ -301,12 +301,12 @@ raw< const Method > Class::getMethod(istring methodName) const
             }
         }
     }
-    return raw< const Method >();
+    return {};
 }
 
 raw< const ObjectInfo > Class::getStaticProperty(istring propertyName) const
 {
-    raw< const ObjectInfo > o = objects;
+    raw< const ObjectInfo > o = this->objects;
     while(o)
     {
         if(o->name == propertyName)
@@ -352,7 +352,7 @@ Value Class::get(Value& from, istring propname, bool& found) const
     }
 
     found = false;
-    return Value();
+    return {};
 }
 
 Value Class::get(const Value& from, istring propname, bool& found) const
@@ -389,7 +389,7 @@ Value Class::get(const Value& from, istring propname, bool& found) const
     }
 
     found = false;
-    return Value();
+    return {};
 }
 
 bool Class::isA(raw< const Class > klass) const
@@ -410,18 +410,19 @@ Value Class::getTag(const Type& type) const
     {
         if(cls->tags)
         {
-            for(const Tag* tag = cls->tags->begin(); tag != cls->tags->end(); ++tag)
+            for(const auto& tag: *cls->tags)
             {
-                if(type <= tag->tag.type()) return Value(Value::ByRef(tag->tag));
+                if(type <= tag.tag.type()) return Value(Value::ByRef(tag.tag));
             }
         }
     }
-    return Value();
+    return {};
 }
 
 Value Class::getTag(raw< const Class > type) const
 {
-    return getTag(Type::makeType(type, Type::Indirection::Value, Type::Constness::Const, Type::Constness::Const));
+    return getTag(Type::makeType(type, Type::Indirection::Value, Type::Constness::Const,
+                                 Type::Constness::Const));
 }
 
 bool Class::distance(raw< const Class > other, u16& result) const
@@ -463,9 +464,20 @@ Value Class::findClass(inamespace name)
 
 raw< Meta::Class > motor_motor_Namespace()
 {
-    static Meta::Class ci
-        = {"Motor", 0,      0,   Meta::ClassType_Namespace,         {0}, {0}, {0}, {0},
-           {0, 0},  {0, 0}, {0}, Meta::OperatorTable::s_emptyTable, 0,   0};
+    static Meta::Class ci     = {"Motor",
+                                 0,
+                                 0,
+                                 Meta::ClassType_Namespace,
+                                 {nullptr},
+                                 {nullptr},
+                                 {nullptr},
+                                 {nullptr},
+                                 {0, nullptr},
+                                 {0, nullptr},
+                                 {nullptr},
+                                 Meta::OperatorTable::s_emptyTable,
+                                 nullptr,
+                                 nullptr};
     raw< Meta::Class > result = {&ci};
     return result;
 }

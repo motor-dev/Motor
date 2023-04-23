@@ -6,12 +6,8 @@
 
 namespace Motor { namespace KernelScheduler {
 
-ICodeLoader::ICodeLoader()
-{
-}
+ICodeLoader::ICodeLoader() = default;
 
-ICodeLoader::~ICodeLoader()
-{
-}
+ICodeLoader::~ICodeLoader() = default;
 
 }}  // namespace Motor::KernelScheduler

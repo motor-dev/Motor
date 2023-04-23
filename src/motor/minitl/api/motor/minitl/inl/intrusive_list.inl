@@ -22,8 +22,8 @@ private:
 protected:
     item();
     ~item();
-    item(item&& other);
-    item& operator=(item&& other);
+    item(item&& other) noexcept;
+    item& operator=(item&& other) noexcept;
     item(const item& other);
     item& operator=(const item& other);
 
@@ -42,8 +42,8 @@ intrusive_list< T, INDEX >::item::item() : m_next(this)
 }
 
 template < typename T, int INDEX >
-intrusive_list< T, INDEX >::item::item(item&& other) : m_next(this)
-                                                     , m_previous(this)
+intrusive_list< T, INDEX >::item::item(item&& other) noexcept : m_next(this)
+                                                              , m_previous(this)
 {
     motor_forceuse(other);
 }
@@ -56,7 +56,8 @@ intrusive_list< T, INDEX >::item::item(const item& other) : m_next(this)
 }
 
 template < typename T, int INDEX >
-typename intrusive_list< T, INDEX >::item& intrusive_list< T, INDEX >::item::operator=(item&& other)
+typename intrusive_list< T, INDEX >::item&
+intrusive_list< T, INDEX >::item::operator=(item&& other) noexcept
 {
     motor_forceuse(other);
     return *this;
@@ -124,20 +125,29 @@ private:
     item_ptr m_iterator;
 
 public:
-    base_iterator();
-    explicit base_iterator(item_ptr it);
-    base_iterator(const base_iterator& other);
-    // base_iterator(const base_iterator<typename POLICY::mutable_policy>& other);
-    ~base_iterator();
-    base_iterator& operator=(const base_iterator& other)
+    base_iterator() : m_iterator(0)
     {
-        m_iterator = other.m_iterator;
-        return *this;
     }
 
+    explicit base_iterator(item_ptr it) : m_iterator(it)
+    {
+    }
+
+    base_iterator(const base_iterator& other)            = default;
+    ~base_iterator()                                     = default;
+    base_iterator& operator=(const base_iterator& other) = default;
+
 public:
-    bool operator==(const base_iterator< POLICY >& other) const;
-    bool operator!=(const base_iterator< POLICY >& other) const;
+    bool operator==(const base_iterator< POLICY >& other) const
+    {
+        return m_iterator == other.m_iterator;
+    }
+
+    bool operator!=(const base_iterator< POLICY >& other) const
+
+    {
+        return m_iterator != other.m_iterator;
+    }
 
     base_iterator< POLICY >& operator++()
     {
@@ -161,73 +171,18 @@ public:
         m_iterator                = POLICY::previous(m_iterator);
         return p;
     }
-    typename POLICY::pointer   operator->() const;
-    typename POLICY::reference operator*() const;
+    typename POLICY::pointer operator->() const
+    {
+        return const_cast< typename POLICY::pointer >(
+            static_cast< typename POLICY::const_pointer >(m_iterator));
+    }
+
+    typename POLICY::reference operator*() const
+    {
+        return *const_cast< typename POLICY::pointer >(
+            static_cast< typename POLICY::const_pointer >(m_iterator));
+    }
 };
-
-template < typename T, int INDEX >
-template < typename POLICY >
-intrusive_list< T, INDEX >::base_iterator< POLICY >::base_iterator() : m_iterator(0)
-{
-}
-
-template < typename T, int INDEX >
-template < typename POLICY >
-intrusive_list< T, INDEX >::base_iterator< POLICY >::base_iterator(item_ptr it) : m_iterator(it)
-{
-}
-
-template < typename T, int INDEX >
-template < typename POLICY >
-intrusive_list< T, INDEX >::base_iterator< POLICY >::base_iterator(const base_iterator& other)
-    : m_iterator(other.m_iterator)
-{
-}
-
-/*template< typename T, int INDEX >
-template< typename POLICY >
-intrusive_list<T, INDEX>::base_iterator<POLICY>::base_iterator(const base_iterator<typename
-POLICY::mutable_policy>& other) :   m_iterator(other.operator->())
-{
-}*/
-
-template < typename T, int INDEX >
-template < typename POLICY >
-intrusive_list< T, INDEX >::base_iterator< POLICY >::~base_iterator()
-{
-}
-
-template < typename T, int INDEX >
-template < typename POLICY >
-bool intrusive_list< T, INDEX >::base_iterator< POLICY >::operator==(
-    const base_iterator< POLICY >& other) const
-{
-    return m_iterator == other.m_iterator;
-}
-
-template < typename T, int INDEX >
-template < typename POLICY >
-bool intrusive_list< T, INDEX >::base_iterator< POLICY >::operator!=(
-    const base_iterator< POLICY >& other) const
-{
-    return m_iterator != other.m_iterator;
-}
-
-template < typename T, int INDEX >
-template < typename POLICY >
-typename POLICY::pointer intrusive_list< T, INDEX >::base_iterator< POLICY >::operator->() const
-{
-    return const_cast< typename POLICY::pointer >(
-        static_cast< typename POLICY::const_pointer >(m_iterator));
-}
-
-template < typename T, int INDEX >
-template < typename POLICY >
-typename POLICY::reference intrusive_list< T, INDEX >::base_iterator< POLICY >::operator*() const
-{
-    return *const_cast< typename POLICY::pointer >(
-        static_cast< typename POLICY::const_pointer >(m_iterator));
-}
 
 template < typename T, int INDEX >
 struct intrusive_list< T, INDEX >::iterator_policy

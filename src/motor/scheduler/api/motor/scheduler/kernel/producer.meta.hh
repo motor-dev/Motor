@@ -15,6 +15,31 @@ namespace Motor { namespace KernelScheduler {
 class IProduct;
 class ProducerLoader;
 
+class Producer;
+
+class motor_api(SCHEDULER) IProduct : public minitl::refcountable
+{
+protected:
+    weak< const Producer > m_producer;
+
+protected:
+    explicit IProduct(const weak< const Producer >& producer) : m_producer(producer)
+    {
+    }
+
+    ~IProduct() override;
+
+public:
+    static raw< Meta::Class > getNamespace();
+
+    weak< const Producer > producer() const
+    {
+        return m_producer;
+    }
+
+    virtual ref< IParameter > createParameter() const = 0;
+};
+
 class motor_api(SCHEDULER) Producer : public Resource::Description< Producer >
 {
 protected:
@@ -30,20 +55,18 @@ protected:
         minitl::vector< Task::ITask::CallbackConnection > chain;
 
     public:
-        Runtime(ref< Task::ITask > task, u32 parameterCount);
+        Runtime(const ref< Task::ITask >& task, u32 parameterCount);
     };
 
 protected:
     Producer();
-    virtual ~Producer();
+    ~Producer() override;
 
 public:
     virtual ref< Runtime > createRuntime(weak< const ProducerLoader > loader) const = 0;
-    ref< Task::ITask >     getTask(weak< const ProducerLoader > loader) const;
-    ref< IParameter >      getParameter(weak< const ProducerLoader > loader,
-                                        weak< const IProduct >       product) const;
+    ref< Task::ITask >     getTask(const weak< const ProducerLoader >& loader) const;
+    ref< IParameter >      getParameter(const weak< const ProducerLoader >& loader,
+                                        const weak< const IProduct >&       product) const;
 };
 
 }}  // namespace Motor::KernelScheduler
-
-#include <motor/scheduler/kernel/iproduct.meta.hh>

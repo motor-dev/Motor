@@ -11,7 +11,7 @@ class motor_api(3D) TextureDescription : public Resource::Description< TextureDe
 {
 public:
     TextureDescription();
-    ~TextureDescription();
+    ~TextureDescription() override;
 };
 
 }  // namespace Motor

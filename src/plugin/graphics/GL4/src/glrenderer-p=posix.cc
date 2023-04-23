@@ -10,11 +10,7 @@
 #include <motor/plugin.graphics.3d/mesh/mesh.meta.hh>
 #include <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.hh>
 #include <motor/plugin.graphics.3d/shader/shader.meta.hh>
-#include <motor/plugin.graphics.3d/texture/texture.meta.hh>
-#include <loaders/mesh/glmesh.hh>
 #include <loaders/rendertarget/glwindow.hh>
-#include <loaders/shader/glshader.hh>
-#include <loaders/texture/gltexture.hh>
 
 #include <GL/glx.h>
 #include <GL/glxext.h>
@@ -52,19 +48,18 @@ public:
     const ShaderExtensions shaderext;
 
 public:
-    Context(PlatformData* data);
-    ~Context();
+    explicit Context(PlatformData* data);
+    ~Context() override;
 };
 
 static GLXContext createGLXContext(::Display* display, ::GLXFBConfig fbConfig)
 {
-    GLXContext context = 0;
+    GLXContext context = nullptr;
     GLXContext ctx_old
-        = glXCreateContext(display, glXGetVisualFromFBConfig(display, fbConfig), 0, GL_TRUE);
+        = glXCreateContext(display, glXGetVisualFromFBConfig(display, fbConfig), nullptr, GL_TRUE);
     motor_assert(ctx_old, "could not create legacy OpenGL context");
-    glXCreateContextAttribsARBProc glXCreateContextAttribsARB
-        = (glXCreateContextAttribsARBProc)glXGetProcAddress(
-            (const GLubyte*)"glXCreateContextAttribsARB");
+    auto glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc)glXGetProcAddress(
+        (const GLubyte*)"glXCreateContextAttribsARB");
     if(glXCreateContextAttribsARB)
     {
         int attribs[][10]
@@ -92,17 +87,17 @@ static GLXContext createGLXContext(::Display* display, ::GLXFBConfig fbConfig)
                 GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB, None},
                {GLX_CONTEXT_MAJOR_VERSION_ARB, 2, GLX_CONTEXT_MINOR_VERSION_ARB, 1, None}};
         XSync(display, False);
-        for(int i = 0; i < sizeof(attribs) / sizeof(attribs[0]); ++i)
+        for(auto& attrib: attribs)
         {
-            context = glXCreateContextAttribsARB(display, fbConfig, 0, True, attribs[i]);
+            context = glXCreateContextAttribsARB(display, fbConfig, nullptr, True, attrib);
             if(context) break;
         }
     }
     if(!context)
     {
-        context = glXCreateNewContext(display, fbConfig, GLX_RGBA_TYPE, 0, True);
+        context = glXCreateNewContext(display, fbConfig, GLX_RGBA_TYPE, nullptr, True);
     }
-    glXMakeCurrent(display, 0, 0);
+    glXMakeCurrent(display, 0, nullptr);
     glXDestroyContext(display, ctx_old);
     return context;
 }
@@ -160,7 +155,7 @@ private:
 
 public:
     Context(::Display* display, GLXContext context, u64 threadId);
-    ~Context();
+    ~Context() override;
 };
 
 GLWindow::Context::Context(::Display* display, GLXContext context, u64 threadId)
@@ -173,9 +168,7 @@ GLWindow::Context::Context(::Display* display, GLXContext context, u64 threadId)
     motor_forceuse(threadId);
 }
 
-GLWindow::Context::~Context()
-{
-}
+GLWindow::Context::~Context() = default;
 
 //------------------------------------------------------------------------
 
@@ -191,10 +184,10 @@ GLRenderer::GLRenderer(const Plugin::Context& context)
 
 GLRenderer::~GLRenderer()
 {
-    flush();
+    GLRenderer::flush();
 }
 
-void GLRenderer::attachWindow(weak< GLWindow > w) const
+void GLRenderer::attachWindow(const weak< GLWindow >& w) const
 {
     motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     w->m_context.reset(scoped< GLWindow::Context >::create(
@@ -215,20 +208,20 @@ const ShaderExtensions& GLRenderer::shaderext() const
 
 bool GLRenderer::success() const
 {
-    return hasPlatformRenderer() && m_context != 0;
+    return hasPlatformRenderer() && m_context != nullptr;
 }
 
 //------------------------------------------------------------------------
 
-GLWindow::GLWindow(weak< const RenderWindowDescription > renderwindow,
-                   weak< const GLRenderer >              renderer)
+GLWindow::GLWindow(const weak< const RenderWindowDescription >& renderwindow,
+                   const weak< const GLRenderer >&              renderer)
     : Windowing::Window(renderwindow, renderer)
     , m_context(scoped< Context >())
 {
     motor_info_format(Log::gl(), "creating window {0}", renderwindow->title);
 }
 
-void GLWindow::load(weak< const Resource::IDescription > description)
+void GLWindow::load(const weak< const Resource::IDescription >& description)
 {
     Window::load(description);
     motor_checked_cast< const GLRenderer >(m_renderer)->attachWindow(this);
@@ -247,7 +240,7 @@ void GLWindow::setCurrent() const
     {
         motor_assert(Thread::currentId() == m_context->m_threadId,
                      "render command on wrong thread");
-        ::Window* w = (::Window*)getWindowHandle();
+        auto* w = (::Window*)getWindowHandle();
         if(!glXMakeCurrent(m_context->m_display, *w, m_context->m_glContext))
             motor_error(Log::gl(), "Unable to set current context");
     }
@@ -272,7 +265,7 @@ void GLWindow::present() const
     {
         motor_assert(Thread::currentId() == m_context->m_threadId,
                      "render command on wrong thread");
-        ::Window* w = (::Window*)getWindowHandle();
+        auto* w = (::Window*)getWindowHandle();
         glXSwapBuffers(motor_checked_cast< const GLRenderer >(m_renderer)->m_context->m_display,
                        *w);
     }

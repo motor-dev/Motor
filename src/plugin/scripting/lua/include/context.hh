@@ -18,8 +18,8 @@ private:
     lua_State* m_state;
 
 public:
-    Context(const Plugin::Context& context);
-    ~Context();
+    explicit Context(const Plugin::Context& context);
+    ~Context() override;
 
     static minitl::format_buffer< 1024u > tostring(lua_State* state, int element);
     static void                           printStack(lua_State* l);
@@ -32,12 +32,12 @@ public:
     static minitl::format_buffer< 1024u > getCallInfo(lua_State* state);
 
 private:
-    virtual void unload(weak< const Resource::IDescription > description,
-                        Resource::Resource&                  handle) override;
-    virtual void runBuffer(weak< const LuaScript > script, Resource::Resource& resource,
-                           const minitl::Allocator::Block< u8 >& buffer) override;
-    virtual void reloadBuffer(weak< const LuaScript > script, Resource::Resource& resource,
-                              const minitl::Allocator::Block< u8 >& buffer) override;
+    void unload(const weak< const Resource::IDescription >& description,
+                Resource::Resource&                         handle) override;
+    void runBuffer(const weak< const LuaScript >& script, Resource::Resource& resource,
+                   const minitl::Allocator::Block< u8 >& buffer) override;
+    void reloadBuffer(const weak< const LuaScript >& script, Resource::Resource& resource,
+                      const minitl::Allocator::Block< u8 >& buffer) override;
 
     static void* luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize);
 };

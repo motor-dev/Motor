@@ -26,7 +26,6 @@ def path_from(path, task_gen, appname):
 
 
 def gather_includes_defines(task_gen, appname):
-
     def gather_includes_defines_recursive(task_gen):
         try:
             return task_gen.motor_eclipse_cache
@@ -241,8 +240,8 @@ class eclipse(Build.BuildContext):
                                 argument = launch_tg.target if self.launcher != launch_tg else ''
                                 with XmlDocument(open(node.abspath(), 'w'), 'UTF-8') as doc:
                                     with XmlNode(
-                                        doc, 'launchConfiguration',
-                                        {'type': 'org.eclipse.cdt.launch.applicationLaunchType'}
+                                            doc, 'launchConfiguration',
+                                            {'type': 'org.eclipse.cdt.launch.applicationLaunchType'}
                                     ) as launchConfig:
                                         XmlNode(
                                             launchConfig, 'booleanAttribute', {
@@ -251,8 +250,8 @@ class eclipse(Build.BuildContext):
                                             }
                                         ).close()
                                         with XmlNode(
-                                            launchConfig, 'listAttribute',
-                                            {'key': 'org.eclipse.cdt.dsf.gdb.AUTO_SOLIB_LIST'}
+                                                launchConfig, 'listAttribute',
+                                                {'key': 'org.eclipse.cdt.dsf.gdb.AUTO_SOLIB_LIST'}
                                         ) as soLibList:
                                             pass
                                         gdb = env.GDB[0] or 'gdb'
@@ -378,18 +377,18 @@ class eclipse(Build.BuildContext):
                                             }
                                         ).close()
                                         with XmlNode(
-                                            launchConfig, 'listAttribute',
-                                            {'key': 'org.eclipse.debug.core.MAPPED_RESOURCE_PATHS'}
+                                                launchConfig, 'listAttribute',
+                                                {'key': 'org.eclipse.debug.core.MAPPED_RESOURCE_PATHS'}
                                         ) as resourcePaths:
                                             XmlNode(resourcePaths, 'listEntry', {'value': '/Motor'}).close()
                                         with XmlNode(
-                                            launchConfig, 'listAttribute',
-                                            {'key': 'org.eclipse.debug.core.MAPPED_RESOURCE_TYPES'}
+                                                launchConfig, 'listAttribute',
+                                                {'key': 'org.eclipse.debug.core.MAPPED_RESOURCE_TYPES'}
                                         ) as resourceTypes:
                                             XmlNode(resourceTypes, 'listEntry', {'value': '4'}).close()
                                         with XmlNode(
-                                            launchConfig, 'listAttribute',
-                                            {'key': 'org.eclipse.debug.ui.favoriteGroups'}
+                                                launchConfig, 'listAttribute',
+                                                {'key': 'org.eclipse.debug.ui.favoriteGroups'}
                                         ) as resourceTypes:
                                             XmlNode(
                                                 resourceTypes, 'listEntry', {
@@ -409,12 +408,12 @@ class eclipse(Build.BuildContext):
 
                             with XmlNode(rootStorageModule, 'cconfiguration', {'id': cconf_id}) as cconf:
                                 with XmlNode(
-                                    cconf, 'storageModule', {
-                                        'buildSystemId': oe_cdt + '.managedbuilder.core.configurationDataProvider',
-                                        'id': cconf_id,
-                                        'moduleId': cdt_core + '.settings',
-                                        'name': toolchain + ':' + variant
-                                    }
+                                        cconf, 'storageModule', {
+                                            'buildSystemId': oe_cdt + '.managedbuilder.core.configurationDataProvider',
+                                            'id': cconf_id,
+                                            'moduleId': cdt_core + '.settings',
+                                            'name': toolchain + ':' + variant
+                                        }
                                 ) as storageModule:
                                     XmlNode(storageModule, 'externalSettings').close()
                                     with XmlNode(storageModule, 'extensions') as extensions:
@@ -453,43 +452,43 @@ class eclipse(Build.BuildContext):
                                             ).close()
 
                                 with XmlNode(
-                                    cconf, 'storageModule', {
-                                        'moduleId': 'cdtBuildSystem',
-                                        'version': '4.0.0'
-                                    }
+                                        cconf, 'storageModule', {
+                                            'moduleId': 'cdtBuildSystem',
+                                            'version': '4.0.0'
+                                        }
                                 ) as storageModule:
                                     with XmlNode(
-                                        storageModule, 'configuration', {
-                                            'artifactName': appname,
-                                            'buildProperties': '',
-                                            'description': '',
-                                            'id': cconf_id,
-                                            'name': toolchain + ':' + variant,
-                                            'parent': cdt_bld + '.prefbase.cfg'
-                                        }
+                                            storageModule, 'configuration', {
+                                                'artifactName': appname,
+                                                'buildProperties': '',
+                                                'description': '',
+                                                'id': cconf_id,
+                                                'name': toolchain + ':' + variant,
+                                                'parent': cdt_bld + '.prefbase.cfg'
+                                            }
                                     ) as config:
                                         count = count + 1
                                         with XmlNode(
-                                            config, 'folderInfo', {
-                                                'id': cconf_id + '.%d' % count,
-                                                'resourcePath': '/',
-                                                'name': ''
-                                            }
+                                                config, 'folderInfo', {
+                                                    'id': cconf_id + '.%d' % count,
+                                                    'resourcePath': '/',
+                                                    'name': ''
+                                                }
                                         ) as folderInfo:
                                             count = count + 1
                                             with XmlNode(
-                                                folderInfo, 'toolChain', {
-                                                    'id':
-                                                        cdt_bld + '.prefbase.toolchain.%d' % count,
-                                                    'name':
-                                                        'Motor',
-                                                    'resourceTypeBasedDiscovery':
-                                                        'false',
-                                                    'superClass':
-                                                        'cdt.managedbuild.toolchain.gnu.base',
-                                                    'unusedChildren':
-                                                        'cdt.managedbuild.tool.gnu.c.linker.base;cdt.managedbuild.tool.gnu.archiver.base;cdt.managedbuild.tool.gnu.cpp.linker.base;cdt.managedbuild.tool.gnu.assembler.base'
-                                                }
+                                                    folderInfo, 'toolChain', {
+                                                        'id':
+                                                            cdt_bld + '.prefbase.toolchain.%d' % count,
+                                                        'name':
+                                                            'Motor',
+                                                        'resourceTypeBasedDiscovery':
+                                                            'false',
+                                                        'superClass':
+                                                            'cdt.managedbuild.toolchain.gnu.base',
+                                                        'unusedChildren':
+                                                            'cdt.managedbuild.tool.gnu.c.linker.base;cdt.managedbuild.tool.gnu.archiver.base;cdt.managedbuild.tool.gnu.cpp.linker.base;cdt.managedbuild.tool.gnu.assembler.base'
+                                                    }
                                             ) as toolChain:
                                                 XmlNode(
                                                     toolChain, 'targetPlatform', {
@@ -519,7 +518,7 @@ class eclipse(Build.BuildContext):
                                                     }
                                                 ).close()
                                                 for tool_name, id_name in (
-                                                    ('GCC C Compiler', 'c'), ('GCC C++ Compiler', 'cpp')
+                                                        ('GCC C Compiler', 'c'), ('GCC C++ Compiler', 'cpp')
                                                 ):
                                                     count = count + 1
                                                     XmlNode(
@@ -537,14 +536,14 @@ class eclipse(Build.BuildContext):
                                 'moduleId': 'org.eclipse.cdt.core.externalSettings'
                             }).close()
                             with XmlNode(
-                                cproject_setting, 'configuration', {
-                                    'id': cconf_id,
-                                    'name': toolchain + ':' + variant
-                                }
+                                    cproject_setting, 'configuration', {
+                                        'id': cconf_id,
+                                        'name': toolchain + ':' + variant
+                                    }
                             ) as cconf_setting:
                                 with XmlNode(
-                                    cconf_setting, 'extension',
-                                    {'point': 'org.eclipse.cdt.core.LanguageSettingsProvider'}
+                                        cconf_setting, 'extension',
+                                        {'point': 'org.eclipse.cdt.core.LanguageSettingsProvider'}
                                 ) as extension:
                                     XmlNode(
                                         extension, 'provider-reference', {
@@ -553,21 +552,21 @@ class eclipse(Build.BuildContext):
                                         }
                                     ).close()
                                     with XmlNode(
-                                        extension, 'provider', {
-                                            'class':
-                                                'org.eclipse.cdt.core.language.settings.providers.LanguageSettingsGenericProvider',
-                                            'id':
-                                                'org.eclipse.cdt.ui.UserLanguageSettingsProvider',
-                                            'name':
-                                                'CDT User Setting Entries',
-                                            'prefer-non-shared':
-                                                'true',
-                                            'store-entries-with-project':
-                                                'true'
-                                        }
+                                            extension, 'provider', {
+                                                'class':
+                                                    'org.eclipse.cdt.core.language.settings.providers.LanguageSettingsGenericProvider',
+                                                'id':
+                                                    'org.eclipse.cdt.ui.UserLanguageSettingsProvider',
+                                                'name':
+                                                    'CDT User Setting Entries',
+                                                'prefer-non-shared':
+                                                    'true',
+                                                'store-entries-with-project':
+                                                    'true'
+                                            }
                                     ) as provider:
                                         with XmlNode(
-                                            provider, 'language', {'id': 'org.eclipse.cdt.core.g++'}
+                                                provider, 'language', {'id': 'org.eclipse.cdt.core.g++'}
                                         ) as language:
                                             for g in self.groups:
                                                 for tg in g:
@@ -577,55 +576,54 @@ class eclipse(Build.BuildContext):
                                                         continue
                                                     task_includes, task_defines = gather_includes_defines(tg, appname)
                                                     with XmlNode(
-                                                        language, 'resource',
-                                                        {'project-relative-path': tg.name.replace('.', '/')}
+                                                            language, 'resource',
+                                                            {'project-relative-path': tg.name.replace('.', '/')}
                                                     ) as resource:
                                                         for include in sub_env.INCLUDES + [
                                                             '%s/usr/include' % sub_env.SYSROOT
-                                                        ] + sub_env.SYSTEM_INCLUDES:
+                                                        ] + sub_env.COMPILER_INCLUDES:
                                                             with XmlNode(
-                                                                resource, 'entry', {
-                                                                    'kind': 'includePath',
-                                                                    'name': include
-                                                                }
+                                                                    resource, 'entry', {
+                                                                        'kind': 'includePath',
+                                                                        'name': include
+                                                                    }
                                                             ) as entry:
                                                                 XmlNode(entry, 'flag', {'value': 'BUILTIN'}).close()
                                                         for flags, include in task_includes:
                                                             with XmlNode(
-                                                                resource, 'entry', {
-                                                                    'kind': 'includePath',
-                                                                    'name': include
-                                                                }
+                                                                    resource, 'entry', {
+                                                                        'kind': 'includePath',
+                                                                        'name': include
+                                                                    }
                                                             ) as entry:
                                                                 XmlNode(entry, 'flag', {
                                                                     'value': '|'.join(flags)
                                                                 }).close()
-                                                        for d in task_defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES:
+                                                        for d in task_defines + sub_env.DEFINES + sub_env.COMPILER_DEFINES:
                                                             try:
                                                                 define, value = d.split('=')
                                                             except:
                                                                 define = d
                                                                 value = ''
                                                             with XmlNode(
-                                                                resource, 'entry', {
-                                                                    'kind': 'macro',
-                                                                    'name': define,
-                                                                    'value': value
-                                                                }
+                                                                    resource, 'entry', {
+                                                                        'kind': 'macro',
+                                                                        'name': define,
+                                                                        'value': value
+                                                                    }
                                                             ) as entry:
                                                                 XmlNode(entry, 'flag', {'value': 'BUILTIN'}).close()
 
                 with XmlNode(
-                    cproject, 'storageModule', {
-                        'moduleId': 'cdtBuildSystem',
-                        'version': '4.0.0'
-                    }
+                        cproject, 'storageModule', {
+                            'moduleId': 'cdtBuildSystem',
+                            'version': '4.0.0'
+                        }
                 ) as storageModule:
                     XmlNode(storageModule, 'project', {'id': '%s.null.0' % appname, 'name': appname}).close()
 
                 with XmlNode(cproject, 'storageModule', {'moduleId': cdt_mk + '.buildtargets'}) as storageModule:
                     with XmlNode(storageModule, 'buildTargets') as buildTargets:
-
                         def addTargetWrap(name, runAll):
                             return self.addTarget(buildTargets, executable, name, '"%s" %s' % (waf, name), runAll)
 
@@ -653,24 +651,25 @@ class eclipse(Build.BuildContext):
                 wafadmin = [p for p in system_path if p.find('wafadmin') != -1]
                 if wafadmin:
                     with XmlNode(
-                        pydevproject, 'pydev_pathproperty', {'name': 'org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH'}
+                            pydevproject, 'pydev_pathproperty',
+                            {'name': 'org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH'}
                     ) as prop:
                         for i in wafadmin:
                             XmlNode(prop, 'path', i).close()
                 if user_path:
                     with XmlNode(
-                        pydevproject, 'pydev_pathproperty', {'name': 'org.python.pydev.PROJECT_SOURCE_PATH'}
+                            pydevproject, 'pydev_pathproperty', {'name': 'org.python.pydev.PROJECT_SOURCE_PATH'}
                     ) as prop:
                         for i in user_path:
                             XmlNode(prop, 'path', '/' + appname + '/' + i).close()
 
     def addTarget(self, buildTargets, executable, name, buildTarget, runAllBuilders=True):
         with XmlNode(
-            buildTargets, 'target', {
-                'name': name,
-                'path': '',
-                'targetID': oe_cdt + '.build.MakeTargetBuilder'
-            }
+                buildTargets, 'target', {
+                    'name': name,
+                    'path': '',
+                    'targetID': oe_cdt + '.build.MakeTargetBuilder'
+                }
         ) as target:
             XmlNode(target, 'buildCommand', executable).close()
             XmlNode(target, 'buildArguments', None).close()

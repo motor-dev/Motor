@@ -5,9 +5,9 @@
 #include <motor/core/threads/semaphore.hh>
 
 #include <cerrno>
-#include <stdio.h>
+#include <cstdio>
 
-#include <limits.h>
+#include <climits>
 #include <linux/futex.h>
 #include <sys/syscall.h>
 #include <unistd.h>
@@ -38,7 +38,7 @@ void Semaphore::release(int count)
 
 Threads::Waitable::WaitResult Semaphore::wait()
 {
-    int result;
+    long result;
     do
     {
         i32 count = m_data.value--;

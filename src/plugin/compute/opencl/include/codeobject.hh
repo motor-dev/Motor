@@ -19,11 +19,11 @@ private:
     cl_program            m_program;
 
 private:
-    cl_program loadProgram(weak< const Context > context);
+    cl_program loadProgram(const weak< const Context >& context);
 
 public:
-    CodeObject(weak< const Context > context, const inamespace& name);
-    ~CodeObject();
+    CodeObject(const weak< const Context >& context, const inamespace& name);
+    ~CodeObject() override;
 };
 
 }}}  // namespace Motor::KernelScheduler::OpenCL

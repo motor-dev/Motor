@@ -13,9 +13,7 @@ Integer::Integer(i64 value) : Node(), m_value(value)
     motor_forceuse(m_value);
 }
 
-Integer::~Integer()
-{
-}
+Integer::~Integer() = default;
 
 ConversionCost Integer::distance(const Type& type) const
 {

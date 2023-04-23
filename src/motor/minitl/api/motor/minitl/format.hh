@@ -100,7 +100,7 @@ u32 format_to(char* destination, u32 length, T format, Args&&... arguments);
         {                                                                                          \
             constexpr const char& operator[](unsigned i) const                                     \
             {                                                                                      \
-                return x[i];                                                                       \
+                return (x)[i];                                                                     \
             }                                                                                      \
             constexpr unsigned size() const                                                        \
             {                                                                                      \

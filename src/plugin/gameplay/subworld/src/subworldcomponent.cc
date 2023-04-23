@@ -8,21 +8,25 @@ namespace Motor { namespace World {
 
 void SubWorldComponent::load(const EntityContext& owner, EventContext& context)
 {
+    motor_forceuse(this);
     motor_forceuse(owner);
     motor_forceuse(context);
 }
 void SubWorldComponent::unload(const EntityContext& owner, EventContext& context)
 {
+    motor_forceuse(this);
     motor_forceuse(owner);
     motor_forceuse(context);
 }
 void SubWorldComponent::spawn(const EntityContext& owner, EventContext& context)
 {
+    motor_forceuse(this);
     motor_forceuse(owner);
     motor_forceuse(context);
 }
 void SubWorldComponent::despawn(const EntityContext& owner, EventContext& context, u32 instance)
 {
+    motor_forceuse(this);
     motor_forceuse(owner);
     motor_forceuse(context);
     motor_forceuse(instance);

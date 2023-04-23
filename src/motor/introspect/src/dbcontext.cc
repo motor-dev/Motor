@@ -6,7 +6,7 @@
 
 namespace Motor { namespace Meta { namespace AST {
 
-DbContext::DbContext(minitl::Allocator& arena, ref< Folder > rootFolder)
+DbContext::DbContext(minitl::Allocator& arena, const ref< Folder >& rootFolder)
     : rootNamespace(ref< Namespace >::create(arena, byref(arena)))
     , rootFolder(rootFolder)
     , messages(arena)
@@ -14,7 +14,8 @@ DbContext::DbContext(minitl::Allocator& arena, ref< Folder > rootFolder)
 {
 }
 
-DbContext::DbContext(minitl::Allocator& arena, ref< Namespace > ns, ref< Folder > rootFolder)
+DbContext::DbContext(minitl::Allocator& arena, const ref< Namespace >& ns,
+                     const ref< Folder >& rootFolder)
     : rootNamespace(ns)
     , rootFolder(rootFolder)
     , messages(arena)
@@ -22,20 +23,20 @@ DbContext::DbContext(minitl::Allocator& arena, ref< Namespace > ns, ref< Folder 
 {
 }
 
-void DbContext::error(weak< const Node > owner, const Message::MessageType& error)
+void DbContext::error(const weak< const Node >& owner, const Message::MessageType& error)
 {
-    messages.push_back(Message(owner, error, logError));
+    messages.emplace_back(owner, error, logError);
     errorCount++;
 }
 
-void DbContext::warning(weak< const Node > owner, const Message::MessageType& warning)
+void DbContext::warning(const weak< const Node >& owner, const Message::MessageType& warning)
 {
-    messages.push_back(Message(owner, warning, logWarning));
+    messages.emplace_back(owner, warning, logWarning);
 }
 
-void DbContext::info(weak< const Node > owner, const Message::MessageType& info)
+void DbContext::info(const weak< const Node >& owner, const Message::MessageType& info)
 {
-    messages.push_back(Message(owner, info, logInfo));
+    messages.emplace_back(owner, info, logInfo);
 }
 
 }}}  // namespace Motor::Meta::AST

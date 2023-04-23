@@ -11,7 +11,6 @@
 #include <motor/meta/value.hh>
 #include <motor/plugin/dynobjectlist.hh>
 #include <motor/plugin/hook.hh>
-#include <motor/plugin/plugin.hh>
 
 namespace Motor { namespace Plugin {
 
@@ -81,8 +80,8 @@ namespace Motor { namespace Plugin {
         if(r) r->addref();                                                                         \
         return r.operator->();                                                                     \
     }                                                                                              \
-    MOTOR_PLUGIN_EXPORT void motor_destroyPlugin(minitl::refcountable*                    cls,     \
-                                                 weak< Motor::Resource::ResourceManager > manager) \
+    MOTOR_PLUGIN_EXPORT void motor_destroyPlugin(                                                  \
+        minitl::refcountable* cls, const weak< Motor::Resource::ResourceManager >& manager)        \
     {                                                                                              \
         if(cls) cls->decref();                                                                     \
         for(minitl::intrusive_list< Motor::Plugin::IPluginHook >::iterator it                      \
@@ -210,7 +209,7 @@ raw< const Meta::Class > Plugin< T >::pluginNamespace() const
             return ci;
         }
     }
-    raw< const Meta::Class > ci = {0};
+    raw< const Meta::Class > ci = {nullptr};
     return ci;
 }
 

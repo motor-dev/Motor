@@ -5,7 +5,7 @@
 #include <motor/meta/engine/namespace.hh>
 #include <motor/settings/settings.factory.hh>
 
-MOTOR_REGISTER_NAMESPACE_2_NAMED(motor, Motor, Settings);
+MOTOR_REGISTER_NAMESPACE_2_NAMED(motor, Motor, Settings)
 
 namespace Motor { namespace Settings {
 
@@ -27,12 +27,11 @@ SettingsBase::~SettingsBase()
     this->unhook();
 }
 
-void SettingsBase::onProviderAdded(weak< const SettingsProvider > provider)
+void SettingsBase::onProviderAdded(const weak< const SettingsProvider >& provider)
 {
-    for(minitl::intrusive_list< SettingsBase >::iterator it = getSettings().begin();
-        it != getSettings().end(); ++it)
+    for(auto& it: getSettings())
     {
-        provider->apply(*it);
+        provider->apply(it);
     }
 }
 

@@ -57,7 +57,7 @@ public:
         do
         {
             ++m_current;
-        } while((char*)m_current.operator->() >= (char*)m_owner->m_index.begin()
+        } while((char*)m_current.   operator->() >= (char*)m_owner->m_index.begin()
                 && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
         return *this;
     }
@@ -67,7 +67,7 @@ public:
         do
         {
             ++m_current;
-        } while((char*)m_current.operator->() >= (char*)m_owner->m_index.begin()
+        } while((char*)m_current.   operator->() >= (char*)m_owner->m_index.begin()
                 && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
         return copy;
     }
@@ -76,7 +76,7 @@ public:
         do
         {
             --m_current;
-        } while((char*)m_current.operator->() >= (char*)m_owner->m_index.begin()
+        } while((char*)m_current.   operator->() >= (char*)m_owner->m_index.begin()
                 && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
         return *this;
     }
@@ -86,7 +86,7 @@ public:
         do
         {
             --m_current;
-        } while((char*)m_current.operator->() >= (char*)m_owner->m_index.begin()
+        } while((char*)m_current.   operator->() >= (char*)m_owner->m_index.begin()
                 && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
         return copy;
     }

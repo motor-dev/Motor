@@ -12,8 +12,8 @@
 #endif
 
 #include <alloca.h>
-#include <stdint.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdlib>
 typedef int8_t   i8;
 typedef int16_t  i16;
 typedef int32_t  i32;
@@ -44,14 +44,19 @@ extern "C" void* __builtin_alloca(size_t);
 #ifdef __Cplusplus
 #    include <cerrno>
 #else
-#    include <errno.h>
+#    include <cerrno>
 #endif
 
 #define MOTOR_NEVER_INLINE
 #define MOTOR_ALWAYS_INLINE inline
 
-#define MOTOR_EXPORT __global
-#define MOTOR_IMPORT
+#ifndef __clang_analyzer__
+#    define MOTOR_EXPORT __global
+#    define MOTOR_IMPORT
+#else
+#    define MOTOR_EXPORT
+#    define MOTOR_IMPORT
+#endif
 
 #pragma error_messages(off, noexthrow)
 #if __SUNPRO_CC < 0x5130

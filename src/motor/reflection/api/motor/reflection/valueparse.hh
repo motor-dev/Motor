@@ -11,9 +11,9 @@ namespace Motor { namespace Meta {
 
 motor_api(REFLECTION) ref< AST::Node > parseValue(minitl::Allocator& arena,
                                                   AST::MessageList& context, const char* strBegin,
-                                                  const char* strEnd = 0, u32 initialLine = 0,
+                                                  const char* strEnd = nullptr, u32 initialLine = 0,
                                                   u32 initialColumn = 0);
 
 motor_api(REFLECTION) Meta::Value
-    quickParse(minitl::Allocator& arena, const char* strBegin, const char* strEnd = 0);
+    quickParse(minitl::Allocator& arena, const char* strBegin, const char* strEnd = nullptr);
 }}  // namespace Motor::Meta

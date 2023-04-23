@@ -4,7 +4,6 @@
 #include <motor/world/stdafx.h>
 #include <runtime/archetypestorage.meta.hh>
 
-#include <motor/world/component/component.meta.hh>
 #include <motor/world/componentregistry.meta.hh>
 
 #include <motor/introspect/node/array.hh>
@@ -15,7 +14,6 @@
 #include <motor/meta/engine/objectinfo.meta.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/meta/value.hh>
-#include <motor/scheduler/kernel/parameters/segments.hh>
 #include <motor/scheduler/kernel/producerloader.hh>
 
 namespace Motor { namespace World {
@@ -58,7 +56,7 @@ struct Visitor : public Meta::AST::Node::Visitor
     u32                                        errorCount;
     bool                                       verify;
 
-    Visitor(weak< const Meta::AST::Node > owner, Meta::AST::DbContext& context)
+    Visitor(const weak< const Meta::AST::Node >& owner, Meta::AST::DbContext& context)
         : owner(owner)
         , context(context)
         , classes(Arena::meta())
@@ -69,15 +67,15 @@ struct Visitor : public Meta::AST::Node::Visitor
     }
 
     using Meta::AST::Node::Visitor::accept;
-    void accept(weak< const Meta::AST::Parameter > parameter, istring name,
-                weak< const Meta::AST::Node > value) override
+    void accept(const weak< const Meta::AST::Parameter >& parameter, istring name,
+                const weak< const Meta::AST::Node >& value) override
     {
         motor_forceuse(parameter);
         motor_forceuse(name);
         value->visit(*this);
     }
 
-    void accept(weak< const Meta::AST::Array >                         arrayNode,
+    void accept(const weak< const Meta::AST::Array >&                  arrayNode,
                 const minitl::vector< weak< const Meta::AST::Node > >& arrayValue) override
     {
         motor_forceuse(arrayNode);
@@ -90,8 +88,8 @@ struct Visitor : public Meta::AST::Node::Visitor
         }
     }
 
-    void accept(weak< const Meta::AST::Reference > reference,
-                const Meta::Value&                 referencedValue) override
+    void accept(const weak< const Meta::AST::Reference >& reference,
+                const Meta::Value&                        referencedValue) override
     {
         motor_forceuse(reference);
         raw< const Meta::Class > cls = referencedValue.as< raw< const Meta::Class > >();
@@ -141,16 +139,17 @@ private:
     minitl::array< raw< const Meta::Class > > m_parameters;
 
 public:
-    IntrospectionHint(weak< const Meta::AST::Object > owner, raw< const Meta::Method > method,
-                      const Meta::CallInfo& callInfo, u32 argumentThis,
+    IntrospectionHint(const weak< const Meta::AST::Object >& owner,
+                      raw< const Meta::Method > method, const Meta::CallInfo& callInfo,
+                      u32                                               argumentThis,
                       const minitl::vector< raw< const Meta::Class > >& parameters)
         : Meta::AST::IntrospectionHint(owner, method, callInfo, argumentThis)
         , m_parameters(Arena::meta(), parameters.begin(), parameters.end())
     {
     }
 
-    virtual bool getPropertyType(Meta::AST::DbContext& context, const istring propertyName,
-                                 Meta::Type& propertyType) const override
+    bool getPropertyType(Meta::AST::DbContext& context, const istring propertyName,
+                         Meta::Type& propertyType) const override
     {
         bool result
             = Meta::AST::IntrospectionHint::getPropertyType(context, propertyName, propertyType);
@@ -158,12 +157,11 @@ public:
         if(!result)
         {
             Meta::Type type = motor_type< ref< KernelScheduler::IProduct > >();
-            for(minitl::array< raw< const Meta::Class > >::const_iterator it = m_parameters.begin();
-                it != m_parameters.end(); ++it)
+            for(auto m_parameter: m_parameters)
             {
-                if(propertyName == (*it)->name)
+                if(propertyName == m_parameter->name)
                 {
-                    type.metaclass = findProductType(*it);
+                    type.metaclass = findProductType(m_parameter);
                     propertyType   = type;
                     return true;
                 }
@@ -173,8 +171,8 @@ public:
         return result;
     }
 
-    virtual bool getPropertyValue(Meta::Value& value, const istring& propertyName,
-                                  Meta::Value& result) const override
+    bool getPropertyValue(Meta::Value& value, const istring& propertyName,
+                          Meta::Value& result) const override
     {
         bool found = Meta::AST::IntrospectionHint::getPropertyValue(value, propertyName, result);
 
@@ -199,13 +197,13 @@ public:
 };
 
 static ref< KernelScheduler::IProduct >
-createProduct(raw< const Meta::Class >                componentClass,
-              weak< const KernelScheduler::Producer > producer)
+createProduct(raw< const Meta::Class >                       componentClass,
+              const weak< const KernelScheduler::Producer >& producer)
 {
     raw< const Meta::Class > productClass = findProductType(componentClass);
     if(!productClass)
     {
-        return ref< KernelScheduler::IProduct >();
+        return {};
     }
     motor_assert_format(productClass->constructor, "product class {0} does not have a constructor",
                         productClass->fullname());
@@ -222,10 +220,8 @@ static u32
 componentCount(const minitl::array< minitl::array< raw< const Meta::Class > > >& archetypes)
 {
     u32 result = 0;
-    for(minitl::array< minitl::array< raw< const Meta::Class > > >::const_iterator it
-        = archetypes.begin();
-        it != archetypes.end(); ++it)
-        result += it->size();
+    for(const auto& archetype: archetypes)
+        result += archetype.size();
     return result;
 }
 
@@ -245,7 +241,7 @@ ref< Meta::AST::IntrospectionHint > ArchetypeStorage::Policy::verify(
 }
 
 ArchetypeStorage::ArchetypeStorage(
-    weak< ComponentRegistry >                                         registry,
+    const weak< ComponentRegistry >&                                  registry,
     const minitl::array< raw< const Meta::Class > >&                  componentClasses,
     const minitl::array< minitl::array< raw< const Meta::Class > > >& archetypes)
     : m_registry(registry)
@@ -262,9 +258,7 @@ ArchetypeStorage::ArchetypeStorage(
     }
 }
 
-ArchetypeStorage::~ArchetypeStorage()
-{
-}
+ArchetypeStorage::~ArchetypeStorage() = default;
 
 ref< ArchetypeStorage::Runtime >
 ArchetypeStorage::createRuntime(weak< const KernelScheduler::ProducerLoader > loader) const

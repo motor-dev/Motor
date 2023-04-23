@@ -5,7 +5,7 @@ import sys
 
 class SunCC(Configure.ConfigurationContext.GnuCompiler):
     DEFINES = []
-    NAMES = ('SunCC', )
+    NAMES = ('SunCC',)
     SUNCC_PLATFORMS = {
         '__gnu_linux__': 'linux-gnu',
         '__gnu__linux__': 'linux-gnu',
@@ -92,7 +92,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
                     major = value[2:-3]
                     version = '%s.%s%s' % (major, minor, patch if patch != '0' else '')
         self.target = '%s-%s' % (arch, platform)
-        self.targets = (self.target, )
+        self.targets = (self.target,)
         return version, platform, arch
 
     def set_optimisation_options(self, conf):
@@ -128,9 +128,9 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
         v['CFLAGS_warnall'] = ['-erroff=%none', '-v', '-errtags=yes']
         v['CXXFLAGS_warnall'] = [
             '+w2', '-errtags=yes', '-erroff=fieldsemicolonw,notused,'
-            'unknownpragma,wunreachable,doubunder,wvarhidenmem,wvarhidemem,'
-            'reftotemp,truncwarn,badargtype2w,hidef,wemptydecl,notemsource,'
-            'nonewline,inllargeuse,identexpected'
+                                   'unknownpragma,wunreachable,doubunder,wvarhidenmem,wvarhidemem,'
+                                   'reftotemp,truncwarn,badargtype2w,hidef,wemptydecl,notemsource,'
+                                   'nonewline,inllargeuse,identexpected'
         ]
 
     def error_flag(self):
@@ -191,7 +191,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
 
         v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
         v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
-        v.append_unique('LINKFLAGS', ['-lrt', '-mt', '-znow', '-xldscope=hidden']) #, '-z', 'absexec', '-Kpic'])
+        v.append_unique('LINKFLAGS', ['-lrt', '-mt', '-znow', '-xldscope=hidden'])  # , '-z', 'absexec', '-Kpic'])
         v.CFLAGS_exportall = ['-xldscope=symbolic']
         v.CXXFLAGS_exportall = ['-xldscope=symbolic']
         v.SHLIB_MARKER = '-Bdynamic'
@@ -208,7 +208,33 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
         v.TARGETS = self.targets
 
     def populate_useful_variables(self, conf, sysroot):
-        pass
+        compiler_defines = []
+        result, out, err = self.run_cxx(conf.env.CXXFLAGS + ['-std=c++14', '-xdumpmacros', '-E', '/dev/null'])
+        if result != 0:
+            raise Exception('could not run SunCC (%s)' % (err))
+        for l in out.split('\n') + err.split('\n'):
+            if l.startswith('#define '):
+                l = l.strip()[len('#define '):]
+                sp = l.find(' ')
+                if sp == -1:
+                    compiler_defines.append(l)
+                else:
+                    compiler_defines.append('%s=%s' % (l[:sp].strip(), l[sp + 1:].strip()))
+        conf.env.COMPILER_DEFINES = compiler_defines + ['__clang_analyzer__']
+        # path = os.path.join(os.path.dirname(os.path.dirname(self.compiler_cxx)), 'lib/compilers/include')
+        # gcc_path_cxx = os.path.join(path, '../CC-gcc/include/c++/')
+        # gcc_path = os.path.join(path, '../CC-gcc/lib/gcc/x86_64-unknown-linux-gnu')
+        # versions = os.listdir(gcc_path_cxx)
+        # if self.arch == 'amd64':
+        #    triple = os.path.join('x86_64-unknown-linux-gnu/amd64')
+        # else:
+        #    triple = os.path.join('x86_64-unknown-linux-gnu')
+        if self.arch == 'x86':
+            arch_include = 'i386-linux-gnu'
+        else:
+            arch_include = 'x86_64-linux-gnu'
+        conf.env.append_unique('COMPILER_INCLUDES',
+                               ['/usr/include/', os.path.join('/usr/include', arch_include)])
 
 
 def detect_suncc(conf):

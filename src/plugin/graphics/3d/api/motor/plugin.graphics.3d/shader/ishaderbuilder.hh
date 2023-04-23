@@ -81,8 +81,6 @@ enum Builtin
 
 class motor_api(3D) IShaderBuilder
 {
-    MOTOR_NOCOPY(IShaderBuilder);
-
 private:
     struct Namespace
     {
@@ -110,16 +108,18 @@ public:
     i64         textSize() const;
 
 public:
-    void addUniform(weak< const Node > node, Stage stage, const istring& name, ValueType type);
-    void addVarying(weak< const Node > node, Stage currentStage, Stage targetStage, ValueType type);
-    void addAttribute(weak< const Node > node, Stage currentStage, Stage targetStage,
+    void addUniform(const weak< const Node >& node, Stage stage, const istring& name,
+                    ValueType type);
+    void addVarying(const weak< const Node >& node, Stage currentStage, Stage targetStage,
+                    ValueType type);
+    void addAttribute(const weak< const Node >& node, Stage currentStage, Stage targetStage,
                       ValueType type);
     void forwardAttributes();
     void beginMethodDefinition(const istring& name);
     void end();
-    void saveTo(Semantic semantic, weak< const Node > node);
-    void addOperator(weak< const Node > node, Operator op, ValueType type, weak< const Node > node1,
-                     weak< const Node > node2);
+    void saveTo(Semantic semantic, const weak< const Node >& node);
+    void addOperator(const weak< const Node >& node, Operator op, ValueType type,
+                     const weak< const Node >& node1, const weak< const Node >& node2);
     void write(float value);
     void write(knl::float2 value);
     void write(knl::float3 value);
@@ -131,7 +131,7 @@ public:
     void write(bool value);
 
 protected:
-    istring referenceNode(weak< const Node > node);
+    istring referenceNode(const weak< const Node >& node);
 
     virtual void doAddUniformDeclaration(const istring& name, Stage stage, ValueType type)   = 0;
     virtual void doAddVaryingDeclaration(const istring& name, Stage stage, ValueType type)   = 0;

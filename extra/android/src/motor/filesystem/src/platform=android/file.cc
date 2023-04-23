@@ -16,7 +16,7 @@ PosixFile::PosixFile(const ifilename& filename, u64 size, time_t modifiedTime)
 
 PosixFile::~PosixFile() = default;
 
-void PosixFile::doFillBuffer(weak< File::Ticket > ticket) const
+void PosixFile::doFillBuffer(const weak< File::Ticket >& ticket) const
 {
     static const int g_bufferSize = 1024;
 
@@ -64,7 +64,7 @@ void PosixFile::doFillBuffer(weak< File::Ticket > ticket) const
     }
 }
 
-void PosixFile::doWriteBuffer(weak< Ticket > ticket) const
+void PosixFile::doWriteBuffer(const weak< Ticket >& ticket) const
 {
     static const int g_bufferSize = 1024;
 

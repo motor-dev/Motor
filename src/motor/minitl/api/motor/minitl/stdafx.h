@@ -22,10 +22,6 @@
 #include <motor/kernel/simd.hh>
 #include <motor/minitl/features.hh>
 
-#define MOTOR_NOCOPY(x)                                                                            \
-    x(const x&)            = delete;                                                               \
-    x& operator=(const x&) = delete
-
 namespace minitl {
 
 template < typename T >

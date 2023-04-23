@@ -11,7 +11,7 @@ class motor_api(TEXT) Text : public Resource::Description< Text >
 {
 public:
     Text();
-    ~Text();
+    ~Text() override;
 };
 
 }  // namespace Motor

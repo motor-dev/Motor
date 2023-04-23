@@ -152,8 +152,8 @@ bool InterlockedType< 4 >::set_conditional(tagged_t* p, tagged_t::value_t v,
                          "       setz %1\n\t"
                          "       pop %%ebx\n\t"
                          : "=m"(*p), "=a"(result), "=d"(unused)
-                         : "S"(p), "a"(condition.tagged_value.tag), "d"(condition.tagged_value.value),
-                           "c"(v)
+                         : "S"(p), "a"(condition.tagged_value.tag),
+                           "d"(condition.tagged_value.value), "c"(v)
                          : "memory", "cc");
     motor_forceuse(unused);
     return result;
@@ -219,7 +219,7 @@ InterlockedType< 8 >::value_t InterlockedType< 8 >::set_conditional(value_t* p, 
 {
     union split
     {
-        i64 asI64;
+        i64 asI64 {};
         i32 asI32[2];
     };
     split dst {v};

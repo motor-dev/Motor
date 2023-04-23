@@ -32,20 +32,20 @@ void Property::set(Value& from, const Value& value) const
 
 Value Property::getTag(const Type& tagType) const
 {
-    if(tags)
+    if(this->tags)
     {
-        for(const Tag* tag = tags->begin(); tag != tags->end(); ++tag)
+        for(const auto& tag: *tags)
         {
-            if(tagType <= tag->tag.type()) return Value(Value::ByRef(tag->tag));
+            if(tagType <= tag.tag.type()) return Value(Value::ByRef(tag.tag));
         }
     }
-    return Value();
+    return {};
 }
 
 Value Property::getTag(raw< const Class > tagType) const
 {
-    return getTag(Type::makeType(tagType, Type::Indirection::Value, Type::Constness::Const,
-                                 Type::Constness::Const));
+    return this->getTag(Type::makeType(tagType, Type::Indirection::Value, Type::Constness::Const,
+                                       Type::Constness::Const));
 }
 
 }}  // namespace Motor::Meta

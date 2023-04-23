@@ -15,5 +15,17 @@ def build_binary(bld, name, env, path):
     return tg
 
 
+def build_project(bld, name, env, path):
+    tg = bld.thirdparty(
+        name,
+        source_node=path,
+        feature_list=['OpenCL'],
+        use=['motor.3rdparty.graphics.OpenGL'],
+        env=env,
+    )
+    tg.export_includes = [bld.path.parent.find_node('api')]
+    return tg
+
+
 def build(bld):
-    bld.package('motor.3rdparty.compute.OpenCL', 'OPENCL_BINARY', build_binary, 'OPENCL_SOURCE', None)
+    bld.package('motor.3rdparty.compute.OpenCL', 'OPENCL_BINARY', build_binary, 'OPENCL_SOURCE', build_project)

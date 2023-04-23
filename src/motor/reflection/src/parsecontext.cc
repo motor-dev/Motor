@@ -33,7 +33,7 @@ ParseContext::ParseContext(minitl::Allocator& allocator, const char* bufferStart
 ParseContext::~ParseContext()
 {
     s_useCount--;
-    g_parseContext = 0;
+    g_parseContext = nullptr;
 }
 
 }}}  // namespace Motor::Meta::Parse

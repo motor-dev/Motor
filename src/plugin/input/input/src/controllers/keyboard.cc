@@ -6,12 +6,8 @@
 
 namespace Motor { namespace Input {
 
-Keyboard::Keyboard()
-{
-}
+Keyboard::Keyboard() = default;
 
-Keyboard::~Keyboard()
-{
-}
+Keyboard::~Keyboard() = default;
 
 }}  // namespace Motor::Input

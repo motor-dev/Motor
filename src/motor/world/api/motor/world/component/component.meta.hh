@@ -17,7 +17,8 @@ struct motor_api(WORLD) LogicComponent
 {
     raw< const Meta::Class > const kernelClass;
 
-    LogicComponent(raw< const Meta::Class > kernelClass = raw< const Meta::Class >::null());
+    explicit LogicComponent(raw< const Meta::Class > kernelClass
+                            = raw< const Meta::Class >::null());
 };
 
 }}  // namespace Motor::World

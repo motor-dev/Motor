@@ -11,14 +11,10 @@ namespace Motor { namespace Task {
 
 class motor_api(SCHEDULER) ITask : public minitl::refcountable
 {
-    MOTOR_NOCOPY(ITask);
-
 public:
     class CallbackConnection;
     class motor_api(SCHEDULER) ICallback : public minitl::refcountable
     {
-        MOTOR_NOCOPY(ICallback);
-
     protected:
         ICallback();
 
@@ -29,7 +25,7 @@ public:
             Completed
         };
 
-        virtual ~ICallback();
+        ~ICallback() override;
 
         virtual void onCompleted(weak< Scheduler > scheduler, weak< const ITask > task) = 0;
         virtual void onConnected(weak< ITask > to, CallbackStatus)                      = 0;
@@ -46,12 +42,12 @@ private:
         i_u32                           m_completed;
 
     public:
-        ChainCallback(weak< ITask > task);
-        virtual ~ChainCallback();
+        explicit ChainCallback(const weak< ITask >& task);
+        ~ChainCallback() override;
 
-        virtual void onCompleted(weak< Scheduler > scheduler, weak< const ITask > task) override;
-        virtual void onConnected(weak< ITask > to, CallbackStatus status) override;
-        virtual bool onDisconnected(weak< ITask > from) override;
+        void onCompleted(weak< Scheduler > scheduler, weak< const ITask > task) override;
+        void onConnected(weak< ITask > to, CallbackStatus status) override;
+        bool onDisconnected(weak< ITask > from) override;
 
     private:
         ChainCallback(const ChainCallback& other);
@@ -69,14 +65,14 @@ private:
     CriticalSection                     m_cs;
 
 private:
-    void addCallback(weak< ICallback > callback, ICallback::CallbackStatus status);
-    bool removeCallback(weak< ICallback > callback);
+    void addCallback(const weak< ICallback >& callback, ICallback::CallbackStatus status);
+    bool removeCallback(const weak< ICallback >& callback);
 
 public:
-    virtual ~ITask();
+    ~ITask() override;
 
     virtual void schedule(weak< Scheduler > scheduler) const = 0;
-    void         completed(weak< Scheduler > scheduler) const;
+    void         completed(const weak< Scheduler >& scheduler) const;
 
     weak< ICallback > startCallback();
 
@@ -92,11 +88,13 @@ private:
 
 public:
     CallbackConnection();
-    CallbackConnection(weak< ITask > task, weak< ICallback > callback,
+    CallbackConnection(const weak< ITask >& task, const weak< ICallback >& callback,
                        ICallback::CallbackStatus status = ICallback::Pending);
     CallbackConnection(const CallbackConnection& other);
     CallbackConnection& operator=(const CallbackConnection& other);
     ~CallbackConnection();
+
+    void clear();
 };
 
 }}  // namespace Motor::Task

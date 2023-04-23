@@ -17,16 +17,16 @@ private:
     Value                                        m_value;
 
 public:
-    Namespace(minitl::Allocator & allocator);
+    explicit Namespace(minitl::Allocator & allocator);
     Namespace(minitl::Allocator & allocator, const Value& value);
-    ~Namespace();
+    ~Namespace() override;
 
     void             add(const inamespace& name, const Value& value);
-    void             add(const inamespace& name, ref< Namespace > ns);
-    void             add(const inamespace& name, ref< Node > node);
-    void             remove(const inamespace& name, ref< Node > node);
-    ref< Namespace > getChild(const istring name) const;
-    ref< Node >      getNode(const istring name) const;
+    void             add(const inamespace& name, const ref< Namespace >& ns);
+    void             add(const inamespace& name, const ref< Node >& node);
+    void             remove(const inamespace& name, const ref< Node >& node);
+    ref< Namespace > getChild(istring name) const;
+    ref< Node >      getNode(istring name) const;
     const Value&     getValue() const;
 };
 

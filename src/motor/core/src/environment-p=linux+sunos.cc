@@ -8,7 +8,7 @@
 
 namespace Motor {
 
-size_t Environment::getProcessorCount() const
+size_t Environment::getProcessorCount()
 {
     return sysconf(_SC_NPROCESSORS_ONLN);
 }

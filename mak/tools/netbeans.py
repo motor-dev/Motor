@@ -126,17 +126,17 @@ class Netbeans(Build.BuildContext):
             for _, node in getattr(task_gen, 'source_nodes', []):
                 self.add(doc, root_folder, node)
 
-            #f, subs = categories[category]
-            #project = project.split('.')
-            #for subname in project:
+            # f, subs = categories[category]
+            # project = project.split('.')
+            # for subname in project:
             #	try:
             #		f, subs = subs[subname]
             #	except KeyError:
             #		f = add(doc, f, 'logicalFolder', {'name': subname, 'displayName': subname, 'projectFiles': 'true'})
             #		subs[subname] = (f, {})
             #		f, subs = subs[subname]
-            #f.setAttribute('displayName', '['+project[-1]+']')
-            #self.addSourceTree(doc, f, source, source.prefix)
+            # f.setAttribute('displayName', '['+project[-1]+']')
+            # self.addSourceTree(doc, f, source, source.prefix)
         impfiles = add(
             doc, lf, 'logicalFolder', {
                 'name': 'ExternalFiles',
@@ -146,10 +146,10 @@ class Netbeans(Build.BuildContext):
             }
         )
         add(doc, impfiles, 'itemPath', sys.argv[0])
-        #add(doc, cd, 'sourceFolderFilter')
+        # add(doc, cd, 'sourceFolderFilter')
         srl = add(doc, cd, 'sourceRootList')
-        #add(doc, srl, 'Elem', '.')
-        #add(doc, srl, 'Elem', './build/')
+        # add(doc, srl, 'Elem', '.')
+        # add(doc, srl, 'Elem', './build/')
         add(doc, cd, 'projectmakefile', sys.argv[0])
         add(doc, cd, 'sourceFolderFilter', '^.*$')
         confs = add(doc, cd, 'confs')
@@ -159,8 +159,8 @@ class Netbeans(Build.BuildContext):
                 env = bld.all_envs[bld_env.SUB_TOOLCHAINS[0]]
             else:
                 env = bld_env
-            platform_defines = env.SYSTEM_DEFINES
-            platform_includes = env.SYSTEM_INCLUDES
+            platform_defines = env.COMPILER_DEFINES
+            platform_includes = env.COMPILER_INCLUDES
             if env.SYSROOT:
                 platform_includes += [os.path.join(env.SYSROOT, 'usr', 'include')]
             options.append((platform_includes, platform_defines))

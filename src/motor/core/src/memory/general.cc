@@ -10,7 +10,7 @@
 
 namespace Motor {
 
-GeneralAllocator::GeneralAllocator()
+GeneralAllocator::GeneralAllocator()  // NOLINT(modernize-use-equals-default)
 {
 #if MOTOR_ENABLE_MEMORY_TRACKING
 #    ifdef MOTOR_COMPILER_MSVC
@@ -20,19 +20,17 @@ GeneralAllocator::GeneralAllocator()
 #endif
 }
 
-GeneralAllocator::~GeneralAllocator()
-{
-}
+GeneralAllocator::~GeneralAllocator() = default;
 
 void* GeneralAllocator::internalAlloc(u64 size, u64 alignment)
 {
 #ifdef _MSC_VER
     return size > 0 ? ::_aligned_malloc(motor_checked_numcast< size_t >(size),
                                         motor_checked_numcast< size_t >(alignment))
-                    : 0;
+                    : nullptr;
 #else
     motor_forceuse(alignment);
-    return size > 0 ? ::malloc(size) : 0;
+    return size > 0 ? ::malloc(size) : nullptr;
 #endif
 }
 

@@ -9,12 +9,12 @@ namespace Motor { namespace KernelScheduler {
 
 static minitl::vector< weak< IScheduler > > s_schedulers(Arena::task());
 
-IScheduler::IScheduler(istring name, weak< Scheduler > scheduler, SchedulerType type)
+IScheduler::IScheduler(istring name, const weak< Scheduler >& scheduler, SchedulerType type)
     : m_scheduler(scheduler)
     , m_name(name)
     , m_type(type)
 {
-    s_schedulers.push_back(this);
+    s_schedulers.emplace_back(this);
 }
 
 IScheduler::~IScheduler()
@@ -34,16 +34,15 @@ IScheduler::~IScheduler()
 weak< IScheduler > IScheduler::findScheduler(SchedulerType preferredType)
 {
     weak< IScheduler > result;
-    for(minitl::vector< weak< IScheduler > >::iterator it = s_schedulers.begin();
-        it != s_schedulers.end(); ++it)
+    for(auto& s_scheduler: s_schedulers)
     {
-        if((*it)->m_type == preferredType)
+        if(s_scheduler->m_type == preferredType)
         {
-            return *it;
+            return s_scheduler;
         }
         else
         {
-            result = *it;
+            result = s_scheduler;
         }
     }
     return result;

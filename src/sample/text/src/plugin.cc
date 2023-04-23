@@ -6,4 +6,4 @@
 #include <motor/plugin/plugin.hh>
 #include <textsample.hh>
 
-MOTOR_PLUGIN_REGISTER(Motor::TextSample);
+MOTOR_PLUGIN_REGISTER(Motor::TextSample)

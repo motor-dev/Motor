@@ -226,7 +226,7 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         env.DEPLOY_KERNELDIR = os.path.join('lib', target_folder)
 
         env.append_value('CFLAGS', self.get_android_c_flags(compiler))
-        env.append_value('CXXFLAGS', self.get_android_c_flags(compiler) + ['-nostdinc++', '-std=c++98'])
+        env.append_value('CXXFLAGS', self.get_android_c_flags(compiler) + ['-nostdinc++'])
         env.append_value('LDFLAGS', self.get_android_ld_flags(compiler))
 
         env.ANDROID_SDK = self.sdk_version
@@ -243,11 +243,13 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         ]
         env.append_unique('JAVACFLAGS', ['-bootclasspath', os.path.join(self.sdk_path, 'android.jar')])
         env.append_unique('AAPTFLAGS', ['-I', os.path.join(self.sdk_path, 'android.jar')])
+        env.append_unique('INCLUDES', [
+            conf.motornode.make_node('extra/android/src/motor/3rdparty/android/libc++/api').abspath()])
 
-        #if not os.path.isfile(
+        # if not os.path.isfile(
         #    os.path.
         #    join(ndk_config.get_ndkroot(), 'prebuilt', 'android-%s' % env.ANDROID_ARCH, 'gdbserver', 'gdbserver')
-        #):
+        # ):
         #    raise Errors.WafError('could not find gdbserver for architecture %s' % env.ANDROID_ARCH)
 
         conf.env.append_value('CFLAGS', sysroot_options)

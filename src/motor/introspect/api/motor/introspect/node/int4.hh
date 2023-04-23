@@ -14,13 +14,13 @@ private:
     const knl::bigint4 m_value;
 
 protected:
-    virtual ConversionCost distance(const Type& type) const override;
-    virtual void           doEval(const Type& expectedType, Value& result) const override;
-    virtual void           doVisit(Node::Visitor & visitor) const override;
+    ConversionCost distance(const Type& type) const override;
+    void           doEval(const Type& expectedType, Value& result) const override;
+    void           doVisit(Node::Visitor & visitor) const override;
 
 public:
-    Int4(knl::bigint4 value);
-    ~Int4();
+    explicit Int4(knl::bigint4 value);
+    ~Int4() override;
 };
 
 }}}  // namespace Motor::Meta::AST

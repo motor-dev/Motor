@@ -18,7 +18,7 @@ static minitl::ref< Motor::Python::Context > create(const Motor::Plugin::Context
     ref< PythonLibrary > library = loadPython(MOTOR_STRINGIZE(PYTHON_LIBRARY));
     if(!library)
     {
-        return minitl::ref< Context >();
+        return {};
     }
     else
     {
@@ -26,4 +26,4 @@ static minitl::ref< Motor::Python::Context > create(const Motor::Plugin::Context
     }
 }
 
-MOTOR_PLUGIN_REGISTER_CREATE(&create);
+MOTOR_PLUGIN_REGISTER_CREATE(&create)

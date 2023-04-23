@@ -9,16 +9,14 @@
 
 namespace Motor { namespace World {
 
-World::World(ref< ComponentRegistry >                                 registry,
+World::World(const ref< ComponentRegistry >&                          registry,
              minitl::array< weak< const KernelScheduler::IProduct > > products)
     : m_registry(registry)
-    , m_products(products)
+    , m_products(minitl::move(products))
 {
 }
 
-World::~World()
-{
-}
+World::~World() = default;
 
 ref< WorldRuntime >
 World::createRuntime(weak< const KernelScheduler::ProducerLoader > producerLoader,

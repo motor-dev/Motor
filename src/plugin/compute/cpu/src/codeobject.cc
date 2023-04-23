@@ -3,7 +3,6 @@
 
 #include <motor/plugin.compute.cpu/stdafx.h>
 #include <codeobject.hh>
-#include <motor/scheduler/kernel/ischeduler.hh>
 
 namespace Motor { namespace KernelScheduler { namespace CPU {
 
@@ -11,8 +10,6 @@ CodeObject::CodeObject(const inamespace& name) : m_kernel(name, ipath("kernel"))
 {
 }
 
-CodeObject::~CodeObject()
-{
-}
+CodeObject::~CodeObject() = default;
 
 }}}  // namespace Motor::KernelScheduler::CPU

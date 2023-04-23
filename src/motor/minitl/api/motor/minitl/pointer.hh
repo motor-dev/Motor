@@ -64,7 +64,11 @@ public:
 #endif
     }
 
-public:
+protected:
+    static void* operator new(size_t size)
+    {
+        return ::operator new(size);
+    }
     static void operator delete(void* memory)
     {
         return ::operator delete(memory);
@@ -75,13 +79,11 @@ public:
     }
 
 public:  // entity behavior
-    pointer(const pointer& other)                = delete;
-    pointer&     operator=(const pointer& other) = delete;
-    void         operator&() const               = delete;  // NOLINT(google-runtime-operator)
-    static void* operator new(size_t size)
-    {
-        return ::operator new(size);
-    }
+    pointer(const pointer& other)            = delete;
+    pointer& operator=(const pointer& other) = delete;
+    pointer(pointer&& other)                 = delete;
+    pointer& operator=(pointer&& other)      = delete;
+    void     operator&() const               = delete;  // NOLINT(google-runtime-operator)
 
 private:  // friend scoped/ref
     static void* operator new(size_t size, void* where)

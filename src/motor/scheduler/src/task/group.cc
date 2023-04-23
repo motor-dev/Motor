@@ -14,18 +14,15 @@ TaskGroup::TaskGroup(istring name, knl::color32 color)
 {
 }
 
-TaskGroup::~TaskGroup()
-{
-}
+TaskGroup::~TaskGroup() = default;
 
 void TaskGroup::schedule(weak< Scheduler > scheduler) const
 {
     if(!m_startTasks.empty())
     {
-        for(minitl::vector< weak< ITask > >::const_iterator it = m_startTasks.begin();
-            it != m_startTasks.end(); ++it)
+        for(const auto& m_startTask: m_startTasks)
         {
-            (*it)->startCallback()->onCompleted(scheduler, this);
+            m_startTask->startCallback()->onCompleted(scheduler, this);
         }
     }
     else
@@ -34,7 +31,7 @@ void TaskGroup::schedule(weak< Scheduler > scheduler) const
     }
 }
 
-void TaskGroup::addStartTask(weak< ITask > task)
+void TaskGroup::addStartTask(const weak< ITask >& task)
 {
     m_startTasks.push_back(task);
     task->startCallback()->onConnected(this, ICallback::Pending);
@@ -58,16 +55,14 @@ bool TaskGroup::removeStartTask(weak< ITask > task)
     return false;
 }
 
-TaskGroup::Callback::Callback(weak< TaskGroup > owner)
+TaskGroup::Callback::Callback(const weak< TaskGroup >& owner)
     : ICallback()
     , m_owner(owner)
     , m_completed(i_u32::create(0))
 {
 }
 
-TaskGroup::Callback::~Callback()
-{
-}
+TaskGroup::Callback::~Callback() = default;
 
 void TaskGroup::Callback::onCompleted(weak< Scheduler > scheduler, weak< const ITask > /*task*/)
 {
@@ -94,7 +89,8 @@ TaskGroup::TaskStartConnection::TaskStartConnection() : m_group(), m_task()
 {
 }
 
-TaskGroup::TaskStartConnection::TaskStartConnection(weak< TaskGroup > group, weak< ITask > task)
+TaskGroup::TaskStartConnection::TaskStartConnection(const weak< TaskGroup >& group,
+                                                    const weak< ITask >&     task)
     : m_group(group)
     , m_task(task)
 {
@@ -148,7 +144,8 @@ TaskGroup::TaskEndConnection::TaskEndConnection() : m_group(), m_task(), m_callb
 {
 }
 
-TaskGroup::TaskEndConnection::TaskEndConnection(weak< TaskGroup > group, weak< ITask > task)
+TaskGroup::TaskEndConnection::TaskEndConnection(const weak< TaskGroup >& group,
+                                                const weak< ITask >&     task)
     : m_group(group)
     , m_task(task)
     , m_callback(task, group->m_completionCallback)

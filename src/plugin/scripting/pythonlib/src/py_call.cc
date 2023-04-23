@@ -21,7 +21,7 @@ struct PythonTypeInfo
     static Meta::Type    getTypeFromPyObject(PyObject* object);
     static PyTypeObject* getPyTypeFromPyObject(PyObject* object);
 
-    PythonTypeInfo(PyObject* object);
+    explicit PythonTypeInfo(PyObject* object);
 };
 
 Meta::ConversionCost calculateConversion(const PythonTypeInfo& typeInfo, const Meta::Type& other)
@@ -45,7 +45,7 @@ Meta::Type PythonTypeInfo::getTypeFromPyObject(PyObject* object)
 {
     if(object->py_type == &PyMotorObject::s_pyType)
     {
-        PyMotorObject* o = static_cast< PyMotorObject* >(object);
+        auto* o = static_cast< PyMotorObject* >(object);
         return o->value.type();
     }
     else
@@ -58,7 +58,7 @@ PyTypeObject* PythonTypeInfo::getPyTypeFromPyObject(PyObject* object)
 {
     if(object->py_type == &PyMotorObject::s_pyType)
     {
-        return 0;
+        return nullptr;
     }
     else
     {
@@ -75,9 +75,8 @@ PyObject* call(raw< const Meta::Method > method, PyObject* self, PyObject* args,
         = args ? motor_checked_numcast< u32 >(s_library->m_PyTuple_Size(args)) : 0;
     const u32 namedArgCount
         = kwargs ? motor_checked_numcast< u32 >(s_library->m_PyDict_Size(kwargs)) : 0;
-    const u32      argCount = selfArgCount + unnamedArgCount + namedArgCount;
-    PythonArgInfo* argInfos
-        = reinterpret_cast< PythonArgInfo* >(malloca(argCount * sizeof(PythonArgInfo)));
+    const u32 argCount = selfArgCount + unnamedArgCount + namedArgCount;
+    auto* argInfos = reinterpret_cast< PythonArgInfo* >(malloca(argCount * sizeof(PythonArgInfo)));
 
     {
         u32 argIndex = 0;
@@ -94,22 +93,22 @@ PyObject* call(raw< const Meta::Method > method, PyObject* self, PyObject* args,
         if(kwargs)
         {
             Py_ssize_t pos     = 0;
-            PyObject*  key     = 0;
-            PyObject*  item    = 0;
+            PyObject*  key     = nullptr;
+            PyObject*  item    = nullptr;
             int        version = s_library->getVersion();
             while(s_library->m_PyDict_Next(kwargs, &pos, &key, &item))
             {
                 if(version >= 33)
                 {
                     new(&argInfos[argIndex])
-                        PythonArgInfo(s_library->m_PyUnicode_AsUTF8(key), item);
+                        PythonArgInfo(s_library->m_PyUnicode_AsUTF8(key), PythonTypeInfo(item));
                 }
                 else if(version >= 30)
                 {
                     PyObject* bytes = s_library->m_PyUnicode_AsASCIIString(key);
                     if(!bytes)
                     {
-                        return 0;
+                        return nullptr;
                     }
                     const char* name = s_library->m_PyBytes_AsString(bytes);
                     new(&argInfos[argIndex]) PythonArgInfo(name, PythonTypeInfo(item));
@@ -136,7 +135,7 @@ PyObject* call(raw< const Meta::Method > method, PyObject* self, PyObject* args,
             argInfos[i - 1].~PythonArgInfo();
         }
         freea(argInfos);
-        return PyMotorObject::stealValue(0, result);
+        return PyMotorObject::stealValue(nullptr, result);
     }
     else
     {
@@ -149,7 +148,7 @@ PyObject* call(raw< const Meta::Method > method, PyObject* self, PyObject* args,
                                   "Could not call method %s: "
                                   "no overload could convert all parameters",
                                   method->name.c_str());
-        return 0;
+        return nullptr;
     }
 }
 

@@ -29,9 +29,10 @@ struct motor_api(PLUGIN) Context
     weak< Resource::ResourceManager > resourceManager;
     ref< Folder >                     dataFolder;
     weak< Scheduler >                 scheduler;
-    Context(weak< Resource::ResourceManager > manager    = weak< Resource::ResourceManager >(),
-            ref< Folder >                     dataFolder = ref< Folder >(),
-            weak< Scheduler >                 scheduler  = weak< Scheduler >());
+    explicit Context(const weak< Resource::ResourceManager >& manager
+                     = weak< Resource::ResourceManager >(),
+                     const ref< Folder >&     dataFolder = ref< Folder >(),
+                     const weak< Scheduler >& scheduler  = weak< Scheduler >());
 };
 
 template < typename Interface >
@@ -71,9 +72,9 @@ public:
     {
         return m_interface;
     }
-    operator const void*() const
+    operator const void*() const  // NOLINT(google-explicit-constructor)
     {
-        return m_dynamicObject ? m_dynamicObject->operator const void*() : 0;
+        return m_dynamicObject ? m_dynamicObject->operator const void*() : nullptr;
     }
     bool operator!() const
     {

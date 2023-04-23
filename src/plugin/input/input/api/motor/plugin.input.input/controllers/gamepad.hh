@@ -9,11 +9,9 @@ namespace Motor { namespace Input {
 
 class Gamepad : public Controller
 {
-    MOTOR_NOCOPY(Gamepad);
-
 public:
     Gamepad();
-    ~Gamepad();
+    ~Gamepad() override;
 };
 
 }}  // namespace Motor::Input

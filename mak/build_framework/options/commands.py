@@ -436,7 +436,7 @@ def options(option_context):
     global OPTION_CONTEXT
     OPTION_CONTEXT = option_context
     try:
-        env = ConfigSet.ConfigSet('.waf_toolchains.py')
+        env = ConfigSet.ConfigSet('.waf_toolchains.cache')
         add_all_build_commands(env)
     except Exception as e:
         pass

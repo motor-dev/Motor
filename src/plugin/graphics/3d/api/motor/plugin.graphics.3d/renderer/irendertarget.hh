@@ -13,8 +13,6 @@ class RenderTargetDescription;
 
 class motor_api(3D) IRenderTarget : public IGPUResource
 {
-    MOTOR_NOCOPY(IRenderTarget);
-
 public:
     enum ClearMode
     {
@@ -35,11 +33,11 @@ private:
     virtual void end(PresentMode present) const = 0;
 
 protected:
-    IRenderTarget(weak< const RenderTargetDescription > rendertarget,
-                  weak< const IRenderer >               renderer);
+    IRenderTarget(const weak< const RenderTargetDescription >& rendertarget,
+                  const weak< const IRenderer >&               renderer);
 
 public:
-    virtual ~IRenderTarget();
+    ~IRenderTarget() override;
 
     weak< Task::ITask > syncTask() const;
     void                drawBatches(const Batch* batches, size_t count) const;

@@ -19,8 +19,8 @@ private:
     ref< const Package > const                m_mainPackage;
 
 public:
-    LuaSample(const Plugin::Context& context);
-    ~LuaSample();
+    explicit LuaSample(const Plugin::Context& context);
+    ~LuaSample() override;
 };
 
 }  // namespace Motor

@@ -14,7 +14,8 @@
 
 namespace Motor {
 
-Win32File::Win32File(ifilename filename, u64 size, u64 timestamp) : File(filename, size, timestamp)
+Win32File::Win32File(const ifilename& filename, u64 size, u64 timestamp)
+    : File(filename, size, timestamp)
 {
 }
 
@@ -39,12 +40,12 @@ static void setFilePointer(const char* debugName, HANDLE file, i64 wantedOffset)
     }
 }
 
-void Win32File::doFillBuffer(weak< File::Ticket > ticket) const
+void Win32File::doFillBuffer(const weak< File::Ticket >& ticket) const
 {
     motor_assert(ticket->file == this, "trying to read wrong file");
     ifilename::Filename pathname = m_filename.str('\\');
-    HANDLE              h
-        = CreateFileA(pathname.name, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, 0);
+    HANDLE h = CreateFileA(pathname.name, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0,
+                           nullptr);
     if(h == INVALID_HANDLE_VALUE)
     {
         DWORD errorCode = ::GetLastError();
@@ -119,11 +120,11 @@ void Win32File::doFillBuffer(weak< File::Ticket > ticket) const
     CloseHandle(h);
 }
 
-void Win32File::doWriteBuffer(weak< Ticket > ticket) const
+void Win32File::doWriteBuffer(const weak< Ticket >& ticket) const
 {
     motor_assert(ticket->file == this, "trying to read wrong file");
     ifilename::Filename pathname = m_filename.str('\\');
-    HANDLE h = CreateFileA(pathname.name, GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, 0);
+    HANDLE h = CreateFileA(pathname.name, GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
     if(h == INVALID_HANDLE_VALUE)
     {
         DWORD errorCode = ::GetLastError();

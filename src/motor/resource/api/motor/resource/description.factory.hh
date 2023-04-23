@@ -3,7 +3,6 @@
 #pragma once
 
 #include <motor/resource/stdafx.h>
-#include <motor/resource/description.hh>
 
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>

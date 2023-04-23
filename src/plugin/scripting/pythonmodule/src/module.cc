@@ -24,7 +24,7 @@ public:
     {
         m_previousCallback = minitl::setAssertionCallback(&onAssert);
     }
-    ~ConsoleLogListener()
+    ~ConsoleLogListener() override
     {
         minitl::setAssertionCallback(m_previousCallback);
     }
@@ -39,8 +39,8 @@ private:
     }
 
 protected:
-    virtual bool log(const Motor::inamespace& logname, Motor::LogLevel level, const char* filename,
-                     int line, const char* thread, const char* msg) const override
+    bool log(const Motor::inamespace& logname, Motor::LogLevel level, const char* filename,
+             int line, const char* thread, const char* msg) const override
     {
 #ifdef MOTOR_PLATFORM_WIN32
         minitl::format_buffer< 1024u > message = minitl::format< 1024u >(
@@ -49,8 +49,7 @@ protected:
         OutputDebugString(message);
 #    define isatty(x) 1
 #endif
-        static const char* term
-            = Motor::Environment::getEnvironment().getEnvironmentVariable("TERM");
+        static const char* term = Motor::Environment::getEnvironmentVariable("TERM");
         static const char* colors[]
             = {isatty(1) && term ? "\x1b[0m" : "",   isatty(1) && term ? "\x1b[01;1m" : "",
                isatty(1) && term ? "\x1b[36m" : "",  isatty(1) && term ? "\x1b[32m" : "",
@@ -93,7 +92,7 @@ extern "C" MOTOR_EXPORT void initpy_motor()
     Environment::getEnvironment().init();
     motor_info(Log::python(), "loading module py_motor (Python 2)");
     static ref< PythonLibrary > s_loadedLibrary
-        = ref< PythonLibrary >::create(Arena::general(), (const char*)0);
+        = ref< PythonLibrary >::create(Arena::general(), (const char*)nullptr);
     setCurrentContext(s_loadedLibrary);
     init2_py_motor(false);
 }
@@ -105,7 +104,7 @@ extern "C" MOTOR_EXPORT Motor::Python::PyObject* PyInit_py_motor()
     /* python 3.x module initialisation */
     Environment::getEnvironment().init();
     static ref< PythonLibrary > s_loadedLibrary
-        = ref< PythonLibrary >::create(Arena::general(), (const char*)0);
+        = ref< PythonLibrary >::create(Arena::general(), (const char*)nullptr);
     setCurrentContext(s_loadedLibrary);
     motor_info(Log::python(), "loading module py_motor (Python 3)");
     PyObject* module = init3_py_motor(false);

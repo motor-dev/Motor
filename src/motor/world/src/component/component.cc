@@ -7,12 +7,11 @@
 
 namespace Motor { namespace World {
 
-Component::Component()
-{
-}
+Component::Component() = default;
 
 LogicComponent::LogicComponent(raw< const Meta::Class > kernelClass) : kernelClass(kernelClass)
 {
+    motor_forceuse(this->kernelClass);
 }
 
 }}  // namespace Motor::World

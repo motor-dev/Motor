@@ -66,7 +66,6 @@ public:
 private:
     void* rawget(const void*) const;
     void  copy(const void* source, void* dest) const;
-    void  create(void* obj) const;
     void  destroy(void* obj) const;
 };
 

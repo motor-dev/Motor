@@ -11,58 +11,54 @@ namespace Motor { namespace World {
 
 class WorldLoader::WorldResource : public minitl::refcountable
 {
-    MOTOR_NOCOPY(WorldResource);
-
 private:
     ref< const WorldRuntime >       m_worldRuntime;
     Task::ITask::CallbackConnection m_startSceneUpdate;
     Task::ITask::CallbackConnection m_endSceneUpdate;
 
 public:
-    WorldResource(weak< const KernelScheduler::ProducerLoader > producerLoader,
-                  const Plugin::Context& context, weak< const World > world,
-                  weak< Task::ITask > task);
-    ~WorldResource();
+    WorldResource(const weak< const KernelScheduler::ProducerLoader >& producerLoader,
+                  const Plugin::Context& context, const weak< const World >& world,
+                  const weak< Task::ITask >& task);
+    ~WorldResource() override;
 
     void disconnect();
 };  // namespace Application::WorldResource:publicminitl::refcountable
 
 WorldLoader::WorldResource::WorldResource(
-    weak< const KernelScheduler::ProducerLoader > producerLoader, const Plugin::Context& context,
-    weak< const World > world, weak< Task::ITask > task)
+    const weak< const KernelScheduler::ProducerLoader >& producerLoader,
+    const Plugin::Context& context, const weak< const World >& world,
+    const weak< Task::ITask >& task)
     : m_worldRuntime(world->createRuntime(producerLoader, context))
     , m_startSceneUpdate(task, m_worldRuntime->startUpdateTask()->startCallback())
     , m_endSceneUpdate(m_worldRuntime->endUpdateTask(), task->startCallback())
 {
 }
 
-WorldLoader::WorldResource::~WorldResource()
-{
-}
+WorldLoader::WorldResource::~WorldResource() = default;
 
 void WorldLoader::WorldResource::disconnect()
 {
-    m_startSceneUpdate = Task::ITask::CallbackConnection();
-    m_endSceneUpdate   = Task::ITask::CallbackConnection();
+    m_startSceneUpdate.clear();
+    m_endSceneUpdate.clear();
 }
 
-WorldLoader::WorldLoader(weak< Task::ITask >                     loopTask,
-                         weak< KernelScheduler::ProducerLoader > producerLoader,
-                         const Plugin::Context&                  pluginContext)
+WorldLoader::WorldLoader(const weak< Task::ITask >&                     loopTask,
+                         const weak< KernelScheduler::ProducerLoader >& producerLoader,
+                         Plugin::Context                                pluginContext)
     : ILoader()
     , m_loopTask(loopTask)
     , m_worlds(Arena::task())
     , m_producerLoader(producerLoader)
-    , m_pluginContext(pluginContext)
+    , m_pluginContext(minitl::move(pluginContext))
     , m_worldCount(0)
 {
 }
 
-WorldLoader::~WorldLoader(void)
-{
-}
+WorldLoader::~WorldLoader(void) = default;
 
-void WorldLoader::load(weak< const Resource::IDescription > desc, Resource::Resource& resource)
+void WorldLoader::load(const weak< const Resource::IDescription >& desc,
+                       Resource::Resource&                         resource)
 {
     m_worldCount++;
     weak< const World >  world   = motor_checked_cast< const World >(desc);
@@ -72,7 +68,8 @@ void WorldLoader::load(weak< const Resource::IDescription > desc, Resource::Reso
     resource.setRefHandle(runtime);
 }
 
-void WorldLoader::unload(weak< const Resource::IDescription > desc, Resource::Resource& resource)
+void WorldLoader::unload(const weak< const Resource::IDescription >& desc,
+                         Resource::Resource&                         resource)
 {
     motor_forceuse(desc);
     m_worldCount--;
@@ -94,9 +91,8 @@ void WorldLoader::unload(weak< const Resource::IDescription > desc, Resource::Re
 
 void WorldLoader::disconnectWorlds()
 {
-    for(minitl::vector< ref< WorldResource > >::iterator it = m_worlds.begin();
-        it != m_worlds.end(); ++it)
-        (*it)->disconnect();
+    for(auto& m_world: m_worlds)
+        m_world->disconnect();
 }
 
 }}  // namespace Motor::World

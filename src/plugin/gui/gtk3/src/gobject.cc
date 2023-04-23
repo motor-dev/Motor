@@ -17,11 +17,11 @@ namespace Motor { namespace Gtk3 {
 static void completeGObjectClass(Gtk3Plugin& plugin, Meta::Class* cls, GType type)
 {
     motor_info_format(Log::gtk(), "finishing registration of type {0}", g_type_name(type));
-    GObjectClass* objectClass = static_cast< GObjectClass* >(g_type_class_ref(type));
-    guint         paramSpecCount;
-    GParamSpec**  paramSpecs    = g_object_class_list_properties(objectClass, &paramSpecCount);
-    u32           propertyCount = 0;
-    u32           constructorParameterCount = 0;
+    auto*        objectClass = static_cast< GObjectClass* >(g_type_class_ref(type));
+    guint        paramSpecCount;
+    GParamSpec** paramSpecs    = g_object_class_list_properties(objectClass, &paramSpecCount);
+    u32          propertyCount = 0;
+    u32          constructorParameterCount = 0;
     for(guint i = 0; i < paramSpecCount; ++i)
     {
         if(paramSpecs[i]->value_type == G_TYPE_POINTER
@@ -58,9 +58,9 @@ static void completeGObjectClass(Gtk3Plugin& plugin, Meta::Class* cls, GType typ
     }
     if(G_TYPE_IS_INSTANTIATABLE(type))
     {
-        Constructor*             constructor = plugin.allocate< Constructor >();
-        Meta::Method::Overload*  overload    = plugin.allocate< Meta::Method::Overload >();
-        Meta::Method::Parameter* parameters  = 0;
+        auto*                    constructor = plugin.allocate< Constructor >();
+        auto*                    overload    = plugin.allocate< Meta::Method::Overload >();
+        Meta::Method::Parameter* parameters  = nullptr;
         raw< const Meta::Class > metaclass   = {cls};
         if(constructorParameterCount)
         {
@@ -76,11 +76,11 @@ static void completeGObjectClass(Gtk3Plugin& plugin, Meta::Class* cls, GType typ
                 if(((paramSpecs[i]->flags & G_PARAM_READWRITE) == G_PARAM_READWRITE)
                    || (paramSpecs[i]->flags & G_PARAM_CONSTRUCT))
                 {
-                    Meta::Value* defaultValue = plugin.allocate< Meta::Value >();
+                    auto* defaultValue = plugin.allocate< Meta::Value >();
                     new(defaultValue) Meta::Value(
                         plugin.fromGValue(g_param_spec_get_default_value(paramSpecs[i])));
                     Meta::Method::Parameter paramTemplate
-                        = {{0},
+                        = {{nullptr},
                            istring(g_param_spec_get_name(paramSpecs[i])),
                            plugin.fromGType(paramSpecs[i]->value_type),
                            {defaultValue}};
@@ -91,7 +91,7 @@ static void completeGObjectClass(Gtk3Plugin& plugin, Meta::Class* cls, GType typ
         }
 
         Meta::Method::Overload overloadTemplate
-            = {{0},
+            = {{nullptr},
                {constructorParameterCount, parameters},
                Meta::Type::makeType(metaclass, Meta::Type::Indirection::Value,
                                     Meta::Type::Constness::Mutable, Meta::Type::Constness::Mutable),
@@ -113,7 +113,7 @@ bool registerGObjectClass(Gtk3Plugin& plugin, GType type)
     motor_assert_format(G_TYPE_FUNDAMENTAL(type) == G_TYPE_OBJECT,
                         "expected GObject type, got {0} which is a {1}", g_type_name(type),
                         g_type_name(G_TYPE_FUNDAMENTAL(type)));
-    Meta::Class* cls = static_cast< Meta::Class* >(g_type_get_qdata(type, plugin.quark()));
+    auto* cls = static_cast< Meta::Class* >(g_type_get_qdata(type, plugin.quark()));
     if(!cls)
     {
         GType parent = g_type_parent(type);
@@ -125,13 +125,13 @@ bool registerGObjectClass(Gtk3Plugin& plugin, GType type)
                                    parentClass->size,
                                    0,
                                    Meta::ClassType_Struct,
-                                   {0},
+                                   {nullptr},
                                    parentClass,
-                                   {0},
-                                   {0},
-                                   {0, 0},
-                                   {0, 0},
-                                   {0},
+                                   {nullptr},
+                                   {nullptr},
+                                   {0, nullptr},
+                                   {0, nullptr},
+                                   {nullptr},
                                    Meta::OperatorTable::s_emptyTable,
                                    parentClass->copyconstructor,
                                    parentClass->destructor};
@@ -151,7 +151,7 @@ raw< const Meta::Class > getGObjectClass(Gtk3Plugin& plugin, GType type)
     motor_assert_format(G_TYPE_FUNDAMENTAL(type) == G_TYPE_OBJECT,
                         "expected GObject type, got {0} which is a {1}", g_type_name(type),
                         g_type_name(G_TYPE_FUNDAMENTAL(type)));
-    Meta::Class* cls = static_cast< Meta::Class* >(g_type_get_qdata(type, plugin.quark()));
+    auto* cls = static_cast< Meta::Class* >(g_type_get_qdata(type, plugin.quark()));
     if(!cls)
     {
         GType parent = g_type_parent(type);
@@ -163,13 +163,13 @@ raw< const Meta::Class > getGObjectClass(Gtk3Plugin& plugin, GType type)
                                    parentClass->size,
                                    0,
                                    Meta::ClassType_Struct,
-                                   {0},
+                                   {nullptr},
                                    parentClass,
-                                   {0},
-                                   {0},
-                                   {0, 0},
-                                   {0, 0},
-                                   {0},
+                                   {nullptr},
+                                   {nullptr},
+                                   {0, nullptr},
+                                   {0, nullptr},
+                                   {nullptr},
                                    Meta::OperatorTable::s_emptyTable,
                                    parentClass->copyconstructor,
                                    parentClass->destructor};
@@ -184,7 +184,7 @@ raw< const Meta::Class > getGObjectClass(Gtk3Plugin& plugin, GType type)
 
 void destroyGObjectClass(Gtk3Plugin& plugin, GType type)
 {
-    Meta::Class* cls = static_cast< Meta::Class* >(g_type_get_qdata(type, plugin.quark()));
+    auto* cls = static_cast< Meta::Class* >(g_type_get_qdata(type, plugin.quark()));
     if(cls && cls->constructor)
     {
         for(u32 i = 0; i < cls->constructor->overloads.count; ++i)

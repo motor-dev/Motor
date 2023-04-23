@@ -10,12 +10,12 @@ namespace Motor {
 class Win32File : public File
 {
 public:
-    Win32File(ifilename file, u64 size, u64 timestamp);
+    Win32File(const ifilename& file, u64 size, u64 timestamp);
     ~Win32File() override;
 
 private:
-    void doFillBuffer(weak< File::Ticket > ticket) const override;
-    void doWriteBuffer(weak< Ticket > ticket) const override;
+    void doFillBuffer(const weak< File::Ticket >& ticket) const override;
+    void doWriteBuffer(const weak< Ticket >& ticket) const override;
 };
 
 }  // namespace Motor

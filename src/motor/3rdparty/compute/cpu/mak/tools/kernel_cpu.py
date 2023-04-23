@@ -76,37 +76,6 @@ class cpuc(Task.Task):
             write_kernels([], namespace)
 
 
-class cpu_header(Task.Task):
-    color = 'BLUE'
-    ext_out = ['.h']
-
-    def scan(self):
-        return ([], [])
-
-    vars = ['VECTOR_OPTIM_VARIANTS']
-
-    def run(self):
-        self.outputs[0].write(
-            "static const char* s_cpuVariants[] = { %s };\n"
-            "static const i32 s_cpuVariantCount = %d;\n"
-            "" % (
-                ', '.join('"%s"' % o for o in [''] + [v[1:] for v in self.env.VECTOR_OPTIM_VARIANTS]
-                          ), 1 + len(self.env.VECTOR_OPTIM_VARIANTS)
-            )
-        )
-
-
-@feature('motor:cpu:variants')
-@before_method('process_source')
-def generate_cpu_variant_header(self):
-    for kernel_name, toolchain in self.env.KERNEL_TOOLCHAINS:
-        if kernel_name == 'cpu':
-            env = self.bld.all_envs[toolchain]
-            out_header = self.make_bld_node('include', None, 'kernel_optims.hh')
-            task = self.create_task('cpu_header', [], [out_header])
-            self.includes.append(out_header.parent)
-
-
 @feature('motor:cpu:kernel_create')
 def build_cpu_kernels(task_gen):
     out = task_gen.make_bld_node(

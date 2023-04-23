@@ -11,12 +11,10 @@ class Class : public minitl::refcountable
     published : i32 x1;
     i32             y1;
 
-    Class(u32 x1 = 0, u32 y1 = 0) : x1(x1), y1(y1)
+    explicit Class(i32 x1 = 0, i32 y1 = 0) : x1(x1), y1(y1)
     {
     }
-    ~Class()
-    {
-    }
+    ~Class() override = default;
 
     void doStuff(float v1, float v2 = 5.0f);
     void doStuff(u32 v1, u32 v2, bool done);

@@ -1,4 +1,4 @@
-.waf_toolchains.py
+.waf_toolchains.cache
 extra/*
 !extra/android
 !extra/ios

@@ -7,7 +7,7 @@
 
 #include <motor/plugin/plugin.hh>
 #include <motor/resource/description.hh>
-#include <motor/scheduler/kernel/iproduct.meta.hh>
+#include <motor/scheduler/kernel/producer.meta.hh>
 
 namespace Motor { namespace KernelScheduler {
 
@@ -31,9 +31,9 @@ public:
                                       const Plugin::Context&                        context) const;
 
 published:
-    World(ref< ComponentRegistry >                                 registry,
+    World(const ref< ComponentRegistry >&                          registry,
           minitl::array< weak< const KernelScheduler::IProduct > > products);
-    ~World();
+    ~World() override;
 };
 
 }}  // namespace Motor::World

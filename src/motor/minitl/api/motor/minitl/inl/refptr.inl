@@ -54,11 +54,24 @@ ref< T >::ref(const ref< U >& other) : m_ptr(checkIsA< T >(other.operator->()))
 }
 
 template < typename T >
+ref< T >::ref(ref&& other) noexcept : m_ptr(other.operator->())
+{
+    other.m_ptr = nullptr;
+}
+
+template < typename T >
 template < typename U >
-ref< T >::ref(scoped< U >&& other) : m_ptr(checkIsA< T >(other.operator->()))
+ref< T >::ref(ref< U >&& other) noexcept : m_ptr(checkIsA< T >(other.operator->()))
+{
+    other.m_ptr = nullptr;
+}
+
+template < typename T >
+template < typename U >
+ref< T >::ref(scoped< U >&& other) noexcept : m_ptr(checkIsA< T >(other.operator->()))
 {
     if(m_ptr) m_ptr->addref();
-    other.m_ptr = 0;
+    other.m_ptr = nullptr;
 }
 
 template < typename T >
@@ -76,6 +89,25 @@ template < typename U >
 ref< T >& ref< T >::operator=(const ref< U >& other)
 {
     ref(other).swap(*this);
+    return *this;
+}
+
+template < typename T >
+ref< T >& ref< T >::operator=(ref< T >&& other) noexcept
+{
+    if(m_ptr) m_ptr->decref();
+    m_ptr       = other.m_ptr;
+    other.m_ptr = nullptr;
+    return *this;
+}
+
+template < typename T >
+template < typename U >
+ref< T >& ref< T >::operator=(ref< U >&& other) noexcept
+{
+    if(m_ptr) m_ptr->decref();
+    m_ptr       = checkIsA< T >(other.m_ptr);
+    other.m_ptr = nullptr;
     return *this;
 }
 

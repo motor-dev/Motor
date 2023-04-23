@@ -11,7 +11,6 @@
 namespace Motor {
 class Folder;
 class Package;
-class IKernelScheduler;
 }  // namespace Motor
 
 namespace Motor { namespace Editor {
@@ -25,8 +24,8 @@ private:
     ref< const Package > const                m_mainPackage;
 
 public:
-    Editor(const Plugin::Context& context);
-    ~Editor();
+    explicit Editor(const Plugin::Context& context);
+    ~Editor() override;
 };
 
 }}  // namespace Motor::Editor

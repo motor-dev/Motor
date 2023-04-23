@@ -101,7 +101,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
             {
                 ref< DiskFolder > newFolder = ref< DiskFolder >::create(
                     Arena::filesystem(), p, newPolicy, Folder::CreateNone);
-                m_folders.push_back(minitl::make_tuple(name, newFolder));
+                m_folders.emplace_back(name, newFolder);
             }
             else
             {
@@ -197,7 +197,7 @@ void DiskFolder::onChanged()
                     motor_info_format(Log::fs(), "new folder: {0}", p);
                     ref< DiskFolder > newFolder = ref< DiskFolder >::create(
                         Arena::filesystem(), p, Folder::ScanNone, Folder::CreateNone);
-                    m_folders.push_back(minitl::make_tuple(name, newFolder));
+                    m_folders.emplace_back(name, newFolder);
                 }
             }
             else
@@ -220,7 +220,7 @@ void DiskFolder::onChanged()
                     ref< File > newFile = ref< PosixFile >::create(Arena::filesystem(),
                                                                    ipath(m_path) + ifilename(name),
                                                                    s.st_size, s.st_mtime);
-                    m_files.push_back(minitl::make_tuple(name, newFile));
+                    m_files.emplace_back(name, newFile);
                 }
             }
         }

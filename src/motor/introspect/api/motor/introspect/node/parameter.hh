@@ -14,16 +14,16 @@ private:
     ref< Node >   m_value;
 
 protected:
-    virtual ConversionCost distance(const Type& type) const override;
-    virtual bool           doResolve(DbContext & context) override;
-    virtual void           doEval(const Type& expectedType, Value& result) const override;
-    virtual void           doVisit(Node::Visitor & visitor) const override;
+    ConversionCost distance(const Type& type) const override;
+    bool           doResolve(DbContext & context) override;
+    void           doEval(const Type& expectedType, Value& result) const override;
+    void           doVisit(Node::Visitor & visitor) const override;
 
 public:
-    Parameter(const istring name, ref< Node > value);
-    ~Parameter();
+    Parameter(istring name, const ref< Node >& value);
+    ~Parameter() override;
 
-    const istring name() const
+    istring name() const
     {
         return m_name;
     }

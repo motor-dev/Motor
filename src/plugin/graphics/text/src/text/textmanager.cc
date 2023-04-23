@@ -6,28 +6,24 @@
 
 namespace Motor {
 
-TextManager::TextManager()
-{
-}
+TextManager::TextManager() = default;
 
-TextManager::~TextManager()
-{
-}
+TextManager::~TextManager() = default;
 
-void TextManager::load(weak< const Resource::IDescription > /*description*/,
+void TextManager::load(const weak< const Resource::IDescription >& /*description*/,
                        Resource::Resource& /*resource*/)
 {
     motor_info(Log::resource(), "loading text");
 }
 
-void TextManager::reload(weak< const Resource::IDescription > /*oldDescription*/,
-                         weak< const Resource::IDescription > /*newDescription*/,
+void TextManager::reload(const weak< const Resource::IDescription >& /*oldDescription*/,
+                         const weak< const Resource::IDescription >& /*newDescription*/,
                          Resource::Resource& /*resource*/)
 {
     motor_info(Log::resource(), "reloading text");
 }
 
-void TextManager::unload(weak< const Resource::IDescription > /*description*/,
+void TextManager::unload(const weak< const Resource::IDescription >& /*description*/,
                          Resource::Resource& /*resource*/)
 {
     motor_info(Log::resource(), "unloading text");

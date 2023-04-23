@@ -31,11 +31,11 @@ private:
 
 protected:
     IParameter();
-    ~IParameter();
+    ~IParameter() override;
 
 public:
     weak< const IMemoryBuffer > getCurrentBank() const;
-    weak< const IMemoryBuffer > getBank(weak< const IMemoryHost > host) const;
+    weak< const IMemoryBuffer > getBank(const weak< const IMemoryHost >& host) const;
 
     static istring getProductTypePropertyName();
 };

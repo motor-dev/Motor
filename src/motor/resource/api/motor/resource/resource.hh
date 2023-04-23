@@ -24,7 +24,7 @@ private:
 public:
     ~Resource();
 
-    void setRefHandle(ref< minitl::refcountable > handle);
+    void setRefHandle(const ref< minitl::refcountable >& handle);
     void clearRefHandle();
     template < typename T >
     weak< T > getRefHandle() const
@@ -34,7 +34,7 @@ public:
 
     static Resource& null();
 
-    operator const void*() const
+    operator const void*() const  // NOLINT(google-explicit-constructor)
     {
         return (const void*)(this - &null());
     }

@@ -18,18 +18,16 @@ ProducerLoader::ProducerLoader()
 {
 }
 
-ProducerLoader::~ProducerLoader()
-{
-}
+ProducerLoader::~ProducerLoader() = default;
 
-void ProducerLoader::load(weak< const Resource::IDescription > producer,
-                          Resource::Resource&                  resource)
+void ProducerLoader::load(const weak< const Resource::IDescription >& producer,
+                          Resource::Resource&                         resource)
 {
     resource.setRefHandle(motor_checked_cast< const Producer >(producer)->createRuntime(this));
 }
 
-void ProducerLoader::unload(weak< const Resource::IDescription > producer,
-                            Resource::Resource&                  resource)
+void ProducerLoader::unload(const weak< const Resource::IDescription >& producer,
+                            Resource::Resource&                         resource)
 {
     motor_forceuse(producer);
     resource.clearRefHandle();

@@ -4,9 +4,10 @@ import os
 
 
 def build(build_context):
-    build_context.recurse(
-        os.path.join(build_context.motornode.abspath(), 'mak', 'build_framework', 'build', 'target', 'macos.py')
-    )
+    if not build_context.env.PROJECTS:
+        build_context.recurse(
+            os.path.join(build_context.motornode.abspath(), 'mak', 'build_framework', 'build', 'target', 'macos.py')
+        )
 
 
 @feature('cprogram', 'cxxprogram')

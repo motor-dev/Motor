@@ -17,12 +17,12 @@ namespace Motor { namespace Physics { namespace Bullet {
 
 static MOTOR_NEVER_INLINE void* allocate(size_t size)
 {
-    return Arena::bullet().alloc(size, 16);
+    return Arena::bullet().alloc(u32(size), 16);
 }
 
 static MOTOR_NEVER_INLINE void* allocate(size_t size, int align)
 {
-    return Arena::bullet().alloc(size, align);
+    return Arena::bullet().alloc(u32(size), align);
 }
 
 static MOTOR_NEVER_INLINE void free(void* block)
@@ -36,9 +36,7 @@ BulletWorld::BulletWorld(const Plugin::Context& /*context*/)
     btAlignedAllocSetCustomAligned(allocate, free);
 }
 
-BulletWorld::~BulletWorld()
-{
-}
+BulletWorld::~BulletWorld() = default;
 
 void BulletWorld::step()
 {

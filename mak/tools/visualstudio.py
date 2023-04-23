@@ -3,6 +3,7 @@ import os, sys
 from xml.dom.minidom import Document
 from minixml import XmlNode, XmlDocument
 import string
+
 try:
     import cStringIO as StringIO
 except ImportError:
@@ -13,9 +14,11 @@ except ImportError:
 
 try:
     import hashlib
+
     createMd5 = hashlib.md5
 except:
     import md5
+
     createMd5 = md5.new
 
 
@@ -251,14 +254,14 @@ class VCproj:
         self.guid = generateGUID('target:' + task_gen.target)
         self.vcproj = XmlDocument(StringIO.StringIO(), 'UTF-8')
         with XmlNode(
-            self.vcproj, 'VisualStudioProject', {
-                'ProjectType': 'Visual C++',
-                'Version': version_project,
-                'Name': self.name,
-                'ProjectGUID': self.guid,
-                'RootNamespace': task_gen.target,
-                'Keyword': 'Win32Proj'
-            }
+                self.vcproj, 'VisualStudioProject', {
+                    'ProjectType': 'Visual C++',
+                    'Version': version_project,
+                    'Name': self.name,
+                    'ProjectGUID': self.guid,
+                    'RootNamespace': task_gen.target,
+                    'Keyword': 'Win32Proj'
+                }
         ) as project:
             with XmlNode(project, 'Platforms') as platforms:
                 for p in task_gen.bld.__class__.platforms:
@@ -274,13 +277,13 @@ class VCproj:
                     for variant in task_gen.bld.env.ALL_VARIANTS:
                         platform = task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM)
                         with XmlNode(
-                            configurations, 'Configuration', {
-                                'Name': '%s-%s|%s' % (toolchain, variant, platform),
-                                'OutputDirectory': '$(SolutionDir)%s\\%s\\' % (sub_env.PREFIX, variant),
-                                'IntermediateDirectory': '$(SolutionDir)%s\\%s\\' % (sub_env.PREFIX, variant),
-                                'ConfigurationType': '0',
-                                'CharacterSet': '2'
-                            }
+                                configurations, 'Configuration', {
+                                    'Name': '%s-%s|%s' % (toolchain, variant, platform),
+                                    'OutputDirectory': '$(SolutionDir)%s\\%s\\' % (sub_env.PREFIX, variant),
+                                    'IntermediateDirectory': '$(SolutionDir)%s\\%s\\' % (sub_env.PREFIX, variant),
+                                    'ConfigurationType': '0',
+                                    'CharacterSet': '2'
+                                }
                         ) as configuration:
                             tool = {'Name': 'VCNMakeTool'}
                             command = getattr(task_gen, 'command', '')
@@ -299,17 +302,19 @@ class VCproj:
                                         sys.executable, sys.argv[0], clean_command, command, ' '.join(options)
                                     )
                             else:
-                                tool['BuildCommandLine'] = 'cd "$(SolutionDir)" && "%s" "%s" build:%s:%s %s --targets=%s' % (
+                                tool[
+                                    'BuildCommandLine'] = 'cd "$(SolutionDir)" && "%s" "%s" build:%s:%s %s --targets=%s' % (
                                     sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target
                                 )
-                                tool['CleanCommandLine'] = 'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s %s --targets=%s' % (
+                                tool[
+                                    'CleanCommandLine'] = 'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s %s --targets=%s' % (
                                     sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target
                                 )
                                 tool['ReBuildCommandLine'
-                                     ] = 'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s build:%s:%s %s --targets=%s' % (
-                                         sys.executable, sys.argv[0], toolchain, variant, toolchain, variant,
-                                         ' '.join(options), task_gen.target
-                                     )
+                                ] = 'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s build:%s:%s %s --targets=%s' % (
+                                    sys.executable, sys.argv[0], toolchain, variant, toolchain, variant,
+                                    ' '.join(options), task_gen.target
+                                )
                             if 'cxxprogram' in task_gen.features:
                                 tool['Output'] = '$(OutDir)\\%s\\%s' % (
                                     env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % task_gen.target
@@ -341,13 +346,13 @@ class VCproj:
                                     )
                             if float(version_project) >= 8:
                                 tool['PreprocessorDefinitions'] = ';'.join(
-                                    defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES
+                                    defines + sub_env.DEFINES + sub_env.COMPILER_DEFINES
                                 )
                                 tool['IncludeSearchPath'] = ';'.join(
                                     [
                                         path_from(p, task_gen.bld)
-                                        for p in includes + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES +
-                                        [os.path.join(sub_env.SYSROOT or '', 'usr', 'include')]
+                                        for p in includes + sub_env.INCLUDES + sub_env.COMPILER_INCLUDES +
+                                                 [os.path.join(sub_env.SYSROOT or '', 'usr', 'include')]
                                     ]
                                 )
                             XmlNode(configuration, 'Tool', tool).close()
@@ -424,7 +429,7 @@ class VCxproj:
 
         globals = self.vcxproj._add(project, 'PropertyGroup', {'Label': 'Globals'})
         self.vcxproj._add(globals, 'ProjectGUID', self.guid)
-        #self.vcxproj._add(globals, 'TargetFrameworkVersion', 'v'+version_project[0])
+        # self.vcxproj._add(globals, 'TargetFrameworkVersion', 'v'+version_project[0])
         self.vcxproj._add(globals, 'RootNamespace', task_gen.target)
         self.vcxproj._add(globals, 'ProjectName', self.name)
         self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.Default.props'})
@@ -509,22 +514,26 @@ class VCxproj:
                     command = command % {'toolchain': toolchain, 'variant': variant}
                     self.vcxproj._add(
                         properties, 'NMakeBuildCommandLine',
-                        'cd "$(SolutionDir)" && "%s" "%s" %s %s' % (sys.executable, sys.argv[0], command, ' '.join(options))
+                        'cd "$(SolutionDir)" && "%s" "%s" %s %s' % (
+                            sys.executable, sys.argv[0], command, ' '.join(options))
                     )
                     clean_command = getattr(task_gen, 'clean_command', '')
                     if clean_command:
                         clean_command = clean_command % {'toolchain': toolchain, 'variant': variant}
                         self.vcxproj._add(
                             properties, 'NMakeCleanCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" %s %s' %
-                            (sys.executable, sys.argv[0], clean_command, ' '.join(options))
+                                                                 (sys.executable, sys.argv[0], clean_command,
+                                                                  ' '.join(options))
                         )
                         self.vcxproj._add(
                             properties, 'NMakeReBuildCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" %s %s %s' %
-                            (sys.executable, sys.argv[0], clean_command, command, ' '.join(options))
+                                                                   (sys.executable, sys.argv[0], clean_command, command,
+                                                                    ' '.join(options))
                         )
                 else:
                     self.vcxproj._add(
-                        properties, 'NMakeBuildCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" build:%s:%s %s --targets=%s' %
+                        properties, 'NMakeBuildCommandLine',
+                        'cd "$(SolutionDir)" && "%s" "%s" build:%s:%s %s --targets=%s' %
                         (sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target)
                     )
                     self.vcxproj._add(
@@ -535,7 +544,8 @@ class VCxproj:
                         )
                     )
                     self.vcxproj._add(
-                        properties, 'NMakeCleanCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s %s --targets=%s' %
+                        properties, 'NMakeCleanCommandLine',
+                        'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s %s --targets=%s' %
                         (sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target)
                     )
                     if 'cxxprogram' in task_gen.features:
@@ -546,7 +556,8 @@ class VCxproj:
                     elif 'motor:game' in task_gen.features:
                         self.vcxproj._add(
                             properties, 'NMakeOutput', '$(OutDir)\\%s\\%s' %
-                            (env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % task_gen.bld.launcher.target)
+                                                       (env.DEPLOY_BINDIR,
+                                                        sub_env.cxxprogram_PATTERN % task_gen.bld.launcher.target)
                         )
                         self.vcxproj._add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
                         self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
@@ -559,13 +570,14 @@ class VCxproj:
                         self.vcxproj._add(properties, 'LocalDebuggerWorkingDirectory', '$(OutDir)')
                     self.vcxproj._add(
                         properties, 'NMakePreprocessorDefinitions',
-                        ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES)
+                        ';'.join(defines + sub_env.DEFINES + sub_env.COMPILER_DEFINES)
                     )
                     if sub_env.SYS_ROOT:
                         includes.append('%s/usr/include' % sub_env.SYSROOT or '')
                     self.vcxproj._add(
                         properties, 'NMakeIncludeSearchPath', ';'.join(
-                            [path_from(i, task_gen.bld) for i in includes] + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES
+                            [path_from(i, task_gen.bld) for i in
+                             includes] + sub_env.INCLUDES + sub_env.COMPILER_INCLUDES
                         )
                     )
         self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.props'})
@@ -573,7 +585,7 @@ class VCxproj:
 
         self.filters = {}
         for node_name, node in getattr(task_gen, 'source_nodes', []):
-            self.add_node(task_gen.bld.srcnode, node,node_name,  node, files)
+            self.add_node(task_gen.bld.srcnode, node, node_name, node, files)
         self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.targets'})
         for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
             env = task_gen.bld.all_envs[toolchain]

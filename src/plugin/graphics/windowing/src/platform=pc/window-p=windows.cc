@@ -17,9 +17,9 @@ namespace Motor { namespace Windowing {
 static inline void displayError()
 {
     char* msg;
-    ::FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, 0,
-                     ::GetLastError(), 0, (char*)&msg, 0, 0);
-    MessageBox(0, msg, "Win32 error", MB_OK);
+    ::FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr,
+                     ::GetLastError(), 0, (char*)&msg, 0, nullptr);
+    MessageBox(nullptr, msg, "Win32 error", MB_OK);
     ::LocalFree(msg);
 }
 
@@ -27,10 +27,11 @@ static inline void displayError()
 #    pragma warning(pop)
 #endif
 
-Window::PlatformWindow::PlatformWindow(weak< const Renderer > renderer, weak< Window > window)
+Window::PlatformWindow::PlatformWindow(const weak< const Renderer >& renderer,
+                                       const weak< Window >&         window)
     : m_renderer(renderer)
 {
-    WindowCreationFlags f;
+    WindowCreationFlags f {};
     f.title = "TODO";
     f.flags = /*TODO*/ WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
     f.x     = 0;
@@ -55,22 +56,20 @@ Window::PlatformWindow::PlatformWindow(weak< const Renderer > renderer, weak< Wi
 Window::PlatformWindow::~PlatformWindow()
 {
     HWND hWnd = m_window;
-    m_window  = 0;
+    m_window  = nullptr;
     if(hWnd) m_renderer->m_platformRenderer->destroyWindowImplementation(hWnd);
 }
 
-Window::Window(weak< const RenderWindowDescription > renderWindowDescription,
-               weak< const Renderer >                renderer)
+Window::Window(const weak< const RenderWindowDescription >& renderWindowDescription,
+               const weak< const Renderer >&                renderer)
     : IRenderTarget(renderWindowDescription, renderer)
     , m_window(scoped< PlatformWindow >())
 {
 }
 
-Window::~Window()
-{
-}
+Window::~Window() = default;
 
-void Window::load(weak< const Resource::IDescription > renderWindowDescription)
+void Window::load(const weak< const Resource::IDescription >& renderWindowDescription)
 {
     motor_forceuse(renderWindowDescription);
     m_window.reset(scoped< PlatformWindow >::create(
@@ -91,7 +90,7 @@ knl::uint2 Window::getDimensions() const
 
 void* Window::getWindowHandle() const
 {
-    if(motor_assert(m_window, "no window implementation is created")) return 0;
+    if(motor_assert(m_window, "no window implementation is created")) return nullptr;
     return (void*)&m_window->m_window;
 }
 

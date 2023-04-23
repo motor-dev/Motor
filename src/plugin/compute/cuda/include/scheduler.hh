@@ -21,10 +21,10 @@ private:
     scoped< MemoryHost >              m_memoryHost;
 
 public:
-    Scheduler(const Plugin::Context& context);
-    ~Scheduler();
+    explicit Scheduler(const Plugin::Context& context);
+    ~Scheduler() override;
 
-    virtual void run(weak< const Task::KernelTask > task) override;
+    void run(weak< const Task::KernelTask > task) override;
 };
 
 }}}  // namespace Motor::KernelScheduler::Cuda

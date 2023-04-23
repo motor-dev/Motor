@@ -6,12 +6,8 @@
 
 namespace Motor { namespace Input {
 
-Mouse::Mouse()
-{
-}
+Mouse::Mouse() = default;
 
-Mouse::~Mouse()
-{
-}
+Mouse::~Mouse() = default;
 
 }}  // namespace Motor::Input

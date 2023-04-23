@@ -7,4 +7,4 @@
 #include <motor/plugin/plugin.hh>
 #include <pythonsample.hh>
 
-MOTOR_PLUGIN_REGISTER(Motor::PythonSample);
+MOTOR_PLUGIN_REGISTER(Motor::PythonSample)

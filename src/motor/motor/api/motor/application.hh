@@ -27,8 +27,6 @@ class Folder;
 
 class motor_api(MOTOR) Application : public minitl::refcountable
 {
-    MOTOR_NOCOPY(Application);
-
 private:
     struct UpdateTask
     {
@@ -52,22 +50,23 @@ private:
     i_bool                                              m_runLoop;
 
 private:
-    void frameUpdate();
-    void updateResources();
+    static void frameUpdate();
+    void        updateResources();
 
 private:
-    void registerInterruptions();
-    void unregisterInterruptions();
+    void        registerInterruptions();
+    static void unregisterInterruptions();
 
 protected:
-    void                   addTask(ref< Task::ITask > task);
-    void                   removeTask(ref< Task::ITask > task);
+    void                   addTask(const ref< Task::ITask >& task);
+    void                   removeTask(const ref< Task::ITask >& task);
     const Plugin::Context& pluginContext() const
     {
         return m_pluginContext;
     }
-    Application(ref< Folder > dataFolder, weak< Resource::ResourceManager > resourceManager,
-                weak< Scheduler > scheduler);
+    Application(const ref< Folder >&                     dataFolder,
+                const weak< Resource::ResourceManager >& resourceManager,
+                const weak< Scheduler >&                 scheduler);
 
     weak< Task::ITask > applicationUpdateTask() const
     {
@@ -75,7 +74,7 @@ protected:
     }
 
 public:
-    virtual ~Application();
+    ~Application() override;
 
     int  run();
     void finish();

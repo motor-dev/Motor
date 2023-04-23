@@ -20,8 +20,6 @@ namespace Motor { namespace Task {
 
 class motor_api(SCHEDULER) KernelTask : public ITask
 {
-    MOTOR_NOCOPY(KernelTask);
-
     friend class ::Motor::Scheduler;
 
 private:
@@ -32,14 +30,15 @@ private:
 public:
     template < typename Container >
     KernelTask(istring name, KernelScheduler::SchedulerType type, knl::color32 color,
-               weak< const Motor::KernelScheduler::Kernel > kernel, const Container& parameters);
+               const weak< const Motor::KernelScheduler::Kernel >& kernel,
+               const Container&                                    parameters);
     template < typename Iterator >
     KernelTask(istring name, KernelScheduler::SchedulerType type, knl::color32 color,
-               weak< const Motor::KernelScheduler::Kernel > kernel, const Iterator& begin,
+               const weak< const Motor::KernelScheduler::Kernel >& kernel, const Iterator& begin,
                const Iterator& end);
-    ~KernelTask();
+    ~KernelTask() override;
 
-    virtual void schedule(weak< Scheduler > scheduler) const override;
+    void schedule(weak< Scheduler > scheduler) const override;
 
     weak< const KernelScheduler::Kernel > kernel() const
     {
@@ -55,8 +54,8 @@ namespace Motor { namespace Task {
 
 template < typename Container >
 KernelTask::KernelTask(istring name, KernelScheduler::SchedulerType type, knl::color32 color,
-                       weak< const Motor::KernelScheduler::Kernel > kernel,
-                       const Container&                             parameters)
+                       const weak< const Motor::KernelScheduler::Kernel >& kernel,
+                       const Container&                                    parameters)
     : ITask(name, color, Scheduler::WorkerThread)
     , m_kernel(kernel)
     , m_targetScheduler(KernelScheduler::IScheduler::findScheduler(type))
@@ -66,8 +65,8 @@ KernelTask::KernelTask(istring name, KernelScheduler::SchedulerType type, knl::c
 
 template < typename Iterator >
 KernelTask::KernelTask(istring name, KernelScheduler::SchedulerType type, knl::color32 color,
-                       weak< const Motor::KernelScheduler::Kernel > kernel, const Iterator& begin,
-                       const Iterator& end)
+                       const weak< const Motor::KernelScheduler::Kernel >& kernel,
+                       const Iterator& begin, const Iterator& end)
     : ITask(name, color, Scheduler::WorkerThread)
     , m_kernel(kernel)
     , m_targetScheduler(KernelScheduler::IScheduler::findScheduler(type))

@@ -5,10 +5,10 @@
 #include <motor/core/threads/semaphore.hh>
 
 #include <cerrno>
-#include <stdio.h>
+#include <cstdio>
 
 #if defined(__linux)
-#    include <limits.h>
+#    include <climits>
 #    include <linux/futex.h>
 #    include <sys/syscall.h>
 #    include <unistd.h>
@@ -39,7 +39,7 @@ void Semaphore::release(int count)
 
 Threads::Waitable::WaitResult Semaphore::wait()
 {
-    int result;
+    long result;
     do
     {
         i32 count = m_data.value--;
@@ -67,26 +67,28 @@ u32 Semaphore::flushPauseCount()
 
 #elif defined(__FreeBSD__)
 
-#    include <limits.h>
+#    include <climits>
 #    include <sys/types.h>
 #    include <sys/umtx.h>
 
 namespace Motor {
 
+static i_u32 s_pauseCount;
+
 Semaphore::Semaphore(int initialCount) : m_data()
 {
-    m_data.value = initialCount;
+    m_data.value.set(initialCount);
 }
 
 Semaphore::~Semaphore()
 {
-    _umtx_op(&m_data.value, UMTX_OP_WAKE, INT_MAX, 0, 0);
+    _umtx_op(&m_data.value, UMTX_OP_WAKE, INT_MAX, nullptr, nullptr);
 }
 
 void Semaphore::release(int count)
 {
     m_data.value += count;
-    _umtx_op(&m_data.value, UMTX_OP_WAKE, count, 0, 0);
+    _umtx_op(&m_data.value, UMTX_OP_WAKE, count, nullptr, nullptr);
 }
 
 Threads::Waitable::WaitResult Semaphore::wait()
@@ -100,13 +102,19 @@ Threads::Waitable::WaitResult Semaphore::wait()
             return Waitable::Finished;
         }
         ++m_data.value;
-        result = _umtx_op(&m_data.value, UMTX_OP_WAIT, count, 0, 0);
+        ++s_pauseCount;
+        result = _umtx_op(&m_data.value, UMTX_OP_WAIT, count, nullptr, nullptr);
     } while(result == 0 || errno == EINTR);
 
     motor_error_format(Log::thread(), "Semaphore error: {0}-{1}[{2}]", result, errno,
                        strerror(errno));
     motor_notreached();
     return Abandoned;
+}
+
+u32 Semaphore::flushPauseCount()
+{
+    return s_pauseCount.exchange(0);
 }
 
 }  // namespace Motor

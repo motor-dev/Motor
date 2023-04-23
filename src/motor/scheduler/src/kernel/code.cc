@@ -10,8 +10,6 @@ Code::Code(const inamespace& name) : m_name(name)
 {
 }
 
-Code::~Code()
-{
-}
+Code::~Code() = default;
 
 }}  // namespace Motor::KernelScheduler

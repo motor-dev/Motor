@@ -5,7 +5,6 @@
 #define MOTOR_META_TYPEINFO_FORMAT_HH_
 /**************************************************************************************************/
 #include <motor/meta/stdafx.h>
-#include <motor/meta/typeinfo.meta.hh>
 #include <motor/minitl/format.hh>
 
 namespace Motor { namespace Meta {

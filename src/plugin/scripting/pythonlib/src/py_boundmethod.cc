@@ -10,68 +10,68 @@
 
 namespace Motor { namespace Python {
 
-PyTypeObject PyBoundMethod::s_pyType = {{{0, 0}, 0},
+PyTypeObject PyBoundMethod::s_pyType = {{{0, nullptr}, 0},
                                         "py_motor.BoundMethod",
                                         sizeof(PyBoundMethod),
                                         0,
                                         &PyBoundMethod::dealloc,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
                                         &PyBoundMethod::repr,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
                                         &PyBoundMethod::call,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
                                         Py_TPFLAGS_MOTOR_DEFAULT | Py_TPFLAGS_IS_ABSTRACT,
                                         "Wrapper class for bound methods to C++ methods",
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
                                         0,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
                                         0,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
+                                        nullptr,
                                         0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0};
+                                        nullptr,
+                                        nullptr};
 
 PyObject* PyBoundMethod::create(raw< const Meta::Method > method, PyMotorObject* value)
 {
-    PyBoundMethod* result = reinterpret_cast< PyBoundMethod* >(s_pyType.tp_alloc(&s_pyType, 0));
-    result->method        = method;
-    result->value         = static_cast< PyObject* >(value);
+    auto* result   = reinterpret_cast< PyBoundMethod* >(s_pyType.tp_alloc(&s_pyType, 0));
+    result->method = method;
+    result->value  = static_cast< PyObject* >(value);
     Py_INCREF(result->value);
     return reinterpret_cast< PyObject* >(result);
 }
 
 PyObject* PyBoundMethod::repr(PyObject* self)
 {
-    PyBoundMethod* self_ = reinterpret_cast< PyBoundMethod* >(self);
+    auto* self_ = reinterpret_cast< PyBoundMethod* >(self);
     if(s_library->getVersion() >= 30)
     {
         return s_library->m_PyUnicode_FromFormat("[BoundMethod %p.%s]", self_,
@@ -86,14 +86,14 @@ PyObject* PyBoundMethod::repr(PyObject* self)
 
 void PyBoundMethod::dealloc(PyObject* self)
 {
-    PyBoundMethod* self_ = reinterpret_cast< PyBoundMethod* >(self);
+    auto* self_ = reinterpret_cast< PyBoundMethod* >(self);
     Py_DECREF(self_->value);
     self->py_type->tp_free(self);
 }
 
 PyObject* PyBoundMethod::call(PyObject* self, PyObject* args, PyObject* kwds)
 {
-    PyBoundMethod* self_ = reinterpret_cast< PyBoundMethod* >(self);
+    auto* self_ = reinterpret_cast< PyBoundMethod* >(self);
     return Python::call(self_->method, self_->value, args, kwds);
 }
 

@@ -40,13 +40,13 @@ struct OutlineDecompose
     }
 };
 
-FreetypeFace::FreetypeFace(weak< FreetypeLibrary >               freetype,
+FreetypeFace::FreetypeFace(const weak< FreetypeLibrary >&        freetype,
                            const minitl::Allocator::Block< u8 >& buffer)
 {
-    FT_Face  face = 0;
+    FT_Face  face = nullptr;
     FT_Error error;
     error = FT_New_Memory_Face(freetype->library, buffer.begin(),
-                               motor_checked_numcast< u32 >(buffer.byteCount()), 0, &face);
+                               motor_checked_numcast< FT_Long >(buffer.byteCount()), 0, &face);
     motor_forceuse(error);
     motor_assert_format(!error, "Freetype error {0}", error);
     error = FT_Select_Charmap(face, FT_ENCODING_UNICODE);
@@ -73,8 +73,6 @@ FreetypeFace::FreetypeFace(weak< FreetypeLibrary >               freetype,
     FT_Done_Face(face);
 }
 
-FreetypeFace::~FreetypeFace()
-{
-}
+FreetypeFace::~FreetypeFace() = default;
 
 }  // namespace Motor

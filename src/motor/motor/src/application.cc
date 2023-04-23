@@ -8,7 +8,6 @@
 #include <motor/core/timer.hh>
 #include <motor/filesystem/folder.meta.hh>
 #include <motor/plugin/plugin.hh>
-#include <motor/resource/loader.hh>
 #include <motor/scheduler/kernel/producerloader.hh>
 #include <motor/scheduler/task/group.hh>
 #include <motor/scheduler/task/method.hh>
@@ -17,9 +16,9 @@
 
 namespace Motor {
 
-Application::Application(ref< Folder >                     dataFolder,
-                         weak< Resource::ResourceManager > resourceManager,
-                         weak< Scheduler >                 scheduler)
+Application::Application(const ref< Folder >&                     dataFolder,
+                         const weak< Resource::ResourceManager >& resourceManager,
+                         const weak< Scheduler >&                 scheduler)
     : m_dataFolder(dataFolder)
     , m_scheduler(scheduler)
     , m_resourceManager(resourceManager)
@@ -43,22 +42,20 @@ Application::Application(ref< Folder >                     dataFolder,
             create(Arena::task(), "application:update_resource", knl::Colors::Green::Green,
                    ref< Task::MethodCaller< Application, &Application::updateResources > >::create(
                        Arena::task(), this)));
-    addTask(
-        ref< Task::Task< Task::MethodCaller< Application, &Application::frameUpdate > > >::create(
-            Arena::task(), "application:update_sync", knl::Colors::Green::Green,
-            ref< Task::MethodCaller< Application, &Application::frameUpdate > >::create(
-                Arena::task(), this)));
+    addTask(ref< Task::Task< Task::ProcedureCaller< &Application::frameUpdate > > >::create(
+        Arena::task(), "application:update_sync", knl::Colors::Green::Green,
+        ref< Task::ProcedureCaller< &Application::frameUpdate > >::create(Arena::task())));
     registerInterruptions();
 }
 
-Application::~Application(void)
+Application::~Application()
 {
     unregisterInterruptions();
     m_resourceManager->detach< World::World >(m_worldLoader);
     m_resourceManager->detach< KernelScheduler::Producer >(m_producerLoader);
 }
 
-void Application::addTask(ref< Task::ITask > task)
+void Application::addTask(const ref< Task::ITask >& task)
 {
     UpdateTask t;
     t.task  = task;
@@ -67,7 +64,7 @@ void Application::addTask(ref< Task::ITask > task)
     m_tasks.push_back(t);
 }
 
-void Application::removeTask(ref< Task::ITask > task)
+void Application::removeTask(const ref< Task::ITask >& task)
 {
     for(size_t i = 0; i < m_tasks.size(); ++i)
     {
@@ -98,7 +95,7 @@ void Application::updateResources()
         m_forceContinue
             = Task::ITask::CallbackConnection(m_updateTask, m_updateTask->startCallback());
     }
-    m_resourceLoadingCount = motor_checked_numcast<u32>(resourceCount);
+    m_resourceLoadingCount = motor_checked_numcast< u32 >(resourceCount);
     if(!m_runLoop)
     {
         motor_info_format(Log::system(),

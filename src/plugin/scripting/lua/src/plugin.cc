@@ -7,4 +7,4 @@
 #include <motor/meta/engine/namespace.hh>
 #include <motor/plugin/plugin.hh>
 
-MOTOR_PLUGIN_REGISTER(Motor::Lua::Context);
+MOTOR_PLUGIN_REGISTER(Motor::Lua::Context)

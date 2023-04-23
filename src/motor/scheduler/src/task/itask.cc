@@ -18,33 +18,31 @@ ITask::ITask(istring name, knl::color32 color, Scheduler::Affinity affinity)
 ITask::~ITask()
 {
     ScopedCriticalSection scope(m_cs);
-    for(minitl::vector< weak< ICallback > >::iterator it = m_callbacks.begin();
-        it != m_callbacks.end(); ++it)
+    for(auto& m_callback: m_callbacks)
     {
-        bool result = (*it)->onDisconnected(this);
+        bool result = m_callback->onDisconnected(this);
         motor_forceuse(result);
         motor_assert(result, "unable to disconnect callback");
     }
 }
 
-void ITask::completed(weak< Scheduler > sc) const
+void ITask::completed(const weak< Scheduler >& sc) const
 {
     ScopedCriticalSection scope(m_cs);
-    for(minitl::vector< weak< ICallback > >::const_iterator it = m_callbacks.begin();
-        it != m_callbacks.end(); ++it)
+    for(const auto& m_callback: m_callbacks)
     {
-        (*it)->onCompleted(sc, this);
+        m_callback->onCompleted(sc, this);
     }
 }
 
-void ITask::addCallback(weak< ICallback > callback, ICallback::CallbackStatus status)
+void ITask::addCallback(const weak< ICallback >& callback, ICallback::CallbackStatus status)
 {
     ScopedCriticalSection scope(m_cs);
     m_callbacks.push_back(callback);
     callback->onConnected(this, status);
 }
 
-bool ITask::removeCallback(weak< ICallback > callback)
+bool ITask::removeCallback(const weak< ICallback >& callback)
 {
     ScopedCriticalSection scope(m_cs);
     for(minitl::vector< weak< ICallback > >::iterator it = m_callbacks.begin();
@@ -69,17 +67,13 @@ weak< ITask::ICallback > ITask::startCallback()
 
 /*----------------------------------------------------------------------------*/
 
-ITask::ICallback::ICallback()
-{
-}
+ITask::ICallback::ICallback() = default;
 
-ITask::ICallback::~ICallback()
-{
-}
+ITask::ICallback::~ICallback() = default;
 
 /*----------------------------------------------------------------------------*/
 
-ITask::ChainCallback::ChainCallback(weak< ITask > task)
+ITask::ChainCallback::ChainCallback(const weak< ITask >& task)
     : ICallback()
     , m_starts(task)
     , m_startedBy(Arena::task())
@@ -132,11 +126,12 @@ bool ITask::ChainCallback::onDisconnected(weak< ITask > from)
 
 /*----------------------------------------------------------------------------*/
 
-ITask::CallbackConnection::CallbackConnection() : m_task(0), m_callback(0)
+ITask::CallbackConnection::CallbackConnection() : m_task(nullptr), m_callback(nullptr)
 {
 }
 
-ITask::CallbackConnection::CallbackConnection(weak< ITask > task, weak< ICallback > callback,
+ITask::CallbackConnection::CallbackConnection(const weak< ITask >&      task,
+                                              const weak< ICallback >&  callback,
                                               ICallback::CallbackStatus status)
     : m_task(task)
     , m_callback(callback)
@@ -182,6 +177,18 @@ ITask::CallbackConnection::~CallbackConnection()
         motor_forceuse(result);
         motor_assert_format(result, "could not disconnect callback from task {0}", m_task->name);
     }
+}
+
+void ITask::CallbackConnection::clear()
+{
+    if(m_task)
+    {
+        bool result = m_task->removeCallback(m_callback);
+        motor_forceuse(result);
+        motor_assert_format(result, "could not disconnect callback from task {0}", m_task->name);
+    }
+    m_task.clear();
+    m_callback.clear();
 }
 
 }}  // namespace Motor::Task

@@ -23,24 +23,24 @@ private:
         i_u32             m_completed;
 
     public:
-        Callback(weak< TaskGroup > owner);
-        virtual ~Callback();
+        explicit Callback(const weak< TaskGroup >& owner);
+        ~Callback() override;
 
-        virtual void onCompleted(weak< Scheduler > scheduler, weak< const ITask > task) override;
-        virtual void onConnected(weak< ITask > to, CallbackStatus status) override;
-        virtual bool onDisconnected(weak< ITask > to) override;
+        void onCompleted(weak< Scheduler > scheduler, weak< const ITask > task) override;
+        void onConnected(weak< ITask > to, CallbackStatus status) override;
+        bool onDisconnected(weak< ITask > to) override;
     };
     friend class Callback;
 
 public:
     TaskGroup(istring name, knl::color32 color);
-    ~TaskGroup();
+    ~TaskGroup() override;
 
 public:  // ITask
-    virtual void schedule(weak< Scheduler > scheduler) const override;
+    void schedule(weak< Scheduler > scheduler) const override;
 
 public:
-    void addStartTask(weak< ITask > task);
+    void addStartTask(const weak< ITask >& task);
     bool removeStartTask(weak< ITask > task);
 
 private:
@@ -57,7 +57,7 @@ private:
 
 public:
     TaskStartConnection();
-    TaskStartConnection(weak< TaskGroup > group, weak< ITask > task);
+    TaskStartConnection(const weak< TaskGroup >& group, const weak< ITask >& task);
     TaskStartConnection(const TaskStartConnection& other);
     TaskStartConnection& operator=(const TaskStartConnection& other);
     ~TaskStartConnection();
@@ -72,7 +72,7 @@ private:
 
 public:
     TaskEndConnection();
-    TaskEndConnection(weak< TaskGroup > group, weak< ITask > task);
+    TaskEndConnection(const weak< TaskGroup >& group, const weak< ITask >& task);
     TaskEndConnection(const TaskEndConnection& other);
     TaskEndConnection& operator=(const TaskEndConnection& other);
     ~TaskEndConnection();

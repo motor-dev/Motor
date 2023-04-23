@@ -12,11 +12,9 @@
 
 namespace Motor {
 
-MOTOR_EXPORT void* s_dummyData = 0;
+MOTOR_EXPORT void* s_dummyData = nullptr;
 
-Environment::~Environment()
-{
-}
+Environment::~Environment() = default;
 
 void Environment::init()
 {
@@ -44,7 +42,7 @@ void Environment::init(int argc, const char* argv[])
     }
 }
 
-const char* Environment::getEnvironmentVariable(const char* variable) const
+const char* Environment::getEnvironmentVariable(const char* variable)
 {
     return getenv(variable);
 }

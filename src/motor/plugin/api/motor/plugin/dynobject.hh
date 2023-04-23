@@ -30,13 +30,13 @@ public:
     DynamicObject(const inamespace& objectName, const ipath& objectPath);
     ~DynamicObject();
 
-    operator const void*() const
+    operator const void*() const  // NOLINT(google-explicit-constructor)
     {
         return m_handle;
     }
     bool operator!() const
     {
-        return m_handle == 0;
+        return m_handle == nullptr;
     }
 
     template < typename T >

@@ -26,8 +26,8 @@ private:
     Task::ITask::CallbackConnection           m_startNextUpdateGL;
 
 public:
-    TextSample(const Plugin::Context& context);
-    ~TextSample();
+    explicit TextSample(const Plugin::Context& context);
+    ~TextSample() override;
 };
 
 }  // namespace Motor

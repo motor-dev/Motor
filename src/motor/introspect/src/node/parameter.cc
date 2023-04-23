@@ -6,13 +6,11 @@
 
 namespace Motor { namespace Meta { namespace AST {
 
-Parameter::Parameter(const istring name, ref< Node > value) : m_name(name), m_value(value)
+Parameter::Parameter(istring name, const ref< Node >& value) : m_name(name), m_value(value)
 {
 }
 
-Parameter::~Parameter()
-{
-}
+Parameter::~Parameter() = default;
 
 ConversionCost Parameter::distance(const Type& type) const
 {

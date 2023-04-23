@@ -6,12 +6,12 @@
 
 namespace Motor { namespace KernelScheduler {
 
-Kernel::Kernel(ref< const Code > code, const istring& name) : m_kernelCode(code), m_name(name)
+Kernel::Kernel(const ref< const Code >& code, const istring& name)
+    : m_kernelCode(code)
+    , m_name(name)
 {
 }
 
-Kernel::~Kernel()
-{
-}
+Kernel::~Kernel() = default;
 
 }}  // namespace Motor::KernelScheduler

@@ -12,12 +12,10 @@ CodeLoader::CodeLoader() : ICodeLoader()
 {
 }
 
-CodeLoader::~CodeLoader()
-{
-}
+CodeLoader::~CodeLoader() = default;
 
-void CodeLoader::load(weak< const Resource::IDescription > kernelDescription,
-                      Resource::Resource&                  resource)
+void CodeLoader::load(const weak< const Resource::IDescription >& kernelDescription,
+                      Resource::Resource&                         resource)
 {
     motor_info_format(Log::cuda(), "loading Cuda kernel {0}",
                       motor_checked_cast< const Kernel >(kernelDescription)->name());
@@ -26,7 +24,7 @@ void CodeLoader::load(weak< const Resource::IDescription > kernelDescription,
     resource.setRefHandle(ref< KernelObject >::create(Arena::task(), name));
 }
 
-void CodeLoader::unload(weak< const Resource::IDescription > /*codeDescription*/,
+void CodeLoader::unload(const weak< const Resource::IDescription >& /*codeDescription*/,
                         Resource::Resource& resource)
 {
     resource.clearRefHandle();

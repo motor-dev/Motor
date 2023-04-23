@@ -9,9 +9,7 @@
 
 namespace Motor { namespace Meta { namespace AST {
 
-Policy::~Policy()
-{
-}
+Policy::~Policy() = default;
 
 ref< IntrospectionHint > Policy::verify(Meta::AST::DbContext&           context,
                                         weak< const Meta::AST::Object > object,

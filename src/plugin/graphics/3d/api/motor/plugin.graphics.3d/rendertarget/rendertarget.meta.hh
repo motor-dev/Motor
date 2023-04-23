@@ -10,33 +10,29 @@ namespace Motor {
 class motor_api(3D) RenderTargetDescription
     : public Resource::Description< RenderTargetDescription >
 {
-    MOTOR_NOCOPY(RenderTargetDescription);
-
 protected:
     RenderTargetDescription();
 
 public:
-    ~RenderTargetDescription();
+    ~RenderTargetDescription() override;
 };
 
 class motor_api(3D) RenderSurfaceDescription : public RenderTargetDescription
 {
-    MOTOR_NOCOPY(RenderSurfaceDescription);
 published:
     const knl::uint2 dimensions;
 published:
     RenderSurfaceDescription(u16 width, u16 height);
-    ~RenderSurfaceDescription();
+    ~RenderSurfaceDescription() override;
 };
 
 class motor_api(3D) RenderWindowDescription : public RenderTargetDescription
 {
-    MOTOR_NOCOPY(RenderWindowDescription);
 published:
     const istring title;
 published:
-    RenderWindowDescription(istring title);
-    ~RenderWindowDescription();
+    explicit RenderWindowDescription(istring title);
+    ~RenderWindowDescription() override;
 };
 
 }  // namespace Motor

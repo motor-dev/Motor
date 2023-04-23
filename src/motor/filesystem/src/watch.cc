@@ -7,13 +7,11 @@
 
 namespace Motor {
 
-Folder::Watch::Watch(weak< Folder > folder) : m_folder(folder)
+Folder::Watch::Watch(const weak< Folder >& folder) : m_folder(folder)
 {
 }
 
-Folder::Watch::~Watch()
-{
-}
+Folder::Watch::~Watch() = default;
 
 void Folder::Watch::signal()
 {

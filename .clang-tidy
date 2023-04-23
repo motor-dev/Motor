@@ -1,10 +1,8 @@
-# Generated from CLion Inspection settings
 ---
 Checks: '-*,
 bugprone-argument-comment,
 bugprone-assert-side-effect,
 bugprone-bad-signal-to-kill-thread,
-bugprone-branch-clone,
 bugprone-copy-constructor-init,
 bugprone-dangling-handle,
 bugprone-dynamic-static-initializers,
@@ -64,7 +62,6 @@ cert-str34-c,
 cppcoreguidelines-interfaces-global-init,
 cppcoreguidelines-narrowing-conversions,
 cppcoreguidelines-pro-type-member-init,
-cppcoreguidelines-pro-type-static-cast-downcast,
 cppcoreguidelines-slicing,
 google-default-arguments,
 google-explicit-constructor,
@@ -145,3 +142,6 @@ readability-static-definition-in-anonymous-namespace,
 readability-string-compare,
 readability-uniqueptr-delete-release,
 readability-use-anyofallof'
+CheckOptions:
+  - key: modernize-use-emplace.ContainersWithPushBack
+    value: minitl::vector

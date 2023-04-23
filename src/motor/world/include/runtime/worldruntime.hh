@@ -7,7 +7,6 @@
 
 #include <motor/plugin/plugin.hh>
 #include <motor/resource/resourcemanager.hh>
-#include <motor/scheduler/kernel/iproduct.meta.hh>
 #include <motor/scheduler/kernel/producerloader.hh>
 #include <motor/scheduler/task/group.hh>
 
@@ -25,11 +24,11 @@ private:
     {
     public:
         SubWorldResource();
-        ~SubWorldResource();
+        ~SubWorldResource() override;
     };
     struct SubWorldData
     {
-        u32 id;
+        u32 id {};
     };
     struct ProductRuntime;
     typedef minitl::hashmap< weak< const KernelScheduler::IProduct >,
@@ -51,22 +50,24 @@ private:
     void processEvents();
 
 private:
-    void load(weak< const Resource::IDescription > subworld, Resource::Resource& resource);
-    void unload(weak< const Resource::IDescription > subWorld, Resource::Resource& resource);
+    void load(const weak< const Resource::IDescription >& subworld,
+              Resource::Resource&                         resource) override;
+    void unload(const weak< const Resource::IDescription >& subWorld,
+                Resource::Resource&                         resource) override;
     void addLogicComponentType(raw< const Meta::Class > type);
 
 public:
     weak< Task::ITask > startUpdateTask() const;
     weak< Task::ITask > endUpdateTask() const;
 
-    void spawn(weak< const SubWorld > subworld, u32 parentId, Meta::Value spawnParameters[]);
+    void spawn(const weak< const SubWorld >& subworld, u32 parentId, Meta::Value spawnParameters[]);
 
 public:
-    WorldRuntime(weak< const KernelScheduler::ProducerLoader >            producerLoader,
-                 const Plugin::Context&                                   context,
-                 minitl::array< weak< const KernelScheduler::IProduct > > products,
-                 weak< ComponentRegistry::Runtime >                       registryRuntime);
-    ~WorldRuntime();
+    WorldRuntime(const weak< const KernelScheduler::ProducerLoader >&            producerLoader,
+                 const Plugin::Context&                                          context,
+                 const minitl::array< weak< const KernelScheduler::IProduct > >& products,
+                 const weak< ComponentRegistry::Runtime >&                       registryRuntime);
+    ~WorldRuntime() override;
 };
 
 }}  // namespace Motor::World

@@ -11,13 +11,13 @@ class motor_api(CORE) StackAllocator : public minitl::Allocator
 {
 public:
     StackAllocator();
-    ~StackAllocator();
+    ~StackAllocator() override;
 
 protected:
-    virtual void* internalAlloc(u64 size, u64 alignment) override;
-    virtual bool  internalResize(void* ptr, u64 size) override;
-    virtual void* internalRealloc(void* ptr, u64 size, u64 alignment) override;
-    virtual void  internalFree(const void* pointer) override;
+    void* internalAlloc(u64 size, u64 alignment) override;
+    bool  internalResize(void* ptr, u64 size) override;
+    void* internalRealloc(void* ptr, u64 size, u64 alignment) override;
+    void  internalFree(const void* pointer) override;
 };
 
 }  // namespace Motor

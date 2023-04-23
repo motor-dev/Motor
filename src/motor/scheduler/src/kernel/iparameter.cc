@@ -8,26 +8,22 @@
 
 namespace Motor { namespace KernelScheduler {
 
-IParameter::IParameter()
-{
-}
+IParameter::IParameter() = default;
 
-IParameter::~IParameter()
-{
-}
+IParameter::~IParameter() = default;
 
 weak< const IMemoryBuffer > IParameter::getCurrentBank() const
 {
     return m_buffers[0];
 }
 
-weak< const IMemoryBuffer > IParameter::getBank(weak< const IMemoryHost > host) const
+weak< const IMemoryBuffer > IParameter::getBank(const weak< const IMemoryHost >& host) const
 {
-    for(u32 i = 0; i < BufferCount; ++i)
+    for(const auto& m_buffer: m_buffers)
     {
-        if(m_buffers[i] && m_buffers[i]->getHost() == host) return m_buffers[i];
+        if(m_buffer && m_buffer->getHost() == host) return m_buffer;
     }
-    return weak< const IMemoryBuffer >();
+    return {};
 }
 
 istring IParameter::getProductTypePropertyName()
@@ -204,7 +200,7 @@ IImage1D::ParameterRegistration::getParameter(raw< const Meta::Class > objectCla
     ParameterRegistry& reg = registry();
     for(ParameterRegistry::const_iterator it = reg.begin(); it != reg.end(); ++it)
         if(it->first == objectClass) return it->second;
-    return raw< const Meta::Class >();
+    return {};
 }
 
 raw< const Meta::Class >
@@ -213,7 +209,7 @@ IImage2D::ParameterRegistration::getParameter(raw< const Meta::Class > objectCla
     ParameterRegistry& reg = registry();
     for(ParameterRegistry::const_iterator it = reg.begin(); it != reg.end(); ++it)
         if(it->first == objectClass) return it->second;
-    return raw< const Meta::Class >();
+    return {};
 }
 
 raw< const Meta::Class >
@@ -222,7 +218,7 @@ IImage3D::ParameterRegistration::getParameter(raw< const Meta::Class > objectCla
     ParameterRegistry& reg = registry();
     for(ParameterRegistry::const_iterator it = reg.begin(); it != reg.end(); ++it)
         if(it->first == objectClass) return it->second;
-    return raw< const Meta::Class >();
+    return {};
 }
 
 raw< const Meta::Class >
@@ -231,7 +227,7 @@ ISegment::ParameterRegistration::getParameter(raw< const Meta::Class > objectCla
     ParameterRegistry& reg = registry();
     for(ParameterRegistry::const_iterator it = reg.begin(); it != reg.end(); ++it)
         if(it->first == objectClass) return it->second;
-    return raw< const Meta::Class >();
+    return {};
 }
 
 raw< const Meta::Class >
@@ -240,7 +236,7 @@ ISegments::ParameterRegistration::getParameter(raw< const Meta::Class > objectCl
     ParameterRegistry& reg = registry();
     for(ParameterRegistry::const_iterator it = reg.begin(); it != reg.end(); ++it)
         if(it->first == objectClass) return it->second;
-    return raw< const Meta::Class >();
+    return {};
 }
 
 raw< const Meta::Class >
@@ -249,7 +245,7 @@ IStream::ParameterRegistration::getParameter(raw< const Meta::Class > objectClas
     ParameterRegistry& reg = registry();
     for(ParameterRegistry::const_iterator it = reg.begin(); it != reg.end(); ++it)
         if(it->first == objectClass) return it->second;
-    return raw< const Meta::Class >();
+    return {};
 }
 
 }}  // namespace Motor::KernelScheduler

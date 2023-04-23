@@ -11,14 +11,13 @@ class Window;
 class Window::PlatformWindow : public minitl::refcountable
 {
     friend class Window;
-    MOTOR_NOCOPY(PlatformWindow);
 
 private:
     weak< const Renderer > m_renderer;
     HWND                   m_window;
 
 public:
-    PlatformWindow(weak< const Renderer > renderer, weak< Window > window);
+    PlatformWindow(const weak< const Renderer >& renderer, const weak< Window >& window);
     ~PlatformWindow();
 };
 

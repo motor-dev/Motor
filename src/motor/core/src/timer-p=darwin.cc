@@ -19,7 +19,7 @@ u64 Timer::tick()
     __asm__ __volatile__("rdtsc" : "=a"(lo), "=d"(hi));
     return ((u64)lo) | (((u64)hi) << 32);
 #elif defined(_PPC)
-    u64               result = 0;
+    u64               result;
     unsigned long int upper, lower, tmp;
     __asm__ volatile("0:                  \n"
                      "\tmftbu   %0           \n"

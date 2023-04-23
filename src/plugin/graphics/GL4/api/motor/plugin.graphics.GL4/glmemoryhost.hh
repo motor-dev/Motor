@@ -11,9 +11,9 @@ class motor_api(GL4) GLMemoryHost : public KernelScheduler::IMemoryHost
 {
 public:
     GLMemoryHost();
-    ~GLMemoryHost();
+    ~GLMemoryHost() override;
 
-    void release(weak< KernelScheduler::IMemoryBuffer > buffer);
+    void release(const weak< KernelScheduler::IMemoryBuffer >& buffer) override;
 };
 
 }}  // namespace Motor::OpenGL

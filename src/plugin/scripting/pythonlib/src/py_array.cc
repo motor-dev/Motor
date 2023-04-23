@@ -9,79 +9,146 @@
 
 namespace Motor { namespace Python {
 
-static PyTypeObject::Py2NumberMethods s_py2ArrayNumber
-    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, 0, &PyMotorArray::nonZero,
-       0,         0, 0, 0, 0, 0, 0, 0, 0,
-       0,         0, 0, 0, 0, 0, 0, 0, 0,
-       0,         0, 0, 0, 0, 0, 0, 0, 0,
-       0};
+static PyTypeObject::Py2NumberMethods s_py2ArrayNumber = {{nullptr, nullptr, nullptr},
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          &PyMotorArray::nonZero,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr};
 
-static PyTypeObject::Py3NumberMethods s_py3ArrayNumber
-    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, &PyMotorArray::nonZero,
-       0,         0, 0, 0, 0, 0, 0, 0,
-       0,         0, 0, 0, 0, 0, 0, 0,
-       0,         0, 0, 0, 0, 0, 0, 0,
-       0,         0};
+static PyTypeObject::Py3NumberMethods s_py3ArrayNumber = {{nullptr, nullptr, nullptr},
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          &PyMotorArray::nonZero,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr};
 
-static PyTypeObject::PySequenceMethods s_pyArraySequence
-    = {&PyMotorArray::length, 0, 0, &PyMotorArray::item, 0, &PyMotorArray::setItem, 0, 0, 0, 0};
+static PyTypeObject::PySequenceMethods s_pyArraySequence = {&PyMotorArray::length,
+                                                            nullptr,
+                                                            nullptr,
+                                                            &PyMotorArray::item,
+                                                            nullptr,
+                                                            &PyMotorArray::setItem,
+                                                            nullptr,
+                                                            nullptr,
+                                                            nullptr,
+                                                            nullptr};
 
-PyTypeObject PyMotorArray::s_pyType = {{{0, 0}, 0},
+PyTypeObject PyMotorArray::s_pyType = {{{0, nullptr}, 0},
                                        "py_motor.Array",
                                        sizeof(PyMotorArray),
                                        0,
                                        &PyMotorArray::dealloc,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
                                        &PyMotorArray::repr,
-                                       0,
+                                       nullptr,
                                        &s_pyArraySequence,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
                                        Py_TPFLAGS_MOTOR_DEFAULT | Py_TPFLAGS_IS_ABSTRACT,
                                        "Wrapper class for the C++ Motor array types",
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
                                        0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
+                                       nullptr,
+                                       nullptr,
                                        PyMotorObject::s_methods,
+                                       nullptr,
+                                       nullptr,
+                                       PyMotorObject::s_pyTypePtr,
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
                                        0,
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
+                                       nullptr,
                                        0,
-                                       &PyMotorObject::s_pyType,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0,
-                                       0};
+                                       nullptr,
+                                       nullptr};
 
 PyObject* PyMotorArray::stealValue(PyObject* owner, Meta::Value& value)
 {
     motor_assert(value.type().metaclass->type() == Meta::ClassType_Array,
                  "PyMotorArray only accepts Array types");
-    PyMotorArray* result = static_cast< PyMotorArray* >(s_pyType.tp_alloc(&s_pyType, 0));
-    (result)->owner      = owner;
+    auto* result    = static_cast< PyMotorArray* >(s_pyType.tp_alloc(&s_pyType, 0));
+    (result)->owner = owner;
 
     if(owner)
     {
@@ -102,7 +169,7 @@ PyObject* PyMotorArray::stealValue(PyObject* owner, Meta::Value& value)
 
 PyObject* PyMotorArray::repr(PyObject* self)
 {
-    PyMotorObject*     self_ = static_cast< PyMotorObject* >(self);
+    auto*              self_ = static_cast< PyMotorObject* >(self);
     const Meta::Value& v     = self_->value;
 
     if(s_library->getVersion() >= 30)
@@ -123,7 +190,7 @@ int PyMotorArray::nonZero(PyObject* self)
 
 Py_ssize_t PyMotorArray::length(PyObject* self)
 {
-    PyMotorArray*    self_ = static_cast< PyMotorArray* >(self);
+    auto*            self_ = static_cast< PyMotorArray* >(self);
     const Meta::Type t     = self_->value.type();
     motor_assert(t.metaclass->type() == Meta::ClassType_Array, "PyMotorArray expected array value");
     return Py_ssize_t(t.metaclass->operators->arrayOperators->size(self_->value));
@@ -131,7 +198,7 @@ Py_ssize_t PyMotorArray::length(PyObject* self)
 
 PyObject* PyMotorArray::item(PyObject* self, Py_ssize_t index)
 {
-    PyMotorArray* self_ = static_cast< PyMotorArray* >(self);
+    auto* self_ = static_cast< PyMotorArray* >(self);
     if(index >= 0 && index < length(self))
     {
         u32              index_ = motor_checked_numcast< u32 >(index);
@@ -139,18 +206,18 @@ PyObject* PyMotorArray::item(PyObject* self, Py_ssize_t index)
         Meta::Value      v
             = t.isConst() ? t.metaclass->operators->arrayOperators->indexConst(self_->value, index_)
                           : t.metaclass->operators->arrayOperators->index(self_->value, index_);
-        return PyMotorObject::stealValue(0, v);
+        return PyMotorObject::stealValue(nullptr, v);
     }
     else
     {
         s_library->m_PyErr_Format(*s_library->m_PyExc_IndexError, "Index out of range");
-        return 0;
+        return nullptr;
     }
 }
 
 int PyMotorArray::setItem(PyObject* self, Py_ssize_t index, PyObject* value)
 {
-    PyMotorArray*                         self_    = static_cast< PyMotorArray* >(self);
+    auto*                                 self_    = static_cast< PyMotorArray* >(self);
     const Meta::Type                      t        = self_->value.type();
     raw< const Meta::ArrayOperatorTable > arrayApi = t.metaclass->operators->arrayOperators;
     if(t.isConst())
@@ -170,8 +237,8 @@ int PyMotorArray::setItem(PyObject* self, Py_ssize_t index, PyObject* value)
     }
     else
     {
-        u32          index_ = motor_checked_numcast< u32 >(index);
-        Meta::Value* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
+        u32   index_ = motor_checked_numcast< u32 >(index);
+        auto* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
         PyMotorObject::unpack(value, arrayApi->value_type, v);
         arrayApi->index(self_->value, index_) = *v;
         v->~Value();

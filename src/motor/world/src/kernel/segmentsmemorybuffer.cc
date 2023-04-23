@@ -6,13 +6,11 @@
 
 namespace Motor { namespace World {
 
-SegmentsMemoryBuffer::SegmentsMemoryBuffer(weak< const KernelScheduler::IMemoryHost > host)
+SegmentsMemoryBuffer::SegmentsMemoryBuffer(const weak< const KernelScheduler::IMemoryHost >& host)
     : IMemoryBuffer(host)
 {
 }
 
-SegmentsMemoryBuffer::~SegmentsMemoryBuffer()
-{
-}
+SegmentsMemoryBuffer::~SegmentsMemoryBuffer() = default;
 
 }}  // namespace Motor::World

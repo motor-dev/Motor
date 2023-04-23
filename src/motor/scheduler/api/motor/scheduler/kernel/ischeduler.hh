@@ -30,8 +30,8 @@ protected:
     const SchedulerType     m_type;
 
 protected:
-    IScheduler(istring name, weak< Scheduler > scheduler, SchedulerType type);
-    virtual ~IScheduler();
+    IScheduler(istring name, const weak< Scheduler >& scheduler, SchedulerType type);
+    ~IScheduler() override;
 
 public:
     virtual void run(weak< const Task::KernelTask > task) = 0;
@@ -40,5 +40,3 @@ public:
 };
 
 }}  // namespace Motor::KernelScheduler
-
-#include <motor/scheduler/task/kerneltask.hh>

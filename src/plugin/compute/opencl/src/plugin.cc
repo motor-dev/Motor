@@ -17,8 +17,8 @@ private:
     minitl::vector< ref< Scheduler > > m_schedulers;
 
 public:
-    PlatformLoader(const Plugin::Context& context);
-    ~PlatformLoader();
+    explicit PlatformLoader(const Plugin::Context& context);
+    ~PlatformLoader() override;
 };
 
 PlatformLoader::PlatformLoader(const Plugin::Context& context)
@@ -36,10 +36,8 @@ PlatformLoader::PlatformLoader(const Plugin::Context& context)
     }
 }
 
-PlatformLoader::~PlatformLoader()
-{
-}
+PlatformLoader::~PlatformLoader() = default;
 
 }}}  // namespace Motor::KernelScheduler::OpenCL
 
-MOTOR_PLUGIN_REGISTER(Motor::KernelScheduler::OpenCL::PlatformLoader);
+MOTOR_PLUGIN_REGISTER(Motor::KernelScheduler::OpenCL::PlatformLoader)

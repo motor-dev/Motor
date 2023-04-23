@@ -13,7 +13,7 @@
 namespace Motor {
 
 /* condition variables are only supported in Vista+ */
-Event::Event() : m_data(CreateEvent(0, FALSE, FALSE, 0))
+Event::Event() : m_data(CreateEvent(nullptr, FALSE, FALSE, nullptr)), m_lock(nullptr)
 {
 }
 

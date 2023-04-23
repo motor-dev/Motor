@@ -34,8 +34,8 @@ def options(option_context):
         except OSError:
             pass
     for vstudio_root_path in (
-        r'C:\Microsoft\AndroidNDK64', r'C:\ProgramData\Microsoft\AndroidNDK64', r'C:\Microsoft\AndroidNDK',
-        r'C:\ProgramData\Microsoft\AndroidNDK'
+            r'C:\Microsoft\AndroidNDK64', r'C:\ProgramData\Microsoft\AndroidNDK64', r'C:\Microsoft\AndroidNDK',
+            r'C:\ProgramData\Microsoft\AndroidNDK'
     ):
         try:
             for p in os.listdir(vstudio_root_path):
@@ -101,7 +101,7 @@ def options(option_context):
         dest='android_ndk_path',
         help='Path to the root of the Android NDK (%s)' % (ndk_paths or 'none detected')
     )
-    #option_context.recurse('mak/device.py')
+    # option_context.recurse('mak/device.py')
 
 
 def host_configure(configuration_context):
@@ -133,7 +133,8 @@ def setup(configuration_context):
 
 def build(build_context):
     # type: (Build.BuildContext) -> None
-    build_context.recurse('mak/build.py')
+    if not build_context.env.PROJECTS:
+        build_context.recurse('mak/build.py')
     build_context.recurse('src/build.py')
 
 

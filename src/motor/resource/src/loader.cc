@@ -11,8 +11,6 @@ ILoader::ILoader() : m_id(s_nextLoaderId++)
 {
 }
 
-ILoader::~ILoader()
-{
-}
+ILoader::~ILoader() = default;
 
 }}  // namespace Motor::Resource

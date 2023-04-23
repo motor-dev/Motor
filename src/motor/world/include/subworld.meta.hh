@@ -11,7 +11,7 @@ class motor_api(WORLD) SubWorld : public Resource::Description< SubWorld >
 {
 published:
     SubWorld();
-    ~SubWorld();
+    ~SubWorld() override;
 };
 
 }}  // namespace Motor::World

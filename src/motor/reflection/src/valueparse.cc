@@ -18,7 +18,7 @@ ref< AST::Node > parseValue(minitl::Allocator& arena, AST::MessageList& errors,
     motor_value_lex_destroy();
     if(result != 0 || !errors.empty())
     {
-        return ref< AST::Node >();
+        return {};
     }
     else
     {

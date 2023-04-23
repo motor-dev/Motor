@@ -36,7 +36,7 @@ private:
 
 public:
     ThreadParams(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2);
-    ~ThreadParams();
+    ~ThreadParams() = default;
 
     static unsigned long WINAPI threadWrapper(void* params);
 };
@@ -53,7 +53,7 @@ public:
         {
             motor_warning(Log::thread(), "TLS not available");
         }
-        static Thread::ThreadParams p("main", 0, 0, 0);
+        static Thread::ThreadParams p("main", nullptr, 0, 0);
         createThreadSpecificData(p);
     }
     ~ThreadSpecificData()
@@ -63,14 +63,14 @@ public:
             TlsFree(m_key);
         }
     }
-    void createThreadSpecificData(const Thread::ThreadParams& params)
+    void createThreadSpecificData(const Thread::ThreadParams& params) const
     {
         if(!FAILED(m_key))
         {
             TlsSetValue(m_key, (void*)&params);
         }
     }
-    const Thread::ThreadParams* getThreadParams()
+    const Thread::ThreadParams* getThreadParams() const
     {
         if(!FAILED(m_key))
         {
@@ -78,7 +78,7 @@ public:
         }
         else
         {
-            return 0;
+            return nullptr;
         }
     }
 };
@@ -95,14 +95,10 @@ Thread::ThreadParams::ThreadParams(const istring& name, ThreadFunction f, intptr
     motor_info_format(Log::thread(), "starting thread {0}", name);
 }
 
-Thread::ThreadParams::~ThreadParams()
-{
-}
-
 static void setThreadName(const istring& name)
 {
 #ifdef _MSC_VER
-    THREADNAME_INFO info;
+    THREADNAME_INFO info {};
     info.dwType     = 0x1000;
     info.szName     = name.c_str();
     info.dwThreadID = GetCurrentThreadId();
@@ -121,7 +117,7 @@ static void setThreadName(const istring& name)
 
 unsigned long WINAPI Thread::ThreadParams::threadWrapper(void* params)
 {
-    ThreadParams* p = static_cast< ThreadParams* >(params);
+    auto* p = static_cast< ThreadParams* >(params);
     s_threadData.createThreadSpecificData(*p);
     motor_debug_format(Log::thread(), "started thread {0}", p->m_name);
     setThreadName(p->m_name);
@@ -133,7 +129,10 @@ unsigned long WINAPI Thread::ThreadParams::threadWrapper(void* params)
 
 Thread::Thread(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2, Priority p)
     : m_params(new ThreadParams(name, f, p1, p2))
-    , m_data((void*)CreateThread(0, 0, &ThreadParams::threadWrapper, m_params, 0, &m_id))
+    , m_id {}
+    , m_data((void*)CreateThread(
+          nullptr, 0, reinterpret_cast< LPTHREAD_START_ROUTINE >(&ThreadParams::threadWrapper),
+          m_params, 0, &m_id))
 {
     setPriority(p);
 }

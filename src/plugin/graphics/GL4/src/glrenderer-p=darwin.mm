@@ -144,7 +144,7 @@ GLRenderer::~GLRenderer()
     flush();
 }
 
-void GLRenderer::attachWindow(weak< GLWindow > w) const
+void GLRenderer::attachWindow(const weak< GLWindow >& w) const
 {
     NSWindow*        window  = (NSWindow*)w->getWindowHandle();
     NSOpenGLContext* context = [[NSOpenGLContext alloc] initWithFormat:m_context->m_pixelFormat
@@ -168,8 +168,8 @@ bool GLRenderer::success() const
 
 //------------------------------------------------------------------------
 
-GLWindow::GLWindow(weak< const RenderWindowDescription > windowDescription,
-                   weak< const GLRenderer >              renderer)
+GLWindow::GLWindow(const weak< const RenderWindowDescription >& windowDescription,
+                   const weak< const GLRenderer >&              renderer)
     : Windowing::Window(windowDescription, renderer)
     , m_context(scoped< Context >())
 {

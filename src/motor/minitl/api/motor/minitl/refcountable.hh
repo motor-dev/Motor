@@ -3,7 +3,7 @@
 #pragma once
 
 #include <motor/minitl/stdafx.h>
-#include <motor/minitl/cast.hh>
+#include <motor/minitl/assert.hh>
 #include <motor/minitl/pointer.hh>
 
 namespace minitl {
@@ -26,7 +26,7 @@ public:
     refcountable() : m_refCount(i_u32::create(0))
     {
     }
-    inline virtual ~refcountable()
+    inline ~refcountable() override
     {
         motor_assert_format(m_refCount == 0, "object is destroyed but has {0} references",
                             m_refCount);
@@ -46,12 +46,12 @@ protected:
     template < typename T >
     ref< T > refFromThis()
     {
-        return ref< T >(motor_checked_cast< T >(this));
+        return ref< T >(static_cast< T* >(this));
     }
     template < typename T >
     ref< const T > refFromThis() const
     {
-        return ref< const T >(motor_checked_cast< const T >(this));
+        return ref< const T >(static_cast< const T* >(this));
     }
     static void operator delete(void* memory)
     {

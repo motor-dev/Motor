@@ -524,7 +524,6 @@ void vector< T >::ensure(size_type size)
         size = size >> 4 | size;
         size = size >> 8 | size;
         size = size >> 16 | size;
-        size = size >> (sizeof(size_type) == 8 ? 32 : 0) | size;  // NOLINT
         size++;
         reserve(size);
     }
@@ -542,7 +541,6 @@ typename vector< T >::iterator vector< T >::ensure(const_iterator location, size
         size = size >> 4 | size;
         size = size >> 8 | size;
         size = size >> 16 | size;
-        size = size >> (sizeof(size_type) == 8 ? 32 : 0) | size;  // NOLINT
         size++;
 
         Allocator::Block< T > block(m_memory.arena(), size);

@@ -6,12 +6,10 @@
 
 namespace Motor {
 
-Package::Package(weak< const File > file) : Script<Package>(file)
+Package::Package(const weak< const File >& file) : Script< Package >(file)
 {
 }
 
-Package::~Package()
-{
-}
+Package::~Package() = default;
 
 }  // namespace Motor

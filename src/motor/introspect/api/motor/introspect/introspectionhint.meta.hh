@@ -23,14 +23,14 @@ protected:
     u32                  m_argumentThis;
 
 public:
-    IntrospectionHint(weak< const Object > owner, raw< const Method > method,
+    IntrospectionHint(const weak< const Object >& owner, raw< const Method > method,
                       const CallInfo& callInfo, u32 argumentThis);
-    virtual ~IntrospectionHint();
+    ~IntrospectionHint() override;
 
     virtual ConversionCost calculateConversion(const Type& targetType) const;
     virtual Type           getType() const;
-    virtual bool           getPropertyType(DbContext & context, const istring propertyName,
-                                           Type& propertyType) const;
+    virtual bool getPropertyType(DbContext & context, istring propertyName, Type & propertyType)
+        const;
     virtual bool  getPropertyValue(Value & value, const istring& propertyName, Value& result) const;
     virtual Value call(const ArgInfo arguments[], u32 argumentCount) const;
     virtual minitl::tuple< minitl::raw< const Method >, bool > getCall(DbContext & context) const;

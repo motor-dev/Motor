@@ -9,132 +9,132 @@ namespace Motor { namespace Python {
 
 template < typename T >
 PyTypeObject::Py2NumberMethods PyMotorNumber< T >::s_py2NumberNumber
-    = {{0, 0, 0},
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
+    = {{nullptr, nullptr, nullptr},
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
        &PyMotorNumber< T >::nonZero,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
        &PyMotorNumber< T >::toint,
        &PyMotorNumber< T >::tolong,
        &PyMotorNumber< T >::tofloat,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0};
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr};
 
 template < typename T >
 PyTypeObject::Py3NumberMethods PyMotorNumber< T >::s_py3NumberNumber
-    = {{0, 0, 0},
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
+    = {{nullptr, nullptr, nullptr},
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
        &PyMotorNumber< T >::nonZero,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
        &PyMotorNumber< T >::tolong,
-       0,
+       nullptr,
        &PyMotorNumber< T >::tofloat,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0,
-       0};
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr,
+       nullptr};
 
 template < typename T >
 PyTypeObject PyMotorNumber< T >::s_pyType = {
-    {{0, 0}, 0},
+    {{0, nullptr}, 0},
     istring(minitl::format< 128u >(FMT("py_motor.{0}"), motor_type< T >().metaclass->name)).c_str(),
     sizeof(PyMotorNumber< T >),
     0,
     &PyMotorNumber< T >::dealloc,
-    0,
-    0,
-    0,
-    0,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
     &PyMotorNumber< T >::repr,
-    0,
-    0,
-    0,
-    0,
-    0,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
     &PyMotorNumber< T >::str,
-    0,
-    0,
-    0,
+    nullptr,
+    nullptr,
+    nullptr,
     Py_TPFLAGS_MOTOR_DEFAULT,
     "Wrapper class for the C++ Motor number types",
+    nullptr,
+    nullptr,
+    nullptr,
     0,
-    0,
-    0,
-    0,
-    0,
-    0,
+    nullptr,
+    nullptr,
     PyMotorObject::s_methods,
-    0,
-    0,
-    &PyMotorObject::s_pyType,
-    0,
-    0,
-    0,
+    nullptr,
+    nullptr,
+    PyMotorObject::s_pyTypePtr,
+    nullptr,
+    nullptr,
+    nullptr,
     0,
     &PyMotorNumber< T >::init,
-    0,
+    nullptr,
     &PyMotorNumber< T >::newinst,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
     0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0};
+    nullptr,
+    nullptr};
 
 template < typename T >
 PyObject* PyMotorNumber< T >::stealValue(PyObject* owner, Meta::Value& value)
@@ -160,8 +160,8 @@ template < typename T >
 int PyMotorNumber< T >::init(PyObject* self, PyObject* args, PyObject* kwds)
 {
     motor_forceuse(kwds);
-    PyMotorObject* self_    = static_cast< PyMotorObject* >(self);
-    Py_ssize_t     argCount = s_library->m_PyTuple_Size(args);
+    auto*      self_    = static_cast< PyMotorObject* >(self);
+    Py_ssize_t argCount = s_library->m_PyTuple_Size(args);
     if(argCount == 0)
     {
         self_->value = Meta::Value(T());
@@ -197,7 +197,7 @@ int PyMotorNumber< T >::init(PyObject* self, PyObject* args, PyObject* kwds)
 template < typename T >
 PyObject* PyMotorNumber< T >::repr(PyObject* self)
 {
-    PyMotorObject*                 self_ = static_cast< PyMotorObject* >(self);
+    auto*                          self_ = static_cast< PyMotorObject* >(self);
     const Meta::Value&             v     = self_->value;
     minitl::format_buffer< 1024u > format
         = minitl::format< 1024u >(FMT("[{0} {1}]"), v.type(), v.as< const T >());
@@ -214,31 +214,31 @@ PyObject* PyMotorNumber< T >::repr(PyObject* self)
 template < typename T >
 PyObject* PyMotorNumber< T >::toint(PyObject* self)
 {
-    PyMotorObject* self_ = static_cast< PyMotorObject* >(self);
-    long           value = (long)self_->value.as< const T >();
+    auto* self_ = static_cast< PyMotorObject* >(self);
+    auto  value = (long)self_->value.as< const T >();  // NOLINT
     return s_library->m_PyInt_FromLong(value);
 }
 
 template < typename T >
 PyObject* PyMotorNumber< T >::tolong(PyObject* self)
 {
-    PyMotorObject*     self_ = static_cast< PyMotorObject* >(self);
-    unsigned long long value = (unsigned long long)self_->value.as< const T >();
+    auto* self_ = static_cast< PyMotorObject* >(self);
+    auto  value = (unsigned long long)self_->value.as< const T >();  // NOLINT
     return s_library->m_PyLong_FromUnsignedLongLong(value);
 }
 
 template < typename T >
 PyObject* PyMotorNumber< T >::tofloat(PyObject* self)
 {
-    PyMotorObject* self_ = static_cast< PyMotorObject* >(self);
-    double         value = (double)self_->value.as< const T >();
+    auto* self_ = static_cast< PyMotorObject* >(self);
+    auto  value = (double)self_->value.as< const T >();
     return s_library->m_PyFloat_FromDouble(value);
 }
 
 template < typename T >
 PyObject* PyMotorNumber< T >::str(PyObject* self)
 {
-    PyMotorObject*     self_                       = static_cast< PyMotorObject* >(self);
+    auto*              self_                       = static_cast< PyMotorObject* >(self);
     const Meta::Value& v                           = self_->value;
     PyObject* (*tostring)(const char* format, ...) = s_library->getVersion() >= 30
                                                          ? s_library->m_PyUnicode_FromFormat
@@ -249,7 +249,7 @@ PyObject* PyMotorNumber< T >::str(PyObject* self)
 template < typename T >
 int PyMotorNumber< T >::nonZero(PyObject* self)
 {
-    PyMotorNumber*   self_ = static_cast< PyMotorNumber* >(self);
+    auto*            self_ = static_cast< PyMotorNumber* >(self);
     const Meta::Type t     = self_->value.type();
     motor_assert(t.metaclass->type() == Meta::ClassType_Number,
                  "PyMotorNumber expected number value");
@@ -259,7 +259,7 @@ int PyMotorNumber< T >::nonZero(PyObject* self)
     }
     else
     {
-        return self_->value.template as< const void* const >() != 0;
+        return self_->value.template as< const void* const >() != nullptr;
     }
 }
 

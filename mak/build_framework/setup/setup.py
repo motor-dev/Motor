@@ -25,9 +25,10 @@ def setup(configuration_context):
     # type: (Configure.ConfigurationContext) -> None
     "setup step before the build: recursively calls setup on every third party library"
     configuration_context.recurse('host/host.py')
+    env = configuration_context.env
     extra = configuration_context.motornode.make_node('extra')
-    if configuration_context.env.VALID_PLATFORMS:
-        extra_dir = os.path.join(extra.abspath(), configuration_context.env.VALID_PLATFORMS[0])
+    if env.VALID_PLATFORMS:
+        extra_dir = os.path.join(extra.abspath(), env.VALID_PLATFORMS[0])
         if os.path.isdir(extra_dir):
             configuration_context.recurse(extra_dir, once=False)
 
@@ -43,6 +44,7 @@ def multiarch_setup(configuration_context):
                 configuration_context.start_msg('Setting up environment')
                 configuration_context.end_msg(t)
                 configuration_context.setenv(t + '.setup', configuration_context.all_envs[t])
+                configuration_context.env.TOOLCHAIN_NAME = configuration_context.env.TOOLCHAIN
                 configuration_context.env.TOOLCHAIN = configuration_context.env.TOOLCHAIN + '.setup'
                 configuration_context.recurse(configuration_context.run_dir, once=False)
             except Exception as e:
@@ -63,6 +65,7 @@ def multiarch_setup(configuration_context):
             configuration_context.start_msg('Setting up environment')
             configuration_context.end_msg(t)
             configuration_context.setenv(t + '.setup', configuration_context.all_envs[t])
+            configuration_context.env.TOOLCHAIN_NAME = configuration_context.env.TOOLCHAIN
             configuration_context.env.TOOLCHAIN = configuration_context.env.TOOLCHAIN + '.setup'
             configuration_context.recurse(configuration_context.run_dir, once=False)
         except Exception as e:

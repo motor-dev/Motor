@@ -13,9 +13,7 @@ Float::Float(float value) : Node(), m_value(value)
     motor_forceuse(m_value);
 }
 
-Float::~Float()
-{
-}
+Float::~Float() = default;
 
 ConversionCost Float::distance(const Type& type) const
 {

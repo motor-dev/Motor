@@ -6,12 +6,8 @@
 
 namespace Motor {
 
-TextureDescription::TextureDescription()
-{
-}
+TextureDescription::TextureDescription() = default;
 
-TextureDescription::~TextureDescription()
-{
-}
+TextureDescription::~TextureDescription() = default;
 
 }  // namespace Motor

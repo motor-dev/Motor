@@ -61,16 +61,16 @@ struct InterlockedType< 4 >
             value_t   value;
         } tagged_value;
 
-        tagged_t(value_t value = 0) : tagged_value{0, value}
+        explicit tagged_t(value_t value = nullptr) : tagged_value {0, value}
         {
         }
-        tagged_t(const tagged_t& other) = default;
-        tagged_t& operator=(const tagged_t& other) = default;
-        inline value_t value()
+        tagged_t(const tagged_t& other)                 = default;
+        tagged_t&      operator=(const tagged_t& other) = default;
+        inline value_t value() const
         {
             return tagged_value.value;
         }
-        inline bool operator==(tagged_t& other)
+        inline bool operator==(tagged_t& other) const
         {
             return (tagged_value.tag == other.tagged_value.tag)
                    && (tagged_value.value == other.tagged_value.value);
@@ -143,16 +143,16 @@ struct InterlockedType< 8 >
             value_t   value;
         } tagged_value;
 
-        tagged_t(value_t value = 0) : tagged_value{0, value}
+        explicit tagged_t(value_t value = nullptr) : tagged_value {0, value}
         {
         }
-        tagged_t(const tagged_t& other) = default;
-        tagged_t& operator=(const tagged_t& other) = default;
-        inline value_t value()
+        tagged_t(const tagged_t& other)                 = default;
+        tagged_t&      operator=(const tagged_t& other) = default;
+        inline value_t value() const
         {
             return tagged_value.value;
         }
-        inline bool operator==(tagged_t& other)
+        inline bool operator==(tagged_t& other) const
         {
             return (tagged_value.tag == other.tagged_value.tag)
                    && (tagged_value.value == other.tagged_value.value);

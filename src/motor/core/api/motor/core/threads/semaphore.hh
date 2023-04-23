@@ -12,17 +12,17 @@ class motor_api(CORE) Semaphore : public Threads::Waitable
 private:
     union Data
     {
-        i_u32 value;
+        i_i32 value;
         void* ptr;
     };
     Data m_data;
 
 public:
-    Semaphore(int initialCount);
-    ~Semaphore();
+    explicit Semaphore(int initialCount);
+    ~Semaphore() override;
 
-    void                         release(int count);
-    virtual Waitable::WaitResult wait() override;
+    void                 release(int count);
+    Waitable::WaitResult wait() override;
 
     static u32 flushPauseCount();
 };

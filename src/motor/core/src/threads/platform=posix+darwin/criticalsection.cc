@@ -10,7 +10,7 @@ namespace Motor {
 
 CriticalSection::CriticalSection() : m_data(new pthread_mutex_t)
 {
-    pthread_mutex_init(reinterpret_cast< pthread_mutex_t* >(m_data), 0);
+    pthread_mutex_init(reinterpret_cast< pthread_mutex_t* >(m_data), nullptr);
 }
 
 CriticalSection::~CriticalSection()

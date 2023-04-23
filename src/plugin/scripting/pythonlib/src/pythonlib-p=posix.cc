@@ -14,7 +14,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
                    ? dlopen(minitl::format< 1024u >(FMT("lib{0}.so"), m_pythonLibraryName),
                             RTLD_LAZY | RTLD_GLOBAL)
                    : RTLD_DEFAULT)
-    , m_status(dlerror() == 0)
+    , m_status(dlerror() == nullptr)
     , m_api(1013)
     , m_version(0)
 {
@@ -29,7 +29,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     do                                                                                             \
     {                                                                                              \
         void* tmp = dlsym(m_handle, #f);                                                           \
-        if(tmp) memcpy(&m_##dest, &tmp, sizeof(dest##Type));                                       \
+        if(tmp) memcpy(&m_##dest, &tmp, sizeof(Type_##dest));                                      \
     } while(0)
 #define motor_get_func_opt(f) motor_get_func_name_opt(f, f)
 #define motor_get_func_name(f, dest)                                                               \
@@ -61,8 +61,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         }
         else
         {
-            m_Py_InitModule4    = 0;
-            m_Py_InitModule4_64 = 0;
+            m_Py_InitModule4    = nullptr;
+            m_Py_InitModule4_64 = nullptr;
             motor_get_func_opt(Py_InitModule4);
             motor_get_func_opt(Py_InitModule4_64);
             motor_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab2);
@@ -70,12 +70,12 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         }
         if(m_version >= 32)
         {
-            m_Py_CompileStringFlags = 0;
+            m_Py_CompileStringFlags = nullptr;
             motor_get_func(Py_CompileStringExFlags);
         }
         else
         {
-            m_Py_CompileStringExFlags = 0;
+            m_Py_CompileStringExFlags = nullptr;
             motor_get_func(Py_CompileStringFlags);
         }
         motor_get_func(PyEval_EvalCodeEx);

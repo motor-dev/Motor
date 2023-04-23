@@ -10,8 +10,6 @@ GtkResourceDescription::GtkResourceDescription() : Description()
 {
 }
 
-GtkResourceDescription::~GtkResourceDescription()
-{
-}
+GtkResourceDescription::~GtkResourceDescription() = default;
 
 }}  // namespace Motor::Gtk3

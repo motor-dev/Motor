@@ -12,12 +12,8 @@ template < typename T >
 class Description : public IDescription
 {
 protected:
-    Description() : IDescription()
-    {
-    }
-    ~Description()
-    {
-    }
+    Description()           = default;
+    ~Description() override = default;
 };
 
 }}  // namespace Motor::Resource

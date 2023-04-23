@@ -16,27 +16,26 @@ protected:
     weak< Resource::ResourceManager > m_manager;
 
 public:
-    virtual ~ScriptEngine();
+    ~ScriptEngine() override;
 
 protected:
     ScriptEngine(minitl::Allocator& arena, weak< Resource::ResourceManager > manager);
-    virtual void runBuffer(weak< const T > script, Resource::Resource& resource,
+    virtual void runBuffer(const weak< const T >& script, Resource::Resource& resource,
                            const minitl::Allocator::Block< u8 >& buffer)
         = 0;
-    virtual void reloadBuffer(weak< const T > script, Resource::Resource& resource,
+    virtual void reloadBuffer(const weak< const T >& script, Resource::Resource& resource,
                               const minitl::Allocator::Block< u8 >& buffer)
         = 0;
 
 private:
-    virtual void load(weak< const Resource::IDescription > script,
-                      Resource::Resource&                  resource) override;
-    virtual void reload(weak< const Resource::IDescription > oldScript,
-                        weak< const Resource::IDescription > newScript,
-                        Resource::Resource&                  resource) override;
-    virtual void onTicketLoaded(weak< const Resource::IDescription >  script,
-                                Resource::Resource&                   resource,
-                                const minitl::Allocator::Block< u8 >& buffer,
-                                ILoader::LoadType                     type) override;
+    void load(const weak< const Resource::IDescription >& script,
+              Resource::Resource&                         resource) override;
+    void reload(const weak< const Resource::IDescription >& oldScript,
+                const weak< const Resource::IDescription >& newScript,
+                Resource::Resource&                         resource) override;
+    void onTicketLoaded(const weak< const Resource::IDescription >& script,
+                        Resource::Resource& resource, const minitl::Allocator::Block< u8 >& buffer,
+                        ILoader::LoadType type) override;
 };
 
 }  // namespace Motor

@@ -5,6 +5,7 @@
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/minitl/intrusive_list.hh>
 #include <motor/minitl/refcountable.hh>
+#include <motor/resource/idescription.meta.hh>
 
 namespace Motor {
 
@@ -24,7 +25,6 @@ class motor_api(3D) IGPUResource
 {
     template < typename T >
     friend class GPUResourceLoader;
-    MOTOR_NOCOPY(IGPUResource);
 
 protected:
     const weak< const IRenderer >        m_renderer;
@@ -34,12 +34,12 @@ private:
     i32 m_index;
 
 public:
-    IGPUResource(weak< const Resource::IDescription > description,
-                 weak< const IRenderer >              renderer);
-    virtual ~IGPUResource();
+    IGPUResource(const weak< const Resource::IDescription >& description,
+                 const weak< const IRenderer >&              renderer);
+    ~IGPUResource() override;
 
-    virtual void load(weak< const Resource::IDescription > description) = 0;
-    virtual void unload()                                               = 0;
+    virtual void load(const weak< const Resource::IDescription >& description) = 0;
+    virtual void unload()                                                      = 0;
 
     weak< const Resource::IDescription > resource() const
     {

@@ -40,7 +40,7 @@ private:
     ref< WatchPoint > m_watchpoint;
 
 public:
-    WatchRequest(RequestType /*type*/, const ipath& path, ref< WatchPoint > watchpoint)
+    WatchRequest(RequestType /*type*/, const ipath& path, const ref< WatchPoint >& watchpoint)
         : m_path(path)
         , m_watchpoint(watchpoint)
     {
@@ -62,15 +62,15 @@ private:
 
 public:
     WatchThread();
-    ~WatchThread();
+    ~WatchThread() override;
 
-    bool add(const ipath& path, ref< FileSystem::WatchPoint > watchpoint);
+    bool add(const ipath& path, const ref< FileSystem::WatchPoint >& watchpoint);
 };
 
 static void setThreadName(const istring& name)
 {
 #ifdef _MSC_VER
-    THREADNAME_INFO info;
+    THREADNAME_INFO info {};
     info.dwType     = 0x1000;
     info.szName     = name.c_str();
     info.dwThreadID = GetCurrentThreadId();
@@ -89,7 +89,7 @@ static void setThreadName(const istring& name)
 
 unsigned long WINAPI WatchThread::doWatchFolders(void* params)
 {
-    WatchThread* watchThread   = reinterpret_cast< WatchThread* >(params);
+    auto*        watchThread   = reinterpret_cast< WatchThread* >(params);
     static i_u32 s_threadIndex = i_u32::create(0);
     setThreadName(istring(minitl::format< 1024u >(FMT("FileSystem watch {0}"), s_threadIndex++)));
 
@@ -121,7 +121,7 @@ unsigned long WINAPI WatchThread::doWatchFolders(void* params)
                               | FILE_NOTIFY_CHANGE_LAST_WRITE;
                 HANDLE handle
                     = FindFirstChangeNotificationA(request->m_path.str().name, FALSE, flags);
-                watchThread->m_watches.push_back(minitl::make_tuple(handle, request->m_watchpoint));
+                watchThread->m_watches.emplace_back(handle, request->m_watchpoint);
                 request->~WatchRequest();
                 Arena::temporary().free(request);
             }
@@ -129,7 +129,7 @@ unsigned long WINAPI WatchThread::doWatchFolders(void* params)
         else if(result >= WAIT_OBJECT_0 + 1
                 && result <= WAIT_OBJECT_0 + watchThread->m_watches.size())
         {
-            int index = result - WAIT_OBJECT_0 - 1;
+            int index = int(result - WAIT_OBJECT_0 - 1);
             watchThread->m_watches[index].second->signalDirty();
             FindNextChangeNotification(watchThread->m_watches[index].first);
         }
@@ -137,16 +137,16 @@ unsigned long WINAPI WatchThread::doWatchFolders(void* params)
                 && result <= WAIT_ABANDONED_0 + watchThread->m_watches.size())
         {
             motor_notreached();
-            int index = result - WAIT_ABANDONED_0 - 1;
+            int index = int(result - WAIT_ABANDONED_0 - 1);
             FindNextChangeNotification(watchThread->m_watches[index].first);
         }
         else
         {
-            char* errorMessage = 0;
-            int   errorCode    = ::GetLastError();
-            FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL,
+            char* errorMessage = nullptr;
+            DWORD errorCode    = ::GetLastError();
+            FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr,
                           errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                          reinterpret_cast< LPSTR >(&errorMessage), 0, NULL);
+                          reinterpret_cast< LPSTR >(&errorMessage), 0, nullptr);
             motor_error_format(Log::fs(), "file watch wait interrupted: {0}", errorMessage);
             ::LocalFree(errorMessage);
             motor_notreached();
@@ -156,38 +156,37 @@ unsigned long WINAPI WatchThread::doWatchFolders(void* params)
 }
 
 WatchThread::WatchThread()
-    : m_semaphore(CreateSemaphore(NULL, 0, 65535, NULL))
+    : m_semaphore(CreateSemaphore(nullptr, 0, 65535, nullptr))
     , m_watches(Arena::filesystem())
     , m_watchCount(0)
-    , m_thread(CreateThread(0, 0, &WatchThread::doWatchFolders, this, 0, 0))
+    , m_thread(CreateThread(
+          nullptr, 0, reinterpret_cast< LPTHREAD_START_ROUTINE >(&WatchThread::doWatchFolders),
+          this, 0, nullptr))
 {
 }
 
 WatchThread::~WatchThread()
 {
-    ReleaseSemaphore(m_semaphore, 1, NULL);
+    ReleaseSemaphore(m_semaphore, 1, nullptr);
     DWORD result = WaitForSingleObject(m_thread, 2000);
     motor_assert(result != WAIT_TIMEOUT, "timed out when waiting for filesystem watch thread");
     motor_forceuse(result);
     CloseHandle(m_thread);
     CloseHandle(m_semaphore);
-    for(minitl::vector< minitl::tuple< HANDLE, weak< FileSystem::WatchPoint > > >::iterator it
-        = m_watches.begin();
-        it != m_watches.end(); ++it)
+    for(auto& m_watche: m_watches)
     {
-        FindCloseChangeNotification(it->first);
+        FindCloseChangeNotification(m_watche.first);
     }
 }
 
-bool WatchThread::add(const ipath& path, ref< FileSystem::WatchPoint > watchpoint)
+bool WatchThread::add(const ipath& path, const ref< FileSystem::WatchPoint >& watchpoint)
 {
     if(m_watchCount < s_maximumWatchCount)
     {
-        WatchRequest* request
-            = new(Arena::temporary()) WatchRequest(WatchRequest::Add, path, watchpoint);
+        auto* request = new(Arena::temporary()) WatchRequest(WatchRequest::Add, path, watchpoint);
         m_requests.push(request);
         m_watchCount++;
-        ReleaseSemaphore(m_semaphore, 1, 0);
+        ReleaseSemaphore(m_semaphore, 1, nullptr);
         return true;
     }
     else
@@ -196,7 +195,8 @@ bool WatchThread::add(const ipath& path, ref< FileSystem::WatchPoint > watchpoin
     }
 }
 
-ref< Folder::Watch > WatchPoint::addWatch(weak< DiskFolder > folder, const Motor::ipath& path)
+ref< Folder::Watch > WatchPoint::addWatch(const weak< DiskFolder >& folder,
+                                          const Motor::ipath&       path)
 {
     static minitl::vector< ref< WatchThread > > s_threads(Arena::filesystem());
 
@@ -205,10 +205,9 @@ ref< Folder::Watch > WatchPoint::addWatch(weak< DiskFolder > folder, const Motor
     {
         watchpoint = getWatchPointOrCreate(path);
         bool found = false;
-        for(minitl::vector< ref< WatchThread > >::iterator it = s_threads.begin();
-            it != s_threads.end(); ++it)
+        for(auto& s_thread: s_threads)
         {
-            if((*it)->add(path, watchpoint))
+            if(s_thread->add(path, watchpoint))
             {
                 found = true;
                 break;

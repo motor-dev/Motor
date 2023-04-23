@@ -21,7 +21,8 @@ private:
     const u32               m_total;
 
 public:
-    TaskItem(weak< const ITask > owner, weak< const IExecutor > executor, u32 totalCount);
+    TaskItem(const weak< const ITask >& owner, const weak< const IExecutor >& executor,
+             u32 totalCount);
     ~TaskItem();
 
 private:

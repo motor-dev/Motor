@@ -17,7 +17,6 @@ class motor_api(RESOURCE) IDescription
     , public minitl::intrusive_list< const IDescription, 2 >::item
 {
     friend class ResourceManager;
-    MOTOR_NOCOPY(IDescription);
 
 private:
     enum
@@ -34,16 +33,16 @@ private:
 
 private:
     Resource* getResourceBuffer() const;
-    Resource& getResourceForWriting(weak< const ILoader > owner) const;
-    void      load(weak< ILoader > loader) const;
-    void      unload(weak< ILoader > loader) const;
+    Resource& getResourceForWriting(const weak< const ILoader >& owner) const;
+    void      load(const weak< ILoader >& loader) const;
+    void      unload(const weak< ILoader >& loader) const;
 
 protected:
     IDescription();
-    ~IDescription();
+    ~IDescription() override;
 
 public:
-    const Resource& getResource(weak< const ILoader > owner) const;
+    const Resource& getResource(const weak< const ILoader >& owner) const;
 };
 
 }}  // namespace Motor::Resource

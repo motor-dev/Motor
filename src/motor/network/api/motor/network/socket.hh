@@ -9,8 +9,8 @@ namespace Motor { namespace Network {
 class motor_api(NETWORK) Socket
 {
 public:
-    Socket(void);
-    ~Socket(void);
+    Socket();
+    ~Socket();
 };
 
 }}  // namespace Motor::Network

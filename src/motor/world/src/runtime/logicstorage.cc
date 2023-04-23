@@ -12,8 +12,8 @@
 namespace Motor { namespace World {
 
 static ref< KernelScheduler::Producer >
-createProducer(raw< const Meta::Class >                componentClass,
-               weak< const KernelScheduler::IProduct > product)
+createProducer(raw< const Meta::Class >                       componentClass,
+               const weak< const KernelScheduler::IProduct >& product)
 {
     Meta::Value logicComponentTag = componentClass->getTag(motor_class< LogicComponent >());
     if(logicComponentTag)
@@ -33,12 +33,12 @@ createProducer(raw< const Meta::Class >                componentClass,
                 motor_error_format(Log::world(),
                                    "Kernel task {0} for logic component {1} has no constructor",
                                    kernelClass->fullname(), componentClass->fullname());
-                return ref< KernelScheduler::Producer >();
+                return {};
             }
         }
         else
         {
-            return ref< KernelScheduler::Producer >();
+            return {};
         }
     }
     else
@@ -47,12 +47,12 @@ createProducer(raw< const Meta::Class >                componentClass,
                            "Component class {0} registered as Logic Component but does not have a "
                            "LogicComponent tag",
                            componentClass->fullname());
-        return ref< KernelScheduler::Producer >();
+        return {};
     }
 }
 
-LogicStorage::LogicStorage(raw< const Meta::Class >           componentClass,
-                           weak< ComponentRegistry::Runtime > registryRuntime)
+LogicStorage::LogicStorage(raw< const Meta::Class >                  componentClass,
+                           const weak< ComponentRegistry::Runtime >& registryRuntime)
     : m_componentClass(componentClass)
     , m_componentProduct()
     , m_updateProducer(createProducer(m_componentClass, m_componentProduct))
@@ -60,8 +60,6 @@ LogicStorage::LogicStorage(raw< const Meta::Class >           componentClass,
 {
 }
 
-LogicStorage::~LogicStorage()
-{
-}
+LogicStorage::~LogicStorage() = default;
 
 }}  // namespace Motor::World

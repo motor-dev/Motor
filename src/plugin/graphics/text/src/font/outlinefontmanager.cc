@@ -12,20 +12,18 @@
 
 namespace Motor {
 
-OutlineFontManager::OutlineFontManager(weak< Resource::ResourceManager > manager,
-                                       weak< FreetypeLibrary >           freetype,
-                                       weak< const FontList >            fontList)
+OutlineFontManager::OutlineFontManager(const weak< Resource::ResourceManager >& manager,
+                                       const weak< FreetypeLibrary >&           freetype,
+                                       const weak< const FontList >&            fontList)
     : m_manager(manager)
     , m_freetype(freetype)
     , m_fontList(fontList)
 {
 }
 
-OutlineFontManager::~OutlineFontManager()
-{
-}
+OutlineFontManager::~OutlineFontManager() = default;
 
-void OutlineFontManager::load(weak< const Resource::IDescription > description,
+void OutlineFontManager::load(const weak< const Resource::IDescription >& description,
                               Resource::Resource& /*resource*/)
 {
     motor_info(Log::resource(), "loading outline font");
@@ -42,8 +40,8 @@ void OutlineFontManager::load(weak< const Resource::IDescription > description,
     }
 }
 
-void OutlineFontManager::reload(weak< const Resource::IDescription > /*oldDescription*/,
-                                weak< const Resource::IDescription > newDescription,
+void OutlineFontManager::reload(const weak< const Resource::IDescription >& /*oldDescription*/,
+                                const weak< const Resource::IDescription >& newDescription,
                                 Resource::Resource& /*resource*/)
 {
     motor_info(Log::resource(), "reloading outline font");
@@ -60,14 +58,14 @@ void OutlineFontManager::reload(weak< const Resource::IDescription > /*oldDescri
     }
 }
 
-void OutlineFontManager::unload(weak< const Resource::IDescription > /*description*/,
+void OutlineFontManager::unload(const weak< const Resource::IDescription >& /*description*/,
                                 Resource::Resource& resource)
 {
     motor_info(Log::resource(), "unloading outline font");
     resource.clearRefHandle();
 }
 
-void OutlineFontManager::onTicketLoaded(weak< const Resource::IDescription > /*description*/,
+void OutlineFontManager::onTicketLoaded(const weak< const Resource::IDescription >& /*description*/,
                                         Resource::Resource&                   resource,
                                         const minitl::Allocator::Block< u8 >& buffer,
                                         LoadType /*type*/)

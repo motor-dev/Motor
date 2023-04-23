@@ -22,7 +22,7 @@ Environment::Environment()
     , m_dataDirectory("data")
     , m_game("")
     , m_user("")
-    , m_programPath(0)
+    , m_programPath(nullptr)
 {
     HANDLE token;
     OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token);
@@ -32,11 +32,10 @@ Environment::Environment()
     m_user    = profile;
     size      = sizeof(profile);
     HMODULE h = LoadLibraryA("userenv.dll");
-    if(h != 0)
+    if(h != nullptr)
     {
-        FARPROC                         symbol = GetProcAddress(h, "GetUserProfileDirectoryA");
-        GetUserProfileDirectoryFunction function
-            = motor_function_cast< GetUserProfileDirectoryFunction >(symbol);
+        FARPROC symbol   = GetProcAddress(h, "GetUserProfileDirectoryA");
+        auto    function = motor_function_cast< GetUserProfileDirectoryFunction >(symbol);
         (*function)(token, profile, &size);
         FreeLibrary(h);
     }
@@ -46,10 +45,10 @@ Environment::Environment()
 
 Environment::~Environment()
 {
-    SetDllDirectoryA(NULL);
+    SetDllDirectoryA(nullptr);
 }
 
-extern "C" IMAGE_DOS_HEADER __ImageBase;
+extern "C" IMAGE_DOS_HEADER __ImageBase;  // NOLINT
 void                        Environment::init()
 {
     char dllPath[MAX_PATH] = {0};
@@ -57,7 +56,7 @@ void                        Environment::init()
     {
         IMAGE_DOS_HEADER* imageBase;
         HINSTANCE         value;
-    } convertToHinstance;
+    } convertToHinstance {};
     convertToHinstance.imageBase = &__ImageBase;
     GetModuleFileNameA(convertToHinstance.value, dllPath, sizeof(dllPath));
     const char* progName = dllPath;
@@ -84,14 +83,14 @@ void Environment::init(int argc, const char* argv[])
     SetDllDirectoryA((getDataDirectory() + ipath("plugin")).str().name);
 }
 
-size_t Environment::getProcessorCount() const
+size_t Environment::getProcessorCount()
 {
     SYSTEM_INFO i;
     GetSystemInfo(&i);
     return i.dwNumberOfProcessors;
 }
 
-const char* Environment::getEnvironmentVariable(const char* variable) const
+const char* Environment::getEnvironmentVariable(const char* variable)
 {
     return getenv(variable);
 }

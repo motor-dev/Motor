@@ -38,7 +38,7 @@ static const luaL_Reg loadedlibs[] = {{"_G", luaopen_base},
 #endif
                                       {LUA_MATHLIBNAME, luaopen_math},
                                       {LUA_DBLIBNAME, luaopen_debug},
-                                      {NULL, NULL}};
+                                      {nullptr, nullptr}};
 
 void Context::typeError(lua_State* state, int narg, const char* expected, const char* got)
 {
@@ -75,12 +75,12 @@ void Context::checkArg(lua_State* state, int narg, const char* userDataType)
     {
         lua_pop(state, 1);
         const char* typeName = luaL_typename(state, narg);
-        for(u32 i = 0; i < sizeof(s_metaTables) / sizeof(s_metaTables[0]); ++i)
+        for(const char* metatable: s_metaTables)
         {
-            luaL_getmetatable(state, s_metaTables[i]);
+            luaL_getmetatable(state, metatable);
             if(lua_rawequal(state, -1, -2))
             {
-                typeName = s_metaTables[i];
+                typeName = metatable;
             }
             lua_pop(state, 1);
         }
@@ -102,12 +102,12 @@ void Context::checkArg(lua_State* state, int narg, const Meta::Type& type)
     {
         lua_pop(state, 1);
         const char* typeName = luaL_typename(state, narg);
-        for(u32 i = 0; i < sizeof(s_metaTables) / sizeof(s_metaTables[0]); ++i)
+        for(const char* metatable: s_metaTables)
         {
-            luaL_getmetatable(state, s_metaTables[i]);
+            luaL_getmetatable(state, metatable);
             if(lua_rawequal(state, -1, -2))
             {
-                typeName = s_metaTables[i];
+                typeName = metatable;
             }
             lua_pop(state, 1);
         }
@@ -115,7 +115,7 @@ void Context::checkArg(lua_State* state, int narg, const Meta::Type& type)
         typeError(state, narg, type, typeName);
     }
     lua_pop(state, 2);
-    Meta::Value* value = (Meta::Value*)lua_touserdata(state, narg);
+    auto* value = (Meta::Value*)lua_touserdata(state, narg);
     if(!value->type().isA(type))
     {
         typeError(state, narg, type, minitl::format<>(FMT("{0}"), value->type()));
@@ -130,7 +130,7 @@ int Context::push(lua_State* state, const Meta::Value& v)
         return 0;
     }
     else if(v.type().indirection >= Meta::Type::Indirection::RawPtr
-            && v.as< const void* const >() == 0)
+            && v.as< const void* const >() == nullptr)
     {
         lua_pushnil(state);
         return 1;
@@ -184,7 +184,7 @@ minitl::format_buffer< 1024u > Context::tostring(lua_State* state, int element)
         if(lua_rawequal(state, -1, -2))
         {
             lua_pop(state, 2);
-            Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, element);
+            auto* userdata = (Meta::Value*)lua_touserdata(state, element);
             return minitl::format<>(FMT("({0}[{1}]"), userdata->type().metaclass->name.c_str(),
                                     userdata);
         }
@@ -193,8 +193,7 @@ minitl::format_buffer< 1024u > Context::tostring(lua_State* state, int element)
         if(lua_rawequal(state, -1, -2))
         {
             lua_pop(state, 2);
-            Plugin::Plugin< void >* userdata
-                = (Plugin::Plugin< void >*)lua_touserdata(state, element);
+            auto* userdata = (Plugin::Plugin< void >*)lua_touserdata(state, element);
             return minitl::format< 1024u >(FMT("Motor.Plugin[{0}]"), userdata->name());
         }
         lua_pop(state, 1);
@@ -243,11 +242,11 @@ extern "C" int luaPrint(lua_State* L)
     for(i = 1; i <= n; i++)
     {
         const char* s;
-        lua_pushvalue(L, -1); /* function to be called */
-        lua_pushvalue(L, i);  /* value to print */
+        lua_pushvalue(L, -1);    /* function to be called */
+        lua_pushvalue(L, i);     /* value to print */
         lua_call(L, 1, 1);
         s = lua_tostring(L, -1); /* get result */
-        if(s == NULL) return luaL_error(L, "'tostring' must return a string to 'print'");
+        if(s == nullptr) return luaL_error(L, "'tostring' must return a string to 'print'");
         lua_Debug ar;
         if(lua_getstack(L, 1, &ar))
         {
@@ -288,9 +287,9 @@ extern "C" int luaGet(lua_State* state)
     Context::checkArg(state, 1, "Motor.Object");
     Context::checkArg(state, 2, LUA_TSTRING);
 
-    Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, -2);
-    const char*  name     = lua_tostring(state, -1);
-    Meta::Value  v        = (*userdata)[name];
+    auto*       userdata = (Meta::Value*)lua_touserdata(state, -2);
+    const char* name     = lua_tostring(state, -1);
+    Meta::Value v        = (*userdata)[name];
     if(!v)
     {
         lua_pushnil(state);
@@ -309,7 +308,7 @@ extern "C" int luaGetType(lua_State* state)
     }
     Context::checkArg(state, 1, "Motor.Object");
 
-    Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, -2);
+    auto* userdata = (Meta::Value*)lua_touserdata(state, -2);
     Context::push(state, Meta::Value(userdata->type()));
     return 1;
 }
@@ -318,7 +317,7 @@ static const luaL_Reg base_funcs[] = {{"print", luaPrint},
                                       {"plugin", luaPlugin},
                                       {"getattr", luaGet},
                                       {"gettype", luaGetType},
-                                      {NULL, NULL}};
+                                      {nullptr, nullptr}};
 
 void* Context::luaAlloc(void* /*ud*/, void* ptr, size_t osize, size_t nsize)
 {
@@ -336,7 +335,7 @@ void* Context::luaAlloc(void* /*ud*/, void* ptr, size_t osize, size_t nsize)
     else
     {
         Arena::lua().free(ptr);
-        return 0;
+        return nullptr;
     }
 }
 
@@ -360,7 +359,7 @@ minitl::format_buffer< 1024u > Context::getCallInfo(lua_State* state)
 
 Context::Context(const Plugin::Context& context)
     : ScriptEngine< LuaScript >(Arena::lua(), context.resourceManager)
-    , m_state(lua_newstate(&Context::luaAlloc, 0))
+    , m_state(lua_newstate(&Context::luaAlloc, nullptr))
 {
     for(const luaL_Reg* lib = loadedlibs; lib->func; lib++)
     {
@@ -392,8 +391,8 @@ Context::Context(const Plugin::Context& context)
     lua_settable(m_state, -3);
     luaL_setfuncs(m_state, s_resourceLoaderMetaTable, 0);
 
-    void* udata = lua_newuserdata(m_state, sizeof(weak< Resource::ResourceManager >));
-    weak< Resource::ResourceManager >* manager = (weak< Resource::ResourceManager >*)udata;
+    void* udata   = lua_newuserdata(m_state, sizeof(weak< Resource::ResourceManager >));
+    auto* manager = (weak< Resource::ResourceManager >*)udata;
     new(manager) weak< Resource::ResourceManager >(context.resourceManager);
     luaL_getmetatable(m_state, "Motor.ResourceManager");
     lua_setmetatable(m_state, -2);
@@ -401,7 +400,7 @@ Context::Context(const Plugin::Context& context)
 
     push(m_state, Meta::Value(motor_motor_Namespace()));
     lua_setglobal(m_state, "Motor");
-    for(const luaL_Reg* method = base_funcs; method->func != 0; ++method)
+    for(const luaL_Reg* method = base_funcs; method->func != nullptr; ++method)
     {
         lua_pushcfunction(m_state, method->func);
         lua_setglobal(m_state, method->name);
@@ -413,12 +412,12 @@ Context::~Context()
     lua_close(m_state);
 }
 
-void Context::unload(weak< const Resource::IDescription > /*description*/,
+void Context::unload(const weak< const Resource::IDescription >& /*description*/,
                      Resource::Resource& /*handle*/)
 {
 }
 
-void Context::runBuffer(weak< const LuaScript > script, Resource::Resource& /*resource*/,
+void Context::runBuffer(const weak< const LuaScript >& script, Resource::Resource& /*resource*/,
                         const minitl::Allocator::Block< u8 >& block)
 {
     int       result;
@@ -433,7 +432,7 @@ void Context::runBuffer(weak< const LuaScript > script, Resource::Resource& /*re
     motor_assert_format(result == 0, "{0}", lua_tostring(m_state, -1));
 }
 
-void Context::reloadBuffer(weak< const LuaScript > script, Resource::Resource& /*resource*/,
+void Context::reloadBuffer(const weak< const LuaScript >& script, Resource::Resource& /*resource*/,
                            const minitl::Allocator::Block< u8 >& block)
 {
     int       result;

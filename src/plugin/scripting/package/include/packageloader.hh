@@ -15,22 +15,20 @@ namespace Motor { namespace PackageManager {
 
 class PackageLoader : public ScriptEngine< Package >
 {
-    MOTOR_NOCOPY(PackageLoader);
-
 private:
     scoped< PackageBuilder::PackageBuilder > m_packageBuilder;
 
 public:
-    PackageLoader(const Plugin::Context& context);
-    ~PackageLoader();
+    explicit PackageLoader(const Plugin::Context& context);
+    ~PackageLoader() override;
 
 private:
-    virtual void unload(weak< const Resource::IDescription > description,
-                        Resource::Resource&                  handle) override;
-    virtual void runBuffer(weak< const Package > script, Resource::Resource& resource,
-                           const minitl::Allocator::Block< u8 >& buffer) override;
-    virtual void reloadBuffer(weak< const Package > script, Resource::Resource& resource,
-                              const minitl::Allocator::Block< u8 >& buffer) override;
+    void unload(const weak< const Resource::IDescription >& description,
+                Resource::Resource&                         handle) override;
+    void runBuffer(const weak< const Package >& script, Resource::Resource& resource,
+                   const minitl::Allocator::Block< u8 >& buffer) override;
+    void reloadBuffer(const weak< const Package >& script, Resource::Resource& resource,
+                      const minitl::Allocator::Block< u8 >& buffer) override;
 };
 
 }}  // namespace Motor::PackageManager

@@ -6,12 +6,8 @@
 
 namespace Motor { namespace Input {
 
-Wincontrol::Wincontrol()
-{
-}
+Wincontrol::Wincontrol() = default;
 
-Wincontrol::~Wincontrol()
-{
-}
+Wincontrol::~Wincontrol() = default;
 
 }}  // namespace Motor::Input

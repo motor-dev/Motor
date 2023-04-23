@@ -33,7 +33,7 @@ private:
 
 public:
     ThreadParams(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2);
-    ~ThreadParams();
+    ~ThreadParams() = default;
 
     static void* threadWrapper(void* params);
 };
@@ -42,9 +42,9 @@ struct ThreadData
 {
     pthread_key_t key;
     istring       name;
-    ThreadData() : name("main")
+    ThreadData() : key {}, name("main")
     {
-        pthread_key_create(&key, 0);
+        pthread_key_create(&key, nullptr);
         pthread_setspecific(key, &name);
 #if MOTOR_PLATFORM_LINUX && !MOTOR_COMPILER_SUNCC
         pthread_setname_np(pthread_self(), name.c_str());
@@ -68,6 +68,7 @@ Thread::ThreadParams::ThreadParams(const istring& name, ThreadFunction f, intptr
     , m_param1(p1)
     , m_param2(p2)
     , m_result(0)
+    , m_id()
 {
     // motor_info_format(Log::thread(), "starting thread {0}", name);
 #ifdef MOTOR_PLATFORM_INUX
@@ -75,13 +76,9 @@ Thread::ThreadParams::ThreadParams(const istring& name, ThreadFunction f, intptr
 #endif
 }
 
-Thread::ThreadParams::~ThreadParams()
-{
-}
-
 void* Thread::ThreadParams::threadWrapper(void* params)
 {
-    ThreadParams* p = reinterpret_cast< ThreadParams* >(params);
+    auto* p = reinterpret_cast< ThreadParams* >(params);
     pthread_setspecific(s_data.key, &p->m_name);
 #if MOTOR_PLATFORM_LINUX && !MOTOR_COMPILER_SUNCC
     pthread_setname_np(pthread_self(), p->m_name.c_str());
@@ -93,14 +90,14 @@ void* Thread::ThreadParams::threadWrapper(void* params)
     motor_debug_format(Log::thread(), "started thread {0}", p->m_name);
     p->m_result = (*p->m_function)(p->m_param1, p->m_param2);
     // motor_info_format(Log::thread(), "stopped thread {0}", p->m_name);
-    return 0;
+    return nullptr;
 }
 
 Thread::Thread(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2, Priority p)
     : m_params(new ThreadParams(name, f, p1, p2))
     , m_data(new pthread_t)
 {
-    pthread_create(reinterpret_cast< pthread_t* >(m_data), 0, &ThreadParams::threadWrapper,
+    pthread_create(reinterpret_cast< pthread_t* >(m_data), nullptr, &ThreadParams::threadWrapper,
                    m_params);
     m_id = u64(ptrdiff_t(*reinterpret_cast< pthread_t* >(m_data)));
     setPriority(p);
@@ -147,7 +144,7 @@ u64 Thread::currentId()
 
 istring Thread::name()
 {
-    istring* name = static_cast< istring* >(pthread_getspecific(s_data.key));
+    auto* name = static_cast< istring* >(pthread_getspecific(s_data.key));
     if(name)
     {
         return *name;
@@ -166,7 +163,7 @@ void Thread::wait() const
 
 void Thread::setPriority(Priority p)
 {
-    sched_param param;
+    sched_param param {};
     param.sched_priority = sched_get_priority_min(SCHED_RR) + (int)p;
     pthread_setschedparam(*reinterpret_cast< pthread_t* >(m_data), SCHED_RR, &param);
 }

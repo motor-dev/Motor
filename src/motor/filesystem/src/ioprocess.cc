@@ -20,7 +20,7 @@ IOContext::IOContext()
 {
     for(u32 i = 0; i < MaxRequestCount - 1; ++i)
         m_requests[i].next = &m_requests[i + 1];
-    m_requests[MaxRequestCount - 1].next = 0;
+    m_requests[MaxRequestCount - 1].next = nullptr;
     m_freeRequestList.pushList(&m_requests[0], &m_requests[MaxRequestCount - 1]);
 }
 
@@ -69,8 +69,8 @@ void IOContext::processRequests(IORequest* head)
 
 intptr_t IOContext::ioProcess(intptr_t p1, intptr_t /*p2*/)
 {
-    IOContext* context = reinterpret_cast< IOContext* >(p1);
-    while(1)
+    auto* context = reinterpret_cast< IOContext* >(p1);
+    while(true)
     {
         context->m_availableTickets.wait();
         IORequest* requests = context->m_requestQueue.popAll();
@@ -85,7 +85,7 @@ intptr_t IOContext::ioProcess(intptr_t p1, intptr_t /*p2*/)
     return 0;
 }
 
-void IOContext::pushTicket(ref< File::Ticket > ticket)
+void IOContext::pushTicket(const ref< File::Ticket >& ticket)
 {
     s_context->m_freeSlots.wait();
     IORequest* request = s_context->m_freeRequestList.pop();

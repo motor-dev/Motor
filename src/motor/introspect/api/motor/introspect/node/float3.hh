@@ -1,4 +1,4 @@
-/* Motor <motor.devel@gmail.com>
+/* Motor <motor.devel@gmail.com>m_logHandlerGtk
    see LICENSE for detail */
 #pragma once
 
@@ -14,13 +14,13 @@ private:
     const knl::float3 m_value;
 
 protected:
-    virtual ConversionCost distance(const Type& type) const override;
-    virtual void           doEval(const Type& expectedType, Value& result) const override;
-    virtual void           doVisit(Node::Visitor & visitor) const override;
+    ConversionCost distance(const Type& type) const override;
+    void           doEval(const Type& expectedType, Value& result) const override;
+    void           doVisit(Node::Visitor & visitor) const override;
 
 public:
-    Float3(knl::float3 value);
-    ~Float3();
+    explicit Float3(knl::float3 value);
+    ~Float3() override;
 };
 
 }}}  // namespace Motor::Meta::AST

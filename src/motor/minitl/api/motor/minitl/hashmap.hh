@@ -90,7 +90,7 @@ public:
     const_iterator find(const Key& key) const;
 
     iterator erase(iterator it);
-    void erase(const Key& key);
+    void     erase(const Key& key);
 
     tuple< iterator, bool > insert(Key&& k, Value&& value);
     tuple< iterator, bool > insert(Key&& k, const Value& value);

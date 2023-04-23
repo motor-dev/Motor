@@ -16,8 +16,8 @@ class array
 private:
     minitl::Allocator::Block< T > m_array;
 
-private:
-    array& operator=(const array& other);
+public:
+    array& operator=(const array& other) = delete;
 
 public:
     typedef const T* const_iterator;

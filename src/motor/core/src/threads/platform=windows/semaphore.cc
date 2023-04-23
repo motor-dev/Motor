@@ -16,7 +16,7 @@ namespace Motor {
 
 Semaphore::Semaphore(int initialCount) : m_data()
 {
-    m_data.ptr = CreateSemaphore(NULL, initialCount, 65535, NULL);
+    m_data.ptr = CreateSemaphore(nullptr, initialCount, 65535, nullptr);
 }
 
 Semaphore::~Semaphore()
@@ -26,7 +26,7 @@ Semaphore::~Semaphore()
 
 void Semaphore::release(int count)
 {
-    ReleaseSemaphore((HANDLE)m_data.ptr, count, NULL);
+    ReleaseSemaphore((HANDLE)m_data.ptr, count, nullptr);
 }
 
 Threads::Waitable::WaitResult Semaphore::wait()
@@ -84,8 +84,8 @@ Threads::Waitable::WaitResult Semaphore::wait()
         }
         ++m_data.value;
         ++s_pauseCount;
-        WaitOnAddress(&m_data.value, &count, sizeof(i_u32), INFINITE);
-    } while(1);
+        WaitOnAddress(&m_data.value, &count, sizeof(m_data.value), INFINITE);
+    } while(true);
 }
 
 u32 Semaphore::flushPauseCount()

@@ -52,7 +52,7 @@ class clangd(Build.BuildContext):
     motor_variant = 'projects.setup'
     variant = 'projects/clangd'
 
-    #motor_variant = '%(motor_variant)s'
+    # motor_variant = '%(motor_variant)s'
 
     def execute(self):
         """
@@ -107,7 +107,8 @@ class clangd(Build.BuildContext):
                                 else:
                                     bld_env = env.derive()
                                 includes, defines = gather_includes_defines(tg)
-                                bld_env.append_value('INCPATHS', includes + bld_env.INCLUDES + bld_env.SYSTEM_INCLUDES)
+                                bld_env.append_value('INCPATHS',
+                                                     includes + bld_env.INCLUDES + bld_env.COMPILER_INCLUDES)
                                 bld_env.append_value('DEFINES', defines)
                                 cmd = self.expand_cmd(task, bld_env)
                                 for variant in self.env.ALL_VARIANTS:
@@ -143,7 +144,7 @@ class clangd(Build.BuildContext):
                 return 'Utils.to_list(env.%s)' % name
 
         def expand_var(match):
-            task   # publish task as a local variable in locals()
+            task  # publish task as a local variable in locals()
             expression = match.group(1)
             expansion = expression.find(':')
             if expansion != -1:

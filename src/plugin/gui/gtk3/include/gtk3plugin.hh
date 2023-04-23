@@ -3,6 +3,7 @@
 #pragma once
 
 #include <motor/core/memory/allocators/system.hh>
+#include <motor/meta/engine/objectinfo.meta.hh>
 #include <glib-object.h>
 
 namespace Motor { namespace Gtk3 {

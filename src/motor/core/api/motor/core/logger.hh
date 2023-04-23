@@ -2,7 +2,6 @@
    see LICENSE for detail */
 #pragma once
 
-#include <motor/core/stdafx.h>
 #include <motor/core/string/istring.hh>
 #include <motor/core/threads/criticalsection.hh>
 #include <motor/minitl/hashmap.hh>
@@ -29,9 +28,7 @@ class ILogListener : public minitl::refcountable
 
 protected:
     static motor_api(CORE) const char* getLogLevelName(LogLevel level);
-    virtual ~ILogListener()
-    {
-    }
+    virtual ~ILogListener() = default;
     virtual bool log(const inamespace& logname, LogLevel level, const char* filename, int line,
                      const char* thread, const char* msg) const
         = 0;
@@ -41,7 +38,6 @@ class motor_api(CORE) Logger : public minitl::refcountable
 {
     friend class minitl::ref< Logger >;
     friend struct ScopedLogListener;
-    MOTOR_NOCOPY(Logger);
 
 private:
     CriticalSection                                   m_cs;
@@ -53,16 +49,15 @@ private:
 
 private:
     Logger();
-    Logger(minitl::weak< Logger > parent, const istring& name, LogLevel minLogLevel = logDebug);
+    Logger(const minitl::weak< Logger >& parent, const istring& name,
+           LogLevel minLogLevel = logDebug);
 
 public:
     ~Logger();
 
     minitl::ref< Logger >         getChild(const istring& name);
     static minitl::weak< Logger > instance(const inamespace& name);
-    static bool log(const inamespace& name, LogLevel level, const char* filename, int line,
-                    const char* msg);
-    static minitl::ref< Logger > root();
+    static minitl::ref< Logger >  root();
 
     inline bool willLog(LogLevel level) const
     {
@@ -78,8 +73,8 @@ public:
     }
 
 private:
-    void addListener(minitl::weak< ILogListener > listener);
-    void removeListener(minitl::weak< ILogListener > listener);
+    void addListener(const minitl::weak< ILogListener >& listener);
+    void removeListener(const minitl::weak< ILogListener >& listener);
     bool doLog(LogLevel level, const inamespace& logName, const char* filename, int line,
                const char* msg) const;
 };
@@ -87,20 +82,21 @@ private:
 struct ScopedLogListener
 {
 private:
-    minitl::scoped< ILogListener > const m_listener;
-
-    ScopedLogListener(const ScopedLogListener&) = delete;
+    minitl::scoped< ILogListener > const m_listener {};
 
 public:
-    ScopedLogListener(minitl::scoped< ILogListener >&& listener)
+    explicit ScopedLogListener(minitl::scoped< ILogListener >&& listener)
         : m_listener(minitl::move(listener))
     {
+        motor_forceuse(this);
         Logger::root()->addListener(m_listener);
     }
     ~ScopedLogListener()
     {
+        motor_forceuse(this);
         Logger::root()->removeListener(m_listener);
     }
+    ScopedLogListener(const ScopedLogListener&) = delete;
 };
 
 #define motor_log(logger, level, msg)                                                              \

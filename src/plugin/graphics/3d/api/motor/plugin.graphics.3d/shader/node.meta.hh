@@ -12,12 +12,9 @@ class IShaderBuilder;
 
 class motor_api(3D) Node : public minitl::refcountable
 {
-    MOTOR_NOCOPY(Node);
-
-public:
 protected:
     Node();
-    ~Node();
+    ~Node() override;
 
 public:
     virtual void buildDeclarations(IShaderBuilder & stream, Stage currentStage, Stage targetStage)

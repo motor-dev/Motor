@@ -9,9 +9,9 @@ namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
 static CLStringInfo getPlatformInfo(cl_platform_id platform, cl_platform_info name)
 {
-    CLStringInfo result;
+    CLStringInfo result {};
     size_t       size = CLStringInfo::InfoLogSize;
-    checkResult(clGetPlatformInfo(platform, name, size, result.info, 0));
+    checkResult(clGetPlatformInfo(platform, name, size, result.info, nullptr));
     return result;
 }
 
@@ -19,13 +19,12 @@ minitl::vector< ref< Platform > > Platform::loadPlatforms()
 {
     minitl::vector< ref< Platform > > result(Arena::task());
     cl_uint                           platformCount = 0;
-    checkResult(clGetPlatformIDs(0, 0, &platformCount));
+    checkResult(clGetPlatformIDs(0, nullptr, &platformCount));
     if(platformCount)
     {
         result.reserve(platformCount);
 
-        cl_platform_id* platforms
-            = (cl_platform_id*)malloca(sizeof(cl_platform_id) * platformCount);
+        auto* platforms = (cl_platform_id*)malloca(sizeof(cl_platform_id) * platformCount);
         checkResult(clGetPlatformIDs(platformCount, platforms, &platformCount));
         for(cl_uint i = 0; i < platformCount; ++i)
         {
@@ -46,7 +45,7 @@ Platform::Platform(cl_platform_id platformId) : m_platformId(platformId), m_cont
 
     cl_uint deviceCount = 0;
     cl_uint deviceType  = CL_DEVICE_TYPE_ACCELERATOR | CL_DEVICE_TYPE_GPU;
-    cl_int  error       = clGetDeviceIDs(m_platformId, deviceType, 0, 0, &deviceCount);
+    cl_int  error       = clGetDeviceIDs(m_platformId, deviceType, 0, nullptr, &deviceCount);
     if(error != CL_DEVICE_NOT_FOUND)
     {
         if(error != CL_SUCCESS)
@@ -55,14 +54,14 @@ Platform::Platform(cl_platform_id platformId) : m_platformId(platformId), m_cont
         }
         else if(deviceCount > 0)
         {
-            cl_device_id* devices = (cl_device_id*)malloca(sizeof(cl_device_id) * deviceCount);
+            auto* devices = (cl_device_id*)malloca(sizeof(cl_device_id) * deviceCount);
 
-            checkResult(clGetDeviceIDs(m_platformId, deviceType, deviceCount, devices, 0));
+            checkResult(clGetDeviceIDs(m_platformId, deviceType, deviceCount, devices, nullptr));
             for(cl_uint i = 0; i < deviceCount; ++i)
             {
                 cl_device_id device = devices[i];
                 cl_int       err;
-                cl_context   context = clCreateContext(NULL, 1, &device, 0, 0, &err);
+                cl_context   context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &err);
                 if(err != CL_SUCCESS)
                 {
                     char   deviceName[1024];
@@ -84,8 +83,6 @@ Platform::Platform(cl_platform_id platformId) : m_platformId(platformId), m_cont
     }
 }
 
-Platform::~Platform()
-{
-}
+Platform::~Platform() = default;
 
 }}}  // namespace Motor::KernelScheduler::OpenCL

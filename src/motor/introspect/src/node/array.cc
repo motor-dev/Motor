@@ -18,9 +18,7 @@ Array::Array(const minitl::vector< ref< Node > >& value) : Node(), m_value(value
 {
 }
 
-Array::~Array()
-{
-}
+Array::~Array() = default;
 
 ConversionCost Array::distance(const Type& type) const
 {
@@ -28,10 +26,9 @@ ConversionCost Array::distance(const Type& type) const
     {
         ConversionCost                  result = ConversionCost();
         raw< const ArrayOperatorTable > api    = type.metaclass->operators->arrayOperators;
-        for(minitl::vector< ref< Node > >::const_iterator it = m_value.begin(); it != m_value.end();
-            ++it)
+        for(const auto& it: m_value)
         {
-            ConversionCost itemCost = (*it)->distance(api->value_type);
+            ConversionCost itemCost = it->distance(api->value_type);
             if(itemCost > result) result = itemCost;
         }
         return result;
@@ -45,9 +42,9 @@ ConversionCost Array::distance(const Type& type) const
 bool Array::doResolve(DbContext& context)
 {
     bool result = true;
-    for(u32 i = 0; i < m_value.size(); ++i)
+    for(const auto& i: m_value)
     {
-        result = result & m_value[i]->resolve(context);
+        result = result & i->resolve(context);
     }
     return result;
 }

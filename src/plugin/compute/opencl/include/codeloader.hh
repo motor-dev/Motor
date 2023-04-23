@@ -16,13 +16,13 @@ private:
     weak< const Context > m_context;
 
 public:
-    CodeLoader(weak< const Context > context);
-    ~CodeLoader();
+    explicit CodeLoader(const weak< const Context >& context);
+    ~CodeLoader() override;
 
-    virtual void load(weak< const Resource::IDescription > codeDescription,
-                      Resource::Resource&                  resource) override;
-    virtual void unload(weak< const Resource::IDescription > codeDescription,
-                        Resource::Resource&                  resource) override;
+    void load(const weak< const Resource::IDescription >& codeDescription,
+              Resource::Resource&                         resource) override;
+    void unload(const weak< const Resource::IDescription >& codeDescription,
+                Resource::Resource&                         resource) override;
 };
 
 }}}  // namespace Motor::KernelScheduler::OpenCL

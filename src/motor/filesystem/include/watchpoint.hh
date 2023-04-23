@@ -21,18 +21,18 @@ private:
 
 public:
     WatchPoint();
-    WatchPoint(weak< WatchPoint > parent);
-    ~WatchPoint();
+    explicit WatchPoint(const weak< WatchPoint >& parent);
+    ~WatchPoint() override;
 
 public:
     void signalDirty();
 
-    static ref< Folder::Watch > addWatch(weak< DiskFolder > folder, const ipath& path);
+    static ref< Folder::Watch > addWatch(const weak< DiskFolder >& folder, const ipath& path);
     static ref< WatchPoint >    getWatchPoint(const ipath& path);
 
 private:
-    void addWatch(weak< Folder::Watch > watch);
-    void removeWatch(weak< Folder::Watch > watch);
+    void addWatch(const weak< Folder::Watch >& watch);
+    void removeWatch(const weak< Folder::Watch >& watch);
     void cleanupTree();
 
     static ref< WatchPoint > getWatchPointOrCreate(const ipath& path);

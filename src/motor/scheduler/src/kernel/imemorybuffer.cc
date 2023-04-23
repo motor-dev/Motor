@@ -6,12 +6,10 @@
 
 namespace Motor { namespace KernelScheduler {
 
-IMemoryBuffer::IMemoryBuffer(weak< const IMemoryHost > host) : m_host(host)
+IMemoryBuffer::IMemoryBuffer(const weak< const IMemoryHost >& host) : m_host(host)
 {
 }
 
-IMemoryBuffer::~IMemoryBuffer()
-{
-}
+IMemoryBuffer::~IMemoryBuffer() = default;
 
 }}  // namespace Motor::KernelScheduler

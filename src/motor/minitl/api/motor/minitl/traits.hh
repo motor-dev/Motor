@@ -3,7 +3,7 @@
 #pragma once
 
 #include <motor/minitl/stdafx.h>
-#include <string.h>
+#include <cstring>
 
 namespace minitl {
 

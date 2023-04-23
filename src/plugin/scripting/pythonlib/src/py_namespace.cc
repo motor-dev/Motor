@@ -8,58 +8,58 @@
 
 namespace Motor { namespace Python {
 
-PyMethodDef PyMotorNamespace::s_methods[]
-    = {{"__dir__", &PyMotorNamespace::dir, METH_NOARGS, NULL}, {NULL, NULL, 0, NULL}};
+PyMethodDef PyMotorNamespace::s_methodArray[]
+    = {{"__dir__", &PyMotorNamespace::dir, METH_NOARGS, nullptr}, {nullptr, nullptr, 0, nullptr}};
 
-PyTypeObject PyMotorNamespace::s_pyType = {{{0, 0}, 0},
+PyTypeObject PyMotorNamespace::s_pyType = {{{0, nullptr}, 0},
                                            "py_motor.Namespace",
                                            sizeof(PyMotorNamespace),
                                            0,
                                            &PyMotorNamespace::dealloc,
-                                           0,
+                                           nullptr,
                                            &PyMotorNamespace::getattr,
                                            &PyMotorNamespace::setattr,
-                                           0,
+                                           nullptr,
                                            &PyMotorNamespace::repr,
-                                           0,
-                                           0,
-                                           0,
-                                           0,
-                                           0,
-                                           0,
-                                           0,
-                                           0,
-                                           0,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
                                            Py_TPFLAGS_MOTOR_DEFAULT | Py_TPFLAGS_IS_ABSTRACT,
                                            "Wrapper class for the C++ Motor namespaces",
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
                                            0,
-                                           0,
-                                           0,
-                                           0,
-                                           0,
-                                           0,
+                                           nullptr,
+                                           nullptr,
                                            PyMotorNamespace::s_methods,
-                                           0,
-                                           0,
-                                           &PyMotorObject::s_pyType,
-                                           0,
-                                           0,
-                                           0,
+                                           nullptr,
+                                           nullptr,
+                                           PyMotorObject::s_pyTypePtr,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
                                            0,
                                            &PyMotorNamespace::init,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
                                            0,
-                                           0,
-                                           0,
-                                           0,
-                                           0,
-                                           0,
-                                           0,
-                                           0,
-                                           0,
-                                           0,
-                                           0,
-                                           0,
-                                           0};
+                                           nullptr,
+                                           nullptr};
 
 PyObject* PyMotorNamespace::stealValue(PyObject* owner, Meta::Value& value)
 {
@@ -88,9 +88,9 @@ int PyMotorNamespace::init(PyObject* self, PyObject* args, PyObject* kwds)
 
 PyObject* PyMotorNamespace::getattr(PyObject* self, const char* name)
 {
-    PyMotorNamespace*  self_ = static_cast< PyMotorNamespace* >(self);
-    const Meta::Class& klass = self_->value.as< const Meta::Class& >();
-    istring            name_(name);
+    auto*       self_ = static_cast< PyMotorNamespace* >(self);
+    const auto& klass = self_->value.as< const Meta::Class& >();
+    istring     name_(name);
     for(raw< const Meta::ObjectInfo > o = klass.objects; o; o = o->next)
     {
         if(o->name == name_)
@@ -104,9 +104,9 @@ PyObject* PyMotorNamespace::getattr(PyObject* self, const char* name)
 
 int PyMotorNamespace::setattr(PyObject* self, const char* name, PyObject* value)
 {
-    PyMotorObject*     self_ = static_cast< PyMotorObject* >(self);
-    istring            name_(name);
-    const Meta::Class& klass = self_->value.as< const Meta::Class& >();
+    auto*       self_ = static_cast< PyMotorObject* >(self);
+    istring     name_(name);
+    const auto& klass = self_->value.as< const Meta::Class& >();
     for(raw< const Meta::ObjectInfo > ob = klass.objects; ob; ob = ob->next)
     {
         if(ob->name == name_)
@@ -116,7 +116,7 @@ int PyMotorNamespace::setattr(PyObject* self, const char* name, PyObject* value)
                 Meta::ConversionCost c = distance(value, ob->value.type());
                 if(c < Meta::ConversionCost::s_incompatible)
                 {
-                    Meta::Value* v = (Meta::Value*)malloca(sizeof(Meta::Value));
+                    auto* v = (Meta::Value*)malloca(sizeof(Meta::Value));
                     unpack(value, ob->value.type(), v);
                     ob->value = *v;
                     v->~Value();
@@ -149,14 +149,14 @@ int PyMotorNamespace::setattr(PyObject* self, const char* name, PyObject* value)
 
 PyObject* PyMotorNamespace::dir(PyObject* self, PyObject* args)
 {
-    PyMotorObject* self_ = static_cast< PyMotorObject* >(self);
+    auto* self_ = static_cast< PyMotorObject* >(self);
     motor_forceuse(args);
     PyObject* result = s_library->m_PyList_New(0);
-    if(!result) return NULL;
-    const Meta::Class&             klass      = self_->value.as< const Meta::Class& >();
-    PyString_FromStringAndSizeType fromString = s_library->getVersion() >= 30
-                                                    ? s_library->m_PyUnicode_FromStringAndSize
-                                                    : s_library->m_PyString_FromStringAndSize;
+    if(!result) return nullptr;
+    const auto&                     klass      = self_->value.as< const Meta::Class& >();
+    Type_PyString_FromStringAndSize fromString = s_library->getVersion() >= 30
+                                                     ? s_library->m_PyUnicode_FromStringAndSize
+                                                     : s_library->m_PyString_FromStringAndSize;
 
     for(raw< const Meta::ObjectInfo > o = klass.objects; o; o = o->next)
     {
@@ -164,13 +164,13 @@ PyObject* PyMotorNamespace::dir(PyObject* self, PyObject* args)
         if(!str)
         {
             Py_DECREF(result);
-            return NULL;
+            return nullptr;
         }
         if(s_library->m_PyList_Append(result, str) == -1)
         {
             Py_DECREF(str);
             Py_DECREF(result);
-            return NULL;
+            return nullptr;
         }
         Py_DECREF(str);
     }
@@ -179,9 +179,9 @@ PyObject* PyMotorNamespace::dir(PyObject* self, PyObject* args)
 
 PyObject* PyMotorNamespace::repr(PyObject* self)
 {
-    PyMotorObject*     self_ = static_cast< PyMotorObject* >(self);
+    auto*              self_ = static_cast< PyMotorObject* >(self);
     const Meta::Value& v     = self_->value;
-    const Meta::Class& ns    = v.as< const Meta::Class& >();
+    const auto&        ns    = v.as< const Meta::Class& >();
 
     if(s_library->getVersion() >= 30)
     {
@@ -201,7 +201,7 @@ void PyMotorNamespace::registerType(PyObject* module)
     result = (*s_library->m_PyModule_AddObject)(module, "Namespace", (PyObject*)&s_pyType);
     motor_assert(result >= 0, "unable to register type");
     Meta::Value v = Meta::Value(motor_motor_Namespace());
-    result        = (*s_library->m_PyModule_AddObject)(module, "Motor", stealValue(0, v));
+    result        = (*s_library->m_PyModule_AddObject)(module, "Motor", stealValue(nullptr, v));
     motor_assert(result >= 0, "unable to register type");
     motor_forceuse(result);
 }

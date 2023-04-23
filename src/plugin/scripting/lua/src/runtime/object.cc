@@ -24,7 +24,7 @@ static int valueGC(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Object");
 
-    Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, -1);
+    auto* userdata = (Meta::Value*)lua_touserdata(state, -1);
     userdata->~Value();
     return 0;
 }
@@ -33,7 +33,7 @@ static int valueToString(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Object");
 
-    Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, -1);
+    auto* userdata = (Meta::Value*)lua_touserdata(state, -1);
     if(userdata->type().indirection == Meta::Type::Indirection::Value)
     {
         raw< const Meta::Class > metaclass = userdata->type().metaclass;
@@ -53,13 +53,14 @@ static int valueToString(lua_State* state)
             return 1;
         }
     }
-    return pushUserdataString(state, userdata);
+    pushUserdataString(state, userdata);
+    return 1;
 }
 
 static int valueGet(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Object");
-    Meta::Value*             userdata = (Meta::Value*)lua_touserdata(state, -2);
+    auto*                    userdata = (Meta::Value*)lua_touserdata(state, -2);
     raw< const Meta::Class > cls      = userdata->type().metaclass;
 
     if(cls->type() == Meta::ClassType_Array && lua_type(state, 2) == LUA_TNUMBER)
@@ -102,7 +103,7 @@ static int valueGet(lua_State* state)
 static int valueSet(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Object");
-    Meta::Value*             userdata = (Meta::Value*)lua_touserdata(state, 1);
+    auto*                    userdata = (Meta::Value*)lua_touserdata(state, 1);
     raw< const Meta::Class > cls      = userdata->type().metaclass;
     if(cls->type() == Meta::ClassType_Array && lua_type(state, 2) == LUA_TNUMBER)
     {
@@ -146,8 +147,8 @@ static int valueSet(lua_State* state)
         }
         else
         {
-            Meta::Value* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
-            bool         result = createValue(state, -1, p->type, v);
+            auto* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
+            bool  result = createValue(state, -1, p->type, v);
 
             if(result)
             {
@@ -170,8 +171,8 @@ static int valueSet(lua_State* state)
 static int valueCall(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Object");
-    Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, 1);
-    Meta::Value  value    = (*userdata)["?call"];
+    auto*       userdata = (Meta::Value*)lua_touserdata(state, 1);
+    Meta::Value value    = (*userdata)["?call"];
     if(!value)
     {
         return error(state,
@@ -193,17 +194,14 @@ static int valueCall(lua_State* state)
 static int valueType(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Object");
-    Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, 1);
-    Meta::Value  v        = Meta::Value(userdata->type());
+    auto*       userdata = (Meta::Value*)lua_touserdata(state, 1);
+    Meta::Value v        = Meta::Value(userdata->type());
     return Context::push(state, v);
 }
 
-const luaL_Reg s_valueMetaTable[] = {{"__gc", valueGC},
-                                     {"__tostring", valueToString},
-                                     {"__index", valueGet},
-                                     {"__newindex", valueSet},
-                                     {"__call", valueCall},
-                                     {"typeof", valueType},
-                                     {0, 0}};
+const luaL_Reg s_valueMetaTable[]
+    = {{"__gc", valueGC},        {"__tostring", valueToString}, {"__index", valueGet},
+       {"__newindex", valueSet}, {"__call", valueCall},         {"typeof", valueType},
+       {nullptr, nullptr}};
 
 }}  // namespace Motor::Lua

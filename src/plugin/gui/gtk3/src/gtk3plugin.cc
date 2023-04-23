@@ -40,7 +40,7 @@ static void log(const gchar* domain, GLogLevelFlags log_level, const gchar* mess
     case G_LOG_LEVEL_ERROR: level = logFatal; break;
     case G_LOG_LEVEL_CRITICAL: level = logError; break;
     case G_LOG_LEVEL_WARNING: level = logWarning; break;
-    case G_LOG_LEVEL_MESSAGE: level = logInfo; break;
+    case G_LOG_LEVEL_MESSAGE:
     case G_LOG_LEVEL_INFO: level = logInfo; break;
     case G_LOG_LEVEL_DEBUG: level = logDebug; break;
     }
@@ -63,15 +63,15 @@ Gtk3Plugin::Gtk3Plugin()
     , m_motorQuark(g_quark_from_static_string("motor"))
     , m_objectPtr(motor_plugin_gui_gtk3_Namespace()->objects)
     , m_logger(Log::gtk())
-    , m_logHandlerDefault(g_log_set_handler(NULL, GLogLevelFlags(~0), log, &m_logger))
+    , m_logHandlerDefault(g_log_set_handler(nullptr, GLogLevelFlags(~0), log, &m_logger))
     , m_logHandlerGLib(g_log_set_handler("GLib", GLogLevelFlags(~0), log, &m_logger))
     , m_logHandlerGtk(g_log_set_handler("GTK", GLogLevelFlags(~0), log, &m_logger))
 {
     g_log_set_default_handler(log, &m_logger);
-    gtk_init(0, 0);
+    gtk_init(nullptr, nullptr);
     gtk_test_register_all_types();
 
-    m_firstPage->next    = 0;
+    m_firstPage->next    = nullptr;
     m_firstPage->current = m_firstPage->memory;
 
     registerBoxed(G_TYPE_BOXED);
@@ -87,7 +87,7 @@ Gtk3Plugin::~Gtk3Plugin()
     unregisterClass(G_TYPE_OBJECT);
     unregisterInterface(G_TYPE_INTERFACE);
 
-    g_log_set_default_handler(0, 0);
+    g_log_set_default_handler(nullptr, nullptr);
     while(m_firstPage)
     {
         Page* next = m_firstPage->next;
@@ -95,8 +95,8 @@ Gtk3Plugin::~Gtk3Plugin()
         m_firstPage = next;
     }
     g_log_remove_handler("Gtk", m_logHandlerGtk);
-    g_log_remove_handler("GLib", m_logHandlerGtk);
-    g_log_remove_handler(NULL, m_logHandlerDefault);
+    g_log_remove_handler("GLib", m_logHandlerGLib);
+    g_log_remove_handler(nullptr, m_logHandlerDefault);
 }
 
 void* Gtk3Plugin::allocate(u32 size)
@@ -116,9 +116,10 @@ void* Gtk3Plugin::allocate(u32 size)
 void Gtk3Plugin::registerValue(const istring& name, const Meta::Value& value)
 {
     Meta::ObjectInfo objectTemplate
-        = {motor_plugin_gui_gtk3_Namespace()->objects, {0}, name, Meta::Value()};
-    Meta::ObjectInfo* object = new(allocate< Meta::ObjectInfo >()) Meta::ObjectInfo(objectTemplate);
-    object->value            = value;
+        = {motor_plugin_gui_gtk3_Namespace()->objects, {nullptr}, name, Meta::Value()};
+    void* memory  = allocate< Meta::ObjectInfo >();
+    auto* object  = new(memory) Meta::ObjectInfo(objectTemplate);
+    object->value = value;
 
     motor_plugin_gui_gtk3_Namespace()->objects.set(object);
 }
@@ -185,7 +186,7 @@ void Gtk3Plugin::unregisterInterface(GType type)
         unregisterClass(children[i]);
     }
     g_free(children);
-    g_type_set_qdata(type, m_motorQuark, 0);
+    g_type_set_qdata(type, m_motorQuark, nullptr);
 }
 
 void Gtk3Plugin::registerClass(GType type)
@@ -211,7 +212,7 @@ void Gtk3Plugin::unregisterClass(GType type)
         unregisterClass(children[i]);
     }
     g_free(children);
-    g_type_set_qdata(type, m_motorQuark, 0);
+    g_type_set_qdata(type, m_motorQuark, nullptr);
 }
 
 Meta::Type Gtk3Plugin::fromGType(GType type)
@@ -279,26 +280,26 @@ Meta::Type Gtk3Plugin::fromGType(GType type)
 
 Meta::Value Gtk3Plugin::fromGValue(const GValue* value)
 {
-    motor_assert(value != 0, "NULL value");
+    motor_assert(value != nullptr, "NULL value");
     GType type = G_VALUE_TYPE(value);
     if(G_TYPE_FUNDAMENTAL(type) == G_TYPE_GTYPE)
     {
         motor_assert_format(false, "don't know how to handle type {0}", g_type_name(type));
-        return Meta::Value();
+        return {};
     }
 
     switch(G_TYPE_FUNDAMENTAL(type))
     {
-    case G_TYPE_NONE: return Meta::Value();
+    case G_TYPE_NONE: return {};
     case G_TYPE_INTERFACE:
     {
         raw< const Meta::Class > cls    = getGInterfaceClass(*this, type);
         GObjectWrapper           object = {reinterpret_cast< GObject* >(g_value_get_object(value))};
 
-        return Meta::Value(Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
-                                                Meta::Type::Constness::Mutable,
-                                                Meta::Type::Constness::Mutable),
-                           &object, Meta::Value::MakeCopy);
+        return {Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
+                                     Meta::Type::Constness::Mutable,
+                                     Meta::Type::Constness::Mutable),
+                &object, Meta::Value::MakeCopy};
     }
     case G_TYPE_CHAR: return Meta::Value(g_value_get_schar(value));
     case G_TYPE_UCHAR: return Meta::Value(g_value_get_uchar(value));
@@ -313,19 +314,19 @@ Meta::Value Gtk3Plugin::fromGValue(const GValue* value)
     {
         raw< const Meta::Class > cls       = getGEnumClass(*this, type);
         GEnumWrapper             enumValue = {g_value_get_enum(value)};
-        return Meta::Value(Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
-                                                Meta::Type::Constness::Mutable,
-                                                Meta::Type::Constness::Mutable),
-                           &enumValue, Meta::Value::MakeCopy);
+        return {Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
+                                     Meta::Type::Constness::Mutable,
+                                     Meta::Type::Constness::Mutable),
+                &enumValue, Meta::Value::MakeCopy};
     }
     case G_TYPE_FLAGS:
     {
         raw< const Meta::Class > cls        = getGFlagsClass(*this, type);
         GFlagsWrapper            flagsValue = {g_value_get_flags(value)};
-        return Meta::Value(Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
-                                                Meta::Type::Constness::Mutable,
-                                                Meta::Type::Constness::Mutable),
-                           &flagsValue, Meta::Value::MakeCopy);
+        return {Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
+                                     Meta::Type::Constness::Mutable,
+                                     Meta::Type::Constness::Mutable),
+                &flagsValue, Meta::Value::MakeCopy};
     }
     case G_TYPE_FLOAT: return Meta::Value(g_value_get_float(value));
     case G_TYPE_DOUBLE: return Meta::Value(g_value_get_double(value));
@@ -335,19 +336,19 @@ Meta::Value Gtk3Plugin::fromGValue(const GValue* value)
         // raw< const Meta::Class > cls = getGBoxedClass(*this, type);
         raw< const Meta::Class > cls        = getGBoxedClass(*this, type);
         GBoxedWrapper            boxedValue = {g_value_get_boxed(value)};
-        return Meta::Value(Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
-                                                Meta::Type::Constness::Mutable,
-                                                Meta::Type::Constness::Mutable),
-                           &boxedValue, Meta::Value::MakeCopy);
+        return {Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
+                                     Meta::Type::Constness::Mutable,
+                                     Meta::Type::Constness::Mutable),
+                &boxedValue, Meta::Value::MakeCopy};
     }
     case G_TYPE_OBJECT:
     {
         raw< const Meta::Class > cls    = getGObjectClass(*this, type);
         GObjectWrapper           object = {reinterpret_cast< GObject* >(g_value_get_object(value))};
-        return Meta::Value(Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
-                                                Meta::Type::Constness::Mutable,
-                                                Meta::Type::Constness::Mutable),
-                           &object, Meta::Value::MakeCopy);
+        return {Meta::Type::makeType(cls, Meta::Type::Indirection::Value,
+                                     Meta::Type::Constness::Mutable,
+                                     Meta::Type::Constness::Mutable),
+                &object, Meta::Value::MakeCopy};
     }
     case G_TYPE_VARIANT:
     case G_TYPE_PARAM:
@@ -355,7 +356,7 @@ Meta::Value Gtk3Plugin::fromGValue(const GValue* value)
     default:
     {
         motor_assert_format(false, "don't know how to handle type {0}", g_type_name(type));
-        return Meta::Value();
+        return {};
     }
     }
 }

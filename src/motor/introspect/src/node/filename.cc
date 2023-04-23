@@ -14,9 +14,7 @@ FileName::FileName(const ifilename& value) : Node(), m_value(value), m_file()
     motor_forceuse(m_value);
 }
 
-FileName::~FileName()
-{
-}
+FileName::~FileName() = default;
 
 ConversionCost FileName::distance(const Type& type) const
 {

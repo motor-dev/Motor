@@ -7,9 +7,7 @@
 
 namespace Motor { namespace Task {
 
-KernelTask::~KernelTask()
-{
-}
+KernelTask::~KernelTask() = default;
 
 void KernelTask::schedule(weak< Scheduler > scheduler) const
 {

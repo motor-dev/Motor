@@ -10,9 +10,9 @@ namespace Motor { namespace Plugin {
 
 #ifdef MOTOR_STATIC
 
-DynamicObjectList* DynamicObjectList::s_dynamicObjectRoot = 0;
+DynamicObjectList* DynamicObjectList::s_dynamicObjectRoot = nullptr;
 
-DynamicObjectList::Symbol::Symbol() : name(0), symbol()
+DynamicObjectList::Symbol::Symbol() : name(nullptr), symbol()
 {
 }
 
@@ -44,7 +44,7 @@ DynamicObjectList* DynamicObjectList::findDynamicObject(const char* name)
         current = current->m_next;
     }
     motor_info_format(Log::plugin(), "unable to load dynamic object {0}", name);
-    return 0;
+    return nullptr;
 }
 
 bool DynamicObjectList::registerSymbolInternal(const char* name, SymbolPointer value)
@@ -70,7 +70,7 @@ DynamicObjectList::findSymbolInternal(const char* name) const
             return &m_symbols[i].symbol;
         }
     }
-    return 0;
+    return nullptr;
 }
 
 void DynamicObjectList::showList()

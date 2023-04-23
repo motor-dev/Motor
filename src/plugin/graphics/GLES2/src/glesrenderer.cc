@@ -15,7 +15,7 @@ GLESRenderer::GLESRenderer(const Plugin::Context& context)
 
 GLESRenderer::~GLESRenderer()
 {
-    flush();
+    GLESRenderer::flush();
 }
 
 void GLESRenderer::flush()
@@ -26,19 +26,19 @@ void GLESRenderer::flush()
 ref< IGPUResource >
 GLESRenderer::create(weak< const RenderSurfaceDescription > /*renderSurfaceDescription*/) const
 {
-    return ref< IGPUResource >();
+    return {};
 }
 
 ref< IGPUResource >
 GLESRenderer::create(weak< const RenderWindowDescription > /*renderWindowDescription*/) const
 {
-    return ref< IGPUResource >();
+    return {};
 }
 
 ref< IGPUResource >
 GLESRenderer::create(weak< const ShaderProgramDescription > /*shaderDescription*/) const
 {
-    return ref< IGPUResource >();
+    return {};
 }
 
 knl::uint2 GLESRenderer::getScreenSize() const

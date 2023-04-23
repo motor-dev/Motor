@@ -9,13 +9,19 @@ namespace Motor { namespace EditHint {
 struct motor_api(META) Extension
 {
     const istring ext;
-    Extension(const istring& ext) : ext(ext)
+    explicit Extension(const istring& ext) : ext(ext)
     {
     }
 };
 
-struct motor_api(META) Temporary {Temporary() {}};
+struct motor_api(META) Temporary
+{
+    Temporary() = default;
+};
 
-struct motor_api(META) OutputNode {OutputNode() {}};
+struct motor_api(META) OutputNode
+{
+    OutputNode() = default;
+};
 
 }}  // namespace Motor::EditHint

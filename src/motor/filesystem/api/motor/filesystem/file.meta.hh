@@ -69,7 +69,7 @@ public:
 
     ref< const Ticket > beginRead(u32 size = 0, i64 offset = 0, bool text = false,
                                   minitl::Allocator& arena = Arena::temporary()) const;
-    ref< const Ticket > beginWrite(const void* data, u32 size, i64 offset = -1);
+    ref< const Ticket > beginWrite(const void* data, u32 size, i64 offset = -1) const;
 
     void fillBuffer(const weak< Ticket >& ticket) const;
     void writeBuffer(const weak< Ticket >& ticket) const;
@@ -84,8 +84,8 @@ public:
     }
 
 private:
-    virtual void doFillBuffer(weak< Ticket > ticket) const  = 0;
-    virtual void doWriteBuffer(weak< Ticket > ticket) const = 0;
+    virtual void doFillBuffer(const weak< Ticket >& ticket) const  = 0;
+    virtual void doWriteBuffer(const weak< Ticket >& ticket) const = 0;
 };
 
 }  // namespace Motor

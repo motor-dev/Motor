@@ -22,11 +22,11 @@ protected:
     void* getWindowHandle() const;
 
 public:
-    Window(weak< const RenderWindowDescription > renderWindowDescription,
-           weak< const Renderer >                renderer);
-    ~Window();
+    Window(const weak< const RenderWindowDescription >& renderWindowDescription,
+           const weak< const Renderer >&                renderer);
+    ~Window() override;
 
-    void load(weak< const Resource::IDescription > renderWindowDescription) override;
+    void load(const weak< const Resource::IDescription >& renderWindowDescription) override;
     void unload() override;
 
     knl::uint2 getDimensions() const;

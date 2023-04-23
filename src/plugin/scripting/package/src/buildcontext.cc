@@ -6,7 +6,7 @@
 
 int motor_package_lex_destroy();
 
-const minitl::Allocator::Block< u8 >* g_buffer                   = 0;
+const minitl::Allocator::Block< u8 >* g_buffer                   = nullptr;
 int                                   g_bufferPosition           = 0;
 int                                   g_packageOffset            = 0;
 int                                   g_packageLine              = 0;
@@ -33,7 +33,7 @@ BuildContext::BuildContext(const ifilename& filename, const minitl::Allocator::B
 BuildContext::~BuildContext()
 {
     motor_package_lex_destroy();
-    g_buffer         = 0;
+    g_buffer         = nullptr;
     g_bufferPosition = 0;
     --s_useCount;
 }

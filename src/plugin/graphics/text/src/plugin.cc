@@ -40,4 +40,4 @@ TextPlugin::~TextPlugin()
 
 }  // namespace Motor
 
-MOTOR_PLUGIN_REGISTER(Motor::TextPlugin);
+MOTOR_PLUGIN_REGISTER(Motor::TextPlugin)

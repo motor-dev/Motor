@@ -15,16 +15,16 @@ private:
     ref< Task::ITask > m_startTask;
 
 private:
-    void load(weak< const Resource::IDescription > producer, Resource::Resource & resource)
+    void load(const weak< const Resource::IDescription >& producer, Resource::Resource& resource)
         override;
-    void unload(weak< const Resource::IDescription > producer, Resource::Resource & resource)
+    void unload(const weak< const Resource::IDescription >& producer, Resource::Resource& resource)
         override;
 
     void start();
 
 public:
     ProducerLoader();
-    virtual ~ProducerLoader();
+    ~ProducerLoader() override;
 
     ref< Task::ITask > startTask() const
     {

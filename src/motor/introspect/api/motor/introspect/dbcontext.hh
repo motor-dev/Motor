@@ -16,7 +16,7 @@ struct Message
     weak< const Node >                    owner;
     MessageType                           message;
     LogLevel                              severity;
-    Message(weak< const Node > owner, const MessageType& message, LogLevel severity)
+    Message(const weak< const Node >& owner, const MessageType& message, LogLevel severity)
         : owner(owner)
         , message(message)
         , severity(severity)
@@ -32,11 +32,12 @@ struct motor_api(INTROSPECT) DbContext
     MessageList            messages;
     u32                    errorCount;
 
-    DbContext(minitl::Allocator & arena, ref< Folder > rootFolder);
-    DbContext(minitl::Allocator & arena, ref< Namespace > ns, ref< Folder > rootFolder);
-    void error(weak< const Node > owner, const Message::MessageType& error);
-    void warning(weak< const Node > owner, const Message::MessageType& warning);
-    void info(weak< const Node > owner, const Message::MessageType& info);
+    DbContext(minitl::Allocator & arena, const ref< Folder >& rootFolder);
+    DbContext(minitl::Allocator & arena, const ref< Namespace >& ns,
+              const ref< Folder >& rootFolder);
+    void error(const weak< const Node >& owner, const Message::MessageType& error);
+    void warning(const weak< const Node >& owner, const Message::MessageType& warning);
+    void info(const weak< const Node >& owner, const Message::MessageType& info);
 };
 
 }}}  // namespace Motor::Meta::AST

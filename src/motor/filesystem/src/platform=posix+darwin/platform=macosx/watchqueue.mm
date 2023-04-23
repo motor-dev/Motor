@@ -1,37 +1,38 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#include    <motor/filesystem/stdafx.h>
-#include    <macosx/watchqueue.hh>
+#include <motor/filesystem/stdafx.h>
+#include <macosx/watchqueue.hh>
 
-#include    <diskwatch.hh>
-#include    <watchpoint.hh>
+#include <diskwatch.hh>
+#include <watchpoint.hh>
 
-#include    <motor/core/environment.hh>
-#include    <Foundation/Foundation.h>
+#include <motor/core/environment.hh>
+#include <Foundation/Foundation.h>
 
-namespace Motor { namespace FileSystem
-{
+namespace Motor { namespace FileSystem {
 
 static CFStringRef getApplicationDirectory()
 {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-    NSString* bundlePath = [[NSBundle mainBundle] bundlePath];
-    CFStringRef result = CFStringCreateWithCString(kCFAllocatorDefault, [bundlePath UTF8String], kCFStringEncodingUTF8);
+    NSAutoreleasePool* pool       = [[NSAutoreleasePool alloc] init];
+    NSString*          bundlePath = [[NSBundle mainBundle] bundlePath];
+    CFStringRef result = CFStringCreateWithCString(kCFAllocatorDefault, [bundlePath UTF8String],
+                                                   kCFStringEncodingUTF8);
     [pool release];
     return result;
 }
 
 FileSystemWatchProcessQueue::FileSystemWatchProcessQueue()
-    :   m_Path(getApplicationDirectory())
-    ,   m_thread("FileSystemWatch", &FileSystemWatchProcessQueue::runFileSystemWatch, (intptr_t)this, 0)
-    ,   m_runLoop(0)
+    : m_Path(getApplicationDirectory())
+    , m_thread("FileSystemWatch", &FileSystemWatchProcessQueue::runFileSystemWatch, (intptr_t)this,
+               0)
+    , m_runLoop(0)
 {
 }
 
 FileSystemWatchProcessQueue::~FileSystemWatchProcessQueue()
 {
-    while (!m_runLoop)
+    while(!m_runLoop)
     {
         Thread::yield();
     }
@@ -43,13 +44,16 @@ FileSystemWatchProcessQueue::~FileSystemWatchProcessQueue()
 
 intptr_t FileSystemWatchProcessQueue::runFileSystemWatch(intptr_t p1, intptr_t /*p2*/)
 {
-    FileSystemWatchProcessQueue* watch = reinterpret_cast<FileSystemWatchProcessQueue*>(p1);
-    CFRunLoopRef runLoop = CFRunLoopGetCurrent();
+    FileSystemWatchProcessQueue* watch   = reinterpret_cast< FileSystemWatchProcessQueue* >(p1);
+    CFRunLoopRef                 runLoop = CFRunLoopGetCurrent();
     CFRetain(runLoop);
     watch->m_runLoop = &runLoop;
 
-    FSEventStreamContext context = { 0, (void*)watch, NULL, NULL, NULL };
-    FSEventStreamRef eventStream = FSEventStreamCreate(kCFAllocatorDefault, &FileSystemWatchProcessQueue::onFileSystemEvent, &context, CFArrayCreate(kCFAllocatorDefault, (const void**)&watch->m_Path, 1, 0), kFSEventStreamEventIdSinceNow, 3.0, kFSEventStreamCreateFlagNone);
+    FSEventStreamContext context     = {0, (void*)watch, NULL, NULL, NULL};
+    FSEventStreamRef     eventStream = FSEventStreamCreate(
+        kCFAllocatorDefault, &FileSystemWatchProcessQueue::onFileSystemEvent, &context,
+        CFArrayCreate(kCFAllocatorDefault, (const void**)&watch->m_Path, 1, 0),
+        kFSEventStreamEventIdSinceNow, 3.0, kFSEventStreamCreateFlagNone);
     FSEventStreamScheduleWithRunLoop(eventStream, runLoop, kCFRunLoopCommonModes);
     FSEventStreamStart(eventStream);
 
@@ -63,18 +67,17 @@ intptr_t FileSystemWatchProcessQueue::runFileSystemWatch(intptr_t p1, intptr_t /
 }
 
 void FileSystemWatchProcessQueue::onFileSystemEvent(ConstFSEventStreamRef /*streamRef*/,
-                                                    void* /*clientCallBackInfo*/,
-                                                    size_t eventCount,
+                                                    void* /*clientCallBackInfo*/, size_t eventCount,
                                                     void* eventPaths,
                                                     const FSEventStreamEventFlags /*eventFlags*/[],
                                                     const FSEventStreamEventId /*eventIds*/[])
 {
     const char** eventPathsC = (const char**)eventPaths;
-    for (size_t i = 0; i < eventCount; ++i)
+    for(size_t i = 0; i < eventCount; ++i)
     {
-        ipath path(eventPathsC[i]);
-        weak<FileSystem::WatchPoint> point = FileSystem::WatchPoint::getWatchPoint(path);
-        if (point)
+        ipath                          path(eventPathsC[i]);
+        weak< FileSystem::WatchPoint > point = FileSystem::WatchPoint::getWatchPoint(path);
+        if(point)
         {
             motor_info_format(Log::fs(), "refreshing path {0}", path);
             point->signalDirty();
@@ -82,25 +85,24 @@ void FileSystemWatchProcessQueue::onFileSystemEvent(ConstFSEventStreamRef /*stre
     }
 }
 
-
-ref<Folder::Watch> WatchPoint::addWatch(weak<DiskFolder> folder, const Motor::ipath& path)
+ref< Folder::Watch > WatchPoint::addWatch(const weak< DiskFolder >& folder,
+                                          const Motor::ipath&       path)
 {
     static FileSystemWatchProcessQueue s_queue;
 
-
     ipath absolutePath("");
-    if (path[0] != istring(""))
+    if(path[0] != istring(""))
     {
-        char prefixBuffer[PATH_MAX+1];
+        char  prefixBuffer[PATH_MAX + 1];
         char* prefix = getcwd(prefixBuffer, PATH_MAX);
         absolutePath += ipath(prefix);
     }
     absolutePath += path;
 
-    weak<WatchPoint> point = WatchPoint::getWatchPointOrCreate(absolutePath);
-    ref<DiskFolder::Watch> result = ref<DiskFolder::Watch>::create(Arena::filesystem(), folder, point);
+    weak< WatchPoint >       point = WatchPoint::getWatchPointOrCreate(absolutePath);
+    ref< DiskFolder::Watch > result
+        = ref< DiskFolder::Watch >::create(Arena::filesystem(), folder, point);
     return result;
 }
 
-
-}}
+}}  // namespace Motor::FileSystem

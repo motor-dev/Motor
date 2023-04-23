@@ -9,11 +9,9 @@ namespace Motor { namespace KernelScheduler {
 
 class motor_api(SCHEDULER) ICodeLoader : public Resource::ILoader
 {
-    MOTOR_NOCOPY(ICodeLoader);
-
 protected:
     ICodeLoader();
-    ~ICodeLoader();
+    ~ICodeLoader() override;
 };
 
 }}  // namespace Motor::KernelScheduler

@@ -25,94 +25,96 @@ namespace Motor { namespace Meta { namespace AST {
 
 static const Value s_notFound = Value();
 
-void Node::Visitor::accept(weak< const Array >                         arrayNode,
+void Node::Visitor::accept(const weak< const Array >&                  arrayNode,
                            const minitl::vector< weak< const Node > >& arrayValue)
 {
     motor_forceuse(arrayNode);
     motor_forceuse(arrayValue);
 }
 
-void Node::Visitor::accept(weak< const Bool > boolValue)
+void Node::Visitor::accept(const weak< const Bool >& boolValue)
 {
     motor_forceuse(boolValue);
 }
 
-void Node::Visitor::accept(weak< const FileName > filenameValue)
+void Node::Visitor::accept(const weak< const FileName >& filenameValue)
 {
     motor_forceuse(filenameValue);
 }
 
-void Node::Visitor::accept(weak< const Float > floatValue)
+void Node::Visitor::accept(const weak< const Float >& floatValue)
 {
     motor_forceuse(floatValue);
 }
 
-void Node::Visitor::accept(weak< const Float2 > float2Value)
+void Node::Visitor::accept(const weak< const Float2 >& float2Value)
 {
     motor_forceuse(float2Value);
 }
 
-void Node::Visitor::accept(weak< const Float3 > float3Value)
+void Node::Visitor::accept(const weak< const Float3 >& float3Value)
 {
     motor_forceuse(float3Value);
 }
 
-void Node::Visitor::accept(weak< const Float4 > float4Value)
+void Node::Visitor::accept(const weak< const Float4 >& float4Value)
 {
     motor_forceuse(float4Value);
 }
 
-void Node::Visitor::accept(weak< const Integer > integerValue)
+void Node::Visitor::accept(const weak< const Integer >& integerValue)
 {
     motor_forceuse(integerValue);
 }
 
-void Node::Visitor::accept(weak< const Int2 > int2Value)
+void Node::Visitor::accept(const weak< const Int2 >& int2Value)
 {
     motor_forceuse(int2Value);
 }
 
-void Node::Visitor::accept(weak< const Int3 > int3Value)
+void Node::Visitor::accept(const weak< const Int3 >& int3Value)
 {
     motor_forceuse(int3Value);
 }
 
-void Node::Visitor::accept(weak< const Int4 > int4Value)
+void Node::Visitor::accept(const weak< const Int4 >& int4Value)
 {
     motor_forceuse(int4Value);
 }
 
-void Node::Visitor::accept(weak< const Object > objectValue)
+void Node::Visitor::accept(const weak< const Object >& objectValue)
 {
     motor_forceuse(objectValue);
 }
 
-void Node::Visitor::accept(weak< const Parameter > parameter, istring name,
-                           weak< const Node > value)
+void Node::Visitor::accept(const weak< const Parameter >& parameter, istring name,
+                           const weak< const Node >& value)
 {
     motor_forceuse(parameter);
     motor_forceuse(name);
     motor_forceuse(value);
 }
 
-void Node::Visitor::accept(weak< const Property > propertyValue)
+void Node::Visitor::accept(const weak< const Property >& propertyValue)
 {
     motor_forceuse(propertyValue);
 }
 
-void Node::Visitor::accept(weak< const Reference > referenceValue, const Value& resolvedValue)
+void Node::Visitor::accept(const weak< const Reference >& referenceValue,
+                           const Value&                   resolvedValue)
 {
     motor_forceuse(referenceValue);
     motor_forceuse(resolvedValue);
 }
 
-void Node::Visitor::accept(weak< const Reference > referenceValue, weak< const Node > resolvedNode)
+void Node::Visitor::accept(const weak< const Reference >& referenceValue,
+                           const weak< const Node >&      resolvedNode)
 {
     motor_forceuse(referenceValue);
     motor_forceuse(resolvedNode);
 }
 
-void Node::Visitor::accept(weak< const String > stringValue)
+void Node::Visitor::accept(const weak< const String >& stringValue)
 {
     motor_forceuse(stringValue);
 }
@@ -170,13 +172,11 @@ Value Node::eval(const Type& expectedType) const
     return Value(Value::ByRef(m_cache));
 }
 
-const Value& Node::getMetadata(const istring name) const
+const Value& Node::getMetadata(istring name) const
 {
-    for(minitl::vector< minitl::tuple< const istring, Value > >::const_iterator it
-        = m_metadata.begin();
-        it != m_metadata.end(); ++it)
+    for(const auto& it: m_metadata)
     {
-        if(it->first == name) return it->second;
+        if(it.first == name) return it.second;
     }
     return s_notFound;
 }
@@ -191,7 +191,7 @@ ref< Node > Node::getProperty(DbContext& context, const inamespace& name) const
 {
     motor_forceuse(name);
     context.error(this, minitl::format_buffer< 512 > {"object does not have properties"});
-    return ref< Node >();
+    return {};
 }
 
 void Node::visit(Node::Visitor& visitor) const

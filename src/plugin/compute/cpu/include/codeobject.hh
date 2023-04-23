@@ -18,8 +18,8 @@ private:
     Plugin::DynamicObject m_kernel;
 
 public:
-    CodeObject(const inamespace& name);
-    ~CodeObject();
+    explicit CodeObject(const inamespace& name);
+    ~CodeObject() override;
 };
 
 }}}  // namespace Motor::KernelScheduler::CPU

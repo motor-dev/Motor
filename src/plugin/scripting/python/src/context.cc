@@ -18,19 +18,20 @@ Context::~Context()
     m_library->destroyThread(m_pythonState);
 }
 
-void Context::unload(weak< const Resource::IDescription > /*description*/,
+void Context::unload(const weak< const Resource::IDescription >& /*description*/,
                      Resource::Resource& /*handle*/)
 {
     PythonLibrary::ThreadLock lock(m_library, m_pythonState);
 }
 
-void Context::runBuffer(weak< const PythonScript > script, Resource::Resource& /*resource*/,
+void Context::runBuffer(const weak< const PythonScript >& script, Resource::Resource& /*resource*/,
                         const minitl::Allocator::Block< u8 >& block)
 {
     runCode(reinterpret_cast< const char* >(block.begin()), script->getScriptName());
 }
 
-void Context::reloadBuffer(weak< const PythonScript > script, Resource::Resource& /*resource*/,
+void Context::reloadBuffer(const weak< const PythonScript >& script,
+                           Resource::Resource& /*resource*/,
                            const minitl::Allocator::Block< u8 >& block)
 {
     runCode(reinterpret_cast< const char* >(block.begin()), script->getScriptName());

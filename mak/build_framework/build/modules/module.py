@@ -94,13 +94,15 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, depends, 
 
 @conf
 def module(
-    build_context, name, env, path, depends, private_depends, features, source_list, extra_includes,
-    extra_public_includes, extra_system_includes, extra_defines, extra_public_defines, conditions, project_name, uselib,
-    **kw_args
+        build_context, name, env, path, depends, private_depends, features, source_list, extra_includes,
+        extra_public_includes, extra_system_includes, extra_defines, extra_public_defines, conditions, project_name,
+        uselib,
+        **kw_args
 ):
-    for condition in conditions:
-        if condition not in env.FEATURES:
-            return None
+    if not env.PROJECTS:
+        for condition in conditions:
+            if condition not in env.FEATURES:
+                return None
     source_nodes = get_source_nodes(build_context, path, name)
     source_filter = ['src/**/*.%s' % ext for ext in COMPILE_EXTENSIONS]
     includes = []
@@ -151,15 +153,16 @@ def module(
         source_nodes=source_nodes,
         source=source_list,
         defines=[
-            'building_%s' % safe_name(name.split('.')[-1]),
-            'MOTOR_PROJECTID=%s' % safe_name(name.replace('.', '_')),
-            'MOTOR_PROJECTNAME=%s' % name
-        ] + extra_defines,
+                    'building_%s' % safe_name(name.split('.')[-1]),
+                    'MOTOR_PROJECTID=%s' % safe_name(name.replace('.', '_')),
+                    'MOTOR_PROJECTNAME=%s' % name
+                ] + extra_defines,
         export_defines=extra_public_defines[:],
         includes=extra_includes + includes + api + [build_context.srcnode],
         export_includes=extra_public_includes + api,
         export_system_includes=extra_system_includes,
         project_name=project_name or name,
+        conditions=conditions,
     )
     if module_path is not None:
         task_gen.module_path = module_path
@@ -191,7 +194,7 @@ def module(
                         features=['cxx', 'cxxprogram', 'motor:cxx', 'motor:unit_test'],
                         use=[task_gen.target],
                         uselib=[build_context.__class__.optim] +
-                        (build_context.env.STATIC and ['static'] or ['dynamic']) + uselib,
+                               (build_context.env.STATIC and ['static'] or ['dynamic']) + uselib,
                         source=[test],
                         source_nodes=source_nodes,
                         defines=[
@@ -201,6 +204,7 @@ def module(
                         ],
                         includes=extra_includes + includes + api + [p
                                                                     for _, p in source_nodes] + [build_context.srcnode],
+                        conditions=conditions,
                     )
 
     return task_gen

@@ -13,9 +13,7 @@ Float3::Float3(knl::float3 value) : Node(), m_value(value)
     motor_forceuse(m_value);
 }
 
-Float3::~Float3()
-{
-}
+Float3::~Float3() = default;
 
 ConversionCost Float3::distance(const Type& type) const
 {

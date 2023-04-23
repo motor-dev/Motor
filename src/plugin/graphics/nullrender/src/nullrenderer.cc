@@ -24,7 +24,7 @@ NullRenderer::NullRenderer(const Plugin::Context& context)
 
 NullRenderer::~NullRenderer()
 {
-    flush();
+    NullRenderer::flush();
 }
 
 ref< IGPUResource >

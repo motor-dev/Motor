@@ -26,7 +26,7 @@ struct hash< const char* >
         u32       len       = str ? (u32)strlen(str) : 0;
         u32       hashvalue = len, tmp;
         u32       rem;
-        if(len == 0 || data == NULL) return 0;
+        if(len == 0 || data == nullptr) return 0;
 
         rem = len & 3;
         len >>= 2;
@@ -108,7 +108,7 @@ private:
 
     public:
         StringInfoBuffer();
-        ~StringInfoBuffer();
+        ~StringInfoBuffer() = default;
 
         byte* reserve(u32 size);
     };
@@ -137,26 +137,16 @@ public:
     static u32                    unique(const char* begin, const char* end);
 
 private:
-    mutable i_u32 m_refCount;
-    u32           m_length;
-    char          m_text[1];
+    u32  m_length;
+    char m_text[1];
 
 private:
-    StringInfo(u32 len) : m_refCount(i_u32::create(0)), m_length(len), m_text()
+    explicit StringInfo(u32 len) : m_length(len), m_text()
     {
     }
-    StringInfo();
+    StringInfo() = default;
 
 public:
-    void retain(void) const
-    {
-        m_refCount++;
-    }
-    void release(void) const
-    {
-        motor_assert(m_refCount, "string's refcount already 0");
-        m_refCount--;
-    }
     u32 size() const
     {
         return m_length;
@@ -167,17 +157,13 @@ public:
     }
 };
 
-StringInfo::StringInfoBuffer::StringInfoBuffer() : m_used(i_u32::create(0))
-{
-}
-
-StringInfo::StringInfoBuffer::~StringInfoBuffer()
+StringInfo::StringInfoBuffer::StringInfoBuffer() : m_used(i_u32::create(0)), m_data()
 {
 }
 
 u32 StringInfo::StringInfoBuffer::capacity()
 {
-    return Arena::string().blockSize() - sizeof(StringInfoBuffer) + sizeof(byte[1]);
+    return Arena::string().blockSize() - u32(sizeof(StringInfoBuffer) + sizeof(byte[1]));
 }
 
 byte* StringInfo::StringInfoBuffer::reserve(u32 size)
@@ -189,7 +175,7 @@ byte* StringInfo::StringInfoBuffer::reserve(u32 size)
     }
     else
     {
-        return 0;
+        return nullptr;
     }
 }
 
@@ -204,7 +190,7 @@ StringInfo::StringInfoBufferCache::StringInfoBufferCache()
         reinterpret_cast< iptr< StringInfo::StringInfoBuffer >* >(Arena::string().allocate()))
     , m_bufferCount(i_u32::create(0))
 {
-    m_buffers[0] = 0;
+    m_buffers[0] = nullptr;
     allocate(0);
     motor_assert(m_bufferCount == 1, "unable to allocate initial buffer");
 }
@@ -238,16 +224,16 @@ StringInfo::StringInfoBuffer* StringInfo::StringInfoBufferCache::get(u32 index)
             false,
             "Asking for a buffer out of range; current buffer count: {0}, requested buffer: {1}",
             m_bufferCount, index);
-        return 0;
+        return nullptr;
     }
 }
 
 StringInfo::StringInfoBuffer* StringInfo::StringInfoBufferCache::allocate(u32 place)
 {
-    StringInfoBuffer* buffer = reinterpret_cast< StringInfoBuffer* >(Arena::string().allocate());
-    if(m_buffers[place].setConditional(buffer, 0) == 0)
+    auto* buffer = reinterpret_cast< StringInfoBuffer* >(Arena::string().allocate());
+    if(m_buffers[place].setConditional(buffer, nullptr) == nullptr)
     {
-        m_buffers[place + 1] = 0;
+        m_buffers[place + 1] = nullptr;
         new(buffer) StringInfoBuffer;
         m_bufferCount++;
         return buffer;
@@ -321,14 +307,12 @@ u32 StringInfo::unique(const char* val)
 u32 istring::init(const char* str)
 {
     u32 result = StringInfo::unique(str);
-    StringInfo::getCache().resolve(result)->retain();
     return result;
 }
 
 u32 istring::init(const char* begin, const char* end)
 {
     u32 result = StringInfo::unique(begin, end);
-    StringInfo::getCache().resolve(result)->retain();
     return result;
 }
 
@@ -342,37 +326,6 @@ istring::istring(const char* value) : m_index(init(value))
 
 istring::istring(const char* begin, const char* end) : m_index(init(begin, end))
 {
-}
-
-istring::istring(istring&& other) : m_index(other.m_index)
-{
-    StringInfo::getCache().resolve(m_index)->retain();
-}
-
-istring::istring(const istring& other) : m_index(other.m_index)
-{
-    StringInfo::getCache().resolve(m_index)->retain();
-}
-
-istring::~istring()
-{
-    StringInfo::getCache().resolve(m_index)->release();
-}
-
-istring& istring::operator=(const istring& other)
-{
-    StringInfo::getCache().resolve(other.m_index)->retain();
-    StringInfo::getCache().resolve(m_index)->release();
-    m_index = other.m_index;
-    return *this;
-}
-
-istring& istring::operator=(istring&& other)
-{
-    StringInfo::getCache().resolve(other.m_index)->retain();
-    StringInfo::getCache().resolve(m_index)->release();
-    m_index = other.m_index;
-    return *this;
 }
 
 u32 istring::hash() const
@@ -433,11 +386,11 @@ static void parse(const char* str, const char* end, const char* sep, igenericnam
             str = ss;
         }
     }
-    return;
 }
 
 igenericnamespace::igenericnamespace()
     : m_namespace((istring*)(m_buffer))
+    , m_buffer()
     , m_size(0)
     , m_capacity(MaxNamespaceSize)
 {
@@ -445,8 +398,9 @@ igenericnamespace::igenericnamespace()
 
 igenericnamespace::igenericnamespace(const igenericnamespace& other)
     : m_namespace(other.m_capacity > MaxNamespaceSize
-                      ? (istring*)Arena::general().alloc(other.m_capacity * sizeof(istring))
+                      ? (istring*)Arena::general().alloc(other.m_capacity * u32(sizeof(istring)))
                       : (istring*)(m_buffer))
+    , m_buffer()
     , m_size(other.m_size)
     , m_capacity(other.m_capacity)
 {
@@ -458,6 +412,7 @@ igenericnamespace::igenericnamespace(const igenericnamespace& other)
 
 igenericnamespace::igenericnamespace(const istring& onlycomponent)
     : m_namespace((istring*)(m_buffer))
+    , m_buffer()
     , m_size(1)
     , m_capacity(MaxNamespaceSize)
 {
@@ -466,6 +421,7 @@ igenericnamespace::igenericnamespace(const istring& onlycomponent)
 
 igenericnamespace::igenericnamespace(const char* begin, const char* end, const char* sep)
     : m_namespace((istring*)(m_buffer))
+    , m_buffer()
     , m_size(0)
     , m_capacity(MaxNamespaceSize)
 {
@@ -474,6 +430,7 @@ igenericnamespace::igenericnamespace(const char* begin, const char* end, const c
 
 igenericnamespace::igenericnamespace(const char* str, const char* sep)
     : m_namespace((istring*)(m_buffer))
+    , m_buffer()
     , m_size(0)
     , m_capacity(MaxNamespaceSize)
 {
@@ -539,7 +496,7 @@ void igenericnamespace::push_back(const istring& component)
 
 istring igenericnamespace::pop_back()
 {
-    if(motor_assert(m_size >= 1, "pop_back called on an empty namespace")) return istring();
+    if(motor_assert(m_size >= 1, "pop_back called on an empty namespace")) return {};
     --m_size;
     istring result = m_namespace[m_size];
     m_namespace[m_size].~istring();
@@ -548,7 +505,7 @@ istring igenericnamespace::pop_back()
 
 istring igenericnamespace::pop_front()
 {
-    if(motor_assert(m_size >= 1, "pop_front called on an empty namespace")) return istring();
+    if(motor_assert(m_size >= 1, "pop_front called on an empty namespace")) return {};
     istring result = m_namespace[0];
     for(u32 i = 1; i < m_size; ++i)
         m_namespace[i - 1] = m_namespace[i];
@@ -610,7 +567,7 @@ void igenericnamespace::str(char* buffer, char separator, u32 size) const
 
 void igenericnamespace::grow(u16 newCapacity)
 {
-    istring* newStrings = (istring*)Arena::general().alloc(newCapacity * sizeof(istring));
+    auto* newStrings = (istring*)Arena::general().alloc(newCapacity * u32(sizeof(istring)));
     for(u16 i = 0; i < m_size; ++i)
         new(&newStrings[i]) istring(m_namespace[i]);
     for(u16 i = m_size; i < newCapacity; ++i)
@@ -629,9 +586,7 @@ void igenericnamespace::grow(u16 newCapacity)
 
 //-----------------------------------------------------------------------------
 
-inamespace::inamespace()
-{
-}
+inamespace::inamespace() = default;
 
 inamespace::inamespace(const istring& onlycomponent) : igenericnamespace(onlycomponent)
 {
@@ -677,16 +632,14 @@ inamespace operator+(const inamespace& ns1, const inamespace& ns2)
 
 inamespace::Path inamespace::str(char separator) const
 {
-    Path p;
+    Path p {};
     igenericnamespace::str(p.name, separator, sizeof(p.name));
     return p;
 }
 
 //-----------------------------------------------------------------------------
 
-ipath::ipath()
-{
-}
+ipath::ipath() = default;
 
 ipath::ipath(const istring& onlycomponent) : igenericnamespace(onlycomponent)
 {
@@ -716,16 +669,14 @@ ipath operator+(const ipath& path1, const ipath& path2)
 
 ipath::Filename ipath::str(char separator) const
 {
-    Filename p;
+    Filename p {};
     igenericnamespace::str(p.name, separator, sizeof(p.name));
     return p;
 }
 
 //-----------------------------------------------------------------------------
 
-ifilename::ifilename()
-{
-}
+ifilename::ifilename() = default;
 
 ifilename::ifilename(const istring& onlycomponent) : igenericnamespace(onlycomponent)
 {
@@ -751,7 +702,7 @@ ifilename operator+(const ipath& path, const ifilename& file)
 
 ifilename::Filename ifilename::str(char separator) const
 {
-    Filename p;
+    Filename p {};
     igenericnamespace::str(p.name, separator, sizeof(p.name));
     return p;
 }
@@ -839,7 +790,7 @@ u32 format_arg_partial(char* destination, const igenericnamespace& value,
         }
         else if(size < maxCapacity)
         {
-            size += minitl::format_details::string_format::format_arg_partial(
+            minitl::format_details::string_format::format_arg_partial(
                 destination + size, value[i].c_str(), options, value.size(), maxCapacity);
             break;
         }
@@ -852,40 +803,40 @@ u32 format_arg_partial(char* destination, const igenericnamespace& value,
 u32 format_arg(char* destination, const inamespace& value, const minitl::format_options& options,
                u32 reservedLength)
 {
-    return format_arg(destination, value, options, reservedLength, value.Separator);
+    return format_arg(destination, value, options, reservedLength, Motor::inamespace::Separator);
 }
 
 u32 format_arg_partial(char* destination, const inamespace& value,
                        const minitl::format_options& options, u32 reservedLength, u32 maxCapacity)
 {
     return format_arg_partial(destination, value, options, reservedLength, maxCapacity,
-                              value.Separator);
+                              Motor::inamespace::Separator);
 }
 
 u32 format_arg(char* destination, const ipath& value, const minitl::format_options& options,
                u32 reservedLength)
 {
-    return format_arg(destination, value, options, reservedLength, value.Separator);
+    return format_arg(destination, value, options, reservedLength, Motor::ipath::Separator);
 }
 
 u32 format_arg_partial(char* destination, const ipath& value, const minitl::format_options& options,
                        u32 reservedLength, u32 maxCapacity)
 {
     return format_arg_partial(destination, value, options, reservedLength, maxCapacity,
-                              value.Separator);
+                              Motor::ipath::Separator);
 }
 
 u32 format_arg(char* destination, const ifilename& value, const minitl::format_options& options,
                u32 reservedLength)
 {
-    return format_arg(destination, value, options, reservedLength, value.Separator);
+    return format_arg(destination, value, options, reservedLength, Motor::ifilename::Separator);
 }
 
 u32 format_arg_partial(char* destination, const ifilename& value,
                        const minitl::format_options& options, u32 reservedLength, u32 maxCapacity)
 {
     return format_arg_partial(destination, value, options, reservedLength, maxCapacity,
-                              value.Separator);
+                              Motor::ifilename::Separator);
 }
 
 }  // namespace Motor

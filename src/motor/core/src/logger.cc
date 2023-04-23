@@ -19,11 +19,15 @@ motor_api(CORE) const char* ILogListener::getLogLevelName(LogLevel level)
         return "Unknown";
 }
 
-Logger::Logger() : m_listeners(Arena::debug()), m_children(Arena::debug()), m_name()
+Logger::Logger()
+    : m_listeners(Arena::debug())
+    , m_children(Arena::debug())
+    , m_name()
+    , m_logFilter(LogLevel::logWarning)
 {
 }
 
-Logger::Logger(weak< Logger > parent, const istring& name, LogLevel minLogLevel)
+Logger::Logger(const weak< Logger >& parent, const istring& name, LogLevel minLogLevel)
     : m_listeners(Arena::debug())
     , m_children(Arena::debug())
     , m_parent(parent)
@@ -32,9 +36,7 @@ Logger::Logger(weak< Logger > parent, const istring& name, LogLevel minLogLevel)
 {
 }
 
-Logger::~Logger()
-{
-}
+Logger::~Logger() = default;
 
 ref< Logger > Logger::getChild(const istring& name)
 {
@@ -73,13 +75,13 @@ ref< Logger > Logger::root()
 //     return instance(name)->log(level, filename, line, msg);
 // }
 
-void Logger::addListener(weak< ILogListener > listener)
+void Logger::addListener(const weak< ILogListener >& listener)
 {
     ScopedCriticalSection _(m_cs);
     m_listeners.push_back(listener);
 }
 
-void Logger::removeListener(weak< ILogListener > listener)
+void Logger::removeListener(const weak< ILogListener >& listener)
 {
     ScopedCriticalSection _(m_cs);
     for(minitl::vector< weak< ILogListener > >::iterator it = m_listeners.begin();
@@ -99,10 +101,9 @@ bool Logger::doLog(LogLevel level, const inamespace& logName, const char* filena
 {
     ScopedCriticalSection _(m_cs);
     bool                  result = false;
-    for(minitl::vector< weak< ILogListener > >::const_iterator it = m_listeners.begin();
-        it != m_listeners.end(); ++it)
+    for(const auto& m_listener: m_listeners)
     {
-        result |= (*it)->log(logName, level, filename, line, Thread::name().c_str(), msg);
+        result |= m_listener->log(logName, level, filename, line, Thread::name().c_str(), msg);
     }
 
     if(m_parent)

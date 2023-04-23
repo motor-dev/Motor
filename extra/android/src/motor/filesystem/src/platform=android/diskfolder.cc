@@ -131,7 +131,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                 {
                     ref< DiskFolder > newFolder = ref< DiskFolder >::create(
                         Arena::filesystem(), p, newPolicy, Folder::CreateNone);
-                    m_folders.push_back(minitl::make_tuple(name, newFolder));
+                    m_folders.emplace_back(name, newFolder);
                 }
                 else
                 {
@@ -161,11 +161,10 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                     {
                         unz_file_pos filePos;
                         unzGetFilePos(m_handle.ptrHandle, &filePos);
-                        ifilename filepath = path + ifilename(filename);
-                        m_files.push_back(minitl::make_tuple(
-                            filename,
-                            ref< ZipFile >::create(Arena::filesystem(), m_handle.ptrHandle,
-                                                   filepath, info, filePos)));
+                        ifilename fullFilename = path + ifilename(filename);
+                        m_files.emplace_back(filename, ref< ZipFile >::create(
+                                                           Arena::filesystem(), m_handle.ptrHandle,
+                                                           fullFilename, info, filePos));
                     }
                     else if(path.size() >= 1)
                     {
@@ -184,9 +183,9 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                     {
                         ipath path = relativePath;
                         path.push_back(*it);
-                        m_folders.push_back(minitl::make_tuple(
-                            *it, ref< ZipFolder >::create(Arena::filesystem(), m_handle.ptrHandle,
-                                                          path, newPolicy)));
+                        m_folders.emplace_back(*it, ref< ZipFolder >::create(Arena::filesystem(),
+                                                                             m_handle.ptrHandle,
+                                                                             path, newPolicy));
                     }
                 }
             }

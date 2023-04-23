@@ -10,8 +10,6 @@ IMemoryHost::IMemoryHost(const istring& name) : m_name(name)
 {
 }
 
-IMemoryHost::~IMemoryHost()
-{
-}
+IMemoryHost::~IMemoryHost() = default;
 
 }}  // namespace Motor::KernelScheduler

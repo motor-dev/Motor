@@ -17,8 +17,8 @@ static bool convertNilToValue(lua_State* state, int index, const Meta::Type& typ
     motor_forceuse(index);
     if(type.indirection >= Meta::Type::Indirection::RawPtr)
     {
-        Meta::Value* value = new(buffer) Meta::Value(type, Meta::Value::Reserve);
-        *static_cast< void** >(value->memory()) = 0;
+        auto* value = new(buffer) Meta::Value(type, Meta::Value::Reserve);
+        *static_cast< void** >(value->memory()) = nullptr;
         return true;
     }
     else
@@ -169,7 +169,7 @@ static bool convertUserdataToValue(lua_State* state, int index, const Meta::Type
     if(lua_rawequal(state, -1, -2))
     {
         lua_pop(state, 2);
-        Meta::Value*         userdata   = (Meta::Value*)lua_touserdata(state, index);
+        auto*                userdata   = (Meta::Value*)lua_touserdata(state, index);
         Meta::ConversionCost conversion = userdata->type().calculateConversion(type);
         if(conversion >= Meta::ConversionCost::s_incompatible)
         {
@@ -198,9 +198,9 @@ static bool convertTableToValue(lua_State* state, int index, const Meta::Type& t
         motor_assert_format(type.metaclass->operators->arrayOperators,
                             "Array type {0} does not implement Array API methods",
                             type.metaclass->fullname());
-        Meta::Type   arrayType  = type.metaclass->operators->arrayOperators->value_type;
-        u32          count      = motor_checked_numcast< u32 >(luaL_len(state, index));
-        Meta::Value* parameters = (Meta::Value*)malloca(
+        Meta::Type arrayType  = type.metaclass->operators->arrayOperators->value_type;
+        u32        count      = motor_checked_numcast< u32 >(luaL_len(state, index));
+        auto*      parameters = (Meta::Value*)malloca(
             minitl::align(count * sizeof(Meta::Value), motor_alignof(Meta::Value)));
 
         lua_pushnil(state);
@@ -235,9 +235,10 @@ static bool convertTableToValue(lua_State* state, int index, const Meta::Type& t
             Meta::Value array = type.metaclass->constructor->doCall(parameters, count);
             new(buffer) Meta::Value(array);
         }
-        for(int j = count - 1; j >= 0; --j)
+        while(count)
         {
-            parameters[j].~Value();
+            count--;
+            parameters[count].~Value();
         }
         freea(parameters);
         return result;
@@ -249,7 +250,7 @@ static bool convertTableToValue(lua_State* state, int index, const Meta::Type& t
         Meta::Type valueType
             = Meta::Type::makeType(type.metaclass, Meta::Type::Indirection::Value,
                                    Meta::Type::Constness::Mutable, Meta::Type::Constness::Mutable);
-        Meta::Value* value = new(buffer) Meta::Value(valueType, Meta::Value::Reserve);
+        auto* value = new(buffer) Meta::Value(valueType, Meta::Value::Reserve);
         lua_pushnil(state);
         while(lua_next(state, index) != 0)
         {
@@ -267,8 +268,8 @@ static bool convertTableToValue(lua_State* state, int index, const Meta::Type& t
                 value->~Value();
                 return false;
             }
-            Meta::Value* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
-            bool         result = createValue(state, -1, property->type, v);
+            auto* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
+            bool  result = createValue(state, -1, property->type, v);
             if(!result)
             {
                 lua_pop(state, 2);

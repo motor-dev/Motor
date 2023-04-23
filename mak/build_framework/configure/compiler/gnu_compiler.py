@@ -82,7 +82,12 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
     )
     ARCHIVER = 'ar'
     DEFINES = ['_WIN32', '_WIN64', '_M_AMD64', '_M_ARM', '_M_ARM_ARMV7VE', '_M_ARM_FP', '_M_ARM64', '_M_ARM64EC',
-               '_M_IX86', '_M_IX86_FP', '_M_X64']
+               '_M_IX86', '_M_IX86_FP', '_M_X64', '__LP64__', '__ILP32__', '__BIG_ENDIAN__', '__LITTLE_ENDIAN__',
+               '__x86_64__', '__i386__', '__i486__', '__i586__', '__i686__', '__powerpc__', '__powerpc64__',
+               '__POWERPC__', '__ppc64__', '__arm64e__', '__aarch64__', '__aarch64__', '__aarch64', '__aarch32__',
+               '__arm__', '__ARM_ARCH_5__', '__ARM_ARCH_6__', '__ARM_ARCH_6K__', '__ARM_ARCH_6Z__', '__ARM_ARCH_6KZ__',
+               '__ARM_ARCH_6ZK__', '__ARM_ARCH_7A__', '__ARM_ARCH_7K__', '__ARM_ARCH_7S__', '__ARM_ARCH_7A__',
+               '_CALL_ELF']
 
     def __init__(self, compiler_c, compiler_cxx, extra_args={}, extra_env={}):
         extra_env = dict(extra_env)
@@ -380,7 +385,8 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
     def populate_useful_variables(self, conf, sysroot):
         env = conf.env
         sysroot_flags = sysroot and ['--sysroot', sysroot] or []
-        result, out, err = self.run_cxx(sysroot_flags + ['-x', 'c++', '-v', '-dM', '-E', '-'], '\n')
+        result, out, err = self.run_cxx(
+            sysroot_flags + conf.env.CXXFLAGS + ['-std=c++14', '-x', 'c++', '-v', '-dM', '-E', '-'], '\n')
         result = 0
         if result != 0:
             print('could not retrieve system includes: %s' % err)
@@ -393,23 +399,20 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
                         path = out.pop(0).strip()
                         if not os.path.isdir(path):
                             break
-                        env.append_unique('SYSTEM_INCLUDES', [os.path.normpath(path)])
+                        env.append_unique('COMPILER_INCLUDES', [os.path.normpath(path)])
                 elif line.startswith('#define'):
                     line = line[len('#define'):].strip()
                     space = line.find(' ')
                     if space != -1:
                         define = line[:space]
                         value = line[space + 1:]
-                        if define in self.DEFINES:
-                            env.append_unique('SYSTEM_DEFINES', ['%s=%s' % (define, value)])
-                    elif line in self.DEFINES:
-                        conf.env.append_unique('SYSTEM_DEFINES', [line])
-
+                        env.append_unique('COMPILER_DEFINES', ['%s=%s' % (define, value)])
         result, out, err = self.run_cxx(sysroot_flags + ['-x', 'c++', '-print-search-dirs'])
         if result != 0:
             print('could not retrieve system defines: %s' % str(e))
         else:
             out = out.split('\n')
+            libs = []
             while out:
                 line = out.pop(0)
                 if line and line.startswith('libraries:'):

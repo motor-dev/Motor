@@ -105,7 +105,7 @@ Meta::ConversionCost calculateConversion(const LuaParameterType& type, const Met
             if(lua_rawequal(type.state, -1, -2))
             {
                 lua_pop(type.state, 2);
-                Meta::Value* userdata = (Meta::Value*)lua_touserdata(type.state, index);
+                auto* userdata = (Meta::Value*)lua_touserdata(type.state, index);
                 return Meta::calculateConversion(userdata->type(), target);
             }
             else
@@ -217,7 +217,7 @@ typedef Meta::ArgInfo< LuaParameterType > LuaParameterInfo;
 
 int call(lua_State* state, raw< const Meta::Method > method)
 {
-    u32 nargs = lua_gettop(state) - 1;
+    int nargs = lua_gettop(state) - 1;
     if((nargs == 1 && lua_type(state, 2) == LUA_TTABLE)
        || (nargs == 2 && lua_type(state, 3) == LUA_TTABLE))
     {
@@ -228,9 +228,9 @@ int call(lua_State* state, raw< const Meta::Method > method)
         {
             lua_pop(state, 1);
         }
-        u32               positionParameterCount = 0;
-        u32               keywordParameterCount  = 0;
-        LuaParameterInfo* parameters
+        u32   positionParameterCount = 0;
+        u32   keywordParameterCount  = 0;
+        auto* parameters
             = (LuaParameterInfo*)malloca(sizeof(LuaParameterInfo) * (parameterCount + 1));
 
         if(nargs == 2)
@@ -248,7 +248,7 @@ int call(lua_State* state, raw< const Meta::Method > method)
             {
             case LUA_TNUMBER:
             {
-                u32 j = (u32)lua_tonumber(state, -1);
+                int j = (int)lua_tonumber(state, -1);
                 new(&parameters[positionParameterCount])
                     LuaParameterInfo(LuaParameterType(state, nargs + 1, istring(), j));
                 positionParameterCount++;
@@ -292,9 +292,8 @@ int call(lua_State* state, raw< const Meta::Method > method)
             freea(parameters);
         }
     }
-    LuaParameterInfo* parameters
-        = (LuaParameterInfo*)malloca(sizeof(LuaParameterInfo) * (nargs + 1));
-    for(u32 i = 0; i < nargs; ++i)
+    auto* parameters = (LuaParameterInfo*)malloca(sizeof(LuaParameterInfo) * (nargs + 1));
+    for(int i = 0; i < nargs; ++i)
     {
         new(&parameters[i]) LuaParameterInfo(LuaParameterType(state, 2 + i));
     }
@@ -309,7 +308,7 @@ int call(lua_State* state, raw< const Meta::Method > method)
     {
         freea(parameters);
         char message[4096] = "no overload can convert all parameters\n  ";
-        for(u32 i = 0; i < nargs; ++i)
+        for(int i = 0; i < nargs; ++i)
         {
             strcat(message, minitl::format< 128u >(FMT("{0}{1}"), Context::tostring(state, 2 + i),
                                                    (i < nargs - 1 ? ", " : "")));

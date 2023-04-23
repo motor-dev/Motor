@@ -19,16 +19,15 @@ private:
     Meta::Value       m_value;
 
 protected:
-    virtual minitl::tuple< raw< const Meta::Method >, bool > getCall(DbContext & context)
-        const override;
-    virtual ConversionCost distance(const Type& type) const override;
-    virtual bool           doResolve(DbContext & context) override;
-    virtual void           doEval(const Type& expectedType, Value& result) const override;
-    virtual void           doVisit(Node::Visitor & visitor) const override;
+    minitl::tuple< raw< const Meta::Method >, bool > getCall(DbContext & context) const override;
+    ConversionCost                                   distance(const Type& type) const override;
+    bool                                             doResolve(DbContext & context) override;
+    void doEval(const Type& expectedType, Value& result) const override;
+    void doVisit(Node::Visitor & visitor) const override;
 
 public:
-    Reference(const inamespace& name);
-    ~Reference();
+    explicit Reference(const inamespace& name);
+    ~Reference() override;
 
     const inamespace& name() const
     {

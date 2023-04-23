@@ -16,10 +16,10 @@ private:
     typedef typename type_t::value_t      value_t;
 
 private:
-    type_t m_value;
+    type_t m_value {};
 
 public:
-    itaggedptr(T* t)  // NOLINT(google-explicit-constructor)
+    itaggedptr(T* t = nullptr)  // NOLINT(google-explicit-constructor)
         : m_value((typename type_t::value_t)(t))
     {
     }
@@ -86,7 +86,7 @@ public:
 };
 
 template < typename T >
-istack< T >::istack() : m_head(0)
+istack< T >::istack() : m_head()
 {
 }
 

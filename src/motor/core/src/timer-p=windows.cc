@@ -40,7 +40,7 @@ float Timer::now()
     LARGE_INTEGER t, freq;
     QueryPerformanceCounter(&t);
     QueryPerformanceFrequency(&freq);
-    return (float)t.QuadPart * 1000.0f / freq.QuadPart;
+    return (float)t.QuadPart * 1000.0f / (float)freq.QuadPart;
 }
 
 }  // namespace Motor

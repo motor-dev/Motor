@@ -16,7 +16,7 @@ struct PlatformData
     ::XVisualInfo* visual;
     ::Atom         wm_protocols;
     ::Atom         wm_delete_window;
-    PlatformData(::Display* display);
+    explicit PlatformData(::Display* display);
 };
 
 class Renderer::PlatformRenderer : public minitl::refcountable
@@ -34,7 +34,7 @@ private:
 
 public:
     PlatformRenderer();
-    ~PlatformRenderer();
+    ~PlatformRenderer() override;
     ::Window createWindow(i16 x, i16 y, u16 w, u16 h);
 
     weak< Window > getWindowFromXWindow(::Window w);

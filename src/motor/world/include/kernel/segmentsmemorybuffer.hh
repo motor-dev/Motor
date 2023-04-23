@@ -13,8 +13,8 @@ class motor_api(WORLD) SegmentsMemoryBuffer
     , public minitl::intrusive_list< SegmentsMemoryBuffer >::item
 {
 public:
-    SegmentsMemoryBuffer(weak< const KernelScheduler::IMemoryHost > host);
-    ~SegmentsMemoryBuffer();
+    explicit SegmentsMemoryBuffer(const weak< const KernelScheduler::IMemoryHost >& host);
+    ~SegmentsMemoryBuffer() override;
 };
 
 }}  // namespace Motor::World

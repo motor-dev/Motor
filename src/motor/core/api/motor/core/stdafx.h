@@ -40,29 +40,6 @@ motor_api(CORE) minitl::Allocator& debug();
 motor_api(CORE) minitl::Allocator& general();
 }}  // namespace Motor::Arena
 
-namespace Motor {
-
-inline u32 bitCount(u32 bitMask)
-{
-    u32 result = 0;
-    for(u32 i = 0; i < 32; ++i, bitMask >>= 1)
-    {
-        result += bitMask & 0x1;
-    }
-    return result;
-}
-
-inline u32 getFirstBit(u32 bitMask)
-{
-    for(u32 i = 0; i < 32; ++i, bitMask >>= 1)
-    {
-        if(bitMask & 0x1) return i;
-    }
-    return (u32)-1;
-}
-
-}  // namespace Motor
-
 #    include <motor/minitl/assert.hh>
 
 #    include <motor/minitl/cast.hh>
@@ -72,9 +49,10 @@ inline u32 getFirstBit(u32 bitMask)
 #    include <motor/minitl/scopedptr.hh>
 #    include <motor/minitl/weakptr.hh>
 
-#    include <motor/core/logger.hh>
 #    include <motor/core/string/istring.hh>
 #    include <motor/core/string/text.hh>
+
+#    include <motor/core/logger.hh>
 
 using minitl::motor_checked_cast;
 using minitl::motor_checked_numcast;

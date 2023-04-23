@@ -6,4 +6,4 @@
 #include <motor/plugin/plugin.hh>
 #include <gtksample.hh>
 
-MOTOR_PLUGIN_REGISTER(Motor::GtkSample);
+MOTOR_PLUGIN_REGISTER(Motor::GtkSample)

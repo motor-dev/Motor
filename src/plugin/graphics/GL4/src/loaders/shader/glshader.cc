@@ -11,8 +11,8 @@
 
 namespace Motor { namespace OpenGL {
 
-GLShaderProgram::GLShaderProgram(weak< const Resource::IDescription > shaderDescription,
-                                 weak< const GLRenderer >             renderer)
+GLShaderProgram::GLShaderProgram(const weak< const Resource::IDescription >& shaderDescription,
+                                 const weak< const GLRenderer >&             renderer)
     : IGPUResource(shaderDescription, renderer)
     , m_shaderProgram(0)
     , m_vertexShader(0)
@@ -21,9 +21,7 @@ GLShaderProgram::GLShaderProgram(weak< const Resource::IDescription > shaderDesc
 {
 }
 
-GLShaderProgram::~GLShaderProgram()
-{
-}
+GLShaderProgram::~GLShaderProgram() = default;
 
 void GLShaderProgram::attach()
 {
@@ -56,9 +54,10 @@ static GLenum toGLShaderStage(Shaders::Stage stage)
     }
 }
 
-GLhandleARB GLShaderProgram::build(weak< const ShaderProgramDescription > program) const
+GLhandleARB GLShaderProgram::build(const weak< const ShaderProgramDescription >& program) const
 {
     motor_forceuse(program);
+    motor_forceuse(this);
     toGLShaderStage(Shaders::FragmentStage);
 #if 0
     //GLenum shaderType = toGLShaderStage(stage);
@@ -96,7 +95,7 @@ GLhandleARB GLShaderProgram::build(weak< const ShaderProgramDescription > progra
 #endif
 }
 
-void GLShaderProgram::load(weak< const Resource::IDescription > shaderDescription)
+void GLShaderProgram::load(const weak< const Resource::IDescription >& shaderDescription)
 {
     weak< const ShaderProgramDescription > program
         = motor_checked_cast< const ShaderProgramDescription >(shaderDescription);
