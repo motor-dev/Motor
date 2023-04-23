@@ -20,15 +20,15 @@ struct tuple : public details::tuple_helper< 0, T... >
     constexpr explicit tuple(const T&... args);
     template < typename... Args >
     constexpr explicit tuple(Args&&... args);
-    constexpr tuple(const tuple&)     = default;
-    constexpr tuple(tuple&&) noexcept = default;
+    constexpr tuple(const tuple&) = default;
+    constexpr tuple(tuple&&)      = default;       // NOLINT(performance-noexcept-move-constructor)
     template < typename... T1 >
     constexpr tuple(const tuple< T1... >& other);  // NOLINT(google-explicit-constructor)
     template < typename... T1 >
     constexpr tuple(tuple< T1... >&& other);       // NOLINT(google-explicit-constructor)
 
-    tuple& operator=(const tuple&)     = default;
-    tuple& operator=(tuple&&) noexcept = default;
+    tuple& operator=(const tuple&) = default;
+    tuple& operator=(tuple&&)      = default;  // NOLINT(performance-noexcept-move-constructor)
     template < typename... T1 >
     tuple& operator=(const tuple< T1... >& other);
 };

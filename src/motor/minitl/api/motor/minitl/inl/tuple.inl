@@ -20,12 +20,14 @@ struct tuple_field
     constexpr explicit tuple_field(T&& t) : m_field(move(t))
     {
     }
-    constexpr tuple_field()                              = default;
-    constexpr tuple_field(const tuple_field& other)      = default;
-    constexpr tuple_field(tuple_field&& other) noexcept  = default;
-    tuple_field& operator=(const tuple_field& other)     = default;
-    tuple_field& operator=(tuple_field&& other) noexcept = default;
-    ~tuple_field()                                       = default;
+    constexpr tuple_field()                         = default;
+    constexpr tuple_field(const tuple_field& other) = default;
+    constexpr tuple_field(tuple_field&& other)  // NOLINT(performance-noexcept-move-constructor)
+        = default;
+    tuple_field& operator=(const tuple_field& other) = default;
+    tuple_field& operator=(tuple_field&& other)  // NOLINT(performance-noexcept-move-constructor)
+        = default;
+    ~tuple_field() = default;
 
     constexpr T& get() &
     {
@@ -52,12 +54,14 @@ struct tuple_field< 0, T >
     constexpr explicit tuple_field(T&& t) : first(move(t))
     {
     }
-    constexpr tuple_field()                              = default;
-    constexpr tuple_field(const tuple_field& other)      = default;
-    constexpr tuple_field(tuple_field&& other) noexcept  = default;
-    tuple_field& operator=(const tuple_field& other)     = default;
-    tuple_field& operator=(tuple_field&& other) noexcept = default;
-    ~tuple_field()                                       = default;
+    constexpr tuple_field()                         = default;
+    constexpr tuple_field(const tuple_field& other) = default;
+    constexpr tuple_field(tuple_field&& other)  // NOLINT(performance-noexcept-move-constructor)
+        = default;
+    tuple_field& operator=(const tuple_field& other) = default;
+    tuple_field& operator=(tuple_field&& other)  // NOLINT(performance-noexcept-move-constructor)
+        = default;
+    ~tuple_field() = default;
 
     constexpr T& get() &
     {
@@ -84,12 +88,14 @@ struct tuple_field< 1, T >
     constexpr explicit tuple_field(T&& t) : second(move(t))
     {
     }
-    constexpr tuple_field()                              = default;
-    constexpr tuple_field(const tuple_field& other)      = default;
-    constexpr tuple_field(tuple_field&& other) noexcept  = default;
-    tuple_field& operator=(const tuple_field& other)     = default;
-    tuple_field& operator=(tuple_field&& other) noexcept = default;
-    ~tuple_field()                                       = default;
+    constexpr tuple_field()                         = default;
+    constexpr tuple_field(const tuple_field& other) = default;
+    constexpr tuple_field(tuple_field&& other)  // NOLINT(performance-noexcept-move-constructor)
+        = default;
+    tuple_field& operator=(const tuple_field& other) = default;
+    tuple_field& operator=(tuple_field&& other)  // NOLINT(performance-noexcept-move-constructor)
+        = default;
+    ~tuple_field() = default;
 
     constexpr T& get() &
     {
@@ -116,12 +122,14 @@ struct tuple_field< 2, T >
     constexpr explicit tuple_field(T&& t) : third(move(t))
     {
     }
-    constexpr tuple_field()                              = default;
-    constexpr tuple_field(const tuple_field& other)      = default;
-    constexpr tuple_field(tuple_field&& other) noexcept  = default;
-    tuple_field& operator=(const tuple_field& other)     = default;
-    tuple_field& operator=(tuple_field&& other) noexcept = default;
-    ~tuple_field()                                       = default;
+    constexpr tuple_field()                         = default;
+    constexpr tuple_field(const tuple_field& other) = default;
+    constexpr tuple_field(tuple_field&& other)  // NOLINT(performance-noexcept-move-constructor)
+        = default;
+    tuple_field& operator=(const tuple_field& other) = default;
+    tuple_field& operator=(tuple_field&& other)  // NOLINT(performance-noexcept-move-constructor)
+        = default;
+    ~tuple_field() = default;
 
     constexpr T& get() &
     {
@@ -142,9 +150,10 @@ struct tuple_helper
     : public tuple_field< INDEX, T >
     , public tuple_helper< INDEX + 1, TAIL... >
 {
-    constexpr tuple_helper()                        = default;
-    constexpr tuple_helper(const tuple_helper&)     = default;
-    constexpr tuple_helper(tuple_helper&&) noexcept = default;
+    constexpr tuple_helper()                    = default;
+    constexpr tuple_helper(const tuple_helper&) = default;
+    constexpr tuple_helper(tuple_helper&&)  // NOLINT(performance-noexcept-move-constructor)
+        = default;
     constexpr explicit tuple_helper(const T& t, const TAIL&... tail)
         : tuple_field< INDEX, T >(t)
         , tuple_helper< INDEX + 1, TAIL... >(tail...)
@@ -177,16 +186,18 @@ struct tuple_helper
     {
     }
 
-    tuple_helper& operator=(const tuple_helper& other)     = default;
-    tuple_helper& operator=(tuple_helper&& other) noexcept = default;
+    tuple_helper& operator=(const tuple_helper& other) = default;
+    tuple_helper& operator=(tuple_helper&& other)  // NOLINT(performance-noexcept-move-constructor)
+        = default;
 };
 
 template < int INDEX, typename T >
 struct tuple_helper< INDEX, T > : public tuple_field< INDEX, T >
 {
-    constexpr tuple_helper()                        = default;
-    constexpr tuple_helper(const tuple_helper&)     = default;
-    constexpr tuple_helper(tuple_helper&&) noexcept = default;
+    constexpr tuple_helper()                    = default;
+    constexpr tuple_helper(const tuple_helper&) = default;
+    constexpr tuple_helper(tuple_helper&&)  // NOLINT(performance-noexcept-move-constructor)
+        = default;
     constexpr explicit tuple_helper(const T& t) : tuple_field< INDEX, T >(t)
     {
     }
@@ -210,8 +221,9 @@ struct tuple_helper< INDEX, T > : public tuple_field< INDEX, T >
     {
     }
 
-    tuple_helper& operator=(const tuple_helper& other)     = default;
-    tuple_helper& operator=(tuple_helper&& other) noexcept = default;
+    tuple_helper& operator=(const tuple_helper& other) = default;
+    tuple_helper& operator=(tuple_helper&& other)  // NOLINT(performance-noexcept-move-constructor)
+        = default;
 };
 
 template < int GET, int INDEX, typename T, typename... TAIL,

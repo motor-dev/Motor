@@ -122,7 +122,7 @@ typedef u8               byte;
 #    define motor_break() __debugbreak()
 #    if defined(_ARM) || defined(_ARM64)
 #        include <intrin.h>
-#        define motor_pause() YieldProcessor()
+#        define motor_pause() __yield()
 #    else
 #        include <emmintrin.h>
 #        define motor_pause() _mm_pause()

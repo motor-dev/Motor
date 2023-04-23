@@ -21,7 +21,7 @@ Environment::Environment()
     m_homeDirectory.push_back(".motor");
 }
 
-size_t Environment::getProcessorCount() const
+size_t Environment::getProcessorCount()
 {
     int    cpuCount = 0;
     size_t len      = sizeof(cpuCount);
