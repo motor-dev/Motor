@@ -23,9 +23,9 @@ private:
 
 public:
     pool(Allocator& allocator, u64 capacity, u64 alignment = motor_alignof(T));
-    pool(pool&& other) noexcept            = default;
-    pool& operator=(pool&& other) noexcept = default;
-    ~pool()                                = default;
+    pool(pool&& other)            = default;  // NOLINT(performance-noexcept-move-constructor)
+    pool& operator=(pool&& other) = default;  // NOLINT(performance-noexcept-move-constructor)
+    ~pool()                       = default;
 
     pool(const pool& other)            = delete;
     pool& operator=(const pool& other) = delete;
