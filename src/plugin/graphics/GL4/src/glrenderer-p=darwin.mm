@@ -175,7 +175,7 @@ GLWindow::GLWindow(const weak< const RenderWindowDescription >& windowDescriptio
 {
 }
 
-void GLWindow::load(weak< const Resource::IDescription > windowDescription)
+void GLWindow::load(const weak< const Resource::IDescription >& windowDescription)
 {
     Window::load(windowDescription);
     motor_checked_cast< const GLRenderer >(m_renderer)->attachWindow(this);
