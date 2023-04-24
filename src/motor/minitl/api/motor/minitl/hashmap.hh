@@ -69,9 +69,9 @@ public:
     explicit hashmap(Allocator& allocator, u32 reserved = 0);
     ~hashmap();
     hashmap(const hashmap& other);
-    hashmap(hashmap&& other) noexcept = default;
+    hashmap(hashmap&& other) = default;             // NOLINT(performance-noexcept-move-constructor)
     hashmap(Allocator& allocator, const hashmap& other);
-    hashmap& operator=(hashmap&& other) noexcept = default;
+    hashmap& operator=(hashmap&& other) = default;  // NOLINT(performance-noexcept-move-constructor)
     hashmap& operator=(hashmap other);
 
     void reserve(u32 size);
