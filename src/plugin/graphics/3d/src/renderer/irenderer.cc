@@ -11,7 +11,7 @@
 
 namespace Motor {
 
-IRenderer::IRenderer(minitl::Allocator& allocator, const weak< Resource::ResourceManager >& manager,
+IRenderer::IRenderer(minitl::allocator& allocator, const weak< Resource::ResourceManager >& manager,
                      Scheduler::Affinity affinity)
     : m_allocator(allocator)
     , m_resourceManager(manager)
@@ -51,7 +51,7 @@ weak< Task::ITask > IRenderer::syncTask() const
     return m_syncTask;
 }
 
-minitl::Allocator& IRenderer::arena() const
+minitl::allocator& IRenderer::arena() const
 {
     return m_allocator;
 }

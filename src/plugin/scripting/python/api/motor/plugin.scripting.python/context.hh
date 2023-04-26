@@ -23,9 +23,9 @@ private:
     void unload(const weak< const Resource::IDescription >& description, Resource::Resource& handle)
         override;
     void runBuffer(const weak< const PythonScript >& script, Resource::Resource& resource,
-                   const minitl::Allocator::Block< u8 >& buffer) override;
+                   const minitl::allocator::block< u8 >& buffer) override;
     void reloadBuffer(const weak< const PythonScript >& script, Resource::Resource& resource,
-                      const minitl::Allocator::Block< u8 >& buffer) override;
+                      const minitl::allocator::block< u8 >& buffer) override;
 
 private:
     void runCode(const char* buffer, const ifilename& filename);

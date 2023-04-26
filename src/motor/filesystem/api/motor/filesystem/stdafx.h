@@ -18,7 +18,7 @@ namespace Motor {
 
 namespace Arena {
 
-motor_api(FILESYSTEM) minitl::Allocator& filesystem();
+motor_api(FILESYSTEM) minitl::allocator& filesystem();
 
 }
 

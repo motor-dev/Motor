@@ -30,31 +30,31 @@ struct direct_formatter_left_aligned
 {
     template < typename T >
     static inline u32 write(char* destination, T value, const format_options& options,
-                            u32 reservedLength)
+                            u32 reserved_length)
     {
-        WRAPPED_FORMATTER::write(destination, value, options, reservedLength);
-        if(options.width > reservedLength)
+        WRAPPED_FORMATTER::write(destination, value, options, reserved_length);
+        if(options.width > reserved_length)
         {
-            u32 paddingSize = options.width - reservedLength;
-            memset(destination + reservedLength, options.fill, paddingSize);
+            u32 padding_size = options.width - reserved_length;
+            memset(destination + reserved_length, options.fill, padding_size);
             return options.width;
         }
     }
     template < typename T >
     static inline u32 write_partial(char* destination, T value, const format_options& options,
-                                    u32 reservedLength, u32 maxCapacity)
+                                    u32 reserved_length, u32 max_capacity)
     {
-        if(maxCapacity < reservedLength)
+        if(max_capacity < reserved_length)
         {
-            return WRAPPED_FORMATTER::write_partial(destination, value, options, reservedLength,
-                                                    maxCapacity);
+            return WRAPPED_FORMATTER::write_partial(destination, value, options, reserved_length,
+                                                    max_capacity);
         }
         else
         {
-            WRAPPED_FORMATTER::write(destination, value, options, reservedLength);
-            u32 paddingSize = maxCapacity - reservedLength;
-            memset(destination + reservedLength, options.fill, paddingSize);
-            return maxCapacity;
+            WRAPPED_FORMATTER::write(destination, value, options, reserved_length);
+            u32 padding_size = max_capacity - reserved_length;
+            memset(destination + reserved_length, options.fill, padding_size);
+            return max_capacity;
         }
     }
     using WRAPPED_FORMATTER::format_length;
@@ -65,36 +65,36 @@ struct direct_formatter_right_aligned
 {
     template < typename T >
     static inline u32 write(char* destination, T value, const format_options& options,
-                            u32 reservedLength)
+                            u32 reserved_length)
     {
-        u32 paddingSize = options.width - reservedLength;
-        memset(destination, options.fill, paddingSize);
-        WRAPPED_FORMATTER::wrtie(destination + paddingSize, value, options, reservedLength);
+        u32 padding_size = options.width - reserved_length;
+        memset(destination, options.fill, padding_size);
+        WRAPPED_FORMATTER::wrtie(destination + padding_size, value, options, reserved_length);
         return options.width;
     }
     template < typename T >
     static inline u32 write_partial(char* destination, T value, const format_options& options,
-                                    u32 reservedLength, u32 maxCapacity)
+                                    u32 reserved_length, u32 max_capacity)
     {
-        if(options.width < reservedLength)
+        if(options.width < reserved_length)
         {
-            return WRAPPED_FORMATTER::write_partial(destination, value, options, reservedLength,
-                                                    maxCapacity);
+            return WRAPPED_FORMATTER::write_partial(destination, value, options, reserved_length,
+                                                    max_capacity);
         }
         else
         {
-            u32 paddingSize = options.width - reservedLength;
-            if(paddingSize <= maxCapacity)
+            u32 padding_size = options.width - reserved_length;
+            if(padding_size <= max_capacity)
             {
-                memset(destination, options.fill, maxCapacity);
+                memset(destination, options.fill, max_capacity);
             }
             else
             {
-                memset(destination, options.fill, paddingSize);
-                WRAPPED_FORMATTER::write_partial(destination + paddingSize, value, options,
-                                                 maxCapacity - paddingSize);
+                memset(destination, options.fill, padding_size);
+                WRAPPED_FORMATTER::write_partial(destination + padding_size, value, options,
+                                                 max_capacity - padding_size);
             }
-            return maxCapacity;
+            return max_capacity;
         }
     }
     using WRAPPED_FORMATTER::format_length;
@@ -105,50 +105,51 @@ struct direct_formatter_centered
 {
     template < typename T >
     static inline u32 write(char* destination, T value, const format_options& options,
-                            u32 reservedLength)
+                            u32 reserved_length)
     {
-        u32 paddingSize     = (options.width - reservedLength);
-        u32 paddingSizeLeft = paddingSize / 2;
-        memset(destination, options.fill, paddingSizeLeft);
-        WRAPPED_FORMATTER::format_to(destination + paddingSizeLeft, value, options, reservedLength);
-        memset(destination + paddingSizeLeft + reservedLength, options.fill,
-               paddingSize - paddingSizeLeft);
+        u32 padding_size      = (options.width - reserved_length);
+        u32 padding_size_left = padding_size / 2;
+        memset(destination, options.fill, padding_size_left);
+        WRAPPED_FORMATTER::format_to(destination + padding_size_left, value, options,
+                                     reserved_length);
+        memset(destination + padding_size_left + reserved_length, options.fill,
+               padding_size - padding_size_left);
         return options.width;
     }
     template < typename T >
     static inline u32 write_partial(char* destination, T value, const format_options& options,
-                                    u32 reservedLength, u32 maxCapacity)
+                                    u32 reserved_length, u32 max_capacity)
     {
-        if(options.width < reservedLength)
+        if(options.width < reserved_length)
         {
-            return WRAPPED_FORMATTER::write_partial(destination, value, options, reservedLength,
-                                                    maxCapacity);
+            return WRAPPED_FORMATTER::write_partial(destination, value, options, reserved_length,
+                                                    max_capacity);
         }
         else
         {
-            u32 paddingSize     = (options.width - reservedLength);
-            u32 paddingSizeLeft = paddingSize / 2;
-            if(paddingSizeLeft <= maxCapacity)
+            u32 padding_size      = (options.width - reserved_length);
+            u32 padding_size_left = padding_size / 2;
+            if(padding_size_left <= max_capacity)
             {
-                memset(destination, options.fill, maxCapacity);
+                memset(destination, options.fill, max_capacity);
             }
             else
             {
-                memset(destination, options.fill, paddingSizeLeft);
-                if(reservedLength + paddingSizeLeft < maxCapacity)
+                memset(destination, options.fill, padding_size_left);
+                if(reserved_length + padding_size_left < max_capacity)
                 {
-                    WRAPPED_FORMATTER::write_partial(destination + paddingSizeLeft, value, options,
-                                                     maxCapacity - paddingSizeLeft);
+                    WRAPPED_FORMATTER::write_partial(destination + padding_size_left, value,
+                                                     options, max_capacity - padding_size_left);
                 }
                 else
                 {
-                    WRAPPED_FORMATTER::write(destination + paddingSizeLeft, value, options,
-                                             reservedLength);
-                    memset(destination + paddingSizeLeft + reservedLength, options.fill,
-                           maxCapacity - paddingSizeLeft - reservedLength);
+                    WRAPPED_FORMATTER::write(destination + padding_size_left, value, options,
+                                             reserved_length);
+                    memset(destination + padding_size_left + reserved_length, options.fill,
+                           max_capacity - padding_size_left - reserved_length);
                 }
             }
-            return maxCapacity;
+            return max_capacity;
         }
     }
     using WRAPPED_FORMATTER::format_length;
@@ -156,13 +157,13 @@ struct direct_formatter_centered
 
 template < typename T >
 u32 format_arg_partial_delegate(char* destination, T&& value, const format_options& options,
-                                u32 reservedLength, u32 maxCapacity)
+                                u32 reserved_length, u32 max_capacity)
 {
-    char* buffer = static_cast< char* >(malloca(reservedLength));
-    format_arg(destination, minitl::forward< T >(value), options, reservedLength);
-    memcpy(destination, buffer, maxCapacity);
+    char* buffer = static_cast< char* >(malloca(reserved_length));
+    format_arg(destination, minitl::forward< T >(value), options, reserved_length);
+    memcpy(destination, buffer, max_capacity);
     freea(buffer);
-    return maxCapacity;
+    return max_capacity;
 }
 
 namespace string_format {
@@ -174,21 +175,21 @@ static inline u32 format_length(const char* value, const format_options& options
 }
 
 static inline u32 format_arg(char* destination, const char* value, const format_options& options,
-                             u32 reservedLength)
+                             u32 reserved_length)
 {
     motor_forceuse(options);
-    memcpy(destination, value, reservedLength);
-    return reservedLength;
+    memcpy(destination, value, reserved_length);
+    return reserved_length;
 }
 
 static inline u32 format_arg_partial(char* destination, const char* value,
-                                     const format_options& options, u32 reservedLength,
-                                     u32 maxCapacity)
+                                     const format_options& options, u32 reserved_length,
+                                     u32 max_capacity)
 {
     motor_forceuse(options);
-    motor_forceuse(reservedLength);
-    memcpy(destination, value, maxCapacity);
-    return maxCapacity;
+    motor_forceuse(reserved_length);
+    memcpy(destination, value, max_capacity);
+    return max_capacity;
 }
 
 static inline u32 format_length(bool_wrapper value, const format_options& options)
@@ -198,10 +199,10 @@ static inline u32 format_length(bool_wrapper value, const format_options& option
 }
 
 motor_api(MINITL) u32 format_arg(char* destination, bool_wrapper value,
-                                 const format_options& options, u32 reservedLength);
+                                 const format_options& options, u32 reserved_length);
 motor_api(MINITL) u32
     format_arg_partial(char* destination, bool_wrapper value, const format_options& options,
-                       u32 reservedLength, u32 maxCapacity);
+                       u32 reserved_length, u32 max_capacity);
 
 }  // namespace string_format
 
@@ -234,18 +235,18 @@ struct formatter< 's' >
     }
     template < typename T >
     static inline u32 write(char* destination, T&& value, const format_options& options,
-                            u32 reservedLength)
+                            u32 reserved_length)
     {
         using namespace format_details::string_format;
-        return format_arg(destination, minitl::forward< T >(value), options, reservedLength);
+        return format_arg(destination, minitl::forward< T >(value), options, reserved_length);
     }
     template < typename T >
     static inline u32 write_partial(char* destination, T&& value, const format_options& options,
-                                    u32 reservedLength, u32 maxCapacity)
+                                    u32 reserved_length, u32 max_capacity)
     {
         using namespace format_details::string_format;
-        return format_arg_partial(destination, minitl::forward< T >(value), options, reservedLength,
-                                  maxCapacity);
+        return format_arg_partial(destination, minitl::forward< T >(value), options,
+                                  reserved_length, max_capacity);
     }
 };
 
@@ -268,22 +269,22 @@ struct formatter< 'c' >
         return 1;
     }
     static inline u32 write(char* destination, char value, const format_options& options,
-                            u32 reservedLength)
+                            u32 reserved_length)
     {
         motor_forceuse(options);
-        motor_forceuse(reservedLength);
+        motor_forceuse(reserved_length);
         *destination = value;
         return 1;
     }
     template < typename T >
     static inline u32 write_partial(char* destination, T&& value, const format_options& options,
-                                    u32 reservedLength, u32 maxCapacity)
+                                    u32 reserved_length, u32 max_capacity)
     {
         motor_forceuse(destination);
         motor_forceuse(value);
         motor_forceuse(options);
-        motor_forceuse(reservedLength);
-        motor_forceuse(maxCapacity);
+        motor_forceuse(reserved_length);
+        motor_forceuse(max_capacity);
         return 0;
     }
 };
@@ -309,23 +310,23 @@ struct formatter< 'd' >
     }
     template < typename T >
     static inline u32 write(char* destination, T&& value, const format_options& options,
-                            u32 reservedLength)
+                            u32 reserved_length)
     {
         motor_forceuse(destination);
         motor_forceuse(value);
         motor_forceuse(options);
-        motor_forceuse(reservedLength);
+        motor_forceuse(reserved_length);
         return 0;
     }
     template < typename T >
     static inline u32 write_partial(char* destination, T&& value, const format_options& options,
-                                    u32 reservedLength, u32 maxCapacity)
+                                    u32 reserved_length, u32 max_capacity)
     {
         motor_forceuse(destination);
         motor_forceuse(value);
         motor_forceuse(options);
-        motor_forceuse(reservedLength);
-        motor_forceuse(maxCapacity);
+        motor_forceuse(reserved_length);
+        motor_forceuse(max_capacity);
         return 0;
     }
 };
@@ -351,23 +352,23 @@ struct formatter< 'x' >
     }
     template < typename T >
     static inline u32 write(char* destination, T&& value, const format_options& options,
-                            u32 reservedLength)
+                            u32 reserved_length)
     {
         motor_forceuse(destination);
         motor_forceuse(value);
         motor_forceuse(options);
-        motor_forceuse(reservedLength);
+        motor_forceuse(reserved_length);
         return 0;
     }
     template < typename T >
     static inline u32 write_partial(char* destination, T&& value, const format_options& options,
-                                    u32 reservedLength, u32 maxCapacity)
+                                    u32 reserved_length, u32 max_capacity)
     {
         motor_forceuse(destination);
         motor_forceuse(value);
         motor_forceuse(options);
-        motor_forceuse(reservedLength);
-        motor_forceuse(maxCapacity);
+        motor_forceuse(reserved_length);
+        motor_forceuse(max_capacity);
         return 0;
     }
 };
@@ -393,23 +394,23 @@ struct formatter< 'p' >
     }
     template < typename T >
     static inline u32 write(char* destination, T&& value, const format_options& options,
-                            u32 reservedLength)
+                            u32 reserved_length)
     {
         motor_forceuse(destination);
         motor_forceuse(value);
         motor_forceuse(options);
-        motor_forceuse(reservedLength);
+        motor_forceuse(reserved_length);
         return 0;
     }
     template < typename T >
     static inline u32 write_partial(char* destination, T&& value, const format_options& options,
-                                    u32 reservedLength, u32 maxCapacity)
+                                    u32 reserved_length, u32 max_capacity)
     {
         motor_forceuse(destination);
         motor_forceuse(value);
         motor_forceuse(options);
-        motor_forceuse(reservedLength);
-        motor_forceuse(maxCapacity);
+        motor_forceuse(reserved_length);
+        motor_forceuse(max_capacity);
         return 0;
     }
 };
@@ -435,23 +436,23 @@ struct formatter< 'g' >
     }
     template < typename T >
     static inline u32 write(char* destination, T&& value, const format_options& options,
-                            u32 reservedLength)
+                            u32 reserved_length)
     {
         motor_forceuse(destination);
         motor_forceuse(value);
         motor_forceuse(options);
-        motor_forceuse(reservedLength);
+        motor_forceuse(reserved_length);
         return 0;
     }
     template < typename T >
     static inline u32 write_partial(char* destination, T&& value, const format_options& options,
-                                    u32 reservedLength, u32 maxCapacity)
+                                    u32 reserved_length, u32 max_capacity)
     {
         motor_forceuse(destination);
         motor_forceuse(value);
         motor_forceuse(options);
-        motor_forceuse(reservedLength);
-        motor_forceuse(maxCapacity);
+        motor_forceuse(reserved_length);
+        motor_forceuse(max_capacity);
         return 0;
     }
 };

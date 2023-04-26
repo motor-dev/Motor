@@ -32,7 +32,7 @@ class motor_api(3D) IRenderer : public minitl::refcountable
     friend class GPUResourceLoader;
 
 protected:
-    minitl::Allocator&                                      m_allocator;
+    minitl::allocator&                                      m_allocator;
     weak< Resource::ResourceManager >                       m_resourceManager;
     ref< Task::ITask >                                      m_syncTask;
     scoped< GPUResourceLoader< RenderSurfaceDescription > > m_renderSurfaceLoader;
@@ -42,7 +42,7 @@ protected:
     scoped< KernelScheduler::Kernel >                       m_kernelRender;
 
 protected:
-    IRenderer(minitl::Allocator & allocator, const weak< Resource::ResourceManager >& manager,
+    IRenderer(minitl::allocator & allocator, const weak< Resource::ResourceManager >& manager,
               Scheduler::Affinity affinity = Scheduler::WorkerThread);
     ~IRenderer() override;
 
@@ -64,7 +64,7 @@ public:
     weak< IGPUResource > getShaderProgram(const weak< const Resource::IDescription >& description)
         const;
 
-    minitl::Allocator&  arena() const;
+    minitl::allocator&  arena() const;
     weak< Task::ITask > syncTask() const;
 
     virtual knl::uint2 getScreenSize() const                   = 0;

@@ -105,10 +105,12 @@ class CLion(Build.BuildContext):
         idea_dir = self.srcnode.make_node('.idea')
         run_configs_dir = idea_dir.make_node('runConfigurations')
         code_styles_dir = idea_dir.make_node('codeStyles')
+        inspections_dir = idea_dir.make_node('inspectionProfiles')
         scopes_dir = idea_dir.make_node('scopes')
         run_configs_dir.mkdir()
         code_styles_dir.mkdir()
         scopes_dir.mkdir()
+        inspections_dir.mkdir()
         with open(idea_dir.make_node('.name').abspath(), 'w') as name:
             name.write(appname)
         with open(idea_dir.make_node('modules.xml').abspath(), 'w') as modules_xml_file:
@@ -137,6 +139,10 @@ class CLion(Build.BuildContext):
                     '<?xml version="1.0" encoding="UTF-8"?>\n'
                     '<module classpath="CMake" type="CPP_MODULE" version="4" />\n'
                 )
+        for filename in ('profiles_settings.xml', 'Motor_strict.xml'):
+            with open(inspections_dir.make_node(filename).abspath(), 'w') as inspection_file:
+                with open(self.motornode.make_node('mak/tools/clion/%s' % filename).abspath(), 'r') as template_file:
+                    inspection_file.write(template_file.read())
         with open(idea_dir.make_node('custom-compiler.xml').abspath(), 'w') as custom_compiler_xml_file:
             custom_compiler_xml_file.write(custom_compiler_xml)
         with open(idea_dir.make_node('custom_compiler.yaml').abspath(), 'w') as custom_compiler_yaml_file:

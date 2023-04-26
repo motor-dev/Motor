@@ -5,7 +5,7 @@
 
 namespace Motor { namespace Arena {
 
-minitl::Allocator& filesystem()
+minitl::allocator& filesystem()
 {
     return general();
 }

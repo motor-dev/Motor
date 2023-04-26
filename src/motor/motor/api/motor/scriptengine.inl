@@ -9,7 +9,8 @@
 namespace Motor {
 
 template < typename T >
-ScriptEngine< T >::ScriptEngine(minitl::Allocator& arena, weak< Resource::ResourceManager > manager)
+ScriptEngine< T >::ScriptEngine(minitl::allocator&                       arena,
+                                const weak< Resource::ResourceManager >& manager)
     : ILoader()
     , m_scriptArena(arena)
     , m_manager(manager)
@@ -48,7 +49,7 @@ void ScriptEngine< T >::reload(const weak< const Resource::IDescription >& /*old
 template < typename T >
 void ScriptEngine< T >::onTicketLoaded(const weak< const Resource::IDescription >& script,
                                        Resource::Resource&                         resource,
-                                       const minitl::Allocator::Block< u8 >&       buffer,
+                                       const minitl::allocator::block< u8 >&       buffer,
                                        ILoader::LoadType                           type)
 {
     if(type == ILoader::LoadReload)

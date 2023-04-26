@@ -35,7 +35,7 @@ struct format_options
     char sign;
     bool locale;
     bool alternate;
-    bool signPadding;
+    bool sign_padding;
     char formatter;
 };
 
@@ -88,11 +88,11 @@ struct formatter< 'g' >;
 template <>
 struct formatter< 'G' >;
 
-template < u32 SIZE = 1024, typename T, typename... Args >
-format_buffer< SIZE > format(T format, Args&&... arguments);
+template < u32 SIZE = 1024, typename T, typename... ARGS >
+format_buffer< SIZE > format(T format_string, ARGS&&... arguments);
 
-template < typename T, typename... Args >
-u32 format_to(char* destination, u32 length, T format, Args&&... arguments);
+template < typename T, typename... ARGS >
+u32 format_to(char* destination, u32 length, T format_string, ARGS&&... arguments);
 
 #define FMT(x)                                                                                     \
     []() {                                                                                         \

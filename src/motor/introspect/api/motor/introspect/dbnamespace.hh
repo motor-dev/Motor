@@ -11,14 +11,14 @@ namespace Motor { namespace Meta { namespace AST {
 class motor_api(INTROSPECT) Namespace : public minitl::refcountable
 {
 private:
-    minitl::Allocator&                           m_allocator;
+    minitl::allocator&                           m_allocator;
     minitl::hashmap< istring, ref< Namespace > > m_children;
     minitl::hashmap< istring, ref< Node > >      m_nodes;
     Value                                        m_value;
 
 public:
-    explicit Namespace(minitl::Allocator & allocator);
-    Namespace(minitl::Allocator & allocator, const Value& value);
+    explicit Namespace(minitl::allocator & allocator);
+    Namespace(minitl::allocator & allocator, const Value& value);
     ~Namespace() override;
 
     void             add(const inamespace& name, const Value& value);

@@ -18,8 +18,8 @@ struct tuple : public details::tuple_helper< 0, T... >
 {
     constexpr tuple() = default;
     constexpr explicit tuple(const T&... args);
-    template < typename... Args >
-    constexpr explicit tuple(Args&&... args);
+    template < typename... ARGS >
+    constexpr explicit tuple(ARGS&&... args);
     constexpr tuple(const tuple&) = default;
     constexpr tuple(tuple&&)      = default;       // NOLINT(performance-noexcept-move-constructor)
     template < typename... T1 >

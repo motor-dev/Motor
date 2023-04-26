@@ -46,10 +46,10 @@ void ZipFile::doFillBuffer(const weak< File::Ticket >& ticket) const
         s_fileOffset += read;
     }
 
-    motor_assert_format(ticket->buffer.byteCount() > ticket->total,
+    motor_assert_format(ticket->buffer.byte_count() > ticket->total,
                         "buffer is not long enough to read entire file; "
                         "buffer size is {0}, requires {1} bytes",
-                        ticket->buffer.byteCount(), ticket->total);
+                        ticket->buffer.byte_count(), ticket->total);
     u8* buffer = ticket->buffer.begin();
     while(!ticket->done())
     {

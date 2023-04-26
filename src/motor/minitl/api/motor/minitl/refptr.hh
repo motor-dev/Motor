@@ -25,7 +25,7 @@ private:
 
 private:
     inline explicit ref(T* value);
-    inline ref(T* value, Allocator& deleter);
+    inline ref(T* value, allocator& deleter);
 
 public:
     inline ref();
@@ -53,11 +53,11 @@ public:
     inline T&   operator*();
 
     inline void clear();
-    template < typename... Args >
-    static inline ref< T > create(Allocator& allocator, Args&&... args)
+    template < typename... ARGS >
+    static inline ref< T > create(allocator& allocator, ARGS&&... args)
     {
         void* mem = allocator.alloc(sizeof(T), motor_alignof(T));
-        return ref< T >(new(mem) T(minitl::forward< Args >(args)...), allocator);
+        return ref< T >(new(mem) T(minitl::forward< ARGS >(args)...), allocator);
     }
 };
 

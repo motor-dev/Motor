@@ -6,30 +6,30 @@
 
 namespace minitl {
 
-template < class T, T v >
+template < class T, T V >
 struct integral_constant
 {
-    static constexpr T value = v;
-    using value_type         = T;
+    static constexpr T value = V;
+    using value_t            = T;
     using type               = integral_constant;
 
-    constexpr operator value_type() const noexcept  // NOLINT(google-explicit-constructor)
+    constexpr operator value_t() const noexcept  // NOLINT(google-explicit-constructor)
     {
         return value;
     }
-    constexpr value_type operator()() const noexcept
+    constexpr value_t operator()() const noexcept
     {
         return value;
     }
 };
 
 template < typename T >
-struct is_const : public false_type
+struct is_const : public false_t
 {
 };
 
 template < typename T >
-struct is_const< const T > : public true_type
+struct is_const< const T > : public true_t
 {
 };
 
@@ -69,17 +69,17 @@ struct remove_cv< volatile T >
 };
 
 template < typename T >
-struct is_reference : public false_type
+struct is_reference : public false_t
 {
 };
 
 template < typename T >
-struct is_reference< T& > : public true_type
+struct is_reference< T& > : public true_t
 {
 };
 
 template < typename T >
-struct is_reference< T&& > : public true_type
+struct is_reference< T&& > : public true_t
 {
 };
 
@@ -118,11 +118,8 @@ using enable_if_t = typename enable_if< CONDITION, T >::type;
 template < class T >
 struct decay
 {
-private:
-    typedef typename remove_reference< T >::type U;
-
 public:
-    typedef typename remove_cv< U >::type type;
+    typedef typename remove_cv< typename remove_reference< T >::type >::type type;
 };
 
 template < class T >
@@ -146,7 +143,7 @@ template < class T >
 class reference_wrapper
 {
 public:
-    typedef T type;
+    typedef T wrapped_t;
 
     constexpr reference_wrapper(T&& t) noexcept : m_ptr(&t)  // NOLINT(google-explicit-constructor)
     {

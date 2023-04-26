@@ -6,23 +6,23 @@
 
 namespace Motor { namespace Arena {
 
-minitl::Allocator& general()
+minitl::allocator& general()
 {
     static GeneralAllocator s_allocator;
     return s_allocator;
 }
 
-minitl::Allocator& temporary()
+minitl::allocator& temporary()
 {
     return general();
 }
 
-minitl::Allocator& stack()
+minitl::allocator& stack()
 {
     return general();
 }
 
-minitl::Allocator& debug()
+minitl::allocator& debug()
 {
     return general();
 }

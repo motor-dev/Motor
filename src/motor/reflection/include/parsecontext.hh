@@ -34,7 +34,7 @@ namespace Motor { namespace Meta { namespace Parse {
 
 struct ParseContext
 {
-    minitl::Allocator* arena;
+    minitl::allocator* arena;
     ref< AST::Node >   result;
     const char*        bufferStart;
     const char*        bufferEnd;
@@ -42,7 +42,7 @@ struct ParseContext
     AST::MessageList&  errors;
     Location           location;
 
-    ParseContext(minitl::Allocator& arena, const char* bufferStart, const char* bufferEnd,
+    ParseContext(minitl::allocator& arena, const char* bufferStart, const char* bufferEnd,
                  AST::MessageList& errors, u32 lineStart = 0, u32 columnStart = 0);
     ~ParseContext();
 };

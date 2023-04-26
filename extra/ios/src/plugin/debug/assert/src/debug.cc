@@ -9,13 +9,13 @@
 
 namespace Motor { namespace Debug {
 
-minitl::AssertionResult AssertionCallback(const char* file, int line, const char* expr,
-                                          const char* message)
+minitl::assertion_result assertionCallback(const char* file, int line, const char* expr,
+                                           const char* message)
 {
     fprintf(stderr, "%s:%d Assertion failed: %s\n\t", file, line, expr);
     fprintf(stderr, "%s\n", message);
 
-    return minitl::AssertionResult::Break;
+    return minitl::assertion_result::breakpoint;
 }
 
 }}  // namespace Motor::Debug

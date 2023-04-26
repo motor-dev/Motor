@@ -6,13 +6,13 @@
 
 namespace minitl {
 
-namespace impl {
+namespace details {
 
 template < typename ITERATOR, typename ITERATOR_TYPE >
-static typename iterator_traits< ITERATOR >::difference_type
+static typename iterator_traits< ITERATOR >::difference_t
 distance(const ITERATOR& t1, const ITERATOR& t2, ITERATOR_TYPE /*type*/)
 {
-    typename ITERATOR::difference_type result = 0;
+    typename ITERATOR::difference_t result = 0;
     while(t1 != t2)
     {
         result++;
@@ -22,29 +22,29 @@ distance(const ITERATOR& t1, const ITERATOR& t2, ITERATOR_TYPE /*type*/)
 }
 
 template < typename ITERATOR >
-static typename iterator_traits< ITERATOR >::difference_type
+static typename iterator_traits< ITERATOR >::difference_t
 distance(const ITERATOR& t1, const ITERATOR& t2, random_access_iterator_tag /*type*/)
 {
     return t2 - t1;
 }
 
-}  // namespace impl
+}  // namespace details
 
 template < typename ITERATOR >
-typename iterator_traits< ITERATOR >::iterator_category iterator_category(const ITERATOR& /*it*/)
+typename iterator_traits< ITERATOR >::iterator_category_t iterator_category(const ITERATOR& /*it*/)
 {
-    return typename iterator_traits< ITERATOR >::iterator_category();
+    return typename iterator_traits< ITERATOR >::iterator_category_t();
 }
 
 template < typename ITERATOR >
-typename iterator_traits< ITERATOR >::difference_type distance(const ITERATOR& first,
-                                                               const ITERATOR& last)
+typename iterator_traits< ITERATOR >::difference_t distance(const ITERATOR& first,
+                                                            const ITERATOR& last)
 {
-    return impl::distance(first, last, iterator_category(first));
+    return details::distance(first, last, iterator_category(first));
 }
 
 template < typename T >
-difference_type distance(T* t1, T* t2)
+difference_t distance(T* t1, T* t2)
 {
     const byte* ptr1 = reinterpret_cast< const byte* >(t1);
     const byte* ptr2 = reinterpret_cast< const byte* >(t2);
@@ -55,7 +55,7 @@ difference_type distance(T* t1, T* t2)
 }
 
 template < typename T >
-difference_type distance(const T* t1, const T* t2)
+difference_t distance(const T* t1, const T* t2)
 {
     const byte* ptr1 = reinterpret_cast< const byte* >(t1);
     const byte* ptr2 = reinterpret_cast< const byte* >(t2);
@@ -66,14 +66,14 @@ difference_type distance(const T* t1, const T* t2)
 }
 
 template < typename ITERATOR >
-static ITERATOR advance(const ITERATOR&                                       it,
-                        typename iterator_traits< ITERATOR >::difference_type offset)
+static ITERATOR advance(const ITERATOR&                                    it,
+                        typename iterator_traits< ITERATOR >::difference_t offset)
 {
     return it + offset;
 }
 
 template < typename T >
-static T* advance_ptr(T* input, difference_type offset)
+static T* advance_ptr(T* input, difference_t offset)
 {
     char* ptr = reinterpret_cast< char* >(input);
     ptr       = ptr + minitl::align(sizeof(T), motor_alignof(T)) * offset;
@@ -81,7 +81,7 @@ static T* advance_ptr(T* input, difference_type offset)
 }
 
 template < typename T >
-static const T* advance_ptr(const T* input, difference_type offset)
+static const T* advance_ptr(const T* input, difference_t offset)
 {
     const char* ptr = reinterpret_cast< const char* >(input);
     ptr             = ptr + minitl::align(sizeof(T), motor_alignof(T)) * offset;

@@ -31,10 +31,10 @@
 #    include <motor/minitl/allocator.hh>
 
 namespace Motor { namespace Arena {
-motor_api(CORE) minitl::Allocator& temporary();
-motor_api(CORE) minitl::Allocator& stack();
-motor_api(CORE) minitl::Allocator& debug();
-motor_api(CORE) minitl::Allocator& general();
+motor_api(CORE) minitl::allocator& temporary();
+motor_api(CORE) minitl::allocator& stack();
+motor_api(CORE) minitl::allocator& debug();
+motor_api(CORE) minitl::allocator& general();
 }}  // namespace Motor::Arena
 
 #    include <motor/minitl/assert.hh>

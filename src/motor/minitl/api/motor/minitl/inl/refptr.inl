@@ -25,7 +25,7 @@ ref< T >::ref(T* value) : m_ptr(value)
 }
 
 template < typename T >
-ref< T >::ref(T* value, Allocator& deleter) : m_ptr(value)
+ref< T >::ref(T* value, allocator& deleter) : m_ptr(value)
 {
     motor_assert_format(
         value->pointer::m_allocator == 0,
@@ -48,7 +48,7 @@ ref< T >::ref(const ref& other) : m_ptr(other.operator->())
 
 template < typename T >
 template < typename U >
-ref< T >::ref(const ref< U >& other) : m_ptr(checkIsA< T >(other.operator->()))
+ref< T >::ref(const ref< U >& other) : m_ptr(check_is_a< T >(other.operator->()))
 {
     if(m_ptr) m_ptr->addref();
 }
@@ -61,14 +61,14 @@ ref< T >::ref(ref&& other) noexcept : m_ptr(other.operator->())
 
 template < typename T >
 template < typename U >
-ref< T >::ref(ref< U >&& other) noexcept : m_ptr(checkIsA< T >(other.operator->()))
+ref< T >::ref(ref< U >&& other) noexcept : m_ptr(check_is_a< T >(other.operator->()))
 {
     other.m_ptr = nullptr;
 }
 
 template < typename T >
 template < typename U >
-ref< T >::ref(scoped< U >&& other) noexcept : m_ptr(checkIsA< T >(other.operator->()))
+ref< T >::ref(scoped< U >&& other) noexcept : m_ptr(check_is_a< T >(other.operator->()))
 {
     if(m_ptr) m_ptr->addref();
     other.m_ptr = nullptr;
@@ -106,7 +106,7 @@ template < typename U >
 ref< T >& ref< T >::operator=(ref< U >&& other) noexcept
 {
     if(m_ptr) m_ptr->decref();
-    m_ptr       = checkIsA< T >(other.m_ptr);
+    m_ptr       = check_is_a< T >(other.m_ptr);
     other.m_ptr = nullptr;
     return *this;
 }

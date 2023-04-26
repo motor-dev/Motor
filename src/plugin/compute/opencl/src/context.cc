@@ -85,7 +85,7 @@ cl_program Context::buildProgram(u64 size, const char* code) const
     clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG, 0, nullptr, &len);
     if(len > 2)
     {
-        minitl::Allocator::Block< char > buffer(Arena::temporary(), len + 1);
+        minitl::allocator::block< char > buffer(Arena::temporary(), len + 1);
         clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG, (len + 1), buffer.data(),
                               &len);
         motor_info_format(Log::opencl(), "compilation result:\n{0}", buffer.data());
@@ -100,7 +100,7 @@ cl_program Context::buildProgram(u64 size, const char* code) const
 #if CL_VERSION_1_2
     {
         checkResult(clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, 0, nullptr, &len));
-        minitl::Allocator::Block< char > buffer(Arena::temporary(), len + 1);
+        minitl::allocator::block< char > buffer(Arena::temporary(), len + 1);
         clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, (len + 1), buffer.data(), &len);
         motor_info_format(Log::opencl(), "list of kernels: {0}", buffer.data());
         freea(buffer);

@@ -13,9 +13,7 @@ namespace minitl {
 template < typename T >
 void weak< T >::swap(weak& other)
 {
-    T* tmp      = other.m_ptr;
-    other.m_ptr = m_ptr;
-    m_ptr       = tmp;
+    minitl::swap(m_ptr, other.m_ptr);
 }
 
 template < typename T >
@@ -27,25 +25,25 @@ template < typename T >
 weak< T >::weak(T* p) : m_ptr(p)
 {
 #if MOTOR_ENABLE_WEAKCHECK
-    if(m_ptr) m_ptr->addWeak();
+    if(m_ptr) m_ptr->add_weak();
 #endif
 }
 
 template < typename T >
 template < typename U >
-weak< T >::weak(ref< U > other) : m_ptr(checkIsA< T >(other.operator->()))
+weak< T >::weak(ref< U > other) : m_ptr(check_is_a< T >(other.operator->()))
 {
 #if MOTOR_ENABLE_WEAKCHECK
-    if(m_ptr) m_ptr->addWeak();
+    if(m_ptr) m_ptr->add_weak();
 #endif
 }
 
 template < typename T >
 template < typename U >
-weak< T >::weak(const scoped< U >& other) : m_ptr(checkIsA< T >(other.operator->()))
+weak< T >::weak(const scoped< U >& other) : m_ptr(check_is_a< T >(other.operator->()))
 {
 #if MOTOR_ENABLE_WEAKCHECK
-    if(m_ptr) m_ptr->addWeak();
+    if(m_ptr) m_ptr->add_weak();
 #endif
 }
 
@@ -53,16 +51,16 @@ template < typename T >
 weak< T >::weak(const weak& other) : m_ptr(other.operator->())
 {
 #if MOTOR_ENABLE_WEAKCHECK
-    if(m_ptr) m_ptr->addWeak();
+    if(m_ptr) m_ptr->add_weak();
 #endif
 }
 
 template < typename T >
 template < typename U >
-weak< T >::weak(const weak< U >& other) : m_ptr(checkIsA< T >(other.operator->()))
+weak< T >::weak(const weak< U >& other) : m_ptr(check_is_a< T >(other.operator->()))
 {
 #if MOTOR_ENABLE_WEAKCHECK
-    if(m_ptr) m_ptr->addWeak();
+    if(m_ptr) m_ptr->add_weak();
 #endif
 }
 
@@ -70,7 +68,7 @@ template < typename T >
 weak< T >::~weak()
 {
 #if MOTOR_ENABLE_WEAKCHECK
-    if(m_ptr) m_ptr->decWeak();
+    if(m_ptr) m_ptr->add_weak();
 #endif
 }
 
@@ -128,7 +126,7 @@ template < typename T >
 void weak< T >::clear()
 {
 #if MOTOR_ENABLE_WEAKCHECK
-    if(m_ptr) m_ptr->decWeak();
+    if(m_ptr) m_ptr->dec_weak();
 #endif
     m_ptr = 0;
 }

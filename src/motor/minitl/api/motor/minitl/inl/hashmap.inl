@@ -6,24 +6,24 @@
 
 namespace minitl {
 
-template < typename Key, typename Value, typename Hash >
+template < typename KEY, typename VALUE, typename HASH >
 template < typename POLICY >
-struct hashmap< Key, Value, Hash >::iterator_base
+struct hashmap< KEY, VALUE, HASH >::iterator_base
 {
-    friend class hashmap< Key, Value, Hash >;
+    friend class hashmap< KEY, VALUE, HASH >;
 
 private:
     typedef typename POLICY::iterator iterator;
 
 private:
-    const hashmap< Key, Value, Hash >* m_owner;
+    const hashmap< KEY, VALUE, HASH >* m_owner;
     typename POLICY::iterator          m_current;
 
 public:
     iterator_base() : m_owner(0), m_current()
     {
     }
-    iterator_base(const hashmap< Key, Value, Hash >& owner, iterator l)
+    iterator_base(const hashmap< KEY, VALUE, HASH >& owner, iterator l)
         : m_owner(&owner)
         , m_current(l)
     {
@@ -43,13 +43,13 @@ public:
     {
         return m_owner != other.m_owner || m_current != other.m_current;
     }
-    typename POLICY::reference operator*() const
+    typename POLICY::reference_t operator*() const
     {
-        return static_cast< typename POLICY::item_type* >(m_current.operator->())->value;
+        return static_cast< typename POLICY::item_t* >(m_current.operator->())->value;
     }
-    typename POLICY::pointer operator->() const
+    typename POLICY::pointer_t operator->() const
     {
-        return &(static_cast< typename POLICY::item_type* >(m_current.operator->()))->value;
+        return &(static_cast< typename POLICY::item_t* >(m_current.operator->()))->value;
     }
 
     iterator_base& operator++()
@@ -57,7 +57,7 @@ public:
         do
         {
             ++m_current;
-        } while((char*)m_current.   operator->() >= (char*)m_owner->m_index.begin()
+        } while((char*)m_current.operator->() >= (char*)m_owner->m_index.begin()
                 && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
         return *this;
     }
@@ -67,7 +67,7 @@ public:
         do
         {
             ++m_current;
-        } while((char*)m_current.   operator->() >= (char*)m_owner->m_index.begin()
+        } while((char*)m_current.operator->() >= (char*)m_owner->m_index.begin()
                 && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
         return copy;
     }
@@ -76,7 +76,7 @@ public:
         do
         {
             --m_current;
-        } while((char*)m_current.   operator->() >= (char*)m_owner->m_index.begin()
+        } while((char*)m_current.operator->() >= (char*)m_owner->m_index.begin()
                 && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
         return *this;
     }
@@ -86,49 +86,49 @@ public:
         do
         {
             --m_current;
-        } while((char*)m_current.   operator->() >= (char*)m_owner->m_index.begin()
+        } while((char*)m_current.operator->() >= (char*)m_owner->m_index.begin()
                 && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
         return copy;
     }
 };
 
-template < typename Key, typename Value, typename Hash >
-struct hashmap< Key, Value, Hash >::iterator_policy
+template < typename KEY, typename VALUE, typename HASH >
+struct hashmap< KEY, VALUE, HASH >::iterator_policy
 {
-    typedef typename hashmap< Key, Value, Hash >::value_type    value_type;
-    typedef typename hashmap< Key, Value, Hash >::value_type&   reference;
-    typedef typename hashmap< Key, Value, Hash >::value_type*   pointer;
-    typedef typename hashmap< Key, Value, Hash >::item          item_type;
-    typedef typename hashmap< Key, Value, Hash >::list_iterator iterator;
+    typedef typename hashmap< KEY, VALUE, HASH >::value_t       value_t;
+    typedef typename hashmap< KEY, VALUE, HASH >::value_t&      reference_t;
+    typedef typename hashmap< KEY, VALUE, HASH >::value_t*      pointer_t;
+    typedef typename hashmap< KEY, VALUE, HASH >::item          item_t;
+    typedef typename hashmap< KEY, VALUE, HASH >::list_iterator iterator;
 };
-template < typename Key, typename Value, typename Hash >
-struct hashmap< Key, Value, Hash >::const_iterator_policy
+template < typename KEY, typename VALUE, typename HASH >
+struct hashmap< KEY, VALUE, HASH >::const_iterator_policy
 {
-    typedef const typename hashmap< Key, Value, Hash >::value_type    value_type;
-    typedef const typename hashmap< Key, Value, Hash >::value_type&   reference;
-    typedef const typename hashmap< Key, Value, Hash >::value_type*   pointer;
-    typedef const typename hashmap< Key, Value, Hash >::item          item_type;
-    typedef typename hashmap< Key, Value, Hash >::const_list_iterator iterator;
+    typedef const typename hashmap< KEY, VALUE, HASH >::value_t       value_t;
+    typedef const typename hashmap< KEY, VALUE, HASH >::value_t&      reference_t;
+    typedef const typename hashmap< KEY, VALUE, HASH >::value_t*      pointer_t;
+    typedef const typename hashmap< KEY, VALUE, HASH >::item          item_t;
+    typedef typename hashmap< KEY, VALUE, HASH >::const_list_iterator iterator;
 };
 
-template < typename Key, typename Value, typename Hash >
-hashmap< Key, Value, Hash >::hashmap(Allocator& allocator, u32 reserved)
-    : m_itemPool(allocator, max(nextPowerOf2(reserved), u32(8)))
+template < typename KEY, typename VALUE, typename HASH >
+hashmap< KEY, VALUE, HASH >::hashmap(allocator& allocator, u32 reserved)
+    : m_itemPool(allocator, max(next_power_of_2(reserved), u32(8)))
     , m_items()
-    , m_index(allocator, 1 + max(nextPowerOf2(reserved), u32(8)))
+    , m_index(allocator, 1 + max(next_power_of_2(reserved), u32(8)))
     , m_count(0)
 {
-    buildIndex();
+    build_index();
 }
 
-template < typename Key, typename Value, typename Hash >
-hashmap< Key, Value, Hash >::hashmap(const hashmap& other)
+template < typename KEY, typename VALUE, typename HASH >
+hashmap< KEY, VALUE, HASH >::hashmap(const hashmap& other)
     : m_itemPool(other.m_index.arena(), other.m_index.count() - 1)
     , m_items()
     , m_index(other.m_index.arena(), other.m_index.count())
     , m_count(other.m_count)
 {
-    buildIndex();
+    build_index();
     if(m_count)
     {
         list_iterator myIt = m_items.begin();
@@ -149,14 +149,14 @@ hashmap< Key, Value, Hash >::hashmap(const hashmap& other)
     }
 }
 
-template < typename Key, typename Value, typename Hash >
-hashmap< Key, Value, Hash >::hashmap(Allocator& allocator, const hashmap& other)
+template < typename KEY, typename VALUE, typename HASH >
+hashmap< KEY, VALUE, HASH >::hashmap(allocator& allocator, const hashmap& other)
     : m_itemPool(allocator, other.m_index.count() - 1)
     , m_items()
     , m_index(allocator, other.m_index.count())
     , m_count(other.m_count)
 {
-    buildIndex();
+    build_index();
     if(m_count)
     {
         list_iterator myIt = m_items.begin();
@@ -177,12 +177,12 @@ hashmap< Key, Value, Hash >::hashmap(Allocator& allocator, const hashmap& other)
     }
 }
 
-template < typename Key, typename Value, typename Hash >
-hashmap< Key, Value, Hash >::~hashmap()
+template < typename KEY, typename VALUE, typename HASH >
+hashmap< KEY, VALUE, HASH >::~hashmap()
 {
     if(m_index)
     {
-        for(index_item* it = m_index.begin(); it != m_index.end() - 1; ++it)
+        for(index_item_t* it = m_index.begin(); it != m_index.end() - 1; ++it)
         {
             list_iterator object = it->second;
             object++;
@@ -191,42 +191,42 @@ hashmap< Key, Value, Hash >::~hashmap()
                 list_iterator itemToDelete = object++;
                 m_itemPool.release(&static_cast< item& >(*itemToDelete));
             }
-            it->~index_item();
+            it->~index_item_t();
         }
-        (m_index.end() - 1)->~index_item();
+        (m_index.end() - 1)->~index_item_t();
     }
 }
 
-template < typename Key, typename Value, typename Hash >
-void hashmap< Key, Value, Hash >::buildIndex()
+template < typename KEY, typename VALUE, typename HASH >
+void hashmap< KEY, VALUE, HASH >::build_index()
 {
     list_iterator current = m_items.begin();
-    for(index_item* it = m_index.begin(); it != m_index.end(); ++it)
+    for(index_item_t* it = m_index.begin(); it != m_index.end(); ++it)
     {
-        new(it) index_item;
+        new(it) index_item_t;
         current = it->second = m_items.insert(current, it->first);
     }
 }
 
-template < typename Key, typename Value, typename Hash >
-void hashmap< Key, Value, Hash >::grow(u32 size)
+template < typename KEY, typename VALUE, typename HASH >
+void hashmap< KEY, VALUE, HASH >::grow(u32 size)
 {
     motor_assert_format(size > m_count, "cannot resize from {0} to smaller capacity {1}", m_count,
                         size);
 
-    size = nextPowerOf2(size);
-    pool< item >                   newPool(m_index.arena(), size);
-    Allocator::Block< index_item > newIndex(m_index.arena(), size + 1);
-    intrusive_list< empty_item >   newList;
+    size = next_power_of_2(size);
+    pool< item >                     newPool(m_index.arena(), size);
+    allocator::block< index_item_t > newIndex(m_index.arena(), size + 1);
+    intrusive_list< empty_item >     newList;
 
     list_iterator current = newList.begin();
-    for(index_item* it = newIndex.begin(); it != newIndex.end(); ++it)
+    for(index_item_t* it = newIndex.begin(); it != newIndex.end(); ++it)
     {
-        new(it) index_item;
+        new(it) index_item_t;
         current = it->second = newList.insert(current, it->first);
     }
 
-    for(index_item* index = m_index.begin(); index != m_index.end() - 1; ++index)
+    for(index_item_t* index = m_index.begin(); index != m_index.end() - 1; ++index)
     {
         list_iterator object = index->second;
         object++;
@@ -234,83 +234,83 @@ void hashmap< Key, Value, Hash >::grow(u32 size)
         {
             list_iterator itemToCopy = object++;
             item*         i          = static_cast< item* >(itemToCopy.operator->());
-            u32           hash       = Hash()(i->value.first) % (u32)(newIndex.count() - 1);
+            u32           hash       = HASH()(i->value.first) % (u32)(newIndex.count() - 1);
             item*         newItem    = newPool.allocate(move(i->value));
             newList.insert(newIndex[hash].second, *newItem);
             m_itemPool.release(i);
         }
-        index->~index_item();
+        index->~index_item_t();
     }
-    (m_index.end() - 1)->~index_item();
+    (m_index.end() - 1)->~index_item_t();
 
     m_itemPool = move(newPool);
     m_items    = move(newList);
     m_index    = move(newIndex);
 }
 
-template < typename Key, typename Value, typename Hash >
-hashmap< Key, Value, Hash >& hashmap< Key, Value, Hash >::operator=(hashmap other)
+template < typename KEY, typename VALUE, typename HASH >
+hashmap< KEY, VALUE, HASH >& hashmap< KEY, VALUE, HASH >::operator=(hashmap other)
 {
     swap(other);
     return *this;
 }
 
-template < typename Key, typename Value, typename Hash >
-void hashmap< Key, Value, Hash >::reserve(u32 size)
+template < typename KEY, typename VALUE, typename HASH >
+void hashmap< KEY, VALUE, HASH >::reserve(u32 size)
 {
     if(size >= m_index.count()) grow(size);
 }
 
-template < typename Key, typename Value, typename Hash >
-typename hashmap< Key, Value, Hash >::iterator hashmap< Key, Value, Hash >::begin()
+template < typename KEY, typename VALUE, typename HASH >
+typename hashmap< KEY, VALUE, HASH >::iterator hashmap< KEY, VALUE, HASH >::begin()
 {
     return ++iterator(*this, m_items.begin());
 }
 
-template < typename Key, typename Value, typename Hash >
-typename hashmap< Key, Value, Hash >::iterator hashmap< Key, Value, Hash >::end()
+template < typename KEY, typename VALUE, typename HASH >
+typename hashmap< KEY, VALUE, HASH >::iterator hashmap< KEY, VALUE, HASH >::end()
 {
     return iterator(*this, m_items.end());
 }
 
-template < typename Key, typename Value, typename Hash >
-typename hashmap< Key, Value, Hash >::const_iterator hashmap< Key, Value, Hash >::begin() const
+template < typename KEY, typename VALUE, typename HASH >
+typename hashmap< KEY, VALUE, HASH >::const_iterator hashmap< KEY, VALUE, HASH >::begin() const
 {
     return ++const_iterator(*this, m_items.begin());
 }
 
-template < typename Key, typename Value, typename Hash >
-typename hashmap< Key, Value, Hash >::const_iterator hashmap< Key, Value, Hash >::end() const
+template < typename KEY, typename VALUE, typename HASH >
+typename hashmap< KEY, VALUE, HASH >::const_iterator hashmap< KEY, VALUE, HASH >::end() const
 {
     return const_iterator(*this, m_items.end());
 }
 
-template < typename Key, typename Value, typename Hash >
-u32 hashmap< Key, Value, Hash >::size() const
+template < typename KEY, typename VALUE, typename HASH >
+u32 hashmap< KEY, VALUE, HASH >::size() const
 {
     return m_count;
 }
 
-template < typename Key, typename Value, typename Hash >
-bool hashmap< Key, Value, Hash >::empty() const
+template < typename KEY, typename VALUE, typename HASH >
+bool hashmap< KEY, VALUE, HASH >::empty() const
 {
     return m_count == 0;
 }
 
-template < typename Key, typename Value, typename Hash >
-Value& hashmap< Key, Value, Hash >::operator[](const Key& key)
+template < typename KEY, typename VALUE, typename HASH >
+VALUE& hashmap< KEY, VALUE, HASH >::operator[](const KEY& key)
 {
-    return insert(key, Value()).first->second;
+    return insert(key, VALUE()).first->second;
 }
 
-template < typename Key, typename Value, typename Hash >
-typename hashmap< Key, Value, Hash >::iterator hashmap< Key, Value, Hash >::find(const Key& key)
+template < typename KEY, typename VALUE, typename HASH >
+typename hashmap< KEY, VALUE, HASH >::iterator hashmap< KEY, VALUE, HASH >::find(const KEY& key)
 {
-    u32           hash = Hash()(key) % (u32)(m_index.count() - 1);
+    u32           hash = HASH()(key) % (u32)(m_index.count() - 1);
     list_iterator it   = m_index[hash].second;
     for(++it; it != m_index[hash + 1].second; ++it)
     {
-        if(Hash()(static_cast< item* >(it.operator->())->value.first, key))
+        if(HASH()(static_cast< item* >(it.operator->())->value.first, key))
         {
             return iterator(*this, it);
         }
@@ -318,16 +318,16 @@ typename hashmap< Key, Value, Hash >::iterator hashmap< Key, Value, Hash >::find
     return end();
 }
 
-template < typename Key, typename Value, typename Hash >
-typename hashmap< Key, Value, Hash >::const_iterator
-hashmap< Key, Value, Hash >::find(const Key& key) const
+template < typename KEY, typename VALUE, typename HASH >
+typename hashmap< KEY, VALUE, HASH >::const_iterator
+hashmap< KEY, VALUE, HASH >::find(const KEY& key) const
 {
-    u32                 hash = Hash()(key) % (u32)(m_index.count() - 1);
+    u32                 hash = HASH()(key) % (u32)(m_index.count() - 1);
     const_list_iterator it(const_list_iterator(m_index[hash].second.operator->()));
     const_list_iterator stop(const_list_iterator(m_index[hash + 1].second.operator->()));
     for(++it; it != stop; ++it)
     {
-        if(Hash()(static_cast< const item* >(it.operator->())->value.first, key))
+        if(HASH()(static_cast< const item* >(it.operator->())->value.first, key))
         {
             return const_iterator(*this, it);
         }
@@ -335,8 +335,8 @@ hashmap< Key, Value, Hash >::find(const Key& key) const
     return end();
 }
 
-template < typename Key, typename Value, typename Hash >
-auto hashmap< Key, Value, Hash >::erase(iterator it) -> iterator
+template < typename KEY, typename VALUE, typename HASH >
+auto hashmap< KEY, VALUE, HASH >::erase(iterator it) -> iterator
 {
     m_count--;
     item*         i = static_cast< item* >(it.m_current.operator->());
@@ -347,58 +347,58 @@ auto hashmap< Key, Value, Hash >::erase(iterator it) -> iterator
     return it;
 }
 
-template < typename Key, typename Value, typename Hash >
-void hashmap< Key, Value, Hash >::erase(const Key& key)
+template < typename KEY, typename VALUE, typename HASH >
+void hashmap< KEY, VALUE, HASH >::erase(const KEY& key)
 {
     iterator it = find(key);
     if(motor_assert_format(it != end(), "could not find item with index {0}", key)) return;
     erase(it);
 }
 
-template < typename Key, typename Value, typename Hash >
-tuple< typename hashmap< Key, Value, Hash >::iterator, bool >
-hashmap< Key, Value, Hash >::insert(Key&& key, Value&& value)
+template < typename KEY, typename VALUE, typename HASH >
+tuple< typename hashmap< KEY, VALUE, HASH >::iterator, bool >
+hashmap< KEY, VALUE, HASH >::insert(KEY&& key, VALUE&& value)
 {
-    return insert(tuple< const Key, Value >(move(key), move(value)));
+    return insert(tuple< const KEY, VALUE >(move(key), move(value)));
 }
 
-template < typename Key, typename Value, typename Hash >
-tuple< typename hashmap< Key, Value, Hash >::iterator, bool >
-hashmap< Key, Value, Hash >::insert(Key&& key, const Value& value)
+template < typename KEY, typename VALUE, typename HASH >
+tuple< typename hashmap< KEY, VALUE, HASH >::iterator, bool >
+hashmap< KEY, VALUE, HASH >::insert(KEY&& key, const VALUE& value)
 {
-    return insert(tuple< const Key, Value >(move(key), value));
+    return insert(tuple< const KEY, VALUE >(move(key), value));
 }
 
-template < typename Key, typename Value, typename Hash >
-tuple< typename hashmap< Key, Value, Hash >::iterator, bool >
-hashmap< Key, Value, Hash >::insert(const Key& key, Value&& value)
+template < typename KEY, typename VALUE, typename HASH >
+tuple< typename hashmap< KEY, VALUE, HASH >::iterator, bool >
+hashmap< KEY, VALUE, HASH >::insert(const KEY& key, VALUE&& value)
 {
-    return insert(tuple< const Key, Value >(key, move(value)));
+    return insert(tuple< const KEY, VALUE >(key, move(value)));
 }
 
-template < typename Key, typename Value, typename Hash >
-tuple< typename hashmap< Key, Value, Hash >::iterator, bool >
-hashmap< Key, Value, Hash >::insert(const Key& key, const Value& value)
+template < typename KEY, typename VALUE, typename HASH >
+tuple< typename hashmap< KEY, VALUE, HASH >::iterator, bool >
+hashmap< KEY, VALUE, HASH >::insert(const KEY& key, const VALUE& value)
 {
-    return insert(tuple< const Key, Value >(key, value));
+    return insert(tuple< const KEY, VALUE >(key, value));
 }
 
-template < typename Key, typename Value, typename Hash >
-tuple< typename hashmap< Key, Value, Hash >::iterator, bool >
-hashmap< Key, Value, Hash >::insert(const tuple< const Key, Value >& v)
+template < typename KEY, typename VALUE, typename HASH >
+tuple< typename hashmap< KEY, VALUE, HASH >::iterator, bool >
+hashmap< KEY, VALUE, HASH >::insert(const tuple< const KEY, VALUE >& v)
 {
-    return insert(tuple< const Key, Value >(v));
+    return insert(tuple< const KEY, VALUE >(v));
 }
 
-template < typename Key, typename Value, typename Hash >
-tuple< typename hashmap< Key, Value, Hash >::iterator, bool >
-hashmap< Key, Value, Hash >::insert(tuple< const Key, Value >&& v)
+template < typename KEY, typename VALUE, typename HASH >
+tuple< typename hashmap< KEY, VALUE, HASH >::iterator, bool >
+hashmap< KEY, VALUE, HASH >::insert(tuple< const KEY, VALUE >&& v)
 {
-    u32           hash = Hash()(v.first);
+    u32           hash = HASH()(v.first);
     list_iterator it   = m_index[hash % (m_index.count() - 1)].second;
     for(++it; it != m_index[1 + hash % (m_index.count() - 1)].second; ++it)
     {
-        if(Hash()(static_cast< item* >(it.operator->())->value.first, v.first))
+        if(HASH()(static_cast< item* >(it.operator->())->value.first, v.first))
         {
             return make_tuple(iterator(*this, it), false);
         }
@@ -414,8 +414,8 @@ hashmap< Key, Value, Hash >::insert(tuple< const Key, Value >&& v)
     return make_tuple(iterator(*this, m_items.insert(it, *i)), true);
 }
 
-template < typename Key, typename Value, typename Hash >
-void hashmap< Key, Value, Hash >::swap(hashmap& other)
+template < typename KEY, typename VALUE, typename HASH >
+void hashmap< KEY, VALUE, HASH >::swap(hashmap& other)
 {
     m_index.swap(other.m_index);
     m_items.swap(other.m_items);

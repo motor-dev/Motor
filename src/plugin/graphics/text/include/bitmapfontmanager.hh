@@ -33,7 +33,7 @@ public:
     void unload(const weak< const Resource::IDescription >& description,
                 Resource::Resource&                         resource) override;
     void onTicketLoaded(const weak< const Resource::IDescription >& description,
-                        Resource::Resource& resource, const minitl::Allocator::Block< u8 >& buffer,
+                        Resource::Resource& resource, const minitl::allocator::block< u8 >& buffer,
                         LoadType type) override;
 };
 

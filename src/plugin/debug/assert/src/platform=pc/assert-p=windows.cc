@@ -45,12 +45,12 @@ static INT_PTR CALLBACK AssertionDialogProc(HWND hwndDlg, UINT message, WPARAM w
     }
 }
 
-static const int        BUFFER_SIZE = 4096 * 128;
-static char             outMessage[BUFFER_SIZE];
-static char             callstack[BUFFER_SIZE];
-static char             buffer[BUFFER_SIZE];
-minitl::AssertionResult AssertionCallback(const char* file, int line, const char* expr,
-                                          const char* message)
+static const int         BUFFER_SIZE = 4096 * 128;
+static char              outMessage[BUFFER_SIZE];
+static char              callstack[BUFFER_SIZE];
+static char              buffer[BUFFER_SIZE];
+minitl::assertion_result assertionCallback(const char* file, int line, const char* expr,
+                                           const char* message)
 {
     {
         (void)_snprintf(outMessage, BUFFER_SIZE - 1, "%s:%d : Assertion %s failed - %s\r\n", file,
@@ -84,18 +84,18 @@ minitl::AssertionResult AssertionCallback(const char* file, int line, const char
         (void)MessageBox(nullptr, outMessage, "Failed to open assertion dialog",
                          MB_ICONERROR | MB_OK);
         (void)LocalFree(errorMessage);
-        return minitl::AssertionResult::Ignore;
+        return minitl::assertion_result::ignore;
     }
     else if(locr == IDC_BUTTONBREAK)
     {
-        return minitl::AssertionResult::Break;
+        return minitl::assertion_result::breakpoint;
     }
     else if(locr == IDC_BUTTONIGNOREALL)
-        return minitl::AssertionResult::IgnoreAll;
+        return minitl::assertion_result::ignore_all;
     else if(locr == IDC_BUTTONABORT)
-        return minitl::AssertionResult::Abort;
+        return minitl::assertion_result::abort;
     else
-        return minitl::AssertionResult::Ignore;
+        return minitl::assertion_result::ignore;
 }
 
 }}  // namespace Motor::Debug
