@@ -14,7 +14,7 @@ template < typename T >
 class array
 {
 private:
-    minitl::Allocator::Block< T > m_array;
+    minitl::allocator::block< T > m_array;
 
 public:
     array& operator=(const array& other) = delete;
@@ -24,9 +24,9 @@ public:
     typedef T*       iterator;
 
 public:
-    inline array(Allocator& allocator, u32 size);
+    inline array(allocator& allocator, u32 size);
     template < typename ITERATOR >
-    inline array(Allocator& allocator, ITERATOR begin, ITERATOR end);
+    inline array(allocator& allocator, ITERATOR begin, ITERATOR end);
     inline array(const array& other);
     inline array(array&& other) noexcept;
     inline ~array();

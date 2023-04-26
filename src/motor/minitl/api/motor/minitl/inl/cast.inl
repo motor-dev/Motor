@@ -43,8 +43,8 @@ inline weak< U > motor_checked_cast(weak< T > value)
 template < typename U, typename T >
 inline U motor_function_cast(T value)
 {
-    typedef void (*GenericFunction)();
-    return reinterpret_cast< U >(reinterpret_cast< GenericFunction >(value));
+    typedef void (*generic_function_t)();
+    return reinterpret_cast< U >(reinterpret_cast< generic_function_t >(value));
 }
 
 #if MOTOR_COMPILER_MSVC

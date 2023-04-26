@@ -23,13 +23,13 @@ private:
     struct const_reverse_iterator_policy;
 
 public:
-    typedef T                       value_type;
-    typedef T*                      pointer;
-    typedef T&                      reference;
-    typedef const T*                const_pointer;
-    typedef const T&                const_reference;
-    typedef minitl::size_type       size_type;
-    typedef minitl::difference_type difference_type;
+    typedef T                    value_t;
+    typedef T*                   pointer_t;
+    typedef T&                   reference_t;
+    typedef const T*             const_pointer_t;
+    typedef const T&             const_reference_t;
+    typedef minitl::size_t       size_t;
+    typedef minitl::difference_t difference_t;
 
 public:
     typedef base_iterator< iterator_policy >               iterator;
@@ -57,19 +57,19 @@ public:
     const_reverse_iterator rbegin() const;
     const_reverse_iterator rend() const;
 
-    size_type size() const;
-    bool      empty() const;
+    size_t size() const;
+    bool   empty() const;
 
-    void     push_front(const_reference r);
-    void     push_back(const_reference r);
-    iterator insert(iterator after, const_reference r);
+    void     push_front(const_reference_t r);
+    void     push_back(const_reference_t r);
+    iterator insert(iterator after, const_reference_t r);
     iterator erase(iterator it);
     iterator erase(iterator first, iterator last);
 
-    reference       front();
-    reference       back();
-    const_reference front() const;
-    const_reference back() const;
+    reference_t       front();
+    reference_t       back();
+    const_reference_t front() const;
+    const_reference_t back() const;
 
     void clear();
     void swap(intrusive_list& other);

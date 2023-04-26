@@ -10,7 +10,7 @@
 namespace minitl {
 
 template < typename T >
-scoped< T >::scoped(T* value, Allocator& allocator) : m_ptr(value)
+scoped< T >::scoped(T* value, allocator& allocator) : m_ptr(value)
 {
     motor_assert_format(
         value->pointer::m_allocator == 0,

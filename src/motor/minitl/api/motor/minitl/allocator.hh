@@ -8,25 +8,25 @@
 
 namespace minitl {
 
-class motor_api(MINITL) Allocator
+class motor_api(MINITL) allocator
 {
 public:
     template < typename T >
-    class Block
+    class block
     {
     private:
-        Allocator* m_allocator;
+        allocator* m_allocator;
         u64        m_count;
         T*         m_data;
 
     public:
-        Block(Allocator& allocator, u64 count, u64 blockAlignment = 4)
+        block(allocator& allocator, u64 count, u64 block_alignment = 4)
             : m_allocator(&allocator)
             , m_count(count)
             , m_data(count ? (T*)allocator.alloc(align(sizeof(T), motor_alignof(T)) * count,
-                                                 max< u64 >(blockAlignment, motor_alignof(T)))
+                                                 max< u64 >(block_alignment, motor_alignof(T)))
                            : 0) {};
-        Block(Block&& other) noexcept
+        block(block&& other) noexcept
             : m_allocator(other.m_allocator)
             , m_count(other.m_count)
             , m_data(other.m_data)
@@ -34,7 +34,7 @@ public:
             other.m_count = 0;
             other.m_data  = nullptr;
         }
-        Block& operator=(Block&& other) noexcept
+        block& operator=(block&& other) noexcept
         {
             m_allocator->free(m_data);
             m_allocator   = other.m_allocator;
@@ -44,13 +44,13 @@ public:
             other.m_data  = nullptr;
             return *this;
         }
-        Block(const Block&)            = delete;
-        Block& operator=(const Block&) = delete;
-        ~Block()
+        block(const block&)            = delete;
+        block& operator=(const block&) = delete;
+        ~block()
         {
             m_allocator->free(m_data);
         }
-        inline Allocator& arena() const
+        inline allocator& arena() const
         {
             return *m_allocator;
         }
@@ -74,7 +74,7 @@ public:
         {
             return m_count;
         }
-        u64 byteCount() const
+        u64 byte_count() const
         {
             return align(sizeof(T), motor_alignof(T)) * m_count;
         }
@@ -108,11 +108,11 @@ public:
                 return false;
             }
         }
-        void realloc(u64 count, u64 blockAlignment = 4)
+        void realloc(u64 count, u64 block_alignment = 4)
         {
             if(count > m_count)
             {
-                u64 alignment = max< u64 >(blockAlignment, motor_alignof(T));
+                u64 alignment = max< u64 >(block_alignment, motor_alignof(T));
                 u64 size      = align(sizeof(T), motor_alignof(T)) * count;
                 m_count       = count;
                 m_data        = (T*)m_allocator->realloc(m_data, size, alignment);
@@ -128,7 +128,7 @@ public:
                 }
             }
         }
-        void swap(Block< T >& other)
+        void swap(block< T >& other)
         {
             minitl::swap(m_allocator, other.m_allocator);
             minitl::swap(m_count, other.m_count);
@@ -137,11 +137,11 @@ public:
     };
 
 protected:
-    virtual void* internalAlloc(u64 size, u64 alignment)              = 0;
-    virtual bool  internalResize(void* ptr, u64 size)                 = 0;
-    virtual void* internalRealloc(void* ptr, u64 size, u64 alignment) = 0;
-    virtual void  internalFree(const void* pointer)                   = 0;
-    virtual ~Allocator()                                              = default;
+    virtual void* internal_alloc(u64 size, u64 alignment)              = 0;
+    virtual bool  internal_resize(void* ptr, u64 size)                 = 0;
+    virtual void* internal_realloc(void* ptr, u64 size, u64 alignment) = 0;
+    virtual void  internal_free(const void* pointer)                   = 0;
+    virtual ~allocator()                                               = default;
 
 public:
     inline void* alloc(u64 size, u64 alignment = 4);
@@ -154,51 +154,51 @@ public:
     inline T* alloc();
 };
 
-void* Allocator::alloc(u64 size, u64 alignment)
+void* allocator::alloc(u64 size, u64 alignment)
 {
-    return internalAlloc(size, alignment);
+    return internal_alloc(size, alignment);
 }
 
-bool Allocator::resize(void* ptr, u64 size)
+bool allocator::resize(void* ptr, u64 size)
 {
-    return internalResize(ptr, size);
+    return internal_resize(ptr, size);
 }
 
-void* Allocator::realloc(void* ptr, u64 size, u64 alignment)
+void* allocator::realloc(void* ptr, u64 size, u64 alignment)
 {
-    return internalRealloc(ptr, size, alignment);
+    return internal_realloc(ptr, size, alignment);
 }
 
-void Allocator::free(const void* pointer)
+void allocator::free(const void* pointer)
 {
-    internalFree(pointer);
+    internal_free(pointer);
 }
 
-char* Allocator::strdup(const char* src)
+char* allocator::strdup(const char* src)
 {
     size_t s      = strlen(src);
-    char*  result = static_cast< char* >(internalAlloc(s + 1, 1));
+    char*  result = static_cast< char* >(internal_alloc(s + 1, 1));
     strcpy(result, src);
     return result;
 }
 
-char* Allocator::strdup(const char* begin, const char* end)
+char* allocator::strdup(const char* begin, const char* end)
 {
     size_t s      = end - begin;
-    char*  result = static_cast< char* >(internalAlloc(s + 1, 1));
+    char*  result = static_cast< char* >(internal_alloc(s + 1, 1));
     strncpy(result, begin, s);
     result[s] = '\0';
     return result;
 }
 
 template < typename T >
-T* Allocator::alloc()
+T* allocator::alloc()
 {
     return (T*)alloc(sizeof(T), motor_alignof(T));
 }
 
 template < typename T >
-void swap(Allocator::Block< T >& a, Allocator::Block< T >& b)
+void swap(allocator::block< T >& a, allocator::block< T >& b)
 {
     a.swap(b);
 }
@@ -207,42 +207,42 @@ void swap(Allocator::Block< T >& a, Allocator::Block< T >& b)
 
 #include <new>
 
-inline void* operator new(size_t size, minitl::Allocator& allocator)
+inline void* operator new(size_t size, minitl::allocator& allocator)
 {
     return allocator.alloc(size);
 }
 
-inline void* operator new(size_t size, minitl::Allocator& allocator, size_t align)
+inline void* operator new(size_t size, minitl::allocator& allocator, size_t align)
 {
     return allocator.alloc(size, align);
 }
 
-inline void operator delete(void* ptr, minitl::Allocator& allocator)
+inline void operator delete(void* ptr, minitl::allocator& allocator)
 {
     allocator.free(ptr);
 }
 
-inline void operator delete(void* ptr, minitl::Allocator& allocator, size_t /*align*/)
+inline void operator delete(void* ptr, minitl::allocator& allocator, size_t /*align*/)
 {
     allocator.free(ptr);
 }
 
-inline void* operator new[](size_t size, minitl::Allocator& allocator)
+inline void* operator new[](size_t size, minitl::allocator& allocator)
 {
     return allocator.alloc(size);
 }
 
-inline void* operator new[](size_t size, minitl::Allocator& allocator, size_t align)
+inline void* operator new[](size_t size, minitl::allocator& allocator, size_t align)
 {
     return allocator.alloc(size, align);
 }
 
-inline void operator delete[](void* ptr, minitl::Allocator& allocator)
+inline void operator delete[](void* ptr, minitl::allocator& allocator)
 {
     allocator.free(ptr);
 }
 
-inline void operator delete[](void* ptr, minitl::Allocator& allocator, size_t /*align*/)
+inline void operator delete[](void* ptr, minitl::allocator& allocator, size_t /*align*/)
 {
     allocator.free(ptr);
 }

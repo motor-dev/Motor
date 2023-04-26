@@ -9,11 +9,11 @@
 
 namespace Motor { namespace Meta {
 
-motor_api(REFLECTION) ref< AST::Node > parseValue(minitl::Allocator& arena,
+motor_api(REFLECTION) ref< AST::Node > parseValue(minitl::allocator& arena,
                                                   AST::MessageList& context, const char* strBegin,
                                                   const char* strEnd = nullptr, u32 initialLine = 0,
                                                   u32 initialColumn = 0);
 
 motor_api(REFLECTION) Meta::Value
-    quickParse(minitl::Allocator& arena, const char* strBegin, const char* strEnd = nullptr);
+    quickParse(minitl::allocator& arena, const char* strBegin, const char* strEnd = nullptr);
 }}  // namespace Motor::Meta

@@ -35,9 +35,9 @@ private:
     void unload(const weak< const Resource::IDescription >& description,
                 Resource::Resource&                         handle) override;
     void runBuffer(const weak< const LuaScript >& script, Resource::Resource& resource,
-                   const minitl::Allocator::Block< u8 >& buffer) override;
+                   const minitl::allocator::block< u8 >& buffer) override;
     void reloadBuffer(const weak< const LuaScript >& script, Resource::Resource& resource,
-                      const minitl::Allocator::Block< u8 >& buffer) override;
+                      const minitl::allocator::block< u8 >& buffer) override;
 
     static void* luaAlloc(void* ud, void* ptr, size_t osize, size_t nsize);
 };

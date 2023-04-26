@@ -6,7 +6,7 @@
 
 namespace Motor {
 
-MemoryStream::MemoryStream(minitl::Allocator& allocator, u32 size)
+MemoryStream::MemoryStream(minitl::allocator& allocator, u32 size)
     : m_memory(allocator, size)
     , m_size(size)
     , m_capacity(0)

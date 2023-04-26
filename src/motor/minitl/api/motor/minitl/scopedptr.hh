@@ -19,7 +19,7 @@ private:
     T* m_ptr;
 
 private:
-    scoped(T* value, Allocator& allocator);
+    scoped(T* value, allocator& allocator);
 
 public:
     scoped(const scoped& other) = delete;
@@ -42,11 +42,11 @@ public:
     template < typename U >
     inline void reset(scoped< U >&& other);
 
-    template < typename... Args >
-    static inline scoped< T > create(Allocator& allocator, Args&&... args)
+    template < typename... ARGS >
+    static inline scoped< T > create(allocator& allocator, ARGS&&... args)
     {
         void* mem = allocator.alloc(sizeof(T), motor_alignof(T));
-        return scoped< T >(new(mem) T(minitl::forward< Args >(args)...), allocator);
+        return scoped< T >(new(mem) T(minitl::forward< ARGS >(args)...), allocator);
     }
 };
 

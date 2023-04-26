@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#pragma once
 
-#ifndef MOTOR_MINITL_FORMAT_INL_
-#define MOTOR_MINITL_FORMAT_INL_
-/**************************************************************************************************/
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/tuple.hh>
 #include <motor/minitl/utility.hh>
@@ -33,10 +31,10 @@ motor_api(MINITL) bool invalid_format(const char* reason);
 
 struct format_pattern_info
 {
-    u32            blockStart;
-    u32            patternStart;
-    u32            patternEnd;
-    u32            argumentIndex;
+    u32            block_start;
+    u32            pattern_start;
+    u32            pattern_end;
+    u32            argument_index;
     format_options options;
     bool           error;
 };
@@ -47,8 +45,8 @@ struct brace_format
 
 struct pattern_range
 {
-    u32 blockStart;
-    u32 patternStart;
+    u32 block_start;
+    u32 pattern_start;
 };
 
 template < typename T >
@@ -83,21 +81,21 @@ constexpr u32 count_patterns(T format)
 }
 
 template < typename T >
-constexpr pattern_range get_pattern_start(u32 patternIndex, u32 startIndex)
+constexpr pattern_range get_pattern_start(u32 pattern_index, u32 start_index)
 {
     T   format {};
-    u32 first  = startIndex;
-    u32 result = startIndex;
+    u32 first  = start_index;
+    u32 result = start_index;
     for(; format[result] != 0; ++result)
     {
         if(format[result] == '{')
         {
-            if(patternIndex == 0)
+            if(pattern_index == 0)
             {
                 return {first, result};
             }
             ++result;
-            patternIndex--;
+            pattern_index--;
             if(format[result] == '{')
             {
                 first = result + 1;
@@ -113,12 +111,12 @@ constexpr pattern_range get_pattern_start(u32 patternIndex, u32 startIndex)
         {
             if(format[result + 1] == '}')
             {
-                if(patternIndex == 0)
+                if(pattern_index == 0)
                 {
                     return {first, result};
                 }
                 ++result;
-                patternIndex--;
+                pattern_index--;
                 first = result + 1;
             }
         }
@@ -162,7 +160,7 @@ constexpr void fill_format_info_formatter(T format, u32 offset, format_pattern_i
             result.error = invalid_format("missing '}' in format specifier");
         }
     }
-    result.patternEnd = offset + 1;
+    result.pattern_end = offset + 1;
 }
 
 template < typename T >
@@ -206,7 +204,7 @@ constexpr void fill_format_info_signaware(T format, u32 offset, format_pattern_i
     if(format[offset] == '0')
     {
         fill_format_info_width(format, offset + 1, result);
-        result.options.signPadding = true;
+        result.options.sign_padding = true;
     }
     else
     {
@@ -262,90 +260,90 @@ constexpr void fill_format_info_align(T format, u32 offset, format_pattern_info&
     }
 }
 
-template < typename T, u32 PATTERN_INDEX, typename... DefaultFormatters >
+template < typename T, u32 PATTERN_INDEX, typename... DEFAULT_FORMATTERS >
 constexpr format_pattern_info get_format_info(T format)
 {
-    constexpr u32            argumentCount = sizeof...(DefaultFormatters);
-    constexpr format_options defaultFormat[argumentCount]
-        = {DefaultFormatters::default_format_options...};
-    pattern_range range        = get_pattern_start< T >(PATTERN_INDEX, 0);
-    u32           patternStart = range.patternStart;
+    constexpr u32            argument_count = sizeof...(DEFAULT_FORMATTERS);
+    constexpr format_options default_format[argument_count]
+        = {DEFAULT_FORMATTERS::default_format_options...};
+    pattern_range range         = get_pattern_start< T >(PATTERN_INDEX, 0);
+    u32           pattern_start = range.pattern_start;
 
-    if(format[patternStart] == '}')
+    if(format[pattern_start] == '}')
     {
         // deliberate offset to include the '{}' characters in the copy
-        return {range.blockStart,
-                patternStart + 1,
-                patternStart + 2,
-                argumentCount,
+        return {range.block_start,
+                pattern_start + 1,
+                pattern_start + 2,
+                argument_count,
                 formatter< '{' >::default_format_options,
-                !(format[patternStart + 1] == '}')
+                !(format[pattern_start + 1] == '}')
                     && invalid_format("unmatched '}' in format string")};
     }
 
-    if(format[patternStart + 1] == '{')
+    if(format[pattern_start + 1] == '{')
     {
         // deliberate offset to include the '{}' characters in the copy
-        return {range.blockStart,
-                patternStart + 1,
-                patternStart + 2,
-                argumentCount,
+        return {range.block_start,
+                pattern_start + 1,
+                pattern_start + 2,
+                argument_count,
                 formatter< '{' >::default_format_options,
                 false};
     }
 
-    u32 argumentOffset = patternStart + 1;
-    if(format[argumentOffset] == '}' || format[argumentOffset] == ':')
+    u32 argument_offset = pattern_start + 1;
+    if(format[argument_offset] == '}' || format[argument_offset] == ':')
     {
-        return {range.blockStart,
-                patternStart,
-                patternStart + 1,
-                argumentCount,
+        return {range.block_start,
+                pattern_start,
+                pattern_start + 1,
+                argument_count,
                 formatter< 's' >::default_format_options,
                 invalid_format("argument index is empty")};
     }
 
-    u32 argumentIndex = 0;
-    for(; format[argumentOffset] != '}' && format[argumentOffset] != ':'; ++argumentOffset)
+    u32 argument_index = 0;
+    for(; format[argument_offset] != '}' && format[argument_offset] != ':'; ++argument_offset)
     {
-        if(format[argumentOffset] < '0' || format[argumentOffset] > '9')
+        if(format[argument_offset] < '0' || format[argument_offset] > '9')
         {
-            return {range.blockStart,
-                    patternStart,
-                    patternStart + 1,
-                    argumentCount,
+            return {range.block_start,
+                    pattern_start,
+                    pattern_start + 1,
+                    argument_count,
                     formatter< 's' >::default_format_options,
                     invalid_format("argument index is not a number")};
         }
-        argumentIndex = argumentIndex * 10 + format[argumentOffset] - '0';
+        argument_index = argument_index * 10 + format[argument_offset] - '0';
     }
 
-    if(argumentIndex >= argumentCount)
+    if(argument_index >= argument_count)
     {
-        return {range.blockStart,
-                patternStart,
-                patternStart + 1,
-                argumentCount,
+        return {range.block_start,
+                pattern_start,
+                pattern_start + 1,
+                argument_count,
                 formatter< 's' >::default_format_options,
                 invalid_format("argument index out of range")};
     }
-    format_pattern_info result = {range.blockStart,
-                                  patternStart,
-                                  argumentOffset + 1,
-                                  argumentIndex,
-                                  defaultFormat[argumentIndex],
+    format_pattern_info result = {range.block_start,
+                                  pattern_start,
+                                  argument_offset + 1,
+                                  argument_index,
+                                  default_format[argument_index],
                                   false};
-    if(format[argumentOffset] == ':')
+    if(format[argument_offset] == ':')
     {
-        fill_format_info_align(format, argumentOffset + 1, result);
+        fill_format_info_align(format, argument_offset + 1, result);
     }
     return result;
 }
 
 template < typename T, u32 PATTERN_INDEX >
-constexpr format_pattern_info get_format_info_end(T format, u32 blockStart)
+constexpr format_pattern_info get_format_info_end(T format, u32 block_start)
 {
-    return {blockStart,
+    return {block_start,
             format.size(),
             format.size(),
             PATTERN_INDEX,
@@ -354,94 +352,97 @@ constexpr format_pattern_info get_format_info_end(T format, u32 blockStart)
 }
 
 template < u32 INDEX >
-constexpr bool isIndexInList()
+constexpr bool is_index_in_list()
 {
     return invalid_format("argument not used in format");
 }
 
 template < u32 INDEX, i32 FIRST, i32... INDICES, enable_if_t< INDEX == FIRST, bool > = true >
-constexpr bool isIndexInList()
+constexpr bool is_index_in_list()
 {
     return true;
 }
 
 template < u32 INDEX, i32 FIRST, i32... INDICES, enable_if_t< INDEX != FIRST, int > = true >
-constexpr bool isIndexInList()
+constexpr bool is_index_in_list()
 {
-    return isIndexInList< INDEX, INDICES... >();
+    return is_index_in_list< INDEX, INDICES... >();
 }
 
-template < typename T, typename Formatter, typename Arg >
-u32 fill_buffer(char* destination, u32 length, u32 offset, const format_pattern_info& patternInfo,
-                u32 argumentLength, const Formatter& formatter, Arg&& arg)
+template < typename T, typename FORMATTER, typename ARG >
+u32 fill_buffer(char* destination, u32 length, u32 offset, const format_pattern_info& pattern_info,
+                u32 argument_length, const FORMATTER& formatter, ARG&& arg)
 {
     T   format;
-    u32 maxSize       = length - offset;
-    u32 segmentLength = patternInfo.patternStart - patternInfo.blockStart;
-    segmentLength     = segmentLength > maxSize ? maxSize : segmentLength;
-    memcpy(destination + offset, &format[patternInfo.blockStart], segmentLength);
-    offset += segmentLength;
-    maxSize -= segmentLength;
-    if(argumentLength <= maxSize)
+    u32 max_size       = length - offset;
+    u32 segment_length = pattern_info.pattern_start - pattern_info.block_start;
+    segment_length     = segment_length > max_size ? max_size : segment_length;
+    memcpy(destination + offset, &format[pattern_info.block_start], segment_length);
+    offset += segment_length;
+    max_size -= segment_length;
+    if(argument_length <= max_size)
     {
-        offset += formatter.write(destination + offset, minitl::forward< Arg >(arg),
-                                  patternInfo.options, argumentLength);
+        offset += formatter.write(destination + offset, minitl::forward< ARG >(arg),
+                                  pattern_info.options, argument_length);
     }
-    else if(maxSize > 0)
+    else if(max_size > 0)
     {
-        offset += formatter.write_partial(destination + offset, minitl::forward< Arg >(arg),
-                                          patternInfo.options, argumentLength, maxSize);
+        offset += formatter.write_partial(destination + offset, minitl::forward< ARG >(arg),
+                                          pattern_info.options, argument_length, max_size);
     }
     return offset;
 }
 
 template < typename T >
-u32 fill_buffer(char* destination, u32 length, u32 offset, const format_pattern_info& patternInfo,
-                u32 argumentLength, const formatter< '{' >&, const brace_format&)
+u32 fill_buffer(char* destination, u32 length, u32 offset, const format_pattern_info& pattern_info,
+                u32 argument_length, const formatter< '{' >&, const brace_format&)
 {
-    motor_forceuse(argumentLength);
+    motor_forceuse(argument_length);
     T   format;
-    u32 maxSize       = length - offset;
-    u32 segmentLength = patternInfo.patternStart - patternInfo.blockStart;
-    segmentLength     = segmentLength > maxSize ? maxSize : segmentLength;
-    memcpy(destination + offset, &format[patternInfo.blockStart], segmentLength);
-    return offset + segmentLength;
+    u32 max_size       = length - offset;
+    u32 segment_length = pattern_info.pattern_start - pattern_info.block_start;
+    segment_length     = segment_length > max_size ? max_size : segment_length;
+    memcpy(destination + offset, &format[pattern_info.block_start], segment_length);
+    return offset + segment_length;
 }
 
 enum struct format_alignment
 {
-    None,
-    Left,
-    Right,
-    Center
+    none,
+    left,
+    right,
+    center
 };
 
 template < typename FORMATTER, format_alignment >
 struct aligned_formatter;
 
 template < typename FORMATTER >
-struct aligned_formatter< FORMATTER, format_alignment::None >
+struct aligned_formatter< FORMATTER, format_alignment::none >
 {
-    typedef FORMATTER type;
+    typedef FORMATTER formatter_t;
 };
 
 template < typename FORMATTER >
-struct aligned_formatter< FORMATTER, format_alignment::Left >
+struct aligned_formatter< FORMATTER, format_alignment::left >
 {
-    typedef typename FORMATTER::formatter_left_aligned type;
+    typedef typename FORMATTER::formatter_left_aligned formatter_t;
 };
 
 template < typename FORMATTER >
-struct aligned_formatter< FORMATTER, format_alignment::Right >
+struct aligned_formatter< FORMATTER, format_alignment::right >
 {
-    typedef typename FORMATTER::formatter_right_aligned type;
+    typedef typename FORMATTER::formatter_right_aligned formatter_t;
 };
 
 template < typename FORMATTER >
-struct aligned_formatter< FORMATTER, format_alignment::Center >
+struct aligned_formatter< FORMATTER, format_alignment::center >
 {
-    typedef typename FORMATTER::formatter_centered type;
+    typedef typename FORMATTER::formatter_centered formatter_t;
 };
+
+template < typename FORMATTER, format_alignment ALIGNMENT >
+using aligned_formatter_t = typename aligned_formatter< FORMATTER, ALIGNMENT >::formatter_t;
 
 template < typename FORMATTER, bool >
 struct alternate_formatter;
@@ -449,70 +450,74 @@ struct alternate_formatter;
 template < typename FORMATTER >
 struct alternate_formatter< FORMATTER, false >
 {
-    typedef FORMATTER type;
+    typedef FORMATTER formatter_t;
 };
 
 template < typename FORMATTER >
 struct alternate_formatter< FORMATTER, true >
 {
-    typedef typename FORMATTER::formatter_alternate type;
+    typedef typename FORMATTER::formatter_alternate formatter_t;
 };
 
-template < typename T, typename... Args, u32... PATTERN_INDICES, u32... ARGUMENT_INDICES >
-u32 format(char* destination, u32 destinationLength, index_sequence< PATTERN_INDICES... >,
-           index_sequence< ARGUMENT_INDICES... >, Args&&... arguments)
+template < typename FORMATTER, bool USE_ALTERNATE >
+using alternate_formatter_t = typename alternate_formatter< FORMATTER, USE_ALTERNATE >::formatter_t;
+
+template < typename T, typename... ARGS, u32... PATTERN_INDICES, u32... ARGUMENT_INDICES >
+u32 format(char* destination, u32 destination_length, index_sequence< PATTERN_INDICES... >,
+           index_sequence< ARGUMENT_INDICES... >, ARGS&&... arguments)
 {
     constexpr T                   format {};
-    constexpr u32                 patternCount           = sizeof...(PATTERN_INDICES);
-    constexpr format_pattern_info patterns[patternCount] = {
+    constexpr u32                 pattern_count           = sizeof...(PATTERN_INDICES);
+    constexpr format_pattern_info patterns[pattern_count] = {
         get_format_info< T, PATTERN_INDICES,
-                         decltype(format_as(minitl::forward< Args >(arguments)))... >(format)...};
-    constexpr bool argUsed[] = {isIndexInList< ARGUMENT_INDICES, u32(sizeof...(Args)),
-                                               patterns[PATTERN_INDICES].argumentIndex... >()...};
-    motor_forceuse(argUsed);  // no check needed here
+                         decltype(format_as(minitl::forward< ARGS >(arguments)))... >(format)...};
+    constexpr bool arg_used[]
+        = {is_index_in_list< ARGUMENT_INDICES, u32(sizeof...(ARGS)),
+                             patterns[PATTERN_INDICES].argument_index... >()...};
+    motor_forceuse(arg_used);  // no check needed here
     constexpr format_alignment alignments[]
         = {patterns[PATTERN_INDICES].options.width == 0
-               ? format_alignment::None
+               ? format_alignment::none
                : (patterns[PATTERN_INDICES].options.align == '<'
-                      ? format_alignment::Left
+                      ? format_alignment::left
                       : (patterns[PATTERN_INDICES].options.align == '>'
-                             ? format_alignment::Right
-                             : format_alignment::Center))...};
+                             ? format_alignment::right
+                             : format_alignment::center))...};
     constexpr auto formatters = make_tuple(
-        typename aligned_formatter<
-            typename alternate_formatter< formatter< patterns[PATTERN_INDICES].options.formatter >,
-                                          patterns[PATTERN_INDICES].options.alternate >::type,
-            alignments[PATTERN_INDICES] >::type()...);
+        aligned_formatter_t<
+            alternate_formatter_t< formatter< patterns[PATTERN_INDICES].options.formatter >,
+                                   patterns[PATTERN_INDICES].options.alternate >,
+            alignments[PATTERN_INDICES] >()...);
 
-    u32 lengths[patternCount] = {
+    u32 lengths[pattern_count] = {
         get< PATTERN_INDICES >(formatters)
-            .length(get< patterns[PATTERN_INDICES].argumentIndex >(arguments..., brace_format {}),
+            .length(get< patterns[PATTERN_INDICES].argument_index >(arguments..., brace_format {}),
                     patterns[PATTERN_INDICES].options)...};
 
-    u32 offset = 0;
-    u32 offsets[]
-        = {offset = fill_buffer< T >(
-               destination, destinationLength, offset, patterns[PATTERN_INDICES],
-               lengths[PATTERN_INDICES], get< patterns[PATTERN_INDICES].argumentIndex >(formatters),
-               get< patterns[PATTERN_INDICES].argumentIndex >(arguments..., brace_format {}))...};
+    u32 offset    = 0;
+    u32 offsets[] = {
+        offset = fill_buffer< T >(
+            destination, destination_length, offset, patterns[PATTERN_INDICES],
+            lengths[PATTERN_INDICES], get< patterns[PATTERN_INDICES].argument_index >(formatters),
+            get< patterns[PATTERN_INDICES].argument_index >(arguments..., brace_format {}))...};
     motor_forceuse(offsets);
 
-    u32 maxSize       = destinationLength - offset;
-    u32 segmentLength = format.size() - patterns[patternCount - 1].patternEnd;
-    segmentLength     = (segmentLength > maxSize) ? maxSize : segmentLength;
-    memcpy(destination + offset, &format[patterns[patternCount - 1].patternEnd], segmentLength);
-    offset += segmentLength;
-    if(offset < destinationLength)
+    u32 max_size       = destination_length - offset;
+    u32 segment_length = format.size() - patterns[pattern_count - 1].pattern_end;
+    segment_length     = (segment_length > max_size) ? max_size : segment_length;
+    memcpy(destination + offset, &format[patterns[pattern_count - 1].pattern_end], segment_length);
+    offset += segment_length;
+    if(offset < destination_length)
     {
         return offset - 1;
     }
     else
     {
-        destination[destinationLength - 4] = '.';
-        destination[destinationLength - 3] = '.';
-        destination[destinationLength - 2] = '.';
-        destination[destinationLength - 1] = '\0';
-        return destinationLength - 1;
+        destination[destination_length - 4] = '.';
+        destination[destination_length - 3] = '.';
+        destination[destination_length - 2] = '.';
+        destination[destination_length - 1] = '\0';
+        return destination_length - 1;
     }
 }
 
@@ -520,26 +525,23 @@ formatter< '{' > format_as(format_details::brace_format);
 
 }  // namespace format_details
 
-template < u32 SIZE, typename T, typename... Args >
-format_buffer< SIZE > format(T formatString, Args&&... arguments)
+template < u32 SIZE, typename T, typename... ARGS >
+format_buffer< SIZE > format(T format_string, ARGS&&... arguments)
 {
     format_buffer< SIZE > result;
-    format_to(result.buffer, SIZE, formatString, minitl::forward< Args >(arguments)...);
+    format_to(result.buffer, SIZE, format_string, minitl::forward< ARGS >(arguments)...);
     return result;
 }
 
-template < typename T, typename... Args >
-u32 format_to(char* destination, u32 length, T format, Args&&... arguments)
+template < typename T, typename... ARGS >
+u32 format_to(char* destination, u32 length, T format_string, ARGS&&... arguments)
 {
-    motor_forceuse(format);
-    constexpr u32 patternCount = format_details::count_patterns(T {});
+    motor_forceuse(format_string);
+    constexpr u32 pattern_count = format_details::count_patterns(T {});
 
-    return format_details::format< T >(destination, length, make_index_sequence< patternCount >(),
-                                       make_index_sequence< sizeof...(Args) >(),
-                                       minitl::forward< Args >(arguments)...);
+    return format_details::format< T >(destination, length, make_index_sequence< pattern_count >(),
+                                       make_index_sequence< sizeof...(ARGS) >(),
+                                       minitl::forward< ARGS >(arguments)...);
 }
 
 }  // namespace minitl
-
-/**************************************************************************************************/
-#endif

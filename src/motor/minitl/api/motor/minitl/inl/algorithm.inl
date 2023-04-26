@@ -7,14 +7,14 @@
 
 namespace minitl {
 
-namespace impl {
+namespace details {
 
 template < typename ITERATOR, typename COMPARE >
-struct SortPredicate
+struct sort_predicate
 {
     ITERATOR m_iterator;
     COMPARE  m_compare;
-    explicit SortPredicate(ITERATOR it) : m_iterator(it)
+    explicit sort_predicate(ITERATOR it) : m_iterator(it)
     {
     }
     bool operator()(const ITERATOR& r)
@@ -23,7 +23,7 @@ struct SortPredicate
     }
 };
 
-}  // namespace impl
+}  // namespace details
 
 template < typename ITERATOR, typename FUNCTOR >
 void for_each(ITERATOR first, ITERATOR last, FUNCTOR f)
@@ -57,13 +57,13 @@ ITERATOR partition(ITERATOR first, ITERATOR last, PREDICATE p)
 template < typename ITERATOR, typename COMPARE >
 void sort(ITERATOR first, ITERATOR last, COMPARE s)
 {
-    minitl::difference_type d = distance(first, last);
+    minitl::difference_t d = distance(first, last);
     if(d > 1)
     {
         ITERATOR reallast = last - 1;
         ITERATOR t        = first + d / 2;
         swap(*t, *reallast);
-        t = partition(first, reallast, impl::SortPredicate< ITERATOR, COMPARE >(reallast));
+        t = partition(first, reallast, details::sort_predicate< ITERATOR, COMPARE >(reallast));
         swap(*t, *reallast);
         sort(first, t, s);
         sort(t, last, s);

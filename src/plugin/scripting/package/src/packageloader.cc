@@ -10,7 +10,7 @@
 
 namespace Motor { namespace Arena {
 
-minitl::Allocator& package()
+minitl::allocator& package()
 {
     return resource();
 }
@@ -61,7 +61,7 @@ void PackageLoader::unload(const weak< const Resource::IDescription >& /*descrip
 }
 
 void PackageLoader::runBuffer(const weak< const Package >& script, Resource::Resource& resource,
-                              const minitl::Allocator::Block< u8 >& buffer)
+                              const minitl::allocator::block< u8 >& buffer)
 {
     MD5 md5 = digest(buffer);
     motor_info_format(Log::package(), "md5 sum of package: {0}", md5);
@@ -81,7 +81,7 @@ void PackageLoader::runBuffer(const weak< const Package >& script, Resource::Res
 }
 
 void PackageLoader::reloadBuffer(const weak< const Package >& script, Resource::Resource& resource,
-                                 const minitl::Allocator::Block< u8 >& buffer)
+                                 const minitl::allocator::block< u8 >& buffer)
 {
     MD5 md5 = digest(buffer);
     motor_info_format(Log::package(), "md5 sum of package: {0}", md5);

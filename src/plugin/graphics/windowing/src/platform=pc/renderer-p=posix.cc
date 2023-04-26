@@ -125,7 +125,7 @@ int Renderer::PlatformRenderer::ioError(::Display* /*display*/)
     return result;
 }
 
-Renderer::Renderer(minitl::Allocator& arena, const weak< Resource::ResourceManager >& manager)
+Renderer::Renderer(minitl::allocator& arena, const weak< Resource::ResourceManager >& manager)
     : IRenderer(arena, manager, Scheduler::MainThread)
     , m_platformRenderer(scoped< PlatformRenderer >::create(arena))
 {

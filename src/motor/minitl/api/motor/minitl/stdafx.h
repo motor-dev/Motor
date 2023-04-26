@@ -7,6 +7,7 @@
 #if defined(MOTOR_COMPUTE)
 #    define motor_api(module)
 #else
+// NOLINTNEXTLINE(readability-identifier-naming)
 #    define motor_api(module) MOTOR_API_##module
 #endif
 
@@ -44,7 +45,7 @@ T max(T t1, T t2)
 }
 
 template < typename T >
-T nextPowerOf2(T t)
+T next_power_of_2(T t)
 {
     u64 result = t;
     result -= 1;

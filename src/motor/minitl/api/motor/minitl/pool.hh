@@ -18,11 +18,11 @@ private:
     {
     };
     knl::istack< node >   m_items;
-    Allocator::Block< T > m_pool;
+    allocator::block< T > m_pool;
     T*                    m_end;
 
 public:
-    pool(Allocator& allocator, u64 capacity, u64 alignment = motor_alignof(T));
+    pool(allocator& allocator, u64 capacity, u64 alignment = motor_alignof(T));
     pool(pool&& other)            = default;  // NOLINT(performance-noexcept-move-constructor)
     pool& operator=(pool&& other) = default;  // NOLINT(performance-noexcept-move-constructor)
     ~pool()                       = default;
@@ -30,8 +30,8 @@ public:
     pool(const pool& other)            = delete;
     pool& operator=(const pool& other) = delete;
 
-    template < typename... Args >
-    T*   allocate(Args&&... args);
+    template < typename... ARGS >
+    T*   allocate(ARGS&&... args);
     void release(T* t);
 
     void swap(pool< T >& other);

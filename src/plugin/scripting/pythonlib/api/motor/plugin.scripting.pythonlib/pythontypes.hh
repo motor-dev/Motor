@@ -184,8 +184,8 @@ typedef int (*Type_PySys_SetObject)(const char* name, PyObject* object);
 
 struct PyObject
 {
-    minitl::size_type py_refcount {};
-    PyTypeObject*     py_type {};
+    minitl::size_t py_refcount {};
+    PyTypeObject*  py_type {};
 };
 
 enum Py_InputStart
@@ -351,10 +351,10 @@ struct PyTypeObject
         objobjargproc mp_ass_subscript;
     };
 
-    PyVarObject       object;
-    const char*       tp_name {};
-    minitl::size_type tp_basicsize {};
-    minitl::size_type tp_itemsize {};
+    PyVarObject    object;
+    const char*    tp_name {};
+    minitl::size_t tp_basicsize {};
+    minitl::size_t tp_itemsize {};
 
     destructor  tp_dealloc {};
     printfunc   tp_print {};
@@ -441,8 +441,8 @@ struct PyModuleDef_Base
 {
     PyObject ob_base;
     PyObject* (*m_init)() {};
-    minitl::size_type m_index {};
-    PyObject*         m_copy {};
+    minitl::size_t m_index {};
+    PyObject*      m_copy {};
 };
 
 #define PyModuleDef_HEAD_INIT                                                                      \
@@ -455,15 +455,15 @@ struct PyModuleDef_Base
 
 struct PyModuleDef
 {
-    PyModuleDef_Base  m_base;
-    const char*       m_name {};
-    const char*       m_doc {};
-    minitl::size_type m_size {};
-    PyMethodDef*      m_methods {};
-    inquiry           m_reload {};
-    traverseproc      m_traverse {};
-    inquiry           m_clear {};
-    freefunc          m_free {};
+    PyModuleDef_Base m_base;
+    const char*      m_name {};
+    const char*      m_doc {};
+    minitl::size_t   m_size {};
+    PyMethodDef*     m_methods {};
+    inquiry          m_reload {};
+    traverseproc     m_traverse {};
+    inquiry          m_clear {};
+    freefunc         m_free {};
 };
 
 #define Py_INCREF(pyobject)                                                                        \

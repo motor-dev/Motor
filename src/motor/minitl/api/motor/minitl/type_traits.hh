@@ -6,11 +6,11 @@
 
 namespace minitl {
 
-template < class T, T v >
+template < class T, T V >
 struct integral_constant;
 
-typedef integral_constant< bool, true >  true_type;
-typedef integral_constant< bool, false > false_type;
+typedef integral_constant< bool, true >  true_t;
+typedef integral_constant< bool, false > false_t;
 
 template < typename T >
 struct is_const;

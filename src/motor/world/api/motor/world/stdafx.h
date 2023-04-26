@@ -20,7 +20,7 @@
 
 namespace Motor { namespace Arena {
 
-motor_api(WORLD) minitl::Allocator& game();
+motor_api(WORLD) minitl::allocator& game();
 
 }}  // namespace Motor::Arena
 

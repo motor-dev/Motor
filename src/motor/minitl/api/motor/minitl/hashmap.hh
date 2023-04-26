@@ -13,7 +13,7 @@
 
 namespace minitl {
 
-template < typename Key, typename Value, typename Hash = hash< Key > >
+template < typename KEY, typename VALUE, typename HASH = hash< KEY > >
 class hashmap
 {
 private:
@@ -29,9 +29,9 @@ public:
     typedef iterator_base< iterator_policy >       iterator;
     typedef iterator_base< const_iterator_policy > const_iterator;
 
-    typedef tuple< const Key, Value >        value_type;
-    typedef tuple< const Key, Value >&       reference;
-    typedef const tuple< const Key, Value >& const_reference;
+    typedef tuple< const KEY, VALUE >        value_t;
+    typedef tuple< const KEY, VALUE >&       reference_t;
+    typedef const tuple< const KEY, VALUE >& const_reference_t;
 
 private:
     struct empty_item : public intrusive_list< empty_item >::item
@@ -43,34 +43,34 @@ private:
     };
     struct item : public empty_item
     {
-        value_type value;
-        explicit item(const value_type& value) : value(value)
+        value_t value;
+        explicit item(const value_t& value) : value(value)
         {
         }
-        explicit item(value_type&& value) : value(move(value))
+        explicit item(value_t&& value) : value(move(value))
         {
         }
     };
     typedef typename intrusive_list< empty_item >::iterator       list_iterator;
     typedef typename intrusive_list< empty_item >::const_iterator const_list_iterator;
-    typedef tuple< empty_item, list_iterator >                    index_item;
+    typedef tuple< empty_item, list_iterator >                    index_item_t;
 
 private:
-    pool< item >                   m_itemPool;
-    intrusive_list< empty_item >   m_items;
-    Allocator::Block< index_item > m_index;
-    u32                            m_count;
+    pool< item >                     m_itemPool;
+    intrusive_list< empty_item >     m_items;
+    allocator::block< index_item_t > m_index;
+    u32                              m_count;
 
 private:
-    void buildIndex();
+    void build_index();
     void grow(u32 size);
 
 public:
-    explicit hashmap(Allocator& allocator, u32 reserved = 0);
+    explicit hashmap(allocator& allocator, u32 reserved = 0);
     ~hashmap();
     hashmap(const hashmap& other);
     hashmap(hashmap&& other) = default;             // NOLINT(performance-noexcept-move-constructor)
-    hashmap(Allocator& allocator, const hashmap& other);
+    hashmap(allocator& allocator, const hashmap& other);
     hashmap& operator=(hashmap&& other) = default;  // NOLINT(performance-noexcept-move-constructor)
     hashmap& operator=(hashmap other);
 
@@ -84,26 +84,26 @@ public:
     u32  size() const;
     bool empty() const;
 
-    Value& operator[](const Key& key);
+    VALUE& operator[](const KEY& key);
 
-    iterator       find(const Key& key);
-    const_iterator find(const Key& key) const;
+    iterator       find(const KEY& key);
+    const_iterator find(const KEY& key) const;
 
     iterator erase(iterator it);
-    void     erase(const Key& key);
+    void     erase(const KEY& key);
 
-    tuple< iterator, bool > insert(Key&& k, Value&& value);
-    tuple< iterator, bool > insert(Key&& k, const Value& value);
-    tuple< iterator, bool > insert(const Key& k, Value&& value);
-    tuple< iterator, bool > insert(const Key& k, const Value& value);
-    tuple< iterator, bool > insert(const tuple< const Key, Value >& v);
-    tuple< iterator, bool > insert(tuple< const Key, Value >&& v);
+    tuple< iterator, bool > insert(KEY&& k, VALUE&& value);
+    tuple< iterator, bool > insert(KEY&& k, const VALUE& value);
+    tuple< iterator, bool > insert(const KEY& k, VALUE&& value);
+    tuple< iterator, bool > insert(const KEY& k, const VALUE& value);
+    tuple< iterator, bool > insert(const tuple< const KEY, VALUE >& v);
+    tuple< iterator, bool > insert(tuple< const KEY, VALUE >&& v);
 
     void swap(hashmap& other);
 };
 
-template < typename Key, typename Value, typename Hash = hash< Key > >
-void swap(hashmap< Key, Value, Hash >& a, hashmap< Key, Value, Hash >& b)
+template < typename KEY, typename VALUE, typename HASH = hash< KEY > >
+void swap(hashmap< KEY, VALUE, HASH >& a, hashmap< KEY, VALUE, HASH >& b)
 {
     a.swap(b);
 }

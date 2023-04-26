@@ -10,24 +10,24 @@ namespace minitl {
 template < typename T >
 template < typename POLICY >
 class vector< T >::base_iterator
-    : public random_access_iterator< T, typename vector< T >::difference_type >
+    : public random_access_iterator< T, typename vector< T >::difference_t >
 {
     friend class vector< T >;
 
 public:
-    typedef random_access_iterator_tag       iterator_category;
-    typedef typename POLICY::value_type      value_type;
-    typedef typename POLICY::pointer         pointer;
-    typedef typename POLICY::reference       reference;
-    typedef typename POLICY::size_type       size_type;
-    typedef typename POLICY::difference_type difference_type;
+    typedef random_access_iterator_tag    iterator_category_t;
+    typedef typename POLICY::value_t      value_t;
+    typedef typename POLICY::pointer_t    pointer_t;
+    typedef typename POLICY::reference_t  reference_t;
+    typedef typename POLICY::size_t       size_t;
+    typedef typename POLICY::difference_t difference_t;
 
 public:
-    const vector< T >*       m_owner;
-    typename POLICY::pointer m_iterator;
+    const vector< T >*         m_owner;
+    typename POLICY::pointer_t m_iterator;
 
 private:
-    base_iterator(const vector< T >* owner, typename POLICY::pointer it)
+    base_iterator(const vector< T >* owner, typename POLICY::pointer_t it)
         : m_owner(owner)
         , m_iterator(it)
     {
@@ -62,15 +62,15 @@ public:
     base_iterator< POLICY >& operator=(const base_iterator< POLICY >& other)     = default;
     base_iterator< POLICY >& operator=(base_iterator< POLICY >&& other) noexcept = default;
 
-    base_iterator< POLICY > operator+(typename POLICY::difference_type offset) const
+    base_iterator< POLICY > operator+(typename POLICY::difference_t offset) const
     {
         return base_iterator< POLICY >(m_owner, POLICY::advance(m_iterator, offset));
     }
-    base_iterator< POLICY > operator-(typename POLICY::difference_type offset) const
+    base_iterator< POLICY > operator-(typename POLICY::difference_t offset) const
     {
         return base_iterator< POLICY >(m_owner, POLICY::advance(m_iterator, -offset));
     }
-    typename POLICY::difference_type operator-(const base_iterator< POLICY >& other) const
+    typename POLICY::difference_t operator-(const base_iterator< POLICY >& other) const
     {
         if(motor_assert(m_owner == other.m_owner,
                         "cannot calculate distance between unrelated iterators"))
@@ -89,7 +89,7 @@ public:
         m_iterator                = POLICY::advance(m_iterator, 1);
         return p;
     }
-    base_iterator< POLICY >& operator+=(typename POLICY::difference_type size)
+    base_iterator< POLICY >& operator+=(typename POLICY::difference_t size)
     {
         m_iterator = POLICY::advance(m_iterator, size);
         return *this;
@@ -105,17 +105,17 @@ public:
         m_iterator                = POLICY::advance(m_iterator, -1);
         return p;
     }
-    base_iterator< POLICY >& operator-=(typename POLICY::difference_type size)
+    base_iterator< POLICY >& operator-=(typename POLICY::difference_t size)
     {
         m_iterator = POLICY::advance(m_iterator, -size);
         return *this;
     }
-    typename POLICY::pointer operator->() const
+    typename POLICY::pointer_t operator->() const
     {
         return m_iterator;
     }
 
-    typename POLICY::reference operator*() const
+    typename POLICY::reference_t operator*() const
     {
         return *m_iterator;
     }
@@ -124,16 +124,16 @@ public:
 template < typename T >
 struct vector< T >::iterator_policy
 {
-    typedef typename vector< T >::value_type      value_type;
-    typedef typename vector< T >::pointer         pointer;
-    typedef typename vector< T >::reference       reference;
-    typedef typename vector< T >::size_type       size_type;
-    typedef typename vector< T >::difference_type difference_type;
-    static pointer                                advance(pointer i, ptrdiff_t offset)
+    typedef typename vector< T >::value_t      value_t;
+    typedef typename vector< T >::pointer_t    pointer_t;
+    typedef typename vector< T >::reference_t  reference_t;
+    typedef typename vector< T >::size_t       size_t;
+    typedef typename vector< T >::difference_t difference_t;
+    static pointer_t                           advance(pointer_t i, ptrdiff_t offset)
     {
         return minitl::advance(i, offset);
     }
-    static difference_type distance(pointer begin, pointer end)
+    static difference_t distance(pointer_t begin, pointer_t end)
     {
         return minitl::distance(begin, end);
     }
@@ -142,16 +142,16 @@ struct vector< T >::iterator_policy
 template < typename T >
 struct vector< T >::const_iterator_policy
 {
-    typedef typename vector< T >::value_type const value_type;
-    typedef typename vector< T >::const_pointer    pointer;
-    typedef typename vector< T >::const_reference  reference;
-    typedef typename vector< T >::size_type        size_type;
-    typedef typename vector< T >::difference_type  difference_type;
-    static pointer                                 advance(pointer i, ptrdiff_t offset)
+    typedef typename vector< T >::value_t const     value_t;
+    typedef typename vector< T >::const_pointer_t   pointer_t;
+    typedef typename vector< T >::const_reference_t reference_t;
+    typedef typename vector< T >::size_t            size_t;
+    typedef typename vector< T >::difference_t      difference_t;
+    static pointer_t                                advance(pointer_t i, ptrdiff_t offset)
     {
         return minitl::advance(i, offset);
     }
-    static difference_type distance(pointer begin, pointer end)
+    static difference_t distance(pointer_t begin, pointer_t end)
     {
         return minitl::distance(begin, end);
     }
@@ -160,16 +160,16 @@ struct vector< T >::const_iterator_policy
 template < typename T >
 struct vector< T >::reverse_iterator_policy
 {
-    typedef typename vector< T >::value_type      value_type;
-    typedef typename vector< T >::pointer         pointer;
-    typedef typename vector< T >::reference       reference;
-    typedef typename vector< T >::size_type       size_type;
-    typedef typename vector< T >::difference_type difference_type;
-    static pointer                                advance(pointer i, ptrdiff_t offset)
+    typedef typename vector< T >::value_t      value_t;
+    typedef typename vector< T >::pointer_t    pointer_t;
+    typedef typename vector< T >::reference_t  reference_t;
+    typedef typename vector< T >::size_t       size_t;
+    typedef typename vector< T >::difference_t difference_t;
+    static pointer_t                           advance(pointer_t i, ptrdiff_t offset)
     {
         return minitl::advance(i, -offset);
     }
-    static difference_type distance(pointer begin, pointer end)
+    static difference_t distance(pointer_t begin, pointer_t end)
     {
         return minitl::distance(end, begin);
     }
@@ -178,24 +178,24 @@ struct vector< T >::reverse_iterator_policy
 template < typename T >
 struct vector< T >::const_reverse_iterator_policy
 {
-    typedef typename vector< T >::value_type const value_type;
-    typedef typename vector< T >::const_pointer    pointer;
-    typedef typename vector< T >::const_reference  reference;
-    typedef typename vector< T >::size_type        size_type;
-    typedef typename vector< T >::difference_type  difference_type;
-    static pointer                                 advance(pointer i, ptrdiff_t offset)
+    typedef typename vector< T >::value_t const     value_t;
+    typedef typename vector< T >::const_pointer_t   pointer_t;
+    typedef typename vector< T >::const_reference_t reference_t;
+    typedef typename vector< T >::size_t            size_t;
+    typedef typename vector< T >::difference_t      difference_t;
+    static pointer_t                                advance(pointer_t i, ptrdiff_t offset)
     {
         return minitl::advance(i, -offset);
     }
-    static difference_type distance(pointer begin, pointer end)
+    static difference_t distance(pointer_t begin, pointer_t end)
     {
         return minitl::distance(end, begin);
     }
 };
 
 template < typename T >
-vector< T >::vector(Allocator& allocator, size_type initialCapacity)
-    : m_memory(allocator, initialCapacity)
+vector< T >::vector(allocator& allocator, size_t initial_capacity)
+    : m_memory(allocator, initial_capacity)
     , m_end(m_memory)
 {
 }
@@ -218,7 +218,7 @@ vector< T >::vector(vector&& other) noexcept
 
 template < typename T >
 template < typename ITERATOR >
-vector< T >::vector(Allocator& allocator, ITERATOR first, ITERATOR last)
+vector< T >::vector(allocator& allocator, ITERATOR first, ITERATOR last)
     : m_memory(allocator, minitl::distance(first, last))
     , m_end(m_memory)
 {
@@ -239,7 +239,7 @@ vector< T >& vector< T >::operator=(const vector< T >& other)
 template < typename T >
 vector< T >::~vector()
 {
-    for(const_pointer t = m_end; t > m_memory; t = advance(t, -1))
+    for(const_pointer_t t = m_end; t > m_memory; t = advance(t, -1))
     {
         advance(t, -1)->~T();
     }
@@ -294,7 +294,7 @@ typename vector< T >::const_reverse_iterator vector< T >::rend() const
 }
 
 template < typename T >
-typename vector< T >::size_type vector< T >::size() const
+typename vector< T >::size_t vector< T >::size() const
 {
     return distance(m_memory.data(), m_end);
 }
@@ -306,19 +306,19 @@ bool vector< T >::empty() const
 }
 
 template < typename T >
-typename vector< T >::reference vector< T >::operator[](size_type i)
+typename vector< T >::reference_t vector< T >::operator[](size_t i)
 {
     return *advance(m_memory.data(), i);
 }
 
 template < typename T >
-typename vector< T >::const_reference vector< T >::operator[](size_type i) const
+typename vector< T >::const_reference_t vector< T >::operator[](size_t i) const
 {
     return *advance(m_memory.data(), i);
 }
 
 template < typename T >
-void vector< T >::push_back(const_reference r)
+void vector< T >::push_back(const_reference_t r)
 {
     ensure(size() + 1);
     new((void*)m_end) T(r);
@@ -326,7 +326,7 @@ void vector< T >::push_back(const_reference r)
 }
 
 template < typename T >
-void vector< T >::push_back(rvalue_reference r)
+void vector< T >::push_back(rvalue_reference_t r)
 {
     ensure(size() + 1);
     new((void*)m_end) T(minitl::move(r));
@@ -337,7 +337,7 @@ template < typename T >
 template < typename ITERATOR >
 void vector< T >::push_back(ITERATOR first, ITERATOR last)
 {
-    size_type count = minitl::distance(first, last);
+    size_t count = minitl::distance(first, last);
     ensure(size() + count);
     while(first != last)
     {
@@ -348,7 +348,7 @@ void vector< T >::push_back(ITERATOR first, ITERATOR last)
 }
 
 template < typename T >
-typename vector< T >::iterator vector< T >::insert(const_iterator location, const_reference r)
+typename vector< T >::iterator vector< T >::insert(const_iterator location, const_reference_t r)
 {
     iterator it = ensure(location, 1);
     new(it.m_iterator) T(r);
@@ -356,7 +356,7 @@ typename vector< T >::iterator vector< T >::insert(const_iterator location, cons
 }
 
 template < typename T >
-typename vector< T >::iterator vector< T >::insert(const_iterator location, rvalue_reference r)
+typename vector< T >::iterator vector< T >::insert(const_iterator location, rvalue_reference_t r)
 {
     iterator it = ensure(location, 1);
     new(it.m_iterator) T(minitl::move(r));
@@ -382,8 +382,8 @@ typename vector< T >::iterator vector< T >::insert(const_iterator location, ITER
 }
 
 template < typename T >
-template < class... Args >
-typename vector< T >::iterator vector< T >::emplace(const_iterator location, Args&&... args)
+template < class... ARGS >
+typename vector< T >::iterator vector< T >::emplace(const_iterator location, ARGS&&... args)
 {
     if(motor_assert(location.m_owner == this,
                     "can't emplace at iterator that is not pointing on current vector"))
@@ -391,16 +391,16 @@ typename vector< T >::iterator vector< T >::emplace(const_iterator location, Arg
             this, advance_ptr(m_memory.data(), distance(m_memory.data(), location.m_iterator)));
 
     iterator result = ensure(location, 1);
-    new(result.m_iterator) T(minitl::forward< Args >(args)...);
+    new(result.m_iterator) T(minitl::forward< ARGS >(args)...);
     return result;
 }
 
 template < typename T >
-template < class... Args >
-typename vector< T >::iterator vector< T >::emplace_back(Args&&... args)
+template < class... ARGS >
+typename vector< T >::iterator vector< T >::emplace_back(ARGS&&... args)
 {
     ensure(size() + 1);
-    new((void*)m_end) T(minitl::forward< Args >(args)...);
+    new((void*)m_end) T(minitl::forward< ARGS >(args)...);
     iterator result(this, m_end);
     m_end = advance_ptr(m_end, 1);
     return result;
@@ -440,12 +440,12 @@ typename vector< T >::iterator vector< T >::erase(iterator first, iterator last)
                            first.m_iterator, last.m_iterator))
         return first;
 
-    for(pointer i = first.m_iterator; i != last.m_iterator; i = advance_ptr(i, 1))
+    for(pointer_t i = first.m_iterator; i != last.m_iterator; i = advance_ptr(i, 1))
     {
         i->~T();
     }
-    pointer t  = first.m_iterator;
-    pointer t2 = last.m_iterator;
+    pointer_t t  = first.m_iterator;
+    pointer_t t2 = last.m_iterator;
     for(; t2 != m_end; t = advance(t, 1), t2 = advance_ptr(t2, 1))
     {
         new((void*)t) T(minitl::move(*t2));
@@ -456,49 +456,49 @@ typename vector< T >::iterator vector< T >::erase(iterator first, iterator last)
 }
 
 template < typename T >
-typename vector< T >::reference vector< T >::front()
+typename vector< T >::reference_t vector< T >::front()
 {
     motor_assert(!empty(), "getting front of empty vector");
     return *m_memory;
 }
 
 template < typename T >
-typename vector< T >::reference vector< T >::back()
+typename vector< T >::reference_t vector< T >::back()
 {
     motor_assert(!empty(), "getting back of empty vector");
     return *advance_ptr(m_end, -1);
 }
 
 template < typename T >
-typename vector< T >::const_reference vector< T >::front() const
+typename vector< T >::const_reference_t vector< T >::front() const
 {
     motor_assert(!empty(), "getting front of empty vector");
     return *m_memory;
 }
 
 template < typename T >
-typename vector< T >::const_reference vector< T >::back() const
+typename vector< T >::const_reference_t vector< T >::back() const
 {
     motor_assert(!empty(), "getting front of empty vector");
     return *advance_ptr(m_end, -1);
 }
 
 template < typename T >
-void vector< T >::resize(size_type size)
+void vector< T >::resize(size_t size)
 {
-    size_type s = distance(m_memory.data(), m_end);
+    size_t s = distance(m_memory.data(), m_end);
     if(size > s)
     {
         ensure(size);
-        pointer newEnd = advance_ptr(m_memory.data(), size);
-        for(pointer t = m_end; t != newEnd; ++t)
+        pointer_t newEnd = advance_ptr(m_memory.data(), size);
+        for(pointer_t t = m_end; t != newEnd; ++t)
             new((void*)t) T;
         m_end = newEnd;
     }
     else
     {
-        pointer newEnd = advance_ptr(m_memory.data(), size);
-        for(pointer t = newEnd; t != m_end; ++t)
+        pointer_t newEnd = advance_ptr(m_memory.data(), size);
+        for(pointer_t t = newEnd; t != m_end; ++t)
             t->~T();
         m_end = newEnd;
     }
@@ -507,7 +507,7 @@ void vector< T >::resize(size_type size)
 template < typename T >
 void vector< T >::clear()
 {
-    for(const_pointer t = m_end; t > m_memory; t = advance(t, -1))
+    for(const_pointer_t t = m_end; t > m_memory; t = advance(t, -1))
     {
         advance(t, -1)->~T();
     }
@@ -515,7 +515,7 @@ void vector< T >::clear()
 }
 
 template < typename T >
-void vector< T >::ensure(size_type size)
+void vector< T >::ensure(size_t size)
 {
     if(size > m_memory.count())
     {
@@ -530,9 +530,9 @@ void vector< T >::ensure(size_type size)
 }
 
 template < typename T >
-typename vector< T >::iterator vector< T >::ensure(const_iterator location, size_type size)
+typename vector< T >::iterator vector< T >::ensure(const_iterator location, size_t size)
 {
-    size_type object_count = size;
+    size_t object_count = size;
     size += distance(m_memory.data(), m_end);
     if(size > m_memory.count())
     {
@@ -543,9 +543,9 @@ typename vector< T >::iterator vector< T >::ensure(const_iterator location, size
         size = size >> 16 | size;
         size++;
 
-        Allocator::Block< T > block(m_memory.arena(), size);
-        pointer               t  = block;
-        pointer               t2 = m_memory;
+        allocator::block< T > block(m_memory.arena(), size);
+        pointer_t             t  = block;
+        pointer_t             t2 = m_memory;
         for(; t2 != location.m_iterator; t = advance_ptr(t, 1), t2 = advance_ptr(t2, 1))
         {
             new((void*)t) T(minitl::move(*t2));
@@ -565,8 +565,8 @@ typename vector< T >::iterator vector< T >::ensure(const_iterator location, size
     }
     else
     {
-        const_pointer end = advance_ptr(location.m_iterator, -1);
-        for(pointer t = advance_ptr(m_end, object_count - 1), t2 = advance_ptr(m_end, -1);
+        const_pointer_t end = advance_ptr(location.m_iterator, -1);
+        for(pointer_t t = advance_ptr(m_end, object_count - 1), t2 = advance_ptr(m_end, -1);
             t2 != end; t = advance_ptr(t, -1), t2 = advance_ptr(t2, -1))
         {
             new((void*)t) T(minitl::move(*t2));
@@ -579,13 +579,13 @@ typename vector< T >::iterator vector< T >::ensure(const_iterator location, size
 }
 
 template < typename T >
-void vector< T >::reserve(size_type size)
+void vector< T >::reserve(size_t size)
 {
     if(size > m_memory.count())
     {
-        Allocator::Block< T > block(m_memory.arena(), size);
-        pointer               t = block;
-        for(pointer t2 = m_memory; t2 != m_end; t = advance_ptr(t, 1), t2 = advance_ptr(t2, 1))
+        allocator::block< T > block(m_memory.arena(), size);
+        pointer_t             t = block;
+        for(pointer_t t2 = m_memory; t2 != m_end; t = advance_ptr(t, 1), t2 = advance_ptr(t2, 1))
         {
             new((void*)t) T(minitl::move(*t2));
             t2->~T();

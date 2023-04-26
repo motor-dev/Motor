@@ -7,25 +7,25 @@
 
 namespace Motor { namespace Debug {
 
-minitl::AssertionResult AssertionCallback(const char* file, int line, const char* expr,
-                                          const char* message);
+minitl::assertion_result assertionCallback(const char* file, int line, const char* expr,
+                                           const char* message);
 class AssertSetup : public minitl::refcountable
 {
 private:
-    minitl::AssertionCallback_t m_previousAssertionCallback;
+    minitl::assertion_callback_t m_previousAssertionCallback;
 
 public:
     AssertSetup(const AssertSetup& other)            = delete;
     AssertSetup& operator=(const AssertSetup& other) = delete;
 
     explicit AssertSetup(const Motor::Plugin::Context& /*context*/)
-        : m_previousAssertionCallback(minitl::setAssertionCallback(&AssertionCallback))
+        : m_previousAssertionCallback(minitl::set_assertion_callback(&assertionCallback))
     {
         motor_debug(Log::system(), "installed assert callback");
     }
     ~AssertSetup() override
     {
-        minitl::setAssertionCallback(m_previousAssertionCallback);
+        minitl::set_assertion_callback(m_previousAssertionCallback);
     }
 };
 

@@ -40,7 +40,7 @@ static HMODULE getPythonModuleHandle()
             motor_error(Log::python(), "Could not locate python: EnumProcessModules failed");
             return (HMODULE) nullptr;
         }
-        minitl::Allocator::Block< HMODULE > modules(Arena::temporary(), needed / sizeof(HMODULE));
+        minitl::allocator::block< HMODULE > modules(Arena::temporary(), needed / sizeof(HMODULE));
         if(!(*EnumProcessModules)(GetCurrentProcess(), modules.data(), (DWORD)modules.byteCount(),
                                   &needed))
         {

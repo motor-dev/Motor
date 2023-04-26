@@ -30,14 +30,14 @@ private:
     struct const_reverse_iterator_policy;
 
 public:
-    typedef T                       value_type;
-    typedef T*                      pointer;
-    typedef T&                      reference;
-    typedef const T*                const_pointer;
-    typedef const T&                const_reference;
-    typedef T&&                     rvalue_reference;
-    typedef minitl::size_type       size_type;
-    typedef minitl::difference_type difference_type;
+    typedef T                    value_t;
+    typedef T*                   pointer_t;
+    typedef T&                   reference_t;
+    typedef const T*             const_pointer_t;
+    typedef const T&             const_reference_t;
+    typedef T&&                  rvalue_reference_t;
+    typedef minitl::size_t       size_t;
+    typedef minitl::difference_t difference_t;
 
 public:
     typedef base_iterator< iterator_policy >               iterator;
@@ -46,20 +46,20 @@ public:
     typedef base_iterator< const_reverse_iterator_policy > const_reverse_iterator;
 
 private:
-    Allocator::Block< T > m_memory;
+    allocator::block< T > m_memory;
     T*                    m_end;
 
 private:
-    void     ensure(size_type size);
-    iterator ensure(const_iterator location, size_type size);
+    void     ensure(size_t size);
+    iterator ensure(const_iterator location, size_t size);
 
 public:
-    explicit vector(Allocator& allocator, size_type initialCapacity = 0);
+    explicit vector(allocator& allocator, size_t initial_capacity = 0);
     vector(const vector< T >& other);
     vector(vector< T >&& other) noexcept;
     vector& operator=(const vector< T >& other);
     template < typename ITERATOR >
-    vector(Allocator& allocator, ITERATOR first, ITERATOR last);
+    vector(allocator& allocator, ITERATOR first, ITERATOR last);
     ~vector();
 
     iterator               begin();
@@ -71,38 +71,38 @@ public:
     const_reverse_iterator rbegin() const;
     const_reverse_iterator rend() const;
 
-    size_type size() const;
-    bool      empty() const;
+    size_t size() const;
+    bool   empty() const;
 
-    reference       operator[](size_type i);
-    const_reference operator[](size_type i) const;
+    reference_t       operator[](size_t i);
+    const_reference_t operator[](size_t i) const;
 
-    void push_back(const_reference r);
-    void push_back(rvalue_reference r);
+    void push_back(const_reference_t r);
+    void push_back(rvalue_reference_t r);
     template < typename ITERATOR >
     void push_back(ITERATOR first, ITERATOR last);
     void pop_back();
 
-    iterator insert(const_iterator location, const_reference r);
-    iterator insert(const_iterator location, rvalue_reference r);
+    iterator insert(const_iterator location, const_reference_t r);
+    iterator insert(const_iterator location, rvalue_reference_t r);
     template < typename ITERATOR >
     iterator insert(const_iterator location, ITERATOR first, ITERATOR last);
 
-    template < class... Args >
-    iterator emplace(const_iterator location, Args&&... args);
-    template < class... Args >
-    iterator emplace_back(Args&&... args);
+    template < class... ARGS >
+    iterator emplace(const_iterator location, ARGS&&... args);
+    template < class... ARGS >
+    iterator emplace_back(ARGS&&... args);
 
     iterator erase(iterator it);
     iterator erase(iterator first, iterator last);
 
-    reference       front();
-    reference       back();
-    const_reference front() const;
-    const_reference back() const;
+    reference_t       front();
+    reference_t       back();
+    const_reference_t front() const;
+    const_reference_t back() const;
 
-    void reserve(size_type size);
-    void resize(size_type size);
+    void reserve(size_t size);
+    void resize(size_t size);
     void clear();
 };
 

@@ -9,7 +9,7 @@
 namespace minitl {
 
 template < typename T >
-array< T >::array(Allocator& allocator, u32 size) : m_array(allocator, size)
+array< T >::array(allocator& allocator, u32 size) : m_array(allocator, size)
 {
     for(u32 i = 0; i < size; ++i)
     {
@@ -19,7 +19,7 @@ array< T >::array(Allocator& allocator, u32 size) : m_array(allocator, size)
 
 template < typename T >
 template < typename ITERATOR >
-array< T >::array(Allocator& allocator, ITERATOR begin, ITERATOR end)
+array< T >::array(allocator& allocator, ITERATOR begin, ITERATOR end)
     : m_array(allocator, distance(begin, end))
 {
     for(int i = 0; begin != end; ++begin, ++i)

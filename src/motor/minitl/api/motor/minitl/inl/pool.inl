@@ -5,7 +5,7 @@
 namespace minitl {
 
 template < typename T >
-pool< T >::pool(Allocator& allocator, u64 capacity, u64 alignment)
+pool< T >::pool(allocator& allocator, u64 capacity, u64 alignment)
     : m_pool(allocator, capacity, alignment)
     , m_end(&m_pool[capacity])
 {

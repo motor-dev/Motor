@@ -280,8 +280,8 @@ constexpr tuple< T... >::tuple(const T&... args) : details::tuple_helper< 0, T..
 }
 
 template < typename... T >
-template < typename... Args >
-constexpr tuple< T... >::tuple(Args&&... args) : details::tuple_helper< 0, T... >(args...)
+template < typename... ARGS >
+constexpr tuple< T... >::tuple(ARGS&&... args) : details::tuple_helper< 0, T... >(args...)
 {
 }
 

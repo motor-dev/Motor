@@ -9,8 +9,8 @@
 //! @{
 namespace minitl {
 
-typedef size_t    size_type;
-typedef ptrdiff_t difference_type;
+typedef ::size_t  size_t;
+typedef ptrdiff_t difference_t;
 
 struct input_iterator_tag
 {
@@ -25,22 +25,22 @@ struct random_access_iterator_tag : public bidirectional_iterator_tag
 {
 };
 
-template < typename T, typename DIFF = ::minitl::difference_type >
+template < typename T, typename DIFF = ::minitl::difference_t >
 struct input_iterator
 {
 };
 
-template < typename T, typename DIFF = ::minitl::difference_type >
+template < typename T, typename DIFF = ::minitl::difference_t >
 struct forward_iterator : public input_iterator< T, DIFF >
 {
 };
 
-template < typename T, typename DIFF = ::minitl::difference_type >
+template < typename T, typename DIFF = ::minitl::difference_t >
 struct bidirectional_iterator : public forward_iterator< T, DIFF >
 {
 };
 
-template < typename T, typename DIFF = ::minitl::difference_type >
+template < typename T, typename DIFF = ::minitl::difference_t >
 struct random_access_iterator : public bidirectional_iterator< T, DIFF >
 {
 };
@@ -48,32 +48,32 @@ struct random_access_iterator : public bidirectional_iterator< T, DIFF >
 template < typename ITERATOR >
 struct iterator_traits
 {
-    typedef typename ITERATOR::iterator_category iterator_category;
-    typedef typename ITERATOR::value_type        value_type;
-    typedef typename ITERATOR::pointer           pointer;
-    typedef typename ITERATOR::reference         reference;
-    typedef typename ITERATOR::size_type         size_type;
-    typedef typename ITERATOR::difference_type   difference_type;
+    typedef typename ITERATOR::iterator_category_t iterator_category_t;
+    typedef typename ITERATOR::value_t             value_t;
+    typedef typename ITERATOR::pointer_t           pointer_t;
+    typedef typename ITERATOR::reference_t         reference_t;
+    typedef typename ITERATOR::size_t              size_t;
+    typedef typename ITERATOR::difference_t        difference_t;
 };
 template < typename T >
 struct iterator_traits< T* >
 {
-    typedef random_access_iterator_tag iterator_category;
-    typedef T                          value_type;
-    typedef T*                         pointer;
-    typedef T&                         reference;
-    typedef minitl::size_type          size_type;
-    typedef minitl::difference_type    difference_type;
+    typedef random_access_iterator_tag iterator_category_t;
+    typedef T                          value_t;
+    typedef T*                         pointer_t;
+    typedef T&                         reference_t;
+    typedef minitl::size_t             size_t;
+    typedef minitl::difference_t       difference_t;
 };
 template < typename T >
 struct iterator_traits< const T* >
 {
-    typedef random_access_iterator_tag iterator_category;
-    typedef const T                    value_type;
-    typedef const T*                   pointer;
-    typedef const T&                   reference;
-    typedef minitl::size_type          size_type;
-    typedef minitl::difference_type    difference_type;
+    typedef random_access_iterator_tag iterator_category_t;
+    typedef const T                    value_t;
+    typedef const T*                   pointer_t;
+    typedef const T&                   reference_t;
+    typedef minitl::size_t             size_t;
+    typedef minitl::difference_t       difference_t;
 };
 
 template < typename ITERATOR >
@@ -81,33 +81,33 @@ static typename iterator_traits< ITERATOR >::iterator_category
 iterator_category(const ITERATOR& it);
 
 template < typename ITERATOR >
-static typename iterator_traits< ITERATOR >::difference_type distance(const ITERATOR& first,
-                                                                      const ITERATOR& last);
+static typename iterator_traits< ITERATOR >::difference_t distance(const ITERATOR& first,
+                                                                   const ITERATOR& last);
 
 template < typename ITERATOR >
-static ITERATOR advance(const ITERATOR&                                       it,
-                        typename iterator_traits< ITERATOR >::difference_type offset);
+static ITERATOR advance(const ITERATOR&                                    it,
+                        typename iterator_traits< ITERATOR >::difference_t offset);
 
-template < typename Container >
-typename Container::iterator begin(Container& c)
+template < typename CONTAINER >
+typename CONTAINER::iterator begin(CONTAINER& c)
 {
     return c.begin();
 }
 
-template < typename Container >
-typename Container::const_iterator begin(const Container& c)
+template < typename CONTAINER >
+typename CONTAINER::const_iterator begin(const CONTAINER& c)
 {
     return c.begin();
 }
 
-template < typename Container >
-typename Container::iterator end(Container& c)
+template < typename CONTAINER >
+typename CONTAINER::iterator end(CONTAINER& c)
 {
     return c.end();
 }
 
-template < typename Container >
-typename Container::const_iterator end(const Container& c)
+template < typename CONTAINER >
+typename CONTAINER::const_iterator end(const CONTAINER& c)
 {
     return c.end();
 }

@@ -21,9 +21,9 @@ static inline bool operator==(const MD5& hash1, const MD5& hash2)
 motor_api(CORE) MD5 digest(const void* data, u64 size);
 
 template < typename T >
-static inline MD5 digest(const minitl::Allocator::Block< T >& block)
+static inline MD5 digest(const minitl::allocator::block< T >& block)
 {
-    return digest(block.data(), block.byteCount());
+    return digest(block.data(), block.byte_count());
 }
 
 motor_api(CORE) u32 format_length(const MD5& s, const minitl::format_options& options);

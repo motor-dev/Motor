@@ -163,7 +163,7 @@ bool Object::getPropertyType(DbContext& context, istring propertyName, Type& pro
 ref< Node > Object::getProperty(DbContext& context, const inamespace& propertyName) const
 {
     motor_forceuse(context);
-    return ref< Property >::create(Arena::general(), refFromThis< Object >(), propertyName);
+    return ref< Property >::create(Arena::general(), ref_from_this< Object >(), propertyName);
 }
 
 weak< const Parameter > Object::getParameter(istring parameterName) const

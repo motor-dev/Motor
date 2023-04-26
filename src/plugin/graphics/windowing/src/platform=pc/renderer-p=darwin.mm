@@ -54,7 +54,7 @@ void Renderer::PlatformRenderer::flush()
     }
 }
 
-Renderer::Renderer(minitl::Allocator& arena, const weak< Resource::ResourceManager >& manager)
+Renderer::Renderer(minitl::allocator& arena, const weak< Resource::ResourceManager >& manager)
     : IRenderer(arena, manager, Scheduler::MainThread)
     , m_platformRenderer(scoped< PlatformRenderer >::create(arena))
 {

@@ -6,7 +6,7 @@
 
 namespace Motor { namespace Arena {
 
-static minitl::Allocator& bullet()
+static minitl::allocator& bullet()
 {
     return general();
 }

@@ -8,7 +8,7 @@
 
 namespace Motor { namespace Meta {
 
-ref< AST::Node > parseValue(minitl::Allocator& arena, AST::MessageList& errors,
+ref< AST::Node > parseValue(minitl::allocator& arena, AST::MessageList& errors,
                             const char* strBegin, const char* strEnd, u32 initialLine,
                             u32 initialColumn)
 {

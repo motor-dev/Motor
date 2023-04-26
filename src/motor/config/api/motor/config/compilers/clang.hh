@@ -32,8 +32,25 @@
 #    define motor_pause()
 #endif
 
-#include <cstdint>
-#include <cstdlib>
+#ifdef __clang_analyzer__
+typedef char           i8;
+typedef short          i16;
+typedef int            i32;
+typedef unsigned char  u8;
+typedef unsigned short u16;
+typedef unsigned int   u32;
+typedef u8             byte;
+#    if __WORDSIZE == 64
+typedef signed long int   i64;
+typedef unsigned long int u64;
+#    else
+__extension__ typedef signed long long int   i64;
+__extension__ typedef unsigned long long int u64;
+#    endif
+typedef u64 size_t;
+#else
+#    include <cstdint>
+#    include <cstdlib>
 typedef int8_t   i8;
 typedef int16_t  i16;
 typedef int32_t  i32;
@@ -43,6 +60,7 @@ typedef uint16_t u16;
 typedef uint32_t u32;
 typedef uint64_t u64;
 typedef u8       byte;
+#endif
 
 #if __GXX_EXPERIMENTAL_CXX0X__
 #    define MOTOR_HAS_MOVE_SEMANTICS

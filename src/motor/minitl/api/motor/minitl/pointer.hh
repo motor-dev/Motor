@@ -8,7 +8,7 @@
 namespace minitl {
 
 template < typename U, typename T >
-static inline U* checkIsA(T* t)
+static inline U* check_is_a(T* t)
 {
     return t;
 }
@@ -16,8 +16,7 @@ static inline U* checkIsA(T* t)
 template < typename T >
 static inline void checked_destroy(const T* ptr)
 {
-    char typeMustBeComplete[sizeof(T)];
-    (void)typeMustBeComplete;
+    static_assert(sizeof(T) >= sizeof(char), "type must be complete");
     if(ptr)
     {
         ptr->~T();
@@ -44,7 +43,7 @@ class pointer
     friend struct formatter;
 
 private:
-    mutable Allocator* m_allocator;
+    mutable allocator* m_allocator;
 #if MOTOR_ENABLE_WEAKCHECK
     mutable i_u32 m_weakCount;
 #endif
@@ -85,7 +84,7 @@ public:  // entity behavior
     pointer& operator=(pointer&& other)      = delete;
     void     operator&() const               = delete;  // NOLINT(google-runtime-operator)
 
-private:  // friend scoped/ref
+private:                                                // friend scoped/ref
     static void* operator new(size_t size, void* where)
     {
         return ::operator new(size, where);
@@ -94,16 +93,16 @@ private:  // friend scoped/ref
 protected:
     inline void checked_delete() const
     {
-        Allocator* d = m_allocator;
+        allocator* d = m_allocator;
         checked_destroy(this);
         d->free(this);
     }
 #if MOTOR_ENABLE_WEAKCHECK
-    inline void addWeak() const
+    inline void add_weak() const
     {
         ++m_weakCount;
     }
-    inline void decWeak() const
+    inline void dec_weak() const
     {
         motor_assert(m_weakCount, "object has no weak reference; cannot dereference it again");
         --m_weakCount;
