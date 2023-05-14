@@ -7,7 +7,7 @@
 namespace Motor { namespace World {
 
 MemoryHost::MemoryHost(const SystemAllocator& pageAllocator)
-    : KernelScheduler::IMemoryHost("World")
+    : KernelScheduler::IMemoryHost(istring("World"))
     , m_allocator(pageAllocator)
 {
     motor_forceuse(m_allocator);

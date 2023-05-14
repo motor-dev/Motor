@@ -312,7 +312,7 @@ int PyMotorObject::setattr(PyObject* self, const char* name, PyObject* value)
             minitl::format<>(FMT("instance of {0} is const"), self_->value.type()));
         return -1;
     }
-    raw< const Meta::Property > prop = self_->value.type().metaclass->getProperty(name);
+    raw< const Meta::Property > prop = self_->value.type().metaclass->getProperty(istring(name));
     if(!prop)
     {
         s_library->m_PyErr_Format(
@@ -383,7 +383,7 @@ PyObject* PyMotorObject::call(PyObject* self, PyObject* args, PyObject* kwds)
     }
     else
     {
-        raw< const Meta::Method > method = v.as< raw< const Meta::Method > >();
+        auto method = v.as< raw< const Meta::Method > >();
         if(!method)
         {
             s_library->m_PyErr_Format(
@@ -450,7 +450,7 @@ static inline void unpackNumber(PyObject* arg, const Meta::Type& type, void* buf
     {
     case Meta::ClassIndex_bool:
     {
-        bool v = value ? true : false;
+        bool v = value != 0;
         new(buffer) Meta::Value(v);
         break;
     }
@@ -529,7 +529,7 @@ static inline void unpackFloat(PyObject* arg, const Meta::Type& type, void* buff
     {
     case 0:
     {
-        bool v = value != 0 ? true : false;
+        bool v = value != 0;
         new(buffer) Meta::Value(v);
         break;
     }
@@ -840,7 +840,7 @@ PyObject* PyMotorObject::dir(raw< const Meta::Class > metaclass)
 
     for(raw< const Meta::ObjectInfo > o = metaclass->objects; o; o = o->next)
     {
-        PyObject* str = fromString(o->name.c_str(), o->name.size());
+        PyObject* str = fromString(o->name.c_str(), Py_ssize_t(o->name.size()));
         if(!str)
         {
             Py_DECREF(result);
@@ -856,9 +856,9 @@ PyObject* PyMotorObject::dir(raw< const Meta::Class > metaclass)
     }
     for(raw< const Meta::Class > cls = metaclass; cls; cls = cls->parent)
     {
-        for(const auto& propertie: cls->properties)
+        for(const auto& property: cls->properties)
         {
-            PyObject* str = fromString(propertie.name.c_str(), propertie.name.size());
+            PyObject* str = fromString(property.name.c_str(), Py_ssize_t(property.name.size()));
             if(!str)
             {
                 Py_DECREF(result);
@@ -874,7 +874,7 @@ PyObject* PyMotorObject::dir(raw< const Meta::Class > metaclass)
         }
         for(const auto& method: cls->methods)
         {
-            PyObject* str = fromString(method.name.c_str(), method.name.size());
+            PyObject* str = fromString(method.name.c_str(), Py_ssize_t(method.name.size()));
             if(!str)
             {
                 Py_DECREF(result);

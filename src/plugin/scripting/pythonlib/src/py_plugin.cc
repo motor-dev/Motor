@@ -71,7 +71,7 @@ int PyMotorPlugin::init(PyObject* self, PyObject* args, PyObject* /*kwds*/)
     const char* name  = nullptr;
     if(s_library->m__PyArg_ParseTuple_SizeT(args, "s", &name))
     {
-        self_->value = Plugin::Plugin< void >(name, Plugin::Plugin< void >::Preload);
+        self_->value = Plugin::Plugin< void >(inamespace(name), Plugin::Plugin< void >::Preload);
         return 0;
     }
     else
@@ -86,7 +86,7 @@ PyObject* PyMotorPlugin::getattr(PyObject* self, const char* name)
     if(self_->value)
     {
         Meta::Value v(self_->value.pluginNamespace());
-        Meta::Value result = v[name];
+        Meta::Value result = v[istring(name)];
         return PyMotorObject::stealValue(self, result);
     }
     else

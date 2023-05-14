@@ -7,7 +7,7 @@ namespace Motor { namespace Log {
 
 weak< Logger > python()
 {
-    static weak< Logger > result = motor()->getChild("python");
+    static weak< Logger > result = motor()->getChild(istring("python"));
     return result;
 }
 

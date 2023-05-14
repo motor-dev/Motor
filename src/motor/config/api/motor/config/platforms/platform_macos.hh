@@ -10,6 +10,7 @@
 #define malloca  alloca
 #define freea(p) (void)p
 
+// NOLINTNEXTLINE(bugprone-macro-parentheses)
 #define DIRENT_H   <sys/dir.h>
 #define PLUGIN_EXT ".dylib"
 

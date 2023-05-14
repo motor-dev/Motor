@@ -107,9 +107,14 @@ class clangd(Build.BuildContext):
                                 else:
                                     bld_env = env.derive()
                                 includes, defines = gather_includes_defines(tg)
-                                bld_env.append_value('INCPATHS',
-                                                     includes + bld_env.INCLUDES + bld_env.COMPILER_INCLUDES)
-                                bld_env.append_value('DEFINES', defines)
+                                if task.__class__.__name__ in ('cxx', 'objcxx'):
+                                    bld_env.append_value('INCPATHS',
+                                                         includes + bld_env.INCLUDES + bld_env.COMPILER_CXX_INCLUDES)
+                                    bld_env.append_value('DEFINES', defines + bld_env.COMPILER_CXX_DEFINES)
+                                else:
+                                    bld_env.append_value('INCPATHS',
+                                                         includes + bld_env.INCLUDES + bld_env.COMPILER_C_INCLUDES)
+                                    bld_env.append_value('DEFINES', defines + bld_env.COMPILER_C_DEFINES)
                                 cmd = self.expand_cmd(task, bld_env)
                                 for variant in self.env.ALL_VARIANTS:
                                     vars = {'toolchain': env_name, 'optim': variant}

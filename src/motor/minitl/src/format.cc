@@ -19,93 +19,6 @@ bool invalid_format(const char* reason)
 #    error Code currently only working on little endian!
 #endif
 
-u32 format_strncpy_align_left(char* destination, const char* value, const format_options& options,
-                              u32 reserved_length, u32 maximal_length)
-{
-    if(options.width <= reserved_length)
-    {
-        // string was too big for field, no padding
-        memcpy(destination, value, maximal_length);
-    }
-    else
-    {
-        u32 remaining = maximal_length;
-        if(reserved_length <= remaining)
-        {
-            memcpy(destination, value, reserved_length);
-            remaining -= reserved_length;
-            memset(destination + reserved_length, options.fill, remaining);
-        }
-        else
-        {
-            memcpy(destination, value, remaining);
-        }
-    }
-    return maximal_length;
-}
-
-u32 format_strncpy_align_center(char* destination, const char* value, const format_options& options,
-                                u32 reserved_length, u32 maximal_length)
-{
-    if(options.width <= reserved_length)
-    {
-        // string was too big for field, copy first X bytes
-        memcpy(destination, value, maximal_length);
-    }
-    else
-    {
-        u32 padding_size = options.width - reserved_length;
-        u32 left_padding = padding_size / 2;
-        u32 remaining    = maximal_length;
-        if(left_padding <= remaining)
-        {
-            memset(destination, options.fill, left_padding);
-            remaining -= left_padding;
-            if(reserved_length <= remaining)
-            {
-                memcpy(destination + left_padding, value, reserved_length);
-                remaining -= reserved_length;
-                memset(destination + left_padding + reserved_length, options.fill, remaining);
-            }
-            else
-            {
-                memcpy(destination + left_padding, value, remaining);
-            }
-        }
-        else
-        {
-            memset(destination, options.fill, maximal_length);
-        }
-    }
-    return maximal_length;
-}
-
-u32 format_strncpy_align_right(char* destination, const char* value, const format_options& options,
-                               u32 reserved_length, u32 maximal_length)
-{
-    if(options.width <= reserved_length)
-    {
-        // string was too big for field, copy first X bytes
-        memcpy(destination, value, maximal_length);
-    }
-    else
-    {
-        u32 padding_size = options.width - reserved_length;
-        u32 remaining    = maximal_length;
-        if(padding_size <= remaining)
-        {
-            memset(destination, options.fill, padding_size);
-            remaining -= padding_size;
-            memcpy(destination + padding_size, value, remaining);
-        }
-        else
-        {
-            memset(destination, options.fill, maximal_length);
-        }
-    }
-    return maximal_length;
-}
-
 static inline u64 format_binary_8(u8 number)
 {
     u64 result = number;
@@ -122,12 +35,10 @@ static inline u64 format_binary_8(u8 number)
 }
 
 template < u32 BYTE_COUNT >
-static inline u32 format_binary_generic(char* destination, u64 number, char sign, u32 add_sign)
+static inline u32 format_binary_generic(char* destination, u64 number)
 {
     const u64 zero_string = ((u64('0') << 56) | (u64('0') << 48) | (u64('0') << 40)
                              | (u64('0') << 32) | ('0' << 24) | ('0' << 16) | ('0' << 8) | '0');
-    *destination          = sign;
-    destination += add_sign;
 
     for(u32 highest = BYTE_COUNT - 1; highest > 0; --highest)
     {
@@ -153,7 +64,7 @@ static inline u32 format_binary_generic(char* destination, u64 number, char sign
             result = format_binary_8(u8(number & 0xff));
             result += zero_string;
             memcpy(destination, &result, sizeof(result));
-            return digit_count + add_sign + 8 * highest;
+            return digit_count + 8 * highest;
         }
     }
     u64 result = format_binary_8(u8(number));
@@ -165,7 +76,7 @@ static inline u32 format_binary_generic(char* destination, u64 number, char sign
     }
     result += zero_string;
     memcpy(destination, &result, sizeof(result));
-    return digit_count + add_sign;
+    return digit_count;
 }
 
 static inline u64 format_octal_8(u32 number)
@@ -184,12 +95,10 @@ static inline u64 format_octal_8(u32 number)
 }
 
 template < u32 WORD_COUNT >
-static inline u32 format_octal_generic(char* destination, u64 number, char sign, u32 add_sign)
+static inline u32 format_octal_generic(char* destination, u64 number)
 {
     const u64 zero_string = ((u64('0') << 56) | (u64('0') << 48) | (u64('0') << 40)
                              | (u64('0') << 32) | ('0' << 24) | ('0' << 16) | ('0' << 8) | '0');
-    *destination          = sign;
-    destination += add_sign;
 
     for(u32 highest = WORD_COUNT - 1; highest > 0; --highest)
     {
@@ -215,7 +124,7 @@ static inline u32 format_octal_generic(char* destination, u64 number, char sign,
             result = format_octal_8(u32(number & 0xffffffff));
             result += zero_string;
             memcpy(destination, &result, sizeof(result));
-            return digit_count + add_sign + 8 * highest;
+            return digit_count + 8 * highest;
         }
     }
     u64 result = format_octal_8(u32(number));
@@ -227,7 +136,7 @@ static inline u32 format_octal_generic(char* destination, u64 number, char sign,
     }
     result += zero_string;
     memcpy(destination, &result, sizeof(result));
-    return digit_count + add_sign;
+    return digit_count;
 }
 
 static inline u64 format_hexadecimal_8(u32 number)
@@ -246,13 +155,10 @@ static inline u64 format_hexadecimal_8(u32 number)
 }
 
 template < u32 WORD_COUNT >
-static inline u32 format_hexadecimal_generic(char* destination, u64 number, char sign, u32 add_sign,
-                                             char a)
+static inline u32 format_hexadecimal_generic(char* destination, u64 number, char a)
 {
     const u64 zero_string = ((u64('0') << 56) | (u64('0') << 48) | (u64('0') << 40)
                              | (u64('0') << 32) | ('0' << 24) | ('0' << 16) | ('0' << 8) | '0');
-    *destination          = sign;
-    destination += add_sign;
 
     if(WORD_COUNT >= 2 && number >> 32)
     {
@@ -279,7 +185,7 @@ static inline u32 format_hexadecimal_generic(char* destination, u64 number, char
         result += zero_string;
         result += char(a - '9' - 1) * above10;
         memcpy(destination, &result, sizeof(result));
-        return digit_count + add_sign + 8;
+        return digit_count + 8;
     }
     else
     {
@@ -297,7 +203,7 @@ static inline u32 format_hexadecimal_generic(char* destination, u64 number, char
         result += zero_string;
         result += char(a - '9' - 1) * above10;
         memcpy(destination, &result, sizeof(result));
-        return digit_count + add_sign;
+        return digit_count;
     }
 }
 
@@ -321,47 +227,235 @@ static inline u64 format_decimal_8(u64 number)
     return number;
 }
 
-motor_api(MINITL) u32 format_binary(char* destination, u8 number, char sign, u32 add_sign)
+namespace binary_format {
+
+motor_api(MINITL) u32 format_arg(char* destination, i8 number, const format_options& options)
 {
-    return format_binary_generic< sizeof(u8) >(destination, number, sign, add_sign);
+    u32 negative       = u32(number < 0);
+    u32 negative_mask  = ~(negative - 1);
+    u32 add_sign       = negative | (options.sign == '+');
+    u8  negative_value = ~number + 1;
+    u8  value          = number + ((negative_value - number) & negative_mask);
+    *destination       = char('+' + (('-' - '+') & negative_mask));
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    return format_binary_generic< sizeof(u8) >(destination, value) + add_sign
+           + 2 * options.alternate;
 }
 
-motor_api(MINITL) u32 format_binary(char* destination, u16 number, char sign, u32 add_sign)
+motor_api(MINITL) u32 format_arg(char* destination, i16 number, const format_options& options)
 {
-    return format_binary_generic< sizeof(u16) >(destination, number, sign, add_sign);
+    u32 negative       = u32(number < 0);
+    u32 negative_mask  = ~(negative - 1);
+    u32 add_sign       = negative | (options.sign == '+');
+    u16 negative_value = ~number + 1;
+    u16 value          = number + ((negative_value - number) & negative_mask);
+    *destination       = char('+' + (('-' - '+') & negative_mask));
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    return format_binary_generic< sizeof(u16) >(destination, value) + add_sign
+           + 2 * options.alternate;
 }
 
-motor_api(MINITL) u32 format_binary(char* destination, u32 number, char sign, u32 add_sign)
+motor_api(MINITL) u32 format_arg(char* destination, i32 number, const format_options& options)
 {
-    return format_binary_generic< sizeof(u32) >(destination, number, sign, add_sign);
+    u32 negative       = u32(number < 0);
+    u32 negative_mask  = ~(negative - 1);
+    u32 add_sign       = negative | (options.sign == '+');
+    u32 negative_value = ~number + 1;
+    u32 value          = number + ((negative_value - number) & negative_mask);
+    *destination       = char('+' + (('-' - '+') & negative_mask));
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    *destination = char('+' + (('-' - '+') & negative_mask));
+
+    return format_binary_generic< sizeof(u32) >(destination, value) + add_sign
+           + 2 * options.alternate;
 }
 
-motor_api(MINITL) u32 format_binary(char* destination, u64 number, char sign, u32 add_sign)
+motor_api(MINITL) u32 format_arg(char* destination, i64 number, const format_options& options)
 {
-    return format_binary_generic< sizeof(u64) >(destination, number, sign, add_sign);
+    u64 negative       = u32(number < 0);
+    u64 negative_mask  = ~(negative - 1);
+    u64 add_sign       = negative | (options.sign == '+');
+    u64 negative_value = ~number + 1;
+    u64 value          = number + ((negative_value - number) & negative_mask);
+    *destination       = char('+' + (('-' - '+') & negative_mask));
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    return format_binary_generic< sizeof(u64) >(destination, value) + add_sign
+           + 2 * options.alternate;
 }
 
-motor_api(MINITL) u32 format_octal(char* destination, u8 number, char sign, u32 add_sign)
+motor_api(MINITL) u32 format_arg(char* destination, u8 number, const format_options& options)
 {
-    return format_octal_generic< 1 >(destination, number, sign, add_sign);
+    u64 add_sign = options.sign == '+';
+    *destination = '+';
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    return format_binary_generic< sizeof(u8) >(destination, number) + add_sign
+           + 2 * options.alternate;
 }
 
-motor_api(MINITL) u32 format_octal(char* destination, u16 number, char sign, u32 add_sign)
+motor_api(MINITL) u32 format_arg(char* destination, u16 number, const format_options& options)
 {
-    return format_octal_generic< 1 >(destination, number, sign, add_sign);
+    u64 add_sign = options.sign == '+';
+    *destination = '+';
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    return format_binary_generic< sizeof(u16) >(destination, number) + add_sign
+           + 2 * options.alternate;
 }
 
-motor_api(MINITL) u32 format_octal(char* destination, u32 number, char sign, u32 add_sign)
+motor_api(MINITL) u32 format_arg(char* destination, u32 number, const format_options& options)
 {
-    return format_octal_generic< 2 >(destination, number, sign, add_sign);
+    u64 add_sign = options.sign == '+';
+    *destination = '+';
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    return format_binary_generic< sizeof(u32) >(destination, number) + add_sign
+           + 2 * options.alternate;
 }
 
-motor_api(MINITL) u32 format_octal(char* destination, u64 number, char sign, u32 add_sign)
+motor_api(MINITL) u32 format_arg(char* destination, u64 number, const format_options& options)
 {
-    return format_octal_generic< 3 >(destination, number, sign, add_sign);
+    u64 add_sign = options.sign == '+';
+    *destination = '+';
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    return format_binary_generic< sizeof(u64) >(destination, number) + add_sign
+           + 2 * options.alternate;
 }
 
-motor_api(MINITL) u32 format_decimal(char* destination, u8 number, char sign, u32 add_sign)
+}  // namespace binary_format
+
+namespace octal_format {
+
+motor_api(MINITL) u32 format_arg(char* destination, i8 number, const format_options& options)
+{
+    u64 negative       = u32(number < 0);
+    u64 negative_mask  = ~(negative - 1);
+    u64 add_sign       = negative | (options.sign == '+');
+    u64 negative_value = ~number + 1;
+    u64 value          = number + ((negative_value - number) & negative_mask);
+    *destination       = char('+' + (('-' - '+') & negative_mask));
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    return format_octal_generic< 1 >(destination, value) + add_sign + options.alternate;
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, i16 number, const format_options& options)
+{
+    u64 negative       = u32(number < 0);
+    u64 negative_mask  = ~(negative - 1);
+    u64 add_sign       = negative | (options.sign == '+');
+    u64 negative_value = ~number + 1;
+    u64 value          = number + ((negative_value - number) & negative_mask);
+    *destination       = char('+' + (('-' - '+') & negative_mask));
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    return format_octal_generic< 1 >(destination, value) + add_sign + options.alternate;
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, i32 number, const format_options& options)
+{
+    u64 negative       = u32(number < 0);
+    u64 negative_mask  = ~(negative - 1);
+    u64 add_sign       = negative | (options.sign == '+');
+    u64 negative_value = ~number + 1;
+    u64 value          = number + ((negative_value - number) & negative_mask);
+    *destination       = char('+' + (('-' - '+') & negative_mask));
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    return format_octal_generic< 2 >(destination, value) + add_sign + options.alternate;
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, i64 number, const format_options& options)
+{
+    u64 negative       = u32(number < 0);
+    u64 negative_mask  = ~(negative - 1);
+    u64 add_sign       = negative | (options.sign == '+');
+    u64 negative_value = ~number + 1;
+    u64 value          = number + ((negative_value - number) & negative_mask);
+    *destination       = char('+' + (('-' - '+') & negative_mask));
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    return format_octal_generic< 3 >(destination, value) + add_sign + options.alternate;
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, u8 number, const format_options& options)
+{
+    u64 add_sign = options.sign == '+';
+    *destination = '+';
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    return format_octal_generic< 1 >(destination, number) + add_sign + options.alternate;
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, u16 number, const format_options& options)
+{
+    u64 add_sign = options.sign == '+';
+    *destination = '+';
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    return format_octal_generic< 1 >(destination, number) + add_sign + options.alternate;
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, u32 number, const format_options& options)
+{
+    u64 add_sign = options.sign == '+';
+    *destination = '+';
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    return format_octal_generic< 2 >(destination, number) + add_sign + options.alternate;
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, u64 number, const format_options& options)
+{
+    u64 add_sign = options.sign == '+';
+    *destination = '+';
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    return format_octal_generic< 3 >(destination, number) + add_sign + options.alternate;
+}
+
+}  // namespace octal_format
+
+namespace decimal_format {
+
+static inline u32 format_decimal(char* destination, u8 number, char sign, u32 add_sign)
 {
     const u32 zero_string
         = (('0' << 24) | ('0' << 16) | ('0' << 8) | '0') + char((sign - '0') & (~add_sign + 1));
@@ -377,7 +471,7 @@ motor_api(MINITL) u32 format_decimal(char* destination, u8 number, char sign, u3
     return digit_count;
 }
 
-motor_api(MINITL) u32 format_decimal(char* destination, u16 number, char sign, u32 add_sign)
+static inline u32 format_decimal(char* destination, u16 number, char sign, u32 add_sign)
 {
     const u64 zero_string = ((u64('0') << 56) | (u64('0') << 48) | (u64('0') << 40)
                              | (u64('0') << 32) | ('0' << 24) | ('0' << 16) | ('0' << 8) | '0')
@@ -408,7 +502,7 @@ motor_api(MINITL) u32 format_decimal(char* destination, u16 number, char sign, u
     return digit_count;
 }
 
-motor_api(MINITL) u32 format_decimal(char* destination, u32 number, char sign, u32 add_sign)
+static inline u32 format_decimal(char* destination, u32 number, char sign, u32 add_sign)
 {
     const u64 zero_string = (u64('0') << 56) | (u64('0') << 48) | (u64('0') << 40)
                             | (u64('0') << 32) | ('0' << 24) | ('0' << 16) | ('0' << 8) | '0';
@@ -467,7 +561,7 @@ motor_api(MINITL) u32 format_decimal(char* destination, u32 number, char sign, u
     }
 }
 
-motor_api(MINITL) u32 format_decimal(char* destination, u64 number, char sign, u32 add_sign)
+static inline u32 format_decimal(char* destination, u64 number, char sign, u32 add_sign)
 {
     const u64 zero_string      = ((u64('0') << 56) | (u64('0') << 48) | (u64('0') << 40)
                              | (u64('0') << 32) | ('0' << 24) | ('0' << 16) | ('0' << 8) | '0');
@@ -529,29 +623,265 @@ motor_api(MINITL) u32 format_decimal(char* destination, u64 number, char sign, u
     }
 }
 
-motor_api(MINITL) u32
-    format_hexadecimal(char* destination, u8 number, char sign, u32 add_sign, char a)
+motor_api(MINITL) u32 format_arg(char* destination, i8 number, const format_options& options)
 {
-    return format_hexadecimal_generic< 1 >(destination, number, sign, add_sign, a);
+    u64  negative       = u32(number < 0);
+    u64  negative_mask  = ~(negative - 1);
+    u64  add_sign       = negative | (options.sign == '+');
+    u64  negative_value = ~number + 1;
+    u64  value          = number + ((negative_value - number) & negative_mask);
+    char sign           = char('+' + (('-' - '+') & negative_mask));
+    return format_decimal(destination, value, sign, add_sign);
 }
 
-motor_api(MINITL) u32
-    format_hexadecimal(char* destination, u16 number, char sign, u32 add_sign, char a)
+motor_api(MINITL) u32 format_arg(char* destination, i16 number, const format_options& options)
 {
-    return format_hexadecimal_generic< 1 >(destination, number, sign, add_sign, a);
+    u64  negative       = u32(number < 0);
+    u64  negative_mask  = ~(negative - 1);
+    u64  add_sign       = negative | (options.sign == '+');
+    u64  negative_value = ~number + 1;
+    u64  value          = number + ((negative_value - number) & negative_mask);
+    char sign           = char('+' + (('-' - '+') & negative_mask));
+    return format_decimal(destination, value, sign, add_sign);
 }
 
-motor_api(MINITL) u32
-    format_hexadecimal(char* destination, u32 number, char sign, u32 add_sign, char a)
+motor_api(MINITL) u32 format_arg(char* destination, i32 number, const format_options& options)
 {
-    return format_hexadecimal_generic< 1 >(destination, number, sign, add_sign, a);
+    u64  negative       = u32(number < 0);
+    u64  negative_mask  = ~(negative - 1);
+    u64  add_sign       = negative | (options.sign == '+');
+    u64  negative_value = ~number + 1;
+    u64  value          = number + ((negative_value - number) & negative_mask);
+    char sign           = char('+' + (('-' - '+') & negative_mask));
+    return format_decimal(destination, value, sign, add_sign);
 }
 
-motor_api(MINITL) u32
-    format_hexadecimal(char* destination, u64 number, char sign, u32 add_sign, char a)
+motor_api(MINITL) u32 format_arg(char* destination, i64 number, const format_options& options)
 {
-    return format_hexadecimal_generic< 2 >(destination, number, sign, add_sign, a);
+    u64  negative       = u32(number < 0);
+    u64  negative_mask  = ~(negative - 1);
+    u64  add_sign       = negative | (options.sign == '+');
+    u64  negative_value = ~number + 1;
+    u64  value          = number + ((negative_value - number) & negative_mask);
+    char sign           = char('+' + (('-' - '+') & negative_mask));
+    return format_decimal(destination, value, sign, add_sign);
 }
+
+motor_api(MINITL) u32 format_arg(char* destination, u8 number, const format_options& options)
+{
+    return format_decimal(destination, number, options.sign, options.sign == '+');
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, u16 number, const format_options& options)
+{
+    return format_decimal(destination, number, options.sign, options.sign == '+');
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, u32 number, const format_options& options)
+{
+    return format_decimal(destination, number, options.sign, options.sign == '+');
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, u64 number, const format_options& options)
+{
+    return format_decimal(destination, number, options.sign, options.sign == '+');
+}
+
+}  // namespace decimal_format
+
+namespace hexadecimal_format {
+
+motor_api(MINITL) u32 format_hexadecimal_whole(char* destination, u32 number)
+{
+    const u64 zero_string = ((u64('0') << 56) | (u64('0') << 48) | (u64('0') << 40)
+                             | (u64('0') << 32) | ('0' << 24) | ('0' << 16) | ('0' << 8) | '0');
+    u64       str, above10;
+
+    str     = format_hexadecimal_8(number);
+    above10 = str + 0x0606060606060606;
+    above10 >>= 4;
+    above10 &= 0x0101010101010101;
+    str += zero_string;
+    str += char('a' - '9' - 1) * above10;
+    memcpy(destination, &str, sizeof(str));
+    return 8;
+}
+
+motor_api(MINITL) u32 format_hexadecimal_whole(char* destination, u64 number)
+{
+    const u64 zero_string = ((u64('0') << 56) | (u64('0') << 48) | (u64('0') << 40)
+                             | (u64('0') << 32) | ('0' << 24) | ('0' << 16) | ('0' << 8) | '0');
+    u64       str, above10;
+
+    str     = format_hexadecimal_8(u32(number >> 32));
+    above10 = str + 0x0606060606060606;
+    above10 >>= 4;
+    above10 &= 0x0101010101010101;
+    str += zero_string;
+    str += char('a' - '9' - 1) * above10;
+    memcpy(destination, &str, sizeof(str));
+    destination += 8;
+    str     = format_hexadecimal_8(u32(number & 0xffffffff));
+    above10 = str + 0x0606060606060606;
+    above10 >>= 4;
+    above10 &= 0x0101010101010101;
+    str += zero_string;
+    str += char('a' - '9' - 1) * above10;
+    memcpy(destination + 8, &str, sizeof(str));
+    return 16;
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, i8 number, const format_options& options)
+{
+    u64 negative       = u32(number < 0);
+    u64 negative_mask  = ~(negative - 1);
+    u64 add_sign       = negative | (options.sign == '+');
+    u64 negative_value = ~number + 1;
+    u64 value          = number + ((negative_value - number) & negative_mask);
+    *destination       = char('+' + (('-' - '+') & negative_mask));
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    char a = char('a' + options.formatter - 'x');
+    return format_hexadecimal_generic< 1 >(destination, value, a) + add_sign
+           + options.alternate * 2;
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, i16 number, const format_options& options)
+{
+    u64 negative       = u32(number < 0);
+    u64 negative_mask  = ~(negative - 1);
+    u64 add_sign       = negative | (options.sign == '+');
+    u64 negative_value = ~number + 1;
+    u64 value          = number + ((negative_value - number) & negative_mask);
+    *destination       = char('+' + (('-' - '+') & negative_mask));
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    char a = char('a' + options.formatter - 'x');
+    return format_hexadecimal_generic< 1 >(destination, value, a) + add_sign
+           + options.alternate * 2;
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, i32 number, const format_options& options)
+{
+    u64 negative       = u32(number < 0);
+    u64 negative_mask  = ~(negative - 1);
+    u64 add_sign       = negative | (options.sign == '+');
+    u64 negative_value = ~number + 1;
+    u64 value          = number + ((negative_value - number) & negative_mask);
+    *destination       = char('+' + (('-' - '+') & negative_mask));
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    char a = char('a' + options.formatter - 'x');
+    return format_hexadecimal_generic< 1 >(destination, value, a) + add_sign
+           + options.alternate * 2;
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, i64 number, const format_options& options)
+{
+    u64 negative       = u32(number < 0);
+    u64 negative_mask  = ~(negative - 1);
+    u64 add_sign       = negative | (options.sign == '+');
+    u64 negative_value = ~number + 1;
+    u64 value          = number + ((negative_value - number) & negative_mask);
+    *destination       = char('+' + (('-' - '+') & negative_mask));
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    char a = char('a' + options.formatter - 'x');
+    return format_hexadecimal_generic< 2 >(destination, value, a) + add_sign + options.alternate;
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, u8 number, const format_options& options)
+{
+    u64 add_sign = options.sign == '+';
+    *destination = '+';
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    char a = char('a' + options.formatter - 'x');
+    return options.sign + format_hexadecimal_generic< 1 >(destination, number, a) + add_sign
+           + options.alternate * 2;
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, u16 number, const format_options& options)
+{
+    u64 add_sign = options.sign == '+';
+    *destination = '+';
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    char a = char('a' + options.formatter - 'x');
+    return options.sign + format_hexadecimal_generic< 1 >(destination, number, a) + add_sign
+           + options.alternate * 2;
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, u32 number, const format_options& options)
+{
+    u64 add_sign = options.sign == '+';
+    *destination = '+';
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    char a = char('a' + options.formatter - 'x');
+    return options.sign + format_hexadecimal_generic< 1 >(destination, number, a) + add_sign
+           + options.alternate * 2;
+}
+
+motor_api(MINITL) u32 format_arg(char* destination, u64 number, const format_options& options)
+{
+    u64 add_sign = options.sign == '+';
+    *destination = '+';
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    char a = char('a' + options.formatter - 'x');
+    return options.sign + format_hexadecimal_generic< 2 >(destination, number, a) + add_sign
+           + options.alternate * 2;
+}
+
+}  // namespace hexadecimal_format
+
+namespace pointer_format {
+
+motor_api(MINITL) u32
+    format_arg(char* destination, const void* pointer, const format_options& options)
+{
+    union
+    {
+        const void* pointer;
+        u64         number;
+    } x          = {pointer};
+    u32 result   = options.alternate;
+    *destination = '@';
+    destination += result;
+#if _LP64
+    result += hexadecimal_format::format_hexadecimal_whole(destination + result, x.number);
+#else
+    result += hexadecimal_format::format_hexadecimal_whole(destination + result, u32(x.number));
+#endif
+    return result;
+}
+
+}  // namespace pointer_format
 
 namespace string_format {
 

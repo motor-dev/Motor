@@ -42,7 +42,7 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy,
                        Folder::CreatePolicy createPolicy)
     : m_path(diskpath)
     , m_handle()
-    , m_index(m_path[0] == "apk:" ? 1 : 0)
+    , m_index(m_path[0] == istring("apk:") ? 1 : 0)
     , m_watch()
 {
     if(m_index == 0)
@@ -114,8 +114,8 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
             {
                 if(d->d_name[0] == '.' && d->d_name[1] == 0) continue;
                 if(d->d_name[0] == '.' && d->d_name[1] == '.' && d->d_name[2] == 0) continue;
-                istring name = d->d_name;
-                ipath   p    = m_path;
+                auto  name = istring(d->d_name);
+                ipath p    = m_path;
                 p.push_back(name);
                 ipath::Filename filename = p.str();
                 struct stat     s

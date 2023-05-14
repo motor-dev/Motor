@@ -10,7 +10,7 @@ namespace knl {
 template < typename T >
 struct segments
 {
-    int        x;
+    int        x {};
     typedef T* iterator;
 
     __device u32 size() const

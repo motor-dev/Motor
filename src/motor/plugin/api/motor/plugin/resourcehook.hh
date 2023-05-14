@@ -15,14 +15,14 @@ private:
     ref< const RESOURCE > m_resource;
 
 public:
-    ResourceHook(ref< const RESOURCE > resource) : m_resource(resource)
+    explicit ResourceHook(ref< const RESOURCE > resource) : m_resource(resource)
     {
     }
     void onload(const Context& context)
     {
         context.resourceManager->load(m_resource);
     }
-    void onunload(weak< Resource::ResourceManager > manager)
+    void onunload(const weak< Resource::ResourceManager >& manager)
     {
         manager->unload(m_resource);
     }

@@ -7,7 +7,7 @@ namespace Motor { namespace Log {
 
 weak< Logger > text()
 {
-    static weak< Logger > result = graphics()->getChild("text");
+    static weak< Logger > result = graphics()->getChild(istring("text"));
     return result;
 }
 

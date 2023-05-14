@@ -159,8 +159,8 @@ class Netbeans(Build.BuildContext):
                 env = bld.all_envs[bld_env.SUB_TOOLCHAINS[0]]
             else:
                 env = bld_env
-            platform_defines = env.COMPILER_DEFINES
-            platform_includes = env.COMPILER_INCLUDES
+            platform_defines = env.COMPILER_C_DEFINES + env.COMPILER_CXX_DEFINES
+            platform_includes = env.COMPILER_C_INCLUDES + env.COMPILER_CXX_INCLUDES
             if env.SYSROOT:
                 platform_includes += [os.path.join(env.SYSROOT, 'usr', 'include')]
             options.append((platform_includes, platform_defines))

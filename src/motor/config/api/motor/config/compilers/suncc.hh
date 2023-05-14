@@ -50,13 +50,8 @@ extern "C" void* __builtin_alloca(size_t);
 #define MOTOR_NEVER_INLINE
 #define MOTOR_ALWAYS_INLINE inline
 
-#ifndef __clang_analyzer__
-#    define MOTOR_EXPORT __global
-#    define MOTOR_IMPORT
-#else
-#    define MOTOR_EXPORT
-#    define MOTOR_IMPORT
-#endif
+#define MOTOR_EXPORT __global
+#define MOTOR_IMPORT
 
 #pragma error_messages(off, noexthrow)
 #if __SUNPRO_CC < 0x5130

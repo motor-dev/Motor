@@ -24,7 +24,7 @@ class Linux(Configure.ConfigurationContext.Platform):
         except Exception as e:
             return False
         finally:
-            #if result:
+            # if result:
             #    print(compiler.name(), err)
             node.delete()
             tgtnode.delete()
@@ -44,6 +44,7 @@ class Linux(Configure.ConfigurationContext.Platform):
         env.DEST_OS = 'linux'
         env.ABI = 'elf'
         env.VALID_PLATFORMS = ['linux', 'posix', 'pc']
+        env.SYSTEM_NAME = 'linux-gnu'
 
         env.DEPLOY_ROOTDIR = ''
         env.DEPLOY_BINDIR = 'bin'

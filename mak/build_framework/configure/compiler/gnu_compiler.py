@@ -359,7 +359,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
     def load_in_env(self, conf, platform):
         env = conf.env
         env.IDIRAFTER = '-idirafter'
-        env.SYSTEM_INCLUDE_PATTERN = '-isystem'
+        env.SYSTEM_INCLUDE_PATTERN = '-isystem%s'
         Configure.ConfigurationContext.Compiler.load_in_env(self, conf, platform)
         env.SYSROOT = env.SYSROOT or self.sysroot
         env.PATH = self.directories + platform.directories + os.environ['PATH'].split(os.pathsep)
@@ -385,12 +385,8 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
     def populate_useful_variables(self, conf, sysroot):
         env = conf.env
         sysroot_flags = sysroot and ['--sysroot', sysroot] or []
-        result, out, err = self.run_cxx(
-            sysroot_flags + conf.env.CXXFLAGS + ['-std=c++14', '-x', 'c++', '-v', '-dM', '-E', '-'], '\n')
-        result = 0
-        if result != 0:
-            print('could not retrieve system includes: %s' % err)
-        else:
+
+        def populate_var(language, out, err):
             out = err.split('\n') + out.split('\n')
             while out:
                 line = out.pop(0)
@@ -399,14 +395,28 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
                         path = out.pop(0).strip()
                         if not os.path.isdir(path):
                             break
-                        env.append_unique('COMPILER_INCLUDES', [os.path.normpath(path)])
+                        env.append_unique('COMPILER_%s_INCLUDES' % language, [os.path.normpath(path)])
                 elif line.startswith('#define'):
                     line = line[len('#define'):].strip()
                     space = line.find(' ')
                     if space != -1:
                         define = line[:space]
                         value = line[space + 1:]
-                        env.append_unique('COMPILER_DEFINES', ['%s=%s' % (define, value)])
+                        env.append_unique('COMPILER_%s_DEFINES' % language, ['%s=%s' % (define, value)])
+
+        result, out, err = self.run_c(
+            sysroot_flags + conf.env['CFLAGS'] + ['-x', 'c', '-v', '-dM', '-E', '-'], '\n')
+        if result != 0:
+            print('could not retrieve system includes: %s' % err)
+        else:
+            populate_var('C', out, err)
+        result, out, err = self.run_cxx(
+            sysroot_flags + conf.env['CXXFLAGS'] + ['-std=c++14', '-x', 'c++', '-v', '-dM', '-E', '-'], '\n')
+        if result != 0:
+            print('could not retrieve system includes: %s' % err)
+        else:
+            populate_var('CXX', out, err)
+
         result, out, err = self.run_cxx(sysroot_flags + ['-x', 'c++', '-print-search-dirs'])
         if result != 0:
             print('could not retrieve system defines: %s' % str(e))
@@ -419,6 +429,8 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
                     line = line[10:].strip()
                     libs = self.split_path_list(line)
             env.append_unique('SYSTEM_LIBPATHS', libs)
+        env.COMPILER_C_FLAGS = env.CFLAGS
+        env.COMPILER_CXX_FLAGS = env.CXXFLAGS
 
     def split_path_list(self, line):
         return line.split(os.pathsep)

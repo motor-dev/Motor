@@ -53,9 +53,8 @@ void ZipFile::doFillBuffer(const weak< File::Ticket >& ticket) const
     u8* buffer = ticket->buffer.begin();
     while(!ticket->done())
     {
-        i64 bytesToRead = ticket->total - ticket->processed;
-        u32 bytesRead
-            = unzReadCurrentFile(m_handle, buffer, motor_checked_numcast< u32 >(bytesToRead));
+        u32 bytesToRead = motor_checked_numcast< u32 >(ticket->total - ticket->processed);
+        u32 bytesRead   = unzReadCurrentFile(m_handle, buffer, bytesToRead);
         if(bytesRead > 0)
         {
             ticket->processed += bytesRead;

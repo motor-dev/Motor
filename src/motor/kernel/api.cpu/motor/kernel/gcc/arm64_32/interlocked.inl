@@ -48,7 +48,8 @@ struct InterlockedType< 4 >
                              : AO_THUMB_SWITCH_CLOBBERS "cc");
         return result;
     }
-    static inline value_t fetch_and_add(value_t* p, value_t incr)
+    static inline value_t fetch_and_add(value_t* p,  // NOLINT(readability-non-const-parameter)
+                                        value_t  incr)
     {
         value_t old;
         value_t temp, flag;
@@ -68,7 +69,8 @@ struct InterlockedType< 4 >
     {
         return fetch_and_add(p, -incr);
     }
-    static inline value_t fetch_and_set(value_t* p, value_t v)
+    static inline value_t fetch_and_set(value_t* p,  // NOLINT(readability-non-const-parameter)
+                                        value_t  v)
     {
         value_t prev, flag;
         __asm__ __volatile__(AO_THUMB_GO_ARM "       dmb sy\n"
@@ -82,7 +84,8 @@ struct InterlockedType< 4 >
                              : AO_THUMB_SWITCH_CLOBBERS "cc");
         return prev;
     }
-    static inline value_t set_conditional(value_t* p, value_t v, value_t condition)
+    static inline value_t set_conditional(value_t* p,  // NOLINT(readability-non-const-parameter)
+                                          value_t v, value_t condition)
     {
         value_t result, old;
         __asm__ __volatile__(AO_THUMB_GO_ARM
@@ -113,29 +116,23 @@ struct InterlockedType< 4 >
 
         __attribute__((aligned(4))) value_t m_value;
 
-        tagged_t(value_t value = 0) : m_value(value)
+        explicit tagged_t(value_t value = nullptr) : m_value(value)
         {
         }
-        tagged_t(const tagged_t& other) : m_value(other.m_value)
-        {
-        }
-        tagged_t& operator=(const tagged_t& other)
-        {
-            m_value = other.m_value;
-            return *this;
-        }
-        inline value_t value()
+        tagged_t(const tagged_t& other)                 = default;
+        tagged_t&      operator=(const tagged_t& other) = default;
+        inline value_t value() const
         {
             return m_value;
         }
-        inline bool operator==(tagged_t& other)
+        inline bool operator==(const tagged_t& other) const
         {
             return m_value == other.m_value;
         }
     };
     static inline tagged_t::tag_t get_ticket(const tagged_t& p)
     {
-        tagged_t::value_t result;
+        tagged_t::tag_t result;
         __asm__ __volatile__(AO_THUMB_GO_ARM "       ldaxr   %w0, %1\n" AO_THUMB_RESTORE_MODE
                              : "=r"(result)
                              : "Q"(p.m_value)
@@ -191,7 +188,8 @@ struct InterlockedType< 8 >
     {
         return fetch_and_add(p, -incr);
     }
-    static inline value_t fetch_and_set(value_t* p, value_t v)
+    static inline value_t fetch_and_set(value_t* p,  // NOLINT(readability-non-const-parameter)
+                                        value_t  v)
     {
         value_t prev, flag;
         __asm__ __volatile__(AO_THUMB_GO_ARM "       dmb sy\n"
@@ -205,7 +203,8 @@ struct InterlockedType< 8 >
                              : AO_THUMB_SWITCH_CLOBBERS "cc");
         return prev;
     }
-    static inline value_t set_conditional(value_t* p, value_t v, value_t condition)
+    static inline value_t set_conditional(value_t* p,  // NOLINT(readability-non-const-parameter)
+                                          value_t v, value_t condition)
     {
         value_t result, old;
         __asm__ __volatile__(AO_THUMB_GO_ARM
@@ -235,29 +234,23 @@ struct InterlockedType< 8 >
 
         __attribute__((aligned(8))) value_t m_value;
 
-        tagged_t(value_t value = 0) : m_value(value)
+        explicit tagged_t(value_t value = nullptr) : m_value(value)
         {
         }
-        tagged_t(const tagged_t& other) : m_value(other.m_value)
-        {
-        }
-        tagged_t& operator=(const tagged_t& other)
-        {
-            m_value = other.m_value;
-            return *this;
-        }
-        inline value_t value()
+        tagged_t(const tagged_t& other)                 = default;
+        tagged_t&      operator=(const tagged_t& other) = default;
+        inline value_t value() const
         {
             return m_value;
         }
-        inline bool operator==(tagged_t& other)
+        inline bool operator==(const tagged_t& other) const
         {
             return m_value == other.m_value;
         }
     };
     static inline tagged_t::tag_t get_ticket(const tagged_t& p)
     {
-        tagged_t::value_t result;
+        tagged_t::tag_t result;
         __asm__ __volatile__(AO_THUMB_GO_ARM "       ldaxr   %x0, %1\n" AO_THUMB_RESTORE_MODE
                              : "=r"(result)
                              : "Q"(p.m_value)

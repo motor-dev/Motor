@@ -22,6 +22,7 @@ def log_handler_emit(self, record):
 
 if (sys.platform == "win32"):
     import ctypes
+
     kernel32 = ctypes.windll.kernel32
     kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
 Logs.log_handler.emit_override = log_handler_emit
@@ -89,7 +90,7 @@ def add_package_options(option_context, package_name):
         action='store',
         dest='%s_package' % package_name,
         help='source of the ' + package_name +
-        ' package. Default is "best" (try pkgconfig, system, prebuilt, source in that order)',
+             ' package. Default is "best" (try pkgconfig, system, prebuilt, source in that order)',
         default='best',
         choices=('best', 'pkgconfig', 'system', 'prebuilt', 'source', 'disabled')
     )
@@ -135,7 +136,7 @@ def options(option_context):
         '--profile', action='store_true', default=False, dest='profile', help='run WAF in the profiler'
     )
 
-    tool_dir = os.path.join(option_context.motornode.abspath(), 'mak', 'tools')
+    tool_dir = os.path.join(option_context.motornode.abspath(), 'mak', 'libs', 'waftools')
     option_context.load('visualstudio', tooldir=[tool_dir])
     option_context.load('xcode', tooldir=[tool_dir])
     option_context.load('netbeans', tooldir=[tool_dir])
@@ -149,7 +150,7 @@ def options(option_context):
     option_context.recurse('compilers.py')
     option_context.recurse('host/host.py')
     option_context.recurse('target/target.py')
-    #device.options(opt)
+    # device.options(opt)
     for extra in option_context.motornode.make_node('extra').listdir():
         if os.path.isfile(os.path.join(option_context.motornode.abspath(), 'extra', extra, 'wscript')):
             option_context.recurse(os.path.join(option_context.motornode.abspath(), 'extra', extra))

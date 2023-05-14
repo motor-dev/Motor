@@ -3,6 +3,7 @@
 
 #include <motor/plugin/stdafx.h>
 #include <motor/plugin/hook.hh>
+#include <motor/plugin/resourcehook.hh>
 
 namespace Motor { namespace Plugin {
 

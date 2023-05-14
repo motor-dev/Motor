@@ -7,7 +7,7 @@ namespace Motor { namespace Log {
 
 weak< Logger > plugin()
 {
-    static weak< Logger > result = system()->getChild("plugin");
+    static weak< Logger > result = system()->getChild(istring("plugin"));
     return result;
 }
 

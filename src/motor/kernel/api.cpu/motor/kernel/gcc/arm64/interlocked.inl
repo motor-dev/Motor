@@ -125,7 +125,7 @@ struct InterlockedType< 4 >
         {
             return m_value;
         }
-        inline bool operator==(tagged_t& other) const
+        inline bool operator==(const tagged_t& other) const
         {
             return m_value == other.m_value;
         }
@@ -244,7 +244,7 @@ struct InterlockedType< 8 >
         {
             return m_value;
         }
-        inline bool operator==(tagged_t& other) const
+        inline bool operator==(const tagged_t& other) const
         {
             return m_value == other.m_value;
         }

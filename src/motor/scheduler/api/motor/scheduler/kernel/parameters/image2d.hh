@@ -21,9 +21,7 @@ public:
     {
         (void)s_registration;
     }
-    ~Image2D()
-    {
-    }
+    ~Image2D() override = default;
 };
 
 template < typename T >

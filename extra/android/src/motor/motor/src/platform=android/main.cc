@@ -72,7 +72,8 @@ JNIEXPORT void JNICALL Java_com_motor_MotorLib_setPaths(JNIEnv* env, jclass /*cl
 JNIEXPORT void JNICALL Java_com_motor_MotorLib_init(JNIEnv* /*env*/, jclass /*cls*/, jint width,
                                                     jint height)
 {
-    s_mainThread = new Motor::Thread("android_main", &Motor::Android::android_main, width, height);
+    s_mainThread = new Motor::Thread(Motor::istring("android_main"), &Motor::Android::android_main,
+                                     width, height);
 }
 
 JNIEXPORT void JNICALL Java_com_motor_MotorLib_step(JNIEnv* /*env*/, jclass /*cls*/)

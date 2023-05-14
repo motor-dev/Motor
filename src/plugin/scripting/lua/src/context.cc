@@ -289,7 +289,7 @@ extern "C" int luaGet(lua_State* state)
 
     auto*       userdata = (Meta::Value*)lua_touserdata(state, -2);
     const char* name     = lua_tostring(state, -1);
-    Meta::Value v        = (*userdata)[name];
+    Meta::Value v        = (*userdata)[istring(name)];
     if(!v)
     {
         lua_pushnil(state);

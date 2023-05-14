@@ -13,7 +13,7 @@ IOContext::IOContext()
     : m_availableTickets(0)
     , m_freeSlots(MaxRequestCount)
     , m_ioDone(i_u8::create(0))
-    , m_ioThread("IOThread", &IOContext::ioProcess, reinterpret_cast< intptr_t >(this), 0,
+    , m_ioThread(istring("IOThread"), &IOContext::ioProcess, reinterpret_cast< intptr_t >(this), 0,
                  Thread::Highest)
     , m_freeRequestList()
     , m_requestQueue()

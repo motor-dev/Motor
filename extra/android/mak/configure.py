@@ -203,6 +203,7 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         target_folder = self.get_target_folder(arch)
 
         env.VALID_PLATFORMS = ['android']
+        env.SYSTEM_NAME = 'linux-android'
         appname = getattr(Context.g_module, Context.APPNAME, conf.srcnode.name)
         env.cxxprogram_PATTERN = 'lib%s.so'
         env.append_unique('CFLAGS', ['-fPIC'])
@@ -237,13 +238,12 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         compiler.sysroot = ndk_config.get_sysroot()
 
         sysroot_options = ndk_config.get_defines() + [
-            '-isystem',
-            os.path.join(compiler.sysroot, 'usr', 'include'), '-isystem',
-            os.path.join(compiler.sysroot, 'usr', 'include', compiler.target)
+            '-isystem%s' % os.path.join(compiler.sysroot, 'usr', 'include'),
+            '-isystem%s' % os.path.join(compiler.sysroot, 'usr', 'include', compiler.target)
         ]
         env.append_unique('JAVACFLAGS', ['-bootclasspath', os.path.join(self.sdk_path, 'android.jar')])
         env.append_unique('AAPTFLAGS', ['-I', os.path.join(self.sdk_path, 'android.jar')])
-        env.append_unique('INCLUDES', [
+        env.append_unique('COMPILER_CXX_INCLUDES', [
             conf.motornode.make_node('extra/android/src/motor/3rdparty/android/libc++/api').abspath()])
 
         # if not os.path.isfile(

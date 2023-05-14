@@ -7,7 +7,7 @@ namespace Motor { namespace Log {
 
 weak< Logger > cuda()
 {
-    static weak< Logger > result = compute()->getChild("cuda");
+    static weak< Logger > result = compute()->getChild(istring("cuda"));
     return result;
 }
 

@@ -49,11 +49,11 @@ class GLRenderer::Context : public minitl::refcountable
     friend class GLRenderer;
 
 private:
-    HWND                            m_dummyHwnd;
-    HDC                             m_dummyDC;
-    HGLRC                           m_glContext;
-    const PFNWGLSWAPINTERVALEXTPROC m_setSwapInterval;
-    u64                             m_threadId;
+    HWND                      m_dummyHwnd;
+    HDC                       m_dummyDC;
+    HGLRC                     m_glContext;
+    PFNWGLSWAPINTERVALEXTPROC m_setSwapInterval;
+    u64                       m_threadId;
 
 public:
     const ShaderExtensions shaderext;
@@ -219,7 +219,7 @@ GLRenderer::GLRenderer(const Plugin::Context& context)
     : Windowing::Renderer(Arena::general(), context.resourceManager)
     , m_context(scoped< Context >::create(Arena::general(), this))
     , m_openGLMemoryHost(scoped< GLMemoryHost >::create(Arena::general()))
-    , m_openCLScheduler("plugin.compute.opencl_gl", context)
+    , m_openCLScheduler(inamespace("plugin.compute.opencl_gl"), context)
 {
 }
 

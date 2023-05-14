@@ -38,7 +38,7 @@ void Environment::init(int argc, const char* argv[])
         {
             continue;
         }
-        m_game = argv[arg];
+        m_game = istring(argv[arg]);
     }
 }
 

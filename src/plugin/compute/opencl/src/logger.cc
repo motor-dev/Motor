@@ -7,7 +7,7 @@ namespace Motor { namespace Log {
 
 weak< Logger > opencl()
 {
-    static weak< Logger > result = compute()->getChild("opencl");
+    static weak< Logger > result = compute()->getChild(istring("opencl"));
     return result;
 }
 

@@ -28,7 +28,7 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
     {
         if(errno != EEXIST)
         {
-            perror("");
+            perror(nullptr);
         }
     }
 }
@@ -86,8 +86,8 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
         {
             if(strcmp(d->d_name, ".") == 0) continue;
             if(strcmp(d->d_name, "..") == 0) continue;
-            istring name = d->d_name;
-            ipath   p    = m_path;
+            auto  name = istring(d->d_name);
+            ipath p    = m_path;
             p.push_back(name);
             ipath::Filename filename = p.str();
             struct stat     s        = {};
@@ -168,8 +168,8 @@ void DiskFolder::onChanged()
         {
             if(strcmp(d->d_name, ".") == 0) continue;
             if(strcmp(d->d_name, "..") == 0) continue;
-            istring name = d->d_name;
-            ipath   p    = m_path;
+            auto  name = istring(d->d_name);
+            ipath p    = m_path;
             p.push_back(name);
             ipath::Filename filename = p.str();
             struct stat     s        = {};

@@ -581,7 +581,7 @@ class eclipse(Build.BuildContext):
                                                     ) as resource:
                                                         for include in sub_env.INCLUDES + [
                                                             '%s/usr/include' % sub_env.SYSROOT
-                                                        ] + sub_env.COMPILER_INCLUDES:
+                                                        ] + sub_env.COMPILER_CXX_INCLUDES:
                                                             with XmlNode(
                                                                     resource, 'entry', {
                                                                         'kind': 'includePath',

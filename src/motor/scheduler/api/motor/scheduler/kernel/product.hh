@@ -11,13 +11,11 @@ template < typename T >
 class Product : public IProduct
 {
 public:
-    Product(weak< const Producer > producer) : IProduct(producer)
+    explicit Product(weak< const Producer > producer) : IProduct(producer)
     {
     }
 
-    ~Product()
-    {
-    }
+    ~Product() override = default;
 
     ref< IParameter > createParameter() const override
     {

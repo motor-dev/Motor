@@ -14,9 +14,9 @@ UnitTestsApplication::UnitTestsApplication(const Plugin::Context& context)
         ref< DiskFolder >::create(Arena::game(), Environment::getEnvironment().getDataDirectory()
                                                      + ipath("test/compute/unittests")),
         context.resourceManager, context.scheduler)
-    , m_packageManager("plugin.scripting.package", pluginContext())
-    , m_computeCudaModule("plugin.compute.cuda", pluginContext())
-    , m_computeCLModule("plugin.compute.opencl", pluginContext())
+    , m_packageManager(inamespace("plugin.scripting.package"), pluginContext())
+    , m_computeCudaModule(inamespace("plugin.compute.cuda"), pluginContext())
+    , m_computeCLModule(inamespace("plugin.compute.opencl"), pluginContext())
     , m_mainPackage(ref< Package >::create(
           Arena::game(), pluginContext().dataFolder->openFile(ifilename("unittests.pkg"))))
 {

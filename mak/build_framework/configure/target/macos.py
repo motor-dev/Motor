@@ -13,7 +13,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
     NAME = 'Darwin'
     SDK_NAME = 'Darwin'
     OS_NAME = 'darwin'
-    SUPPORTED_TARGETS = (re.compile('.*-darwin.*'), )
+    SUPPORTED_TARGETS = (re.compile('.*-darwin.*'),)
 
     def __init__(self, conf, sdk=None):
         Configure.ConfigurationContext.Platform.__init__(self)
@@ -119,7 +119,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
         conf.env.append_unique('CXXFLAGS', ['-isysroot', self.sdk[1]] + self.sdk[4][1])
         conf.env.append_unique(
             'LINKFLAGS', ['-isysroot', self.sdk[1], '-L%s/usr/lib' % self.sdk[1]] + self.sdk[4][2] +
-            ['-B%s' % bin_path for bin_path in self.directories]
+                         ['-B%s' % bin_path for bin_path in self.directories]
         )
         if compiler.arch == 'x86':
             conf.env.append_unique('CFLAGS', ['-msse2'])
@@ -344,6 +344,7 @@ class MacOS(Darwin):
     def load_in_env(self, conf, compiler):
         Darwin.load_in_env(self, conf, compiler)
         sdk_path = self.sdk[1]
+        conf.env.SYSTEM_NAME = 'apple-macosx'
         if os.path.isfile(os.path.join(sdk_path, 'usr', 'lib', 'libgcc_s.10.5.dylib')):
             conf.env.append_unique('LINKFLAGS', ['-lgcc_s.10.5'])
 

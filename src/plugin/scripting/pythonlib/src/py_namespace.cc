@@ -160,7 +160,7 @@ PyObject* PyMotorNamespace::dir(PyObject* self, PyObject* args)
 
     for(raw< const Meta::ObjectInfo > o = klass.objects; o; o = o->next)
     {
-        PyObject* str = fromString(o->name.c_str(), o->name.size());
+        PyObject* str = fromString(o->name.c_str(), Py_ssize_t(o->name.size()));
         if(!str)
         {
             Py_DECREF(result);

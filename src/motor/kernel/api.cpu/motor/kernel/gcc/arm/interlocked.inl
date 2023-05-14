@@ -99,7 +99,7 @@ struct InterlockedType< 4 >
                                    "       it              eq\n"     /* IT block */
                                    "       strexeq %0, %5, [%3]\n"   /* store new one if matched */
                                    "       teq             %0, #1\n"
-                                   "       beq             1b\n" /* if update failed, repeat */
+                                   "       beq             1b\n"     /* if update failed, repeat */
             DMB(6) AO_THUMB_RESTORE_MODE
             : "=&r"(result), "=&r"(old), "+m"(*p)
             : "r"(p), "r"(condition), "r"(v), "r"(0)
@@ -120,29 +120,23 @@ struct InterlockedType< 4 >
 
         __attribute__((aligned(4))) value_t m_value;
 
-        tagged_t(value_t value = 0) : m_value(value)
+        explicit tagged_t(value_t value = nullptr) : m_value(value)
         {
         }
-        tagged_t(const tagged_t& other) : m_value(other.m_value)
-        {
-        }
-        tagged_t& operator=(const tagged_t& other)
-        {
-            m_value = other.m_value;
-            return *this;
-        }
-        inline value_t value()
+        tagged_t(const tagged_t& other)                 = default;
+        tagged_t&      operator=(const tagged_t& other) = default;
+        inline value_t value() const
         {
             return m_value;
         }
-        inline bool operator==(tagged_t& other)
+        inline bool operator==(const tagged_t& other) const
         {
             return m_value == other.m_value;
         }
     };
     static inline tagged_t::tag_t get_ticket(const tagged_t& p)
     {
-        tagged_t::value_t result;
+        tagged_t::tag_t result;
         __asm__ __volatile__(AO_THUMB_GO_ARM "       ldrex   %0, [%1]\n" DMB(2)
                                  AO_THUMB_RESTORE_MODE
                              : "=r"(result)

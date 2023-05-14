@@ -7,9 +7,11 @@
 #if defined(__ICL) && __ICL < 1010
 extern "C"
 {
+    // NOLINTBEGIN(bugprone-reserved-identifier)
     long __cdecl _InterlockedCompareExchange(long volatile* Dest, long Exchange, long Comp);
     long __cdecl _InterlockedExchange(long volatile* Target, long Value);
     long __cdecl _InterlockedExchangeAdd(long volatile* Addend, long Value);
+    // NOLINTEND(bugprone-reserved-identifier)
 }
 #    pragma intrinsic(_InterlockedExchange)
 #    pragma intrinsic(_InterlockedExchangeAdd)
@@ -21,9 +23,11 @@ extern "C"
 #else
 extern "C"
 {
+    // NOLINTBEGIN(bugprone-reserved-identifier)
     long __cdecl _InterlockedCompareExchange(long volatile* Dest, long Exchange, long Comp);
     long __cdecl _InterlockedExchange(long volatile* Target, long Value);
     long __cdecl _InterlockedExchangeAdd(long volatile* Addend, long Value);
+    // NOLINTEND(bugprone-reserved-identifier)
 }
 #    pragma intrinsic(_InterlockedExchange)
 #    pragma intrinsic(_InterlockedExchangeAdd)
@@ -84,19 +88,21 @@ struct InterlockedType< 4 >
             } tagged_value;
             __declspec(align(8)) volatile long long asLongLong;
         };
-        tagged_t(value_t value = 0) : tagged_value{0, value}
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+        explicit tagged_t(value_t value = nullptr) : tagged_value {0, value}
         {
         }
-        tagged_t(counter_t tag, value_t value) : tagged_value{tag, value}
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+        tagged_t(counter_t tag, value_t value) : tagged_value {tag, value}
         {
         }
         tagged_t(const tagged_t& other) = default;
-        inline value_t value()
+        inline value_t value() const
         {
             return tagged_value.value;
         }
-        tagged_t& operator=(const tagged_t& other) = default;
-        inline bool operator==(tagged_t& other)
+        tagged_t&   operator=(const tagged_t& other) = default;
+        inline bool operator==(const tagged_t& other) const
         {
             return asLongLong == other.asLongLong;
         }

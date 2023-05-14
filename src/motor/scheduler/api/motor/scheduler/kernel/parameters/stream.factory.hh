@@ -25,13 +25,20 @@ struct ClassID< KernelScheduler::Stream< T > >
 {
     MOTOR_EXPORT static raw< const Meta::Class > klass()
     {
-        static const Meta::Class s_class = {name(), u32(sizeof(KernelScheduler::Stream< T >)),
-                                            0,      Meta::ClassType_Object,
-                                            {0},    motor_class< KernelScheduler::IStream >(),
-                                            {0},    {0},
-                                            {0, 0}, {0, 0},
-                                            {0},    Meta::OperatorTable::s_emptyTable,
-                                            0,      0};
+        static const Meta::Class s_class = {name(),
+                                            u32(sizeof(KernelScheduler::Stream< T >)),
+                                            0,
+                                            Meta::ClassType_Object,
+                                            {nullptr},
+                                            motor_class< KernelScheduler::IStream >(),
+                                            {nullptr},
+                                            {nullptr},
+                                            {0, nullptr},
+                                            {0, nullptr},
+                                            {nullptr},
+                                            Meta::OperatorTable::s_emptyTable,
+                                            nullptr,
+                                            nullptr};
         raw< const Meta::Class > result  = {&s_class};
         return result;
     }

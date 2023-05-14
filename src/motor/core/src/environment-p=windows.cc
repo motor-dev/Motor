@@ -29,7 +29,7 @@ Environment::Environment()
     char  profile[MAX_PATH];
     DWORD size = sizeof(profile);
     GetUserName(profile, &size);
-    m_user    = profile;
+    m_user    = istring(profile);
     size      = sizeof(profile);
     HMODULE h = LoadLibraryA("userenv.dll");
     if(h != nullptr)
@@ -40,7 +40,7 @@ Environment::Environment()
         FreeLibrary(h);
     }
     m_homeDirectory = ipath(profile);
-    m_homeDirectory.push_back(istring("motor"));
+    m_homeDirectory.push_back(istring(istring("motor")));
 }
 
 Environment::~Environment()
@@ -54,7 +54,7 @@ void                        Environment::init()
     char dllPath[MAX_PATH] = {0};
     union
     {
-        IMAGE_DOS_HEADER* imageBase;
+        IMAGE_DOS_HEADER* imageBase {};
         HINSTANCE         value;
     } convertToHinstance {};
     convertToHinstance.imageBase = &__ImageBase;
@@ -77,7 +77,7 @@ void Environment::init(int argc, const char* argv[])
         {
             continue;
         }
-        m_game = argv[arg];
+        m_game = istring(argv[arg]);
     }
 
     SetDllDirectoryA((getDataDirectory() + ipath("plugin")).str().name);

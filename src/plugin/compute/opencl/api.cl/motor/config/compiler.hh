@@ -2,8 +2,8 @@
    see LICENSE for detail */
 #pragma once
 
-#define __host
-#define __device
+#define __host    // NOLINT(bugprone-reserved-identifier)
+#define __device  // NOLINT(bugprone-reserved-identifier)
 
 typedef signed char    i8;
 typedef unsigned char  u8;
@@ -30,7 +30,7 @@ typedef u8             byte;
 #define kernel_generic  __generic
 
 #define kernel
-#define __kernel
+#define __kernel  // NOLINT(bugprone-reserved-identifier)
 
 #define motor_alignof(t) __alignof__(t)
 

@@ -85,7 +85,7 @@ static int valueGet(lua_State* state)
     {
         Context::checkArg(state, 2, LUA_TSTRING);
 
-        istring              name = istring(lua_tostring(state, -1));
+        auto                 name = istring(lua_tostring(state, -1));
         static const istring type = istring("__type");
         if(name == type)
         {
@@ -172,13 +172,13 @@ static int valueCall(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Object");
     auto*       userdata = (Meta::Value*)lua_touserdata(state, 1);
-    Meta::Value value    = (*userdata)["?call"];
+    Meta::Value value    = (*userdata)[Meta::Class::nameOperatorCall()];
     if(!value)
     {
         return error(state,
                      minitl::format< 4096u >(FMT("object {0} is not callable"), userdata->type()));
     }
-    raw< const Meta::Method > method = value.as< raw< const Meta::Method > >();
+    auto method = value.as< raw< const Meta::Method > >();
     if(method)
     {
         return call(state, method);

@@ -17,10 +17,10 @@ namespace Motor { namespace FileSystem {
 #pragma pack(push, 8)
 struct THREADNAME_INFO
 {
-    DWORD  dwType;
-    LPCSTR szName;
-    DWORD  dwThreadID;
-    DWORD  dwFlags;
+    DWORD  dwType {};
+    LPCSTR szName {};
+    DWORD  dwThreadID {};
+    DWORD  dwFlags {};
 };
 #pragma pack(pop)
 

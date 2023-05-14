@@ -6,9 +6,10 @@ import sys
 import re
 import string
 import datetime
-from waflib import Context, Build, Logs
+from waflib import Context, Build, Logs, Options
 from minixml import XmlDocument, XmlNode
 from xml.dom.minidom import parse
+import cmake
 
 if sys.platform == 'win32':
     HOME_DIRECTORY = os.path.join(os.getenv('APPDATA'), 'QtProject', 'qtcreator')
@@ -201,6 +202,19 @@ class QtObject:
                     write_value(variant_map, value, key=var_name)
 
 
+class QtCMakeTools(QtObject):
+    published_vars = [
+        ('AutoCreateBuildDirectory', False),
+        ('AutoDetected', False),
+        ('AutoRun', False),
+        ('Binary', True),
+        ('DetectionSource', True),
+        ('DisplayName', True),
+        ('Id', False),
+        ('QchFile', True),
+    ]
+
+
 class QtToolchain(QtObject):
     published_vars = [
         ('ProjectExplorer.CustomToolChain.CompilerPath', False),
@@ -281,86 +295,36 @@ class QtToolchain(QtObject):
                 if f == '-target':
                     f = original_flags.pop(0)
                     flags.append('--target=%s' % f)
-                else:
-                    for undesirable_flag in ['-triple', '-arch', '-march']:
-                        if f.startswith(undesirable_flag):
-                            if f == undesirable_flag:
-                                original_flags.pop(0)
-                            break
-                    else:
-                        flags.append(f)
             if isinstance(compiler, list):
                 compiler = compiler[0]
-            for define in env.DEFINES + env.COMPILER_DEFINES:
-                flags.append(env.DEFINES_ST % define)
-
-            if env.COMPILER_NAME == 'gcc':
-                self.ProjectExplorer_GccToolChain_Path = compiler
-                self.ProjectExplorer_GccToolChain_TargetAbi = abi
-                self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
-                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
-                if platform == 'android':
-                    toolchain_id = 'Qt4ProjectManager.ToolChain.Android:%s' % generateGUID(
-                        'Motor:toolchain:%s:%d' % (env_name, language)
-                    )
-                    self.Qt4ProjectManager_Android_NDK_TC_VERION = env_name.split('-')[-1]
-                else:
-                    toolchain_id = 'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID(
-                        'Motor:toolchain:%s:%d' % (env_name, language)
-                    )
-            elif env.COMPILER_NAME in ('clang', 'llvm'):
-                self.ProjectExplorer_GccToolChain_Path = compiler
-                self.ProjectExplorer_GccToolChain_TargetAbi = abi
-                self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
-                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
-                if platform == 'android':
-                    toolchain_id = 'Qt4ProjectManager.ToolChain.Android:%s' % generateGUID(
-                        'Motor:toolchain:%s:%d' % (env_name, language)
-                    )
-                    self.Qt4ProjectManager_Android_NDK_TC_VERION = env_name.split('-')[-1]
-                else:
-                    toolchain_id = 'ProjectExplorer.ToolChain.Clang:%s' % generateGUID(
-                        'Motor:toolchain:%s:%d' % (env_name, language)
-                    )
-            elif env.COMPILER_NAME == 'icc':
-                self.ProjectExplorer_GccToolChain_Path = compiler
-                self.ProjectExplorer_GccToolChain_TargetAbi = abi
-                toolchain_id = 'ProjectExplorer.ToolChain.LinuxIcc:%s' % generateGUID(
-                    'Motor:toolchain:%s:%d' % (env_name, language)
-                )
-            elif env.COMPILER_NAME == 'suncc':
-                self.ProjectExplorer_GccToolChain_Path = compiler
-                self.ProjectExplorer_GccToolChain_TargetAbi = abi
-                self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
-                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
-                toolchain_id = 'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID(
-                    'Motor:toolchain:%s:%d' % (env_name, language)
-                )
-            elif env.COMPILER_NAME == 'msvc' and env.MSVC_COMPILER != 'intel':
-                self.ProjectExplorer_MsvcToolChain_VarsBat = env.MSVC_BATFILE[0].replace('\\', '/')
-                self.ProjectExplorer_MsvcToolChain_VarsBatArg = env.MSVC_BATFILE[1] or ''
-                self.ProjectExplorer_MsvcToolChain_SupportedAbi = abi
-                toolchain_id = 'ProjectExplorer.ToolChain.Msvc:%s' % generateGUID(
-                    'Motor:toolchain:%s:%d' % (env_name, language)
-                )
+            if compiler == 1:
+                defines = env.COMPILER_C_DEFINES
+                includes = env.COMPILER_C_INCLUDES
             else:
-                self.ProjectExplorer_CustomToolChain_CompilerPath = compiler
-                self.ProjectExplorer_CustomToolChain_Cxx11Flags = ()
-                self.ProjectExplorer_CustomToolChain_ErrorPattern = ''
-                self.ProjectExplorer_CustomToolChain_FileNameCap = 1
-                self.ProjectExplorer_CustomToolChain_HeaderPaths = tuple(
-                    i.replace('\\', '/') for i in env.INCLUDES + env.COMPILER_INCLUDES
-                )
-                self.ProjectExplorer_CustomToolChain_LineNumberCap = 2
-                self.ProjectExplorer_CustomToolChain_MakePath = ''
-                self.ProjectExplorer_CustomToolChain_MessageCap = 3
-                self.ProjectExplorer_CustomToolChain_Mkspecs = ''
-                self.ProjectExplorer_CustomToolChain_OutputParser = 0
-                toolchain_id = 'ProjectExplorer.ToolChain.Custom:%s' % generateGUID(
-                    'Motor:toolchain:%s:%d' % (env_name, language)
-                )
-                self.ProjectExplorer_CustomToolChain_PredefinedMacros = tuple(env.DEFINES + env.COMPILER_DEFINES)
-                self.ProjectExplorer_CustomToolChain_TargetAbi = abi
+                defines = env.COMPILER_CXX_DEFINES
+                includes = env.COMPILER_CXX_INCLUDES
+            for define in env.DEFINES + defines:
+                flags.append(env.DEFINES_ST % define)
+            for include in env.INCLUDES + includes:
+                flags.append(env.SYSTEM_INCLUDE_PATTERN % include)
+
+            self.ProjectExplorer_CustomToolChain_CompilerPath = compiler
+            self.ProjectExplorer_CustomToolChain_Cxx11Flags = ()
+            self.ProjectExplorer_CustomToolChain_ErrorPattern = ''
+            self.ProjectExplorer_CustomToolChain_FileNameCap = 1
+            self.ProjectExplorer_CustomToolChain_HeaderPaths = tuple(
+                i.replace('\\', '/') for i in env.INCLUDES + includes
+            )
+            self.ProjectExplorer_CustomToolChain_LineNumberCap = 2
+            self.ProjectExplorer_CustomToolChain_MakePath = ''
+            self.ProjectExplorer_CustomToolChain_MessageCap = 3
+            self.ProjectExplorer_CustomToolChain_Mkspecs = ''
+            self.ProjectExplorer_CustomToolChain_OutputParser = 0
+            toolchain_id = 'ProjectExplorer.ToolChain.Custom:%s' % generateGUID(
+                'Motor:toolchain:%s:%d' % (env_name, language)
+            )
+            self.ProjectExplorer_CustomToolChain_PredefinedMacros = tuple(env.DEFINES + defines)
+            self.ProjectExplorer_CustomToolChain_TargetAbi = abi
             self.ProjectExplorer_ToolChain_Language = language
             self.ProjectExplorer_ToolChain_Autodetect = False
             self.ProjectExplorer_ToolChain_DisplayName = 'Motor:toolchain:' + env_name
@@ -419,7 +383,7 @@ class QtPlatform(QtObject):
         ('PE.Profile.SDK', False),
     ]
 
-    def __init__(self, bld, env_name=None, env=None, toolchain_c=None, toolchain_cxx=None, debugger=None):
+    def __init__(self, bld, env_name=None, env=None, toolchain_c=None, toolchain_cxx=None, debugger=None, cmake=None):
         if env_name:
             assert (env)
             sysroot = env.SYSROOT or ''
@@ -438,6 +402,10 @@ class QtPlatform(QtObject):
                 ('PE.Profile.ToolChain', toolchain_c),
                 ('PE.Profile.ToolChains', [('C', toolchain_c), ('Cxx', toolchain_cxx)]),
                 ('PE.Profile.ToolChainsV3', [('C', toolchain_c), ('Cxx', toolchain_cxx)]),
+                ('CMakeProjectManager.CMakeKitInformation', cmake),
+                ('CMake.ConfigurationKitInformation',
+                 ('CMAKE_TOOLCHAIN_FILE=%s/.cmake/%s/toolchain.txt' % (bld.srcnode.abspath(), env_name),)
+                 ),
                 ('QtPM4.mkSPecInformation', ''),
                 ('QtSupport.QtInformation', -1),
             ]
@@ -468,6 +436,7 @@ class QtCreator(Build.BuildContext):
             return "SKIP"
 
         self.restore()
+        Options.options.nomaster = True
         if not self.all_envs:
             self.load_envs()
         self.variant = self.__class__.motor_variant
@@ -488,6 +457,10 @@ class QtCreator(Build.BuildContext):
 
         self.environment_id = self.get_environment_id()
         self.build_platform_list()
+
+        self.write_project_files()
+
+    def write_project_files(self):
         appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
         self.base_node = self.srcnode.make_node('%s.qtcreator' % appname)
         self.base_node.mkdir()
@@ -538,6 +511,42 @@ class QtCreator(Build.BuildContext):
         for platform_name, platform in self.platforms:
             if platform_name == guid:
                 return guid
+
+    def load_cmake_tools_list(self):
+        self.cmake_tools = []
+        self.cmake_tools_to_remove = []
+        try:
+            document = parse(os.path.join(HOME_DIRECTORY, 'cmaketools.xml'))
+        except Exception as e:
+            Logs.warn('QtCreator cmaketools not found; creating default one')
+        else:
+            for data in document.getElementsByTagName('data'):
+                variable_name = data.getElementsByTagName('variable')[0]
+                variable_name = variable_name.childNodes[0].toxml().strip()
+                if variable_name.startswith('CMakeTools.'):
+                    try:
+                        variable_index = int(variable_name[11:])
+                    except ValueError:
+                        pass
+                    else:
+                        cmake_tools = QtCMakeTools()
+                        cmake_tools.load_from_node(data.getElementsByTagName('valuemap')[0])
+                        self.cmake_tools.append(cmake_tools)
+                        if cmake_tools.DisplayName.startswith('Motor:'):
+                            self.cmake_tools_to_remove.append(cmake_tools)
+        if not self.cmake_tools:
+            cmake = self.find_program('cmake', quiet=True, mandatory=False)
+            if cmake:
+                cmake_tool = QtCMakeTools()
+                cmake_tool.Id = generateGUID('Motor:cmake')
+                cmake_tool.AutoCreateBuildDirectory = False
+                cmake_tool.AutoDetected = False
+                cmake_tool.AutoRun = True
+                cmake_tool.DetectionSource = ''
+                cmake_tool.DisplayName = 'Motor:cmake'
+                cmake_tool.QchFile = ''
+                cmake_tool.Binary = cmake[0]
+                self.cmake_tools.append(cmake_tool)
 
     def load_debugger_list(self):
         self.debuggers = []
@@ -628,6 +637,7 @@ class QtCreator(Build.BuildContext):
             self.load_debugger_list()
         self.load_device_list()
         self.load_platform_list()
+        self.load_cmake_tools_list()
         for env_name in self.env.ALL_TOOLCHAINS:
             env = self.all_envs[env_name]
             if env.SUB_TOOLCHAINS:
@@ -677,12 +687,12 @@ class QtCreator(Build.BuildContext):
                 debugger = debugger.Id
             platform = QtPlatform(
                 self, env_name, env, toolchains[0].ProjectExplorer_ToolChain_Id,
-                toolchains[1].ProjectExplorer_ToolChain_Id, debugger
+                toolchains[1].ProjectExplorer_ToolChain_Id, debugger, self.cmake_tools[0].Id
             )
             for p_name, p in self.platforms:
                 if p_name == platform.PE_Profile_Id:
                     p.copy_from(platform)
-                    self.platforms_to_remove.append(p)
+                    self.platforms_to_remove.remove(p)
                     break
             else:
                 self.platforms.append((platform.PE_Profile_Id, platform))
@@ -729,6 +739,28 @@ class QtCreator(Build.BuildContext):
                     XmlNode(data, 'value', '1', [('type', 'int')])
 
         with XmlDocument(
+                open(os.path.join(HOME_DIRECTORY, 'cmaketools.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorCMakeTools')]
+        ) as document:
+            with XmlNode(document, 'qtcreator') as creator:
+                cmaketools_index = 0
+                for cmaketools in self.cmake_tools:
+                    if cmaketools not in self.cmake_tools_to_remove:
+                        with XmlNode(creator, 'data') as data:
+                            XmlNode(data, 'variable', 'CMakeTools.%d' % cmaketools_index)
+                            cmaketools.write(data)
+                        cmaketools_index += 1
+                with XmlNode(creator, 'data') as data:
+                    XmlNode(data, 'variable', 'CMakeTools.Count')
+                    XmlNode(data, 'value', str(cmaketools_index), [('type', 'int')])
+                if self.cmake_tools:
+                    with XmlNode(creator, 'data') as data:
+                        XmlNode(data, 'variable', 'CMakeTools.Default')
+                        XmlNode(data, 'value', str(self.cmake_tools[0].Id), [('type', 'QString')])
+                with XmlNode(creator, 'data') as data:
+                    XmlNode(data, 'variable', 'Version')
+                    XmlNode(data, 'value', '1', [('type', 'int')])
+
+        with XmlDocument(
                 open(os.path.join(HOME_DIRECTORY, 'toolchains.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorToolChains')]
         ) as document:
             with XmlNode(document, 'qtcreator') as creator:
@@ -747,7 +779,6 @@ class QtCreator(Build.BuildContext):
                     XmlNode(data, 'value', '1', [('type', 'int')])
 
     def gather_includes_defines(self, task_gen):
-
         def gather_includes_defines_recursive(task_gen):
             try:
                 return task_gen.bug_qtcreator_cache
@@ -773,6 +804,45 @@ class QtCreator(Build.BuildContext):
         includes = includes + [path_from(i, self.base_node) for i in getattr(task_gen, 'includes', [])]
         defines = defines + getattr(task_gen, 'defines', [])
         return unique(includes), unique(defines)
+
+    def write_codestyle(self, file):
+        with XmlDocument(file, 'UTF-8', [('DOCTYPE', 'QtCreatorCodeStyle')]) as cs:
+            with XmlNode(cs, 'qtcreator') as qtcreator:
+                with XmlNode(qtcreator, 'data') as data:
+                    XmlNode(data, 'variable', 'CodeStyleData').close()
+                    write_value(
+                        data, [
+                            ("AlignAssignments", True),
+                            ("AutoSpacesForTabs", False),
+                            ("BindStarToIdentifier", False),
+                            ("BindStarToLeftSpecifier", True),
+                            ("BindStarToRightSpecifier", False),
+                            ("BindStarToTypeName", True),
+                            ("ExtraPaddingForConditionsIfConfusingAlign", False),
+                            ("IndentAccessSpecifiers", False),
+                            ("IndentBlockBody", True),
+                            ("IndentBlockBraces", False),
+                            ("IndentBlocksRelativeToSwitchLabels", True),
+                            ("IndentClassBraces", False),
+                            ("IndentControlFlowRelativeToSwitchLabels", True),
+                            ("IndentDeclarationsRelativeToAccessSpecifiers", True),
+                            ("IndentEnumBraces", False),
+                            ("IndentFunctionBody", True),
+                            ("IndentFunctionBraces", False),
+                            ("IndentNamespaceBody", False),
+                            ("IndentNamespaceBraces", False),
+                            ("IndentSize", 4),
+                            ("IndentStatementsRelativeToSwitchLabels", True),
+                            ("IndentSwitchLabels", False),
+                            ("PaddingMode", 2),
+                            ("ShortGetterName", True),
+                            ("SpacesForTabs", True),
+                            ("TabSize", 4),
+                        ]
+                    )
+                with XmlNode(qtcreator, 'data') as data:
+                    XmlNode(data, 'variable', 'DisplayName').close()
+                    write_value(data, 'Motor')
 
     def write_codestyle(self, file):
         with XmlDocument(file, 'UTF-8', [('DOCTYPE', 'QtCreatorCodeStyle')]) as cs:
@@ -888,7 +958,6 @@ class QtCreator(Build.BuildContext):
                     write_value(data, [])
                 with XmlNode(qtcreator, 'data') as data:
                     target_index = 0
-                    options = [a for a in sys.argv if a[0] == '-']
                     for env_name in self.env.ALL_TOOLCHAINS:
                         XmlNode(data, 'variable', 'ProjectExplorer.Project.Target.%d' % target_index).close()
                         bld_env = self.all_envs[env_name]
@@ -900,130 +969,9 @@ class QtCreator(Build.BuildContext):
                         deploy_configurations = []
                         build_configuration_index = 0
                         for variant in self.env.ALL_VARIANTS:
-                            target_os = qbsPlatformList(env)
-                            extraPlatformFlags = target_os and [
-                                ('qbs.targetOS', target_os),
-                            ] or []
                             build_configurations.append(
-                                (
-                                    'ProjectExplorer.Target.BuildConfiguration.%d' % build_configuration_index, [
-                                        (
-                                            'ProjectExplorer.BuildConfiguration.BuildDirectory',
-                                            self.bldnode.make_node('qtcreator').abspath()
-                                        ),
-                                        (
-                                            'GenericProjectManager.GenericBuildConfiguration.BuildDirectory',
-                                            self.bldnode.make_node('qtcreator').abspath()
-                                        ),
-                                        (
-                                            'ProjectExplorer.BuildConfiguration.BuildStepList.0', [
-                                                (
-                                                    'ProjectExplorer.BuildStepList.Step.0', [
-                                                        ('ProjectExplorer.BuildStep.Enabled', False),
-                                                        (
-                                                            'ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
-                                                            'Qbs configuration'
-                                                        ), ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                                        (
-                                                            'Qbs.Configuration', [
-                                                                ('qbs.buildVariant', 'debug'),
-                                                                ('qbs.architecture', qbsArch(env.TARGET_ARCH)),
-                                                                ('qbs.targetPlatform', qbsPlatform(env)),
-                                                            ] + extraPlatformFlags
-                                                        ), ('ProjectExplorer.ProjectConfiguration.Id', 'Qbs.BuildStep')
-                                                    ]
-                                                ),
-                                                (
-                                                    'ProjectExplorer.BuildStepList.Step.1', [
-                                                        ('ProjectExplorer.BuildStep.Enabled', True),
-                                                        (
-                                                            'ProjectExplorer.ProcessStep.Arguments',
-                                                            '%s build:%s:%s %s' %
-                                                            (sys.argv[0], env_name, variant, ' '.join(options))
-                                                        ),
-                                                        ('ProjectExplorer.ProcessStep.Command', sys.executable),
-                                                        (
-                                                            'ProjectExplorer.ProcessStep.WorkingDirectory',
-                                                            self.srcnode.abspath()
-                                                        ),
-                                                        (
-                                                            'ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
-                                                            'Waf configuration'
-                                                        ),
-                                                        ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                                        (
-                                                            'ProjectExplorer.ProjectConfiguration.Id',
-                                                            'ProjectExplorer.ProcessStep'
-                                                        ),
-                                                    ]
-                                                ), ('ProjectExplorer.BuildStepList.StepsCount', 2),
-                                                ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Build'),
-                                                ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                                (
-                                                    'ProjectExplorer.ProjectConfiguration.Id',
-                                                    'ProjectExplorer.BuildSteps.Build'
-                                                )
-                                            ]
-                                        ),
-                                        (
-                                            'ProjectExplorer.BuildConfiguration.BuildStepList.1', [
-                                                (
-                                                    'ProjectExplorer.BuildStepList.Step.0', [
-                                                        ('ProjectExplorer.BuildStep.Enabled', True),
-                                                        (
-                                                            'ProjectExplorer.ProcessStep.Arguments',
-                                                            '%s clean:%s:%s' % (sys.argv[0], env_name, variant)
-                                                        ), ('ProjectExplorer.ProcessStep.Command', sys.executable),
-                                                        (
-                                                            'ProjectExplorer.ProcessStep.WorkingDirectory',
-                                                            self.srcnode.abspath()
-                                                        ),
-                                                        (
-                                                            'ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
-                                                            'Waf configuration'
-                                                        ), ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                                        (
-                                                            'ProjectExplorer.ProjectConfiguration.Id',
-                                                            'ProjectExplorer.ProcessStep'
-                                                        )
-                                                    ]
-                                                ), ('ProjectExplorer.BuildStepList.StepsCount', 1),
-                                                ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Clean'),
-                                                ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                                (
-                                                    'ProjectExplorer.ProjectConfiguration.Id',
-                                                    'ProjectExplorer.BuildSteps.Clean'
-                                                )
-                                            ]
-                                        ), ('ProjectExplorer.BuildConfiguration.BuildStepListCount', 2),
-                                        ('ProjectExplorer.BuildConfiguration.ClearSystemEnvironment', False),
-                                        (
-                                            'ProjectExplorer.BuildConfiguration.UserEnvironmentChanges',
-                                            tuple(
-                                                '%s=%s' % (var_name, bld_env[var_name.upper()]) for var_name in (
-                                                    'Toolchain', 'Prefix', 'Deploy_RootDir', 'Deploy_BinDir',
-                                                    'Deploy_RunBinDir', 'Deploy_LibDir', 'Deploy_IncludeDir',
-                                                    'Deploy_DataDir'
-                                                )
-                                            ) + (
-                                                'OUT_NAME=%s' % os.path.join(
-                                                    self.srcnode.abspath(), bld_env.PREFIX, variant, env.DEPLOY_BINDIR,
-                                                    env.cxxprogram_PATTERN % self.launcher.target
-                                                ), 'OUT_DIR=%s' %
-                                                os.path.join(self.srcnode.abspath(), bld_env.PREFIX, variant),
-                                                'RUNBIN_DIR=%s' % os.path.join(
-                                                    self.srcnode.abspath(), bld_env.PREFIX, variant,
-                                                    env.DEPLOY_RUNBINDIR
-                                                ), 'TERM=msys', 'Python="%s"' % sys.executable,
-                                                'SrcDir="%s"' % self.srcnode.abspath(), 'Variant=%s' % variant,
-                                                'PATH=%s' % os.environ['PATH']
-                                            )
-                                        ), ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),
-                                        ('ProjectExplorer.ProjectConfiguration.DisplayName', variant),
-                                        ('ProjectExplorer.ProjectConfiguration.Id', self.PROJECT_TYPE)
-                                    ]
-                                )
-                            )
+                                self.make_build_configuration(build_configuration_index, bld_env, env, env_name,
+                                                              variant))
                             build_configuration_index += 1
                         run_configurations = []
                         index = 0
@@ -1163,51 +1111,7 @@ class QtCreator(Build.BuildContext):
                                       ('ProjectExplorer.Target.ActiveRunConfiguration', 0),
                                   ] + build_configurations + [
                                       ('ProjectExplorer.Target.BuildConfigurationCount', len(build_configurations)),
-                                      (
-                                          'ProjectExplorer.Target.DeployConfiguration.0', [
-                                              (
-                                                  'ProjectExplorer.BuildConfiguration.BuildStepList.0', [
-                                                      (
-                                                          'ProjectExplorer.BuildStepList.Step.0', [
-                                                              ('ProjectExplorer.BuildStep.Enabled', True),
-                                                              (
-                                                                  'ProjectExplorer.ProcessStep.Arguments',
-                                                                  '%s deploy:%s:%s' %
-                                                                  (sys.argv[0], to_var('Toolchain'), to_var('Variant'))
-                                                              ),
-                                                              ('ProjectExplorer.ProcessStep.Command', sys.executable),
-                                                              (
-                                                                  'ProjectExplorer.ProcessStep.WorkingDirectory',
-                                                                  self.srcnode.abspath()
-                                                              ),
-                                                              (
-                                                                  'ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
-                                                                  'Custom Process Step'
-                                                              ),
-                                                              ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                                              (
-                                                                  'ProjectExplorer.ProjectConfiguration.Id',
-                                                                  'ProjectExplorer.ProcessStep'
-                                                              ),
-                                                          ]
-                                                      ),
-                                                      ('ProjectExplorer.BuildStepList.StepsCount', 1),
-                                                      ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
-                                                       'Deploy'),
-                                                      ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                                      (
-                                                          'ProjectExplorer.ProjectConfiguration.Id',
-                                                          'ProjectExplorer.BuildSteps.Deploy'
-                                                      ),
-                                                  ]
-                                              ),
-                                              ('ProjectExplorer.BuildConfiguration.BuildStepListCount', 1),
-                                              ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
-                                               'Deploy locally'),
-                                              ('ProjectExplorer.ProjectConfiguration.DisplayName', 'Qbs Install'),
-                                              ('ProjectExplorer.ProjectConfiguration.Id', 'Qbs.Deploy'),
-                                          ]
-                                      ), ('ProjectExplorer.Target.DeployConfigurationCount', 1),
+                                      ('ProjectExplorer.Target.DeployConfigurationCount', 0),
                                       ('ProjectExplorer.Target.PluginSettings', [])
                                   ] + run_configurations + [
                                       ('ProjectExplorer.Target.RunConfigurationCount', len(run_configurations)),
@@ -1223,6 +1127,131 @@ class QtCreator(Build.BuildContext):
                 with XmlNode(qtcreator, 'data') as data:
                     XmlNode(data, 'variable', 'Version').close()
                     write_value(data, self.__class__.version[1])
+
+    def make_build_configuration(self, build_configuration_index, bld_env, env, env_name, variant):
+        options = [a for a in sys.argv if a[0] == '-']
+        target_os = qbsPlatformList(env)
+        extraPlatformFlags = target_os and [
+            ('qbs.targetOS', target_os),
+        ] or []
+        return (
+            'ProjectExplorer.Target.BuildConfiguration.%d' % build_configuration_index, [
+                (
+                    'ProjectExplorer.BuildConfiguration.BuildDirectory',
+                    self.bldnode.make_node('qtcreator').abspath()
+                ),
+                (
+                    'GenericProjectManager.GenericBuildConfiguration.BuildDirectory',
+                    self.bldnode.make_node('qtcreator').abspath()
+                ),
+                (
+                    'ProjectExplorer.BuildConfiguration.BuildStepList.0', [
+                        (
+                            'ProjectExplorer.BuildStepList.Step.0', [
+                                ('ProjectExplorer.BuildStep.Enabled', False),
+                                (
+                                    'ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                    'Qbs configuration'
+                                ), ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                (
+                                    'Qbs.Configuration', [
+                                        ('qbs.buildVariant', 'debug'),
+                                        ('qbs.architecture', qbsArch(env.TARGET_ARCH)),
+                                        ('qbs.targetPlatform', qbsPlatform(env)),
+                                    ] + extraPlatformFlags
+                                ), ('ProjectExplorer.ProjectConfiguration.Id', 'Qbs.BuildStep')
+                            ]
+                        ),
+                        (
+                            'ProjectExplorer.BuildStepList.Step.1', [
+                                ('ProjectExplorer.BuildStep.Enabled', True),
+                                (
+                                    'ProjectExplorer.ProcessStep.Arguments',
+                                    '%s build:%s:%s %s' %
+                                    (sys.argv[0], env_name, variant, ' '.join(options))
+                                ),
+                                ('ProjectExplorer.ProcessStep.Command', sys.executable),
+                                (
+                                    'ProjectExplorer.ProcessStep.WorkingDirectory',
+                                    self.srcnode.abspath()
+                                ),
+                                (
+                                    'ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                    'Waf configuration'
+                                ),
+                                ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                (
+                                    'ProjectExplorer.ProjectConfiguration.Id',
+                                    'ProjectExplorer.ProcessStep'
+                                ),
+                            ]
+                        ), ('ProjectExplorer.BuildStepList.StepsCount', 2),
+                        ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Build'),
+                        ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                        (
+                            'ProjectExplorer.ProjectConfiguration.Id',
+                            'ProjectExplorer.BuildSteps.Build'
+                        )
+                    ]
+                ),
+                (
+                    'ProjectExplorer.BuildConfiguration.BuildStepList.1', [
+                        (
+                            'ProjectExplorer.BuildStepList.Step.0', [
+                                ('ProjectExplorer.BuildStep.Enabled', True),
+                                (
+                                    'ProjectExplorer.ProcessStep.Arguments',
+                                    '%s clean:%s:%s' % (sys.argv[0], env_name, variant)
+                                ), ('ProjectExplorer.ProcessStep.Command', sys.executable),
+                                (
+                                    'ProjectExplorer.ProcessStep.WorkingDirectory',
+                                    self.srcnode.abspath()
+                                ),
+                                (
+                                    'ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                    'Waf configuration'
+                                ), ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                (
+                                    'ProjectExplorer.ProjectConfiguration.Id',
+                                    'ProjectExplorer.ProcessStep'
+                                )
+                            ]
+                        ), ('ProjectExplorer.BuildStepList.StepsCount', 1),
+                        ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Clean'),
+                        ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                        (
+                            'ProjectExplorer.ProjectConfiguration.Id',
+                            'ProjectExplorer.BuildSteps.Clean'
+                        )
+                    ]
+                ), ('ProjectExplorer.BuildConfiguration.BuildStepListCount', 2),
+                ('ProjectExplorer.BuildConfiguration.ClearSystemEnvironment', False),
+                (
+                    'ProjectExplorer.BuildConfiguration.UserEnvironmentChanges',
+                    tuple(
+                        '%s=%s' % (var_name, bld_env[var_name.upper()]) for var_name in (
+                            'Toolchain', 'Prefix', 'Deploy_RootDir', 'Deploy_BinDir',
+                            'Deploy_RunBinDir', 'Deploy_LibDir', 'Deploy_IncludeDir',
+                            'Deploy_DataDir'
+                        )
+                    ) + (
+                        'OUT_NAME=%s' % os.path.join(
+                            self.srcnode.abspath(), bld_env.PREFIX, variant, env.DEPLOY_BINDIR,
+                            env.cxxprogram_PATTERN % self.launcher.target
+                        ), 'OUT_DIR=%s' %
+                        os.path.join(self.srcnode.abspath(), bld_env.PREFIX, variant),
+                        'RUNBIN_DIR=%s' % os.path.join(
+                            self.srcnode.abspath(), bld_env.PREFIX, variant,
+                            env.DEPLOY_RUNBINDIR
+                        ), 'TERM=msys', 'Python="%s"' % sys.executable,
+                        'SrcDir="%s"' % self.srcnode.abspath(), 'Variant=%s' % variant,
+                        'PATH=%s' % os.environ['PATH']
+                    )
+                ), ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),
+                ('ProjectExplorer.ProjectConfiguration.DisplayName', variant),
+                ('ProjectExplorer.ProjectConfiguration.Id', self.PROJECT_TYPE)
+            ]
+        )
 
     def write_workspace(self, projects, appname, launcher):
         workspace_file = os.path.join(HOME_DIRECTORY, '%s.qws' % appname)
@@ -1276,31 +1305,7 @@ class Qbs(QtCreator):
     cmd = '_qbs'
     PROJECT_TYPE = 'Qbs.QbsBuildConfiguration'
 
-    def execute(self):
-        if self.schedule_setup():
-            return "SKIP"
-
-        self.restore()
-        if not self.all_envs:
-            self.load_envs()
-        self.variant = self.__class__.motor_variant
-        self.env.PROJECTS = [self.__class__.cmd]
-        self.env.VARIANT = to_var('Variant')
-        self.env.TOOLCHAIN = to_var('Toolchain')
-        self.env.PREFIX = to_var('Prefix')
-        self.env.DEPLOY_ROOTDIR = to_var('Deploy_RootDir')
-        self.env.DEPLOY_BINDIR = to_var('Deploy_BinDir')
-        self.env.DEPLOY_RUNBINDIR = to_var('Deploy_RunBinDir')
-        self.env.DEPLOY_LIBDIR = to_var('Deploy_LibDir')
-        self.env.DEPLOY_INCLUDEDIR = to_var('Deploy_IncludeDir')
-        self.env.DEPLOY_DATADIR = to_var('Deploy_DataDir')
-        self.env.DEPLOY_PLUGINDIR = to_var('Deploy_PluginDir')
-        self.env.DEPLOY_KERNELDIR = to_var('Deploy_KernelDir')
-        self.features = ['GUI']
-        self.recurse([self.run_dir])
-
-        self.environment_id = self.get_environment_id()
-        self.build_platform_list()
+    def write_project_files(self):
         appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
         self.base_node = self.srcnode
         qbs_project = self.base_node.make_node('%s.qbs' % appname)
@@ -1394,6 +1399,126 @@ class Qbs(QtCreator):
                         project_file.write('%s        "%s",\n' % (indent, node_path))
                 project_file.write('%s    ]\n' % indent)
                 project_file.write('%s}\n' % indent)
+
+
+class QCMake(QtCreator):
+    cmd = 'qcmake'
+    PROJECT_TYPE = 'CMakeProjectManager.CMakeBuildConfiguration'
+    fun = 'build'
+    optim = 'debug'
+    motor_toolchain = 'projects'
+    motor_variant = 'projects.setup'
+    variant = 'projects/qcmake'
+    version = (4, 18)
+
+    def write_project_files(self):
+        cmake.write_cmake_workspace(self)
+        appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
+        self.base_node = self.srcnode
+        cmake_user = self.base_node.make_node('CMakeLists.txt.user')
+        try:
+            os.makedirs(os.path.join(HOME_DIRECTORY, 'codestyles', 'Cpp'))
+        except OSError:
+            pass
+        with open(os.path.join(HOME_DIRECTORY, 'codestyles', 'Cpp', 'motor.xml'), 'w') as codestyle:
+            self.write_codestyle(codestyle)
+        project_list = []
+        for group in self.groups:
+            for task_gen in group:
+                if 'motor:kernel' in task_gen.features:
+                    continue
+                if 'motor:preprocess' in task_gen.features:
+                    continue
+                project_list.append(task_gen)
+        with open(cmake_user.abspath(), 'w') as f:
+            self.write_user(f, project_list)
+
+    def make_build_configuration(self, build_configuration_index, bld_env, env, env_name, variant):
+        return (
+            'ProjectExplorer.Target.BuildConfiguration.%d' % build_configuration_index, [
+                ('CMake.Build.Type', '%s-%s' % (env_name, variant)),
+                ('CMake.Configure.ClearSystemEnvironment', False),
+                ('CMake.Configure.UserEnvironmentChanges', tuple()),
+                ('CMake.Initial.Parameters', "-DCMAKE_BUILD_TYPE:STRING=%s-%s" % (env_name, variant)),
+                (
+                    'ProjectExplorer.BuildConfiguration.BuildDirectory',
+                    self.bldnode.make_node('%s/%s' % (env_name, variant)).abspath()
+                ),
+                (
+                    'GenericProjectManager.GenericBuildConfiguration.BuildDirectory',
+                    self.bldnode.make_node('%s/%s' % (env_name, variant)).abspath()
+                ),
+                (
+                    'ProjectExplorer.BuildConfiguration.BuildStepList.0', [
+                        (
+                            'ProjectExplorer.BuildStepList.Step.0', [
+                                ('CMakeProjectManager.MakeStep.BuildPreset', ''),
+                                ('CMakeProjectManager.MakeStep.BuildTargets', ('all',)),
+                                ('CMakeProjectManager.MakeStep.ClearSystemEnvironment', False),
+                                ('CMakeProjectManager.MakeStep.UserEnvironmentChanges', tuple()),
+                                ('ProjectExplorer.BuildStep.Enabled', True),
+                                ('ProjectExplorer.ProjectConfiguration.DisplayName', 'Build'),
+                                ('ProjectExplorer.ProjectConfiguration.Id', 'CMakeProjectManager.MakeStep')
+                            ]
+                        ),
+                        ('ProjectExplorer.BuildStepList.StepsCount', 1),
+                        ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Build'),
+                        ('ProjectExplorer.ProjectConfiguration.DisplayName', 'Build'),
+                        (
+                            'ProjectExplorer.ProjectConfiguration.Id',
+                            'ProjectExplorer.BuildSteps.Build'
+                        )
+                    ]
+                ),
+                (
+                    'ProjectExplorer.BuildConfiguration.BuildStepList.1', [
+                        (
+                            'ProjectExplorer.BuildStepList.Step.0', [
+                                ('CMakeProjectManager.MakeStep.BuildPreset', ''),
+                                ('CMakeProjectManager.MakeStep.BuildTargets', ('clean',)),
+                                ('CMakeProjectManager.MakeStep.ClearSystemEnvironment', False),
+                                ('CMakeProjectManager.MakeStep.UserEnvironmentChanges', tuple()),
+                                ('ProjectExplorer.BuildStep.Enabled', True),
+                                ('ProjectExplorer.ProjectConfiguration.DisplayName', 'Clean'),
+                                ('ProjectExplorer.ProjectConfiguration.Id', 'CMakeProjectManager.MakeStep')
+                            ]
+                        ), ('ProjectExplorer.BuildStepList.StepsCount', 1),
+                        ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Clean'),
+                        ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                        (
+                            'ProjectExplorer.ProjectConfiguration.Id',
+                            'ProjectExplorer.BuildSteps.Clean'
+                        )
+                    ]
+                ),
+                ('ProjectExplorer.BuildConfiguration.BuildStepListCount', 2),
+                ('ProjectExplorer.BuildConfiguration.ClearSystemEnvironment', False),
+                (
+                    'ProjectExplorer.BuildConfiguration.UserEnvironmentChanges',
+                    tuple(
+                        '%s=%s' % (var_name, bld_env[var_name.upper()]) for var_name in (
+                            'Toolchain', 'Prefix', 'Deploy_RootDir', 'Deploy_BinDir',
+                            'Deploy_RunBinDir', 'Deploy_LibDir', 'Deploy_IncludeDir',
+                            'Deploy_DataDir'
+                        )
+                    ) + (
+                        'OUT_NAME=%s' % os.path.join(
+                            self.srcnode.abspath(), bld_env.PREFIX, variant, env.DEPLOY_BINDIR,
+                            env.cxxprogram_PATTERN % self.launcher.target
+                        ), 'OUT_DIR=%s' %
+                        os.path.join(self.srcnode.abspath(), bld_env.PREFIX, variant),
+                        'RUNBIN_DIR=%s' % os.path.join(
+                            self.srcnode.abspath(), bld_env.PREFIX, variant,
+                            env.DEPLOY_RUNBINDIR
+                        ), 'TERM=msys', 'Python="%s"' % sys.executable,
+                        'SrcDir="%s"' % self.srcnode.abspath(), 'Variant=%s' % variant,
+                        'PATH=%s' % os.environ['PATH']
+                    )
+                ), ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),
+                ('ProjectExplorer.ProjectConfiguration.DisplayName', variant),
+                ('ProjectExplorer.ProjectConfiguration.Id', self.PROJECT_TYPE)
+            ]
+        )
 
 
 class QtCreator2(QtCreator):

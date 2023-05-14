@@ -120,7 +120,7 @@ carray_RTTIHelper< T, Count >::trampoline_method_Index_overload_1(Meta::Value* p
 
 template < typename T, u32 Count >
 const Meta::ObjectInfo carray_RTTIHelper< T, Count >::s_prop_value_type_object_value_type
-    = {{0}, {0}, istring(istring("value_type")), Meta::Value(value_type)};
+    = {{nullptr}, {nullptr}, istring(istring("value_type")), Meta::Value(value_type)};
 
 template < typename T, u32 Count >
 const Meta::Method::Parameter carray_RTTIHelper< T, Count >::s_method_size_overload_0_params[]
@@ -172,7 +172,7 @@ const Meta::ArrayOperatorTable carray_RTTIHelper< T, Count >::scriptingArrayAPI
 
 template < typename T, u32 Count >
 const Meta::OperatorTable carray_RTTIHelper< T, Count >::scriptingAPI
-    = {{&scriptingArrayAPI}, {0, 0}, {0}};
+    = {{&scriptingArrayAPI}, {0, nullptr}, {nullptr}};
 
 template < typename T, u32 Count >
 MOTOR_EXPORT raw< const Meta::Class > ClassID< T[Count] >::klass()

@@ -8,40 +8,40 @@
 
 namespace Motor { namespace Meta {
 
-Value::Value(const Value& other) : m_type(other.m_type), m_ref(), m_reference(other.m_reference)
+Value::Value(const Value& other) : m_type(other.m_type), m_buffer(), m_reference(other.m_reference)
 {
     if(m_reference)
     {
-        m_ref.m_pointer    = other.m_ref.m_pointer;
-        m_ref.m_deallocate = false;
+        m_buffer.m_ref.m_pointer    = other.m_buffer.m_ref.m_pointer;
+        m_buffer.m_ref.m_deallocate = false;
     }
     else
     {
-        m_ref.m_pointer
+        m_buffer.m_ref.m_pointer
             = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : nullptr;
-        m_ref.m_deallocate = (m_ref.m_pointer != nullptr);
+        m_buffer.m_ref.m_deallocate = (m_buffer.m_ref.m_pointer != nullptr);
         m_type.copy(other.memory(), memory());
     }
 }
 
 Value::Value(Type type, const void* location, MakeCopyType)
     : m_type(type)
-    , m_ref()
+    , m_buffer()
     , m_reference(false)
 {
-    m_ref.m_pointer
+    m_buffer.m_ref.m_pointer
         = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : nullptr;
-    m_ref.m_deallocate = m_ref.m_pointer != nullptr;
+    m_buffer.m_ref.m_deallocate = m_buffer.m_ref.m_pointer != nullptr;
     m_type.copy(location, memory());
 }
 
-Value::Value(Type type, void* location) : m_type(type), m_ref(), m_reference(true)
+Value::Value(Type type, void* location) : m_type(type), m_buffer(), m_reference(true)
 {
-    m_ref.m_pointer    = location;
-    m_ref.m_deallocate = false;
+    m_buffer.m_ref.m_pointer    = location;
+    m_buffer.m_ref.m_deallocate = false;
 }
 
-Value::Value(Type type, const Value& castFrom) : m_type(type), m_ref(), m_reference(false)
+Value::Value(Type type, const Value& castFrom) : m_type(type), m_buffer(), m_reference(false)
 {
     motor_assert_format(m_type.metaclass->isA(castFrom.type().metaclass)
                             || castFrom.type().metaclass->isA(m_type.metaclass),
@@ -50,17 +50,17 @@ Value::Value(Type type, const Value& castFrom) : m_type(type), m_ref(), m_refere
                             || castFrom.type().isA(m_type),
                         "cannot upcast value type from {0} to {1}", castFrom.type(), m_type);
 
-    m_ref.m_pointer
+    m_buffer.m_ref.m_pointer
         = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : nullptr;
-    m_ref.m_deallocate = (m_ref.m_pointer != nullptr);
+    m_buffer.m_ref.m_deallocate = (m_buffer.m_ref.m_pointer != nullptr);
     m_type.copy(castFrom.memory(), memory());
 }
 
-Value::Value(Type type, ReserveType) : m_type(type), m_ref(), m_reference(false)
+Value::Value(Type type, ReserveType) : m_type(type), m_buffer(), m_reference(false)
 {
-    m_ref.m_pointer
+    m_buffer.m_ref.m_pointer
         = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : nullptr;
-    m_ref.m_deallocate = m_ref.m_pointer != nullptr;
+    m_buffer.m_ref.m_deallocate = m_buffer.m_ref.m_pointer != nullptr;
 }
 
 Value::~Value()
@@ -68,9 +68,9 @@ Value::~Value()
     if(!m_reference)
     {
         m_type.destroy(memory());
-        if(m_type.size() > sizeof(m_buffer) && m_ref.m_deallocate)
+        if(m_type.size() > sizeof(m_buffer) && m_buffer.m_ref.m_deallocate)
         {
-            Arena::script().free(m_ref.m_pointer);
+            Arena::script().free(m_buffer.m_ref.m_pointer);
         }
     }
 }
@@ -127,9 +127,9 @@ void* Value::unpackAs(const Type& ti, ref< minitl::refcountable >& rptr,
 
 void Value::store(const void* src)
 {
-    m_ref.m_pointer
+    m_buffer.m_ref.m_pointer
         = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : nullptr;
-    m_ref.m_deallocate = m_ref.m_pointer != nullptr;
+    m_buffer.m_ref.m_deallocate = m_buffer.m_ref.m_pointer != nullptr;
     m_type.copy(src, memory());
 }
 
@@ -163,23 +163,23 @@ void Value::swap(Value& other)
         if(m_reference && other.m_reference)
         {
             minitl::swap(m_type, other.m_type);
-            minitl::swap(m_ref, other.m_ref);
+            minitl::swap(m_buffer.m_ref, other.m_buffer.m_ref);
         }
         else if(m_reference)
         {
             minitl::swap(m_type, other.m_type);
             minitl::swap(m_reference, other.m_reference);
-            Reference r = m_ref;
-            m_type.copy(other.m_buffer, m_buffer);
-            m_type.destroy(other.m_buffer);
-            other.m_ref = r;
+            Reference r = m_buffer.m_ref;
+            m_type.copy(other.m_buffer.m_data, m_buffer.m_data);
+            m_type.destroy(other.m_buffer.m_data);
+            other.m_buffer.m_ref = r;
         }
         else if(other.m_reference)
         {
-            Reference r = other.m_ref;
-            m_type.copy(m_buffer, other.m_buffer);
-            m_type.destroy(m_buffer);
-            m_ref = r;
+            Reference r = other.m_buffer.m_ref;
+            m_type.copy(m_buffer.m_data, other.m_buffer.m_data);
+            m_type.destroy(m_buffer.m_data);
+            m_buffer.m_ref = r;
             minitl::swap(m_type, other.m_type);
             minitl::swap(m_reference, other.m_reference);
         }

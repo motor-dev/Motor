@@ -178,7 +178,7 @@ GLRenderer::GLRenderer(const Plugin::Context& context)
                     Arena::general(), static_cast< PlatformData* >(getPlatformData()))
                                       : scoped< Context >())
     , m_openGLMemoryHost(scoped< GLMemoryHost >::create(Arena::general()))
-    , m_openCLScheduler("plugin.compute.opencl_gl", context)
+    , m_openCLScheduler(inamespace("plugin.compute.opencl_gl"), context)
 {
 }
 

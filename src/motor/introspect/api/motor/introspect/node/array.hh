@@ -19,7 +19,7 @@ protected:
     void           doVisit(Node::Visitor & visitor) const override;
 
 public:
-    explicit Array(const minitl::vector< ref< Node > >& value);
+    explicit Array(minitl::vector< ref< Node > > value);
     ~Array() override;
 };
 

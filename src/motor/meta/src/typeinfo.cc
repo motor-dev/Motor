@@ -155,8 +155,9 @@ u32 format_arg(char* destination, const Type& type, const minitl::format_options
 u32 format_arg_partial(char* destination, const Type& type, const minitl::format_options& options,
                        u32 reservedLength, u32 maxCapacity)
 {
-    return minitl::format_details::format_arg_partial_delegate(destination, type, options,
-                                                               reservedLength, maxCapacity);
+    return minitl::format_details::format_arg_partial_delegate< const Type&,
+                                                                minitl::formatter< 's' > >(
+        destination, type, options, reservedLength, maxCapacity);
 }
 
 }}  // namespace Motor::Meta
