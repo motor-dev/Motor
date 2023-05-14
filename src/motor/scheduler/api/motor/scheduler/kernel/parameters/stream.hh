@@ -18,11 +18,9 @@ private:
 public:
     Stream()
     {
-        (void)s_registration;
+        motor_forceuse(s_registration);
     }
-    ~Stream()
-    {
-    }
+    ~Stream() override = default;
 };
 
 template < typename T >

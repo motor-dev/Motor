@@ -4,6 +4,7 @@
 #include <motor/plugin.scripting.package/stdafx.h>
 #include <motor/core/md5.hh>
 #include <motor/filesystem/folder.meta.hh>
+#include <motor/minitl/reverse.hh>
 #include <motor/plugin.scripting.package/nodes/package.hh>
 #include <packagebuilder.hh>
 #include <packageloader.hh>
@@ -45,13 +46,12 @@ void PackageLoader::unload(const weak< const Resource::IDescription >& /*descrip
         weak< PackageInstance > instance = handle.getRefHandle< PackageInstance >();
         if(instance)
         {
-            for(minitl::vector< Meta::Value >::reverse_iterator it = instance->values.rbegin();
-                it != instance->values.rend(); ++it)
+            for(auto& value: minitl::reverse_view(instance->values))
             {
-                if(it->isA(motor_type< const Resource::IDescription >()))
+                if(value.isA(motor_type< const Resource::IDescription >()))
                 {
-                    m_manager->unload(it->type().metaclass,
-                                      it->as< weak< const Resource::IDescription > >());
+                    m_manager->unload(value.type().metaclass,
+                                      value.as< weak< const Resource::IDescription > >());
                 }
             }
             instance->values.clear();
@@ -67,10 +67,9 @@ void PackageLoader::runBuffer(const weak< const Package >& script, Resource::Res
     motor_info_format(Log::package(), "md5 sum of package: {0}", md5);
     ref< PackageBuilder::Nodes::Package > package
         = m_packageBuilder->createPackage(script->getScriptName(), buffer);
-    for(Meta::AST::MessageList::const_iterator it = package->context().messages.begin();
-        it != package->context().messages.end(); ++it)
+    for(const auto& message: package->context().messages)
     {
-        Log::package()->log(it->severity, MOTOR_FILE, MOTOR_LINE, it->message.c_str());
+        Log::package()->log(message.severity, MOTOR_FILE, MOTOR_LINE, message.message.c_str());
     }
     if(package->success())
     {

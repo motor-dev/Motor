@@ -7,7 +7,7 @@ namespace Motor { namespace Log {
 
 weak< Logger > windowing()
 {
-    static weak< Logger > result = graphics()->getChild("windowing");
+    static weak< Logger > result = graphics()->getChild(istring("windowing"));
     return result;
 }
 

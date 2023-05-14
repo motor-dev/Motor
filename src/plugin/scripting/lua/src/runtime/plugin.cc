@@ -33,7 +33,7 @@ static int pluginGet(lua_State* state)
     auto*       userdata = (Plugin::Plugin< void >*)lua_touserdata(state, 1);
     const char* name     = lua_tostring(state, 2);
     Meta::Value v(userdata->pluginNamespace());
-    Context::push(state, v[name]);
+    Context::push(state, v[istring(name)]);
     return 1;
 }
 

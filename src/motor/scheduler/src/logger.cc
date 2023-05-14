@@ -7,13 +7,13 @@ namespace Motor { namespace Log {
 
 weak< Logger > scheduler()
 {
-    static weak< Logger > result = system()->getChild("scheduler");
+    static weak< Logger > result = system()->getChild(istring("scheduler"));
     return result;
 }
 
 weak< Logger > compute()
 {
-    static weak< Logger > result = system()->getChild("compute");
+    static weak< Logger > result = system()->getChild(istring("compute"));
     return result;
 }
 

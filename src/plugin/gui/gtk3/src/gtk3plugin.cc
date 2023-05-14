@@ -45,16 +45,18 @@ static void log(const gchar* domain, GLogLevelFlags log_level, const gchar* mess
     case G_LOG_LEVEL_DEBUG: level = logDebug; break;
     }
     if(domain)
-        logger->getChild(domain)->log(level, "", 0, message);
+        logger->getChild(istring(domain))->log(level, "", 0, message);
     else
         logger->log(level, "", 0, message);
 }
 
 struct Gtk3Plugin::Page
 {
-    Page* next;
-    u8*   current;
-    u8    memory[64 * 1024 - sizeof(Page*) - sizeof(u8*)];
+    Page*                next;
+    u8*                  current;
+    static constexpr u64 s_overhead
+        = sizeof(next) + sizeof(current);  // NOLINT(bugprone-sizeof-expression)
+    u8 memory[64 * 1024 - s_overhead];
 };
 
 Gtk3Plugin::Gtk3Plugin()
@@ -305,7 +307,7 @@ Meta::Value Gtk3Plugin::fromGValue(const GValue* value)
     }
     case G_TYPE_CHAR: return Meta::Value(g_value_get_schar(value));
     case G_TYPE_UCHAR: return Meta::Value(g_value_get_uchar(value));
-    case G_TYPE_BOOLEAN: return Meta::Value(g_value_get_boolean(value) ? true : false);
+    case G_TYPE_BOOLEAN: return Meta::Value(g_value_get_boolean(value));
     case G_TYPE_INT: return Meta::Value(i32(g_value_get_int(value)));
     case G_TYPE_UINT: return Meta::Value(u32(g_value_get_uint(value)));
     case G_TYPE_LONG: return Meta::Value(i64(g_value_get_long(value)));

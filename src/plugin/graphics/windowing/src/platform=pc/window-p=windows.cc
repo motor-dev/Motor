@@ -30,6 +30,7 @@ static inline void displayError()
 Window::PlatformWindow::PlatformWindow(const weak< const Renderer >& renderer,
                                        const weak< Window >&         window)
     : m_renderer(renderer)
+    , m_window {}
 {
     WindowCreationFlags f {};
     f.title = "TODO";

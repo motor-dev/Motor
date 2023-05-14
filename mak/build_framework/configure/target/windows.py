@@ -19,7 +19,7 @@ class Windows(Configure.ConfigurationContext.Platform):
         except Exception as e:
             return False
         finally:
-            #if result:
+            # if result:
             #    print(compiler.name())
             node.delete()
             tgtnode.delete()
@@ -37,7 +37,7 @@ class Windows(Configure.ConfigurationContext.Platform):
         except Exception as e:
             return False
         finally:
-            #if result:
+            # if result:
             #    print(compiler.name())
             node.delete()
             tgtnode.delete()
@@ -59,7 +59,7 @@ class Windows(Configure.ConfigurationContext.Platform):
                         if self.is_valid(c):
                             result.append((c, [], Windows_GCC()))
                     elif 'msvc' in c.NAMES:
-                        if c.arch not in ('ia64', ) and self.is_valid_msvc(c):
+                        if c.arch not in ('ia64',) and self.is_valid_msvc(c):
                             result.append((c, [], Windows_MSVC()))
                     else:
                         result.append((c, [], self))
@@ -101,7 +101,7 @@ class Windows(Configure.ConfigurationContext.Platform):
                 winres = conf.find_program('windres', var='WINRC', path_list=compiler.directories, mandatory=False)
             if not winres:
                 winres = conf.find_program('windres', var='WINRC', mandatory=False)
-            conf.load('winres_patch', tooldir=[os.path.join(conf.motornode.abspath(), 'mak', 'tools')])
+            conf.load('winres_patch', tooldir=[os.path.join(conf.motornode.abspath(), 'mak', 'libs', 'waftools')])
             if compiler.arch == 'x86':
                 conf.env.append_unique('WINRCFLAGS', ['--target=pe-i386'])
             elif compiler.arch == 'amd64':
@@ -138,6 +138,7 @@ class Windows_Clang(Windows):
             env.STRIP_BINARY = True
             env.implib_PATTERN = 'lib%s.a'
             env.COMPILER_ABI = 'mingw'
+            env.SYSTEM_NAME = 'w64-mingw32'
         else:
             env.SHLIB_MARKER = []
             env.STLIB_MARKER = []
@@ -152,6 +153,7 @@ class Windows_Clang(Windows):
             env.LINKFLAGS_console = ['-Wl,-subsystem:console']
             env.COMPILER_ABI = 'msvc'
             env.CC_NAME = 'clang_msvc'
+            env.SYSTEM_NAME = 'pc-win32'
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
         self.find_winres(conf, compiler)
         env.DEFINES_console = ['_CONSOLE=1']
@@ -181,6 +183,7 @@ class Windows_GCC(Windows):
         env.append_unique('LINKFLAGS', ['-static'])
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
         env.COMPILER_ABI = 'mingw'
+        env.SYSTEM_NAME = 'w64-mingw32'
         self.find_winres(conf, compiler)
         env.DEFINES_console = ['_CONSOLE=1']
         env.LINKFLAGS_console = ['-mconsole']
@@ -215,7 +218,8 @@ class Windows_MSVC(Windows):
         conf.env.LINKFLAGS_console = ['/SUBSYSTEM:console']
         conf.env.IMPLIB_ST = '/IMPLIB:%s'
         conf.env.DEF_ST = '/DEF:%s'
-        #for l in conf.env.LIBPATH:
+        conf.env.SYSTEM_NAME = 'pc-win32'
+        # for l in conf.env.LIBPATH:
         #    msvcrt_path = os.path.join(l, 'msvcprt.lib')
         #    if os.path.isfile(msvcrt_path):
         #        with open(msvcrt_path, 'rb') as file:
@@ -226,7 +230,7 @@ class Windows_MSVC(Windows):
         #            else:
         #                api = reference.group(1).decode()
         #        break
-        #else:
+        # else:
         #    raise Errors.WafError('can\'t determine ABI of the SDK')
         conf.env.COMPILER_ABI = 'msvc'
 

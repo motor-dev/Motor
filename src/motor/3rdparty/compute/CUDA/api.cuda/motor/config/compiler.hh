@@ -2,9 +2,9 @@
    see LICENSE for detail */
 #pragma once
 
-#define __host    __host__
-#define __device  __device__
-#define __kernel  __device__
+#define __host    __host__ // NOLINT(bugprone-reserved-identifier)
+#define __device  __device__ // NOLINT(bugprone-reserved-identifier)
+#define __kernel  __device__ // NOLINT(bugprone-reserved-identifier)
 
 typedef signed char         i8;
 typedef unsigned char       u8;

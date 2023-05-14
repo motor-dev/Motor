@@ -153,9 +153,9 @@ static istring s_toInt    = istring("toInt");
 
 PyObject* PyMotorEnum::str(PyObject* self)
 {
-    auto*                     self_    = static_cast< PyMotorEnum* >(self);
-    const Meta::Value&        v        = self_->value;
-    raw< const Meta::Method > toString = self_->value[s_toString].as< raw< const Meta::Method > >();
+    auto*              self_    = static_cast< PyMotorEnum* >(self);
+    const Meta::Value& v        = self_->value;
+    auto               toString = self_->value[s_toString].as< raw< const Meta::Method > >();
     minitl::format_buffer< 1024u > format = minitl::format< 1024u >(
         FMT("{0}.{1}"), v.type(), toString->doCall(&self_->value, 1).as< const istring >());
     if(s_library->getVersion() >= 30)
@@ -170,10 +170,10 @@ PyObject* PyMotorEnum::str(PyObject* self)
 
 PyObject* PyMotorEnum::cmp(PyObject* self, PyObject* other, int operation)
 {
-    auto*                     self_ = static_cast< PyMotorEnum* >(self);
-    raw< const Meta::Method > toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
-    i64                       value = toInt->doCall(&self_->value, 1).as< u32 >();
-    i64                       otherValue;
+    auto* self_ = static_cast< PyMotorEnum* >(self);
+    auto  toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
+    i64   value = toInt->doCall(&self_->value, 1).as< u32 >();
+    i64   otherValue;
 
     if(other->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS)
     {
@@ -282,32 +282,32 @@ PyObject* PyMotorEnum::cmp(PyObject* self, PyObject* other, int operation)
 
 PyObject* PyMotorEnum::toint(PyObject* self)
 {
-    auto*                     self_ = static_cast< PyMotorObject* >(self);
-    raw< const Meta::Method > toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
-    long                      value = (long)toInt->doCall(&self_->value, 1).as< u32 >();
+    auto* self_ = static_cast< PyMotorObject* >(self);
+    auto  toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
+    long  value = (long)toInt->doCall(&self_->value, 1).as< u32 >();
     return s_library->m_PyInt_FromLong(value);
 }
 
 PyObject* PyMotorEnum::tolong(PyObject* self)
 {
-    auto*                     self_ = static_cast< PyMotorObject* >(self);
-    raw< const Meta::Method > toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
+    auto*              self_ = static_cast< PyMotorObject* >(self);
+    auto               toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
     unsigned long long value = (unsigned long long)toInt->doCall(&self_->value, 1).as< u32 >();
     return s_library->m_PyLong_FromUnsignedLongLong(value);
 }
 
 PyObject* PyMotorEnum::tofloat(PyObject* self)
 {
-    auto*                     self_ = static_cast< PyMotorObject* >(self);
-    raw< const Meta::Method > toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
-    double                    value = (double)toInt->doCall(&self_->value, 1).as< u32 >();
+    auto*  self_ = static_cast< PyMotorObject* >(self);
+    auto   toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
+    double value = (double)toInt->doCall(&self_->value, 1).as< u32 >();
     return s_library->m_PyFloat_FromDouble(value);
 }
 
 int PyMotorEnum::nonZero(PyObject* self)
 {
-    auto*                     self_ = static_cast< PyMotorObject* >(self);
-    raw< const Meta::Method > toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
+    auto* self_ = static_cast< PyMotorObject* >(self);
+    auto  toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
     return toInt->doCall(&self_->value, 1).as< u32 >() != 0;
 }
 

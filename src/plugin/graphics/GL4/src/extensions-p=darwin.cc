@@ -12,7 +12,7 @@ Extension glGetExtension(const char* name)
     static void* image
         = dlopen("/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL", RTLD_LAZY);
     if(!image)
-        return NULL;
+        return nullptr;
     else
         return (Extension)dlsym(image, name);
 }

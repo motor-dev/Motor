@@ -25,8 +25,8 @@ private:
     union
     {
         Reference m_ref;
-        char      m_buffer[47];
-    };
+        char      m_data[47];
+    } m_buffer;
     bool m_reference;
 
 private:

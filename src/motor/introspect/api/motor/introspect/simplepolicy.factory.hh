@@ -19,10 +19,10 @@ template < typename INTROSPECTION_HINT >
 struct SimplePolicy : public Policy
 {
 public:
-    virtual ref< IntrospectionHint > verify(Meta::AST::DbContext&           context,
-                                            weak< const Meta::AST::Object > object,
-                                            raw< const Method > method, const CallInfo& callInfo,
-                                            u32 argumentThis) const
+    ref< IntrospectionHint > verify(Meta::AST::DbContext&           context,
+                                    weak< const Meta::AST::Object > object,
+                                    raw< const Method > method, const CallInfo& callInfo,
+                                    u32 argumentThis) const override
     {
         motor_forceuse(context);
         return ref< INTROSPECTION_HINT >::create(Arena::meta(), object, method, callInfo,

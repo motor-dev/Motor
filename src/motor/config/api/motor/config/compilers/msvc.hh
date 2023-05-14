@@ -25,8 +25,9 @@
 #    define motor_restrict __restrict
 #endif
 
-#define motor_alignof(t) __alignof(t&)
+#define motor_alignof(t) __alignof(t)
 
+// NOLINTBEGIN(bugprone-reserved-identifier)
 typedef signed __int8    i8;
 typedef signed __int16   i16;
 typedef signed __int32   i32;
@@ -35,7 +36,8 @@ typedef unsigned __int8  u8;
 typedef unsigned __int16 u16;
 typedef unsigned __int32 u32;
 typedef unsigned __int64 u64;
-typedef u8               byte;
+// NOLINTEND(bugprone-reserved-identifier)
+typedef u8 byte;
 
 // member function does not override any base class virtual member function
 #pragma warning(default : 4263)
@@ -111,10 +113,6 @@ typedef u8               byte;
 #    define MOTOR_IMPORT
 #endif
 
-#if _MSC_VER >= 1600
-#    define MOTOR_HAS_MOVE_SEMANTICS
-#endif
-
 #if _MSC_VER >= 1300
 /*# ifndef _XBOX
 #  include <xmmintrin.h>
@@ -140,4 +138,5 @@ typedef u8               byte;
 #    pragma warning(disable : 4714)
 #endif
 
+// NOLINTNEXTLINE(bugprone-reserved-identifier)
 #define _CRT_SECURE_NO_DEPRECATE 1

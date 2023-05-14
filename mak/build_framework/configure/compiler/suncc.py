@@ -157,7 +157,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
     def load_in_env(self, conf, platform):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         v = conf.env
-        v.SYSTEM_INCLUDE_PATTERN = '-I'
+        v.SYSTEM_INCLUDE_PATTERN = '-I%s'
         v['RPATH_ST'] = '-R%s'
         v.IDIRAFTER = '-I'
         if platform.NAME == 'Linux':
@@ -209,24 +209,26 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
 
     def populate_useful_variables(self, conf, sysroot):
         compiler_defines = []
-        result, out, err = self.run_cxx(conf.env.CXXFLAGS + ['-std=c++14', '-xdumpmacros', '-E', '/dev/null'])
+        result, out, err = self.run_c(conf.env.CFLAGS + ['-xdumpmacros=defs,loc', '-E', '/dev/null'])
         if result != 0:
-            raise Exception('could not run SunCC (%s)' % (err))
+            raise Exception('could not run SunC (%s)' % (err))
         for l in out.split('\n') + err.split('\n'):
-            if l.startswith('#define '):
-                l = l.strip()[len('#define '):]
+            if l.startswith('command line: #define '):
+                l = l.strip()[len('command line: #define '):]
+                if l.find('__oracle_') != -1:
+                    continue
                 sp = l.find(' ')
                 if sp == -1:
                     compiler_defines.append(l)
                 else:
                     compiler_defines.append('%s=%s' % (l[:sp].strip(), l[sp + 1:].strip()))
-        conf.env.COMPILER_DEFINES = compiler_defines + ['__clang_analyzer__', '__Pragma(x)']
-        main_node = conf.bldnode.make_node('main.cc')
+        conf.env.COMPILER_C_DEFINES = compiler_defines + ['_Pragma(x)=', '__global=']
+        main_node = conf.bldnode.make_node('main.c')
         with open(main_node.abspath(), 'w') as main:
-            main.write('#include <cstdint>\n')
+            main.write('#include <stdint.h>\n')
 
-        result, out, err = self.run_cxx(
-            conf.env.CXXFLAGS + ['-std=c++14', '-P', '-H', '-o/dev/null', main_node.abspath()])
+        result, out, err = self.run_c(
+            conf.env.CXXFLAGS + ['-P', '-H', '-E', '-o/dev/null', main_node.abspath()])
 
         compiler_includes = []
         for file in err.split('\n'):
@@ -245,7 +247,46 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
             compiler_includes.append('/usr/include/x86_64-linux-gnu')
         else:
             compiler_includes.append('/usr/include/i386-linux-gnu')
-        conf.env.append_unique('COMPILER_INCLUDES', compiler_includes)
+        conf.env.append_unique('COMPILER_C_INCLUDES', compiler_includes)
+
+        compiler_defines = []
+        result, out, err = self.run_cxx(conf.env.CXXFLAGS + ['-std=c++14', '-xdumpmacros=defs,loc', '-E', '/dev/null'])
+        if result != 0:
+            raise Exception('could not run SunCC (%s)' % (err))
+        for l in out.split('\n') + err.split('\n'):
+            if l.startswith('command line: #define '):
+                l = l.strip()[len('command line: #define '):]
+                sp = l.find(' ')
+                if sp == -1:
+                    compiler_defines.append(l)
+                else:
+                    compiler_defines.append('%s=%s' % (l[:sp].strip(), l[sp + 1:].strip()))
+        conf.env.COMPILER_CXX_DEFINES = compiler_defines + ['_Pragma(x)=', '__global=']
+        main_node = conf.bldnode.make_node('main.cc')
+        with open(main_node.abspath(), 'w') as main:
+            main.write('#include <cstdint>\n')
+
+        result, out, err = self.run_cxx(
+            conf.env.CXXFLAGS + ['-std=c++14', '-P', '-H', '-E', '-o/dev/null', main_node.abspath()])
+
+        compiler_includes = []
+        for file in err.split('\n'):
+            file = file.strip()
+            if file:
+                pos = file.find('/bits/')
+                if pos == -1:
+                    pos = file.find('/sys/')
+                if pos != -1:
+                    directory = file[:pos]
+                else:
+                    directory = os.path.dirname(file)
+                if directory not in compiler_includes:
+                    compiler_includes.append(directory)
+        if self.arch == 'amd64':
+            compiler_includes.append('/usr/include/x86_64-linux-gnu')
+        else:
+            compiler_includes.append('/usr/include/i386-linux-gnu')
+        conf.env.append_unique('COMPILER_CXX_INCLUDES', compiler_includes)
 
 
 def detect_suncc(conf):

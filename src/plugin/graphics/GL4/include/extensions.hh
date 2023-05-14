@@ -25,18 +25,18 @@ struct ShaderExtensions
     typedef void(APIENTRY* glGetObjectParameterivARBProc)(GLhandleARB, GLenum, GLint*);
     typedef void(APIENTRY* glGetInfoLogARBProc)(GLhandleARB, GLsizei, GLsizei*, GLcharARB*);
 
-    const glCreateProgramObjectARBProc glCreateProgram;
-    const glDeleteProgramObjectARBProc glDeleteProgram;
-    const glAttachObjectARBProc        glAttachShader;
-    const glDetachObjectARBProc        glDetachShader;
-    const glLinkProgramARBProc         glLinkProgram;
+    glCreateProgramObjectARBProc glCreateProgram;
+    glDeleteProgramObjectARBProc glDeleteProgram;
+    glAttachObjectARBProc        glAttachShader;
+    glDetachObjectARBProc        glDetachShader;
+    glLinkProgramARBProc         glLinkProgram;
 
-    const glCreateShaderObjectARBProc   glCreateShader;
-    const glDeleteShaderObjectARBProc   glDeleteShader;
-    const glShaderSourceARBProc         glShaderSource;
-    const glCompileShaderARBProc        glCompileShader;
-    const glGetObjectParameterivARBProc glGetObjectParameteriv;
-    const glGetInfoLogARBProc           glGetInfoLog;
+    glCreateShaderObjectARBProc   glCreateShader;
+    glDeleteShaderObjectARBProc   glDeleteShader;
+    glShaderSourceARBProc         glShaderSource;
+    glCompileShaderARBProc        glCompileShader;
+    glGetObjectParameterivARBProc glGetObjectParameteriv;
+    glGetInfoLogARBProc           glGetInfoLog;
     ShaderExtensions();
 
 private:

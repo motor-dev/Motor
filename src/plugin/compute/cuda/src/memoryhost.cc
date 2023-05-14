@@ -6,7 +6,7 @@
 
 namespace Motor { namespace KernelScheduler { namespace Cuda {
 
-MemoryHost::MemoryHost() : IMemoryHost("Cuda")
+MemoryHost::MemoryHost() : IMemoryHost(istring("Cuda"))
 {
 }
 

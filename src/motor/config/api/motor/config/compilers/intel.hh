@@ -55,8 +55,9 @@
 
 #ifndef _WIN32
 
-#    include <stdint.h>
+#    include <cstdint>
 #    include <unistd.h>
+// NOLINTBEGIN(bugprone-reserved-identifier)
 typedef signed __int8    i8;
 typedef signed __int16   i16;
 typedef signed __int32   i32;
@@ -65,7 +66,8 @@ typedef unsigned __int8  u8;
 typedef unsigned __int16 u16;
 typedef unsigned __int32 u32;
 typedef unsigned __int64 u64;
-typedef u8               byte;
+// NOLINTEND(bugprone-reserved-identifier)
+typedef u8 byte;
 
 #    define override
 #    define MOTOR_NEVER_INLINE  __attribute__((noinline))

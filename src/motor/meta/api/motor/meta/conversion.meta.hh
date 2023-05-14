@@ -33,7 +33,7 @@ public:
                | (u64(variant) << 48) | (u64(incompatible) << 56);
     }
 
-    bool operator==(ConversionCost other) const
+    bool operator==(const ConversionCost& other) const
     {
         return value() == other.value();
     }

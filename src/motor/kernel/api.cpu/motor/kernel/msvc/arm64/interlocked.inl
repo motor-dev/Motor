@@ -25,23 +25,33 @@ struct InterlockedType< 4 >
     {
         return *p;
     }
-    static inline value_t fetch_and_add(volatile value_t* p, incr_t incr)
+    static inline value_t
+    fetch_and_add(volatile value_t* p,  // NOLINT(readability-non-const-parameter)
+                  incr_t            incr)
     {
         return _InterlockedExchangeAdd(p, incr);
     }
-    static inline value_t fetch_and_sub(volatile value_t* p, incr_t incr)
+    static inline value_t
+    fetch_and_sub(volatile value_t* p,  // NOLINT(readability-non-const-parameter)
+                  incr_t            incr)
     {
         return _InterlockedExchangeAdd(p, -incr);
     }
-    static inline value_t fetch_and_set(volatile value_t* p, incr_t v)
+    static inline value_t
+    fetch_and_set(volatile value_t* p,  // NOLINT(readability-non-const-parameter)
+                  incr_t            v)
     {
         return _InterlockedExchange(p, v);
     }
-    static inline value_t set_conditional(volatile value_t* p, incr_t v, incr_t condition)
+    static inline value_t
+    set_conditional(volatile value_t* p,  // NOLINT(readability-non-const-parameter)
+                    incr_t v, incr_t condition)
     {
         return _InterlockedCompareExchange(p, v, condition);
     }
-    static inline value_t set_and_fetch(volatile value_t* p, incr_t v)
+    static inline value_t
+    set_and_fetch(volatile value_t* p,  // NOLINT(readability-non-const-parameter)
+                  incr_t            v)
     {
         _InterlockedExchange(p, v);
         return v;
@@ -64,23 +74,33 @@ struct InterlockedType< 8 >
     {
         return *p;
     }
-    static inline value_t fetch_and_add(volatile value_t* p, incr_t incr)
+    static inline value_t
+    fetch_and_add(volatile value_t* p,  // NOLINT(readability-non-const-parameter)
+                  incr_t            incr)
     {
         return _InterlockedExchangeAdd64(p, incr);
     }
-    static inline value_t fetch_and_sub(volatile value_t* p, incr_t incr)
+    static inline value_t
+    fetch_and_sub(volatile value_t* p,  // NOLINT(readability-non-const-parameter)
+                  incr_t            incr)
     {
         return _InterlockedExchangeAdd64(p, -incr);
     }
-    static inline value_t fetch_and_set(volatile value_t* p, incr_t v)
+    static inline value_t
+    fetch_and_set(volatile value_t* p,  // NOLINT(readability-non-const-parameter)
+                  incr_t            v)
     {
         return _InterlockedExchange64(p, v);
     }
-    static inline value_t set_conditional(volatile value_t* p, incr_t v, incr_t condition)
+    static inline value_t
+    set_conditional(volatile value_t* p,  // NOLINT(readability-non-const-parameter)
+                    incr_t v, incr_t condition)
     {
         return _InterlockedCompareExchange64(p, v, condition);
     }
-    static inline value_t set_and_fetch(volatile value_t* p, incr_t v)
+    static inline value_t
+    set_and_fetch(volatile value_t* p,  // NOLINT(readability-non-const-parameter)
+                  incr_t            v)
     {
         _InterlockedExchange64(p, v);
         return v;
@@ -93,26 +113,19 @@ struct InterlockedType< 8 >
         typedef tagged_t tag_t;
         __declspec(align(16)) volatile counter_t m_tag;
         __declspec(align(8)) volatile value_t m_value;
-        tagged_t(value_t value = 0) : m_tag(0), m_value(value)
+        explicit tagged_t(value_t value = nullptr) : m_tag(0), m_value(value)
         {
         }
         tagged_t(counter_t tag, value_t value) : m_tag(tag), m_value(value)
         {
         }
-        tagged_t(const tagged_t& other) : m_tag(other.m_tag), m_value(other.m_value)
-        {
-        }
-        tagged_t& operator=(const tagged_t& other)
-        {
-            m_tag   = other.m_tag;
-            m_value = other.m_value;
-            return *this;
-        }
-        inline value_t value()
+        tagged_t(const tagged_t& other)                 = default;
+        tagged_t&      operator=(const tagged_t& other) = default;
+        inline value_t value() const
         {
             return m_value;
         }
-        inline bool operator==(tagged_t& other)
+        inline bool operator==(const tagged_t& other) const
         {
             return m_tag == other.m_tag && m_value == other.m_value;
         }

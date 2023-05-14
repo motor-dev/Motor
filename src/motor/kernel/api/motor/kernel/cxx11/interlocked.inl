@@ -58,7 +58,7 @@ struct InterlockedType< 4 >
 
         __attribute__((aligned(4))) value_t m_value;
 
-        tagged_t(void* value = nullptr) : m_value {tagged_pointer {value, 0}}
+        explicit tagged_t(void* value = nullptr) : m_value {tagged_pointer {value, 0}}
         {
         }
         tagged_t(const tagged_t& other) = delete;
@@ -71,7 +71,7 @@ struct InterlockedType< 4 >
         {
             return atomic_load(&m_value).value;
         }
-        inline bool operator==(tagged_t& other)
+        inline bool operator==(const tagged_t& other) const
         {
             return atomic_load(&m_value) == atomic_load(&other.m_value);
         }
@@ -146,7 +146,7 @@ struct InterlockedType< 8 >
 
         __attribute__((aligned(8))) value_t m_value;
 
-        tagged_t(void* value = nullptr) : m_value {tagged_pointer {value, 0}}
+        explicit tagged_t(void* value = nullptr) : m_value {tagged_pointer {value, 0}}
         {
         }
         tagged_t(const tagged_t& other) = delete;
@@ -159,7 +159,7 @@ struct InterlockedType< 8 >
         {
             return atomic_load(&m_value).value;
         }
-        inline bool operator==(tagged_t& other)
+        inline bool operator==(const tagged_t& other) const
         {
             return atomic_load(&m_value) == atomic_load(&other.m_value);
         }

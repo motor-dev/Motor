@@ -14,14 +14,14 @@
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/call.hh>
 #include <motor/meta/value.hh>
+#include <motor/minitl/utility.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 
-Object::Object(const ref< Reference >&                   className,
-               const minitl::vector< ref< Parameter > >& parameters)
+Object::Object(const ref< Reference >& className, minitl::vector< ref< Parameter > > parameters)
     : Node()
     , m_className(className)
-    , m_parameters(parameters)
+    , m_parameters(minitl::move(parameters))
     , m_arguments(Arena::temporary())
 {
 }

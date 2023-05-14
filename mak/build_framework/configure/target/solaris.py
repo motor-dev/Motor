@@ -24,7 +24,7 @@ class Solaris(Configure.ConfigurationContext.Platform):
             print(e)
             pass
         finally:
-            #if result:
+            # if result:
             #    print(compiler.name(), err)
             node.delete()
             out = out.split() + err.split()
@@ -43,7 +43,7 @@ class Solaris(Configure.ConfigurationContext.Platform):
         except Exception as e:
             return False
         finally:
-            #if result:
+            # if result:
             #    print(compiler.name(), err)
             node.delete()
             tgtnode.delete()
@@ -59,7 +59,7 @@ class Solaris(Configure.ConfigurationContext.Platform):
                         break
             else:
                 pass
-                #print(c.platform)
+                # print(c.platform)
         return result
 
     def load_in_env(self, conf, compiler):
@@ -68,6 +68,7 @@ class Solaris(Configure.ConfigurationContext.Platform):
         env.DEST_OS = 'solaris'
         env.ABI = 'elf'
         env.VALID_PLATFORMS = ['solaris', 'sunos', 'posix', 'pc']
+        env.SYSTEM_NAME = 'pc-solaris'
 
         env.DEPLOY_ROOTDIR = ''
         env.DEPLOY_BINDIR = 'bin'
@@ -93,7 +94,7 @@ class Solaris(Configure.ConfigurationContext.Platform):
             self.get_suncc_system_libpath(conf, compiler)
         env.append_unique('DEFINES', ['_GNU_SOURCE'])
         env.append_unique('LDFLAGS', ['-ldl', '-lrt', '-lpthread', '-lm', '-lc'])
-        #env.append_unique('LINKFLAGS', ['-rdynamic'])
+        # env.append_unique('LINKFLAGS', ['-rdynamic'])
 
     def platform_name(self, compiler):
         return 'solaris'

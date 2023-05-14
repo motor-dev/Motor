@@ -25,31 +25,43 @@ MD5 digest(const void* buffer, u64 size)
     return result;
 }
 
-u32 format_length(const MD5& type, const minitl::format_options& options)
+u32 format_length(const MD5& md5, const minitl::format_options& options)
 {
-    motor_forceuse(type);
+    motor_forceuse(md5);
     motor_forceuse(options);
-    return 0;
+    return 32;
 }
 
-u32 format_arg(char* destination, const MD5& type, const minitl::format_options& options,
+u32 format_arg(char* destination, const MD5& md5, const minitl::format_options& options,
                u32 reservedLength)
 {
-    motor_forceuse(destination);
-    motor_forceuse(type);
     motor_forceuse(options);
     motor_forceuse(reservedLength);
-    return 0;
+    using minitl::format_details::hexadecimal_format::format_hexadecimal_whole;
+    destination += format_hexadecimal_whole(destination, md5.hash[0]);
+    destination += format_hexadecimal_whole(destination, md5.hash[1]);
+    destination += format_hexadecimal_whole(destination, md5.hash[2]);
+    format_hexadecimal_whole(destination, md5.hash[3]);
+    return 32;
 }
 
-u32 format_arg_partial(char* destination, const MD5& type, const minitl::format_options& options,
+u32 format_arg_partial(char* destination, const MD5& md5, const minitl::format_options& options,
                        u32 reservedLength, u32 maxCapacity)
 {
-    motor_forceuse(destination);
-    motor_forceuse(type);
     motor_forceuse(options);
     motor_forceuse(reservedLength);
-    motor_forceuse(maxCapacity);
-    return 0;
+    using minitl::format_details::hexadecimal_format::format_hexadecimal_whole;
+    u32 i = 0;
+    while(maxCapacity >= 8)
+    {
+        destination += format_hexadecimal_whole(destination, md5.hash[i]);
+        maxCapacity -= 8;
+        ++i;
+    }
+    char buffer[8];
+    format_hexadecimal_whole(buffer, md5.hash[i]);
+    memcpy(destination, buffer, maxCapacity);
+    return i * 8 + maxCapacity;
 }
+
 }  // namespace Motor

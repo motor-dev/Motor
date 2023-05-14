@@ -12,7 +12,7 @@ def configure(configuration_context):
         directory = extra.make_node(extra_platform).abspath()
         if os.path.isdir(directory) and os.path.isfile(os.path.join(directory, 'wscript')):
             configuration_context.recurse(extra.make_node(extra_platform).abspath(), name='host_configure')
-    tool_dir = os.path.join(configuration_context.motornode.abspath(), 'mak', 'tools')
+    tool_dir = os.path.join(configuration_context.motornode.abspath(), 'mak', 'libs', 'waftools')
 
     configuration_context.setenv('projects', configuration_context.env.derive())
     configuration_context.env.TOOLCHAIN = 'projects'

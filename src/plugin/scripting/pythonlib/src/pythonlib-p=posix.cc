@@ -91,10 +91,10 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         motor_get_func(PyThreadState_Swap);
         motor_get_func(PyRun_SimpleString);
         motor_get_func(PyRun_InteractiveLoopFlags);
-        motor_get_func(_Py_NoneStruct);
-        motor_get_func(_Py_TrueStruct);
-        motor_get_func(_Py_FalseStruct);
-        motor_get_func(_Py_NotImplementedStruct);
+        motor_get_func(_Py_NoneStruct);            // NOLINT(bugprone-sizeof-expression)
+        motor_get_func(_Py_TrueStruct);            // NOLINT(bugprone-sizeof-expression)
+        motor_get_func(_Py_FalseStruct);           // NOLINT(bugprone-sizeof-expression)
+        motor_get_func(_Py_NotImplementedStruct);  // NOLINT(bugprone-sizeof-expression)
         motor_get_func(PyObject_SetAttrString);
         motor_get_func(PyObject_GetAttrString);
         motor_get_func(_PyArg_ParseTuple_SizeT);
@@ -168,8 +168,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         motor_get_func(PyErr_SetString);
         motor_get_func(PyErr_Format);
         motor_get_func(PyErr_BadArgument);
-        motor_get_func(PyBool_Type);
-        motor_get_func(PyFloat_Type);
+        motor_get_func(PyBool_Type);   // NOLINT(bugprone-sizeof-expression)
+        motor_get_func(PyFloat_Type);  // NOLINT(bugprone-sizeof-expression)
         motor_get_func(PyExc_Exception);
         motor_get_func(PyExc_AttributeError);
         motor_get_func(PyExc_ImportError);

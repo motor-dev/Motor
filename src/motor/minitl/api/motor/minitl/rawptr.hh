@@ -13,11 +13,11 @@ public:
     T* m_ptr;
 
 public:
-    inline T*       operator->() const;
-    inline          operator const void*() const;  // NOLINT(google-explicit-constructor)
-    inline bool     operator!() const;
-    inline T&       operator*();
-    inline const T& operator*() const;
+    MOTOR_ALWAYS_INLINE T* operator->() const;
+    inline                 operator const void*() const;  // NOLINT(google-explicit-constructor)
+    inline bool            operator!() const;
+    MOTOR_ALWAYS_INLINE T& operator*();
+    MOTOR_ALWAYS_INLINE const T& operator*() const;
 
     template < typename U >
     operator raw< U >() const  // NOLINT(google-explicit-constructor)
@@ -31,6 +31,41 @@ public:
     static inline raw< T > null();
 };
 
-}  // namespace minitl
+template < typename T >
+T* raw< T >::operator->() const
+{
+    return m_ptr;
+}
 
-#include <motor/minitl/inl/rawptr.inl>
+template < typename T >
+raw< T >::operator const void*() const
+{
+    return m_ptr;
+}
+
+template < typename T >
+bool raw< T >::operator!() const
+{
+    return m_ptr == 0;
+}
+
+template < typename T >
+T& raw< T >::operator*()
+{
+    return *m_ptr;
+}
+
+template < typename T >
+const T& raw< T >::operator*() const
+{
+    return *m_ptr;
+}
+
+template < typename T >
+raw< T > raw< T >::null()
+{
+    raw< T > result = {0};
+    return result;
+}
+
+}  // namespace minitl

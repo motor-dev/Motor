@@ -52,7 +52,7 @@ Renderer::PlatformRenderer::PlatformRenderer(const weak< Renderer >& renderer)
     m_wndClassEx.hbrBackground = nullptr;
     m_wndClassEx.lpszMenuName  = nullptr;
     m_wndClassEx.cbClsExtra    = 0;
-    m_wndClassEx.cbWndExtra    = sizeof(Window*);
+    m_wndClassEx.cbWndExtra    = sizeof(Window*);  // NOLINT(bugprone-sizeof-expression)
 
     RegisterClassEx(&m_wndClassEx);
 }

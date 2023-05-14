@@ -346,12 +346,12 @@ class VCproj:
                                     )
                             if float(version_project) >= 8:
                                 tool['PreprocessorDefinitions'] = ';'.join(
-                                    defines + sub_env.DEFINES + sub_env.COMPILER_DEFINES
+                                    defines + sub_env.DEFINES + sub_env.COMPILER_CXX_DEFINES
                                 )
                                 tool['IncludeSearchPath'] = ';'.join(
                                     [
                                         path_from(p, task_gen.bld)
-                                        for p in includes + sub_env.INCLUDES + sub_env.COMPILER_INCLUDES +
+                                        for p in includes + sub_env.INCLUDES + sub_env.COMPILER_CXX_INCLUDES +
                                                  [os.path.join(sub_env.SYSROOT or '', 'usr', 'include')]
                                     ]
                                 )
@@ -570,14 +570,14 @@ class VCxproj:
                         self.vcxproj._add(properties, 'LocalDebuggerWorkingDirectory', '$(OutDir)')
                     self.vcxproj._add(
                         properties, 'NMakePreprocessorDefinitions',
-                        ';'.join(defines + sub_env.DEFINES + sub_env.COMPILER_DEFINES)
+                        ';'.join(defines + sub_env.DEFINES + sub_env.COMPILER_CXX_DEFINES)
                     )
                     if sub_env.SYS_ROOT:
                         includes.append('%s/usr/include' % sub_env.SYSROOT or '')
                     self.vcxproj._add(
                         properties, 'NMakeIncludeSearchPath', ';'.join(
                             [path_from(i, task_gen.bld) for i in
-                             includes] + sub_env.INCLUDES + sub_env.COMPILER_INCLUDES
+                             includes] + sub_env.INCLUDES + sub_env.COMPILER_CXX_INCLUDES
                         )
                     )
         self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.props'})

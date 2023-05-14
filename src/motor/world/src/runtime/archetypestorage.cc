@@ -92,7 +92,7 @@ struct Visitor : public Meta::AST::Node::Visitor
                 const Meta::Value&                        referencedValue) override
     {
         motor_forceuse(reference);
-        raw< const Meta::Class > cls = referencedValue.as< raw< const Meta::Class > >();
+        auto cls = referencedValue.as< raw< const Meta::Class > >();
         if(!verify)
         {
             for(u32 i = 0; i < index; ++i)
@@ -178,8 +178,8 @@ public:
 
         if(!found)
         {
-            weak< ArchetypeStorage > storage = value.as< weak< ArchetypeStorage > >();
-            u32                      i       = 0;
+            auto storage = value.as< weak< ArchetypeStorage > >();
+            u32  i       = 0;
             for(minitl::array< raw< const Meta::Class > >::const_iterator it = m_parameters.begin();
                 it != m_parameters.end(); ++it, ++i)
             {
@@ -230,9 +230,9 @@ ref< Meta::AST::IntrospectionHint > ArchetypeStorage::Policy::verify(
     raw< const Meta::Method > method, const Meta::CallInfo& callInfo, u32 argumentThis) const
 {
     Visitor visitor(object, context);
-    object->getParameter("componentClasses")->visit(visitor);
+    object->getParameter(istring("componentClasses"))->visit(visitor);
     visitor.verify = true;
-    object->getParameter("archetypes")->visit(visitor);
+    object->getParameter(istring("archetypes"))->visit(visitor);
     if(visitor.errorCount)
         return ref< IntrospectionHint >();
     else

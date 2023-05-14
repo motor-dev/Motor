@@ -171,23 +171,15 @@ class vscode(Build.BuildContext):
                             continue
                         tg.post()
                         mark = len(commands)
-                        resp_file_name = variant_node.make_node('%s.txt' % tg.name).path_from(self.srcnode)
+                        resp_file_name_c = variant_node.make_node('%s_c.txt' % tg.name).path_from(self.srcnode)
+                        resp_file_name_cxx = variant_node.make_node('%s_cxx.txt' % tg.name).path_from(self.srcnode)
 
                         for task in tg.tasks:
                             if task.__class__.__name__ in ('c', 'objc'):
                                 commands.append(
                                     {
                                         'directory': self.path.abspath(),
-                                        'arguments': env.CC + ['@%s' % (resp_file_name)],
-                                        'file': task.inputs[0].path_from(self.path),
-                                        'output': task.outputs[0].path_from(self.path)
-                                    }
-                                )
-                            if task.__class__.__name__ in ('cxx', 'objcxx'):
-                                commands.append(
-                                    {
-                                        'directory': self.path.abspath(),
-                                        'arguments': env.CXX + ['-std=c++14', '@%s' % resp_file_name],
+                                        'arguments': env.CC + ['@%s' % (resp_file_name_c)],
                                         'file': task.inputs[0].path_from(self.path),
                                         'output': task.outputs[0].path_from(self.path)
                                     }
@@ -196,8 +188,8 @@ class vscode(Build.BuildContext):
                                 commands.append(
                                     {
                                         'directory': self.path.abspath(),
-                                        'arguments': env.CXX + ['-std=c++14', '@%s' % resp_file_name],
-                                        'file': task.generator.source[0].path_from(self.path),
+                                        'arguments': env.CXX + ['-std=c++14', '@%s' % resp_file_name_cxx],
+                                        'file': task.inputs[0].path_from(self.path),
                                         'output': task.outputs[0].path_from(self.path)
                                     }
                                 )
@@ -214,13 +206,20 @@ class vscode(Build.BuildContext):
                             tg_defines += getattr(tg, 'export_defines', [])
                             tg_defines += getattr(tg, 'extra_defines', [])
                             tg_defines += tg.env.DEFINES
-                            with open(resp_file_name, 'w') as response_file:
+                            with open(resp_file_name_c, 'w') as response_file:
+                                for i in env.COMPILER_C_INCLUDES + env.INCLUDES:
+                                    response_file.write('-isystem%s\n' % i)
+                                for i in tg_includes + tg.env.INCPATHS:
+                                    response_file.write('-I%s\n' % i)
+                                for d in env.COMPILER_C_DEFINES + env.DEFINES + tg_defines:
+                                    response_file.write('-D%s\n' % d)
+                            with open(resp_file_name_cxx, 'w') as response_file:
                                 response_file.write('-std=c++14%s\n')
-                                for i in env.COMPILER_INCLUDES + env.INCLUDES:
+                                for i in env.COMPILER_CXX_INCLUDES + env.INCLUDES:
                                     response_file.write('-isystem\n%s\n' % i)
                                 for i in tg_includes + tg.env.INCPATHS:
                                     response_file.write('-I%s\n' % i)
-                                for d in env.COMPILER_DEFINES + env.DEFINES + tg_defines:
+                                for d in env.COMPILER_CXX_DEFINES + env.DEFINES + tg_defines:
                                     response_file.write('-D%s\n' % d)
 
                             include_paths += tg_includes

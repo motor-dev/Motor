@@ -117,7 +117,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         if self.arch == 'x86':
             conf.find_program('ml', var='ML', path_list=conf.env.PATH, mandatory=False)
         env = conf.env
-        env.SYSTEM_INCLUDE_PATTERN = '/I'
+        env.SYSTEM_INCLUDE_PATTERN = '/I%s'
         env.IDIRAFTER = '/I'
         if os_platform().endswith('64'):
             conf.find_program('cdb64', var='CDB', mandatory=False)

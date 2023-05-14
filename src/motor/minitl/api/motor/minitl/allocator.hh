@@ -12,129 +12,7 @@ class motor_api(MINITL) allocator
 {
 public:
     template < typename T >
-    class block
-    {
-    private:
-        allocator* m_allocator;
-        u64        m_count;
-        T*         m_data;
-
-    public:
-        block(allocator& allocator, u64 count, u64 block_alignment = 4)
-            : m_allocator(&allocator)
-            , m_count(count)
-            , m_data(count ? (T*)allocator.alloc(align(sizeof(T), motor_alignof(T)) * count,
-                                                 max< u64 >(block_alignment, motor_alignof(T)))
-                           : 0) {};
-        block(block&& other) noexcept
-            : m_allocator(other.m_allocator)
-            , m_count(other.m_count)
-            , m_data(other.m_data)
-        {
-            other.m_count = 0;
-            other.m_data  = nullptr;
-        }
-        block& operator=(block&& other) noexcept
-        {
-            m_allocator->free(m_data);
-            m_allocator   = other.m_allocator;
-            m_count       = other.m_count;
-            m_data        = other.m_data;
-            other.m_count = 0;
-            other.m_data  = nullptr;
-            return *this;
-        }
-        block(const block&)            = delete;
-        block& operator=(const block&) = delete;
-        ~block()
-        {
-            m_allocator->free(m_data);
-        }
-        inline allocator& arena() const
-        {
-            return *m_allocator;
-        }
-        T* data()
-        {
-            return m_data;
-        }
-        const T* data() const
-        {
-            return m_data;
-        }
-        operator T*()  // NOLINT(google-explicit-constructor)
-        {
-            return m_data;
-        }
-        operator const T*() const  // NOLINT(google-explicit-constructor)
-        {
-            return m_data;
-        }
-        u64 count() const
-        {
-            return m_count;
-        }
-        u64 byte_count() const
-        {
-            return align(sizeof(T), motor_alignof(T)) * m_count;
-        }
-        T* begin()
-        {
-            return m_data;
-        }
-        T* end()
-        {
-            return m_data + m_count;
-        }
-        const T* begin() const
-        {
-            return m_data;
-        }
-        const T* end() const
-        {
-            return m_data + m_count;
-        }
-
-        bool resize(u64 count)
-        {
-            u64 size = align(sizeof(T), motor_alignof(T)) * count;
-            if(m_allocator->resize(m_data, size))
-            {
-                m_count = count;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        void realloc(u64 count, u64 block_alignment = 4)
-        {
-            if(count > m_count)
-            {
-                u64 alignment = max< u64 >(block_alignment, motor_alignof(T));
-                u64 size      = align(sizeof(T), motor_alignof(T)) * count;
-                m_count       = count;
-                m_data        = (T*)m_allocator->realloc(m_data, size, alignment);
-            }
-            else
-            {
-                // shrink does not realloc
-                m_count = count;
-                if(!count)
-                {
-                    m_allocator->free(m_data);
-                    m_data = 0;
-                }
-            }
-        }
-        void swap(block< T >& other)
-        {
-            minitl::swap(m_allocator, other.m_allocator);
-            minitl::swap(m_count, other.m_count);
-            minitl::swap(m_data, other.m_data);
-        }
-    };
+    class block;
 
 protected:
     virtual void* internal_alloc(u64 size, u64 alignment)              = 0;
@@ -152,6 +30,131 @@ public:
     inline char* strdup(const char* begin, const char* end);
     template < typename T >
     inline T* alloc();
+};
+
+template < typename T >
+class allocator::block
+{
+private:
+    allocator* m_allocator;
+    u64        m_count;
+    T*         m_data;
+
+public:
+    block(allocator& allocator, u64 count, u64 block_alignment = 4)
+        : m_allocator(&allocator)
+        , m_count(count)
+        , m_data(count ? (T*)allocator.alloc(align(sizeof(T), motor_alignof(T)) * count,
+                                             max< u64 >(block_alignment, motor_alignof(T)))
+                       : 0) {};
+    block(block&& other) noexcept
+        : m_allocator(other.m_allocator)
+        , m_count(other.m_count)
+        , m_data(other.m_data)
+    {
+        other.m_count = 0;
+        other.m_data  = nullptr;
+    }
+    block& operator=(block&& other) noexcept
+    {
+        m_allocator->free(m_data);
+        m_allocator   = other.m_allocator;
+        m_count       = other.m_count;
+        m_data        = other.m_data;
+        other.m_count = 0;
+        other.m_data  = nullptr;
+        return *this;
+    }
+    block(const block&)            = delete;
+    block& operator=(const block&) = delete;
+    ~block()
+    {
+        m_allocator->free(m_data);
+    }
+    inline allocator& arena() const
+    {
+        return *m_allocator;
+    }
+    T* data()
+    {
+        return m_data;
+    }
+    const T* data() const
+    {
+        return m_data;
+    }
+    operator T*()  // NOLINT(google-explicit-constructor)
+    {
+        return m_data;
+    }
+    operator const T*() const  // NOLINT(google-explicit-constructor)
+    {
+        return m_data;
+    }
+    u64 count() const
+    {
+        return m_count;
+    }
+    u64 byte_count() const
+    {
+        return align(sizeof(T), motor_alignof(T)) * m_count;
+    }
+    T* begin()
+    {
+        return m_data;
+    }
+    T* end()
+    {
+        return m_data + m_count;
+    }
+    const T* begin() const
+    {
+        return m_data;
+    }
+    const T* end() const
+    {
+        return m_data + m_count;
+    }
+
+    bool resize(u64 count)
+    {
+        u64 size = align(sizeof(T), motor_alignof(T)) * count;
+        if(m_allocator->resize(m_data, size))
+        {
+            m_count = count;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    void realloc(u64 count, u64 block_alignment = 4)
+    {
+        if(count > m_count)
+        {
+            u64 alignment = max< u64 >(block_alignment, motor_alignof(T));
+            u64 size      = align(sizeof(T), motor_alignof(T)) * count;
+            m_count       = count;
+            m_data        = (T*)m_allocator->realloc(m_data, size, alignment);
+        }
+        else
+        {
+            // shrink does not realloc
+            m_count = count;
+            if(!count)
+            {
+                m_allocator->free(m_data);
+                m_data = 0;
+            }
+        }
+    }
+    void swap(block< T >& other)
+    {
+        minitl::swap(m_allocator, other.m_allocator);
+        minitl::swap(m_count, other.m_count);
+        minitl::swap(m_data, other.m_data);
+    }
 };
 
 void* allocator::alloc(u64 size, u64 alignment)

@@ -75,7 +75,6 @@ misc-throw-by-value-catch-by-reference,
 misc-unconventional-assign-operator,
 misc-uniqueptr-reset-release,
 modernize-avoid-bind,
-modernize-concat-nested-namespaces,
 modernize-deprecated-headers,
 modernize-deprecated-ios-base-aliases,
 modernize-loop-convert,
@@ -95,7 +94,6 @@ modernize-use-bool-literals,
 modernize-use-emplace,
 modernize-use-equals-default,
 modernize-use-equals-delete,
-modernize-use-nodiscard,
 modernize-use-noexcept,
 modernize-use-nullptr,
 modernize-use-override,
@@ -144,3 +142,7 @@ readability-use-anyofallof'
 CheckOptions:
   - key: modernize-use-emplace.ContainersWithPushBack
     value: minitl::vector
+  - key: modernize-loop-convert.MakeReverseRangeFunction
+    value: minitl::reverse_view
+  - key: modernize-loop-convert.MakeReverseRangeHeader
+    value: <motor/minitl/reverse.hh>

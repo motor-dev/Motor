@@ -133,7 +133,7 @@ const Meta::Method::Parameter ClassID< Meta::staticarray< T > >::s_size_params[1
 
 template < typename T >
 const Meta::Method::Overload ClassID< Meta::staticarray< T > >::s_method_size_overloads[1]
-    = {{{0}, {1, s_size_params}, motor_type< u32 >(), false, &callStaticArraySize}};
+    = {{{nullptr}, {1, s_size_params}, motor_type< u32 >(), false, &callStaticArraySize}};
 
 template < typename T >
 const Meta::ArrayOperatorTable ClassID< Meta::staticarray< T > >::scriptingArrayAPI
@@ -141,7 +141,7 @@ const Meta::ArrayOperatorTable ClassID< Meta::staticarray< T > >::scriptingArray
 
 template < typename T >
 const Meta::OperatorTable ClassID< Meta::staticarray< T > >::scriptingAPI
-    = {{&scriptingArrayAPI}, {0, 0}, {0}};
+    = {{&scriptingArrayAPI}, {0, nullptr}, {nullptr}};
 
 template < typename T >
 MOTOR_EXPORT raw< const Meta::Class > ClassID< Meta::staticarray< T > >::klass()

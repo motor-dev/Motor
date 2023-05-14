@@ -30,7 +30,8 @@ byte* SystemAllocator::platformReserve(u32 size)
     return result;
 }
 
-void SystemAllocator::platformCommit(byte* ptr, u32 start, u32 stop)
+void SystemAllocator::platformCommit(byte* ptr, u32 start,
+                                     u32 stop)  // NOLINT(readability-non-const-parameter)
 {
     motor_assert_format((uintptr_t)ptr % platformPageSize() == 0,
                         "pointer {0} is not aligned on a page boundary (page size = {1})", ptr,
@@ -44,7 +45,7 @@ void SystemAllocator::platformCommit(byte* ptr, u32 start, u32 stop)
     VirtualAlloc(ptr + start, stop - start, MEM_COMMIT, PAGE_READWRITE);
 }
 
-void SystemAllocator::platformFree(byte* ptr, u32 size)
+void SystemAllocator::platformFree(byte* ptr, u32 size)  // NOLINT(readability-non-const-parameter)
 {
     motor_assert_format((uintptr_t)ptr % platformPageSize() == 0,
                         "pointer {0} is not aligned on a page boundary (page size = {1})", ptr,

@@ -24,7 +24,7 @@ TaskScheduler::TaskPool::TaskPool(u32 workerCount)
     , m_poolLock((int)workerCount)
     , m_taskPool(static_cast< TaskItem** >(Arena::task().alloc(
           minitl::next_power_of_2(s_maxConcurrentTasks * s_breakdownPerThread * m_workerCount)
-          * sizeof(TaskItem*))))
+          * sizeof(TaskItem*))))  // NOLINT(bugprone-sizeof-expression)
     , m_firstQueued(i_u32::create(0))
     , m_lastQueued(i_u32::create(0))
     , m_firstFree(i_u32::create(0))
@@ -180,7 +180,7 @@ TaskScheduler::~TaskScheduler()
         delete m_worker;
 }
 
-void TaskScheduler::queue(weak< const ITask > task, weak< const IExecutor > executor,
+void TaskScheduler::queue(const weak< const ITask >& task, const weak< const IExecutor >& executor,
                           u32 breakdownCount)
 {
     m_scheduler->m_runningTasks++;

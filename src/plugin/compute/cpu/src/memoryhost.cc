@@ -6,7 +6,7 @@
 
 namespace Motor { namespace KernelScheduler { namespace CPU {
 
-MemoryHost::MemoryHost() : IMemoryHost("CPU")
+MemoryHost::MemoryHost() : IMemoryHost(istring("CPU"))
 {
 }
 

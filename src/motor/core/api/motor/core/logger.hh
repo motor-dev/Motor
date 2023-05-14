@@ -28,7 +28,7 @@ class ILogListener : public minitl::refcountable
 
 protected:
     static motor_api(CORE) const char* getLogLevelName(LogLevel level);
-    virtual ~ILogListener() = default;
+    ~ILogListener() override = default;
     virtual bool log(const inamespace& logname, LogLevel level, const char* filename, int line,
                      const char* thread, const char* msg) const
         = 0;
@@ -53,7 +53,7 @@ private:
            LogLevel minLogLevel = logDebug);
 
 public:
-    ~Logger();
+    ~Logger() override;
 
     minitl::ref< Logger >         getChild(const istring& name);
     static minitl::weak< Logger > instance(const inamespace& name);

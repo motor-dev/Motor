@@ -22,21 +22,21 @@ class ArgumentDeclarationVisitor(utils.StringRef):
 
     def visit_declarator_element_abstract(self, declarator_element_abstract: ast.DeclaratorElementAbstract) -> None:
         if self._depth == 1:
-            assert False   # parameter needs to have a name for the exporter
+            assert False  # parameter needs to have a name for the exporter
         else:
             return utils.StringRef.visit_declarator_element_abstract(self, declarator_element_abstract)
 
     def visit_declarator_element_abstract_pack(
-        self, declarator_element_abstract_pack: ast.DeclaratorElementAbstractPack
+            self, declarator_element_abstract_pack: ast.DeclaratorElementAbstractPack
     ) -> None:
         if self._depth == 1:
-            assert False   # parameter pack not supported
+            assert False  # parameter pack not supported
         else:
             return utils.StringRef.visit_declarator_element_abstract_pack(self, declarator_element_abstract_pack)
 
     def visit_declarator_element_pack_id(self, declarator_element_pack_id: ast.DeclaratorElementPackId) -> None:
         if self._depth == 1:
-            assert False   # parameter pack not supported
+            assert False  # parameter pack not supported
         else:
             return utils.StringRef.visit_declarator_element_pack_id(self, declarator_element_pack_id)
 
@@ -67,12 +67,12 @@ class DeclarationVisitor(ast.Visitor):
 
     def visit_type_specifier_seq(self, type_specifier_seq: ast.TypeSpecifierSeq) -> None:
         if len(type_specifier_seq._types) != 1:
-            assert False   # error: kernel should return void
+            assert False  # error: kernel should return void
         elif type_specifier_seq._types[0] != ast.type.PrimitiveTypeSpecifiers.VOID:
-            assert False   # error: kernel should return void
+            assert False  # error: kernel should return void
 
     def visit_ambiguous_init_declarator_list(
-        self, ambiguous_init_declarator_list: ast.AmbiguousInitDeclaratorList
+            self, ambiguous_init_declarator_list: ast.AmbiguousInitDeclaratorList
     ) -> None:
         ambiguous_init_declarator_list.accept_best(self)
 
@@ -90,7 +90,7 @@ class DeclarationVisitor(ast.Visitor):
 
     def visit_declarator_list(self, declarator_list: ast.DeclaratorList) -> None:
         if not declarator_list.is_method():
-            assert False   # todo: error
+            assert False  # todo: error
         declarator_list.accept_element(self)
 
     def visit_declarator_element_id(self, declarator_element_id: ast.DeclaratorElementId) -> None:
@@ -104,7 +104,7 @@ class DeclarationVisitor(ast.Visitor):
         assert False
 
     def visit_declarator_element_abstract_pack(
-        self, declarator_element_abstract_pack: ast.DeclaratorElementAbstractPack
+            self, declarator_element_abstract_pack: ast.DeclaratorElementAbstractPack
     ) -> None:
         assert False
 
@@ -120,7 +120,7 @@ class DeclarationVisitor(ast.Visitor):
         assert False
 
     def visit_declarator_element_rvalue_reference(
-        self, declarator_element_rvalue_reference: ast.DeclaratorElementRValueReference
+            self, declarator_element_rvalue_reference: ast.DeclaratorElementRValueReference
     ) -> None:
         # todo: proper error message
         assert False
@@ -134,8 +134,8 @@ class DeclarationVisitor(ast.Visitor):
         declarator_element_method.accept_next(self)
         declarator_element_method.accept_parameter_clause(self)
         assert self._current_name != ''
-        if self._current_name not in self._current_namespace[3]:                      # type: ignore
-            self._current_namespace[3][self._current_name] = self._current_parameters # type: ignore
+        if self._current_name not in self._current_namespace[3]:  # type: ignore
+            self._current_namespace[3][self._current_name] = self._current_parameters  # type: ignore
         self._current_namespace = self._declaration_namespace
         self._current_name = ''
         self._current_parameters = []
@@ -145,7 +145,7 @@ class DeclarationVisitor(ast.Visitor):
 
     def visit_simple_parameter_clause(self, simple_parameter_clause: ast.SimpleParameterClause) -> None:
         if simple_parameter_clause._variadic:
-            assert False   # not supported for kernel methods
+            assert False  # not supported for kernel methods
         for i, parameter in enumerate(simple_parameter_clause._parameter_list):
             v = ArgumentDeclarationVisitor()
             parameter.accept(v)
@@ -157,11 +157,11 @@ class DeclarationVisitor(ast.Visitor):
                 pass
             sr = utils.StringRef()
             element.accept(sr)
-            if sr.result in self._current_namespace[2]:              # type: ignore
-                self._current_namespace = self._current_namespace[2] # type: ignore
+            if sr.result in self._current_namespace[2]:  # type: ignore
+                self._current_namespace = self._current_namespace[2]  # type: ignore
             else:
-                ns = ([], [], {}, {})                                # type: ignore
-                self._current_namespace[2][sr.result] = ns           # type: ignore
+                ns = ([], [], {}, {})  # type: ignore
+                self._current_namespace[2][sr.result] = ns  # type: ignore
                 self._current_namespace = ns
         sr = utils.StringRef()
         reference._name_list[-1].accept(sr)
@@ -178,9 +178,9 @@ class KernelCollector(pyxx.ast.Visitor):
 
     def __init__(self):
         # type: () -> None
-        self._namespace = [([], [], {}, {})] # type: ignore
+        self._namespace = [([], [], {}, {})]  # type: ignore
         self._root_namespace = self._namespace[0]
-        self._error_stack = []               # type: List[str]
+        self._error_stack = []  # type: List[str]
 
     def visit_translation_unit(self, translation_unit):
         # type: (ast.TranslationUnit) -> None
@@ -192,9 +192,9 @@ class KernelCollector(pyxx.ast.Visitor):
         if namespace._namespace_name is not None:
             for _, n in namespace._nested_name + [(False, namespace._namespace_name)]:
                 try:
-                    self._namespace.append(self._namespace[-1][3][n]) # type: ignore
+                    self._namespace.append(self._namespace[-1][3][n])  # type: ignore
                 except KeyError:
-                    new_namespace = ([], [], {}, {})                  # type: ignore
+                    new_namespace = ([], [], {}, {})  # type: ignore
                     self._namespace[-1][2][n] = new_namespace
                     self._namespace.append(new_namespace)
             namespace.accept_children(self)
@@ -274,7 +274,6 @@ def filter_namespace(ns):
 
 
 def write_cc(Name, namespace, out_cc, full_name=[]):
-
     for name, ns in namespace[2].items():
         out_cc.write('namespace %s {\n' % name)
         write_cc(Name, ns, out_cc, full_name + [name])
@@ -354,7 +353,7 @@ def write_cc(Name, namespace, out_cc, full_name=[]):
                 '    %(parameter_assign)s\n'
                 '    ref< ::Motor::Task::KernelTask > task = ref< ::Motor::Task::KernelTask >::create(\n'
                 '            ::Motor::Arena::task(),\n'
-                '            "%(kernel_full_name)s",\n'
+                '            ::Motor::istring("%(kernel_full_name)s"),\n'
                 '            Motor::KernelScheduler::GPUType,\n'
                 '            knl::Colors::Red::Red,\n'
                 '            s_%(KernelName)sKernel,\n'
@@ -373,7 +372,6 @@ def write_cc(Name, namespace, out_cc, full_name=[]):
 
 
 def write_hh(namespace, out_hh, full_name=[]):
-
     if namespace[0]:
         out_hh.write('\n')
         for using_directive in namespace[0]:

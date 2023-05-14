@@ -26,12 +26,12 @@ struct InterlockedType< 4 >
             volatile value_t value;
         } tagged_value;
 
-        inline tagged_t(value_t value = 0);
+        inline explicit tagged_t(value_t value = nullptr);
         inline tagged_t(counter_t tag, value_t value);
-        inline tagged_t(const tagged_t& other) = default;
+        inline tagged_t(const tagged_t& other)            = default;
         inline tagged_t& operator=(const tagged_t& other) = default;
-        inline value_t   value();
-        inline bool      operator==(tagged_t& other);
+        inline value_t   value() const;
+        inline bool      operator==(tagged_t& other) const;
     };
 
     static inline value_t fetch(const value_t* p);
@@ -73,12 +73,12 @@ struct InterlockedType< 8 >
             value_t   value;
         } tagged_value;
 
-        inline tagged_t(value_t value = 0);
+        inline explicit tagged_t(value_t value = nullptr);
         inline tagged_t(counter_t tag, value_t value);
-        inline tagged_t(const tagged_t& other) = default;
+        inline tagged_t(const tagged_t& other)            = default;
         inline tagged_t& operator=(const tagged_t& other) = default;
         inline value_t   value();
-        inline bool      operator==(tagged_t& other);
+        inline bool      operator==(tagged_t& other) const;
     };
 
     static inline value_t fetch(const value_t* p);
@@ -141,33 +141,32 @@ bool InterlockedType< 4 >::set_conditional(tagged_t* p, tagged_t::value_t v,
         __tsan_memory_order_acq_rel, __tsan_memory_order_relaxed);
 }
 
-InterlockedType< 4 >::tagged_t::tagged_t(value_t value) : tagged_value{0, value}
+InterlockedType< 4 >::tagged_t::tagged_t(value_t value) : tagged_value {0, value}
 {
 }
 
-InterlockedType< 4 >::tagged_t::tagged_t(counter_t tag, value_t value) : tagged_value{tag, value}
+InterlockedType< 4 >::tagged_t::tagged_t(counter_t tag, value_t value) : tagged_value {tag, value}
 {
 }
 
-InterlockedType< 4 >::tagged_t::value_t InterlockedType< 4 >::tagged_t::value()
+InterlockedType< 4 >::tagged_t::value_t InterlockedType< 4 >::tagged_t::value() const
 {
     return tagged_value.value;
 }
 
-bool InterlockedType< 4 >::tagged_t::operator==(tagged_t& other)
+bool InterlockedType< 4 >::tagged_t::operator==(tagged_t& other) const
 {
     return (tagged_value.tag == other.tagged_value.tag)
            && (tagged_value.value == other.tagged_value.value);
 }
 
-InterlockedType< 8 >::tagged_t::tagged_t(value_t value) : tagged_value{0, value}
+InterlockedType< 8 >::tagged_t::tagged_t(value_t value) : tagged_value {0, value}
 {
 }
 
-InterlockedType< 8 >::tagged_t::tagged_t(counter_t tag, value_t value) : tagged_value{tag, value}
+InterlockedType< 8 >::tagged_t::tagged_t(counter_t tag, value_t value) : tagged_value {tag, value}
 {
 }
-
 
 InterlockedType< 8 >::tagged_t::value_t InterlockedType< 8 >::tagged_t::value()
 {
@@ -175,7 +174,7 @@ InterlockedType< 8 >::tagged_t::value_t InterlockedType< 8 >::tagged_t::value()
                                          __tsan_memory_order_acquire);
 }
 
-bool InterlockedType< 8 >::tagged_t::operator==(tagged_t& other)
+bool InterlockedType< 8 >::tagged_t::operator==(tagged_t& other) const
 {
     return (tagged_value.tag == other.tagged_value.tag)
            && (tagged_value.value == other.tagged_value.value);

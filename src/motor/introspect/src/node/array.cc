@@ -9,12 +9,13 @@
 #include <motor/meta/engine/objectinfo.meta.hh>
 #include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/minitl/array.hh>
+#include <motor/minitl/utility.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 
 static const istring value_type = istring("value_type");
 
-Array::Array(const minitl::vector< ref< Node > >& value) : Node(), m_value(value)
+Array::Array(minitl::vector< ref< Node > > value) : Node(), m_value(minitl::move(value))
 {
 }
 

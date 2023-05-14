@@ -8,8 +8,8 @@ namespace knl {
 template < typename T >
 struct segment
 {
-    T* const  m_begin;
-    u32 const m_count;
+    T* const  m_begin {};
+    u32 const m_count {};
 
     typedef T* iterator;
 

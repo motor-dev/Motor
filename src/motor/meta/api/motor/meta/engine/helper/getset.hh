@@ -15,13 +15,13 @@ struct PropertyHelper
     static Value get(raw< const Property > property, void* from)
     {
         motor_forceuse(property);
-        const Owner* owner = reinterpret_cast< const Owner* >(from);
+        const auto* owner = reinterpret_cast< const Owner* >(from);
         return Value::ByRef(owner->*Member);
     }
     static void set(raw< const Property > property, void* from, const Value& value)
     {
         motor_forceuse(property);
-        Owner* owner = reinterpret_cast< Owner* >(from);
+        auto* owner = reinterpret_cast< Owner* >(from);
         new(&(owner->*Member)) T(value.as< const T& >());
     }
 };
@@ -32,7 +32,7 @@ struct PropertyHelper< const T, Owner, Member >
     static Value get(raw< const Property > property, void* from)
     {
         motor_forceuse(property);
-        const Owner* owner = reinterpret_cast< const Owner* >(from);
+        const auto* owner = reinterpret_cast< const Owner* >(from);
         return Value::ByRef(owner->*Member);
     }
     static void set(raw< const Property > property, void* from, const Value& value)
