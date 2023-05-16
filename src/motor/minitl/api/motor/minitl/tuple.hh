@@ -26,6 +26,7 @@ struct tuple : public details::tuple_helper< 0, T... >
     constexpr tuple(const tuple< T1... >& other);  // NOLINT(google-explicit-constructor)
     template < typename... T1 >
     constexpr tuple(tuple< T1... >&& other);       // NOLINT(google-explicit-constructor)
+    ~tuple() = default;
 
     tuple& operator=(const tuple&) = default;
     tuple& operator=(tuple&&)      = default;  // NOLINT(performance-noexcept-move-constructor)
@@ -221,6 +222,7 @@ struct tuple_helper
         , tuple_helper< INDEX + 1, TAIL... >((const tuple_helper< INDEX + 1, TAIL1... >&)tuple)
     {
     }
+    ~tuple_helper() = default;
 
     tuple_helper& operator=(const tuple_helper& other) = default;
     tuple_helper& operator=(tuple_helper&& other)  // NOLINT(performance-noexcept-move-constructor)
@@ -256,6 +258,7 @@ struct tuple_helper< INDEX, T > : public tuple_field< INDEX, T >
         : tuple_field< INDEX, T >(move(tuple).tuple_field< INDEX, T1 >::get())
     {
     }
+    ~tuple_helper() = default;
 
     tuple_helper& operator=(const tuple_helper& other) = default;
     tuple_helper& operator=(tuple_helper&& other)  // NOLINT(performance-noexcept-move-constructor)

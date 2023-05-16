@@ -112,6 +112,7 @@ u32 format_to(char* destination, u32 length, T format_string, ARGS&&... argument
 }  // namespace minitl
 
 #include <motor/kernel/interlocked.hh>
+#include <motor/minitl/integer_types.hh>
 #include <motor/minitl/tuple.hh>
 #include <cstdio>
 #include <cstring>
@@ -642,131 +643,70 @@ struct numeric_formatter : public buffered_partial_formatter< formatter< FORMAT 
 
 namespace decimal_format {
 
-static MOTOR_ALWAYS_INLINE u32 format_length(i8 value, const format_options& options)
+template < typename T >
+static MOTOR_ALWAYS_INLINE u32 format_length(T value, const format_options& options)
 {
     motor_forceuse(value);
     motor_forceuse(options);
-    return 4;
+    // 1 -> 3
+    // 2 -> 5
+    // 4 -> 11
+    // 8 -> 20 / actually 21
+    return 1 + (sizeof(T) * 2) + 2 * (sizeof(T) / 4) + 1;
 }
 
-static MOTOR_ALWAYS_INLINE u32 format_length(i16 value, const format_options& options)
-{
-    motor_forceuse(value);
-    motor_forceuse(options);
-    return 6;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(i32 value, const format_options& options)
-{
-    motor_forceuse(value);
-    motor_forceuse(options);
-    return 11;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(i64 value, const format_options& options)
-{
-    motor_forceuse(value);
-    motor_forceuse(options);
-    return 20;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(u8 value, const format_options& options)
-{
-    motor_forceuse(value);
-    motor_forceuse(options);
-    return 4;  // includes optional '+'
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(u16 value, const format_options& options)
-{
-    motor_forceuse(value);
-    motor_forceuse(options);
-    return 6;  // includes optional '+'
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(u32 value, const format_options& options)
-{
-    motor_forceuse(value);
-    motor_forceuse(options);
-    return 11;  // includes optional '+'
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(u64 value, const format_options& options)
-{
-    motor_forceuse(value);
-    motor_forceuse(options);
-    return 20;
-}
-
-motor_api(MINITL) u32 format_arg(char* destination, i8 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, i16 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, i32 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, i64 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, u8 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, u16 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, u32 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, u64 value, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed char number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed short number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed int number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed long number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed long long number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned char number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned short number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned int number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned long number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned long long number, const format_options& options);
 
 }  // namespace decimal_format
 
 namespace hexadecimal_format {
 
-static MOTOR_ALWAYS_INLINE u32 format_length(i8 value, const format_options& options)
+template < typename T >
+static MOTOR_ALWAYS_INLINE u32 format_length(T value, const format_options& options)
 {
     motor_forceuse(value);
-    return 3 + options.alternate * 2;
+    return (sizeof(T) * 2) + 1 + 2 * options.alternate;
 }
 
-static MOTOR_ALWAYS_INLINE u32 format_length(i16 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 5 + options.alternate * 2;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(i32 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 9 + options.alternate * 2;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(i64 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 17 + options.alternate * 2;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(u8 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 3 + options.alternate * 2;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(u16 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 5 + options.alternate * 2;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(u32 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 9 + options.alternate * 2;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(u64 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 17 + options.alternate * 2;
-}
-
-motor_api(MINITL) u32 format_arg(char* destination, i8 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, i16 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, i32 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, i64 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, u8 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, u16 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, u32 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, u64 value, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed char number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed short number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed int number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed long number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed long long number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned char number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned short number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned int number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned long number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned long long number, const format_options& options);
 
 motor_api(MINITL) u32 format_hexadecimal_whole(char* destination, u32 number);
 motor_api(MINITL) u32 format_hexadecimal_whole(char* destination, u64 number);
@@ -775,123 +715,72 @@ motor_api(MINITL) u32 format_hexadecimal_whole(char* destination, u64 number);
 
 namespace binary_format {
 
-static MOTOR_ALWAYS_INLINE u32 format_length(i8 value, const format_options& options)
+template < typename T >
+static MOTOR_ALWAYS_INLINE u32 format_length(T value, const format_options& options)
 {
     motor_forceuse(value);
-    return 9 + options.alternate * 2;
+    return (sizeof(T) * 8) + 1 + 2 * options.alternate;
 }
 
-static MOTOR_ALWAYS_INLINE u32 format_length(i16 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 17 + options.alternate * 2;
-}
+template < u32 SIZE, bool IS_SIGNED >
+u32 format_arg_size(char* destination, signed_integer_type_t< SIZE > number,
+                    const format_options& options);
+template < u32 SIZE, bool IS_SIGNED >
+u32 format_arg_size(char* destination, unsigned_integer_type_t< SIZE > number,
+                    const format_options& options);
 
-static MOTOR_ALWAYS_INLINE u32 format_length(i32 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 33 + options.alternate * 2;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(i64 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 65 + options.alternate * 2;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(u8 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 9 + options.alternate * 2;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(u16 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 17 + options.alternate * 2;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(u32 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 33 + options.alternate * 2;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(u64 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 65 + options.alternate * 2;
-}
-
-motor_api(MINITL) u32 format_arg(char* destination, i8 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, i16 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, i32 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, i64 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, u8 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, u16 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, u32 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, u64 value, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed char number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed short number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed int number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed long number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed long long number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned char number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned short number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned int number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned long number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned long long number, const format_options& options);
 
 }  // namespace binary_format
 
 namespace octal_format {
 
-static MOTOR_ALWAYS_INLINE u32 format_length(i8 value, const format_options& options)
+template < typename T >
+static MOTOR_ALWAYS_INLINE u32 format_length(T value, const format_options& options)
 {
     motor_forceuse(value);
-    return 4 + options.alternate;
+    return (sizeof(T) * 8 + 2) / 3 + 1 + 2 * options.alternate;
 }
 
-static MOTOR_ALWAYS_INLINE u32 format_length(i16 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 7 + options.alternate;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(i32 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 12 + options.alternate;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(i64 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 23 + options.alternate;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(u8 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 4 + options.alternate;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(u16 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 7 + options.alternate;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(u32 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 12 + options.alternate;
-}
-
-static MOTOR_ALWAYS_INLINE u32 format_length(u64 value, const format_options& options)
-{
-    motor_forceuse(value);
-    return 23 + options.alternate;
-}
-
-motor_api(MINITL) u32 format_arg(char* destination, i8 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, i16 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, i32 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, i64 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, u8 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, u16 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, u32 value, const format_options& options);
-motor_api(MINITL) u32 format_arg(char* destination, u64 value, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed char number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed short number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed int number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed long number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, signed long long number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned char number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned short number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned int number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned long number, const format_options& options);
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned long long number, const format_options& options);
 
 }  // namespace octal_format
 
@@ -1012,15 +901,16 @@ struct formatter< 'd' > : format_details::numeric_formatter< 'd' >
     template < typename T >
     static MOTOR_ALWAYS_INLINE u32 length(T&& value, const format_options& options)
     {
-        return format_details::decimal_format::format_length(minitl::forward< T >(value), options);
+        using namespace format_details::decimal_format;
+        return format_length(minitl::forward< T >(value), options);
     }
     template < typename T >
     static MOTOR_ALWAYS_INLINE u32 write(char* destination, T&& value,
                                          const format_options& options, u32 reserved_length)
     {
+        using namespace format_details::decimal_format;
         motor_forceuse(reserved_length);
-        return format_details::decimal_format::format_arg(destination, minitl::forward< T >(value),
-                                                          options);
+        return format_arg(destination, minitl::forward< T >(value), options);
     }
 };
 
@@ -1031,15 +921,16 @@ struct formatter< 'o' > : format_details::numeric_formatter< 'o' >
     template < typename T >
     static MOTOR_ALWAYS_INLINE u32 length(T&& value, const format_options& options)
     {
-        return format_details::octal_format::format_length(minitl::forward< T >(value), options);
+        using namespace format_details::octal_format;
+        return format_length(minitl::forward< T >(value), options);
     }
     template < typename T >
     static MOTOR_ALWAYS_INLINE u32 write(char* destination, T&& value,
                                          const format_options& options, u32 reserved_length)
     {
         motor_forceuse(reserved_length);
-        return format_details::octal_format::format_arg(destination, minitl::forward< T >(value),
-                                                        options);
+        using namespace format_details::octal_format;
+        return format_arg(destination, minitl::forward< T >(value), options);
     }
 };
 
@@ -1050,16 +941,16 @@ struct formatter< 'x' > : format_details::numeric_formatter< 'x' >
     template < typename T >
     static MOTOR_ALWAYS_INLINE u32 length(T&& value, const format_options& options)
     {
-        return format_details::hexadecimal_format::format_length(minitl::forward< T >(value),
-                                                                 options);
+        using namespace format_details::hexadecimal_format;
+        return format_length(minitl::forward< T >(value), options);
     }
     template < typename T >
     static MOTOR_ALWAYS_INLINE u32 write(char* destination, T&& value,
                                          const format_options& options, u32 reserved_length)
     {
         motor_forceuse(reserved_length);
-        return format_details::hexadecimal_format::format_arg(destination,
-                                                              minitl::forward< T >(value), options);
+        using namespace format_details::hexadecimal_format;
+        return format_arg(destination, minitl::forward< T >(value), options);
     }
 };
 
@@ -1070,16 +961,16 @@ struct formatter< 'X' > : format_details::numeric_formatter< 'X' >
     template < typename T >
     static MOTOR_ALWAYS_INLINE u32 length(T&& value, const format_options& options)
     {
-        return format_details::hexadecimal_format::format_length(minitl::forward< T >(value),
-                                                                 options);
+        using namespace format_details::hexadecimal_format;
+        return format_length(minitl::forward< T >(value), options);
     }
     template < typename T >
     static MOTOR_ALWAYS_INLINE u32 write(char* destination, T&& value,
                                          const format_options& options, u32 reserved_length)
     {
         motor_forceuse(reserved_length);
-        return format_details::hexadecimal_format::format_arg(destination,
-                                                              minitl::forward< T >(value), options);
+        using namespace format_details::hexadecimal_format;
+        return format_arg(destination, minitl::forward< T >(value), options);
     }
 };
 
@@ -1090,15 +981,16 @@ struct formatter< 'b' > : format_details::numeric_formatter< 'b' >
     template < typename T >
     static MOTOR_ALWAYS_INLINE u32 length(T&& value, const format_options& options)
     {
-        return format_details::binary_format::format_length(minitl::forward< T >(value), options);
+        using namespace format_details::binary_format;
+        return format_length(minitl::forward< T >(value), options);
     }
     template < typename T >
     static MOTOR_ALWAYS_INLINE u32 write(char* destination, T&& value,
                                          const format_options& options, u32 reserved_length)
     {
         motor_forceuse(reserved_length);
-        return format_details::binary_format::format_arg(destination, minitl::forward< T >(value),
-                                                         options);
+        using namespace format_details::binary_format;
+        return format_arg(destination, minitl::forward< T >(value), options);
     }
 };
 
@@ -1109,15 +1001,16 @@ struct formatter< 'B' > : format_details::numeric_formatter< 'B' >
     template < typename T >
     static MOTOR_ALWAYS_INLINE u32 length(T&& value, const format_options& options)
     {
-        return format_details::binary_format::format_length(minitl::forward< T >(value), options);
+        using namespace format_details::binary_format;
+        return format_length(minitl::forward< T >(value), options);
     }
     template < typename T >
     static MOTOR_ALWAYS_INLINE u32 write(char* destination, T&& value,
                                          const format_options& options, u32 reserved_length)
     {
         motor_forceuse(reserved_length);
-        return format_details::binary_format::format_arg(destination, minitl::forward< T >(value),
-                                                         options);
+        using namespace format_details::binary_format;
+        return format_arg(destination, minitl::forward< T >(value), options);
     }
 };
 
@@ -1128,15 +1021,16 @@ struct formatter< 'p' > : format_details::buffered_partial_formatter< formatter<
     template < typename T >
     static MOTOR_ALWAYS_INLINE u32 length(T&& value, const format_options& options)
     {
-        return format_details::pointer_format::format_length(minitl::forward< T >(value), options);
+        using namespace format_details::pointer_format;
+        return format_length(minitl::forward< T >(value), options);
     }
     template < typename T >
     static MOTOR_ALWAYS_INLINE u32 write(char* destination, T&& value,
                                          const format_options& options, u32 reserved_length)
     {
         motor_forceuse(reserved_length);
-        return format_details::pointer_format::format_arg(destination, minitl::forward< T >(value),
-                                                          options);
+        using namespace format_details::pointer_format;
+        return format_arg(destination, minitl::forward< T >(value), options);
     }
 };
 

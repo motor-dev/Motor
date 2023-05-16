@@ -229,48 +229,51 @@ static inline u64 format_decimal_8(u64 number)
 
 namespace binary_format {
 
-motor_api(MINITL) u32 format_arg(char* destination, i8 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed char number, const format_options& options)
 {
-    u32 negative       = u32(number < 0);
-    u32 negative_mask  = ~(negative - 1);
-    u32 add_sign       = negative | (options.sign == '+');
-    u8  negative_value = ~number + 1;
-    u8  value          = number + ((negative_value - number) & negative_mask);
-    *destination       = char('+' + (('-' - '+') & negative_mask));
+    u32           negative       = u32(number < 0);
+    u32           negative_mask  = ~(negative - 1);
+    u32           add_sign       = negative | (options.sign == '+');
+    unsigned char negative_value = ~number + 1;
+    unsigned char value          = number + ((negative_value - number) & negative_mask);
+    *destination                 = char('+' + (('-' - '+') & negative_mask));
     destination += add_sign;
     *destination = '0';
     destination += options.alternate;
     *destination = options.formatter;
     destination += options.alternate;
-    return format_binary_generic< sizeof(u8) >(destination, value) + add_sign
+    return format_binary_generic< sizeof(number) >(destination, value) + add_sign
            + 2 * options.alternate;
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, i16 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed short number, const format_options& options)
 {
-    u32 negative       = u32(number < 0);
-    u32 negative_mask  = ~(negative - 1);
-    u32 add_sign       = negative | (options.sign == '+');
-    u16 negative_value = ~number + 1;
-    u16 value          = number + ((negative_value - number) & negative_mask);
-    *destination       = char('+' + (('-' - '+') & negative_mask));
+    u32            negative       = u32(number < 0);
+    u32            negative_mask  = ~(negative - 1);
+    u32            add_sign       = negative | (options.sign == '+');
+    unsigned short negative_value = ~number + 1;
+    unsigned short value          = number + ((negative_value - number) & negative_mask);
+    *destination                  = char('+' + (('-' - '+') & negative_mask));
     destination += add_sign;
     *destination = '0';
     destination += options.alternate;
     *destination = options.formatter;
     destination += options.alternate;
-    return format_binary_generic< sizeof(u16) >(destination, value) + add_sign
+    return format_binary_generic< sizeof(number) >(destination, value) + add_sign
            + 2 * options.alternate;
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, i32 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed int number, const format_options& options)
 {
-    u32 negative       = u32(number < 0);
-    u32 negative_mask  = ~(negative - 1);
-    u32 add_sign       = negative | (options.sign == '+');
-    u32 negative_value = ~number + 1;
-    u32 value          = number + ((negative_value - number) & negative_mask);
-    *destination       = char('+' + (('-' - '+') & negative_mask));
+    u32          negative       = u32(number < 0);
+    u32          negative_mask  = ~(negative - 1);
+    u32          add_sign       = negative | (options.sign == '+');
+    unsigned int negative_value = ~number + 1;
+    unsigned int value          = number + ((negative_value - number) & negative_mask);
+    *destination                = char('+' + (('-' - '+') & negative_mask));
     destination += add_sign;
     *destination = '0';
     destination += options.alternate;
@@ -278,54 +281,48 @@ motor_api(MINITL) u32 format_arg(char* destination, i32 number, const format_opt
     destination += options.alternate;
     *destination = char('+' + (('-' - '+') & negative_mask));
 
-    return format_binary_generic< sizeof(u32) >(destination, value) + add_sign
+    return format_binary_generic< sizeof(number) >(destination, value) + add_sign
            + 2 * options.alternate;
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, i64 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed long number, const format_options& options)
 {
-    u64 negative       = u32(number < 0);
-    u64 negative_mask  = ~(negative - 1);
-    u64 add_sign       = negative | (options.sign == '+');
-    u64 negative_value = ~number + 1;
-    u64 value          = number + ((negative_value - number) & negative_mask);
-    *destination       = char('+' + (('-' - '+') & negative_mask));
+    u64           negative       = u32(number < 0);
+    u64           negative_mask  = ~(negative - 1);
+    u64           add_sign       = negative | (options.sign == '+');
+    unsigned long negative_value = ~number + 1;
+    unsigned long value          = number + ((negative_value - number) & negative_mask);
+    *destination                 = char('+' + (('-' - '+') & negative_mask));
     destination += add_sign;
     *destination = '0';
     destination += options.alternate;
     *destination = options.formatter;
     destination += options.alternate;
-    return format_binary_generic< sizeof(u64) >(destination, value) + add_sign
+    return format_binary_generic< sizeof(number) >(destination, value) + add_sign
            + 2 * options.alternate;
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, u8 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed long long number, const format_options& options)
 {
-    u64 add_sign = options.sign == '+';
-    *destination = '+';
+    u64                negative       = u32(number < 0);
+    u64                negative_mask  = ~(negative - 1);
+    u64                add_sign       = negative | (options.sign == '+');
+    unsigned long long negative_value = ~number + 1;
+    unsigned long long value          = number + ((negative_value - number) & negative_mask);
+    *destination                      = char('+' + (('-' - '+') & negative_mask));
     destination += add_sign;
     *destination = '0';
     destination += options.alternate;
     *destination = options.formatter;
     destination += options.alternate;
-    return format_binary_generic< sizeof(u8) >(destination, number) + add_sign
+    return format_binary_generic< sizeof(number) >(destination, value) + add_sign
            + 2 * options.alternate;
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, u16 number, const format_options& options)
-{
-    u64 add_sign = options.sign == '+';
-    *destination = '+';
-    destination += add_sign;
-    *destination = '0';
-    destination += options.alternate;
-    *destination = options.formatter;
-    destination += options.alternate;
-    return format_binary_generic< sizeof(u16) >(destination, number) + add_sign
-           + 2 * options.alternate;
-}
-
-motor_api(MINITL) u32 format_arg(char* destination, u32 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned char number, const format_options& options)
 {
     u64 add_sign = options.sign == '+';
     *destination = '+';
@@ -334,11 +331,12 @@ motor_api(MINITL) u32 format_arg(char* destination, u32 number, const format_opt
     destination += options.alternate;
     *destination = options.formatter;
     destination += options.alternate;
-    return format_binary_generic< sizeof(u32) >(destination, number) + add_sign
+    return format_binary_generic< sizeof(number) >(destination, number) + add_sign
            + 2 * options.alternate;
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, u64 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned short number, const format_options& options)
 {
     u64 add_sign = options.sign == '+';
     *destination = '+';
@@ -347,7 +345,49 @@ motor_api(MINITL) u32 format_arg(char* destination, u64 number, const format_opt
     destination += options.alternate;
     *destination = options.formatter;
     destination += options.alternate;
-    return format_binary_generic< sizeof(u64) >(destination, number) + add_sign
+    return format_binary_generic< sizeof(number) >(destination, number) + add_sign
+           + 2 * options.alternate;
+}
+
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned int number, const format_options& options)
+{
+    u64 add_sign = options.sign == '+';
+    *destination = '+';
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    return format_binary_generic< sizeof(number) >(destination, number) + add_sign
+           + 2 * options.alternate;
+}
+
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned long number, const format_options& options)
+{
+    u64 add_sign = options.sign == '+';
+    *destination = '+';
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    return format_binary_generic< sizeof(number) >(destination, number) + add_sign
+           + 2 * options.alternate;
+}
+
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned long long number, const format_options& options)
+{
+    u64 add_sign = options.sign == '+';
+    *destination = '+';
+    destination += add_sign;
+    *destination = '0';
+    destination += options.alternate;
+    *destination = options.formatter;
+    destination += options.alternate;
+    return format_binary_generic< sizeof(number) >(destination, number) + add_sign
            + 2 * options.alternate;
 }
 
@@ -355,100 +395,98 @@ motor_api(MINITL) u32 format_arg(char* destination, u64 number, const format_opt
 
 namespace octal_format {
 
-motor_api(MINITL) u32 format_arg(char* destination, i8 number, const format_options& options)
+static constexpr u32 s_iteration_count[5] = {1, 1, 2, 2, 3};
+
+template < typename T, typename UNSIGNED_T,
+           enable_if_t< !is_same< T, UNSIGNED_T >::value, bool > X = true >
+static MOTOR_ALWAYS_INLINE u32 format_arg_generic(char* destination, T number,
+                                                  const format_options& options)
 {
-    u64 negative       = u32(number < 0);
-    u64 negative_mask  = ~(negative - 1);
-    u64 add_sign       = negative | (options.sign == '+');
-    u64 negative_value = ~number + 1;
-    u64 value          = number + ((negative_value - number) & negative_mask);
-    *destination       = char('+' + (('-' - '+') & negative_mask));
+    auto       negative       = UNSIGNED_T(number < 0);
+    UNSIGNED_T negative_mask  = ~(negative - 1);
+    UNSIGNED_T add_sign       = negative | (options.sign == '+');
+    UNSIGNED_T negative_value = ~number + 1;
+    UNSIGNED_T value          = number + ((negative_value - number) & negative_mask);
+    *destination              = char('+' + (('-' - '+') & negative_mask));
     destination += add_sign;
     *destination = '0';
     destination += options.alternate;
-    return format_octal_generic< 1 >(destination, value) + add_sign + options.alternate;
+    return format_octal_generic< s_iteration_count[sizeof(number) / 2] >(destination, value)
+           + add_sign + options.alternate;
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, i16 number, const format_options& options)
+template < typename T, typename UNSIGNED_T,
+           enable_if_t< is_same< T, UNSIGNED_T >::value, int > X = true >
+static MOTOR_ALWAYS_INLINE u32 format_arg_generic(char* destination, T number,
+                                                  const format_options& options)
 {
-    u64 negative       = u32(number < 0);
-    u64 negative_mask  = ~(negative - 1);
-    u64 add_sign       = negative | (options.sign == '+');
-    u64 negative_value = ~number + 1;
-    u64 value          = number + ((negative_value - number) & negative_mask);
-    *destination       = char('+' + (('-' - '+') & negative_mask));
-    destination += add_sign;
-    *destination = '0';
-    destination += options.alternate;
-    return format_octal_generic< 1 >(destination, value) + add_sign + options.alternate;
-}
-
-motor_api(MINITL) u32 format_arg(char* destination, i32 number, const format_options& options)
-{
-    u64 negative       = u32(number < 0);
-    u64 negative_mask  = ~(negative - 1);
-    u64 add_sign       = negative | (options.sign == '+');
-    u64 negative_value = ~number + 1;
-    u64 value          = number + ((negative_value - number) & negative_mask);
-    *destination       = char('+' + (('-' - '+') & negative_mask));
-    destination += add_sign;
-    *destination = '0';
-    destination += options.alternate;
-    return format_octal_generic< 2 >(destination, value) + add_sign + options.alternate;
-}
-
-motor_api(MINITL) u32 format_arg(char* destination, i64 number, const format_options& options)
-{
-    u64 negative       = u32(number < 0);
-    u64 negative_mask  = ~(negative - 1);
-    u64 add_sign       = negative | (options.sign == '+');
-    u64 negative_value = ~number + 1;
-    u64 value          = number + ((negative_value - number) & negative_mask);
-    *destination       = char('+' + (('-' - '+') & negative_mask));
-    destination += add_sign;
-    *destination = '0';
-    destination += options.alternate;
-    return format_octal_generic< 3 >(destination, value) + add_sign + options.alternate;
-}
-
-motor_api(MINITL) u32 format_arg(char* destination, u8 number, const format_options& options)
-{
-    u64 add_sign = options.sign == '+';
-    *destination = '+';
+    UNSIGNED_T add_sign = options.sign == '+';
+    *destination        = '+';
     destination += add_sign;
     *destination = '0';
     destination += options.alternate;
     return format_octal_generic< 1 >(destination, number) + add_sign + options.alternate;
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, u16 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed char number, const format_options& options)
 {
-    u64 add_sign = options.sign == '+';
-    *destination = '+';
-    destination += add_sign;
-    *destination = '0';
-    destination += options.alternate;
-    return format_octal_generic< 1 >(destination, number) + add_sign + options.alternate;
+    return format_arg_generic< signed char, unsigned char >(destination, number, options);
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, u32 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed short number, const format_options& options)
 {
-    u64 add_sign = options.sign == '+';
-    *destination = '+';
-    destination += add_sign;
-    *destination = '0';
-    destination += options.alternate;
-    return format_octal_generic< 2 >(destination, number) + add_sign + options.alternate;
+    return format_arg_generic< signed short, unsigned short >(destination, number, options);
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, u64 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed int number, const format_options& options)
 {
-    u64 add_sign = options.sign == '+';
-    *destination = '+';
-    destination += add_sign;
-    *destination = '0';
-    destination += options.alternate;
-    return format_octal_generic< 3 >(destination, number) + add_sign + options.alternate;
+    return format_arg_generic< signed int, unsigned int >(destination, number, options);
+}
+
+motor_api(MINITL) u32
+    format_arg(char* destination, signed long number, const format_options& options)
+{
+    return format_arg_generic< signed long, unsigned long >(destination, number, options);
+}
+
+motor_api(MINITL) u32
+    format_arg(char* destination, signed long long number, const format_options& options)
+{
+    return format_arg_generic< signed long long, unsigned long long >(destination, number, options);
+}
+
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned char number, const format_options& options)
+{
+    return format_arg_generic< unsigned char, unsigned char >(destination, number, options);
+}
+
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned short number, const format_options& options)
+{
+    return format_arg_generic< unsigned short, unsigned short >(destination, number, options);
+}
+
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned int number, const format_options& options)
+{
+    return format_arg_generic< unsigned int, unsigned int >(destination, number, options);
+}
+
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned long number, const format_options& options)
+{
+    return format_arg_generic< unsigned long, unsigned long >(destination, number, options);
+}
+
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned long long number, const format_options& options)
+{
+    return format_arg_generic< unsigned long long, unsigned long long >(destination, number,
+                                                                        options);
 }
 
 }  // namespace octal_format
@@ -623,68 +661,83 @@ static inline u32 format_decimal(char* destination, u64 number, char sign, u32 a
     }
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, i8 number, const format_options& options)
+template < typename T, typename UNSIGNED_T >
+static MOTOR_ALWAYS_INLINE u32 format_arg_generic(char* destination, T number,
+                                                  const format_options& options)
 {
-    u64  negative       = u32(number < 0);
-    u64  negative_mask  = ~(negative - 1);
-    u64  add_sign       = negative | (options.sign == '+');
-    u64  negative_value = ~number + 1;
-    u64  value          = number + ((negative_value - number) & negative_mask);
-    char sign           = char('+' + (('-' - '+') & negative_mask));
-    return format_decimal(destination, value, sign, add_sign);
+    auto       negative       = UNSIGNED_T(number < 0);
+    UNSIGNED_T negative_mask  = ~(negative - 1);
+    UNSIGNED_T add_sign       = negative | (options.sign == '+');
+    UNSIGNED_T negative_value = ~number + 1;
+    UNSIGNED_T value          = number + ((negative_value - number) & negative_mask);
+    char       sign           = char('+' + (('-' - '+') & negative_mask));
+    return format_decimal(destination, unsigned_integer_type_t< sizeof(value) >(value), sign,
+                          add_sign);
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, i16 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed char number, const format_options& options)
 {
-    u64  negative       = u32(number < 0);
-    u64  negative_mask  = ~(negative - 1);
-    u64  add_sign       = negative | (options.sign == '+');
-    u64  negative_value = ~number + 1;
-    u64  value          = number + ((negative_value - number) & negative_mask);
-    char sign           = char('+' + (('-' - '+') & negative_mask));
-    return format_decimal(destination, value, sign, add_sign);
+    return format_arg_generic< signed char, unsigned char >(destination, number, options);
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, i32 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed short number, const format_options& options)
 {
-    u64  negative       = u32(number < 0);
-    u64  negative_mask  = ~(negative - 1);
-    u64  add_sign       = negative | (options.sign == '+');
-    u64  negative_value = ~number + 1;
-    u64  value          = number + ((negative_value - number) & negative_mask);
-    char sign           = char('+' + (('-' - '+') & negative_mask));
-    return format_decimal(destination, value, sign, add_sign);
+    return format_arg_generic< signed short, unsigned short >(destination, number, options);
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, i64 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed int number, const format_options& options)
 {
-    u64  negative       = u32(number < 0);
-    u64  negative_mask  = ~(negative - 1);
-    u64  add_sign       = negative | (options.sign == '+');
-    u64  negative_value = ~number + 1;
-    u64  value          = number + ((negative_value - number) & negative_mask);
-    char sign           = char('+' + (('-' - '+') & negative_mask));
-    return format_decimal(destination, value, sign, add_sign);
+    return format_arg_generic< signed int, unsigned int >(destination, number, options);
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, u8 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed long number, const format_options& options)
 {
-    return format_decimal(destination, number, options.sign, options.sign == '+');
+    return format_arg_generic< signed long, unsigned long >(destination, number, options);
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, u16 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed long long number, const format_options& options)
 {
-    return format_decimal(destination, number, options.sign, options.sign == '+');
+    return format_arg_generic< signed long long, unsigned long long >(destination, number, options);
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, u32 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned char number, const format_options& options)
 {
-    return format_decimal(destination, number, options.sign, options.sign == '+');
+    return format_decimal(destination, unsigned_integer_type_t< sizeof(number) >(number),
+                          options.sign, options.sign == '+');
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, u64 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned short number, const format_options& options)
 {
-    return format_decimal(destination, number, options.sign, options.sign == '+');
+    return format_decimal(destination, unsigned_integer_type_t< sizeof(number) >(number),
+                          options.sign, options.sign == '+');
+}
+
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned int number, const format_options& options)
+{
+    return format_decimal(destination, unsigned_integer_type_t< sizeof(number) >(number),
+                          options.sign, options.sign == '+');
+}
+
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned long number, const format_options& options)
+{
+    return format_decimal(destination, unsigned_integer_type_t< sizeof(number) >(number),
+                          options.sign, options.sign == '+');
+}
+
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned long long number, const format_options& options)
+{
+    return format_decimal(destination, unsigned_integer_type_t< sizeof(number) >(number),
+                          options.sign, options.sign == '+');
 }
 
 }  // namespace decimal_format
@@ -731,131 +784,104 @@ motor_api(MINITL) u32 format_hexadecimal_whole(char* destination, u64 number)
     return 16;
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, i8 number, const format_options& options)
+template < typename T, typename UNSIGNED_T,
+           enable_if_t< !is_same< T, UNSIGNED_T >::value, bool > X = true >
+static MOTOR_ALWAYS_INLINE u32 format_arg_generic(char* destination, T number,
+                                                  const format_options& options)
 {
-    u64 negative       = u32(number < 0);
-    u64 negative_mask  = ~(negative - 1);
-    u64 add_sign       = negative | (options.sign == '+');
-    u64 negative_value = ~number + 1;
-    u64 value          = number + ((negative_value - number) & negative_mask);
-    *destination       = char('+' + (('-' - '+') & negative_mask));
+    auto       negative       = UNSIGNED_T(number < 0);
+    UNSIGNED_T negative_mask  = ~(negative - 1);
+    UNSIGNED_T add_sign       = negative | (options.sign == '+');
+    UNSIGNED_T negative_value = ~number + 1;
+    UNSIGNED_T value          = number + ((negative_value - number) & negative_mask);
+    *destination              = char('+' + (('-' - '+') & negative_mask));
     destination += add_sign;
     *destination = '0';
     destination += options.alternate;
     *destination = options.formatter;
     destination += options.alternate;
     char a = char('a' + options.formatter - 'x');
-    return format_hexadecimal_generic< 1 >(destination, value, a) + add_sign
-           + options.alternate * 2;
+    return format_hexadecimal_generic< 1 + sizeof(UNSIGNED_T) / 8 >(destination, value, a)
+           + add_sign + options.alternate * 2;
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, i16 number, const format_options& options)
+template < typename T, typename UNSIGNED_T,
+           enable_if_t< is_same< T, UNSIGNED_T >::value, int > X = true >
+static MOTOR_ALWAYS_INLINE u32 format_arg_generic(char* destination, T number,
+                                                  const format_options& options)
 {
-    u64 negative       = u32(number < 0);
-    u64 negative_mask  = ~(negative - 1);
-    u64 add_sign       = negative | (options.sign == '+');
-    u64 negative_value = ~number + 1;
-    u64 value          = number + ((negative_value - number) & negative_mask);
-    *destination       = char('+' + (('-' - '+') & negative_mask));
+    UNSIGNED_T add_sign = options.sign == '+';
+    *destination        = '+';
     destination += add_sign;
     *destination = '0';
     destination += options.alternate;
     *destination = options.formatter;
     destination += options.alternate;
     char a = char('a' + options.formatter - 'x');
-    return format_hexadecimal_generic< 1 >(destination, value, a) + add_sign
-           + options.alternate * 2;
+    return options.sign
+           + format_hexadecimal_generic< 1 + sizeof(UNSIGNED_T) / 8 >(destination, number, a)
+           + add_sign + options.alternate * 2;
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, i32 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed char number, const format_options& options)
 {
-    u64 negative       = u32(number < 0);
-    u64 negative_mask  = ~(negative - 1);
-    u64 add_sign       = negative | (options.sign == '+');
-    u64 negative_value = ~number + 1;
-    u64 value          = number + ((negative_value - number) & negative_mask);
-    *destination       = char('+' + (('-' - '+') & negative_mask));
-    destination += add_sign;
-    *destination = '0';
-    destination += options.alternate;
-    *destination = options.formatter;
-    destination += options.alternate;
-    char a = char('a' + options.formatter - 'x');
-    return format_hexadecimal_generic< 1 >(destination, value, a) + add_sign
-           + options.alternate * 2;
+    return format_arg_generic< signed char, unsigned char >(destination, number, options);
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, i64 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed short number, const format_options& options)
 {
-    u64 negative       = u32(number < 0);
-    u64 negative_mask  = ~(negative - 1);
-    u64 add_sign       = negative | (options.sign == '+');
-    u64 negative_value = ~number + 1;
-    u64 value          = number + ((negative_value - number) & negative_mask);
-    *destination       = char('+' + (('-' - '+') & negative_mask));
-    destination += add_sign;
-    *destination = '0';
-    destination += options.alternate;
-    *destination = options.formatter;
-    destination += options.alternate;
-    char a = char('a' + options.formatter - 'x');
-    return format_hexadecimal_generic< 2 >(destination, value, a) + add_sign + options.alternate;
+    return format_arg_generic< signed short, unsigned short >(destination, number, options);
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, u8 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed int number, const format_options& options)
 {
-    u64 add_sign = options.sign == '+';
-    *destination = '+';
-    destination += add_sign;
-    *destination = '0';
-    destination += options.alternate;
-    *destination = options.formatter;
-    destination += options.alternate;
-    char a = char('a' + options.formatter - 'x');
-    return options.sign + format_hexadecimal_generic< 1 >(destination, number, a) + add_sign
-           + options.alternate * 2;
+    return format_arg_generic< signed int, unsigned int >(destination, number, options);
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, u16 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed long number, const format_options& options)
 {
-    u64 add_sign = options.sign == '+';
-    *destination = '+';
-    destination += add_sign;
-    *destination = '0';
-    destination += options.alternate;
-    *destination = options.formatter;
-    destination += options.alternate;
-    char a = char('a' + options.formatter - 'x');
-    return options.sign + format_hexadecimal_generic< 1 >(destination, number, a) + add_sign
-           + options.alternate * 2;
+    return format_arg_generic< signed long, unsigned long >(destination, number, options);
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, u32 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, signed long long number, const format_options& options)
 {
-    u64 add_sign = options.sign == '+';
-    *destination = '+';
-    destination += add_sign;
-    *destination = '0';
-    destination += options.alternate;
-    *destination = options.formatter;
-    destination += options.alternate;
-    char a = char('a' + options.formatter - 'x');
-    return options.sign + format_hexadecimal_generic< 1 >(destination, number, a) + add_sign
-           + options.alternate * 2;
+    return format_arg_generic< signed long long, unsigned long long >(destination, number, options);
 }
 
-motor_api(MINITL) u32 format_arg(char* destination, u64 number, const format_options& options)
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned char number, const format_options& options)
 {
-    u64 add_sign = options.sign == '+';
-    *destination = '+';
-    destination += add_sign;
-    *destination = '0';
-    destination += options.alternate;
-    *destination = options.formatter;
-    destination += options.alternate;
-    char a = char('a' + options.formatter - 'x');
-    return options.sign + format_hexadecimal_generic< 2 >(destination, number, a) + add_sign
-           + options.alternate * 2;
+    return format_arg_generic< unsigned char, unsigned char >(destination, number, options);
+}
+
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned short number, const format_options& options)
+{
+    return format_arg_generic< unsigned short, unsigned short >(destination, number, options);
+}
+
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned int number, const format_options& options)
+{
+    return format_arg_generic< unsigned int, unsigned int >(destination, number, options);
+}
+
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned long number, const format_options& options)
+{
+    return format_arg_generic< unsigned long, unsigned long >(destination, number, options);
+}
+
+motor_api(MINITL) u32
+    format_arg(char* destination, unsigned long long number, const format_options& options)
+{
+    return format_arg_generic< unsigned long long, unsigned long long >(destination, number,
+                                                                        options);
 }
 
 }  // namespace hexadecimal_format
