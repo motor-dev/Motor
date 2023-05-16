@@ -69,18 +69,6 @@ class reference_wrapper;
 template < class T >
 reference_wrapper< T > byref(T& t) noexcept;
 
-template < typename T >
-struct make_signed;
-
-template < typename T >
-using make_signed_t = typename make_signed< T >::type;
-
-template < typename T >
-struct make_unsigned;
-
-template < typename T >
-using make_unsigned_t = typename make_unsigned< T >::type;
-
 template < class T, T V >
 struct integral_constant
 {
@@ -247,135 +235,14 @@ reference_wrapper< T > byref(T& t) noexcept
     return reference_wrapper< T >(move(t));
 }
 
-template <>
-struct make_signed< char >
+template < typename T1, typename T2 >
+struct is_same : public integral_constant< bool, false >
 {
-    typedef signed char type;
 };
 
-template <>
-struct make_signed< signed char >
+template < typename T >
+struct is_same< T, T > : public integral_constant< bool, true >
 {
-    typedef signed char type;
 };
 
-template <>
-struct make_signed< signed short >
-{
-    typedef signed short type;
-};
-
-template <>
-struct make_signed< signed int >
-{
-    typedef signed int type;
-};
-
-template <>
-struct make_signed< signed long int >
-{
-    typedef signed long int type;
-};
-
-template <>
-struct make_signed< signed long long int >
-{
-    typedef signed long long int type;
-};
-
-template <>
-struct make_signed< unsigned char >
-{
-    typedef signed char type;
-};
-
-template <>
-struct make_signed< unsigned short >
-{
-    typedef signed short type;
-};
-
-template <>
-struct make_signed< unsigned int >
-{
-    typedef signed int type;
-};
-
-template <>
-struct make_signed< unsigned long int >
-{
-    typedef signed long int type;
-};
-
-template <>
-struct make_signed< unsigned long long int >
-{
-    typedef signed long long int type;
-};
-
-template <>
-struct make_unsigned< char >
-{
-    typedef unsigned char type;
-};
-
-template <>
-struct make_unsigned< signed char >
-{
-    typedef unsigned char type;
-};
-
-template <>
-struct make_unsigned< signed short >
-{
-    typedef unsigned short type;
-};
-
-template <>
-struct make_unsigned< signed int >
-{
-    typedef unsigned int type;
-};
-
-template <>
-struct make_unsigned< signed long int >
-{
-    typedef unsigned long int type;
-};
-
-template <>
-struct make_unsigned< signed long long int >
-{
-    typedef unsigned long long int type;
-};
-
-template <>
-struct make_unsigned< unsigned char >
-{
-    typedef unsigned char type;
-};
-
-template <>
-struct make_unsigned< unsigned short >
-{
-    typedef unsigned short type;
-};
-
-template <>
-struct make_unsigned< unsigned int >
-{
-    typedef unsigned int type;
-};
-
-template <>
-struct make_unsigned< unsigned long int >
-{
-    typedef unsigned long int type;
-};
-
-template <>
-struct make_unsigned< unsigned long long int >
-{
-    typedef unsigned long long int type;
-};
 }  // namespace minitl

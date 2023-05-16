@@ -48,17 +48,17 @@ public:
     intrusive_list& operator=(const intrusive_list& other) = delete;
     ~intrusive_list();
 
-    iterator               begin();
-    iterator               end();
-    const_iterator         begin() const;
-    const_iterator         end() const;
-    reverse_iterator       rbegin();
-    reverse_iterator       rend();
-    const_reverse_iterator rbegin() const;
-    const_reverse_iterator rend() const;
+    MOTOR_ALWAYS_INLINE iterator               begin();
+    MOTOR_ALWAYS_INLINE iterator               end();
+    MOTOR_ALWAYS_INLINE const_iterator         begin() const;
+    MOTOR_ALWAYS_INLINE const_iterator         end() const;
+    MOTOR_ALWAYS_INLINE reverse_iterator       rbegin();
+    MOTOR_ALWAYS_INLINE reverse_iterator       rend();
+    MOTOR_ALWAYS_INLINE const_reverse_iterator rbegin() const;
+    MOTOR_ALWAYS_INLINE const_reverse_iterator rend() const;
 
-    size_t size() const;
-    bool   empty() const;
+    size_t                   size() const;
+    MOTOR_ALWAYS_INLINE bool empty() const;
 
     void     push_front(const_reference_t r);
     void     push_back(const_reference_t r);
@@ -66,13 +66,13 @@ public:
     iterator erase(iterator it);
     iterator erase(iterator first, iterator last);
 
-    reference_t       front();
-    reference_t       back();
-    const_reference_t front() const;
-    const_reference_t back() const;
+    MOTOR_ALWAYS_INLINE reference_t       front();
+    MOTOR_ALWAYS_INLINE reference_t       back();
+    MOTOR_ALWAYS_INLINE const_reference_t front() const;
+    MOTOR_ALWAYS_INLINE const_reference_t back() const;
 
-    void clear();
-    void swap(intrusive_list& other);
+    MOTOR_ALWAYS_INLINE void clear();
+    void                     swap(intrusive_list& other);
 };
 
 template < typename T, int INDEX >
@@ -528,14 +528,7 @@ typename intrusive_list< T, INDEX >::const_reference_t intrusive_list< T, INDEX 
 template < typename T, int INDEX >
 void intrusive_list< T, INDEX >::clear()
 {
-    iterator first = begin();
-    iterator last  = end();
-    while(first != last)
-    {
-        const item* i = first.m_iterator;
-        ++first;
-        i->unhook();
-    }
+    erase(begin(), end());
 }
 
 template < typename T, int INDEX >
