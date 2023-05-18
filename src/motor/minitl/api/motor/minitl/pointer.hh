@@ -4,6 +4,7 @@
 
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/allocator.hh>
+#include <motor/minitl/assert.hh>
 
 namespace minitl {
 

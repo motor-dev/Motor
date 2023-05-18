@@ -14,6 +14,12 @@ public:
     template < typename T >
     class block;
 
+    allocator()                            = default;
+    allocator(const allocator&)            = delete;
+    allocator& operator=(const allocator&) = delete;
+    allocator(allocator&&)                 = delete;
+    allocator& operator=(allocator&&)      = delete;
+
 protected:
     virtual void* internal_alloc(u64 size, u64 alignment)              = 0;
     virtual bool  internal_resize(void* ptr, u64 size)                 = 0;

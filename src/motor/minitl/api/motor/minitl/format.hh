@@ -5,7 +5,6 @@
 #include <motor/minitl/stdafx.h>
 #include <motor/kernel/interlocked.hh>
 #include <motor/minitl/allocator.hh>
-#include <motor/minitl/type_traits.hh>
 #include <motor/minitl/utility.hh>
 #include <cstring>
 

@@ -89,6 +89,7 @@ def build(bld):
     bld.load('bin2c', tooldir=[tool_dir])
     bld.load('clir', tooldir=[tool_dir])
     bld.load('ir_compiler', tooldir=[tool_dir])
+    bld.load('cmake', tooldir=[tool_dir])
     bld.env.STATIC = bld.env.STATIC or Options.options.static
     bld.env.DYNAMIC = Options.options.dynamic
     if bld.env.STATIC and bld.env.DYNAMIC:

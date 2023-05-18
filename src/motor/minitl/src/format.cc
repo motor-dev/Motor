@@ -4,7 +4,7 @@
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/assert.hh>
 #include <motor/minitl/format.hh>
-#include <motor/minitl/weakptr.hh>
+#include <motor/minitl/type_traits.hh>
 #include <cstring>
 
 namespace minitl { namespace format_details {

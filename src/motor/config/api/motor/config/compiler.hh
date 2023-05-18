@@ -36,11 +36,11 @@
 #ifdef __device
 #    undef __device
 #endif
-#define __device inline  // NOLINT(bugprone-reserved-identifier)
+#define __device  // NOLINT(bugprone-reserved-identifier)
 #ifdef __kernel
 #    undef __kernel
 #endif
-#define __kernel inline  // NOLINT(bugprone-reserved-identifier)
+#define __kernel  // NOLINT(bugprone-reserved-identifier)
 
 #define kernel_constant const
 #define kernel_global

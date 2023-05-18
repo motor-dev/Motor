@@ -124,11 +124,8 @@ def module(
         source_list = source_nodes[0][1].ant_glob(source_list)
     else:
         source_list = []
-    if not build_context.env.PROJECTS:
-        preprocess = build_context.get_tgen_by_name('%s.preprocess' % name)
-        extra_includes = extra_includes + [preprocess.generated_include_node]
-    else:
-        preprocess = None
+    preprocess = build_context.get_tgen_by_name('%s.preprocess' % name)
+    extra_includes = extra_includes + [preprocess.generated_include_node]
 
     module_path = None
     if path:

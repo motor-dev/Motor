@@ -24,9 +24,9 @@ private:
 
 public:
     inline weak();
-    inline weak(T* p);  // NOLINT(google-explicit-constructor)
+    inline weak(T* p);                      // NOLINT(google-explicit-constructor)
     template < typename U >
-    inline weak(ref< U > other);  // NOLINT(google-explicit-constructor)
+    inline weak(const ref< U >& other);     // NOLINT(google-explicit-constructor)
     template < typename U >
     inline weak(const scoped< U >& other);  // NOLINT(google-explicit-constructor)
     inline weak(const weak& other);
@@ -41,7 +41,7 @@ public:
     inline weak& operator=(U* other);
 
     MOTOR_ALWAYS_INLINE T* operator->() const;
-    inline                 operator const void*() const;  // NOLINT(google-explicit-constructor)
+    inline operator const void*() const;  // NOLINT(google-explicit-constructor)
     inline bool            operator!() const;
     MOTOR_ALWAYS_INLINE T& operator*();
 
@@ -92,7 +92,7 @@ weak< T >::weak(T* p) : m_ptr(p)
 
 template < typename T >
 template < typename U >
-weak< T >::weak(ref< U > other) : m_ptr(check_is_a< T >(other.operator->()))
+weak< T >::weak(const ref< U >& other) : m_ptr(check_is_a< T >(other.operator->()))
 {
 #if MOTOR_ENABLE_WEAKCHECK
     if(m_ptr) m_ptr->add_weak();
@@ -129,7 +129,7 @@ template < typename T >
 weak< T >::~weak()
 {
 #if MOTOR_ENABLE_WEAKCHECK
-    if(m_ptr) m_ptr->add_weak();
+    if(m_ptr) m_ptr->dec_weak();
 #endif
 }
 

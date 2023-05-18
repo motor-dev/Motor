@@ -309,7 +309,7 @@ class QtToolchain(QtObject):
                 flags.append(env.SYSTEM_INCLUDE_PATTERN % include)
 
             self.ProjectExplorer_CustomToolChain_CompilerPath = compiler
-            self.ProjectExplorer_CustomToolChain_Cxx11Flags = ()
+            self.ProjectExplorer_CustomToolChain_Cxx11Flags = ('-std=c++14')
             self.ProjectExplorer_CustomToolChain_ErrorPattern = ''
             self.ProjectExplorer_CustomToolChain_FileNameCap = 1
             self.ProjectExplorer_CustomToolChain_HeaderPaths = tuple(
@@ -323,7 +323,8 @@ class QtToolchain(QtObject):
             toolchain_id = 'ProjectExplorer.ToolChain.Custom:%s' % generateGUID(
                 'Motor:toolchain:%s:%d' % (env_name, language)
             )
-            self.ProjectExplorer_CustomToolChain_PredefinedMacros = tuple(env.DEFINES + defines)
+            self.ProjectExplorer_CustomToolChain_PredefinedMacros = tuple(
+                '#define %s' % ' '.join(d.split('=', 1)) for d in env.DEFINES + defines)
             self.ProjectExplorer_CustomToolChain_TargetAbi = abi
             self.ProjectExplorer_ToolChain_Language = language
             self.ProjectExplorer_ToolChain_Autodetect = False
@@ -403,9 +404,6 @@ class QtPlatform(QtObject):
                 ('PE.Profile.ToolChains', [('C', toolchain_c), ('Cxx', toolchain_cxx)]),
                 ('PE.Profile.ToolChainsV3', [('C', toolchain_c), ('Cxx', toolchain_cxx)]),
                 ('CMakeProjectManager.CMakeKitInformation', cmake),
-                ('CMake.ConfigurationKitInformation',
-                 ('CMAKE_TOOLCHAIN_FILE=%s/.cmake/%s/toolchain.txt' % (bld.srcnode.abspath(), env_name),)
-                 ),
                 ('QtPM4.mkSPecInformation', ''),
                 ('QtSupport.QtInformation', -1),
             ]
@@ -1128,7 +1126,7 @@ class QtCreator(Build.BuildContext):
                     XmlNode(data, 'variable', 'Version').close()
                     write_value(data, self.__class__.version[1])
 
-    def make_build_configuration(self, build_configuration_index, bld_env, env, env_name, variant):
+    def make_build_configuration(self, build_configuration_index, bld_env, env, env_name):
         options = [a for a in sys.argv if a[0] == '-']
         target_os = qbsPlatformList(env)
         extraPlatformFlags = target_os and [
@@ -1412,7 +1410,9 @@ class QCMake(QtCreator):
     version = (4, 18)
 
     def write_project_files(self):
-        cmake.write_cmake_workspace(self)
+        self.cmake_toolchains = {}
+        for env_name, toolchain in cmake.write_cmake_workspace(self):
+            self.cmake_toolchains[env_name] = toolchain
         appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
         self.base_node = self.srcnode
         cmake_user = self.base_node.make_node('CMakeLists.txt.user')
@@ -1436,10 +1436,15 @@ class QCMake(QtCreator):
     def make_build_configuration(self, build_configuration_index, bld_env, env, env_name, variant):
         return (
             'ProjectExplorer.Target.BuildConfiguration.%d' % build_configuration_index, [
-                ('CMake.Build.Type', '%s-%s' % (env_name, variant)),
+                ('CMake.Build.Type', variant),
                 ('CMake.Configure.ClearSystemEnvironment', False),
                 ('CMake.Configure.UserEnvironmentChanges', tuple()),
-                ('CMake.Initial.Parameters', "-DCMAKE_BUILD_TYPE:STRING=%s-%s" % (env_name, variant)),
+                ('CMake.Initial.Parameters',
+                 '-DCMAKE_BUILD_TYPE:STRING=%s\n'
+                 '-DCMAKE_TOOLCHAIN_FILE:STRING=%s\n'
+                 '-DCMAKE_C_COMPILER:FILEPATH=%%{Compiler:Executable:C}\n'
+                 '-DCMAKE_CXX_COMPILER:FILEPATH=%%{Compiler:Executable:Cxx}' % (
+                     variant, self.cmake_toolchains[env_name])),
                 (
                     'ProjectExplorer.BuildConfiguration.BuildDirectory',
                     self.bldnode.make_node('%s/%s' % (env_name, variant)).abspath()
