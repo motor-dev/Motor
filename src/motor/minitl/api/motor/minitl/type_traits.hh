@@ -9,9 +9,6 @@ namespace minitl {
 template < class T, T V >
 struct integral_constant;
 
-typedef integral_constant< bool, true >  true_t;
-typedef integral_constant< bool, false > false_t;
-
 template < typename T >
 struct is_const;
 
@@ -85,6 +82,9 @@ struct integral_constant
         return value;
     }
 };
+
+typedef integral_constant< bool, true >  true_t;
+typedef integral_constant< bool, false > false_t;
 
 template < typename T >
 struct is_const : public false_t
@@ -236,12 +236,12 @@ reference_wrapper< T > byref(T& t) noexcept
 }
 
 template < typename T1, typename T2 >
-struct is_same : public integral_constant< bool, false >
+struct is_same : public false_t
 {
 };
 
 template < typename T >
-struct is_same< T, T > : public integral_constant< bool, true >
+struct is_same< T, T > : public true_t
 {
 };
 

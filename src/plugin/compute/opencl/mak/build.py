@@ -110,3 +110,5 @@ def cl_kernel_compile(task_gen, source):
 def build(build_context):
     build_context.env.IRCC_CL_TARGET = build_context.path.find_node('ir2cl')
     task_gen.kernel_processors.append(create_cl_kernel)
+    if build_context.env.PROJECTS:
+        build_context.env.CLC_KERNEL_HEADER_PATH = [build_context.path.parent.make_node('api.cl').abspath()]

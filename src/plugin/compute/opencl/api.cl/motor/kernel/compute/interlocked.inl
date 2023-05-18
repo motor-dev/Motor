@@ -22,14 +22,6 @@ struct InterlockedType< 4 >
     static inline __host __device value_t set_and_fetch(kernel_global value_t* p, value_t v);
     static inline __host __device value_t fetch_and_set(kernel_global value_t* p, value_t v);
 
-    static inline __host __device value_t fetch_and_add(kernel_local value_t* p, value_t incr);
-    static inline __host __device value_t fetch_and_sub(kernel_local value_t* p, value_t incr);
-
-    static inline __host __device value_t set_conditional(kernel_local value_t* p, value_t v,
-                                                          value_t condition);
-    static inline __host __device value_t set_and_fetch(kernel_local value_t* p, value_t v);
-    static inline __host __device value_t fetch_and_set(kernel_local value_t* p, value_t v);
-
     /* not defined, host only */
     struct tagged_t
     {
@@ -63,14 +55,6 @@ struct InterlockedType< 8 >
     static inline __host __device value_t set_conditional(kernel_global value_t* p, value_t v,
                                                           value_t condition);
     static inline __host __device value_t set_and_fetch(kernel_global value_t* p, value_t v);
-
-    static inline __host __device value_t fetch_and_add(kernel_local value_t* p, value_t incr);
-    static inline __host __device value_t fetch_and_sub(kernel_local value_t* p, value_t incr);
-
-    static inline __host __device value_t fetch_and_set(kernel_local value_t* p, value_t v);
-    static inline __host __device value_t set_conditional(kernel_local value_t* p, value_t v,
-                                                          value_t condition);
-    static inline __host __device value_t set_and_fetch(kernel_local value_t* p, value_t v);
 
     /* not defined, host only */
     struct tagged_t

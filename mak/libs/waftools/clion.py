@@ -38,6 +38,7 @@ misc_xml = """<?xml version="1.0" encoding="UTF-8"?>
     </sourceRoots>
     <excludeRoots>
       <file path="$PROJECT_DIR$/%s" />
+      <file path="$PROJECT_DIR$/.cache" />
     </excludeRoots>
   </component>
 </project>"""
@@ -78,7 +79,7 @@ class CLion(cmake.CMake):
         self._inspections_dir = self._idea_dir.make_node('inspectionProfiles')
         self._scopes_dir = self._idea_dir.make_node('scopes')
 
-        configurations, targets = cmake.CMake.write_workspace(self)
+        configurations = cmake.CMake.write_workspace(self)
 
         appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
 
@@ -88,7 +89,7 @@ class CLion(cmake.CMake):
         self._inspections_dir.mkdir()
 
         self.write_base(appname)
-        self.write_custom_compilers(configurations)
+        self.write_custom_compilers()
         self.write_cmake_xml(configurations)
         self.write_codestyle()
         self.write_launch_files(appname)
@@ -127,12 +128,18 @@ class CLion(cmake.CMake):
                 with open(self.motornode.make_node('mak/tools/clion/%s' % filename).abspath(), 'r') as template_file:
                     inspection_file.write(template_file.read())
 
-    def write_custom_compilers(self, configurations):
+    def write_custom_compilers(self):
         with open(self._idea_dir.make_node('custom-compiler.xml').abspath(), 'w') as custom_compiler_xml_file:
             custom_compiler_xml_file.write(custom_compiler_xml)
         with open(self._idea_dir.make_node('custom_compiler.yaml').abspath(), 'w') as custom_compiler_yaml_file:
             custom_compiler_yaml_file.write('compilers:\n')
-            for toolchain_name, bld_env, env, toolchain, c_compiler, cxx_compiler in configurations:
+            for toolchain_name in self.env.ALL_TOOLCHAINS:
+                bld_env = self.all_envs[toolchain_name]
+                if bld_env.SUB_TOOLCHAINS:
+                    env = self.all_envs[bld_env.SUB_TOOLCHAINS[0]]
+                else:
+                    env = bld_env
+
                 custom_compiler_yaml_file.write(
                     '  - description: %(toolchain_name)s\n'
                     '    match-language: C\n'
@@ -175,13 +182,13 @@ class CLion(cmake.CMake):
                 '  <component name="CMakeSharedSettings">\n'
                 '    <configurations>\n'
             )
-            for toolchain_name, bld_env, env, toolchain, c_compiler, cxx_compiler in configurations:
+            for toolchain_name, toolchain in configurations:
                 for variant in self.env.ALL_VARIANTS:
                     cmake_xml.write(
                         '      <configuration PROFILE_NAME="%(toolchain_name)s:%(variant)s"'
                         ' ENABLED="true"'
                         ' GENERATION_DIR="%(bld_path)s/%(toolchain_name)s/%(variant)s"'
-                        ' CONFIG_NAME="%(toolchain_name)s-%(variant)s"'
+                        ' CONFIG_NAME="%(variant)s"'
                         ' GENERATION_OPTIONS='
                         '"-DCMAKE_TOOLCHAIN_FILE=%(toolchain)s" />\n' % {
                             'toolchain_name': toolchain_name,

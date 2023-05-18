@@ -73,7 +73,7 @@ ref< const File::Ticket > File::beginRead(u32 size, i64 offset, bool text,
         motor_assert(m_size + offset + size + 1 <= m_size, "reading past end of file");
         s = size ? size : motor_checked_numcast< u32 >((i64)m_size + offset + (text ? 1 : 0));
     }
-    ref< Ticket > t = ref< Ticket >::create(ticketPool(), byref(arena), this, offset, s, text);
+    ref< Ticket > t = ref< Ticket >::create(ticketPool(), arena, this, offset, s, text);
     IOProcess::IOContext::pushTicket(t);
     return t;
 }
@@ -84,8 +84,8 @@ ref< const File::Ticket > File::beginWrite(const void* data, u32 size, i64 offse
         motor_assert((u64)offset <= m_size, "writing past end of file");
     else if(offset < 0)
         motor_assert(offset + (i64)m_size + 1 >= 0, "writing past end of file");
-    ref< Ticket > t = ref< Ticket >::create(ticketPool(), byref(Arena::temporary()), this, offset,
-                                            size, false, data);
+    ref< Ticket > t
+        = ref< Ticket >::create(ticketPool(), Arena::temporary(), this, offset, size, false, data);
     IOProcess::IOContext::pushTicket(t);
     return t;
 }
