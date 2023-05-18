@@ -197,15 +197,9 @@ struct tuple_helper
     {
     }
     template < typename T1, typename... TAIL1 >
-    constexpr explicit tuple_helper(const T1& t, const TAIL1&... tail)
-        : tuple_field< INDEX, T >(t)
-        , tuple_helper< INDEX + 1, TAIL... >(tail...)
-    {
-    }
-    template < typename T1, typename... TAIL1 >
     constexpr explicit tuple_helper(T1&& t, TAIL1&&... tail)
-        : tuple_field< INDEX, T >(move(t))
-        , tuple_helper< INDEX + 1, TAIL... >(move(tail)...)
+        : tuple_field< INDEX, T >(forward< T1 >(t))
+        , tuple_helper< INDEX + 1, TAIL... >(forward< TAIL1 >(tail)...)
     {
     }
     template < typename T1, typename... TAIL1 >
@@ -239,11 +233,7 @@ struct tuple_helper< INDEX, T > : public tuple_field< INDEX, T >
     constexpr explicit tuple_helper(const T& t) : tuple_field< INDEX, T >(t)
     {
     }
-    template < typename T1 >
-    constexpr explicit tuple_helper(const T1& t) : tuple_field< INDEX, T >(t)
-    {
-    }
-    constexpr explicit tuple_helper(T&& t) : tuple_field< INDEX, T >(move(t))
+    constexpr explicit tuple_helper(T&& t) : tuple_field< INDEX, T >(forward< T >(t))
     {
     }
     template < typename T1 >
@@ -320,7 +310,8 @@ constexpr tuple< T... >::tuple(const T&... args) : details::tuple_helper< 0, T..
 
 template < typename... T >
 template < typename... ARGS >
-constexpr tuple< T... >::tuple(ARGS&&... args) : details::tuple_helper< 0, T... >(args...)
+constexpr tuple< T... >::tuple(ARGS&&... args)
+    : details::tuple_helper< 0, T... >(minitl::forward< ARGS >(args)...)
 {
 }
 
