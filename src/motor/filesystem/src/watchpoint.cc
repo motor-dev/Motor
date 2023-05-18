@@ -45,7 +45,7 @@ ref< WatchPoint > WatchPoint::getWatchPointOrCreate(const ipath& path)
         if(!nextChild)
         {
             ref< WatchPoint > newChild = ref< WatchPoint >::create(Arena::filesystem(), result);
-            result->m_children.push_back(minitl::make_tuple(path[i], newChild));
+            result->m_children.emplace_back(path[i], newChild);
             nextChild = newChild;
         }
         result = nextChild;

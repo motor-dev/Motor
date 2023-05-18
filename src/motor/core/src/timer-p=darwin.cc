@@ -51,7 +51,8 @@ float Timer::now()
     {
         mach_timebase_info(&info);
     }
-    return (float)((mach_absolute_time() - s_base) * info.numer / info.denom) / 1000000.0f;
+    return (float(mach_absolute_time() - s_base) * float(info.numer) / float(info.denom))
+           / 1000000.0f;
 }
 
 }  // namespace Motor

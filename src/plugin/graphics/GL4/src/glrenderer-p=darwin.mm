@@ -64,7 +64,7 @@ private:
 
 public:
     Context();
-    ~Context();
+    ~Context() override;
 };
 
 static NSOpenGLPixelFormatAttribute s_attributes[] = {
@@ -106,7 +106,7 @@ private:
 
 public:
     Context(NSWindow* window, NSOpenGLContext* context, u64 threadId);
-    ~Context();
+    ~Context() override;
 };
 
 GLWindow::Context::Context(NSWindow* window, NSOpenGLContext* context, u64 threadId)
