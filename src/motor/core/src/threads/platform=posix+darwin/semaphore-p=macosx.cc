@@ -40,7 +40,7 @@ Semaphore::~Semaphore()
 #endif
 }
 
-void Semaphore::release(int count)
+void Semaphore::release(int count)  // NOLINT(readability-make-member-function-const)
 {
     for(int i = 0; i < count; ++i)
     {
@@ -54,11 +54,11 @@ void Semaphore::release(int count)
 
 Threads::Waitable::WaitResult Semaphore::wait()
 {
-    int result;
 #if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ >= 1060
-    result = dispatch_semaphore_wait(reinterpret_cast< dispatch_semaphore_t >(m_data.ptr),
-                                     DISPATCH_TIME_FOREVER);
+    intptr_t result = dispatch_semaphore_wait(reinterpret_cast< dispatch_semaphore_t >(m_data.ptr),
+                                              DISPATCH_TIME_FOREVER);
 #else
+    int result;
     do
     {
         result = MPWaitOnSemaphore(*(MPSemaphoreID*)m_data.ptr, kDurationForever);

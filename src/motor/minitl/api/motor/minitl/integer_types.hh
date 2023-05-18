@@ -6,7 +6,7 @@ see LICENSE for detail */
 
 namespace minitl {
 
-template < u32 BYTE_SIZE >
+template < u32 BYTE_COUNT >
 struct integer_type;
 
 template <>
@@ -37,9 +37,9 @@ struct integer_type< 8 >
     typedef i64 signed_type;
 };
 
-template < u32 BYTE_SIZE >
-using signed_integer_type_t = typename integer_type< BYTE_SIZE >::signed_type;
-template < u32 BYTE_SIZE >
-using unsigned_integer_type_t = typename integer_type< BYTE_SIZE >::unsigned_type;
+template < u32 BYTE_COUNT >
+using signed_integer_type_t = typename integer_type< BYTE_COUNT >::signed_type;
+template < u32 BYTE_COUNT >
+using unsigned_integer_type_t = typename integer_type< BYTE_COUNT >::unsigned_type;
 
 }  // namespace minitl

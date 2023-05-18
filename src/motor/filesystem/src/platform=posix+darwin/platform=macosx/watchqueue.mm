@@ -24,8 +24,8 @@ static CFStringRef getApplicationDirectory()
 
 FileSystemWatchProcessQueue::FileSystemWatchProcessQueue()
     : m_Path(getApplicationDirectory())
-    , m_thread("FileSystemWatch", &FileSystemWatchProcessQueue::runFileSystemWatch, (intptr_t)this,
-               0)
+    , m_thread(istring("FileSystemWatch"), &FileSystemWatchProcessQueue::runFileSystemWatch,
+               (intptr_t)this, 0)
     , m_runLoop(0)
 {
 }
