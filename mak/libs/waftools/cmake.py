@@ -86,10 +86,10 @@ def write_cmake_workspace(build_context, build_options=[]):
                         tg_files = source_node.ant_glob('**/*', excl='kernels/**')
                         if tg_files:
                             all_files[(tg_path + '/' + prefix, source_node)
-                                      ] = [f.path_from(build_context.srcnode).replace('\\', '/') for f in tg_files]
+                            ] = [f.path_from(build_context.srcnode).replace('\\', '/') for f in tg_files]
                     else:
                         all_files[(tg_path + '/' + prefix, source_node.parent)
-                                  ] = [source_node.path_from(build_context.srcnode).replace('\\', '/')]
+                        ] = [source_node.path_from(build_context.srcnode).replace('\\', '/')]
 
                 for task in tg.tasks:
                     if task.__class__.__name__ in ('c', 'objc', 'cxx', 'objcxx', 'cpuc'):
@@ -170,7 +170,7 @@ def write_cmake_workspace(build_context, build_options=[]):
                     if 'motor:kernel' in tg.features:
                         target_list.write(
                             'set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/%s PROPERTIES LANGUAGE CXX)\n' %
-                            (tg.source[0].path_from(build_context.srcnode), )
+                            (tg.source[0].path_from(build_context.srcnode),)
                         )
 
         for env_name in build_context.env.ALL_TOOLCHAINS:
@@ -201,7 +201,7 @@ def write_cmake_workspace(build_context, build_options=[]):
                     '    WORKING_DIRECTORY "%s"\n'
                     '    USES_TERMINAL\n'
                     ')\n\n'
-                    'add_custom_target(prepare COMMAND cmake -E touch_nocreate main.cpp)\n'
+                    'add_custom_target(prepare COMMAND ${CMAKE_COMMAND} -E touch_nocreate main.cpp)\n'
                     'add_dependencies(motor.launcher prepare)\n'
                     '' % (
                         '\n    '.join(env.DEFINES), build_context.launcher.target,
