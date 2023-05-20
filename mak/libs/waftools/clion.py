@@ -143,7 +143,7 @@ class CLion(cmake.CMake):
                 custom_compiler_yaml_file.write(
                     '  - description: %(toolchain_name)s\n'
                     '    match-language: C\n'
-                    '    match-compiler-exe: %(c_compiler)s\n'
+                    '    match-compiler-exe: .*\n'
                     '    match-args: -U%(toolchain_name)s\n'
                     '    code-insight-target-name: %(arch)s-%(system)s\n'
                     '    defines:\n'
@@ -152,7 +152,7 @@ class CLion(cmake.CMake):
                     '      - %(includes_c)s\n'
                     '  - description: %(toolchain_name)s\n'
                     '    match-language: CPP\n'
-                    '    match-compiler-exe: %(cxx_compiler)s\n'
+                    '    match-compiler-exe: .*\n'
                     '    match-args: -U%(toolchain_name)s\n'
                     '    code-insight-target-name: %(arch)s-%(system)s\n'
                     '    defines:\n'
@@ -161,8 +161,6 @@ class CLion(cmake.CMake):
                     '      - %(includes_cxx)s\n'
                     '' % {
                         'toolchain_name': toolchain_name,
-                        'c_compiler': env.CC[0].replace('+', '\\+'),
-                        'cxx_compiler': env.CXX[0].replace('+', '\\+'),
                         'arch': env.ARCHITECTURE,
                         'system': env.SYSTEM_NAME,
                         'includes_c': '\n      - '.join(
