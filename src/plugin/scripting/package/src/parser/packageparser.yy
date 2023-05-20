@@ -111,13 +111,13 @@ decl_import:
 decl_plugin:
         KW_plugin fullname ';'
             {
-                ((BuildContext*)param)->result->loadPlugin($2, $2);
+                ((BuildContext*)param)->result->loadPlugin(Motor::inamespace($2), Motor::inamespace($2));
                 free($2);
             }
     |
         KW_plugin fullname KW_as TOK_ID ';'
             {
-                ((BuildContext*)param)->result->loadPlugin($2, $4);
+                ((BuildContext*)param)->result->loadPlugin(Motor::inamespace($2), Motor::inamespace($4));
                 free($2);
                 free($4);
             }
@@ -134,7 +134,7 @@ decl_object:
                                              $4.line, $4.column);
             if (node)
             {
-                context->result->insertNode($2, node);
+                context->result->insertNode(Motor::istring($2), node);
             }
             free($2);
         }

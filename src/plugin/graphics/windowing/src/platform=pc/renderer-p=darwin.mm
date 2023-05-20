@@ -54,15 +54,13 @@ void Renderer::PlatformRenderer::flush()
     }
 }
 
-Renderer::Renderer(minitl::Allocator& arena, weak< Resource::ResourceManager > manager)
+Renderer::Renderer(minitl::allocator& arena, const weak< Resource::ResourceManager >& manager)
     : IRenderer(arena, manager, Scheduler::MainThread)
     , m_platformRenderer(scoped< PlatformRenderer >::create(arena))
 {
 }
 
-Renderer::~Renderer()
-{
-}
+Renderer::~Renderer() = default;
 
 knl::uint2 Renderer::getScreenSize() const
 {

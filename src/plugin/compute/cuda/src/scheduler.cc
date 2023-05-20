@@ -12,7 +12,7 @@
 namespace Motor { namespace KernelScheduler { namespace Cuda {
 
 Scheduler::Scheduler(const Plugin::Context& context)
-    : IScheduler("Cuda", context.scheduler, GPUType)
+    : IScheduler(istring("Cuda"), context.scheduler, GPUType)
     , m_resourceManager(context.resourceManager)
     , m_cudaLoader(ref< CodeLoader >::create(Arena::task()))
     , m_memoryHost(scoped< MemoryHost >::create(Arena::task()))

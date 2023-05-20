@@ -118,19 +118,19 @@ namespace Log {
 
 weak< Logger > motor()
 {
-    static weak< Logger > logger = Logger::root()->getChild("motor");
+    static weak< Logger > logger = Logger::root()->getChild(istring("motor"));
     return logger;
 }
 
 weak< Logger > system()
 {
-    static weak< Logger > logger = motor()->getChild("system");
+    static weak< Logger > logger = motor()->getChild(istring("system"));
     return logger;
 }
 
 weak< Logger > thread()
 {
-    static weak< Logger > logger = system()->getChild("thread");
+    static weak< Logger > logger = system()->getChild(istring("thread"));
     return logger;
 }
 

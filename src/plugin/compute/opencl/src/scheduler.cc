@@ -23,7 +23,7 @@ static const int s_profilingMode =
     ;
 
 Scheduler::Scheduler(const Plugin::Context& pluginContext, const ref< Context >& clContext)
-    : IScheduler("OpenCL", pluginContext.scheduler, GPUType)
+    : IScheduler(istring("OpenCL"), pluginContext.scheduler, GPUType)
     , m_context(clContext)
     , m_resourceManager(pluginContext.resourceManager)
     , m_loader(scoped< KernelLoader >::create(Arena::task(),

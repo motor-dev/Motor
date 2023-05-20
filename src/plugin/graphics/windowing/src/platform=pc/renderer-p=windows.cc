@@ -52,7 +52,7 @@ Renderer::PlatformRenderer::PlatformRenderer(const weak< Renderer >& renderer)
     m_wndClassEx.hbrBackground = nullptr;
     m_wndClassEx.lpszMenuName  = nullptr;
     m_wndClassEx.cbClsExtra    = 0;
-    m_wndClassEx.cbWndExtra    = sizeof(Window*);
+    m_wndClassEx.cbWndExtra    = sizeof(Window*);  // NOLINT(bugprone-sizeof-expression)
 
     RegisterClassEx(&m_wndClassEx);
 }
@@ -84,7 +84,7 @@ void Renderer::PlatformRenderer::destroyWindowImplementation(HWND hWnd)
 
 //-----------------------------------------------------------------------------
 
-Renderer::Renderer(minitl::Allocator& allocator, const weak< Resource::ResourceManager >& manager)
+Renderer::Renderer(minitl::allocator& allocator, const weak< Resource::ResourceManager >& manager)
     : IRenderer(allocator, manager, Scheduler::MainThread)
     , m_platformRenderer(scoped< PlatformRenderer >::create(allocator, this))
 {

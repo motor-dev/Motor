@@ -13,7 +13,7 @@ Environment::Environment()
     , m_user(getenv("USER"))
     , m_programPath()
 {
-    m_homeDirectory.push_back(".motor");
+    m_homeDirectory.push_back(istring(".motor"));
 }
 
 }  // namespace Motor

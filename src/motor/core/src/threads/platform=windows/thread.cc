@@ -16,10 +16,10 @@ namespace Motor {
 #pragma pack(push, 8)
 struct THREADNAME_INFO
 {
-    DWORD  dwType;
-    LPCSTR szName;
-    DWORD  dwThreadID;
-    DWORD  dwFlags;
+    DWORD  dwType {};
+    LPCSTR szName {};
+    DWORD  dwThreadID {};
+    DWORD  dwFlags {};
 };
 #pragma pack(pop)
 
@@ -53,7 +53,7 @@ public:
         {
             motor_warning(Log::thread(), "TLS not available");
         }
-        static Thread::ThreadParams p("main", nullptr, 0, 0);
+        static Thread::ThreadParams p(istring("main"), nullptr, 0, 0);
         createThreadSpecificData(p);
     }
     ~ThreadSpecificData()

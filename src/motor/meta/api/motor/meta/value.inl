@@ -32,16 +32,16 @@ template < typename T >
 Value::Value(ByRefType< T > t) : m_type(motor_type< T >())
                                , m_reference(true)
 {
-    m_ref.m_pointer    = const_cast< void* >((const void*)&t.value);
-    m_ref.m_deallocate = false;
+    m_buffer.m_ref.m_pointer    = const_cast< void* >((const void*)&t.value);
+    m_buffer.m_ref.m_deallocate = false;
 }
 
 template <>
 inline Value::Value(ByRefType< Value > t) : m_type(t.value.m_type)
                                           , m_reference(true)
 {
-    m_ref.m_pointer    = t.value.memory();
-    m_ref.m_deallocate = false;
+    m_buffer.m_ref.m_pointer    = t.value.memory();
+    m_buffer.m_ref.m_deallocate = false;
 }
 
 template <>
@@ -49,8 +49,8 @@ inline Value::Value(ByRefType< const Value > t)
     : m_type(Type::makeType(t.value.m_type, Type::MakeConst))
     , m_reference(true)
 {
-    m_ref.m_pointer    = const_cast< void* >(t.value.memory());
-    m_ref.m_deallocate = false;
+    m_buffer.m_ref.m_pointer    = const_cast< void* >(t.value.memory());
+    m_buffer.m_ref.m_deallocate = false;
 }
 
 template < typename T >
@@ -119,11 +119,11 @@ void* Value::memory()
 {
     if(!m_reference && m_type.size() <= sizeof(m_buffer))
     {
-        return m_buffer;
+        return m_buffer.m_data;
     }
     else
     {
-        return m_ref.m_pointer;
+        return m_buffer.m_ref.m_pointer;
     }
 }
 
@@ -131,11 +131,11 @@ const void* Value::memory() const
 {
     if(!m_reference && m_type.size() <= sizeof(m_buffer))
     {
-        return m_buffer;
+        return m_buffer.m_data;
     }
     else
     {
-        return m_ref.m_pointer;
+        return m_buffer.m_ref.m_pointer;
     }
 }
 

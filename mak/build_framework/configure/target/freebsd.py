@@ -39,6 +39,7 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
         env.ABI = 'elf'
         env.COMPILER_ABI = 'freebsd'
         env.VALID_PLATFORMS = ['freebsd', 'posix', 'pc']
+        env.SYSTEM_NAME = 'pc-freebsd'
         sysroot = compiler.sysroot if compiler.sysroot is not None else ''
         if '-m32' in compiler.extra_args['cxx']:
             env.PKGCONFIG_DISABLE = True
@@ -75,7 +76,7 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
                             libpaths.append('%s%s' % (compiler.sysroot or '', line))
         if compiler.arch.startswith('arm') and compiler.arch != 'arm64':
             if 'GCC' in compiler.NAMES:
-                env.append_value('CXXFLAGS', ['-nostdinc++', '-isystem', '/usr/include/c++/v1'])
+                env.append_value('CXXFLAGS', ['-nostdinc++', '-isystem/usr/include/c++/v1'])
                 env.LINK_CC = ['/usr/bin/cc']
                 env.LINK_CXX = ['/usr/bin/c++']
             elif 'Clang' in compiler.NAMES:

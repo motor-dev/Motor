@@ -143,7 +143,8 @@ Plugin< T >::Plugin(const inamespace& pluginName, const Context& context)
 {
     if(*m_dynamicObject)
     {
-        CreateFunction* create = m_dynamicObject->getSymbol< CreateFunction >("motor_createPlugin");
+        CreateFunction* create
+            = m_dynamicObject->getSymbol< CreateFunction >(istring("motor_createPlugin"));
         if(motor_assert(create, "could not load method motor_createPlugin")) return;
         m_interface = (*create)(context);
     }
@@ -157,7 +158,7 @@ Plugin< T >::~Plugin()
         if(m_interface)
         {
             DestroyFunction* destroy
-                = m_dynamicObject->getSymbol< DestroyFunction >("motor_destroyPlugin");
+                = m_dynamicObject->getSymbol< DestroyFunction >(istring("motor_destroyPlugin"));
             motor_assert(destroy, "could not load method motor_destroyPlugin");
             (*destroy)(m_interface, m_resourceManager);
         }
@@ -202,7 +203,7 @@ raw< const Meta::Class > Plugin< T >::pluginNamespace() const
     if(m_dynamicObject && *m_dynamicObject)
     {
         auto* getNamespace
-            = m_dynamicObject->getSymbol< GetPluginNamespace >("motor_pluginNamespace");
+            = m_dynamicObject->getSymbol< GetPluginNamespace >(istring("motor_pluginNamespace"));
         if(getNamespace)
         {
             raw< const Meta::Class > ci = {(*getNamespace)()};

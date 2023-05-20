@@ -25,14 +25,14 @@ void Context::unload(const weak< const Resource::IDescription >& /*description*/
 }
 
 void Context::runBuffer(const weak< const PythonScript >& script, Resource::Resource& /*resource*/,
-                        const minitl::Allocator::Block< u8 >& block)
+                        const minitl::allocator::block< u8 >& block)
 {
     runCode(reinterpret_cast< const char* >(block.begin()), script->getScriptName());
 }
 
 void Context::reloadBuffer(const weak< const PythonScript >& script,
                            Resource::Resource& /*resource*/,
-                           const minitl::Allocator::Block< u8 >& block)
+                           const minitl::allocator::block< u8 >& block)
 {
     runCode(reinterpret_cast< const char* >(block.begin()), script->getScriptName());
 }

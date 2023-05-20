@@ -7,7 +7,7 @@ namespace Motor { namespace Log {
 
 weak< Logger > lua()
 {
-    static weak< Logger > result = motor()->getChild("lua");
+    static weak< Logger > result = motor()->getChild(istring("lua"));
     return result;
 }
 

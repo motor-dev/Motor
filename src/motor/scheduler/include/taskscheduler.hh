@@ -60,7 +60,8 @@ public:
     explicit TaskScheduler(const weak< Scheduler >& scheduler);
     ~TaskScheduler() override;
 
-    void queue(weak< const ITask > task, weak< const IExecutor > executor, u32 breakdownCount);
+    void queue(const weak< const ITask >& task, const weak< const IExecutor >& executor,
+               u32 breakdownCount);
 
     void mainThreadJoin();
     void notifyEnd();

@@ -88,7 +88,7 @@ PyObject* call(raw< const Meta::Method > method, PyObject* self, PyObject* args,
         for(u32 i = 0; i < unnamedArgCount; ++argIndex, ++i)
         {
             new(&argInfos[argIndex])
-                PythonArgInfo(PythonTypeInfo(s_library->m_PyTuple_GetItem(args, i)));
+                PythonArgInfo(PythonTypeInfo(s_library->m_PyTuple_GetItem(args, Py_ssize_t(i))));
         }
         if(kwargs)
         {
@@ -100,8 +100,8 @@ PyObject* call(raw< const Meta::Method > method, PyObject* self, PyObject* args,
             {
                 if(version >= 33)
                 {
-                    new(&argInfos[argIndex])
-                        PythonArgInfo(s_library->m_PyUnicode_AsUTF8(key), PythonTypeInfo(item));
+                    new(&argInfos[argIndex]) PythonArgInfo(
+                        istring(s_library->m_PyUnicode_AsUTF8(key)), PythonTypeInfo(item));
                 }
                 else if(version >= 30)
                 {
@@ -111,13 +111,13 @@ PyObject* call(raw< const Meta::Method > method, PyObject* self, PyObject* args,
                         return nullptr;
                     }
                     const char* name = s_library->m_PyBytes_AsString(bytes);
-                    new(&argInfos[argIndex]) PythonArgInfo(name, PythonTypeInfo(item));
+                    new(&argInfos[argIndex]) PythonArgInfo(istring(name), PythonTypeInfo(item));
                     Py_DECREF(bytes);
                 }
                 else
                 {
-                    new(&argInfos[argIndex])
-                        PythonArgInfo(s_library->m_PyString_AsString(key), PythonTypeInfo(item));
+                    new(&argInfos[argIndex]) PythonArgInfo(
+                        istring(s_library->m_PyString_AsString(key)), PythonTypeInfo(item));
                 }
                 ++argIndex;
             }

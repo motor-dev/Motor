@@ -14,14 +14,14 @@
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/call.hh>
 #include <motor/meta/value.hh>
+#include <motor/minitl/utility.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 
-Object::Object(const ref< Reference >&                   className,
-               const minitl::vector< ref< Parameter > >& parameters)
+Object::Object(const ref< Reference >& className, minitl::vector< ref< Parameter > > parameters)
     : Node()
     , m_className(className)
-    , m_parameters(parameters)
+    , m_parameters(minitl::move(parameters))
     , m_arguments(Arena::temporary())
 {
 }
@@ -163,7 +163,7 @@ bool Object::getPropertyType(DbContext& context, istring propertyName, Type& pro
 ref< Node > Object::getProperty(DbContext& context, const inamespace& propertyName) const
 {
     motor_forceuse(context);
-    return ref< Property >::create(Arena::general(), refFromThis< Object >(), propertyName);
+    return ref< Property >::create(Arena::general(), ref_from_this< Object >(), propertyName);
 }
 
 weak< const Parameter > Object::getParameter(istring parameterName) const

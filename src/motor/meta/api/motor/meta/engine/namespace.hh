@@ -14,15 +14,15 @@
     raw< Meta::Class > motor_##plugin##_Namespace_##n()                                            \
     {                                                                                              \
         static Meta::Class ci                                                                      \
-            = {#n,     0,      0,   Meta::ClassType_Namespace,         {0}, {0}, {0}, {0},         \
-               {0, 0}, {0, 0}, {0}, Meta::OperatorTable::s_emptyTable, 0,   0};                    \
+            = {istring(#n), 0,      0,   Meta::ClassType_Namespace,         {0}, {0}, {0}, {0},    \
+               {0, 0},      {0, 0}, {0}, Meta::OperatorTable::s_emptyTable, 0,   0};               \
         raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
     static Meta::ObjectInfo s_##plugin##_Namespace_##n##_ob                                        \
         = {motor_##plugin##_Namespace()->objects,                                                  \
            {0},                                                                                    \
-           #n,                                                                                     \
+           istring(#n),                                                                            \
            Meta::Value(motor_##plugin##_Namespace_##n())};                                         \
     MOTOR_EXPORT const Meta::ObjectInfo* s_##plugin##_Namespace_##n##_r                            \
         = motor_##plugin##_Namespace()->objects.set(&s_##plugin##_Namespace_##n##_ob);             \
@@ -33,7 +33,7 @@
     raw< Meta::Class > motor_##plugin##_Namespace_##n1();                                          \
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2()                                    \
     {                                                                                              \
-        static Meta::Class ci  = {#n2,                                                             \
+        static Meta::Class ci  = {istring(#n2),                                                    \
                                   0,                                                               \
                                   0,                                                               \
                                   Meta::ClassType_Namespace,                                       \
@@ -53,7 +53,7 @@
     static Meta::ObjectInfo s_##plugin##_Namespace_##n1##_##n2##_ob                                \
         = {motor_##plugin##_Namespace_##n1()->objects,                                             \
            {0},                                                                                    \
-           #n2,                                                                                    \
+           istring(#n2),                                                                           \
            Meta::Value(motor_##plugin##_Namespace_##n1##_##n2())};                                 \
     MOTOR_EXPORT const Meta::ObjectInfo* s_##plugin##_Namespace_##n1##_##n2##_r                    \
         = motor_##plugin##_Namespace_##n1()->objects.set(                                          \
@@ -65,7 +65,7 @@
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2();                                   \
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3()                             \
     {                                                                                              \
-        static Meta::Class ci  = {#n3,                                                             \
+        static Meta::Class ci  = {istring(#n3),                                                    \
                                   0,                                                               \
                                   0,                                                               \
                                   Meta::ClassType_Namespace,                                       \
@@ -85,7 +85,7 @@
     static Meta::ObjectInfo s_##plugin##_Namespace_##n1##_##n2##_##n3##_ob                         \
         = {motor_##plugin##_Namespace_##n1##_##n2()->objects,                                      \
            {0},                                                                                    \
-           #n3,                                                                                    \
+           istring(#n3),                                                                           \
            Meta::Value(motor_##plugin##_Namespace_##n1##_##n2##_##n3())};                          \
     MOTOR_EXPORT const Meta::ObjectInfo* s_##plugin##_Namespace_##n1##_##n2##_##n3##_r             \
         = motor_##plugin##_Namespace_##n1##_##n2()->objects.set(                                   \
@@ -97,7 +97,7 @@
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3();                            \
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()                      \
     {                                                                                              \
-        static Meta::Class ci  = {#n4,                                                             \
+        static Meta::Class ci  = {istring(#n4),                                                    \
                                   0,                                                               \
                                   0,                                                               \
                                   Meta::ClassType_Namespace,                                       \
@@ -117,7 +117,7 @@
     static Meta::ObjectInfo s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_ob                  \
         = {motor_##plugin##_Namespace_##n1##_##n2##_##n3()->objects,                               \
            {0},                                                                                    \
-           #n4,                                                                                    \
+           istring(#n4),                                                                           \
            Meta::Value(motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4())};                   \
     MOTOR_EXPORT const Meta::ObjectInfo* s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_r      \
         = motor_##plugin##_Namespace_##n1##_##n2##_##n3()->objects.set(                            \
@@ -129,7 +129,7 @@
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4();                     \
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5()               \
     {                                                                                              \
-        static Meta::Class ci  = {#n5,                                                             \
+        static Meta::Class ci  = {istring(#n5),                                                    \
                                   0,                                                               \
                                   0,                                                               \
                                   Meta::ClassType_Namespace,                                       \
@@ -149,7 +149,7 @@
     static Meta::ObjectInfo s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_ob           \
         = {motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()->objects,                        \
            {0},                                                                                    \
-           #n5,                                                                                    \
+           istring(#n5),                                                                           \
            Meta::Value(motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5())};            \
     MOTOR_EXPORT const Meta::ObjectInfo*                                                           \
                        s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_r                 \
@@ -184,7 +184,7 @@
     }                                                                                              \
     static Meta::ObjectInfo ob##id##parent##_##name = {motor_##id##_Namespace##parent()->objects,  \
                                                        {0},                                        \
-                                                       #name,                                      \
+                                                       istring(#name),                             \
                                                        Meta::Value(motor_##id##_Namespace())};     \
     MOTOR_EXPORT const Meta::ObjectInfo* s_namespaceRegistration_##id##parent##_##name             \
         = (motor_##id##_Namespace##parent()->objects.m_ptr = &ob##id##parent##_##name);            \

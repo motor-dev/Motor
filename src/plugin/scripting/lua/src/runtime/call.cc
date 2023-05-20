@@ -156,8 +156,9 @@ Meta::ConversionCost calculateConversion(const LuaParameterType& type, const Met
                             lua_pop(type.state, 2);
                             return Meta::ConversionCost::s_incompatible;
                         }
-                        const char*                 str      = lua_tostring(type.state, -2);
-                        raw< const Meta::Property > property = target.metaclass->getProperty(str);
+                        const char*                 str = lua_tostring(type.state, -2);
+                        raw< const Meta::Property > property
+                            = target.metaclass->getProperty(istring(str));
                         if(!property)
                         {
                             lua_pop(type.state, 2);
@@ -257,7 +258,7 @@ int call(lua_State* state, raw< const Meta::Method > method)
             case LUA_TSTRING:
             {
                 const char* keyStr = lua_tostring(state, -1);
-                istring     key    = istring(keyStr);
+                auto        key    = istring(keyStr);
                 keywordParameterCount++;
                 new(&parameters[parameterCount - keywordParameterCount])
                     LuaParameterInfo(key, LuaParameterType(state, nargs + 1, key, 0));

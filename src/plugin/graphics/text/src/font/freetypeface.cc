@@ -41,12 +41,12 @@ struct OutlineDecompose
 };
 
 FreetypeFace::FreetypeFace(const weak< FreetypeLibrary >&        freetype,
-                           const minitl::Allocator::Block< u8 >& buffer)
+                           const minitl::allocator::block< u8 >& buffer)
 {
     FT_Face  face = nullptr;
     FT_Error error;
     error = FT_New_Memory_Face(freetype->library, buffer.begin(),
-                               motor_checked_numcast< FT_Long >(buffer.byteCount()), 0, &face);
+                               motor_checked_numcast< FT_Long >(buffer.byte_count()), 0, &face);
     motor_forceuse(error);
     motor_assert_format(!error, "Freetype error {0}", error);
     error = FT_Select_Charmap(face, FT_ENCODING_UNICODE);

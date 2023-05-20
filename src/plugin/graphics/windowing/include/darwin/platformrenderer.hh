@@ -16,7 +16,7 @@ private:
 
 public:
     PlatformRenderer();
-    ~PlatformRenderer();
+    ~PlatformRenderer() override;
     void flush();
 };
 

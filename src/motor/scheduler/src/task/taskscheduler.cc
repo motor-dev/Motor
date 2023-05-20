@@ -18,25 +18,18 @@ static tls< TaskScheduler::Worker > s_worker;
 static const u32 s_maxConcurrentTasks = 4096;
 static const u32 s_breakdownPerThread = 4;
 
-static inline u32 nextPowerOf2(u32 number)
-{
-    u32 result = s_maxConcurrentTasks * s_breakdownPerThread;
-    while(result < number)
-        result <<= 1;
-    return result;
-}
-
 TaskScheduler::TaskPool::TaskPool(u32 workerCount)
     : m_workerCount(workerCount)
     , m_poolSignal(0)
     , m_poolLock((int)workerCount)
     , m_taskPool(static_cast< TaskItem** >(Arena::task().alloc(
-          nextPowerOf2(s_maxConcurrentTasks * s_breakdownPerThread * m_workerCount)
-          * sizeof(TaskItem*))))
+          minitl::next_power_of_2(s_maxConcurrentTasks * s_breakdownPerThread * m_workerCount)
+          * sizeof(TaskItem*))))  // NOLINT(bugprone-sizeof-expression)
     , m_firstQueued(i_u32::create(0))
     , m_lastQueued(i_u32::create(0))
     , m_firstFree(i_u32::create(0))
-    , m_poolMask(nextPowerOf2(s_maxConcurrentTasks * s_breakdownPerThread * m_workerCount) - 1)
+    , m_poolMask(
+          minitl::next_power_of_2(s_maxConcurrentTasks * s_breakdownPerThread * m_workerCount) - 1)
 {
 }
 
@@ -187,7 +180,7 @@ TaskScheduler::~TaskScheduler()
         delete m_worker;
 }
 
-void TaskScheduler::queue(weak< const ITask > task, weak< const IExecutor > executor,
+void TaskScheduler::queue(const weak< const ITask >& task, const weak< const IExecutor >& executor,
                           u32 breakdownCount)
 {
     m_scheduler->m_runningTasks++;

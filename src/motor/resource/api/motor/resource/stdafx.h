@@ -19,7 +19,7 @@ namespace Motor {
 
 namespace Arena {
 
-motor_api(RESOURCE) minitl::Allocator& resource();
+motor_api(RESOURCE) minitl::allocator& resource();
 
 }
 

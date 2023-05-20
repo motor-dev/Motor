@@ -6,7 +6,7 @@
 
 int motor_package_lex_destroy();
 
-const minitl::Allocator::Block< u8 >* g_buffer                   = nullptr;
+const minitl::allocator::block< u8 >* g_buffer                   = nullptr;
 int                                   g_bufferPosition           = 0;
 int                                   g_packageOffset            = 0;
 int                                   g_packageLine              = 0;
@@ -17,7 +17,7 @@ static i_u32                          s_useCount                 = i_u32::create
 
 namespace Motor { namespace PackageBuilder {
 
-BuildContext::BuildContext(const ifilename& filename, const minitl::Allocator::Block< u8 >& buffer,
+BuildContext::BuildContext(const ifilename& filename, const minitl::allocator::block< u8 >& buffer,
                            ref< Folder > folder)
     : result(ref< Nodes::Package >::create(Arena::packageBuilder(), filename, folder))
 {

@@ -10,7 +10,7 @@ StackAllocator::StackAllocator() = default;
 
 StackAllocator::~StackAllocator() = default;
 
-void* StackAllocator::internalAlloc(u64 size, u64 alignment)
+void* StackAllocator::internal_alloc(u64 size, u64 alignment)
 {
 #ifdef _MSC_VER
     return ::_aligned_malloc(motor_checked_numcast< size_t >(size),
@@ -21,12 +21,12 @@ void* StackAllocator::internalAlloc(u64 size, u64 alignment)
 #endif
 }
 
-bool StackAllocator::internalResize(void* /*ptr*/, u64 /*size*/)
+bool StackAllocator::internal_resize(void* /*ptr*/, u64 /*size*/)
 {
     return false;
 }
 
-void* StackAllocator::internalRealloc(void* ptr, u64 size, u64 alignment)
+void* StackAllocator::internal_realloc(void* ptr, u64 size, u64 alignment)
 {
 #ifdef _MSC_VER
     return ::_aligned_realloc(ptr, motor_checked_numcast< size_t >(size),
@@ -37,7 +37,7 @@ void* StackAllocator::internalRealloc(void* ptr, u64 size, u64 alignment)
 #endif
 }
 
-void StackAllocator::internalFree(const void* pointer)
+void StackAllocator::internal_free(const void* pointer)
 {
 #ifdef _MSC_VER
     ::_aligned_free(const_cast< void* >(pointer));

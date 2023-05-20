@@ -11,7 +11,7 @@ int motor_package_parse(void* param);
 namespace Motor {
 
 namespace Arena {
-minitl::Allocator& packageBuilder()
+minitl::allocator& packageBuilder()
 {
     return resource();
 }
@@ -26,7 +26,7 @@ PackageBuilder::PackageBuilder(const ref< Folder >& dataFolder) : m_dataFolder(d
 PackageBuilder::~PackageBuilder() = default;
 
 ref< Nodes::Package > PackageBuilder::createPackage(const ifilename&                      filename,
-                                                    const minitl::Allocator::Block< u8 >& buffer)
+                                                    const minitl::allocator::block< u8 >& buffer)
 {
     BuildContext context(filename, buffer, m_dataFolder);
     motor_package_parse(&context);

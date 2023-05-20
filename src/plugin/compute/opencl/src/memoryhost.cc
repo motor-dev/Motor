@@ -6,7 +6,7 @@
 
 namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
-MemoryHost::MemoryHost() : IMemoryHost("OpenCL")
+MemoryHost::MemoryHost() : IMemoryHost(istring("OpenCL"))
 {
 }
 

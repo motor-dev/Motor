@@ -17,7 +17,7 @@
 namespace Motor { namespace KernelScheduler { namespace CPU {
 
 Scheduler::Scheduler(const Plugin::Context& context)
-    : IScheduler("CPU", context.scheduler, CPUType)
+    : IScheduler(istring("CPU"), context.scheduler, CPUType)
     , m_resourceManager(context.resourceManager)
     , m_cpuLoaders(Arena::task(), s_cpuVariantCount + 1)
     , m_memoryHost(scoped< MemoryHost >::create(Arena::task()))

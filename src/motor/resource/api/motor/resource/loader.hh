@@ -45,12 +45,12 @@ protected:
 
     virtual void onTicketUpdated(
         const weak< const IDescription >& /*description*/, Resource& /*resource*/,
-        const minitl::Allocator::Block< u8 >& /*buffer*/, u32 /*progress*/, LoadType /*loadType*/)
+        const minitl::allocator::block< u8 >& /*buffer*/, u32 /*progress*/, LoadType /*loadType*/)
     {
     }
     virtual void onTicketLoaded(
         const weak< const IDescription >& /*description*/, Resource& /*resource*/,
-        const minitl::Allocator::Block< u8 >& /*buffer*/, LoadType /*loadType*/)
+        const minitl::allocator::block< u8 >& /*buffer*/, LoadType /*loadType*/)
     {
         motor_notreached();
     }

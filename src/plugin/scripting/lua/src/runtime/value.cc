@@ -61,7 +61,7 @@ static bool convertBooleanToValue(lua_State* state, int index, const Meta::Type&
 {
     if(type.metaclass == motor_type< bool >().metaclass)
     {
-        new(buffer) Meta::Value(lua_toboolean(state, index) ? true : false);
+        new(buffer) Meta::Value(lua_toboolean(state, index));
         return true;
     }
     else if(type.metaclass->type() == Meta::ClassType_Number)
@@ -261,7 +261,7 @@ static bool convertTableToValue(lua_State* state, int index, const Meta::Type& t
                 return false;
             }
             const char*                 str      = lua_tostring(state, -2);
-            raw< const Meta::Property > property = type.metaclass->getProperty(str);
+            raw< const Meta::Property > property = type.metaclass->getProperty(istring(str));
             if(!property)
             {
                 lua_pop(state, 2);

@@ -12,9 +12,9 @@ Editor::Editor(const Plugin::Context& context)
     : Application(
         ref< DiskFolder >::create(Arena::game(), Environment::getEnvironment().getDataDirectory()),
         context.resourceManager, context.scheduler)
-    , m_renderer("plugin.graphics.GL4", pluginContext())
-    , m_packageManager("plugin.scripting.package", pluginContext())
-    , m_luaScripting("plugin.scripting.lua", pluginContext())
+    , m_renderer(inamespace("plugin.graphics.GL4"), pluginContext())
+    , m_packageManager(inamespace("plugin.scripting.package"), pluginContext())
+    , m_luaScripting(inamespace("plugin.scripting.lua"), pluginContext())
     , m_mainPackage(ref< Package >::create(
           Arena::game(), pluginContext().dataFolder->openFile(istring("main.pkg"))))
 {

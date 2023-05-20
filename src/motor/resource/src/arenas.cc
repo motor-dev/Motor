@@ -5,7 +5,7 @@
 
 namespace Motor { namespace Arena {
 
-minitl::Allocator& resource()
+minitl::allocator& resource()
 {
     return general();
 }

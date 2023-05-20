@@ -214,7 +214,7 @@ value:
         {
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Reference>::create(*context->arena,
-                                                            $1.value));
+                                                            Motor::inamespace($1.value)));
             $$.location = $1.location;
             free($1.value);
         }

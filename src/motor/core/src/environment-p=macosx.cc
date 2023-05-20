@@ -4,8 +4,8 @@
 #include <motor/core/stdafx.h>
 #include <motor/core/environment.hh>
 
-#include <errno.h>
-#include <stdio.h>
+#include <cerrno>
+#include <cstdio>
 #include <sys/sysctl.h>
 #include <sys/types.h>
 
@@ -18,10 +18,10 @@ Environment::Environment()
     , m_user(getenv("USER"))
     , m_programPath()
 {
-    m_homeDirectory.push_back(".motor");
+    m_homeDirectory.push_back(istring(".motor"));
 }
 
-size_t Environment::getProcessorCount() const
+size_t Environment::getProcessorCount()
 {
     int    cpuCount = 0;
     size_t len      = sizeof(cpuCount);
@@ -29,9 +29,9 @@ size_t Environment::getProcessorCount() const
     int mib[4];
     mib[0] = CTL_HW;
     mib[1] = HW_NCPU;
-    if(sysctlbyname("hw.physicalcpu", &cpuCount, &len, NULL, 0) == -1)
+    if(sysctlbyname("hw.physicalcpu", &cpuCount, &len, nullptr, 0) == -1)
     {
-        if(sysctl(mib, 2, &cpuCount, &len, NULL, 0) == -1)
+        if(sysctl(mib, 2, &cpuCount, &len, nullptr, 0) == -1)
         {
             motor_error_format(Log::system(), "Could not retrieve number of processors: {0}",
                                sys_errlist[errno]);

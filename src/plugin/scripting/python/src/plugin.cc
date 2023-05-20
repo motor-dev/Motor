@@ -26,7 +26,8 @@ static ref< PythonVersion > create(const Motor::Plugin::Context& context)
         minitl::format_buffer< 1024u > pluginName
             = minitl::format< 1024u >(FMT("plugin.scripting.python{0}"), version);
         Motor::Plugin::Plugin< minitl::refcountable > p
-            = Motor::Plugin::Plugin< minitl::refcountable >(pluginName.c_str(), context);
+            = Motor::Plugin::Plugin< minitl::refcountable >(Motor::inamespace(pluginName.c_str()),
+                                                            context);
         if(p)
         {
             motor_info_format(Motor::Log::python(), "Loaded Python version {0}", version);

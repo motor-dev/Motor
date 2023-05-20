@@ -32,8 +32,8 @@ struct motor_api(INTROSPECT) DbContext
     MessageList            messages;
     u32                    errorCount;
 
-    DbContext(minitl::Allocator & arena, const ref< Folder >& rootFolder);
-    DbContext(minitl::Allocator & arena, const ref< Namespace >& ns,
+    DbContext(minitl::allocator & arena, const ref< Folder >& rootFolder);
+    DbContext(minitl::allocator & arena, const ref< Namespace >& ns,
               const ref< Folder >& rootFolder);
     void error(const weak< const Node >& owner, const Message::MessageType& error);
     void warning(const weak< const Node >& owner, const Message::MessageType& warning);

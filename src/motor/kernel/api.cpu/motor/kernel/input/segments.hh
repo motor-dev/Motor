@@ -39,12 +39,12 @@ public:
         }
 
     public:
-        bool operator==(const iterator& other)
+        bool operator==(const iterator& other) const
         {
             return m_currentSegment == other.m_currentSegment
                    && m_currentOffset == other.m_currentOffset;
         }
-        bool operator!=(const iterator& other)
+        bool operator!=(const iterator& other) const
         {
             return m_currentSegment != other.m_currentSegment
                    || m_currentOffset != other.m_currentOffset;
@@ -69,7 +69,7 @@ public:
             return *this;
         }
 
-        iterator operator++(int)
+        const iterator operator++(int)  // NOLINT(readability-const-return-type)
         {
             iterator result = *this;
             ++m_currentOffset;
@@ -81,7 +81,7 @@ public:
             return result;
         }
 
-        iterator operator--(int)
+        const iterator operator--(int)  // NOLINT(readability-const-return-type)
         {
             iterator result = *this;
             --m_currentSegment;

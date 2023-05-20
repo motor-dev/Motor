@@ -2,25 +2,26 @@
    see LICENSE for detail */
 
 #include <motor/minitl/stdafx.h>
+#include <motor/minitl/allocator.hh>
 #include <motor/minitl/assert.hh>
 
 namespace minitl {
 
-AssertionResult defaultAssertionCallback(const char* /*file*/, int /*line*/, const char* /*expr*/,
-                                         const char* /*message*/)
+assertion_result default_assertion_callback(const char* /*file*/, int /*line*/,
+                                            const char* /*expr*/, const char* /*message*/)
 {
-    return AssertionResult::Break;
+    return assertion_result::breakpoint;
 }
 
-static AssertionCallback_t g_callback = defaultAssertionCallback;
-AssertionCallback_t        setAssertionCallback(AssertionCallback_t callback)
+static assertion_callback_t g_callback = default_assertion_callback;
+assertion_callback_t        set_assertion_callback(assertion_callback_t callback)
 {
-    AssertionCallback_t previous = g_callback;
-    g_callback                   = callback;
+    assertion_callback_t previous = g_callback;
+    g_callback                    = callback;
     return previous;
 }
 
-AssertionCallback_t getAssertionCallback()
+assertion_callback_t get_assertion_callback()
 {
     return g_callback;
 }

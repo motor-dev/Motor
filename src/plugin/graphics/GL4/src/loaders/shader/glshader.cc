@@ -14,10 +14,10 @@ namespace Motor { namespace OpenGL {
 GLShaderProgram::GLShaderProgram(const weak< const Resource::IDescription >& shaderDescription,
                                  const weak< const GLRenderer >&             renderer)
     : IGPUResource(shaderDescription, renderer)
-    , m_shaderProgram(0)
-    , m_vertexShader(0)
-    , m_geometryShader(0)
-    , m_fragmentShader(0)
+    , m_shaderProgram()
+    , m_vertexShader()
+    , m_geometryShader()
+    , m_fragmentShader()
 {
 }
 
@@ -77,7 +77,7 @@ GLhandleARB GLShaderProgram::build(const weak< const ShaderProgramDescription >&
     if (!success || loglength)
     {
         GLsizei maxLength = loglength, result;
-        minitl::Allocator::Block<GLcharARB> log(Arena::stack(), loglength);
+        minitl::allocator::block<GLcharARB> log(Arena::stack(), loglength);
         shaderext.glGetInfoLog(shader, maxLength, &result, log.data());
         if (!success)
         {
@@ -91,7 +91,7 @@ GLhandleARB GLShaderProgram::build(const weak< const ShaderProgramDescription >&
 #    endif
     return shader;
 #else
-    return 0;
+    return {};
 #endif
 }
 
@@ -99,7 +99,7 @@ void GLShaderProgram::load(const weak< const Resource::IDescription >& shaderDes
 {
     weak< const ShaderProgramDescription > program
         = motor_checked_cast< const ShaderProgramDescription >(shaderDescription);
-    motor_assert(m_shaderProgram == 0, "shader program loaded twice?");
+    motor_assert(m_shaderProgram == GLhandleARB(), "shader program loaded twice?");
 
     const ShaderExtensions& shaderext
         = motor_checked_cast< const GLRenderer >(m_renderer)->shaderext();
@@ -118,7 +118,7 @@ void GLShaderProgram::load(const weak< const Resource::IDescription >& shaderDes
     if(!success || loglength)
     {
         GLsizei                               maxLength = loglength, result;
-        minitl::Allocator::Block< GLcharARB > log(Arena::stack(), loglength);
+        minitl::allocator::block< GLcharARB > log(Arena::stack(), loglength);
         shaderext.glGetInfoLog(m_shaderProgram, maxLength, &result, log.data());
         if(!success)
         {
@@ -139,26 +139,26 @@ void GLShaderProgram::unload()
         motor_checked_cast< const GLRenderer >(m_renderer)
             ->shaderext()
             .glDeleteShader(m_vertexShader);
-        m_vertexShader = 0;
+        m_vertexShader = GLhandleARB();
     }
     if(m_geometryShader)
     {
         motor_checked_cast< const GLRenderer >(m_renderer)
             ->shaderext()
             .glDeleteShader(m_geometryShader);
-        m_geometryShader = 0;
+        m_geometryShader = GLhandleARB();
     }
     if(m_fragmentShader)
     {
         motor_checked_cast< const GLRenderer >(m_renderer)
             ->shaderext()
             .glDeleteShader(m_fragmentShader);
-        m_fragmentShader = 0;
+        m_fragmentShader = GLhandleARB();
     }
     motor_checked_cast< const GLRenderer >(m_renderer)
         ->shaderext()
         .glDeleteProgram(m_shaderProgram);
-    m_shaderProgram = 0;
+    m_shaderProgram = GLhandleARB();
 }
 
 }}  // namespace Motor::OpenGL

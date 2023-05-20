@@ -17,8 +17,8 @@ namespace Motor {
 
 namespace Arena {
 
-minitl::Allocator& package();
-minitl::Allocator& packageBuilder();
+minitl::allocator& package();
+minitl::allocator& packageBuilder();
 
 }  // namespace Arena
 

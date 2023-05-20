@@ -26,9 +26,9 @@ private:
     void unload(const weak< const Resource::IDescription >& description,
                 Resource::Resource&                         handle) override;
     void runBuffer(const weak< const Package >& script, Resource::Resource& resource,
-                   const minitl::Allocator::Block< u8 >& buffer) override;
+                   const minitl::allocator::block< u8 >& buffer) override;
     void reloadBuffer(const weak< const Package >& script, Resource::Resource& resource,
-                      const minitl::Allocator::Block< u8 >& buffer) override;
+                      const minitl::allocator::block< u8 >& buffer) override;
 };
 
 }}  // namespace Motor::PackageManager

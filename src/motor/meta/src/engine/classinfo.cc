@@ -15,231 +15,15 @@ namespace Meta {
 
 motor_api(META) char s_zero[] = {0, 0, 0, 0};
 
-istring Class::nameConstructor()
-{
-    static const istring result = "?new";
-    return result;
-}
-
-istring Class::nameDestructor()
-{
-    static const istring result = "?del";
-    return result;
-}
-
 istring Class::nameOperatorCall()
 {
-    static const istring result = "?call";
+    static auto result = istring("?call");
     return result;
 }
 
-istring Class::nameOperatorIndex()
+istring Class::nameConstructor()
 {
-    static const istring result = "?[]";
-    return result;
-}
-
-istring Class::nameOperatorLessThan()
-{
-    static const istring result = "?<";
-    return result;
-}
-
-istring Class::nameOperatorGreaterThan()
-{
-    static const istring result = "?>";
-    return result;
-}
-
-istring Class::nameOperatorLessThanOrEqual()
-{
-    static const istring result = "?<=";
-    return result;
-}
-
-istring Class::nameOperatorGreaterThanOrEqual()
-{
-    static const istring result = "?>=";
-    return result;
-}
-
-istring Class::nameOperatorMultiply()
-{
-    static const istring result = "?*";
-    return result;
-}
-
-istring Class::nameOperatorDivide()
-{
-    static const istring result = "?*";
-    return result;
-}
-
-istring Class::nameOperatorModulo()
-{
-    static const istring result = "?%";
-    return result;
-}
-
-istring Class::nameOperatorAdd()
-{
-    static const istring result = "?+";
-    return result;
-}
-
-istring Class::nameOperatorSubstract()
-{
-    static const istring result = "?-";
-    return result;
-}
-
-istring Class::nameOperatorShiftLeft()
-{
-    static const istring result = "?<<";
-    return result;
-}
-
-istring Class::nameOperatorShiftRight()
-{
-    static const istring result = "?>>";
-    return result;
-}
-
-istring Class::nameOperatorBitwiseAnd()
-{
-    static const istring result = "?&";
-    return result;
-}
-
-istring Class::nameOperatorBitwiseOr()
-{
-    static const istring result = "?|";
-    return result;
-}
-
-istring Class::nameOperatorBitwiseXor()
-{
-    static const istring result = "?^";
-    return result;
-}
-
-istring Class::nameOperatorBitwiseNot()
-{
-    static const istring result = "?~";
-    return result;
-}
-
-istring Class::nameOperatorLogicalAnd()
-{
-    static const istring result = "?&&";
-    return result;
-}
-
-istring Class::nameOperatorLogicalOr()
-{
-    static const istring result = "?||";
-    return result;
-}
-
-istring Class::nameOperatorLogicalNot()
-{
-    static const istring result = "?!";
-    return result;
-}
-
-istring Class::nameOperatorEqual()
-{
-    static const istring result = "?==";
-    return result;
-}
-
-istring Class::nameOperatorNotEqual()
-{
-    static const istring result = "?!=";
-    return result;
-}
-
-istring Class::nameOperatorAssign()
-{
-    static const istring result = "?=";
-    return result;
-}
-
-istring Class::nameOperatorMultiplyAssign()
-{
-    static const istring result = "?*=";
-    return result;
-}
-
-istring Class::nameOperatorDivideAssign()
-{
-    static const istring result = "?/=";
-    return result;
-}
-
-istring Class::nameOperatorModuloAssign()
-{
-    static const istring result = "?%=";
-    return result;
-}
-
-istring Class::nameOperatorAddAssign()
-{
-    static const istring result = "?+=";
-    return result;
-}
-
-istring Class::nameOperatorSubstractAssign()
-{
-    static const istring result = "?-=";
-    return result;
-}
-
-istring Class::nameOperatorShiftLeftAssign()
-{
-    static const istring result = "?<<=";
-    return result;
-}
-
-istring Class::nameOperatorShiftRightAssign()
-{
-    static const istring result = "?>>=";
-    return result;
-}
-
-istring Class::nameOperatorAndAssign()
-{
-    static const istring result = "?&=";
-    return result;
-}
-
-istring Class::nameOperatorOrAssign()
-{
-    static const istring result = "?|=";
-    return result;
-}
-
-istring Class::nameOperatorXorAssign()
-{
-    static const istring result = "?^=";
-    return result;
-}
-
-istring Class::nameOperatorIncrement()
-{
-    static const istring result = "?++";
-    return result;
-}
-
-istring Class::nameOperatorDecrement()
-{
-    static const istring result = "?--";
-    return result;
-}
-
-istring Class::nameOperatorGet()
-{
-    static const istring result = "?->";
+    static auto result = istring("?new");
     return result;
 }
 
@@ -323,7 +107,7 @@ Value Class::get(Value& from, istring propname, bool& found) const
     static raw< const Class > const s_metaClass = motor_class< Class >();
     if(from.type().metaclass == s_metaClass)
     {
-        raw< const Class >      cls = from.as< raw< const Class > >();
+        auto                    cls = from.as< raw< const Class > >();
         raw< const ObjectInfo > o   = cls->getStaticProperty(propname);
         if(o)
         {
@@ -360,7 +144,7 @@ Value Class::get(const Value& from, istring propname, bool& found) const
     static raw< const Class > const s_metaClass = motor_class< Class >();
     if(from.type().metaclass == s_metaClass)
     {
-        raw< const Class >      cls = from.as< raw< const Class > >();
+        auto                    cls = from.as< raw< const Class > >();
         raw< const ObjectInfo > o   = cls->getStaticProperty(propname);
         if(o)
         {
@@ -464,7 +248,7 @@ Value Class::findClass(inamespace name)
 
 raw< Meta::Class > motor_motor_Namespace()
 {
-    static Meta::Class ci     = {"Motor",
+    static Meta::Class ci     = {istring("Motor"),
                                  0,
                                  0,
                                  Meta::ClassType_Namespace,

@@ -34,19 +34,16 @@
 
 #include <cstdint>
 #include <cstdlib>
-typedef int8_t   i8;
-typedef int16_t  i16;
-typedef int32_t  i32;
-typedef int64_t  i64;
-typedef uint8_t  u8;
-typedef uint16_t u16;
-typedef uint32_t u32;
-typedef uint64_t u64;
-typedef u8       byte;
-
-#if __GXX_EXPERIMENTAL_CXX0X__
-#    define MOTOR_HAS_MOVE_SEMANTICS
-#endif
+typedef int8_t      i8;
+typedef int16_t     i16;
+typedef int32_t     i32;
+typedef int64_t     i64;
+typedef uint8_t     u8;
+typedef uint16_t    u16;
+typedef uint32_t    u32;
+typedef uint64_t    u64;
+typedef u8          byte;
+typedef std::size_t size_t;
 
 #ifndef _MSC_VER
 #    if(__clang_major__ >= 3)

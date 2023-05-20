@@ -20,7 +20,7 @@ namespace Motor {
 
 namespace Arena {
 
-motor_api(SCHEDULER) minitl::Allocator& task();
+motor_api(SCHEDULER) minitl::allocator& task();
 
 }
 

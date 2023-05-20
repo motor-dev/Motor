@@ -6,7 +6,7 @@
 
 namespace Motor { namespace Arena {
 
-minitl::Allocator& python()
+minitl::allocator& python()
 {
     return script();
 }

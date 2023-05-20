@@ -4,6 +4,7 @@ import os
 import sys
 import json
 from json_minify import json_minify
+import cmake
 
 
 def vscode_path_from(path, node):
@@ -13,14 +14,13 @@ def vscode_path_from(path, node):
         return os.path.join('${workspaceFolder}', path.path_from(node))
 
 
-class vscode(Build.BuildContext):
-    "creates projects for Visual Studio Code"
-    cmd = 'vscode'
+class vscode_common(Build.BuildContext):
+    "creates common plumbing for VSCode projects"
+    cmd = '_vscode'
     fun = 'build'
     optim = 'debug'
     motor_toolchain = 'projects'
     motor_variant = 'projects.setup'
-    variant = 'projects/vscode'
 
     SETTINGS = '  {\n' \
                '    "editor.formatOnSave": true,\n' \
@@ -61,7 +61,9 @@ class vscode(Build.BuildContext):
                '    "clangd.arguments": [\n' \
                '      "--header-insertion=never"\n' \
                '    ],\n' \
-               '    "C_Cpp.codeAnalysis.clangTidy.enabled": true\n' \
+               '    "C_Cpp.codeAnalysis.clangTidy.enabled": true,\n' \
+               '    "cmake.buildDirectory": "${workspaceFolder}/%(projectpath)s/${buildKit}/${buildType}",\n' \
+               '    "cmake.showSystemKits": false\n' \
                '  }\n'
 
     def execute(self):
@@ -99,7 +101,6 @@ class vscode(Build.BuildContext):
         appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
 
         workspace_node = self.srcnode.make_node('%s.code-workspace' % appname)
-        extra_node = self.motornode.make_node('extra')
 
         with open(workspace_node.abspath(), 'w') as workspace:
             workspace.write(
@@ -114,15 +115,27 @@ class vscode(Build.BuildContext):
             workspace.write(
                 '  "extensions": {\n'
                 '    "recommendations": [\n'
-                '      "ms-vscode.cpptools",\n'
-                '      "ms-python.python"\n'
+                '      %s\n'
                 '    ]\n'
                 '  },\n'
                 '  "settings": %s\n'
-                '}\n' % (self.SETTINGS % {
-                    'motorpath': self.motornode.path_from(self.path)
-                })
+                '}\n' % (
+                    ',\n      '.join(self.extensions), self.SETTINGS % {
+                        'motorpath': self.motornode.path_from(self.path),
+                        'projectpath': self.bldnode.path_from(self.path)
+                    }
+                )
             )
+
+
+class vscode(vscode_common):
+    "creates projects for Visual Studio Code"
+    cmd = 'vscode'
+    variant = 'projects/vscode'
+    extensions = ['"ms-vscode.cpptools"', '"ms-python.python"']
+
+    def write_workspace(self):
+        vscode_common.write_workspace(self)
         options = [a for a in sys.argv if a[0] == '-']
         tasks = []
         configurations = []
@@ -171,23 +184,15 @@ class vscode(Build.BuildContext):
                             continue
                         tg.post()
                         mark = len(commands)
-                        resp_file_name = variant_node.make_node('%s.txt' % tg.name).path_from(self.srcnode)
+                        resp_file_name_c = variant_node.make_node('%s_c.txt' % tg.name).path_from(self.srcnode)
+                        resp_file_name_cxx = variant_node.make_node('%s_cxx.txt' % tg.name).path_from(self.srcnode)
 
                         for task in tg.tasks:
                             if task.__class__.__name__ in ('c', 'objc'):
                                 commands.append(
                                     {
                                         'directory': self.path.abspath(),
-                                        'arguments': env.CC + ['@%s' % (resp_file_name)],
-                                        'file': task.inputs[0].path_from(self.path),
-                                        'output': task.outputs[0].path_from(self.path)
-                                    }
-                                )
-                            if task.__class__.__name__ in ('cxx', 'objcxx'):
-                                commands.append(
-                                    {
-                                        'directory': self.path.abspath(),
-                                        'arguments': env.CXX + ['-std=c++14', '@%s' % resp_file_name],
+                                        'arguments': env.CC + ['@%s' % (resp_file_name_c)],
                                         'file': task.inputs[0].path_from(self.path),
                                         'output': task.outputs[0].path_from(self.path)
                                     }
@@ -196,8 +201,8 @@ class vscode(Build.BuildContext):
                                 commands.append(
                                     {
                                         'directory': self.path.abspath(),
-                                        'arguments': env.CXX + ['-std=c++14', '@%s' % resp_file_name],
-                                        'file': task.generator.source[0].path_from(self.path),
+                                        'arguments': env.CXX + ['-std=c++14', '@%s' % resp_file_name_cxx],
+                                        'file': task.inputs[0].path_from(self.path),
                                         'output': task.outputs[0].path_from(self.path)
                                     }
                                 )
@@ -214,13 +219,21 @@ class vscode(Build.BuildContext):
                             tg_defines += getattr(tg, 'export_defines', [])
                             tg_defines += getattr(tg, 'extra_defines', [])
                             tg_defines += tg.env.DEFINES
-                            with open(resp_file_name, 'w') as response_file:
-                                response_file.write('-std=c++14%s\n')
-                                for i in env.COMPILER_INCLUDES + env.INCLUDES:
-                                    response_file.write('-isystem\n%s\n' % i)
+                            with open(resp_file_name_c, 'w') as response_file:
+                                response_file.write('--target=%s-%s\n' % (env.ARCHITECTURE, env.SYSTEM_NAME))
+                                for i in env.COMPILER_C_INCLUDES + env.INCLUDES:
+                                    response_file.write('-isystem%s\n' % i)
                                 for i in tg_includes + tg.env.INCPATHS:
                                     response_file.write('-I%s\n' % i)
-                                for d in env.COMPILER_DEFINES + env.DEFINES + tg_defines:
+                                for d in env.COMPILER_C_DEFINES + env.DEFINES + tg_defines:
+                                    response_file.write('-D%s\n' % d)
+                            with open(resp_file_name_cxx, 'w') as response_file:
+                                response_file.write('--target=%s-%s\n' % (env.ARCHITECTURE, env.SYSTEM_NAME))
+                                for i in env.COMPILER_CXX_INCLUDES + env.INCLUDES:
+                                    response_file.write('-isystem%s\n' % i)
+                                for i in tg_includes + tg.env.INCPATHS:
+                                    response_file.write('-I%s\n' % i)
+                                for d in env.COMPILER_CXX_DEFINES + env.DEFINES + tg_defines:
                                     response_file.write('-D%s\n' % d)
 
                             include_paths += tg_includes
@@ -436,43 +449,102 @@ class vscode(Build.BuildContext):
             json.dump(launch_configs, document, indent=2)
 
 
-def create_vscode_kernels(task_gen, kernel_name, kernel_source, kernel_node, kernel_type):
-    return
-    if 'vscode' in task_gen.env.PROJECTS:
-        for kernel, kernel_source, kernel_path, kernel_ast in task_gen.kernels:
-            kernel_type = 'parse'
-            env = task_gen.env
-            kernel_env = env
-            tgen = task_gen.bld.get_tgen_by_name(env.ENV_PREFIX % task_gen.parent)
-            target_suffix = kernel_type
-            kernel_target = task_gen.parent + '.' + '.'.join(kernel) + '.' + target_suffix
-            kernel_task_gen = task_gen.bld(
-                env=kernel_env.derive(),
-                bld_env=env,
-                target=env.ENV_PREFIX % kernel_target,
-                target_name=env.ENV_PREFIX % task_gen.parent,
-                safe_target_name=kernel_target.replace('.', '_').replace('-', '_'),
-                kernel=kernel,
-                kernel_source_node=kernel_source,
-                features=[
-                    'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel',
-                    'motor:cpu:kernel_create'
-                ],
-                defines=tgen.defines + [
-                    'MOTOR_KERNEL_ID=%s_%s' % (task_gen.parent.replace('.', '_'), kernel_target.replace('.', '_')),
-                    'MOTOR_KERNEL_NAME=%s' % (kernel_target),
-                    'MOTOR_KERNEL_TARGET=%s' % kernel_type
-                ],
-                variant_name='',
-                includes=tgen.includes,
-                kernel_source=kernel_ast,
-                source=[kernel_source],
-                source_nodes=tgen.source_nodes,
-                use=tgen.use + [env.ENV_PREFIX % 'plugin.compute.cpu'],
-                uselib=tgen.uselib,
+class vscode_cmake(vscode_common):
+    "creates projects for Visual Studio Code using CMake"
+    cmd = 'vscode_cmake'
+    variant = 'projects/vscode'
+    extensions = ['"ms-vscode.cpptools"', '"ms-python.python"', '"ms-vscode.cmake-tools"']
+
+    def write_workspace(self):
+        vscode_common.write_workspace(self)
+        toolchains = cmake.write_cmake_workspace(self, [a for a in sys.argv if a[0] == '-'])
+        vscode_node = self.srcnode.make_node('.vscode')
+        vscode_node.mkdir()
+
+        with open(vscode_node.make_node('cmake-kits.json').abspath(), 'w') as kits:
+            kits.write(
+                '[\n'
+                '%s\n'
+                ']' %
+                ',\n'.join('  {\n'
+                           '    "name": "%s",\n'
+                           '    "toolchainFile": "%s"\n'
+                           '  }' % t for t in toolchains)
             )
-            kernel_task_gen.env.PLUGIN = task_gen.env.plugin_name
 
+        with open(vscode_node.make_node('cmake-variants.json').abspath(), 'w') as variants:
+            variants.write(
+                '{\n'
+                '  "buildTypes": {\n'
+                '    "default": "%s",\n'
+                '    "description": "build types",\n'
+                '    "choices": {\n'
+                '      %s\n'
+                '    }\n'
+                '  }\n'
+                '}' % (
+                    self.env.ALL_VARIANTS[0], ',\n'.join(
+                        '      "%(variant)s": {\n'
+                        '        "short": "%(variant)s",\n'
+                        '        "long": "build %(variant)s",\n'
+                        '        "buildType": "%(variant)s"\n'
+                        '      }' % {'variant': variant} for variant in self.env.ALL_VARIANTS
+                    )
+                )
+            )
 
-def build(build_context):
-    task_gen.kernel_processors.append(create_vscode_kernels)
+        launch_file = vscode_node.make_node('launch.json')
+        try:
+            launch_config_content = json_minify(Utils.readf(launch_file.abspath(), 'r'))
+        except IOError:
+            launch_configs = {'version': '0.2.0', 'configurations': [], 'inputs': []}
+        else:
+            launch_configs = json.loads(launch_config_content)
+            launch_configs['configurations'] = [
+                c for c in launch_configs['configurations'] if not c['name'].startswith('motor:')
+            ]
+
+        debuggers = set()
+        for env_name in self.env.ALL_TOOLCHAINS:
+            bld_env = self.all_envs[env_name]
+            if bld_env.GDB:
+                debuggers.add(('gdb', 'cppdbg', 'gdb'))
+            if bld_env.LLDB:
+                debuggers.add(('lldb', 'cppdbg', 'lldb'))
+            if bld_env.CDB:
+                debuggers.add(('cdb', 'cppvsdbg', ''))
+
+        for g in self.groups:
+            for tg in g:
+                if not isinstance(tg, TaskGen.task_gen):
+                    continue
+                if 'motor:game' in tg.features:
+                    for name, category, type in debuggers:
+                        launch_configs['configurations'].append(
+                            {
+                                'name': 'motor:%s[%s]' % (tg.target, name),
+                                'type': category,
+                                'request': 'launch',
+                                'program': '${command:cmake.launchTargetPath}',
+                                'args': [tg.target],
+                                'cwd': '${workspaceFolder}',
+                            }
+                        )
+                if 'motor:python_module' in tg.features:
+                    for name, category, type in debuggers:
+                        launch_configs['configurations'].append(
+                            {
+                                'name': 'motor:%s[%s]' % (tg.target, name),
+                                'type': category,
+                                'request': 'launch',
+                                'program': sys.executable,
+                                'args': ['-c', 'import py_motor; py_motor.run()'],
+                                'cwd':
+                                    '${workspaceFolder}/${input:motor-Prefix}/${input:motor-Variant}/${input:motor-Deploy_RunBinDir}',
+                                'preLaunchTask':
+                                    '${command:cmake.tasksBuildCommand}'
+                            }
+                        )
+
+        with open(launch_file.abspath(), 'w') as document:
+            json.dump(launch_configs, document, indent=2)

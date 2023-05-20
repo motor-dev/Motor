@@ -44,9 +44,9 @@ struct VertexElementInfo
         ushort4
     };
 
-    size_t            offset;
-    VertexElementType type;
-    VertexSemantics   semantic;
+    size_t            offset {};
+    VertexElementType type {};
+    VertexSemantics   semantic {};
 };
 
 template < typename T >
@@ -61,20 +61,20 @@ struct VertexElementTypeMapToIndex;
         };                                                                                         \
     }
 MAKETYPEINDEX(float, float1);
-MAKETYPEINDEX(float2, float2);
-MAKETYPEINDEX(float3, float3);
-MAKETYPEINDEX(float4, float4);
-MAKETYPEINDEX(color32, color32);
-MAKETYPEINDEX(byte4, byte4);
-MAKETYPEINDEX(short2, short2);
-MAKETYPEINDEX(short4, short4);
+MAKETYPEINDEX(knl::float2, float2);
+MAKETYPEINDEX(knl::float3, float3);
+MAKETYPEINDEX(knl::float4, float4);
+MAKETYPEINDEX(knl::color32, color32);
+MAKETYPEINDEX(knl::byte4, byte4);
+MAKETYPEINDEX(knl::short2, short2);
+MAKETYPEINDEX(knl::short4, short4);
 #undef MAKETYPEINDEX
 
 struct VertexBufferFlags
 {
-    u32                      vertexSize;
-    u32                      elementCount;
-    const VertexElementInfo* info;
+    u32                      vertexSize {};
+    u32                      elementCount {};
+    const VertexElementInfo* info {};
 };
 
 template < typename T, int sem >
@@ -133,7 +133,7 @@ struct VertexDescription
         static VertexBufferFlags pflags   = parent::getFlags();
         desc[VertexComponents - 1].offset = pflags.vertexSize;
         desc[VertexComponents - 1].type   = VertexElementInfo::VertexElementType(
-              VertexElementTypeMapToIndex< typename Queue::VertexSemanticType >::Index);
+            VertexElementTypeMapToIndex< typename Queue::VertexSemanticType >::Index);
         desc[VertexComponents - 1].semantic = VertexSemantics(Queue::semantic);
         if(VertexComponents > 1)
             memcpy(desc, pflags.info, sizeof(VertexElementInfo) * (VertexComponents - 1));
@@ -155,7 +155,7 @@ struct VertexDescription< void >
     static VertexBufferFlags getFlags()
     {
         static VertexBufferFlags flags;
-        flags.info         = 0;
+        flags.info         = nullptr;
         flags.elementCount = 0;
         flags.vertexSize   = 0;
         return flags;
@@ -228,7 +228,7 @@ struct IndexBufferFlags
 
     IndexBufferFormat format;
 
-    inline IndexBufferFlags(IndexBufferFormat f) : format(f)
+    explicit inline IndexBufferFlags(IndexBufferFormat f) : format(f)
     {
     }
 };

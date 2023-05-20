@@ -69,25 +69,24 @@ void SettingsProvider::apply(SettingsBase& settings) const
         = Meta::Type::makeType(settings.m_settingsClass, Meta::Type::Indirection::Value,
                                Meta::Type::Constness::Mutable, Meta::Type::Constness::Mutable);
     Meta::Value settingsValue = Meta::Value(type, &settings);
-    for(SettingsCategoryMap::const_iterator it = m_settings.begin(); it != m_settings.end(); ++it)
+    for(const auto& category: m_settings)
     {
-        if(it->first == settings.m_settingsClass->name)
+        if(category.first == settings.m_settingsClass->name)
         {
-            for(SettingsList::const_iterator setting = it->second.begin();
-                setting != it->second.end(); ++setting)
+            for(const auto& setting: category.second)
             {
                 raw< const Meta::Property > property
-                    = settings.m_settingsClass->getProperty(setting->first);
+                    = settings.m_settingsClass->getProperty(setting.first);
                 if(!property)
                 {
                     motor_error_format(Log::settings(), "Unknwon setting {0} in category {1}",
-                                       setting->first, it->first);
+                                       setting.first, category.first);
                 }
                 else
                 {
-                    Meta::AST::DbContext context(Arena::stack(), setting->second, m_folder);
-                    setting->third->resolve(context);
-                    Meta::Value v = setting->third->eval(property->type);
+                    Meta::AST::DbContext context(Arena::stack(), setting.second, m_folder);
+                    setting.third->resolve(context);
+                    Meta::Value v = setting.third->eval(property->type);
                     if(!context.errorCount)
                     {
                         property->set(settingsValue, v);
