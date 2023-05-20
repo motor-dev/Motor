@@ -242,6 +242,7 @@ all_icl_platforms = (
     ('ia64', 'ia64', 'ia64'),
 )
 
+
 @conf
 def gather_vswhere_versions(conf, versions):
     import json
@@ -272,6 +273,7 @@ def gather_vswhere_versions(conf, versions):
         path = str(os.path.abspath(entry['installationPath']))
         if os.path.exists(path) and ('%s %s' % (product, ver)) not in versions:
             conf.gather_msvc_targets(versions, ver, path, product)
+
 
 @conf
 def gather_intel_composer_versions(conf, versions):
@@ -341,8 +343,7 @@ def gather_vstudio_compilers(conf):
     else:
         result = []
         instances = json.loads(txt)
-        compilers = []
-        seen = set()
+        compilers = {}
         for instance in instances:
             installationPath = instance['installationPath']
             toolsets = os.listdir(os.path.join(installationPath, 'VC/Tools/MSVC'))
@@ -352,12 +353,17 @@ def gather_vstudio_compilers(conf):
                     if host.startswith('Host'):
                         host_arch = host[4:].lower()
                         targets = os.listdir(os.path.join(installationPath, 'VC/Tools/MSVC', toolset, 'bin', host))
+                        version = tuple(int(i) for i in toolset.split('.'))
+                        toolset_short = '%d.%d' % (version[0], version[1])
                         for target in targets:
-                            if (toolset, host_arch, target) not in seen:
-                                compilers.append((installationPath, toolset, host_arch, target))
-                                seen.add((toolset, host_arch, target))
-        for installationPath, toolset, host_arch, target in compilers:
-            result.append(conf.get_msvc_version_new(installationPath, toolset, host_arch, target))
+                            if (toolset_short, host_arch, target) not in compilers:
+                                compilers[toolset_short, host_arch, target] = (
+                                    version, installationPath, toolset_short, host_arch, target)
+                            elif compilers[toolset_short, host_arch, target][0] < version:
+                                compilers[toolset_short, host_arch, target] = (
+                                    version, installationPath, toolset_short, host_arch, target)
+        for version, installationPath, toolset_short, host_arch, target in sorted(compilers.values()):
+            result.append(conf.get_msvc_version_new(installationPath, toolset_short, host_arch, target))
         return result
 
 
@@ -479,15 +485,18 @@ def configure(conf):
 
     compilers = conf.gather_vstudio_compilers()
     for batfile, version, host_arch, target_arch, path, incdir, libdir in compilers:
+        if (version, target_arch) in seen:
+            continue
         cl = conf.detect_executable('cl', path)
         c = MSVC(
-            cl, 'msvc', version, host_arch + '_' + target_arch, target_arch, batfile,
+            cl, 'msvc', version, target_arch, target_arch, batfile,
             "-arch=%s -host_arch=%s -vcvars_ver=%s -no_logo" % (target_arch, host_arch, version),
             path, incdir, libdir
         )
         if c.name() in seen:
             continue
         seen.add(c.name())
+        seen.add((version, target_arch))
         conf.compilers.append(c)
 
     conf.end_msg('done')
