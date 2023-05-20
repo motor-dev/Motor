@@ -4,6 +4,7 @@
 
 #if(_MSC_VER >= 1400) && !defined(_ARM) && !defined(_ARM64)
 //  Following 8 lines: workaround for a bug in some older SDKs
+// NOLINTBEGIN(bugprone-reserved-identifier)
 #    pragma push_macro("_interlockedbittestandset")
 #    pragma push_macro("_interlockedbittestandreset")
 #    pragma push_macro("_interlockedbittestandset64")
@@ -17,6 +18,7 @@
 #    pragma pop_macro("_interlockedbittestandset64")
 #    pragma pop_macro("_interlockedbittestandreset")
 #    pragma pop_macro("_interlockedbittestandset")
+// NOLINTEND(bugprone-reserved-identifier)
 #endif
 
 #ifndef __cplusplus
