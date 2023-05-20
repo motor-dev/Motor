@@ -48,7 +48,7 @@ public:
     inline ~ref();
 
     MOTOR_ALWAYS_INLINE T* operator->() const;
-    inline                 operator const void*() const;  // NOLINT(google-explicit-constructor)
+    inline operator const void*() const;  // NOLINT(google-explicit-constructor)
     inline bool            operator!() const;
     MOTOR_ALWAYS_INLINE T& operator*();
 
@@ -138,10 +138,8 @@ ref< T >::ref(scoped< U >&& other) noexcept : m_ptr(check_is_a< T >(other.operat
 template < typename T >
 ref< T >& ref< T >::operator=(const ref< T >& other)
 {
-    if(this != &other)
-    {
-        ref(other).swap(*this);
-    }
+    if(m_ptr == other.m_ptr) return *this;
+    ref(other).swap(*this);
     return *this;
 }
 
@@ -149,6 +147,7 @@ template < typename T >
 template < typename U >
 ref< T >& ref< T >::operator=(const ref< U >& other)
 {
+    if(m_ptr == other.m_ptr) return *this;
     ref(other).swap(*this);
     return *this;
 }
