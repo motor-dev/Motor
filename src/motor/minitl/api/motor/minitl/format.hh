@@ -1395,13 +1395,13 @@ constexpr bool is_index_in_list()
     return invalid_format("argument not used in format");
 }
 
-template < u32 INDEX, i32 FIRST, i32... INDICES, enable_if_t< INDEX == FIRST, bool > = true >
+template < u32 INDEX, u32 FIRST, u32... INDICES, enable_if_t< INDEX == FIRST, bool > = true >
 constexpr bool is_index_in_list()
 {
     return true;
 }
 
-template < u32 INDEX, i32 FIRST, i32... INDICES, enable_if_t< INDEX != FIRST, int > = true >
+template < u32 INDEX, u32 FIRST, u32... INDICES, enable_if_t< INDEX != FIRST, int > = true >
 constexpr bool is_index_in_list()
 {
     return is_index_in_list< INDEX, INDICES... >();
