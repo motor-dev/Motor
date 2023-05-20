@@ -49,8 +49,6 @@ def write_cmake_workspace(build_context, build_options=[]):
                 'set(CMAKE_CXX_COMPILER_WORKS TRUE)\n'
                 'set(CMAKE_C_FLAGS "-U%s --target=%s-%s %s")\n'
                 'set(CMAKE_CXX_FLAGS "-U%s --target=%s-%s %s")\n'
-                'set(CMAKE_C_COMPILER_ARG1 "-driver-mode=gcc")\n'
-                'set(CMAKE_CXX_COMPILER_ARG1 "-driver-mode=gxx")\n'
                 '' % (
                     env.CC[0].replace('\\', '/'), env.CXX[0].replace('\\', '/'), env_name, env.ARCHITECTURE,
                     env.SYSTEM_NAME, env_name, env.ARCHITECTURE,
@@ -236,12 +234,10 @@ def write_cmake_workspace(build_context, build_options=[]):
         CMakeLists.write(
             'cmake_minimum_required(VERSION 3.15)\n'
             'project(%(appname)s)\n'
-            'set(CMAKE_C_COMPILER_LAUNCHER "%(python)s")\n'
-            'set(CMAKE_CXX_COMPILER_LAUNCHER "%(python)s")\n'
-            'set(CMAKE_C_LINKER_LAUNCHER "%(python)s")\n'
-            'set(CMAKE_CXX_LINKER_LAUNCHER "%(python)s")\n'
-            'set(CMAKE_C_COMPILER "%(true)s")\n'
-            'set(CMAKE_CXX_COMPILER "%(true)s")\n'
+            'set(CMAKE_C_COMPILER_LAUNCHER "%(python)s;%(true)s")\n'
+            'set(CMAKE_CXX_COMPILER_LAUNCHER "%(python)s;%(true)s")\n'
+            'set(CMAKE_C_LINKER_LAUNCHER "%(python)s;%(true)s")\n'
+            'set(CMAKE_CXX_LINKER_LAUNCHER "%(python)s;%(true)s")\n'
             'set(CMAKE_CONFIGURATION_TYPES "%(configs)s" CACHE STRING "" FORCE)\n\n'
             'set(CMAKE_CXX_STANDARD 14)\n'
             'set(CMAKE_CXX_STANDARD_REQUIRED ON)\n'
