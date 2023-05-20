@@ -28,21 +28,21 @@ jobs:
           command: |
             & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf configure
       - run:
-          name: Build Windows MSVC 16.11 x64
+          name: Build Windows MSVC x64
           command: |
-            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_amd64-community_x64-16.11:debug --tests
+            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_amd64-msvc_x64-14.29:debug --tests
       - run:
-          name: Build Windows MSVC 16.11 x86
+          name: Build Windows MSVC x86
           command: |
-            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_x86-community_x86-16.11:debug
+            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_x86-msvc_x86-14.29:debug
       - run:
-          name: Build Windows MSVC 16.11 ARM
+          name: Build Windows MSVC ARM
           command: |
-            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_armv7a-community_amd64_arm-16.11:debug
+            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_armv7a-msvc_arm-14.29:debug
       - run:
-          name: Build Windows MSVC 16.11 ARM64
+          name: Build Windows MSVC ARM64
           command: |
-            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_arm64-community_amd64_arm64-16.11:debug
+            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_arm64-msvc_arm64-14.29:debug
 
   macOS:
     macos:
