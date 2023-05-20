@@ -40,7 +40,7 @@
 #ifdef __kernel
 #    undef __kernel
 #endif
-#define __kernel  // NOLINT(bugprone-reserved-identifier)
+#define __kernel static inline  // NOLINT(bugprone-reserved-identifier)
 
 #define kernel_constant const
 #define kernel_global
