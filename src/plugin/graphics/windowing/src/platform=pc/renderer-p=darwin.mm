@@ -60,9 +60,7 @@ Renderer::Renderer(minitl::allocator& arena, const weak< Resource::ResourceManag
 {
 }
 
-Renderer::~Renderer()
-{
-}
+Renderer::~Renderer() = default;
 
 knl::uint2 Renderer::getScreenSize() const
 {
