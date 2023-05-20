@@ -5,6 +5,74 @@ import os
 import re
 import sys
 
+MSVC_PREDEFINED_MACROS = (
+    '__cplusplus',
+    '__STDC__',
+    '__STDC_HOSTED__',
+    '__STDC_NO_ATOMICS__',
+    '__STDC_NO_COMPLEX__',
+    '__STDC_NO_THREADS__',
+    '__STDC_NO_VLA__',
+    '__STDC_VERSION__',
+    '__STDCPP_DEFAULT_NEW_ALIGNMENT__',
+    '__STDCPP_THREADS__',
+    '__ATOM__',
+    '__AVX__',
+    '__AVX2__',
+    '__AVX512BW__',
+    '__AVX512CD__',
+    '__AVX512DQ__',
+    '__AVX512F__',
+    '__AVX512VL__',
+    '_CHAR_UNSIGNED',
+    '__CLR_VER',
+    '_CONTROL_FLOW_GUARD',
+    '__cplusplus_cli',
+    '__cplusplus_winrt',
+    '_CPPRTTI',
+    '_CPPUNWIND',
+    '_DEBUG',
+    '_DLL',
+    '_INTEGRAL_MAX_BITS',
+    '_ISO_VOLATILE',
+    '_M_AMD64',
+    '_M_ARM',
+    '_M_ARM_ARMV7VE',
+    '_M_ARM_FP',
+    '_M_ARM64',
+    '_M_ARM64EC',
+    '_M_CEE',
+    '_M_CEE_PURE',
+    '_M_CEE_SAFE',
+    '_M_FP_CONTRACT',
+    '_M_FP_EXCEPT',
+    '_M_FP_FAST',
+    '_M_FP_PRECISE',
+    '_M_FP_STRICT',
+    '_M_IX86',
+    '_M_IX86_FP',
+    '_M_X64',
+    '_MANAGED',
+    '_MSC_BUILD',
+    '_MSC_EXTENSIONS',
+    '_MSC_FULL_VER',
+    '_MSC_VER',
+    '_MSVC_LANG',
+    '__MSVC_RUNTIME_CHECKS',
+    '_MSVC_TRADITIONAL',
+    '_MT',
+    '_NATIVE_WCHAR_T_DEFINED',
+    '_OPENMP',
+    '_PREFAST_',
+    '__SANITIZE_ADDRESS__',
+    '__TIMESTAMP__',
+    '_VC_NODEFAULTLIB',
+    '_WCHAR_T_DEFINED',
+    '_WIN32',
+    '_WIN64',
+    '_WINRT_DLL',
+)
+
 
 class MSVC(Configure.ConfigurationContext.Compiler):
 
@@ -19,8 +87,9 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         self.args = args
         self.arch_name = target_arch
         self.includes = [
-            os.path.join(i, target_arch) for i in includes if os.path.isdir(os.path.join(i, target_arch))
-        ] + includes
+                            os.path.join(i, target_arch) for i in includes if
+                            os.path.isdir(os.path.join(i, target_arch))
+                        ] + includes
         self.libdirs = libdirs
         self.target = self.platform
         self.platform_name = 'windows'
@@ -52,7 +121,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         if self.arch == 'x86':
             conf.env.append_unique('CFLAGS', ['/arch:SSE2'])
             conf.env.append_unique('CXXFLAGS', ['/arch:SSE2'])
-        if self.NAMES[0] != 'msvc' or self.version_number >= (8, ):
+        if self.NAMES[0] != 'msvc' or self.version_number >= (8,):
             conf.env.append_unique('CFLAGS_profile', ['/GS-'])
             conf.env.append_unique('CXXFLAGS_profile', ['/GS-'])
             conf.env.append_unique('CFLAGS_final', ['/GS-'])
@@ -64,7 +133,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
     def set_warning_options(self, conf):
         if self.NAMES[0] == 'intel':
             conf.env.append_unique('CXXFLAGS', ['/Zc:forScope'])
-            if self.version_number >= (11, ):
+            if self.version_number >= (11,):
                 warning = ['/W4', '/Qdiag-disable:remark']
             else:
                 warning = ['/W3']
@@ -74,7 +143,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         conf.env.append_unique('CFLAGS_warnnone', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0'])
         conf.env.append_unique('CXXFLAGS_warnall', warning + ['/D_CRT_SECURE_NO_WARNINGS=1', '/WX'])
         conf.env.append_unique('CXXFLAGS_warnnone', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0'])
-        if self.NAMES[0] == 'msvc' and self.version_number >= (14, ):
+        if self.NAMES[0] == 'msvc' and self.version_number >= (14,):
             conf.env.append_unique('CFLAGS_warnall', ['/D_ALLOW_RTCc_IN_STL=1'])
             conf.env.append_unique('CXXFLAGS_warnall', ['/D_ALLOW_RTCc_IN_STL=1'])
             conf.env.append_unique('CFLAGS_warnnone', ['/D_ALLOW_RTCc_IN_STL=1'])
@@ -84,7 +153,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         env = conf.env
         version = '%s %s' % (self.NAMES[0], self.version)
         version_number = float(self.version.replace('Exp', ''))
-        if self.NAMES[0] == 'msvc' and self.version_number < (7, ):
+        if self.NAMES[0] == 'msvc' and self.version_number < (7,):
             raise Errors.WafError('unsupported compiler')
         env.NO_MSVC_DETECT = 1
         env.INCLUDES = self.includes
@@ -103,11 +172,11 @@ class MSVC(Configure.ConfigurationContext.Compiler):
             env.append_value('CFLAGS', ['/Qmultibyte-chars-'])
             env.append_value('CXXFLAGS', ['/Qmultibyte-chars-'])
         if (
-            (self.NAMES[0] == 'msvc' and version_number >= 8) or (self.NAMES[0] == 'wsdk' and version_number >= 6)
-            or (self.NAMES[0] == 'intel' and version_number >= 11)
+                (self.NAMES[0] == 'msvc' and version_number >= 8) or (self.NAMES[0] == 'wsdk' and version_number >= 6)
+                or (self.NAMES[0] == 'intel' and version_number >= 11)
         ):
             env.append_unique('LINKFLAGS', ['/MANIFEST:NO'])
-        if self.version_number >= (14, ):
+        if self.version_number >= (14,):
             env.append_unique('LIB', ['legacy_stdio_definitions'])
 
     def load_in_env(self, conf, platform):
@@ -124,6 +193,42 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         else:
             conf.find_program('cdb', var='CDB', mandatory=False)
 
+        env.COMPILER_C_INCLUDES = self.includes
+        env.COMPILER_CXX_INCLUDES = self.includes
+        main_test = conf.bldnode.make_node('main.c')
+        main_test_pp = conf.bldnode.make_node('main.i')
+        with open(main_test.abspath(), 'w') as macro_dump_file:
+            macro_dump_file.write('#define show(X) #X X\n')
+            for macro in MSVC_PREDEFINED_MACROS:
+                macro_dump_file.write(
+                    '#ifdef %s\n'
+                    'show(%s)\n'
+                    '#endif\n' % (macro, macro)
+                )
+        macros_c = []
+        result, out, err = self.run_c(['/TC', '/EP', '/P', '/Fi:%s' % main_test_pp.abspath(), main_test.abspath(), ])
+        with open(main_test_pp.abspath(), 'r') as listing:
+            for line in listing.readlines():
+                line = line.strip()
+                if line:
+                    _, macro, value = line.split('"', maxsplit=2)
+                    value = value.strip()
+                    macros_c.append('%s=%s' % (macro, value))
+        env.COMPILER_C_DEFINES = macros_c
+        macros_cxx = []
+        result, out, err = self.run_c(
+            ['/TP', '/std:c++14', '/Zc:__cplusplus', '/EP', '/P', '/Fi:%s' % main_test_pp.abspath(),
+             main_test.abspath(), ])
+        with open(main_test_pp.abspath(), 'r') as listing:
+            for line in listing.readlines():
+                line = line.strip()
+                if line:
+                    _, macro, value = line.split('"', maxsplit=2)
+                    value = value.strip()
+                    macros_cxx.append('%s=%s' % (macro, value))
+        env.COMPILER_CXX_DEFINES = macros_cxx
+        main_test.delete(evict=True)
+        main_test_pp.delete(evict=True)
         env.CXXFLAGS_cxx98 = []
         env.CXXFLAGS_cxx03 = []
         env.CXXFLAGS_cxx11 = []
@@ -244,14 +349,13 @@ def os_platform():
         true_platform = os.environ["PROCESSOR_ARCHITEW6432"]
     except KeyError:
         pass
-        #true_platform not assigned to if this does not exist
+        # true_platform not assigned to if this does not exist
     return true_platform
 
 
 def configure(conf):
     seen = set([])
     from waflib.Tools import msvc
-    conf.env.append_unique('useful_defines', ['__INTEL_COMPILER', '__clang__', '_MSC_VER'])
     conf.start_msg('Looking for msvc compilers')
     try:
         versions = conf.get_msvc_versions()
