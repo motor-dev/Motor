@@ -19,8 +19,9 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         self.args = args
         self.arch_name = target_arch
         self.includes = [
-            os.path.join(i, target_arch) for i in includes if os.path.isdir(os.path.join(i, target_arch))
-        ] + includes
+                            os.path.join(i, target_arch) for i in includes if
+                            os.path.isdir(os.path.join(i, target_arch))
+                        ] + includes
         self.libdirs = libdirs
         self.target = self.platform
         self.platform_name = 'windows'
@@ -52,7 +53,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         if self.arch == 'x86':
             conf.env.append_unique('CFLAGS', ['/arch:SSE2'])
             conf.env.append_unique('CXXFLAGS', ['/arch:SSE2'])
-        if self.NAMES[0] != 'msvc' or self.version_number >= (8, ):
+        if self.NAMES[0] != 'msvc' or self.version_number >= (8,):
             conf.env.append_unique('CFLAGS_profile', ['/GS-'])
             conf.env.append_unique('CXXFLAGS_profile', ['/GS-'])
             conf.env.append_unique('CFLAGS_final', ['/GS-'])
@@ -64,7 +65,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
     def set_warning_options(self, conf):
         if self.NAMES[0] == 'intel':
             conf.env.append_unique('CXXFLAGS', ['/Zc:forScope'])
-            if self.version_number >= (11, ):
+            if self.version_number >= (11,):
                 warning = ['/W4', '/Qdiag-disable:remark']
             else:
                 warning = ['/W3']
@@ -74,7 +75,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         conf.env.append_unique('CFLAGS_warnnone', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0'])
         conf.env.append_unique('CXXFLAGS_warnall', warning + ['/D_CRT_SECURE_NO_WARNINGS=1', '/WX'])
         conf.env.append_unique('CXXFLAGS_warnnone', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0'])
-        if self.NAMES[0] == 'msvc' and self.version_number >= (14, ):
+        if self.NAMES[0] == 'msvc' and self.version_number >= (14,):
             conf.env.append_unique('CFLAGS_warnall', ['/D_ALLOW_RTCc_IN_STL=1'])
             conf.env.append_unique('CXXFLAGS_warnall', ['/D_ALLOW_RTCc_IN_STL=1'])
             conf.env.append_unique('CFLAGS_warnnone', ['/D_ALLOW_RTCc_IN_STL=1'])
@@ -83,8 +84,8 @@ class MSVC(Configure.ConfigurationContext.Compiler):
     def load_tools(self, conf, platform):
         env = conf.env
         version = '%s %s' % (self.NAMES[0], self.version)
-        version_number = float(self.version.replace('Exp', ''))
-        if self.NAMES[0] == 'msvc' and self.version_number < (7, ):
+        version_number = tuple(int(i) for i in self.version.split('.'))
+        if self.NAMES[0] == 'msvc' and self.version_number < (7,):
             raise Errors.WafError('unsupported compiler')
         env.NO_MSVC_DETECT = 1
         env.INCLUDES = self.includes
@@ -102,13 +103,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         if self.NAMES[0] == 'intel':
             env.append_value('CFLAGS', ['/Qmultibyte-chars-'])
             env.append_value('CXXFLAGS', ['/Qmultibyte-chars-'])
-        if (
-            (self.NAMES[0] == 'msvc' and version_number >= 8) or (self.NAMES[0] == 'wsdk' and version_number >= 6)
-            or (self.NAMES[0] == 'intel' and version_number >= 11)
-        ):
-            env.append_unique('LINKFLAGS', ['/MANIFEST:NO'])
-        if self.version_number >= (14, ):
-            env.append_unique('LIB', ['legacy_stdio_definitions'])
+        env.append_unique('LINKFLAGS', ['/MANIFEST:NO'])
 
     def load_in_env(self, conf, platform):
         Configure.ConfigurationContext.Compiler.load_in_env(self, conf, platform)
@@ -143,7 +138,6 @@ all_icl_platforms = (
     ('ia64', 'ia64', 'ia64'),
 )
 
-
 @conf
 def gather_vswhere_versions(conf, versions):
     import json
@@ -174,7 +168,6 @@ def gather_vswhere_versions(conf, versions):
         path = str(os.path.abspath(entry['installationPath']))
         if os.path.exists(path) and ('%s %s' % (product, ver)) not in versions:
             conf.gather_msvc_targets(versions, ver, path, product)
-
 
 @conf
 def gather_intel_composer_versions(conf, versions):
@@ -226,6 +219,114 @@ def gather_intel_composer_versions(conf, versions):
 
 
 @conf
+def gather_vstudio_compilers(conf):
+    try:
+        import json
+    except ImportError:
+        Logs.error('Visual Studio 2017+ detection requires JSon')
+        return []
+
+    prg_path = os.environ.get('ProgramFiles(x86)', os.environ.get('ProgramFiles', 'C:\\Program Files (x86)'))
+
+    vswhere = os.path.join(prg_path, 'Microsoft Visual Studio', 'Installer', 'vswhere.exe')
+    args = [vswhere, '-requires', 'Microsoft.VisualStudio.Workload.NativeDesktop', '-format', 'json']
+    try:
+        txt = conf.cmd_and_log(args)
+    except Errors.WafError as e:
+        return []
+    else:
+        result = []
+        instances = json.loads(txt)
+        compilers = []
+        seen = set()
+        for instance in instances:
+            installationPath = instance['installationPath']
+            toolsets = os.listdir(os.path.join(installationPath, 'VC/Tools/MSVC'))
+            for toolset in toolsets:
+                hosts = os.listdir(os.path.join(installationPath, 'VC/Tools/MSVC', toolset, 'bin'))
+                for host in hosts:
+                    if host.startswith('Host'):
+                        host_arch = host[4:].lower()
+                        targets = os.listdir(os.path.join(installationPath, 'VC/Tools/MSVC', toolset, 'bin', host))
+                        for target in targets:
+                            if (toolset, host_arch, target) not in seen:
+                                compilers.append((installationPath, toolset, host_arch, target))
+                                seen.add((toolset, host_arch, target))
+        for installationPath, toolset, host_arch, target in compilers:
+            result.append(conf.get_msvc_version_new(installationPath, toolset, host_arch, target))
+        return result
+
+
+@conf
+def get_msvc_version_new(conf, install_dir, version, host, target):
+    """
+    Checks that an installed compiler actually runs and uses vcvars to obtain the
+    environment needed by the compiler.
+
+    :param install_dir: Visual Studio installation directory.
+    :param version: Compiler version to discover
+    :param target: target architecture
+    :return: the location of the compiler executable, the location of include dirs, and the library paths
+    :rtype: tuple of strings
+    """
+    try:
+        conf.msvc_cnt += 1
+    except AttributeError:
+        conf.msvc_cnt = 1
+    batfile = conf.bldnode.make_node('waf-print-msvc-%d.bat' % conf.msvc_cnt)
+    batfile.write("""@echo off
+set INCLUDE=
+set LIB=
+call "%s\\Common7\\Tools\\vsdevcmd.bat" -arch=%s -host_arch=%s -vcvars_ver=%s -no_logo
+echo PATH=%%PATH%%
+echo INCLUDE=%%INCLUDE%%
+echo LIB=%%LIB%%;%%LIBPATH%%
+""" % (install_dir, target, host, version))
+    sout = conf.cmd_and_log(['cmd.exe', '/E:on', '/V:on', '/C', batfile.abspath()])
+    lines = sout.splitlines()
+
+    if not lines[0]:
+        lines.pop(0)
+    existing_paths = os.environ['PATH'].split(';')
+
+    msvc_path = msvc_incdir = msvc_libdir = None
+    for line in lines:
+        if line.startswith('PATH='):
+            path = line[5:]
+            msvc_path = [p for p in path.split(';') if p not in existing_paths]
+        elif line.startswith('INCLUDE='):
+            msvc_incdir = [i for i in line[8:].split(';') if i]
+        elif line.startswith('LIB='):
+            msvc_libdir = [i for i in line[4:].split(';') if i]
+    if None in (msvc_path, msvc_incdir, msvc_libdir):
+        conf.fatal('msvc: Could not find a valid architecture for building (get_msvc_version_new)')
+
+    # Check if the compiler is usable at all.
+    # The detection may return 64-bit versions even on 32-bit systems, and these would fail to run.
+    env = dict(os.environ)
+    env.update(PATH=path)
+    try:
+        cxx = conf.find_program('cl', path_list=msvc_path)
+    except Errors.WafError as e:
+        print(e)
+
+    # delete CL if exists. because it could contain parameters which can change cl's behaviour rather catastrophically.
+    if 'CL' in env:
+        del (env['CL'])
+    try:
+        conf.cmd_and_log(cxx + ['/help'], env=env)
+    except UnicodeError:
+        conf.fatal('msvc: Unicode error - check the code page?')
+    except Exception:
+        conf.fatal('msvc: cannot run the compiler in get_msvc_version (run with -v to display errors)')
+    finally:
+        conf.env['cl'] = ''
+
+    return os.path.join(install_dir,
+                        'Common7\\Tools\\vsdevcmd.bat'), version, host, target, msvc_path, msvc_incdir, msvc_libdir
+
+
+@conf
 def get_msvc_versions(self):
     """
 	:return: platform to compiler configurations
@@ -233,7 +334,6 @@ def get_msvc_versions(self):
 	"""
     dct = Utils.ordered_iter_dict()
     self.gather_intel_composer_versions(dct)
-    self.gather_vswhere_versions(dct)
     Logs.debug('msvc: detected versions %r', list(dct.keys()))
     return dct
 
@@ -244,7 +344,7 @@ def os_platform():
         true_platform = os.environ["PROCESSOR_ARCHITEW6432"]
     except KeyError:
         pass
-        #true_platform not assigned to if this does not exist
+        # true_platform not assigned to if this does not exist
     return true_platform
 
 
@@ -273,4 +373,18 @@ def configure(conf):
                         continue
                     seen.add(c.name())
                     conf.compilers.append(c)
+
+    compilers = conf.gather_vstudio_compilers()
+    for batfile, version, host_arch, target_arch, path, incdir, libdir in compilers:
+        cl = conf.detect_executable('cl', path)
+        c = MSVC(
+            cl, 'msvc', version, host_arch + '_' + target_arch, target_arch, batfile,
+            "-arch=%s -host_arch=%s -vcvars_ver=%s -no_logo" % (target_arch, host_arch, version),
+            path, incdir, libdir
+        )
+        if c.name() in seen:
+            continue
+        seen.add(c.name())
+        conf.compilers.append(c)
+
     conf.end_msg('done')

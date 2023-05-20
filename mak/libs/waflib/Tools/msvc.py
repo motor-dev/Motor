@@ -911,9 +911,8 @@ def msvc_common_flags(conf):
 	v.CXX_SRC_F    = ''
 	v.CXX_TGT_F    = ['/c', '/Fo']
 
-	if (v.MSVC_COMPILER == 'msvc' and v.MSVC_VERSION >= 8) or (v.MSVC_COMPILER == 'wsdk' and v.MSVC_VERSION >= 6):
-		v.CC_TGT_F = ['/FC'] + v.CC_TGT_F
-		v.CXX_TGT_F = ['/FC'] + v.CXX_TGT_F
+	v.CC_TGT_F = ['/FC'] + v.CC_TGT_F
+	v.CXX_TGT_F = ['/FC'] + v.CXX_TGT_F
 
 	v.CPPPATH_ST = '/I%s' # template for adding include paths
 
