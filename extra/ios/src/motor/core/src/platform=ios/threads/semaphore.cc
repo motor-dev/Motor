@@ -11,8 +11,8 @@
 #else
 #    include <semaphore.h>
 #endif
-#include <errno.h>
-#include <stdio.h>
+#include <cerrno>
+#include <cstdio>
 
 namespace Motor {
 

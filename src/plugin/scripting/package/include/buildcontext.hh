@@ -31,7 +31,7 @@ struct BuildContext
 {
     ref< Nodes::Package > result;
 
-    BuildContext(const ifilename& filename, const minitl::Allocator::Block< u8 >& buffer,
+    BuildContext(const ifilename& filename, const minitl::allocator::block< u8 >& buffer,
                  ref< Folder > folder);
     ~BuildContext();
 };
@@ -44,5 +44,5 @@ extern int g_packageColumnBefore;
 extern int g_packageColumnAfter;
 extern int g_packageObjectNestedLevel;
 
-extern const minitl::Allocator::Block< u8 >* g_buffer;
+extern const minitl::allocator::block< u8 >* g_buffer;
 extern int                                   g_bufferPosition;

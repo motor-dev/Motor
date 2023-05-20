@@ -5,11 +5,11 @@
 
 namespace Motor { namespace Arena {
 
-minitl::Allocator& meta()
+minitl::allocator& meta()
 {
     return general();
 }
-minitl::Allocator& script()
+minitl::allocator& script()
 {
     return general();
 }

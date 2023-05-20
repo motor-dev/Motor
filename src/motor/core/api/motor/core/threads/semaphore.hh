@@ -12,7 +12,7 @@ class motor_api(CORE) Semaphore : public Threads::Waitable
 private:
     union Data
     {
-        i_i32 value;
+        i_i32 value {};
         void* ptr;
     };
     Data m_data;

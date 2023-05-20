@@ -10,8 +10,8 @@ namespace Motor { namespace Python {
 
 struct PyMotorObject : public PyObject
 {
-    PyObject*   owner;
-    Meta::Value value;
+    PyObject*   owner {};
+    Meta::Value value {};
 
     static void registerType(PyObject* module);
 

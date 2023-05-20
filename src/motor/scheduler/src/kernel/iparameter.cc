@@ -5,6 +5,7 @@
 #include <motor/scheduler/kernel/imemorybuffer.hh>
 #include <motor/scheduler/kernel/imemoryhost.hh>
 #include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
+#include <motor/scheduler/kernel/parameters/parameters.hh>
 
 namespace Motor { namespace KernelScheduler {
 

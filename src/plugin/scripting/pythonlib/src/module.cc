@@ -67,13 +67,13 @@ PyObject* init2_py_motor(bool registerLog)
     PyObject* module;
     if(s_library->m_Py_InitModule4)
     {
-        motor_assert(sizeof(minitl::size_type) == 4, "Python is 32bits but Motor is 64bits");
+        motor_assert(sizeof(minitl::size_t) == 4, "Python is 32bits but Motor is 64bits");
         module = (*s_library->m_Py_InitModule4)("py_motor", s_methods, "", nullptr,
                                                 s_library->getApi());
     }
     else if(s_library->m_Py_InitModule4_64)
     {
-        motor_assert(sizeof(minitl::size_type) == 8, "Python is 64bits but Motor is 32bits");
+        motor_assert(sizeof(minitl::size_t) == 8, "Python is 64bits but Motor is 32bits");
         module = (*s_library->m_Py_InitModule4_64)("py_motor", s_methods, "", nullptr,
                                                    s_library->getApi());
     }

@@ -6,7 +6,7 @@
 
 namespace Motor { namespace Meta { namespace AST {
 
-DbContext::DbContext(minitl::Allocator& arena, const ref< Folder >& rootFolder)
+DbContext::DbContext(minitl::allocator& arena, const ref< Folder >& rootFolder)
     : rootNamespace(ref< Namespace >::create(arena, byref(arena)))
     , rootFolder(rootFolder)
     , messages(arena)
@@ -14,7 +14,7 @@ DbContext::DbContext(minitl::Allocator& arena, const ref< Folder >& rootFolder)
 {
 }
 
-DbContext::DbContext(minitl::Allocator& arena, const ref< Namespace >& ns,
+DbContext::DbContext(minitl::allocator& arena, const ref< Namespace >& ns,
                      const ref< Folder >& rootFolder)
     : rootNamespace(ns)
     , rootFolder(rootFolder)

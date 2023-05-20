@@ -21,7 +21,7 @@ Environment::Environment()
     , m_user("android")
 {
     motor_assert(s_dataDirectory, "Data directory not set when Environment created");
-    m_homeDirectory.push_back(".motor");
+    m_homeDirectory.push_back(istring(".motor"));
 }
 
 Environment::~Environment() = default;
@@ -54,7 +54,7 @@ void Environment::init(int argc, const char* argv[])
         {
             continue;
         }
-        m_game = argv[arg];
+        m_game = istring(argv[arg]);
     }
 }
 

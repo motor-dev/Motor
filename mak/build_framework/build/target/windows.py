@@ -23,17 +23,17 @@ class symbols(Task.Task):
                     for symbol in table:
                         export_file.write('/* %s */\n' % (str(symbol)))
                         if symbol.storagecls == coff.IMAGE_SYM_CLASS_EXTERNAL and (
-                            symbol.sectnum > 0
+                                symbol.sectnum > 0
                         ) and symbol.name not in seen:
                             seen.add(symbol.name)
                             if self.generator.env.CC_NAME not in ('msvc', 'clang_msvc'):
-                                if self.generator.env.ARCHITECTURE == 'x86':
+                                if self.generator.env.ARCHITECTURE == 'i386':
                                     undecorated_name = symbol.name[1:]
                                 else:
                                     undecorated_name = symbol.name
                                 export_file.write('asm (".ascii \\" -export:%s\\"");\n' % (undecorated_name))
                             else:
-                                if not symbol.name.startswith('??_G'): # scalar destructor
+                                if not symbol.name.startswith('??_G'):  # scalar destructor
                                     export_file.write('#pragma comment(linker, "/export:%s")\n' % (symbol.name))
 
 

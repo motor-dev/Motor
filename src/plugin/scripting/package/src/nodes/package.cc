@@ -52,7 +52,7 @@ void Package::insertNode(istring name, const ref< Meta::AST::Node >& object)
 
 void Package::removeNode(const ref< Meta::AST::Node >& object)
 {
-    istring name = object->getMetadata(s_name).as< const istring >();
+    auto name = object->getMetadata(s_name).as< const istring >();
     m_context.rootNamespace->remove(inamespace(name), object);
 
     minitl::vector< ref< Meta::AST::Node > >::iterator it = m_nodes.begin();

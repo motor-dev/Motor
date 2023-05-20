@@ -20,8 +20,8 @@
 #ifndef MOTOR_COMPUTE
 namespace Motor {
 namespace Arena {
-motor_api(META) minitl::Allocator& meta();
-motor_api(META) minitl::Allocator& script();
+motor_api(META) minitl::allocator& meta();
+motor_api(META) minitl::allocator& script();
 
 }  // namespace Arena
 

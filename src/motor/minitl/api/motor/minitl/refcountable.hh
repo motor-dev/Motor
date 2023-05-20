@@ -44,12 +44,12 @@ private:
 
 protected:
     template < typename T >
-    ref< T > refFromThis()
+    ref< T > ref_from_this()
     {
         return ref< T >(static_cast< T* >(this));
     }
     template < typename T >
-    ref< const T > refFromThis() const
+    ref< const T > ref_from_this() const
     {
         return ref< const T >(static_cast< const T* >(this));
     }

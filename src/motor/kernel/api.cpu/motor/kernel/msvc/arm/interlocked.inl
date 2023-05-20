@@ -6,11 +6,13 @@
 
 extern "C"
 {
+    // NOLINTBEGIN(bugprone-reserved-identifier)
     long __cdecl _InterlockedCompareExchange(long volatile* dest, long exchange, long comp);
     long long __cdecl _InterlockedCompareExchange64(long long volatile* dest, long long exchange,
                                                     long long comp);
     long __cdecl _InterlockedExchange(long volatile* target, long value);
     long __cdecl _InterlockedExchangeAdd(long volatile* addend, long value);
+    // NOLINTEND(bugprone-reserved-identifier)
 }
 #pragma intrinsic(_InterlockedExchange)
 #pragma intrinsic(_InterlockedExchangeAdd)
@@ -69,17 +71,20 @@ struct InterlockedType< 4 >
             } tagged_value;
             __declspec(align(8)) volatile long long asLongLong;
         };
-        tagged_t(long long value) : asLongLong(value)
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+        explicit tagged_t(long long value) : asLongLong(value)
         {
         }
-        tagged_t(value_t value = 0) : tagged_value {0, value}
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+        explicit tagged_t(value_t value = nullptr) : tagged_value {0, value}
         {
         }
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
         tagged_t(counter_t tag, value_t value) : tagged_value {tag, value}
         {
         }
         tagged_t(const tagged_t& other) = default;
-        inline value_t value()
+        inline value_t value() const
         {
             return tagged_value.value;
         }

@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #pragma once
 
+#include <motor/core/coredefs.hh>
 #include <motor/minitl/format.hh>
 
 namespace Motor {
@@ -17,7 +18,7 @@ private:
 
 public:
     istring();
-    istring(const char* str);
+    explicit istring(const char* str);
     template < u32 BUFFER_SIZE >
     explicit istring(const minitl::format_buffer< BUFFER_SIZE >& str) : m_index(init(str.buffer))
     {
@@ -88,17 +89,15 @@ public:
     struct Path
     {
         char name[MaxPathLength];
-             operator const char*() const
+        operator const char*() const  // NOLINT(google-explicit-constructor)
         {
             return name;
         }
     };
     inamespace();
     explicit inamespace(const istring& onlycomponent);
-    inamespace(const char* str);
-    ~inamespace()
-    {
-    }
+    explicit inamespace(const char* str);
+    ~inamespace() = default;
     inamespace& operator+=(const inamespace& other);
     inamespace& operator+=(const istring& component);
 
@@ -122,7 +121,7 @@ public:
     {
         char name[MaxFilenameLength];
 
-        operator const char*() const
+        operator const char*() const  // NOLINT(google-explicit-constructor)
         {
             return name;
         }
@@ -131,9 +130,7 @@ public:
     explicit ifilename(const istring& onlycomponent);
     explicit ifilename(const char* str);
     explicit ifilename(const ipath& path);
-    ~ifilename()
-    {
-    }
+    ~ifilename() = default;
 
     Filename str(char separator = Separator) const;
 };
@@ -148,7 +145,7 @@ public:
     {
         char name[MaxFilenameLength];
 
-        operator const char*() const
+        operator const char*() const  // NOLINT(google-explicit-constructor)
         {
             return name;
         }
@@ -157,9 +154,7 @@ public:
     explicit ipath(const istring& onlycomponent);
     explicit ipath(const char* str);
     ipath(const char* begin, const char* end);
-    ~ipath()
-    {
-    }
+    ~ipath() = default;
 
     ipath&   operator+=(const ipath& other);
     Filename str(char separator = Separator) const;

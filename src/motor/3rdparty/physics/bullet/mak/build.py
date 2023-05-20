@@ -24,7 +24,7 @@ def deploy_bullet_package(task_gen):
 
     if task_gen.env.TOOLCHAIN == task_gen.bld.multiarch_envs[0].TOOLCHAIN:
         for h in src.ant_glob(
-            ['*.h', 'BulletCollision/**/*.h', 'BulletDynamics/**/*.h', 'BulletSoftBody/**/*.h', 'LinearMath/**/*.h']
+                ['*.h', 'BulletCollision/**/*.h', 'BulletDynamics/**/*.h', 'BulletSoftBody/**/*.h', 'LinearMath/**/*.h']
         ):
             task_gen.deploy_as(os.path.join('bld', 'packages', bullet_dest, 'api', h.path_from(src)), h)
     if task_gen.env.STATIC:
@@ -40,7 +40,26 @@ def deploy_bullet_package(task_gen):
 
 
 def build_source(bld, name, env, path):
-    if bld.env.STATIC:
+    if bld.env.PROJECTS:
+        result = bld.headers(
+            name,
+            bld.platforms,
+            path=path.make_node('src'),
+            features=['motor:warnings:off', 'motor:deploy:off', 'motor:deploy:bullet', 'motor:nortc'],
+            extra_includes=[path.make_node('src')],
+            extra_system_includes=[path.make_node('src')],
+            extra_defines=[
+                '_ALLOW_MSC_VER_MISMATCH=1', '_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH=1',
+                '_ALLOW_RUNTIME_LIBRARY_MISMATCH=1', 'BT_NO_PROFILE'
+            ],
+            env=env,
+            source_list=[
+                'BulletCollision/**/*.cpp', 'BulletDynamics/**/*.cpp', 'BulletSoftBody/**/*.cpp',
+                'LinearMath/**/*.cpp'
+            ],
+            uselib=['cxx98']
+        )
+    elif bld.env.STATIC:
         return bld.static_library(
             name,
             bld.platforms,

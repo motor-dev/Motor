@@ -11,7 +11,7 @@
 namespace Motor {
 
 namespace Arena {
-static minitl::Allocator& lua()
+static minitl::allocator& lua()
 {
     return script();
 }
@@ -289,7 +289,7 @@ extern "C" int luaGet(lua_State* state)
 
     auto*       userdata = (Meta::Value*)lua_touserdata(state, -2);
     const char* name     = lua_tostring(state, -1);
-    Meta::Value v        = (*userdata)[name];
+    Meta::Value v        = (*userdata)[istring(name)];
     if(!v)
     {
         lua_pushnil(state);
@@ -418,7 +418,7 @@ void Context::unload(const weak< const Resource::IDescription >& /*description*/
 }
 
 void Context::runBuffer(const weak< const LuaScript >& script, Resource::Resource& /*resource*/,
-                        const minitl::Allocator::Block< u8 >& block)
+                        const minitl::allocator::block< u8 >& block)
 {
     int       result;
     ifilename filename = script->getScriptName();
@@ -433,7 +433,7 @@ void Context::runBuffer(const weak< const LuaScript >& script, Resource::Resourc
 }
 
 void Context::reloadBuffer(const weak< const LuaScript >& script, Resource::Resource& /*resource*/,
-                           const minitl::Allocator::Block< u8 >& block)
+                           const minitl::allocator::block< u8 >& block)
 {
     int       result;
     ifilename filename = script->getScriptName();

@@ -12,19 +12,19 @@ template < typename T >
 class ScriptEngine : public Resource::ILoader
 {
 protected:
-    minitl::Allocator&                m_scriptArena;
+    minitl::allocator&                m_scriptArena;
     weak< Resource::ResourceManager > m_manager;
 
 public:
     ~ScriptEngine() override;
 
 protected:
-    ScriptEngine(minitl::Allocator& arena, weak< Resource::ResourceManager > manager);
+    ScriptEngine(minitl::allocator& arena, const weak< Resource::ResourceManager >& manager);
     virtual void runBuffer(const weak< const T >& script, Resource::Resource& resource,
-                           const minitl::Allocator::Block< u8 >& buffer)
+                           const minitl::allocator::block< u8 >& buffer)
         = 0;
     virtual void reloadBuffer(const weak< const T >& script, Resource::Resource& resource,
-                              const minitl::Allocator::Block< u8 >& buffer)
+                              const minitl::allocator::block< u8 >& buffer)
         = 0;
 
 private:
@@ -34,7 +34,7 @@ private:
                 const weak< const Resource::IDescription >& newScript,
                 Resource::Resource&                         resource) override;
     void onTicketLoaded(const weak< const Resource::IDescription >& script,
-                        Resource::Resource& resource, const minitl::Allocator::Block< u8 >& buffer,
+                        Resource::Resource& resource, const minitl::allocator::block< u8 >& buffer,
                         ILoader::LoadType type) override;
 };
 

@@ -8,7 +8,7 @@
 
 namespace Motor { namespace Meta { namespace AST {
 
-Namespace::Namespace(minitl::Allocator& allocator)
+Namespace::Namespace(minitl::allocator& allocator)
     : m_allocator(allocator)
     , m_children(m_allocator)
     , m_nodes(m_allocator)
@@ -16,7 +16,7 @@ Namespace::Namespace(minitl::Allocator& allocator)
 {
 }
 
-Namespace::Namespace(minitl::Allocator& allocator, const Value& value)
+Namespace::Namespace(minitl::allocator& allocator, const Value& value)
     : m_allocator(allocator)
     , m_children(m_allocator)
     , m_nodes(m_allocator)

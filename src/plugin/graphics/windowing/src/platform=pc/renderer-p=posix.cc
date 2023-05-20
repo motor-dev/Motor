@@ -72,8 +72,9 @@ weak< Window > Renderer::PlatformRenderer::getWindowFromXWindow(::Window w)
     unsigned long  nbItems;
     unsigned long  leftBytes;
     unsigned char* property = nullptr;
-    XGetWindowProperty(m_platformData.display, w, m_windowProperty, 0, sizeof(Window*) / 4, False,
-                       AnyPropertyType, &type, &format, &nbItems, &leftBytes, &property);
+    XGetWindowProperty(m_platformData.display, w, m_windowProperty, 0,
+                       sizeof(Window*) / 4,  // NOLINT(bugprone-sizeof-expression)
+                       False, AnyPropertyType, &type, &format, &nbItems, &leftBytes, &property);
     motor_assert(property, "could not retrieve engine window handle from X11 window");
     weak< Window > result(*(Window**)property);
     XFree(property);
@@ -125,7 +126,7 @@ int Renderer::PlatformRenderer::ioError(::Display* /*display*/)
     return result;
 }
 
-Renderer::Renderer(minitl::Allocator& arena, const weak< Resource::ResourceManager >& manager)
+Renderer::Renderer(minitl::allocator& arena, const weak< Resource::ResourceManager >& manager)
     : IRenderer(arena, manager, Scheduler::MainThread)
     , m_platformRenderer(scoped< PlatformRenderer >::create(arena))
 {

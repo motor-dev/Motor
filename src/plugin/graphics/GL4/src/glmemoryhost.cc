@@ -6,7 +6,7 @@
 
 namespace Motor { namespace OpenGL {
 
-GLMemoryHost::GLMemoryHost() : IMemoryHost("OpenGL")
+GLMemoryHost::GLMemoryHost() : IMemoryHost(istring("OpenGL"))
 {
 }
 

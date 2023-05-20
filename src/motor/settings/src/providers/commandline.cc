@@ -2,6 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/settings/stdafx.h>
+#include <motor/minitl/utility.hh>
 #include <motor/reflection/valueparse.hh>
 #include <motor/settings/providers/commandline.hh>
 
@@ -74,7 +75,7 @@ CommandLineSettingsProvider::buildSettings(int argc, const char* argv[])
 
 CommandLineSettingsProvider::CommandLineSettingsProvider(int argc, const char* argv[],
                                                          const ref< Folder >& folder)
-    : SettingsProvider(buildSettings(argc, argv), folder)
+    : SettingsProvider(minitl::move(buildSettings(argc, argv)), folder)
 {
 }
 

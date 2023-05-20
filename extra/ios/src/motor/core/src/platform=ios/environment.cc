@@ -11,7 +11,7 @@
 
 namespace Motor {
 
-MOTOR_EXPORT void* s_dummyData = 0;
+MOTOR_EXPORT void* s_dummyData = nullptr;
 
 Environment::Environment()
     : m_homeDirectory(getenv("HOME"))
@@ -20,7 +20,7 @@ Environment::Environment()
     , m_user(getenv("USER") ? getenv("USER") : "")
     , m_programPath()
 {
-    m_homeDirectory.push_back(".motor");
+    m_homeDirectory.push_back(istring(".motor"));
 }
 
 void Environment::init()
@@ -44,13 +44,11 @@ void Environment::init(int argc, const char* argv[])
         {
             continue;
         }
-        m_game = argv[arg];
+        m_game = istring(argv[arg]);
     }
 }
 
-Environment::~Environment()
-{
-}
+Environment::~Environment() = default;
 
 size_t Environment::getProcessorCount()
 {

@@ -26,8 +26,8 @@ struct ClassID< KernelScheduler::Segments< T > >
     MOTOR_EXPORT static raw< const Meta::Class > klass()
     {
         static Meta::ObjectInfo s_productClass = {
-            {0},
-            {0},
+            {nullptr},
+            {nullptr},
             KernelScheduler::IParameter::getProductTypePropertyName(),
             Meta::Value(
                 motor_class< KernelScheduler::Product<
@@ -35,24 +35,24 @@ struct ClassID< KernelScheduler::Segments< T > >
 
         static Meta::ObjectInfo s_parameterClassProperty
             = {{&s_productClass},
-               {0},
-               "ParameterClass",
+               {nullptr},
+               istring("ParameterClass"),
                Meta::Value(motor_class< typename minitl::remove_const< T >::type >())};
 
         static const Meta::Class s_class = {name(),
                                             u32(sizeof(KernelScheduler::Segments< T >)),
                                             0,
                                             Meta::ClassType_Object,
-                                            {0},
+                                            {nullptr},
                                             motor_class< KernelScheduler::ISegments >(),
                                             {&s_parameterClassProperty},
-                                            {0},
-                                            {0, 0},
-                                            {0, 0},
-                                            {0},
+                                            {nullptr},
+                                            {0, nullptr},
+                                            {0, nullptr},
+                                            {nullptr},
                                             Meta::OperatorTable::s_emptyTable,
-                                            0,
-                                            0};
+                                            nullptr,
+                                            nullptr};
         raw< const Meta::Class > result  = {&s_class};
         return result;
     }

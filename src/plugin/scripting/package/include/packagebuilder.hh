@@ -18,7 +18,7 @@ public:
 
 public:
     ref< Nodes::Package > createPackage(const ifilename&                      filename,
-                                        const minitl::Allocator::Block< u8 >& buffer);
+                                        const minitl::allocator::block< u8 >& buffer);
 };
 
 }}  // namespace Motor::PackageBuilder

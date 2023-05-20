@@ -19,11 +19,9 @@ private:
 public:
     Image1D()
     {
-        (void)s_registration;
+        motor_forceuse(s_registration);
     }
-    ~Image1D()
-    {
-    }
+    ~Image1D() override = default;
 };
 
 template < typename T >

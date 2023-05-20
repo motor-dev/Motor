@@ -9,19 +9,20 @@ class iOS(Configure.ConfigurationContext.Darwin):
     SDK_NAME = 'iphoneos'
     OS_NAME = 'iphoneos'
 
-    def __init__(self, conf, sdk = None):
+    def __init__(self, conf, sdk=None):
         Configure.ConfigurationContext.Darwin.__init__(self, conf, sdk)
 
     def get_root_dirs(self, appname):
         return (appname + '.app',
                 appname + '.app')
 
-
     def load_in_env(self, conf, compiler):
         Configure.ConfigurationContext.Darwin.load_in_env(self, conf, compiler)
+        conf.env.SYSTEM_NAME = 'apple-ios'
         if 'GCC' in compiler.NAMES:
             conf.env.append_unique('LINKFLAGS_cxxshlib', ['-lgcc_eh'])
             conf.env.append_unique('LINKFLAGS_cxxprogram', ['-lgcc_eh'])
+
 
 class iOSSimulator(iOS):
     NAME = 'iPhoneSimulator'
@@ -29,8 +30,9 @@ class iOSSimulator(iOS):
     SDK_NAME = 'iphonesimulator'
     OS_NAME = 'iphoneos'
 
-    def __init__(self, conf, sdk = None):
+    def __init__(self, conf, sdk=None):
         Configure.ConfigurationContext.Darwin.__init__(self, conf, sdk)
+
 
 class WatchOS(iOS):
     NAME = 'WatchOS'
@@ -38,12 +40,15 @@ class WatchOS(iOS):
     SDK_NAME = 'watchos'
     OS_NAME = 'watchos'
 
-    def __init__(self, conf, sdk = None):
+    def __init__(self, conf, sdk=None):
         Configure.ConfigurationContext.Darwin.__init__(self, conf, sdk)
+
+    def load_in_env(self, conf, compiler):
+        iOS.load_in_env(self, conf, compiler)
+        conf.env.SYSTEM_NAME = 'apple-watchos'
 
 
 def configure(conf):
     conf.platforms.append(iOS(conf))
     conf.platforms.append(iOSSimulator(conf))
     conf.platforms.append(WatchOS(conf))
-

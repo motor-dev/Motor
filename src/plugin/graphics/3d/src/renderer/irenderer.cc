@@ -11,12 +11,12 @@
 
 namespace Motor {
 
-IRenderer::IRenderer(minitl::Allocator& allocator, const weak< Resource::ResourceManager >& manager,
+IRenderer::IRenderer(minitl::allocator& allocator, const weak< Resource::ResourceManager >& manager,
                      Scheduler::Affinity affinity)
     : m_allocator(allocator)
     , m_resourceManager(manager)
     , m_syncTask(ref< Task::Task< Task::MethodCaller< IRenderer, &IRenderer::flush > > >::create(
-          Arena::task(), "flush", knl::Colors::Red::Red,
+          Arena::task(), istring("flush"), knl::Colors::Red::Red,
           ref< Task::MethodCaller< IRenderer, &IRenderer::flush > >::create(Arena::task(), this),
           affinity))
     , m_renderSurfaceLoader(
@@ -51,7 +51,7 @@ weak< Task::ITask > IRenderer::syncTask() const
     return m_syncTask;
 }
 
-minitl::Allocator& IRenderer::arena() const
+minitl::allocator& IRenderer::arena() const
 {
     return m_allocator;
 }

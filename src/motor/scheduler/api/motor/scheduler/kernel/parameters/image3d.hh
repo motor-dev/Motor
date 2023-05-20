@@ -21,9 +21,7 @@ public:
     {
         (void)s_registration;
     }
-    ~Image3D()
-    {
-    }
+    ~Image3D() override = default;
 };
 
 template < typename T >

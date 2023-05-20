@@ -15,7 +15,7 @@ WorldTestApplication::WorldTestApplication(const Plugin::Context& context)
         ref< DiskFolder >::create(Arena::game(), Environment::getEnvironment().getDataDirectory()
                                                      + ipath("test/world")),
         context.resourceManager, context.scheduler)
-    , m_packageManager("plugin.scripting.package", pluginContext())
+    , m_packageManager(inamespace("plugin.scripting.package"), pluginContext())
     , m_mainPackage(ref< Package >::create(
           Arena::game(), pluginContext().dataFolder->openFile(ifilename("worldtest.pkg"))))
 {

@@ -7,8 +7,11 @@
 namespace minitl {
 
 template < typename T >
-void swap(T& a, T& b);
-
+MOTOR_ALWAYS_INLINE void swap(T& a, T& b)
+{
+    T c = a;
+    a   = b;
+    b   = c;
 }
 
-#include <motor/minitl/inl/swap.inl>
+}  // namespace minitl

@@ -7,13 +7,13 @@ namespace Motor { namespace Log {
 
 weak< Logger > graphics()
 {
-    static weak< Logger > result = motor()->getChild("graphics");
+    static weak< Logger > result = motor()->getChild(istring("graphics"));
     return result;
 }
 
 weak< Logger > shader()
 {
-    static weak< Logger > result = graphics()->getChild("shader");
+    static weak< Logger > result = graphics()->getChild(istring("shader"));
     return result;
 }
 

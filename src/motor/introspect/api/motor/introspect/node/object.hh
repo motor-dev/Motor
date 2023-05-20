@@ -33,7 +33,7 @@ protected:
     void        doVisit(Node::Visitor & visitor) const override;
 
 public:
-    Object(const ref< Reference >& className, const minitl::vector< ref< Parameter > >& parameters);
+    Object(const ref< Reference >& className, minitl::vector< ref< Parameter > > parameters);
     ~Object() override;
 
     Type getType() const;

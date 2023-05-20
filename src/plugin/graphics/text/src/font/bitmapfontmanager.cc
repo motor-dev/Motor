@@ -39,7 +39,7 @@ void BitmapFontManager::unload(const weak< const Resource::IDescription >& /*des
 
 void BitmapFontManager::onTicketLoaded(const weak< const Resource::IDescription >& /*description*/,
                                        Resource::Resource& /*resource*/,
-                                       const minitl::Allocator::Block< u8 >& /*buffer*/,
+                                       const minitl::allocator::block< u8 >& /*buffer*/,
                                        LoadType /*type*/)
 {
     motor_info(Log::resource(), "bitmap font file done loading");

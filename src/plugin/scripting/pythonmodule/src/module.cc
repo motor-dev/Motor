@@ -17,25 +17,25 @@
 class ConsoleLogListener : public Motor::ILogListener
 {
 private:
-    minitl::AssertionCallback_t m_previousCallback;
+    minitl::assertion_callback_t m_previousCallback;
 
 public:
     ConsoleLogListener()
     {
-        m_previousCallback = minitl::setAssertionCallback(&onAssert);
+        m_previousCallback = minitl::set_assertion_callback(&onAssert);
     }
     ~ConsoleLogListener() override
     {
-        minitl::setAssertionCallback(m_previousCallback);
+        minitl::set_assertion_callback(m_previousCallback);
     }
 
 private:
-    static minitl::AssertionResult onAssert(const char* file, int line, const char* expr,
-                                            const char* message)
+    static minitl::assertion_result onAssert(const char* file, int line, const char* expr,
+                                             const char* message)
     {
         motor_fatal_format(Motor::Logger::root(), "{0}:{1} Assertion failed: {2}\n\t{3}", file,
                            line, expr, message);
-        return minitl::AssertionResult::Break;
+        return minitl::assertion_result::breakpoint;
     }
 
 protected:

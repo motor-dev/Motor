@@ -11,7 +11,7 @@ PoolAllocator::PoolAllocator() = default;
 
 PoolAllocator::~PoolAllocator() = default;
 
-void* PoolAllocator::internalAlloc(u64 size, u64 alignment)
+void* PoolAllocator::internal_alloc(u64 size, u64 alignment)
 {
 #ifdef _MSC_VER
     return ::_aligned_malloc(motor_checked_numcast< size_t >(size),
@@ -22,12 +22,12 @@ void* PoolAllocator::internalAlloc(u64 size, u64 alignment)
 #endif
 }
 
-bool PoolAllocator::internalResize(void* /*ptr*/, u64 /*size*/)
+bool PoolAllocator::internal_resize(void* /*ptr*/, u64 /*size*/)
 {
     return false;
 }
 
-void* PoolAllocator::internalRealloc(void* ptr, u64 size, u64 alignment)
+void* PoolAllocator::internal_realloc(void* ptr, u64 size, u64 alignment)
 {
 #ifdef _MSC_VER
     return ::_aligned_realloc(ptr, motor_checked_numcast< size_t >(size),
@@ -38,7 +38,7 @@ void* PoolAllocator::internalRealloc(void* ptr, u64 size, u64 alignment)
 #endif
 }
 
-void PoolAllocator::internalFree(const void* pointer)
+void PoolAllocator::internal_free(const void* pointer)
 {
 #ifdef _MSC_VER
     ::_aligned_free(const_cast< void* >(pointer));

@@ -16,7 +16,7 @@ namespace Motor {
 
 namespace Arena {
 
-motor_api(PYTHONLIB) minitl::Allocator& python();
+motor_api(PYTHONLIB) minitl::allocator& python();
 
 }
 

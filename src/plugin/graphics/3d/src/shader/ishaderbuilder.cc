@@ -73,11 +73,11 @@ istring IShaderBuilder::referenceNode(const weak< const Node >& node)
         minitl::hashmap< weak< const Node >, istring >::const_iterator name = it->names.find(node);
         if(name != it->names.end())
         {
-            return (name->second.c_str());
+            return name->second;
         }
     }
     motor_error(Log::shader(), "Undeclared object");
-    return {""};
+    return {};
 }
 
 void IShaderBuilder::addUniform(const weak< const Node >& node, Stage stage, const istring& name,

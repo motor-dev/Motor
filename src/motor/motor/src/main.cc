@@ -133,6 +133,7 @@ int beMain(int argc, const char* argv[])
             DiskFolder::ScanRecursive, DiskFolder::CreateOne);
         ScopedLogListener console(
             scoped< ConsoleLogListener >::create(Arena::debug(), Motor::logInfo));
+
         ref< DiskFolder > home = ref< DiskFolder >::create(
             Arena::general(), Environment::getEnvironment().getGameHomeDirectory(),
             DiskFolder::ScanRecursive, DiskFolder::CreateOne);
@@ -143,7 +144,7 @@ int beMain(int argc, const char* argv[])
             Plugin::Context(weak< Resource::ResourceManager >(), ref< Folder >(),
                                 weak< Scheduler >()));
         ScopedLogListener file(
-            scoped< FileLogListener >::create(Arena::debug(), home->createFile("log")));
+            scoped< FileLogListener >::create(Arena::debug(), home->createFile(istring("log"))));
         scoped< Scheduler >                 scheduler = scoped< Scheduler >::create(Arena::task());
         scoped< Resource::ResourceManager > manager
             = scoped< Resource::ResourceManager >::create(Arena::resource());

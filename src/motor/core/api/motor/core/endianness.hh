@@ -74,13 +74,11 @@ private:
     T m_value;
 
 public:
-    Integer(T value = 0) : m_value(ByteSwap< T, Endianness_Self, e >::byteswap(value))
+    explicit Integer(T value = 0) : m_value(ByteSwap< T, Endianness_Self, e >::byteswap(value))
     {
     }
-    ~Integer()
-    {
-    }
-    operator T() const
+    ~Integer() = default;
+    operator T() const  // NOLINT(google-explicit-constructor)
     {
         return ByteSwap< T, e, Endianness_Self >::byteswap(m_value);
     }

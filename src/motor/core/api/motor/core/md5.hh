@@ -9,7 +9,7 @@ namespace Motor {
 
 struct MD5
 {
-    u32 hash[4];
+    u32 hash[4] {};
 };
 
 static inline bool operator==(const MD5& hash1, const MD5& hash2)
@@ -21,16 +21,16 @@ static inline bool operator==(const MD5& hash1, const MD5& hash2)
 motor_api(CORE) MD5 digest(const void* data, u64 size);
 
 template < typename T >
-static inline MD5 digest(const minitl::Allocator::Block< T >& block)
+static inline MD5 digest(const minitl::allocator::block< T >& block)
 {
-    return digest(block.data(), block.byteCount());
+    return digest(block.data(), block.byte_count());
 }
 
-motor_api(CORE) u32 format_length(const MD5& s, const minitl::format_options& options);
-motor_api(CORE) u32 format_arg(char* destination, const MD5& value,
+motor_api(CORE) u32 format_length(const MD5& md5, const minitl::format_options& options);
+motor_api(CORE) u32 format_arg(char* destination, const MD5& md5,
                                const minitl::format_options& options, u32 reservedLength);
 motor_api(CORE) u32
-    format_arg_partial(char* destination, const MD5& value, const minitl::format_options& options,
+    format_arg_partial(char* destination, const MD5& md5, const minitl::format_options& options,
                        u32 reservedLength, u32 maxCapacity);
 
 }  // namespace Motor

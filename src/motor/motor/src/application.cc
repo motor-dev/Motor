@@ -23,12 +23,12 @@ Application::Application(const ref< Folder >&                     dataFolder,
     , m_scheduler(scheduler)
     , m_resourceManager(resourceManager)
     , m_pluginContext(resourceManager, m_dataFolder, m_scheduler)
-    , m_updateTask(ref< Task::TaskGroup >::create(Arena::task(), "application:update",
+    , m_updateTask(ref< Task::TaskGroup >::create(Arena::task(), istring("application:update"),
                                                   knl::Colors::Yellow::Yellow))
     , m_producerLoader(scoped< KernelScheduler::ProducerLoader >::create(Arena::game()))
     , m_worldLoader(scoped< World::WorldLoader >::create(Arena::game(), m_updateTask,
                                                          m_producerLoader, m_pluginContext))
-    , m_cpuKernelScheduler("plugin.compute.cpu", m_pluginContext)
+    , m_cpuKernelScheduler(inamespace("plugin.compute.cpu"), m_pluginContext)
     , m_tasks(Arena::task())
     , m_forceContinue()
     , m_resourceLoadingCount(0)
@@ -39,11 +39,11 @@ Application::Application(const ref< Folder >&                     dataFolder,
 
     addTask(
         ref< Task::Task< Task::MethodCaller< Application, &Application::updateResources > > >::
-            create(Arena::task(), "application:update_resource", knl::Colors::Green::Green,
+            create(Arena::task(), istring("application:update_resource"), knl::Colors::Green::Green,
                    ref< Task::MethodCaller< Application, &Application::updateResources > >::create(
                        Arena::task(), this)));
     addTask(ref< Task::Task< Task::ProcedureCaller< &Application::frameUpdate > > >::create(
-        Arena::task(), "application:update_sync", knl::Colors::Green::Green,
+        Arena::task(), istring("application:update_sync"), knl::Colors::Green::Green,
         ref< Task::ProcedureCaller< &Application::frameUpdate > >::create(Arena::task())));
     registerInterruptions();
 }

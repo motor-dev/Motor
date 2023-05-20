@@ -21,11 +21,9 @@ private:
 public:
     Segment()
     {
-        (void)s_registration;
+        motor_forceuse(s_registration);
     }
-    ~Segment()
-    {
-    }
+    ~Segment() override = default;
 };
 
 template < typename T >

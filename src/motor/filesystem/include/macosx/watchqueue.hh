@@ -29,7 +29,7 @@ private:
 
 public:
     FileSystemWatchProcessQueue();
-    ~FileSystemWatchProcessQueue();
+    ~FileSystemWatchProcessQueue() override;
 
     ref< DiskFolder::Watch > addFolder(weak< DiskFolder > folder, const Motor::ipath& path);
 };

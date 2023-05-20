@@ -81,7 +81,7 @@ def build(bld):
     bld.package_node = bld.package_node.make_node('packages')
     bld.platforms = []
 
-    tool_dir = os.path.join(bld.motornode.abspath(), 'mak', 'tools')
+    tool_dir = os.path.join(bld.motornode.abspath(), 'mak', 'libs', 'waftools')
     bld.load('cpp_parser', tooldir=[tool_dir])
     bld.load('metagen', tooldir=[tool_dir])
     bld.load('kernel', tooldir=[tool_dir])
@@ -89,6 +89,7 @@ def build(bld):
     bld.load('bin2c', tooldir=[tool_dir])
     bld.load('clir', tooldir=[tool_dir])
     bld.load('ir_compiler', tooldir=[tool_dir])
+    bld.load('cmake', tooldir=[tool_dir])
     bld.env.STATIC = bld.env.STATIC or Options.options.static
     bld.env.DYNAMIC = Options.options.dynamic
     if bld.env.STATIC and bld.env.DYNAMIC:

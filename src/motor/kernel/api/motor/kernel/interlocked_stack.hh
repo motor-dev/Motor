@@ -72,9 +72,9 @@ private:
 
 public:
     istack();
-    istack(istack&& other) noexcept            = default;
-    istack& operator=(istack&& other) noexcept = default;
-    ~istack()                                  = default;
+    istack(istack&& other)            = default;  // NOLINT(performance-noexcept-move-constructor)
+    istack& operator=(istack&& other) = default;  // NOLINT(performance-noexcept-move-constructor)
+    ~istack()                         = default;
 
     istack(const istack& other)            = delete;
     istack& operator=(const istack& other) = delete;

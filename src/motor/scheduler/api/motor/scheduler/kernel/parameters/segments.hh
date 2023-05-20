@@ -23,9 +23,7 @@ public:
     {
         (void)s_registration;
     }
-    ~Segments()
-    {
-    }
+    ~Segments() override = default;
 };
 
 template < typename T >

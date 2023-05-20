@@ -8,41 +8,42 @@
 
 namespace minitl {
 
-enum struct AssertionResult
+enum struct assertion_result
 {
-    Abort,
-    Ignore,
-    IgnoreAll,
-    Break
+    abort,
+    ignore,
+    ignore_all,
+    breakpoint
 };
 
-typedef AssertionResult (*AssertionCallback_t)(const char* filename, int line, const char* expr,
-                                               const char* message);
+typedef assertion_result (*assertion_callback_t)(const char* filename, int line, const char* expr,
+                                                 const char* message);
 
-motor_api(MINITL) AssertionCallback_t setAssertionCallback(AssertionCallback_t callback);
-
-motor_api(MINITL) AssertionCallback_t getAssertionCallback();
+motor_api(MINITL) assertion_callback_t set_assertion_callback(assertion_callback_t callback);
+motor_api(MINITL) assertion_callback_t get_assertion_callback();
 
 #if !(MOTOR_ENABLE_ASSERT)
 static inline bool assertCondition()
 {
     return false;
 }
+// NOLINTNEXTLINE(readability-identifier-naming)
 #    define motor_assert_impl_(cond, msg) ::minitl::assertCondition()
 #else
+// NOLINTNEXTLINE(readability-identifier-naming)
 #    define motor_assert_impl_(cond, msg)                                                          \
         (!(cond) && [&]() {                                                                        \
-            static bool ignoreAll = false;                                                         \
-            if(!ignoreAll)                                                                         \
+            static bool s_ignoreAll = false;                                                       \
+            if(!s_ignoreAll)                                                                       \
             {                                                                                      \
-                minitl::AssertionResult motor_r_;                                                  \
-                motor_r_ = minitl::getAssertionCallback()(__FILE__, __LINE__, #cond, msg);         \
+                minitl::assertion_result motor_r_;                                                 \
+                motor_r_ = minitl::get_assertion_callback()(MOTOR_FILE, MOTOR_LINE, #cond, msg);   \
                 switch(motor_r_)                                                                   \
                 {                                                                                  \
-                case minitl::AssertionResult::Abort: ::abort(); break;                             \
-                case minitl::AssertionResult::Ignore: break;                                       \
-                case minitl::AssertionResult::IgnoreAll: ignoreAll = true; break;                  \
-                case minitl::AssertionResult::Break: motor_break(); break;                         \
+                case minitl::assertion_result::abort: ::abort(); break;                            \
+                case minitl::assertion_result::ignore: break;                                      \
+                case minitl::assertion_result::ignore_all: s_ignoreAll = true; break;              \
+                case minitl::assertion_result::breakpoint: motor_break(); break;                   \
                 default:;                                                                          \
                 }                                                                                  \
             }                                                                                      \
@@ -50,10 +51,14 @@ static inline bool assertCondition()
         }())
 #endif
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 #define motor_assert(cond, msg) motor_assert_impl_(cond, msg)
+// NOLINTNEXTLINE(readability-identifier-naming)
 #define motor_assert_format(cond, msg, ...)                                                        \
     motor_assert_impl_(cond, minitl::format< 4096 >(FMT(msg), __VA_ARGS__))
+// NOLINTNEXTLINE(readability-identifier-naming)
 #define motor_unimplemented() motor_assert_impl_(!"implemented", "not implemented")
-#define motor_notreached()    motor_assert_impl_(!"reached", "should not reach code")
+// NOLINTNEXTLINE(readability-identifier-naming)
+#define motor_notreached() motor_assert_impl_(!"reached", "should not reach code")
 
 }  // namespace minitl

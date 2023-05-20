@@ -39,9 +39,8 @@ static int resourceLoaderLoad(lua_State* state)
 
     weak< Resource::ResourceManager > userdata
         = *(weak< Resource::ResourceManager >*)lua_touserdata(state, 1);
-    auto*                                v = (Meta::Value*)lua_touserdata(state, 2);
-    weak< const Resource::IDescription > description
-        = v->as< weak< const Resource::IDescription > >();
+    auto* v             = (Meta::Value*)lua_touserdata(state, 2);
+    auto  description   = v->as< weak< const Resource::IDescription > >();
     auto* resourceToken = (ResourceToken*)lua_newuserdata(state, sizeof(ResourceToken));
     new((void*)resourceToken) ResourceToken;
     resourceToken->description = description;

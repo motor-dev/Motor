@@ -98,7 +98,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                 if(data.cFileName[0] == '.' && data.cFileName[1] == 0) continue;
                 if(data.cFileName[0] == '.' && data.cFileName[1] == '.' && data.cFileName[2] == 0)
                     continue;
-                istring name = data.cFileName;
+                istring name = istring(data.cFileName);
                 if(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 {
                     for(auto& m_folder: m_folders)
@@ -183,7 +183,7 @@ void DiskFolder::onChanged()
                 if(data.cFileName[0] == '.' && data.cFileName[1] == 0) continue;
                 if(data.cFileName[0] == '.' && data.cFileName[1] == '.' && data.cFileName[2] == 0)
                     continue;
-                istring name = data.cFileName;
+                istring name = istring(data.cFileName);
                 if(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 {
                     bool exists = false;

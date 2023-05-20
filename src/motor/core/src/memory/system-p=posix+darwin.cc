@@ -12,7 +12,7 @@ namespace Motor {
 
 static u32 pageSize()
 {
-    static const u32 s_pageSize = sysconf(_SC_PAGE_SIZE);
+    static const u32 s_pageSize = static_cast< u32 >(sysconf(_SC_PAGE_SIZE));
     return s_pageSize;
 }
 
