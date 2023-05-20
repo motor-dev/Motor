@@ -140,43 +140,72 @@ def create_cuda_kernel(task_gen, kernel_name, kernel_source, kernel_node, kernel
 
     env = task_gen.env
     kernel_target = '.'.join([task_gen.name, '.'.join(kernel_name), 'cuda'])
-    for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
-        if kernel_type != 'cuda':
-            continue
-        kernel_env = task_gen.bld.all_envs[toolchain]
+    if not env.PROJECTS:
+        for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
+            if kernel_type != 'cuda':
+                continue
+            kernel_env = task_gen.bld.all_envs[toolchain]
 
+            kernel_task_gen = task_gen.bld(
+                env=kernel_env.derive(),
+                bld_env=env,
+                target=env.ENV_PREFIX % kernel_target,
+                target_name=env.ENV_PREFIX % task_gen.name,
+                safe_target_name=kernel_target.replace('.', '_').replace('-', '_'),
+                kernel_name=kernel_name,
+                kernel_source=kernel_source,
+                kernel_node=kernel_node,
+                features=[
+                    'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel',
+                    'motor:cuda:kernel_create'
+                ],
+                defines=task_gen.defines + [
+                    'MOTOR_KERNEL_ID=%s_%s' % (task_gen.name.replace('.', '_'), kernel_target.replace('.', '_')),
+                    'MOTOR_KERNEL_NAME=%s' % kernel_target,
+                    'MOTOR_KERNEL_TARGET=%s' % kernel_type,
+                ],
+                includes=task_gen.includes,
+                use=task_gen.use + [env.ENV_PREFIX % 'plugin.compute.cuda'],
+                uselib=task_gen.uselib,
+                source_nodes=task_gen.source_nodes,
+            )
+            kernel_task_gen.env.PLUGIN = kernel_task_gen.env.plugin_name
+
+            if task_gen.name != task_gen.target_name:
+                try:
+                    multiarch = task_gen.bld.get_tgen_by_name(kernel_target)
+                except Errors.WafError:
+                    task_gen.bld.multiarch(kernel_target, [kernel_task_gen])
+                else:
+                    multiarch.use.append(kernel_task_gen.target)
+    else:
+        tgen = task_gen.bld.get_tgen_by_name(task_gen.name)
+        target_suffix = '.'.join([kernel_type])
+
+        kernel_target = task_gen.target_name + '.' + '.'.join(kernel_name) + '.cuda'
         kernel_task_gen = task_gen.bld(
-            env=kernel_env.derive(),
+            env=task_gen.env.derive(),
             bld_env=env,
             target=env.ENV_PREFIX % kernel_target,
-            target_name=env.ENV_PREFIX % task_gen.name,
+            target_name=task_gen.name,
             safe_target_name=kernel_target.replace('.', '_').replace('-', '_'),
+            source=[kernel_source],
             kernel_name=kernel_name,
-            kernel_source=kernel_source,
             kernel_node=kernel_node,
             features=[
-                'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel',
-                'motor:cuda:kernel_create'
+                'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel'
             ],
-            defines=task_gen.defines + [
-                'MOTOR_KERNEL_ID=%s_%s' % (task_gen.name.replace('.', '_'), kernel_target.replace('.', '_')),
-                'MOTOR_KERNEL_NAME=%s' % kernel_target,
-                'MOTOR_KERNEL_TARGET=%s' % kernel_type,
+            defines=tgen.defines + [
+                'MOTOR_KERNEL_ID=%s_%s' % (task_gen.target_name.replace('.', '_'), kernel_target.replace('.', '_')),
+                'MOTOR_KERNEL_NAME=%s' % (kernel_target),
+                'MOTOR_KERNEL_TARGET=%s' % kernel_type
             ],
-            includes=task_gen.includes,
-            use=task_gen.use + [env.ENV_PREFIX % 'plugin.compute.cuda'],
-            uselib=task_gen.uselib,
-            source_nodes=task_gen.source_nodes,
+            includes=tgen.includes + [task_gen.bld.srcnode] + env.CLC_KERNEL_HEADER_PATH,
+            use=[tgen.target] + tgen.use + [env.ENV_PREFIX % 'plugin.compute.cuda'],
+            uselib=tgen.uselib,
+            source_nodes=[('', kernel_source)]
         )
-        kernel_task_gen.env.PLUGIN = kernel_task_gen.env.plugin_name
-
-        if task_gen.name != task_gen.target_name:
-            try:
-                multiarch = task_gen.bld.get_tgen_by_name(kernel_target)
-            except Errors.WafError:
-                task_gen.bld.multiarch(kernel_target, [kernel_task_gen])
-            else:
-                multiarch.use.append(kernel_task_gen.target)
+        kernel_task_gen.env.PLUGIN = task_gen.env.plugin_name
 
 
 def build(bld):
