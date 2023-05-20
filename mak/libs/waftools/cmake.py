@@ -40,8 +40,8 @@ def write_cmake_workspace(build_context, build_options=[]):
         configurations.append((env_name, toolchain))
         with open(toolchain, 'w') as toolchain_file:
             toolchain_file.write(
-                'set(CMAKE_C_COMPILER %s CACHE STRING "")\n'
-                'set(CMAKE_CXX_COMPILER %s  CACHE STRING "")\n'
+                'set(CMAKE_C_COMPILER "%s" CACHE STRING "")\n'
+                'set(CMAKE_CXX_COMPILER "%s"  CACHE STRING "")\n'
                 'set(MOTOR_TOOLCHAIN %s CACHE INTERNAL "" FORCE)\n'
                 'set(triple %s-%s)\n'
                 'set(CMAKE_SYSTEM_NAME Generic)\n'
@@ -49,8 +49,11 @@ def write_cmake_workspace(build_context, build_options=[]):
                 'set(CMAKE_CXX_COMPILER_WORKS TRUE)\n'
                 'set(CMAKE_C_FLAGS "-U%s --target=%s-%s %s")\n'
                 'set(CMAKE_CXX_FLAGS "-U%s --target=%s-%s %s")\n'
+                'set(CMAKE_C_COMPILER_ARG1 "-driver-mode=gcc")\n'
+                'set(CMAKE_CXX_COMPILER_ARG1 "-driver-mode=gxx")\n'
                 '' % (
-                    env.CC[0], env.CXX[0], env_name, env.ARCHITECTURE, env.SYSTEM_NAME, env_name, env.ARCHITECTURE,
+                    env.CC[0].replace('\\', '/'), env.CXX[0].replace('\\', '/'), env_name, env.ARCHITECTURE,
+                    env.SYSTEM_NAME, env_name, env.ARCHITECTURE,
                     env.SYSTEM_NAME, ' '.join(env.COMPILER_C_FLAGS), env_name, env.ARCHITECTURE, env.SYSTEM_NAME,
                     ' '.join(env.COMPILER_CXX_FLAGS)
                 )
@@ -86,10 +89,10 @@ def write_cmake_workspace(build_context, build_options=[]):
                         tg_files = source_node.ant_glob('**/*', excl='kernels/**')
                         if tg_files:
                             all_files[(tg_path + '/' + prefix, source_node)
-                                      ] = [f.path_from(build_context.srcnode).replace('\\', '/') for f in tg_files]
+                            ] = [f.path_from(build_context.srcnode).replace('\\', '/') for f in tg_files]
                     else:
                         all_files[(tg_path + '/' + prefix, source_node.parent)
-                                  ] = [source_node.path_from(build_context.srcnode).replace('\\', '/')]
+                        ] = [source_node.path_from(build_context.srcnode).replace('\\', '/')]
 
                 for task in tg.tasks:
                     if task.__class__.__name__ in ('c', 'objc', 'cxx', 'objcxx', 'cpuc'):
@@ -108,7 +111,7 @@ def write_cmake_workspace(build_context, build_options=[]):
                         special_files[filename] = tg.source[0]
 
                 target_file = cmake_dir.make_node('%s.txt' % tg.name).path_from(build_context.srcnode)
-                CMakeLists.write('include(%s)\n' % target_file)
+                CMakeLists.write('include(%s)\n' % target_file.replace('\\', '/'))
                 with open(target_file, 'w') as target_list:
                     if files or special_files:
                         target_list.write(
@@ -170,9 +173,13 @@ def write_cmake_workspace(build_context, build_options=[]):
                     if 'motor:kernel' in tg.features:
                         target_list.write(
                             'set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/%s PROPERTIES LANGUAGE CXX)\n' %
-                            (tg.source[0].path_from(build_context.srcnode).replace('\\','/'))
+                            (tg.source[0].path_from(build_context.srcnode).replace('\\', '/'))
                         )
 
+        CMakeLists.write(
+            'include(%s/${MOTOR_TOOLCHAIN}/targets.txt)\n'
+            '' % (cmake_dir.path_from(build_context.path).replace('\\', '/'))
+        )
         for env_name in build_context.env.ALL_TOOLCHAINS:
             bld_env = build_context.all_envs[env_name]
             if bld_env.SUB_TOOLCHAINS:
@@ -181,12 +188,6 @@ def write_cmake_workspace(build_context, build_options=[]):
                 env = bld_env
             target_file = cmake_dir.make_node(env_name).make_node('targets.txt')
             target_file.parent.mkdir()
-            CMakeLists.write(
-                'if (${MOTOR_TOOLCHAIN} STREQUAL %s)\n'
-                '    include(%s)\n'
-                'endif()\n'
-                '' % (env_name, target_file.path_from(build_context.path))
-            )
             with open(target_file.abspath(), 'w') as CMakeLists_variant:
                 CMakeLists_variant.write(
                     'add_compile_definitions(\n'
@@ -194,7 +195,8 @@ def write_cmake_workspace(build_context, build_options=[]):
                     ')\n'
                     '\n'
                     'add_executable(%s %s)\n'
-                    'set_property(TARGET %s PROPERTY\n'
+                    'set_target_properties(%s PROPERTIES\n'
+                    '        RUNTIME_OUTPUT_NAME "%s"\n'
                     '        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/%s/${CMAKE_BUILD_TYPE}/%s/")\n'
                     'add_custom_command(TARGET %s POST_BUILD\n'
                     '    COMMAND "%s" "%s" build:%s:${CMAKE_BUILD_TYPE} %s\n'
@@ -204,10 +206,13 @@ def write_cmake_workspace(build_context, build_options=[]):
                     'add_custom_target(prepare COMMAND cmake -E touch_nocreate main.cpp)\n'
                     'add_dependencies(motor.launcher prepare)\n'
                     '' % (
-                        '\n    '.join(env.DEFINES), build_context.launcher.target,
+                        '\n    '.join(env.DEFINES),
+                        build_context.launcher.target,
                         cmake_dir.make_node('main.cpp').path_from(build_context.path).replace('\\', '/'),
-                        build_context.launcher.target, bld_env.PREFIX.replace('\\', '/'),
-                        bld_env.DEPLOY_BINDIR.replace('\\', '/'), build_context.launcher.target,
+                        build_context.launcher.target,
+                        env.cxxprogram_PATTERN % build_context.launcher.target,
+                        bld_env.PREFIX.replace('\\', '/'),
+                        env.DEPLOY_BINDIR.replace('\\', '/'), build_context.launcher.target,
                         sys.executable.replace('\\', '/'), sys.argv[0].replace('\\', '/'), env_name,
                         ' '.join(build_options), build_context.srcnode.abspath().replace('\\', '/')
                     )
@@ -230,11 +235,13 @@ def write_cmake_workspace(build_context, build_options=[]):
     with open('CMakeLists.txt', 'w') as CMakeLists:
         CMakeLists.write(
             'cmake_minimum_required(VERSION 3.15)\n'
-            'set(CMAKE_C_COMPILER_LAUNCHER %(python)s %(true)s)\n'
-            'set(CMAKE_CXX_COMPILER_LAUNCHER %(python)s %(true)s)\n'
-            'set(CMAKE_C_LINKER_LAUNCHER %(python)s %(true)s)\n'
-            'set(CMAKE_CXX_LINKER_LAUNCHER %(python)s %(true)s)\n'
             'project(%(appname)s)\n'
+            'set(CMAKE_C_COMPILER_LAUNCHER "%(python)s")\n'
+            'set(CMAKE_CXX_COMPILER_LAUNCHER "%(python)s")\n'
+            'set(CMAKE_C_LINKER_LAUNCHER "%(python)s")\n'
+            'set(CMAKE_CXX_LINKER_LAUNCHER "%(python)s")\n'
+            'set(CMAKE_C_COMPILER "%(true)s")\n'
+            'set(CMAKE_CXX_COMPILER "%(true)s")\n'
             'set(CMAKE_CONFIGURATION_TYPES "%(configs)s" CACHE STRING "" FORCE)\n\n'
             'set(CMAKE_CXX_STANDARD 14)\n'
             'set(CMAKE_CXX_STANDARD_REQUIRED ON)\n'
@@ -246,9 +253,9 @@ def write_cmake_workspace(build_context, build_options=[]):
             '' % {
                 'appname': appname,
                 'configs': ';'.join(build_context.env.ALL_VARIANTS),
-                'cmake_dir': cmake_dir.path_from(build_context.srcnode),
-                'python': sys.executable,
-                'true': build_context.motornode.make_node('mak/tools/bin/true.py').abspath()
+                'cmake_dir': cmake_dir.path_from(build_context.srcnode).replace('\\', '/'),
+                'python': sys.executable.replace('\\', '/'),
+                'true': build_context.motornode.make_node('mak/tools/bin/true.py').abspath().replace('\\', '/')
             }
         )
 
