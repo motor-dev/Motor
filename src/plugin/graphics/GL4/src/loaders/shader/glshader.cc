@@ -14,10 +14,10 @@ namespace Motor { namespace OpenGL {
 GLShaderProgram::GLShaderProgram(const weak< const Resource::IDescription >& shaderDescription,
                                  const weak< const GLRenderer >&             renderer)
     : IGPUResource(shaderDescription, renderer)
-    , m_shaderProgram(nullptr)
-    , m_vertexShader(nullptr)
-    , m_geometryShader(nullptr)
-    , m_fragmentShader(nullptr)
+    , m_shaderProgram()
+    , m_vertexShader()
+    , m_geometryShader()
+    , m_fragmentShader()
 {
 }
 
@@ -91,7 +91,7 @@ GLhandleARB GLShaderProgram::build(const weak< const ShaderProgramDescription >&
 #    endif
     return shader;
 #else
-    return nullptr;
+    return {};
 #endif
 }
 
@@ -99,7 +99,7 @@ void GLShaderProgram::load(const weak< const Resource::IDescription >& shaderDes
 {
     weak< const ShaderProgramDescription > program
         = motor_checked_cast< const ShaderProgramDescription >(shaderDescription);
-    motor_assert(m_shaderProgram == nullptr, "shader program loaded twice?");
+    motor_assert(m_shaderProgram == GLhandleARB(), "shader program loaded twice?");
 
     const ShaderExtensions& shaderext
         = motor_checked_cast< const GLRenderer >(m_renderer)->shaderext();
@@ -139,26 +139,26 @@ void GLShaderProgram::unload()
         motor_checked_cast< const GLRenderer >(m_renderer)
             ->shaderext()
             .glDeleteShader(m_vertexShader);
-        m_vertexShader = nullptr;
+        m_vertexShader = GLhandleARB();
     }
     if(m_geometryShader)
     {
         motor_checked_cast< const GLRenderer >(m_renderer)
             ->shaderext()
             .glDeleteShader(m_geometryShader);
-        m_geometryShader = nullptr;
+        m_geometryShader = GLhandleARB();
     }
     if(m_fragmentShader)
     {
         motor_checked_cast< const GLRenderer >(m_renderer)
             ->shaderext()
             .glDeleteShader(m_fragmentShader);
-        m_fragmentShader = nullptr;
+        m_fragmentShader = GLhandleARB();
     }
     motor_checked_cast< const GLRenderer >(m_renderer)
         ->shaderext()
         .glDeleteProgram(m_shaderProgram);
-    m_shaderProgram = nullptr;
+    m_shaderProgram = GLhandleARB();
 }
 
 }}  // namespace Motor::OpenGL
