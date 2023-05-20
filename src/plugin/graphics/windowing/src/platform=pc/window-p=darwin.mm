@@ -27,7 +27,7 @@ private:
 
 public:
     PlatformWindow(u32 w, u32 h);
-    ~PlatformWindow();
+    ~PlatformWindow() override = default;
 };
 
 Window::PlatformWindow::PlatformWindow(u32 w, u32 h)
@@ -39,10 +39,6 @@ Window::PlatformWindow::PlatformWindow(u32 w, u32 h)
 {
 }
 
-Window::PlatformWindow::~PlatformWindow()
-{
-}
-
 Window::Window(const weak< const RenderWindowDescription >& renderWindowDescription,
                const weak< const Renderer >&                renderer)
     : IRenderTarget(renderWindowDescription, renderer)
@@ -50,9 +46,7 @@ Window::Window(const weak< const RenderWindowDescription >& renderWindowDescript
 {
 }
 
-Window::~Window()
-{
-}
+Window::~Window() = default;
 
 void Window::load(const weak< const Resource::IDescription >& /*renderWindowDescription*/)
 {
@@ -69,7 +63,7 @@ void Window::unload()
 
 void* Window::getWindowHandle() const
 {
-    if(motor_assert(m_window, "no window implementation is created")) return 0;
+    if(motor_assert(m_window, "no window implementation is created")) return nullptr;
     return (void*)m_window->m_window;
 }
 
