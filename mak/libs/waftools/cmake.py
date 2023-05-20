@@ -201,7 +201,7 @@ def write_cmake_workspace(build_context, build_options=[]):
                     '    WORKING_DIRECTORY "%s"\n'
                     '    USES_TERMINAL\n'
                     ')\n\n'
-                    'add_custom_target(prepare COMMAND cmake -E touch_nocreate main.cpp)\n'
+                    'add_custom_target(prepare COMMAND ${CMAKE_COMMAND} -E touch_nocreate main.cpp)\n'
                     'add_dependencies(motor.launcher prepare)\n'
                     '' % (
                         '\n    '.join(env.DEFINES),
@@ -234,10 +234,12 @@ def write_cmake_workspace(build_context, build_options=[]):
         CMakeLists.write(
             'cmake_minimum_required(VERSION 3.15)\n'
             'project(%(appname)s)\n'
-            'set(CMAKE_C_COMPILER_LAUNCHER "%(python)s;%(true)s")\n'
-            'set(CMAKE_CXX_COMPILER_LAUNCHER "%(python)s;%(true)s")\n'
-            'set(CMAKE_C_LINKER_LAUNCHER "%(python)s;%(true)s")\n'
-            'set(CMAKE_CXX_LINKER_LAUNCHER "%(python)s;%(true)s")\n'
+            'set(CMAKE_C_COMPILER "%(python)s")\n'
+            'set(CMAKE_CXX_COMPILER "%(python)s")\n'
+            'set(CMAKE_C_COMPILER_ARG1 "%(true)s")\n'
+            'set(CMAKE_CXX_COMPILER_ARG1 "%(true)s")\n'
+            'set(CMAKE_C_LINKER_LAUNCHER "%(python)s;%(true)s;--")\n'
+            'set(CMAKE_CXX_LINKER_LAUNCHER "%(python)s;%(true)s;--")\n'
             'set(CMAKE_CONFIGURATION_TYPES "%(configs)s" CACHE STRING "" FORCE)\n\n'
             'set(CMAKE_CXX_STANDARD 14)\n'
             'set(CMAKE_CXX_STANDARD_REQUIRED ON)\n'
@@ -250,8 +252,8 @@ def write_cmake_workspace(build_context, build_options=[]):
                 'appname': appname,
                 'configs': ';'.join(build_context.env.ALL_VARIANTS),
                 'cmake_dir': cmake_dir.path_from(build_context.srcnode).replace('\\', '/'),
-                'python': sys.executable.replace('\\', '/'),
-                'true': build_context.motornode.make_node('mak/tools/bin/true.py').abspath().replace('\\', '/')
+                'python': sys.executable.replace('\\', '\\\\'),
+                'true': build_context.motornode.make_node('mak/tools/bin/true.py').abspath().replace('\\', '\\\\')
             }
         )
 
