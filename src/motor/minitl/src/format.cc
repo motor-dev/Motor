@@ -288,9 +288,9 @@ motor_api(MINITL) u32
 motor_api(MINITL) u32
     format_arg(char* destination, signed long number, const format_options& options)
 {
-    u64           negative       = u32(number < 0);
-    u64           negative_mask  = ~(negative - 1);
-    u64           add_sign       = negative | (options.sign == '+');
+    u32           negative       = u32(number < 0);
+    u64           negative_mask  = ~(u64(negative) - 1);
+    u32           add_sign       = negative | (options.sign == '+');
     unsigned long negative_value = ~number + 1;
     unsigned long value          = number + ((negative_value - number) & negative_mask);
     *destination                 = char('+' + (('-' - '+') & negative_mask));
@@ -306,9 +306,9 @@ motor_api(MINITL) u32
 motor_api(MINITL) u32
     format_arg(char* destination, signed long long number, const format_options& options)
 {
-    u64                negative       = u32(number < 0);
-    u64                negative_mask  = ~(negative - 1);
-    u64                add_sign       = negative | (options.sign == '+');
+    u32                negative       = u32(number < 0);
+    u64                negative_mask  = ~(u64(negative) - 1);
+    u32                add_sign       = negative | (options.sign == '+');
     unsigned long long negative_value = ~number + 1;
     unsigned long long value          = number + ((negative_value - number) & negative_mask);
     *destination                      = char('+' + (('-' - '+') & negative_mask));
@@ -324,7 +324,7 @@ motor_api(MINITL) u32
 motor_api(MINITL) u32
     format_arg(char* destination, unsigned char number, const format_options& options)
 {
-    u64 add_sign = options.sign == '+';
+    u32 add_sign = options.sign == '+';
     *destination = '+';
     destination += add_sign;
     *destination = '0';
@@ -338,7 +338,7 @@ motor_api(MINITL) u32
 motor_api(MINITL) u32
     format_arg(char* destination, unsigned short number, const format_options& options)
 {
-    u64 add_sign = options.sign == '+';
+    u32 add_sign = options.sign == '+';
     *destination = '+';
     destination += add_sign;
     *destination = '0';
@@ -352,7 +352,7 @@ motor_api(MINITL) u32
 motor_api(MINITL) u32
     format_arg(char* destination, unsigned int number, const format_options& options)
 {
-    u64 add_sign = options.sign == '+';
+    u32 add_sign = options.sign == '+';
     *destination = '+';
     destination += add_sign;
     *destination = '0';
@@ -366,7 +366,7 @@ motor_api(MINITL) u32
 motor_api(MINITL) u32
     format_arg(char* destination, unsigned long number, const format_options& options)
 {
-    u64 add_sign = options.sign == '+';
+    u32 add_sign = options.sign == '+';
     *destination = '+';
     destination += add_sign;
     *destination = '0';
@@ -380,7 +380,7 @@ motor_api(MINITL) u32
 motor_api(MINITL) u32
     format_arg(char* destination, unsigned long long number, const format_options& options)
 {
-    u64 add_sign = options.sign == '+';
+    u32 add_sign = options.sign == '+';
     *destination = '+';
     destination += add_sign;
     *destination = '0';
@@ -402,9 +402,9 @@ template < typename T, typename UNSIGNED_T,
 static MOTOR_ALWAYS_INLINE u32 format_arg_generic(char* destination, T number,
                                                   const format_options& options)
 {
-    auto       negative       = UNSIGNED_T(number < 0);
-    UNSIGNED_T negative_mask  = ~(negative - 1);
-    UNSIGNED_T add_sign       = negative | (options.sign == '+');
+    auto       negative       = u32(number < 0);
+    UNSIGNED_T negative_mask  = ~(UNSIGNED_T(negative) - 1);
+    u32        add_sign       = negative | (options.sign == '+');
     UNSIGNED_T negative_value = ~number + 1;
     UNSIGNED_T value          = number + ((negative_value - number) & negative_mask);
     *destination              = char('+' + (('-' - '+') & negative_mask));
@@ -416,12 +416,12 @@ static MOTOR_ALWAYS_INLINE u32 format_arg_generic(char* destination, T number,
 }
 
 template < typename T, typename UNSIGNED_T,
-           enable_if_t< is_same< T, UNSIGNED_T >::value, int > X = true >
+           enable_if_t< is_same< T, UNSIGNED_T >::value, int > = true >
 static MOTOR_ALWAYS_INLINE u32 format_arg_generic(char* destination, T number,
                                                   const format_options& options)
 {
-    UNSIGNED_T add_sign = options.sign == '+';
-    *destination        = '+';
+    u32 add_sign = options.sign == '+';
+    *destination = '+';
     destination += add_sign;
     *destination = '0';
     destination += options.alternate;
@@ -665,9 +665,9 @@ template < typename T, typename UNSIGNED_T >
 static MOTOR_ALWAYS_INLINE u32 format_arg_generic(char* destination, T number,
                                                   const format_options& options)
 {
-    auto       negative       = UNSIGNED_T(number < 0);
-    UNSIGNED_T negative_mask  = ~(negative - 1);
-    UNSIGNED_T add_sign       = negative | (options.sign == '+');
+    auto       negative       = u32(number < 0);
+    UNSIGNED_T negative_mask  = ~(UNSIGNED_T(negative) - 1);
+    u32        add_sign       = negative | (options.sign == '+');
     UNSIGNED_T negative_value = ~number + 1;
     UNSIGNED_T value          = number + ((negative_value - number) & negative_mask);
     char       sign           = char('+' + (('-' - '+') & negative_mask));
@@ -789,9 +789,9 @@ template < typename T, typename UNSIGNED_T,
 static MOTOR_ALWAYS_INLINE u32 format_arg_generic(char* destination, T number,
                                                   const format_options& options)
 {
-    auto       negative       = UNSIGNED_T(number < 0);
-    UNSIGNED_T negative_mask  = ~(negative - 1);
-    UNSIGNED_T add_sign       = negative | (options.sign == '+');
+    auto       negative       = u32(number < 0);
+    UNSIGNED_T negative_mask  = ~(UNSIGNED_T(negative) - 1);
+    u32        add_sign       = negative | (options.sign == '+');
     UNSIGNED_T negative_value = ~number + 1;
     UNSIGNED_T value          = number + ((negative_value - number) & negative_mask);
     *destination              = char('+' + (('-' - '+') & negative_mask));
@@ -810,8 +810,8 @@ template < typename T, typename UNSIGNED_T,
 static MOTOR_ALWAYS_INLINE u32 format_arg_generic(char* destination, T number,
                                                   const format_options& options)
 {
-    UNSIGNED_T add_sign = options.sign == '+';
-    *destination        = '+';
+    u32 add_sign = options.sign == '+';
+    *destination = '+';
     destination += add_sign;
     *destination = '0';
     destination += options.alternate;
