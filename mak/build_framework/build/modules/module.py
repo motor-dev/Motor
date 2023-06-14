@@ -78,7 +78,8 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, depends, 
         uselib=uselib,
         out_sources=[],
         generated_include_node=build_context.bldnode.make_node(name + '.preprocess/include'),
-        use=use
+        use=use,
+        nomaster=set([])
     )
 
     for _, source_node in source_nodes:
@@ -160,6 +161,7 @@ def module(
         export_system_includes=extra_system_includes,
         project_name=project_name or name,
         conditions=conditions,
+        nomaster=preprocess.nomaster if preprocess is not None else set(),
     )
     if module_path is not None:
         task_gen.module_path = module_path
@@ -202,6 +204,7 @@ def module(
                         includes=extra_includes + includes + api + [p
                                                                     for _, p in source_nodes] + [build_context.srcnode],
                         conditions=conditions,
+                        nomaster=p.nomaster
                     )
 
     return task_gen

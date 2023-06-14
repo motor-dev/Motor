@@ -112,7 +112,7 @@ def create_cpu_kernel(task_gen, kernel_name, kernel_source, kernel_node, kernel_
                     ],
                     defines=tgen.defines + [
                         'MOTOR_KERNEL_ID=%s_%s' % (
-                        task_gen.target_name.replace('.', '_'), kernel_target.replace('.', '_')),
+                            task_gen.target_name.replace('.', '_'), kernel_target.replace('.', '_')),
                         'MOTOR_KERNEL_NAME=%s' % (kernel_target),
                         'MOTOR_KERNEL_TARGET=%s' % kernel_type,
                         'MOTOR_KERNEL_ARCH=%s' % variant
@@ -120,6 +120,7 @@ def create_cpu_kernel(task_gen, kernel_name, kernel_source, kernel_node, kernel_
                     includes=tgen.includes + [task_gen.bld.srcnode],
                     use=tgen.use + [env.ENV_PREFIX % 'plugin.compute.cpu'] + ([variant] if variant else []),
                     uselib=tgen.uselib,
+                    nomaster=set(),
                 )
                 kernel_task_gen.env.PLUGIN = task_gen.env.plugin_name
                 if task_gen.name != task_gen.target_name:
@@ -154,9 +155,9 @@ def create_cpu_kernel(task_gen, kernel_name, kernel_source, kernel_node, kernel_
             includes=tgen.includes + [task_gen.bld.srcnode],
             use=[tgen.target] + tgen.use + [env.ENV_PREFIX % 'plugin.compute.cpu'],
             uselib=tgen.uselib,
-            source_nodes=[('', kernel_source)]
+            source_nodes=[('', kernel_source)],
+            nomaster=set(),
         )
 
-
-def build(build_context):
-    task_gen.kernel_processors.append(create_cpu_kernel)
+    def build(build_context):
+        task_gen.kernel_processors.append(create_cpu_kernel)

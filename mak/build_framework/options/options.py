@@ -15,7 +15,7 @@ def log_handler_emit(self, record):
             sys.stdout.write('\0337\033[999B\r\033[K\0338')
         legacy_log_emit_override(self, record)
         if self.terminator == '\n' or newline_count:
-            sys.stdout.write('\033[2K\033D\033M\0337\033[999B\r\033[K%s\0338' % status_line)
+            sys.stdout.write('\033[2K\033D\033M\0337\033[999B\r%s\0338' % status_line)
     else:
         legacy_log_emit_override(self, record)
 
@@ -34,7 +34,7 @@ def set_status_line(context, line):
     if status_line is None:
         sys.stdout.write('\033D\033M')
     status_line = line
-    sys.stdout.write('\0337\033[999B\r\033[K%s\0338' % status_line)
+    sys.stdout.write('\0337\033[999B\r%s\0338' % status_line)
 
 
 @Configure.conf

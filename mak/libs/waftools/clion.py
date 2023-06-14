@@ -164,10 +164,10 @@ class CLion(cmake.CMake):
                         'arch': env.ARCHITECTURE,
                         'system': env.SYSTEM_NAME,
                         'includes_c': '\n      - '.join(
-                            [i for i in env.COMPILER_C_INCLUDES if i.find('/lib/clang/') == -1]),
+                            [i for i in env.COMPILER_C_INCLUDES]),
                         'defines_c': '\n      '.join([get_define(d) for d in env.COMPILER_C_DEFINES]),
                         'includes_cxx': '\n      - '.join(
-                            [i for i in env.COMPILER_CXX_INCLUDES if i.find('/lib/clang/') == -1]),
+                            [i for i in env.COMPILER_CXX_INCLUDES]),
                         'defines_cxx': '\n      '.join([get_define(d) for d in env.COMPILER_CXX_DEFINES]),
                     })
 

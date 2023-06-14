@@ -114,9 +114,9 @@ def write_cmake_workspace(build_context, build_options=[]):
                     if files or special_files:
                         target_list.write(
                             'add_library(%s.completion STATIC EXCLUDE_FROM_ALL\n'
-                            '    ${CMAKE_CURRENT_SOURCE_DIR}/%s\n'
+                            '    ${PROJECT_SOURCE_DIR}/%s\n'
                             ')\n' % (
-                                tg.target, '\n    ${CMAKE_CURRENT_SOURCE_DIR}/'.join(
+                                tg.target, '\n    ${PROJECT_SOURCE_DIR}/'.join(
                                     [
                                         f for _, file_list in all_files.items()
                                         for f in file_list if f not in special_files
@@ -146,17 +146,17 @@ def write_cmake_workspace(build_context, build_options=[]):
                         if disabled_files:
                             target_list.write(
                                 'set_source_files_properties(\n'
-                                '    ${CMAKE_CURRENT_SOURCE_DIR}/%s\n'
+                                '    ${PROJECT_SOURCE_DIR}/%s\n'
                                 '    PROPERTY HEADER_FILE_ONLY ON\n'
                                 '    PROPERTY LANGUAGE Disabled\n'
-                                ')\n' % '\n    ${CMAKE_CURRENT_SOURCE_DIR}/'.join(disabled_files)
+                                ')\n' % '\n    ${PROJECT_SOURCE_DIR}/'.join(disabled_files)
                             )
                     elif all_files:
                         target_list.write(
                             'add_library(%s.completion INTERFACE\n'
-                            '    ${CMAKE_CURRENT_SOURCE_DIR}/%s\n'
+                            '    ${PROJECT_SOURCE_DIR}/%s\n'
                             ')\n' % (
-                                tg.target, '\n    ${CMAKE_CURRENT_SOURCE_DIR}/'.join(
+                                tg.target, '\n    ${PROJECT_SOURCE_DIR}/'.join(
                                     [f for _, file_list in all_files.items() for f in file_list]
                                 )
                             )
@@ -164,13 +164,13 @@ def write_cmake_workspace(build_context, build_options=[]):
                     for (prefix, source_node), prefix_files in all_files.items():
                         source_path = source_node.path_from(build_context.srcnode).replace('\\', '/')
                         target_list.write(
-                            'source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/%s PREFIX "" FILES\n'
-                            '    ${CMAKE_CURRENT_SOURCE_DIR}/%s\n'
-                            ')\n' % (source_path, '\n    ${CMAKE_CURRENT_SOURCE_DIR}/'.join(prefix_files))
+                            'source_group(TREE ${PROJECT_SOURCE_DIR}/%s PREFIX "" FILES\n'
+                            '    ${PROJECT_SOURCE_DIR}/%s\n'
+                            ')\n' % (source_path, '\n    ${PROJECT_SOURCE_DIR}/'.join(prefix_files))
                         )
                     if 'motor:kernel' in tg.features:
                         target_list.write(
-                            'set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/%s PROPERTIES LANGUAGE CXX)\n' %
+                            'set_source_files_properties(${PROJECT_SOURCE_DIR}/%s PROPERTIES LANGUAGE CXX)\n' %
                             (tg.source[0].path_from(build_context.srcnode).replace('\\', '/'))
                         )
 
@@ -195,7 +195,7 @@ def write_cmake_workspace(build_context, build_options=[]):
                     'add_executable(%s %s)\n'
                     'set_target_properties(%s PROPERTIES\n'
                     '        RUNTIME_OUTPUT_NAME "%s"\n'
-                    '        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/%s/${CMAKE_BUILD_TYPE}/%s/")\n'
+                    '        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/%s/${CMAKE_BUILD_TYPE}/%s/")\n'
                     'add_custom_command(TARGET %s POST_BUILD\n'
                     '    COMMAND "%s" "%s" build:%s:${CMAKE_BUILD_TYPE} %s\n'
                     '    WORKING_DIRECTORY "%s"\n'
@@ -225,8 +225,8 @@ def write_cmake_workspace(build_context, build_options=[]):
                         CMakeLists_variant.write(
                             'target_sources(\n'
                             '    %s.completion PRIVATE\n'
-                            '    ${CMAKE_CURRENT_SOURCE_DIR}/%s\n'
-                            ')\n' % (tg.name, '\n    ${CMAKE_CURRENT_SOURCE_DIR}/'.join(platform_files))
+                            '    ${PROJECT_SOURCE_DIR}/%s\n'
+                            ')\n' % (tg.name, '\n    ${PROJECT_SOURCE_DIR}/'.join(platform_files))
                         )
     with open(cmake_dir.make_node('main.cpp').abspath(), 'w') as main:
         pass

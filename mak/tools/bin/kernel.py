@@ -524,10 +524,13 @@ if __name__ == '__main__':
         write_cc(Name, collector._root_namespace, out_cc)
 
     with open(arguments.out_hh, 'w') as out_hh:
+        plugin = arguments.module.replace('.', '_').upper()
+        header = arguments.rel_hh.replace('/', '_').replace('-', '_').replace('.', '_').upper()
         out_hh.write(
             '/* Motor <motor.devel@gmail.com>\n'
             '   see LICENSE for detail */\n'
-            '#pragma once\n'
+            '#ifndef %s_%s\n'
+            '#define %s_%s\n'
             '\n'
             '#include    <motor/scheduler/kernel/kernel.meta.hh>\n'
             '#include    <motor/scheduler/task/itask.hh>\n'
@@ -538,8 +541,9 @@ if __name__ == '__main__':
             '#include    <motor/scheduler/task/kerneltask.hh>\n'
             '#include    <motor/kernel/colors.hh>\n'
             '#include    <motor/plugin/resourcehook.hh>\n'
-            '\n'
+            '\n' % (plugin, header, plugin, header)
         )
         for include in translation_unit._included_files:
             out_hh.write('#include %s\n' % include)
         write_hh(collector._root_namespace, out_hh)
+        out_hh.write('\n#endif\n')

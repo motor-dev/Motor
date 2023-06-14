@@ -125,7 +125,7 @@ class TemplateId(_Id):
     def __init__(self, id: _Id, template_arguments: List[List["TemplateArgument"]]) -> None:
         self._id = id
         if len(template_arguments) == 0:
-            self._template_arguments = None                                                         # type: Optional[AbstractTemplateArgumentList]
+            self._template_arguments = None  # type: Optional[AbstractTemplateArgumentList]
         elif len(template_arguments) == 1:
             self._template_arguments = TemplateArgumentList(template_arguments[0])
         else:

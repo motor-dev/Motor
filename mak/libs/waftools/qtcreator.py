@@ -13,8 +13,10 @@ import cmake
 
 if sys.platform == 'win32':
     HOME_DIRECTORY = os.path.join(os.getenv('APPDATA'), 'QtProject', 'qtcreator')
+    INI_FILE = os.path.join(os.getenv('APPDATA'), 'QtProject', 'QtCreator.ini')
 else:
     HOME_DIRECTORY = os.path.join(os.path.expanduser('~'), '.config', 'QtProject', 'qtcreator')
+    INI_FILE = os.path.join(os.path.expanduser('~'), '.config', 'QtProject', 'QtCreator.ini')
 import hashlib
 
 VAR_PATTERN = '${%s}' if sys.platform != 'win32' else '%%%s%%'
@@ -24,6 +26,15 @@ IGNORE_PATTERNS = [
     re.compile('.*__pycache__.*'),
 ]
 
+CLANG_TIDY_CONFIG="ClangDiagnosticConfigs\\{0}\\clangTidyChecks=\n"\
+                  "ClangDiagnosticConfigs\\{0}\\clangTidyChecksOptions=@Variant(\\0\\0\\0\\b\\0\\0\\0\\0)\n"\
+                  "ClangDiagnosticConfigs\\{0}\\clangTidyMode=2\n"\
+                  "ClangDiagnosticConfigs\\{0}\\clazyChecks=\n"\
+                  "ClangDiagnosticConfigs\\{0}\\clazyMode=0\n"\
+                  "ClangDiagnosticConfigs\\{0}\\diagnosticOptions=-w\n"\
+                  "ClangDiagnosticConfigs\\{0}\\displayName=Motor\n"\
+                  "ClangDiagnosticConfigs\\{0}\\id={{c75a31ba-e37d-4044-8825-36527d4ceea1}}\n"\
+                  "ClangDiagnosticConfigs\\{0}\\useBuildSystemFlags=false\n"
 
 def qbsArch(arch_name):
     archs = {'amd64': 'x86_64', 'x64': 'x86_64', 'x86_amd64': 'x86_64', 'aarch64': 'arm64'}
@@ -454,9 +465,60 @@ class QtCreator(Build.BuildContext):
         self.recurse([self.run_dir])
 
         self.environment_id = self.get_environment_id()
+        self.write_ini_file()
         self.build_platform_list()
-
         self.write_project_files()
+
+    def write_ini_file(self):
+        try:
+            config_line = None
+            max_index = None
+            delete_index = None
+            parse = False
+            with open(INI_FILE, 'r') as ini_file:
+                content = ini_file.readlines()
+                for index, line in enumerate(content):
+                    line = line.strip()
+                    if line == '[ClangTools]':
+                        config_line = index + 1
+                        parse = True
+                    elif line and line[0] == '[':
+                        parse = False
+                    if not parse:
+                        continue
+                    if line.startswith('ClangDiagnosticConfigs'):
+                        config_line = index + 1
+                        key, value = line.split('=')
+                        key = key.split('\\')
+                        if key[1] == 'size':
+                            delete_index = index
+                        else:
+                            config_index = int(key[1])
+                            if max_index is None or config_index > max_index:
+                                max_index = config_index
+                            if key[2] == 'id' and value == '{c75a31ba-e37d-4044-8825-36527d4ceea1}':
+                                # found ClangTidy config, nothing to patch
+                                return
+            if delete_index is not None:
+                del content[delete_index]
+                if config_line > delete_index:
+                    config_line -= 1
+            if config_line is None:
+                content += ['[ClangTools]\n', CLANG_TIDY_CONFIG.format(1), 'ClangDiagnosticConfigs\\size=1\n']
+            elif max_index is None:
+                content[config_line:config_line] = [CLANG_TIDY_CONFIG.format(1), 'ClangDiagnosticConfigs\\size=1\n']
+            else:
+                content[config_line:config_line] = [CLANG_TIDY_CONFIG.format(max_index+1), 'ClangDiagnosticConfigs\\size=%d\n'%(max_index+1)]
+
+            with open(INI_FILE, 'w') as ini_file:
+                ini_file.write(''.join(content))
+        except IOError:
+            print('QtCreator ini file not found; creating one')
+            with open(INI_FILE, 'w') as ini_file:
+                ini_file.write('[ClangTools]\n')
+                ini_file.write(CLANG_TIDY_CONFIG.format(1))
+                ini_file.write('ClangDiagnosticConfigs\\size=1\n')
+
 
     def write_project_files(self):
         appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
@@ -953,7 +1015,14 @@ class QtCreator(Build.BuildContext):
                     )
                 with XmlNode(qtcreator, 'data') as data:
                     XmlNode(data, 'variable', 'ProjectExplorer.Project.PluginSettings').close()
-                    write_value(data, [])
+                    write_value(data, [
+                        ('ClangTools', [
+                            ('ClangTools.AnalyzeOpenFiles', True),
+                            ('ClangTools.BuildBeforeAnalysis', True),
+                            ('ClangTools.DiagnosticConfig', '{c75a31ba-e37d-4044-8825-36527d4ceea1}'),
+                            ('ClangTools.UseGlobalSettings', False)
+                        ])
+                    ])
                 with XmlNode(qtcreator, 'data') as data:
                     target_index = 0
                     for env_name in self.env.ALL_TOOLCHAINS:
@@ -1487,7 +1556,28 @@ class QCMake(QtCreator):
                                 ('ProjectExplorer.ProjectConfiguration.DisplayName', 'Clean'),
                                 ('ProjectExplorer.ProjectConfiguration.Id', 'CMakeProjectManager.MakeStep')
                             ]
-                        ), ('ProjectExplorer.BuildStepList.StepsCount', 1),
+                        ),
+                        (
+                            'ProjectExplorer.BuildStepList.Step.1', [
+                                ('ProjectExplorer.BuildStep.Enabled', True),
+                                (
+                                    'ProjectExplorer.ProcessStep.Arguments',
+                                    '%s clean:%s:%s' % (sys.argv[0], env_name, variant)
+                                ),
+                                ('ProjectExplorer.ProcessStep.Command', sys.executable),
+                                (
+                                    'ProjectExplorer.ProcessStep.WorkingDirectory',
+                                    self.srcnode.abspath()
+                                ),
+                                (
+                                    'ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                    'Waf configuration'
+                                ),
+                                ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.ProcessStep')
+                            ]
+                        ),
+                        ('ProjectExplorer.BuildStepList.StepsCount', 2),
                         ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Clean'),
                         ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
                         (
