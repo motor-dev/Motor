@@ -1,10 +1,12 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_MOTOR_SCRIPTENGINE_INL
+#define MOTOR_MOTOR_SCRIPTENGINE_INL
 
 #include <motor/stdafx.h>
 
 #include <motor/resource/resourcemanager.hh>
+#include <motor/scriptengine.hh>
 
 namespace Motor {
 
@@ -63,3 +65,5 @@ void ScriptEngine< T >::onTicketLoaded(const weak< const Resource::IDescription 
 }
 
 }  // namespace Motor
+
+#endif

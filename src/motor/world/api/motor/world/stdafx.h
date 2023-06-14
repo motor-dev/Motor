@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_WORLD_STDAFX_H
+#define MOTOR_WORLD_STDAFX_H
 
 #include <motor/core/stdafx.h>
 #include <motor/filesystem/stdafx.h>
@@ -29,5 +30,7 @@ namespace Motor { namespace Log {
 motor_api(WORLD) weak< Logger > world();
 
 }}  // namespace Motor::Log
+
+#endif
 
 #endif

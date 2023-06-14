@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_SCRIPTING_LUA_LUA_META_HH
+#define MOTOR_PLUGIN_SCRIPTING_LUA_LUA_META_HH
 
 #include <stdafx.h>
 #include <motor/meta/tags/editor.meta.hh>
@@ -18,3 +19,5 @@ class LuaScript : public Script< LuaScript >
 };
 
 }  // namespace Motor
+
+#endif

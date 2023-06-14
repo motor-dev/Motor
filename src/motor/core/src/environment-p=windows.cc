@@ -10,7 +10,7 @@
 #endif
 #include <windows.h>
 
-#include <cstdlib>
+#include <stdlib.h>
 
 typedef BOOL(WINAPI* GetUserProfileDirectoryFunction)(HANDLE hToken, LPSTR lpProfileDir,
                                                       LPDWORD lpcchSize);

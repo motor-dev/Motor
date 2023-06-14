@@ -5,8 +5,8 @@
 #include <motor/minitl/assert.hh>
 #include <motor/plugin.debug.runtime/callstack.hh>
 
-#include <cstdio>
-#include <cstring>
+#include <stdio.h>
+#include <string.h>
 
 #include <resource.h>
 

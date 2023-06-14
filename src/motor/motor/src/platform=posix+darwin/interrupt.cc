@@ -4,7 +4,7 @@
 #include <motor/stdafx.h>
 #include <motor/application.hh>
 
-#include <csignal>
+#include <signal.h>
 
 namespace Motor {
 

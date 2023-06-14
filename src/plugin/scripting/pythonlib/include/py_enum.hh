@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_SCRIPTING_PYTHONLIB_PY_ENUM_HH
+#define MOTOR_PLUGIN_SCRIPTING_PYTHONLIB_PY_ENUM_HH
 
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <py_object.hh>
@@ -25,3 +26,5 @@ struct PyMotorEnum : public PyMotorObject
 };
 
 }}  // namespace Motor::Python
+
+#endif

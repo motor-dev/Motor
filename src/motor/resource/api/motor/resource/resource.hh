@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_RESOURCE_RESOURCE_HH
+#define MOTOR_RESOURCE_RESOURCE_HH
 
 #include <motor/resource/stdafx.h>
 #include <motor/resource/handle.meta.hh>
@@ -45,3 +46,5 @@ public:
 };
 
 }}  // namespace Motor::Resource
+
+#endif

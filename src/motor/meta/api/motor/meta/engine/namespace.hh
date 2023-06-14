@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_ENGINE_NAMESPACE_HH
+#define MOTOR_META_ENGINE_NAMESPACE_HH
 
 #include <motor/meta/stdafx.h>
 #include <motor/meta/classinfo.meta.hh>
@@ -190,3 +191,5 @@
         = (motor_##id##_Namespace##parent()->objects.m_ptr = &ob##id##parent##_##name);            \
     }
 #define MOTOR_REGISTER_ROOT_NAMESPACE(id, ns, parent) MOTOR_REGISTER_ROOT_NAMESPACE_(id, ns, parent)
+
+#endif

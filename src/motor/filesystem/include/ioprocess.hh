@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_FILESYSTEM_IOPROCESS_HH
+#define MOTOR_FILESYSTEM_IOPROCESS_HH
 
 #include <motor/filesystem/stdafx.h>
 #include <motor/core/threads/semaphore.hh>
@@ -44,3 +45,5 @@ public:
 };
 
 }}  // namespace Motor::IOProcess
+
+#endif

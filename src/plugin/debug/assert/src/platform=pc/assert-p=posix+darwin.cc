@@ -4,8 +4,9 @@
 #include <stdafx.h>
 #include <motor/minitl/assert.hh>
 #include <motor/plugin.debug.runtime/callstack.hh>
-#include <cstdarg>
-#include <cstdio>
+
+#include <stdarg.h>
+#include <stdio.h>
 
 namespace Motor { namespace Debug {
 
@@ -24,8 +25,8 @@ minitl::assertion_result assertionCallback(const char* file, int line, const cha
     for(Runtime::Callstack::Address* a = address; a < address + result; ++a)
     {
         char buffer[4096];
-        minitl::format_to(buffer, sizeof(buffer), FMT("[{0: #x}]\r\n"), a->address());
-        fprintf(stderr, "%s", minitl::format<>(FMT("  [{0: #x}]\n"), a->address()).c_str());
+        minitl::format_to(buffer, sizeof(buffer), FMT("[@{0:0>16x}]\r\n"), a->address());
+        fprintf(stderr, "%s", minitl::format<>(FMT("  [@{0:0>16X}]\n"), a->address()).c_str());
     }
 
     return minitl::assertion_result::breakpoint;

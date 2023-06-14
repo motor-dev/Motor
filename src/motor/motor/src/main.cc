@@ -14,8 +14,8 @@
 #include <motor/scheduler/scheduler.hh>
 #include <motor/settings/providers/commandline.hh>
 
-#include <cstdio>
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #ifdef MOTOR_PLATFORM_WIN32

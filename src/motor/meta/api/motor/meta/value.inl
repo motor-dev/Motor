@@ -1,20 +1,23 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_VALUE_INL
+#define MOTOR_META_VALUE_INL
 
-#include <motor/meta/stdafx.h>
+#include <motor/meta/value.hh>
+
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/minitl/type_traits.hh>
 
 namespace Motor { namespace Meta {
 
-Value::Value() : m_type(motor_type< void >()), m_reference(false)
+Value::Value() : m_type(motor_type< void >()), m_buffer(), m_reference(false)
 {
 }
 
 template < typename T >
 Value::Value(T t) : m_type(motor_type< T >())
+                  , m_buffer()
                   , m_reference(false)
 {
     store(&t);
@@ -23,6 +26,7 @@ Value::Value(T t) : m_type(motor_type< T >())
 template < typename T >
 Value::Value(T t, MakeConstType /*constify*/)
     : m_type(Type::makeType(motor_type< T >(), Type::MakeConst))
+    , m_buffer()
     , m_reference(false)
 {
     store(&t);
@@ -30,6 +34,7 @@ Value::Value(T t, MakeConstType /*constify*/)
 
 template < typename T >
 Value::Value(ByRefType< T > t) : m_type(motor_type< T >())
+                               , m_buffer()
                                , m_reference(true)
 {
     m_buffer.m_ref.m_pointer    = const_cast< void* >((const void*)&t.value);
@@ -38,6 +43,7 @@ Value::Value(ByRefType< T > t) : m_type(motor_type< T >())
 
 template <>
 inline Value::Value(ByRefType< Value > t) : m_type(t.value.m_type)
+                                          , m_buffer()
                                           , m_reference(true)
 {
     m_buffer.m_ref.m_pointer    = t.value.memory();
@@ -47,6 +53,7 @@ inline Value::Value(ByRefType< Value > t) : m_type(t.value.m_type)
 template <>
 inline Value::Value(ByRefType< const Value > t)
     : m_type(Type::makeType(t.value.m_type, Type::MakeConst))
+    , m_buffer()
     , m_reference(true)
 {
     m_buffer.m_ref.m_pointer    = const_cast< void* >(t.value.memory());
@@ -87,7 +94,7 @@ Type Value::type() const
 }
 
 template < typename T >
-const T Value::as() const
+const T Value::as() const  // NOLINT(readability-const-return-type)
 {
     return const_cast< Value* >(this)->as< T >();
 }
@@ -162,3 +169,5 @@ void* Value::rawget() const
 }}  // namespace Motor::Meta
 
 #include <motor/meta/typeinfo.inl>
+
+#endif

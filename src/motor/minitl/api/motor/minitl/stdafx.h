@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_MINITL_STDAFX_HH
+#define MOTOR_MINITL_STDAFX_HH
 
 #include <motor/kernel/stdafx.h>
 
@@ -45,7 +46,7 @@ T max(T t1, T t2)
 }
 
 template < typename T >
-T next_power_of_2(T t)
+inline T next_power_of_2(T t)
 {
     u64 result = t;
     result -= 1;
@@ -59,3 +60,5 @@ T next_power_of_2(T t)
 }
 
 }  // namespace minitl
+
+#endif

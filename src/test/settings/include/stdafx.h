@@ -1,5 +1,8 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_TEST_SETTINGS_STDAFX_H
+#define MOTOR_TEST_SETTINGS_STDAFX_H
 
 #include <motor/stdafx.h>
+
+#endif

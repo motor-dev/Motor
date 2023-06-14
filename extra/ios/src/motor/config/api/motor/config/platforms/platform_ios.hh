@@ -1,9 +1,8 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef MOTOR_CONFIG_PLATFORM_IOS_HH_
-#define MOTOR_CONFIG_PLATFORM_IOS_HH_
-/**************************************************************************************************/
+#ifndef MOTOR_CONFIG_PLATFORMS_PLATFORM_IOS_HH
+#define MOTOR_CONFIG_PLATFORMS_PLATFORM_IOS_HH
 
 #define MOTOR_PLATFORM_NAME  iOS
 #define MOTOR_PLATFORM_IOS   1
@@ -15,5 +14,4 @@
 #define DIRENT_H   <dirent.h>
 #define PLUGIN_EXT ".dylib"
 
-/**************************************************************************************************/
 #endif

@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_KERNEL_COLORS_HH
+#define MOTOR_KERNEL_COLORS_HH
 
 #include <motor/kernel/stdafx.h>
 #include <motor/kernel/simd.hh>
@@ -30,3 +31,5 @@ static inline color32 make(u8 r, u8 g, u8 b, u8 a = 255)
 }
 
 }}  // namespace knl::Colors
+
+#endif

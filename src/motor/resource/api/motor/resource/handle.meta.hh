@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_RESOURCE_HANDLE_META_HH
+#define MOTOR_RESOURCE_HANDLE_META_HH
 
 #include <motor/resource/stdafx.h>
 
@@ -20,3 +21,5 @@ struct motor_api(RESOURCE) Handle
 };
 
 }}  // namespace Motor::Resource
+
+#endif

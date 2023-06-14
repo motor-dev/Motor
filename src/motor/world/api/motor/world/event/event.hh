@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_WORLD_EVENT_EVENT_HH
+#define MOTOR_WORLD_EVENT_EVENT_HH
 
 #include <motor/world/stdafx.h>
 
@@ -35,5 +36,7 @@ public:
 };
 
 }}  // namespace Motor::World
+
+#endif
 
 #endif

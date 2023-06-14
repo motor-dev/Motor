@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SETTINGS_STDAFX_H
+#define MOTOR_SETTINGS_STDAFX_H
 
 #include <motor/core/stdafx.h>
 #include <motor/meta/stdafx.h>
@@ -19,3 +20,5 @@ namespace Motor { namespace Log {
 motor_api(SETTINGS) weak< Logger > settings();
 
 }}  // namespace Motor::Log
+
+#endif

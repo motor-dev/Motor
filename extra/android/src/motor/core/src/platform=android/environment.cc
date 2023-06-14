@@ -4,10 +4,10 @@
 #include <motor/core/stdafx.h>
 #include <motor/core/environment.hh>
 
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 extern MOTOR_IMPORT const char* s_dataDirectory;

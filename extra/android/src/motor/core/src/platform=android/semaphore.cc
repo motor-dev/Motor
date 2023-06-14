@@ -4,10 +4,10 @@
 #include <motor/core/stdafx.h>
 #include <motor/core/threads/semaphore.hh>
 
-#include <cerrno>
-#include <cstdio>
+#include <errno.h>
+#include <stdio.h>
 
-#include <climits>
+#include <limits.h>
 #include <linux/futex.h>
 #include <sys/syscall.h>
 #include <unistd.h>

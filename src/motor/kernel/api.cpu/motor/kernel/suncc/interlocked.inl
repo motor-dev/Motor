@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_KERNEL_SUNCC_INTERLOCKED_INL
+#define MOTOR_KERNEL_SUNCC_INTERLOCKED_INL
 
 #include <motor/kernel/stdafx.h>
 
@@ -173,3 +174,5 @@ struct InterlockedType< 8 >
 #endif
 
 }  // namespace knl
+
+#endif

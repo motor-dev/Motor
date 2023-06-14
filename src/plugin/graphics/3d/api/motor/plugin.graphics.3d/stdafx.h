@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GRAPHICS_3D_STDAFX_H
+#define MOTOR_PLUGIN_GRAPHICS_3D_STDAFX_H
 
 #include <motor/stdafx.h>
 
@@ -18,3 +19,5 @@ motor_api(3D) weak< Logger > graphics();
 motor_api(3D) weak< Logger > shader();
 
 }}  // namespace Motor::Log
+
+#endif

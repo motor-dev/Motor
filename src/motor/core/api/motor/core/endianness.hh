@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CORE_ENDIANNESS_HH
+#define MOTOR_CORE_ENDIANNESS_HH
 
 #include <motor/core/stdafx.h>
 
@@ -106,4 +107,7 @@ typedef Integer< i8, Endianness_Big >  i8_b;
 typedef Integer< i16, Endianness_Big > i16_b;
 typedef Integer< i32, Endianness_Big > i32_b;
 typedef Integer< i64, Endianness_Big > i64_b;
+
 }  // namespace Motor
+
+#endif

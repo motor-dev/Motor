@@ -4,11 +4,11 @@
 #include <motor/core/stdafx.h>
 #include <motor/core/threads/semaphore.hh>
 
-#include <cerrno>
-#include <cstdio>
+#include <errno.h>
+#include <stdio.h>
 
 #if defined(__linux)
-#    include <climits>
+#    include <limits.h>
 #    include <linux/futex.h>
 #    include <sys/syscall.h>
 #    include <unistd.h>
@@ -67,7 +67,7 @@ u32 Semaphore::flushPauseCount()
 
 #elif defined(__FreeBSD__)
 
-#    include <climits>
+#    include <limits.h>
 #    include <sys/types.h>
 #    include <sys/umtx.h>
 

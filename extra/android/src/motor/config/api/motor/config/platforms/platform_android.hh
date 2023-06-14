@@ -1,9 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-
-#ifndef MOTOR_CONFIG_PLATFORM_ANDROID_HH_
-#define MOTOR_CONFIG_PLATFORM_ANDROID_HH_
-/**************************************************************************************************/
+#ifndef MOTOR_CONFIG_PLATFORMS_PLATFORM_ANDROID_HH
+#define MOTOR_CONFIG_PLATFORMS_PLATFORM_ANDROID_HH
 
 #define MOTOR_PLATFORM_NAME    Android
 #define MOTOR_PLATFORM_ANDROID 1
@@ -16,5 +14,4 @@
 #define DIRENT_H   <dirent.h>
 #define PLUGIN_EXT ".so"
 
-/**************************************************************************************************/
 #endif

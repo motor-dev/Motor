@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_COMPUTE_OPENCL_CODELOADER_HH
+#define MOTOR_PLUGIN_COMPUTE_OPENCL_CODELOADER_HH
 
 #include <motor/plugin.compute.opencl/stdafx.h>
 #include <motor/scheduler/kernel/icodeloader.hh>
@@ -26,3 +27,5 @@ public:
 };
 
 }}}  // namespace Motor::KernelScheduler::OpenCL
+
+#endif

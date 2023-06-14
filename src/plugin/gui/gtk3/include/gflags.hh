@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GUI_GTK3_GFLAGS_HH
+#define MOTOR_PLUGIN_GUI_GTK3_GFLAGS_HH
 
 #include <stdafx.h>
 
@@ -11,3 +12,5 @@ class Gtk3Plugin;
 raw< const Meta::Class > getGFlagsClass(Gtk3Plugin& plugin, GType type);
 
 }}  // namespace Motor::Gtk3
+
+#endif

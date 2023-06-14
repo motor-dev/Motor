@@ -3,8 +3,8 @@
 
 #include <stdafx.h>
 #include <motor/main.hh>
-#include <cstdio>
 #include <fcntl.h>
+#include <stdio.h>
 
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX

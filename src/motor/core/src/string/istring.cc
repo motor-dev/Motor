@@ -9,7 +9,7 @@
 #include <motor/minitl/algorithm.hh>
 #include <motor/minitl/hashmap.hh>
 
-#include <cstring>
+#include <string.h>
 
 namespace minitl {
 

@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_KERNEL_PARAMETERS_PARAMETERS_HH
+#define MOTOR_SCHEDULER_KERNEL_PARAMETERS_PARAMETERS_HH
 
 #include <motor/scheduler/stdafx.h>
 
@@ -10,3 +11,5 @@
 #include <motor/scheduler/kernel/parameters/segment.hh>
 #include <motor/scheduler/kernel/parameters/segments.hh>
 #include <motor/scheduler/kernel/parameters/stream.hh>
+
+#endif

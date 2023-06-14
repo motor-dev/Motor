@@ -2,9 +2,9 @@
    see LICENSE for detail */
 
 #include <motor/filesystem/stdafx.h>
-#include <cerrno>
-#include <cstdio>
+#include <errno.h>
 #include <posix/file.hh>
+#include <stdio.h>
 
 namespace Motor {
 

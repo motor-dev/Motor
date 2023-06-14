@@ -1,8 +1,10 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_TASK_TASK_INL
+#define MOTOR_SCHEDULER_TASK_TASK_INL
 
-#include <motor/scheduler/stdafx.h>
+#include <motor/scheduler/task/task.hh>
+
 #include <motor/scheduler/scheduler.hh>
 
 namespace Motor { namespace Task {
@@ -23,3 +25,5 @@ void Task< Executor >::schedule(weak< Scheduler > sc) const
 }
 
 }}  // namespace Motor::Task
+
+#endif

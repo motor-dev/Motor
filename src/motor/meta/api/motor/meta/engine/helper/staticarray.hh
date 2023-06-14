@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
 see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_ENGINE_HELPER_STATICARRAY_HH
+#define MOTOR_META_ENGINE_HELPER_STATICARRAY_HH
 
 #include <motor/meta/stdafx.h>
 
@@ -60,3 +61,5 @@ const T* staticarray< T >::end() const
 }
 
 }}  // namespace Motor::Meta
+
+#endif

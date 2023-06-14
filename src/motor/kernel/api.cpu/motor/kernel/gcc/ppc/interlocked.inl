@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_KERNEL_GCC_PPC_INTERLOCKED_INL
+#define MOTOR_KERNEL_GCC_PPC_INTERLOCKED_INL
 
 #include <motor/kernel/stdafx.h>
 
@@ -327,3 +328,5 @@ bool InterlockedType< 8 >::set_conditional(tagged_t* p, tagged_t::value_t v,
 #endif
 
 }  // namespace knl
+
+#endif

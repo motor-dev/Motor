@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_NETWORK_STDAFX_H
+#define MOTOR_NETWORK_STDAFX_H
 
 #include <motor/core/stdafx.h>
 
@@ -10,4 +11,6 @@
 #    define MOTOR_API_NETWORK MOTOR_IMPORT
 #else
 #    define MOTOR_API_NETWORK
+#endif
+
 #endif

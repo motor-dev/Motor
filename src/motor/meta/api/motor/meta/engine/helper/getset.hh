@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_ENGINE_HELPER_GETSET_HH
+#define MOTOR_META_ENGINE_HELPER_GETSET_HH
 
 #include <motor/meta/value.hh>
 
@@ -45,3 +46,5 @@ struct PropertyHelper< const T, Owner, Member >
 };
 
 }}  // namespace Motor::Meta
+
+#endif

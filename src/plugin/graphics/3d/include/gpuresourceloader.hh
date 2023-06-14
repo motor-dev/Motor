@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GRAPHICS_3D_GPURESOURCELOADER_HH
+#define MOTOR_PLUGIN_GRAPHICS_3D_GPURESOURCELOADER_HH
 
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/resource/loader.hh>
@@ -36,3 +37,5 @@ protected:
 }  // namespace Motor
 
 #include <gpuresourceloader.inl>
+
+#endif

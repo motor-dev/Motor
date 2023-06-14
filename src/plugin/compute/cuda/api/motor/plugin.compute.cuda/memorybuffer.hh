@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_COMPUTE_CUDA_MEMORYBUFFER_HH
+#define MOTOR_PLUGIN_COMPUTE_CUDA_MEMORYBUFFER_HH
 
 #include <motor/plugin.compute.cuda/stdafx.h>
 #include <motor/scheduler/kernel/imemorybuffer.hh>
@@ -35,3 +36,5 @@ public:
 };
 
 }}}  // namespace Motor::KernelScheduler::Cuda
+
+#endif

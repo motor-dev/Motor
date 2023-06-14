@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CONFIG_COMPILERS_SUNCC_HH
+#define MOTOR_CONFIG_COMPILERS_SUNCC_HH
 
 #define motor_alignof(t) __alignof__(t)
 #if defined(_X86) || defined(_AMD64)
@@ -12,8 +13,8 @@
 #endif
 
 #include <alloca.h>
-#include <cstdint>
-#include <cstdlib>
+#include <stdint.h>
+#include <stdlib.h>
 typedef int8_t   i8;
 typedef int16_t  i16;
 typedef int32_t  i32;
@@ -41,11 +42,7 @@ extern "C" void* __builtin_alloca(size_t);
 #endif
 
 #undef __REDIRECT
-#ifdef __Cplusplus
-#    include <cerrno>
-#else
-#    include <cerrno>
-#endif
+#include <errno.h>
 
 #define MOTOR_NEVER_INLINE
 #define MOTOR_ALWAYS_INLINE inline
@@ -65,4 +62,6 @@ extern "C" void* __builtin_alloca(size_t);
 #endif
 #if __SUNPRO_CC >= 0x5140 && __SUNPRO_CC < 0x5150
 #    pragma error_messages(off, placementdelmatch)
+#endif
+
 #endif

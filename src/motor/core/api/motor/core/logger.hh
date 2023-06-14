@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CORE_LOGGER_HH
+#define MOTOR_CORE_LOGGER_HH
 
 #include <motor/core/string/istring.hh>
 #include <motor/core/threads/criticalsection.hh>
@@ -103,7 +104,7 @@ public:
     do                                                                                             \
     {                                                                                              \
         const weak< ::Motor::Logger >& motor_log_ll = logger;                                      \
-        if(motor_log_ll->willLog(level)) motor_log_ll->log(level, "", MOTOR_LINE, msg);            \
+        if(motor_log_ll->willLog(level)) motor_log_ll->log(level, MOTOR_FILE, MOTOR_LINE, msg);    \
     } while(0)
 
 #define motor_log_format(logger, level, msg, ...)                                                  \
@@ -141,3 +142,5 @@ public:
     motor_log_format(logger, ::Motor::logFatal, msg, __VA_ARGS__)
 
 }  // namespace Motor
+
+#endif

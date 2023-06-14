@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_ENGINE_CALL_HH
+#define MOTOR_META_ENGINE_CALL_HH
 
 #include <motor/meta/stdafx.h>
 #include <motor/meta/conversion.meta.hh>
@@ -203,3 +204,5 @@ Value call(raw< const Method > method, CallInfo callInfo, const ArgInfo< T > arg
 }
 
 }}  // namespace Motor::Meta
+
+#endif

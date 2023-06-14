@@ -3,8 +3,8 @@
 
 #include <stdafx.h>
 #include <motor/minitl/assert.hh>
-#include <cstdarg>
-#include <cstdio>
+#include <stdarg.h>
+#include <stdio.h>
 
 namespace Motor { namespace Debug {
 

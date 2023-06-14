@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GRAPHICS_NULLRENDER_LOADERS_NULLSHADER_HH
+#define MOTOR_PLUGIN_GRAPHICS_NULLRENDER_LOADERS_NULLSHADER_HH
 
 #include <stdafx.h>
 #include <motor/plugin.graphics.3d/renderer/igpuresource.hh>
@@ -23,3 +24,5 @@ private:
 };
 
 }}  // namespace Motor::Null
+
+#endif

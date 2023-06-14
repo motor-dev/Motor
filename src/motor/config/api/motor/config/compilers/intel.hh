@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CONFIG_COMPILERS_INTEL_HH
+#define MOTOR_CONFIG_COMPILERS_INTEL_HH
 
 #define motor_alignof(t) __alignof(t)
 #define motor_break()    /*__asm("int $3")*/
@@ -55,7 +56,7 @@
 
 #ifndef _WIN32
 
-#    include <cstdint>
+#    include <stdint.h>
 #    include <unistd.h>
 // NOLINTBEGIN(bugprone-reserved-identifier)
 typedef signed __int8    i8;
@@ -127,5 +128,7 @@ typedef u8               byte;
 #    ifndef _CRT_SECURE_NO_DEPRECATE
 #        define _CRT_SECURE_NO_DEPRECATE 1
 #    endif
+
+#endif
 
 #endif

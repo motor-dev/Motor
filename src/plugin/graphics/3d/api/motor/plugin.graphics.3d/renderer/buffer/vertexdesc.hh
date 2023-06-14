@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GRAPHICS_3D_RENDERER_BUFFER_VERTEXDESC_HH
+#define MOTOR_PLUGIN_GRAPHICS_3D_RENDERER_BUFFER_VERTEXDESC_HH
 
 #include <motor/plugin.graphics.3d/stdafx.h>
 
@@ -240,3 +241,5 @@ enum IndexUsage
 };
 
 }  // namespace Motor
+
+#endif

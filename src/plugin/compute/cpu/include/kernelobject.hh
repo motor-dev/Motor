@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_COMPUTE_CPU_KERNELOBJECT_HH
+#define MOTOR_PLUGIN_COMPUTE_CPU_KERNELOBJECT_HH
 
 #include <motor/plugin.compute.cpu/stdafx.h>
 #include <motor/scheduler/task/iexecutor.hh>
@@ -30,3 +31,5 @@ public:
 };
 
 }}}  // namespace Motor::KernelScheduler::CPU
+
+#endif

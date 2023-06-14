@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_WORLD_EVENT_EVENT_FACTORY_HH
+#define MOTOR_WORLD_EVENT_EVENT_FACTORY_HH
 
 #include <motor/world/stdafx.h>
 
@@ -45,3 +46,5 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< World::Event< T1, T2, T3, T4 > >:
 }
 
 }}  // namespace Motor::Meta
+
+#endif

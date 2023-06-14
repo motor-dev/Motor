@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_ENGINE_TUPLE_FACTORY_HH
+#define MOTOR_META_ENGINE_TUPLE_FACTORY_HH
 
 #include <motor/meta/stdafx.h>
 #include <motor/minitl/tuple.hh>
@@ -58,3 +59,5 @@ MOTOR_EXPORT raw< const Class > ClassID< minitl::tuple< T... > >::klass()
 }
 
 }}  // namespace Motor::Meta
+
+#endif

@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_KERNEL_INTERLOCKED_STACK_HH
+#define MOTOR_KERNEL_INTERLOCKED_STACK_HH
 
 #include <motor/kernel/stdafx.h>
 #include <motor/kernel/interlocked.hh>
@@ -134,3 +135,5 @@ T* istack< T >::popAll()
 }
 
 }  // namespace knl
+
+#endif

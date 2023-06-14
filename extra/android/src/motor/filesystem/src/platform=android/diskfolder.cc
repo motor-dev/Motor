@@ -8,9 +8,9 @@
 #include <watchpoint.hh>
 #include <zipfile.hh>
 
-#include <cerrno>
-#include <cstdio>
 #include <dirent.h>
+#include <errno.h>
+#include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unzip.h>

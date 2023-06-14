@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_MOTOR_SCRIPT_HH
+#define MOTOR_MOTOR_SCRIPT_HH
 
 #include <motor/stdafx.h>
 #include <motor/filesystem/file.meta.hh>
@@ -36,3 +37,5 @@ public:
 }  // namespace Motor
 
 #include <motor/script.factory.hh>
+
+#endif

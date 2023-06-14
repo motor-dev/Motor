@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_ENGINE_TAGINFO_META_HH
+#define MOTOR_META_ENGINE_TAGINFO_META_HH
 
 #include <motor/meta/stdafx.h>
 #include <motor/meta/value.hh>
@@ -13,3 +14,5 @@ struct motor_api(META) Tag
 };
 
 }}  // namespace Motor::Meta
+
+#endif

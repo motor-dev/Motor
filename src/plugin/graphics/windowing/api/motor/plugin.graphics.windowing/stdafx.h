@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GRAPHICS_WINDOWING_STDAFX_H
+#define MOTOR_PLUGIN_GRAPHICS_WINDOWING_STDAFX_H
 
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/stdafx.h>
@@ -18,3 +19,5 @@ namespace Motor { namespace Log {
 motor_api(WINDOWING) weak< Logger > windowing();
 
 }}  // namespace Motor::Log
+
+#endif

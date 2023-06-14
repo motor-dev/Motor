@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_ENGINE_MAP_FACTORY_HH
+#define MOTOR_META_ENGINE_MAP_FACTORY_HH
 
 #include <motor/meta/stdafx.h>
 #include <motor/meta/classinfo.meta.hh>
@@ -14,3 +15,5 @@
 namespace Motor {
 
 }
+
+#endif

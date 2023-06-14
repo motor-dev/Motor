@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_FILESYSTEM_POSIX_FILE_HH
+#define MOTOR_FILESYSTEM_POSIX_FILE_HH
 
 #include <motor/filesystem/stdafx.h>
 #include <motor/filesystem/file.meta.hh>
@@ -23,3 +24,5 @@ private:
 };
 
 }  // namespace Motor
+
+#endif

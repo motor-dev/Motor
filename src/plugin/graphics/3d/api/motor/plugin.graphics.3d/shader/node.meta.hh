@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GRAPHICS_3D_SHADER_NODE_META_HH
+#define MOTOR_PLUGIN_GRAPHICS_3D_SHADER_NODE_META_HH
 
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/core/memory/streams.hh>
@@ -26,3 +27,5 @@ public:
 };
 
 }}  // namespace Motor::Shaders
+
+#endif

@@ -1,5 +1,8 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GAMEPLAY_TIME_STDAFX_H
+#define MOTOR_PLUGIN_GAMEPLAY_TIME_STDAFX_H
 
 #include <motor/stdafx.h>
+
+#endif

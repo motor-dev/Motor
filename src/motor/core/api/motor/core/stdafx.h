@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CORE_STDAFX_H
+#define MOTOR_CORE_STDAFX_H
 
 #include <motor/kernel/stdafx.h>
 #include <motor/core/coredefs.hh>
@@ -19,5 +20,7 @@ motor_api(CORE) weak< Logger > system();
 motor_api(CORE) weak< Logger > thread();
 
 }}  // namespace Motor::Log
+
+#endif
 
 #endif

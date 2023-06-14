@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_CLASSINFO_META_HH
+#define MOTOR_META_CLASSINFO_META_HH
 
 #include <motor/meta/stdafx.h>
 #include <motor/meta/builtin.hh>
@@ -110,3 +111,5 @@ MOTOR_EXPORT raw< Meta::Class > motor_motor_Namespace();
 MOTOR_EXPORT raw< Meta::Class > motor_motor_Namespace_Motor();
 
 }  // namespace Motor
+
+#endif

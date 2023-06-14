@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_TASK_KERNELTASK_HH
+#define MOTOR_SCHEDULER_TASK_KERNELTASK_HH
 
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/kernel/kernel.meta.hh>
@@ -75,3 +76,5 @@ KernelTask::KernelTask(istring name, KernelScheduler::SchedulerType type, knl::c
 }
 
 }}  // namespace Motor::Task
+
+#endif

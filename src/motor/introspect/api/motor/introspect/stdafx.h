@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_INTROSPECT_STDAFX_H
+#define MOTOR_INTROSPECT_STDAFX_H
 
 #include <motor/core/stdafx.h>
 #include <motor/filesystem/stdafx.h>
@@ -12,4 +13,6 @@
 #    define MOTOR_API_INTROSPECT MOTOR_IMPORT
 #else
 #    define MOTOR_API_INTROSPECT
+#endif
+
 #endif

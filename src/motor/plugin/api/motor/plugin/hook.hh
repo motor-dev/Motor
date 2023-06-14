@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_HOOK_HH
+#define MOTOR_PLUGIN_HOOK_HH
 
 #include <motor/plugin/stdafx.h>
 #include <motor/core/preproc.hh>
@@ -39,8 +40,7 @@ public:
     PluginHook(HookList& list, const T& t) : IPluginHook(list), m_hook(t)
     {
     }
-    ~PluginHook() override
-    = default;
+    ~PluginHook() override = default;
     void onload(const Context& context) override
     {
         m_hook.onload(context);
@@ -52,3 +52,5 @@ public:
 };
 
 }}  // namespace Motor::Plugin
+
+#endif

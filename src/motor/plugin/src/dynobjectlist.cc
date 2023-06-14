@@ -4,7 +4,7 @@
 #include <motor/plugin/stdafx.h>
 #include <motor/plugin/dynobject.hh>
 #include <motor/plugin/dynobjectlist.hh>
-#include <cstring>
+#include <string.h>
 
 namespace Motor { namespace Plugin {
 

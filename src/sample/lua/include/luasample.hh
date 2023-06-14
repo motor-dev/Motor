@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SAMPLE_LUA_LUASAMPLE_HH
+#define MOTOR_SAMPLE_LUA_LUASAMPLE_HH
 
 #include <stdafx.h>
 #include <motor/application.hh>
@@ -24,3 +25,5 @@ public:
 };
 
 }  // namespace Motor
+
+#endif

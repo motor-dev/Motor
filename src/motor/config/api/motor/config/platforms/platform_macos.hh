@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CONFIG_PLATFORMS_PLATFORM_MACOS_HH
+#define MOTOR_CONFIG_PLATFORMS_PLATFORM_MACOS_HH
 
 #define MOTOR_PLATFORM_NAME  MacOSX
 #define MOTOR_PLATFORM_MACOS 1
@@ -34,4 +35,6 @@
 #    if !defined(AVAILABLE_MAC_OS_X_VERSION_10_9_AND_LATER)
 #        define AVAILABLE_MAC_OS_X_VERSION_10_9_AND_LATER UNAVAILABLE_ATTRIBUTE
 #    endif
+#endif
+
 #endif

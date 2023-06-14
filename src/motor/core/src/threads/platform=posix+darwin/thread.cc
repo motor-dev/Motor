@@ -6,7 +6,7 @@
 
 #include <motor/core/timer.hh>
 
-#include <cerrno>
+#include <errno.h>
 #include <pthread.h>
 
 #ifdef MOTOR_PLATFORM_FREEBSD

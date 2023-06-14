@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GAMEPLAY_TIME_DELAY_META_HH
+#define MOTOR_PLUGIN_GAMEPLAY_TIME_DELAY_META_HH
 
 #include <stdafx.h>
 #include <motor/world/component/component.meta.hh>
@@ -21,3 +22,5 @@ motor_tag(World::LogicComponent(motor_class< Motor::Gameplay::DelayKernel >())) 
 };
 
 }}  // namespace Motor::Gameplay
+
+#endif

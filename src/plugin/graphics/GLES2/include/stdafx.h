@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GRAPHICS_GLES2_STDAFX_H
+#define MOTOR_PLUGIN_GRAPHICS_GLES2_STDAFX_H
 
 #include <motor/stdafx.h>
 
@@ -12,4 +13,6 @@
 #else
 #    include <EGL/egl.h>
 #    include <GLES2/gl2.h>
+#endif
+
 #endif

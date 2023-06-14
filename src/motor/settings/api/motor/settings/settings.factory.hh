@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SETTINGS_SETTINGS_FACTORY_HH
+#define MOTOR_SETTINGS_SETTINGS_FACTORY_HH
 
 #include <motor/settings/stdafx.h>
 #include <motor/meta/engine/methodinfo.meta.hh>
@@ -140,3 +141,5 @@ MOTOR_EXPORT raw< const Meta::Class > Meta::ClassID< Settings::Settings< T > >::
 }
 
 }  // namespace Motor
+
+#endif

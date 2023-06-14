@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_SCRIPTING_PYTHONLIB_STDAFX_H
+#define MOTOR_PLUGIN_SCRIPTING_PYTHONLIB_STDAFX_H
 
 #include <motor/stdafx.h>
 
@@ -27,3 +28,5 @@ motor_api(PYTHONLIB) weak< Logger > python();
 }
 
 }  // namespace Motor
+
+#endif

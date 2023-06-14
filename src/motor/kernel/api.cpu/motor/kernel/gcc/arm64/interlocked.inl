@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_KERNEL_GCC_ARM64_INTERLOCKED_INL
+#define MOTOR_KERNEL_GCC_ARM64_INTERLOCKED_INL
 
 #include <motor/kernel/stdafx.h>
 
@@ -94,8 +95,8 @@ struct InterlockedType< 4 >
                              "       ldaxr   %w1, [%3]\n"        /* get original */
                              "       cmp             %w1, %w4\n" /* see if match */
                              "       b.ne     2f\n"
-                             "       stxr  %w0, %w5, [%3]\n"    /* store new one if matched */
-                             "       cbnz            %w0, 1b\n" /* if update failed, repeat */
+                             "       stxr  %w0, %w5, [%3]\n"     /* store new one if matched */
+                             "       cbnz            %w0, 1b\n"  /* if update failed, repeat */
                              "2:     dmb st\n" AO_THUMB_RESTORE_MODE
                              : "=&r"(result), "=&r"(old), "+m"(*p)
                              : "r"(p), "r"(condition), "r"(v)
@@ -210,8 +211,8 @@ struct InterlockedType< 8 >
         value_t result, old;
         __asm__ __volatile__(AO_THUMB_GO_ARM
                              "       dmb sy\n"
-                             "1:     ldaxr    %x1, [%3]\n" /* get original */
-                             "       cmp      %x1, %x4\n"  /* see if match */
+                             "1:     ldaxr    %x1, [%3]\n"      /* get original */
+                             "       cmp      %x1, %x4\n"       /* see if match */
                              "       b.ne     2f\n"
                              "       stlxr    %w0, %x5, [%3]\n" /* store new one if matched */
                              "       cbnz     %w0, 1b\n"        /* if update failed, repeat */
@@ -285,3 +286,5 @@ struct InterlockedType< 2 > : public InterlockedType< 4 >
 };
 
 }  // namespace knl
+
+#endif

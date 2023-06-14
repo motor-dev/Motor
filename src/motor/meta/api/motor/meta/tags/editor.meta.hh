@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_TAGS_EDITOR_META_HH
+#define MOTOR_META_TAGS_EDITOR_META_HH
 
 #include <motor/meta/stdafx.h>
 
@@ -25,3 +26,5 @@ struct motor_api(META) OutputNode
 };
 
 }}  // namespace Motor::EditHint
+
+#endif

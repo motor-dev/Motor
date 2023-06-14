@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CORE_THREADS_THREAD_HH
+#define MOTOR_CORE_THREADS_THREAD_HH
 
 #include <motor/core/stdafx.h>
 
@@ -49,3 +50,5 @@ public:
 };
 
 }  // namespace Motor
+
+#endif

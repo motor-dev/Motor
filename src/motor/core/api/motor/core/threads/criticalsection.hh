@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CORE_THREADS_CRITICALSECTION_HH
+#define MOTOR_CORE_THREADS_CRITICALSECTION_HH
 
 namespace Motor {
 
@@ -43,3 +44,5 @@ public:
 };
 
 }  // namespace Motor
+
+#endif

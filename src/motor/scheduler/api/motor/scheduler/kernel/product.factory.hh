@@ -1,8 +1,9 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_KERNEL_PRODUCT_FACTORY_HH
+#define MOTOR_SCHEDULER_KERNEL_PRODUCT_FACTORY_HH
 
-#include <motor/scheduler/stdafx.h>
+#include <motor/scheduler/kernel/product.hh>
 
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
@@ -42,18 +43,18 @@ struct ClassID< KernelScheduler::Product< T > >
                                             Meta::ClassType_Object,
                                             {KernelScheduler::IProduct::getNamespace().m_ptr},
                                             {motor_class< KernelScheduler::IProduct >().m_ptr},
-                                            {0},
-                                            {0},
-                                            {0, 0},
+                                            {nullptr},
+                                            {nullptr},
+                                            {0, nullptr},
                                             {1, &s_ctr},
                                             {&s_ctr},
                                             Meta::OperatorTable::s_emptyTable,
-                                            0,
-                                            0};
+                                            nullptr,
+                                            nullptr};
         raw< const Meta::Class > result  = {&s_class};
 
         static Meta::ObjectInfo registry = {KernelScheduler::IProduct::getNamespace()->objects,
-                                            {0},
+                                            {nullptr},
                                             s_class.name,
                                             Meta::Value(result)};
         static const Meta::ObjectInfo* ptr
@@ -81,3 +82,5 @@ const Meta::Method ClassID< KernelScheduler::Product< T > >::s_ctr
        {&ClassID< KernelScheduler::Product< T > >::s_ctr}};
 
 }}  // namespace Motor::Meta
+
+#endif

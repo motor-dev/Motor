@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_SUBWORLD_SUBWORLDCOMPONENT_META_HH
+#define MOTOR_PLUGIN_SUBWORLD_SUBWORLDCOMPONENT_META_HH
 
 #include <stdafx.h>
 #include <motor/world/component/component.meta.hh>
@@ -27,3 +28,5 @@ motor_tag(LogicComponent()) struct SubWorldComponent
 };
 
 }}  // namespace Motor::World
+
+#endif

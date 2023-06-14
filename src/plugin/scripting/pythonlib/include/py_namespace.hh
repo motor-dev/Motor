@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_SCRIPTING_PYTHONLIB_PY_NAMESPACE_HH
+#define MOTOR_PLUGIN_SCRIPTING_PYTHONLIB_PY_NAMESPACE_HH
 
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <py_object.hh>
@@ -24,3 +25,5 @@ struct PyMotorNamespace : public PyMotorObject
 };
 
 }}  // namespace Motor::Python
+
+#endif

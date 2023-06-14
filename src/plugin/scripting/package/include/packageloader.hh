@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_SCRIPTING_PACKAGE_PACKAGELOADER_HH
+#define MOTOR_PLUGIN_SCRIPTING_PACKAGE_PACKAGELOADER_HH
 
 #include <motor/plugin.scripting.package/stdafx.h>
 #include <motor/plugin.scripting.package/package.meta.hh>
@@ -32,3 +33,5 @@ private:
 };
 
 }}  // namespace Motor::PackageManager
+
+#endif

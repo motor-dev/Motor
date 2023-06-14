@@ -1,8 +1,9 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_SCRIPTING_PYTHONLIB_PYTHONTYPES_HH
+#define MOTOR_PLUGIN_SCRIPTING_PYTHONLIB_PYTHONTYPES_HH
 
-#include <cstdio>
+#include <stdio.h>
 
 namespace Motor { namespace Python {
 
@@ -483,3 +484,5 @@ struct PyModuleDef
     } while(0)
 
 }}  // namespace Motor::Python
+
+#endif

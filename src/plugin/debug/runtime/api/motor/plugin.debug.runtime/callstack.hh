@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_DEBUG_RUNTIME_CALLSTACK_HH
+#define MOTOR_PLUGIN_DEBUG_RUNTIME_CALLSTACK_HH
 
 #include <motor/plugin.debug.runtime/stdafx.h>
 
@@ -34,3 +35,5 @@ public:
 };
 
 }}  // namespace Motor::Runtime
+
+#endif

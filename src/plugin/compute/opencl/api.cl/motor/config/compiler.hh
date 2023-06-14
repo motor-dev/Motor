@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CONFIG_COMPILER_HH
+#define MOTOR_CONFIG_COMPILER_HH
 
 #define __host    // NOLINT(bugprone-reserved-identifier)
 #define __device  // NOLINT(bugprone-reserved-identifier)
@@ -36,3 +37,5 @@ typedef u8             byte;
 
 #pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
 #include <opencl-c.h>
+
+#endif

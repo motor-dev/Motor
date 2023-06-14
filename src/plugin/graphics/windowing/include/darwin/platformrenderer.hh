@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GRAPHICS_WINDOWING_DARWIN_PLATFORMRENDERER_HH
+#define MOTOR_PLUGIN_GRAPHICS_WINDOWING_DARWIN_PLATFORMRENDERER_HH
 
 #include <motor/plugin.graphics.windowing/stdafx.h>
 #include <motor/plugin.graphics.windowing/renderer.hh>
@@ -21,3 +22,5 @@ public:
 };
 
 }}  // namespace Motor::Windowing
+
+#endif

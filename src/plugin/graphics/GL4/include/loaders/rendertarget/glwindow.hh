@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GRAPHICS_GL4_LOADERS_RENDERTARGET_GLWINDOW_HH
+#define MOTOR_PLUGIN_GRAPHICS_GL4_LOADERS_RENDERTARGET_GLWINDOW_HH
 
 #include <motor/plugin.graphics.GL4/stdafx.h>
 #include <motor/plugin.graphics.3d/renderer/irenderer.hh>
@@ -37,3 +38,5 @@ public:
 };
 
 }}  // namespace Motor::OpenGL
+
+#endif

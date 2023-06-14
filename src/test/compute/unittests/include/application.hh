@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com> under New BSD License
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_TEST_COMPUTE_UNITTESTS_APPLICATION_HH
+#define MOTOR_TEST_COMPUTE_UNITTESTS_APPLICATION_HH
 
 #include <stdafx.h>
 #include <motor/application.hh>
@@ -23,3 +24,5 @@ public:
 };
 
 }}}}  // namespace Motor::Test::Compute::UnitTests
+
+#endif

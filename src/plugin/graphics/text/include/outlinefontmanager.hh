@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GRAPHICS_TEXT_OUTLINEFONTMANAGER_HH
+#define MOTOR_PLUGIN_GRAPHICS_TEXT_OUTLINEFONTMANAGER_HH
 
 #include <motor/plugin.graphics.text/stdafx.h>
 #include <motor/resource/loader.hh>
@@ -36,3 +37,5 @@ public:
 };
 
 }  // namespace Motor
+
+#endif

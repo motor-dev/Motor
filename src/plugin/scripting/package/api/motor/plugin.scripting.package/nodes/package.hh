@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_SCRIPTING_PACKAGE_NODES_PACKAGE_HH
+#define MOTOR_PLUGIN_SCRIPTING_PACKAGE_NODES_PACKAGE_HH
 
 #include <motor/plugin.scripting.package/stdafx.h>
 
@@ -55,3 +56,5 @@ public:
 };
 
 }}}  // namespace Motor::PackageBuilder::Nodes
+
+#endif

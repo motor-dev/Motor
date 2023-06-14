@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_PHYSICS_BULLET_BULLETWORLD_HH
+#define MOTOR_PLUGIN_PHYSICS_BULLET_BULLETWORLD_HH
 
 #include <stdafx.h>
 #include <motor/plugin/plugin.hh>
@@ -41,3 +42,5 @@ public:
 };
 
 }}}  // namespace Motor::Physics::Bullet
+
+#endif

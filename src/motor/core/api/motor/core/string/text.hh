@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CORE_STRING_TEXT_HH
+#define MOTOR_CORE_STRING_TEXT_HH
 
 #include <motor/minitl/format.hh>
 
@@ -39,3 +40,5 @@ static inline u32 format_length(const text& s, const minitl::format_options& opt
 }
 
 }  // namespace Motor
+
+#endif

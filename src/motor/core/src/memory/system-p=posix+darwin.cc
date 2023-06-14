@@ -4,7 +4,7 @@
 #include <motor/core/stdafx.h>
 #include <motor/core/memory/allocators/system.hh>
 
-#include <cerrno>
+#include <errno.h>
 #include <sys/mman.h>
 #include <unistd.h>
 

@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CONFIG_COMPILERS_MSVC_HH
+#define MOTOR_CONFIG_COMPILERS_MSVC_HH
 
 #if(_MSC_VER >= 1400) && !defined(_ARM) && !defined(_ARM64)
 //  Following 8 lines: workaround for a bug in some older SDKs
@@ -142,3 +143,5 @@ typedef u8 byte;
 
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 #define _CRT_SECURE_NO_DEPRECATE 1
+
+#endif
