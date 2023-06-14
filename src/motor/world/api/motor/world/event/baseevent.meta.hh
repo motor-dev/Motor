@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_WORLD_EVENT_BASEEVENT_META_HH
+#define MOTOR_WORLD_EVENT_BASEEVENT_META_HH
 
 #include <motor/world/stdafx.h>
 #include <motor/world/event/context.meta.hh>
@@ -19,3 +20,5 @@ protected:
 };
 
 }}  // namespace Motor::World
+
+#endif

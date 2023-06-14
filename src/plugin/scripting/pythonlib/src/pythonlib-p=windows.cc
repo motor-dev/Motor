@@ -3,7 +3,7 @@ see LICENSE for detail */
 
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>
-#include <cstring>
+#include <string.h>
 
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX

@@ -1,22 +1,17 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_MINITL_TRAITS_HH
+#define MOTOR_MINITL_TRAITS_HH
 
 #include <motor/minitl/stdafx.h>
-#include <cstring>
 
 namespace minitl {
 
 template < typename T >
 struct less;
 
-template <>
-struct less< const char* >
-{
-    bool operator()(const char* str1, const char* str2) const
-    {
-        return ::strcmp(str1, str2) < 0;
-    }
-};
-
 }  // namespace minitl
+
+#include <motor/minitl/inl/traits.hh>
+
+#endif

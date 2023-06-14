@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_COMPUTE_CUDA_SCHEDULER_HH
+#define MOTOR_PLUGIN_COMPUTE_CUDA_SCHEDULER_HH
 
 #include <motor/plugin.compute.cuda/stdafx.h>
 #include <motor/plugin/plugin.hh>
@@ -28,3 +29,5 @@ public:
 };
 
 }}}  // namespace Motor::KernelScheduler::Cuda
+
+#endif

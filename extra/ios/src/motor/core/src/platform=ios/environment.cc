@@ -4,9 +4,9 @@
 #include <motor/core/stdafx.h>
 #include <motor/core/environment.hh>
 
-#include <cstdio>
-#include <cstdlib>
 #include <dlfcn.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 namespace Motor {

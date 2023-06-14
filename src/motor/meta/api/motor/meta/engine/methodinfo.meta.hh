@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_ENGINE_METHODINFO_META_HH
+#define MOTOR_META_ENGINE_METHODINFO_META_HH
 
 #include <motor/meta/stdafx.h>
 #include <motor/meta/engine/helper/staticarray.hh>
@@ -43,7 +44,7 @@ published:
 
     public:
         minitl::format_buffer< 1024u > signature() const;
-        Value (*call)(raw< const Method > method, Value * params, u32 paramCount);
+        Value (*call)(raw< const Method > method, Value* params, u32 paramCount);
     };
 
 published:
@@ -56,3 +57,5 @@ published:
 };
 
 }}  // namespace Motor::Meta
+
+#endif

@@ -1,9 +1,8 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
+#ifndef MOTOR_META_TYPEINFO_FORMAT_HH
+#define MOTOR_META_TYPEINFO_FORMAT_HH
 
-#ifndef MOTOR_META_TYPEINFO_FORMAT_HH_
-#define MOTOR_META_TYPEINFO_FORMAT_HH_
-/**************************************************************************************************/
 #include <motor/meta/stdafx.h>
 #include <motor/minitl/format.hh>
 
@@ -18,5 +17,4 @@ motor_api(META) u32
 
 }}  // namespace Motor::Meta
 
-/**************************************************************************************************/
 #endif

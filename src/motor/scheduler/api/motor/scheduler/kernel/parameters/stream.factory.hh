@@ -1,9 +1,9 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_KERNEL_PARAMETERS_STREAM_FACTORY_HH
+#define MOTOR_SCHEDULER_KERNEL_PARAMETERS_STREAM_FACTORY_HH
 
-#include <motor/scheduler/stdafx.h>
-#include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
+#include <motor/scheduler/kernel/parameters/stream.factory.hh>
 
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
@@ -50,3 +50,5 @@ struct ClassID< KernelScheduler::Stream< T > >
 };
 
 }}  // namespace Motor::Meta
+
+#endif

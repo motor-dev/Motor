@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_TASK_IEXECUTOR_HH
+#define MOTOR_SCHEDULER_TASK_IEXECUTOR_HH
 
 #include <motor/scheduler/stdafx.h>
 
@@ -16,3 +17,5 @@ public:
 };
 
 }}  // namespace Motor::Task
+
+#endif

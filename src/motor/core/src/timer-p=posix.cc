@@ -4,7 +4,7 @@
 #include <motor/core/stdafx.h>
 #include <motor/core/timer.hh>
 
-#include <ctime>
+#include <time.h>
 
 namespace Motor {
 

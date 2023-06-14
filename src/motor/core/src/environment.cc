@@ -6,7 +6,7 @@
 
 #include <motor/core/string/istring.hh>
 
-#include <cstring>
+#include <string.h>
 
 namespace Motor {
 

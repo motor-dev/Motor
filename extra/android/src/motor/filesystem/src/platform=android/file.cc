@@ -4,8 +4,8 @@
 #include <motor/filesystem/stdafx.h>
 #include <posix/file.hh>
 
-#include <cerrno>
-#include <cstdio>
+#include <errno.h>
+#include <stdio.h>
 
 namespace Motor {
 

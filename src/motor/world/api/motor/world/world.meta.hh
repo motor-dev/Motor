@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_WORLD_WORLD_META_HH
+#define MOTOR_WORLD_WORLD_META_HH
 
 #include <motor/world/stdafx.h>
 #include <motor/world/componentregistry.meta.hh>
@@ -37,3 +38,5 @@ published:
 };
 
 }}  // namespace Motor::World
+
+#endif

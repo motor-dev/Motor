@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_STDAFX_H
+#define MOTOR_SCHEDULER_STDAFX_H
 
 #include <motor/core/stdafx.h>
 #include <motor/filesystem/stdafx.h>
@@ -32,4 +33,6 @@ motor_api(SCHEDULER) weak< Logger > compute();
 }  // namespace Log
 
 }  // namespace Motor
+#endif
+
 #endif

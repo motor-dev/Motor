@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GRAPHICS_GLES2_GLESRENDERER_HH
+#define MOTOR_PLUGIN_GRAPHICS_GLES2_GLESRENDERER_HH
 
 #include <stdafx.h>
 #include <motor/plugin.graphics.3d/renderer/irenderer.hh>
@@ -35,3 +36,5 @@ private:
 };
 
 }}  // namespace Motor::OpenGLES
+
+#endif

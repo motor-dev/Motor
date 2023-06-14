@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CORE_MEMORY_ALLOCATORS_SYSTEM_HH
+#define MOTOR_CORE_MEMORY_ALLOCATORS_SYSTEM_HH
 
 #include <motor/core/stdafx.h>
 #include <motor/core/threads/mutex.hh>
@@ -60,3 +61,5 @@ private:
 };
 
 }  // namespace Motor
+
+#endif

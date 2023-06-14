@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_VALUE_HH
+#define MOTOR_META_VALUE_HH
 
 #include <motor/meta/stdafx.h>
 #include <motor/meta/typeinfo.meta.hh>
@@ -119,3 +120,5 @@ public:
 }}  // namespace Motor::Meta
 
 #include <motor/meta/value.inl>
+
+#endif

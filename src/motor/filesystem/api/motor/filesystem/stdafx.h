@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_FILESYSTEM_STDAFX_H
+#define MOTOR_FILESYSTEM_STDAFX_H
 
 #include <motor/core/stdafx.h>
 #include <motor/meta/stdafx.h>
@@ -29,4 +30,6 @@ motor_api(FILESYSTEM) weak< Logger > fs();
 }
 
 }  // namespace Motor
+#endif
+
 #endif

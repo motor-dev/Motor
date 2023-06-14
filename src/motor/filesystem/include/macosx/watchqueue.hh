@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_FILESYSTEM_MACOSX_WATCHQUEUE_HH
+#define MOTOR_FILESYSTEM_MACOSX_WATCHQUEUE_HH
 
 #include <motor/filesystem/stdafx.h>
 #include <motor/core/threads/thread.hh>
@@ -35,3 +36,5 @@ public:
 };
 
 }}  // namespace Motor::FileSystem
+
+#endif

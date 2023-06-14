@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_SCRIPTING_PACKAGE_PACKAGE_META_HH
+#define MOTOR_PLUGIN_SCRIPTING_PACKAGE_PACKAGE_META_HH
 
 #include <motor/plugin.scripting.package/stdafx.h>
 #include <motor/meta/tags/editor.meta.hh>
@@ -19,3 +20,5 @@ published:
 };
 
 }  // namespace Motor
+
+#endif

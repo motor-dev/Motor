@@ -1,8 +1,10 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_MOTOR_SCRIPT_FACTORY_HH
+#define MOTOR_MOTOR_SCRIPT_FACTORY_HH
 
 #include <motor/stdafx.h>
+#include <motor/script.hh>
 
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
@@ -36,3 +38,5 @@ struct ClassID< Script< T > >
 };
 
 }}  // namespace Motor::Meta
+
+#endif

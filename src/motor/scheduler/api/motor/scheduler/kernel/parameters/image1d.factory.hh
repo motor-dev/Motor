@@ -1,9 +1,9 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_KERNEL_PARAMETERS_IMAGE1D_FACTORY_HH
+#define MOTOR_SCHEDULER_KERNEL_PARAMETERS_IMAGE1D_FACTORY_HH
 
-#include <motor/scheduler/stdafx.h>
-#include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
+#include <motor/scheduler/kernel/parameters/image1d.hh>
 
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
@@ -51,3 +51,5 @@ struct ClassID< KernelScheduler::Image1D< T > >
 };
 
 }}  // namespace Motor::Meta
+
+#endif

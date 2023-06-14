@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_KERNEL_GCC_TSAN_INTERLOCKED_INL
+#define MOTOR_KERNEL_GCC_TSAN_INTERLOCKED_INL
 
 #include <motor/kernel/stdafx.h>
 #include <sanitizer/tsan_interface_atomic.h>
@@ -185,7 +186,9 @@ InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch(const value_t* p)
     return __tsan_atomic64_load(p, __tsan_memory_order_acquire);
 }
 
-InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_add(value_t* p, value_t incr)
+InterlockedType< 8 >::value_t
+InterlockedType< 8 >::fetch_and_add(value_t* p,  // NOLINT(readability-non-const-parameter)
+                                    value_t  incr)
 {
     return __tsan_atomic64_fetch_add(p, incr, __tsan_memory_order_acq_rel);
 }
@@ -195,7 +198,9 @@ InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_sub(value_t* p, va
     return fetch_and_add(p, -incr);
 }
 
-InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_set(value_t* p, value_t v)
+InterlockedType< 8 >::value_t
+InterlockedType< 8 >::fetch_and_set(value_t* p,  // NOLINT(readability-non-const-parameter)
+                                    value_t  v)
 {
     return __tsan_atomic64_exchange(p, v, __tsan_memory_order_acq_rel);
 }
@@ -232,3 +237,5 @@ bool InterlockedType< 8 >::set_conditional(tagged_t* p, tagged_t::value_t v,
 }
 
 }  // namespace knl
+
+#endif

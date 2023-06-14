@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SAMPLE_PYTHON_FUNCTIONS_META_HH
+#define MOTOR_SAMPLE_PYTHON_FUNCTIONS_META_HH
 
 #include <stdafx.h>
 
@@ -33,3 +34,5 @@ enum Enum
 };
 
 }}  // namespace Motor::TestCases
+
+#endif

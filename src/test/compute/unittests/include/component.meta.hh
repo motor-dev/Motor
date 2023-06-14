@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com> under New BSD License
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_TEST_COMPUTE_UNITTESTS_COMPONENT_META_HH
+#define MOTOR_TEST_COMPUTE_UNITTESTS_COMPONENT_META_HH
 
 #include <stdafx.h>
 #include <motor/world/component/component.meta.hh>
@@ -73,3 +74,5 @@ struct ComponentDouble
 };
 
 }}}}  // namespace Motor::Test::Compute::UnitTests
+
+#endif

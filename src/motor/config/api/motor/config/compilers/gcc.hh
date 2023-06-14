@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CONFIG_COMPILERS_GCC_HH
+#define MOTOR_CONFIG_COMPILERS_GCC_HH
 
 #define motor_alignof(t) __alignof__(t)
 #if(defined(_X86) || defined(_AMD64))
@@ -29,8 +30,8 @@
 #    define motor_pause()
 #endif
 
-#include <cstdint>
-#include <cstdlib>
+#include <stdint.h>
+#include <stdlib.h>
 typedef int8_t   i8;
 typedef int16_t  i16;
 typedef int32_t  i32;
@@ -69,4 +70,6 @@ typedef u8       byte;
 #else
 #    define MOTOR_EXPORT
 #    define MOTOR_IMPORT
+#endif
+
 #endif

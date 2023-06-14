@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_REFLECTION_LOCATION_META_HH
+#define MOTOR_REFLECTION_LOCATION_META_HH
 
 #include <motor/reflection/stdafx.h>
 
@@ -26,3 +27,5 @@ struct Location
 };
 
 }}}  // namespace Motor::Meta::Parse
+
+#endif

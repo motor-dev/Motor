@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com> under New BSD License
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_TEST_WORLD_COMPONENT_META_HH
+#define MOTOR_TEST_WORLD_COMPONENT_META_HH
 
 #include <stdafx.h>
 #include <motor/world/component/component.meta.hh>
@@ -16,3 +17,5 @@ motor_tag(Motor::World::LogicComponent()) struct Component2
 };
 
 }}}  // namespace Motor::Test::World
+
+#endif

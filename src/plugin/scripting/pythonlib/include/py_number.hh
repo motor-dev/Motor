@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_SCRIPTING_PYTHONLIB_PY_NUMBER_HH
+#define MOTOR_PLUGIN_SCRIPTING_PYTHONLIB_PY_NUMBER_HH
 
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <py_object.hh>
@@ -36,3 +37,5 @@ extern template struct PyMotorNumber< u32 >;
 extern template struct PyMotorNumber< u64 >;
 
 }}  // namespace Motor::Python
+
+#endif

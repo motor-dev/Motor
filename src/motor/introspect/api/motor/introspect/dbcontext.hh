@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_INTROSPECT_DBCONTEXT_HH
+#define MOTOR_INTROSPECT_DBCONTEXT_HH
 
 #include <motor/introspect/stdafx.h>
 #include <motor/filesystem/folder.meta.hh>
@@ -41,3 +42,5 @@ struct motor_api(INTROSPECT) DbContext
 };
 
 }}}  // namespace Motor::Meta::AST
+
+#endif

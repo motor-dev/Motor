@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CORE_MEMORY_ALLOCATORS_POOL_HH
+#define MOTOR_CORE_MEMORY_ALLOCATORS_POOL_HH
 
 #include <motor/core/stdafx.h>
 #include <motor/minitl/allocator.hh>
@@ -21,3 +22,5 @@ protected:
 };
 
 }  // namespace Motor
+
+#endif

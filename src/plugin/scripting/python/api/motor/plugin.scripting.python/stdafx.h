@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_SCRIPTING_PYTHON_STDAFX_H
+#define MOTOR_PLUGIN_SCRIPTING_PYTHON_STDAFX_H
 
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <motor/stdafx.h>
@@ -11,4 +12,6 @@
 #    define MOTOR_API_PYTHON MOTOR_IMPORT
 #else
 #    define MOTOR_API_PYTHON
+#endif
+
 #endif

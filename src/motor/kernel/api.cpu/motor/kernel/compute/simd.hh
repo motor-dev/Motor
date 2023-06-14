@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_KERNEL_COMPUTE_SIMD_HH
+#define MOTOR_KERNEL_COMPUTE_SIMD_HH
 
 #include <motor/kernel/stdafx.h>
 
@@ -119,3 +120,5 @@ typedef knl::array< double, 8 >  double8;
 typedef knl::array< double, 16 > double16;
 
 }  // namespace knl
+
+#endif

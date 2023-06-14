@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_REFLECTION_VALUEPARSE_HH
+#define MOTOR_REFLECTION_VALUEPARSE_HH
 
 #include <motor/reflection/stdafx.h>
 #include <motor/introspect/dbcontext.hh>
@@ -17,3 +18,5 @@ motor_api(REFLECTION) ref< AST::Node > parseValue(minitl::allocator& arena,
 motor_api(REFLECTION) Meta::Value
     quickParse(minitl::allocator& arena, const char* strBegin, const char* strEnd = nullptr);
 }}  // namespace Motor::Meta
+
+#endif

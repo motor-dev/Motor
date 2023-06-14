@@ -4,7 +4,7 @@
 #include <motor/filesystem/stdafx.h>
 #include <windows/file.hh>
 
-#include <cstdio>
+#include <stdio.h>
 
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX

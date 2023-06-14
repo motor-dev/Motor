@@ -1,13 +1,14 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_FILESYSTEM_ZIPFILE_HH
+#define MOTOR_FILESYSTEM_ZIPFILE_HH
 
 #include <motor/filesystem/stdafx.h>
 #include <motor/filesystem/file.meta.hh>
 
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include <cstdio>
 #include <unzip.h>
 
 namespace Motor {
@@ -29,3 +30,5 @@ private:
 };
 
 }  // namespace Motor
+
+#endif

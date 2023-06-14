@@ -4,8 +4,8 @@
 #include <motor/core/stdafx.h>
 #include <motor/core/environment.hh>
 
-#include <cerrno>
-#include <cstdio>
+#include <errno.h>
+#include <stdio.h>
 #include <sys/types.h>
 
 #include <sys/sysctl.h>

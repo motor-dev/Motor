@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_FILESYSTEM_ZIPFOLDER_META_HH
+#define MOTOR_FILESYSTEM_ZIPFOLDER_META_HH
 
 #include <motor/filesystem/stdafx.h>
 #include <motor/filesystem/folder.meta.hh>
@@ -28,3 +29,5 @@ published:
 };
 
 }  // namespace Motor
+
+#endif

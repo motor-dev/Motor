@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_TAGS_DOCUMENTATION_META_HH
+#define MOTOR_META_TAGS_DOCUMENTATION_META_HH
 
 #include <motor/meta/stdafx.h>
 
@@ -18,3 +19,5 @@ published:
 };
 
 }}  // namespace Motor::Meta
+
+#endif

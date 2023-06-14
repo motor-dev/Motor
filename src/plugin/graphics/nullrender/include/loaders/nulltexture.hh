@@ -1,3 +1,6 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GRAPHICS_NULLRENDER_LOADERS_NULLTEXTURE_HH
+#define MOTOR_PLUGIN_GRAPHICS_NULLRENDER_LOADERS_NULLTEXTURE_HH
+
+#endif

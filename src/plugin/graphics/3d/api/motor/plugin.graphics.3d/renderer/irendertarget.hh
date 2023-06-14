@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GRAPHICS_3D_RENDERER_IRENDERTARGET_HH
+#define MOTOR_PLUGIN_GRAPHICS_3D_RENDERER_IRENDERTARGET_HH
 
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/plugin.graphics.3d/renderer/igpuresource.hh>
@@ -44,3 +45,5 @@ public:
 };
 
 }  // namespace Motor
+
+#endif

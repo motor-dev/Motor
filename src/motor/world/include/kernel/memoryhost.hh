@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_WORLD_MEMORYHOST_HH
+#define MOTOR_WORLD_MEMORYHOST_HH
 
 #include <motor/world/stdafx.h>
 #include <motor/core/memory/allocators/system.hh>
@@ -21,3 +22,5 @@ public:
 };
 
 }}  // namespace Motor::World
+
+#endif

@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_KERNEL_GCC_ARM_INTERLOCKED_INL
+#define MOTOR_KERNEL_GCC_ARM_INTERLOCKED_INL
 
 #include <motor/kernel/stdafx.h>
 
@@ -170,3 +171,5 @@ struct InterlockedType< 2 > : public InterlockedType< 4 >
 };
 
 }  // namespace knl
+
+#endif

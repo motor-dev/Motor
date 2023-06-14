@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CORE_THREADS_SEMAPHORE_HH
+#define MOTOR_CORE_THREADS_SEMAPHORE_HH
 
 #include <motor/core/stdafx.h>
 #include <motor/core/threads/waitable.hh>
@@ -28,3 +29,5 @@ public:
 };
 
 }  // namespace Motor
+
+#endif

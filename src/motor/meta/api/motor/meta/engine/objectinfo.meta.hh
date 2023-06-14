@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_ENGINE_OBJECTINFO_META_HH
+#define MOTOR_META_ENGINE_OBJECTINFO_META_HH
 
 #include <motor/meta/stdafx.h>
 #include <motor/meta/engine/helper/staticarray.hh>
@@ -19,3 +20,5 @@ struct motor_api(META) ObjectInfo
 };
 
 }}  // namespace Motor::Meta
+
+#endif

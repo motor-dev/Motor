@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GRAPHICS_TEXT_PLUGIN_HH
+#define MOTOR_PLUGIN_GRAPHICS_TEXT_PLUGIN_HH
 
 #include <motor/plugin.graphics.text/stdafx.h>
 #include <motor/minitl/pointer.hh>
@@ -30,3 +31,5 @@ public:
 };
 
 }  // namespace Motor
+
+#endif

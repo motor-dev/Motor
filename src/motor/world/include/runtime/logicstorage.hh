@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_WORLD_LOGICSTORAGE_HH
+#define MOTOR_WORLD_LOGICSTORAGE_HH
 
 #include <motor/world/stdafx.h>
 
@@ -25,3 +26,5 @@ public:
 };
 
 }}  // namespace Motor::World
+
+#endif

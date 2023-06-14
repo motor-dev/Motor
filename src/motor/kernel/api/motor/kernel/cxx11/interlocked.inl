@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
 see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_KERNEL_CXX11_INTERLOCKED_INL
+#define MOTOR_KERNEL_CXX11_INTERLOCKED_INL
 
 #include <atomic>
 
@@ -176,3 +177,5 @@ struct InterlockedType< 8 >
 };
 
 }  // namespace knl
+
+#endif

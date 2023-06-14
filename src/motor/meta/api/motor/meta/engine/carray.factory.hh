@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_ENGINE_CARRAY_FACTORY_HH
+#define MOTOR_META_ENGINE_CARRAY_FACTORY_HH
 
 #include <motor/meta/stdafx.h>
 #include <motor/meta/classinfo.meta.hh>
@@ -239,3 +240,5 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< const T[Count] >::klass()
 }
 
 }}  // namespace Motor::Meta
+
+#endif

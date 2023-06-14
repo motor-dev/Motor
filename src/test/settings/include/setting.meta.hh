@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_TEST_SETTINGS_SETTINGS_META_HH
+#define MOTOR_TEST_SETTINGS_SETTINGS_META_HH
 
 #include <stdafx.h>
 #include <motor/settings/settings.factory.hh>
@@ -23,3 +24,5 @@ struct TestSettings : public Settings::Settings< TestSettings >
 };
 
 }}  // namespace Motor::TestSettings
+
+#endif

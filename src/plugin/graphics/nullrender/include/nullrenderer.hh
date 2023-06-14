@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GRAPHICS_NULLRENDER_NULLRENDERER_HH
+#define MOTOR_PLUGIN_GRAPHICS_NULLRENDER_NULLRENDERER_HH
 
 #include <stdafx.h>
 #include <motor/filesystem/folder.meta.hh>
@@ -36,3 +37,5 @@ private:
 };
 
 }}  // namespace Motor::Null
+
+#endif

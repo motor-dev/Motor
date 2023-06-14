@@ -7,10 +7,10 @@
 #include <sys/types.h>
 #include <watchpoint.hh>
 #include DIRENT_H
-#include <cerrno>
-#include <climits>
-#include <cstdio>
+#include <errno.h>
+#include <limits.h>
 #include <posix/file.hh>
+#include <stdio.h>
 
 namespace Motor {
 

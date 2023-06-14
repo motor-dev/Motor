@@ -1,9 +1,11 @@
 /* Motor <motor.devel@gmail.com>
 see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_ENGINE_HELPER_STATICARRAY_FACTORY_HH
+#define MOTOR_META_ENGINE_HELPER_STATICARRAY_FACTORY_HH
 
 #include <motor/meta/stdafx.h>
 #include <motor/meta/classinfo.meta.hh>
+
 #include <motor/meta/engine/helper/method.hh>
 #include <motor/meta/engine/helper/staticarray.hh>
 #include <motor/meta/engine/methodinfo.meta.hh>
@@ -25,11 +27,30 @@ struct ClassID< Meta::staticarray< T > >
     static Meta::Value      indexConst(const Meta::Value& v, u32 i);
 
     static Meta::Value callStaticArrayOperatorIndex(raw< const Meta::Method > method,
-                                                    Meta::Value* params, u32 paramCount);
-    static Meta::Value callStaticArraySize(raw< const Meta::Method > method, Meta::Value* params,
-                                           u32 paramCount);
+                                                    Meta::Value* params, u32 paramCount)
+    {
+        motor_forceuse(method);
+        motor_assert_format(paramCount == 1, "expected 1 parameter; received {0}", paramCount);
+        return Meta::Value(
+            params[0].as< Meta::staticarray< T >& >().operator[](params[1].as< u32 >()));
+    }
+
     static Meta::Value callStaticArrayOperatorIndexConst(raw< const Meta::Method > method,
-                                                         Meta::Value* params, u32 paramCount);
+                                                         Meta::Value* params, u32 paramCount)
+    {
+        motor_forceuse(method);
+        motor_assert_format(paramCount == 2, "expected 2 parameter; received {0}", paramCount);
+        return Meta::Value(
+            params[0].as< const Meta::staticarray< T >& >().operator[](params[1].as< u32 >()));
+    }
+
+    static Meta::Value callStaticArraySize(raw< const Meta::Method > method, Meta::Value* params,
+                                           u32 paramCount)
+    {
+        motor_forceuse(method);
+        motor_assert_format(paramCount == 1, "expected 1 parameter; received {0}", paramCount);
+        return Meta::Value(params[0].as< const Meta::staticarray< T >& >().count);
+    }
 
     static const Meta::Method::Parameter  s_index_0_params[2];
     static const Meta::Method::Parameter  s_index_1_params[2];
@@ -67,36 +88,6 @@ template < typename T >
 Meta::Value ClassID< Meta::staticarray< T > >::indexConst(const Meta::Value& v, u32 i)
 {
     return Meta::Value(Meta::Value::ByRef(v.as< const Meta::staticarray< T >& >().operator[](i)));
-}
-
-template < typename T >
-Meta::Value
-ClassID< Meta::staticarray< T > >::callStaticArrayOperatorIndex(raw< const Meta::Method > method,
-                                                                Meta::Value* params, u32 paramCount)
-{
-    motor_forceuse(method);
-    motor_assert_format(paramCount == 1, "expected 1 parameter; received {0}", paramCount);
-    return Meta::Value(params[0].as< Meta::staticarray< T >& >().operator[](params[1].as< u32 >()));
-}
-
-template < typename T >
-Meta::Value ClassID< Meta::staticarray< T > >::callStaticArraySize(raw< const Meta::Method > method,
-                                                                   Meta::Value*              params,
-                                                                   u32 paramCount)
-{
-    motor_forceuse(method);
-    motor_assert_format(paramCount == 1, "expected 1 parameter; received {0}", paramCount);
-    return Meta::Value(params[0].as< const Meta::staticarray< T >& >().count);
-}
-
-template < typename T >
-Meta::Value ClassID< Meta::staticarray< T > >::callStaticArrayOperatorIndexConst(
-    raw< const Meta::Method > method, Meta::Value* params, u32 paramCount)
-{
-    motor_forceuse(method);
-    motor_assert_format(paramCount == 2, "expected 2 parameter; received {0}", paramCount);
-    return Meta::Value(
-        params[0].as< const Meta::staticarray< T >& >().operator[](params[1].as< u32 >()));
 }
 
 template < typename T >
@@ -176,3 +167,5 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< Meta::staticarray< T > >::klass()
 }
 
 }}  // namespace Motor::Meta
+
+#endif

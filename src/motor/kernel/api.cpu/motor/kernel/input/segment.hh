@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_KERNEL_INPUT_SEGMENT_HH
+#define MOTOR_KERNEL_INPUT_SEGMENT_HH
 
 #include <motor/kernel/stdafx.h>
 
@@ -36,3 +37,5 @@ public:
 };
 
 }  // namespace knl
+
+#endif

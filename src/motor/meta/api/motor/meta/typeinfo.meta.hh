@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_TYPEINFO_META_HH
+#define MOTOR_META_TYPEINFO_META_HH
 
 #include <motor/meta/stdafx.h>
 #include <motor/meta/classinfo.meta.hh>
@@ -79,3 +80,5 @@ static inline ConversionCost calculateConversion(const Type& type, const Type& t
 }}  // namespace Motor::Meta
 
 #include <motor/meta/typeinfo_format.hh>
+
+#endif

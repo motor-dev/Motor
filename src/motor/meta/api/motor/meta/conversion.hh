@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_CONVERSION_HH
+#define MOTOR_META_CONVERSION_HH
 
 #include <motor/meta/stdafx.h>
 #include <motor/meta/conversion.meta.hh>
@@ -108,3 +109,5 @@ ConversionCost ConversionCalculator< knl::array< T, 2 > >::calculate(const Type&
 }
 
 }}  // namespace Motor::Meta
+
+#endif

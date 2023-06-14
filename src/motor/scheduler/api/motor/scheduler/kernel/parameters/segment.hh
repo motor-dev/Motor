@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_KERNEL_PARAMETERS_SEGMENT_HH
+#define MOTOR_SCHEDULER_KERNEL_PARAMETERS_SEGMENT_HH
 
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
@@ -39,3 +40,5 @@ struct ParamTypeToKernelType< ::knl::segment< T > >
 }}  // namespace Motor::KernelScheduler
 
 #include <motor/scheduler/kernel/parameters/segment.factory.hh>
+
+#endif

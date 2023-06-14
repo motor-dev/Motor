@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_KERNEL_PARAMETERS_IMAGE2D_HH
+#define MOTOR_SCHEDULER_KERNEL_PARAMETERS_IMAGE2D_HH
 
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
@@ -31,3 +32,5 @@ IImage2D::ParameterRegistration Image2D< T >::s_registration(motor_class< T >(),
 }}  // namespace Motor::KernelScheduler
 
 #include <motor/scheduler/kernel/parameters/image2d.factory.hh>
+
+#endif

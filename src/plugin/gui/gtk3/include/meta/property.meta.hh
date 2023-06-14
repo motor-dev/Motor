@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_GUI_GTK3_META_PROPERTY_META_HH
+#define MOTOR_PLUGIN_GUI_GTK3_META_PROPERTY_META_HH
 
 #include <stdafx.h>
 #include <motor/meta/engine/propertyinfo.meta.hh>
@@ -19,3 +20,5 @@ public:
 };
 
 }}  // namespace Motor::Gtk3
+
+#endif

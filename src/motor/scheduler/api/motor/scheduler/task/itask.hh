@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_TASK_ITASK_HH
+#define MOTOR_SCHEDULER_TASK_ITASK_HH
 
 #include <motor/scheduler/stdafx.h>
 #include <motor/core/threads/criticalsection.hh>
@@ -98,3 +99,5 @@ public:
 };
 
 }}  // namespace Motor::Task
+
+#endif

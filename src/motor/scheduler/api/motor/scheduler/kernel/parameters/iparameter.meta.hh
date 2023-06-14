@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_KERNEL_PARAMETERS_IPARAMETER_HH
+#define MOTOR_SCHEDULER_KERNEL_PARAMETERS_IPARAMETER_HH
 
 #include <motor/scheduler/stdafx.h>
 
@@ -191,3 +192,5 @@ public:
 };
 
 }}  // namespace Motor::KernelScheduler
+
+#endif

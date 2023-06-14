@@ -6,7 +6,7 @@
 
 #include <motor/core/threads/mutex.hh>
 
-#include <cstdio>
+#include <stdio.h>
 #include <windows.h>
 
 namespace Motor {

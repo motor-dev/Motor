@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_WORLD_UPDATE_CONTEXT_HH
+#define MOTOR_WORLD_UPDATE_CONTEXT_HH
 
 #include <motor/world/stdafx.h>
 #include <motor/world/event/context.meta.hh>
@@ -14,3 +15,5 @@ struct UpdateContext
 };
 
 }}  // namespace Motor::World
+
+#endif

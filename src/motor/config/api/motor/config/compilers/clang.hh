@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CONFIG_COMPILERS_CLANG_HH
+#define MOTOR_CONFIG_COMPILERS_CLANG_HH
 
 #define motor_alignof(t) __alignof__(t)
 #if defined(_X86) || defined(_AMD64)
@@ -32,18 +33,17 @@
 #    define motor_pause()
 #endif
 
-#include <cstdint>
-#include <cstdlib>
-typedef int8_t      i8;
-typedef int16_t     i16;
-typedef int32_t     i32;
-typedef int64_t     i64;
-typedef uint8_t     u8;
-typedef uint16_t    u16;
-typedef uint32_t    u32;
-typedef uint64_t    u64;
-typedef u8          byte;
-typedef std::size_t size_t;
+#include <stdint.h>
+#include <stdlib.h>
+typedef int8_t   i8;
+typedef int16_t  i16;
+typedef int32_t  i32;
+typedef int64_t  i64;
+typedef uint8_t  u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+typedef u8       byte;
 
 #ifndef _MSC_VER
 #    if(__clang_major__ >= 3)
@@ -78,4 +78,6 @@ typedef std::size_t size_t;
 #else
 #    define MOTOR_EXPORT
 #    define MOTOR_IMPORT
+#endif
+
 #endif

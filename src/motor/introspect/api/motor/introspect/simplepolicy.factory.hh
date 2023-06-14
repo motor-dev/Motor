@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_INTROSPECT_SIMPLEPOLICY_FACTORY_HH
+#define MOTOR_INTROSPECT_SIMPLEPOLICY_FACTORY_HH
 
 #include <motor/introspect/stdafx.h>
 #include <motor/introspect/policy.meta.hh>
@@ -63,3 +64,5 @@ struct ClassID< AST::SimplePolicy< INTROSPECTION_HINT > >
 };
 
 }}  // namespace Motor::Meta
+
+#endif

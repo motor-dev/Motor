@@ -1,10 +1,11 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_MINITL_ASSERT_HH
+#define MOTOR_MINITL_ASSERT_HH
 
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/format.hh>
-#include <cstdlib>
+#include <stdlib.h>
 
 namespace minitl {
 
@@ -62,3 +63,5 @@ static inline bool assertCondition()
 #define motor_notreached() motor_assert_impl_(!"reached", "should not reach code")
 
 }  // namespace minitl
+
+#endif

@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_KERNEL_PARAMETERS_STREAM_HH
+#define MOTOR_SCHEDULER_KERNEL_PARAMETERS_STREAM_HH
 
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
@@ -30,3 +31,5 @@ IStream::ParameterRegistration Stream< T >::s_registration(motor_class< T >(),
 }}  // namespace Motor::KernelScheduler
 
 #include <motor/scheduler/kernel/parameters/stream.factory.hh>
+
+#endif

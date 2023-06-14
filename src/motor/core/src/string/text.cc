@@ -4,7 +4,7 @@
 #include <motor/core/stdafx.h>
 #include <motor/core/string/text.hh>
 
-#include <cstring>
+#include <string.h>
 
 namespace Motor {
 

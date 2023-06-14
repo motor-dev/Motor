@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_SCRIPTING_PYTHONLIB_PY_LOG_HH
+#define MOTOR_PLUGIN_SCRIPTING_PYTHONLIB_PY_LOG_HH
 
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <motor/core/logger.hh>
@@ -32,3 +33,5 @@ struct PyMotorLog
 };
 
 }}  // namespace Motor::Python
+
+#endif

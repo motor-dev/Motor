@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CORE_STRING_ISTRING_HH
+#define MOTOR_CORE_STRING_ISTRING_HH
 
 #include <motor/core/coredefs.hh>
 #include <motor/minitl/format.hh>
@@ -208,3 +209,5 @@ struct hash< Motor::istring >
 };
 
 }  // namespace minitl
+
+#endif

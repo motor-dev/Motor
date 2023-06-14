@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CORE_MD5_HH
+#define MOTOR_CORE_MD5_HH
 
 #include <motor/core/stdafx.h>
 #include <motor/minitl/format.hh>
@@ -34,3 +35,5 @@ motor_api(CORE) u32
                        u32 reservedLength, u32 maxCapacity);
 
 }  // namespace Motor
+
+#endif

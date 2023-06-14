@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_MINITL_RAWPTR_HH
+#define MOTOR_MINITL_RAWPTR_HH
 
 #include <motor/minitl/stdafx.h>
 
@@ -14,9 +15,9 @@ public:
 
 public:
     MOTOR_ALWAYS_INLINE T* operator->() const;
-    inline                 operator const void*() const;  // NOLINT(google-explicit-constructor)
-    inline bool            operator!() const;
-    MOTOR_ALWAYS_INLINE T& operator*();
+    inline operator const void*() const;  // NOLINT(google-explicit-constructor)
+    inline bool                  operator!() const;
+    MOTOR_ALWAYS_INLINE T&       operator*();
     MOTOR_ALWAYS_INLINE const T& operator*() const;
 
     template < typename U >
@@ -31,41 +32,8 @@ public:
     static inline raw< T > null();
 };
 
-template < typename T >
-T* raw< T >::operator->() const
-{
-    return m_ptr;
-}
-
-template < typename T >
-raw< T >::operator const void*() const
-{
-    return m_ptr;
-}
-
-template < typename T >
-bool raw< T >::operator!() const
-{
-    return m_ptr == 0;
-}
-
-template < typename T >
-T& raw< T >::operator*()
-{
-    return *m_ptr;
-}
-
-template < typename T >
-const T& raw< T >::operator*() const
-{
-    return *m_ptr;
-}
-
-template < typename T >
-raw< T > raw< T >::null()
-{
-    raw< T > result = {0};
-    return result;
-}
-
 }  // namespace minitl
+
+#include <motor/minitl/inl/rawptr.hh>
+
+#endif

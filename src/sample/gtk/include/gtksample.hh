@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SAMPLE_GTK_GTKSAMPLE_HH
+#define MOTOR_SAMPLE_GTK_GTKSAMPLE_HH
 
 #include <stdafx.h>
 #include <motor/application.hh>
@@ -25,3 +26,5 @@ public:
 };
 
 }  // namespace Motor
+
+#endif

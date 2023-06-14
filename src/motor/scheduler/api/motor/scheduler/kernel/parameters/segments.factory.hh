@@ -1,9 +1,9 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_KERNEL_PARAMETERS_SEGMENTS_FACTORY_HH
+#define MOTOR_SCHEDULER_KERNEL_PARAMETERS_SEGMENTS_FACTORY_HH
 
-#include <motor/scheduler/stdafx.h>
-#include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
+#include <motor/scheduler/kernel/parameters/segments.hh>
 
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
@@ -65,3 +65,5 @@ struct ClassID< KernelScheduler::Segments< T > >
 };
 
 }}  // namespace Motor::Meta
+
+#endif

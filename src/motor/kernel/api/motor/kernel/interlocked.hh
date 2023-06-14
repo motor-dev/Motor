@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_KERNEL_INTERLOCKED_HH
+#define MOTOR_KERNEL_INTERLOCKED_HH
 
 #include <motor/kernel/stdafx.h>
 
@@ -169,3 +170,5 @@ typedef knl::interlocked< i16 >    i_i16;
 typedef knl::interlocked< i32 >    i_i32;
 typedef knl::interlocked< size_t > i_size_t;
 using knl::iptr;
+
+#endif

@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_STDAFX_H
+#define MOTOR_META_STDAFX_H
 
 #include <motor/core/stdafx.h>
 #include <motor/kernel/colors.hh>
@@ -40,5 +41,7 @@ motor_api(META) weak< Logger > meta();
 }
 
 }  // namespace Motor
+
+#endif
 
 #endif

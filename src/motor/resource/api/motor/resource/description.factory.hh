@@ -1,8 +1,9 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_RESOURCE_DESCRIPTION_FACTORY_HH
+#define MOTOR_RESOURCE_DESCRIPTION_FACTORY_HH
 
-#include <motor/resource/stdafx.h>
+#include <motor/resource/description.hh>
 
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/objectinfo.meta.hh>
@@ -17,13 +18,20 @@ struct ClassID< Resource::Description< T > >
     static const Meta::OperatorTable             s_operatorTable;
     MOTOR_EXPORT static raw< const Meta::Class > klass()
     {
-        static const Meta::Class s_class = {name(), u32(sizeof(Resource::Description< T >)),
-                                            0,      Meta::ClassType_Object,
-                                            {0},    motor_class< Resource::IDescription >(),
-                                            {0},    {0},
-                                            {0, 0}, {0, 0},
-                                            {0},    {&s_operatorTable},
-                                            0,      0};
+        static const Meta::Class s_class = {name(),
+                                            u32(sizeof(Resource::Description< T >)),
+                                            0,
+                                            Meta::ClassType_Object,
+                                            {nullptr},
+                                            motor_class< Resource::IDescription >(),
+                                            {nullptr},
+                                            {nullptr},
+                                            {0, nullptr},
+                                            {0, nullptr},
+                                            {nullptr},
+                                            {&s_operatorTable},
+                                            nullptr,
+                                            nullptr};
         raw< const Meta::Class > result  = {&s_class};
         return result;
     }
@@ -40,3 +48,5 @@ const Meta::OperatorTable ClassID< Resource::Description< T > >::s_operatorTable
     = {{0}, {0, 0}, motor_class< T >()};
 
 }}  // namespace Motor::Meta
+
+#endif

@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_SCHEDULER_HH
+#define MOTOR_SCHEDULER_SCHEDULER_HH
 
 #include <motor/scheduler/stdafx.h>
 #include <motor/minitl/array.hh>
@@ -70,3 +71,5 @@ public:
 };
 
 }  // namespace Motor
+
+#endif

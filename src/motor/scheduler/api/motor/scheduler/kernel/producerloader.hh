@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_KERNEL_PRODUCERLOADER_HH
+#define MOTOR_SCHEDULER_KERNEL_PRODUCERLOADER_HH
 
 #include <motor/scheduler/stdafx.h>
 
@@ -33,3 +34,5 @@ public:
 };
 
 }}  // namespace Motor::KernelScheduler
+
+#endif

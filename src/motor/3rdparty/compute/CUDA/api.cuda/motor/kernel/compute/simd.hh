@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_KERNEL_COMPUTE_SIMD_HH
+#define MOTOR_KERNEL_COMPUTE_SIMD_HH
 
 namespace knl {
 
@@ -26,3 +27,5 @@ typedef int4 int8[2];
 typedef int4 int16[4];
 
 }
+
+#endif

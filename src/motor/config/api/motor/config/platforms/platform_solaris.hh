@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CONFIG_PLATFORMS_PLATFORM_SOLARIS_HH
+#define MOTOR_CONFIG_PLATFORMS_PLATFORM_SOLARIS_HH
 
 #define MOTOR_PLATFORM_NAME  SunOS
 #define MOTOR_PLATFORM_SUN   1
@@ -9,9 +10,11 @@
 
 #include <alloca.h>
 #include <malloc.h>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #define malloca  alloca
 #define freea(p) (void)p
 #define DIRENT_H <dirent.h>
+
+#endif

@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_KERNEL_ISCHEDULER_HH
+#define MOTOR_SCHEDULER_KERNEL_ISCHEDULER_HH
 
 #include <motor/scheduler/stdafx.h>
 #include <motor/scheduler/kernel/imemorybuffer.hh>
@@ -40,3 +41,5 @@ public:
 };
 
 }}  // namespace Motor::KernelScheduler
+
+#endif

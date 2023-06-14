@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_CONFIG_COMPILER_HH
+#define MOTOR_CONFIG_COMPILER_HH
 
 #define __host    __host__ // NOLINT(bugprone-reserved-identifier)
 #define __device  __device__ // NOLINT(bugprone-reserved-identifier)
@@ -30,3 +31,5 @@ typedef u8                  byte;
 #define kernel_constant   __device const
 #define kernel_global     __device
 #define kernel_generic
+
+#endif

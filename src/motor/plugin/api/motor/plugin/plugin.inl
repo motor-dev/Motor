@@ -1,8 +1,11 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_PLUGIN_PLUGIN_INL
+#define MOTOR_PLUGIN_PLUGIN_INL
 
 #include <motor/plugin/stdafx.h>
+#include <motor/plugin/plugin.hh>
+
 #include <motor/core/environment.hh>
 #include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/engine/helper/staticarray.hh>
@@ -215,3 +218,5 @@ raw< const Meta::Class > Plugin< T >::pluginNamespace() const
 }
 
 }}  // namespace Motor::Plugin
+
+#endif

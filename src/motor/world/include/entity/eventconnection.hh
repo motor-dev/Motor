@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_WORLD_EVENTCONNECTION_HH
+#define MOTOR_WORLD_EVENTCONNECTION_HH
 
 #include <motor/world/stdafx.h>
 
@@ -23,3 +24,5 @@ struct motor_api(WORLD) CommandConnectionList
 };
 
 }}  // namespace Motor::World
+
+#endif

@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_META_TYPEINFO_HH
+#define MOTOR_META_TYPEINFO_HH
 
 #include <motor/meta/stdafx.h>
 #include <motor/meta/typeinfo.meta.hh>
@@ -244,3 +245,5 @@ raw< const Motor::Meta::Class > motor_class()
 {
     return Motor::Meta::ClassID< T >::klass();
 }
+
+#endif

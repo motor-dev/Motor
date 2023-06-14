@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_KERNEL_COMPUTE_INTERLOCKED_INL
+#define MOTOR_KERNEL_COMPUTE_INTERLOCKED_INL
 
 #include <motor/kernel/stdafx.h>
 
@@ -212,3 +213,5 @@ __device InterlockedType< 8 >::value_t InterlockedType< 8 >::set_and_fetch(kerne
 }
 
 }  // namespace knl
+
+#endif

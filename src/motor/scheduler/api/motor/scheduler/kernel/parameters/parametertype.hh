@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_SCHEDULER_KERNEL_PARAMETERS_PARAMETERTYPE_HH
+#define MOTOR_SCHEDULER_KERNEL_PARAMETERS_PARAMETERTYPE_HH
 
 #include <motor/scheduler/stdafx.h>
 
@@ -25,3 +26,5 @@ struct ParamTypeToKernelType< T& >
 };
 
 }}  // namespace Motor::KernelScheduler
+
+#endif

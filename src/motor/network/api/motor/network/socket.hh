@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_NETWORK_SOCKET_HH
+#define MOTOR_NETWORK_SOCKET_HH
 
 #include <motor/network/stdafx.h>
 
@@ -14,3 +15,5 @@ public:
 };
 
 }}  // namespace Motor::Network
+
+#endif

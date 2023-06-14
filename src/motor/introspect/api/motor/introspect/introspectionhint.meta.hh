@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_INTROSPECT_INTROSPECTIONHINT_META_HH
+#define MOTOR_INTROSPECT_INTROSPECTIONHINT_META_HH
 
 #include <motor/introspect/stdafx.h>
 
@@ -39,3 +40,5 @@ public:
 }}}  // namespace Motor::Meta::AST
 
 #include <motor/introspect/introspectionhint.inl>
+
+#endif

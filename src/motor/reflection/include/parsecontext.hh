@@ -1,6 +1,7 @@
 /* Motor <motor.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
-#pragma once
+#ifndef MOTOR_REFLECTION_PARSECONTEXT_HH
+#define MOTOR_REFLECTION_PARSECONTEXT_HH
 
 #include <motor/reflection/stdafx.h>
 #include <motor/introspect/dbcontext.hh>
@@ -53,3 +54,5 @@ extern ParseContext* g_parseContext;
 
 extern "C" int motor_value_parse(Motor::Meta::Parse::ParseContext* context);
 extern "C" int motor_value_lex_destroy();
+
+#endif
