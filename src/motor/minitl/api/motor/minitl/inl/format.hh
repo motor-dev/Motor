@@ -489,10 +489,13 @@ static MOTOR_ALWAYS_INLINE u32 format_arg_partial_delegate(char* destination, T&
                                                            const format_options& options,
                                                            u32 reserved_length, u32 max_capacity)
 {
-    char* buffer = static_cast< char* >(malloca(reserved_length));
-    WRAPPED_FORMATTER::write(buffer, minitl::forward< T >(value), options, reserved_length);
-    memcpy(destination, buffer, max_capacity);
-    freea(buffer);
+    if(reserved_length)
+    {
+        char* buffer = static_cast< char* >(malloca(reserved_length));
+        WRAPPED_FORMATTER::write(buffer, minitl::forward< T >(value), options, reserved_length);
+        memcpy(destination, buffer, max_capacity);
+        freea(buffer);
+    }
     return max_capacity;
 }
 
