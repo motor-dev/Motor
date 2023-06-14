@@ -612,7 +612,7 @@ def rc_file(self, node):
 
 @extension('.c', '.m')
 def c_hook(self, node):
-    if 'motor:c' in self.features:
+    if 'motor:c' in self.features and node not in self.nomaster:
         if 'motor:masterfiles:folder' in self.features and not Options.options.nomaster:
             try:
                 mastertask_c = self.mastertasks_c_folders[node.parent]
@@ -657,7 +657,7 @@ def c_hook(self, node):
 
 @extension('.cc', '.cxx', '.cpp', '.mm')
 def cc_hook(self, node):
-    if 'motor:cxx' in self.features:
+    if 'motor:cxx' in self.features and node not in self.nomaster:
         if 'motor:masterfiles:folder' in self.features and not Options.options.nomaster:
             try:
                 mastertask_cxx = self.mastertasks_cxx_folders[node.parent]
@@ -678,30 +678,22 @@ def cc_hook(self, node):
                 self.mastertasks_cxx_folders[node.parent] = mastertask_cxx
                 self.create_compiled_task('cxx', output)
         elif 'motor:masterfiles:off' not in self.features and not Options.options.nomaster:
-            if node.name.endswith('-instances.cc'):
-                try:
-                    self.instancetask_cxx.set_inputs([node])
-                except:
-                    output = self.make_bld_node('src', None, 'instances-master-cxx.%s' % (self.objc and 'mm' or 'cc'))
-                    self.instancetask_cxx = self.create_task('master', [node], [output])
-                    self.create_compiled_task('cxx', output)
-            else:
-                try:
-                    mastertask_cxx = self.mastertasks_cxx[-1]
-                    if len(mastertask_cxx.inputs) <= 10:
-                        mastertask_cxx.set_inputs([node])
-                    else:
-                        output = self.make_bld_node(
-                            'src', None, 'master-cxx-%d.%s' % (len(self.mastertasks_cxx), self.objc and 'mm' or 'cc')
-                        )
-                        mastertask_cxx = self.create_task('master', [node], [output])
-                        self.mastertasks_cxx.append(mastertask_cxx)
-                        self.create_compiled_task('cxx', output)
-                except:
-                    output = self.make_bld_node('src', None, 'master-cxx-0.%s' % (self.objc and 'mm' or 'cc'))
+            try:
+                mastertask_cxx = self.mastertasks_cxx[-1]
+                if len(mastertask_cxx.inputs) <= 10:
+                    mastertask_cxx.set_inputs([node])
+                else:
+                    output = self.make_bld_node(
+                        'src', None, 'master-cxx-%d.%s' % (len(self.mastertasks_cxx), self.objc and 'mm' or 'cc')
+                    )
                     mastertask_cxx = self.create_task('master', [node], [output])
-                    self.mastertasks_cxx = [mastertask_cxx]
+                    self.mastertasks_cxx.append(mastertask_cxx)
                     self.create_compiled_task('cxx', output)
+            except:
+                output = self.make_bld_node('src', None, 'master-cxx-0.%s' % (self.objc and 'mm' or 'cc'))
+                mastertask_cxx = self.create_task('master', [node], [output])
+                self.mastertasks_cxx = [mastertask_cxx]
+                self.create_compiled_task('cxx', output)
         else:
             self.create_compiled_task('cxx', node)
     else:
@@ -783,7 +775,7 @@ dbg_strip_cls.exec_command = exec_command_objcopy
 
 @taskgen_method
 def strip_debug_info_impl(self):
-    if self.env.STRIP_BINARY and self.env.STRIP and self.env.OBJCOPY:
+    if self.env.STRIP_BINARY and self.env.STRIP and self.env.OBJCOPY and False:
         try:
             optim = self.bld.optim
         except AttributeError:

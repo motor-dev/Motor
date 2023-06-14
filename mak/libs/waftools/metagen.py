@@ -56,32 +56,57 @@ class docgen(Task.Task):
         return 0
 
 
-class nsdef(Task.Task):
+class meta_export(Task.Task):
 
     def run(self):
         seen = set([])
-        with open(self.outputs[0].abspath(), 'w') as namespace_file:
+        with open(self.outputs[0].abspath(), 'w') as export_file:
             pch = getattr(self, 'pch', '')
             if pch:
-                namespace_file.write('#include <%s>\n' % pch)
-            namespace_file.write('#include <motor/meta/engine/namespace.hh>\n')
+                export_file.write('#include <%s>\n' % pch)
+            export_file.write('#include <motor/meta/engine/namespace.hh>\n')
+            export_file.write('#include <motor/meta/typeinfo.hh>\n')
             for input in self.inputs:
                 with open(input.abspath(), 'rb') as in_file:
-                    plugin, root_namespace = pickle.load(in_file)
+                    plugin, root_namespace, include = pickle.load(in_file)
+                    export_file.write('#include <%s>\n' % include)
                     root_namespace = root_namespace.split('::')
                     while True:
                         try:
-                            namespace = pickle.load(in_file)
-                            if (plugin, '.'.join(namespace)) not in seen:
-                                seen.add((plugin, '.'.join(namespace)))
-                                if namespace == root_namespace:
-                                    line = namespace_alias % (
-                                        plugin, '_' + '_'.join(root_namespace[:-1]) if len(root_namespace) > 1 else '',
-                                        root_namespace[-1]
-                                    )
-                                else:
-                                    line = namespace_register % (len(namespace), plugin, ', '.join(namespace))
-                                namespace_file.write(line)
+                            type, full_name = pickle.load(in_file)
+                            if type == 'ns':
+                                if (plugin, '.'.join(full_name)) not in seen:
+                                    seen.add((plugin, '.'.join(full_name)))
+                                    if full_name == root_namespace:
+                                        line = namespace_alias % (
+                                            plugin,
+                                            '_' + '_'.join(root_namespace[:-1]) if len(root_namespace) > 1 else '',
+                                            root_namespace[-1]
+                                        )
+                                    else:
+                                        line = namespace_register % (len(full_name), plugin, ', '.join(full_name))
+                                    export_file.write(line)
+                            else:
+                                export_file.write(
+                                    'namespace %s_Meta {\n'
+                                    'extern Motor::Meta::Class s_klass;\n'
+                                    'extern Motor::istring name();\n'
+                                    '%s\n'
+                                    'template<>\n'
+                                    'MOTOR_EXPORT raw< const ::Motor::Meta::Class > Motor::Meta::ClassID<%s>::klass()\n'
+                                    '{\n'
+                                    '    return {&%s_Meta::s_klass};\n'
+                                    '};\n'
+                                    'template<>\n'
+                                    'MOTOR_EXPORT Motor::istring Motor::Meta::ClassID<::%s>::name()\n'
+                                    '{\n'
+                                    '    static const istring s_name = %s_Meta::name();\n'
+                                    '    return s_name;\n'
+                                    '};\n' % (
+                                        ' { namespace '.join(full_name), '}' * len(full_name), '::'.join(full_name),
+                                        '::'.join(full_name),
+                                        '::'.join(full_name), '::'.join(full_name))
+                                )
                         except EOFError:
                             break
         return 0
@@ -94,7 +119,7 @@ def datagen(self, node):
     out_node.parent.mkdir()
     outs.append(out_node)
     outs.append(out_node.change_ext('.doc'))
-    outs.append(out_node.change_ext('.namespaces'))
+    outs.append(out_node.change_ext('.exports'))
 
     tsk = self.create_task(
         'metagen',
@@ -119,8 +144,8 @@ def dummy_feature_module(self):
 @before_method('process_source')
 @before_method('filter_sources')
 @after_method('static_dependencies')
-def nsgen(self):
-    # gather all namespaces of dependencies
+def exports_gen(self):
+    # gather all exports of dependencies
     preprocess = getattr(self, 'preprocess')
     seen = set([])
     use = getattr(self, 'use', [])[:]
@@ -140,20 +165,21 @@ def nsgen(self):
                 if 'motor:module' not in y_p.features:
                     use += getattr(y, 'use', [])
                     for s in y_p.source:
-                        if s.name.endswith('.namespaces'):
-                            preprocess.add_namespace_file(s)
+                        if s.name.endswith('.exports'):
+                            preprocess.add_export_file(s)
 
 
-@extension('.namespaces')
-def add_namespace_file(self, node):
+@extension('.exports')
+def add_export_file(self, node):
     if 'motor:module' not in self.features:
         return
     try:
-        self.namespace_task.set_inputs([node])
+        self.exports_task.set_inputs([node])
     except AttributeError:
-        out_node = self.make_bld_node('src', None, 'namespace_definition.cc')
+        out_node = self.make_bld_node('src', None, 'meta_exports.cc')
         self.out_sources.append(out_node)
-        self.namespace_task = self.create_task('nsdef', [node], [out_node])
+        self.nomaster.add(out_node)
+        self.exports_task = self.create_task('meta_export', [node], [out_node])
 
 
 @extension('.doc')

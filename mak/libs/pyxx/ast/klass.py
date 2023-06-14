@@ -52,8 +52,8 @@ class AccessSpecifierMacro(AccessSpecifier):
 class BaseSpecifier(object):
 
     def __init__(
-        self, base_type: TypeSpecifier, attribute_list: List[Attribute], access_specifier: AccessSpecifier,
-        is_virtual: bool, is_pack_expand: bool
+            self, base_type: TypeSpecifier, attribute_list: List[Attribute], access_specifier: AccessSpecifier,
+            is_virtual: bool, is_pack_expand: bool
     ) -> None:
         self._base_type = base_type
         self._attribute_list = attribute_list
@@ -113,8 +113,8 @@ class AmbiguousBaseClause(AbstractBaseClause):
 class ClassSpecifier(TypeSpecifier):
 
     def __init__(
-        self, class_type: str, attribute_list: List[Attribute], name: Optional[Reference], is_final: bool,
-        base_class_list: List[List[BaseSpecifier]], member_list: List[Tuple[AccessSpecifier, List[Declaration]]]
+            self, class_type: str, attribute_list: List[Attribute], name: Optional[Reference], is_final: bool,
+            base_class_list: List[List[BaseSpecifier]], member_list: List[Tuple[AccessSpecifier, List[Declaration]]]
     ) -> None:
         TypeSpecifier.__init__(self)
         self._is_defining_type_specifier = True
@@ -122,7 +122,7 @@ class ClassSpecifier(TypeSpecifier):
         self._attribute_list = attribute_list
         self._name = name
         if len(base_class_list) == 0:
-            self._base_clause = None                                                   # type: Optional[AbstractBaseClause]
+            self._base_clause = None  # type: Optional[AbstractBaseClause]
         elif len(base_class_list) == 1:
             self._base_clause = BaseClause(base_class_list[0])
         else:

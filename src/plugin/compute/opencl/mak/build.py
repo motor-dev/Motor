@@ -70,7 +70,8 @@ def create_cl_kernel(task_gen, kernel_name, kernel_source, kernel_node, kernel_t
                 includes=task_gen.includes,
                 use=task_gen.use + [env.ENV_PREFIX % 'plugin.compute.opencl'],
                 uselib=task_gen.uselib,
-                source_nodes=task_gen.source_nodes
+                source_nodes=task_gen.source_nodes,
+                nomaster=set()
             )
             kernel_task_gen.env.PLUGIN = kernel_task_gen.env.plugin_name
 
@@ -106,7 +107,8 @@ def create_cl_kernel(task_gen, kernel_name, kernel_source, kernel_node, kernel_t
             includes=tgen.includes + [task_gen.bld.srcnode] + env.CLC_KERNEL_HEADER_PATH,
             use=[tgen.target] + tgen.use + [env.ENV_PREFIX % 'plugin.compute.cl'],
             uselib=tgen.uselib,
-            source_nodes=[('', kernel_source)]
+            source_nodes=[('', kernel_source)],
+            nomaster=set()
         )
         kernel_task_gen.env.PLUGIN = task_gen.env.plugin_name
 
