@@ -174,15 +174,18 @@ def module(
                     test_name = os.path.splitext(test.path_from(test_path))[0]
                     test_name = re.split('[\\\\/]', test_name)
                     target_name = 'unittest.%s.%s' % (name, '.'.join(test_name))
-                    p = build_context.preprocess(
-                        target_name + '.preprocess',
-                        test_path,
-                        preprocess.root_namespace,
-                        preprocess.plugin_name,
-                        depends=[task_gen.target],
-                        uselib=uselib,
-                        extra_features=['motor:module']
-                    )
+                    try:
+                        p = build_context.get_tgen_by_name(target_name + '.preprocess')
+                    except Errors.WafError:
+                        p = build_context.preprocess(
+                            target_name,
+                            test_path,
+                            preprocess.root_namespace,
+                            preprocess.plugin_name,
+                            depends=[task_gen.target],
+                            uselib=uselib,
+                            extra_features=['motor:module']
+                        )
 
                     build_context(
                         env=env.derive(),

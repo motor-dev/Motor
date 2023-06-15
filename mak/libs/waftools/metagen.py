@@ -34,6 +34,7 @@ class metagen(Task.Task):
                 self.outputs[0].path_from(self.generator.bld.bldnode),
                 self.outputs[1].path_from(self.generator.bld.bldnode),
                 self.outputs[2].path_from(self.generator.bld.bldnode),
+                self.outputs[3].path_from(self.generator.bld.bldnode),
             ]
         )
 
@@ -56,7 +57,7 @@ class docgen(Task.Task):
         return 0
 
 
-class meta_export(Task.Task):
+class ns_export(Task.Task):
 
     def run(self):
         seen = set([])
@@ -65,6 +66,37 @@ class meta_export(Task.Task):
             if pch:
                 export_file.write('#include <%s>\n' % pch)
             export_file.write('#include <motor/meta/engine/namespace.hh>\n')
+            for input in self.inputs:
+                with open(input.abspath(), 'rb') as in_file:
+                    plugin, root_namespace, include = pickle.load(in_file)
+                    root_namespace = root_namespace.split('::')
+                    while True:
+                        try:
+                            full_name = pickle.load(in_file)
+                            if (plugin, '.'.join(full_name)) not in seen:
+                                seen.add((plugin, '.'.join(full_name)))
+                                if full_name == root_namespace:
+                                    line = namespace_alias % (
+                                        plugin,
+                                        '_' + '_'.join(root_namespace[:-1]) if len(root_namespace) > 1 else '',
+                                        root_namespace[-1]
+                                    )
+                                else:
+                                    line = namespace_register % (len(full_name), plugin, ', '.join(full_name))
+                                export_file.write(line)
+                        except EOFError:
+                            break
+        return 0
+
+
+class cls_export(Task.Task):
+
+    def run(self):
+        seen = set([])
+        with open(self.outputs[0].abspath(), 'w') as export_file:
+            pch = getattr(self, 'pch', '')
+            if pch:
+                export_file.write('#include <%s>\n' % pch)
             export_file.write('#include <motor/meta/typeinfo.hh>\n')
             for input in self.inputs:
                 with open(input.abspath(), 'rb') as in_file:
@@ -73,40 +105,27 @@ class meta_export(Task.Task):
                     root_namespace = root_namespace.split('::')
                     while True:
                         try:
-                            type, full_name = pickle.load(in_file)
-                            if type == 'ns':
-                                if (plugin, '.'.join(full_name)) not in seen:
-                                    seen.add((plugin, '.'.join(full_name)))
-                                    if full_name == root_namespace:
-                                        line = namespace_alias % (
-                                            plugin,
-                                            '_' + '_'.join(root_namespace[:-1]) if len(root_namespace) > 1 else '',
-                                            root_namespace[-1]
-                                        )
-                                    else:
-                                        line = namespace_register % (len(full_name), plugin, ', '.join(full_name))
-                                    export_file.write(line)
-                            else:
-                                export_file.write(
-                                    'namespace %s_Meta {\n'
-                                    'extern Motor::Meta::Class s_klass;\n'
-                                    'extern Motor::istring name();\n'
-                                    '%s\n'
-                                    'template<>\n'
-                                    'MOTOR_EXPORT raw< const ::Motor::Meta::Class > Motor::Meta::ClassID<%s>::klass()\n'
-                                    '{\n'
-                                    '    return {&%s_Meta::s_klass};\n'
-                                    '};\n'
-                                    'template<>\n'
-                                    'MOTOR_EXPORT Motor::istring Motor::Meta::ClassID<::%s>::name()\n'
-                                    '{\n'
-                                    '    static const istring s_name = %s_Meta::name();\n'
-                                    '    return s_name;\n'
-                                    '};\n' % (
-                                        ' { namespace '.join(full_name), '}' * len(full_name), '::'.join(full_name),
-                                        '::'.join(full_name),
-                                        '::'.join(full_name), '::'.join(full_name))
-                                )
+                            full_name = pickle.load(in_file)
+                            export_file.write(
+                                'namespace %s_Meta {\n'
+                                'extern Motor::Meta::Class s_klass;\n'
+                                'extern Motor::istring name();\n'
+                                '%s\n'
+                                'template<>\n'
+                                'MOTOR_EXPORT raw< const ::Motor::Meta::Class > Motor::Meta::ClassID<%s>::klass()\n'
+                                '{\n'
+                                '    return {&%s_Meta::s_klass};\n'
+                                '};\n'
+                                'template<>\n'
+                                'MOTOR_EXPORT Motor::istring Motor::Meta::ClassID<::%s>::name()\n'
+                                '{\n'
+                                '    static const istring s_name = %s_Meta::name();\n'
+                                '    return s_name;\n'
+                                '};\n' % (
+                                    ' { namespace '.join(full_name), '}' * len(full_name), '::'.join(full_name),
+                                    '::'.join(full_name),
+                                    '::'.join(full_name), '::'.join(full_name))
+                            )
                         except EOFError:
                             break
         return 0
@@ -119,7 +138,8 @@ def datagen(self, node):
     out_node.parent.mkdir()
     outs.append(out_node)
     outs.append(out_node.change_ext('.doc'))
-    outs.append(out_node.change_ext('.exports'))
+    outs.append(out_node.change_ext('.class_exports'))
+    outs.append(out_node.change_ext('.namespace_exports'))
 
     tsk = self.create_task(
         'metagen',
@@ -133,6 +153,7 @@ def datagen(self, node):
     self.out_sources.append(out_node)
     self.source.append(outs[1])
     self.source.append(outs[2])
+    self.source.append(outs[3])
 
 
 @feature('motor:module')
@@ -144,7 +165,7 @@ def dummy_feature_module(self):
 @before_method('process_source')
 @before_method('filter_sources')
 @after_method('static_dependencies')
-def exports_gen(self):
+def namespace_exports_gen(self):
     # gather all exports of dependencies
     preprocess = getattr(self, 'preprocess')
     seen = set([])
@@ -165,21 +186,32 @@ def exports_gen(self):
                 if 'motor:module' not in y_p.features:
                     use += getattr(y, 'use', [])
                     for s in y_p.source:
-                        if s.name.endswith('.exports'):
-                            preprocess.add_export_file(s)
+                        if s.name.endswith('.namespace_exports'):
+                            preprocess.add_namespace_export_file(s)
 
 
-@extension('.exports')
-def add_export_file(self, node):
+@extension('.namespace_exports')
+def add_namespace_export_file(self, node):
     if 'motor:module' not in self.features:
         return
     try:
-        self.exports_task.set_inputs([node])
+        self.namespace_exports_task.set_inputs([node])
     except AttributeError:
-        out_node = self.make_bld_node('src', None, 'meta_exports.cc')
+        out_node = self.make_bld_node('src', None, 'meta_namespace_export.cc')
         self.out_sources.append(out_node)
         self.nomaster.add(out_node)
-        self.exports_task = self.create_task('meta_export', [node], [out_node])
+        self.namespace_exports_task = self.create_task('ns_export', [node], [out_node])
+
+
+@extension('.class_exports')
+def add_class_export_file(self, node):
+    try:
+        self.class_exports_task.set_inputs([node])
+    except AttributeError:
+        out_node = self.make_bld_node('src', None, 'meta_class_export.cc')
+        self.out_sources.append(out_node)
+        self.nomaster.add(out_node)
+        self.class_exports_task = self.create_task('cls_export', [node], [out_node])
 
 
 @extension('.doc')
