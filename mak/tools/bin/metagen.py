@@ -21,10 +21,10 @@ class MetaObject(object):
         self._children = {}  # type: Dict[str, MetaObject]
         self._namespace = parent._namespace[:] if parent is not None else []
 
-    def dump_exports(self, namespace, out):
+    def dump_exports(self, namespace, out_classes, out_namespace):
         for name, child in self._children.items():
             namespace.append(name)
-            child.dump_exports(namespace, out)
+            child.dump_exports(namespace, out_classes, out_namespace)
             namespace.pop(-1)
 
     def write_declarations(self, namespace, out):
@@ -52,7 +52,7 @@ class RootNamespace(MetaObject):
         return '::Motor::' + self._cpp_name + '()'
 
     def write_declarations(self, namespace, out):
-        out.write('namespace Motor { MOTOR_EXPORT raw<Meta::Class> %s(); }\n' % self._cpp_name)
+        out.write('namespace Motor { raw<Meta::Class> %s(); }\n' % self._cpp_name)
         super().write_declarations(namespace, out)
 
 
@@ -65,12 +65,12 @@ class Namespace(MetaObject):
         parent._children[name] = self
         self._namespace.append(name)
 
-    def dump_exports(self, namespace, out):
-        pickle.dump(('ns', namespace), out)
-        super().dump_exports(namespace, out)
+    def dump_exports(self, namespace, out_classes, out_namespace):
+        pickle.dump(namespace, out_namespace)
+        super().dump_exports(namespace, out_classes, out_namespace)
 
     def write_declarations(self, namespace, out):
-        out.write('namespace Motor { MOTOR_EXPORT raw<Meta::Class> %s(); }\n' % self._cpp_name)
+        out.write('namespace Motor { raw<Meta::Class> %s(); }\n' % self._cpp_name)
         super().write_declarations(namespace, out)
 
     def name(self) -> str:
@@ -88,9 +88,9 @@ class Class(MetaObject):
         self._methods = []
         self._namespace.append(name)
 
-    def dump_exports(self, namespace, out):
-        pickle.dump(('class', namespace), out)
-        super().dump_exports(namespace, out)
+    def dump_exports(self, namespace, out_classes, out_namespace):
+        pickle.dump(namespace, out_classes)
+        super().dump_exports(namespace, out_classes, out_namespace)
 
     def write_metaclasses(self, namespace, out):
         full_name = '::'.join(namespace)
@@ -293,9 +293,14 @@ if __name__ == '__main__':
         metavar="DOC",
     )
     argument_context.add_argument(
-        "exports",
-        help="Output export file",
-        metavar="EXPORT",
+        "class_exports",
+        help="Output class export file",
+        metavar="CLS_EXPORT",
+    )
+    argument_context.add_argument(
+        "namespace_exports",
+        help="Output namespace export file",
+        metavar="NAMESPACE_EXPORT",
     )
 
     arguments = argument_context.parse_args()
@@ -316,6 +321,8 @@ if __name__ == '__main__':
     with open(arguments.doc, 'w') as doc:
         pass
 
-    with open(arguments.exports, 'wb') as exports:
-        pickle.dump((arguments.module, arguments.root, arguments.in_relative), exports)
-        explorer._namespace.dump_exports([], exports)
+    with open(arguments.class_exports, 'wb') as class_exports:
+        with open(arguments.namespace_exports, 'wb') as namespace_exports:
+            pickle.dump((arguments.module, arguments.root, arguments.in_relative), class_exports)
+            pickle.dump((arguments.module, arguments.root, arguments.in_relative), namespace_exports)
+            explorer._namespace.dump_exports([], class_exports, namespace_exports)
