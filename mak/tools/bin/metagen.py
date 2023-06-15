@@ -51,6 +51,10 @@ class RootNamespace(MetaObject):
     def name(self) -> str:
         return '::Motor::' + self._cpp_name + '()'
 
+    def write_declarations(self, namespace, out):
+        out.write('namespace Motor { MOTOR_EXPORT raw<Meta::Class> %s(); }\n' % self._cpp_name)
+        super().write_declarations(namespace, out)
+
 
 class Namespace(MetaObject):
 
