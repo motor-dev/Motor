@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(sys.argv[0]))), 'libs'))
 from typing import List, Tuple
@@ -524,8 +525,8 @@ if __name__ == '__main__':
         write_cc(Name, collector._root_namespace, out_cc)
 
     with open(arguments.out_hh, 'w') as out_hh:
-        plugin = arguments.module.replace('.', '_').upper()
-        header = arguments.rel_hh.replace('/', '_').replace('-', '_').replace('.', '_').upper()
+        plugin = re.sub('[^a-zA-Z0-9_]+', '_', arguments.module).upper()
+        header = re.sub('[^a-zA-Z0-9_]+', '_', arguments.rel_hh).upper()
         out_hh.write(
             '/* Motor <motor.devel@gmail.com>\n'
             '   see LICENSE for detail */\n'
