@@ -2,6 +2,7 @@
 see LICENSE for detail */
 #ifndef MOTOR_MINITL_INL_INTEGER_TYPES_HH
 #define MOTOR_MINITL_INL_INTEGER_TYPES_HH
+#pragma once
 
 #include <motor/minitl/integer_types.hh>
 

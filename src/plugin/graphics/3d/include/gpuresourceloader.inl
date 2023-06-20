@@ -2,8 +2,12 @@
    see LICENSE for detail */
 #ifndef MOTOR_PLUGIN_GRAPHICS_3D_GPURESOURCELOADER_INL
 #define MOTOR_PLUGIN_GRAPHICS_3D_GPURESOURCELOADER_INL
+#pragma once
 
 #include <gpuresourceloader.hh>
+
+#include <motor/plugin.graphics.3d/renderer/igpuresource.hh>
+#include <motor/plugin.graphics.3d/renderer/irenderer.hh>
 
 namespace Motor {
 

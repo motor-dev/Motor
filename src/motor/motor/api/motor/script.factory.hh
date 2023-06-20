@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #ifndef MOTOR_MOTOR_SCRIPT_FACTORY_HH
 #define MOTOR_MOTOR_SCRIPT_FACTORY_HH
+#pragma once
 
 #include <motor/stdafx.h>
 #include <motor/script.hh>

@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #ifndef MOTOR_SCHEDULER_KERNEL_PRODUCT_FACTORY_HH
 #define MOTOR_SCHEDULER_KERNEL_PRODUCT_FACTORY_HH
+#pragma once
 
 #include <motor/scheduler/kernel/product.hh>
 

@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #ifndef MOTOR_MINITL_INL_ARRAY_HH
 #define MOTOR_MINITL_INL_ARRAY_HH
+#pragma once
 
 #include <motor/minitl/array.hh>
 

@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #ifndef MOTOR_INTROSPECT_INTROSPECTIONHINT_INL
 #define MOTOR_INTROSPECT_INTROSPECTIONHINT_INL
+#pragma once
 
 #include <motor/introspect/introspectionhint.meta.hh>
 #include <motor/meta/engine/call.hh>

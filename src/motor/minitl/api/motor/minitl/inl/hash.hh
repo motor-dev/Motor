@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #ifndef MOTOR_MINITL_INL_HASH_HH
 #define MOTOR_MINITL_INL_HASH_HH
+#pragma once
 
 #include <motor/minitl/hash.hh>
 #include <stddef.h>

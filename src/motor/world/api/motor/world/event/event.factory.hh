@@ -2,8 +2,9 @@
    see LICENSE for detail */
 #ifndef MOTOR_WORLD_EVENT_EVENT_FACTORY_HH
 #define MOTOR_WORLD_EVENT_EVENT_FACTORY_HH
+#pragma once
 
-#include <motor/world/stdafx.h>
+#include <motor/world/event/event.hh>
 
 #include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/typeinfo.hh>

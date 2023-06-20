@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #ifndef MOTOR_SCHEDULER_TASK_TASK_INL
 #define MOTOR_SCHEDULER_TASK_TASK_INL
+#pragma once
 
 #include <motor/scheduler/task/task.hh>
 

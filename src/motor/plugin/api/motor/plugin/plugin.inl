@@ -2,8 +2,8 @@
    see LICENSE for detail */
 #ifndef MOTOR_PLUGIN_PLUGIN_INL
 #define MOTOR_PLUGIN_PLUGIN_INL
+#pragma once
 
-#include <motor/plugin/stdafx.h>
 #include <motor/plugin/plugin.hh>
 
 #include <motor/core/environment.hh>

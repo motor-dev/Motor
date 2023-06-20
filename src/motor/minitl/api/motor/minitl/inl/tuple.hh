@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #ifndef MOTOR_MINITL_INL_TUPLE_HH
 #define MOTOR_MINITL_INL_TUPLE_HH
+#pragma once
 
 #include <motor/minitl/tuple.hh>
 

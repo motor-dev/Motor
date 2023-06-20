@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #ifndef MOTOR_SCHEDULER_KERNEL_PARAMETERS_IMAGE3D_FACTORY_HH
 #define MOTOR_SCHEDULER_KERNEL_PARAMETERS_IMAGE3D_FACTORY_HH
+#pragma once
 
 #include <motor/scheduler/kernel/parameters/image3d.hh>
 

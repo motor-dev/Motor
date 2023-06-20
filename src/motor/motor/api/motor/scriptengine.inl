@@ -2,11 +2,11 @@
    see LICENSE for detail */
 #ifndef MOTOR_MOTOR_SCRIPTENGINE_INL
 #define MOTOR_MOTOR_SCRIPTENGINE_INL
+#pragma once
 
-#include <motor/stdafx.h>
+#include <motor/scriptengine.hh>
 
 #include <motor/resource/resourcemanager.hh>
-#include <motor/scriptengine.hh>
 
 namespace Motor {
 
