@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #ifndef MOTOR_MINITL_INL_WEAKPTR_HH
 #define MOTOR_MINITL_INL_WEAKPTR_HH
+#pragma once
 
 #include <motor/minitl/weakptr.hh>
 

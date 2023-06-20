@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #ifndef MOTOR_MINITL_INL_SCOPEDPTR_HH
 #define MOTOR_MINITL_INL_SCOPEDPTR_HH
+#pragma once
 
 #include <motor/minitl/scopedptr.hh>
 

@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #ifndef MOTOR_RESOURCE_DESCRIPTION_FACTORY_HH
 #define MOTOR_RESOURCE_DESCRIPTION_FACTORY_HH
+#pragma once
 
 #include <motor/resource/description.hh>
 

@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #ifndef MOTOR_MINITL_INL_INTRUSIVE_LIST_HH
 #define MOTOR_MINITL_INL_INTRUSIVE_LIST_HH
+#pragma once
 
 #include <motor/minitl/intrusive_list.hh>
 

@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #ifndef MOTOR_META_VALUE_INL
 #define MOTOR_META_VALUE_INL
+#pragma once
 
 #include <motor/meta/value.hh>
 

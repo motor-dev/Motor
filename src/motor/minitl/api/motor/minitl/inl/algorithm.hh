@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #ifndef MOTOR_MINITL_INL_ALGORITHM_HH
 #define MOTOR_MINITL_INL_ALGORITHM_HH
+#pragma once
 
 #include <motor/minitl/algorithm.hh>
 

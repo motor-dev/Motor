@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #ifndef MOTOR_MINITL_INL_REFPTR_HH
 #define MOTOR_MINITL_INL_REFPTR_HH
+#pragma once
 
 #include <motor/minitl/refptr.hh>
 

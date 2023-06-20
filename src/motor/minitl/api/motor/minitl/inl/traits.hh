@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #ifndef MOTOR_MINITL_INL_TRAITS_HH
 #define MOTOR_MINITL_INL_TRAITS_HH
+#pragma once
 
 #include <motor/minitl/traits.hh>
 #include <string.h>
