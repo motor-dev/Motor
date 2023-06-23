@@ -84,10 +84,10 @@ struct InterlockedType< 4 >
         {
             __declspec(align(8)) struct
             {
-                volatile counter_t tag;
-                volatile value_t   value;
+                counter_t tag;
+                value_t   value;
             } tagged_value;
-            __declspec(align(8)) volatile long long asLongLong;
+            __declspec(align(8)) long long asLongLong;
         };
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
         explicit tagged_t(value_t value = nullptr) : tagged_value {0, value}
