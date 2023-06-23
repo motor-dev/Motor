@@ -166,6 +166,7 @@ GLRenderer::Context::Context(const weak< const GLRenderer >& renderer)
     , m_threadId(Thread::currentId())
     , shaderext()
 {
+    motor_forceuse(m_threadId);
 }
 
 GLRenderer::Context::~Context()
@@ -199,6 +200,7 @@ GLWindow::Context::Context(HGLRC rc, HWND hwnd, HDC defaultDc, u64 threadId)
     , m_defaultDc(defaultDc)
     , m_threadId(threadId)
 {
+    motor_forceuse(m_threadId);
     auto pixelFormat = ChoosePixelFormat(m_dc, &s_pfd);
     SetPixelFormat(m_dc, pixelFormat, &s_pfd);
 }
