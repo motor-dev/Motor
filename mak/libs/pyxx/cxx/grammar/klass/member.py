@@ -91,7 +91,6 @@ def member_declaration_declarator(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.rule('member-declaration : using-declaration')
 @glrp.rule('member-declaration : template-declaration')
 @glrp.rule('member-declaration : explicit-specialization')
-@glrp.rule('member-declaration : alias-declaration')
 @glrp.rule('member-declaration : empty-declaration')
 @cxx98
 def member_declaration(self: CxxParser, p: glrp.Production) -> Any:
@@ -100,6 +99,7 @@ def member_declaration(self: CxxParser, p: glrp.Production) -> Any:
 
 @glrp.rule('member-declaration : static_assert-declaration')
 @glrp.rule('member-declaration : opaque-enum-declaration')
+@glrp.rule('member-declaration : alias-declaration')
 @cxx11
 def member_declaration_cxx11(self: CxxParser, p: glrp.Production) -> Any:
     return p[0]
