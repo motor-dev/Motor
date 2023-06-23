@@ -92,7 +92,7 @@ def run(arguments: argparse.Namespace) -> List[Any]:
                 macros = json.load(macro_file_content)
                 for macro, macro_type in macros.items():
                     p.lexer._macros[macro] = macro_type
-        result = p.parse(arguments.input)
+        result = p.parse(arguments.input, arguments.debug)
         if not result:
             sys.exit(1)
         elif logger._error_count > 0:

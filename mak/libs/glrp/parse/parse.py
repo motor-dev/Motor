@@ -539,8 +539,11 @@ class Parser(object):
         else:
             raise SyntaxError('unexpected end of file')
 
-    def parse(self, filename: str) -> List[Any]:
-        return self.parse_opt(filename)
+    def parse(self, filename: str, debug: bool = False) -> List[Any]:
+        if debug:
+            return self.parse_debug(filename)
+        else:
+            return self.parse_opt(filename)
 
     def accept(self, p: Production) -> Any:
         return p[0]
