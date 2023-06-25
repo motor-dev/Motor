@@ -89,7 +89,7 @@ class CLion(cmake.CMake):
         self._inspections_dir.mkdir()
 
         self.write_base(appname)
-        self.write_custom_compilers()
+        self.write_custom_compilers(configurations)
         self.write_cmake_xml(configurations)
         self.write_codestyle()
         self.write_launch_files(appname)
@@ -128,12 +128,12 @@ class CLion(cmake.CMake):
                 with open(self.motornode.make_node('mak/tools/clion/%s' % filename).abspath(), 'r') as template_file:
                     inspection_file.write(template_file.read())
 
-    def write_custom_compilers(self):
+    def write_custom_compilers(self, configurations):
         with open(self._idea_dir.make_node('custom-compiler.xml').abspath(), 'w') as custom_compiler_xml_file:
             custom_compiler_xml_file.write(custom_compiler_xml)
         with open(self._idea_dir.make_node('custom_compiler.yaml').abspath(), 'w') as custom_compiler_yaml_file:
             custom_compiler_yaml_file.write('compilers:\n')
-            for toolchain_name in self.env.ALL_TOOLCHAINS:
+            for toolchain_name, _ in configurations:
                 bld_env = self.all_envs[toolchain_name]
                 if bld_env.SUB_TOOLCHAINS:
                     env = self.all_envs[bld_env.SUB_TOOLCHAINS[0]]

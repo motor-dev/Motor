@@ -40,23 +40,31 @@ def write_cmake_workspace(build_context, build_options=[]):
         configurations.append((env_name, toolchain))
         with open(toolchain, 'w') as toolchain_file:
             toolchain_file.write(
-                'set(CMAKE_C_COMPILER "%s" CACHE STRING "")\n'
-                'set(CMAKE_CXX_COMPILER "%s"  CACHE STRING "")\n'
-                'set(MOTOR_TOOLCHAIN %s CACHE INTERNAL "" FORCE)\n'
-                'set(triple %s-%s)\n'
+                'set(CMAKE_C_COMPILER "%(CC)s" CACHE STRING "")\n'
+                'set(CMAKE_CXX_COMPILER "%(CXX)s"  CACHE STRING "")\n'
+                'set(MOTOR_TOOLCHAIN %(ENV)s CACHE INTERNAL "" FORCE)\n'
+                'set(triple %(ARCH)s-%(SYSTEM)s)\n'
                 'set(CMAKE_SYSTEM_NAME Generic)\n'
                 'set(CMAKE_C_COMPILER_WORKS TRUE)\n'
                 'set(CMAKE_CXX_COMPILER_WORKS TRUE)\n'
-                'set(CMAKE_C_FLAGS "-U%s --target=%s-%s %s")\n'
-                'set(CMAKE_CXX_FLAGS "-U%s --target=%s-%s %s")\n'
-                '' % (
-                    env.CC[0].replace('\\', '/'), env.CXX[0].replace('\\', '/'), env_name, env.ARCHITECTURE,
-                    env.SYSTEM_NAME, env_name, env.ARCHITECTURE,
-                    env.SYSTEM_NAME, ' '.join(env.COMPILER_C_FLAGS), env_name, env.ARCHITECTURE, env.SYSTEM_NAME,
-                    ' '.join(env.COMPILER_CXX_FLAGS)
-                )
+                'set(CMAKE_C_FLAGS "-U%(ENV)s --target=%(ARCH)s-%(SYSTEM)s %(COMPILER_C_FLAGS)s")\n'
+                'set(CMAKE_CXX_FLAGS "-U%(ENV)s --target=%(ARCH)s-%(SYSTEM)s %(COMPILER_CXX_FLAGS)s")\n'
+                'if(USE_CMAKE_COMPILER_INFORMATION)\n'
+                '  add_compile_definitions("%(COMPILER_DEFINES)s")\n'
+                '  include_directories("%(COMPILER_INCLUDES)s")\n'
+                'endif()\n'
+                '' % {
+                    'CC': env.CC[0].replace('\\', '/'),
+                    'CXX': env.CXX[0].replace('\\', '/'),
+                    'ENV': env_name,
+                    'ARCH': env.ARCHITECTURE,
+                    'SYSTEM': env.SYSTEM_NAME,
+                    'COMPILER_C_FLAGS': ' '.join(env.COMPILER_C_FLAGS),
+                    'COMPILER_CXX_FLAGS': ' '.join(env.COMPILER_CXX_FLAGS),
+                    'COMPILER_DEFINES': ';'.join(d.replace('"', '\\"') for d in env.COMPILER_C_DEFINES + env.COMPILER_CXX_DEFINES),
+                    'COMPILER_INCLUDES': ';'.join(i.replace('\\', '/') for i in env.COMPILER_C_INCLUDES + env.COMPILER_CXX_INCLUDES)
+                }
             )
-
     with open(cmake_dir.make_node('project.txt').abspath(), 'w') as CMakeLists:
         special_files_tg = {}
         for g in build_context.groups:
@@ -195,7 +203,7 @@ def write_cmake_workspace(build_context, build_options=[]):
                     'add_executable(%s %s)\n'
                     'set_target_properties(%s PROPERTIES\n'
                     '        RUNTIME_OUTPUT_NAME "%s"\n'
-                    '        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/%s/${CMAKE_BUILD_TYPE}/%s/")\n'
+                    '        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/%s/${CMAKE_BUILD_TYPE}/%s")\n'
                     'add_custom_command(TARGET %s POST_BUILD\n'
                     '    COMMAND "%s" "%s" build:%s:${CMAKE_BUILD_TYPE} %s\n'
                     '    WORKING_DIRECTORY "%s"\n'
@@ -230,10 +238,14 @@ def write_cmake_workspace(build_context, build_options=[]):
                         )
     with open(cmake_dir.make_node('main.cpp').abspath(), 'w') as main:
         pass
+
     with open('CMakeLists.txt', 'w') as CMakeLists:
+        CMakeLists.write('cmake_minimum_required(VERSION 3.15)\n'
+                         'project(%s)\n'
+                         'include(%s.cmake)' % (appname, appname))
+
+    with open('%s.cmake' % appname, 'w') as CMakeLists:
         CMakeLists.write(
-            'cmake_minimum_required(VERSION 3.15)\n'
-            'project(%(appname)s)\n'
             'set(CMAKE_C_COMPILER "%(python)s")\n'
             'set(CMAKE_CXX_COMPILER "%(python)s")\n'
             'set(CMAKE_C_COMPILER_ARG1 "%(true)s")\n'
@@ -249,7 +261,6 @@ def write_cmake_workspace(build_context, build_options=[]):
             'MESSAGE(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}")\n'
             'include(%(cmake_dir)s/project.txt)\n'
             '' % {
-                'appname': appname,
                 'configs': ';'.join(build_context.env.ALL_VARIANTS),
                 'cmake_dir': cmake_dir.path_from(build_context.srcnode).replace('\\', '/'),
                 'python': sys.executable.replace('\\', '\\\\'),

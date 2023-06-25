@@ -3,6 +3,8 @@ import os, sys
 from xml.dom.minidom import Document
 from minixml import XmlNode, XmlDocument
 import string
+import cmake
+import json
 
 try:
     import cStringIO as StringIO
@@ -956,3 +958,247 @@ class vs2022(VisualStudio):
     fun = 'build'
     version = (('Visual Studio 17', '12.00', True, '17.0.00000.0'), (VCxproj, ('6.0', '14.3', '17.0')))
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
+    
+class vs_cmake(cmake.CMake):
+    "creates projects for Visual Studio using CMake"
+    cmd = 'vs-cmake'
+    fun = 'build'
+    optim = 'debug'
+    motor_toolchain = 'projects'
+    motor_variant = 'projects.setup'
+    variant = 'projects/vs-cmake'
+
+    def execute(self):
+        """
+        Entry point
+        """
+        if self.schedule_setup():
+            return "SKIP"
+        self.restore()
+        if not self.all_envs:
+            self.load_envs()
+        self.variant = self.__class__.motor_variant
+        self.env.PROJECTS = [self.__class__.cmd]
+
+        self.env.VARIANT = '${env .Variant}'
+        self.env.TOOLCHAIN = '${env.Toolchain}'
+        self.env.PREFIX = '${env.Prefix}'
+        self.env.TMPDIR = '${env.TmpDir}'
+        self.env.DEPLOY_ROOTDIR = '${env.Deploy_RootDir}'
+        self.env.DEPLOY_BINDIR = '${env.Deploy_BinDir}'
+        self.env.DEPLOY_RUNBINDIR = '${env.Deploy_RunBinDir}'
+        self.env.DEPLOY_LIBDIR = '${env.Deploy_LibDir}'
+        self.env.DEPLOY_INCLUDEDIR = '${env.Deploy_IncludeDir}'
+        self.env.DEPLOY_DATADIR = '${env.Deploy_DataDir}'
+        self.env.DEPLOY_PLUGINDIR = '${env.Deploy_PluginDir}'
+        self.env.DEPLOY_KERNELDIR = '${env.Deploy_KernelDir}'
+        self.features = ['GUI']
+
+        self.recurse([self.run_dir])
+
+        configurations = self.write_workspace()
+        self.write_tasks()
+        self.write_launch(configurations)
+        self.write_config(configurations)
+
+    def write_tasks(self):
+        tasks_file = self.path.make_node('.vs/tasks.vs.json')
+        motor_tasks =  [
+            {
+                'taskLabel': 'motor:refresh project',
+                'appliesTo': '/',
+                'type': 'launch',
+                'command': sys.executable.replace('\\', '/'),
+                'args': [
+                    sys.argv[0],
+                    self.cmd
+                ]
+            },
+            {
+                'taskLabel': 'motor:reconfigure',
+                'appliesTo': '/',
+                'type': 'launch',
+                'command': sys.executable.replace('\\', '/'),
+                'args': [
+                    sys.argv[0],
+                    'reconfigure'
+                ]
+            },
+            {
+                'taskLabel': 'motor:setup',
+                'appliesTo': '/',
+                'type': 'launch',
+                'command': sys.executable.replace('\\', '/'),
+                'inheritEnvironments': ['${cpp.activeConfiguration}'],
+                'args': [
+                    sys.argv[0],
+                    'setup:${env.TOOLCHAIN}:${env.BUILD_TYPE}'
+                ]
+            },
+            {
+                'taskLabel': 'motor:clean',
+                'appliesTo': '/',
+                'type': 'launch',
+                'contextType': 'clean',
+                'command': sys.executable.replace('\\', '/'),
+                'inheritEnvironments': ['${cpp.activeConfiguration}'],
+                'args': [
+                    sys.argv[0],
+                    'clean:${env.TOOLCHAIN}:${env.BUILD_TYPE}'
+                ]
+            },
+            {
+                'taskLabel': 'motor:build',
+                'appliesTo': '/',
+                'type': 'launch',
+                'contextType': 'build',
+                'command': sys.executable.replace('\\', '/'),
+                'inheritEnvironments': ['${cpp.activeConfiguration}'],
+                'args': [
+                    sys.argv[0],
+                    'build:${env.TOOLCHAIN}:${env.BUILD_TYPE}',
+                ]
+            },
+            {
+                'taskLabel': 'motor:build[nomaster]',
+                'appliesTo': '/',
+                'type': 'launch',
+                'command': sys.executable.replace('\\', '/'),
+                'inheritEnvironments': ['${cpp.activeConfiguration}'],
+                'args': [
+                    sys.argv[0],
+                    'build:${env.TOOLCHAIN}:${env.BUILD_TYPE}',
+                    '--nomaster'
+                ]
+            },
+            {
+                'taskLabel': 'motor:build[dynamic]',
+                'appliesTo': '/',
+                'type': 'launch',
+                'command': sys.executable.replace('\\', '/'),
+                'inheritEnvironments': ['${cpp.activeConfiguration}'],
+                'args': [
+                    sys.argv[0],
+                    'build:${env.TOOLCHAIN}:${env.BUILD_TYPE}',
+                    '--dynamic'
+                ]
+            },
+            {
+                'taskLabel': 'motor:build[static]',
+                'appliesTo': '/',
+                'type': 'launch',
+                'command': sys.executable.replace('\\', '/'),
+                'inheritEnvironments': ['${cpp.activeConfiguration}'],
+                'args': [
+                    sys.argv[0],
+                    'build:${env.TOOLCHAIN}:${env.BUILD_TYPE}',
+                    '--static'
+                ]
+            },
+        ]
+        try:
+            with open(tasks_file.abspath(), 'r') as tasks_content:
+                tasks = json.load(tasks_content)
+            task_list = tasks['tasks']
+            for motor_task in motor_tasks:
+                for i, task in enumerate(task_list):
+                    if task['taskLabel'] == motor_task['taskLabel']:
+                        task_list[i] = motor_task
+                        break
+                else:
+                    task_list.append(motor_task)
+        except (IOError, KeyError, json.decoder.JSONDecodeError):
+            tasks_file.parent.mkdir()
+            tasks = {
+                'version':  '0.2',
+                'tasks': motor_tasks
+            }
+
+        with open(tasks_file.abspath(), 'w') as tasks_content:
+            json.dump(tasks, tasks_content, indent=2)
+
+    def write_launch(self, configurations):
+        targets = []
+        for group in self.groups:
+            for task_gen in group:
+                if 'motor:game' in task_gen.features:
+                    targets.append(task_gen.target)
+        launch_file = self.path.make_node('.vs/launch.vs.json')
+        launch_items = []
+        for env_name, _ in configurations:
+            env = self.all_envs[env_name]
+            executable = env.cxxprogram_PATTERN % self.launcher.target
+            for variant in env.ALL_VARIANTS:
+                for target in targets:
+                    launch_item = {
+                            'project': 'CMakeLists.txt',
+                            'projectTarget': '%s (%s)' % (executable, os.path.join(self.path.abspath(), env.PREFIX, env.DEPLOY_BINDIR, variant, executable).replace('/', '\\')),
+                            'name': target,
+                            'args': [target]
+                        }
+                    if env.LLDB:
+                        launch_item['type'] = 'cppdbg'
+                        launch_item['miDebuggerPath'] = env.LLDB[0]
+                        launch_item['MIMode'] = 'lldb'
+                        launch_item['program'] = executable
+                    elif env.GDB:
+                        launch_item['type'] = 'cppdbg'
+                        launch_item['miDebuggerPath'] = env.GDB[0]
+                        launch_item['MIMode'] = 'gdb'
+                        launch_item['program'] = executable
+                    else:
+                        launch_item['type'] = 'default'
+                    launch_items.append(launch_item)
+
+        with open(launch_file.abspath(), 'w') as launch_content:
+            json.dump({'version': '0.2.1', 'defaults': {}, 'configurations': launch_items}, launch_content, indent=2)
+        
+    def write_config(self, configurations):
+        with open('CMakePresets.json', 'w') as settings_file:
+            settings_file.write('{\n'
+                                '  "version": 3,\n'
+                                '  "configurePresets": [\n')
+            for i, (configuration, toolchain) in enumerate(configurations):
+                for variant in self.env.ALL_VARIANTS:
+                    last = i == len(configurations)-1 and variant == self.env.ALL_VARIANTS[-1]
+                    env = self.all_envs[configuration]
+                    if env.SUB_TOOLCHAINS:
+                        env = self.all_envs[env.SUB_TOOLCHAINS[0]]
+                    settings_file.write(
+                        '  {\n'
+                        '    "name": "%(toolchain)s-%(variant)s",\n'
+                        '    "displayName": "%(toolchain)s-%(variant)s",\n'
+                        '    "description": "%(toolchain)s-%(variant)s",\n'
+                        '    "generator": "Ninja",\n'
+                        '    "binaryDir": "%(blddir)s/%(toolchain)s/%(variant)s",\n'
+                        '    "toolchainFile": "%(toolchain_file)s",\n'
+                        '     "architecture": {\n'
+                        '       "value": "unspecified",\n'
+                        '       "strategy": "external"\n'
+                        '     },\n'
+                        '    "cacheVariables": {\n'
+                        '      "MOTOR_TOOLCHAIN": "%(toolchain)s",\n'
+                        '      "CMAKE_BUILD_TYPE": "%(variant)s",\n'
+                        '      "USE_CMAKE_COMPILER_INFORMATION": true\n'
+                        '    },\n'
+                        '    "environment": {\n'
+                        '      "TOOLCHAIN": "%(toolchain)s",\n'
+                        '      "BUILD_TYPE": "%(variant)s"\n'
+                        '    },\n'
+                        '    "vendor": {\n'
+                        '      "microsoft.com/VisualStudioSettings/CMake/1.0": {\n'
+                        '        "enableClangTidyCodeAnalysis": true,\n'
+                        '        "intelliSenseMode": "windows-clang-x64",\n'
+                        '        "intelliSenseOptions": {\n'
+                        '          "useCompilerDefaults": false\n'
+                        '        }\n'
+                        '      }\n'
+                        '    }\n'
+                        '  }%(comma_opt)s\n' % {
+                            'toolchain': configuration,
+                            'variant': variant,
+                            'toolchain_file': toolchain.replace('\\', '/'),
+                            'blddir': self.bldnode.abspath().replace('\\', '/'),
+                            'comma_opt': ',' if not last else ''}
+                    )
+            settings_file.write('  ]\n}\n')

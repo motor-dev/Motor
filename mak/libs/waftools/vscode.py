@@ -469,7 +469,7 @@ class vscode_cmake(vscode_common):
                 ',\n'.join('  {\n'
                            '    "name": "%s",\n'
                            '    "toolchainFile": "%s"\n'
-                           '  }' % t for t in toolchains)
+                           '  }' % t for t, _ in toolchains)
             )
 
         with open(vscode_node.make_node('cmake-variants.json').abspath(), 'w') as variants:
