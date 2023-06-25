@@ -128,7 +128,7 @@ class Windows_Clang(Windows):
         env = conf.env
         if not compiler.target.endswith('-msvc'):
             env.append_value('DEFINES', ['__MSVCRT_VERSION__=0x0700'])
-            env.append_unique('LINKFLAGS', ['-static', '-Wl,--enable-auto-import'])
+            env.append_unique('LDFLAGS', ['-Wl,-Bstatic', '-static', '-static-libgcc', '-static-libstdc++', '-Wl,--enable-auto-import'])
             env.append_unique('CXXFLAGS_debug', ['-fno-exceptions'])
             if compiler.version_number < (3, 8):
                 env.append_unique('LINKFLAGS', ['-Wl,--allow-multiple-definition'])
@@ -180,7 +180,7 @@ class Windows_GCC(Windows):
     def load_in_env(self, conf, compiler):
         Windows.load_in_env(self, conf, compiler)
         env = conf.env
-        env.append_unique('LINKFLAGS', ['-static'])
+        env.append_unique('LDFLAGS', ['-Wl,-Bstatic', '-static', '-static-libgcc', '-static-libstdc++'])
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
         env.COMPILER_ABI = 'mingw'
         env.SYSTEM_NAME = 'w64-mingw32'
