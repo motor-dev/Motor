@@ -15,6 +15,8 @@ Motor.*
 **/.mypy_cache
 docs/_build
 .venv
-CMakeLists.txt
 .idea
 cmake-variants.yaml
+CMakePresets.json
+CMakeSettings.json
+.vs
