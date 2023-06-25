@@ -1,6 +1,6 @@
 #include <motor/meta/typeinfo.hh>
 
-int main()
+MOTOR_EXPORT int main()
 {
     return 0;
 }
