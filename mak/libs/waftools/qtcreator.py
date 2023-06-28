@@ -1195,7 +1195,7 @@ class QtCreator(Build.BuildContext):
                     XmlNode(data, 'variable', 'Version').close()
                     write_value(data, self.__class__.version[1])
 
-    def make_build_configuration(self, build_configuration_index, bld_env, env, env_name):
+    def make_build_configuration(self, build_configuration_index, bld_env, env, env_name, variant):
         options = [a for a in sys.argv if a[0] == '-']
         target_os = qbsPlatformList(env)
         extraPlatformFlags = target_os and [
@@ -1222,7 +1222,7 @@ class QtCreator(Build.BuildContext):
                                 ), ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
                                 (
                                     'Qbs.Configuration', [
-                                        ('qbs.buildVariant', 'debug'),
+                                        ('qbs.buildVariant', variant),
                                         ('qbs.architecture', qbsArch(env.TARGET_ARCH)),
                                         ('qbs.targetPlatform', qbsPlatform(env)),
                                     ] + extraPlatformFlags
