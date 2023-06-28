@@ -2,6 +2,7 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
+#include <bulletapi.hh>
 #include <bulletworld.hh>
 
 namespace Motor { namespace Arena {

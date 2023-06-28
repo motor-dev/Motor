@@ -3,6 +3,8 @@
 #ifndef MOTOR_CORE_THREADS_CRITICALSECTION_HH
 #define MOTOR_CORE_THREADS_CRITICALSECTION_HH
 
+#include <motor/core/coredefs.hh>
+
 namespace Motor {
 
 class ScopedCriticalSection;

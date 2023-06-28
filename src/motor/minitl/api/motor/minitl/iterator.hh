@@ -10,8 +10,8 @@
 //! @{
 namespace minitl {
 
-typedef std::size_t    size_t;
-typedef std::ptrdiff_t difference_t;
+typedef size_t    size_t;
+typedef ptrdiff_t difference_t;
 
 struct input_iterator_tag
 {

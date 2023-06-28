@@ -215,7 +215,16 @@ void swap(allocator::block< T >& a, allocator::block< T >& b)
 
 }  // namespace minitl
 
-#include <new>
+void* operator new(size_t size);
+void  operator delete(void* ptr) noexcept;
+void* operator new[](size_t size);
+void  operator delete[](void* ptr) noexcept;
+
+inline void* operator new(size_t size, void* pointer) noexcept
+{
+    (void)(size);
+    return pointer;
+}
 
 inline void* operator new(size_t size, minitl::allocator& allocator)
 {
@@ -225,6 +234,12 @@ inline void* operator new(size_t size, minitl::allocator& allocator)
 inline void* operator new(size_t size, minitl::allocator& allocator, size_t align)
 {
     return allocator.alloc(size, align);
+}
+
+inline void operator delete(void* ptr, void* pointer)
+{
+    (void)(ptr);
+    (void)(pointer);
 }
 
 inline void operator delete(void* ptr, minitl::allocator& allocator)
@@ -237,6 +252,12 @@ inline void operator delete(void* ptr, minitl::allocator& allocator, size_t /*al
     allocator.free(ptr);
 }
 
+inline void* operator new[](size_t size, void* pointer) noexcept
+{
+    (void)(size);
+    return pointer;
+}
+
 inline void* operator new[](size_t size, minitl::allocator& allocator)
 {
     return allocator.alloc(size);
@@ -245,6 +266,12 @@ inline void* operator new[](size_t size, minitl::allocator& allocator)
 inline void* operator new[](size_t size, minitl::allocator& allocator, size_t align)
 {
     return allocator.alloc(size, align);
+}
+
+inline void operator delete[](void* ptr, void* pointer)
+{
+    (void)(ptr);
+    (void)(pointer);
 }
 
 inline void operator delete[](void* ptr, minitl::allocator& allocator)

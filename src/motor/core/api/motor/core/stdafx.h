@@ -2,6 +2,7 @@
    see LICENSE for detail */
 #ifndef MOTOR_CORE_STDAFX_H
 #define MOTOR_CORE_STDAFX_H
+#pragma once
 
 #include <motor/kernel/stdafx.h>
 #include <motor/core/coredefs.hh>
