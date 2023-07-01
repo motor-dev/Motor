@@ -47,7 +47,7 @@ def build_source(bld, name, env, path):
             path=path.make_node('src'),
             features=['motor:warnings:off', 'motor:deploy:off', 'motor:deploy:bullet', 'motor:nortc'],
             extra_includes=[path.make_node('src')],
-            extra_system_includes=[path.make_node('src')],
+            extra_public_includes=[path.make_node('src')],
             extra_defines=[
                 '_ALLOW_MSC_VER_MISMATCH=1', '_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH=1',
                 '_ALLOW_RUNTIME_LIBRARY_MISMATCH=1', 'BT_NO_PROFILE'

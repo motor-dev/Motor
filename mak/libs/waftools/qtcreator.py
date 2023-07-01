@@ -229,7 +229,7 @@ class QtCMakeTools(QtObject):
 class QtToolchain(QtObject):
     published_vars = [
         ('ProjectExplorer.CustomToolChain.CompilerPath', False),
-        ('ProjectExplorer.CustomToolChain.Cxx11Flags', True),
+        ('ProjectExplorer.CustomToolChain.Cxx11Flags', False),
         ('ProjectExplorer.CustomToolChain.ErrorPattern', False),
         ('ProjectExplorer.CustomToolChain.FileNameCap', False),
         ('ProjectExplorer.CustomToolChain.HeaderPaths', False),
@@ -239,6 +239,7 @@ class QtToolchain(QtObject):
         ('ProjectExplorer.CustomToolChain.Mkspecs', False),
         ('ProjectExplorer.CustomToolChain.OutputParser', False),
         ('ProjectExplorer.CustomToolChain.PredefinedMacros', False),
+        ('ProjectExplorer.CustomToolChain.TargetAbi', False),
         ('ProjectExplorer.GccToolChain.Path', False),
         ('ProjectExplorer.GccToolChain.TargetAbi', False),
         ('ProjectExplorer.GccToolChain.PlatformCodeGenFlags', False),
@@ -320,7 +321,7 @@ class QtToolchain(QtObject):
                 flags.append(env.SYSTEM_INCLUDE_PATTERN % include)
 
             self.ProjectExplorer_CustomToolChain_CompilerPath = compiler
-            self.ProjectExplorer_CustomToolChain_Cxx11Flags = ('-std=c++14')
+            self.ProjectExplorer_CustomToolChain_Cxx11Flags = ('-std=c++14',)
             self.ProjectExplorer_CustomToolChain_ErrorPattern = ''
             self.ProjectExplorer_CustomToolChain_FileNameCap = 1
             self.ProjectExplorer_CustomToolChain_HeaderPaths = tuple(
@@ -861,6 +862,15 @@ class QtCreator(Build.BuildContext):
                 return task_gen.bug_qtcreator_cache
 
         includes, defines = gather_includes_defines_recursive(task_gen)
+        for task_name in getattr(task_gen, 'private_use', []):
+            try:
+                t = task_gen.bld.get_tgen_by_name(task_name)
+            except:
+                pass
+            else:
+                use_includes, use_defines = gather_includes_defines_recursive(t)
+                includes = includes + use_includes
+                defines = defines + use_defines
         includes = includes + [path_from(i, self.base_node) for i in getattr(task_gen, 'includes', [])]
         defines = defines + getattr(task_gen, 'defines', [])
         return unique(includes), unique(defines)
