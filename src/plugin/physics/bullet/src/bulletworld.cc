@@ -2,8 +2,9 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bulletapi.hh>
 #include <bulletworld.hh>
+
+#include <LinearMath/btAlignedAllocator.h>
 
 namespace Motor { namespace Arena {
 
