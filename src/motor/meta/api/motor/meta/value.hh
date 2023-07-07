@@ -4,7 +4,7 @@
 #define MOTOR_META_VALUE_HH
 
 #include <motor/meta/stdafx.h>
-#include <motor/meta/typeinfo.meta.hh>
+#include <motor/meta/type.meta.hh>
 
 namespace Motor { namespace Meta {
 
@@ -119,6 +119,6 @@ public:
 
 }}  // namespace Motor::Meta
 
-#include <motor/meta/value.inl>
+#include <motor/meta/inl/value.hh>
 
 #endif

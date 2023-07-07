@@ -107,6 +107,9 @@ public:
     void reserve(size_t size);
     void resize(size_t size);
     void clear();
+
+    pointer_t       data();
+    const_pointer_t data() const;
 };
 
 }  // namespace minitl

@@ -59,6 +59,9 @@ inline T next_power_of_2(T t)
     return static_cast< T >(result + 1);
 }
 
+/* allows declaring format methods without including format.hh */
+struct format_options;
+
 }  // namespace minitl
 
 #endif

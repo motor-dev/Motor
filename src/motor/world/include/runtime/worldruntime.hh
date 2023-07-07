@@ -64,10 +64,10 @@ public:
     void spawn(const weak< const SubWorld >& subworld, u32 parentId, Meta::Value spawnParameters[]);
 
 public:
-    WorldRuntime(const weak< const KernelScheduler::ProducerLoader >&            producerLoader,
-                 const Plugin::Context&                                          context,
-                 const minitl::array< weak< const KernelScheduler::IProduct > >& products,
-                 const weak< ComponentRegistry::Runtime >&                       registryRuntime);
+    WorldRuntime(const weak< const KernelScheduler::ProducerLoader >&             producerLoader,
+                 const Plugin::Context&                                           context,
+                 const minitl::vector< weak< const KernelScheduler::IProduct > >& products,
+                 const weak< ComponentRegistry::Runtime >&                        registryRuntime);
     ~WorldRuntime() override;
 };
 

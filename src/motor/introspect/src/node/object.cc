@@ -104,8 +104,8 @@ bool Object::resolveInternal(DbContext& context)
             IntrospectionHint::ArgInfo* arguments
                 = m_arguments.empty() ? nullptr : &m_arguments.front();
             CallInfo callInfo
-                = Meta::resolve(method.first, arguments, argumentThis, arguments + argumentThis,
-                                motor_checked_numcast< u32 >(m_parameters.size()));
+                = Meta::resolve(method.first, {arguments, arguments + argumentThis},
+                                {arguments + argumentThis, arguments + argumentCount});
             if(callInfo.overload)
             {
                 Meta::Value policyTag = callInfo.overload->getTag(motor_class< Policy >());

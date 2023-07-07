@@ -66,9 +66,9 @@ static int valueGet(lua_State* state)
     if(cls->type() == Meta::ClassType_Array && lua_type(state, 2) == LUA_TNUMBER)
     {
         motor_assert_format(cls->operators, "Array type {0} does not implement operator methods",
-                            cls->fullname());
+                            cls->name);
         motor_assert_format(cls->operators->arrayOperators,
-                            "Array type {0} does not implement Array API methods", cls->fullname());
+                            "Array type {0} does not implement Array API methods", cls->name);
         const u32 i = motor_checked_numcast< u32 >(lua_tonumber(state, 2));
         if(userdata->type().isConst())
         {
@@ -108,9 +108,9 @@ static int valueSet(lua_State* state)
     if(cls->type() == Meta::ClassType_Array && lua_type(state, 2) == LUA_TNUMBER)
     {
         motor_assert_format(cls->operators, "Array type {0} does not implement operator methods",
-                            cls->fullname());
+                            cls->name);
         motor_assert_format(cls->operators->arrayOperators,
-                            "Array type {0} does not implement Array API methods", cls->fullname());
+                            "Array type {0} does not implement Array API methods", cls->name);
         const u32 i = motor_checked_numcast< u32 >(lua_tonumber(state, 2));
         if(userdata->type().isConst())
         {

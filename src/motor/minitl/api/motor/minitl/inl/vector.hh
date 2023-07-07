@@ -600,6 +600,18 @@ void vector< T >::reserve(size_t size)
 }
 
 template < typename T >
+typename vector< T >::pointer_t vector< T >::data()
+{
+    return m_memory.begin();
+}
+
+template < typename T >
+typename vector< T >::const_pointer_t vector< T >::data() const
+{
+    return m_memory.begin();
+}
+
+template < typename T >
 void swap(vector< T >& t1, vector< T >& t2)
 {
     t1.m_memory.swap(t2.m_memory);

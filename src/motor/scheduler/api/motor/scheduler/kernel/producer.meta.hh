@@ -6,8 +6,8 @@
 #include <motor/scheduler/stdafx.h>
 #include <motor/resource/description.hh>
 
-#include <motor/minitl/array.hh>
 #include <motor/minitl/tuple.hh>
+#include <motor/minitl/vector.hh>
 #include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
 #include <motor/scheduler/task/itask.hh>
 
@@ -47,7 +47,7 @@ protected:
     class motor_api(SCHEDULER) Runtime : public minitl::refcountable
     {
     public:
-        typedef minitl::array< minitl::tuple< weak< const IProduct >, ref< IParameter > > >
+        typedef minitl::vector< minitl::tuple< weak< const IProduct >, ref< IParameter > > >
             ParameterArray;
 
     public:

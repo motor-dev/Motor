@@ -4,7 +4,7 @@
 #define MOTOR_PLUGIN_GUI_GTK3_GTK3PLUGIN_HH
 
 #include <motor/core/memory/allocators/system.hh>
-#include <motor/meta/engine/objectinfo.meta.hh>
+#include <motor/meta/object.meta.hh>
 #include <glib-object.h>
 
 namespace Motor { namespace Gtk3 {
@@ -15,14 +15,14 @@ private:
     struct Page;
 
 private:
-    SystemAllocator               m_allocator;
-    Page*                         m_firstPage {};
-    GQuark                        m_motorQuark;
-    raw< const Meta::ObjectInfo > m_objectPtr;
-    weak< Logger >                m_logger;
-    guint                         m_logHandlerDefault;
-    guint                         m_logHandlerGLib;
-    guint                         m_logHandlerGtk;
+    SystemAllocator           m_allocator;
+    Page*                     m_firstPage {};
+    GQuark                    m_motorQuark;
+    raw< const Meta::Object > m_objectPtr;
+    weak< Logger >            m_logger;
+    guint                     m_logHandlerDefault;
+    guint                     m_logHandlerGLib;
+    guint                     m_logHandlerGtk;
 
 private:
     void* allocate(u32 size);

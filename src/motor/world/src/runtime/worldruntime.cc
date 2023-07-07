@@ -17,10 +17,11 @@ WorldRuntime::SubWorldResource::SubWorldResource() = default;
 
 WorldRuntime::SubWorldResource::~SubWorldResource() = default;
 
-WorldRuntime::WorldRuntime(const weak< const KernelScheduler::ProducerLoader >& producerLoader,
-                           const Plugin::Context&                               context,
-                           const minitl::array< weak< const KernelScheduler::IProduct > >& products,
-                           const weak< ComponentRegistry::Runtime >& registryRuntime)
+WorldRuntime::WorldRuntime(
+    const weak< const KernelScheduler::ProducerLoader >&             producerLoader,
+    const Plugin::Context&                                           context,
+    const minitl::vector< weak< const KernelScheduler::IProduct > >& products,
+    const weak< ComponentRegistry::Runtime >&                        registryRuntime)
     : m_resourceManager(scoped< Resource::ResourceManager >::create(Arena::game()))
     , m_context(m_resourceManager, context.dataFolder, context.scheduler)
     , m_logicComponentStorage(Arena::game())

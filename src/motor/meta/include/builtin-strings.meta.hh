@@ -4,8 +4,6 @@
 #define MOTOR_META_BUILTIN_STRINGS_META_HH
 
 #include <motor/meta/stdafx.h>
-#include <motor/meta/builtin.hh>
-#include <motor/meta/classinfo.meta.hh>
 
 #if 0
 

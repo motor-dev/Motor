@@ -8,7 +8,7 @@
 #include <meta/constructor.meta.hh>
 #include <meta/property.meta.hh>
 
-#include <motor/meta/engine/operatortable.meta.hh>
+#include <motor/meta/engine/operatortable.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/meta/value.hh>
 

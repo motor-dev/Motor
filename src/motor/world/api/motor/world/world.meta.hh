@@ -24,16 +24,16 @@ class WorldRuntime;
 class motor_api(WORLD) World : public Resource::Description< World >
 {
 private:
-    ref< ComponentRegistry >                                 m_registry;
-    minitl::array< weak< const KernelScheduler::IProduct > > m_products;
+    ref< ComponentRegistry >                                  m_registry;
+    minitl::vector< weak< const KernelScheduler::IProduct > > m_products;
 
 public:
     ref< WorldRuntime > createRuntime(weak< const KernelScheduler::ProducerLoader > producerLoader,
                                       const Plugin::Context&                        context) const;
 
 published:
-    World(const ref< ComponentRegistry >&                          registry,
-          minitl::array< weak< const KernelScheduler::IProduct > > products);
+    World(const ref< ComponentRegistry >&                           registry,
+          minitl::vector< weak< const KernelScheduler::IProduct > > products);
     ~World() override;
 };
 

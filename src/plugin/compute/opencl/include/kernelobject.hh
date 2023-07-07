@@ -21,7 +21,7 @@ public:
     KernelObject(const weak< const CodeObject >& context, istring name);
     ~KernelObject() override;
 
-    // void run(const minitl::array< weak< const IMemoryBuffer > >& params);
+    // void run(const minitl::vector< weak< const IMemoryBuffer > >& params);
 };
 
 }}}  // namespace Motor::KernelScheduler::OpenCL

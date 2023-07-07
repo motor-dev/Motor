@@ -7,8 +7,8 @@
 #include <motor/introspect/dbcontext.hh>
 #include <motor/introspect/node/node.hh>
 #include <motor/introspect/node/object.hh>
-#include <motor/meta/engine/objectinfo.meta.hh>
-#include <motor/meta/engine/propertyinfo.meta.hh>
+#include <motor/meta/call.hh>
+#include <motor/meta/operatortable.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 
@@ -30,21 +30,18 @@ ConversionCost IntrospectionHint::calculateConversion(const Type& targetType) co
 
 Value IntrospectionHint::call(const ArgInfo parameters[], u32 argumentCount) const
 {
-    return Meta::call(m_method, m_callInfo, parameters, m_argumentThis, parameters + m_argumentThis,
-                      argumentCount - m_argumentThis);
+    return Meta::call< weak< const Node > >(
+        m_method, m_callInfo, {parameters, parameters + m_argumentThis},
+        {parameters + m_argumentThis, parameters + argumentCount});
 }
 
-minitl::tuple< minitl::raw< const Method >, bool >
-IntrospectionHint::getCall(DbContext& context) const
+minitl::raw< const Method > IntrospectionHint::getCall(DbContext& context) const
 {
     raw< const Class > cls = m_callInfo.overload->returnType.metaclass;
-
-    raw< const ObjectInfo > object = cls->getStaticProperty(Class::nameOperatorCall());
-    if(object)
+    if(cls->operators->call)
     {
-        return minitl::make_tuple(object->value.as< raw< const Method > >(), false);
+        return cls->operators->call;
     }
-    raw< const Meta::Method > result = cls->getMethod(Class::nameOperatorCall());
     if(result) return minitl::make_tuple(result, true);
     if(cls->getProperty(Class::nameOperatorCall()))
         context.error(m_owner, minitl::format< 512 >(FMT("call on object of type {0} is dynamic"),

@@ -194,10 +194,10 @@ static bool convertTableToValue(lua_State* state, int index, const Meta::Type& t
     {
         motor_assert_format(type.metaclass->operators,
                             "Array type {0} does not implement operator methods",
-                            type.metaclass->fullname());
+                            type.metaclass->name);
         motor_assert_format(type.metaclass->operators->arrayOperators,
                             "Array type {0} does not implement Array API methods",
-                            type.metaclass->fullname());
+                            type.metaclass->name);
         Meta::Type arrayType  = type.metaclass->operators->arrayOperators->value_type;
         u32        count      = motor_checked_numcast< u32 >(luaL_len(state, index));
         auto*      parameters = (Meta::Value*)malloca(

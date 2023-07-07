@@ -12,7 +12,7 @@ namespace Motor { namespace KernelScheduler { namespace OpenCL_GL {
 class Scheduler : public OpenCL::Scheduler
 {
 private:
-    static minitl::array< cl_context_properties > createPlatformSpecificContextProperties();
+    static minitl::vector< cl_context_properties > createPlatformSpecificContextProperties();
 
 public:
     Scheduler(const Plugin::Context& context);

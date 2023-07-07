@@ -6,9 +6,9 @@
 
 #include <motor/resource/description.hh>
 
-#include <motor/meta/classinfo.meta.hh>
-#include <motor/meta/engine/objectinfo.meta.hh>
-#include <motor/meta/engine/operatortable.meta.hh>
+#include <motor/meta/class.meta.hh>
+#include <motor/meta/object.meta.hh>
+#include <motor/meta/operatortable.hh>
 #include <motor/meta/typeinfo.hh>
 
 namespace Motor { namespace Meta {
@@ -21,14 +21,12 @@ struct ClassID< Resource::Description< T > >
     {
         static const Meta::Class s_class = {name(),
                                             u32(sizeof(Resource::Description< T >)),
-                                            0,
-                                            Meta::ClassType_Object,
-                                            {nullptr},
                                             motor_class< Resource::IDescription >(),
-                                            {nullptr},
-                                            {nullptr},
-                                            {0, nullptr},
-                                            {0, nullptr},
+                                            0,
+                                            motor_class< Resource::IDescription >()->objects,
+                                            motor_class< Resource::IDescription >()->tags,
+                                            motor_class< Resource::IDescription >()->properties,
+                                            motor_class< Resource::IDescription >()->methods,
                                             {nullptr},
                                             {&s_operatorTable},
                                             nullptr,
@@ -46,7 +44,14 @@ struct ClassID< Resource::Description< T > >
 
 template < typename T >
 const Meta::OperatorTable ClassID< Resource::Description< T > >::s_operatorTable
-    = {{0}, {0, 0}, motor_class< T >()};
+    = {motor_class< Resource::IDescription >()->operators->arrayOperators,
+       motor_class< Resource::IDescription >()->operators->mapOperators,
+       motor_class< Resource::IDescription >()->operators->stringOperators,
+       motor_class< Resource::IDescription >()->operators->integerOperators,
+       motor_class< Resource::IDescription >()->operators->floatOperators,
+       motor_class< Resource::IDescription >()->operators->variantOperators,
+       motor_class< T >(),
+       motor_class< Resource::IDescription >()->operators->call};
 
 }}  // namespace Motor::Meta
 

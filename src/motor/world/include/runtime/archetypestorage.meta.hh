@@ -26,9 +26,9 @@ class ArchetypeStorage : published KernelScheduler::Producer
     };
 
 private:
-    weak< ComponentRegistry > const                   m_registry;
-    minitl::array< raw< const Meta::Class > > const   m_componentClasses;
-    minitl::array< ref< KernelScheduler::IProduct > > m_components;
+    weak< ComponentRegistry > const                    m_registry;
+    minitl::vector< raw< const Meta::Class > > const   m_componentClasses;
+    minitl::vector< ref< KernelScheduler::IProduct > > m_components;
 
 private:
     ref< Runtime >
@@ -36,9 +36,9 @@ private:
 
     published
         : motor_tag(Policy()) ArchetypeStorage(
-              const weak< ComponentRegistry >&                                  registry,
-              const minitl::array< raw< const Meta::Class > >&                  componentClasses,
-              const minitl::array< minitl::array< raw< const Meta::Class > > >& archetypes);
+              const weak< ComponentRegistry >&                                    registry,
+              minitl::vector< raw< const Meta::Class > >                          componentClasses,
+              const minitl::vector< minitl::vector< raw< const Meta::Class > > >& archetypes);
     ~ArchetypeStorage() override;
 
 public:

@@ -5,7 +5,7 @@
 #pragma once
 
 #include <motor/introspect/introspectionhint.meta.hh>
-#include <motor/meta/engine/call.hh>
+#include <motor/meta/call.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 

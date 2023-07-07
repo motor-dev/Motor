@@ -24,9 +24,9 @@ class motor_api(SCHEDULER) KernelTask : public ITask
     friend class ::Motor::Scheduler;
 
 private:
-    weak< const KernelScheduler::Kernel > const                m_kernel;
-    weak< KernelScheduler::IScheduler >                        m_targetScheduler;
-    minitl::array< weak< KernelScheduler::IParameter > > const m_parameters;
+    weak< const KernelScheduler::Kernel > const                 m_kernel;
+    weak< KernelScheduler::IScheduler >                         m_targetScheduler;
+    minitl::vector< weak< KernelScheduler::IParameter > > const m_parameters;
 
 public:
     template < typename Container >

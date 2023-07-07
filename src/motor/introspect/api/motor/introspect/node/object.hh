@@ -7,7 +7,7 @@
 #include <motor/introspect/node/node.hh>
 
 #include <motor/introspect/introspectionhint.meta.hh>
-#include <motor/meta/engine/methodinfo.meta.hh>
+#include <motor/meta/method.meta.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 

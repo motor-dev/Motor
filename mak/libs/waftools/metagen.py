@@ -65,7 +65,7 @@ class ns_export(Task.Task):
             pch = getattr(self, 'pch', '')
             if pch:
                 export_file.write('#include <%s>\n' % pch)
-            export_file.write('#include <motor/meta/engine/namespace.hh>\n')
+            export_file.write('#include <motor/meta/namespace.hh>\n')
             for input in self.inputs:
                 with open(input.abspath(), 'rb') as in_file:
                     plugin, root_namespace, include = pickle.load(in_file)

@@ -7,9 +7,9 @@
 #include <motor/stdafx.h>
 #include <motor/script.hh>
 
-#include <motor/meta/classinfo.meta.hh>
-#include <motor/meta/engine/objectinfo.meta.hh>
-#include <motor/meta/engine/operatortable.meta.hh>
+#include <motor/meta/class.meta.hh>
+#include <motor/meta/object.meta.hh>
+#include <motor/meta/operatortable.hh>
 #include <motor/meta/typeinfo.hh>
 
 namespace Motor { namespace Meta {
@@ -19,16 +19,20 @@ struct ClassID< Script< T > >
 {
     MOTOR_EXPORT static raw< const Meta::Class > klass()
     {
-        static const Meta::Class s_class
-            = {name(), u32(sizeof(Script< T >)),
-               0,      Meta::ClassType_Object,
-               {0},    motor_class< Resource::Description< T > >(),
-               {0},    {0},
-               {0, 0}, {0, 0},
-               {0},    motor_class< Resource::Description< T > >()->operators,
-               0,      0};
-        raw< const Meta::Class > result = {&s_class};
-        return result;
+        static const Meta::Class s_class = {name(),
+                                            u32(sizeof(Script< T >)),
+                                            0,
+                                            motor_class< Resource::Description< T > >(),
+                                            0,
+                                            motor_class< Resource::Description< T > >()->objects,
+                                            motor_class< Resource::Description< T > >()->tags,
+                                            motor_class< Resource::Description< T > >()->properties,
+                                            motor_class< Resource::Description< T > >()->methods,
+                                            {nullptr},
+                                            motor_class< Resource::Description< T > >()->operators,
+                                            0,
+                                            0};
+        return {&s_class};
     }
     MOTOR_EXPORT static istring name()
     {

@@ -6,9 +6,7 @@
 
 #include <motor/scheduler/kernel/parameters/stream.factory.hh>
 
-#include <motor/meta/classinfo.meta.hh>
-#include <motor/meta/engine/objectinfo.meta.hh>
-#include <motor/meta/engine/operatortable.meta.hh>
+#include <motor/meta/class.meta.hh>
 #include <motor/meta/typeinfo.hh>
 
 namespace Motor { namespace KernelScheduler {
@@ -28,16 +26,14 @@ struct ClassID< KernelScheduler::Stream< T > >
     {
         static const Meta::Class s_class = {name(),
                                             u32(sizeof(KernelScheduler::Stream< T >)),
-                                            0,
-                                            Meta::ClassType_Object,
-                                            {nullptr},
                                             motor_class< KernelScheduler::IStream >(),
+                                            0,
+                                            motor_class< KernelScheduler::IStream >()->objects,
+                                            motor_class< KernelScheduler::IStream >()->tags,
+                                            motor_class< KernelScheduler::IStream >()->properties,
+                                            motor_class< KernelScheduler::IStream >()->methods,
                                             {nullptr},
-                                            {nullptr},
-                                            {0, nullptr},
-                                            {0, nullptr},
-                                            {nullptr},
-                                            Meta::OperatorTable::s_emptyTable,
+                                            motor_class< KernelScheduler::IStream >()->operators,
                                             nullptr,
                                             nullptr};
         raw< const Meta::Class > result  = {&s_class};

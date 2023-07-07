@@ -644,7 +644,7 @@ static inline void unpackPod(PyObject* arg, const Meta::Type& type, void* buffer
 
     auto* result = new(buffer) Meta::Value(type, Meta::Value::Reserve);
     auto* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
-    for(raw< const Meta::Class > c = type.metaclass; c; c = c->parent)
+    for(raw< const Meta::Class > c = type.metaclass; c; c = c->base)
     {
         for(const auto& propertie: c->properties)
         {
@@ -699,10 +699,10 @@ Meta::ConversionCost PyMotorObject::distance(PyObject* object, const Meta::Type&
         {
             motor_assert_format(desiredType.metaclass->operators,
                                 "Array type {0} does not implement operator methods",
-                                desiredType.metaclass->fullname());
+                                desiredType.metaclass->name);
             motor_assert_format(desiredType.metaclass->operators->arrayOperators,
                                 "Array type {0} does not implement Array API methods",
-                                desiredType.metaclass->fullname());
+                                desiredType.metaclass->name);
             Type_PyTuple_Size    size = object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS)
                                             ? s_library->m_PyList_Size
                                             : s_library->m_PyTuple_Size;
@@ -738,7 +738,7 @@ Meta::ConversionCost PyMotorObject::distance(PyObject* object, const Meta::Type&
         if(desiredType.metaclass->type() == Meta::ClassType_Pod)
         {
             u32 i = 0;
-            for(raw< const Meta::Class > c = desiredType.metaclass; c; c = c->parent)
+            for(raw< const Meta::Class > c = desiredType.metaclass; c; c = c->base)
             {
                 for(const auto& propertie: c->properties)
                 {
@@ -838,7 +838,7 @@ PyObject* PyMotorObject::dir(raw< const Meta::Class > metaclass)
                                                      ? s_library->m_PyUnicode_FromStringAndSize
                                                      : s_library->m_PyString_FromStringAndSize;
 
-    for(raw< const Meta::ObjectInfo > o = metaclass->objects; o; o = o->next)
+    for(raw< const Meta::Object > o = metaclass->objects; o; o = o->next)
     {
         PyObject* str = fromString(o->name.c_str(), Py_ssize_t(o->name.size()));
         if(!str)
@@ -854,7 +854,7 @@ PyObject* PyMotorObject::dir(raw< const Meta::Class > metaclass)
         }
         Py_DECREF(str);
     }
-    for(raw< const Meta::Class > cls = metaclass; cls; cls = cls->parent)
+    for(raw< const Meta::Class > cls = metaclass; cls; cls = cls->base)
     {
         for(const auto& property: cls->properties)
         {

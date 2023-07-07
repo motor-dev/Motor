@@ -9,8 +9,8 @@
 
 namespace Motor { namespace World {
 
-World::World(const ref< ComponentRegistry >&                          registry,
-             minitl::array< weak< const KernelScheduler::IProduct > > products)
+World::World(const ref< ComponentRegistry >&                           registry,
+             minitl::vector< weak< const KernelScheduler::IProduct > > products)
     : m_registry(registry)
     , m_products(minitl::move(products))
 {

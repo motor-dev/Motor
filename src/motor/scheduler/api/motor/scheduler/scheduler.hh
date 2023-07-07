@@ -4,8 +4,8 @@
 #define MOTOR_SCHEDULER_SCHEDULER_HH
 
 #include <motor/scheduler/stdafx.h>
-#include <motor/minitl/array.hh>
 #include <motor/minitl/pool.hh>
+#include <motor/minitl/vector.hh>
 #include <motor/scheduler/kernel/parameters/iparameter.meta.hh>
 #include <motor/scheduler/task/iexecutor.hh>
 

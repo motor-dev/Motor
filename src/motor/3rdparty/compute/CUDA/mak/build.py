@@ -5,7 +5,7 @@ import pickle
 
 template_kernel = """
 MOTOR_PLUGIN_EXPORT void _%(kernel)s(const u32 index, const u32 total,
-                              const minitl::array< minitl::weak<const Motor::KernelScheduler::IMemoryBuffer> >& /*argv*/)
+                              const minitl::vector< minitl::weak<const Motor::KernelScheduler::IMemoryBuffer> >& /*argv*/)
 {
     motor_forceuse(index);
     motor_forceuse(total);
@@ -18,7 +18,7 @@ template_cpp = """
 #include    <motor/kernel/simd.hh>
 #include    <motor/kernel/input/input.hh>
 #include    <motor/plugin/dynobjectlist.hh>
-#include    <motor/minitl/array.hh>
+#include    <motor/minitl/vector.hh>
 #include    <motor/plugin.compute.cuda/memorybuffer.hh>
 #include    <motor/scheduler/kernel/parameters/parameters.hh>
 
@@ -75,7 +75,7 @@ class cudac(Task.Task):
                 '#include <motor/config/config.hh>\n'
                 '#include <motor/kernel/input/input.hh>\n'
                 '#include <motor/kernel/simd.hh>\n'
-                '#include <motor/minitl/array.hh>\n'
+                '#include <motor/minitl/vector.hh>\n'
                 '#include <motor/plugin.compute.cuda/memorybuffer.hh>\n'
                 '#include <motor/plugin/dynobjectlist.hh>\n'
                 '#include <motor/scheduler/kernel/parameters/parameters.hh>\n'
@@ -105,7 +105,7 @@ class cudac(Task.Task):
                     }
                     out.write(
                         'MOTOR_PLUGIN_EXPORT void _%(kernelname)s(const u32 index, const u32 total,\n'
-                        '        const minitl::array<\n'
+                        '        const minitl::vector<\n'
                         '        minitl::weak< const Motor::KernelScheduler::IMemoryBuffer > >& /*argv*/)\n'
                         '{\n'
                         '    motor_forceuse(index);\n'

@@ -28,10 +28,10 @@ weak< ResourceManager::LoaderInfo >
 ResourceManager::getLoaderInfo(raw< const Meta::Class > classinfo)
 {
     motor_assert_format(classinfo->operators, "Resource class {0} does not have an operator table",
-                        classinfo->fullname());
-    raw< const Meta::Class > resourceType = classinfo->operators->templatedClass;
-    motor_assert_format(resourceType, "Resource class {0} does not have a resource class",
-                        classinfo->fullname());
+                        classinfo->name);
+    motor_assert_format(classinfo->operators->resourceType,
+                        "Resource class {0} does not have a resource class", classinfo->name);
+    raw< const Meta::Class > resourceType = classinfo->operators->resourceType;
     for(auto& m_loader: m_loaders)
     {
         if(resourceType == m_loader->classinfo) return m_loader;

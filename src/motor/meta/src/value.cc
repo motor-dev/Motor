@@ -4,7 +4,7 @@
 #include <motor/meta/stdafx.h>
 #include <motor/meta/value.hh>
 
-#include <motor/meta/engine/methodinfo.meta.hh>
+#include <motor/meta/method.meta.hh>
 
 namespace Motor { namespace Meta {
 
