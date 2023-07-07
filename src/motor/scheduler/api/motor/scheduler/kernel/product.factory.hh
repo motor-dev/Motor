@@ -6,10 +6,9 @@
 
 #include <motor/scheduler/kernel/product.hh>
 
-#include <motor/meta/classinfo.meta.hh>
-#include <motor/meta/engine/methodinfo.meta.hh>
-#include <motor/meta/engine/objectinfo.meta.hh>
-#include <motor/meta/engine/operatortable.meta.hh>
+#include <motor/meta/class.meta.hh>
+#include <motor/meta/method.meta.hh>
+#include <motor/meta/object.meta.hh>
 #include <motor/meta/typeinfo.hh>
 
 namespace Motor { namespace KernelScheduler {
@@ -40,25 +39,23 @@ struct ClassID< KernelScheduler::Product< T > >
     {
         static const Meta::Class s_class = {name(),
                                             u32(sizeof(KernelScheduler::Product< T >)),
+                                            motor_class< KernelScheduler::IProduct >(),
                                             0,
-                                            Meta::ClassType_Object,
-                                            {KernelScheduler::IProduct::getNamespace().m_ptr},
-                                            {motor_class< KernelScheduler::IProduct >().m_ptr},
+                                            motor_class< KernelScheduler::IProduct >()->objects,
+                                            motor_class< KernelScheduler::IProduct >()->tags,
+                                            motor_class< KernelScheduler::IProduct >()->properties,
+                                            motor_class< KernelScheduler::IProduct >()->methods,
                                             {nullptr},
-                                            {nullptr},
-                                            {0, nullptr},
-                                            {1, &s_ctr},
-                                            {&s_ctr},
-                                            Meta::OperatorTable::s_emptyTable,
+                                            motor_class< KernelScheduler::IProduct >()->operators,
                                             nullptr,
                                             nullptr};
         raw< const Meta::Class > result  = {&s_class};
 
-        static Meta::ObjectInfo registry = {KernelScheduler::IProduct::getNamespace()->objects,
-                                            {nullptr},
-                                            s_class.name,
-                                            Meta::Value(result)};
-        static const Meta::ObjectInfo* ptr
+        static Meta::Object        registry = {KernelScheduler::IProduct::getNamespace()->objects,
+                                               {nullptr},
+                                               s_class.name,
+                                               Meta::Value(result)};
+        static const Meta::Object* ptr
             = KernelScheduler::IProduct::getNamespace()->objects.set(&registry);
         motor_forceuse(ptr);
 
@@ -78,9 +75,7 @@ const Meta::Method::Overload ClassID< KernelScheduler::Product< T > >::s_ctrOver
 
 template < typename T >
 const Meta::Method ClassID< KernelScheduler::Product< T > >::s_ctr
-    = {Meta::Class::nameConstructor(),
-       {1, &s_ctrOverload},
-       {&ClassID< KernelScheduler::Product< T > >::s_ctr}};
+    = {istring("?ctor"), {1, &s_ctrOverload}, {&ClassID< KernelScheduler::Product< T > >::s_ctr}};
 
 }}  // namespace Motor::Meta
 

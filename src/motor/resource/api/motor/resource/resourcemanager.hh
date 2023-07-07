@@ -5,11 +5,11 @@
 
 #include <motor/resource/stdafx.h>
 #include <motor/filesystem/file.meta.hh>
-#include <motor/meta/classinfo.meta.hh>
+#include <motor/meta/class.meta.hh>
 #include <motor/meta/typeinfo.hh>
-#include <motor/minitl/array.hh>
 #include <motor/minitl/intrusive_list.hh>
 #include <motor/minitl/refcountable.hh>
+#include <motor/minitl/vector.hh>
 #include <motor/resource/idescription.meta.hh>
 #include <motor/resource/loader.hh>
 

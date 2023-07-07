@@ -5,15 +5,13 @@
 #include <motor/introspect/node/array.hh>
 
 #include <motor/introspect/dbcontext.hh>
-#include <motor/meta/engine/methodinfo.meta.hh>
-#include <motor/meta/engine/objectinfo.meta.hh>
-#include <motor/meta/engine/operatortable.meta.hh>
-#include <motor/minitl/array.hh>
+#include <motor/meta/method.meta.hh>
+#include <motor/meta/object.meta.hh>
+#include <motor/meta/operatortable.hh>
 #include <motor/minitl/utility.hh>
+#include <motor/minitl/vector.hh>
 
 namespace Motor { namespace Meta { namespace AST {
-
-static const istring value_type = istring("value_type");
 
 Array::Array(minitl::vector< ref< Node > > value) : Node(), m_value(minitl::move(value))
 {
@@ -23,13 +21,13 @@ Array::~Array() = default;
 
 ConversionCost Array::distance(const Type& type) const
 {
-    if(type.metaclass->type() == Meta::ClassType_Array)
+    if(type.metaclass->operators->arrayOperators)
     {
-        ConversionCost                  result = ConversionCost();
-        raw< const ArrayOperatorTable > api    = type.metaclass->operators->arrayOperators;
+        ConversionCost result    = ConversionCost();
+        Type           valueType = type.metaclass->operators->arrayOperators->valueType;
         for(const auto& it: m_value)
         {
-            ConversionCost itemCost = it->distance(api->value_type);
+            ConversionCost itemCost = it->distance(valueType);
             if(itemCost > result) result = itemCost;
         }
         return result;
@@ -52,16 +50,16 @@ bool Array::doResolve(DbContext& context)
 
 void Array::doEval(const Meta::Type& expectedType, Value& result) const
 {
-    Meta::Type valueType = expectedType.metaclass->operators->arrayOperators->value_type;
+    Meta::Type valueType = expectedType.metaclass->operators->arrayOperators->valueType;
 
-    minitl::array< Meta::Value > v(Arena::temporary(),
-                                   motor_checked_numcast< u32 >(m_value.size()));
+    minitl::vector< Meta::Value > v(Arena::temporary(),
+                                    motor_checked_numcast< u32 >(m_value.size()));
     for(u32 i = 0; i < m_value.size(); ++i)
     {
         m_value[i]->doEval(valueType, v[i]);
     }
     result = expectedType.metaclass->constructor->doCall(
-        v.begin(), motor_checked_numcast< u32 >(m_value.size()));
+        v.data(), motor_checked_numcast< u32 >(m_value.size()));
 }
 
 void Array::doVisit(Node::Visitor& visitor) const

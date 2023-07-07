@@ -4,7 +4,7 @@
 #define MOTOR_META_TYPEINFO_HH
 
 #include <motor/meta/stdafx.h>
-#include <motor/meta/typeinfo.meta.hh>
+#include <motor/meta/type.meta.hh>
 #include <motor/minitl/type_traits.hh>
 
 namespace Motor { namespace Meta {

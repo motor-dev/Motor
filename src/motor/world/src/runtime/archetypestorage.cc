@@ -10,11 +10,12 @@
 #include <motor/introspect/node/object.hh>
 #include <motor/introspect/node/parameter.hh>
 #include <motor/introspect/node/reference.hh>
-#include <motor/meta/engine/methodinfo.meta.hh>
-#include <motor/meta/engine/objectinfo.meta.hh>
+#include <motor/meta/method.meta.hh>
+#include <motor/meta/object.meta.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/meta/value.hh>
 #include <motor/scheduler/kernel/producerloader.hh>
+#include <utility>
 
 namespace Motor { namespace World {
 
@@ -24,7 +25,7 @@ static raw< const Meta::Class > findProductType(raw< const Meta::Class > compone
         = KernelScheduler::ISegments::getParameter(componentType);
     if(parameterClass)
     {
-        raw< const Meta::ObjectInfo > productClass = parameterClass->getStaticProperty(
+        raw< const Meta::Object > productClass = parameterClass->getStaticProperty(
             KernelScheduler::IParameter::getProductTypePropertyName());
         if(productClass)
         {
@@ -42,7 +43,7 @@ static raw< const Meta::Class > findProductType(raw< const Meta::Class > compone
     {
         motor_error_format(Log::world(),
                            "class {0} has not been registered as a segments parameter",
-                           componentType->fullname());
+                           componentType->name);
         return motor_class< KernelScheduler::IProduct >();
     }
 }
@@ -136,7 +137,7 @@ struct Visitor : public Meta::AST::Node::Visitor
 class IntrospectionHint : public Meta::AST::IntrospectionHint
 {
 private:
-    minitl::array< raw< const Meta::Class > > m_parameters;
+    minitl::vector< raw< const Meta::Class > > m_parameters;
 
 public:
     IntrospectionHint(const weak< const Meta::AST::Object >& owner,
@@ -180,7 +181,8 @@ public:
         {
             auto storage = value.as< weak< ArchetypeStorage > >();
             u32  i       = 0;
-            for(minitl::array< raw< const Meta::Class > >::const_iterator it = m_parameters.begin();
+            for(minitl::vector< raw< const Meta::Class > >::const_iterator it
+                = m_parameters.begin();
                 it != m_parameters.end(); ++it, ++i)
             {
                 if(propertyName == (*it)->name)
@@ -206,10 +208,10 @@ createProduct(raw< const Meta::Class >                       componentClass,
         return {};
     }
     motor_assert_format(productClass->constructor, "product class {0} does not have a constructor",
-                        productClass->fullname());
+                        productClass->name);
     motor_assert_format(productClass->constructor->overloads.count == 1,
                         "product class {0} has more than one constructor overload",
-                        productClass->fullname());
+                        productClass->name);
     Meta::Value                   parameter(producer);
     const Meta::Method::Overload& overload = productClass->constructor->overloads[0];
     return (overload.call)(productClass->constructor, &parameter, 1)
@@ -217,7 +219,7 @@ createProduct(raw< const Meta::Class >                       componentClass,
 }
 
 static u32
-componentCount(const minitl::array< minitl::array< raw< const Meta::Class > > >& archetypes)
+componentCount(const minitl::vector< minitl::vector< raw< const Meta::Class > > >& archetypes)
 {
     u32 result = 0;
     for(const auto& archetype: archetypes)
@@ -241,17 +243,17 @@ ref< Meta::AST::IntrospectionHint > ArchetypeStorage::Policy::verify(
 }
 
 ArchetypeStorage::ArchetypeStorage(
-    const weak< ComponentRegistry >&                                  registry,
-    const minitl::array< raw< const Meta::Class > >&                  componentClasses,
-    const minitl::array< minitl::array< raw< const Meta::Class > > >& archetypes)
+    const weak< ComponentRegistry >&                                    registry,
+    minitl::vector< raw< const Meta::Class > >                          componentClasses,
+    const minitl::vector< minitl::vector< raw< const Meta::Class > > >& archetypes)
     : m_registry(registry)
-    , m_componentClasses(componentClasses)
+    , m_componentClasses(std::move(componentClasses))
     , m_components(Arena::game(), componentCount(archetypes) + componentClasses.size())
 {
     motor_forceuse(registry);
     motor_forceuse(archetypes);
-    minitl::array< ref< KernelScheduler::IProduct > >::iterator product = m_components.begin();
-    for(minitl::array< raw< const Meta::Class > >::const_iterator it = m_componentClasses.begin();
+    minitl::vector< ref< KernelScheduler::IProduct > >::iterator product = m_components.begin();
+    for(minitl::vector< raw< const Meta::Class > >::const_iterator it = m_componentClasses.begin();
         it != m_componentClasses.end(); ++it, ++product)
     {
         *product = createProduct(*it, this);
@@ -268,7 +270,8 @@ ArchetypeStorage::createRuntime(weak< const KernelScheduler::ProducerLoader > lo
     ref< Runtime > result
         = ref< Runtime >::create(Arena::game(), loader->startTask(), m_components.size());
     u32 i = 0;
-    for(minitl::array< ref< KernelScheduler::IProduct > >::const_iterator it = m_components.begin();
+    for(minitl::vector< ref< KernelScheduler::IProduct > >::const_iterator it
+        = m_components.begin();
         it != m_components.end(); ++it, ++i)
     {
         result->parameters[i].first = *it;

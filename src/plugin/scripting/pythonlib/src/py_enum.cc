@@ -195,8 +195,7 @@ PyObject* PyMotorEnum::cmp(PyObject* self, PyObject* other, int operation)
                     *s_library->m_PyExc_TypeError,
                     minitl::format<>(
                         FMT("cannot compare value of enum type {0} with value of enum type {1}"),
-                        self_->value.type().metaclass->fullname(),
-                        other_->value.type().metaclass->fullname()));
+                        self_->value.type().metaclass->name, other_->value.type().metaclass->name));
                 return nullptr;
             }
             else
@@ -242,8 +241,7 @@ PyObject* PyMotorEnum::cmp(PyObject* self, PyObject* other, int operation)
                 *s_library->m_PyExc_TypeError,
                 minitl::format<>(
                     FMT("cannot compare value of enum type {0} with value of type {1}"),
-                    self_->value.type().metaclass->fullname(),
-                    other_->value.type().metaclass->fullname()));
+                    self_->value.type().metaclass->name, other_->value.type().metaclass->name));
             return nullptr;
         }
     }

@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/settings/stdafx.h>
-#include <motor/meta/engine/namespace.hh>
+#include <motor/meta/namespace.hh>
 #include <motor/settings/settings.factory.hh>
 
 MOTOR_REGISTER_NAMESPACE_2_NAMED(motor, Motor, Settings)
@@ -23,7 +23,7 @@ SettingsBase::SettingsBase(raw< const Meta::Class > settingsClass) : m_settingsC
 SettingsBase::~SettingsBase()
 {
     motor_assert_format(this->hooked(), "Settings object {0} was removed from the settings list",
-                        m_settingsClass->fullname());
+                        m_settingsClass->name);
     this->unhook();
 }
 

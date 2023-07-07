@@ -100,7 +100,7 @@ public:
 };
 
 TaskScheduler::Worker::Worker(const weak< TaskScheduler >& scheduler, u32 workerId)
-    : m_workThread(istring(minitl::format< 128u >(FMT("worker {0}"), workerId)),
+    : m_workThread(istring(minitl::format< 128u >(FMT("w:{0}"), workerId)),
                    &TaskScheduler::Worker::work, reinterpret_cast< intptr_t >(this),
                    reinterpret_cast< intptr_t >(scheduler.operator->()), Thread::BelowNormal)
 {

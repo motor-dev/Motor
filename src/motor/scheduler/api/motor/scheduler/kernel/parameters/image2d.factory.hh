@@ -6,10 +6,7 @@
 
 #include <motor/scheduler/kernel/parameters/image2d.hh>
 
-#include <motor/meta/classinfo.meta.hh>
-#include <motor/meta/engine/methodinfo.meta.hh>
-#include <motor/meta/engine/objectinfo.meta.hh>
-#include <motor/meta/engine/operatortable.meta.hh>
+#include <motor/meta/class.meta.hh>
 #include <motor/meta/typeinfo.hh>
 
 namespace Motor { namespace KernelScheduler {
@@ -29,16 +26,14 @@ struct ClassID< KernelScheduler::Image2D< T > >
     {
         static const Meta::Class s_class = {name(),
                                             u32(sizeof(KernelScheduler::Image2D< T >)),
-                                            0,
-                                            Meta::ClassType_Object,
-                                            {nullptr},
                                             motor_class< KernelScheduler::IImage2D >(),
+                                            0,
+                                            motor_class< KernelScheduler::IImage2D >()->objects,
+                                            motor_class< KernelScheduler::IImage2D >()->tags,
+                                            motor_class< KernelScheduler::IImage2D >()->properties,
+                                            motor_class< KernelScheduler::IImage2D >()->methods,
                                             {nullptr},
-                                            {nullptr},
-                                            {0, nullptr},
-                                            {0, nullptr},
-                                            {nullptr},
-                                            Meta::OperatorTable::s_emptyTable,
+                                            motor_class< KernelScheduler::IImage2D >()->operators,
                                             nullptr,
                                             nullptr};
         raw< const Meta::Class > result  = {&s_class};

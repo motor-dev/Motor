@@ -159,10 +159,9 @@ PyObject* PyMotorArray::stealValue(PyObject* owner, Meta::Value& value)
     new(&(static_cast< PyMotorArray* >(result))->value) Meta::Value();
     (static_cast< PyMotorArray* >(result))->value.swap(value);
     motor_assert_format(arrayClass->operators, "Array type {0} does not implement operator methods",
-                        arrayClass->fullname());
+                        arrayClass->name);
     motor_assert_format(arrayClass->operators->arrayOperators,
-                        "Array type {0} does not implement Array API methods",
-                        arrayClass->fullname());
+                        "Array type {0} does not implement Array API methods", arrayClass->name);
     motor_forceuse(arrayClass);
     return result;
 }

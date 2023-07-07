@@ -22,7 +22,7 @@ class cpuc(Task.Task):
                 '#include <motor/config/config.hh>\n'
                 '#include <motor/kernel/input/input.hh>\n'
                 '#include <motor/kernel/simd.hh>\n'
-                '#include <motor/minitl/array.hh>\n'
+                '#include <motor/minitl/vector.hh>\n'
                 '#include <motor/plugin.compute.cpu/memorybuffer.hh>\n'
                 '#include <motor/plugin/dynobjectlist.hh>\n'
                 '#include <motor/scheduler/kernel/parameters/parameters.hh>\n'
@@ -62,7 +62,7 @@ class cpuc(Task.Task):
                     }
                     out.write(
                         'MOTOR_PLUGIN_EXPORT void _%(kernelname)s%(static_variant)s(const u32 index, const u32 total,\n'
-                        '        const minitl::array<\n'
+                        '        const minitl::vector<\n'
                         '        minitl::weak< const Motor::KernelScheduler::IMemoryBuffer > >& /*argv*/)\n'
                         '{\n'
                         '    %(namespace)s\n'

@@ -9,12 +9,6 @@
 #include <motor/introspect/node/bool.hh>
 #include <motor/introspect/node/filename.hh>
 #include <motor/introspect/node/float.hh>
-#include <motor/introspect/node/float2.hh>
-#include <motor/introspect/node/float3.hh>
-#include <motor/introspect/node/float4.hh>
-#include <motor/introspect/node/int2.hh>
-#include <motor/introspect/node/int3.hh>
-#include <motor/introspect/node/int4.hh>
 #include <motor/introspect/node/integer.hh>
 #include <motor/introspect/node/object.hh>
 #include <motor/introspect/node/parameter.hh>
@@ -47,39 +41,9 @@ void Node::Visitor::accept(const weak< const Float >& floatValue)
     motor_forceuse(floatValue);
 }
 
-void Node::Visitor::accept(const weak< const Float2 >& float2Value)
-{
-    motor_forceuse(float2Value);
-}
-
-void Node::Visitor::accept(const weak< const Float3 >& float3Value)
-{
-    motor_forceuse(float3Value);
-}
-
-void Node::Visitor::accept(const weak< const Float4 >& float4Value)
-{
-    motor_forceuse(float4Value);
-}
-
 void Node::Visitor::accept(const weak< const Integer >& integerValue)
 {
     motor_forceuse(integerValue);
-}
-
-void Node::Visitor::accept(const weak< const Int2 >& int2Value)
-{
-    motor_forceuse(int2Value);
-}
-
-void Node::Visitor::accept(const weak< const Int3 >& int3Value)
-{
-    motor_forceuse(int3Value);
-}
-
-void Node::Visitor::accept(const weak< const Int4 >& int4Value)
-{
-    motor_forceuse(int4Value);
 }
 
 void Node::Visitor::accept(const weak< const Object >& objectValue)

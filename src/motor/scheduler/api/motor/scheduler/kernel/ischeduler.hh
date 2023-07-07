@@ -7,7 +7,7 @@
 #include <motor/scheduler/kernel/imemorybuffer.hh>
 #include <motor/scheduler/kernel/kernel.meta.hh>
 
-#include <motor/minitl/array.hh>
+#include <motor/minitl/vector.hh>
 
 namespace Motor {
 class Scheduler;

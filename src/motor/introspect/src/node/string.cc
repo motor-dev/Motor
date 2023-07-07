@@ -16,23 +16,10 @@ String::~String() = default;
 
 ConversionCost String::distance(const Type& type) const
 {
-    if(type.metaclass->type() == ClassType_String)
-        return ConversionCost();
-    else
-        return ConversionCost::s_incompatible;
 }
 
 void String::doEval(const Meta::Type& expectedType, Value& result) const
 {
-    switch(expectedType.metaclass->index())
-    {
-    case ClassIndex_istring: result = Meta::Value(istring(m_value)); break;
-    case ClassIndex_ifilename: result = Meta::Value(ifilename(m_value)); break;
-    case ClassIndex_ipath: result = Meta::Value(ipath(m_value)); break;
-    case ClassIndex_inamespace: result = Meta::Value(inamespace(m_value)); break;
-    case ClassIndex_text: result = Meta::Value(text(m_value)); break;
-    default: motor_notreached();
-    }
 }
 
 void String::doVisit(Node::Visitor& visitor) const

@@ -4,9 +4,9 @@
 #define MOTOR_META_BUILTIN_HELP_META_HH
 
 #include <motor/meta/stdafx.h>
-#include <motor/meta/classinfo.meta.hh>
-#include <motor/meta/engine/methodinfo.meta.hh>
-#include <motor/meta/engine/propertyinfo.meta.hh>
+#include <motor/meta/class.meta.hh>
+#include <motor/meta/method.meta.hh>
+#include <motor/meta/property.meta.hh>
 
 namespace Motor {
 

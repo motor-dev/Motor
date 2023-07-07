@@ -91,7 +91,7 @@ PyObject* PyMotorNamespace::getattr(PyObject* self, const char* name)
     auto*       self_ = static_cast< PyMotorNamespace* >(self);
     const auto& klass = self_->value.as< const Meta::Class& >();
     istring     name_(name);
-    for(raw< const Meta::ObjectInfo > o = klass.objects; o; o = o->next)
+    for(raw< const Meta::Object > o = klass.objects; o; o = o->next)
     {
         if(o->name == name_)
         {
@@ -107,7 +107,7 @@ int PyMotorNamespace::setattr(PyObject* self, const char* name, PyObject* value)
     auto*       self_ = static_cast< PyMotorObject* >(self);
     istring     name_(name);
     const auto& klass = self_->value.as< const Meta::Class& >();
-    for(raw< const Meta::ObjectInfo > ob = klass.objects; ob; ob = ob->next)
+    for(raw< const Meta::Object > ob = klass.objects; ob; ob = ob->next)
     {
         if(ob->name == name_)
         {
@@ -158,7 +158,7 @@ PyObject* PyMotorNamespace::dir(PyObject* self, PyObject* args)
                                                      ? s_library->m_PyUnicode_FromStringAndSize
                                                      : s_library->m_PyString_FromStringAndSize;
 
-    for(raw< const Meta::ObjectInfo > o = klass.objects; o; o = o->next)
+    for(raw< const Meta::Object > o = klass.objects; o; o = o->next)
     {
         PyObject* str = fromString(o->name.c_str(), Py_ssize_t(o->name.size()));
         if(!str)
@@ -185,11 +185,11 @@ PyObject* PyMotorNamespace::repr(PyObject* self)
 
     if(s_library->getVersion() >= 30)
     {
-        return s_library->m_PyUnicode_FromFormat("[%s]", ns.fullname().str().name);
+        return s_library->m_PyUnicode_FromFormat("[%s]", ns.name.c_str());
     }
     else
     {
-        return s_library->m_PyString_FromFormat("[%s]", ns.fullname().str().name);
+        return s_library->m_PyString_FromFormat("[%s]", ns.name.c_str());
     }
 }
 

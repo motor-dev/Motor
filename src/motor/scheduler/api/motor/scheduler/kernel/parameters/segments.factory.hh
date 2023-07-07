@@ -6,9 +6,8 @@
 
 #include <motor/scheduler/kernel/parameters/segments.hh>
 
-#include <motor/meta/classinfo.meta.hh>
-#include <motor/meta/engine/objectinfo.meta.hh>
-#include <motor/meta/engine/operatortable.meta.hh>
+#include <motor/meta/class.meta.hh>
+#include <motor/meta/object.meta.hh>
 #include <motor/meta/typeinfo.hh>
 
 namespace Motor { namespace KernelScheduler {
@@ -26,15 +25,15 @@ struct ClassID< KernelScheduler::Segments< T > >
 {
     MOTOR_EXPORT static raw< const Meta::Class > klass()
     {
-        static Meta::ObjectInfo s_productClass = {
-            {nullptr},
+        static Meta::Object s_productClass = {
+            motor_class< KernelScheduler::ISegments >()->objects,
             {nullptr},
             KernelScheduler::IParameter::getProductTypePropertyName(),
             Meta::Value(
                 motor_class< KernelScheduler::Product<
                     KernelScheduler::Segments< typename minitl::remove_const< T >::type > > >())};
 
-        static Meta::ObjectInfo s_parameterClassProperty
+        static Meta::Object s_parameterClassProperty
             = {{&s_productClass},
                {nullptr},
                istring("ParameterClass"),
@@ -42,16 +41,14 @@ struct ClassID< KernelScheduler::Segments< T > >
 
         static const Meta::Class s_class = {name(),
                                             u32(sizeof(KernelScheduler::Segments< T >)),
-                                            0,
-                                            Meta::ClassType_Object,
-                                            {nullptr},
                                             motor_class< KernelScheduler::ISegments >(),
+                                            0,
                                             {&s_parameterClassProperty},
+                                            motor_class< KernelScheduler::ISegments >()->tags,
+                                            motor_class< KernelScheduler::ISegments >()->properties,
+                                            motor_class< KernelScheduler::ISegments >()->methods,
                                             {nullptr},
-                                            {0, nullptr},
-                                            {0, nullptr},
-                                            {nullptr},
-                                            Meta::OperatorTable::s_emptyTable,
+                                            motor_class< KernelScheduler::ISegments >()->operators,
                                             nullptr,
                                             nullptr};
         raw< const Meta::Class > result  = {&s_class};

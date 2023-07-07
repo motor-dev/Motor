@@ -17,7 +17,7 @@ class KernelObject : public minitl::refcountable
 
 private:
     typedef void(KernelMain)(const u32, const u32,
-                             const minitl::array< weak< const IMemoryBuffer > >& params);
+                             const minitl::vector< weak< const IMemoryBuffer > >& params);
 
 private:
     class Callback;

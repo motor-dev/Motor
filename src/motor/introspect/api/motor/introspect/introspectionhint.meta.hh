@@ -6,7 +6,7 @@
 #include <motor/introspect/stdafx.h>
 
 #include <motor/introspect/node/node.hh>
-#include <motor/meta/engine/call.hh>
+#include <motor/meta/call.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 
@@ -34,7 +34,7 @@ public:
         const;
     virtual bool  getPropertyValue(Value & value, const istring& propertyName, Value& result) const;
     virtual Value call(const ArgInfo arguments[], u32 argumentCount) const;
-    virtual minitl::tuple< minitl::raw< const Method >, bool > getCall(DbContext & context) const;
+    virtual minitl::raw< const Method > getCall(DbContext & context) const;
 };
 
 }}}  // namespace Motor::Meta::AST

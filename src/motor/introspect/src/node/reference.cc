@@ -6,7 +6,8 @@
 
 #include <motor/introspect/dbcontext.hh>
 #include <motor/introspect/node/object.hh>
-#include <motor/meta/engine/objectinfo.meta.hh>
+#include <motor/meta/object.meta.hh>
+#include <motor/meta/operatortable.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 
@@ -117,34 +118,23 @@ void Reference::doEval(const Type& expectedType, Value& result) const
     }
 }
 
-minitl::tuple< raw< const Meta::Method >, bool > Reference::getCall(DbContext& context) const
+raw< const Meta::Method > Reference::getCall(DbContext& context) const
 {
     motor_forceuse(context);
     if(m_node)
-        return minitl::make_tuple(raw< const Method >::null(), false);
+    {
+        return raw< const Method >::null();
+    }
     else
     {
-        bool                    found     = false;
-        raw< const Class >      metaclass = m_value.type().metaclass;
-        raw< const ObjectInfo > staticCall
-            = metaclass->getStaticProperty(Class::nameOperatorCall());
-        if(staticCall)
+        raw< const Class > metaclass = m_value.type().metaclass;
+        if(metaclass->operators->call)
         {
-            return minitl::make_tuple(staticCall->value.as< raw< const Method > >(), false);
-        }
-        raw< const Method > method = metaclass->getMethod(Class::nameOperatorCall());
-        if(method)
-        {
-            return minitl::make_tuple(method, true);
-        }
-        Value call = metaclass->get(m_value, Class::nameOperatorCall(), found);
-        if(found)
-        {
-            return minitl::make_tuple(call.as< raw< const Method > >(), false);
+            return (*metaclass->operators->call)(m_value);
         }
         else
         {
-            return minitl::make_tuple(raw< const Method >::null(), false);
+            return raw< const Method >::null();
         }
     }
 }

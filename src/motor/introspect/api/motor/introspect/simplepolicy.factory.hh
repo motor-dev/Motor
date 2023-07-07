@@ -7,9 +7,8 @@
 #include <motor/introspect/policy.meta.hh>
 
 #include <motor/introspect/node/object.hh>
-#include <motor/meta/classinfo.meta.hh>
-#include <motor/meta/engine/helper/method.hh>
-#include <motor/meta/engine/operatortable.meta.hh>
+#include <motor/meta/class.meta.hh>
+#include <motor/meta/operatortable.hh>
 #include <motor/meta/typeinfo.hh>
 
 namespace Motor { namespace Meta {

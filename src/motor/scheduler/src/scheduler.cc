@@ -2,7 +2,6 @@
    see LICENSE for detail */
 
 #include <motor/scheduler/stdafx.h>
-#include <motor/meta/engine/namespace.hh>
 #include <motor/scheduler/kernel/imemorybuffer.hh>
 #include <motor/scheduler/kernel/ischeduler.hh>
 #include <motor/scheduler/kernel/kernel.meta.hh>

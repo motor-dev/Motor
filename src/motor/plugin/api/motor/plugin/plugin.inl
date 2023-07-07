@@ -7,10 +7,8 @@
 #include <motor/plugin/plugin.hh>
 
 #include <motor/core/environment.hh>
-#include <motor/meta/classinfo.meta.hh>
-#include <motor/meta/engine/helper/staticarray.hh>
-#include <motor/meta/engine/objectinfo.meta.hh>
-#include <motor/meta/engine/operatortable.meta.hh>
+#include <motor/meta/class.meta.hh>
+#include <motor/meta/object.meta.hh>
 #include <motor/meta/value.hh>
 #include <motor/plugin/dynobjectlist.hh>
 #include <motor/plugin/hook.hh>
@@ -21,11 +19,21 @@ namespace Motor { namespace Plugin {
     namespace Motor {                                                                              \
     raw< Meta::Class > motor_##name##_Namespace()                                                  \
     {                                                                                              \
-        static Meta::Class ci                                                                      \
-            = {istring(#name), 0,      0,   Meta::ClassType_Namespace,         {0}, {0}, {0}, {0}, \
-               {0, 0},         {0, 0}, {0}, Meta::OperatorTable::s_emptyTable, 0,   0};            \
-        raw< Meta::Class > ptr = {&ci};                                                            \
-        return ptr;                                                                                \
+        static Meta::Class ci = {                                                                  \
+            istring(#name),                                                                        \
+            0,                                                                                     \
+            motor_class< void >(),                                                                 \
+            0,                                                                                     \
+            motor_class< void >()->objects,                                                        \
+            motor_class< void >()->tags,                                                           \
+            motor_class< void >()->properties,                                                     \
+            motor_class< void >()->methods,                                                        \
+            {nullptr},                                                                             \
+            motor_class< void >()->operators,                                                      \
+            nullptr,                                                                               \
+            nullptr,                                                                               \
+        };                                                                                         \
+        return {&ci};                                                                              \
     }                                                                                              \
     }
 

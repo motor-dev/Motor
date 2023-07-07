@@ -6,13 +6,13 @@
 
 namespace Motor { namespace KernelScheduler { namespace OpenCL_GL {
 
-minitl::array< cl_context_properties > Scheduler::createPlatformSpecificContextProperties()
+minitl::vector< cl_context_properties > Scheduler::createPlatformSpecificContextProperties()
 {
     HGLRC glrc = wglGetCurrentContext();
     HDC   dc   = wglGetCurrentDC();
     if(glrc)
     {
-        minitl::array< cl_context_properties > properties(Arena::temporary(), 5);
+        minitl::vector< cl_context_properties > properties(Arena::temporary(), 5);
         properties[0] = CL_GL_CONTEXT_KHR;
         properties[1] = (cl_context_properties)glrc;
         properties[2] = CL_WGL_HDC_KHR;
@@ -24,7 +24,7 @@ minitl::array< cl_context_properties > Scheduler::createPlatformSpecificContextP
     {
         motor_info(Log::opencl_gl(),
                    "no OpenGL context found; OpenGL/OpenCL compatibility disabled");
-        minitl::array< cl_context_properties > properties(Arena::temporary(), 1);
+        minitl::vector< cl_context_properties > properties(Arena::temporary(), 1);
         properties[0] = 0;
         return properties;
     }

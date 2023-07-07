@@ -12,13 +12,7 @@ class Array;
 class Bool;
 class FileName;
 class Float;
-class Float2;
-class Float3;
-class Float4;
 class Integer;
-class Int2;
-class Int3;
-class Int4;
 class Object;
 class Parameter;
 class Property;
@@ -64,13 +58,7 @@ public:
         virtual void accept(const weak< const Bool >& boolValue);
         virtual void accept(const weak< const FileName >& filenameValue);
         virtual void accept(const weak< const Float >& floatValue);
-        virtual void accept(const weak< const Float2 >& float2Value);
-        virtual void accept(const weak< const Float3 >& float3Value);
-        virtual void accept(const weak< const Float4 >& float4Value);
         virtual void accept(const weak< const Integer >& integerValue);
-        virtual void accept(const weak< const Int2 >& int2Value);
-        virtual void accept(const weak< const Int3 >& int3Value);
-        virtual void accept(const weak< const Int4 >& int4Value);
         virtual void accept(const weak< const Object >& objectValue);
         virtual void accept(const weak< const Parameter >& parameter, istring name,
                             const weak< const Node >& value);
@@ -84,10 +72,10 @@ public:
 
     virtual ConversionCost distance(const Type& type) const = 0;
     virtual ref< Node >    getProperty(DbContext & context, const inamespace& name) const;
-    virtual minitl::tuple< raw< const Meta::Method >, bool > getCall(DbContext & context) const;
-    bool                                                     resolve(DbContext & context);
-    void  eval(const Type& expectedType, Value& result) const;
-    Value eval(const Type& expectedType) const;
+    virtual raw< const Meta::Method > getCall(DbContext & context) const;
+    bool                              resolve(DbContext & context);
+    void                              eval(const Type& expectedType, Value& result) const;
+    Value                             eval(const Type& expectedType) const;
 
     template < typename T >
     void setMetadata(const istring name, T value)

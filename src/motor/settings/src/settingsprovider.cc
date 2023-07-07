@@ -2,7 +2,6 @@
    see LICENSE for detail */
 
 #include <motor/settings/stdafx.h>
-#include <motor/meta/engine/namespace.hh>
 #include <motor/settings/settings.factory.hh>
 #include <motor/settings/settingsprovider.hh>
 

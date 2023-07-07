@@ -99,11 +99,19 @@ class Class(MetaObject):
             offset = 'static_cast<i32>(reinterpret_cast<char*>(static_cast<%s*>(reinterpret_cast<%s*>(1)))-reinterpret_cast<char*>(1))' % (
                 self._superclass, full_name)
             parent = '::Motor::Meta::ClassID<%s>::klass()' % self._superclass
+            objects = '::Motor::Meta::ClassID<%s>::klass()->objects' % self._superclass
+            properties = '::Motor::Meta::ClassID<%s>::klass()->properties' % self._superclass
+            methods = '::Motor::Meta::ClassID<%s>::klass()->methods' % self._superclass
+            tags = '::Motor::Meta::ClassID<%s>::klass()->tags' % self._superclass
             operators = '::Motor::Meta::ClassID<%s>::klass()->operators' % self._superclass
         else:
             offset = '0'
             parent = '::Motor::Meta::ClassID<void>::klass()'
-            operators = '::Motor::Meta::OperatorTable::s_emptyTable'
+            objects = '{nullptr}'
+            properties = '{nullptr}'
+            methods = '{nullptr}'
+            tags = '{nullptr}'
+            operators = '::Motor::Meta::ClassID<void>::klass()->operators'
 
         out.write('\nnamespace %s_Meta\n{\n' % (' { namespace '.join(namespace)))
         out.write('::Motor::istring name()\n'
@@ -115,18 +123,16 @@ class Class(MetaObject):
                   '    name(),\n'
                   '    sizeof(%s),\n'
                   '    %s,\n'
-                  '    0,\n'
                   '    %s,\n'
                   '    %s,\n'
-                  '    {nullptr},\n'
-                  '    {nullptr},\n'
-                  '    {0, nullptr},\n'
-                  '    {0, nullptr},\n'
+                  '    %s,\n'
+                  '    %s,\n'
+                  '    %s,\n'
                   '    {nullptr},\n'
                   '    %s,\n'
                   '    nullptr,\n'
                   '    nullptr\n'
-                  '};\n' % (full_name, offset, self._parent.name(), parent, operators))
+                  '};\n' % (full_name, parent, offset, objects, tags, properties, methods, operators))
         out.write('%s\n\n' % ('}' * (len(namespace))))
 
 
@@ -313,7 +319,7 @@ if __name__ == '__main__':
     with open(arguments.out, 'w') as out:
         out.write('#include <motor/meta/typeinfo.hh>\n'
                   '#include "%s"\n'
-                  '#include <motor/meta/engine/operatortable.meta.hh>\n'
+                  '#include <motor/meta/operatortable.hh>\n'
                   '%s\n\n' % (arguments.in_relative, '\n'.join('#include %s' % i for i in results[0]._included_files)))
         explorer._namespace.write_declarations([], out)
         explorer._namespace.write_metaclasses([], out)
