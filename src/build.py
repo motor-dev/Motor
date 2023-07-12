@@ -103,34 +103,34 @@ def build_plugins(bld):
     #           ['motor'],
     #           ['motor.3rdparty.audio.OpenAL'])
 
-    bld.plugin('plugin.scripting.lua', ['motor'], ['motor.3rdparty.scripting.lua'], uselib=['cxx14'])
+    # bld.plugin('plugin.scripting.lua', ['motor'], ['motor.3rdparty.scripting.lua'], uselib=['cxx14'])
     bld.plugin('plugin.input.input', ['motor'], uselib=['cxx14'])
-    bld.shared_library('plugin.scripting.pythonlib', ['motor'], conditions=['python'], uselib=['cxx14'])
-    bld.plugin(
-        'plugin.scripting.python', ['motor', 'plugin.scripting.pythonlib'], conditions=['python'], uselib=['cxx14']
-    )
-    bld.python_module(
-        'py_motor', ['motor', 'plugin.scripting.pythonlib'],
-        path=bld.path.find_node('plugin/scripting/pythonmodule'),
-        conditions=['python'],
-        uselib=['cxx14']
-    )
-    if bld.env.PROJECTS:
-        bld.plugin(
-            'plugin.scripting.python3', ['motor', 'plugin.scripting.python'],
-            extra_defines=['PYTHON_LIBRARY=python3'],
-            path=bld.path.find_node('plugin/scripting/pythonbinding'), uselib=['cxx14']
-        )
-    else:
-        for version in bld.env.PYTHON_VERSIONS:
-            short_version = version.replace('.', '')
-            bld.plugin(
-                'plugin.scripting.python%s' % short_version, ['motor', 'plugin.scripting.python'],
-                ['motor.3rdparty.scripting.python%s' % short_version],
-                path=bld.path.find_node('plugin/scripting/pythonbinding'),
-                conditions=['python%s' % version],
-                uselib=['cxx14']
-            )
+    # bld.shared_library('plugin.scripting.pythonlib', ['motor'], conditions=['python'], uselib=['cxx14'])
+    # bld.plugin(
+    #    'plugin.scripting.python', ['motor', 'plugin.scripting.pythonlib'], conditions=['python'], uselib=['cxx14']
+    # )
+    # bld.python_module(
+    #    'py_motor', ['motor', 'plugin.scripting.pythonlib'],
+    #    path=bld.path.find_node('plugin/scripting/pythonmodule'),
+    #    conditions=['python'],
+    #    uselib=['cxx14']
+    # )
+    # if bld.env.PROJECTS:
+    #    bld.plugin(
+    #        'plugin.scripting.python3', ['motor', 'plugin.scripting.python'],
+    #        extra_defines=['PYTHON_LIBRARY=python3'],
+    #        path=bld.path.find_node('plugin/scripting/pythonbinding'), uselib=['cxx14']
+    #    )
+    # else:
+    #    for version in bld.env.PYTHON_VERSIONS:
+    #        short_version = version.replace('.', '')
+    #        bld.plugin(
+    #            'plugin.scripting.python%s' % short_version, ['motor', 'plugin.scripting.python'],
+    #            ['motor.3rdparty.scripting.python%s' % short_version],
+    #            path=bld.path.find_node('plugin/scripting/pythonbinding'),
+    #            conditions=['python%s' % version],
+    #            uselib=['cxx14']
+    #        )
 
     bld.plugin('plugin.compute.cpu', ['motor'], uselib=['cxx14'])
     bld.plugin(

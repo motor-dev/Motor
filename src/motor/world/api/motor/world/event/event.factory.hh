@@ -6,7 +6,6 @@
 
 #include <motor/world/event/event.hh>
 
-#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/typeinfo.hh>
 
 namespace Motor { namespace Meta {
@@ -29,16 +28,14 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< World::Event< T1, T2, T3, T4 > >:
 {
     static const Meta::Class s_class = {/* .name */ name(),
                                         /* .size */ u32(sizeof(World::Event< T1, T2, T3, T4 >)),
+                                        /* .parent */ motor_class< void >(),
                                         /* .offset */ 0,
-                                        /* .id */ Meta::ClassType_Struct,
-                                        /* .owner */ {nullptr},
-                                        /* .parent */ {motor_class< void >().m_ptr},
-                                        /* .objects */ {nullptr},
-                                        /* .tags */ {nullptr},
-                                        /* .properties */ {0, nullptr},
-                                        /* .methods */ {0, nullptr},
+                                        /* .objects */ motor_class< void >()->objects,
+                                        /* .tags */ motor_class< void >()->tags,
+                                        /* .properties */ motor_class< void >()->properties,
+                                        /* .methods */ motor_class< void >()->methods,
                                         /* .constructor */ {nullptr},
-                                        /* .operators */ Meta::OperatorTable::s_emptyTable,
+                                        /* .operators */ motor_class< void >()->operators,
                                         /* .copyconstructor */ nullptr,
                                         /* .destructor */ nullptr};
 

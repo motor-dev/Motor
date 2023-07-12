@@ -6,7 +6,6 @@
 #include <gtk3plugin.hh>
 #include <gtkresourcedescription.meta.hh>
 
-#include <motor/meta/engine/operatortable.meta.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/meta/value.hh>
 
@@ -34,16 +33,14 @@ raw< const Meta::Class > getGFlagsClass(Gtk3Plugin& plugin, GType type)
             = parent ? getGFlagsClass(plugin, parent) : motor_class< GFlagsWrapper >();
         Meta::Class clsTemplate = {istring(g_type_name(type)),
                                    parentClass->size,
-                                   0,
-                                   Meta::ClassType_Number,
-                                   {nullptr},
                                    parentClass,
+                                   0,
+                                   parentClass->objects,
+                                   parentClass->tags,
+                                   parentClass->properties,
+                                   parentClass->methods,
                                    {nullptr},
-                                   {nullptr},
-                                   {0, nullptr},
-                                   {0, nullptr},
-                                   {nullptr},
-                                   Meta::OperatorTable::s_emptyTable,
+                                   parentClass->operators,
                                    parentClass->copyconstructor,
                                    parentClass->destructor};
 

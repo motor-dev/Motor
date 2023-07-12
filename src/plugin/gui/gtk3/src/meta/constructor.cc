@@ -70,7 +70,7 @@ Meta::Value Constructor::call(raw< const Meta::Method > method, Meta::Value* par
     GObjectWrapper object = {(GObject*)g_object_newv(type, actualParamCount, gparams)};
 #endif
 
-    motor_assert_format(method->overloads.count == 1,
+    motor_assert_format(method->overloads.size() == 1,
                         "Constructor for type {0} has more than one overload", g_type_name(type));
     Meta::Type  returnType = method->overloads[0].returnType;
     Meta::Value result(returnType, &object, Meta::Value::MakeCopy);

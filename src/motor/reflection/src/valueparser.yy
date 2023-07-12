@@ -137,61 +137,11 @@ value:
             $$.location = $1.location;
         }
     |
-        '(' VAL_INTEGER ',' VAL_INTEGER ')'
-        {
-            $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
-            new ($$.value) ref<Node>(ref<Int2>::create(*context->arena,
-                                                       knl::bigint2{$2.value, $4.value}));
-            $$.location = $1.location;
-        }
-    |
-        '(' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER')'
-        {
-            $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
-            new ($$.value) ref<Node>(ref<Int3>::create(*context->arena,
-                                                       knl::bigint3{$2.value, $4.value, $6.value}));
-            $$.location = $1.location;
-        }
-    |
-        '(' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER ')'
-        {
-            $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
-            new ($$.value) ref<Node>(ref<Int4>::create(*context->arena,
-                                                       knl::bigint4{$2.value, $4.value,
-                                                                    $6.value, $8.value}));
-            $$.location = $1.location;
-        }
-    |
         VAL_FLOAT
         {
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Float>::create(*context->arena,
                                                         $1.value));
-            $$.location = $1.location;
-        }
-    |
-        '(' VAL_FLOAT ',' VAL_FLOAT ')'
-        {
-            $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
-            new ($$.value) ref<Node>(ref<Float2>::create(*context->arena,
-                                                         knl::float2{$2.value, $4.value}));
-            $$.location = $1.location;
-        }
-    |
-        '(' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT')'
-        {
-            $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
-            new ($$.value) ref<Node>(ref<Float3>::create(*context->arena,
-                                                         knl::float3{$2.value, $4.value, $6.value}));
-            $$.location = $1.location;
-        }
-    |
-        '(' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT ')'
-        {
-            $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
-            new ($$.value) ref<Node>(ref<Float4>::create(*context->arena,
-                                                         knl::float4{$2.value, $4.value,
-                                                                     $6.value, $8.value}));
             $$.location = $1.location;
         }
     |
@@ -256,7 +206,7 @@ object:
         ')'
         {
             ref<Reference> name = ref<Reference>::create(*context->arena,
-                                                        Motor::inamespace($1.value));
+                                                         Motor::inamespace($1.value));
             if ($3.value->size() >= 2)
             {
                 for (minitl::vector< ref<Parameter> >::iterator it = $3.value->begin();
@@ -285,8 +235,52 @@ object:
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Object>::create(*context->arena,
                                                          name,
+                                                         false,
                                                          *$3.value));
             $3.value->~vector();
+            free($3.value);
+            free($1.value);
+        }
+    |
+        fullname ':' TOK_ID
+        '('
+            param_list
+        ')'
+        {
+            ref<Reference> name = ref<Reference>::create(*context->arena,
+                                                         Motor::inamespace($1.value) + Motor::istring($3.value));
+            if ($5.value->size() >= 2)
+            {
+                for (minitl::vector< ref<Parameter> >::iterator it = $5.value->begin();
+                     it != $5.value->end() - 1;
+                     ++it)
+                {
+                    for (minitl::vector< ref<Parameter> >::iterator it2 = it + 1;
+                         it2 != $5.value->end();
+                         /*nothing*/)
+                    {
+                        if ((*it)->name() == (*it2)->name())
+                        {
+                            context->errors.push_back(Message(*it2,
+                                                              minitl::format<512>(FMT("attribute {0} specified several times"),
+                                                                                  (*it2)->name()),
+                                                              Motor::logError));
+                            it2 = $5.value->erase(it2);
+                        }
+                        else
+                        {
+                            ++it2;
+                        }
+                    }
+                }
+            }
+            $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
+            new ($$.value) ref<Node>(ref<Object>::create(*context->arena,
+                                                         name,
+                                                         true,
+                                                         *$5.value));
+            $5.value->~vector();
+            free($5.value);
             free($3.value);
             free($1.value);
         }

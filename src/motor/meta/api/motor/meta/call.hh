@@ -74,7 +74,7 @@ CallInfo getCost(raw< const Method::Overload > overload, minitl::span< u32 > arg
     const Method::Parameter*       p     = begin;
     for(u32 i = 0; i < placedArgumentCount; ++i, ++p)
     {
-        cost += calculateConversion(arguments[i].type, p->type);
+        cost += calculateConversionTo(arguments[i].type, p->type);
         if(cost >= ConversionCost::s_incompatible) return result;
     }
 
@@ -90,7 +90,7 @@ CallInfo getCost(raw< const Method::Overload > overload, minitl::span< u32 > arg
         {
             if(namedParams[j]->name == namedArguments[i].name)
             {
-                cost += calculateConversion(namedArguments[i].type, namedParams[j]->type);
+                cost += calculateConversionTo(namedArguments[i].type, namedParams[j]->type);
                 found = true;
                 minitl::swap(namedParams[j], namedParams[i]);
                 argumentIndices[i] = (u32)(namedParams[i] - begin);

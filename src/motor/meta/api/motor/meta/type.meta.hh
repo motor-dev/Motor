@@ -53,7 +53,7 @@ struct motor_api(META) Type
     }
     u32            size() const;
     bool           isA(const Type& other) const;
-    ConversionCost calculateConversion(const Type& other) const;
+    ConversionCost calculateConversionTo(const Type& other) const;
 
 public:
     template < typename T >
@@ -72,9 +72,9 @@ private:
 
 motor_api(META) bool         operator==(Type t1, Type t2);
 motor_api(META) bool         operator<=(Type t1, Type t2);
-static inline ConversionCost calculateConversion(const Type& type, const Type& target)
+static inline ConversionCost calculateConversionTo(const Type& from, const Type& target)
 {
-    return type.calculateConversion(target);
+    return from.calculateConversionTo(target);
 }
 
 motor_api(META) u32 format_length(const Type& type, const minitl::format_options& options);

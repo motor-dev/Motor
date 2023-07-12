@@ -4,7 +4,7 @@
 #define MOTOR_PLUGIN_GUI_GTK3_META_PROPERTY_META_HH
 
 #include <stdafx.h>
-#include <motor/meta/engine/propertyinfo.meta.hh>
+#include <motor/meta/property.meta.hh>
 
 namespace Motor { namespace Gtk3 {
 

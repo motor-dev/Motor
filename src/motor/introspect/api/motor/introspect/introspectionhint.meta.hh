@@ -28,7 +28,7 @@ public:
                       const CallInfo& callInfo, u32 argumentThis);
     ~IntrospectionHint() override;
 
-    virtual ConversionCost calculateConversion(const Type& targetType) const;
+    virtual ConversionCost calculateConversionTo(const Type& targetType) const;
     virtual Type           getType() const;
     virtual bool getPropertyType(DbContext & context, istring propertyName, Type & propertyType)
         const;

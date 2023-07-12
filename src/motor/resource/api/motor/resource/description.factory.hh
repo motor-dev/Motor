@@ -44,14 +44,18 @@ struct ClassID< Resource::Description< T > >
 
 template < typename T >
 const Meta::OperatorTable ClassID< Resource::Description< T > >::s_operatorTable
-    = {motor_class< Resource::IDescription >()->operators->arrayOperators,
-       motor_class< Resource::IDescription >()->operators->mapOperators,
-       motor_class< Resource::IDescription >()->operators->stringOperators,
-       motor_class< Resource::IDescription >()->operators->integerOperators,
+    = {motor_class< Resource::IDescription >()->operators->boolOperators,
+       motor_class< Resource::IDescription >()->operators->signedIntegerOperators,
+       motor_class< Resource::IDescription >()->operators->unsignedIntegerOperators,
        motor_class< Resource::IDescription >()->operators->floatOperators,
+       motor_class< Resource::IDescription >()->operators->doubleOperators,
+       motor_class< Resource::IDescription >()->operators->stringOperators,
        motor_class< Resource::IDescription >()->operators->variantOperators,
+       motor_class< Resource::IDescription >()->operators->arrayOperators,
+       motor_class< Resource::IDescription >()->operators->mapOperators,
        motor_class< T >(),
-       motor_class< Resource::IDescription >()->operators->call};
+       motor_class< Resource::IDescription >()->operators->call,
+       motor_class< Resource::IDescription >()->operators->dynamicCall};
 
 }}  // namespace Motor::Meta
 

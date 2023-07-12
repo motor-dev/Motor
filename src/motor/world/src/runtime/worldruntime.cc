@@ -4,7 +4,6 @@
 #include <motor/world/stdafx.h>
 #include <runtime/worldruntime.hh>
 
-#include <motor/meta/engine/namespace.hh>
 #include <motor/scheduler/task/group.hh>
 #include <motor/scheduler/task/method.hh>
 

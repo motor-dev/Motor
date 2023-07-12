@@ -137,4 +137,28 @@ struct [[motor::meta(name = "i64")]] motor_i64
     }
 };
 
+struct [[motor::meta(name = "float")]] motor_float
+{
+    float value;
+    [[motor::meta(implicit)]] motor_float(float value) : value(value)
+    {
+    }
+    operator float() const
+    {
+        return value;
+    }
+};
+
+struct [[motor::meta(name = "double")]] motor_double
+{
+    double value;
+    [[motor::meta(implicit)]] motor_double(double value) : value(value)
+    {
+    }
+    operator double() const
+    {
+        return value;
+    }
+};
+
 #endif

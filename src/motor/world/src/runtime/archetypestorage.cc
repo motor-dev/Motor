@@ -209,7 +209,7 @@ createProduct(raw< const Meta::Class >                       componentClass,
     }
     motor_assert_format(productClass->constructor, "product class {0} does not have a constructor",
                         productClass->name);
-    motor_assert_format(productClass->constructor->overloads.count == 1,
+    motor_assert_format(productClass->constructor->overloads.size() == 1,
                         "product class {0} has more than one constructor overload",
                         productClass->name);
     Meta::Value                   parameter(producer);

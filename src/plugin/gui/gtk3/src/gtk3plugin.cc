@@ -12,9 +12,6 @@
 #include <gobject.hh>
 #include <gtkresourcedescription.meta.hh>
 
-#include <motor/meta/engine/helper/method.hh>
-#include <motor/meta/engine/methodinfo.meta.hh>
-#include <motor/meta/engine/namespace.hh>
 #include <motor/plugin/plugin.hh>
 
 #include <meta/constructor.meta.hh>

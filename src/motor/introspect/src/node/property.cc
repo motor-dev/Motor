@@ -21,13 +21,13 @@ Property::~Property() = default;
 
 ConversionCost Property::distance(const Type& type) const
 {
-    return m_type.calculateConversion(type);
+    return m_type.calculateConversionTo(type);
 }
 
-minitl::tuple< raw< const Meta::Method >, bool > Property::getCall(DbContext& context) const
+raw< const Meta::Method > Property::getCall(DbContext& context) const
 {
     motor_forceuse(context);
-    return minitl::make_tuple(raw< const Method >::null(), false);
+    return {};
 }
 
 bool Property::doResolve(DbContext& context)

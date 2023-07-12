@@ -3,7 +3,6 @@
 
 #include <stdafx.h>
 #include <motor/filesystem/diskfolder.meta.hh>
-#include <motor/meta/engine/namespace.hh>
 #include <motor/plugin/plugin.hh>
 #include <application.hh>
 

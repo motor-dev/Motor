@@ -3,7 +3,6 @@
 
 #include <stdafx.h>
 
-#include <motor/meta/engine/namespace.hh>
 #include <motor/plugin.scripting.python/context.hh>
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <motor/plugin/plugin.hh>

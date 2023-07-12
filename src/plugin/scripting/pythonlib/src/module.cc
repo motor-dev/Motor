@@ -3,15 +3,9 @@
 
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>
-#include <py_array.hh>
-#include <py_class.hh>
-#include <py_enum.hh>
 #include <py_log.hh>
-#include <py_namespace.hh>
-#include <py_number.hh>
 #include <py_object.hh>
 #include <py_plugin.hh>
-#include <py_string.hh>
 
 namespace Motor { namespace Python {
 
@@ -40,25 +34,6 @@ static void setupModule(PyObject* module, bool registerLog)
     }
     PyMotorPlugin::registerType(module);
     PyMotorObject::registerType(module);
-    PyMotorEnum::registerType(module);
-    PyMotorNumber< bool >::registerType(module);
-    PyMotorNumber< u8 >::registerType(module);
-    PyMotorNumber< u16 >::registerType(module);
-    PyMotorNumber< u32 >::registerType(module);
-    PyMotorNumber< u64 >::registerType(module);
-    PyMotorNumber< i8 >::registerType(module);
-    PyMotorNumber< i16 >::registerType(module);
-    PyMotorNumber< i32 >::registerType(module);
-    PyMotorNumber< i64 >::registerType(module);
-    PyMotorNumber< float >::registerType(module);
-    PyMotorNumber< double >::registerType(module);
-    PyMotorString< istring >::registerType(module);
-    PyMotorString< inamespace >::registerType(module);
-    PyMotorString< ipath >::registerType(module);
-    PyMotorString< ifilename >::registerType(module);
-    PyMotorArray::registerType(module);
-    PyMotorNamespace::registerType(module);
-    PyMotorClass::registerType(module);
 }
 
 PyObject* init2_py_motor(bool registerLog)

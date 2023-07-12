@@ -9,8 +9,8 @@
 
 namespace Motor { namespace Meta { namespace AST {
 
-static inline Meta::ConversionCost calculateConversion(const weak< const Node >& node,
-                                                       const Meta::Type&         other)
+static inline Meta::ConversionCost calculateConversionTo(const weak< const Node >& node,
+                                                         const Meta::Type&         other)
 {
     return node->distance(other);
 }
