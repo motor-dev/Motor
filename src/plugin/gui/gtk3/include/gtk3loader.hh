@@ -3,7 +3,6 @@
 #ifndef MOTOR_PLUGIN_GUI_GTK3_GTK3LOADER_HH
 #define MOTOR_PLUGIN_GUI_GTK3_GTK3LOADER_HH
 
-#include <motor/meta/classinfo.meta.hh>
 #include <motor/plugin/plugin.hh>
 #include <motor/resource/loader.hh>
 

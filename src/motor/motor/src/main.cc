@@ -8,7 +8,7 @@
 
 #include <motor/core/environment.hh>
 #include <motor/filesystem/diskfolder.meta.hh>
-#include <motor/meta/engine/namespace.hh>
+#include <motor/meta/namespace.hh>
 #include <motor/plugin/plugin.hh>
 #include <motor/resource/resourcemanager.hh>
 #include <motor/scheduler/scheduler.hh>

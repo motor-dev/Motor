@@ -44,8 +44,8 @@ struct ClassID< KernelScheduler::Product< T > >
                                             motor_class< KernelScheduler::IProduct >()->objects,
                                             motor_class< KernelScheduler::IProduct >()->tags,
                                             motor_class< KernelScheduler::IProduct >()->properties,
-                                            motor_class< KernelScheduler::IProduct >()->methods,
-                                            {nullptr},
+                                            {&s_ctr},
+                                            {&s_ctr},
                                             motor_class< KernelScheduler::IProduct >()->operators,
                                             nullptr,
                                             nullptr};
@@ -71,11 +71,15 @@ struct ClassID< KernelScheduler::Product< T > >
 
 template < typename T >
 const Meta::Method::Overload ClassID< KernelScheduler::Product< T > >::s_ctrOverload
-    = {{0}, {0, 0}, motor_type< ref< KernelScheduler::Product< T > > >(), false, &construct};
+    = {{nullptr},
+       {nullptr, nullptr},
+       motor_type< ref< KernelScheduler::Product< T > > >(),
+       false,
+       &construct};
 
 template < typename T >
 const Meta::Method ClassID< KernelScheduler::Product< T > >::s_ctr
-    = {istring("?ctor"), {1, &s_ctrOverload}, {&ClassID< KernelScheduler::Product< T > >::s_ctr}};
+    = {motor_class< KernelScheduler::IProduct >()->methods, istring("?ctor"), {&s_ctrOverload, 1}};
 
 }}  // namespace Motor::Meta
 

@@ -102,7 +102,7 @@ ConversionCost Reference::distance(const Type& type) const
     }
     else
     {
-        return m_value.type().calculateConversion(type);
+        return m_value.type().calculateConversionTo(type);
     }
 }
 
@@ -130,7 +130,11 @@ raw< const Meta::Method > Reference::getCall(DbContext& context) const
         raw< const Class > metaclass = m_value.type().metaclass;
         if(metaclass->operators->call)
         {
-            return (*metaclass->operators->call)(m_value);
+            return metaclass->operators->call;
+        }
+        else if(metaclass->operators->dynamicCall)
+        {
+            return (*metaclass->operators->dynamicCall)(m_value);
         }
         else
         {

@@ -170,7 +170,7 @@ static bool convertUserdataToValue(lua_State* state, int index, const Meta::Type
     {
         lua_pop(state, 2);
         auto*                userdata   = (Meta::Value*)lua_touserdata(state, index);
-        Meta::ConversionCost conversion = userdata->type().calculateConversion(type);
+        Meta::ConversionCost conversion = userdata->type().calculateConversionTo(type);
         if(conversion >= Meta::ConversionCost::s_incompatible)
         {
             return false;

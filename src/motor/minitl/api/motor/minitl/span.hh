@@ -21,6 +21,7 @@ public:
 
 public:
     span(T* begin, T* end);
+    span(T* begin, u32 count);
     span(initializer_list< T > init_list);
     span(const span& other)                = default;
     span& operator=(const span& other)     = default;

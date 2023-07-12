@@ -5,7 +5,7 @@
 
 #include <motor/plugin.scripting.python/stdafx.h>
 #include <motor/filesystem/file.meta.hh>
-#include <motor/meta/classinfo.meta.hh>
+#include <motor/meta/class.meta.hh>
 #include <motor/meta/value.hh>
 #include <motor/plugin.scripting.python/pythonscript.meta.hh>
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>

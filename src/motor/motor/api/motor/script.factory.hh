@@ -21,7 +21,6 @@ struct ClassID< Script< T > >
     {
         static const Meta::Class s_class = {name(),
                                             u32(sizeof(Script< T >)),
-                                            0,
                                             motor_class< Resource::Description< T > >(),
                                             0,
                                             motor_class< Resource::Description< T > >()->objects,

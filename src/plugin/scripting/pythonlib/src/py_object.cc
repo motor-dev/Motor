@@ -2,20 +2,13 @@
    see LICENSE for detail */
 
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
-#include <motor/meta/classinfo.meta.hh>
-#include <motor/meta/engine/methodinfo.meta.hh>
-#include <motor/meta/engine/operatortable.meta.hh>
-#include <motor/meta/engine/propertyinfo.meta.hh>
+#include <motor/meta/class.meta.hh>
+#include <motor/meta/method.meta.hh>
+#include <motor/meta/operatortable.hh>
+#include <motor/meta/property.meta.hh>
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>
-#include <py_array.hh>
 #include <py_boundmethod.hh>
-#include <py_call.hh>
-#include <py_class.hh>
-#include <py_enum.hh>
-#include <py_namespace.hh>
-#include <py_number.hh>
 #include <py_object.hh>
-#include <py_string.hh>
 
 namespace Motor { namespace Python {
 
@@ -147,67 +140,6 @@ PyTypeObject PyMotorObject::s_pyType = {{{0, nullptr}, 0},
 
 typedef PyObject* (*CreateMethod)(PyObject* owner, Meta::Value& value);
 
-template < typename T >
-PyObject* createPyNumeric(PyObject* owner, Meta::Value& value)
-{
-    motor_forceuse(owner);
-    auto v = static_cast< unsigned long long >(value.as< T >());  // NOLINT
-    return s_library->m_PyLong_FromUnsignedLongLong(v);
-}
-
-template <>
-PyObject* createPyNumeric< bool >(PyObject* owner, Meta::Value& value)
-{
-    motor_forceuse(owner);
-    long v = static_cast< long >(value.as< bool >());
-    return s_library->m_PyBool_FromLong(v);
-}
-
-template <>
-PyObject* createPyNumeric< float >(PyObject* owner, Meta::Value& value)
-{
-    motor_forceuse(owner);
-    auto v = static_cast< double >(value.as< float >());
-    return s_library->m_PyFloat_FromDouble(v);
-}
-
-template <>
-PyObject* createPyNumeric< double >(PyObject* owner, Meta::Value& value)
-{
-    motor_forceuse(owner);
-    auto v = value.as< double >();
-    return s_library->m_PyFloat_FromDouble(v);
-}
-
-PyObject* createPyString(PyObject* owner, Meta::Value& value)
-{
-    motor_forceuse(owner);
-    const text& t = static_cast< const text& >(value.as< const text& >());
-    typedef PyObject* (*toStringType)(const char* format);
-    toStringType toString = s_library->getVersion() >= 30 ? s_library->m_PyUnicode_FromString
-                                                          : s_library->m_PyString_FromString;
-    return toString(t.begin());
-}
-
-static CreateMethod s_createPyNumber[]
-    = {&createPyNumeric< bool >,  &createPyNumeric< u8 >,    &createPyNumeric< u16 >,
-       &createPyNumeric< u32 >,   &createPyNumeric< u64 >,   &createPyNumeric< i8 >,
-       &createPyNumeric< i16 >,   &createPyNumeric< i32 >,   &createPyNumeric< i64 >,
-       &createPyNumeric< float >, &createPyNumeric< double >};
-
-static CreateMethod s_createNumber[]
-    = {&PyMotorNumber< bool >::stealValue,  &PyMotorNumber< u8 >::stealValue,
-       &PyMotorNumber< u16 >::stealValue,   &PyMotorNumber< u32 >::stealValue,
-       &PyMotorNumber< u64 >::stealValue,   &PyMotorNumber< i8 >::stealValue,
-       &PyMotorNumber< i16 >::stealValue,   &PyMotorNumber< i32 >::stealValue,
-       &PyMotorNumber< i64 >::stealValue,   &PyMotorNumber< float >::stealValue,
-       &PyMotorNumber< double >::stealValue};
-
-static CreateMethod s_createString[]
-    = {&PyMotorString< istring >::stealValue, &PyMotorString< inamespace >::stealValue,
-       &PyMotorString< ifilename >::stealValue, &PyMotorString< ipath >::stealValue,
-       &PyMotorString< text >::stealValue};
-
 PyObject* PyMotorObject::stealValue(PyObject* owner, Meta::Value& value)
 {
     const Meta::Type& t = value.type();
@@ -224,49 +156,18 @@ PyObject* PyMotorObject::stealValue(PyObject* owner, Meta::Value& value)
         Py_INCREF(result);
         return result;
     }
-    else if(t.indirection == Meta::Type::Indirection::Value
-            && t.metaclass->type() == Meta::ClassType_Number)
-    {
-        return s_createPyNumber[t.metaclass->index()](owner, value);
-    }
-    else if(t.indirection == Meta::Type::Indirection::Value
-            && t.metaclass->type() == Meta::ClassType_String
-            && t.metaclass->index() == Meta::ClassIndex_text)
-    {
-        return createPyString(owner, value);
-    }
     else
-        switch(t.metaclass->type())
+    {
+        PyObject* result                = s_pyType.tp_alloc(&s_pyType, 0);
+        ((PyMotorObject*)result)->owner = owner;
+        new(&(static_cast< PyMotorObject* >(result))->value) Meta::Value();
+        (static_cast< PyMotorObject* >(result))->value.swap(value);
+        if(owner)
         {
-        case Meta::ClassType_Number: return s_createNumber[t.metaclass->index()](owner, value);
-        case Meta::ClassType_Enum: return PyMotorEnum::stealValue(owner, value);
-        case Meta::ClassType_String: return s_createString[t.metaclass->index()](owner, value);
-        case Meta::ClassType_Array: return PyMotorArray::stealValue(owner, value);
-        case Meta::ClassType_Namespace:
-        {
-            const auto& cls = value.as< const Meta::Class& >();
-            if(cls.constructor)
-            {
-                return PyMotorClass::stealValue(owner, value);
-            }
-            else
-            {
-                return PyMotorNamespace::stealValue(owner, value);
-            }
+            Py_INCREF(owner);
         }
-        default:
-        {
-            PyObject* result                = s_pyType.tp_alloc(&s_pyType, 0);
-            ((PyMotorObject*)result)->owner = owner;
-            new(&(static_cast< PyMotorObject* >(result))->value) Meta::Value();
-            (static_cast< PyMotorObject* >(result))->value.swap(value);
-            if(owner)
-            {
-                Py_INCREF(owner);
-            }
-            return result;
-        }
-        }
+        return result;
+    }
 }
 
 PyObject* PyMotorObject::newinst(PyTypeObject* type, PyObject* args, PyObject* kwds)

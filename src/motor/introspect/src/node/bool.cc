@@ -17,7 +17,7 @@ Bool::~Bool() = default;
 
 ConversionCost Bool::distance(const Type& type) const
 {
-    return motor_type< bool >().calculateConversion(type);
+    return motor_type< bool >().calculateConversionTo(type);
 }
 
 void Bool::doEval(const Meta::Type& expectedType, Value& result) const

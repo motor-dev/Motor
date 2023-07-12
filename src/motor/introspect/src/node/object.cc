@@ -11,17 +11,19 @@
 #include <motor/introspect/node/reference.hh>
 #include <motor/introspect/policy.meta.hh>
 
-#include <motor/meta/classinfo.meta.hh>
-#include <motor/meta/engine/call.hh>
+#include <motor/meta/call.hh>
+#include <motor/meta/class.meta.hh>
 #include <motor/meta/value.hh>
 #include <motor/minitl/utility.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 
-Object::Object(const ref< Reference >& className, minitl::vector< ref< Parameter > > parameters)
+Object::Object(const ref< Reference >& className, bool memberCall,
+               minitl::vector< ref< Parameter > > parameters)
     : Node()
     , m_className(className)
     , m_parameters(minitl::move(parameters))
+    , m_memberCall(memberCall)
     , m_arguments(Arena::temporary())
 {
 }
@@ -32,7 +34,7 @@ ConversionCost Object::distance(const Type& type) const
 {
     if(m_introspectionHint)
     {
-        return m_introspectionHint->calculateConversion(type);
+        return m_introspectionHint->calculateConversionTo(type);
     }
     else
     {
@@ -40,7 +42,7 @@ ConversionCost Object::distance(const Type& type) const
     }
 }
 
-minitl::tuple< raw< const Meta::Method >, bool > Object::getCall(DbContext& context) const
+raw< const Meta::Method > Object::getCall(DbContext& context) const
 {
     if(m_introspectionHint)
     {
@@ -48,7 +50,7 @@ minitl::tuple< raw< const Meta::Method >, bool > Object::getCall(DbContext& cont
     }
     else
     {
-        return minitl::make_tuple(raw< const Method >::null(), false);
+        return {};
     }
 }
 
@@ -79,8 +81,8 @@ bool Object::resolveInternal(DbContext& context)
     }
     if(result)
     {
-        minitl::tuple< raw< const Meta::Method >, bool > method = m_className->getCall(context);
-        if(!method.first)
+        raw< const Meta::Method > method = m_className->getCall(context);
+        if(!method)
         {
             context.error(
                 this, minitl::format< 512 >(FMT("unable to call object {0}"), m_className->name()));
@@ -88,24 +90,21 @@ bool Object::resolveInternal(DbContext& context)
         }
         else
         {
-            u32 argumentThis  = method.second ? 1 : 0;
-            u32 argumentCount = motor_checked_numcast< u32 >(m_parameters.size()) + argumentThis;
+            u32 argumentCount = motor_checked_numcast< u32 >(m_parameters.size()) + m_memberCall;
             m_arguments.resize(argumentCount);
-            if(method.second)
+            if(m_memberCall)
             {
                 m_arguments[0] = IntrospectionHint::ArgInfo(this);
             }
             for(u32 currentArg = 0; currentArg < m_parameters.size(); ++currentArg)
             {
-                m_arguments[currentArg + argumentThis] = IntrospectionHint::ArgInfo(
+                m_arguments[currentArg + m_memberCall] = IntrospectionHint::ArgInfo(
                     m_parameters[currentArg]->name(), m_parameters[currentArg]);
             }
 
-            IntrospectionHint::ArgInfo* arguments
-                = m_arguments.empty() ? nullptr : &m_arguments.front();
-            CallInfo callInfo
-                = Meta::resolve(method.first, {arguments, arguments + argumentThis},
-                                {arguments + argumentThis, arguments + argumentCount});
+            CallInfo callInfo = Meta::resolve< weak< const Node > >(
+                method, {m_arguments.data(), m_arguments.data() + m_memberCall},
+                {m_arguments.data() + m_memberCall, m_arguments.data() + argumentCount});
             if(callInfo.overload)
             {
                 Meta::Value policyTag = callInfo.overload->getTag(motor_class< Policy >());
@@ -114,13 +113,13 @@ bool Object::resolveInternal(DbContext& context)
                     const auto& policy     = policyTag.as< const Policy& >();
                     u32         errorCount = context.errorCount;
                     m_introspectionHint
-                        = policy.verify(context, this, method.first, callInfo, argumentThis);
+                        = policy.verify(context, this, method, callInfo, m_memberCall);
                     result = errorCount == context.errorCount;
                 }
                 else
                 {
                     m_introspectionHint = ref< IntrospectionHint >::create(
-                        Arena::meta(), this, method.first, callInfo, argumentThis);
+                        Arena::meta(), this, method, callInfo, m_memberCall);
                 }
             }
             else

@@ -64,7 +64,7 @@ void Type::destroy(void* ptr) const
     }
 }
 
-ConversionCost Type::calculateConversion(const Type& other) const
+ConversionCost Type::calculateConversionTo(const Type& other) const
 {
     ConversionCost result;
 

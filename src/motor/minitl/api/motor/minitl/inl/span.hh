@@ -17,6 +17,12 @@ span< T >::span(T* begin, T* end) : m_begin(begin)
 }
 
 template < typename T >
+span< T >::span(T* begin, u32 count) : m_begin(begin)
+                                     , m_end(begin + count)
+{
+}
+
+template < typename T >
 span< T >::span(initializer_list< T > init_list)
     : m_begin(init_list.begin())
     , m_end(init_list.end())

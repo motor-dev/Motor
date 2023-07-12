@@ -19,6 +19,7 @@ class motor_api(INTROSPECT) Object : public Node
 private:
     const ref< Reference >                       m_className;
     const minitl::vector< ref< Parameter > >     m_parameters;
+    const u32                                    m_memberCall;
     minitl::vector< IntrospectionHint::ArgInfo > m_arguments;
     ref< IntrospectionHint >                     m_introspectionHint;
 
@@ -26,15 +27,16 @@ private:
     bool resolveInternal(DbContext & context);
 
 protected:
-    minitl::tuple< raw< const Meta::Method >, bool > getCall(DbContext & context) const override;
-    ConversionCost                                   distance(const Type& type) const override;
-    bool                                             doResolve(DbContext & context) override;
+    raw< const Meta::Method > getCall(DbContext & context) const override;
+    ConversionCost            distance(const Type& type) const override;
+    bool                      doResolve(DbContext & context) override;
     ref< Node > getProperty(DbContext & context, const inamespace& propertyName) const override;
     void        doEval(const Type& expectedType, Value& result) const override;
     void        doVisit(Node::Visitor & visitor) const override;
 
 public:
-    Object(const ref< Reference >& className, minitl::vector< ref< Parameter > > parameters);
+    Object(const ref< Reference >& className, bool memberCall,
+           minitl::vector< ref< Parameter > > parameters);
     ~Object() override;
 
     Type getType() const;

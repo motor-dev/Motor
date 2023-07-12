@@ -4,7 +4,7 @@
 #include <motor/world/stdafx.h>
 #include <runtime/logicstorage.hh>
 
-#include <motor/meta/engine/methodinfo.meta.hh>
+#include <motor/meta/method.meta.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/meta/value.hh>
 #include <motor/world/component/component.meta.hh>

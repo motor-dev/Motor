@@ -145,10 +145,10 @@ const Value& Node::getMetadata(istring name) const
     return s_notFound;
 }
 
-minitl::tuple< raw< const Meta::Method >, bool > Node::getCall(DbContext& context) const
+raw< const Meta::Method > Node::getCall(DbContext& context) const
 {
     motor_forceuse(context);
-    return minitl::make_tuple(raw< const Meta::Method >::null(), false);
+    return {};
 }
 
 ref< Node > Node::getProperty(DbContext& context, const inamespace& name) const

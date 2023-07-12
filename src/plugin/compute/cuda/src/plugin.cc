@@ -2,7 +2,6 @@
    see LICENSE for detail */
 
 #include <motor/plugin.compute.cuda/stdafx.h>
-#include <motor/meta/classinfo.meta.hh>
 #include <motor/plugin/plugin.hh>
 #include <scheduler.hh>
 

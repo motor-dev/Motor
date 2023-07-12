@@ -18,7 +18,7 @@ FileName::~FileName() = default;
 
 ConversionCost FileName::distance(const Type& type) const
 {
-    return motor_type< weak< const File > >().calculateConversion(type);
+    return motor_type< weak< const File > >().calculateConversionTo(type);
 }
 
 bool FileName::doResolve(DbContext& context)

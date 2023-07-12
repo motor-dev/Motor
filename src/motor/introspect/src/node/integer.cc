@@ -17,7 +17,7 @@ Integer::~Integer() = default;
 
 ConversionCost Integer::distance(const Type& type) const
 {
-    return motor_type< i64 >().calculateConversion(type);
+    return motor_type< i64 >().calculateConversionTo(type);
 }
 
 void Integer::doEval(const Meta::Type& expectedType, Meta::Value& result) const

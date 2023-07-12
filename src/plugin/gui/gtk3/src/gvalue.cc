@@ -9,65 +9,11 @@
 #include <gobject/gvaluetypes.h>
 #include <gtkresourcedescription.meta.hh>
 
+#include <motor/meta/operatortable.hh>
 #include <motor/meta/value.hh>
 #include <motor/minitl/cast.hh>
 
 namespace Motor { namespace Gtk3 {
-
-template < typename T >
-static T convertNumberToInteger(const Meta::Value& value)
-{
-    motor_assert(value.type().metaclass->type() == Meta::ClassType_Number,
-                 "value is not of Number type");
-    switch(value.type().metaclass->index())
-    {
-    case Meta::ClassIndex_bool:
-    {
-        return T(value.as< bool >());
-    }
-    case Meta::ClassIndex_u8:
-    {
-        return motor_checked_numcast< T >(value.as< u8 >());
-    }
-    case Meta::ClassIndex_u16:
-    {
-        return motor_checked_numcast< T >(value.as< u16 >());
-    }
-    case Meta::ClassIndex_u32:
-    {
-        return motor_checked_numcast< T >(value.as< u32 >());
-    }
-    case Meta::ClassIndex_u64:
-    {
-        return motor_checked_numcast< T >(value.as< u64 >());
-    }
-    case Meta::ClassIndex_i8:
-    {
-        return motor_checked_numcast< T >(value.as< i8 >());
-    }
-    case Meta::ClassIndex_i16:
-    {
-        return motor_checked_numcast< T >(value.as< i16 >());
-    }
-    case Meta::ClassIndex_i32:
-    {
-        return motor_checked_numcast< T >(value.as< i32 >());
-    }
-    case Meta::ClassIndex_i64:
-    {
-        return motor_checked_numcast< T >(value.as< i64 >());
-    }
-    case Meta::ClassIndex_float:
-    {
-        return T(value.as< float >());
-    }
-    case Meta::ClassIndex_double:
-    {
-        return T(value.as< double >());
-    }
-    default: motor_notreached(); return T();
-    }
-}
 
 bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* target)
 {
@@ -97,57 +43,202 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
     }
     case G_TYPE_CHAR:
     {
-        g_value_init(target, type);
-        g_value_set_uchar(target, convertNumberToInteger< i8 >(value));
-        return true;
+        raw< const Meta::OperatorTable::ConversionOperators< i64 > > signedIntegerOperators
+            = value.type().metaclass->operators->signedIntegerOperators;
+        raw< const Meta::OperatorTable::ConversionOperators< u64 > > unsignedIntegerOperators
+            = value.type().metaclass->operators->unsignedIntegerOperators;
+        if(signedIntegerOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_schar(target, (i8)(*signedIntegerOperators->get)(value));
+            return true;
+        }
+        else if(unsignedIntegerOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_schar(target, (i8)(*unsignedIntegerOperators->get)(value));
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
     case G_TYPE_UCHAR:
     {
-        g_value_init(target, type);
-        g_value_set_uchar(target, convertNumberToInteger< u8 >(value));
-        return true;
+        raw< const Meta::OperatorTable::ConversionOperators< i64 > > signedIntegerOperators
+            = value.type().metaclass->operators->signedIntegerOperators;
+        raw< const Meta::OperatorTable::ConversionOperators< u64 > > unsignedIntegerOperators
+            = value.type().metaclass->operators->unsignedIntegerOperators;
+        if(unsignedIntegerOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_uchar(target, (u8)(*unsignedIntegerOperators->get)(value));
+            return true;
+        }
+        else if(signedIntegerOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_uchar(target, (u8)(*signedIntegerOperators->get)(value));
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
     case G_TYPE_BOOLEAN:
     {
-        g_value_init(target, type);
-        g_value_set_boolean(target, convertNumberToInteger< bool >(value));
-        return true;
+        raw< const Meta::OperatorTable::ConversionOperators< bool > > boolOperators
+            = value.type().metaclass->operators->boolOperators;
+        if(boolOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_boolean(target, (*boolOperators->get)(value));
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
     case G_TYPE_INT:
     {
-        g_value_init(target, type);
-        g_value_set_int(target, convertNumberToInteger< i32 >(value));
-        return true;
+        raw< const Meta::OperatorTable::ConversionOperators< i64 > > signedIntegerOperators
+            = value.type().metaclass->operators->signedIntegerOperators;
+        raw< const Meta::OperatorTable::ConversionOperators< u64 > > unsignedIntegerOperators
+            = value.type().metaclass->operators->unsignedIntegerOperators;
+        if(signedIntegerOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_int(target, (i32)(*signedIntegerOperators->get)(value));
+            return true;
+        }
+        else if(unsignedIntegerOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_int(target, (i32)(*unsignedIntegerOperators->get)(value));
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
     case G_TYPE_UINT:
     {
-        g_value_init(target, type);
-        g_value_set_uint(target, convertNumberToInteger< u32 >(value));
-        return true;
+        raw< const Meta::OperatorTable::ConversionOperators< i64 > > signedIntegerOperators
+            = value.type().metaclass->operators->signedIntegerOperators;
+        raw< const Meta::OperatorTable::ConversionOperators< u64 > > unsignedIntegerOperators
+            = value.type().metaclass->operators->unsignedIntegerOperators;
+        if(unsignedIntegerOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_uint(target, (u32)(*unsignedIntegerOperators->get)(value));
+            return true;
+        }
+        else if(signedIntegerOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_uint(target, (u32)(*signedIntegerOperators->get)(value));
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
     case G_TYPE_LONG:
     {
-        g_value_init(target, type);
-        g_value_set_long(target, convertNumberToInteger< long >(value));
-        return true;
+        raw< const Meta::OperatorTable::ConversionOperators< i64 > > signedIntegerOperators
+            = value.type().metaclass->operators->signedIntegerOperators;
+        raw< const Meta::OperatorTable::ConversionOperators< u64 > > unsignedIntegerOperators
+            = value.type().metaclass->operators->unsignedIntegerOperators;
+        if(signedIntegerOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_long(target, (glong)(*signedIntegerOperators->get)(value));
+            return true;
+        }
+        else if(unsignedIntegerOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_long(target, (glong)(*unsignedIntegerOperators->get)(value));
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
     case G_TYPE_INT64:
     {
-        g_value_init(target, type);
-        g_value_set_int64(target, convertNumberToInteger< i64 >(value));
-        return true;
+        raw< const Meta::OperatorTable::ConversionOperators< i64 > > signedIntegerOperators
+            = value.type().metaclass->operators->signedIntegerOperators;
+        raw< const Meta::OperatorTable::ConversionOperators< u64 > > unsignedIntegerOperators
+            = value.type().metaclass->operators->unsignedIntegerOperators;
+        if(signedIntegerOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_int64(target, (i64)(*signedIntegerOperators->get)(value));
+            return true;
+        }
+        else if(unsignedIntegerOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_int64(target, (i64)(*unsignedIntegerOperators->get)(value));
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
     case G_TYPE_ULONG:
     {
-        g_value_init(target, type);
-        g_value_set_ulong(target, convertNumberToInteger< unsigned long >(value));
-        return true;
+        raw< const Meta::OperatorTable::ConversionOperators< i64 > > signedIntegerOperators
+            = value.type().metaclass->operators->signedIntegerOperators;
+        raw< const Meta::OperatorTable::ConversionOperators< u64 > > unsignedIntegerOperators
+            = value.type().metaclass->operators->unsignedIntegerOperators;
+        if(unsignedIntegerOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_ulong(target, (gulong)(*unsignedIntegerOperators->get)(value));
+            return true;
+        }
+        else if(signedIntegerOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_ulong(target, (gulong)(*signedIntegerOperators->get)(value));
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
     case G_TYPE_UINT64:
     {
-        g_value_init(target, type);
-        g_value_set_uint64(target, convertNumberToInteger< u64 >(value));
-        return true;
+        raw< const Meta::OperatorTable::ConversionOperators< i64 > > signedIntegerOperators
+            = value.type().metaclass->operators->signedIntegerOperators;
+        raw< const Meta::OperatorTable::ConversionOperators< u64 > > unsignedIntegerOperators
+            = value.type().metaclass->operators->unsignedIntegerOperators;
+        if(unsignedIntegerOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_uint64(target, (u64)(*unsignedIntegerOperators->get)(value));
+            return true;
+        }
+        else if(signedIntegerOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_uint64(target, (u64)(*signedIntegerOperators->get)(value));
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
     case G_TYPE_ENUM:
     {
@@ -179,68 +270,63 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
     }
     case G_TYPE_FLOAT:
     {
-        g_value_init(target, type);
-        g_value_set_float(target, convertNumberToInteger< float >(value));
-        return true;
+        raw< const Meta::OperatorTable::ConversionOperators< float > > floatOperators
+            = value.type().metaclass->operators->floatOperators;
+        raw< const Meta::OperatorTable::ConversionOperators< double > > doubleOperators
+            = value.type().metaclass->operators->doubleOperators;
+        if(floatOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_float(target, (float)(*floatOperators->get)(value));
+            return true;
+        }
+        else if(doubleOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_float(target, (float)(*doubleOperators->get)(value));
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
     case G_TYPE_DOUBLE:
     {
-        g_value_init(target, type);
-        g_value_set_double(target, convertNumberToInteger< double >(value));
-        return true;
+        raw< const Meta::OperatorTable::ConversionOperators< float > > floatOperators
+            = value.type().metaclass->operators->floatOperators;
+        raw< const Meta::OperatorTable::ConversionOperators< double > > doubleOperators
+            = value.type().metaclass->operators->doubleOperators;
+        if(doubleOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_double(target, (double)(*doubleOperators->get)(value));
+            return true;
+        }
+        else if(floatOperators)
+        {
+            g_value_init(target, type);
+            g_value_set_double(target, (double)(*floatOperators->get)(value));
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
     case G_TYPE_STRING:
     {
-        motor_assert(value.type().metaclass->type() == Meta::ClassType_String,
-                     "value is not of String type");
-        switch(value.type().metaclass->index())
-        {
-        case Meta::ClassIndex_istring:
+        raw< const Meta::OperatorTable::ConversionOperators< const char* > > stringOperators
+            = value.type().metaclass->operators->stringOperators;
+        if(stringOperators)
         {
             g_value_init(target, type);
-#ifdef GLIB_VERSION_2_66
-            g_value_set_interned_string(target, value.as< const istring& >().c_str());
-#else
-            g_value_set_static_string(target, value.as< const istring& >().c_str());
-#endif
+            g_value_set_string(target, (*stringOperators->get)(value));
             return true;
         }
-        case Meta::ClassIndex_inamespace:
+        else
         {
-            inamespace::Path f = value.as< const inamespace& >().str();
-            g_value_init(target, type);
-            g_value_set_string(target, f);
-            return true;
-        }
-        case Meta::ClassIndex_ifilename:
-        {
-            ifilename::Filename f = value.as< const ifilename& >().str();
-            g_value_init(target, type);
-            g_value_set_string(target, f);
-            return true;
-        }
-        case Meta::ClassIndex_ipath:
-        {
-            ipath::Filename f = value.as< const ipath& >().str();
-            g_value_init(target, type);
-            g_value_set_string(target, f);
-            return true;
-        }
-        case Meta::ClassIndex_text:
-        {
-            const char* t = value.as< const text& >().begin();
-            if(t)
-            {
-                g_value_init(target, type);
-                g_value_set_string(target, t);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        default: motor_notreached(); return false;
+            return false;
         }
     }
     case G_TYPE_BOXED:

@@ -5,7 +5,6 @@
 #include <application.hh>
 
 #include <motor/filesystem/diskfolder.meta.hh>
-#include <motor/meta/engine/namespace.hh>
 #include <motor/plugin/plugin.hh>
 
 namespace Motor { namespace Test { namespace World {

@@ -8,7 +8,6 @@
 #include <meta/constructor.meta.hh>
 #include <meta/property.meta.hh>
 
-#include <motor/meta/engine/operatortable.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/meta/value.hh>
 
@@ -92,15 +91,14 @@ static void completeGObjectClass(Gtk3Plugin& plugin, Meta::Class* cls, GType typ
 
         Meta::Method::Overload overloadTemplate
             = {{nullptr},
-               {constructorParameterCount, parameters},
+               {parameters, constructorParameterCount},
                Meta::Type::makeType(metaclass, Meta::Type::Indirection::Value,
                                     Meta::Type::Constness::Mutable, Meta::Type::Constness::Mutable),
                false,
                &Constructor::call};
         new(overload) Meta::Method::Overload(overloadTemplate);
 
-        Constructor ctorTemplate
-            = {{Meta::Class::nameConstructor(), {1, overload}, {&constructor->metaMethod}}, type};
+        Constructor ctorTemplate = {{{nullptr}, istring(""), {overload, 1}}, type};
         new(constructor) Constructor(ctorTemplate);
         cls->constructor.set(&constructor->metaMethod);
     }
@@ -123,16 +121,14 @@ bool registerGObjectClass(Gtk3Plugin& plugin, GType type)
             = parent ? getGObjectClass(plugin, parent) : motor_class< GObjectWrapper >();
         Meta::Class clsTemplate = {istring(g_type_name(type)),
                                    parentClass->size,
-                                   0,
-                                   Meta::ClassType_Struct,
-                                   {nullptr},
                                    parentClass,
+                                   0,
+                                   parentClass->objects,
+                                   parentClass->tags,
+                                   parentClass->properties,
+                                   parentClass->methods,
                                    {nullptr},
-                                   {nullptr},
-                                   {0, nullptr},
-                                   {0, nullptr},
-                                   {nullptr},
-                                   Meta::OperatorTable::s_emptyTable,
+                                   parentClass->operators,
                                    parentClass->copyconstructor,
                                    parentClass->destructor};
 
@@ -161,16 +157,14 @@ raw< const Meta::Class > getGObjectClass(Gtk3Plugin& plugin, GType type)
             = parent ? getGObjectClass(plugin, parent) : motor_class< GObjectWrapper >();
         Meta::Class clsTemplate = {istring(g_type_name(type)),
                                    parentClass->size,
-                                   0,
-                                   Meta::ClassType_Struct,
-                                   {nullptr},
                                    parentClass,
+                                   0,
+                                   parentClass->objects,
+                                   parentClass->tags,
+                                   parentClass->properties,
+                                   parentClass->methods,
                                    {nullptr},
-                                   {nullptr},
-                                   {0, nullptr},
-                                   {0, nullptr},
-                                   {nullptr},
-                                   Meta::OperatorTable::s_emptyTable,
+                                   parentClass->operators,
                                    parentClass->copyconstructor,
                                    parentClass->destructor};
 
@@ -187,12 +181,10 @@ void destroyGObjectClass(Gtk3Plugin& plugin, GType type)
     auto* cls = static_cast< Meta::Class* >(g_type_get_qdata(type, plugin.quark()));
     if(cls && cls->constructor)
     {
-        for(u32 i = 0; i < cls->constructor->overloads.count; ++i)
+        for(const auto& overload: cls->constructor->overloads)
         {
-            const Meta::Method::Overload& overload = cls->constructor->overloads[i];
-            for(u32 j = 0; j < overload.params.count; ++j)
+            for(const auto& param: overload.parameters)
             {
-                const Meta::Method::Parameter& param = overload.params[j];
                 if(param.defaultValue) param.defaultValue->~Value();
             }
         }

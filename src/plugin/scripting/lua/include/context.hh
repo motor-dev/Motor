@@ -5,7 +5,6 @@
 
 #include <stdafx.h>
 #include <motor/filesystem/file.meta.hh>
-#include <motor/meta/classinfo.meta.hh>
 #include <motor/meta/value.hh>
 #include <motor/plugin/plugin.hh>
 #include <motor/scriptengine.hh>

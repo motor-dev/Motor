@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/plugin.scripting.package/stdafx.h>
-#include <motor/meta/engine/propertyinfo.meta.hh>
+#include <motor/meta/property.meta.hh>
 #include <motor/plugin.scripting.package/nodes/package.hh>
 #include <motor/resource/resourcemanager.hh>
 

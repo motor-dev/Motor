@@ -135,26 +135,12 @@ int Context::push(lua_State* state, const Meta::Value& v)
         lua_pushnil(state);
         return 1;
     }
-    else if(t.metaclass->type() == Meta::ClassType_Number)
+    else if(t.metaclass->operators->integerOperators)
     {
-        switch(t.metaclass->index())
-        {
-        case Meta::ClassIndex_bool: lua_pushboolean(state, v.as< bool >()); return 1;
-        case Meta::ClassIndex_u8: lua_pushnumber(state, v.as< u8 >()); return 1;
-        case Meta::ClassIndex_u16: lua_pushnumber(state, v.as< u16 >()); return 1;
-        case Meta::ClassIndex_u32: lua_pushnumber(state, v.as< u32 >()); return 1;
-        case Meta::ClassIndex_u64: lua_pushnumber(state, (lua_Number)v.as< u64 >()); return 1;
-        case Meta::ClassIndex_i8: lua_pushnumber(state, v.as< i8 >()); return 1;
-        case Meta::ClassIndex_i16: lua_pushnumber(state, v.as< i16 >()); return 1;
-        case Meta::ClassIndex_i32: lua_pushnumber(state, v.as< i32 >()); return 1;
-        case Meta::ClassIndex_i64: lua_pushnumber(state, (lua_Number)v.as< i64 >()); return 1;
-        case Meta::ClassIndex_float: lua_pushnumber(state, v.as< float >()); return 1;
-        case Meta::ClassIndex_double: lua_pushnumber(state, v.as< double >()); return 1;
-        default:
-            motor_notreached();
-            lua_pushnumber(state, 0);
-            return 1;
-        }
+        /* TODO? */
+        motor_notreached();
+        lua_pushnumber(state, 0);
+        return 1;
     }
     else
     {

@@ -2,7 +2,6 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <motor/meta/classinfo.meta.hh>
 #include <motor/plugin/plugin.hh>
 
 namespace Motor { namespace Debug {

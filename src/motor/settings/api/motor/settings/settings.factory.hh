@@ -130,7 +130,7 @@ MOTOR_EXPORT raw< const Meta::Class > Meta::ClassID< Settings::Settings< T > >::
                                         motor_class< void >()->objects,
                                         motor_class< void >()->tags,
                                         motor_class< void >()->properties,
-                                        {&Settings::Settings_RTTIHelper< T >::s_methods},
+                                        {&Settings::Settings_RTTIHelper< T >::s_method},
                                         {nullptr},
                                         motor_class< void >()->operators,
                                         nullptr,

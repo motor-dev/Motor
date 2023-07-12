@@ -9,6 +9,7 @@
 #include <motor/introspect/node/object.hh>
 #include <motor/meta/call.hh>
 #include <motor/meta/operatortable.hh>
+#include <motor/meta/property.meta.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 
@@ -23,9 +24,9 @@ IntrospectionHint::IntrospectionHint(const weak< const Object >& owner, raw< con
 
 IntrospectionHint::~IntrospectionHint() = default;
 
-ConversionCost IntrospectionHint::calculateConversion(const Type& targetType) const
+ConversionCost IntrospectionHint::calculateConversionTo(const Type& targetType) const
 {
-    return m_callInfo.overload->returnType.calculateConversion(targetType);
+    return m_callInfo.overload->returnType.calculateConversionTo(targetType);
 }
 
 Value IntrospectionHint::call(const ArgInfo parameters[], u32 argumentCount) const
@@ -42,11 +43,10 @@ minitl::raw< const Method > IntrospectionHint::getCall(DbContext& context) const
     {
         return cls->operators->call;
     }
-    if(result) return minitl::make_tuple(result, true);
-    if(cls->getProperty(Class::nameOperatorCall()))
+    if(cls->operators->dynamicCall)
         context.error(m_owner, minitl::format< 512 >(FMT("call on object of type {0} is dynamic"),
                                                      m_callInfo.overload->returnType));
-    return minitl::make_tuple(raw< const Method >::null(), false);
+    return {};
 }
 
 Type IntrospectionHint::getType() const

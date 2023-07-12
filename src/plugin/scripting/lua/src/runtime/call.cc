@@ -2,11 +2,11 @@
  see LICENSE for detail */
 
 #include <stdafx.h>
+#include <motor/meta/call.hh>
 #include <motor/meta/conversion.meta.hh>
-#include <motor/meta/engine/call.hh>
-#include <motor/meta/engine/methodinfo.meta.hh>
-#include <motor/meta/engine/operatortable.meta.hh>
-#include <motor/meta/engine/propertyinfo.meta.hh>
+#include <motor/meta/method.meta.hh>
+#include <motor/meta/operatortable.hh>
+#include <motor/meta/property.meta.hh>
 #include <context.hh>
 #include <runtime/call.hh>
 #include <runtime/error.hh>
@@ -51,7 +51,7 @@ struct LuaPop
     }
 };
 
-Meta::ConversionCost calculateConversion(const LuaParameterType& type, const Meta::Type& target)
+Meta::ConversionCost calculateConversionTo(const LuaParameterType& type, const Meta::Type& target)
 {
     int index;
     if(type.key != -1)
@@ -73,7 +73,7 @@ Meta::ConversionCost calculateConversion(const LuaParameterType& type, const Met
     }
 
     LuaPop p(type.state, index, type.key != -1);
-    if(target.metaclass->type() == Meta::ClassType_Variant)
+    if(target.metaclass->operators->variantOperators)
     {
         switch(lua_type(type.state, index))
         {
@@ -106,7 +106,7 @@ Meta::ConversionCost calculateConversion(const LuaParameterType& type, const Met
             {
                 lua_pop(type.state, 2);
                 auto* userdata = (Meta::Value*)lua_touserdata(type.state, index);
-                return Meta::calculateConversion(userdata->type(), target);
+                return userdata->type().calculateConversionTo(target);
             }
             else
             {
@@ -136,7 +136,7 @@ Meta::ConversionCost calculateConversion(const LuaParameterType& type, const Met
                     }
                     else
                     {
-                        c += calculateConversion(LuaParameterType(type.state, -1), valueType);
+                        c += calculateConversionTo(LuaParameterType(type.state, -1), valueType);
                         lua_pop(type.state, 1);
                         if(c >= Meta::ConversionCost::s_incompatible) return c;
                     }
@@ -166,8 +166,8 @@ Meta::ConversionCost calculateConversion(const LuaParameterType& type, const Met
                         }
                         else
                         {
-                            c += calculateConversion(LuaParameterType(type.state, -1),
-                                                     property->type);
+                            c += calculateConversionTo(LuaParameterType(type.state, -1),
+                                                       property->type);
                             lua_pop(type.state, 1);
                             if(c >= Meta::ConversionCost::s_incompatible) return c;
                         }

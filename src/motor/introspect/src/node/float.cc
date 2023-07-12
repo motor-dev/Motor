@@ -17,7 +17,7 @@ Float::~Float() = default;
 
 ConversionCost Float::distance(const Type& type) const
 {
-    return motor_type< double >().calculateConversion(type);
+    return motor_type< double >().calculateConversionTo(type);
 }
 
 void Float::doEval(const Meta::Type& expectedType, Meta::Value& result) const
