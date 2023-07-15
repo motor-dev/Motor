@@ -9,8 +9,6 @@
 
 namespace minitl {
 
-class refcountable;
-
 class refcountable : public pointer
 {
     template < typename T >

@@ -6,7 +6,6 @@
 #include <motor/meta/method.meta.hh>
 #include <motor/meta/namespace.hh>
 #include <motor/meta/object.meta.hh>
-#include <motor/meta/operatortable.hh>
 #include <motor/meta/property.meta.hh>
 #include <motor/meta/tag.meta.hh>
 #include <motor/meta/value.hh>
@@ -217,7 +216,7 @@ raw< Meta::Class > motor_motor_Namespace()
                                  {nullptr},
                                  {nullptr},
                                  {nullptr},
-                                 motor_class< void >()->operators,
+                                 motor_class< void >()->interfaces,
                                  nullptr,
                                  nullptr};
     raw< Meta::Class > result = {&ci};

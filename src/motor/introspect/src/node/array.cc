@@ -5,9 +5,9 @@
 #include <motor/introspect/node/array.hh>
 
 #include <motor/introspect/dbcontext.hh>
+#include <motor/meta/interfacetable.hh>
 #include <motor/meta/method.meta.hh>
 #include <motor/meta/object.meta.hh>
-#include <motor/meta/operatortable.hh>
 #include <motor/minitl/utility.hh>
 #include <motor/minitl/vector.hh>
 
@@ -21,10 +21,10 @@ Array::~Array() = default;
 
 ConversionCost Array::distance(const Type& type) const
 {
-    if(type.metaclass->operators->arrayOperators)
+    if(type.metaclass->interfaces->arrayInterface)
     {
         ConversionCost result    = ConversionCost();
-        Type           valueType = type.metaclass->operators->arrayOperators->valueType;
+        Type           valueType = type.metaclass->interfaces->arrayInterface->valueType;
         for(const auto& it: m_value)
         {
             ConversionCost itemCost = it->distance(valueType);
@@ -50,7 +50,7 @@ bool Array::doResolve(DbContext& context)
 
 void Array::doEval(const Meta::Type& expectedType, Value& result) const
 {
-    Meta::Type valueType = expectedType.metaclass->operators->arrayOperators->valueType;
+    Meta::Type valueType = expectedType.metaclass->interfaces->arrayInterface->valueType;
 
     minitl::vector< Meta::Value > v(Arena::temporary(),
                                     motor_checked_numcast< u32 >(m_value.size()));

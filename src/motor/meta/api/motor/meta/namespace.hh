@@ -21,7 +21,7 @@
                                   {nullptr},                                                       \
                                   {nullptr},                                                       \
                                   {nullptr},                                                       \
-                                  motor_class< void >()->operators,                                \
+                                  motor_class< void >()->interfaces,                               \
                                   nullptr,                                                         \
                                   nullptr};                                                        \
         raw< Meta::Class > ptr = {&ci};                                                            \
@@ -50,7 +50,7 @@
                                   {nullptr},                                                       \
                                   {nullptr},                                                       \
                                   {nullptr},                                                       \
-                                  motor_class< void >()->operators,                                \
+                                  motor_class< void >()->interfaces,                               \
                                   nullptr,                                                         \
                                   nullptr};                                                        \
         raw< Meta::Class > ptr = {&ci};                                                            \
@@ -80,7 +80,7 @@
                                   {nullptr},                                                       \
                                   {nullptr},                                                       \
                                   {nullptr},                                                       \
-                                  motor_class< void >()->operators,                                \
+                                  motor_class< void >()->interfaces,                               \
                                   nullptr,                                                         \
                                   nullptr};                                                        \
         raw< Meta::Class > ptr = {&ci};                                                            \
@@ -110,7 +110,7 @@
                                   {nullptr},                                                       \
                                   {nullptr},                                                       \
                                   {nullptr},                                                       \
-                                  motor_class< void >()->operators,                                \
+                                  motor_class< void >()->interfaces,                               \
                                   nullptr,                                                         \
                                   nullptr};                                                        \
         raw< Meta::Class > ptr = {&ci};                                                            \
@@ -140,7 +140,7 @@
                                   {nullptr},                                                       \
                                   {nullptr},                                                       \
                                   {nullptr},                                                       \
-                                  motor_class< void >()->operators,                                \
+                                  motor_class< void >()->interfaces,                               \
                                   nullptr,                                                         \
                                   nullptr};                                                        \
         raw< Meta::Class > ptr = {&ci};                                                            \

@@ -6,8 +6,8 @@
 
 #include <motor/introspect/dbcontext.hh>
 #include <motor/introspect/node/object.hh>
+#include <motor/meta/interfacetable.hh>
 #include <motor/meta/object.meta.hh>
-#include <motor/meta/operatortable.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 
@@ -128,13 +128,13 @@ raw< const Meta::Method > Reference::getCall(DbContext& context) const
     else
     {
         raw< const Class > metaclass = m_value.type().metaclass;
-        if(metaclass->operators->call)
+        if(metaclass->interfaces->call)
         {
-            return metaclass->operators->call;
+            return metaclass->interfaces->call;
         }
-        else if(metaclass->operators->dynamicCall)
+        else if(metaclass->interfaces->dynamicCall)
         {
-            return (*metaclass->operators->dynamicCall)(m_value);
+            return (*metaclass->interfaces->dynamicCall)(m_value);
         }
         else
         {

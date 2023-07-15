@@ -9,14 +9,14 @@ namespace Motor {
 namespace Meta {
 
 class Value;
-struct Object;
-struct Property;
-struct Method;
-struct Tag;
-struct OperatorTable;
+class Object;
+class Property;
+class Method;
+class Tag;
+class InterfaceTable;
 struct Type;
 
-struct motor_api(META) Class
+class motor_api(META) Class
 {
     friend struct Type;
     friend class Value;
@@ -37,9 +37,9 @@ published:
     raw< const Method >         constructor;
 
 public:
-    raw< const OperatorTable > operators;
-    const CopyConstructor      copyconstructor;
-    const Destructor           destructor;
+    raw< const InterfaceTable > interfaces;
+    const CopyConstructor       copyconstructor;
+    const Destructor            destructor;
 
 published:
     Value getTag(const Type& type) const;

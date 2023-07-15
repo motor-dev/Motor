@@ -5,6 +5,8 @@
 
 #include <motor/meta/stdafx.h>
 
+namespace Motor {
+
 struct [[motor::meta(name = "bool")]] motor_bool {};
 
 struct [[motor::meta(name = "u8")]] motor_u8
@@ -160,5 +162,7 @@ struct [[motor::meta(name = "double")]] motor_double
         return value;
     }
 };
+
+}  // namespace Motor
 
 #endif

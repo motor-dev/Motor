@@ -46,7 +46,7 @@ struct ClassID< KernelScheduler::Product< T > >
                                             motor_class< KernelScheduler::IProduct >()->properties,
                                             {&s_ctr},
                                             {&s_ctr},
-                                            motor_class< KernelScheduler::IProduct >()->operators,
+                                            motor_class< KernelScheduler::IProduct >()->interfaces,
                                             nullptr,
                                             nullptr};
         raw< const Meta::Class > result  = {&s_class};

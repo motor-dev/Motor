@@ -65,7 +65,7 @@ raw< const Meta::Class > getGInterfaceClass(Gtk3Plugin& plugin, GType type)
                                    parentClass->properties,
                                    parentClass->methods,
                                    {nullptr},
-                                   parentClass->operators,
+                                   parentClass->interfaces,
                                    parentClass->copyconstructor,
                                    parentClass->destructor};
 

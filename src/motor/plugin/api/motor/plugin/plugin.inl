@@ -29,7 +29,7 @@ namespace Motor { namespace Plugin {
             motor_class< void >()->properties,                                                     \
             motor_class< void >()->methods,                                                        \
             {nullptr},                                                                             \
-            motor_class< void >()->operators,                                                      \
+            motor_class< void >()->interfaces,                                                     \
             nullptr,                                                                               \
             nullptr,                                                                               \
         };                                                                                         \

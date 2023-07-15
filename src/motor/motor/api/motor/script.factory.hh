@@ -9,7 +9,6 @@
 
 #include <motor/meta/class.meta.hh>
 #include <motor/meta/object.meta.hh>
-#include <motor/meta/operatortable.hh>
 #include <motor/meta/typeinfo.hh>
 
 namespace Motor { namespace Meta {
@@ -28,7 +27,7 @@ struct ClassID< Script< T > >
                                             motor_class< Resource::Description< T > >()->properties,
                                             motor_class< Resource::Description< T > >()->methods,
                                             {nullptr},
-                                            motor_class< Resource::Description< T > >()->operators,
+                                            motor_class< Resource::Description< T > >()->interfaces,
                                             0,
                                             0};
         return {&s_class};

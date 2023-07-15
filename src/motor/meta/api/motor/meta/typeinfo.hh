@@ -9,9 +9,7 @@
 
 namespace Motor { namespace Meta {
 
-struct Class;
-struct Property;
-struct Method;
+class Class;
 
 template < typename T >
 struct ClassID

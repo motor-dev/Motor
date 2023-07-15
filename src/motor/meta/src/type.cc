@@ -3,8 +3,8 @@
 
 #include <motor/meta/stdafx.h>
 #include <motor/meta/class.meta.hh>
+#include <motor/meta/interfacetable.hh>
 #include <motor/meta/method.meta.hh>
-#include <motor/meta/operatortable.hh>
 #include <motor/meta/property.meta.hh>
 #include <motor/meta/typeinfo.hh>
 
@@ -68,7 +68,7 @@ ConversionCost Type::calculateConversionTo(const Type& other) const
 {
     ConversionCost result;
 
-    if(other.metaclass->operators->variantOperators) return ConversionCost::s_variant;
+    if(other.metaclass->interfaces->variantInterface) return ConversionCost::s_variant;
     if(other.indirection > Indirection::Value && access < other.access)
         return ConversionCost::s_incompatible;
     else if(other.indirection > Indirection::Value)
@@ -126,26 +126,31 @@ u32 format_arg(char* destination, const Type& type, const minitl::format_options
     {
         memcpy(destination + offset, "const ", 6);  // NOLINT(bugprone-not-null-terminated-result)
         offset += 6;
+        reservedLength -= 6;
     }
     if(type.indirection == Type::Indirection::RawPtr)
     {
         memcpy(destination + offset, "raw<", 4);  // NOLINT(bugprone-not-null-terminated-result)
         offset += 4;
+        reservedLength -= 5;
     }
     else if(type.indirection == Type::Indirection::WeakPtr)
     {
         memcpy(destination + offset, "weak<", 5);  // NOLINT(bugprone-not-null-terminated-result)
         offset += 5;
+        reservedLength -= 6;
     }
     else if(type.indirection == Type::Indirection::RefPtr)
     {
         memcpy(destination + offset, "ref<", 4);  // NOLINT(bugprone-not-null-terminated-result)
         offset += 4;
+        reservedLength -= 5;
     }
     if(type.constness == Type::Constness::Const && type.indirection != Type::Indirection::Value)
     {
         memcpy(destination + offset, "const ", 6);  // NOLINT(bugprone-not-null-terminated-result)
         offset += 6;
+        reservedLength -= 6;
     }
     offset += format_arg(destination + offset, type.metaclass->name, options, reservedLength);
     if(type.indirection != Type::Indirection::Value) destination[offset++] = '>';

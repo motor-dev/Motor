@@ -14,7 +14,7 @@
 namespace Motor {
 
 namespace Meta {
-struct Class;
+class Class;
 }
 
 namespace Resource {

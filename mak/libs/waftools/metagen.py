@@ -105,26 +105,27 @@ class cls_export(Task.Task):
                     root_namespace = root_namespace.split('::')
                     while True:
                         try:
-                            full_name = pickle.load(in_file)
+                            namespace, class_name = pickle.load(in_file)
+                            namespace_name = namespace + ['%s_Meta' % s for s in class_name]
+                            class_name = '::'.join(namespace + class_name)
                             export_file.write(
-                                'namespace %s_Meta {\n'
-                                'extern Motor::Meta::Class s_klass;\n'
+                                'namespace %s {\n'
+                                'extern raw<Motor::Meta::Class> klass();\n'
                                 'extern Motor::istring name();\n'
                                 '%s\n'
                                 'template<>\n'
                                 'MOTOR_EXPORT raw< const ::Motor::Meta::Class > Motor::Meta::ClassID<%s>::klass()\n'
                                 '{\n'
-                                '    return {&%s_Meta::s_klass};\n'
+                                '    return %s::klass();\n'
                                 '};\n'
                                 'template<>\n'
                                 'MOTOR_EXPORT Motor::istring Motor::Meta::ClassID<::%s>::name()\n'
                                 '{\n'
-                                '    static const istring s_name = %s_Meta::name();\n'
+                                '    static const istring s_name = %s::name();\n'
                                 '    return s_name;\n'
                                 '};\n' % (
-                                    ' { namespace '.join(full_name), '}' * len(full_name), '::'.join(full_name),
-                                    '::'.join(full_name),
-                                    '::'.join(full_name), '::'.join(full_name))
+                                    ' { namespace '.join(namespace_name), '}' * len(namespace_name),
+                                    class_name, '::'.join(namespace_name), class_name, '::'.join(namespace_name))
                             )
                         except EOFError:
                             break

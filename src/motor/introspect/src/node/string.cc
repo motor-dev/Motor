@@ -4,7 +4,7 @@
 #include <motor/introspect/stdafx.h>
 #include <motor/introspect/dbcontext.hh>
 #include <motor/introspect/node/string.hh>
-#include <motor/meta/operatortable.hh>
+#include <motor/meta/interfacetable.hh>
 
 namespace Motor { namespace Meta { namespace AST {
 
@@ -16,9 +16,9 @@ String::~String() = default;
 
 ConversionCost String::distance(const Type& type) const
 {
-    if(type.metaclass->operators->stringOperators)
+    if(type.metaclass->interfaces->charpInterface)
     {
-        return type.metaclass->operators->stringOperators->valueType.calculateConversionTo(type);
+        return type.metaclass->interfaces->charpInterface->valueType.calculateConversionTo(type);
     }
     else
     {
@@ -28,7 +28,7 @@ ConversionCost String::distance(const Type& type) const
 
 void String::doEval(const Meta::Type& expectedType, Value& result) const
 {
-    result = (*expectedType.metaclass->operators->stringOperators->construct)(m_value);
+    result = (*expectedType.metaclass->interfaces->charpInterface->construct)(m_value);
 }
 
 void String::doVisit(Node::Visitor& visitor) const

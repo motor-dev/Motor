@@ -11,12 +11,12 @@
 namespace Motor { namespace Meta {
 
 class Value;
-struct Tag;
+class Tag;
 
-struct motor_api(META) Method
+class motor_api(META) Method
 {
 published:
-    struct motor_api(META) Parameter
+    class motor_api(META) Parameter
     {
     published:
         raw< const Tag > const   tags;
@@ -32,7 +32,7 @@ published:
     public:
         static constexpr raw< const Value > noDefaultValue {&s_noDefaultValue};
     };
-    struct motor_api(META) Overload
+    class motor_api(META) Overload
     {
     published:
         raw< Tag > const                tags;

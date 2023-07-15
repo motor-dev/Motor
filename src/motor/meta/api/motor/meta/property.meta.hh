@@ -8,10 +8,10 @@
 
 namespace Motor { namespace Meta {
 
-struct Tag;
+class Tag;
 class Value;
 
-struct motor_api(META) Property
+class motor_api(META) Property
 {
     friend class Value;
     typedef Value (*Getter)(raw< const Property > property, void* data);

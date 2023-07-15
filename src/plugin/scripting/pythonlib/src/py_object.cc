@@ -3,8 +3,8 @@
 
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <motor/meta/class.meta.hh>
+#include <motor/meta/interfacetable.hh>
 #include <motor/meta/method.meta.hh>
-#include <motor/meta/operatortable.hh>
 #include <motor/meta/property.meta.hh>
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <py_boundmethod.hh>

@@ -8,10 +8,11 @@
 
 namespace Motor { namespace Meta {
 
-struct Tag;
+class Tag;
 
-struct motor_api(META) Object
+class motor_api(META) Object
 {
+published:
     raw< const Object > const next;
     raw< const Tag > const    tags;
     istring const             name;
