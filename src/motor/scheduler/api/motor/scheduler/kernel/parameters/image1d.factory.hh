@@ -33,7 +33,7 @@ struct ClassID< KernelScheduler::Image1D< T > >
                                             motor_class< KernelScheduler::IImage1D >()->properties,
                                             motor_class< KernelScheduler::IImage1D >()->methods,
                                             {nullptr},
-                                            motor_class< KernelScheduler::IImage1D >()->operators,
+                                            motor_class< KernelScheduler::IImage1D >()->interfaces,
                                             nullptr,
                                             nullptr};
         raw< const Meta::Class > result  = {&s_class};

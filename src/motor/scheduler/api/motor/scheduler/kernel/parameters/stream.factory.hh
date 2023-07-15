@@ -33,7 +33,7 @@ struct ClassID< KernelScheduler::Stream< T > >
                                             motor_class< KernelScheduler::IStream >()->properties,
                                             motor_class< KernelScheduler::IStream >()->methods,
                                             {nullptr},
-                                            motor_class< KernelScheduler::IStream >()->operators,
+                                            motor_class< KernelScheduler::IStream >()->interfaces,
                                             nullptr,
                                             nullptr};
         raw< const Meta::Class > result  = {&s_class};

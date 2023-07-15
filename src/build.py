@@ -99,11 +99,7 @@ def build_plugins(bld):
         uselib=['cxx14']
     )
 
-    # bld.plugin('plugin.audio.AL',
-    #           ['motor'],
-    #           ['motor.3rdparty.audio.OpenAL'])
-
-    # bld.plugin('plugin.scripting.lua', ['motor'], ['motor.3rdparty.scripting.lua'], uselib=['cxx14'])
+    bld.plugin('plugin.scripting.lua', ['motor'], ['motor.3rdparty.scripting.lua'], uselib=['cxx14'])
     bld.plugin('plugin.input.input', ['motor'], uselib=['cxx14'])
     # bld.shared_library('plugin.scripting.pythonlib', ['motor'], conditions=['python'], uselib=['cxx14'])
     # bld.plugin(

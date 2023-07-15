@@ -28,7 +28,7 @@ motor_api(META) minitl::allocator& script();
 
 namespace Meta {
 
-struct Class;
+class Class;
 struct Type;
 class Value;
 

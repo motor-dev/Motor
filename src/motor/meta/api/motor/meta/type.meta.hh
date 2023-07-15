@@ -10,7 +10,7 @@
 namespace Motor { namespace Meta {
 
 class Value;
-struct Class;
+class Class;
 
 struct motor_api(META) Type
 {

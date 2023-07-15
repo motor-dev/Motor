@@ -2,10 +2,10 @@
  see LICENSE for detail */
 
 #include <stdafx.h>
-#include <motor/meta/engine/methodinfo.meta.hh>
-#include <motor/meta/engine/objectinfo.meta.hh>
-#include <motor/meta/engine/operatortable.meta.hh>
-#include <motor/meta/engine/propertyinfo.meta.hh>
+#include <motor/meta/interfacetable.hh>
+#include <motor/meta/method.meta.hh>
+#include <motor/meta/object.meta.hh>
+#include <motor/meta/property.meta.hh>
 #include <context.hh>
 #include <runtime/value.hh>
 
@@ -29,27 +29,12 @@ static bool convertNilToValue(lua_State* state, int index, const Meta::Type& typ
 
 static bool convertStringToValue(lua_State* state, int index, const Meta::Type& type, void* buffer)
 {
-    if(type.metaclass->type() == Meta::ClassType_String)
+    raw< const Meta::InterfaceTable::TypeInterface< const char* > > charpInterface
+        = type.metaclass->interfaces->charpInterface;
+    if(charpInterface)
     {
-        switch(type.metaclass->index())
-        {
-        case Meta::ClassIndex_istring:
-            new(buffer) Meta::Value(istring(lua_tostring(state, index)));
-            return true;
-        case Meta::ClassIndex_inamespace:
-            new(buffer) Meta::Value(inamespace(lua_tostring(state, index)));
-            return true;
-        case Meta::ClassIndex_ifilename:
-            new(buffer) Meta::Value(ifilename(lua_tostring(state, index)));
-            return true;
-        case Meta::ClassIndex_ipath:
-            new(buffer) Meta::Value(ipath(lua_tostring(state, index)));
-            return true;
-        case Meta::ClassIndex_text:
-            new(buffer) Meta::Value(text(lua_tostring(state, index)));
-            return true;
-        default: motor_notreached(); return false;
-        }
+        new(buffer) Meta::Value((*charpInterface->construct)(lua_tostring(state, index)));
+        return true;
     }
     else
     {
@@ -59,49 +44,12 @@ static bool convertStringToValue(lua_State* state, int index, const Meta::Type& 
 
 static bool convertBooleanToValue(lua_State* state, int index, const Meta::Type& type, void* buffer)
 {
-    if(type.metaclass == motor_type< bool >().metaclass)
+    raw< const Meta::InterfaceTable::TypeInterface< bool > > boolInterface
+        = type.metaclass->interfaces->boolInterface;
+    if(boolInterface)
     {
-        new(buffer) Meta::Value(lua_toboolean(state, index));
+        new(buffer) Meta::Value((*boolInterface->construct)(lua_toboolean(state, index)));
         return true;
-    }
-    else if(type.metaclass->type() == Meta::ClassType_Number)
-    {
-        motor_warning_format(Log::lua(), "{0}: - dubious cast: Lua bool to {1}",
-                             Context::getCallInfo(state), type.metaclass->name);
-        switch(type.metaclass->index())
-        {
-        case Meta::ClassIndex_u8:
-            new(buffer) Meta::Value(static_cast< u8 >(lua_toboolean(state, index)));
-            return true;
-        case Meta::ClassIndex_u16:
-            new(buffer) Meta::Value(static_cast< u16 >(lua_toboolean(state, index)));
-            return true;
-        case Meta::ClassIndex_u32:
-            new(buffer) Meta::Value(static_cast< u32 >(lua_toboolean(state, index)));
-            return true;
-        case Meta::ClassIndex_u64:
-            new(buffer) Meta::Value(static_cast< u64 >(lua_toboolean(state, index)));
-            return true;
-        case Meta::ClassIndex_i8:
-            new(buffer) Meta::Value(static_cast< i8 >(lua_toboolean(state, index)));
-            return true;
-        case Meta::ClassIndex_i16:
-            new(buffer) Meta::Value(static_cast< i16 >(lua_toboolean(state, index)));
-            return true;
-        case Meta::ClassIndex_i32:
-            new(buffer) Meta::Value(static_cast< i32 >(lua_toboolean(state, index)));
-            return true;
-        case Meta::ClassIndex_i64:
-            new(buffer) Meta::Value(static_cast< i64 >(lua_toboolean(state, index)));
-            return true;
-        case Meta::ClassIndex_float:
-            new(buffer) Meta::Value(static_cast< float >(lua_toboolean(state, index)));
-            return true;
-        case Meta::ClassIndex_double:
-            new(buffer) Meta::Value(static_cast< double >(lua_toboolean(state, index)));
-            return true;
-        default: motor_notreached(); return false;
-        }
     }
     else
     {
@@ -111,49 +59,33 @@ static bool convertBooleanToValue(lua_State* state, int index, const Meta::Type&
 
 static bool convertNumberToValue(lua_State* state, int index, const Meta::Type& type, void* buffer)
 {
-    if(type.metaclass->type() == Meta::ClassType_Number)
+    raw< const Meta::InterfaceTable::TypeInterface< i64 > > i64Interface
+        = type.metaclass->interfaces->i64Interface;
+    raw< const Meta::InterfaceTable::TypeInterface< u64 > > u64Interface
+        = type.metaclass->interfaces->u64Interface;
+    raw< const Meta::InterfaceTable::TypeInterface< float > > floatInterface
+        = type.metaclass->interfaces->floatInterface;
+    raw< const Meta::InterfaceTable::TypeInterface< double > > doubleInterface
+        = type.metaclass->interfaces->doubleInterface;
+    if(doubleInterface)
     {
-        switch(type.metaclass->index())
-        {
-        case Meta::ClassIndex_bool:
-        {
-            lua_Number       v         = lua_tonumber(state, index);
-            const lua_Number g_epsilon = 0.000001f;
-            new(buffer) Meta::Value(v > g_epsilon || v < -g_epsilon);
-            return true;
-        }
-        case Meta::ClassIndex_u8:
-            new(buffer) Meta::Value(static_cast< u8 >(lua_tonumber(state, index)));
-            return true;
-        case Meta::ClassIndex_u16:
-            new(buffer) Meta::Value(static_cast< u16 >(lua_tonumber(state, index)));
-            return true;
-        case Meta::ClassIndex_u32:
-            new(buffer) Meta::Value(static_cast< u32 >(lua_tonumber(state, index)));
-            return true;
-        case Meta::ClassIndex_u64:
-            new(buffer) Meta::Value(static_cast< u64 >(lua_tonumber(state, index)));
-            return true;
-        case Meta::ClassIndex_i8:
-            new(buffer) Meta::Value(static_cast< i8 >(lua_tonumber(state, index)));
-            return true;
-        case Meta::ClassIndex_i16:
-            new(buffer) Meta::Value(static_cast< i16 >(lua_tonumber(state, index)));
-            return true;
-        case Meta::ClassIndex_i32:
-            new(buffer) Meta::Value(static_cast< i32 >(lua_tonumber(state, index)));
-            return true;
-        case Meta::ClassIndex_i64:
-            new(buffer) Meta::Value(static_cast< i64 >(lua_tonumber(state, index)));
-            return true;
-        case Meta::ClassIndex_float:
-            new(buffer) Meta::Value(static_cast< float >(lua_tonumber(state, index)));
-            return true;
-        case Meta::ClassIndex_double:
-            new(buffer) Meta::Value(static_cast< double >(lua_tonumber(state, index)));
-            return true;
-        default: motor_notreached(); return false;
-        }
+        new(buffer) Meta::Value((*doubleInterface->construct)(lua_tonumber(state, index)));
+        return true;
+    }
+    else if(floatInterface)
+    {
+        new(buffer) Meta::Value((*floatInterface->construct)(lua_tonumber(state, index)));
+        return true;
+    }
+    if(i64Interface)
+    {
+        new(buffer) Meta::Value((*i64Interface->construct)(lua_tointeger(state, index)));
+        return true;
+    }
+    else if(u64Interface)
+    {
+        new(buffer) Meta::Value((*u64Interface->construct)(lua_tointeger(state, index)));
+        return true;
     }
     else
     {
@@ -190,15 +122,11 @@ static bool convertUserdataToValue(lua_State* state, int index, const Meta::Type
 
 static bool convertTableToValue(lua_State* state, int index, const Meta::Type& type, void* buffer)
 {
-    if(type.metaclass->type() == Meta::ClassType_Array)
+    raw< const Meta::InterfaceTable::ArrayInterface > arrayInterface
+        = type.metaclass->interfaces->arrayInterface;
+    if(arrayInterface && arrayInterface->construct)
     {
-        motor_assert_format(type.metaclass->operators,
-                            "Array type {0} does not implement operator methods",
-                            type.metaclass->name);
-        motor_assert_format(type.metaclass->operators->arrayOperators,
-                            "Array type {0} does not implement Array API methods",
-                            type.metaclass->name);
-        Meta::Type arrayType  = type.metaclass->operators->arrayOperators->value_type;
+        Meta::Type arrayType  = arrayInterface->valueType;
         u32        count      = motor_checked_numcast< u32 >(luaL_len(state, index));
         auto*      parameters = (Meta::Value*)malloca(
             minitl::align(count * sizeof(Meta::Value), motor_alignof(Meta::Value)));
@@ -232,7 +160,7 @@ static bool convertTableToValue(lua_State* state, int index, const Meta::Type& t
         }
         if(result)
         {
-            Meta::Value array = type.metaclass->constructor->doCall(parameters, count);
+            Meta::Value array = (*arrayInterface->construct)(parameters, count);
             new(buffer) Meta::Value(array);
         }
         while(count)
@@ -242,46 +170,6 @@ static bool convertTableToValue(lua_State* state, int index, const Meta::Type& t
         }
         freea(parameters);
         return result;
-    }
-    else if(type.metaclass->type() == Meta::ClassType_Pod)
-    {
-        motor_assert(type.indirection == Meta::Type::Indirection::Value,
-                     "POD type can only be value");
-        Meta::Type valueType
-            = Meta::Type::makeType(type.metaclass, Meta::Type::Indirection::Value,
-                                   Meta::Type::Constness::Mutable, Meta::Type::Constness::Mutable);
-        auto* value = new(buffer) Meta::Value(valueType, Meta::Value::Reserve);
-        lua_pushnil(state);
-        while(lua_next(state, index) != 0)
-        {
-            if(lua_type(state, -2) != LUA_TSTRING)
-            {
-                lua_pop(state, 2);
-                value->~Value();
-                return false;
-            }
-            const char*                 str      = lua_tostring(state, -2);
-            raw< const Meta::Property > property = type.metaclass->getProperty(istring(str));
-            if(!property)
-            {
-                lua_pop(state, 2);
-                value->~Value();
-                return false;
-            }
-            auto* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
-            bool  result = createValue(state, -1, property->type, v);
-            if(!result)
-            {
-                lua_pop(state, 2);
-                value->~Value();
-                freea(v);
-                return false;
-            }
-            property->set(*value, *v);
-            freea(v);
-            lua_pop(state, 1);
-        }
-        return true;
     }
     else
     {

@@ -3,8 +3,8 @@
 
 #include <motor/meta/stdafx.h>
 #include <motor/meta/class.meta.hh>
+#include <motor/meta/interfacetable.hh>
 #include <motor/meta/namespace.hh>
-#include <motor/meta/operatortable.hh>
 #include <builtin-numbers.meta.hh>
 
 namespace Motor { namespace Meta {
@@ -17,7 +17,7 @@ static void nulldestructor(void*)
 {
 }
 
-static OperatorTable s_emptyTable
+static InterfaceTable s_emptyTable
     = {{nullptr}, {nullptr}, {nullptr}, {nullptr}, {nullptr}, {nullptr},
        {nullptr}, {nullptr}, {nullptr}, {nullptr}, {nullptr}, nullptr};
 
@@ -37,8 +37,7 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< void >::klass()
                                  {nullptr},        {nullptr},
                                  {nullptr},        {&s_emptyTable},
                                  &nullconstructor, &nulldestructor};
-    raw< Meta::Class > ci     = {&s_void};
-    return ci;
+    return {&s_void};
 }
 
 template <>
@@ -60,11 +59,10 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< minitl::pointer >::klass()
                                     {nullptr},
                                     {nullptr},
                                     {nullptr},
-                                    motor_class< void >()->operators,
+                                    motor_class< void >()->interfaces,
                                     &nullconstructor,
                                     &nulldestructor};
-    raw< Meta::Class > ci        = {&s_pointer};
-    return ci;
+    return {&s_pointer};
 }
 
 template <>
@@ -79,18 +77,17 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< minitl::refcountable >::klass()
 {
     static Meta::Class s_refcountable = {name(),
                                          0,
-                                         motor_class< void >(),
+                                         motor_class< minitl::pointer >(),
                                          0,
                                          {nullptr},
                                          {nullptr},
                                          {nullptr},
                                          {nullptr},
                                          {nullptr},
-                                         motor_class< void >()->operators,
+                                         motor_class< minitl::pointer >()->interfaces,
                                          &nullconstructor,
                                          &nulldestructor};
-    raw< Meta::Class > ci             = {&s_refcountable};
-    return ci;
+    return {&s_refcountable};
 }
 
 template <>

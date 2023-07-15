@@ -3,9 +3,9 @@
 
 #include <stdafx.h>
 
-#include <motor/meta/classinfo.meta.hh>
-#include <motor/meta/engine/operatortable.meta.hh>
-#include <motor/meta/engine/propertyinfo.meta.hh>
+#include <motor/meta/class.meta.hh>
+#include <motor/meta/interfacetable.hh>
+#include <motor/meta/property.meta.hh>
 #include <context.hh>
 #include <runtime/call.hh>
 #include <runtime/error.hh>
@@ -33,52 +33,36 @@ static int valueToString(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Object");
 
-    auto* userdata = (Meta::Value*)lua_touserdata(state, -1);
-    if(userdata->type().indirection == Meta::Type::Indirection::Value)
+    auto*                             userdata   = (Meta::Value*)lua_touserdata(state, -1);
+    raw< const Meta::InterfaceTable > interfaces = userdata->type().metaclass->interfaces;
+    if(interfaces->charpInterface)
     {
-        raw< const Meta::Class > metaclass = userdata->type().metaclass;
-        if(metaclass == motor_class< inamespace >())
-        {
-            lua_pushfstring(state, "%s", userdata->as< const inamespace >().str().name);
-            return 1;
-        }
-        if(metaclass == motor_class< istring >())
-        {
-            lua_pushfstring(state, "%s", userdata->as< const istring >().c_str());
-            return 1;
-        }
-        if(metaclass == motor_class< ifilename >())
-        {
-            lua_pushfstring(state, "%s", userdata->as< const ifilename >().str().name);
-            return 1;
-        }
+        lua_pushfstring(state, "%s", (*interfaces->charpInterface->get)(*userdata));
     }
-    pushUserdataString(state, userdata);
+    else
+    {
+        pushUserdataString(state, userdata);
+    }
     return 1;
 }
 
 static int valueGet(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Object");
-    auto*                    userdata = (Meta::Value*)lua_touserdata(state, -2);
-    raw< const Meta::Class > cls      = userdata->type().metaclass;
+    auto*                             userdata   = (Meta::Value*)lua_touserdata(state, -2);
+    raw< const Meta::InterfaceTable > interfaces = userdata->type().metaclass->interfaces;
 
-    if(cls->type() == Meta::ClassType_Array && lua_type(state, 2) == LUA_TNUMBER)
+    if(interfaces->arrayInterface && lua_type(state, 2) == LUA_TNUMBER)
     {
-        motor_assert_format(cls->operators, "Array type {0} does not implement operator methods",
-                            cls->name);
-        motor_assert_format(cls->operators->arrayOperators,
-                            "Array type {0} does not implement Array API methods", cls->name);
         const u32 i = motor_checked_numcast< u32 >(lua_tonumber(state, 2));
         if(userdata->type().isConst())
         {
             return Context::push(state,
-                                 cls->operators->arrayOperators->indexConst(*userdata, u32(i - 1)));
+                                 (*interfaces->arrayInterface->getConst)(*userdata, u32(i - 1)));
         }
         else
         {
-            return Context::push(state,
-                                 cls->operators->arrayOperators->index(*userdata, u32(i - 1)));
+            return Context::push(state, (*interfaces->arrayInterface->get)(*userdata, u32(i - 1)));
         }
     }
     else
@@ -103,24 +87,29 @@ static int valueGet(lua_State* state)
 static int valueSet(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Object");
-    auto*                    userdata = (Meta::Value*)lua_touserdata(state, 1);
-    raw< const Meta::Class > cls      = userdata->type().metaclass;
-    if(cls->type() == Meta::ClassType_Array && lua_type(state, 2) == LUA_TNUMBER)
+    auto* userdata = (Meta::Value*)lua_touserdata(state, 1);
+    raw< const Meta::InterfaceTable::ArrayInterface > arrayInterface
+        = userdata->type().metaclass->interfaces->arrayInterface;
+
+    if(arrayInterface && lua_type(state, 2) == LUA_TNUMBER)
     {
-        motor_assert_format(cls->operators, "Array type {0} does not implement operator methods",
-                            cls->name);
-        motor_assert_format(cls->operators->arrayOperators,
-                            "Array type {0} does not implement Array API methods", cls->name);
         const u32 i = motor_checked_numcast< u32 >(lua_tonumber(state, 2));
-        if(userdata->type().isConst())
+
+        auto* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
+        bool  result = createValue(state, -1, arrayInterface->valueType, v);
+
+        if(result)
         {
-            return Context::push(state,
-                                 cls->operators->arrayOperators->indexConst(*userdata, u32(i - 1)));
+            (*arrayInterface->set)(*userdata, u32(i - 1), *v);
+            v->~Value();
         }
-        else
+        freea(v);
+
+        if(!result)
         {
-            return Context::push(state,
-                                 cls->operators->arrayOperators->index(*userdata, u32(i - 1)));
+            return error(state,
+                         minitl::format< 4096u >(FMT("array {0} has incompatible value type {1}"),
+                                                 userdata->type(), arrayInterface->valueType));
         }
     }
     else
@@ -171,23 +160,21 @@ static int valueSet(lua_State* state)
 static int valueCall(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Object");
-    auto*       userdata = (Meta::Value*)lua_touserdata(state, 1);
-    Meta::Value value    = (*userdata)[Meta::Class::nameOperatorCall()];
-    if(!value)
+    auto*                             userdata   = (Meta::Value*)lua_touserdata(state, 1);
+    raw< const Meta::InterfaceTable > interfaces = userdata->type().metaclass->interfaces;
+    if(interfaces->call)
     {
-        return error(state,
-                     minitl::format< 4096u >(FMT("object {0} is not callable"), userdata->type()));
+        return call(state, interfaces->call);
     }
-    auto method = value.as< raw< const Meta::Method > >();
-    if(method)
+    else if(interfaces->dynamicCall)
     {
+        raw< const Meta::Method > method = (*interfaces->dynamicCall)(*userdata);
         return call(state, method);
     }
     else
     {
         return error(state,
-                     minitl::format< 4096u >(FMT("{0}.?call is of type {1}; expected a Method"),
-                                             userdata->type(), value.type()));
+                     minitl::format< 4096u >(FMT("object {0} is not callable"), userdata->type()));
     }
 }
 

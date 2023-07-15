@@ -7,8 +7,8 @@
 #include <motor/resource/description.hh>
 
 #include <motor/meta/class.meta.hh>
+#include <motor/meta/interfacetable.hh>
 #include <motor/meta/object.meta.hh>
-#include <motor/meta/operatortable.hh>
 #include <motor/meta/typeinfo.hh>
 
 namespace Motor { namespace Meta {
@@ -16,7 +16,7 @@ namespace Motor { namespace Meta {
 template < typename T >
 struct ClassID< Resource::Description< T > >
 {
-    static const Meta::OperatorTable             s_operatorTable;
+    static const Meta::InterfaceTable            s_interfaceTable;
     MOTOR_EXPORT static raw< const Meta::Class > klass()
     {
         static const Meta::Class s_class = {name(),
@@ -28,11 +28,10 @@ struct ClassID< Resource::Description< T > >
                                             motor_class< Resource::IDescription >()->properties,
                                             motor_class< Resource::IDescription >()->methods,
                                             {nullptr},
-                                            {&s_operatorTable},
+                                            {&s_interfaceTable},
                                             nullptr,
                                             nullptr};
-        raw< const Meta::Class > result  = {&s_class};
-        return result;
+        return {&s_class};
     }
     MOTOR_EXPORT static istring name()
     {
@@ -43,19 +42,19 @@ struct ClassID< Resource::Description< T > >
 };
 
 template < typename T >
-const Meta::OperatorTable ClassID< Resource::Description< T > >::s_operatorTable
-    = {motor_class< Resource::IDescription >()->operators->boolOperators,
-       motor_class< Resource::IDescription >()->operators->signedIntegerOperators,
-       motor_class< Resource::IDescription >()->operators->unsignedIntegerOperators,
-       motor_class< Resource::IDescription >()->operators->floatOperators,
-       motor_class< Resource::IDescription >()->operators->doubleOperators,
-       motor_class< Resource::IDescription >()->operators->stringOperators,
-       motor_class< Resource::IDescription >()->operators->variantOperators,
-       motor_class< Resource::IDescription >()->operators->arrayOperators,
-       motor_class< Resource::IDescription >()->operators->mapOperators,
+const Meta::InterfaceTable ClassID< Resource::Description< T > >::s_interfaceTable
+    = {motor_class< Resource::IDescription >()->interfaces->boolInterface,
+       motor_class< Resource::IDescription >()->interfaces->i64Interface,
+       motor_class< Resource::IDescription >()->interfaces->u64Interface,
+       motor_class< Resource::IDescription >()->interfaces->floatInterface,
+       motor_class< Resource::IDescription >()->interfaces->doubleInterface,
+       motor_class< Resource::IDescription >()->interfaces->charpInterface,
+       motor_class< Resource::IDescription >()->interfaces->variantInterface,
+       motor_class< Resource::IDescription >()->interfaces->arrayInterface,
+       motor_class< Resource::IDescription >()->interfaces->mapInterface,
        motor_class< T >(),
-       motor_class< Resource::IDescription >()->operators->call,
-       motor_class< Resource::IDescription >()->operators->dynamicCall};
+       motor_class< Resource::IDescription >()->interfaces->call,
+       motor_class< Resource::IDescription >()->interfaces->dynamicCall};
 
 }}  // namespace Motor::Meta
 

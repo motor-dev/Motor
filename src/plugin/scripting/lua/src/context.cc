@@ -135,11 +135,34 @@ int Context::push(lua_State* state, const Meta::Value& v)
         lua_pushnil(state);
         return 1;
     }
-    else if(t.metaclass->operators->integerOperators)
+    else if(t.metaclass->interfaces->i64Interface)
     {
-        /* TODO? */
-        motor_notreached();
-        lua_pushnumber(state, 0);
+        lua_pushinteger(state, (lua_Integer)(*t.metaclass->interfaces->i64Interface->get)(v));
+        return 1;
+    }
+    else if(t.metaclass->interfaces->u64Interface)
+    {
+        lua_pushinteger(state, (lua_Integer)(*t.metaclass->interfaces->u64Interface->get)(v));
+        return 1;
+    }
+    else if(t.metaclass->interfaces->boolInterface)
+    {
+        lua_pushboolean(state, (*t.metaclass->interfaces->boolInterface->get)(v));
+        return 1;
+    }
+    else if(t.metaclass->interfaces->charpInterface)
+    {
+        lua_pushstring(state, (*t.metaclass->interfaces->charpInterface->get)(v));
+        return 1;
+    }
+    else if(t.metaclass->interfaces->doubleInterface)
+    {
+        lua_pushnumber(state, (lua_Number)(*t.metaclass->interfaces->doubleInterface->get)(v));
+        return 1;
+    }
+    else if(t.metaclass->interfaces->floatInterface)
+    {
+        lua_pushnumber(state, (lua_Number)(*t.metaclass->interfaces->floatInterface->get)(v));
         return 1;
     }
     else

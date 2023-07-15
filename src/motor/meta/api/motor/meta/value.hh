@@ -8,13 +8,13 @@
 
 namespace Motor { namespace Meta {
 
-struct Class;
-struct Property;
+class Class;
+class Property;
 
 class motor_api(META) Value
 {
-    friend struct Class;
-    friend struct Property;
+    friend class Class;
+    friend class Property;
 
 private:
     Type m_type;

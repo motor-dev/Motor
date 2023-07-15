@@ -4,8 +4,8 @@
 #include <stdafx.h>
 #include <motor/meta/call.hh>
 #include <motor/meta/conversion.meta.hh>
+#include <motor/meta/interfacetable.hh>
 #include <motor/meta/method.meta.hh>
-#include <motor/meta/operatortable.hh>
 #include <motor/meta/property.meta.hh>
 #include <context.hh>
 #include <runtime/call.hh>
@@ -73,7 +73,7 @@ Meta::ConversionCost calculateConversionTo(const LuaParameterType& type, const M
     }
 
     LuaPop p(type.state, index, type.key != -1);
-    if(target.metaclass->operators->variantOperators)
+    if(target.metaclass->interfaces->variantInterface)
     {
         switch(lua_type(type.state, index))
         {
@@ -87,6 +87,8 @@ Meta::ConversionCost calculateConversionTo(const LuaParameterType& type, const M
         }
     }
     else
+    {
+        raw< const Meta::InterfaceTable > interfaces = target.metaclass->interfaces;
         switch(lua_type(type.state, index))
         {
         case LUA_TNIL:
@@ -94,11 +96,16 @@ Meta::ConversionCost calculateConversionTo(const LuaParameterType& type, const M
                        ? Meta::ConversionCost()
                        : Meta::ConversionCost::s_incompatible;
         case LUA_TSTRING:
-            return target.metaclass->type() == Meta::ClassType_String
+            return interfaces->charpInterface ? Meta::ConversionCost()
+                                              : Meta::ConversionCost::s_incompatible;
+        case LUA_TBOOLEAN:
+            return interfaces->boolInterface ? Meta::ConversionCost()
+                                             : Meta::ConversionCost::s_incompatible;
+        case LUA_TNUMBER:
+            return interfaces->doubleInterface
                        ? Meta::ConversionCost()
-                       : Meta::ConversionCost::s_incompatible;
-        case LUA_TBOOLEAN: return Meta::ConversionCalculator< bool >::calculate(target);
-        case LUA_TNUMBER: return Meta::ConversionCalculator< LUA_NUMBER >::calculate(target);
+                       : (interfaces->floatInterface ? Meta::ConversionCost(0, 1)
+                                                     : Meta::ConversionCost::s_incompatible);
         case LUA_TUSERDATA:
             lua_getmetatable(type.state, index);
             luaL_getmetatable(type.state, "Motor.Object");
@@ -114,16 +121,9 @@ Meta::ConversionCost calculateConversionTo(const LuaParameterType& type, const M
                 return Meta::ConversionCost::s_incompatible;
             }
         case LUA_TTABLE:
-            if(target.metaclass->type() == Meta::ClassType_Array)
+            if(interfaces->arrayInterface)
             {
-                motor_assert_format(target.metaclass->operators,
-                                    "Array class {0} does not have an operator table",
-                                    target.metaclass->name);
-                motor_assert_format(target.metaclass->operators->arrayOperators,
-                                    "Array class {0} does not have an array operator table",
-                                    target.metaclass->name);
-                const Meta::Type& valueType
-                    = target.metaclass->operators->arrayOperators->value_type;
+                const Meta::Type&    valueType = interfaces->arrayInterface->valueType;
                 Meta::ConversionCost c;
                 lua_pushnil(type.state);
                 while(lua_next(type.state, index < 0 ? index - 1 : index))
@@ -143,48 +143,13 @@ Meta::ConversionCost calculateConversionTo(const LuaParameterType& type, const M
                 }
                 return c;
             }
-            else if(target.metaclass->type() == Meta::ClassType_Pod)
-            {
-                if(target.metaclass->constructor)
-                {
-                    Meta::ConversionCost c;
-                    lua_pushnil(type.state);
-                    while(lua_next(type.state, index < 0 ? index - 1 : index))
-                    {
-                        if(lua_type(type.state, -2) != LUA_TSTRING)
-                        {
-                            lua_pop(type.state, 2);
-                            return Meta::ConversionCost::s_incompatible;
-                        }
-                        const char*                 str = lua_tostring(type.state, -2);
-                        raw< const Meta::Property > property
-                            = target.metaclass->getProperty(istring(str));
-                        if(!property)
-                        {
-                            lua_pop(type.state, 2);
-                            return Meta::ConversionCost::s_incompatible;
-                        }
-                        else
-                        {
-                            c += calculateConversionTo(LuaParameterType(type.state, -1),
-                                                       property->type);
-                            lua_pop(type.state, 1);
-                            if(c >= Meta::ConversionCost::s_incompatible) return c;
-                        }
-                    }
-                    return c;
-                }
-                else
-                {
-                    return Meta::ConversionCost::s_incompatible;
-                }
-            }
             else
             {
                 return Meta::ConversionCost::s_incompatible;
             }
         default: return Meta::ConversionCost::s_incompatible;
         }
+    }
 }
 
 void convert(const LuaParameterType& type, void* buffer, const Meta::Type& target)
@@ -272,14 +237,14 @@ int call(lua_State* state, raw< const Meta::Method > method)
         }
         if(!error)
         {
-            Meta::CallInfo result
-                = Meta::resolve(method, parameters, positionParameterCount,
-                                parameters + positionParameterCount, keywordParameterCount);
+            Meta::CallInfo result = Meta::resolve< LuaParameterType >(
+                method, {parameters, positionParameterCount},
+                {parameters + positionParameterCount, keywordParameterCount});
             if(result.conversion < Meta::ConversionCost::s_incompatible)
             {
-                Meta::Value v
-                    = Meta::call(method, result, parameters, positionParameterCount,
-                                 parameters + positionParameterCount, keywordParameterCount);
+                Meta::Value v = Meta::call< LuaParameterType >(
+                    method, result, {parameters, positionParameterCount},
+                    {parameters + positionParameterCount, keywordParameterCount});
                 freea(parameters);
                 return Context::push(state, v);
             }
@@ -298,10 +263,12 @@ int call(lua_State* state, raw< const Meta::Method > method)
     {
         new(&parameters[i]) LuaParameterInfo(LuaParameterType(state, 2 + i));
     }
-    Meta::CallInfo result = Meta::resolve(method, parameters, nargs);
+    Meta::CallInfo result = Meta::resolve< LuaParameterType >(
+        method, {parameters, parameters + nargs}, {nullptr, nullptr});
     if(result.conversion < Meta::ConversionCost::s_incompatible)
     {
-        Meta::Value v = Meta::call(method, result, parameters, nargs);
+        Meta::Value v = Meta::call< LuaParameterType >(
+            method, result, {parameters, parameters + nargs}, {nullptr, nullptr});
         freea(parameters);
         return Context::push(state, v);
     }
@@ -317,5 +284,4 @@ int call(lua_State* state, raw< const Meta::Method > method)
         return error(state, message);
     }
 }
-
 }}  // namespace Motor::Lua

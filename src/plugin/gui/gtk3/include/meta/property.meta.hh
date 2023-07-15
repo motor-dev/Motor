@@ -8,9 +8,9 @@
 
 namespace Motor { namespace Gtk3 {
 
-struct Property
+class Property
 {
-    Meta::Property metaProperty;
+    published : Meta::Property metaProperty;
 
 public:
     const guint propertyId {};

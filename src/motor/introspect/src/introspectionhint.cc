@@ -8,7 +8,7 @@
 #include <motor/introspect/node/node.hh>
 #include <motor/introspect/node/object.hh>
 #include <motor/meta/call.hh>
-#include <motor/meta/operatortable.hh>
+#include <motor/meta/interfacetable.hh>
 #include <motor/meta/property.meta.hh>
 
 namespace Motor { namespace Meta { namespace AST {
@@ -39,11 +39,11 @@ Value IntrospectionHint::call(const ArgInfo parameters[], u32 argumentCount) con
 minitl::raw< const Method > IntrospectionHint::getCall(DbContext& context) const
 {
     raw< const Class > cls = m_callInfo.overload->returnType.metaclass;
-    if(cls->operators->call)
+    if(cls->interfaces->call)
     {
-        return cls->operators->call;
+        return cls->interfaces->call;
     }
-    if(cls->operators->dynamicCall)
+    if(cls->interfaces->dynamicCall)
         context.error(m_owner, minitl::format< 512 >(FMT("call on object of type {0} is dynamic"),
                                                      m_callInfo.overload->returnType));
     return {};

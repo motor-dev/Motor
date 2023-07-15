@@ -35,7 +35,7 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< World::Event< T1, T2, T3, T4 > >:
                                         /* .properties */ motor_class< void >()->properties,
                                         /* .methods */ motor_class< void >()->methods,
                                         /* .constructor */ {nullptr},
-                                        /* .operators */ motor_class< void >()->operators,
+                                        /* .operators */ motor_class< void >()->interfaces,
                                         /* .copyconstructor */ nullptr,
                                         /* .destructor */ nullptr};
 

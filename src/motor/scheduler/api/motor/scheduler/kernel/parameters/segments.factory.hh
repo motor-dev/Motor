@@ -48,7 +48,7 @@ struct ClassID< KernelScheduler::Segments< T > >
                                             motor_class< KernelScheduler::ISegments >()->properties,
                                             motor_class< KernelScheduler::ISegments >()->methods,
                                             {nullptr},
-                                            motor_class< KernelScheduler::ISegments >()->operators,
+                                            motor_class< KernelScheduler::ISegments >()->interfaces,
                                             nullptr,
                                             nullptr};
         raw< const Meta::Class > result  = {&s_class};

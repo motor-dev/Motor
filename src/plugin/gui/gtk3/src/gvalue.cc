@@ -9,7 +9,7 @@
 #include <gobject/gvaluetypes.h>
 #include <gtkresourcedescription.meta.hh>
 
-#include <motor/meta/operatortable.hh>
+#include <motor/meta/interfacetable.hh>
 #include <motor/meta/value.hh>
 #include <motor/minitl/cast.hh>
 
@@ -43,20 +43,20 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
     }
     case G_TYPE_CHAR:
     {
-        raw< const Meta::OperatorTable::ConversionOperators< i64 > > signedIntegerOperators
-            = value.type().metaclass->operators->signedIntegerOperators;
-        raw< const Meta::OperatorTable::ConversionOperators< u64 > > unsignedIntegerOperators
-            = value.type().metaclass->operators->unsignedIntegerOperators;
-        if(signedIntegerOperators)
+        raw< const Meta::InterfaceTable::TypeInterface< i64 > > i64Interface
+            = value.type().metaclass->interfaces->i64Interface;
+        raw< const Meta::InterfaceTable::TypeInterface< u64 > > u64Interface
+            = value.type().metaclass->interfaces->u64Interface;
+        if(i64Interface)
         {
             g_value_init(target, type);
-            g_value_set_schar(target, (i8)(*signedIntegerOperators->get)(value));
+            g_value_set_schar(target, (i8)(*i64Interface->get)(value));
             return true;
         }
-        else if(unsignedIntegerOperators)
+        else if(u64Interface)
         {
             g_value_init(target, type);
-            g_value_set_schar(target, (i8)(*unsignedIntegerOperators->get)(value));
+            g_value_set_schar(target, (i8)(*u64Interface->get)(value));
             return true;
         }
         else
@@ -66,20 +66,20 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
     }
     case G_TYPE_UCHAR:
     {
-        raw< const Meta::OperatorTable::ConversionOperators< i64 > > signedIntegerOperators
-            = value.type().metaclass->operators->signedIntegerOperators;
-        raw< const Meta::OperatorTable::ConversionOperators< u64 > > unsignedIntegerOperators
-            = value.type().metaclass->operators->unsignedIntegerOperators;
-        if(unsignedIntegerOperators)
+        raw< const Meta::InterfaceTable::TypeInterface< i64 > > i64Interface
+            = value.type().metaclass->interfaces->i64Interface;
+        raw< const Meta::InterfaceTable::TypeInterface< u64 > > u64Interface
+            = value.type().metaclass->interfaces->u64Interface;
+        if(u64Interface)
         {
             g_value_init(target, type);
-            g_value_set_uchar(target, (u8)(*unsignedIntegerOperators->get)(value));
+            g_value_set_uchar(target, (u8)(*u64Interface->get)(value));
             return true;
         }
-        else if(signedIntegerOperators)
+        else if(i64Interface)
         {
             g_value_init(target, type);
-            g_value_set_uchar(target, (u8)(*signedIntegerOperators->get)(value));
+            g_value_set_uchar(target, (u8)(*i64Interface->get)(value));
             return true;
         }
         else
@@ -89,12 +89,12 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
     }
     case G_TYPE_BOOLEAN:
     {
-        raw< const Meta::OperatorTable::ConversionOperators< bool > > boolOperators
-            = value.type().metaclass->operators->boolOperators;
-        if(boolOperators)
+        raw< const Meta::InterfaceTable::TypeInterface< bool > > boolInterface
+            = value.type().metaclass->interfaces->boolInterface;
+        if(boolInterface)
         {
             g_value_init(target, type);
-            g_value_set_boolean(target, (*boolOperators->get)(value));
+            g_value_set_boolean(target, (*boolInterface->get)(value));
             return true;
         }
         else
@@ -104,20 +104,20 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
     }
     case G_TYPE_INT:
     {
-        raw< const Meta::OperatorTable::ConversionOperators< i64 > > signedIntegerOperators
-            = value.type().metaclass->operators->signedIntegerOperators;
-        raw< const Meta::OperatorTable::ConversionOperators< u64 > > unsignedIntegerOperators
-            = value.type().metaclass->operators->unsignedIntegerOperators;
-        if(signedIntegerOperators)
+        raw< const Meta::InterfaceTable::TypeInterface< i64 > > i64Interface
+            = value.type().metaclass->interfaces->i64Interface;
+        raw< const Meta::InterfaceTable::TypeInterface< u64 > > u64Interface
+            = value.type().metaclass->interfaces->u64Interface;
+        if(i64Interface)
         {
             g_value_init(target, type);
-            g_value_set_int(target, (i32)(*signedIntegerOperators->get)(value));
+            g_value_set_int(target, (i32)(*i64Interface->get)(value));
             return true;
         }
-        else if(unsignedIntegerOperators)
+        else if(u64Interface)
         {
             g_value_init(target, type);
-            g_value_set_int(target, (i32)(*unsignedIntegerOperators->get)(value));
+            g_value_set_int(target, (i32)(*u64Interface->get)(value));
             return true;
         }
         else
@@ -127,20 +127,20 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
     }
     case G_TYPE_UINT:
     {
-        raw< const Meta::OperatorTable::ConversionOperators< i64 > > signedIntegerOperators
-            = value.type().metaclass->operators->signedIntegerOperators;
-        raw< const Meta::OperatorTable::ConversionOperators< u64 > > unsignedIntegerOperators
-            = value.type().metaclass->operators->unsignedIntegerOperators;
-        if(unsignedIntegerOperators)
+        raw< const Meta::InterfaceTable::TypeInterface< i64 > > i64Interface
+            = value.type().metaclass->interfaces->i64Interface;
+        raw< const Meta::InterfaceTable::TypeInterface< u64 > > u64Interface
+            = value.type().metaclass->interfaces->u64Interface;
+        if(u64Interface)
         {
             g_value_init(target, type);
-            g_value_set_uint(target, (u32)(*unsignedIntegerOperators->get)(value));
+            g_value_set_uint(target, (u32)(*u64Interface->get)(value));
             return true;
         }
-        else if(signedIntegerOperators)
+        else if(i64Interface)
         {
             g_value_init(target, type);
-            g_value_set_uint(target, (u32)(*signedIntegerOperators->get)(value));
+            g_value_set_uint(target, (u32)(*i64Interface->get)(value));
             return true;
         }
         else
@@ -150,20 +150,20 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
     }
     case G_TYPE_LONG:
     {
-        raw< const Meta::OperatorTable::ConversionOperators< i64 > > signedIntegerOperators
-            = value.type().metaclass->operators->signedIntegerOperators;
-        raw< const Meta::OperatorTable::ConversionOperators< u64 > > unsignedIntegerOperators
-            = value.type().metaclass->operators->unsignedIntegerOperators;
-        if(signedIntegerOperators)
+        raw< const Meta::InterfaceTable::TypeInterface< i64 > > i64Interface
+            = value.type().metaclass->interfaces->i64Interface;
+        raw< const Meta::InterfaceTable::TypeInterface< u64 > > u64Interface
+            = value.type().metaclass->interfaces->u64Interface;
+        if(i64Interface)
         {
             g_value_init(target, type);
-            g_value_set_long(target, (glong)(*signedIntegerOperators->get)(value));
+            g_value_set_long(target, (glong)(*i64Interface->get)(value));
             return true;
         }
-        else if(unsignedIntegerOperators)
+        else if(u64Interface)
         {
             g_value_init(target, type);
-            g_value_set_long(target, (glong)(*unsignedIntegerOperators->get)(value));
+            g_value_set_long(target, (glong)(*u64Interface->get)(value));
             return true;
         }
         else
@@ -173,20 +173,20 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
     }
     case G_TYPE_INT64:
     {
-        raw< const Meta::OperatorTable::ConversionOperators< i64 > > signedIntegerOperators
-            = value.type().metaclass->operators->signedIntegerOperators;
-        raw< const Meta::OperatorTable::ConversionOperators< u64 > > unsignedIntegerOperators
-            = value.type().metaclass->operators->unsignedIntegerOperators;
-        if(signedIntegerOperators)
+        raw< const Meta::InterfaceTable::TypeInterface< i64 > > i64Interface
+            = value.type().metaclass->interfaces->i64Interface;
+        raw< const Meta::InterfaceTable::TypeInterface< u64 > > u64Interface
+            = value.type().metaclass->interfaces->u64Interface;
+        if(i64Interface)
         {
             g_value_init(target, type);
-            g_value_set_int64(target, (i64)(*signedIntegerOperators->get)(value));
+            g_value_set_int64(target, (i64)(*i64Interface->get)(value));
             return true;
         }
-        else if(unsignedIntegerOperators)
+        else if(u64Interface)
         {
             g_value_init(target, type);
-            g_value_set_int64(target, (i64)(*unsignedIntegerOperators->get)(value));
+            g_value_set_int64(target, (i64)(*u64Interface->get)(value));
             return true;
         }
         else
@@ -196,20 +196,20 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
     }
     case G_TYPE_ULONG:
     {
-        raw< const Meta::OperatorTable::ConversionOperators< i64 > > signedIntegerOperators
-            = value.type().metaclass->operators->signedIntegerOperators;
-        raw< const Meta::OperatorTable::ConversionOperators< u64 > > unsignedIntegerOperators
-            = value.type().metaclass->operators->unsignedIntegerOperators;
-        if(unsignedIntegerOperators)
+        raw< const Meta::InterfaceTable::TypeInterface< i64 > > i64Interface
+            = value.type().metaclass->interfaces->i64Interface;
+        raw< const Meta::InterfaceTable::TypeInterface< u64 > > u64Interface
+            = value.type().metaclass->interfaces->u64Interface;
+        if(u64Interface)
         {
             g_value_init(target, type);
-            g_value_set_ulong(target, (gulong)(*unsignedIntegerOperators->get)(value));
+            g_value_set_ulong(target, (gulong)(*u64Interface->get)(value));
             return true;
         }
-        else if(signedIntegerOperators)
+        else if(i64Interface)
         {
             g_value_init(target, type);
-            g_value_set_ulong(target, (gulong)(*signedIntegerOperators->get)(value));
+            g_value_set_ulong(target, (gulong)(*i64Interface->get)(value));
             return true;
         }
         else
@@ -219,20 +219,20 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
     }
     case G_TYPE_UINT64:
     {
-        raw< const Meta::OperatorTable::ConversionOperators< i64 > > signedIntegerOperators
-            = value.type().metaclass->operators->signedIntegerOperators;
-        raw< const Meta::OperatorTable::ConversionOperators< u64 > > unsignedIntegerOperators
-            = value.type().metaclass->operators->unsignedIntegerOperators;
-        if(unsignedIntegerOperators)
+        raw< const Meta::InterfaceTable::TypeInterface< i64 > > i64Interface
+            = value.type().metaclass->interfaces->i64Interface;
+        raw< const Meta::InterfaceTable::TypeInterface< u64 > > u64Interface
+            = value.type().metaclass->interfaces->u64Interface;
+        if(u64Interface)
         {
             g_value_init(target, type);
-            g_value_set_uint64(target, (u64)(*unsignedIntegerOperators->get)(value));
+            g_value_set_uint64(target, (u64)(*u64Interface->get)(value));
             return true;
         }
-        else if(signedIntegerOperators)
+        else if(i64Interface)
         {
             g_value_init(target, type);
-            g_value_set_uint64(target, (u64)(*signedIntegerOperators->get)(value));
+            g_value_set_uint64(target, (u64)(*i64Interface->get)(value));
             return true;
         }
         else
@@ -270,20 +270,20 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
     }
     case G_TYPE_FLOAT:
     {
-        raw< const Meta::OperatorTable::ConversionOperators< float > > floatOperators
-            = value.type().metaclass->operators->floatOperators;
-        raw< const Meta::OperatorTable::ConversionOperators< double > > doubleOperators
-            = value.type().metaclass->operators->doubleOperators;
-        if(floatOperators)
+        raw< const Meta::InterfaceTable::TypeInterface< float > > floatInterface
+            = value.type().metaclass->interfaces->floatInterface;
+        raw< const Meta::InterfaceTable::TypeInterface< double > > doubleInterface
+            = value.type().metaclass->interfaces->doubleInterface;
+        if(floatInterface)
         {
             g_value_init(target, type);
-            g_value_set_float(target, (float)(*floatOperators->get)(value));
+            g_value_set_float(target, (float)(*floatInterface->get)(value));
             return true;
         }
-        else if(doubleOperators)
+        else if(doubleInterface)
         {
             g_value_init(target, type);
-            g_value_set_float(target, (float)(*doubleOperators->get)(value));
+            g_value_set_float(target, (float)(*doubleInterface->get)(value));
             return true;
         }
         else
@@ -293,20 +293,20 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
     }
     case G_TYPE_DOUBLE:
     {
-        raw< const Meta::OperatorTable::ConversionOperators< float > > floatOperators
-            = value.type().metaclass->operators->floatOperators;
-        raw< const Meta::OperatorTable::ConversionOperators< double > > doubleOperators
-            = value.type().metaclass->operators->doubleOperators;
-        if(doubleOperators)
+        raw< const Meta::InterfaceTable::TypeInterface< float > > floatInterface
+            = value.type().metaclass->interfaces->floatInterface;
+        raw< const Meta::InterfaceTable::TypeInterface< double > > doubleInterface
+            = value.type().metaclass->interfaces->doubleInterface;
+        if(doubleInterface)
         {
             g_value_init(target, type);
-            g_value_set_double(target, (double)(*doubleOperators->get)(value));
+            g_value_set_double(target, (double)(*doubleInterface->get)(value));
             return true;
         }
-        else if(floatOperators)
+        else if(floatInterface)
         {
             g_value_init(target, type);
-            g_value_set_double(target, (double)(*floatOperators->get)(value));
+            g_value_set_double(target, (double)(*floatInterface->get)(value));
             return true;
         }
         else
@@ -316,12 +316,12 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
     }
     case G_TYPE_STRING:
     {
-        raw< const Meta::OperatorTable::ConversionOperators< const char* > > stringOperators
-            = value.type().metaclass->operators->stringOperators;
-        if(stringOperators)
+        raw< const Meta::InterfaceTable::TypeInterface< const char* > > charpInterface
+            = value.type().metaclass->interfaces->charpInterface;
+        if(charpInterface)
         {
             g_value_init(target, type);
-            g_value_set_string(target, (*stringOperators->get)(value));
+            g_value_set_string(target, (*charpInterface->get)(value));
             return true;
         }
         else

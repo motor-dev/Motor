@@ -8,8 +8,9 @@
 
 namespace Motor { namespace Meta {
 
-struct motor_api(META) Tag
+class motor_api(META) Tag
 {
+published:
     raw< const Tag > next;
     Value            tag;
 };
