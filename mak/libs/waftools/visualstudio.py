@@ -305,7 +305,7 @@ class VCproj:
                                     )
                             else:
                                 tool[
-                                    'BuildCommandLine'] = 'cd "$(SolutionDir)" && "%s" "%s" build:%s:%s %s --targets=%s' % (
+                                    'BuildCommandLine'] = 'cd "$(SolutionDir)" && "%s" "%s" build:%s:%s %s --werror --targets=%s' % (
                                     sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target
                                 )
                                 tool[
@@ -313,7 +313,7 @@ class VCproj:
                                     sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target
                                 )
                                 tool['ReBuildCommandLine'
-                                ] = 'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s build:%s:%s %s --targets=%s' % (
+                                ] = 'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s build:%s:%s %s --werror --targets=%s' % (
                                     sys.executable, sys.argv[0], toolchain, variant, toolchain, variant,
                                     ' '.join(options), task_gen.target
                                 )
@@ -535,12 +535,12 @@ class VCxproj:
                 else:
                     self.vcxproj._add(
                         properties, 'NMakeBuildCommandLine',
-                        'cd "$(SolutionDir)" && "%s" "%s" build:%s:%s %s --targets=%s' %
+                        'cd "$(SolutionDir)" && "%s" "%s" build:%s:%s %s --werror --targets=%s' %
                         (sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target)
                     )
                     self.vcxproj._add(
                         properties, 'NMakeReBuildCommandLine',
-                        'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s build:%s:%s %s --targets=%s' % (
+                        'cd "$(SolutionDir)" && "%s" "%s" clean:%s:%s build:%s:%s %s --werror --targets=%s' % (
                             sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), toolchain, variant,
                             task_gen.target
                         )
@@ -958,7 +958,8 @@ class vs2022(VisualStudio):
     fun = 'build'
     version = (('Visual Studio 17', '12.00', True, '17.0.00000.0'), (VCxproj, ('6.0', '14.3', '17.0')))
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
-    
+
+
 class vs_cmake(cmake.CMake):
     "creates projects for Visual Studio using CMake"
     cmd = 'vs-cmake'
@@ -1003,7 +1004,7 @@ class vs_cmake(cmake.CMake):
 
     def write_tasks(self):
         tasks_file = self.path.make_node('.vs/tasks.vs.json')
-        motor_tasks =  [
+        motor_tasks = [
             {
                 'taskLabel': 'motor:refresh project',
                 'appliesTo': '/',
@@ -1057,6 +1058,7 @@ class vs_cmake(cmake.CMake):
                 'args': [
                     sys.argv[0],
                     'build:${env.TOOLCHAIN}:${env.BUILD_TYPE}',
+                    '--werror'
                 ]
             },
             {
@@ -1068,7 +1070,8 @@ class vs_cmake(cmake.CMake):
                 'args': [
                     sys.argv[0],
                     'build:${env.TOOLCHAIN}:${env.BUILD_TYPE}',
-                    '--nomaster'
+                    '--nomaster',
+                    '--werror'
                 ]
             },
             {
@@ -1080,7 +1083,8 @@ class vs_cmake(cmake.CMake):
                 'args': [
                     sys.argv[0],
                     'build:${env.TOOLCHAIN}:${env.BUILD_TYPE}',
-                    '--dynamic'
+                    '--dynamic',
+                    '--werror'
                 ]
             },
             {
@@ -1092,7 +1096,8 @@ class vs_cmake(cmake.CMake):
                 'args': [
                     sys.argv[0],
                     'build:${env.TOOLCHAIN}:${env.BUILD_TYPE}',
-                    '--static'
+                    '--static',
+                    '--werror'
                 ]
             },
         ]
@@ -1110,7 +1115,7 @@ class vs_cmake(cmake.CMake):
         except (IOError, KeyError, json.decoder.JSONDecodeError):
             tasks_file.parent.mkdir()
             tasks = {
-                'version':  '0.2',
+                'version': '0.2',
                 'tasks': motor_tasks
             }
 
@@ -1131,11 +1136,13 @@ class vs_cmake(cmake.CMake):
             for variant in env.ALL_VARIANTS:
                 for target in targets:
                     launch_item = {
-                            'project': 'CMakeLists.txt',
-                            'projectTarget': '%s (%s)' % (executable, os.path.join(self.path.abspath(), env.PREFIX, env.DEPLOY_BINDIR, variant, executable).replace('/', '\\')),
-                            'name': target,
-                            'args': [target]
-                        }
+                        'project': 'CMakeLists.txt',
+                        'projectTarget': '%s (%s)' % (executable,
+                                                      os.path.join(self.path.abspath(), env.PREFIX, env.DEPLOY_BINDIR,
+                                                                   variant, executable).replace('/', '\\')),
+                        'name': target,
+                        'args': [target]
+                    }
                     if env.LLDB:
                         launch_item['type'] = 'cppdbg'
                         launch_item['miDebuggerPath'] = env.LLDB[0]
@@ -1152,7 +1159,7 @@ class vs_cmake(cmake.CMake):
 
         with open(launch_file.abspath(), 'w') as launch_content:
             json.dump({'version': '0.2.1', 'defaults': {}, 'configurations': launch_items}, launch_content, indent=2)
-        
+
     def write_config(self, configurations):
         with open('CMakePresets.json', 'w') as settings_file:
             settings_file.write('{\n'
@@ -1160,7 +1167,7 @@ class vs_cmake(cmake.CMake):
                                 '  "configurePresets": [\n')
             for i, (configuration, toolchain) in enumerate(configurations):
                 for variant in self.env.ALL_VARIANTS:
-                    last = i == len(configurations)-1 and variant == self.env.ALL_VARIANTS[-1]
+                    last = i == len(configurations) - 1 and variant == self.env.ALL_VARIANTS[-1]
                     env = self.all_envs[configuration]
                     if env.SUB_TOOLCHAINS:
                         env = self.all_envs[env.SUB_TOOLCHAINS[0]]

@@ -19,7 +19,7 @@ Semaphore::Semaphore(int initialCount) : m_data()
     m_data.ptr = CreateSemaphore(nullptr, initialCount, 65535, nullptr);
 }
 
-Semaphore::~Semaphore()
+Semaphore::~Semaphore() noexcept
 {
     CloseHandle((HANDLE)m_data.ptr);
 }
@@ -55,7 +55,7 @@ Semaphore::Semaphore(int initialCount) : m_data()
     m_data.value.set(initialCount);
 }
 
-Semaphore::~Semaphore()
+Semaphore::~Semaphore() noexcept
 {
     WakeByAddressAll(&m_data.value);
 }

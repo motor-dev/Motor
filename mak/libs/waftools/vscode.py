@@ -283,19 +283,25 @@ class vscode(vscode_common):
                 launch_configs['inputs'] = []
 
         for action, command, is_default in [
-            ('build', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '-p'], True),
+            ('build', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '-p', '--werror'], True),
             (
                     'build[fail-tests=no]',
-                    ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--no-fail-on-tests', '-p'], False
-            ), ('build[static]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--static', '-p'], False),
-            ('build[dynamic]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--dynamic', '-p'], False),
-            ('build[nomaster]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--nomaster', '-p'], False),
-            ('build[single]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '-j', '1', '-p'], False),
+                    ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--no-fail-on-tests', '-p', '--werror'],
+                    False
+            ), (
+            'build[static]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--static', '-p', '--werror'],
+            False),
+            ('build[dynamic]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--dynamic', '-p', '--werror'],
+             False),
+            ('build[nomaster]',
+             ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--nomaster', '-p', '--werror'], False),
+            ('build[single]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '-j', '1', '-p', '--werror'],
+             False),
             ('clean', ['clean:${input:motor-Toolchain}:${input:motor-Variant}', '-p'], False),
             (
                     'rebuild', [
                         'clean:${input:motor-Toolchain}:${input:motor-Variant}',
-                        'build:${input:motor-Toolchain}:${input:motor-Variant}', '-p'
+                        'build:${input:motor-Toolchain}:${input:motor-Variant}', '-p', '--werror'
                     ], False
             ), ('setup', ['setup:${input:motor-Toolchain}'], False), ('reconfigure', ['reconfigure'], False),
             (self.cmd, [self.cmd], False)

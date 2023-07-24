@@ -14,7 +14,7 @@ Event::Event() : m_data(new pthread_cond_t), m_lock(new pthread_mutex_t)
     pthread_mutex_init(reinterpret_cast< pthread_mutex_t* >(m_lock), nullptr);
 }
 
-Event::~Event()
+Event::~Event() noexcept
 {
     pthread_mutex_destroy(reinterpret_cast< pthread_mutex_t* >(m_lock));
     pthread_cond_destroy(reinterpret_cast< pthread_cond_t* >(m_data));

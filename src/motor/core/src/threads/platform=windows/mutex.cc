@@ -16,7 +16,7 @@ Mutex::Mutex() : m_data(CreateMutex(nullptr, FALSE, nullptr))
 {
 }
 
-Mutex::~Mutex()
+Mutex::~Mutex() noexcept
 {
     CloseHandle((HANDLE)m_data);
 }

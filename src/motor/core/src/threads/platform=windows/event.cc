@@ -17,7 +17,7 @@ Event::Event() : m_data(CreateEvent(nullptr, FALSE, FALSE, nullptr)), m_lock(nul
 {
 }
 
-Event::~Event()
+Event::~Event() noexcept
 {
     CloseHandle((HANDLE)m_data);
 }

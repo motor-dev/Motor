@@ -19,7 +19,7 @@ private:
 
 public:
     Mutex();
-    ~Mutex() override;
+    ~Mutex() noexcept override;
 
 private:
     void                 release();

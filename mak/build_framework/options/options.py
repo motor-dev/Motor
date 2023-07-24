@@ -130,6 +130,14 @@ def options(option_context):
         help=
         'build completely dynamic executable: All engine components, plugins, samples and kernels will be built as shared objects'
     )
+    gr.add_option(
+        '--werror',
+        action='store_true',
+        default=False,
+        dest='werror',
+        help=
+        'treat warnings as error'
+    )
     gr.add_option('--silent', action='store_true', default=False, dest='silent', help='do not print build log from Waf')
 
     option_context.add_option(

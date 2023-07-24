@@ -12,7 +12,7 @@ class motor_api(CORE) GeneralAllocator : public minitl::allocator
 {
 public:
     GeneralAllocator();
-    ~GeneralAllocator() override;
+    ~GeneralAllocator() noexcept override;
 
 protected:
     void* internal_alloc(u64 size, u64 alignment) override;

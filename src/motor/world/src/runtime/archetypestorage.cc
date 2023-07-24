@@ -67,6 +67,8 @@ struct Visitor : public Meta::AST::Node::Visitor
     {
     }
 
+    ~Visitor() noexcept override;
+
     using Meta::AST::Node::Visitor::accept;
     void accept(const weak< const Meta::AST::Parameter >& parameter, istring name,
                 const weak< const Meta::AST::Node >& value) override
@@ -133,6 +135,10 @@ struct Visitor : public Meta::AST::Node::Visitor
         }
     }
 };
+
+Visitor::~Visitor() noexcept  // NOLINT
+{
+}
 
 class IntrospectionHint : public Meta::AST::IntrospectionHint
 {
