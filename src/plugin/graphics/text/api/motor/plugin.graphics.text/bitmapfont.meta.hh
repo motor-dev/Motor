@@ -18,7 +18,8 @@ class motor_api(TEXT) BitmapFont : public Resource::Description< BitmapFont >
 private:
     istring const            m_fontSystemName;
     weak< const File > const m_fontFile;
-published:
+
+public:
     explicit BitmapFont(const istring& fontSystemName);
     explicit BitmapFont(const weak< const File >& fontFile);
     ~BitmapFont() override;

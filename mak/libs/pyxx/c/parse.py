@@ -8,7 +8,10 @@ class CParser(glrp.Parser):
     Lexer = lexer.C89Lexer
 
     def __init__(self, logger: Logger, tmp_dir: str, mode: int = glrp.LOAD_CACHE) -> None:
+        self.logger = logger
         self.lexer = self.__class__.Lexer()
+        if self.logger:
+            self.logger.set_lexer(self.lexer)
         glrp.Parser.__init__(self, self.lexer, 'translation-unit', tmp_dir, mode)
 
 

@@ -154,7 +154,8 @@ class ClassSpecifier(TypeSpecifier):
 
 
 class MemInitializerId(object):
-    pass
+    def accept(self, visitor: Visitor) -> None:
+        raise NotImplementedError
 
 
 class MemInitializerIdMember(MemInitializerId):
@@ -174,6 +175,9 @@ class MemInitializerIdBase(MemInitializerId):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_mem_initializer_id_base(self)
 
+    def accept_base(self, visitor: Visitor) -> None:
+        self._base.accept(visitor)
+
 
 class AmbiguousMemInitializerId(MemInitializerId):
 
@@ -182,6 +186,9 @@ class AmbiguousMemInitializerId(MemInitializerId):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_ambiguous_mem_initializer_id(self)
+
+    def accept_first(self, visitor: Visitor) -> None:
+        self._mem_initializer_ids[0].accept(visitor)
 
 
 class AbstractMemberInitializer(object):
@@ -205,3 +212,10 @@ class MemberInitializer(AbstractMemberInitializer):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_member_initializer(self)
+
+    def accept_mem_initializer_id(self, visitor: Visitor) -> None:
+        self._id.accept(visitor)
+
+    def accept_value(self, visitor: Visitor) -> None:
+        if self._value is not None:
+            self._value.accept(visitor)

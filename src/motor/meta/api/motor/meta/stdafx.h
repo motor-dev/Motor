@@ -15,8 +15,7 @@
 #    define MOTOR_API_META
 #endif
 
-#define published public
-#define motor_tag(v)
+#define motor_meta(x)
 
 #ifndef MOTOR_COMPUTE
 namespace Motor {

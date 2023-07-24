@@ -1,5 +1,5 @@
 import argparse
-from .logger import Logger
+from .logger import Logger, diagnostic, warning, error
 from motor_typing import TYPE_CHECKING
 
 

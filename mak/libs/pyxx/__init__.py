@@ -73,11 +73,15 @@ def init_arguments() -> argparse.ArgumentParser:
     return argument_context
 
 
+logger = None
+
+
 def run(arguments: argparse.Namespace) -> List[Any]:
     import os
     import sys
     import logging
 
+    global logger
     logger = messages.load_arguments(arguments)
 
     ExceptionType = Exception

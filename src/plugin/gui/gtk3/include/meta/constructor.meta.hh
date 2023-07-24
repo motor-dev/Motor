@@ -13,9 +13,10 @@ struct Constructor
     Meta::Method metaMethod;
 
 public:
-    const GType type {};
+    [[motor::meta(noexport)]] const GType type {};
 
-    static Meta::Value call(raw< const Meta::Method > method, Meta::Value* params, u32 nparams);
+    [[motor::meta(noexport)]] static Meta::Value call(raw< const Meta::Method > method,
+                                                      Meta::Value* params, u32 nparams);
 };
 
 }}  // namespace Motor::Gtk3

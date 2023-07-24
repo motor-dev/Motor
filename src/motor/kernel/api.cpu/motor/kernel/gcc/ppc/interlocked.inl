@@ -17,8 +17,8 @@ struct InterlockedType< 4 >
 
     struct tagged_t
     {
-        typedef void* value_t;
-        typedef void* tag_t;
+        typedef void*    value_t;
+        typedef tagged_t tag_t;
 
         __attribute__((aligned(4))) value_t m_value;
 
@@ -177,7 +177,7 @@ InterlockedType< 4 >::value_t InterlockedType< 4 >::set_and_fetch(value_t* p, va
 
 InterlockedType< 4 >::tagged_t::tag_t InterlockedType< 4 >::get_ticket(const tagged_t& p)
 {
-    tagged_t::value_t result;
+    tagged_t result;
     __asm__ __volatile__("  lwsync\n"
                          "  lwarx %0, 0, %1\n"
                          : "=r"(result)

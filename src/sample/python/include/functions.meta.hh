@@ -9,8 +9,9 @@ namespace Motor { namespace TestCases {
 
 class Class : public minitl::refcountable
 {
-    published : i32 x1;
-    i32             y1;
+public:
+    i32 x1;
+    i32 y1;
 
     explicit Class(i32 x1 = 0, i32 y1 = 0) : x1(x1), y1(y1)
     {

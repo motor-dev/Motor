@@ -11,7 +11,7 @@ namespace Motor { namespace Gameplay {
 
 class DelayKernel;
 
-motor_tag(World::LogicComponent(motor_class< Motor::Gameplay::DelayKernel >())) struct Delay
+struct [[motor::meta(tag = LogicComponent())]] Delay
 {
     float delay;
 

@@ -28,10 +28,11 @@ private:
     minitl::vector< weak< const KernelScheduler::IProduct > > m_products;
 
 public:
-    ref< WorldRuntime > createRuntime(weak< const KernelScheduler::ProducerLoader > producerLoader,
-                                      const Plugin::Context&                        context) const;
+    [[motor::meta(noexport)]] ref< WorldRuntime > createRuntime(
+        weak< const KernelScheduler::ProducerLoader > producerLoader,
+        const Plugin::Context&                        context) const;
 
-published:
+public:
     World(const ref< ComponentRegistry >&                           registry,
           minitl::vector< weak< const KernelScheduler::IProduct > > products);
     ~World() override;

@@ -7,8 +7,6 @@
 
 namespace Motor { namespace Meta {
 
-struct Type;
-
 struct motor_api(META) ConversionCost
 {
 public:

@@ -18,7 +18,8 @@ mem-initializer-id:
 import glrp
 from typing import Any, List
 from ...parse import CxxParser, cxx98, cxx11, cxx98_merge
-from ....ast.klass import MemberInitializer, MemInitializerIdMember, MemInitializerIdBase, AmbiguousMemInitializerId, MemberInitializerError
+from ....ast.klass import MemberInitializer, MemInitializerIdMember, MemInitializerIdBase, AmbiguousMemInitializerId, \
+    MemberInitializerError
 from ....ast.expressions import ParenthesizedExpression, ErrorExpression
 
 
@@ -104,4 +105,4 @@ def mem_initializer_id(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.merge('mem-initializer-id')
 @cxx98_merge
 def ambiguous_mem_initializer_id(self: CxxParser, class_or_decltype: List[Any], mem_initializer: List[Any]) -> Any:
-    return AmbiguousMemInitializerId(class_or_decltype + mem_initializer)
+    return AmbiguousMemInitializerId(mem_initializer + class_or_decltype)

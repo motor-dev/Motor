@@ -10,13 +10,16 @@ namespace Motor { namespace Gtk3 {
 
 class Property
 {
-    published : Meta::Property metaProperty;
+public:
+    Meta::Property metaProperty;
 
 public:
-    const guint propertyId {};
+    [[motor::meta(noexport)]] const guint propertyId {};
 
-    static Meta::Value get(raw< const Meta::Property > property, const void* data);
-    static void set(raw< const Meta::Property > property, void* data, const Meta::Value& value);
+    [[motor::meta(noexport)]] static Meta::Value get(raw< const Meta::Property > property,
+                                                     const void*                 data);
+    [[motor::meta(noexport)]] static void set(raw< const Meta::Property > property, void* data,
+                                              const Meta::Value& value);
 };
 
 }}  // namespace Motor::Gtk3

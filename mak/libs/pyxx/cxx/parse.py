@@ -10,6 +10,8 @@ class CxxParser(glrp.Parser):
     def __init__(self, logger: Logger, tmp_dir: str, mode: int = glrp.LOAD_CACHE) -> None:
         self.logger = logger
         self.lexer = self.__class__.Lexer()
+        if self.logger:
+            self.logger.set_lexer(self.lexer)
         glrp.Parser.__init__(self, self.lexer, 'translation-unit', tmp_dir, mode)
 
 
@@ -121,35 +123,35 @@ def deprecated_cxx03(func: Callable[..., Any]) -> Callable[..., Any]:
 
 
 def deprecated_cxx11(
-    func: Callable[[CxxParser, glrp.Production], Any]
+        func: Callable[[CxxParser, glrp.Production], Any]
 ) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(Cxx11Parser, func.__name__, _empty_rule)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
 def deprecated_cxx14(
-    func: Callable[[CxxParser, glrp.Production], Any]
+        func: Callable[[CxxParser, glrp.Production], Any]
 ) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(Cxx14Parser, func.__name__, _empty_rule)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
 def deprecated_cxx17(
-    func: Callable[[CxxParser, glrp.Production], Any]
+        func: Callable[[CxxParser, glrp.Production], Any]
 ) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(Cxx17Parser, func.__name__, _empty_rule)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
 def deprecated_cxx20(
-    func: Callable[[CxxParser, glrp.Production], Any]
+        func: Callable[[CxxParser, glrp.Production], Any]
 ) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(Cxx20Parser, func.__name__, _empty_rule)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)
 
 
 def deprecated_cxx23(
-    func: Callable[[CxxParser, glrp.Production], Any]
+        func: Callable[[CxxParser, glrp.Production], Any]
 ) -> Callable[[glrp.Parser, glrp.Production], Any]:
     setattr(Cxx23Parser, func.__name__, _empty_rule)
     return cast(Callable[[glrp.Parser, glrp.Production], Any], func)

@@ -260,7 +260,7 @@ class TypeSpecifierSeq(object):
 
     def __init__(self, attributes: List["Attribute"]) -> None:
         self._attributes = attributes
-        self._types = []       # type: List[TypeSpecifier]
+        self._types = []  # type: List[TypeSpecifier]
         self._qualifiers = []  # type: List[CvQualifier]
 
     def add(self, type_specifier: TypeSpecifier) -> None:
@@ -272,13 +272,13 @@ class TypeSpecifierSeq(object):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_type_specifier_seq(self)
 
-    def accept_qualifiers(self, visitor: Visitor) -> None:
-        for qualifier in self._qualifiers:
-            qualifier.accept(visitor)
-
     def accept_attributes(self, visitor: Visitor) -> None:
         for attribute in self._attributes:
             attribute.accept(visitor)
+
+    def accept_qualifiers(self, visitor: Visitor) -> None:
+        for qualifier in self._qualifiers:
+            qualifier.accept(visitor)
 
     def accept_types(self, visitor: Visitor) -> None:
         for type in self._types:
@@ -390,8 +390,8 @@ class DeclaratorElementGroup(DeclaratorElement):
 class DeclaratorElementPointer(DeclaratorElement):
 
     def __init__(
-        self, next: DeclaratorElement, qualified: Optional[List[Tuple[bool, "_Id"]]], attributes: List["Attribute"],
-        qualifiers: Optional[List[CvQualifier]]
+            self, next: DeclaratorElement, qualified: Optional[List[Tuple[bool, "_Id"]]], attributes: List["Attribute"],
+            qualifiers: Optional[List[CvQualifier]]
     ) -> None:
         self._next = next
         self._attributes = attributes
@@ -486,9 +486,10 @@ class DeclaratorElementArray(DeclaratorElement):
 class DeclaratorElementMethod(DeclaratorElement):
 
     def __init__(
-        self, next: DeclaratorElement, parameter_clause: SimpleParameterClause, trailing_return_type: Optional[TypeId],
-        cv_qualifiers: List[CvQualifier], ref_qualifier: Optional[RefQualifier],
-        exception_qualifier: Optional[ExceptionSpecifier], attributes: List["Attribute"]
+            self, next: DeclaratorElement, parameter_clause: SimpleParameterClause,
+            trailing_return_type: Optional[TypeId],
+            cv_qualifiers: List[CvQualifier], ref_qualifier: Optional[RefQualifier],
+            exception_qualifier: Optional[ExceptionSpecifier], attributes: List["Attribute"]
     ) -> None:
         self._next = next
         self._attributes = attributes

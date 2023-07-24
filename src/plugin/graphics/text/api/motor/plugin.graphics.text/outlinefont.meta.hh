@@ -18,7 +18,8 @@ class motor_api(TEXT) OutlineFont : public Resource::Description< OutlineFont >
 private:
     istring const            m_fontSystemName;
     weak< const File > const m_fontFile;
-published:
+
+public:
     explicit OutlineFont(const istring& fontSystemName);
     explicit OutlineFont(const weak< const File >& fontFile);
     ~OutlineFont() override;

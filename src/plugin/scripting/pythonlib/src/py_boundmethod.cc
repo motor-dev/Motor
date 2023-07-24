@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
-#include <motor/meta/engine/methodinfo.meta.hh>
+#include <motor/meta/method.meta.hh>
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <py_boundmethod.hh>
 #include <py_call.hh>

@@ -12,8 +12,10 @@ namespace Motor {
 class motor_api(PYTHON) PythonScript : public Script< PythonScript >
 {
     friend class PackageLoader;
-published:
-    explicit PythonScript(motor_tag(EditHint::Extension(".py")) const weak< const File >& script);
+
+public:
+    explicit PythonScript(
+        [[motor::meta(EditHint::Extension(".py"))]] const weak< const File >& script);
     ~PythonScript() override;
 };
 

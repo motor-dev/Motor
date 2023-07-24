@@ -31,7 +31,7 @@ class Visitor(object):
         pass
 
     def visit_structured_binding_declaration(
-        self, structured_binding_declaration: "StructuredBindingDeclaration"
+            self, structured_binding_declaration: "StructuredBindingDeclaration"
     ) -> None:
         pass
 
@@ -78,7 +78,7 @@ class Visitor(object):
         pass
 
     def visit_ambiguous_init_declarator_list(
-        self, ambiguous_init_declarator_list: "AmbiguousInitDeclaratorList"
+            self, ambiguous_init_declarator_list: "AmbiguousInitDeclaratorList"
     ) -> None:
         pass
 
@@ -113,9 +113,6 @@ class Visitor(object):
         pass
 
     def visit_deduction_guide(self, deduction_guide: "DeductionGuide") -> None:
-        pass
-
-    def visit_declaration(self, declaration: "Declaration") -> None:
         pass
 
     def visit_function_definition(self, function_definition: "FunctionDefinition") -> None:
@@ -247,7 +244,7 @@ class Visitor(object):
     def visit_attribute_error(self, attribute_error: "AttributeError") -> None:
         pass
 
-    def visit_attribute_named(self, attribute_named: "AttributeNamed") -> None:
+    def visit_attribute_named(self, using_namespace: "Optional[str]", attribute_named: "AttributeNamed") -> None:
         pass
 
     def visit_attribute_align_as_type(self, attribute_align_as_type: "AttributeAlignAsType") -> None:
@@ -332,7 +329,7 @@ class Visitor(object):
         pass
 
     def visit_exception_declaration_type_specifier(
-        self, exception_declaration_type_specifier: "ExceptionDeclarationTypeSpecifier"
+            self, exception_declaration_type_specifier: "ExceptionDeclarationTypeSpecifier"
     ) -> None:
         pass
 
@@ -340,7 +337,7 @@ class Visitor(object):
         pass
 
     def visit_ambiguous_exception_declaration(
-        self, ambiguous_exception_declaration: "AmbiguousExceptionDeclaration"
+            self, ambiguous_exception_declaration: "AmbiguousExceptionDeclaration"
     ) -> None:
         pass
 
@@ -423,12 +420,12 @@ class Visitor(object):
         pass
 
     def visit_elaborated_class_type_specifier(
-        self, elaborated_class_type_specifier: "ElaboratedClassTypeSpecifier"
+            self, elaborated_class_type_specifier: "ElaboratedClassTypeSpecifier"
     ) -> None:
         pass
 
     def visit_elaborated_enum_type_specifier(
-        self, elaborated_enum_type_specifier: "ElaboratedEnumTypeSpecifier"
+            self, elaborated_enum_type_specifier: "ElaboratedEnumTypeSpecifier"
     ) -> None:
         pass
 
@@ -475,7 +472,7 @@ class Visitor(object):
         pass
 
     def visit_declarator_element_abstract_pack(
-        self, declarator_element_abstract_pack: "DeclaratorElementAbstractPack"
+            self, declarator_element_abstract_pack: "DeclaratorElementAbstractPack"
     ) -> None:
         pass
 
@@ -489,7 +486,7 @@ class Visitor(object):
         pass
 
     def visit_declarator_element_rvalue_reference(
-        self, declarator_element_rvalue_reference: "DeclaratorElementRValueReference"
+            self, declarator_element_rvalue_reference: "DeclaratorElementRValueReference"
     ) -> None:
         pass
 
@@ -650,7 +647,7 @@ class Visitor(object):
         pass
 
     def visit_user_defined_character_literal(
-        self, user_defined_character_literal: "UserDefinedCharacterLiteral"
+            self, user_defined_character_literal: "UserDefinedCharacterLiteral"
     ) -> None:
         pass
 
@@ -682,7 +679,7 @@ class Visitor(object):
         pass
 
     def visit_lambda_capture_default_reference(
-        self, lambda_capture_default_reference: "LambdaCaptureDefaultReference"
+            self, lambda_capture_default_reference: "LambdaCaptureDefaultReference"
     ) -> None:
         pass
 
@@ -726,7 +723,7 @@ class Visitor(object):
         pass
 
     def visit_ambiguous_template_argument_list(
-        self, ambiguous_template_argument_list: "AmbiguousTemplateArgumentList"
+            self, ambiguous_template_argument_list: "AmbiguousTemplateArgumentList"
     ) -> None:
         pass
 
@@ -743,6 +740,7 @@ class Visitor(object):
         pass
 
 
+from typing import Optional
 from .translation_unit import TranslationUnit
 from .module import (
     ModuleDeclaration,

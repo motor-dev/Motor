@@ -13,7 +13,7 @@ class FileSystemWatch;
 class motor_api(FILESYSTEM) DiskFolder : public Folder
 {
 public:
-    class Watch;
+    class [[motor::meta(export = no)]] Watch;
     friend class Watch;
 
 private:
@@ -30,7 +30,8 @@ private:
 private:
     void doRefresh(Folder::ScanPolicy scanPolicy) override;
     void onChanged() override;
-published:
+
+public:
     explicit DiskFolder(const ipath&         diskpath,
                         Folder::ScanPolicy   scanPolicy   = Folder::ScanRecursive,
                         Folder::CreatePolicy createPolicy = Folder::CreateOne);

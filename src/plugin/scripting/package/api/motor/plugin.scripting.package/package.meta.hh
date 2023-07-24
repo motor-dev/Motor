@@ -14,7 +14,8 @@ class PackageLoader;
 class motor_api(PACKAGE) Package : public Script< Package >
 {
     friend class PackageLoader;
-published:
+
+public:
     explicit Package(const weak< const File >& file);
     ~Package() override;
 };

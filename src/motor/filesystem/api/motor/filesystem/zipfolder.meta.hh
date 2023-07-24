@@ -21,9 +21,10 @@ private:
     void onChanged() override;
 
 public:
-    ZipFolder(void* handle, const ipath& path,
-              Folder::ScanPolicy scanPolicy = Folder::ScanRecursive);
-published:
+    [[motor::meta(export = no)]] ZipFolder(void* handle, const ipath& path,
+                                           Folder::ScanPolicy scanPolicy = Folder::ScanRecursive);
+
+public:
     explicit ZipFolder(const ipath& zippath, Folder::ScanPolicy scanPolicy = Folder::ScanRecursive);
     ~ZipFolder() override;
 };

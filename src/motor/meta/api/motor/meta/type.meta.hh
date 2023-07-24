@@ -5,7 +5,7 @@
 
 #include <motor/meta/stdafx.h>
 #include <motor/meta/class.meta.hh>
-#include <motor/meta/conversion.meta.hh>
+#include <motor/meta/conversioncost.hh>
 
 namespace Motor { namespace Meta {
 
@@ -51,24 +51,28 @@ struct motor_api(META) Type
         Type info = {type.metaclass, type.indirection, type.access, Constness::Const};
         return info;
     }
-    u32            size() const;
-    bool           isA(const Type& other) const;
-    ConversionCost calculateConversionTo(const Type& other) const;
-
-public:
-    template < typename T >
-    bool isA() const;
+    u32  size() const;
+    bool isA(const Type& other) const;
     bool isConst() const
     {
         return indirection == Indirection::Value ? (constness == Constness::Const)
                                                  : (access == Constness::Const);
     }
 
+public:
+    template < typename T >
+    [[motor::meta(export = no)]] bool           isA() const;
+    [[motor::meta(export = no)]] ConversionCost calculateConversionTo(const Type& other) const;
+
 private:
     void* rawget(const void*) const;
     void  copy(const void* source, void* dest) const;
     void  destroy(void* obj) const;
 };
+
+}}  // namespace Motor::Meta
+
+namespace motor_meta(export = no) Motor { namespace Meta {
 
 motor_api(META) bool         operator==(Type t1, Type t2);
 motor_api(META) bool         operator<=(Type t1, Type t2);
@@ -84,6 +88,6 @@ motor_api(META) u32
     format_arg_partial(char* destination, const Type& type, const minitl::format_options& options,
                        u32 reservedLength, u32 maxCapacity);
 
-}}  // namespace Motor::Meta
+}}  // namespace motor_meta(export=no)Motor::Meta
 
 #endif

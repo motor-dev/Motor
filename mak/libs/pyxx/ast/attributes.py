@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from glrp import Token
 from . import Visitor
 
@@ -17,13 +17,12 @@ class AttributeError(object):
 
 class AttributeNamed(object):
 
-    def __init__(self, namespace: Optional[str], attribute: str, value: Optional[List[Token]]):
+    def __init__(self, namespace: Optional[str], attribute: str, value: Optional[List[Token]],
+                 position: Tuple[int, int]):
+        self.position = position
         self._namespace = namespace
         self._attribute = attribute
         self._value = value
-
-    def accept(self, visitor: Visitor) -> None:
-        visitor.visit_attribute_named(self)
 
 
 class AttributeNamedList(Attribute):
@@ -34,6 +33,10 @@ class AttributeNamedList(Attribute):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_attribute_named_list(self)
+
+    def accept_attributes(self, visitor: Visitor) -> None:
+        for attribute in self._attributes:
+            visitor.visit_attribute_named(self._using_namespace, attribute)
 
 
 class AttributeAlignAsType(Attribute):
