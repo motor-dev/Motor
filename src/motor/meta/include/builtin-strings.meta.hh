@@ -20,7 +20,7 @@ motor_tag(Index(Motor::Meta::ClassType_String
           + (Motor::Meta::ClassIndex_inamespace << 16)))
 struct inamespace
 {
-published:
+public:
     u32 size() const;
     const istring& operator[](u32 index) const;
 
@@ -33,7 +33,7 @@ motor_tag(Index(Motor::Meta::ClassType_String
           + (Motor::Meta::ClassIndex_ifilename << 16)))
 struct ifilename
 {
-published:
+public:
     u32 size() const;
     const istring& operator[](u32 index) const;
 
@@ -46,7 +46,7 @@ motor_tag(Index(Motor::Meta::ClassType_String
           + (Motor::Meta::ClassIndex_ipath << 16)))
 struct ipath
 {
-published:
+public:
     u32 size() const;
     const istring& operator[](u32 index) const;
 
@@ -59,7 +59,7 @@ motor_tag(Index(Motor::Meta::ClassType_String
           + (Motor::Meta::ClassIndex_text << 16)))
 struct text
 {
-published:
+public:
     u32 length() const;
 };
 

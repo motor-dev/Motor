@@ -10,14 +10,14 @@
 
 namespace Motor { namespace World {
 
-class motor_api(WORLD) ComponentRegistry : published KernelScheduler::Producer
+class motor_api(WORLD) ComponentRegistry : public KernelScheduler::Producer
 {
 private:
     ref< KernelScheduler::Producer::Runtime > createRuntime(
         weak< const KernelScheduler::ProducerLoader > loader) const override;
 
 public:
-    class Runtime : public KernelScheduler::Producer::Runtime
+    class [[motor::meta(noexport)]] Runtime : public KernelScheduler::Producer::Runtime
     {
     private:
         SystemAllocator m_allocator4k;
@@ -28,12 +28,13 @@ public:
     public:
         Runtime(const ref< Task::ITask >& task, u32 parameterCount);
     };
-    weak< Runtime > getRuntime(const weak< const KernelScheduler::ProducerLoader >& loader) const;
+    [[motor::meta(noexport)]] weak< Runtime > getRuntime(
+        const weak< const KernelScheduler::ProducerLoader >& loader) const;
 
 public:
-    void addComponentStorage();
+    [[motor::meta(noexport)]] void addComponentStorage();
 
-published:
+public:
     ComponentRegistry();
     ~ComponentRegistry() override;
 };

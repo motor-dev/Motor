@@ -12,7 +12,7 @@ class Tag;
 
 class motor_api(META) Object
 {
-published:
+public:
     raw< const Object > const next;
     raw< const Tag > const    tags;
     istring const             name;

@@ -17,8 +17,8 @@ class TemplateParameter(object):
 class TemplateDeclaration(Declaration):
 
     def __init__(
-        self, attributes: List[Attribute], arguments: List[List[TemplateParameter]],
-        requires_clause: Optional["RequiresClause"], is_extern: bool, declaration: Declaration
+            self, attributes: List[Attribute], arguments: List[List[TemplateParameter]],
+            requires_clause: Optional["RequiresClause"], is_extern: bool, declaration: Declaration
     ) -> None:
         self._attributes = attributes
         self._arguments = arguments
@@ -28,6 +28,10 @@ class TemplateDeclaration(Declaration):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_template_declaration(self)
+
+    def accept_attributes(self, visitor: Visitor) -> None:
+        for attribute in self._attributes:
+            attribute.accept(visitor)
 
 
 class TemplateArgument(object):
@@ -118,8 +122,9 @@ class TemplateParameterType(TemplateParameter):
 class TemplateParameterTemplate(TemplateParameter):
 
     def __init__(
-        self, keyword: str, template_parameters: List[TemplateParameter], requires_clause: Optional["RequiresClause"],
-        name: Optional[str], default_value: Optional[Reference], is_pack: bool
+            self, keyword: str, template_parameters: List[TemplateParameter],
+            requires_clause: Optional["RequiresClause"],
+            name: Optional[str], default_value: Optional[Reference], is_pack: bool
     ) -> None:
         self._keyword = keyword
         self._template_parameters = template_parameters
@@ -144,7 +149,7 @@ class TemplateParameterConstant(TemplateParameter):
 class TemplateParameterConstraint(TemplateParameter):
 
     def __init__(
-        self, constraint: Reference, name: Optional[str], default_value: Optional[Reference], is_pack: bool
+            self, constraint: Reference, name: Optional[str], default_value: Optional[Reference], is_pack: bool
     ) -> None:
         self._constraint = constraint
         self._name = name

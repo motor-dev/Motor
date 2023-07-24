@@ -13,9 +13,10 @@
 
 namespace Motor { namespace World {
 
-class ArchetypeStorage : published KernelScheduler::Producer
+class ArchetypeStorage : public KernelScheduler::Producer
 {
-    published : struct Policy : public Meta::AST::Policy
+public:
+    struct Policy : public Meta::AST::Policy
     {
     private:
         ref< Meta::AST::IntrospectionHint > verify(Meta::AST::DbContext&           context,
@@ -34,11 +35,11 @@ private:
     ref< Runtime >
     createRuntime(weak< const KernelScheduler::ProducerLoader > loader) const override;
 
-    published
-        : motor_tag(Policy()) ArchetypeStorage(
-              const weak< ComponentRegistry >&                                    registry,
-              minitl::vector< raw< const Meta::Class > >                          componentClasses,
-              const minitl::vector< minitl::vector< raw< const Meta::Class > > >& archetypes);
+public:
+    [[motor::meta(tag = Policy())]] ArchetypeStorage(
+        const weak< ComponentRegistry >&                                    registry,
+        minitl::vector< raw< const Meta::Class > >                          componentClasses,
+        const minitl::vector< minitl::vector< raw< const Meta::Class > > >& archetypes);
     ~ArchetypeStorage() override;
 
 public:

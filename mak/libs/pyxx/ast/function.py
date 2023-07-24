@@ -7,8 +7,8 @@ from . import Visitor
 class FunctionDefinition(Declaration):
 
     def __init__(
-        self, attribute_specifier_seq, decl_specifier_seq, declarator, requires_clause, virt_specifier_seq,
-        function_body
+            self, attribute_specifier_seq, decl_specifier_seq, declarator, requires_clause, virt_specifier_seq,
+            function_body
     ):
         # type: (List[Attribute], Optional[DeclSpecifierSeq], Declarator, Optional[RequiresClause], List[VirtSpecifier], FunctionBody) -> None
         Declaration.__init__(self)
@@ -22,12 +22,27 @@ class FunctionDefinition(Declaration):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_function_definition(self)
 
+    def accept_attributes(self, visitor: Visitor) -> None:
+        for attribute in self._attributes:
+            attribute.accept(visitor)
+
     def accept_decl_specifier_seq(self, visitor: Visitor) -> None:
         if self._decl_specifier_seq is not None:
             self._decl_specifier_seq.accept(visitor)
 
     def accept_declarator(self, visitor: Visitor) -> None:
         self._declarator.accept(visitor)
+
+    def accept_requires_clause(self, visitor: Visitor) -> None:
+        if self._requires_clause is not None:
+            self._requires_clause.accept(visitor)
+
+    def accept_virt_specifier_seq(self, visitor: Visitor) -> None:
+        for virt_specifier in self._virt_specifier_seq:
+            virt_specifier.accept(visitor)
+
+    def accept_function_body(self, visitor: Visitor) -> None:
+        self._function_body.accept(visitor)
 
 
 class ParameterDeclaration(Declaration):
@@ -75,6 +90,10 @@ class SimpleParameterClause(ParameterClause):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_simple_parameter_clause(self)
 
+    def accept_parameter_list(self, visitor: Visitor) -> None:
+        for parameter in self._parameter_list:
+            parameter.accept(visitor)
+
 
 class AmbiguousParameterClause(ParameterClause):
 
@@ -98,13 +117,20 @@ class FunctionBody(object):
 
 class TryFunctionBody(object):
 
-    def __init__(self, statement_function_body, handler):
+    def __init__(self, statement_function_body, handler_list):
         # type: (StatementFunctionBody, List[ExceptionHandler]) -> None
         self._statement_function_body = statement_function_body
-        self._handler = handler
+        self._handler_list = handler_list
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_try_function_body(self)
+
+    def accept_statement_function_body(self, visitor: Visitor) -> None:
+        self._statement_function_body.accept(visitor)
+
+    def accept_handler_list(self, visitor: Visitor) -> None:
+        for handler in self._handler_list:
+            handler.accept(visitor)
 
 
 class PureVirtualFunctionBody(FunctionBody):
@@ -127,13 +153,22 @@ class DeletedFunctionBody(FunctionBody):
 
 class StatementFunctionBody(FunctionBody):
 
-    def __init__(self, constructor_initializer, statement_list):
+    def __init__(self, constructor_initializer_list, statement_list):
         # type: (Optional [List[MemberInitializer]], List[Statement]) -> None
-        self._constructor_initializer = constructor_initializer
+        self._constructor_initializer_list = constructor_initializer_list
         self._statement_list = statement_list
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_statement_function_body(self)
+
+    def accept_constructor_initializer(self, visitor: Visitor) -> None:
+        if self._constructor_initializer_list is not None:
+            for constructor_initializer in self._constructor_initializer_list:
+                constructor_initializer.accept(visitor)
+
+    def accept_statement_list(self, visitor: Visitor) -> None:
+        for statement in self._statement_list:
+            statement.accept(visitor)
 
 
 class VirtSpecifier(object):

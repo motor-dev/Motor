@@ -3,7 +3,7 @@
 
 #include <stdafx.h>
 #include <motor/meta/call.hh>
-#include <motor/meta/conversion.meta.hh>
+#include <motor/meta/conversioncost.hh>
 #include <motor/meta/interfacetable.hh>
 #include <motor/meta/method.meta.hh>
 #include <motor/meta/property.meta.hh>

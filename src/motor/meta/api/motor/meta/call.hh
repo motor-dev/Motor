@@ -4,7 +4,7 @@
 #define MOTOR_META_CALL_HH
 
 #include <motor/meta/stdafx.h>
-#include <motor/meta/conversion.meta.hh>
+#include <motor/meta/conversioncost.hh>
 #include <motor/meta/method.meta.hh>
 #include <motor/meta/value.hh>
 #include <motor/minitl/span.hh>
@@ -44,12 +44,16 @@ struct ArgInfo
 
 template < typename T >
 CallInfo getCost(raw< const Method::Overload > overload, minitl::span< u32 > argumentIndices,
-                 minitl::view< ArgInfo< T > > arguments,
-                 minitl::view< ArgInfo< T > > namedArguments)
+                 minitl::view< ArgInfo< T > > placedArguments,
+                 minitl::view< ArgInfo< T > > namedArguments, bool optionalSelf)
 {
+    const u32                    skipSelf = u32(optionalSelf & !overload->member);
+    minitl::view< ArgInfo< T > > arguments
+        = {placedArguments.begin() + skipSelf, placedArguments.end()};
     const u32 argumentCount      = arguments.size();
     const u32 namedArgumentCount = namedArguments.size();
-    CallInfo  result             = {ConversionCost::s_incompatible, overload, 0, 0};
+
+    CallInfo result = {ConversionCost::s_incompatible, overload, 0, 0};
     if(namedArgumentCount > overload->parameters.size())
     {
         /* too many arguments */
@@ -74,7 +78,7 @@ CallInfo getCost(raw< const Method::Overload > overload, minitl::span< u32 > arg
     const Method::Parameter*       p     = begin;
     for(u32 i = 0; i < placedArgumentCount; ++i, ++p)
     {
-        cost += calculateConversionTo(arguments[i].type, p->type);
+        cost += calculateConversionTo((const T&)arguments[i].type, p->type);
         if(cost >= ConversionCost::s_incompatible) return result;
     }
 
@@ -90,7 +94,8 @@ CallInfo getCost(raw< const Method::Overload > overload, minitl::span< u32 > arg
         {
             if(namedParams[j]->name == namedArguments[i].name)
             {
-                cost += calculateConversionTo(namedArguments[i].type, namedParams[j]->type);
+                cost += calculateConversionTo((const T&)namedArguments[i].type,
+                                              namedParams[j]->type);
                 found = true;
                 minitl::swap(namedParams[j], namedParams[i]);
                 argumentIndices[i] = (u32)(namedParams[i] - begin);
@@ -131,7 +136,7 @@ struct ArgumentSort
 
 template < typename T >
 CallInfo resolve(raw< const Method > method, minitl::view< ArgInfo< T > > arguments,
-                 minitl::span< ArgInfo< T > > namedArguments)
+                 minitl::span< ArgInfo< T > > namedArguments, bool optionalSelf = false)
 {
     const u32           namedArgumentCount = namedArguments.size();
     u32*                indices = (u32*)malloca(sizeof(u32) * 2 * (namedArgumentCount + 1));
@@ -143,7 +148,8 @@ CallInfo resolve(raw< const Method > method, minitl::view< ArgInfo< T > > argume
     CallInfo best      = {ConversionCost::s_incompatible, {nullptr}, 0, 0};
     for(const auto& overload: method->overloads)
     {
-        CallInfo c = getCost< T >({&overload}, indexSpans[indexTmp], arguments, namedArguments);
+        CallInfo c = getCost< T >({&overload}, indexSpans[indexTmp], arguments, namedArguments,
+                                  optionalSelf);
         if(c.conversion < best.conversion)
         {
             best = c;
@@ -162,9 +168,13 @@ CallInfo resolve(raw< const Method > method, minitl::view< ArgInfo< T > > argume
 }
 
 template < typename T >
-Value call(raw< const Method > method, CallInfo callInfo, minitl::view< ArgInfo< T > > arguments,
-           minitl::view< ArgInfo< T > > namedArguments)
+Value call(raw< const Method > method, CallInfo callInfo,
+           minitl::view< ArgInfo< T > > placedArguments,
+           minitl::view< ArgInfo< T > > namedArguments, bool optionalSelf = false)
 {
+    const u32                    skipSelf = u32(optionalSelf & !callInfo.overload->member);
+    minitl::view< ArgInfo< T > > arguments
+        = {placedArguments.begin() + skipSelf, placedArguments.end()};
     const u32 argumentCount       = arguments.size();
     const u32 namedArgumentCount  = namedArguments.size();
     const u32 totalParameterCount = callInfo.overload->parameters.size() + callInfo.variadicCount;
@@ -174,7 +184,7 @@ Value call(raw< const Method > method, CallInfo callInfo, minitl::view< ArgInfo<
     for(u32 i = 0; i < argumentCount - callInfo.variadicCount; ++i, ++p)
     {
         motor_assert(p != callInfo.overload->parameters.end(), "too many arguments passed to call");
-        convert(arguments[i].type, static_cast< void* >(&v[i]), p->type);
+        convert((const T&)arguments[i].type, static_cast< void* >(&v[i]), p->type);
     }
     u32 index = argumentCount;
     for(u32 i = 0; i < namedArgumentCount; ++i, ++p, ++index)
@@ -191,7 +201,7 @@ Value call(raw< const Method > method, CallInfo callInfo, minitl::view< ArgInfo<
                             "Argument mismatch: {0} expected, got {1}", p->name,
                             namedArguments[i].name);
         motor_assert(p != callInfo.overload->parameters.end(), "too many arguments passed to call");
-        convert(namedArguments[i].type, static_cast< void* >(&v[index]), p->type);
+        convert((const T&)namedArguments[i].type, static_cast< void* >(&v[index]), p->type);
     }
     for(; p != callInfo.overload->parameters.end(); ++p, ++index)
     {
@@ -201,7 +211,7 @@ Value call(raw< const Method > method, CallInfo callInfo, minitl::view< ArgInfo<
     }
     for(u32 i = argumentCount - callInfo.variadicCount; i < argumentCount; ++i, ++index)
     {
-        convert(namedArguments[i].type, static_cast< void* >(&v[index]), p->type);
+        convert((const T&)namedArguments[i].type, static_cast< void* >(&v[index]), p->type);
     }
     Value result = callInfo.overload->call(method, v, totalParameterCount);
     for(u32 i = totalParameterCount; i > 0; --i)

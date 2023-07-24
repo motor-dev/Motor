@@ -60,7 +60,7 @@ def check_nvcc(configuration_context, nvcc):
         source_node.write(_CUDA_SNIPPET)
         out, err = run_nvcc(
             nvcc, configuration_context.env.NVCC_CXXFLAGS +
-            ['-v', source_node.abspath(), '-o', dest_node.abspath()]
+                  ['-v', source_node.abspath(), '-o', dest_node.abspath()]
         )
         target_includes = None
         target_libs = None
@@ -100,7 +100,7 @@ def setup(configuration_context):
         toolchain = configuration_context.env.TOOLCHAIN
         for version, compiler in configuration_context.env.NVCC_COMPILERS[::-1]:
             flags = []
-            if version >= (11, ):
+            if version >= (11,):
                 flags.append('--allow-unsupported-compiler')
                 flags.append('-Wno-deprecated-gpu-targets')
             version = '.'.join(str(x) for x in version)
@@ -137,6 +137,8 @@ def setup(configuration_context):
                 v.append_value(
                     'NVCC_CXXFLAGS', ['-gencode', 'arch=compute_{0}{1},code=compute_{0}{1}'.format(*archs[-1])]
                 )
+
+                v.append_value('NVCC_CXXFLAGS', ['-diag-suppress', '2803'])
                 cuda_available = True
 
                 configuration_context.setenv(toolchain)

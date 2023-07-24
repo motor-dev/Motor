@@ -328,182 +328,49 @@ void PyMotorObject::registerType(PyObject* module)
 
 static inline void unpackArray(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    motor_assert_format(type.metaclass->type() == Meta::ClassType_Array
-                            || type.metaclass->type() == Meta::ClassType_Variant,
-                        "expected to unpack Python Array into Meta::ClassType_Array, got {0}",
-                        type.metaclass->name);
     motor_unimplemented();
     motor_forceuse(arg);
+    motor_forceuse(type);
     motor_forceuse(buffer);
 }
 
 static inline void unpackNumber(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    motor_assert_format(type.metaclass->type() == Meta::ClassType_Number
-                            || type.metaclass->type() == Meta::ClassType_Variant,
-                        "expected to unpack Python Number into Meta::ClassType_Number, got {0}",
-                        type.metaclass->name);
     unsigned long long value
         = arg->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS
               ? (unsigned long long)s_library->m_PyInt_AsUnsignedLongMask(arg)
               : (unsigned long long)s_library->m_PyLong_AsUnsignedLongLongMask(arg);
-    switch(Meta::ClassIndex_Numeric(type.metaclass->index()))
-    {
-    case Meta::ClassIndex_bool:
-    {
-        bool v = value != 0;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case Meta::ClassIndex_u8:
-    {
-        u8 v = (u8)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case Meta::ClassIndex_u16:
-    {
-        u16 v = (u16)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case Meta::ClassIndex_u32:
-    {
-        u32 v = (u32)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case Meta::ClassIndex_u64:
-    {
-        u64 v = (u64)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case Meta::ClassIndex_i8:
-    {
-        i8 v = (i8)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case Meta::ClassIndex_i16:
-    {
-        i16 v = (i16)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case Meta::ClassIndex_i32:
-    {
-        i32 v = (i32)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case Meta::ClassIndex_i64:
-    {
-        i64 v = (i64)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case Meta::ClassIndex_float:
-    {
-        auto v = (float)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case Meta::ClassIndex_double:
-    {
-        auto v = (double)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    default: motor_notreached(); new(buffer) Meta::Value(0);
-    }
+    raw< const Meta::InterfaceTable > interfaces = type.metaclass->interfaces;
+    if(interfaces->i64Interface)
+        new(buffer) Meta::Value(interfaces->i64Interface->construct(i64(value)));
+    else if(interfaces->u64Interface)
+        new(buffer) Meta::Value(interfaces->u64Interface->construct(u64(value)));
+    else if(interfaces->doubleInterface)
+        new(buffer) Meta::Value(interfaces->doubleInterface->construct(double(value)));
+    else if(interfaces->floatInterface)
+        new(buffer) Meta::Value(interfaces->floatInterface->construct(float(value)));
+    else
+        motor_notreached();
 }
 
 static inline void unpackFloat(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    motor_assert_format(type.metaclass->type() == Meta::ClassType_Number
-                            || type.metaclass->type() == Meta::ClassType_Variant,
-                        "expected to unpack Python Float into Meta::ClassType_Number, got {0}",
-                        type.metaclass->name);
-    double value = s_library->m_PyFloat_AsDouble(arg);
-    switch(type.metaclass->index())
-    {
-    case 0:
-    {
-        bool v = value != 0;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case 1:
-    {
-        u8 v = (u8)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case 2:
-    {
-        u16 v = (u16)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case 3:
-    {
-        u32 v = (u32)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case 4:
-    {
-        u64 v = (u64)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case 5:
-    {
-        i8 v = (i8)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case 6:
-    {
-        i16 v = (i16)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case 7:
-    {
-        i32 v = (i32)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case 8:
-    {
-        i64 v = (i64)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case 9:
-    {
-        auto v = (float)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    case 10:
-    {
-        auto v = (double)value;
-        new(buffer) Meta::Value(v);
-        break;
-    }
-    default: motor_notreached(); new(buffer) Meta::Value(0);
-    }
+    double                            value      = s_library->m_PyFloat_AsDouble(arg);
+    raw< const Meta::InterfaceTable > interfaces = type.metaclass->interfaces;
+    if(interfaces->doubleInterface)
+        new(buffer) Meta::Value(interfaces->doubleInterface->construct(double(value)));
+    else if(interfaces->floatInterface)
+        new(buffer) Meta::Value(interfaces->floatInterface->construct(float(value)));
+    else if(interfaces->i64Interface)
+        new(buffer) Meta::Value(interfaces->i64Interface->construct(i64(value)));
+    else if(interfaces->u64Interface)
+        new(buffer) Meta::Value(interfaces->u64Interface->construct(u64(value)));
+    else
+        motor_notreached();
 }
 
 static inline void unpackString(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    motor_assert_format(type.metaclass->type() == Meta::ClassType_String
-                            || type.metaclass->type() == Meta::ClassType_Variant,
-                        "expected to unpack Python String into Meta::ClassType_String, got {0}",
-                        type.metaclass->name);
     char*     string;
     PyObject* decodedUnicode = nullptr;
     if(arg->py_type->tp_flags & Py_TPFLAGS_UNICODE_SUBCLASS)
@@ -522,14 +389,11 @@ static inline void unpackString(PyObject* arg, const Meta::Type& type, void* buf
     {
         string = s_library->m_PyString_AsString(arg);
     }
-    switch(type.metaclass->index())
-    {
-    case 0: new(buffer) Meta::Value(istring(string)); break;
-    case 1: new(buffer) Meta::Value(inamespace(string)); break;
-    case 2: new(buffer) Meta::Value(ifilename(string)); break;
-    case 3: new(buffer) Meta::Value(ipath(string)); break;
-    default: motor_notreached(); new(buffer) Meta::Value();
-    }
+    raw< const Meta::InterfaceTable::TypeInterface< const char* > > charpInterface
+        = type.metaclass->interfaces->charpInterface;
+    motor_assert_format(charpInterface != nullptr, "type {0} is missing the string interface",
+                        type);
+    new(buffer) Meta::Value(charpInterface->construct(string));
 
     if(decodedUnicode)
     {
@@ -537,31 +401,18 @@ static inline void unpackString(PyObject* arg, const Meta::Type& type, void* buf
     }
 }
 
-static inline void unpackPod(PyObject* arg, const Meta::Type& type, void* buffer)
+static inline void unpackMap(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    motor_assert_format(type.metaclass->type() == Meta::ClassType_Pod,
-                        "expected to unpack Python Dict into Meta::ClassType_Pod, got {0}",
-                        type.metaclass->name);
-
-    auto* result = new(buffer) Meta::Value(type, Meta::Value::Reserve);
-    auto* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
-    for(raw< const Meta::Class > c = type.metaclass; c; c = c->base)
-    {
-        for(const auto& propertie: c->properties)
-        {
-            PyObject* value = s_library->m_PyDict_GetItemString(arg, propertie.name.c_str());
-
-            PyMotorObject::unpack(value, propertie.type, v);
-            propertie.set(*result, *v);
-            v->~Value();
-        }
-    }
-    freea(v);
+    motor_unimplemented();
+    motor_forceuse(arg);
+    motor_forceuse(type);
+    motor_forceuse(buffer);
 }
 
 Meta::ConversionCost PyMotorObject::distance(PyObject* object, const Meta::Type& desiredType)
 {
-    if(desiredType.metaclass->type() == Meta::ClassType_Variant)
+    raw< const Meta::InterfaceTable > interfaces = desiredType.metaclass->interfaces;
+    if(interfaces->variantInterface)
     {
         if(object->py_type == &PyMotorObject::s_pyType
            || object->py_type->tp_base == &PyMotorObject::s_pyType
@@ -580,30 +431,53 @@ Meta::ConversionCost PyMotorObject::distance(PyObject* object, const Meta::Type&
             || object->py_type->tp_base->tp_base == &PyMotorObject::s_pyType)
     {
         auto* object_ = static_cast< PyMotorObject* >(object);
-        return object_->value.type().calculateConversion(desiredType);
+        return object_->value.type().calculateConversionTo(desiredType);
     }
     else if(object->py_type == s_library->m_PyBool_Type)
     {
-        return Meta::ConversionCalculator< bool >::calculate(desiredType);
+        if(interfaces->boolInterface)
+        {
+            return Meta::ConversionCost();
+        }
+        else
+        {
+            return Meta::ConversionCost::s_incompatible;
+        }
     }
     else if(object->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS)
     {
-        return Meta::ConversionCalculator< i32 >::calculate(desiredType);
+        if(interfaces->i64Interface != nullptr || interfaces->u64Interface != nullptr)
+        {
+            return Meta::ConversionCost();
+        }
+        else if(interfaces->floatInterface != nullptr || interfaces->doubleInterface != nullptr)
+        {
+            return Meta::ConversionCost(0, 1);
+        }
+        else
+        {
+            return Meta::ConversionCost::s_incompatible;
+        }
     }
     else if(object->py_type->tp_flags & Py_TPFLAGS_LONG_SUBCLASS)
     {
-        return Meta::ConversionCalculator< i64 >::calculate(desiredType);
+        if(interfaces->i64Interface != nullptr || interfaces->u64Interface != nullptr)
+        {
+            return Meta::ConversionCost();
+        }
+        else if(interfaces->floatInterface != nullptr || interfaces->doubleInterface != nullptr)
+        {
+            return Meta::ConversionCost(0, 1);
+        }
+        else
+        {
+            return Meta::ConversionCost::s_incompatible;
+        }
     }
     else if(object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS | Py_TPFLAGS_TUPLE_SUBCLASS))
     {
-        if(desiredType.metaclass->type() == Meta::ClassType_Array)
+        if(interfaces->arrayInterface)
         {
-            motor_assert_format(desiredType.metaclass->operators,
-                                "Array type {0} does not implement operator methods",
-                                desiredType.metaclass->name);
-            motor_assert_format(desiredType.metaclass->operators->arrayOperators,
-                                "Array type {0} does not implement Array API methods",
-                                desiredType.metaclass->name);
             Type_PyTuple_Size    size = object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS)
                                             ? s_library->m_PyList_Size
                                             : s_library->m_PyTuple_Size;
@@ -612,9 +486,7 @@ Meta::ConversionCost PyMotorObject::distance(PyObject* object, const Meta::Type&
                                             : s_library->m_PyTuple_GetItem;
             if(size(object) != 0)
             {
-                raw< const Meta::ArrayOperatorTable > api
-                    = desiredType.metaclass->operators->arrayOperators;
-                const Meta::Type& subType     = api->value_type;
+                const Meta::Type& subType     = interfaces->arrayInterface->valueType;
                 PyObject*         firstObject = get(object, 0);
                 return distance(firstObject, subType);
             }
@@ -630,38 +502,23 @@ Meta::ConversionCost PyMotorObject::distance(PyObject* object, const Meta::Type&
     }
     else if(object->py_type->tp_flags & (Py_TPFLAGS_STRING_SUBCLASS | Py_TPFLAGS_UNICODE_SUBCLASS))
     {
-        return desiredType.metaclass->type() == Meta::ClassType_String
-                   ? Meta::ConversionCost()
-                   : Meta::ConversionCost::s_incompatible;
-    }
-    else if(object->py_type->tp_flags & Py_TPFLAGS_DICT_SUBCLASS)
-    {
-        if(desiredType.metaclass->type() == Meta::ClassType_Pod)
+        if(interfaces->charpInterface)
         {
-            u32 i = 0;
-            for(raw< const Meta::Class > c = desiredType.metaclass; c; c = c->base)
-            {
-                for(const auto& propertie: c->properties)
-                {
-                    PyObject* value
-                        = s_library->m_PyDict_GetItemString(object, propertie.name.c_str());
-                    if(!value)
-                    {
-                        return Meta::ConversionCost::s_incompatible;
-                    }
-                    if(distance(value, propertie.type) >= Meta::ConversionCost::s_incompatible)
-                    {
-                        return Meta::ConversionCost::s_incompatible;
-                    }
-                }
-            }
-            return i == (u32)s_library->m_PyDict_Size(object)
-                       ? Meta::ConversionCost()
-                       : Meta::ConversionCost::s_incompatible;
+            return Meta::ConversionCost();
         }
         else
         {
-            motor_unimplemented();
+            return Meta::ConversionCost::s_incompatible;
+        }
+    }
+    else if(object->py_type->tp_flags & Py_TPFLAGS_DICT_SUBCLASS)
+    {
+        if(interfaces->mapInterface)
+        {
+            return Meta::ConversionCost();
+        }
+        else
+        {
             return Meta::ConversionCost::s_incompatible;
         }
     }
@@ -673,7 +530,18 @@ Meta::ConversionCost PyMotorObject::distance(PyObject* object, const Meta::Type&
     }
     else if(object->py_type == s_library->m_PyFloat_Type)
     {
-        return Meta::ConversionCalculator< float >::calculate(desiredType);
+        if(interfaces->floatInterface != nullptr || interfaces->doubleInterface != nullptr)
+        {
+            return Meta::ConversionCost();
+        }
+        else if(interfaces->i64Interface != nullptr || interfaces->u64Interface != nullptr)
+        {
+            return Meta::ConversionCost(0, 1);
+        }
+        else
+        {
+            return Meta::ConversionCost::s_incompatible;
+        }
     }
     else
     {
@@ -683,7 +551,7 @@ Meta::ConversionCost PyMotorObject::distance(PyObject* object, const Meta::Type&
 
 void PyMotorObject::unpack(PyObject* object, const Meta::Type& desiredType, void* buffer)
 {
-    if(desiredType.metaclass->type() == Meta::ClassType_Variant)
+    if(desiredType.metaclass->interfaces->variantInterface)
     {
         unpackAny(object, buffer);
     }
@@ -710,10 +578,7 @@ void PyMotorObject::unpack(PyObject* object, const Meta::Type& desiredType, void
     }
     else if(object->py_type->tp_flags & (Py_TPFLAGS_DICT_SUBCLASS))
     {
-        if(desiredType.metaclass->type() == Meta::ClassType_Pod)
-        {
-            unpackPod(object, desiredType, buffer);
-        }
+        unpackMap(object, desiredType, buffer);
     }
     else if(object->py_type == s_library->m_PyFloat_Type)
     {
@@ -757,9 +622,10 @@ PyObject* PyMotorObject::dir(raw< const Meta::Class > metaclass)
     }
     for(raw< const Meta::Class > cls = metaclass; cls; cls = cls->base)
     {
-        for(const auto& property: cls->properties)
+        for(raw< const Meta::Property > property = cls->properties; property;
+            property                             = property->next)
         {
-            PyObject* str = fromString(property.name.c_str(), Py_ssize_t(property.name.size()));
+            PyObject* str = fromString(property->name.c_str(), Py_ssize_t(property->name.size()));
             if(!str)
             {
                 Py_DECREF(result);
@@ -773,9 +639,10 @@ PyObject* PyMotorObject::dir(raw< const Meta::Class > metaclass)
             }
             Py_DECREF(str);
         }
-        for(const auto& method: cls->methods)
+
+        for(raw< const Meta::Method > method = cls->methods; method; method = method->next)
         {
-            PyObject* str = fromString(method.name.c_str(), Py_ssize_t(method.name.size()));
+            PyObject* str = fromString(method->name.c_str(), Py_ssize_t(method->name.size()));
             if(!str)
             {
                 Py_DECREF(result);

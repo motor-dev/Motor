@@ -110,7 +110,12 @@ Meta::Value Settings_RTTIHelper< T >::trampoline_method_get_overload_0(
 
 template < typename T >
 const Meta::Method::Overload Settings_RTTIHelper< T >::s_method_get_overloads
-    = {{nullptr}, {nullptr, nullptr}, motor_type< T& >(), false, &trampoline_method_get_overload_0};
+    = {{nullptr},
+       {nullptr, nullptr},
+       motor_type< T& >(),
+       false,
+       false,
+       &trampoline_method_get_overload_0};
 
 template < typename T >
 const Meta::Method Settings_RTTIHelper< T >::s_method

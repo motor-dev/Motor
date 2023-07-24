@@ -12,7 +12,7 @@
 
 namespace Motor { namespace World {
 
-motor_tag(LogicComponent()) struct SubWorldComponent
+struct [[motor::meta(tag = LogicComponent)]] SubWorldComponent
 {
     ResourceHandle subworld;
 

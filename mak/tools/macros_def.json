@@ -1,8 +1,9 @@
 {
-    "published": "access-specifier-macro",
-    "motor_api": "attribute-specifier-macro-function",
-    "MOTOR_EXPORT": "attribute-specifier-macro",
-    "MOTOR_PLUGIN_EXPORT": "attribute-specifier-macro",
-    "motor_tag": "attribute-specifier-macro-function",
-    "__kernel": "decl-specifier-macro"
+  "published": "access-specifier-macro",
+  "motor_api": "attribute-specifier-macro-function",
+  "motor_meta": "attribute-specifier-macro-function",
+  "MOTOR_EXPORT": "attribute-specifier-macro",
+  "MOTOR_PLUGIN_EXPORT": "attribute-specifier-macro",
+  "motor_tag": "attribute-specifier-macro-function",
+  "__kernel": "decl-specifier-macro"
 }

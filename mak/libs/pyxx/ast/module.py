@@ -15,6 +15,11 @@ class ModuleDeclaration(Declaration):
         # type: (Visitor) -> None
         visitor.visit_module_declaration(self)
 
+    def accept_attributes(self, visitor):
+        # type: (Visitor) -> None
+        for attribute in self._attributes:
+            attribyte.accept(self)
+
 
 class ModuleImportDeclaration(Declaration):
 
@@ -27,6 +32,11 @@ class ModuleImportDeclaration(Declaration):
         # type: (Visitor) -> None
         visitor.visit_module_import_declaration(self)
 
+    def accept_attributes(self, visitor):
+        # type: (Visitor) -> None
+        for attribute in self._attributes:
+            attribyte.accept(self)
+
 
 class PrivateModuleFragment(Declaration):
 
@@ -37,6 +47,11 @@ class PrivateModuleFragment(Declaration):
     def accept(self, visitor):
         # type: (Visitor) -> None
         visitor.visit_private_module_fragment(self)
+
+    def accept_declarations(self, visitor):
+        # type: (Visitor) -> None
+        for decl in self._declaration_seq:
+            decl.accept(visitor)
 
 
 class ExportDeclaration(Declaration):
@@ -49,6 +64,11 @@ class ExportDeclaration(Declaration):
         # type: (Visitor) -> None
         visitor.visit_export_declaration(self)
 
+    def accept_declarations(self, visitor):
+        # type: (Visitor) -> None
+        for decl in self._declaration_seq:
+            decl.accept(visitor)
+
 
 class GlobalModuleFragment(object):
 
@@ -59,6 +79,11 @@ class GlobalModuleFragment(object):
     def accept(self, visitor):
         # type: (Visitor) -> None
         visitor.visit_global_module_fragment(self)
+
+    def accept_declarations(self, visitor):
+        # type: (Visitor) -> None
+        for decl in self._declaration_seq:
+            decl.accept(visitor)
 
 
 if TYPE_CHECKING:

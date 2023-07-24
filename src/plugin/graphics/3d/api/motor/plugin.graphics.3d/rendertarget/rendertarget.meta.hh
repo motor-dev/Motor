@@ -20,18 +20,20 @@ public:
 
 class motor_api(3D) RenderSurfaceDescription : public RenderTargetDescription
 {
-published:
+public:
     const knl::uint2 dimensions;
-published:
+
+public:
     RenderSurfaceDescription(u16 width, u16 height);
     ~RenderSurfaceDescription() override;
 };
 
 class motor_api(3D) RenderWindowDescription : public RenderTargetDescription
 {
-published:
+public:
     const istring title;
-published:
+
+public:
     explicit RenderWindowDescription(istring title);
     ~RenderWindowDescription() override;
 };

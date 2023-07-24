@@ -10,7 +10,7 @@ namespace Motor { namespace Meta {
 
 class motor_api(META) Tag
 {
-published:
+public:
     raw< const Tag > next;
     Value            tag;
 };

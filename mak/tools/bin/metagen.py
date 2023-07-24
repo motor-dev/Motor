@@ -3,21 +3,74 @@ import sys
 import re
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(sys.argv[0]))), 'libs'))
-from pyxx import ast, utils
+from pyxx import ast, utils, messages
 
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Any
 import pickle
 
 
-def get_meta_attributes(attribute_list):
-    # default attributes
-    attributes = {'export': True, 'alias': '', 'name': '', 'category': 'Object', 'type': ''}
-    return attributes
+@messages.error
+def M0000(logger: messages.Logger, position: Tuple[int, int], attribute: str) -> Dict[str, Any]:
+    """unknown attribute motor::{attribute}"""
+    return locals()
+
+
+@messages.error
+def M0001(logger: messages.Logger, position: Tuple[int, int], attribute: str) -> Dict[str, Any]:
+    """unknown meta attribute {attribute}"""
+    return locals()
+
+
+@messages.error
+def M0002(logger: messages.Logger, position: Tuple[int, int], attribute: str) -> Dict[str, Any]:
+    """trailing tokens after attribute {attribute}"""
+    return locals()
+
+
+@messages.error
+def M0003(logger: messages.Logger, position: Tuple[int, int], attribute: str) -> Dict[str, Any]:
+    """invalid value for attribute {attribute}"""
+    return locals()
+
+
+@messages.error
+def M0004(logger: messages.Logger, position: Tuple[int, int], attribute: str, object_type: str) -> Dict[str, Any]:
+    """attribute {attribute} cannot be applied on object of type {object_type}"""
+    return locals()
+
+
+@messages.error
+def M0010(logger: messages.Logger, position: Tuple[int, int], export: str) -> Dict[str, Any]:
+    """invalid value {export} for export attribute"""
+    return locals()
+
+
+@messages.warning('multiple-export-attribute', True)
+def M0011(logger: messages.Logger, position: Tuple[int, int]) -> Dict[str, Any]:
+    """multiple definitions for attribute export"""
+    return locals()
+
+
+@messages.diagnostic
+def M0012(logger: messages.Logger, position: Tuple[int, int]) -> Dict[str, Any]:
+    """previous definition here"""
+    return locals()
+
+
+class Attributes(object):
+    def __init__(self):
+        self._export = True
+        self._documentation = 'no documentation available'
+        self._interfaces = []  # type: List[str]
+        self._name = None  # type: Optional[str]
+        self._alias = []  # type: List[str]
+        self._tags = []
 
 
 class MetaObject(object):
 
-    def __init__(self, parent: Optional["MetaObject"]) -> None:
+    def __init__(self, attributes: Attributes, parent: Optional["MetaObject"]) -> None:
+        self._attributes = attributes
         self._parent = parent if parent is not None else self
         self._children = {}  # type: Dict[str, MetaObject]
         self._namespace = (parent._namespace[0][:], parent._namespace[1][:]) if parent is not None else ([], [])
@@ -83,7 +136,7 @@ class MetaObject(object):
 
 class RootNamespace(MetaObject):
     def __init__(self, file_name: str, module_name: str) -> None:
-        super().__init__(None)
+        super().__init__(Attributes(), None)
         self._file_name = file_name
         self._cpp_name = 'motor_%s_Namespace' % module_name
 
@@ -100,8 +153,8 @@ class RootNamespace(MetaObject):
 
 class Namespace(MetaObject):
 
-    def __init__(self, name: str, parent: MetaObject) -> None:
-        super().__init__(parent)
+    def __init__(self, attributes: Attributes, name: str, parent: MetaObject) -> None:
+        super().__init__(attributes, parent)
         self._name = name
         self._cpp_name = parent._cpp_name + '_' + name
         parent._children[name] = self
@@ -121,8 +174,9 @@ class Namespace(MetaObject):
 
 class Class(MetaObject):
 
-    def __init__(self, name: str, is_value_type: bool, superclass: Optional[str], parent: MetaObject) -> None:
-        super().__init__(parent)
+    def __init__(self, attributes: Attributes, name: str, is_value_type: bool, superclass: Optional[str],
+                 parent: MetaObject) -> None:
+        super().__init__(attributes, parent)
         self._name = name
         parent._children[name] = self
         self._superclass = superclass if superclass is not None else 'void'
@@ -234,9 +288,26 @@ class Class(MetaObject):
 
 
 class Enum(Class):
+    def __init__(self, attributes: Attributes, name: str, parent: MetaObject) -> None:
+        super().__init__(attributes, name, True, None, parent)
 
-    def __init__(self, name: str, parent: MetaObject) -> None:
-        super().__init__(name, True, None, parent)
+
+class Method(MetaObject):
+    def __init__(self, attributes: Attributes, name: str, parent: MetaObject):
+        super().__init__(attributes, parent)
+        self._name = name
+
+
+class Variable(MetaObject):
+    def __init__(self, attributes: Attributes, name: str, parent: MetaObject):
+        super().__init__(attributes, parent)
+        self._name = name
+
+
+class TypeDef(MetaObject):
+    def __init__(self, attributes: Attributes, name: str, parent: MetaObject):
+        super().__init__(attributes, parent)
+        self._name = name
 
 
 class BaseClauseVisitor(ast.Visitor):
@@ -274,6 +345,149 @@ class BaseClauseVisitor(ast.Visitor):
         self._is_public = False
 
 
+class AttributeParser(ast.Visitor):
+    def __init__(self, object_type: str):
+        self._attributes = Attributes()
+        self._export_position = None
+        self._object_type = object_type
+
+    def parse_meta_attributes(self, tokens):
+        tokens = tokens[:]
+
+        def skip(tokens):
+            depth = 0
+            while tokens:
+                token = tokens.pop(0).text()
+                if token == ',' and depth == 0:
+                    break
+                elif token in ('(', '[', '{'):
+                    depth += 1
+                elif token in (')', ']', '}'):
+                    depth -= 1
+
+        while tokens:
+            attribute_token = tokens.pop(0)
+            attribute = attribute_token.text()
+            if attribute == 'noexport':
+                if self._export_position is not None:
+                    if (M0011(pyxx.logger, attribute_token.position)):
+                        M0012(pyxx.logger, self._export_position)
+                self._attributes._export = False
+                self._export_position = attribute_token.position
+            elif attribute == 'export':
+                if self._export_position is not None:
+                    if (M0011(pyxx.logger, attribute_token.position)):
+                        M0012(pyxx.logger, self._export_position)
+                self._export_position = attribute_token.position
+                if len(tokens) > 1 and tokens[0].text() == '=':
+                    tokens.pop(0)
+                    export_token = tokens.pop(0)
+                    export = export_token.text()
+                    if export in ('yes', 'true', '1'):
+                        self._attributes._export = True
+                    elif export in ('no', 'false', '0'):
+                        self._attributes._export = False
+                    else:
+                        M0010(pyxx.logger, export_token._lexer, export_token.position, export)
+                else:
+                    self._attributes._export = True
+            elif attribute == 'name':
+                if len(tokens) < 2 or tokens[0].text() != '=':
+                    M0003(pyxx.logger, attribute_token.position, attribute)
+                    skip(tokens)
+                else:
+                    tokens.pop(0)
+                    self._attributes._name = tokens.pop(0).text()
+            elif attribute == 'alias':
+                if len(tokens) < 2 or tokens[0].text() != '=':
+                    M0003(pyxx.logger, attribute_token.position, attribute)
+                    skip(tokens)
+                else:
+                    tokens.pop(0)
+                    self._attributes._alias.append(tokens.pop(0).text())
+            elif attribute == 'tag':
+                if self._object_type == 'namespace':
+                    M0004(pyxx.logger, attribute_token.position, attribute, self._object_type)
+                    skip(tokens)
+                elif len(tokens) < 2 or tokens[0].text() != '=':
+                    M0003(pyxx.logger, attribute_token.position, attribute)
+                    skip(tokens)
+                else:
+                    tokens.pop(0)
+                    tag = []
+                    self._attributes._tags.append(tag)
+                    depth = 0
+                    while tokens:
+                        token = tokens[0].text()
+                        if token == ',' and depth == 0:
+                            break
+                        tag.append(tokens.pop(0))
+                        if token in ('(', '[', '{'):
+                            depth += 1
+                        elif token in (')', ']', '}'):
+                            depth -= 1
+            elif attribute == 'interface':
+                if self._object_type != 'struct':
+                    M0004(pyxx.logger, attribute_token.position, attribute, self._object_type)
+                    skip(tokens)
+                elif len(tokens) < 2 or tokens[0].text() != '=':
+                    M0003(pyxx.logger, attribute_token.position, attribute)
+                    skip(tokens)
+                else:
+                    tokens.pop(0)
+                    self._attributes._interfaces.append(tokens.pop(0).text())
+
+            else:
+                M0001(pyxx.logger, attribute_token.position, attribute)
+                skip(tokens)
+            if tokens:
+                if tokens[0].text() == ',':
+                    tokens.pop(0)
+                    continue
+                else:
+                    M0002(pyxx.logger, tokens[0].position, attribute)
+                    skip(tokens)
+
+    def visit_attribute_named_list(self, attribute_named_list: ast.AttributeNamedList) -> None:
+        attribute_named_list.accept_attributes(self)
+
+    def visit_attribute_named(self, using_namespace: Optional[str], attribute_named: ast.AttributeNamed) -> None:
+        if using_namespace != 'motor' and attribute_named._namespace != 'motor':
+            return
+        if attribute_named._attribute != 'meta':
+            M0000(pyxx.logger, attribute_named.position, attribute_named._attribute)
+            return
+        if attribute_named._value is None:
+            return
+        self.parse_meta_attributes(attribute_named._value)
+
+    def visit_attribute_macro(self, attribute_macro: ast.AttributeMacro) -> None:
+        if attribute_macro._attribute != 'motor_meta':
+            return
+        if attribute_macro._values:
+            if attribute_macro._values[0].text() == '(':
+                self.parse_meta_attributes(attribute_macro._values[1:-1])
+            else:
+                self.parse_meta_attributes(attribute_macro._values)
+
+
+class DeclarationVisitor(ast.Visitor):
+    def __init__(self, attributes: Attributes, namespace: MetaObject):
+        super().__init__()
+        self._attributes = attributes
+        self._namespace = namespace
+
+    def visit_decl_specifier_seq(self, decl_specifier_seq: ast.DeclSpecifierSeq) -> None:
+        decl_specifier_seq.accept_decl_specifiers(self)
+
+    def visit_declaration_specifier(self, declaration_specifier: ast.DeclarationSpecifier) -> None:
+        pass
+
+    def visit_storage_class_specifier(self, storage_class_specifier: ast.StorageClassSpecifier) -> None:
+        # print(storage_class_specifier._decl_specifier)
+        pass
+
+
 class Explorer(ast.Visitor):
 
     def __init__(self, file_name: str, module_name: str) -> None:
@@ -285,29 +499,33 @@ class Explorer(ast.Visitor):
 
     def visit_namespace_declaration(self, namespace_declaration: ast.NamespaceDeclaration) -> None:
         if namespace_declaration._namespace_name is not None:
-            namespace = self._namespace
-            for _, name in namespace_declaration._nested_name:
+            attribute_parser = AttributeParser('namespace')
+            namespace_declaration.accept_attributes(attribute_parser)
+            if attribute_parser._attributes._export:
+                namespace = self._namespace
+                for _, name in namespace_declaration._nested_name:
+                    try:
+                        self._namespace = self._namespace._children[name]
+                    except KeyError:
+                        self._namespace = Namespace(Attributes(name), name, self._namespace)
                 try:
-                    self._namespace = self._namespace._children[name]
+                    self._namespace = self._namespace._children[namespace_declaration._namespace_name]
                 except KeyError:
-                    self._namespace = Namespace(name, self._namespace)
-            try:
-                self._namespace = self._namespace._children[namespace_declaration._namespace_name]
-            except KeyError:
-                self._namespace = Namespace(namespace_declaration._namespace_name, self._namespace)
-            namespace_declaration.accept_children(self)
-            self._namespace = namespace
+                    self._namespace = Namespace(attribute_parser._attributes, namespace_declaration._namespace_name,
+                                                self._namespace)
+                namespace_declaration.accept_children(self)
+                self._namespace = namespace
 
     def visit_ambiguous_declaration(self, ambiguous_declaration):
         # type: (ast.AmbiguousDeclaration) -> None
         ambiguous_declaration.accept_first(self)
 
-    def visit_simple_declaration(self, simple_declaration):
-        # look for class definitions in the decl-specifier-seq
-        simple_declaration.accept_decl_specifier_seq(self)
-
-        # also export declaration itself, if necessary
-        # TODO
+    def visit_simple_declaration(self, simple_declaration: ast.SimpleDeclaration):
+        attribute_parser = AttributeParser('declaration')
+        simple_declaration.accept_attributes(attribute_parser)
+        if attribute_parser._attributes._export:
+            # look for class definitions in the decl-specifier-seq
+            simple_declaration.accept_decl_specifier_seq(self)
 
     def visit_decl_specifier_seq(self, decl_specifier_seq):
         # type: (ast.DeclSpecifierSeq) -> None
@@ -322,60 +540,72 @@ class Explorer(ast.Visitor):
     def visit_class_specifier(self, class_specifier):
         # type: (ast.ClassSpecifier) -> None
         if class_specifier._name is not None:
-            base_clause_visitor = BaseClauseVisitor(class_specifier._class_type != 'class')
-            class_specifier.accept_base_clause(base_clause_visitor)
-            namespace = self._namespace
-            for name in class_specifier._name._name_list[:-1]:
+            attributes_parser = AttributeParser('struct')
+            class_specifier.accept_attributes(attributes_parser)
+            if attributes_parser._attributes._export:
+                base_clause_visitor = BaseClauseVisitor(class_specifier._class_type != 'class')
+                class_specifier.accept_base_clause(base_clause_visitor)
+                namespace = self._namespace
+                for name in class_specifier._name._name_list[:-1]:
+                    sr = utils.StringRef()
+                    name.accept(sr)
+                    try:
+                        self._namespace = self._namespace._children[sr.result]
+                    except KeyError:
+                        self._namespace = Namespace(sr.result, self._namespace)
                 sr = utils.StringRef()
-                name.accept(sr)
+                class_specifier._name._name_list[-1].accept(sr)
                 try:
                     self._namespace = self._namespace._children[sr.result]
                 except KeyError:
-                    self._namespace = Namespace(sr.result, self._namespace)
-            sr = utils.StringRef()
-            class_specifier._name._name_list[-1].accept(sr)
-            try:
-                self._namespace = self._namespace._children[sr.result]
-            except KeyError:
-                self._namespace = Class(sr.result, class_specifier._class_type != 'class',
-                                        base_clause_visitor.base_clause, self._namespace)
-            self._access_specifier.append(
-                class_specifier._class_type in ('struct', 'union') and 'published' or 'private')
-            class_specifier.accept_members(self)
-            self._access_specifier.pop(-1)
-            self._namespace = namespace
+                    self._namespace = Class(attributes_parser._attributes, sr.result,
+                                            class_specifier._class_type != 'class',
+                                            base_clause_visitor.base_clause, self._namespace)
+                self._access_specifier.append(
+                    class_specifier._class_type in ('struct', 'union') and 'public' or 'private')
+                class_specifier.accept_members(self)
+                self._access_specifier.pop(-1)
+                self._namespace = namespace
 
     def visit_enum_specifier(self, enum_specifier):
         # type: (ast.EnumSpecifier) -> None
         if enum_specifier._name is not None:
-            namespace = self._namespace
-            for name in enum_specifier._name._name_list[:-1]:
+            attributes_parser = AttributeParser('enum')
+            enum_specifier.accept_attributes(attributes_parser)
+            if attributes_parser._attributes._export:
+                namespace = self._namespace
+                for name in enum_specifier._name._name_list[:-1]:
+                    sr = utils.StringRef()
+                    name.accept(sr)
+                    try:
+                        self._namespace = self._namespace._children[sr.result]
+                    except KeyError:
+                        self._namespace = Namespace(sr.result, self._namespace)
                 sr = utils.StringRef()
-                name.accept(sr)
+                enum_specifier._name._name_list[-1].accept(sr)
                 try:
                     self._namespace = self._namespace._children[sr.result]
                 except KeyError:
-                    self._namespace = Namespace(sr.result, self._namespace)
-            sr = utils.StringRef()
-            enum_specifier._name._name_list[-1].accept(sr)
-            try:
-                self._namespace = self._namespace._children[sr.result]
-            except KeyError:
-                self._namespace = Enum(sr.result, self._namespace)
-            self._namespace = namespace
+                    self._namespace = Enum(attributes_parser._attributes, sr.result, self._namespace)
+                self._namespace = namespace
 
     def visit_member_declaration(self, access_specifier, declaration):
         # type: (ast.AccessSpecifier, ast.Declaration) -> None
         access_specifier.accept(self)
-        if self._access_specifier[-1] == 'published':
+        if self._access_specifier[-1] == 'public':
             declaration.accept(self)
 
     def visit_function_definition(self, function_definition):
         # type: (ast.FunctionDefinition) -> None
-        # look for class definitions in the decl-specifier-seq
-        function_definition.accept_decl_specifier_seq(self)
-        # also export declaration itself, if necessary
-        # TODO
+        attributes_parser = AttributeParser('method')
+        function_definition.accept_attributes(attributes_parser)
+        if attributes_parser._attributes._export:
+            # look for class definitions in the decl-specifier-seq
+            function_definition.accept_decl_specifier_seq(self)
+
+            # also export declaration itself
+            visitor = DeclarationVisitor(attributes_parser._attributes, self._namespace)
+            function_definition.accept_decl_specifier_seq(visitor)
 
     def visit_access_specifier_default(self, access_specifier: ast.AccessSpecifierDefault) -> None:
         # leave default
@@ -438,21 +668,25 @@ if __name__ == '__main__':
     explorer = Explorer(file_name, arguments.module)
     results[0].accept(explorer)
 
-    with open(arguments.out, 'w') as out:
-        out.write('#include <motor/meta/typeinfo.hh>\n'
-                  '#include "%s"\n'
-                  '#include <motor/meta/object.meta.hh>\n'
-                  '#include <motor/meta/value.hh>\n'
-                  '#include <motor/meta/interfacetable.hh>\n'
-                  '%s\n\n' % (arguments.in_relative, '\n'.join('#include %s' % i for i in results[0]._included_files)))
-        explorer._namespace.write_declarations([], out)
-        explorer._namespace.write_metaclasses([], out)
+    if pyxx.logger._error_count:
+        sys.exit(pyxx.logger._error_count)
+    else:
+        with open(arguments.out, 'w') as out:
+            out.write('#include <motor/meta/typeinfo.hh>\n'
+                      '#include "%s"\n'
+                      '#include <motor/meta/object.meta.hh>\n'
+                      '#include <motor/meta/value.hh>\n'
+                      '#include <motor/meta/interfacetable.hh>\n'
+                      '%s\n\n' % (
+                          arguments.in_relative, '\n'.join('#include %s' % i for i in results[0]._included_files)))
+            explorer._namespace.write_declarations([], out)
+            explorer._namespace.write_metaclasses([], out)
 
-    with open(arguments.doc, 'w') as doc:
-        pass
+        with open(arguments.doc, 'w') as doc:
+            pass
 
-    with open(arguments.class_exports, 'wb') as class_exports:
-        with open(arguments.namespace_exports, 'wb') as namespace_exports:
-            pickle.dump((arguments.module, arguments.root, arguments.in_relative), class_exports)
-            pickle.dump((arguments.module, arguments.root, arguments.in_relative), namespace_exports)
-            explorer._namespace.dump_exports([], class_exports, namespace_exports)
+        with open(arguments.class_exports, 'wb') as class_exports:
+            with open(arguments.namespace_exports, 'wb') as namespace_exports:
+                pickle.dump((arguments.module, arguments.root, arguments.in_relative), class_exports)
+                pickle.dump((arguments.module, arguments.root, arguments.in_relative), namespace_exports)
+                explorer._namespace.dump_exports([], class_exports, namespace_exports)

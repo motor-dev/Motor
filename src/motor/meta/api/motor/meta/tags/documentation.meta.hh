@@ -9,12 +9,15 @@ namespace Motor { namespace Meta {
 
 struct motor_api(META) Documentation
 {
-public:
+private:
     u64       size;
     const u8* bytes;
-published:
+
+public:
     Documentation(u64 size, const u8* gzipBytes) : size(size), bytes(gzipBytes)
     {
+        motor_forceuse(this->size);
+        motor_forceuse(this->bytes);
     }
 };
 

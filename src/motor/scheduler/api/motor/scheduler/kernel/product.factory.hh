@@ -71,11 +71,8 @@ struct ClassID< KernelScheduler::Product< T > >
 
 template < typename T >
 const Meta::Method::Overload ClassID< KernelScheduler::Product< T > >::s_ctrOverload
-    = {{nullptr},
-       {nullptr, nullptr},
-       motor_type< ref< KernelScheduler::Product< T > > >(),
-       false,
-       &construct};
+    = {{nullptr}, {nullptr, nullptr}, motor_type< ref< KernelScheduler::Product< T > > >(), false,
+       false,     &construct};
 
 template < typename T >
 const Meta::Method ClassID< KernelScheduler::Product< T > >::s_ctr

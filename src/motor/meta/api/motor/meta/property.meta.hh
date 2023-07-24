@@ -16,7 +16,8 @@ class motor_api(META) Property
     friend class Value;
     typedef Value (*Getter)(raw< const Property > property, void* data);
     typedef void (*Setter)(raw< const Property > property, void* data, const Value& value);
-published:
+
+public:
     raw< const Property > next;
     raw< const Tag >      tags;
     istring const         name;
@@ -30,8 +31,8 @@ published:
     Value getTag(raw< const Class > tagType) const;
 
 public:
-    const Getter getter;
-    const Setter setter;
+    [[motor::meta(export = no)]] const Getter getter;
+    [[motor::meta(export = no)]] const Setter setter;
 };
 
 }}  // namespace Motor::Meta

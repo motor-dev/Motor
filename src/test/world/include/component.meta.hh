@@ -8,13 +8,9 @@
 
 namespace Motor { namespace Test { namespace World {
 
-motor_tag(Motor::World::LogicComponent()) struct Component
-{
-};
+struct [[motor::meta(tag = LogicComponent())]] Component {};
 
-motor_tag(Motor::World::LogicComponent()) struct Component2
-{
-};
+struct [[motor::meta(tag = LogicComponent())]] Component2 {};
 
 }}}  // namespace Motor::Test::World
 

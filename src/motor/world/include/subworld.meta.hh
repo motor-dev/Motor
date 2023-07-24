@@ -10,7 +10,7 @@ namespace Motor { namespace World {
 
 class motor_api(WORLD) SubWorld : public Resource::Description< SubWorld >
 {
-published:
+public:
     SubWorld();
     ~SubWorld() override;
 };

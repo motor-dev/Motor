@@ -8,61 +8,66 @@ T = TypeVar('T', bound='Callable[..., Dict[str, Any]]')
 
 
 def diagnostic(func: T) -> T:
-
     def call(
-        self: 'Logger', lexer: glrp.Lexer, position: Tuple[int, int], *args: Union[str, int], **kw_args: Union[str, int]
+            self: 'Logger', position: Tuple[int, int], *args: Union[str, int],
+            **kw_args: Union[str, int]
     ) -> None:
         if call in self._expected_diagnostics:
             self._expected_diagnostics.remove(cast(T, call))
-        format_values = func(self, lexer, position, *args, **kw_args)
+        format_values = func(self, position, *args, **kw_args)
         message = getattr(self.LANG, func.__name__, func.__doc__)
         assert isinstance(message, str)
-        self._msg_position('note', lexer, position, message.format(**format_values))
+        self._msg_position('note', position, message.format(**format_values))
 
+    setattr(Logger, func.__name__, call)
     return cast(T, call)
 
 
 def warning(flag_name: str, enabled: bool = False, enabled_in: List[str] = []) -> Callable[[T], T]:
-
     def inner(func: T) -> T:
 
         def call(
-            self: 'Logger', lexer: glrp.Lexer, position: Tuple[int, int], *args: Union[str, int], **kw_args: Union[str,
-                                                                                                                   int]
-        ) -> None:
+                self: 'Logger', position: Tuple[int, int], *args: Union[str, int],
+                **kw_args: Union[str,
+                int]
+        ) -> bool:
             if not getattr(self._arguments, flag_name):
-                return
-            format_values = func(self, lexer, position, *args, **kw_args)
+                return False
+            format_values = func(self, position, *args, **kw_args)
             self._warning_count += 1
             if self._warning_count == 1 and self._arguments.warn_error:
-                self.C0002(lexer, position)
+                self.C0002(position)
             message = getattr(self.LANG, func.__name__, func.__doc__)
             assert isinstance(message, str)
             self._msg_position(
-                'warning', lexer, position,
+                'warning', position,
                 message.format(**format_values) + ' [-W{}]'.format(flag_name)
             )
+            return True
 
         setattr(call, 'flag_name', flag_name)
+        setattr(call, 'enabled', enabled)
         setattr(call, 'enabled_in', enabled_in)
 
+        setattr(Logger, func.__name__, call)
         return cast(T, call)
 
     return inner
 
 
 def error(func: T) -> T:
-
     def call(
-        self: 'Logger', lexer: glrp.Lexer, position: Tuple[int, int], *args: Union[str, int], **kw_args: Union[str, int]
+            self: 'Logger', position: Tuple[int, int], *args: Union[str, int],
+            **kw_args: Union[str, int]
     ) -> None:
         self._error_count += 1
-        format_values = func(self, lexer, position, *args, **kw_args)
+        format_values = func(self, position, *args, **kw_args)
         message = getattr(self.LANG, func.__name__, func.__doc__)
         assert isinstance(message, str)
-        self._msg_position('error', lexer, position, message.format(**format_values))
+        self._msg_position('error', position, message.format(**format_values))
 
     call.__name__ = func.__name__
+    setattr(Logger, func.__name__, call)
     return cast(T, call)
 
 
@@ -94,18 +99,23 @@ class Logger(glrp.Logger):
         for m in self.__dict__.values():
             flag = getattr(m, 'flag_name', None)
             if flag is not None:
-                group.add_argument('-W{}'.format(flag), dest=flag, help=argparse.SUPPRESS, action='store_true')
+                group.add_argument('-W{}'.format(flag), dest=flag, help=argparse.SUPPRESS, action='store_true',
+                                   default=getattr(m, 'enabled'))
                 group.add_argument('-Wno-{}'.format(flag), dest=flag, help=argparse.SUPPRESS, action='store_false')
 
     def __init__(self, arguments: argparse.Namespace) -> None:
         glrp.Logger.__init__(self, io.open(sys.stderr.fileno(), 'w', encoding='utf-8', closefd=False))
+        self._lexer = None
         self._arguments = arguments
         self._warning_count = 0
         self._error_count = 0
         self._diagnostics_format = Logger.IDE_FORMAT[getattr(arguments, 'diagnostics_format')]
-        self._expected_diagnostics = [] # type: List[Callable[..., Dict[str, Any]]]
+        self._expected_diagnostics = []  # type: List[Callable[..., Dict[str, Any]]]
 
-    def _msg_position(self, error_type: str, lexer: glrp.Lexer, position: Tuple[int, int], message: str) -> None:
+    def set_lexer(self, lexer: glrp.Lexer):
+        self._lexer = lexer
+
+    def _msg_position(self, error_type: str, position: Tuple[int, int], message: str) -> None:
         if self._error_color:
             (color_error_type, color_filename, color_message, color_caret,
              color_off) = self.COLOR_PATTERN.get(error_type, self.DEFAULT_COLOR_PATTERN)
@@ -116,8 +126,8 @@ class Logger(glrp.Logger):
             color_caret = ''
             color_off = ''
 
-        filename, (line, column), (end_line, end_column) = lexer.text_position(position)
-        context = lexer.context(position)
+        filename, (line, column), (end_line, end_column) = self._lexer.text_position(position)
+        context = self._lexer.context(position)
 
         self._out_file.write(self._diagnostics_format.format(**locals()))
         if len(context) == 1:
@@ -143,20 +153,20 @@ class Logger(glrp.Logger):
         self._expected_diagnostics = []
         return result
 
-    @error
-    def C0000(self, lexer: glrp.Lexer, position: Tuple[int, int], token: str) -> Dict[str, Any]:
-        """syntax error at token '{token}'"""
-        return locals()
 
-    @error
-    def C0001(self, lexer: glrp.Lexer, position: Tuple[int, int], token: str, current_rules: str) -> Dict[str, Any]:
-        """syntax error at token '{token}' when trying to parse {current_rules}"""
-        return locals()
-
-    @error
-    def C0002(self, lexer: glrp.Lexer, position: Tuple[int, int]) -> Dict[str, Any]:
-        """warning treated as error"""
-        return locals()
+@error
+def C0000(self, position: Tuple[int, int], token: str) -> Dict[str, Any]:
+    """syntax error at token '{token}'"""
+    return locals()
 
 
-logger = None
+@error
+def C0001(self, position: Tuple[int, int], token: str, current_rules: str) -> Dict[str, Any]:
+    """syntax error at token '{token}' when trying to parse {current_rules}"""
+    return locals()
+
+
+@error
+def C0002(self, position: Tuple[int, int]) -> Dict[str, Any]:
+    """warning treated as error"""
+    return locals()

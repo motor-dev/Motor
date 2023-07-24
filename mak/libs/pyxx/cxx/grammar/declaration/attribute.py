@@ -87,13 +87,13 @@ def attribute_specifier_documentation(self: CxxParser, p: glrp.Production) -> An
 @glrp.rule('attribute-specifier : [prec:left,1]"attribute-specifier-macro"')
 @cxx98
 def attribute_specifier_macro(self: CxxParser, p: glrp.Production) -> Any:
-    return AttributeMacro(p[0], None)
+    return AttributeMacro(p[0].text(), None)
 
 
 @glrp.rule('attribute-specifier : [prec:left,1]"attribute-specifier-macro-function" "(" balanced-token-seq? ")"')
 @cxx98
 def attribute_specifier_macro_function(self: CxxParser, p: glrp.Production) -> Any:
-    return AttributeMacro(p[0], p[2])
+    return AttributeMacro(p[0].text(), p[2])
 
 
 @glrp.rule('attribute-specifier : [prec:left,1]"[[" attribute-using-prefix? attribute-list "]" "]"')
@@ -185,7 +185,7 @@ def attribute_list_pack_expand_cxx11(self: CxxParser, p: glrp.Production) -> Any
 @glrp.rule('attribute : attribute-token attribute-argument-clause?')
 @cxx11
 def attribute_cxx11(self: CxxParser, p: glrp.Production) -> Any:
-    return AttributeNamed(p[0][0], p[0][1], p[1])
+    return AttributeNamed(p[0][0], p[0][1], p[1], p[0][2])
 
 
 @glrp.rule('attribute? : ')
@@ -197,7 +197,7 @@ def attribute_opt_empty_cxx11(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.rule('attribute-token : "identifier"')
 @cxx11
 def attribute_token_cxx11(self: CxxParser, p: glrp.Production) -> Any:
-    return (None, p[0].value)
+    return (None, p[0].value, p[0].position)
 
 
 @glrp.rule('attribute-token : attribute-scoped-token')
@@ -209,7 +209,7 @@ def attribute_token_scoped_cxx11(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.rule('attribute-scoped-token : attribute-namespace "::" "identifier"')
 @cxx11
 def attribute_scoped_token_cxx11(self: CxxParser, p: glrp.Production) -> Any:
-    return (p[0], p[2].value)
+    return (p[0], p[2].value, p[2].position)
 
 
 @glrp.rule('attribute-namespace : "identifier"')
@@ -328,7 +328,7 @@ def balanced_token_seq_opt(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.rule('balanced-token : "~"')
 @glrp.rule('balanced-token : "^"')
 @glrp.rule('balanced-token : "<<"')
-#@glrp.rule('balanced-token : ">>"')
+# @glrp.rule('balanced-token : ">>"')
 @glrp.rule('balanced-token : "%>"')
 @glrp.rule('balanced-token : "||"')
 @glrp.rule('balanced-token : "&&"')
@@ -444,7 +444,7 @@ def ambiguous_alignment_specifier(self: CxxParser, type_id: List[Any], expressio
 @glrp.merge('alignment-specifier')
 @cxx11_merge
 def ambiguous_alignment_specifier_ellipsis(
-    self: CxxParser, end_declarator_list: List[Any], continue_declarator_list: List[Any]
+        self: CxxParser, end_declarator_list: List[Any], continue_declarator_list: List[Any]
 ) -> Any:
     # "..."
     assert len(end_declarator_list) == 1

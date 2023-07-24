@@ -20,7 +20,7 @@ protected:
     bool                                                      m_upToDate;
 
 public:
-    class Watch : public minitl::refcountable
+    class [[motor::meta(export = no)]] Watch : public minitl::refcountable
     {
     private:
         weak< Folder > m_folder;
@@ -36,7 +36,8 @@ public:
 protected:
     Folder();
     ~Folder() override;
-published:
+
+public:
     enum CreatePolicy
     {
         CreateNone,
@@ -59,7 +60,8 @@ protected:
     weak< File >   openFileNoLock(ifilename name);
     weak< Folder > openFolderNoLock(istring name);
     weak< Folder > openFolderNoLock(ipath name);
-published:
+
+public:
     weak< File >   openFile(istring name);
     weak< File >   openFile(const ifilename& name);
     weak< Folder > openFolder(istring name);

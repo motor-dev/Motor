@@ -10,8 +10,11 @@ namespace Motor { namespace Float { namespace Float4 {
 
 class Constant : public Shaders::Float4
 {
-    published : const knl::float4 value;
-    published : explicit Constant(knl::float4 value);
+public:
+    const knl::float4 value;
+
+public:
+    explicit Constant(knl::float4 value);
     ~Constant() override;
 
 private:
@@ -23,8 +26,11 @@ private:
 
 class Uniform : public Shaders::Float4
 {
-    published : const istring name;
-    published : explicit Uniform(istring name);
+public:
+    const istring name;
+
+public:
+    explicit Uniform(istring name);
     ~Uniform() override;
 
 private:
@@ -36,7 +42,8 @@ private:
 
 class Varying : public Shaders::Float4
 {
-    published : Varying();
+public:
+    Varying();
     ~Varying() override;
 
 private:
