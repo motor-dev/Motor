@@ -308,7 +308,7 @@ class CLion(cmake.CMake):
                             '    <option name="ADD_CONTENT_ROOTS" value="true" />\n'
                             '    <option name="ADD_SOURCE_ROOTS" value="true" />\n'
                             '    <option name="SCRIPT_NAME" value="%(waf)s" />\n'
-                            '    <option name="PARAMETERS" value="build:%(toolchain)s:%(variant)s %(arg)s" />\n'
+                            '    <option name="PARAMETERS" value="build:%(toolchain)s:%(variant)s --werror %(arg)s" />\n'
                             '    <option name="SHOW_COMMAND_LINE" value="false" />\n'
                             '    <option name="EMULATE_TERMINAL" value="false" />\n'
                             '    <option name="MODULE_MODE" value="false" />\n'

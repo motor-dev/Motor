@@ -61,8 +61,10 @@ def write_cmake_workspace(build_context, build_options=[]):
                     'SYSTEM': env.SYSTEM_NAME,
                     'COMPILER_C_FLAGS': ' '.join(env.COMPILER_C_FLAGS),
                     'COMPILER_CXX_FLAGS': ' '.join(env.COMPILER_CXX_FLAGS),
-                    'COMPILER_DEFINES': ';'.join(d.replace('"', '\\"') for d in env.COMPILER_C_DEFINES + env.COMPILER_CXX_DEFINES),
-                    'COMPILER_INCLUDES': ';'.join(i.replace('\\', '/') for i in env.COMPILER_C_INCLUDES + env.COMPILER_CXX_INCLUDES)
+                    'COMPILER_DEFINES': ';'.join(
+                        d.replace('"', '\\"') for d in env.COMPILER_C_DEFINES + env.COMPILER_CXX_DEFINES),
+                    'COMPILER_INCLUDES': ';'.join(
+                        i.replace('\\', '/') for i in env.COMPILER_C_INCLUDES + env.COMPILER_CXX_INCLUDES)
                 }
             )
     with open(cmake_dir.make_node('project.txt').abspath(), 'w') as CMakeLists:
@@ -205,7 +207,7 @@ def write_cmake_workspace(build_context, build_options=[]):
                     '        RUNTIME_OUTPUT_NAME "%s"\n'
                     '        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/%s/${CMAKE_BUILD_TYPE}/%s")\n'
                     'add_custom_command(TARGET %s POST_BUILD\n'
-                    '    COMMAND "%s" "%s" build:%s:${CMAKE_BUILD_TYPE} %s\n'
+                    '    COMMAND "%s" "%s" build:%s:${CMAKE_BUILD_TYPE} --werror %s\n'
                     '    WORKING_DIRECTORY "%s"\n'
                     '    USES_TERMINAL\n'
                     ')\n\n'

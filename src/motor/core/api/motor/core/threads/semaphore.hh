@@ -20,7 +20,7 @@ private:
 
 public:
     explicit Semaphore(int initialCount);
-    ~Semaphore() override;
+    ~Semaphore() noexcept override;
 
     void                 release(int count);
     Waitable::WaitResult wait() override;

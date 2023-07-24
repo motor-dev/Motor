@@ -12,7 +12,7 @@ class motor_api(CORE) PoolAllocator : public minitl::allocator
 {
 public:
     PoolAllocator();
-    ~PoolAllocator() override;
+    ~PoolAllocator() noexcept override;
 
 protected:
     void* internal_alloc(u64 size, u64 alignment) override;

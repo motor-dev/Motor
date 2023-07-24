@@ -12,7 +12,7 @@ class motor_api(CORE) StackAllocator : public minitl::allocator
 {
 public:
     StackAllocator();
-    ~StackAllocator() override;
+    ~StackAllocator() noexcept override;
 
 protected:
     void* internal_alloc(u64 size, u64 alignment) override;

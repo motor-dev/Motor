@@ -139,10 +139,12 @@ class MSVC(Configure.ConfigurationContext.Compiler):
                 warning = ['/W3']
         else:
             warning = ['/W4']
-        conf.env.append_unique('CFLAGS_warnall', warning + ['/D_CRT_SECURE_NO_WARNINGS=1', '/WX'])
+        conf.env.append_unique('CFLAGS_warnall', warning + ['/D_CRT_SECURE_NO_WARNINGS=1'])
         conf.env.append_unique('CFLAGS_warnnone', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0'])
-        conf.env.append_unique('CXXFLAGS_warnall', warning + ['/D_CRT_SECURE_NO_WARNINGS=1', '/WX'])
+        conf.env.append_unique('CFLAGS_werror', ['/WX'])
+        conf.env.append_unique('CXXFLAGS_warnall', warning + ['/D_CRT_SECURE_NO_WARNINGS=1'])
         conf.env.append_unique('CXXFLAGS_warnnone', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0'])
+        conf.env.append_unique('CXXFLAGS_werror', ['/WX'])
         if self.NAMES[0] == 'msvc' and self.version_number >= (14,):
             conf.env.append_unique('CFLAGS_warnall', ['/D_ALLOW_RTCc_IN_STL=1'])
             conf.env.append_unique('CXXFLAGS_warnall', ['/D_ALLOW_RTCc_IN_STL=1'])

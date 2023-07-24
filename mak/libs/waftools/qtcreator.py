@@ -26,15 +26,16 @@ IGNORE_PATTERNS = [
     re.compile('.*__pycache__.*'),
 ]
 
-CLANG_TIDY_CONFIG="ClangDiagnosticConfigs\\{0}\\clangTidyChecks=\n"\
-                  "ClangDiagnosticConfigs\\{0}\\clangTidyChecksOptions=@Variant(\\0\\0\\0\\b\\0\\0\\0\\0)\n"\
-                  "ClangDiagnosticConfigs\\{0}\\clangTidyMode=2\n"\
-                  "ClangDiagnosticConfigs\\{0}\\clazyChecks=\n"\
-                  "ClangDiagnosticConfigs\\{0}\\clazyMode=0\n"\
-                  "ClangDiagnosticConfigs\\{0}\\diagnosticOptions=-w\n"\
-                  "ClangDiagnosticConfigs\\{0}\\displayName=Motor\n"\
-                  "ClangDiagnosticConfigs\\{0}\\id={{c75a31ba-e37d-4044-8825-36527d4ceea1}}\n"\
-                  "ClangDiagnosticConfigs\\{0}\\useBuildSystemFlags=false\n"
+CLANG_TIDY_CONFIG = "ClangDiagnosticConfigs\\{0}\\clangTidyChecks=\n" \
+                    "ClangDiagnosticConfigs\\{0}\\clangTidyChecksOptions=@Variant(\\0\\0\\0\\b\\0\\0\\0\\0)\n" \
+                    "ClangDiagnosticConfigs\\{0}\\clangTidyMode=2\n" \
+                    "ClangDiagnosticConfigs\\{0}\\clazyChecks=\n" \
+                    "ClangDiagnosticConfigs\\{0}\\clazyMode=0\n" \
+                    "ClangDiagnosticConfigs\\{0}\\diagnosticOptions=-w\n" \
+                    "ClangDiagnosticConfigs\\{0}\\displayName=Motor\n" \
+                    "ClangDiagnosticConfigs\\{0}\\id={{c75a31ba-e37d-4044-8825-36527d4ceea1}}\n" \
+                    "ClangDiagnosticConfigs\\{0}\\useBuildSystemFlags=false\n"
+
 
 def qbsArch(arch_name):
     archs = {'amd64': 'x86_64', 'x64': 'x86_64', 'x86_amd64': 'x86_64', 'aarch64': 'arm64'}
@@ -509,7 +510,8 @@ class QtCreator(Build.BuildContext):
             elif max_index is None:
                 content[config_line:config_line] = [CLANG_TIDY_CONFIG.format(1), 'ClangDiagnosticConfigs\\size=1\n']
             else:
-                content[config_line:config_line] = [CLANG_TIDY_CONFIG.format(max_index+1), 'ClangDiagnosticConfigs\\size=%d\n'%(max_index+1)]
+                content[config_line:config_line] = [CLANG_TIDY_CONFIG.format(max_index + 1),
+                                                    'ClangDiagnosticConfigs\\size=%d\n' % (max_index + 1)]
 
             with open(INI_FILE, 'w') as ini_file:
                 ini_file.write(''.join(content))
@@ -519,7 +521,6 @@ class QtCreator(Build.BuildContext):
                 ini_file.write('[ClangTools]\n')
                 ini_file.write(CLANG_TIDY_CONFIG.format(1))
                 ini_file.write('ClangDiagnosticConfigs\\size=1\n')
-
 
     def write_project_files(self):
         appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
@@ -1244,7 +1245,7 @@ class QtCreator(Build.BuildContext):
                                 ('ProjectExplorer.BuildStep.Enabled', True),
                                 (
                                     'ProjectExplorer.ProcessStep.Arguments',
-                                    '%s build:%s:%s %s' %
+                                    '%s build:%s:%s %s --werror' %
                                     (sys.argv[0], env_name, variant, ' '.join(options))
                                 ),
                                 ('ProjectExplorer.ProcessStep.Command', sys.executable),

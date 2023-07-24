@@ -59,12 +59,13 @@ def configure(configuration_context):
     v = configuration_context.env
     for c in configuration_context.compilers:
         if 'Clang' in c.NAMES:
-            if 'AppleClang' not in c.NAMES and c.version_number >= (10, ):
+            if 'AppleClang' not in c.NAMES and c.version_number >= (10,):
                 v.CLC_CXX = c.compiler_cxx
-            elif 'AppleClang' in c.NAMES and c.version_number >= (12, ):
+            elif 'AppleClang' in c.NAMES and c.version_number >= (12,):
                 v.CLC_CXX = c.compiler_cxx
     if v.CLC_CXX:
-        v.CLC_CXXFLAGS = ['-std=clc++', '-g', '-fno-rtti', '-fno-exceptions', '-fno-discard-value-names']
+        v.CLC_CXXFLAGS = ['-std=clc++', '-g', '-fno-rtti', '-fno-exceptions', '-fno-discard-value-names',
+                          '-Wno-unknown-attributes']
         v.CLC_CXXFLAGS_debug = ['-D_DEBUG', '-O0']
         v.CLC_CXXFLAGS_profile = ['-DNDEBUG', '-O2']
         v.CLC_CXXFLAGS_final = ['-DNDEBUG', '-O2']

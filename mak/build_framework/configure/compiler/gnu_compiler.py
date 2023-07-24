@@ -316,6 +316,8 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
             '-Woverloaded-virtual',
             '-Wstrict-aliasing',
         ] + v.CXXFLAGS_warnall
+        v.CFLAGS_werror = ['-Werror']
+        v.CXXFLAGS_werror = ['-Werror']
 
     def find_target_program(self, conf, platform, program, mandatory=True, os_paths=[], var=''):
         sys_dirs = platform.directories + self.directories

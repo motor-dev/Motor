@@ -16,7 +16,7 @@ private:
 
 public:
     Event();
-    ~Event() override;
+    ~Event() noexcept override;
 
     void                 set();
     void                 pulse();

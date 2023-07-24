@@ -22,7 +22,7 @@ Semaphore::Semaphore(int initialCount) : m_data()
     m_data.value.set(initialCount);
 }
 
-Semaphore::~Semaphore()
+Semaphore::~Semaphore() noexcept
 {
     syscall(SYS_futex, &m_data.value, FUTEX_WAKE_PRIVATE, INT_MAX);
 }
@@ -80,7 +80,7 @@ Semaphore::Semaphore(int initialCount) : m_data()
     m_data.value.set(initialCount);
 }
 
-Semaphore::~Semaphore()
+Semaphore::~Semaphore() noexcept
 {
     _umtx_op(&m_data.value, UMTX_OP_WAKE, INT_MAX, nullptr, nullptr);
 }
@@ -134,7 +134,7 @@ Semaphore::Semaphore(int initialCount) : m_data()
     }
 }
 
-Semaphore::~Semaphore()
+Semaphore::~Semaphore() noexcept
 {
     if(sem_destroy(reinterpret_cast< sem_t* >(m_data.ptr)) != 0)
     {

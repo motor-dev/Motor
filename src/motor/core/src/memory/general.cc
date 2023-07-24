@@ -20,7 +20,7 @@ GeneralAllocator::GeneralAllocator()  // NOLINT(modernize-use-equals-default)
 #endif
 }
 
-GeneralAllocator::~GeneralAllocator() = default;
+GeneralAllocator::~GeneralAllocator() noexcept = default;
 
 void* GeneralAllocator::internal_alloc(u64 size, u64 alignment)
 {

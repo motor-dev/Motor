@@ -178,7 +178,8 @@ class Netbeans(Build.BuildContext):
                 mtype = add(doc, conf, 'makefileType')
                 mtool = add(doc, mtype, 'makeTool')
                 add(doc, mtool, 'buildCommandWorkingDir', '.')
-                add(doc, mtool, 'buildCommand', '%s %s build:%s:%s' % (sys.executable, sys.argv[0], toolchain, variant))
+                add(doc, mtool, 'buildCommand',
+                    '%s %s build:%s:%s --werror' % (sys.executable, sys.argv[0], toolchain, variant))
                 add(doc, mtool, 'cleanCommand', '%s %s clean:%s:%s' % (sys.executable, sys.argv[0], toolchain, variant))
                 if env.ABI == 'mach_o':
                     add(

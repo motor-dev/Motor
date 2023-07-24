@@ -9,7 +9,7 @@ namespace Motor {
 // TODO
 PoolAllocator::PoolAllocator() = default;
 
-PoolAllocator::~PoolAllocator() = default;
+PoolAllocator::~PoolAllocator() noexcept = default;
 
 void* PoolAllocator::internal_alloc(u64 size, u64 alignment)
 {

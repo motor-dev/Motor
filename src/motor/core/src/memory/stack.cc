@@ -8,7 +8,7 @@ namespace Motor {
 
 StackAllocator::StackAllocator() = default;
 
-StackAllocator::~StackAllocator() = default;
+StackAllocator::~StackAllocator() noexcept = default;
 
 void* StackAllocator::internal_alloc(u64 size, u64 alignment)
 {

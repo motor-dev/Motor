@@ -130,11 +130,11 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
             '+w2', '-errtags=yes', '-erroff=fieldsemicolonw,notused,'
                                    'unknownpragma,wunreachable,doubunder,wvarhidenmem,wvarhidemem,'
                                    'reftotemp,truncwarn,badargtype2w,hidef,wemptydecl,notemsource,'
-                                   'nonewline,inllargeuse,identexpected'
+                                   'nonewline,inllargeuse,identexpected,attrskipunsup2'
         ]
 
-    def error_flag(self):
-        return ['-errwarn=%all']
+        v['CFLAGS_werror'] = ['-errwarn=%all']
+        v['CXXFLAGS_werror'] = ['-errwarn=%all']
 
     def is_valid(self, conf, extra_flags=[]):
         node = conf.bldnode.make_node('main.cxx')

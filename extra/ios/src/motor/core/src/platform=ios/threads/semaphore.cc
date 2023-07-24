@@ -37,7 +37,7 @@ Semaphore::Semaphore(int initialCount)
 #endif
 }
 
-Semaphore::~Semaphore()
+Semaphore::~Semaphore() noexcept
 {
 #if USE_DISPATCH_SEMAPHORE
     dispatch_release(reinterpret_cast< dispatch_semaphore_t >(m_data.ptr));

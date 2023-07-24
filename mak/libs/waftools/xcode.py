@@ -654,7 +654,7 @@ class xcode(Build.BuildContext):
                             }
                         )
                     )
-                build = PBXShellScriptBuildPhase('build:' + toolchain + ':${CONFIG}')
+                build = PBXShellScriptBuildPhase('build:' + toolchain + ':${CONFIG} --werror')
                 target = PBXNativeTarget(
                     toolchain, PBXFileReference(appname, appname + '.app', 'wrapper.application', 'BUILT_PRODUCTS_DIR'),
                     "com.apple.product-type.application", [build], variants
@@ -663,7 +663,7 @@ class xcode(Build.BuildContext):
                 p._output.children.append(target.productReference)
                 scheme = XCodeScheme(target._id, toolchain, appname + '.app', schemes.project_name, False)
             else:
-                target = PBXLegacyTarget('build:%s:$(CONFIG)' % toolchain, toolchain)
+                target = PBXLegacyTarget('build:%s:$(CONFIG) --werror' % toolchain, toolchain)
                 p.targets.append(target)
                 scheme = XCodeScheme(target._id, toolchain, appname, schemes.project_name, False)
             scheme.write(schemes.make_node('%s.xcscheme' % toolchain))

@@ -39,7 +39,6 @@ def paths_to_nodes(src_node, bld_node, paths):
 
 
 def compiler_deps_scan(original_scan):
-
     def scan(self):
         if not self.env.ENABLE_COMPILER_DEPS:
             return original_scan(self)
@@ -51,7 +50,6 @@ def compiler_deps_scan(original_scan):
 
 
 def compiler_deps_post_run(original_post_run):
-
     def post_run(self):
         if self.env.ENABLE_COMPILER_DEPS:
             bld = self.generator.bld
@@ -91,7 +89,6 @@ def compiler_deps_post_run(original_post_run):
 
 
 def compiler_deps_sig_implicit_deps(original_sig_implicit_deps):
-
     def sig_implicit_deps(self):
         if not self.env.ENABLE_COMPILER_DEPS:
             return original_sig_implicit_deps(self)
@@ -106,7 +103,7 @@ def compiler_deps_sig_implicit_deps(original_sig_implicit_deps):
 def build(build_context):
     for cls_name in 'c', 'cxx':
         cls = Task.classes.get(cls_name, None)
-        derived = type(cls_name, (cls, ), {})
+        derived = type(cls_name, (cls,), {})
         derived.scan = compiler_deps_scan(derived.scan)
         derived.post_run = compiler_deps_post_run(derived.post_run)
         derived.sig_implicit_deps = compiler_deps_sig_implicit_deps(derived.sig_implicit_deps)
@@ -116,3 +113,6 @@ def build(build_context):
     for compiler in os.listdir(build_context.path.abspath()):
         if not compilers or os.path.splitext(compiler)[0] in compilers:
             build_context.recurse(compiler)
+    if Options.options.werror:
+        build_context.env.append_unique('CFLAGS', build_context.env.CFLAGS_werror)
+        build_context.env.append_unique('CXXFLAGS', build_context.env.CXXFLAGS_werror)

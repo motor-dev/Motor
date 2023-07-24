@@ -21,7 +21,7 @@ Semaphore::Semaphore(int initialCount) : m_data()
     m_data.value.set(initialCount);
 }
 
-Semaphore::~Semaphore()
+Semaphore::~Semaphore() noexcept
 {
     syscall(__NR_futex, &m_data.value, FUTEX_WAKE, INT_MAX);
 }

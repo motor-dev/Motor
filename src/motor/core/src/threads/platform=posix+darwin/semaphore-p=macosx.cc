@@ -30,7 +30,7 @@ Semaphore::Semaphore(int initialCount) : m_data()
 #endif
 }
 
-Semaphore::~Semaphore()
+Semaphore::~Semaphore() noexcept
 {
 #if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ >= 1060
     dispatch_release(reinterpret_cast< dispatch_semaphore_t >(m_data.ptr));
