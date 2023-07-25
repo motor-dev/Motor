@@ -156,7 +156,7 @@ class DeletedFunctionBody(FunctionBody):
 class StatementFunctionBody(FunctionBody):
 
     def __init__(self, constructor_initializer_list, statement_list):
-        # type: (Optional [List[MemberInitializer]], List[Statement]) -> None
+        # type: (Optional [List[MemberInitializer]], CompoundStatement) -> None
         self._constructor_initializer_list = constructor_initializer_list
         self._statement_list = statement_list
 
@@ -169,8 +169,7 @@ class StatementFunctionBody(FunctionBody):
                 constructor_initializer.accept(visitor)
 
     def accept_statement_list(self, visitor: Visitor) -> None:
-        for statement in self._statement_list:
-            statement.accept(visitor)
+        self._statement_list.accept(visitor)
 
 
 class VirtSpecifier(object):
@@ -211,7 +210,7 @@ if TYPE_CHECKING:
     from .type import Declarator
     from .expressions import Expression
     from .declarations import DeclSpecifierSeq
-    from .statements import Statement
+    from .statements import CompoundStatement
     from .constraints import RequiresClause
     from .statements import ExceptionHandler
     from .klass import MemberInitializer

@@ -29,8 +29,9 @@ class Enumerator(object):
 class EnumSpecifier(TypeSpecifier):
 
     def __init__(
-        self, name: Reference, attributes: List[Attribute], is_scoped: bool, base_type: Optional[TypeSpecifierSeq],
-        enumerator_list: List[Enumerator]
+            self, name: Optional[Reference], attributes: List[Attribute], is_scoped: bool,
+            base_type: Optional[TypeSpecifierSeq],
+            enumerator_list: List[Enumerator]
     ) -> None:
         TypeSpecifier.__init__(self)
         self._name = name
@@ -47,7 +48,8 @@ class EnumSpecifier(TypeSpecifier):
             attribute.accept(visitor)
 
     def accept_name(self, visitor: Visitor) -> None:
-        self._name.accept(visitor)
+        if self._name is not None:
+            self._name.accept(visitor)
 
     def accept_base_type(self, visitor: Visitor) -> None:
         if self._base_type is not None:
