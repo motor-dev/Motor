@@ -23,7 +23,8 @@ type-constraint:
 import glrp
 from typing import Any, List
 from ...parse import CxxParser, cxx98, cxx11, cxx20, cxx98_merge
-from ....ast.template import AmbiguousTemplateParameter, TemplateParameterType, TemplateParameterTemplate, TemplateParameterConstant, TemplateParameterConstraint
+from ....ast.template import AmbiguousTemplateParameter, TemplateParameterType, TemplateParameterTemplate, \
+    TemplateParameterConstant, TemplateParameterConstraint
 from ....ast.reference import Reference, Id, TemplateId, TemplateSpecifierId, _Id
 
 
@@ -72,7 +73,6 @@ def type_parameter_template_default(self: CxxParser, p: glrp.Production) -> Any:
 
 
 # amendment: @glrp.rule('type-parameter : type-parameter-key "..." "identifier"?')
-# amendment: @glrp.rule('type-parameter : template-head type-parameter-key "..." "identifier"?')
 @glrp.rule('type-parameter : attribute-specifier-seq? type-parameter-key "..." "identifier"?')
 @cxx11
 def type_parameter_type_pack_cxx11(self: CxxParser, p: glrp.Production) -> Any:
@@ -80,6 +80,7 @@ def type_parameter_type_pack_cxx11(self: CxxParser, p: glrp.Production) -> Any:
     return TemplateParameterType(p[1], p[3], None, True)
 
 
+# amendment: @glrp.rule('type-parameter : template-head type-parameter-key "..." "identifier"?')
 @glrp.rule('type-parameter : attribute-specifier-seq? template-head type-parameter-key "..." "identifier"?')
 @cxx11
 def type_parameter_template_pack_cxx11(self: CxxParser, p: glrp.Production) -> Any:
@@ -141,7 +142,7 @@ def type_constraint_template_name_cxx20(self: CxxParser, p: glrp.Production) -> 
 @glrp.rule('type-constraint : nested-name-specifier template? "identifier"')
 @cxx20
 def type_constraint_nested_identifier_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    id = Id(p[2].value)    # type: _Id
+    id = Id(p[2].value)  # type: _Id
     if p[1]:
         id = TemplateSpecifierId(id)
     return Reference(p[0] + [id])
@@ -150,7 +151,7 @@ def type_constraint_nested_identifier_cxx20(self: CxxParser, p: glrp.Production)
 @glrp.rule('type-constraint : nested-name-specifier template? template-name "<" template-argument-list? "#>"')
 @cxx20
 def type_constraint_nested_template_id_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    id = TemplateId(p[2], p[4])    # type: _Id
+    id = TemplateId(p[2], p[4])  # type: _Id
     if p[1]:
         id = TemplateSpecifierId(id)
     return Reference(p[0] + [id])

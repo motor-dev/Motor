@@ -18,7 +18,7 @@ class ModuleDeclaration(Declaration):
     def accept_attributes(self, visitor):
         # type: (Visitor) -> None
         for attribute in self._attributes:
-            attribyte.accept(self)
+            attribute.accept(visitor)
 
 
 class ModuleImportDeclaration(Declaration):
@@ -35,7 +35,7 @@ class ModuleImportDeclaration(Declaration):
     def accept_attributes(self, visitor):
         # type: (Visitor) -> None
         for attribute in self._attributes:
-            attribyte.accept(self)
+            attribute.accept(visitor)
 
 
 class PrivateModuleFragment(Declaration):

@@ -11,11 +11,12 @@ from . import exception
 import glrp
 from typing import Set
 from ..parse import CxxParser
+from ...messages import C0000, C0001
 
 
 @glrp.error_handler
 def p_error(parser: CxxParser, token: glrp.Token, parsing_rules: Set[str]) -> None:
     if parsing_rules:
-        parser.logger.C0001(token.position, parser.symbol_name(token), ', '.join(sorted(parsing_rules)))
+        C0001(parser.logger, token.position, parser.symbol_name(token), ', '.join(sorted(parsing_rules)))
     else:
-        parser.logger.C0000(token.position, parser.symbol_name(token))
+        C0000(parser.logger, token.position, parser.symbol_name(token))

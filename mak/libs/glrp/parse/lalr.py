@@ -81,7 +81,7 @@ def _find_common_parent(node_list):
         dominance_set = _dominance_set_cache[node_set]
     except KeyError:
         dominance_set = LR0DominanceSet(node_list)
-        #dominance_set.print_dot()
+        # dominance_set.print_dot()
         _dominance_set_cache[node_set] = dominance_set
     if dominance_set._best_dominator:
         return dominance_set._best_dominator._nodes
@@ -99,23 +99,23 @@ def _find_counterexamples(conflict_list):
 
     conflict_paths = [
         (node, []) for node, _ in conflict_list
-    ]                                           # type: List[Tuple[LR0Node, List[Tuple[LR0Node, LR0Path]]]]
+    ]  # type: List[Tuple[LR0Node, List[Tuple[LR0Node, LR0Path]]]]
     reduce_node = [1 if node._item == node._item._last else 0 for node, _ in conflict_list]
 
-    lst = []                       # type: List[List[Tuple[LR0Node, LR0Path, Set[int], Set[Union[Tuple[LR0Node, bool], LR0ItemSet]]]]]
+    lst = []  # type: List[List[Tuple[LR0Node, LR0Path, Set[int], Set[Union[Tuple[LR0Node, bool], LR0ItemSet]]]]]
     states = {
-    }                              # type: Dict[Tuple[LR0ItemSet, int], List[List[Tuple[LR0Node, LR0Path, Set[int], Set[Union[Tuple[LR0Node, bool], LR0ItemSet]]]]]]
+    }  # type: Dict[Tuple[LR0ItemSet, int], List[List[Tuple[LR0Node, LR0Path, Set[int], Set[Union[Tuple[LR0Node, bool], LR0ItemSet]]]]]]
     for s in conflict_list:
         lst.append([(s[0], LR0PathItem(s[0]._item), s[1], set())])
-    intermediate_result = None     # type: Optional[IntermediateResult]
+    intermediate_result = None  # type: Optional[IntermediateResult]
     queue = [(lst, intermediate_result, states)]
 
     while queue:
         path_list, intermediate_result, states = queue.pop(0)
-        temp_result = []   # type: List[List[Tuple[LR0Node, LR0Path]]]
+        temp_result = []  # type: List[List[Tuple[LR0Node, LR0Path]]]
         recurse = False
         report = True
-        all_nodes = []     # type: List[LR0Node]
+        all_nodes = []  # type: List[LR0Node]
 
         for paths in path_list:
             temp_result.append([])
@@ -196,11 +196,12 @@ def _find_counterexamples(conflict_list):
 
 
 def create_parser_table(
-    productions, start_id, name_map, terminal_count, show_merges, sm_log, conflict_log, error_log, show_progress=False
+        productions, start_id, name_map, terminal_count, show_merges, sm_log, conflict_log, error_log,
+        show_progress=False
 ):
-    # type: (Dict[int, Grammar.Production], int, List[str], int, bool, Logger, Logger, Logger) -> LALRTable
-    cidhash = {}       # type: Dict[int, int]
-    goto_cache = {}    # type: Dict[Tuple[int, int], Optional[LR0ItemSet]]
+    # type: (Dict[int, Grammar.Production], int, List[str], int, bool, Logger, Logger, Logger, bool) -> LALRTable
+    cidhash = {}  # type: Dict[int, int]
+    goto_cache = {}  # type: Dict[Tuple[int, int], Optional[LR0ItemSet]]
     goto_cache_2 = {}  # type: Dict[int, Any]
 
     def goto(item_set, index, lookahead):
@@ -216,7 +217,7 @@ def create_parser_table(
             s = {}
             goto_cache_2[lookahead] = s
 
-        gs = []    # type: List[Tuple[LR0Item, Optional[LR0Node], int]]
+        gs = []  # type: List[Tuple[LR0Item, Optional[LR0Node], int]]
         for item in item_set:
             next = item._next
             if next and next._before == lookahead:
@@ -256,7 +257,7 @@ def create_parser_table(
             i += 1
 
             # Collect all of the symbols that could possibly be in the goto(I,X) sets
-            asyms = set([])    # type: Set[int]
+            asyms = set([])  # type: Set[int]
             for item in state:
                 asyms.update(item._symbols)
 
@@ -277,9 +278,9 @@ def create_parser_table(
             stack.append(x)
             d = len(stack)
             N[x] = d
-            F[x] = FP(x)   # F(X) <- F'(x)
+            F[x] = FP(x)  # F(X) <- F'(x)
 
-            rel = R(x)     # Get y's related to x
+            rel = R(x)  # Get y's related to x
             for y in rel:
                 if N[y] == 0:
                     traverse(y, N, stack, F, X, R, FP)
@@ -301,8 +302,8 @@ def create_parser_table(
             N = {}
             for x in X:
                 N[x] = 0
-            stack = []     # type: List[Tuple[int, int]]
-            F = {}         # type: Dict[Tuple[int, int], List[int]]
+            stack = []  # type: List[Tuple[int, int]]
+            F = {}  # type: Dict[Tuple[int, int], List[int]]
             for x in X:
                 if N[x] == 0:
                     traverse(x, N, stack, F, X, R, FP)
@@ -354,8 +355,8 @@ def create_parser_table(
 
         def compute_lookback_includes(trans, nullable):
             # type: (List[Tuple[int, int]], Set[int]) -> Tuple[Dict[Tuple[int, int], List[Tuple[int, LR0Item]]], Dict[Tuple[int, int], List[Tuple[int, int]]]]
-            lookdict = {}      # Dictionary of lookback relations
-            includedict = {}   # type: Dict[Tuple[int, int], List[Tuple[int, int]]]
+            lookdict = {}  # Dictionary of lookback relations
+            includedict = {}  # type: Dict[Tuple[int, int], List[Tuple[int, int]]]
 
             # Make a dictionary of non-terminal transitions
             dtrans = {}
@@ -388,16 +389,16 @@ def create_parser_table(
                             li = lr_index
                             while li < p.len:
                                 if p.rule.production[li] < terminal_count:
-                                    break # No forget it
+                                    break  # No forget it
                                 if p.rule.production[li] not in nullable:
                                     break
                                 li = li + 1
                             else:
-                                          # Appears to be a relation between (j,t) and (state,N)
+                                # Appears to be a relation between (j,t) and (state,N)
                                 includes.append((j, t))
 
-                        g = goto(states[j], len(states), t) # Go to next set
-                        j = cidhash[id(g)]                  # Go to next state
+                        g = goto(states[j], len(states), t)  # Go to next set
+                        j = cidhash[id(g)]  # Go to next state
 
                     # When we get here, j is the final state, now we have to locate the production
                     for r in states[j]:
@@ -411,7 +412,7 @@ def create_parser_table(
                         #    if r._rule[i] != p._rule[i + 1]:
                         #        break
                         #    i = i + 1
-                        #else:
+                        # else:
                         #    lookb.append((j, r))
                         if p._index == 0 and r.rule.production[:r._index] == p.rule.production[:r._index]:
                             lookb.append((j, r))
@@ -471,8 +472,8 @@ def create_parser_table(
         # Add all of the lookaheads
         add_lookaheads(lookd, followsets)
 
-    goto_table = []    # Goto array
-    action = []        # Action array
+    goto_table = []  # Goto array
+    action = []  # Action array
 
     # Build the parser table, state by state
     states = create_item_sets()
@@ -481,12 +482,12 @@ def create_parser_table(
     st = 0
 
     priority_missing = {}  # type: Dict[LR0Item, List[int]]
-    split_missing = {}     # type: Dict[LR0Item, List[int]]
-    merge_missing = {}     # type: Dict[LR0Item, List[int]]
+    split_missing = {}  # type: Dict[LR0Item, List[int]]
+    merge_missing = {}  # type: Dict[LR0Item, List[int]]
 
-    priority_conflict = {}     # type: Dict[FrozenSet[LR0Item], List[int]]
-    conflict_issues = {}       # type: Dict[FrozenSet[LR0Item], Dict[LR0Item, List[Tuple[LR0Node, LR0Path]]]]
-    merge_requests = {}        # type: Dict[int, List[Tuple[Set[str], Dict[str, Set[LR0Path]]]]]
+    priority_conflict = {}  # type: Dict[FrozenSet[LR0Item], List[int]]
+    conflict_issues = {}  # type: Dict[FrozenSet[LR0Item], Dict[LR0Item, List[Tuple[LR0Node, LR0Path]]]]
+    merge_requests = {}  # type: Dict[int, List[Tuple[Set[str], Dict[str, Set[LR0Path]]]]]
 
     num_rr = 0
     num_sr = 0
@@ -497,17 +498,17 @@ def create_parser_table(
         completed = int(bar_size * (1 + st) / len(states))
         remaining = bar_size - completed
         if show_progress:
-            if sys.version_info >= (3, ):
+            if sys.version_info >= (3,):
                 sys.stdout.write('\r[\x1b[32m%s\x1b[37m%s\x1b[0m]' % ('\u2501' * completed, '\u2501' * remaining))
             else:
                 sys.stdout.write(
                     (u'\r[\x1b[32m%s\x1b[37m%s\x1b[0m]' %
                      (u'\u2501' * completed, u'\u2501' * remaining)).encode('utf-8')
                 )
-        action_map = {}    # type: Dict[int, List[Tuple[int, LR0Item]]]
-        st_action = {}     # type: Dict[int, Tuple[Tuple[int, Optional[str]],...]]
-        st_goto = {}       # type: Dict[int, int]
-        merges = {}        # type: Dict[FrozenSet[LR0Item], Tuple[Set[int], Set[LR0Node]]]
+        action_map = {}  # type: Dict[int, List[Tuple[int, LR0Item]]]
+        st_action = {}  # type: Dict[int, Tuple[Tuple[int, Optional[str]],...]]
+        st_goto = {}  # type: Dict[int, int]
+        merges = {}  # type: Dict[FrozenSet[LR0Item], Tuple[Set[int], Set[LR0Node]]]
 
         sm_log.info('')
         sm_log.info('')
@@ -530,7 +531,7 @@ def create_parser_table(
                         item.rule._reduced += 1
             else:
                 i = item._index
-                a = item.rule.production[i] # Get symbol right after the "."
+                a = item.rule.production[i]  # Get symbol right after the "."
                 if a < terminal_count:
                     g = goto(item_group, len(states), a)
                     j = cidhash[id(g)]
@@ -539,7 +540,7 @@ def create_parser_table(
 
         for a in sorted(action_map):
             actions = action_map[a]
-            action_dest = {}   # type: Dict[int, List[LR0Item]]
+            action_dest = {}  # type: Dict[int, List[LR0Item]]
             for i, item in actions:
                 try:
                     action_dest[i].append(item)
@@ -654,7 +655,7 @@ def create_parser_table(
             st_action[a] = tuple(sorted([(j, items[0]._split) for j, items in accepted_actions.items()]))
             if len(accepted_actions) > 1 and not split:
                 # handle conflicts
-                conflicts = []     # type: List[Tuple[LR0Node, Set[int]]]
+                conflicts = []  # type: List[Tuple[LR0Node, Set[int]]]
                 num_rr += 1
                 sm_log.info('    %-30s conflict split', name_map[a])
                 for j, _ in st_action[a]:
@@ -751,7 +752,7 @@ def create_parser_table(
                         if j < 0:
                             sm_log.info('    %-30s reduce using rule %s', name_map[a], item.to_string(name_map))
 
-        #for lookaheads, nodes in merges.values():
+        # for lookaheads, nodes in merges.values():
         #    local_paths = {}                                                                     # type: Dict[int, Dict[str, Set[LR0Path]]]
         #    for la in lookaheads:
         #        counterexamples = _find_counterexamples(
@@ -788,7 +789,7 @@ def create_parser_table(
                             st_goto[s] = j
                             nkeys.add(s)
                             sm_log.info('    %-30s shift and go to state %d', name_map[s], j)
-                            #assert item._next is not None
+                            # assert item._next is not None
 
         action.append(st_action)
         goto_table.append(st_goto)
@@ -824,9 +825,9 @@ def create_parser_table(
                 error_log.warning('Rule (%s) is never reduced', rule.to_string(name_map))
 
     for missing, text in (
-        (priority_missing, 'precedence'),
-        (split_missing, 'split'),
-        (merge_missing, 'merge'),
+            (priority_missing, 'precedence'),
+            (split_missing, 'split'),
+            (merge_missing, 'merge'),
     ):
         if len(missing) == 1:
             error_log.warning('1 missing %s annotation', text)
@@ -847,7 +848,7 @@ def create_parser_table(
     if show_merges:
         for _, production in sorted(productions.items()):
             for rule in production:
-                item_iterator = rule._item # type: Optional[LR0Item]
+                item_iterator = rule._item  # type: Optional[LR0Item]
                 while item_iterator:
                     if item_iterator._split is not None and item_iterator._split_use == 0:
                         error_log.warning('unused split annotation')

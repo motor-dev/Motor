@@ -2,7 +2,7 @@ import sys
 import io
 import argparse
 import glrp
-from typing import TypeVar, cast, Dict, Callable, Tuple, Union, Any, List
+from typing import TypeVar, cast, Dict, Callable, Tuple, Union, Any, List, Optional
 
 T = TypeVar('T', bound='Callable[..., Dict[str, Any]]')
 
@@ -36,7 +36,7 @@ def warning(flag_name: str, enabled: bool = False, enabled_in: List[str] = []) -
             format_values = func(self, position, *args, **kw_args)
             self._warning_count += 1
             if self._warning_count == 1 and self._arguments.warn_error:
-                self.C0002(position)
+                C0002(self, position)
             message = getattr(self.LANG, func.__name__, func.__doc__)
             assert isinstance(message, str)
             self._msg_position(
@@ -105,17 +105,18 @@ class Logger(glrp.Logger):
 
     def __init__(self, arguments: argparse.Namespace) -> None:
         glrp.Logger.__init__(self, io.open(sys.stderr.fileno(), 'w', encoding='utf-8', closefd=False))
-        self._lexer = None
+        self._lexer = None  # type: Optional[glrp.Lexer]
         self._arguments = arguments
         self._warning_count = 0
         self._error_count = 0
         self._diagnostics_format = Logger.IDE_FORMAT[getattr(arguments, 'diagnostics_format')]
         self._expected_diagnostics = []  # type: List[Callable[..., Dict[str, Any]]]
 
-    def set_lexer(self, lexer: glrp.Lexer):
+    def set_lexer(self, lexer: glrp.Lexer) -> None:
         self._lexer = lexer
 
     def _msg_position(self, error_type: str, position: Tuple[int, int], message: str) -> None:
+        assert self._lexer is not None
         if self._error_color:
             (color_error_type, color_filename, color_message, color_caret,
              color_off) = self.COLOR_PATTERN.get(error_type, self.DEFAULT_COLOR_PATTERN)
@@ -155,18 +156,18 @@ class Logger(glrp.Logger):
 
 
 @error
-def C0000(self, position: Tuple[int, int], token: str) -> Dict[str, Any]:
+def C0000(self: Logger, position: Tuple[int, int], token: str) -> Dict[str, Any]:
     """syntax error at token '{token}'"""
     return locals()
 
 
 @error
-def C0001(self, position: Tuple[int, int], token: str, current_rules: str) -> Dict[str, Any]:
+def C0001(self: Logger, position: Tuple[int, int], token: str, current_rules: str) -> Dict[str, Any]:
     """syntax error at token '{token}' when trying to parse {current_rules}"""
     return locals()
 
 
 @error
-def C0002(self, position: Tuple[int, int]) -> Dict[str, Any]:
+def C0002(self: Logger, position: Tuple[int, int]) -> Dict[str, Any]:
     """warning treated as error"""
     return locals()

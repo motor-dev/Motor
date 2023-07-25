@@ -205,6 +205,13 @@ class Visitor(object):
     def visit_enumerator(self, enumerator: "Enumerator") -> None:
         pass
 
+    def visit_template_parameter_list(self, template_parameter_list: "TemplateParameterList") -> None:
+        pass
+
+    def visit_ambiguous_template_parameter_list(self,
+                                                ambiguous_template_parameter_list: "AmbiguousTemplateParameterList") -> None:
+        pass
+
     def visit_template_declaration(self, template_declaration: "TemplateDeclaration") -> None:
         pass
 
@@ -448,12 +455,6 @@ class Visitor(object):
         pass
 
     def visit_ambiguous_type_specifier(self, ambiguous_type_specifier: "AmbiguousTypeSpecifier") -> None:
-        pass
-
-    def visit_cv_qualifiers(self, cv_qualifiers: "CvQualifiers") -> None:
-        pass
-
-    def visit_ref_qualifiers(self, ref_qualifiers: "RefQualifiers") -> None:
         pass
 
     def visit_defining_type_specifier_seq(self, defining_type_specifier_seq: "DefiningTypeSpecifierSeq") -> None:
@@ -704,7 +705,7 @@ class Visitor(object):
     def visit_typename_reference(self, typename_reference: "TypenameReference") -> None:
         pass
 
-    def visit_pack_expand_reference(self, typename_reference: "PackExpandReference") -> None:
+    def visit_pack_expand_reference(self, pack_expand_reference: "PackExpandReference") -> None:
         pass
 
     def visit_root_id(self, root_id: "RootId") -> None:
@@ -819,6 +820,8 @@ from .enumeration import (
 )
 from .template import (
     Declaration,
+    TemplateParameterList,
+    AmbiguousTemplateParameterList,
     TemplateDeclaration,
     TemplateArgumentError,
     TemplateArgumentPackExpand,

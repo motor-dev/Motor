@@ -50,6 +50,9 @@ class DesignatedInitializer(object):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_designated_initializer(self)
 
+    def accept_value(self, visitor: Visitor) -> None:
+        self._value.accept(visitor)
+
 
 class DesignatedBracedInitList(AbstractBracedInitList):
 

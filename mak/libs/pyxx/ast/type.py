@@ -70,6 +70,10 @@ class DynamicExceptionSpecifier(ExceptionSpecifier):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_dynamic_exception_specifier(self)
 
+    def accept_type_id_list(self, visitor: Visitor) -> None:
+        for type_id in self._type_list:
+            type_id.accept(visitor)
+
 
 class AmbiguousExceptionSpecifier(ExceptionSpecifier):
 
@@ -422,7 +426,6 @@ class DeclaratorElementReference(DeclaratorElement):
     def __init__(self, next: DeclaratorElement, attributes: List["Attribute"]) -> None:
         self._next = next
         self._attributes = attributes
-        self._qualifiers = []  # type: List[CvQualifier]
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_declarator_element_reference(self)
@@ -512,6 +515,10 @@ class DeclaratorElementMethod(DeclaratorElement):
     def accept_parameter_clause(self, visitor: Visitor) -> None:
         self._parameter_clause.accept(visitor)
 
+    def accept_trailing_return_type(self, visitor: Visitor) -> None:
+        if self._trailing_return_type is not None:
+            self._trailing_return_type.accept(visitor)
+
     def accept_cv_qualifiers(self, visitor: Visitor) -> None:
         for qualifier in self._cv_qualifiers:
             qualifier.accept(visitor)
@@ -523,10 +530,6 @@ class DeclaratorElementMethod(DeclaratorElement):
     def accept_exception_specifier(self, visitor: Visitor) -> None:
         if self._exception_qualifier is not None:
             self._exception_qualifier.accept(visitor)
-
-    def accept_trailing_return_type(self, visitor: Visitor) -> None:
-        if self._trailing_return_type is not None:
-            self._trailing_return_type.accept(visitor)
 
     def is_method_decl(self) -> bool:
         return self._next.is_element_id()
