@@ -112,7 +112,9 @@ class AmbiguousParameterClause(ParameterClause):
 
 
 class FunctionBody(object):
-    pass
+
+    def accept(self, visitor: Visitor) -> None:
+        raise NotImplementedError
 
 
 class TryFunctionBody(object):
@@ -172,7 +174,8 @@ class StatementFunctionBody(FunctionBody):
 
 
 class VirtSpecifier(object):
-    pass
+    def accept(self, visitor: Visitor) -> None:
+        raise NotImplementedError
 
 
 class VirtSpecifierFinal(VirtSpecifier):

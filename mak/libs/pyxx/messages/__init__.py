@@ -1,5 +1,5 @@
 import argparse
-from .logger import Logger, diagnostic, warning, error
+from .logger import Logger, diagnostic, warning, error, C0000, C0001, C0002
 from motor_typing import TYPE_CHECKING
 
 

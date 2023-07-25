@@ -14,14 +14,50 @@ class TemplateParameter(object):
         raise NotImplementedError
 
 
+class AbstractTemplateParameterList:
+
+    def accept(self, visitor: Visitor) -> None:
+        raise NotImplementedError
+
+
+class TemplateParameterList(AbstractTemplateParameterList):
+    def __init__(self, parameters: List[TemplateParameter]):
+        self._parameters = parameters
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.visit_template_parameter_list(self)
+
+    def accept_parameters(self, visitor: Visitor) -> None:
+        for parameter in self._parameters:
+            parameter.accept(visitor)
+
+
+class AmbiguousTemplateParameterList(AbstractTemplateParameterList):
+    def __init__(self, ambiguous_parameter_list: List[List[TemplateParameter]]):
+        self._parameter_lists = [TemplateParameterList(l) for l in ambiguous_parameter_list]
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.visit_ambiguous_template_parameter_list(self)
+
+    def accept_first(self, visitor: Visitor) -> None:
+        self._parameter_lists[0].accept(visitor)
+
+    def accept_all(self, visitor: Visitor) -> None:
+        for parameter_list in self._parameter_lists:
+            parameter_list.accept(visitor)
+
+
 class TemplateDeclaration(Declaration):
 
     def __init__(
-            self, attributes: List[Attribute], arguments: List[List[TemplateParameter]],
+            self, attributes: List[Attribute], parameters: List[List[TemplateParameter]],
             requires_clause: Optional["RequiresClause"], is_extern: bool, declaration: Declaration
     ) -> None:
         self._attributes = attributes
-        self._arguments = arguments
+        if len(parameters) == 1:
+            self._parameters = TemplateParameterList(parameters[0])  # type: AbstractTemplateParameterList
+        else:
+            self._parameters = AmbiguousTemplateParameterList(parameters)
         self._requires_clause = requires_clause
         self._declaration = declaration
         self._is_extern = is_extern
@@ -32,6 +68,16 @@ class TemplateDeclaration(Declaration):
     def accept_attributes(self, visitor: Visitor) -> None:
         for attribute in self._attributes:
             attribute.accept(visitor)
+
+    def accept_parameter_list(self, visitor: Visitor) -> None:
+        self._parameters.accept(visitor)
+
+    def accept_requires_clause(self, visitor: Visitor) -> None:
+        if self._requires_clause is not None:
+            self._requires_clause.accept(visitor)
+
+    def accept_declaration(self, visitor: Visitor) -> None:
+        self._declaration.accept(visitor)
 
 
 class TemplateArgument(object):
@@ -106,6 +152,13 @@ class AmbiguousTemplateParameter(TemplateParameter):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_ambiguous_template_parameter(self)
 
+    def accept_first(self, visitor: Visitor) -> None:
+        self._template_parameter_list[0].accept(visitor)
+
+    def accept_all(self, visitor: Visitor) -> None:
+        for parameter in self._template_parameter_list:
+            parameter.accept(visitor)
+
 
 class TemplateParameterType(TemplateParameter):
 
@@ -118,16 +171,24 @@ class TemplateParameterType(TemplateParameter):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_template_parameter_type(self)
 
+    def accept_default_value(self, visitor: Visitor) -> None:
+        if self._default_value is not None:
+            self._default_value.accept(visitor)
+
 
 class TemplateParameterTemplate(TemplateParameter):
 
     def __init__(
-            self, keyword: str, template_parameters: List[TemplateParameter],
+            self, keyword: str, template_parameter_list: List[List[TemplateParameter]],
             requires_clause: Optional["RequiresClause"],
             name: Optional[str], default_value: Optional[Reference], is_pack: bool
     ) -> None:
         self._keyword = keyword
-        self._template_parameters = template_parameters
+        if len(template_parameter_list) == 1:
+            self._template_parameter_list = TemplateParameterList(
+                template_parameter_list[0])  # type: AbstractTemplateParameterList
+        else:
+            self._template_parameter_list = AmbiguousTemplateParameterList(template_parameter_list)
         self._requires_clause = requires_clause
         self._name = name
         self._default_value = default_value
@@ -135,6 +196,17 @@ class TemplateParameterTemplate(TemplateParameter):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_template_parameter_template(self)
+
+    def accept_template_parameter_list(self, visitor: Visitor) -> None:
+        self._template_parameter_list.accept(visitor)
+
+    def accept_requires_clause(self, visitor: Visitor) -> None:
+        if self._requires_clause is not None:
+            self._requires_clause.accept(visitor)
+
+    def accept_default_value(self, visitor: Visitor) -> None:
+        if self._default_value is not None:
+            self._default_value.accept(visitor)
 
 
 class TemplateParameterConstant(TemplateParameter):
@@ -144,6 +216,9 @@ class TemplateParameterConstant(TemplateParameter):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_template_parameter_constant(self)
+
+    def accept_parameter_declaration(self, visitor: Visitor) -> None:
+        self._parameter_declaration.accept(visitor)
 
 
 class TemplateParameterConstraint(TemplateParameter):
@@ -158,6 +233,13 @@ class TemplateParameterConstraint(TemplateParameter):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_template_parameter_constraint(self)
+
+    def accept_constraint(self, visitor: Visitor) -> None:
+        self._constraint.accept(visitor)
+
+    def accept_default_value(self, visitor: Visitor) -> None:
+        if self._default_value is not None:
+            self._default_value.accept(visitor)
 
 
 from .constraints import RequiresClause

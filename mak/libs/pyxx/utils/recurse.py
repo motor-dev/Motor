@@ -2,10 +2,10 @@ from .. import ast
 from typing import Optional
 
 
-class RecursiveVisitor(object):
+class RecursiveVisitor(ast.Visitor):
 
     def visit_translation_unit(self, translation_unit: ast.TranslationUnit) -> None:
-        translation_unit.visit_children(self)
+        translation_unit.accept_children(self)
 
     def visit_module_declaration(self, module_declaration: ast.ModuleDeclaration) -> None:
         module_declaration.accept(self)
@@ -199,542 +199,471 @@ class RecursiveVisitor(object):
         enumerator.accept_value(self)
 
     def visit_template_declaration(self, template_declaration: ast.TemplateDeclaration) -> None:
-        pass
+        template_declaration.accept_attributes(self)
+        template_declaration.accept_parameter_list(self)
+        template_declaration.accept_requires_clause(self)
+        template_declaration.accept_declaration(self)
 
-    def visit_template_argument_error(self, template_argument_error: ast.TemplateArgumentError) -> None:
-        pass
+    def visit_template_parameter_list(self, template_parameter_list: ast.TemplateParameterList) -> None:
+        template_parameter_list.accept_parameters(self)
+
+    def visit_ambiguous_template_parameter_list(self,
+                                                ambiguous_template_parameter_list: ast.AmbiguousTemplateParameterList) -> None:
+        ambiguous_template_parameter_list.accept_first(self)
 
     def visit_template_argument_pack_expand(self,
                                             template_argument_pack_expand: ast.TemplateArgumentPackExpand) -> None:
-        pass
+        template_argument_pack_expand.accept_argument(self)
 
     def visit_ambiguous_template_argument(self, ambiguous_template_argument: ast.AmbiguousTemplateArgument) -> None:
-        pass
+        ambiguous_template_argument.accept_first(self)
 
     def visit_template_argument_constant(self, template_argument_constant: ast.TemplateArgumentConstant) -> None:
-        pass
+        template_argument_constant.accept_constant(self)
 
     def visit_template_argument_type_id(self, template_argument_type_id: ast.TemplateArgumentTypeId) -> None:
-        pass
+        template_argument_type_id.accept_type_id(self)
 
     def visit_ambiguous_template_parameter(self, ambiguous_template_parameter: ast.AmbiguousTemplateParameter) -> None:
-        pass
+        ambiguous_template_parameter.accept_first(self)
 
     def visit_template_parameter_type(self, template_parameter_type: ast.TemplateParameterType) -> None:
-        pass
+        template_parameter_type.accept_default_value(self)
 
     def visit_template_parameter_template(self, template_parameter_template: ast.TemplateParameterTemplate) -> None:
-        pass
+        template_parameter_template.accept_template_parameter_list(self)
+        template_parameter_template.accept_requires_clause(self)
+        template_parameter_template.accept_default_value(self)
 
     def visit_template_parameter_constant(self, template_parameter_constant: ast.TemplateParameterConstant) -> None:
-        pass
+        template_parameter_constant.accept_parameter_declaration(self)
 
     def visit_template_parameter_constraint(self,
                                             template_parameter_constraint: ast.TemplateParameterConstraint) -> None:
-        pass
+        template_parameter_constraint.accept_constraint(self)
+        template_parameter_constraint.accept_default_value(self)
 
     def visit_attribute_named_list(self, attribute_named_list: ast.AttributeNamedList) -> None:
-        pass
-
-    def visit_attribute_error(self, attribute_error: ast.AttributeError) -> None:
-        pass
-
-    def visit_attribute_named(self, using_namespace: Optional[str], attribute_named: ast.AttributeNamed) -> None:
-        pass
+        attribute_named_list.accept_attributes(self)
 
     def visit_attribute_align_as_type(self, attribute_align_as_type: ast.AttributeAlignAsType) -> None:
-        pass
+        attribute_align_as_type.accept_type(self)
 
     def visit_attribute_align_as_expression(self,
                                             attribute_align_as_expression: ast.AttributeAlignAsExpression) -> None:
-        pass
+        attribute_align_as_expression.accept_expression(self)
 
     def visit_attribute_align_as_ambiguous(self, attribute_align_as_ambiguous: ast.AttributeAlignAsAmbiguous) -> None:
-        pass
-
-    def visit_attribute_documentation(self, attribute_documentation: ast.AttributeDocumentation) -> None:
-        pass
-
-    def visit_attribute_macro(self, attribute_macro: ast.AttributeMacro) -> None:
-        pass
+        attribute_align_as_ambiguous.accept_alignas_type(self)
 
     def visit_requires_expression(self, requires_expression: ast.RequiresExpression) -> None:
-        pass
-
-    def visit_error_requirement(self, error_requirement: ast.ErrorRequirement) -> None:
-        pass
+        requires_expression.accept_parameter_clause(self)
+        requires_expression.accept_requirement_body(self)
 
     def visit_requirement_body(self, requirement_body: ast.RequirementBody) -> None:
-        pass
+        requirement_body.accept_children(self)
 
     def visit_ambiguous_requirement(self, ambiguous_requirement: ast.AmbiguousRequirement) -> None:
-        pass
+        ambiguous_requirement.accept_first(self)
 
     def visit_simple_requirement(self, simple_requirement: ast.SimpleRequirement) -> None:
-        pass
+        simple_requirement.accept_expression(self)
 
     def visit_type_requirement(self, type_requirement: ast.TypeRequirement) -> None:
-        pass
+        type_requirement.accept_type(self)
 
     def visit_compound_requirement(self, compound_requirement: ast.CompoundRequirement) -> None:
-        pass
+        compound_requirement.accept_expression(self)
+        compound_requirement.accept_type_constraint(self)
 
     def visit_nested_requirement(self, nested_requirement: ast.NestedRequirement) -> None:
-        pass
+        nested_requirement.accept_expression(self)
 
     def visit_requires_clause(self, requires_clause: ast.RequiresClause) -> None:
-        pass
+        requires_clause.accept_requirement_expression(self)
 
     def visit_pack_expand_type(self, pack_expand_type: ast.PackExpandType) -> None:
-        pass
+        pack_expand_type.accept_type(self)
 
     def visit_pack_expand_expression(self, pack_expand_expression: ast.PackExpandExpression) -> None:
-        pass
+        pack_expand_expression.accept_expression(self)
 
     def visit_pack_expand_attribute_named(self, pack_expand_attribute_named: ast.PackExpandAttributeNamed) -> None:
-        pass
+        pack_expand_attribute_named.accept_attribute(self)
 
     def visit_statement_with_attributes(self, statement_with_attributes: ast.StatementWithAttributes) -> None:
-        pass
-
-    def visit_error_statement(self, error_statement: ast.ErrorStatement) -> None:
-        pass
+        statement_with_attributes.accept_attributes(self)
+        statement_with_attributes.accept_statement(self)
 
     def visit_ambiguous_statement(self, ambiguous_statement: ast.AmbiguousStatement) -> None:
-        pass
-
-    def visit_empty_statement(self, empty_statement: ast.EmptyStatement) -> None:
-        pass
+        ambiguous_statement.accept_first(self)
 
     def visit_expression_statement(self, expression_statement: ast.ExpressionStatement) -> None:
-        pass
+        expression_statement.accept_expression(self)
 
     def visit_declaration_statement(self, declaration_statement: ast.DeclarationStatement) -> None:
-        pass
+        declaration_statement.accept_declaration(self)
 
     def visit_compound_statement(self, compound_statement: ast.CompoundStatement) -> None:
-        pass
+        compound_statement.accept_children(self)
 
     def visit_try_block(self, try_block: ast.TryBlock) -> None:
-        pass
+        try_block.accept_try_statement(self)
+        try_block.accept_handlers(self)
 
     def visit_exception_handler(self, exception_handler: ast.ExceptionHandler) -> None:
-        pass
-
-    def visit_exception_declaration_error(self, exception_declaration_error: ast.ExceptionDeclarationError) -> None:
-        pass
+        exception_handler.accept_handler_statement(self)
+        exception_handler.accept_exception_declaration(self)
 
     def visit_exception_declaration_type_specifier(
             self, exception_declaration_type_specifier: ast.ExceptionDeclarationTypeSpecifier
     ) -> None:
-        pass
-
-    def visit_exception_declaration_any(self, exception_declaration_any: ast.ExceptionDeclarationAny) -> None:
-        pass
+        exception_declaration_type_specifier.accept_attributes(self)
+        exception_declaration_type_specifier.accept_type_specifier_seq(self)
+        exception_declaration_type_specifier.accept_declarator(self)
 
     def visit_ambiguous_exception_declaration(
             self, ambiguous_exception_declaration: ast.AmbiguousExceptionDeclaration
     ) -> None:
-        pass
-
-    def visit_break_statement(self, break_statement: ast.BreakStatement) -> None:
-        pass
-
-    def visit_continue_statement(self, continue_statement: ast.ContinueStatement) -> None:
-        pass
+        ambiguous_exception_declaration.accept_first(self)
 
     def visit_return_statement(self, return_statement: ast.ReturnStatement) -> None:
-        pass
+        return_statement.accept_return_expression(self)
 
     def visit_co_return_statement(self, co_return_statement: ast.CoReturnStatement) -> None:
-        pass
-
-    def visit_goto_statement(self, goto_statement: ast.GotoStatement) -> None:
-        pass
+        co_return_statement.accept_return_expression(self)
 
     def visit_labeled_statement(self, labeled_statement: ast.LabeledStatement) -> None:
-        pass
+        labeled_statement.accept_attributes(self)
+        labeled_statement.accept_statement(self)
 
     def visit_case_statement(self, case_statement: ast.CaseStatement) -> None:
-        pass
+        case_statement.accept_attributes(self)
+        case_statement.accept_expression(self)
+        case_statement.accept_statement(self)
 
     def visit_default_statement(self, default_statement: ast.DefaultStatement) -> None:
-        pass
+        default_statement.accept_attributes(self)
+        default_statement.accept_statement(self)
 
     def visit_selection_condition(self, selection_condition: ast.SelectionCondition) -> None:
-        pass
+        selection_condition.accept_init_statement(self)
+        selection_condition.accept_condition(self)
 
     def visit_ambiguous_selection_condition(self,
                                             ambiguous_selection_condition: ast.AmbiguousSelectionCondition) -> None:
-        pass
+        ambiguous_selection_condition.accept_first(self)
 
     def visit_switch_statement(self, switch_statement: ast.SwitchStatement) -> None:
-        pass
+        switch_statement.accept_condition(self)
+        switch_statement.accept_statement(self)
 
     def visit_if_statement(self, if_statement: ast.IfStatement) -> None:
-        pass
+        if_statement.accept_condition(self)
+        if_statement.accept_true_statement(self)
+        if_statement.accept_false_statement(self)
 
     def visit_if_consteval_statement(self, if_consteval_statement: ast.IfConstevalStatement) -> None:
-        pass
+        if_consteval_statement.accept_true_statement(self)
+        if_consteval_statement.accept_false_statement(self)
 
     def visit_while_statement(self, while_statement: ast.WhileStatement) -> None:
-        pass
+        while_statement.accept_condition(self)
+        while_statement.accept_statement(self)
 
     def visit_do_while_statement(self, do_while_statement: ast.DoWhileStatement) -> None:
-        pass
+        do_while_statement.accept_statement(self)
+        do_while_statement.accept_condition(self)
 
     def visit_for_statement(self, for_statement: ast.ForStatement) -> None:
-        pass
+        for_statement.accept_for_condition(self)
+        for_statement.accept_statement(self)
 
     def visit_ambiguous_for_condition(self, ambiguous_for_condition: ast.AmbiguousForCondition) -> None:
-        pass
+        ambiguous_for_condition.accept_first(self)
 
     def visit_for_condition_init(self, for_condition_init: ast.ForConditionInit) -> None:
-        pass
+        for_condition_init.accept_init_statement(self)
+        for_condition_init.accept_condition(self)
+        for_condition_init.accept_update(self)
 
     def visit_for_condition_range(self, for_condition_range: ast.ForConditionRange) -> None:
-        pass
-
-    def visit_cv_qualifier(self, cv_qualifie: ast.CvQualifier) -> None:
-        pass
-
-    def visit_ref_qualifier(self, ref_qualifier: ast.RefQualifier) -> None:
-        pass
-
-    def visit_exception_specifier_error(self, exception_specifier_error: ast.ExceptionSpecifierError) -> None:
-        pass
+        for_condition_range.accept_init_statement(self)
+        for_condition_range.accept_declaration(self)
 
     def visit_dynamic_exception_specifier(self, dynamic_exception_specifier: ast.DynamicExceptionSpecifier) -> None:
-        pass
+        dynamic_exception_specifier.accept_type_id_list(self)
 
     def visit_ambiguous_exception_specifier(self,
                                             ambiguous_exception_specifier: ast.AmbiguousExceptionSpecifier) -> None:
-        pass
+        ambiguous_exception_specifier.accept_first(self)
 
     def visit_noexcept_specifier(self, noexcept_specifier: ast.NoExceptSpecifier) -> None:
-        pass
-
-    def visit_primitive_type_specifier(self, primitive_type_specifier: ast.PrimitiveTypeSpecifier) -> None:
-        pass
+        noexcept_specifier.accept_value(self)
 
     def visit_elaborated_class_type_specifier(
             self, elaborated_class_type_specifier: ast.ElaboratedClassTypeSpecifier
     ) -> None:
-        pass
+        elaborated_class_type_specifier.accept_attributes(self)
+        elaborated_class_type_specifier.accept_name(self)
 
     def visit_elaborated_enum_type_specifier(
             self, elaborated_enum_type_specifier: ast.ElaboratedEnumTypeSpecifier
     ) -> None:
-        pass
-
-    def visit_error_type_specifier(self, error_type_specifier: ast.ErrorTypeSpecifier) -> None:
-        pass
-
-    def visit_auto_type_specifier(self, auto_type_specifier: ast.AutoTypeSpecifier) -> None:
-        pass
+        elaborated_enum_type_specifier.accept_attributes(self)
+        elaborated_enum_type_specifier.accept_name(self)
 
     def visit_decltype_type_specifier(self, decltype_type_specifier: ast.DecltypeTypeSpecifier) -> None:
-        pass
-
-    def visit_decltype_auto_type_specifier(self, decltype_auto_type_specifier: ast.DecltypeAutoTypeSpecifier) -> None:
-        pass
+        decltype_type_specifier.accept_expression(self)
 
     def visit_constrained_type_specifier(self, constrained_type_specifier: ast.ConstrainedTypeSpecifier) -> None:
-        pass
+        constrained_type_specifier.accept_constraint(self)
+        constrained_type_specifier.accept_placeholder_type_specifier(self)
 
     def visit_type_specifier_reference(self, type_specifier_reference: ast.TypeSpecifierReference) -> None:
-        pass
+        type_specifier_reference.accept_reference(self)
 
     def visit_ambiguous_type_specifier(self, ambiguous_type_specifier: ast.AmbiguousTypeSpecifier) -> None:
-        pass
-
-    def visit_cv_qualifiers(self, cv_qualifiers: ast.CvQualifiers) -> None:
-        pass
-
-    def visit_ref_qualifiers(self, ref_qualifiers: ast.RefQualifiers) -> None:
-        pass
+        ambiguous_type_specifier.accept_first(self)
 
     def visit_defining_type_specifier_seq(self, defining_type_specifier_seq: ast.DefiningTypeSpecifierSeq) -> None:
-        pass
-
-    def visit_declarator_element_error(self, declarator_element_error: ast.DeclaratorElementError) -> None:
-        pass
+        defining_type_specifier_seq.accept_attributes(self)
+        defining_type_specifier_seq.accept_types(self)
+        defining_type_specifier_seq.accept_qualifiers(self)
 
     def visit_declarator_element_id(self, declarator_element_id: ast.DeclaratorElementId) -> None:
-        pass
+        declarator_element_id.accept_name(self)
+        declarator_element_id.accept_attributes(self)
 
     def visit_declarator_element_pack_id(self, declarator_element_pack_id: ast.DeclaratorElementPackId) -> None:
-        pass
-
-    def visit_declarator_element_abstract(self, declarator_element_abstract: ast.DeclaratorElementAbstract) -> None:
-        pass
-
-    def visit_declarator_element_abstract_pack(
-            self, declarator_element_abstract_pack: ast.DeclaratorElementAbstractPack
-    ) -> None:
-        pass
+        declarator_element_pack_id.accept_name(self)
+        declarator_element_pack_id.accept_attributes(self)
 
     def visit_declarator_element_group(self, declarator_element_group: ast.DeclaratorElementGroup) -> None:
-        pass
+        declarator_element_group.accept_next(self)
 
     def visit_declarator_element_pointer(self, declarator_element_pointer: ast.DeclaratorElementPointer) -> None:
-        pass
+        declarator_element_pointer.accept_next(self)
+        declarator_element_pointer.accept_attributes(self)
+        declarator_element_pointer.accept_qualifiers(self)
 
     def visit_declarator_element_reference(self, declarator_element_reference: ast.DeclaratorElementReference) -> None:
-        pass
+        declarator_element_reference.accept_next(self)
+        declarator_element_reference.accept_attributes(self)
 
     def visit_declarator_element_rvalue_reference(
             self, declarator_element_rvalue_reference: ast.DeclaratorElementRValueReference
     ) -> None:
-        pass
+        declarator_element_rvalue_reference.accept_next(self)
+        declarator_element_rvalue_reference.accept_attributes(self)
 
     def visit_declarator_element_array(self, declarator_element_array: ast.DeclaratorElementArray) -> None:
-        pass
+        declarator_element_array.accept_next(self)
+        declarator_element_array.accept_attributes(self)
+        declarator_element_array.accept_size(self)
 
     def visit_declarator_element_method(self, declarator_element_method: ast.DeclaratorElementMethod) -> None:
-        pass
+        declarator_element_method.accept_next(self)
+        declarator_element_method.accept_parameter_clause(self)
+        declarator_element_method.accept_cv_qualifiers(self)
+        declarator_element_method.accept_ref_qualifier(self)
+        declarator_element_method.accept_exception_specifier(self)
+        declarator_element_method.accept_attributes(self)
+        declarator_element_method.accept_trailing_return_type(self)
 
     def visit_abstract_declarator_list(self, abstract_declarator_list: ast.AbstractDeclaratorList) -> None:
-        pass
+        abstract_declarator_list.accept_element(self)
 
     def visit_declarator_list(self, declarator_list: ast.DeclaratorList) -> None:
-        pass
+        declarator_list.accept_element(self)
 
     def visit_ambiguous_abstract_declarator(self,
                                             ambiguous_abstract_declarator: ast.AmbiguousAbstractDeclarator) -> None:
-        pass
+        ambiguous_abstract_declarator.accept_first(self)
 
     def visit_type_id_declarator(self, type_id_declarator: ast.TypeIdDeclarator) -> None:
-        pass
+        type_id_declarator.accept_type_specifier_seq(self)
+        type_id_declarator.accept_declarator(self)
 
     def visit_ambiguous_type_id(self, ambiguous_type_id: ast.AmbiguousTypeId) -> None:
-        pass
+        ambiguous_type_id.accept_first(self)
 
     def visit_type_id_pack(self, type_id_pack: ast.TypeIdPack) -> None:
-        pass
-
-    def visit_error_expression(self, error_expression: ast.ErrorExpression) -> None:
-        pass
+        type_id_pack.accept_type_pack(self)
 
     def visit_initializer_list(self, initializer_list: ast.InitializerList) -> None:
-        pass
+        initializer_list.accept_expressions(self)
 
     def visit_ambiguous_initializer_list(self, ambiguous_initializer_list: ast.AmbiguousInitializerList) -> None:
-        pass
+        ambiguous_initializer_list.accept_first(self)
 
     def visit_id_expression(self, id_expression: ast.IdExpression) -> None:
-        pass
+        id_expression.accept_reference(self)
 
     def visit_ambiguous_expression(self, ambiguous_expression: ast.AmbiguousExpression) -> None:
-        pass
+        ambiguous_expression.accept_first(self)
 
     def visit_unary_expression(self, unary_expression: ast.UnaryExpression) -> None:
-        pass
+        unary_expression.accept_operand(self)
 
     def visit_binary_expression(self, binary_expression: ast.BinaryExpression) -> None:
-        pass
+        binary_expression.accept_left_operand(self)
+        binary_expression.accept_right_operand(self)
 
     def visit_postfix_expression(self, postfix_expression: ast.PostfixExpression) -> None:
-        pass
+        postfix_expression.accept_operand(self)
 
     def visit_sizeof_expression(self, sizeof_expression: ast.SizeofExpression) -> None:
-        pass
+        sizeof_expression.accept_operand(self)
 
     def visit_sizeof_type_expression(self, sizeof_type_expression: ast.SizeofTypeExpression) -> None:
-        pass
-
-    def visit_sizeof_pack_expression(self, sizeof_pack_expression: ast.SizeofPackExpression) -> None:
-        pass
+        sizeof_type_expression.accept_type(self)
 
     def visit_alignof_expression(self, alignof_expression: ast.AlignofExpression) -> None:
-        pass
+        alignof_expression.accept_type(self)
 
     def visit_noexcept_expression(self, noexcept_expression: ast.NoexceptExpression) -> None:
-        pass
+        noexcept_expression.accept_operand(self)
 
     def visit_call_expression(self, call_expression: ast.CallExpression) -> None:
-        pass
+        call_expression.accept_method(self)
+        call_expression.accept_arguments(self)
 
     def visit_subscript_expression(self, subscript_expression: ast.SubscriptExpression) -> None:
-        pass
+        subscript_expression.accept_operand(self)
+        subscript_expression.accept_subscript(self)
 
     def visit_cast_expression(self, cast_expression: ast.CastExpression) -> None:
-        pass
+        cast_expression.accept_target_type(self)
+        cast_expression.accept_operand(self)
 
     def visit_cxx_cast_expression(self, cxx_cast_expression: ast.CxxCastExpression) -> None:
-        pass
+        cxx_cast_expression.accept_target_type(self)
+        cxx_cast_expression.accept_operand(self)
 
     def visit_conditional_expression(self, conditional_expression: ast.ConditionalExpression) -> None:
-        pass
+        conditional_expression.accept_condition(self)
+        conditional_expression.accept_expression_true(self)
+        conditional_expression.accept_expression_false(self)
 
     def visit_member_access_expression(self, member_access_expression: ast.MemberAccessExpression) -> None:
-        pass
+        member_access_expression.accept_expression(self)
+        member_access_expression.accept_member_expression(self)
 
     def visit_member_access_ptr_expression(self, member_access_ptr_expression: ast.MemberAccessPtrExpression) -> None:
-        pass
+        member_access_ptr_expression.accept_expression(self)
+        member_access_ptr_expression.accept_member_expression(self)
 
     def visit_member_ptr_expression(self, member_ptr_expression: ast.MemberPtrExpression) -> None:
-        pass
+        member_ptr_expression.accept_expression(self)
+        member_ptr_expression.accept_member_expression(self)
 
     def visit_type_id_expression(self, type_id_expression: ast.TypeIdExpression) -> None:
-        pass
+        type_id_expression.accept_operand(self)
 
     def visit_type_id_expression_type(self, type_id_expression_type: ast.TypeIdExpressionType) -> None:
-        pass
+        type_id_expression_type.accept_type(self)
 
     def visit_simple_cast_expression(self, simple_cast_expression: ast.SimpleCastExpression) -> None:
-        pass
+        simple_cast_expression.accept_type(self)
+        simple_cast_expression.accept_expression(self)
 
     def visit_new_expression(self, new_expression: ast.NewExpression) -> None:
-        pass
+        new_expression.accept_placement(self)
+        new_expression.accept_initializer(self)
+        new_expression.accept_type(self)
 
     def visit_delete_expression(self, delete_expression: ast.DeleteExpression) -> None:
-        pass
+        delete_expression.accept_operand(self)
 
     def visit_throw_expression(self, throw_expression: ast.ThrowExpression) -> None:
-        pass
+        throw_expression.accept_operand(self)
 
     def visit_yield_expression(self, yield_expression: ast.YieldExpression) -> None:
-        pass
+        yield_expression.accept_operand(self)
 
     def visit_await_expression(self, await_expression: ast.AwaitExpression) -> None:
-        pass
+        await_expression.accept_operand(self)
 
     def visit_fold_expression_left(self, fold_expression_left: ast.FoldExpressionLeft) -> None:
-        pass
+        fold_expression_left.accept_expression(self)
 
     def visit_fold_expression_right(self, fold_expression_right: ast.FoldExpressionRight) -> None:
-        pass
+        fold_expression_right.accept_expression(self)
 
     def visit_fold_expression_both(self, fold_expression_both: ast.FoldExpressionBoth) -> None:
-        pass
+        fold_expression_both.accept_expression_left(self)
+        fold_expression_both.accept_expression_right(self)
 
     def visit_parenthesized_expression(self, parenthesized_expression: ast.ParenthesizedExpression) -> None:
-        pass
-
-    def visit_this_expression(self, this_expression: ast.ThisExpression) -> None:
-        pass
-
-    def visit_nullptr_expression(self, nullptr_expression: ast.NullPtrExpression) -> None:
-        pass
-
-    def visit_type_trait_expression(self, type_trait_expression: ast.TypeTraitExpression) -> None:
-        pass
+        parenthesized_expression.accept_expression(self)
 
     def visit_braced_init_list(self, braced_init_list: ast.BracedInitList) -> None:
-        pass
+        braced_init_list.accept_initializers(self)
 
     def visit_ambiguous_braced_init_list(self, ambiguous_braced_init_list: ast.AmbiguousBracedInitList) -> None:
-        pass
+        ambiguous_braced_init_list.accept_first(self)
 
     def visit_designated_braced_init_list(self, designated_braced_init_list: ast.DesignatedBracedInitList) -> None:
-        pass
+        designated_braced_init_list.accept_initializers(self)
 
     def visit_designated_initializer(self, designated_initializer: ast.DesignatedInitializer) -> None:
-        pass
-
-    def visit_boolean_literal(self, boolean_literal: ast.BooleanLiteral) -> None:
-        pass
-
-    def visit_integer_literal(self, integer_literal: ast.IntegerLiteral) -> None:
-        pass
-
-    def visit_user_defined_integer_literal(self, user_defined_integer_literal: ast.UserDefinedIntegerLiteral) -> None:
-        pass
-
-    def visit_character_literal(self, character_literal: ast.CharacterLiteral) -> None:
-        pass
-
-    def visit_user_defined_character_literal(
-            self, user_defined_character_literal: ast.UserDefinedCharacterLiteral
-    ) -> None:
-        pass
-
-    def visit_string_literal(self, string_literal: ast.StringLiteral) -> None:
-        pass
-
-    def visit_string_literal_macro(self, string_literal_macro: ast.StringLiteralMacro) -> None:
-        pass
-
-    def visit_user_defined_string_literal(self, user_defined_string_literal: ast.UserDefinedStringLiteral) -> None:
-        pass
+        designated_initializer.accept_value(self)
 
     def visit_string_list(self, string_list: ast.StringList) -> None:
-        pass
-
-    def visit_floating_literal(self, floating_literal: ast.FloatingLiteral) -> None:
-        pass
-
-    def visit_user_defined_floating_literal(self,
-                                            user_defined_floating_literal: ast.UserDefinedFloatingLiteral) -> None:
-        pass
+        string_list.accept_strings(self)
 
     def visit_lambda_expression(self, lambda_expression: ast.LambdaExpression) -> None:
-        pass
+        lambda_expression.accept_capture(self)
+        lambda_expression.accept_attributes(self)
+        lambda_expression.accept_declarator(self)
+        lambda_expression.accept_compound_statement(self)
 
     def visit_template_lambda_expression(self, template_lambda_expression: ast.TemplateLambdaExpression) -> None:
-        pass
-
-    def visit_lambda_capture_default_copy(self, lambda_capture_default_copy: ast.LambdaCaptureDefaultCopy) -> None:
-        pass
-
-    def visit_lambda_capture_default_reference(
-            self, lambda_capture_default_reference: ast.LambdaCaptureDefaultReference
-    ) -> None:
-        pass
+        template_lambda_expression.accept_capture(self)
+        template_lambda_expression.accept_template_parameter_list(self)
+        template_lambda_expression.accept_constraint(self)
+        template_lambda_expression.accept_attributes(self)
+        template_lambda_expression.accept_declarator(self)
+        template_lambda_expression.accept_compound_statement(self)
 
     def visit_lambda_capture_list(self, lambda_capture_list: ast.LambdaCaptureList) -> None:
-        pass
+        lambda_capture_list.accept_capture_list(self)
 
     def visit_simple_capture(self, simple_capture: ast.SimpleCapture) -> None:
-        pass
-
-    def visit_this_capture(self, this_capture: ast.ThisCapture) -> None:
-        pass
-
-    def visit_lambda_specifier(self, lambda_specifier: ast.LambdaSpecifier) -> None:
-        pass
+        simple_capture.accept_initializer(self)
 
     def visit_lambda_declarator(self, lambda_declarator: ast.LambdaDeclarator) -> None:
-        pass
+        lambda_declarator.accept_parameter_list(self)
+        lambda_declarator.accept_lambda_specifier_seq(self)
+        lambda_declarator.accept_noexceot_specification(self)
+        lambda_declarator.accept_attribute_list(self)
+        lambda_declarator.accept_trailing_return_type(self)
+        lambda_declarator.accept_requires_clause(self)
 
     def visit_reference(self, reference: ast.Reference) -> None:
-        pass
+        reference.accept_names(self)
 
     def visit_typename_reference(self, typename_reference: ast.TypenameReference) -> None:
-        pass
+        typename_reference.accept_reference(self)
 
-    def visit_pack_expand_reference(self, typename_reference: ast.PackExpandReference) -> None:
-        pass
-
-    def visit_root_id(self, root_id: ast.RootId) -> None:
-        pass
+    def visit_pack_expand_reference(self, pack_expand_reference: ast.PackExpandReference) -> None:
+        pack_expand_reference.accept_reference(self)
 
     def visit_template_specifier_id(self, template_specifier_id: ast.TemplateSpecifierId) -> None:
-        pass
-
-    def visit_id(self, id: ast.Id) -> None:
-        pass
+        template_specifier_id.accept_id(self)
 
     def visit_template_id(self, template_id: ast.TemplateId) -> None:
-        pass
+        template_id.accept_id(self)
+        template_id.accept_template_arguments(self)
 
     def visit_template_argument_list(self, template_argument_list: ast.TemplateArgumentList) -> None:
-        pass
+        template_argument_list.accept_arguments(self)
 
     def visit_ambiguous_template_argument_list(
             self, ambiguous_template_argument_list: ast.AmbiguousTemplateArgumentList
     ) -> None:
-        pass
-
-    def visit_destructor_id(self, destructor_id: ast.DestructorId) -> None:
-        pass
-
-    def visit_operator_id(self, operator_id: ast.OperatorId) -> None:
-        pass
+        ambiguous_template_argument_list.accept_first(self)
 
     def visit_conversion_operator_id(self, conversion_operator_id: ast.ConversionOperatorId) -> None:
-        pass
-
-    def visit_literal_operator_id(self, literal_operator_id: ast.LiteralOperatorId) -> None:
-        pass
+        conversion_operator_id.accept_conversion_type(self)

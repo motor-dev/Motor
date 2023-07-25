@@ -24,6 +24,9 @@ class AttributeNamed(object):
         self._attribute = attribute
         self._value = value
 
+    def accept(self, visitor: Visitor) -> None:
+        visitor.visit_attribute_named(self._namespace, self)
+
 
 class AttributeNamedList(Attribute):
 

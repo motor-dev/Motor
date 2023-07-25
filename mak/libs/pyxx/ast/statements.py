@@ -43,6 +43,13 @@ class AmbiguousStatement(Statement):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_ambiguous_statement(self)
 
+    def accept_first(self, visitor: Visitor) -> None:
+        self._statement_list[0].accept(visitor)
+
+    def accept_all(self, visitor: Visitor) -> None:
+        for statement in self._statement_list:
+            statement.accept(visitor)
+
 
 class EmptyStatement(Statement):
 
@@ -58,6 +65,9 @@ class ExpressionStatement(Statement):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_expression_statement(self)
 
+    def accept_expression(self, visitor: Visitor) -> None:
+        self._expression.accept(visitor)
+
 
 class DeclarationStatement(Statement):
 
@@ -66,6 +76,9 @@ class DeclarationStatement(Statement):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_declaration_statement(self)
+
+    def accept_declaration(self, visitor: Visitor) -> None:
+        self._declaration.accept(visitor)
 
 
 class CompoundStatement(Statement):
@@ -76,9 +89,14 @@ class CompoundStatement(Statement):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_compound_statement(self)
 
+    def accept_children(self, visitor: Visitor) -> None:
+        for statement in self._statemenent_list:
+            statement.accept(visitor)
+
 
 class ExceptionDeclaration(object):
-    pass
+    def accept(self, visitor: Visitor) -> None:
+        raise NotImplementedError
 
 
 class ExceptionDeclarationError(ExceptionDeclaration):
@@ -90,7 +108,8 @@ class ExceptionDeclarationError(ExceptionDeclaration):
 class ExceptionDeclarationTypeSpecifier(ExceptionDeclaration):
 
     def __init__(
-        self, attribute_list: List[Attribute], type_specifier_seq: TypeSpecifierSeq, declarator: Optional[Declarator]
+            self, attribute_list: List[Attribute], type_specifier_seq: TypeSpecifierSeq,
+            declarator: Optional[Declarator]
     ) -> None:
         self._attribute_list = attribute_list
         self._type_specifier_seq = type_specifier_seq
@@ -98,6 +117,17 @@ class ExceptionDeclarationTypeSpecifier(ExceptionDeclaration):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_exception_declaration_type_specifier(self)
+
+    def accept_attributes(self, visitor: Visitor) -> None:
+        for attribute in self._attribute_list:
+            attribute.accept(visitor)
+
+    def accept_type_specifier_seq(self, visitor: Visitor) -> None:
+        self._type_specifier_seq.accept(visitor)
+
+    def accept_declarator(self, visitor: Visitor) -> None:
+        if self._declarator is not None:
+            self._declarator.accept(visitor)
 
 
 class ExceptionDeclarationAny(ExceptionDeclaration):
@@ -114,6 +144,13 @@ class AmbiguousExceptionDeclaration(ExceptionDeclaration):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_ambiguous_exception_declaration(self)
 
+    def accept_first(self, visitor: Visitor) -> None:
+        self._exception_declaration_list[0].accept(visitor)
+
+    def accept_all(self, visitor: Visitor) -> None:
+        for exception_declaration in self._exception_declaration_list:
+            exception_declaration.accept(visitor)
+
 
 class ExceptionHandler(object):
 
@@ -124,6 +161,12 @@ class ExceptionHandler(object):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_exception_handler(self)
 
+    def accept_exception_declaration(self, visitor: Visitor) -> None:
+        self._exception_declaration.accept(visitor)
+
+    def accept_handler_statement(self, visitor: Visitor) -> None:
+        self._handler_statement.accept(visitor)
+
 
 class TryBlock(Statement):
 
@@ -133,6 +176,13 @@ class TryBlock(Statement):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_try_block(self)
+
+    def accept_try_statement(self, visitor: Visitor) -> None:
+        self._try_statement.accept(visitor)
+
+    def accept_handlers(self, visitor: Visitor) -> None:
+        for handler in self._handlers:
+            handler.accept(visitor)
 
 
 class BreakStatement(Statement):
@@ -155,6 +205,10 @@ class ReturnStatement(Statement):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_return_statement(self)
 
+    def accept_return_expression(self, visitor: Visitor) -> None:
+        if self._return_expression is not None:
+            self._return_expression.accept(visitor)
+
 
 class CoReturnStatement(Statement):
 
@@ -163,6 +217,10 @@ class CoReturnStatement(Statement):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_co_return_statement(self)
+
+    def accept_return_expression(self, visitor: Visitor) -> None:
+        if self._return_expression is not None:
+            self._return_expression.accept(visitor)
 
 
 class GotoStatement(Statement):
@@ -177,37 +235,62 @@ class GotoStatement(Statement):
 class LabeledStatement(Statement):
 
     def __init__(self, attributes: List[Attribute], label: str, statement: Statement) -> None:
-        self._attributes = attributes
+        self._attribute_list = attributes
         self._label = label
         self._statement = statement
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_labeled_statement(self)
 
+    def accept_attributes(self, visitor: Visitor) -> None:
+        for attribute in self._attribute_list:
+            attribute.accept(visitor)
+
+    def accept_statement(self, visitor: Visitor) -> None:
+        self._statement.accept(visitor)
+
 
 class CaseStatement(Statement):
 
     def __init__(self, attributes: List[Attribute], expression: Expression, statement: Statement) -> None:
-        self._attributes = attributes
+        self._attribute_list = attributes
         self._expression = expression
         self._statement = statement
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_case_statement(self)
 
+    def accept_attributes(self, visitor: Visitor) -> None:
+        for attribute in self._attribute_list:
+            attribute.accept(visitor)
+
+    def accept_expression(self, visitor: Visitor) -> None:
+        self._expression.accept(visitor)
+
+    def accept_statement(self, visitor: Visitor) -> None:
+        self._statement.accept(visitor)
+
 
 class DefaultStatement(Statement):
 
     def __init__(self, attributes: List[Attribute], statement: Statement) -> None:
-        self._attributes = attributes
+        self._attribute_list = attributes
         self._statement = statement
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_default_statement(self)
 
+    def accept_attributes(self, visitor: Visitor) -> None:
+        for attribute in self._attribute_list:
+            attribute.accept(visitor)
+
+    def accept_statement(self, visitor: Visitor) -> None:
+        self._statement.accept(visitor)
+
 
 class _SelectionCondition(object):
-    pass
+    def accept(self, visitor: Visitor) -> None:
+        raise NotImplementedError
 
 
 class SelectionCondition(_SelectionCondition):
@@ -219,6 +302,13 @@ class SelectionCondition(_SelectionCondition):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_selection_condition(self)
 
+    def accept_init_statement(self, visitor: Visitor) -> None:
+        if self._init_statement is not None:
+            self._init_statement.accept(visitor)
+
+    def accept_condition(self, visitor: Visitor) -> None:
+        self._condition.accept(visitor)
+
 
 class AmbiguousSelectionCondition(_SelectionCondition):
 
@@ -227,6 +317,13 @@ class AmbiguousSelectionCondition(_SelectionCondition):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_ambiguous_selection_condition(self)
+
+    def accept_first(self, visitor: Visitor) -> None:
+        self._condition_list[0].accept(visitor)
+
+    def accept_all(self, visitor: Visitor) -> None:
+        for condition in self._condition_list:
+            condition.accept(visitor)
 
 
 class SwitchStatement(Statement):
@@ -238,12 +335,18 @@ class SwitchStatement(Statement):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_switch_statement(self)
 
+    def accept_condition(self, visitor: Visitor) -> None:
+        self._condition.accept(visitor)
+
+    def accept_statement(self, visitor: Visitor) -> None:
+        self._statement.accept(visitor)
+
 
 class IfStatement(Statement):
 
     def __init__(
-        self, condition: _SelectionCondition, true_statement: Statement, false_statement: Optional[Statement],
-        is_constexpr: bool
+            self, condition: _SelectionCondition, true_statement: Statement, false_statement: Optional[Statement],
+            is_constexpr: bool
     ) -> None:
         self._condition = condition
         self._true_statement = true_statement
@@ -252,6 +355,16 @@ class IfStatement(Statement):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_if_statement(self)
+
+    def accept_condition(self, visitor: Visitor) -> None:
+        self._condition.accept(visitor)
+
+    def accept_true_statement(self, visitor: Visitor) -> None:
+        self._true_statement.accept(visitor)
+
+    def accept_false_statement(self, visitor: Visitor) -> None:
+        if self._false_statement is not None:
+            self._false_statement.accept(visitor)
 
 
 class IfConstevalStatement(Statement):
@@ -264,6 +377,13 @@ class IfConstevalStatement(Statement):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_if_consteval_statement(self)
 
+    def accept_true_statement(self, visitor: Visitor) -> None:
+        self._true_statement.accept(visitor)
+
+    def accept_false_statement(self, visitor: Visitor) -> None:
+        if self._false_statement is not None:
+            self._false_statement.accept(visitor)
+
 
 class WhileStatement(Statement):
 
@@ -273,6 +393,12 @@ class WhileStatement(Statement):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_while_statement(self)
+
+    def accept_condition(self, visitor: Visitor) -> None:
+        self._condition.accept(visitor)
+
+    def accept_statement(self, visitor: Visitor) -> None:
+        self._statement.accept(visitor)
 
 
 class DoWhileStatement(Statement):
@@ -284,9 +410,16 @@ class DoWhileStatement(Statement):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_do_while_statement(self)
 
+    def accept_condition(self, visitor: Visitor) -> None:
+        self._condition.accept(visitor)
+
+    def accept_statement(self, visitor: Visitor) -> None:
+        self._statement.accept(visitor)
+
 
 class ForCondition(object):
-    pass
+    def accept(self, viitor: Visitor) -> None:
+        raise NotImplementedError
 
 
 class AmbiguousForCondition(ForCondition):
@@ -297,11 +430,18 @@ class AmbiguousForCondition(ForCondition):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_ambiguous_for_condition(self)
 
+    def accept_first(self, visitor: Visitor) -> None:
+        self._for_condition_list[0].accept(visitor)
+
+    def accept_all(self, visitor: Visitor) -> None:
+        for for_condition in self._for_condition_list:
+            for_condition.accept(visitor)
+
 
 class ForConditionInit(ForCondition):
 
     def __init__(
-        self, init_statement: Statement, condition: Optional[Expression], update: Optional[Expression]
+            self, init_statement: Statement, condition: Optional[Expression], update: Optional[Expression]
     ) -> None:
         self._init_statement = init_statement
         self._condition = condition
@@ -309,6 +449,17 @@ class ForConditionInit(ForCondition):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_for_condition_init(self)
+
+    def accept_init_statement(self, visitor: Visitor) -> None:
+        self._init_statement.accept(visitor)
+
+    def accept_condition(self, visitor: Visitor) -> None:
+        if self._condition is not None:
+            self._condition.accept(visitor)
+
+    def accept_update(self, visitor: Visitor) -> None:
+        if self._update is not None:
+            self._update.accept(visitor)
 
 
 class ForConditionRange(ForCondition):
@@ -320,6 +471,13 @@ class ForConditionRange(ForCondition):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_for_condition_range(self)
 
+    def accept_init_statement(self, visitor: Visitor) -> None:
+        if self._init_statement is not None:
+            self._init_statement.accept(visitor)
+
+    def accept_declaration(self, visitor: Visitor) -> None:
+        self._declaration.accept(visitor)
+
 
 class ForStatement(Statement):
 
@@ -329,3 +487,9 @@ class ForStatement(Statement):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_for_statement(self)
+
+    def accept_for_condition(self, visitor: Visitor) -> None:
+        self._for_range.accept(visitor)
+
+    def accept_statement(self, visitor: Visitor) -> None:
+        self._statement.accept(visitor)

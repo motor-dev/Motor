@@ -91,12 +91,12 @@ class StructuredBindingDeclaration(Declaration):
     def accept_decl_specifier_seq(self, visitor):
         # type: (Visitor) -> None
         if self._decl_specifier_seq is not None:
-            self._decl_specifier_seq.accept(self)
+            self._decl_specifier_seq.accept(visitor)
 
     def accept_ref_qualifier(self, visitor):
         # type: (Visitor) -> None
         if self._ref_qualifier is not None:
-            self._ref_qualifier.accept(self)
+            self._ref_qualifier.accept(visitor)
 
     def accept_initializer(self, visitor):
         # type: (Visitor) -> None
@@ -149,7 +149,7 @@ class AliasDeclaration(Declaration):
 
     def accept_type_id(self, visitor):
         # type: (Visitor) -> None
-        self._type_id.accept(self)
+        self._type_id.accept(visitor)
 
 
 class NamespaceDeclaration(Declaration):
@@ -348,7 +348,7 @@ class AmbiguousInitDeclarator(_InitDeclarator):
 
     def __init__(self, init_declarators):
         # type: (List[InitDeclarator]) -> None
-        self.init_declarators = init_declarators
+        self._init_declarators = init_declarators
 
     def accept(self, visitor):
         # type: (Visitor) -> None
@@ -407,12 +407,12 @@ class MemberInitDeclarator(InitDeclarator):
     def acceot_virt_specifiers(self, visitor):
         # type: (Visitor) -> None
         for virt_specifier in self._virt_specifier_seq:
-            virt_specifier.accept(self)
+            virt_specifier.accept(visitor)
 
     def accept_bitfield_width(self, visitor):
         # type: (Visitor) -> None
         if self._bitfield_width is not None:
-            self._bitfield_width.accept(self)
+            self._bitfield_width.accept(visitor)
 
 
 class _InitDeclaratorList:
