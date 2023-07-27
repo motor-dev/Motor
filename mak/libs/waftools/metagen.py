@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from waflib import Task, Errors
+from waflib import Task, Errors, Options
 from waflib.TaskGen import extension, feature, before_method, after_method
 import sys
 import pickle
@@ -13,6 +13,9 @@ class metagen(Task.Task):
     ext_out = ['.cc']
 
     def run(self):
+        werror = []
+        if Options.options.werror:
+            werror.append('-Werror')
         return self.exec_command(
             [
                 sys.executable,
@@ -29,6 +32,7 @@ class metagen(Task.Task):
                 self.generator.root_namespace,
                 '--tmp',
                 self.generator.bld.bldnode.parent.parent.abspath(),
+            ] + werror + [
                 self.inputs[0].path_from(self.generator.bld.bldnode),
                 self.inputs[0].path_from(self.generator.bld.srcnode),
                 self.outputs[0].path_from(self.generator.bld.bldnode),

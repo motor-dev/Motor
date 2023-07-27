@@ -2,37 +2,44 @@ import sys
 import io
 import argparse
 import glrp
-from typing import TypeVar, cast, Dict, Callable, Tuple, Union, Any, List, Optional
+from typing import cast, Dict, Callable, Tuple, Union, Any, List, Optional
 
-T = TypeVar('T', bound='Callable[..., Dict[str, Any]]')
+from typing_extensions import ParamSpec, Concatenate
+
+T = ParamSpec('T')
 
 
-def diagnostic(func: T) -> T:
-    def call(
-            self: 'Logger', position: Tuple[int, int], *args: Union[str, int],
-            **kw_args: Union[str, int]
-    ) -> None:
+def diagnostic(func: Callable[Concatenate["Logger", Tuple[int, int], T], Dict[str, Any]]) \
+        -> Callable[Concatenate["Logger", Tuple[int, int], T], None]:
+    def call(self: Logger, position: Tuple[int, int], *args: T.args, **kwargs: T.kwargs) -> None:
         if call in self._expected_diagnostics:
-            self._expected_diagnostics.remove(cast(T, call))
-        format_values = func(self, position, *args, **kw_args)
+            self._expected_diagnostics.remove(call)
+        format_values = func(*args, **kwargs)
         message = getattr(self.LANG, func.__name__, func.__doc__)
         assert isinstance(message, str)
         self._msg_position('note', position, message.format(**format_values))
 
     setattr(Logger, func.__name__, call)
-    return cast(T, call)
+    return call
 
 
-def warning(flag_name: str, enabled: bool = False, enabled_in: List[str] = []) -> Callable[[T], T]:
-    def inner(func: T) -> T:
+def warning(flag_name: str, enabled: bool = False, enabled_in: List[str] = []) \
+        -> Callable[
+            [Callable[Concatenate["Logger", Tuple[int, int], T], Dict[str, Any]]],
+            Callable[Concatenate["Logger", Tuple[int, int], T], bool]]:
+    def inner(func: Callable[Concatenate["Logger", Tuple[int, int], T], Dict[str, Any]]) \
+            -> Callable[Concatenate["Logger", Tuple[int, int], T], bool]:
 
         def call(
-                self: 'Logger', position: Tuple[int, int], *args: Union[str, int],
-                **kw_args: Union[str,
-                int]
+                self: "Logger",
+                position: Tuple[int, int],
+                *args: T.args,
+                **kw_args: T.kwargs
         ) -> bool:
+
             if not getattr(self._arguments, flag_name):
                 return False
+
             format_values = func(self, position, *args, **kw_args)
             self._warning_count += 1
             if self._warning_count == 1 and self._arguments.warn_error:
@@ -50,15 +57,16 @@ def warning(flag_name: str, enabled: bool = False, enabled_in: List[str] = []) -
         setattr(call, 'enabled_in', enabled_in)
 
         setattr(Logger, func.__name__, call)
-        return cast(T, call)
+        return call
 
     return inner
 
 
-def error(func: T) -> T:
+def error(func: Callable[Concatenate["Logger", Tuple[int, int], T], Dict[str, Any]]) \
+        -> Callable[Concatenate["Logger", Tuple[int, int], T], None]:
     def call(
-            self: 'Logger', position: Tuple[int, int], *args: Union[str, int],
-            **kw_args: Union[str, int]
+            self: 'Logger', position: Tuple[int, int], *args: T.args,
+            **kw_args: T.kwargs
     ) -> None:
         self._error_count += 1
         format_values = func(self, position, *args, **kw_args)
@@ -68,7 +76,7 @@ def error(func: T) -> T:
 
     call.__name__ = func.__name__
     setattr(Logger, func.__name__, call)
-    return cast(T, call)
+    return call
 
 
 class Logger(glrp.Logger):
@@ -96,9 +104,11 @@ class Logger(glrp.Logger):
         group.add_argument(
             "-Werror", dest="warn_error", help="Treat warning as errors", default=False, action="store_true"
         )
+        seen = set()
         for m in self.__dict__.values():
             flag = getattr(m, 'flag_name', None)
-            if flag is not None:
+            if flag is not None and flag not in seen:
+                seen.add(flag)
                 group.add_argument('-W{}'.format(flag), dest=flag, help=argparse.SUPPRESS, action='store_true',
                                    default=getattr(m, 'enabled'))
                 group.add_argument('-Wno-{}'.format(flag), dest=flag, help=argparse.SUPPRESS, action='store_false')
@@ -110,7 +120,6 @@ class Logger(glrp.Logger):
         self._warning_count = 0
         self._error_count = 0
         self._diagnostics_format = Logger.IDE_FORMAT[getattr(arguments, 'diagnostics_format')]
-        self._expected_diagnostics = []  # type: List[Callable[..., Dict[str, Any]]]
 
     def set_lexer(self, lexer: glrp.Lexer) -> None:
         self._lexer = lexer
@@ -146,12 +155,12 @@ class Logger(glrp.Logger):
             self._out_file.write(context[-1])
             self._out_file.write('\n%s%s%s\n' % (color_caret, '^' * (end_column - 1), color_off))
 
-    def push_expected_diagnostics(self, diagnostics: List[Callable[..., Dict[str, Any]]]) -> None:
+    def push_expected_diagnostics(self, diagnostics: List[Callable[..., Any]]) -> None:
         self._expected_diagnostics += diagnostics
 
     def pop_expected_diagnostics(self) -> bool:
         result = bool(self._expected_diagnostics)
-        self._expected_diagnostics = []
+        self._expected_diagnostics = []  # type: List[Callable[..., Union[bool|None]]]
         return result
 
 
