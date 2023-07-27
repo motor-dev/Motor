@@ -13,7 +13,7 @@ class FileSystemWatch;
 class motor_api(FILESYSTEM) DiskFolder : public Folder
 {
 public:
-    class [[motor::meta(export = no)]] Watch;
+    class Watch;
     friend class Watch;
 
 private:
