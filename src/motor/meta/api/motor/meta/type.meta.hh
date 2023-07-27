@@ -61,7 +61,7 @@ struct motor_api(META) Type
 
 public:
     template < typename T >
-    [[motor::meta(export = no)]] bool           isA() const;
+    bool                                        isA() const;
     [[motor::meta(export = no)]] ConversionCost calculateConversionTo(const Type& other) const;
 
 private:
