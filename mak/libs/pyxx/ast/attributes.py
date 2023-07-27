@@ -97,7 +97,8 @@ class AttributeDocumentation(Attribute):
 
 class AttributeMacro(Attribute):
 
-    def __init__(self, attribute: str, values: Optional[List[Token]]) -> None:
+    def __init__(self, position: Tuple[int, int], attribute: str, values: Optional[List[Token]]) -> None:
+        self.position = position
         self._attribute = attribute
         self._values = values
 

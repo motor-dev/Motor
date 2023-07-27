@@ -87,13 +87,13 @@ def attribute_specifier_documentation(self: CxxParser, p: glrp.Production) -> An
 @glrp.rule('attribute-specifier : [prec:left,1]"attribute-specifier-macro"')
 @cxx98
 def attribute_specifier_macro(self: CxxParser, p: glrp.Production) -> Any:
-    return AttributeMacro(p[0].text(), None)
+    return AttributeMacro(p[0].position, p[0].text(), None)
 
 
 @glrp.rule('attribute-specifier : [prec:left,1]"attribute-specifier-macro-function" "(" balanced-token-seq? ")"')
 @cxx98
 def attribute_specifier_macro_function(self: CxxParser, p: glrp.Production) -> Any:
-    return AttributeMacro(p[0].text(), p[2])
+    return AttributeMacro(p[0].position, p[0].text(), p[2])
 
 
 @glrp.rule('attribute-specifier : [prec:left,1]"[[" attribute-using-prefix? attribute-list "]" "]"')
