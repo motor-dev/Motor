@@ -57,10 +57,6 @@ public:
     inline void* memory();
 
 public:
-    enum MakeConstType
-    {
-        MakeConst
-    };
     enum MakeCopyType
     {
         MakeCopy
@@ -69,8 +65,6 @@ public:
     inline Value();
     template < typename T >
     explicit Value(T t);
-    template < typename T >
-    explicit Value(T t, MakeConstType constify);
     Value(const Value& other);
     template < typename T >
     explicit Value(ByRefType< T > t);

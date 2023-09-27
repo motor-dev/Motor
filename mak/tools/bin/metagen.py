@@ -2,14 +2,13 @@ import io
 import os
 import sys
 import re
+from typing import Dict, Optional, Tuple, Any, List, BinaryIO, TextIO
+import pickle
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(sys.argv[0]))), 'libs'))
 import pyxx
 import glrp
 from pyxx import ast, utils, messages
-
-from typing import Dict, Optional, Tuple, Any, List
-import pickle
 
 
 @messages.error
@@ -104,20 +103,20 @@ class MetaObject(object):
     def file_name(self) -> str:
         return self._parent.file_name()
 
-    def dump_exports(self, namespace: List[str], out_classes: io.BufferedWriter,
-                     out_namespace: io.BufferedWriter) -> None:
+    def dump_exports(self, namespace: List[str], out_classes: BinaryIO,
+                     out_namespace: BinaryIO) -> None:
         for name, child in self._children.items():
             namespace.append(name)
             child.dump_exports(namespace, out_classes, out_namespace)
             namespace.pop(-1)
 
-    def write_declarations(self, namespace: List[str], out: io.TextIOWrapper) -> None:
+    def write_declarations(self, namespace: List[str], out: TextIO) -> None:
         for name, child in self._children.items():
             namespace.append(name)
             child.write_declarations(namespace, out)
             namespace.pop(-1)
 
-    def write_metaclasses(self, namespace: List[str], out: io.TextIOWrapper) -> None:
+    def write_metaclasses(self, namespace: List[str], out: TextIO) -> None:
         object_names = []
         for name, child in self._children.items():
             namespace.append(name)
@@ -133,23 +132,20 @@ class MetaObject(object):
                 out.write('\nnamespace %s\n'
                           '{\n'
                           '\n' % (' { namespace '.join(namespace)))
-            out.write('static ::Motor::Meta::Object s_%s_objects[%d] = {\n' % (file_name, len(object_names)))
+            out.write('MOTOR_EXPORT ::Motor::Meta::Object s_%s_objects[%d] = {\n' % (file_name, len(object_names)))
             for i, (object_name, object_value) in enumerate(object_names):
                 if i < len(object_names) - 1:
                     next = '{&s_%s_objects[%d]}' % (file_name, i + 1)
                     comma = ','
                 else:
-                    next = '%s->objects' % owner_name
+                    next = '{%s->objects.exchange(s_%s_objects)}' % (owner_name, file_name)
                     comma = ''
                 out.write('    {\n'
                           '        %s,\n'
-                          '        {nullptr},\n'
                           '        %s,\n'
                           '        ::Motor::Meta::Value(%s)\n'
                           '    }%s\n' % (next, object_name, object_value, comma))
-            out.write('};\n'
-                      'MOTOR_EXPORT const ::Motor::Meta::Object* s_%s_registry = %s->objects.set(s_%s_objects);\n'
-                      '\n' % (file_name, owner_name, file_name))
+            out.write('};\n')
             if namespace:
                 out.write('%s\n' % ('}' * len(namespace)))
 
@@ -178,7 +174,7 @@ class RootNamespace(MetaObject):
     def name(self) -> str:
         return '::Motor::' + self._cpp_name + '()'
 
-    def write_declarations(self, namespace: List[str], out: io.TextIOWrapper):
+    def write_declarations(self, namespace: List[str], out: TextIO):
         out.write('namespace Motor { raw<Meta::Class> %s(); }\n' % self._cpp_name)
         super().write_declarations(namespace, out)
 
@@ -198,11 +194,11 @@ class Namespace(MetaObject):
     def cpp_name(self) -> str:
         return self._cpp_name
 
-    def dump_exports(self, namespace: List[str], out_classes: io.BufferedWriter, out_namespace: io.BufferedWriter):
+    def dump_exports(self, namespace: List[str], out_classes: BinaryIO, out_namespace: BinaryIO):
         pickle.dump(namespace, out_namespace)
         super().dump_exports(namespace, out_classes, out_namespace)
 
-    def write_declarations(self, namespace: List[str], out: io.TextIOWrapper):
+    def write_declarations(self, namespace: List[str], out: TextIO):
         out.write('namespace Motor { raw<Meta::Class> %s(); }\n' % self._cpp_name)
         super().write_declarations(namespace, out)
 
@@ -262,15 +258,15 @@ class Class(MetaObject):
                     comma = ''
                 out.write('    {\n'
                           '        %s,\n'
-                          '        {nullptr},\n'
                           '        %s,\n'
                           '        ::Motor::Meta::Value(%s)\n'
                           '    }%s\n' % (next, object_name, object_value, comma))
             out.write('};\n')
             objects = '{s_objects}'
         if self._superclass != 'void':
-            offset = 'static_cast<i32>(reinterpret_cast<char*>(static_cast<%s*>(reinterpret_cast<%s*>(1)))-reinterpret_cast<char*>(1))' % (
-                self._superclass, full_name)
+            offset = 'static_cast<i32>(reinterpret_cast<char*>(static_cast<%s*>' \
+                     '(reinterpret_cast<%s*>(1)))-reinterpret_cast<char*>(1))' % (
+                         self._superclass, full_name)
         else:
             offset = '0'
         parent = '::Motor::Meta::ClassID<%s>::klass()' % self._superclass

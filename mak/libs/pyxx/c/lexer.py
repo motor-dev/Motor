@@ -1,6 +1,7 @@
 import glrp
 import decimal
-from motor_typing import TYPE_CHECKING
+from ..messages import Logger
+from typing import Dict, Optional, Set, List, Tuple, Generator
 
 decimal.getcontext().prec = 24
 
@@ -103,18 +104,18 @@ _keywords = (
     '_Noreturn',
     '_Static_assert',
     '_Thread_local',
-)                      # type: Tuple[str,...]
+)  # type: Tuple[str,...]
 
 
 class C89Lexer(glrp.Lexer):
     tokens = ('enumeration-constant', '[[') + _keywords
     keywords = _keywords
 
-    def __init__(self):
-        # type: () -> None
+    def __init__(self, logger: Logger):
         glrp.Lexer.__init__(self)
-        self._enum_constants = set([]) # type: Set[str]
-        self._macros = {}              # type: Dict[str, str]
+        self._logger = logger
+        self._enum_constants = set([])  # type: Set[str]
+        self._macros = {}  # type: Dict[str, str]
 
     @glrp.token(r"\[", "[")
     @glrp.token(r"\]", "]")
@@ -170,7 +171,7 @@ class C89Lexer(glrp.Lexer):
     @glrp.token(r'\#(?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'preprocessor', warn=False)
     def preprocessor(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        #if t.value.find('include') != -1:
+        # if t.value.find('include') != -1:
         #    t.lexer.includes.append(t.value)
         return None
 
@@ -185,10 +186,10 @@ class C89Lexer(glrp.Lexer):
         # type: (glrp.Token) -> Optional[glrp.Token]
         comment = self.text(t)
         return None
-        #if comment[1] == '/' and comment[2] in ('/', '!') or comment[1] == '*' and comment[2] in ('*', '!'):
+        # if comment[1] == '/' and comment[2] in ('/', '!') or comment[1] == '*' and comment[2] in ('*', '!'):
         #    self.set_token_type(t, 'doxycomment')
         #    return t
-        #else:
+        # else:
         #    return None
 
     @glrp.token(_identifier, 'identifier')
@@ -231,7 +232,7 @@ class C89Lexer(glrp.Lexer):
         # type: (bool) -> Generator[glrp.Token, None, None]
         # override token to concatenate [ [ into [[
         # preserving comments and other items between the [ symbols
-        queue = []     # type: List[glrp.Token]
+        queue = []  # type: List[glrp.Token]
         generator = glrp.Lexer._token(self, track_blanks)
         bracket_id = self.get_token_id('[')
         while True:
@@ -242,14 +243,14 @@ class C89Lexer(glrp.Lexer):
             except StopIteration:
                 break
             else:
-                if token._id == bracket_id:
+                if token.id == bracket_id:
                     try:
                         next_token = next(generator)
                     except StopIteration:
                         yield token
                     else:
-                        if next_token._id == bracket_id:
-                            next_token._skipped_tokens = token._skipped_tokens + [token] + next_token._skipped_tokens
+                        if next_token.id == bracket_id:
+                            next_token._skipped_tokens = token.skipped_tokens + [token] + next_token.skipped_tokens
                             self.set_token_type(next_token, '[[')
                             yield next_token
                         else:
@@ -273,7 +274,3 @@ class C17Lexer(C11Lexer):
 
 class C23Lexer(C17Lexer):
     pass
-
-
-if TYPE_CHECKING:
-    from typing import Dict, Optional, Set, List, Tuple, Generator

@@ -27,7 +27,6 @@ struct ClassID< KernelScheduler::Segments< T > >
     {
         static Meta::Object s_productClass = {
             motor_class< KernelScheduler::ISegments >()->objects,
-            {nullptr},
             KernelScheduler::IParameter::getProductTypePropertyName(),
             Meta::Value(
                 motor_class< KernelScheduler::Product<
@@ -35,7 +34,6 @@ struct ClassID< KernelScheduler::Segments< T > >
 
         static Meta::Object s_parameterClassProperty
             = {{&s_productClass},
-               {nullptr},
                istring("ParameterClass"),
                Meta::Value(motor_class< typename minitl::remove_const< T >::type >())};
 

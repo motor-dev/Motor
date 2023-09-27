@@ -8,7 +8,6 @@ import sys
 
 
 class Grammar(object):
-
     class Merge(object):
 
         def __init__(self, result, action, arguments):
@@ -26,8 +25,8 @@ class Grammar(object):
     class Rule(object):
 
         def __init__(
-            self, id, prod_symbol, prod_name, production, action, annnotation_list, filename, lineno, debug_str,
-            merge_list
+                self, id, prod_symbol, prod_name, production, action, annnotation_list, filename, lineno, debug_str,
+                merge_list
         ):
             # type: (int, int, str, Tuple[int,...], Action, List[Tuple[str, List[str], int]], str, int, str, List[Grammar.Merge]) -> None
             self._id = id
@@ -39,7 +38,7 @@ class Grammar(object):
             self._filename = filename
             self._lineno = lineno
             predecessor = self.production[-1] if len(self.production) else None
-            self._annotations = {}     # type: Dict[int, Dict[str, List[str]]]
+            self._annotations = {}  # type: Dict[int, Dict[str, List[str]]]
             for annotation, values, index in annnotation_list:
                 if index == len(production):
                     index = -1
@@ -141,11 +140,11 @@ class Grammar(object):
 def _create_productions(rules, merges, index, log, name_map, terminals, start_id):
     # type: (List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, List[Tuple[str, MergeAction, Tuple[str, ...]]]], Dict[str, int], Logger, List[str], Dict[str, Tuple[int, bool]], int) -> Tuple[Dict[int, Grammar.Production], List[Tuple[int, Tuple[int,...], Action, Dict[str, Grammar.Merge]]]]
     rule_index = 1
-    productions = {}   # type: Dict[int, Grammar.Production]
+    productions = {}  # type: Dict[int, Grammar.Production]
     rule_table = []
 
-    symbol_usage = [0] * len(index)    # type: List[int]
-    unreachable = []                   # type: List[Grammar.Production]
+    symbol_usage = [0] * len(index)  # type: List[int]
+    unreachable = []  # type: List[Grammar.Production]
     errors = False
 
     merge_rules = {}
@@ -156,7 +155,7 @@ def _create_productions(rules, merges, index, log, name_map, terminals, start_id
         prod_symbol = index[nonterminal]
         try:
             symbols = tuple(index[s] for s in production)
-        except KeyError as error:                                                                        # unknown rule or terminal
+        except KeyError as error:  # unknown rule or terminal
             log.error('%s:%d: Symbol %s used, but not defined as a token or a rule' % (filename, lineno, str(error)))
             errors = True
         else:

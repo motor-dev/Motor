@@ -60,7 +60,6 @@ from ....ast.attributes import (
     AttributeNamedList,
 )
 from ....ast.pack import PackExpandType, PackExpandExpression, PackExpandAttributeNamed
-from motor_typing import TYPE_CHECKING
 
 
 @glrp.rule('attribute-specifier-seq? : attribute-specifier-seq? attribute-specifier')
@@ -77,8 +76,8 @@ def attribute_specifier_seq_opt(self: CxxParser, p: glrp.Production) -> Any:
     return []
 
 
-@glrp.rule('attribute-specifier : [prec:left,1]"doxycomment-line"')
-@glrp.rule('attribute-specifier : [prec:left,1]"doxycomment-block"')
+# @glrp.rule('attribute-specifier : [prec:left,1]"doxycomment-line-start" "doxycomment-line-end"')
+@glrp.rule('attribute-specifier : [prec:left,1]"doxycomment-block-start" "doxycomment-block-end"')
 @cxx98
 def attribute_specifier_documentation(self: CxxParser, p: glrp.Production) -> Any:
     return AttributeDocumentation(p[0])

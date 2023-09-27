@@ -110,15 +110,18 @@ class Logger:
 
     IDE_FORMAT = {
         'msvc':
-            '{color_filename}{filename}{color_off}({line:d},{column:d}) : {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
+            '{color_filename}{filename}{color_off}({line:d},{column:d}) : '
+            '{color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
         'unix':
-            '{color_filename}{filename}{color_off}:{line:d}:{column:d}: {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
+            '{color_filename}{filename}{color_off}:{line:d}:{column:d}: '
+            '{color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
         'vi':
-            '{color_filename}{filename}{color_off} +{line:d}:{column:d}: {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
+            '{color_filename}{filename}{color_off} +{line:d}:{column:d}: '
+            '{color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
     }
 
     @classmethod
-    def init_diagnostic_flags(self, group):
+    def init_diagnostic_flags(cld, group):
         # type: (_ArgumentGroup) -> None
         group.add_argument(
             "-e",
@@ -131,7 +134,7 @@ class Logger:
         group.add_argument(
             "-Werror", dest="warn_error", help="Treat warning as errors", default=False, action="store_true"
         )
-        for m in self.__dict__.values():
+        for m in cld.__dict__.values():
             flag = getattr(m, 'flag_name', None)
             if flag is not None:
                 group.add_argument('-W{}'.format(flag), dest=flag, help=argparse.SUPPRESS, action='store_true')
@@ -144,7 +147,7 @@ class Logger:
         self._diagnostics_format = Logger.IDE_FORMAT[getattr(arguments, 'diagnostics_format')]
         self._warning_count = 0
         self._error_count = 0
-        self._expected_diagnostics = [] # type: List[Callable[..., Dict[str, Any]]]
+        self._expected_diagnostics = []  # type: List[Callable[..., Dict[str, Any]]]
 
     def _msg(self, error_type, position, message):
         # type: (str, IrPosition, str) -> None
@@ -273,6 +276,7 @@ class Logger:
 logger = None
 
 from motor_typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from typing import Dict, Callable, TypeVar, Union, Any, List, Tuple
     from ..ir_position import IrPosition

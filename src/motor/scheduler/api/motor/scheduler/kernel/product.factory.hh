@@ -51,13 +51,11 @@ struct ClassID< KernelScheduler::Product< T > >
                                             nullptr};
         raw< const Meta::Class > result  = {&s_class};
 
-        static Meta::Object        registry = {KernelScheduler::IProduct::getNamespace()->objects,
-                                               {nullptr},
-                                               s_class.name,
-                                               Meta::Value(result)};
-        static const Meta::Object* ptr
-            = KernelScheduler::IProduct::getNamespace()->objects.set(&registry);
-        motor_forceuse(ptr);
+        static Meta::Object registry
+            = {{KernelScheduler::IProduct::getNamespace()->objects.exchange(&registry)},
+               s_class.name,
+               Meta::Value(result)};
+        motor_forceuse(registry);
 
         return result;
     }

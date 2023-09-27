@@ -114,11 +114,10 @@ void* Gtk3Plugin::allocate(u32 size)
 
 void Gtk3Plugin::registerValue(const istring& name, const Meta::Value& value)
 {
-    Meta::Object objectTemplate
-        = {motor_plugin_gui_gtk3_Namespace()->objects, {nullptr}, name, Meta::Value()};
-    void* memory  = this->allocate< Meta::Object >();
-    auto* object  = new(memory) Meta::Object(objectTemplate);
-    object->value = value;
+    Meta::Object objectTemplate = {motor_plugin_gui_gtk3_Namespace()->objects, name, Meta::Value()};
+    void*        memory         = this->allocate< Meta::Object >();
+    auto*        object         = new(memory) Meta::Object(objectTemplate);
+    object->value               = value;
 
     motor_plugin_gui_gtk3_Namespace()->objects.set(object);
 }

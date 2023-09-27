@@ -13,9 +13,11 @@ class metagen(Task.Task):
     ext_out = ['.cc']
 
     def run(self):
-        werror = []
+        extra_options = []
         if Options.options.werror:
-            werror.append('-Werror')
+            extra_options.append('-Werror')
+        if sys.stdout.isatty():
+            extra_options.append('--diagnostics-color')
         return self.exec_command(
             [
                 sys.executable,
@@ -32,7 +34,7 @@ class metagen(Task.Task):
                 self.generator.root_namespace,
                 '--tmp',
                 self.generator.bld.bldnode.parent.parent.abspath(),
-            ] + werror + [
+            ] + extra_options + [
                 self.inputs[0].path_from(self.generator.bld.bldnode),
                 self.inputs[0].path_from(self.generator.bld.srcnode),
                 self.outputs[0].path_from(self.generator.bld.bldnode),

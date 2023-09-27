@@ -25,15 +25,6 @@ Value::Value(T t) : m_type(motor_type< T >())
 }
 
 template < typename T >
-Value::Value(T t, MakeConstType /*constify*/)
-    : m_type(Type::makeType(motor_type< T >(), Type::MakeConst))
-    , m_buffer()
-    , m_reference(false)
-{
-    store(&t);
-}
-
-template < typename T >
 Value::Value(ByRefType< T > t) : m_type(motor_type< T >())
                                , m_buffer()
                                , m_reference(true)
@@ -53,7 +44,7 @@ inline Value::Value(ByRefType< Value > t) : m_type(t.value.m_type)
 
 template <>
 inline Value::Value(ByRefType< const Value > t)
-    : m_type(Type::makeType(t.value.m_type, Type::MakeConst))
+    : m_type(t.value.m_type.makeConst())
     , m_buffer()
     , m_reference(true)
 {
@@ -91,7 +82,7 @@ Type Value::type()
 
 Type Value::type() const
 {
-    return Type::makeType(m_type, Type::MakeConst);
+    return m_type.makeConst();
 }
 
 template < typename T >
