@@ -27,13 +27,10 @@
         raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
-    static Meta::Object s_##plugin##_Namespace_##n##_ob                                            \
-        = {motor_##plugin##_Namespace()->objects,                                                  \
-           {0},                                                                                    \
+    MOTOR_EXPORT Meta::Object s_##plugin##_Namespace_##n##_ob                                      \
+        = {{motor_##plugin##_Namespace()->objects.exchange(&s_##plugin##_Namespace_##n##_ob)},     \
            istring(#n),                                                                            \
            Meta::Value(motor_##plugin##_Namespace_##n())};                                         \
-    MOTOR_EXPORT const Meta::Object* s_##plugin##_Namespace_##n##_r                                \
-        = motor_##plugin##_Namespace()->objects.set(&s_##plugin##_Namespace_##n##_ob);             \
     }
 
 #define MOTOR_REGISTER_NAMESPACE_2_NAMED(plugin, n1, n2)                                           \
@@ -56,14 +53,11 @@
         raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
-    static Meta::Object s_##plugin##_Namespace_##n1##_##n2##_ob                                    \
-        = {motor_##plugin##_Namespace_##n1()->objects,                                             \
-           {0},                                                                                    \
+    MOTOR_EXPORT Meta::Object s_##plugin##_Namespace_##n1##_##n2##_ob                              \
+        = {{motor_##plugin##_Namespace_##n1()->objects.exchange(                                   \
+               &s_##plugin##_Namespace_##n1##_##n2##_ob)},                                         \
            istring(#n2),                                                                           \
            Meta::Value(motor_##plugin##_Namespace_##n1##_##n2())};                                 \
-    MOTOR_EXPORT const Meta::Object* s_##plugin##_Namespace_##n1##_##n2##_r                        \
-        = motor_##plugin##_Namespace_##n1()->objects.set(                                          \
-            &s_##plugin##_Namespace_##n1##_##n2##_ob);                                             \
     }
 
 #define MOTOR_REGISTER_NAMESPACE_3_NAMED(plugin, n1, n2, n3)                                       \
@@ -86,14 +80,11 @@
         raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
-    static Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_ob                             \
-        = {motor_##plugin##_Namespace_##n1##_##n2()->objects,                                      \
-           {0},                                                                                    \
+    MOTOR_EXPORT Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_ob                       \
+        = {{motor_##plugin##_Namespace_##n1##_##n2()->objects.exchange(                            \
+               &s_##plugin##_Namespace_##n1##_##n2##_##n3##_ob)},                                  \
            istring(#n3),                                                                           \
            Meta::Value(motor_##plugin##_Namespace_##n1##_##n2##_##n3())};                          \
-    MOTOR_EXPORT const Meta::Object* s_##plugin##_Namespace_##n1##_##n2##_##n3##_r                 \
-        = motor_##plugin##_Namespace_##n1##_##n2()->objects.set(                                   \
-            &s_##plugin##_Namespace_##n1##_##n2##_##n3##_ob);                                      \
     }
 
 #define MOTOR_REGISTER_NAMESPACE_4_NAMED(plugin, n1, n2, n3, n4)                                   \
@@ -116,14 +107,11 @@
         raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
-    static Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_ob                      \
-        = {motor_##plugin##_Namespace_##n1##_##n2##_##n3()->objects,                               \
-           {0},                                                                                    \
+    MOTOR_EXPORT Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_ob                \
+        = {{motor_##plugin##_Namespace_##n1##_##n2##_##n3()->objects.exchange(                     \
+               &Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_ob)},              \
            istring(#n4),                                                                           \
            Meta::Value(motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4())};                   \
-    MOTOR_EXPORT const Meta::Object* s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_r          \
-        = motor_##plugin##_Namespace_##n1##_##n2##_##n3()->objects.set(                            \
-            &s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_ob);                               \
     }
 
 #define MOTOR_REGISTER_NAMESPACE_5_NAMED(plugin, n1, n2, n3, n4, n5)                               \
@@ -146,14 +134,11 @@
         raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
-    static Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_ob               \
-        = {motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()->objects,                        \
-           {0},                                                                                    \
+    MOTOR_EXPORT Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_ob         \
+        = {{motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()->objects.exchange(              \
+               &Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_ob)},       \
            istring(#n5),                                                                           \
            Meta::Value(motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5())};            \
-    MOTOR_EXPORT const Meta::Object* s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_r   \
-        = motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()->objects.set(                     \
-            &s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_ob);                        \
     }
 
 #define MOTOR_REGISTER_NAMESPACE_1_(plugin, n1)     MOTOR_REGISTER_NAMESPACE_1_NAMED(plugin, n1)
@@ -181,12 +166,10 @@
     {                                                                                              \
         return motor_##id##_Namespace();                                                           \
     }                                                                                              \
-    static Meta::Object ob##id##parent##_##name = {motor_##id##_Namespace##parent()->objects,      \
-                                                   {0},                                            \
-                                                   istring(#name),                                 \
-                                                   Meta::Value(motor_##id##_Namespace())};         \
-    MOTOR_EXPORT const Meta::Object* s_namespaceRegistration_##id##parent##_##name                 \
-        = (motor_##id##_Namespace##parent()->objects.m_ptr = &ob##id##parent##_##name);            \
+    MOTOR_EXPORT Meta::Object ob##id##parent##_##name                                              \
+        = {{motor_##id##_Namespace##parent()->objects.exchange(&ob##id##parent##_##name)},         \
+           istring(#name),                                                                         \
+           Meta::Value(motor_##id##_Namespace())};                                                 \
     }
 #define MOTOR_REGISTER_ROOT_NAMESPACE(id, ns, parent) MOTOR_REGISTER_ROOT_NAMESPACE_(id, ns, parent)
 

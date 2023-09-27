@@ -1,8 +1,9 @@
 import sys
 import io
+import re
 import argparse
 import glrp
-from typing import cast, Dict, Callable, Tuple, Union, Any, List, Optional
+from typing import Dict, Callable, Tuple, Union, Any, List, Optional
 
 from typing_extensions import ParamSpec, Concatenate
 
@@ -14,7 +15,7 @@ def diagnostic(func: Callable[Concatenate["Logger", Tuple[int, int], T], Dict[st
     def call(self: Logger, position: Tuple[int, int], *args: T.args, **kwargs: T.kwargs) -> None:
         if call in self._expected_diagnostics:
             self._expected_diagnostics.remove(call)
-        format_values = func(*args, **kwargs)
+        format_values = func(self, position, *args, **kwargs)
         message = getattr(self.LANG, func.__name__, func.__doc__)
         assert isinstance(message, str)
         self._msg_position('note', position, message.format(**format_values))
@@ -23,7 +24,7 @@ def diagnostic(func: Callable[Concatenate["Logger", Tuple[int, int], T], Dict[st
     return call
 
 
-def warning(flag_name: str, enabled: bool = False, enabled_in: List[str] = []) \
+def warning(flag_name: str, enabled: bool = False, enabled_in: Optional[List[str]] = None) \
         -> Callable[
             [Callable[Concatenate["Logger", Tuple[int, int], T], Dict[str, Any]]],
             Callable[Concatenate["Logger", Tuple[int, int], T], bool]]:
@@ -43,7 +44,7 @@ def warning(flag_name: str, enabled: bool = False, enabled_in: List[str] = []) \
             format_values = func(self, position, *args, **kw_args)
             self._warning_count += 1
             if self._warning_count == 1 and self._arguments.warn_error:
-                C0002(self, position)
+                c0002(self, position)
             message = getattr(self.LANG, func.__name__, func.__doc__)
             assert isinstance(message, str)
             self._msg_position(
@@ -54,7 +55,7 @@ def warning(flag_name: str, enabled: bool = False, enabled_in: List[str] = []) \
 
         setattr(call, 'flag_name', flag_name)
         setattr(call, 'enabled', enabled)
-        setattr(call, 'enabled_in', enabled_in)
+        setattr(call, 'enabled_in', enabled_in or [])
 
         setattr(Logger, func.__name__, call)
         return call
@@ -84,15 +85,19 @@ class Logger(glrp.Logger):
 
     IDE_FORMAT = {
         'msvc':
-            '{color_filename}{filename}{color_off}({line:d},{column:d}) : {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
+            '{color_filename}{filename}{color_off}({line:d},{column:d}) : '
+            '{color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
         'unix':
-            '{color_filename}{filename}{color_off}:{line:d}:{column:d}: {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
+            '{color_filename}{filename}{color_off}:{line:d}:{column:d}: '
+            '{color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
         'vi':
-            '{color_filename}{filename}{color_off} +{line:d}:{column:d}: {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
+            '{color_filename}{filename}{color_off} +{line:d}:{column:d}: '
+            '{color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
     }
 
     @classmethod
-    def init_diagnostic_flags(self, group: argparse._ArgumentGroup) -> None:
+    def init_diagnostic_flags(cls, argument_context: argparse.ArgumentParser) -> None:
+        group = argument_context.add_argument_group('Diagnostics options')
         group.add_argument(
             "-e",
             "--diagnostics-format",
@@ -102,10 +107,18 @@ class Logger(glrp.Logger):
             default='unix'
         )
         group.add_argument(
+            "-c",
+            "--diagnostics-color",
+            dest="diagnostics_color",
+            help="Enable color diagnostics",
+            default=False,
+            action='store_true'
+        )
+        group.add_argument(
             "-Werror", dest="warn_error", help="Treat warning as errors", default=False, action="store_true"
         )
         seen = set()
-        for m in self.__dict__.values():
+        for m in cls.__dict__.values():
             flag = getattr(m, 'flag_name', None)
             if flag is not None and flag not in seen:
                 seen.add(flag)
@@ -114,17 +127,42 @@ class Logger(glrp.Logger):
                 group.add_argument('-Wno-{}'.format(flag), dest=flag, help=argparse.SUPPRESS, action='store_false')
 
     def __init__(self, arguments: argparse.Namespace) -> None:
-        glrp.Logger.__init__(self, io.open(sys.stderr.fileno(), 'w', encoding='utf-8', closefd=False))
+        glrp.Logger.__init__(self, io.open(sys.stderr.fileno(), 'w', encoding='utf-8', closefd=False),
+                             arguments.diagnostics_color)
         self._lexer = None  # type: Optional[glrp.Lexer]
         self._arguments = arguments
         self._warning_count = 0
         self._error_count = 0
+        self._expected_diagnostics = []
         self._diagnostics_format = Logger.IDE_FORMAT[getattr(arguments, 'diagnostics_format')]
 
     def set_lexer(self, lexer: glrp.Lexer) -> None:
         self._lexer = lexer
 
     def _msg_position(self, error_type: str, position: Tuple[int, int], message: str) -> None:
+        def replace_tab(start: str, middle: str, end: str, single_char: str, in_text: str) -> str:
+            def start_column(index: int) -> int:
+                result = 0
+                for char in in_text[:index]:
+                    if char == '\t':
+                        result = result + 4 - result % 4
+                    else:
+                        result += 1
+                return result
+
+            def perform_replace(match: re.Match):
+                s, e = match.span()
+                tab_start = start_column(s)
+                tab_length = 4 - tab_start % 4 + 4 * (e - s - 1)
+                if tab_length == 1:
+                    return single_char
+                else:
+                    return '%s%s%s' % (
+                        start, middle * (tab_length - 2), end,
+                    )
+
+            return re.sub('\t+', perform_replace, in_text)
+
         assert self._lexer is not None
         if self._error_color:
             (color_error_type, color_filename, color_message, color_caret,
@@ -138,22 +176,44 @@ class Logger(glrp.Logger):
 
         filename, (line, column), (end_line, end_column) = self._lexer.text_position(position)
         context = self._lexer.context(position)
+        original_context = context
+        if self._error_color:
+            context = [
+                re.sub(r'(\ +)',
+                       lambda x: (self.COLOR_LIST['FAINT'] + ('\u00b7' * len(x.group())) +
+                                  self.COLOR_LIST[
+                                      'NORMAL']),
+                       replace_tab(self.COLOR_LIST['FAINT'] + '\u2576', '\u2500',
+                                   '\u2574' + self.COLOR_LIST['NORMAL'],
+                                   self.COLOR_LIST['FAINT'] + '-' + self.COLOR_LIST['NORMAL'],
+                                   c)) for c in original_context
+            ]
 
         self._out_file.write(self._diagnostics_format.format(**locals()))
-        if len(context) == 1:
-            self._out_file.write(context[0])
+        for i, (text, original_text) in enumerate(zip(context[:-1], original_context[:-1])):
             self._out_file.write(
-                '\n%s%s%s%s\n' % (' ' * (column - 1), color_caret, '^' + '~' * (end_column - column - 1), color_off)
+                '%s%5d \u2502%s%s' % (self.COLOR_LIST['CYAN'], line + i, text, self.COLOR_LIST['NORMAL']))
+            range_highlight_start = replace_tab(' ', ' ', ' ', ' ',
+                                                re.sub(r'[^ \t]', ' ', original_text[:column - 1]))
+            range_highlight_end = replace_tab('~', '~', '~', '~',
+                                              re.sub(r'[^\t]', '~', original_text[column:]))
+            self._out_file.write(
+                '\n%s      \u2502%s%s%s^%s%s\n' % (
+                    self.COLOR_LIST['CYAN'], self.COLOR_LIST['NORMAL'], range_highlight_start, color_caret,
+                    range_highlight_end, color_off)
             )
-        else:
-            for text in context[:-1]:
-                self._out_file.write(text)
-                self._out_file.write(
-                    '\n%s%s%s%s\n' % (' ' * (column - 1), color_caret, '^' + '~' * (len(text) - column), color_off)
-                )
-                column = 1
-            self._out_file.write(context[-1])
-            self._out_file.write('\n%s%s%s\n' % (color_caret, '^' * (end_column - 1), color_off))
+            column = 1
+        self._out_file.write('%s%5d \u2502%s%s' % (
+            self.COLOR_LIST['CYAN'], line + len(context) - 1, context[-1], self.COLOR_LIST['NORMAL']))
+        range_highlight_start = replace_tab(' ', ' ', ' ', ' ',
+                                            re.sub(r'[^ \t]', ' ', original_context[-1][:column - 1]))
+        range_highlight_end = replace_tab('~', '~', '~', '~',
+                                          re.sub(r'[^\t]', '~', original_context[-1][column - 1:end_column - 1]))
+        self._out_file.write(
+            '\n%s      \u2502%s%s%s^%s%s\n' % (
+                self.COLOR_LIST['CYAN'], self.COLOR_LIST['NORMAL'], range_highlight_start, color_caret,
+                range_highlight_end[:-1], color_off,)
+        )
 
     def push_expected_diagnostics(self, diagnostics: List[Callable[..., Any]]) -> None:
         self._expected_diagnostics += diagnostics
@@ -165,18 +225,6 @@ class Logger(glrp.Logger):
 
 
 @error
-def C0000(self: Logger, position: Tuple[int, int], token: str) -> Dict[str, Any]:
-    """syntax error at token '{token}'"""
-    return locals()
-
-
-@error
-def C0001(self: Logger, position: Tuple[int, int], token: str, current_rules: str) -> Dict[str, Any]:
-    """syntax error at token '{token}' when trying to parse {current_rules}"""
-    return locals()
-
-
-@error
-def C0002(self: Logger, position: Tuple[int, int]) -> Dict[str, Any]:
+def c0002(self: Logger, position: Tuple[int, int]) -> Dict[str, Any]:
     """warning treated as error"""
     return locals()

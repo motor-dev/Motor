@@ -1,8 +1,70 @@
 import glrp
 import decimal
-from typing import List, Optional, Tuple, Generator
+from typing import List, Optional, Tuple, Generator, Dict, Any
 import re
 import bisect
+from ..messages import Logger, warning, error, diagnostic
+
+
+@error
+def l0000(self: Logger, position: Tuple[int, int], character: str, ) -> Dict[str, Any]:
+    """ invalid character '{character}'"""
+    return locals()
+
+
+@warning('doxygen', True)
+def c0010(self: Logger, position: Tuple[int, int]) -> Dict[str, Any]:
+    """invalid text indentation in documentation comment"""
+    return locals()
+
+
+@warning('doxygen', True)
+def c0011(self: Logger, position: Tuple[int, int]) -> Dict[str, Any]:
+    """invalid banner indentation in documentation comment"""
+    return locals()
+
+
+@diagnostic
+def c0012(self: Logger, position: Tuple[int, int]) -> Dict[str, Any]:
+    """compared to reference indentation"""
+    return locals()
+
+
+class DoxygenIndentChecker(object):
+    def __init__(self, logger: Logger, lines: List[str], position_start: int, position_end: int) -> None:
+        self._logger = logger
+        reference_indent = lines.pop(-1)
+        banner_offset = reference_indent.find('*')
+        self._banner_indent = banner_offset != -1 and reference_indent[:banner_offset + 1] or None
+        self._text_indent = reference_indent[banner_offset + 1:]
+        self._warned = False
+        self._position_banner = (
+            position_end - len(reference_indent),
+            position_end - len(reference_indent) + banner_offset)
+        self._position_indent = (position_end - len(reference_indent) + banner_offset, position_end)
+        self.verify(lines, position_start, False)
+
+    def verify(self, lines: List[str], position: int, verify_text_indent: bool) -> None:
+        if self._warned:
+            return
+        while lines:
+            indent_text = lines.pop(0)
+            banner_offset = indent_text.find('*')
+            banner_indent = banner_offset != -1 and indent_text[:banner_offset + 1] or None
+            text_indent = indent_text[banner_offset + 1:]
+            if self._banner_indent != banner_indent:
+                c0011(self._logger, (position, position + len(banner_indent)))
+                c0012(self._logger, self._position_banner)
+                self._warned = True
+                break
+            if len(lines) == 0 and verify_text_indent:
+                if not text_indent.startswith(self._text_indent):
+                    c0010(self._logger, (position + banner_offset, position + len(indent_text)))
+                    c0012(self._logger, self._position_indent)
+                    self._warned = True
+                    break
+            position += len(indent_text) + 1
+
 
 decimal.getcontext().prec = 24
 
@@ -21,23 +83,25 @@ _binary_constant = '(?:0[bB][01]+)'
 _unsigned_suffix = '[uU]'
 _long_suffix = '[lL]'
 _long_long_suffix = '(?:(?:ll)|(?:LL))'
-_integer_suffix = '(?:(?:%(_unsigned_suffix)s%(_long_suffix)s?)|(?:%(_unsigned_suffix)s%(_long_long_suffix)s)|(?:%(_long_suffix)s%(_unsigned_suffix)s?)|(?:%(_long_long_suffix)s%(_unsigned_suffix)s?))' % locals(
-)
-_integer_literal = '(?:%(_decimal_constant)s|%(_hexadecimal_constant)s|%(_binary_constant)s|%(_octal_constant)s)%(_integer_suffix)s?' % locals(
-)
+_integer_suffix = '(?:(?:%(_unsigned_suffix)s%(_long_suffix)s?)|(?:%(_unsigned_suffix)s%(_long_long_suffix)s)|' \
+                  '(?:%(_long_suffix)s%(_unsigned_suffix)s?)|(?:%(_long_long_suffix)s%(_unsigned_suffix)s?))' % locals()
+_integer_literal = '(?:%(_decimal_constant)s|%(_hexadecimal_constant)s|%(_binary_constant)s|' \
+                   '%(_octal_constant)s)%(_integer_suffix)s?' % locals()
 
 _floating_suffix = '(?:f|l|F|L|(?:df)|(?:dd)|(?:dl)|(?:DF)|(?:DD)|(?:DL))'
 
 _fractional_constant = r'(?:(?:[0-9]*\.[0-9]+)|(?:[0-9]+\.))'
 _exponent_part = r'(?:[eE][+\-]?[0-9]+)'
-_decimal_floating_constant = '(?:(?:%(_fractional_constant)s%(_exponent_part)s?%(_floating_suffix)s?)|(?:[0-9]+%(_exponent_part)s%(_floating_suffix)s?))' % locals(
-)
+_decimal_floating_constant = '(?:(?:%(_fractional_constant)s%(_exponent_part)s?%(_floating_suffix)s?)|' \
+                             '(?:[0-9]+%(_exponent_part)s%(_floating_suffix)s?))' % locals()
 
-_hexadecimal_fractional_constant = '(?:(?:%(_hexadecimal_digit)s*\\.%(_hexadecimal_digit)s+)|(?:%(_hexadecimal_digit)s+\\.))' % locals(
-)
+_hexadecimal_fractional_constant = '(?:(?:%(_hexadecimal_digit)s*\\.%(_hexadecimal_digit)s+)|' \
+                                   '(?:%(_hexadecimal_digit)s+\\.))' % locals()
 _binary_exponent_part = r'(?:[pP][+\-]?[0-9]+)'
-_hexadecimal_floating_constant = '(?:(?:%(_hexadecimal_prefix)s%(_hexadecimal_fractional_constant)s%(_binary_exponent_part)s%(_floating_suffix)s?)|(?:%(_hexadecimal_prefix)s%(_hexadecimal_digit)s+%(_binary_exponent_part)s%(_floating_suffix)s))' % locals(
-)
+_hexadecimal_floating_constant = '(?:(?:%(_hexadecimal_prefix)s%(_hexadecimal_fractional_constant)s' \
+                                 '%(_binary_exponent_part)s%(_floating_suffix)s?)|' \
+                                 '(?:%(_hexadecimal_prefix)s%(_hexadecimal_digit)s+%(_binary_exponent_part)s' \
+                                 '%(_floating_suffix)s))' % locals()
 
 _floating_literal = '%(_decimal_floating_constant)s|%(_hexadecimal_floating_constant)s' % locals()
 
@@ -47,10 +111,10 @@ _octal_escape_sequence = '(?:\\\\%(_octal_digit)s%(_octal_digit)s?%(_octal_digit
 _hexadecimal_escape_sequence = '(?:\\\\x%(_hexadecimal_digit)s+)' % locals()
 _hexadecimal_quad = '%(_hexadecimal_digit)s%(_hexadecimal_digit)s%(_hexadecimal_digit)s%(_hexadecimal_digit)s' % locals(
 )
-_universal_character_name = '(?:(?:\\\\u%(_hexadecimal_quad)s)|(?:\\\\U%(_hexadecimal_quad)s%(_hexadecimal_quad)s))' % locals(
-)
-_escape_sequence = '(?:%(_simple_escape_sequence)s|%(_octal_escape_sequence)s|%(_hexadecimal_escape_sequence)s|%(_universal_character_name)s)' % locals(
-)
+_universal_character_name = '(?:(?:\\\\u%(_hexadecimal_quad)s)|' \
+                            '(?:\\\\U%(_hexadecimal_quad)s%(_hexadecimal_quad)s))' % locals()
+_escape_sequence = '(?:%(_simple_escape_sequence)s|%(_octal_escape_sequence)s|%(_hexadecimal_escape_sequence)s|' \
+                   '%(_universal_character_name)s)' % locals()
 _c_char = '(?:[^\\\'\\\\\\n]|%(_escape_sequence)s)' % locals()
 _c_char_sequence = '%(_c_char)s+' % locals()
 _character_literal = '%(_encoding_prefix)s?\\\'%(_c_char_sequence)s\\\'' % locals()
@@ -58,30 +122,35 @@ _character_literal = '%(_encoding_prefix)s?\\\'%(_c_char_sequence)s\\\'' % local
 _s_char = '(?:[^"\\n]|%(_escape_sequence)s)' % locals()
 _string_literal = '(?:%(_encoding_prefix)s?"%(_s_char)s*")' % locals()
 
-_user_defined_integer_literal = '(?:%(_decimal_constant)s%(_identifier)s)|(?:%(_hexadecimal_constant)s%(_identifier)s)|(?:%(_octal_constant)s%(_identifier)s)|(?:%(_binary_constant)s%(_identifier)s)' % locals(
-)
+_user_defined_integer_literal = '(?:%(_decimal_constant)s%(_identifier)s)|' \
+                                '(?:%(_hexadecimal_constant)s%(_identifier)s)|' \
+                                '(?:%(_octal_constant)s%(_identifier)s)|' \
+                                '(?:%(_binary_constant)s%(_identifier)s)' % locals()
 
-_user_defined_floating_literal = '(?:%(_fractional_constant)s%(_exponent_part)s?%(_identifier)s)|(?:[0-9]+%(_exponent_part)s%(_identifier)s)|(?:%(_hexadecimal_prefix)s%(_hexadecimal_fractional_constant)s%(_binary_exponent_part)s%(_identifier)s)|(?:%(_hexadecimal_prefix)s%(_hexadecimal_digit)s+%(_binary_exponent_part)s%(_identifier)s)' % locals(
-)
+_user_defined_floating_literal = '(?:%(_fractional_constant)s%(_exponent_part)s?%(_identifier)s)|' \
+                                 '(?:[0-9]+%(_exponent_part)s%(_identifier)s)|(?:%(_hexadecimal_prefix)s' \
+                                 '%(_hexadecimal_fractional_constant)s%(_binary_exponent_part)s%(_identifier)s)|' \
+                                 '(?:%(_hexadecimal_prefix)s%(_hexadecimal_digit)s+%(_binary_exponent_part)s' \
+                                 '%(_identifier)s)' % locals()
 
 _user_defined_string_literal = '%(_string_literal)s%(_identifier)s' % locals()
 
 _user_defined_character_literal = '%(_character_literal)s%(_identifier)s' % locals()
 
 _keywords = (
-                           #'and',
-                           #'and_eq',
+    # 'and',
+    # 'and_eq',
     'asm',
     'auto',
-                           #'bitand',
-                           #'bitor',
+    # 'bitand',
+    # 'bitor',
     'bool',
     'break',
     'case',
     'catch',
     'char',
     'class',
-                           #'compl',
+    # 'compl',
     'const',
     'const_cast',
     'continue',
@@ -106,11 +175,11 @@ _keywords = (
     'mutable',
     'namespace',
     'new',
-                           #'not',
-                           #'not_eq',
+    # 'not',
+    # 'not_eq',
     'operator',
-                           #'or',
-                           #'or_eq',
+    # 'or',
+    # 'or_eq',
     'private',
     'protected',
     'public',
@@ -140,10 +209,10 @@ _keywords = (
     'volatile',
     'wchar_t',
     'while',
-                           #'xor',
-                           #'xor_eq',
+    # 'xor',
+    # 'xor_eq',
     '__int128',
-)                          # type: Tuple[str,...]
+)  # type: Tuple[str,...]
 
 _keywords_cxx11 = (
     'alignas',
@@ -158,7 +227,7 @@ _keywords_cxx11 = (
     'override',
     'static_assert',
     'thread_local',
-)                      # type: Tuple[str,...]
+)  # type: Tuple[str,...]
 
 _keywords_cxx20 = (
     'char8_t',
@@ -172,25 +241,27 @@ _keywords_cxx20 = (
     'import',
     'module',
     'requires',
-)                      # type: Tuple[str,...]
+)  # type: Tuple[str,...]
 
 _keywords_transactional = (
     'atomic_cancel',
     'atomic_commit',
     'atomic_noexcept',
     'synchronized',
-)                              # tupe: Tuple[str,...]
+)  # tupe: Tuple[str,...]
 
-_keywords_reflection = ('reflexpr', )  # tupe: Tuple[str,...]
+_keywords_reflection = ('reflexpr',)  # tupe: Tuple[str,...]
 
 _keywords_cxx23 = _keywords_transactional + _keywords_reflection
 
 REGEX_INCLUDE = re.compile(r'\#[ \t\v\r]*include[ \t\v\r]+?((?:"[^"]*")|(?:<[^>]*>))[ \t\v\r]*\n')
 REGEX_LINE = re.compile(
-    r'\#[ \t\v\r]*line(?:[ \t\v\r]+(\d+))(?:[ \t\v\r]+(\d+))?(?:[ \t\v\r]+(\d+))?(?:[ \t\v\r]+(\d+))?(?:[ \t\v\r]+"([^\n"]*)")?[ \t\v\r]*\n'
+    r'\#[ \t\v\r]*line(?:[ \t\v\r]+(\d+))(?:[ \t\v\r]+(\d+))?'
+    r'(?:[ \t\v\r]+(\d+))?(?:[ \t\v\r]+(\d+))?(?:[ \t\v\r]+"([^\n"]*)")?[ \t\v\r]*\n'
 )
 REGEX_LINE_2 = re.compile(
-    r'\#[ \t\v\r](\d+)(?:[ \t\v\r]+"([^\n"]*)")?(?:[ \t\v\r]+(\d+))?(?:[ \t\v\r]+(\d+))?(?:[ \t\v\r]+(\d+))?[ \t\v\r]*\n'
+    r'\#[ \t\v\r](\d+)(?:[ \t\v\r]+"([^\n"]*)")?'
+    r'(?:[ \t\v\r]+(\d+))?(?:[ \t\v\r]+(\d+))?(?:[ \t\v\r]+(\d+))?[ \t\v\r]*\n'
 )
 
 
@@ -204,11 +275,13 @@ class Cxx98Lexer(glrp.Lexer):
         'string-literal-macro', 'string-literal-macro-function', '%>'
     )
 
-    def __init__(self) -> None:
+    def __init__(self, logger: Logger) -> None:
         glrp.Lexer.__init__(self)
-        self._locations = []       # type: List[int]
-        self._fileinfo = []        # type: List[Tuple[str, int, int]]
+        self._logger = logger
+        self._locations = []  # type: List[int]
+        self._fileinfo = []  # type: List[Tuple[str, int, int]]
         self._included_files = []  # type: List[str]
+        self._doxycomment_indent = None  # type: Optional[DoxygenIndentChecker]
 
         self._macros = {
             '__alignof__': 'alignof-macro',
@@ -276,7 +349,7 @@ class Cxx98Lexer(glrp.Lexer):
         }
 
     @glrp.token(r'[ \t\n]+', 'whitespace', warn=False)
-    def _00_skip(self, t: glrp.Token) -> Optional[glrp.Token]:
+    def _00_skip(self, _: glrp.Token) -> Optional[glrp.Token]:
         return None
 
     # arithmetic operators
@@ -347,9 +420,7 @@ class Cxx98Lexer(glrp.Lexer):
         return token
 
     @glrp.token(r'\#(?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'preprocessor', warn=False)
-    def _03_preprocessor(self, t: glrp.Token) -> Optional[glrp.Token]:
-        #if t.value.find('include') != -1:
-        #    t.lexer.includes.append(t.value)
+    def _03_preprocessor(self, _: glrp.Token) -> Optional[glrp.Token]:
         return None
 
     @glrp.token(
@@ -371,7 +442,8 @@ class Cxx98Lexer(glrp.Lexer):
         lineno, _, _, _, filename = match.groups()
         self._locations.append(t.position[1])
         lineno = int(lineno)
-        if filename is None: filename = self._fileinfo[-1][0]
+        if filename is None:
+            filename = self._fileinfo[-1][0]
         self._fileinfo.append((filename, lineno, 1))
         return None
 
@@ -384,19 +456,72 @@ class Cxx98Lexer(glrp.Lexer):
         lineno, filename, _, _, _ = match.groups()
         self._locations.append(t.position[1])
         lineno = int(lineno)
-        if filename is None: filename = self._fileinfo[-1][0]
+        if filename is None:
+            filename = self._fileinfo[-1][0]
         self._fileinfo.append((filename, lineno, 1))
         return None
 
-    @glrp.token(r'/\*[\!\*](.|\n)*?\*/', 'doxycomment-block')
-    @glrp.token(r'//[/\!](?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'doxycomment-line')
-    def _05_documentation(self, token: glrp.Token) -> Optional[glrp.Token]:
+    @glrp.token(r'/\*(.|\n)*?\*/', 'block-comment', warn=False)
+    def _05_block_comment(self, _: glrp.Token) -> Optional[glrp.Token]:
+        return None
+
+    @glrp.token(r'//(?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'line-comment', warn=False)
+    def _05_line_comment(self, _: glrp.Token) -> Optional[glrp.Token]:
+        return None
+
+    @glrp.token(r'/\*\*+(?:[ \r\t\v]*|(?!\/))', 'doxycomment-block-start')
+    def _06_01_documentation_start_block(self, token: glrp.Token) -> Optional[glrp.Token]:
+        self.push_state('DOXYGEN_BLOCK')
+        self._doxycomment_indent = None
         return token
 
-    @glrp.token(r'/\*(.|\n)*?\*/', 'block-comment', warn=False)
-    @glrp.token(r'//(?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'line-comment', warn=False)
-    def _06_comment(self, t: glrp.Token) -> Optional[glrp.Token]:
+    @glrp.token(r'/\*\*+[ \r\t\v]*\n(?:[ \r\t\v]*(?:\*[ \r\t\v]*)?\n)*[ \r\t\v]*(?:\*[ \r\t\v]+)?',
+                'doxycomment-block-start')
+    def _06_02_documentation_start_block_newline(self, token: glrp.Token) -> Optional[glrp.Token]:
+        self.push_state('DOXYGEN_BLOCK')
+        lines = token.text().split('\n')
+        position = token.position[0]
+        position += len(lines.pop(0)) + 1
+        self._doxycomment_indent = DoxygenIndentChecker(self._logger, lines, position, token.position[1])
+        return token
+
+    @glrp.token(r'(?:[^ \t\v\r\n\*]|\*(?!/))+', 'doxycomment', ('DOXYGEN_BLOCK',))
+    def _doxygen_01_documentation(self, _: glrp.Token) -> Optional[glrp.Token]:
+        # print(token.text())
+        # TODO
         return None
+
+    @glrp.token(r'[ \t\v\r]+', 'doxycomment', ('DOXYGEN_BLOCK',))
+    def _doxygen_02_documentation_delimiter(self, _: glrp.Token) -> Optional[glrp.Token]:
+        return None
+
+    @glrp.token(r'(?:\n[ \r\t\v]*(?:\*[ \r\t\v]*)?)+', 'doxycomment_newline', ('DOXYGEN_BLOCK',))
+    def _doxygen_03_documentation_block_newline(self, token: glrp.Token) -> Optional[glrp.Token]:
+        lines = token.text()[1:].split('\n')
+        position = token.position[0] + 1
+        if self._doxycomment_indent is None:
+            self._doxycomment_indent = DoxygenIndentChecker(self._logger, lines, position, token.position[1])
+        else:
+            self._doxycomment_indent.verify(lines, position, True)
+        return None
+
+    @glrp.token(r'(?:\n[ \r\t\v]*(?:\*[ \r\t\v]*)?)+\*+/', 'doxycomment-block-end', ('DOXYGEN_BLOCK',))
+    def _doxygen_04_documentation_end_banner(self, token: glrp.Token) -> Optional[glrp.Token]:
+        lines = token.text()[1:].split('\n')[:-1]
+        position = token.position[0]
+        if self._doxycomment_indent is None:
+            self._doxycomment_indent = DoxygenIndentChecker(self._logger, lines, position, token.position[1])
+        else:
+            self._doxycomment_indent.verify(lines, position, False)
+        self.pop_state()
+        self._doxycomment_indent = None
+        return token
+
+    @glrp.token(r'\*+/', 'doxycomment-block-end', ('DOXYGEN_BLOCK',))
+    def _doxygen_05_documentation_end(self, token: glrp.Token) -> Optional[glrp.Token]:
+        self.pop_state()
+        self._doxycomment_indent = None
+        return token
 
     @glrp.token(_identifier, '%identifier')
     def _07_identifier(self, t: glrp.Token) -> Optional[glrp.Token]:
@@ -457,12 +582,16 @@ class Cxx98Lexer(glrp.Lexer):
         else:
             end_column = start_column + position[1] - position[0]
 
-        return (filename, (start_lineno, start_column), (end_lineno, end_column))
+        return filename, (start_lineno, start_column), (end_lineno, end_column)
 
     def input(self, filename: str, track_blanks: bool = False) -> Generator[glrp.Token, None, None]:
         self._locations.append(0)
         self._fileinfo.append((filename, 1, 1))
         return glrp.Lexer.input(self, filename, track_blanks)
+
+    def syntax_error(self, lex_position: int) -> None:
+        l0000(self._logger, (lex_position, lex_position + 1), self._lexdata[lex_position])
+        raise SyntaxError("Illegal character '%s' at index %d" % (self._lexdata[lex_position], lex_position))
 
 
 class Cxx03Lexer(Cxx98Lexer):
@@ -470,13 +599,13 @@ class Cxx03Lexer(Cxx98Lexer):
 
 
 class Cxx11Lexer(Cxx03Lexer):
-    tokens = Cxx03Lexer.tokens + ('[[', ) + _keywords_cxx11
+    tokens = Cxx03Lexer.tokens + ('[[',) + _keywords_cxx11
     keywords = Cxx03Lexer.keywords + _keywords_cxx11
 
     def _token(self, track_blanks: bool = False) -> Generator[glrp.Token, None, None]:
         # override token to concatenate [ [ into [[
         # preserving comments and other items between the [ symbols
-        queue = []     # type: List[glrp.Token]
+        queue = []  # type: List[glrp.Token]
         bracket_id = self.get_token_id('[')
         generator = Cxx03Lexer._token(self, track_blanks)
         while True:
@@ -487,14 +616,14 @@ class Cxx11Lexer(Cxx03Lexer):
             except StopIteration:
                 break
             else:
-                if token._id == bracket_id:
+                if token.id == bracket_id:
                     try:
                         next_token = next(generator)
                     except StopIteration:
                         yield token
                     else:
-                        if next_token._id == bracket_id:
-                            next_token._skipped_tokens = token._skipped_tokens + [token] + next_token._skipped_tokens
+                        if next_token.id == bracket_id:
+                            next_token._skipped_tokens = token.skipped_tokens + [token] + next_token.skipped_tokens
                             self.set_token_type(next_token, '[[')
                             yield next_token
                         else:
@@ -505,12 +634,12 @@ class Cxx11Lexer(Cxx03Lexer):
 
     @glrp.token(_user_defined_integer_literal, 'user-defined-integer-literal')
     def _09_user_integer_literal(self, t: glrp.Token) -> Optional[glrp.Token]:
-        t.value = (self.text(t), '')   # TODO
+        t.value = (self.text(t), '')  # TODO
         return t
 
     @glrp.token(_user_defined_floating_literal, 'user-defined-floating-literal')
     def _11_user_floating_literal(self, t: glrp.Token) -> Optional[glrp.Token]:
-        t.value = (self.text(t), '')   # TODO
+        t.value = (self.text(t), '')  # TODO
         return t
 
     @glrp.token(_user_defined_character_literal, 'user-defined-character-literal')

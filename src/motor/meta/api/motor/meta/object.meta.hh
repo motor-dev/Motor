@@ -14,7 +14,6 @@ class motor_api(META) Object
 {
 public:
     raw< const Object > const next;
-    raw< const Tag > const    tags;
     istring const             name;
     mutable Value             value;
 };

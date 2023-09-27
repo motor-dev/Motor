@@ -29,10 +29,6 @@ struct motor_api(META) Type
         Const   = 0,
         Mutable = 1
     };
-    enum MakeConstType
-    {
-        MakeConst
-    };
 
     raw< const Class > metaclass;
     Indirection        indirection;
@@ -42,15 +38,14 @@ struct motor_api(META) Type
     static inline Type makeType(raw< const Class > klass, Indirection indirection, Constness access,
                                 Constness constness)
     {
-        Type info = {klass, indirection, access, constness};
-        return info;
+        return {klass, indirection, access, constness};
     }
-    static inline Type makeType(const Type& type, MakeConstType constify)
+
+    inline Type makeConst() const
     {
-        motor_forceuse(constify);
-        Type info = {type.metaclass, type.indirection, type.access, Constness::Const};
-        return info;
+        return {metaclass, indirection, access, Constness::Const};
     }
+
     u32  size() const;
     bool isA(const Type& other) const;
     bool isConst() const

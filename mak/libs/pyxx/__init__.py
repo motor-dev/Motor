@@ -84,9 +84,9 @@ def run(arguments: argparse.Namespace) -> List[Any]:
     global logger
     logger = messages.load_arguments(arguments)
 
-    ExceptionType = Exception
+    exception_type = Exception
     if arguments.debug:
-        ExceptionType = SyntaxError
+        exception_type = SyntaxError
     try:
         mode = glrp.LOAD_OPTIMIZED if arguments.optimized else glrp.LOAD_CACHE
         p = parse.parser(arguments.lang,
@@ -103,6 +103,6 @@ def run(arguments: argparse.Namespace) -> List[Any]:
             sys.exit(logger._error_count)
         else:
             return result
-    except (SyntaxError, ExceptionType) as exception:
+    except (SyntaxError, exception_type) as exception:
         logging.exception(exception)
         sys.exit(255)

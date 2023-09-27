@@ -1,6 +1,10 @@
+from typing import Any, List, Text, TextIO
+
+
 class Logger:
     COLOR_LIST = {
         'BOLD': '\x1b[01;1m',
+        'FAINT': '\x1b[02;37m',
         'BLACK': '\x1b[30m',
         'RED': '\x1b[31m',
         'GREEN': '\x1b[32m',
@@ -42,18 +46,16 @@ class Logger:
             ),
         'error':
             (
-                COLOR_LIST['BRED'], COLOR_LIST['BWHITE'], COLOR_LIST['BWHITE'], COLOR_LIST['BGREEN'],
+                COLOR_LIST['BRED'], COLOR_LIST['BWHITE'], COLOR_LIST['BOLD'], COLOR_LIST['BGREEN'],
                 COLOR_LIST['NORMAL']
             ),
     }
 
-    def __init__(self, out_file):
-        # type: (IO[Text]) -> None
+    def __init__(self, out_file: TextIO, force_colors: bool = False) -> None:
         self._out_file = out_file
-        self._error_color = out_file.isatty()
+        self._error_color = force_colors or out_file.isatty()
 
-    def _msg(self, error_type, message):
-        # type: (str, Text) -> None
+    def _msg(self, error_type: str, message: Text) -> None:
         if self._error_color:
             (color_error_type, color_filename, color_message, color_caret,
              color_off) = self.COLOR_PATTERN.get(error_type, self.DEFAULT_COLOR_PATTERN)
@@ -71,41 +73,31 @@ class Logger:
 
             self._out_file.write(u'{color_message}{message}{color_off}\n'.format(**locals()))
 
-    def diagnostic(self, filename, line, message, *args):
-        # type: (Text, int, Text, *Union[Text, int]) -> None
+    def diagnostic(self, filename: str, line: int, message: Text, *args: List[Any]) -> None:
         if args:
             message = message % args
         self._out_file.write(u'%s:%d: %s\n' % (filename, line, message))
 
-    def note(self, message, *args):
-        # type: (Text, *Union[Text, int]) -> None
+    def note(self, message: Text, *args: List[Any]) -> None:
         if args:
             self._msg('note', message % args)
         else:
             self._msg('note', message)
 
-    def info(self, message, *args):
-        # type: (Text, *Union[Text,int]) -> None
+    def info(self, message: Text, *args: List[Any]) -> None:
         if args:
             self._msg('info', message % args)
         else:
             self._msg('info', message)
 
-    def warning(self, message, *args):
-        # type: (Text, *Union[Text, int]) -> None
+    def warning(self, message: Text, *args: List[Any]) -> None:
         if args:
             self._msg('warning', message % args)
         else:
             self._msg('warning', message)
 
-    def error(self, message, *args):
-        # type: (Text, *Union[Text, int]) -> None
+    def error(self, message: Text, *args: List[Any]) -> None:
         if args:
             self._msg('error', message % args)
         else:
             self._msg('error', message)
-
-
-from motor_typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from typing import IO, Union, Text

@@ -29,6 +29,12 @@ public:
     {
         return m_ptr = value;
     }
+    T* exchange(T* value)
+    {
+        T* result = m_ptr;
+        m_ptr     = value;
+        return result;
+    }
     static inline raw< T > null();
 };
 

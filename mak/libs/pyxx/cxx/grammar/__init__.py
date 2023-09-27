@@ -9,9 +9,21 @@ from . import template
 from . import exception
 
 import glrp
-from typing import Set
+from typing import Set, Tuple, Dict, Any
 from ..parse import CxxParser
-from ...messages import C0000, C0001
+from ...messages import error, Logger
+
+
+@error
+def C0000(self: Logger, position: Tuple[int, int], token: str) -> Dict[str, Any]:
+    """syntax error at token '{token}'"""
+    return locals()
+
+
+@error
+def C0001(self: Logger, position: Tuple[int, int], token: str, current_rules: str) -> Dict[str, Any]:
+    """syntax error at token '{token}' when trying to parse {current_rules}"""
+    return locals()
 
 
 @glrp.error_handler
