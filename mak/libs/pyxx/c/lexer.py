@@ -117,6 +117,9 @@ class C89Lexer(glrp.Lexer):
         self._enum_constants = set([])  # type: Set[str]
         self._macros = {}  # type: Dict[str, str]
 
+    def add_macro(self, name: str, value: str) -> None:
+        self._macros[name] = value
+
     @glrp.token(r"\[", "[")
     @glrp.token(r"\]", "]")
     @glrp.token(r"\(", "(")

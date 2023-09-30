@@ -7,10 +7,10 @@ class StringRef(ast.Visitor):
         self.result = ''
 
     def visit_reference(self, reference: ast.Reference) -> None:
-        for name in reference._name_list[:-1]:
+        for name in reference.name_list[:-1]:
             name.accept(self)
             self.result += '::'
-        reference._name_list[-1].accept(self)
+        reference.name_list[-1].accept(self)
 
     def visit_typename_reference(self, typename_reference: ast.TypenameReference) -> None:
         self.result += 'typename '
@@ -27,8 +27,8 @@ class StringRef(ast.Visitor):
         self.result += 'template '
         template_specifier_id.accept_id(self)
 
-    def visit_id(self, id: ast.Id) -> None:
-        self.result += id._name
+    def visit_id(self, identifier: ast.Id) -> None:
+        self.result += identifier.name
 
     def visit_template_id(self, template_id: ast.TemplateId) -> None:
         template_id.accept_id(self)
@@ -37,31 +37,31 @@ class StringRef(ast.Visitor):
         self.result += '>'
 
     def visit_template_argument_list(self, template_argument_list: ast.TemplateArgumentList) -> None:
-        for argument in template_argument_list._template_arguments[:-1]:
+        for argument in template_argument_list.template_arguments[:-1]:
             argument.accept(self)
             self.result += ', '
-        template_argument_list._template_arguments[-1].accept(self)
+        template_argument_list.template_arguments[-1].accept(self)
 
     def visit_ambiguous_template_argument_list(
-        self, ambiguous_template_argument_list: ast.AmbiguousTemplateArgumentList
+            self, ambiguous_template_argument_list: ast.AmbiguousTemplateArgumentList
     ) -> None:
         ambiguous_template_argument_list.accept_first(self)
 
     def visit_destructor_id(self, destructor_id: ast.DestructorId) -> None:
-        self.result += '~%s' % destructor_id._id
+        self.result += '~%s' % destructor_id.id
 
     def visit_operator_id(self, operator_id: ast.OperatorId) -> None:
-        self.result += 'operator %s' % operator_id._operator
+        self.result += 'operator %s' % operator_id.operator
 
     def visit_conversion_operator_id(self, conversion_operator_id: ast.ConversionOperatorId) -> None:
         self.result += 'operator '
         conversion_operator_id.accept_conversion_type(self)
 
     def visit_literal_operator_id(self, literal_operator_id: ast.LiteralOperatorId) -> None:
-        self.result += 'operator "" %s' % literal_operator_id._literal_operator
+        self.result += 'operator "" %s' % literal_operator_id.literal_operator
 
     def visit_template_argument_pack_expand(
-        self, template_argument_pack_expand: ast.TemplateArgumentPackExpand
+            self, template_argument_pack_expand: ast.TemplateArgumentPackExpand
     ) -> None:
         template_argument_pack_expand.accept_argument(self)
         self.result += '...'
@@ -87,17 +87,17 @@ class StringRef(ast.Visitor):
         self.result += '...'
 
     def visit_type_specifier_seq(self, type_specifier_seq: ast.TypeSpecifierSeq) -> None:
-        all_specifiers = type_specifier_seq._types + type_specifier_seq._qualifiers
+        all_specifiers = type_specifier_seq.types + type_specifier_seq.qualifiers
         for type_specifier in all_specifiers[:-1]:
             type_specifier.accept(self)
             self.result += ' '
         all_specifiers[-1].accept(self)
 
     def visit_cv_qualifier(self, cv_qualifier: ast.CvQualifier) -> None:
-        self.result += cv_qualifier._qualifier
+        self.result += cv_qualifier.qualifier
 
     def visit_primitive_type_specifier(self, primitive_type_specifier: ast.PrimitiveTypeSpecifier) -> None:
-        self.result += primitive_type_specifier._type
+        self.result += primitive_type_specifier.typename
 
     def visit_enum_specifier(self, enum_specifier: ast.EnumSpecifier) -> None:
         enum_specifier.accept_name(self)
@@ -106,12 +106,12 @@ class StringRef(ast.Visitor):
         assert False
 
     def visit_elaborated_class_type_specifier(
-        self, elaborated_class_type_specifier: ast.ElaboratedClassTypeSpecifier
+            self, elaborated_class_type_specifier: ast.ElaboratedClassTypeSpecifier
     ) -> None:
         elaborated_class_type_specifier.accept_name(self)
 
     def visit_elaborated_enum_type_specifier(
-        self, elaborated_enum_type_specifier: ast.ElaboratedEnumTypeSpecifier
+            self, elaborated_enum_type_specifier: ast.ElaboratedEnumTypeSpecifier
     ) -> None:
         elaborated_enum_type_specifier.accept_name(self)
 
@@ -119,12 +119,12 @@ class StringRef(ast.Visitor):
         self.result += 'auto'
 
     def visit_decltype_type_specifier(self, decltype_type_specifier: ast.DecltypeTypeSpecifier) -> None:
-        self.result += '%s(' % decltype_type_specifier._decltype_kw
+        self.result += '%s(' % decltype_type_specifier.decltype_kw
         decltype_type_specifier.accept_expression(self)
         self.result += ')'
 
     def visit_decltype_auto_type_specifier(self, decltype_auto_type_specifier: ast.DecltypeAutoTypeSpecifier) -> None:
-        self.result += '%s(auto)' % decltype_auto_type_specifier._decltype_kw
+        self.result += '%s(auto)' % decltype_auto_type_specifier.decltype_kw
 
     def visit_type_specifier_reference(self, type_specifier_reference: ast.TypeSpecifierReference) -> None:
         type_specifier_reference.accept_reference(self)
@@ -138,11 +138,11 @@ class StringRef(ast.Visitor):
         constrained_type_specifier.accept_placeholder_type_specifier(self)
 
     def visit_initializer_list(self, initializer_list: ast.InitializerList) -> None:
-        if initializer_list._expressions:
-            for expression in initializer_list._expressions[:-1]:
+        if initializer_list.expressions:
+            for expression in initializer_list.expressions[:-1]:
                 expression.accept(self)
                 self.result += ', '
-            initializer_list._expressions[-1].accept(self)
+            initializer_list.expressions[-1].accept(self)
 
     def visit_ambiguous_initializer_list(self, ambiguous_initializer_list: ast.AmbiguousInitializerList) -> None:
         ambiguous_initializer_list.accept_first(self)
@@ -154,17 +154,17 @@ class StringRef(ast.Visitor):
         ambiguous_expression.accept_first(self)
 
     def visit_unary_expression(self, unary_expression: ast.UnaryExpression) -> None:
-        self.result += unary_expression._operator
+        self.result += unary_expression.operator
         unary_expression.accept_operand(self)
 
     def visit_binary_expression(self, binary_expression: ast.BinaryExpression) -> None:
         binary_expression.accept_left_operand(self)
-        self.result += ' ' + binary_expression._operator + ' '
+        self.result += ' ' + binary_expression.operator + ' '
         binary_expression.accept_right_operand(self)
 
     def visit_postfix_expression(self, postfix_expression: ast.PostfixExpression) -> None:
         postfix_expression.accept_operand(self)
-        self.result += postfix_expression._operator
+        self.result += postfix_expression.operator
 
     def visit_sizeof_expression(self, sizeof_expression: ast.SizeofExpression) -> None:
         self.result += 'sizeof('
@@ -177,10 +177,10 @@ class StringRef(ast.Visitor):
         self.result += ')'
 
     def visit_sizeof_pack_expression(self, sizeof_pack_expression: ast.SizeofPackExpression) -> None:
-        self.result += 'sizeof(%s...)' % sizeof_pack_expression._identifier
+        self.result += 'sizeof(%s...)' % sizeof_pack_expression.identifier
 
     def visit_alignof_expression(self, alignof_expression: ast.AlignofExpression) -> None:
-        self.result += '%s(' % alignof_expression._alignof_token
+        self.result += '%s(' % alignof_expression.alignof_token
         alignof_expression.accept_type(self)
         self.result += ')'
 
@@ -206,7 +206,7 @@ class StringRef(ast.Visitor):
         cast_expression.accept_operand(self)
 
     def visit_cxx_cast_expression(self, cxx_cast_expression: ast.CxxCastExpression) -> None:
-        self.result += '%s<' % cxx_cast_expression._cast_type
+        self.result += '%s<' % cxx_cast_expression.cast_type
         cxx_cast_expression.accept_target_type(self)
         self.result += '>('
         cxx_cast_expression.accept_operand(self)
@@ -231,7 +231,7 @@ class StringRef(ast.Visitor):
 
     def visit_member_ptr_expression(self, member_ptr_expression: ast.MemberPtrExpression) -> None:
         member_ptr_expression.accept_expression(self)
-        self.result += member_ptr_expression._access_type
+        self.result += member_ptr_expression.access_type
         member_ptr_expression.accept_member_expression(self)
 
     def visit_type_id_expression(self, type_id_expression: ast.TypeIdExpression) -> None:
@@ -251,38 +251,38 @@ class StringRef(ast.Visitor):
         self.result += ')'
 
     def visit_new_expression(self, new_expression: ast.NewExpression) -> None:
-        if new_expression._root:
+        if new_expression.root:
             self.result += '::new'
         else:
             self.result += 'new'
-        if new_expression._placement is not None:
+        if new_expression.placement is not None:
             new_expression.accept_placement(self)
-        if new_expression._full_type:
+        if new_expression.full_type:
             self.result += ' ('
             new_expression.accept_type(self)
             self.result += ')'
         else:
             self.result += ' '
             new_expression.accept_type(self)
-        if new_expression._initializer is not None:
+        if new_expression.initializer is not None:
             self.result += ' '
             new_expression.accept_initializer(self)
 
     def visit_delete_expression(self, delete_expression: ast.DeleteExpression) -> None:
-        if delete_expression._root:
-            if delete_expression._array:
+        if delete_expression.root:
+            if delete_expression.array:
                 self.result += '::delete[] '
             else:
                 self.result += '::delete '
         else:
-            if delete_expression._array:
+            if delete_expression.array:
                 self.result += 'delete[] '
             else:
                 self.result += 'delete '
         delete_expression.accept_operand(self)
 
     def visit_throw_expression(self, throw_expression: ast.ThrowExpression) -> None:
-        if throw_expression._operand is not None:
+        if throw_expression.operand is not None:
             self.result += 'throw '
             throw_expression.accept_operand(self)
         else:
@@ -299,17 +299,17 @@ class StringRef(ast.Visitor):
     def visit_fold_expression_left(self, fold_expression_left: ast.FoldExpressionLeft) -> None:
         self.result += '('
         fold_expression_left.accept_expression(self)
-        self.result += ' %s ...)' % fold_expression_left._operator
+        self.result += ' %s ...)' % fold_expression_left.operator
 
     def visit_fold_expression_right(self, fold_expression_right: ast.FoldExpressionRight) -> None:
-        self.result += '(... %s ' % fold_expression_right._operator
+        self.result += '(... %s ' % fold_expression_right.operator
         fold_expression_right.accept_expression(self)
         self.result += ')'
 
     def visit_fold_expression_both(self, fold_expression_both: ast.FoldExpressionBoth) -> None:
         self.result += '('
         fold_expression_both.accept_expression_left(self)
-        self.result += ' %s ... %s ' % (fold_expression_both._operator_left, fold_expression_both._operator_right)
+        self.result += ' %s ... %s ' % (fold_expression_both.operator_left, fold_expression_both.operator_right)
         fold_expression_both.accept_expression_right(self)
         self.result += ')'
 
@@ -325,11 +325,11 @@ class StringRef(ast.Visitor):
         self.result += 'nullptr'
 
     def visit_type_trait_expression(self, type_trait_expression: ast.TypeTraitExpression) -> None:
-        self.result += '%s' % type_trait_expression._type_trait
-        if type_trait_expression._arguments is not None:
+        self.result += '%s' % type_trait_expression.type_trait
+        if type_trait_expression.arguments is not None:
             self.result += '('
-            for argument in type_trait_expression._arguments:
-                if argument._skipped_tokens:
+            for argument in type_trait_expression.arguments:
+                if argument.skipped_tokens:
                     self.result += ' '
                 self.result += argument.text()
             self.result += ')'
@@ -340,58 +340,58 @@ class StringRef(ast.Visitor):
 
     def visit_braced_init_list(self, braced_init_list: ast.BracedInitList) -> None:
         self.result += '{'
-        if braced_init_list._initializer_list:
-            for initializer in braced_init_list._initializer_list[:-1]:
+        if braced_init_list.initializer_list:
+            for initializer in braced_init_list.initializer_list[:-1]:
                 initializer.accept(self)
                 self.result += ', '
-            braced_init_list._initializer_list[-1].accept(self)
+            braced_init_list.initializer_list[-1].accept(self)
         self.result += '}'
 
     def visit_ambiguous_braced_init_list(self, ambiguous_braced_init_list: ast.AmbiguousBracedInitList) -> None:
         ambiguous_braced_init_list.accept_first(self)
 
     def visit_boolean_literal(self, boolean_literal: ast.BooleanLiteral) -> None:
-        if boolean_literal._boolean_value:
+        if boolean_literal.boolean_value:
             self.result += 'true'
         else:
             self.result += 'false'
 
     def visit_integer_literal(self, integer_literal: ast.IntegerLiteral) -> None:
-        self.result += integer_literal._integer_value
+        self.result += integer_literal.integer_value
 
     def visit_user_defined_integer_literal(self, user_defined_integer_literal: ast.UserDefinedIntegerLiteral) -> None:
-        self.result += user_defined_integer_literal._integer_value + user_defined_integer_literal._literal_type
+        self.result += user_defined_integer_literal.integer_value + user_defined_integer_literal.literal_type
 
     def visit_character_literal(self, character_literal: ast.CharacterLiteral) -> None:
-        self.result += "'%s'" % character_literal._character_value
+        self.result += "'%s'" % character_literal.character_value
 
     def visit_user_defined_character_literal(
-        self, user_defined_character_literal: ast.UserDefinedCharacterLiteral
+            self, user_defined_character_literal: ast.UserDefinedCharacterLiteral
     ) -> None:
         self.result += "'%s'%s" % (
-            user_defined_character_literal._character_value, user_defined_character_literal._literal_type
+            user_defined_character_literal.character_value, user_defined_character_literal.literal_type
         )
 
     def visit_floating_literal(self, floating_literal: ast.FloatingLiteral) -> None:
-        self.result += floating_literal._floating_value
+        self.result += floating_literal.floating_value
 
     def visit_user_defined_floating_literal(
-        self, user_defined_floating_literal: ast.UserDefinedFloatingLiteral
+            self, user_defined_floating_literal: ast.UserDefinedFloatingLiteral
     ) -> None:
-        self.result += user_defined_floating_literal._floating_value + user_defined_floating_literal._literal_type
+        self.result += user_defined_floating_literal.floating_value + user_defined_floating_literal.literal_type
 
     def visit_string_literal(self, string_literal: ast.StringLiteral) -> None:
-        self.result += '"%s"' % string_literal._string_value
+        self.result += '"%s"' % string_literal.string_value
 
     def visit_user_defined_string_literal(self, user_defined_string_literal: ast.UserDefinedStringLiteral) -> None:
-        self.result += '"%s"%s' % (user_defined_string_literal._string_value, user_defined_string_literal._literal_type)
+        self.result += '"%s"%s' % (user_defined_string_literal.string_value, user_defined_string_literal.literal_type)
 
     def visit_string_literal_macro(self, string_literal_macro: ast.StringLiteralMacro) -> None:
-        self.result += string_literal_macro._string_value
-        if string_literal_macro._macro_parameters is not None:
+        self.result += string_literal_macro.string_value
+        if string_literal_macro.macro_parameters is not None:
             self.result += '('
-            for argument in string_literal_macro._macro_parameters:
-                if argument._skipped_tokens:
+            for argument in string_literal_macro.macro_parameters:
+                if argument.skipped_tokens:
                     self.result += ' '
                 self.result += argument.text()
             self.result += ')'
@@ -418,7 +418,7 @@ class StringRef(ast.Visitor):
         pass
 
     def visit_declarator_element_abstract_pack(
-        self, declarator_element_abstract_pack: ast.DeclaratorElementAbstractPack
+            self, declarator_element_abstract_pack: ast.DeclaratorElementAbstractPack
     ) -> None:
         self.result += '...'
 
@@ -428,15 +428,15 @@ class StringRef(ast.Visitor):
         self.result += ')'
 
     def visit_declarator_element_pointer(self, declarator_element_pointer: ast.DeclaratorElementPointer) -> None:
-        if declarator_element_pointer._qualified is not None:
-            for is_template, id in declarator_element_pointer._qualified:
+        if declarator_element_pointer.qualified is not None:
+            for is_template, identifier in declarator_element_pointer.qualified:
                 if is_template:
                     self.result += 'template '
-                id.accept(self)
+                identifier.accept(self)
                 self.result += '::'
         self.result += '*'
-        if declarator_element_pointer._qualifiers is not None:
-            for qualifier in declarator_element_pointer._qualifiers:
+        if declarator_element_pointer.qualifiers is not None:
+            for qualifier in declarator_element_pointer.qualifiers:
                 qualifier.accept(self)
                 self.result += ' '
         declarator_element_pointer.accept_next(self)
@@ -446,7 +446,7 @@ class StringRef(ast.Visitor):
         declarator_element_reference.accept_next(self)
 
     def visit_declarator_element_rvalue_reference(
-        self, declarator_element_rvalue_reference: ast.DeclaratorElementRValueReference
+            self, declarator_element_rvalue_reference: ast.DeclaratorElementRValueReference
     ) -> None:
         self.result += '&&'
         declarator_element_rvalue_reference.accept_next(self)
@@ -460,12 +460,12 @@ class StringRef(ast.Visitor):
     def visit_declarator_element_method(self, declarator_element_method: ast.DeclaratorElementMethod) -> None:
         declarator_element_method.accept_next(self)
         declarator_element_method.accept_parameter_clause(self)
-        for cv_qualifier in declarator_element_method._cv_qualifiers:
+        for cv_qualifier in declarator_element_method.cv_qualifiers:
             self.result += ' '
             cv_qualifier.accept(self)
         declarator_element_method.accept_ref_qualifier(self)
         declarator_element_method.accept_exception_specifier(self)
-        if declarator_element_method._trailing_return_type is not None:
+        if declarator_element_method.trailing_return_type is not None:
             self.result += ' -> '
             declarator_element_method.accept_trailing_return_type(self)
 
@@ -474,64 +474,65 @@ class StringRef(ast.Visitor):
 
     def visit_simple_parameter_clause(self, simple_parameter_clause: ast.SimpleParameterClause) -> None:
         self.result += '('
-        if simple_parameter_clause._parameter_list:
-            if simple_parameter_clause._variadic:
-                for parameter in simple_parameter_clause._parameter_list:
+        if simple_parameter_clause.parameter_list:
+            if simple_parameter_clause.variadic:
+                for parameter in simple_parameter_clause.parameter_list:
                     parameter.accept(self)
                     self.result += ', '
                 self.result += '...'
             else:
-                for parameter in simple_parameter_clause._parameter_list[:-1]:
+                for parameter in simple_parameter_clause.parameter_list[:-1]:
                     parameter.accept(self)
                     self.result += ', '
-                simple_parameter_clause._parameter_list[-1].accept(self)
+                simple_parameter_clause.parameter_list[-1].accept(self)
         else:
-            if simple_parameter_clause._variadic:
+            if simple_parameter_clause.variadic:
                 self.result += '...'
         self.result += ')'
 
     def visit_parameter_declaration(self, parameter_declaration: ast.ParameterDeclaration) -> None:
-        if parameter_declaration._this_specifier:
+        if parameter_declaration.this_specifier:
             self.result += 'this '
         parameter_declaration.accept_decl_specifier_seq(self)
         parameter_declaration.accept_declarator(self)
-        if parameter_declaration._default_value is not None:
+        if parameter_declaration.default_value is not None:
             self.result += ' = '
             parameter_declaration.accept_default_value(self)
 
     def visit_ref_qualifier(self, ref_qualifier: ast.RefQualifier) -> None:
-        self.result += ' %s' % ref_qualifier._qualifier
+        self.result += ' %s' % ref_qualifier.qualifier
 
     def visit_ambiguous_exception_specifier(
-        self, ambiguous_exception_specifier: ast.AmbiguousExceptionSpecifier
+            self, ambiguous_exception_specifier: ast.AmbiguousExceptionSpecifier
     ) -> None:
         ambiguous_exception_specifier.accept_first(self)
 
     def visit_dynamic_exception_specifier(self, dynamic_exception_specifier: ast.DynamicExceptionSpecifier) -> None:
         self.result += ' throw('
-        if dynamic_exception_specifier._type_list:
-            for type in dynamic_exception_specifier._type_list[:-1]:
-                type.accept(self)
+        if dynamic_exception_specifier.type_list:
+            for type_id in dynamic_exception_specifier.type_list[:-1]:
+                type_id.accept(self)
                 self.result += ', '
-            dynamic_exception_specifier._type_list[-1].accept(self)
+            dynamic_exception_specifier.type_list[-1].accept(self)
         self.result += ')'
 
     def visit_decl_specifier_seq(self, decl_specifier_seq: ast.DeclSpecifierSeq) -> None:
-        specifiers = decl_specifier_seq._decl_specifiers + decl_specifier_seq._type_specifier_seq._types + decl_specifier_seq._type_specifier_seq._qualifiers
+        specifiers = (decl_specifier_seq.decl_specifiers + decl_specifier_seq.type_specifier_seq.types
+                      + decl_specifier_seq.type_specifier_seq.qualifiers)
         for s in specifiers[:-1]:
             s.accept(self)
             self.result += ' '
         specifiers[-1].accept(self)
 
     def visit_declaration_specifier(self, declaration_specifier: ast.DeclarationSpecifier) -> None:
-        self.result += declaration_specifier._decl_specifier
+        self.result += declaration_specifier.decl_specifier
 
     def visit_declaration_specifier_macro(self, declaration_specifier_macro: ast.DeclarationSpecifierMacro) -> None:
-        self.result += declaration_specifier_macro._decl_specifier
-        if declaration_specifier_macro._values is not None:
+        self.result += declaration_specifier_macro.decl_specifier
+        if declaration_specifier_macro.values is not None:
             self.result += '('
-            for argument in declaration_specifier_macro._values:
-                if argument._skipped_tokens:
+            for argument in declaration_specifier_macro.values:
+                if argument.skipped_tokens:
                     self.result += ' '
                 self.result += argument.text()
             self.result += ')'

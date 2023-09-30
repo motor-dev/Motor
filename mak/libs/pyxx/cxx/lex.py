@@ -51,9 +51,10 @@ class DoxygenIndentChecker(object):
             indent_text = lines.pop(0)
             banner_offset = indent_text.find('*')
             banner_indent = banner_offset != -1 and indent_text[:banner_offset + 1] or None
+            banner_len = len(banner_indent) if banner_indent is not None else len(indent_text)
             text_indent = indent_text[banner_offset + 1:]
             if self._banner_indent != banner_indent:
-                c0011(self._logger, (position, position + len(banner_indent)))
+                c0011(self._logger, (position, position + banner_len))
                 c0012(self._logger, self._position_banner)
                 self._warned = True
                 break
@@ -348,6 +349,9 @@ class Cxx98Lexer(glrp.Lexer):
             '__reference_binds_to_temporary': 'type-trait-macro-function'
         }
 
+    def add_macro(self, name: str, value: str) -> None:
+        self._macros[name] = value
+
     @glrp.token(r'[ \t\n]+', 'whitespace', warn=False)
     def _00_skip(self, _: glrp.Token) -> Optional[glrp.Token]:
         return None
@@ -634,12 +638,12 @@ class Cxx11Lexer(Cxx03Lexer):
 
     @glrp.token(_user_defined_integer_literal, 'user-defined-integer-literal')
     def _09_user_integer_literal(self, t: glrp.Token) -> Optional[glrp.Token]:
-        t.value = (self.text(t), '')  # TODO
+        t.value = (self.text(t), '')  # TODO: find the suffix and split the literal
         return t
 
     @glrp.token(_user_defined_floating_literal, 'user-defined-floating-literal')
     def _11_user_floating_literal(self, t: glrp.Token) -> Optional[glrp.Token]:
-        t.value = (self.text(t), '')  # TODO
+        t.value = (self.text(t), '')  # TODO: find the suffix and split the literal
         return t
 
     @glrp.token(_user_defined_character_literal, 'user-defined-character-literal')

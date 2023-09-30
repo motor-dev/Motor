@@ -12,5 +12,5 @@ class Symbol:
         print('%s"%s"' % (self_indent, name_map[self._id]))
 
     @property
-    def id(self):
+    def id(self) -> int:
         return self._id

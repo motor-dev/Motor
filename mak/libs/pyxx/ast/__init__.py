@@ -1,6 +1,6 @@
 class Visitor(object):
 
-    def visit_translation_unit(self, translation_unit: "TranslationUnit") -> None:
+    def visit_translation_unit(self, unit: "TranslationUnit") -> None:
         pass
 
     def visit_module_declaration(self, module_declaration: "ModuleDeclaration") -> None:
@@ -209,7 +209,8 @@ class Visitor(object):
         pass
 
     def visit_ambiguous_template_parameter_list(self,
-                                                ambiguous_template_parameter_list: "AmbiguousTemplateParameterList") -> None:
+                                                ambiguous_template_parameter_list: "AmbiguousTemplateParameterList") \
+            -> None:
         pass
 
     def visit_template_declaration(self, template_declaration: "TemplateDeclaration") -> None:
@@ -248,7 +249,7 @@ class Visitor(object):
     def visit_attribute_named_list(self, attribute_named_list: "AttributeNamedList") -> None:
         pass
 
-    def visit_attribute_error(self, attribute_error: "AttributeError") -> None:
+    def visit_invalid_attribute(self, invalid_attribute: "InvalidAttribute") -> None:
         pass
 
     def visit_attribute_named(self, using_namespace: "Optional[str]", attribute_named: "AttributeNamed") -> None:
@@ -699,7 +700,7 @@ class Visitor(object):
     def visit_lambda_declarator(self, lambda_declarator: "LambdaDeclarator") -> None:
         pass
 
-    def visit_reference(self, reference: "Reference") -> None:
+    def visit_reference(self, ref: "Reference") -> None:
         pass
 
     def visit_typename_reference(self, typename_reference: "TypenameReference") -> None:
@@ -714,7 +715,7 @@ class Visitor(object):
     def visit_template_specifier_id(self, template_specifier_id: "TemplateSpecifierId") -> None:
         pass
 
-    def visit_id(self, id: "Id") -> None:
+    def visit_id(self, identifier: "Id") -> None:
         pass
 
     def visit_template_id(self, template_id: "TemplateId") -> None:
@@ -836,7 +837,7 @@ from .template import (
 )
 from .attributes import (
     AttributeNamedList,
-    AttributeError,
+    InvalidAttribute,
     AttributeNamed,
     AttributeAlignAsType,
     AttributeAlignAsExpression,

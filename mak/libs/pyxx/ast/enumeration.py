@@ -1,29 +1,27 @@
-from .type import TypeSpecifier
 from typing import List, Optional
 from . import Visitor
-from .expressions import Expression
-from .attributes import Attribute
+from .base import Attribute, Expression
 from .reference import Reference
-from .type import TypeSpecifierSeq
+from .type import TypeSpecifier, TypeSpecifierSeq
 
 
 class Enumerator(object):
 
     def __init__(self, identifier: str, attributes: List[Attribute], constant_value: Optional[Expression]) -> None:
-        self._name = identifier
-        self._attributes = attributes
-        self._value = constant_value
+        self.name = identifier
+        self.attributes = attributes
+        self.value = constant_value
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_enumerator(self)
 
     def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self._attributes:
+        for attribute in self.attributes:
             attribute.accept(visitor)
 
     def accept_value(self, visitor: Visitor) -> None:
-        if self._value is not None:
-            self._value.accept(visitor)
+        if self.value is not None:
+            self.value.accept(visitor)
 
 
 class EnumSpecifier(TypeSpecifier):
@@ -34,27 +32,27 @@ class EnumSpecifier(TypeSpecifier):
             enumerator_list: List[Enumerator]
     ) -> None:
         TypeSpecifier.__init__(self)
-        self._name = name
-        self._attributes = attributes
-        self._is_scoped = is_scoped
-        self._base_type = base_type
-        self._enumerators = enumerator_list
+        self.name = name
+        self.attributes = attributes
+        self.is_scoped = is_scoped
+        self.base_type = base_type
+        self.enumerators = enumerator_list
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_enum_specifier(self)
 
     def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self._attributes:
+        for attribute in self.attributes:
             attribute.accept(visitor)
 
     def accept_name(self, visitor: Visitor) -> None:
-        if self._name is not None:
-            self._name.accept(visitor)
+        if self.name is not None:
+            self.name.accept(visitor)
 
     def accept_base_type(self, visitor: Visitor) -> None:
-        if self._base_type is not None:
-            self._base_type.accept(visitor)
+        if self.base_type is not None:
+            self.base_type.accept(visitor)
 
     def accept_enumerators(self, visitor: Visitor) -> None:
-        for enumerator in self._enumerators:
+        for enumerator in self.enumerators:
             enumerator.accept(visitor)
