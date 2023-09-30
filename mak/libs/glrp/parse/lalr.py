@@ -4,7 +4,6 @@ from .lr0path import LR0PathItem
 from .lr0dominancenode import LR0DominanceSet
 from .merge_tree import MergeTree
 from motor_typing import TYPE_CHECKING
-from collections import OrderedDict
 import os
 import sys
 

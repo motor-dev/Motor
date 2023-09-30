@@ -1,5 +1,4 @@
 from .. import ast
-from typing import Optional
 
 
 class RecursiveVisitor(ast.Visitor):
@@ -208,7 +207,8 @@ class RecursiveVisitor(ast.Visitor):
         template_parameter_list.accept_parameters(self)
 
     def visit_ambiguous_template_parameter_list(self,
-                                                ambiguous_template_parameter_list: ast.AmbiguousTemplateParameterList) -> None:
+                                                ambiguous_template_parameter_list: ast.AmbiguousTemplateParameterList) \
+            -> None:
         ambiguous_template_parameter_list.accept_first(self)
 
     def visit_template_argument_pack_expand(self,

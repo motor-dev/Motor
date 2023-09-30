@@ -13,10 +13,10 @@ class Lexer:
 
         def __init__(
                 self,
-                regex_list: List[Tuple[Pattern[str], List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str,
-                bool, int]]]]]
+                regex_list: List[
+                    Tuple[Pattern[str], List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str, bool, int]]]]]
         ) -> None:
-            self._regex = regex_list
+            self.regex = regex_list
 
     def __init__(self) -> None:
         self._states = {}  # type: Dict[str, Lexer.State]
@@ -93,7 +93,7 @@ class Lexer:
 
         while lexpos < lexlen:
             # Look for a regular expression match
-            for lexre, lexindexfunc in state._regex:
+            for lexre, lexindexfunc in state.regex:
                 m = lexre.match(lexdata, lexpos)
                 if not m:
                     continue
@@ -158,6 +158,12 @@ def _form_master_re(
     regex = '|'.join('(%s)' % (rule[0]) for rule in rule_list)
     try:
         lexre = re.compile(regex)
+    except re.error:
+        m = int(len(rule_list) / 2)
+        if m == 0:
+            m = 1
+        return _form_master_re(rule_list[:m], terminals) + _form_master_re(rule_list[m:], terminals)
+    else:
         result = [None] * (
                 1 + lexre.groups
         )  # type: List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str, bool, int]]]
@@ -171,11 +177,6 @@ def _form_master_re(
             result[index + 1] = (rule[4], rule[1], rule[3], terminal_index)
             index += 1 + rule[2].groups
         return [(lexre, result)]
-    except Exception as e:
-        m = int(len(rule_list) / 2)
-        if m == 0:
-            m = 1
-        return _form_master_re(rule_list[:m], start_index) + _form_master_re(rule_list[m:], start_index + m)
 
 
 def _build_states(owner: Type[Lexer]) -> Tuple[Dict[str, Lexer.State], Dict[str, Tuple[int, bool]]]:

@@ -26,7 +26,7 @@ class Token(Symbol):
             print('%s%s' % (self_indent, name_map[self._id]))
 
     @property
-    def skipped_tokens(self):
+    def skipped_tokens(self) -> List["Token"]:
         return self._skipped_tokens
 
 

@@ -3,7 +3,7 @@ import io
 import re
 import argparse
 import glrp
-from typing import Dict, Callable, Tuple, Union, Any, List, Optional
+from typing import Dict, Callable, Tuple, Any, List, Optional
 
 from typing_extensions import ParamSpec, Concatenate
 
@@ -133,8 +133,12 @@ class Logger(glrp.Logger):
         self._arguments = arguments
         self._warning_count = 0
         self._error_count = 0
-        self._expected_diagnostics = []
+        self._expected_diagnostics = []  # type: List[Callable[..., Any]]
         self._diagnostics_format = Logger.IDE_FORMAT[getattr(arguments, 'diagnostics_format')]
+
+    @property
+    def error_count(self) -> int:
+        return self._error_count
 
     def set_lexer(self, lexer: glrp.Lexer) -> None:
         self._lexer = lexer
@@ -150,7 +154,7 @@ class Logger(glrp.Logger):
                         result += 1
                 return result
 
-            def perform_replace(match: re.Match):
+            def perform_replace(match: re.Match[str]) -> str:
                 s, e = match.span()
                 tab_start = start_column(s)
                 tab_length = 4 - tab_start % 4 + 4 * (e - s - 1)
@@ -220,7 +224,7 @@ class Logger(glrp.Logger):
 
     def pop_expected_diagnostics(self) -> bool:
         result = bool(self._expected_diagnostics)
-        self._expected_diagnostics = []  # type: List[Callable[..., Union[bool|None]]]
+        self._expected_diagnostics = []
         return result
 
 

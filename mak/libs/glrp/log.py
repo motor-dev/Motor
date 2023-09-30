@@ -1,4 +1,4 @@
-from typing import Any, List, Text, TextIO
+from typing import Any, Text, TextIO
 
 
 class Logger:
@@ -73,30 +73,30 @@ class Logger:
 
             self._out_file.write(u'{color_message}{message}{color_off}\n'.format(**locals()))
 
-    def diagnostic(self, filename: str, line: int, message: Text, *args: List[Any]) -> None:
+    def diagnostic(self, filename: str, line: int, message: Text, *args: Any) -> None:
         if args:
             message = message % args
         self._out_file.write(u'%s:%d: %s\n' % (filename, line, message))
 
-    def note(self, message: Text, *args: List[Any]) -> None:
+    def note(self, message: Text, *args: Any) -> None:
         if args:
             self._msg('note', message % args)
         else:
             self._msg('note', message)
 
-    def info(self, message: Text, *args: List[Any]) -> None:
+    def info(self, message: Text, *args: Any) -> None:
         if args:
             self._msg('info', message % args)
         else:
             self._msg('info', message)
 
-    def warning(self, message: Text, *args: List[Any]) -> None:
+    def warning(self, message: Text, *args: Any) -> None:
         if args:
             self._msg('warning', message % args)
         else:
             self._msg('warning', message)
 
-    def error(self, message: Text, *args: List[Any]) -> None:
+    def error(self, message: Text, *args: Any) -> None:
         if args:
             self._msg('error', message % args)
         else:
