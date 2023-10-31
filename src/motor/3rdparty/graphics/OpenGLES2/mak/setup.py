@@ -1,29 +1,32 @@
 import os
+import build_framework
+import waflib.Errors
 
 
-def setup(conf):
-    if not conf.env.PROJECTS:
-        conf.start_msg_setup()
-        if 'darwin' in conf.env.VALID_PLATFORMS:
-            if conf.check_framework('OpenGLES'):
-                conf.end_msg('from system')
+def setup(setup_context: build_framework.SetupContext) -> None:
+    if not setup_context.env.PROJECTS:
+        build_framework.start_msg_setup(setup_context)
+        if 'darwin' in setup_context.env.VALID_PLATFORMS:
+            if build_framework.check_framework(setup_context, ['OpenGLES']):
+                setup_context.end_msg('from system')
             else:
-                conf.end_msg('not found', color='YELLOW')
+                setup_context.end_msg('not found', color='YELLOW')
         else:
             try:
-                conf.pkg_config('glesv2', var='OpenGLES2')
-                conf.pkg_config('egl', var='OpenGLES2')
-            except Exception as e:
-                if conf.check_lib(
-                    ['GLESv2', 'EGL'],
-                    var='OpenGLES2',
-                    includepath=[os.path.join(conf.path.parent.abspath(), 'api')],
-                    includes=['GLES2/gl2.h', 'EGL/egl.h'],
-                    functions=['glGenFramebuffers', 'eglCreateContext']
+                build_framework.pkg_config(setup_context, 'glesv2', var='OpenGLES2')
+                build_framework.pkg_config(setup_context, 'egl', var='OpenGLES2')
+            except waflib.Errors.WafError:
+                if build_framework.check_lib(
+                        setup_context,
+                        ['GLESv2', 'EGL'],
+                        var='OpenGLES2',
+                        includepath=[os.path.join(setup_context.path.parent.abspath(), 'api')],
+                        includes=['GLES2/gl2.h', 'EGL/egl.h'],
+                        functions=['glGenFramebuffers', 'eglCreateContext']
                 ):
-                    conf.end_msg('from system')
+                    setup_context.end_msg('from system')
                 else:
-                    conf.end_msg('not found', color='YELLOW')
+                    setup_context.end_msg('not found', color='YELLOW')
             else:
-                conf.env.SYSTEM_OPENGLES2 = True
-                conf.end_msg('from pkg-config')
+                setup_context.env.SYSTEM_OPENGLES2 = True
+                setup_context.end_msg('from pkg-config')

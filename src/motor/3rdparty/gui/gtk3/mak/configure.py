@@ -1,10 +1,5 @@
-from motor_typing import TYPE_CHECKING
+import build_framework
 
 
-def configure(configuration_context):
-    # type: (Configure.ConfigurationContext) -> None
+def configure(_: build_framework.ConfigurationContext) -> None:
     pass
-
-
-if TYPE_CHECKING:
-    from waflib import Configure

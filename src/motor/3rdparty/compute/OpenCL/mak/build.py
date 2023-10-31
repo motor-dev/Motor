@@ -1,31 +1,48 @@
-from waflib import Options
-from waflib.TaskGen import feature, after_method
-import os
+import build_framework
+import waflib.ConfigSet
+import waflib.Node
+import waflib.TaskGen
 
 
-def build_binary(bld, name, env, path):
-    tg = bld.thirdparty(
+def build_binary(
+        build_context: build_framework.BuildContext,
+        name: str,
+        env: waflib.ConfigSet.ConfigSet,
+        path: waflib.Node.Node
+) -> waflib.TaskGen.task_gen:
+    tg = build_framework.thirdparty(
+        build_context,
         name,
         source_node=path,
         feature_list=['OpenCL'],
         use=['motor.3rdparty.graphics.OpenGL'],
         env=env,
     )
-    tg.export_includes = [bld.path.parent.find_node('api')]
+    assert tg is not None
+    setattr(tg, 'export_includes', [build_context.path.parent.find_node('api')])
     return tg
 
 
-def build_project(bld, name, env, path):
-    tg = bld.thirdparty(
+def build_project(
+        build_context: build_framework.BuildContext,
+        name: str,
+        env: waflib.ConfigSet.ConfigSet,
+        path: waflib.Node.Node
+) -> waflib.TaskGen.task_gen:
+    tg = build_framework.thirdparty(
+        build_context,
         name,
         source_node=path,
         feature_list=['OpenCL'],
         use=['motor.3rdparty.graphics.OpenGL'],
         env=env,
     )
-    tg.export_includes = [bld.path.parent.find_node('api')]
+    assert tg is not None
+    setattr(tg, 'export_includes', [build_context.path.parent.find_node('api')])
     return tg
 
 
-def build(bld):
-    bld.package('motor.3rdparty.compute.OpenCL', 'OPENCL_BINARY', build_binary, 'OPENCL_SOURCE', build_project)
+def build(build_context: build_framework.BuildContext) -> None:
+    build_framework.package(build_context, 'motor.3rdparty.compute.OpenCL', 'OPENCL_BINARY', build_binary,
+                            'OPENCL_SOURCE',
+                            build_project)

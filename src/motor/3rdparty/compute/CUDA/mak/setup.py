@@ -1,7 +1,8 @@
-from waflib import Utils, Configure
-import os
 import sys
 import shlex
+import build_framework
+import waflib.Utils
+from typing import List, Tuple
 
 ARCHS = [
     (3, 0),
@@ -20,22 +21,31 @@ ARCHS = [
 ]
 
 
-def run_nvcc(nvcc, flags):
+class NvccException(Exception):
+    pass
+
+
+def _run_nvcc(nvcc: List[str], flags: List[str]) -> Tuple[str, str]:
     try:
-        p = Utils.subprocess.Popen(
-            nvcc + flags, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE
+        p = waflib.Utils.subprocess.Popen(
+            nvcc + flags, stdin=waflib.Utils.subprocess.PIPE, stdout=waflib.Utils.subprocess.PIPE,
+            stderr=waflib.Utils.subprocess.PIPE
         )
         out, err = p.communicate()
-    except Exception as e:
-        raise
+    except OSError as e:
+        raise NvccException(str(e))
     else:
         if not isinstance(out, str):
-            out = out.decode(sys.stdout.encoding, errors='ignore')
+            out_str = out.decode(sys.stdout.encoding, errors='ignore')
+        else:
+            out_str = out
         if not isinstance(err, str):
-            err = err.decode(sys.stderr.encoding, errors='ignore')
+            err_str = err.decode(sys.stderr.encoding, errors='ignore')
+        else:
+            err_str = err
         if p.returncode != 0:
-            raise Exception(err)
-        return out, err
+            raise NvccException(err_str)
+        return out_str, err_str
 
 
 _CUDA_SNIPPET = """
@@ -52,15 +62,14 @@ int main(int argc, const char *argv[])
 """
 
 
-@Configure.conf
-def check_nvcc(configuration_context, nvcc):
-    source_node = configuration_context.bldnode.make_node('test.cu')
-    dest_node = configuration_context.bldnode.make_node('test.obj')
+def _check_nvcc(setup_context: build_framework.SetupContext, nvcc: List[str]) \
+        -> Tuple[List[str], List[str], List[Tuple[int, int]]]:
+    source_node = setup_context.bldnode.make_node('test.cu')
+    dest_node = setup_context.bldnode.make_node('test.obj')
     try:
         source_node.write(_CUDA_SNIPPET)
-        out, err = run_nvcc(
-            nvcc, configuration_context.env.NVCC_CXXFLAGS +
-                  ['-v', source_node.abspath(), '-o', dest_node.abspath()]
+        out, err = _run_nvcc(
+            nvcc, setup_context.env.NVCC_CXXFLAGS + ['-v', source_node.abspath(), '-o', dest_node.abspath()]
         )
         target_includes = None
         target_libs = None
@@ -74,44 +83,47 @@ def check_nvcc(configuration_context, nvcc):
         archs = []
         for a in ARCHS:
             try:
-                run_nvcc(
-                    nvcc, configuration_context.env.NVCC_CXXFLAGS + ['-arch', 'compute_{0}{1}'.format(*a), '--version']
+                _run_nvcc(
+                    nvcc, setup_context.env.NVCC_CXXFLAGS + ['-arch', 'compute_{0}{1}'.format(*a), '--version']
                 )
-            except Exception as e:
+            except NvccException:
                 pass
             else:
                 archs.append(a)
         if not archs:
-            raise Exception('no viable arch found')
-        return (target_includes or [], target_libs, archs)
+            raise NvccException('no viable arch found')
+        return target_includes or [], target_libs, archs
     finally:
         source_node.delete()
 
 
-def setup(configuration_context):
-    if configuration_context.env.PROJECTS:
+def setup(setup_context: build_framework.SetupContext) -> None:
+    if setup_context.env.PROJECTS:
         return
-    if configuration_context.env.NVCC_COMPILERS:
-        configuration_context.start_msg_setup()
-        if configuration_context.env.COMPILER_NAME == 'suncc':
-            configuration_context.end_msg('not available with sunCC', color='YELLOW')
+    if setup_context.env.NVCC_COMPILERS:
+        build_framework.start_msg_setup(setup_context)
+        if setup_context.env.COMPILER_NAME == 'suncc':
+            setup_context.end_msg('not available with sunCC', color='YELLOW')
             return
-        cuda_available = False
-        toolchain = configuration_context.env.TOOLCHAIN
-        for version, compiler in configuration_context.env.NVCC_COMPILERS[::-1]:
+        cuda_toolchain = None
+        version = (0,)  # type: Tuple[int,...]
+        archs = []  # type: List[Tuple[int, int]]
+        toolchain = setup_context.env.TOOLCHAIN
+        for version, compiler in setup_context.env.NVCC_COMPILERS[::-1]:
             flags = []
             if version >= (11,):
                 flags.append('--allow-unsupported-compiler')
                 flags.append('-Wno-deprecated-gpu-targets')
-            version = '.'.join(str(x) for x in version)
-            cuda_toolchain = toolchain + '-cuda{}'.format(version)
-            configuration_context.setenv(cuda_toolchain, env=configuration_context.env.detach())
-            v = configuration_context.env
+            cuda_toolchain = toolchain + '-cuda{}'.format('.'.join(str(x) for x in version))
+            setup_context.setenv(cuda_toolchain, env=setup_context.env.detach())
+            v = setup_context.env
             v.NVCC_CXX = compiler
             cxx_compiler = v.CXX[0]
             if v.MSVC_COMPILER:
-                cxx_compiler = configuration_context.find_program('cl',
-                                                                  path_list=configuration_context.env.MSVC_PATH)[0]
+                cl = setup_context.find_program('cl',
+                                                path_list=setup_context.env.MSVC_PATH)
+                assert cl is not None
+                cxx_compiler = cl[0]
             v.append_value('NVCC_CXXFLAGS', ['--compiler-bindir', cxx_compiler] + flags)
             if v.ARCH_LP64:
                 v.append_value('NVCC_CXXFLAGS', ['-m64'])
@@ -127,10 +139,11 @@ def setup(configuration_context):
                 else:
                     v.append_value('NVCC_CXXFLAGS', ['-Xcompiler', flag])
             try:
-                include_paths, lib_paths, archs = configuration_context.check_nvcc(compiler)
-            except Exception as e:
-                configuration_context.setenv(toolchain)
-                del configuration_context.all_envs[cuda_toolchain]
+                include_paths, lib_paths, archs = _check_nvcc(setup_context, compiler)
+            except NvccException:
+                setup_context.setenv(toolchain)
+                del setup_context.all_envs[cuda_toolchain]
+                cuda_toolchain = None
             else:
                 for a in archs:
                     v.append_value('NVCC_CXXFLAGS', ['-gencode', 'arch=compute_{0}{1},code=sm_{0}{1}'.format(*a)])
@@ -139,17 +152,16 @@ def setup(configuration_context):
                 )
 
                 v.append_value('NVCC_CXXFLAGS', ['-diag-suppress', '2803'])
-                cuda_available = True
-
-                configuration_context.setenv(toolchain)
-                configuration_context.env.append_value('check_CUDA_cxxflags', include_paths)
-                configuration_context.env.append_value('check_CUDA_linkflags', lib_paths)
-                configuration_context.env.append_value('check_CUDA_stlib', ['cudart_static'])
-                configuration_context.env.append_value('FEATURES', ['CUDA'])
+                setup_context.setenv(toolchain)
+                setup_context.env.append_value('check_CUDA_cxxflags', include_paths)
+                setup_context.env.append_value('check_CUDA_linkflags', lib_paths)
+                setup_context.env.append_value('check_CUDA_stlib', ['cudart_static'])
+                setup_context.env.append_value('FEATURES', ['CUDA'])
                 break
-        if cuda_available:
-            configuration_context.env.append_value('KERNEL_TOOLCHAINS', [('cuda', cuda_toolchain)])
-            configuration_context.env['check_CUDA'] = True
-            configuration_context.end_msg('cuda {} [{}]'.format(version, ', '.join('{}.{}'.format(*a) for a in archs)))
+        if cuda_toolchain is not None:
+            setup_context.env.append_value('KERNEL_TOOLCHAINS', [('cuda', cuda_toolchain)])
+            setup_context.env['check_CUDA'] = True
+            setup_context.end_msg(
+                'cuda {} [{}]'.format('.'.join(str(x) for x in version), ', '.join('{}.{}'.format(*a) for a in archs)))
         else:
-            configuration_context.end_msg('not found', color='YELLOW')
+            setup_context.end_msg('not found', color='YELLOW')

@@ -1,49 +1,99 @@
-from waflib import Options, Utils, Errors
-from waflib.Configure import conf
-from waflib.TaskGen import feature, before_method, after_method
 import os
+import waflib.ConfigSet
+import waflib.Configure
+import waflib.Context
+import waflib.Node
+import waflib.Options
+import waflib.Task
+import waflib.TaskGen
+import waflib.Utils
+import build_framework
+from typing import List, Optional
 
 
-@conf
-def python_module(bld, name, depends, path, conditions, uselib=[]):
+@waflib.Configure.conf
+def python_module(
+        build_context: waflib.Context.Context,
+        name: str,
+        depends: Optional[List[str]] = None,
+        path: Optional[waflib.Node.Node] = None,
+        uselib: Optional[List[str]] = None,
+        conditions: Optional[List[str]] = None
+) -> Optional[waflib.TaskGen.task_gen]:
+    assert isinstance(build_context, build_framework.BuildContext)
 
-    def python_lib(env):
+    def python_lib(env: waflib.ConfigSet.ConfigSet) -> Optional[waflib.TaskGen.task_gen]:
         features = (['c', 'cxx', 'cxxshlib', 'motor:c', 'motor:cxx', 'motor:shared_lib', 'motor:python_module'])
-        result = bld.module(name, env, path, depends, [], features, None, [], [], [], [], [], conditions, None, uselib)
+        result = build_framework.module(
+            build_context,
+            name,
+            env,
+            path,
+            depends,
+            [],
+            features,
+            None,
+            [],
+            [],
+            [],
+            [],
+            [],
+            conditions,
+            None,
+            uselib
+        )
         if result is not None:
             result.env.cxxshlib_PATTERN = result.env.pymodule_PATTERN
+        return result
 
-    bld.preprocess(name, path, 'Motor', name, depends=depends, uselib=uselib)
-    multiarch_module = bld.multiarch(name, [python_lib(env) for env in bld.multiarch_envs])
+    build_framework.preprocess(
+        build_context,
+        name,
+        path,
+        'Motor',
+        name,
+        depends=depends,
+        uselib=uselib,
+        extra_features=None
+    )
+    multiarch_module = build_framework.multiarch(
+        build_context,
+        name,
+        [python_lib(env) for env in build_context.multiarch_envs]
+    )
     if multiarch_module is not None:
-        multiarch_module.env.cxxshlib_PATTERN = module.env.pymodule_PATTERN
+        multiarch_module.env.cxxshlib_PATTERN = multiarch_module.env.pymodule_PATTERN
+    return multiarch_module
 
 
-@feature('motor:python_module')
-@after_method('install_step')
-def install_python_module(self):
-    if not self.env.PROJECTS and not self.env.ENV_PREFIX:                                         #no multiarch
-        self.install_files(
-            os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR),
-            [self.postlink_task.outputs[0]], Utils.O755
+@waflib.TaskGen.feature('motor:python_module')
+@waflib.TaskGen.after_method('install_step')
+def install_python_module(task_gen: waflib.TaskGen.task_gen) -> None:
+    if not task_gen.env.PROJECTS and not task_gen.env.ENV_PREFIX:  # no multiarch
+        build_framework.install_files(
+            task_gen,
+            os.path.join(task_gen.bld.env.PREFIX, task_gen.bld.env.OPTIM, task_gen.bld.env.DEPLOY_RUNBINDIR),
+            [getattr(task_gen, 'postlink_task').outputs[0]], waflib.Utils.O755
         )
-        if self.env.CC_NAME == 'msvc':
-            self.install_files(
-                os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR),
-                [self.link_task.outputs[1]]
+        if task_gen.env.CC_NAME == 'msvc':
+            build_framework.install_files(
+                task_gen,
+                os.path.join(task_gen.bld.env.PREFIX, task_gen.bld.env.OPTIM, task_gen.bld.env.DEPLOY_RUNBINDIR),
+                [getattr(task_gen, 'link_task').outputs[1]]
             )
 
 
-def build(bld):
-    bld.env.PYTHON_VERSIONS = Options.options.python_versions.split(',')
-    for version in bld.env.PYTHON_VERSIONS:
-        bld.recurse('tcltk/build.py')
+def build(build_context: build_framework.BuildContext) -> None:
+    build_context.env.PYTHON_VERSIONS = waflib.Options.options.python_versions.split(',')
+    for version in build_context.env.PYTHON_VERSIONS:
+        build_context.recurse('tcltk/build.py')
         version_number = version.replace('.', '')
-        for env in bld.multiarch_envs:
+        for env in build_context.multiarch_envs:
             path = env['PYTHON%s_BINARY' % version_number]
             if path:
-                path = bld.package_node.make_node(path)
-                bld.thirdparty(
+                path = build_context.package_node.make_node(path)
+                build_framework.thirdparty(
+                    build_context,
                     'motor.3rdparty.scripting.python%s' % version_number,
                     var='python%s' % version_number,
                     source_node=path,
@@ -51,9 +101,10 @@ def build(bld):
                     feature_list=['python', 'python' + version],
                     env=env
                 )
-                bld.add_feature('python', env)
+                build_framework.add_feature(build_context, 'python', env)
             else:
-                bld.thirdparty(
+                build_framework.thirdparty(
+                    build_context,
                     'motor.3rdparty.scripting.python%s' % version_number,
                     var='python%s' % version_number,
                     private_use=['motor.3rdparty.scripting.tcltk'],

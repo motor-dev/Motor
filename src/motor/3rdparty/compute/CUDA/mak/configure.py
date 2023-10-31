@@ -1,53 +1,56 @@
-from waflib import Utils
 import os
 import sys
-import shlex
+import build_framework
+import waflib.Utils
+from typing import Any, List, Tuple
 
 
-def find_cuda_registry_paths(all_versions_key):
-    bindirs = []
-    try:
-        root_path, type = Utils.winreg.QueryValueEx(all_versions_key, 'RootInstallDir')
-    except OSError:
-        root_path = ''
-    index = 0
-    while 1:
-        try:
-            version = Utils.winreg.EnumKey(all_versions_key, index)
-            version_key = Utils.winreg.OpenKey(all_versions_key, version)
-        except OSError:
-            break
-        index += 1
-        try:
-            full_path, type = Utils.winreg.QueryValueEx(version_key, 'InstallDir')
-        except OSError:
-            full_path = os.path.join(root_path, version)
-        bindirs.append(os.path.join(full_path, 'bin'))
+def _find_cuda_registry_paths(all_versions_key: Any) -> List[str]:
+    bindirs = []  # type: List[str]
+    if sys.platform == "win32":
+        import winreg
+        root_path, _ = winreg.QueryValueEx(all_versions_key, 'RootInstallDir')
+        index = 0
+        while 1:
+            try:
+                version = waflib.Utils.winreg.EnumKey(all_versions_key, index)
+                version_key = waflib.Utils.winreg.OpenKey(all_versions_key, version)
+            except OSError:
+                break
+            index += 1
+            try:
+                full_path, _ = waflib.Utils.winreg.QueryValueEx(version_key, 'InstallDir')
+            except OSError:
+                full_path = os.path.join(root_path, version)
+            bindirs.append(os.path.join(full_path, 'bin'))
     return bindirs
 
 
-def find_cuda_paths(configuration_context):
+def find_cuda_paths(configuration_context: build_framework.ConfigurationContext) \
+        -> List[Tuple[Tuple[int, ...], List[str]]]:
     compilers = []
     v = configuration_context.env
     environ = getattr(configuration_context, 'environ', os.environ)
     bindirs = environ['PATH'].split(os.pathsep) + v.EXTRA_PATH
-    if Utils.winreg:
+    if sys.platform == "win32":
+        import winreg
         try:
-            all_versions = Utils.winreg.OpenKey(
-                Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Wow6432node\NVIDIA Corporation\GPU Computing Toolkit\CUDA'
+            all_versions = winreg.OpenKey(
+                winreg.HKEY_LOCAL_MACHINE,
+                r'SOFTWARE\Wow6432node\NVIDIA Corporation\GPU Computing Toolkit\CUDA'
             )
         except OSError:
             pass
         else:
-            bindirs += find_cuda_registry_paths(all_versions)
+            bindirs += _find_cuda_registry_paths(all_versions)
         try:
-            all_versions = Utils.winreg.OpenKey(
-                Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\NVIDIA Corporation\GPU Computing Toolkit\CUDA'
+            all_versions = winreg.OpenKey(
+                winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\NVIDIA Corporation\GPU Computing Toolkit\CUDA'
             )
         except OSError:
             pass
         else:
-            bindirs += find_cuda_registry_paths(all_versions)
+            bindirs += _find_cuda_registry_paths(all_versions)
     else:
         try:
             developer_dirs = os.listdir('/Developer/NVIDIA')
@@ -73,29 +76,30 @@ def find_cuda_paths(configuration_context):
         del v['NVCC_TEMP_PROG']
         if nvcc:
             try:
-                p = Utils.subprocess.Popen(
+                p = waflib.Utils.subprocess.Popen(
                     nvcc + ['--version'],
-                    stdin=Utils.subprocess.PIPE,
-                    stdout=Utils.subprocess.PIPE,
-                    stderr=Utils.subprocess.PIPE
+                    stdin=waflib.Utils.subprocess.PIPE,
+                    stdout=waflib.Utils.subprocess.PIPE,
+                    stderr=waflib.Utils.subprocess.PIPE
                 )
                 out, err = p.communicate()
-            except Exception as e:
-                #print(e)
+            except OSError:
                 pass
             else:
                 if p.returncode == 0:
                     if not isinstance(out, str):
-                        out = out.decode(sys.stdout.encoding, errors='ignore')
-                    for line in out.split('\n'):
+                        out_str = out.decode(sys.stdout.encoding, errors='ignore')
+                    else:
+                        out_str = out
+                    for line in out_str.split('\n'):
                         if line.startswith('Cuda compilation tools'):
                             version = line.split(',')[1].split()[1]
-                            version = tuple(int(x) for x in version.split('.'))
-                            compilers.append((version, nvcc))
+                            version_number = tuple(int(x) for x in version.split('.'))
+                            compilers.append((version_number, nvcc))
     return compilers
 
 
-def configure(configuration_context):
+def configure(configuration_context: build_framework.ConfigurationContext) -> None:
     configuration_context.start_msg('Looking for CUDA')
     v = configuration_context.env
     compilers = find_cuda_paths(configuration_context)

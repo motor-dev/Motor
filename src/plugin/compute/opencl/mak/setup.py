@@ -1,6 +1,9 @@
-def setup(configuration_context):
-    if configuration_context.env.check_OpenCL:
-        configuration_context.env.append_value('KERNEL_TOOLCHAINS', [('opencl', configuration_context.env.TOOLCHAIN)])
-        configuration_context.env.append_value(
-            'CLC_KERNEL_HEADER_PATH', [configuration_context.path.parent.make_node('api.cl').abspath()]
+import build_framework
+
+
+def setup(setup_context: build_framework.SetupContext) -> None:
+    if setup_context.env.check_OpenCL:
+        setup_context.env.append_value('KERNEL_TOOLCHAINS', [('opencl', setup_context.env.TOOLCHAIN)])
+        setup_context.env.append_value(
+            'CLC_KERNEL_HEADER_PATH', [setup_context.path.parent.make_node('api.cl').abspath()]
         )

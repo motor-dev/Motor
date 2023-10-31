@@ -8,6 +8,7 @@
 #include <motor/meta/property.meta.hh>
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 #include <py_boundmethod.hh>
+#include <py_call.hh>
 #include <py_object.hh>
 
 namespace Motor { namespace Python {

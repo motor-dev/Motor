@@ -1,19 +1,19 @@
 #! /usr/bin/env python
-# set Android specific options
 
 import os
-from waflib import Options, Utils
-from motor_typing import TYPE_CHECKING
+import sys
+import waflib.Options
+import build_framework
 
 
-def options(option_context):
-    # type: (Options.OptionsContext) -> None
+def options(option_context: build_framework.OptionsContext) -> None:
     option_group = option_context.get_option_group('SDK paths and options')
+    assert option_group is not None
 
     sdk_path = ''
     ndk_paths = []
 
-    def add_ndk_paths():
+    def add_ndk_paths() -> None:
         ndk_path = os.path.join(sdk_path, 'ndk-bundle')
         if os.path.isdir(ndk_path) and ndk_path not in ndk_paths:
             ndk_paths.append(ndk_path)
@@ -62,23 +62,24 @@ def options(option_context):
             if os.path.isfile(p):
                 ndk_paths.append(path)
     jdk_path = ''
-    if Utils.winreg:
+    if sys.platform == 'win32':
+        import winreg
         try:
             try:
-                key = Utils.winreg.OpenKey(
-                    Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Wow6432Node\Microsoft\VisualStudio\Android'
+                key = winreg.OpenKey(
+                    winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Wow6432Node\Microsoft\VisualStudio\Android'
                 )
             except OSError:
                 try:
-                    key = Utils.winreg.OpenKey(
-                        Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\VisualStudio\Android'
+                    key = winreg.OpenKey(
+                        winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\VisualStudio\Android'
                     )
                 except OSError:
-                    key = Utils.winreg.OpenKey(
-                        Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\VisualStudio\Android', 0,
-                        Utils.winreg.KEY_READ | Utils.winreg.KEY_WOW64_64KEY
+                    key = winreg.OpenKey(
+                        winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\VisualStudio\Android', 0,
+                        winreg.KEY_READ | winreg.KEY_WOW64_64KEY
                     )
-            jdk_path = Utils.winreg.QueryValueEx(key, 'JavaHome')[0]
+            jdk_path = winreg.QueryValueEx(key, 'JavaHome')[0]
         except OSError:
             pass
     option_group.add_option(
@@ -104,8 +105,8 @@ def options(option_context):
     # option_context.recurse('mak/device.py')
 
 
-def host_configure(configuration_context):
-    ndk_paths = Options.options.android_ndk_path.split(',')
+def host_configure(configuration_context: build_framework.ConfigurationContext) -> None:
+    ndk_paths = waflib.Options.options.android_ndk_path.split(',')
     if ndk_paths:
         compiler_paths = []
         for ndk_path in ndk_paths:
@@ -121,37 +122,15 @@ def host_configure(configuration_context):
         configuration_context.env.append_unique('EXTRA_PATH', compiler_paths)
 
 
-def configure(configuration_context):
-    # type: (Configure.ConfigurationContext) -> None
+def configure(configuration_context: build_framework.ConfigurationContext) -> None:
     configuration_context.recurse('mak/configure.py')
 
 
-def setup(configuration_context):
-    # type: (Configure.ConfigurationContext) -> None
-    configuration_context.recurse('mak/setup.py', once=False)
+def setup(setup_context: build_framework.SetupContext) -> None:
+    setup_context.recurse('mak/setup.py', once=False)
 
 
-def build(build_context):
-    # type: (Build.BuildContext) -> None
+def build(build_context: build_framework.BuildContext) -> None:
     if not build_context.env.PROJECTS:
         build_context.recurse('mak/build.py')
     build_context.recurse('src/build.py')
-
-
-def deploy(build_context):
-    # type: (Build.BuildContext) -> None
-    build_context.recurse('mak/deploy.py')
-
-
-def run(build_context):
-    # type: (Build.BuildContext) -> None
-    build_context.recurse('mak/run.py')
-
-
-def debug(build_context):
-    # type: (Build.BuildContext) -> None
-    build_context.recurse('mak/debug.py')
-
-
-if TYPE_CHECKING:
-    from waflib import Configure, Build

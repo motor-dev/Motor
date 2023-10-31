@@ -784,3 +784,4 @@ diff -r -u bullet3-2.87.old/src/BulletCollision/BroadphaseCollision/btDbvt.h bul
  
  			btScalar lambda_max = rayDir.dot(rayTo-rayFrom);
  
+

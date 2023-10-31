@@ -1,5 +1,10 @@
-from waflib.TaskGen import feature, after_method
 import os
+import waflib.ConfigSet
+import waflib.Node
+import waflib.Task
+import waflib.TaskGen
+import build_framework
+from typing import Optional
 
 LUA_HEADERS = ['src/lauxlib.h', 'src/lua.h', 'src/luaconf.h', 'src/lualib.h']
 LUA_SOURCES = [
@@ -30,57 +35,78 @@ LUA_SOURCES = [
     'src/ldblib.c',
     'src/liolib.c',
     'src/lmathlib.c',
-                       #'src/loslib.c',
+    # 'src/loslib.c',
     'src/lstrlib.c',
     'src/ltablib.c',
     'src/lutf8lib.c',
     'src/loadlib.c',
-                       #'src/linit.c',
+    # 'src/linit.c',
 ]
 
 
-@feature('motor:deploy:lua')
-@after_method('install_step')
-@after_method('apply_link')
-def deploy_lua_package(task_gen):
+@waflib.TaskGen.feature('motor:deploy:lua')
+@waflib.TaskGen.after_method('install_step')
+@waflib.TaskGen.after_method('apply_link')
+def deploy_lua_package(task_gen: waflib.TaskGen.task_gen) -> None:
+    assert isinstance(task_gen.bld, build_framework.BuildContext)
     if task_gen.env.PROJECTS:
         return
-    path = task_gen.source_nodes[0][1]
+    path = getattr(task_gen, 'source_nodes')[0][1]
     lua_dest = 'lua-5.3.5-%s-multiarch-%s' % (task_gen.env.VALID_PLATFORMS[0], task_gen.env.COMPILER_ABI)
     src = path.make_node('src')
 
-    def deploy_to(file, subdir):
-        if task_gen.bld.__class__.optim == 'debug':
-            task_gen.deploy_as(
-                os.path.join('bld/packages', lua_dest, subdir, task_gen.bld.__class__.optim, file.name), file
+    def deploy_to(node: waflib.Node.Node, subdir: str) -> None:
+        if task_gen.bld.env.OPTIM == 'debug':
+            build_framework.install_as(
+                task_gen,
+                os.path.join('bld/packages', lua_dest, subdir, task_gen.bld.env.OPTIM, node.name),
+                node,
+                original_install=True
             )
         else:
-            task_gen.deploy_as(os.path.join('bld/packages', lua_dest, subdir, file.name), file)
+            build_framework.install_as(
+                task_gen,
+                os.path.join('bld/packages', lua_dest, subdir, node.name),
+                node,
+                original_install=True
+            )
 
     if task_gen.env.TOOLCHAIN == task_gen.bld.multiarch_envs[0].TOOLCHAIN:
         for h in path.ant_glob(LUA_HEADERS):
-            task_gen.deploy_as(os.path.join('bld/packages', lua_dest, 'api', h.path_from(src)), h)
+            build_framework.install_as(
+                task_gen,
+                os.path.join('bld/packages', lua_dest, 'api', h.path_from(src)),
+                h,
+                original_install=True
+            )
+    link_task = getattr(task_gen, 'link_task')  # type: waflib.Task.Task
     if task_gen.env.STATIC:
-        deploy_to(task_gen.link_task.outputs[0], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+        deploy_to(link_task.outputs[0], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
     else:
         if task_gen.env.DEST_BINFMT == 'pe':
-            for file in task_gen.link_task.outputs[:-1]:
+            for file in link_task.outputs[:-1]:
                 deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
-            deploy_to(task_gen.link_task.outputs[-1], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+            deploy_to(link_task.outputs[-1], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
         else:
-            for file in task_gen.link_task.outputs:
+            for file in link_task.outputs:
                 deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
 
 
-def build_source(bld, name, env, path):
-    if 'windows' in bld.env.VALID_PLATFORMS and not bld.env.DISABLE_DLLEXPORT:
+def build_source(
+        build_context: build_framework.BuildContext,
+        name: str,
+        env: waflib.ConfigSet.ConfigSet,
+        path: waflib.Node.Node
+) -> Optional[waflib.TaskGen.task_gen]:
+    if 'windows' in build_context.env.VALID_PLATFORMS and not build_context.env.DISABLE_DLLEXPORT:
         dll_flags = ['LUA_BUILD_AS_DLL']
         dll_features = []
     else:
         dll_flags = []
         dll_features = ['motor:export_all']
-    if bld.env.STATIC:
-        return bld.static_library(
+    if build_context.env.STATIC:
+        return build_framework.static_library(
+            build_context,
             name,
             env=env,
             path=path,
@@ -92,22 +118,34 @@ def build_source(bld, name, env, path):
         )
 
     else:
-        return bld.shared_library(
+        return build_framework.shared_library(
+            build_context,
             name,
             env=env,
             path=path,
             extra_defines=['LUA_LIB', 'lua_getlocaledecpoint()=0x2e'] + dll_flags,
             extra_includes=[path.make_node('src')],
             extra_public_includes=[path.make_node('src')],
-            features=['motor:masterfiles:off', 'motor:deploy:off', 'motor:deploy:lua', 'motor:warnings:off'] +
-            dll_features,
+            features=dll_features + ['motor:masterfiles:off', 'motor:deploy:off', 'motor:deploy:lua',
+                                     'motor:warnings:off'],
             source_list=LUA_SOURCES
         )
 
 
-def build_binary(bld, name, env, path):
-    return bld.thirdparty(name, source_node=path, env=env, use=bld.platforms)
+def build_binary(
+        build_context: build_framework.BuildContext,
+        name: str,
+        env: waflib.ConfigSet.ConfigSet,
+        path: waflib.Node.Node
+) -> Optional[waflib.TaskGen.task_gen]:
+    return build_framework.thirdparty(build_context, name, source_node=path, env=env,
+                                      use=getattr(build_context, 'platforms'))
 
 
-def build(bld):
-    bld.package('motor.3rdparty.scripting.lua', 'LUA_BINARY', build_binary, 'LUA_SOURCE', build_source)
+def build(build_context: build_framework.BuildContext) -> None:
+    build_framework.package(
+        build_context,
+        'motor.3rdparty.scripting.lua',
+        'LUA_BINARY', build_binary,
+        'LUA_SOURCE', build_source
+    )

@@ -1,43 +1,44 @@
-from waflib.Errors import WafError
-from waflib import Options
-import os
+import build_framework
+import waflib.Errors
 
 CL_ICD_BINARIES = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/OpenCL-icd-2.2-%(platform)s.tgz'
 
 
-def setup(conf):
-    if conf.env.PROJECTS:
-        conf.env.OPENCL_SOURCE = conf.path.path_from(conf.package_node)
+def setup(setup_context: build_framework.SetupContext) -> None:
+    if setup_context.env.PROJECTS:
+        setup_context.env.OPENCL_SOURCE = setup_context.path.path_from(
+            setup_context.package_node)
     else:
-        conf.start_msg_setup()
-        if conf.env.CLC_CXX:
-            if 'posix' in conf.env.VALID_PLATFORMS:
+        build_framework.start_msg_setup(setup_context)
+        if setup_context.env.CLC_CXX:
+            if 'posix' in setup_context.env.VALID_PLATFORMS:
                 try:
-                    conf.pkg_config('OpenCL', var='OpenCL')
-                except WafError as e:
+                    build_framework.pkg_config(setup_context, 'OpenCL', var='OpenCL')
+                except waflib.Errors.WafError as e:
                     pass
                 else:
-                    conf.env.OPENCL_BINARY = True
-                    conf.end_msg('from pkg-config', color='GREEN')
+                    setup_context.env.OPENCL_BINARY = True
+                    setup_context.end_msg('from pkg-config', color='GREEN')
                     return
-            if conf.check_lib('OpenCL', var='OpenCL'):
-                conf.env.OPENCL_BINARY = True
-                conf.end_msg('from system', color='GREEN')
+            if build_framework.check_lib(setup_context, ['OpenCL'], var='OpenCL'):
+                setup_context.env.OPENCL_BINARY = True
+                setup_context.end_msg('from system', color='GREEN')
                 return
             try:
-                cl_node = conf.pkg_unpack('cl_bin_%(platform)s', CL_ICD_BINARIES)
-                if not conf.check_package(
-                        'OpenCL',
+                cl_node = build_framework.pkg_unpack(setup_context, 'cl_bin_%(platform)s', CL_ICD_BINARIES)
+                if not build_framework.check_package(
+                        setup_context,
+                        ['OpenCL'],
                         cl_node,
                         var='OpenCL',
-                        includepath=[conf.path.parent.make_node('api').abspath()],
+                        includepath=[setup_context.path.parent.make_node('api').abspath()],
                         includes=['CL/cl.h'],
                         functions=['clCreateKernel']
                 ):
-                    raise WafError('no OpenCL')
-                conf.env.OPENCL_BINARY = cl_node.path_from(conf.package_node)
-                conf.end_msg('from prebuilt', color='GREEN')
-            except WafError:
-                conf.end_msg('not found', color='YELLOW')
+                    raise waflib.Errors.WafError('no OpenCL')
+                setup_context.env.OPENCL_BINARY = cl_node.path_from(setup_context.package_node)
+                setup_context.end_msg('from prebuilt', color='GREEN')
+            except waflib.Errors.WafError:
+                setup_context.end_msg('not found', color='YELLOW')
         else:
-            conf.end_msg('not found', color='YELLOW')
+            setup_context.end_msg('not found', color='YELLOW')

@@ -1,16 +1,20 @@
-from waflib import Task, Errors
-from waflib.TaskGen import task_gen, feature, before_method, extension
 import pickle
+import build_framework
+import kernel_support
+import waflib.Errors
+import waflib.Node
+import waflib.Task
+import waflib.TaskGen
+from typing import List
 
 
-class embed_cl(Task.Task):
-    "embed_cl"
+class embed_cl(waflib.Task.Task):
     color = 'CYAN'
 
-    def run(self):
+    def run(self) -> None:
         with open(self.inputs[0].abspath(), 'rb') as input_file:
-            container = pickle.load(input_file)
-        params = {'kernel_name': '_'.join(self.generator.kernel_name)}
+            container = pickle.load(input_file)  # type: kernel_support.KernelNamespace
+        params = {'kernel_name': '_'.join(getattr(self.generator, 'kernel_name'))}
         with open(self.outputs[0].abspath(), 'w') as out:
             out.write(
                 '#include    <motor/config/config.hh>\n'
@@ -36,7 +40,14 @@ class embed_cl(Task.Task):
             )
 
 
-def create_cl_kernel(task_gen, kernel_name, kernel_source, kernel_node, kernel_type):
+def create_cl_kernel(
+        build_context: build_framework.BuildContext,
+        task_gen: waflib.TaskGen.task_gen,
+        kernel_name: List[str],
+        kernel_source: waflib.Node.Node,
+        kernel_node: waflib.Node.Node,
+        kernel_type: str
+) -> None:
     if kernel_type == 'cpu':
         return
 
@@ -47,99 +58,100 @@ def create_cl_kernel(task_gen, kernel_name, kernel_source, kernel_node, kernel_t
         for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
             if kernel_type != 'opencl':
                 continue
-            kernel_env = task_gen.bld.all_envs[toolchain]
+            kernel_env = build_context.all_envs[toolchain]
 
-            kernel_task_gen = task_gen.bld(
+            kernel_task_gen = build_context(
                 env=kernel_env.derive(),
                 bld_env=env,
                 target=env.ENV_PREFIX % kernel_target,
                 target_name=env.ENV_PREFIX % task_gen.name,
-                safe_target_name=kernel_target.replace('.', '_').replace('-', '_'),
                 kernel_source=kernel_source,
                 kernel_node=kernel_node,
                 kernel_name=kernel_name,
                 features=[
-                    'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel',
+                    'cxx', build_context.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel',
                     'motor:kernel_create', 'motor:cl:kernel_create'
                 ],
-                defines=task_gen.defines + [
+                defines=getattr(task_gen, 'defines') + [
                     'MOTOR_KERNEL_ID=%s_%s' % (task_gen.name.replace('.', '_'), kernel_target.replace('.', '_')),
                     'MOTOR_KERNEL_NAME=%s' % kernel_target,
                     'MOTOR_KERNEL_TARGET=%s' % kernel_type,
                 ],
-                includes=task_gen.includes,
-                use=task_gen.use + [env.ENV_PREFIX % 'plugin.compute.opencl'],
-                uselib=task_gen.uselib,
-                source_nodes=task_gen.source_nodes,
+                includes=getattr(task_gen, 'includes'),
+                use=getattr(task_gen, 'use') + [env.ENV_PREFIX % 'plugin.compute.opencl'],
+                uselib=getattr(task_gen, 'uselib'),
+                source_nodes=getattr(task_gen, 'source_nodes'),
                 nomaster=set()
             )
             kernel_task_gen.env.PLUGIN = kernel_task_gen.env.plugin_name
 
-            if task_gen.name != task_gen.target_name:
+            if task_gen.name != getattr(task_gen, 'target_name'):
                 try:
-                    multiarch = task_gen.bld.get_tgen_by_name(kernel_target)
-                except Errors.WafError:
-                    task_gen.bld.multiarch(kernel_target, [kernel_task_gen])
+                    multiarch = build_context.get_tgen_by_name(kernel_target)
+                except waflib.Errors.WafError:
+                    build_framework.multiarch(build_context, kernel_target, [kernel_task_gen])
                 else:
-                    multiarch.use.append(kernel_task_gen.target)
+                    getattr(multiarch, 'use').append(kernel_task_gen.target)
     else:
-        tgen = task_gen.bld.get_tgen_by_name(task_gen.name)
-        target_suffix = '.'.join([kernel_type])
+        tgen = build_context.get_tgen_by_name(task_gen.name)
 
-        kernel_target = task_gen.target_name + '.' + '.'.join(kernel_name) + '.cl'
-        kernel_task_gen = task_gen.bld(
+        target_name = getattr(task_gen, 'target_name')
+        kernel_target = target_name + '.' + '.'.join(kernel_name) + '.cl'
+        kernel_task_gen = build_context(
             env=task_gen.env.derive(),
             bld_env=env,
             target=env.ENV_PREFIX % kernel_target,
             target_name=task_gen.name,
-            safe_target_name=kernel_target.replace('.', '_').replace('-', '_'),
             source=[kernel_source],
             kernel_name=kernel_name,
             kernel_node=kernel_node,
             features=[
-                'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel'
+                'cxx', build_context.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel'
             ],
-            defines=tgen.defines + [
-                'MOTOR_KERNEL_ID=%s_%s' % (task_gen.target_name.replace('.', '_'), kernel_target.replace('.', '_')),
-                'MOTOR_KERNEL_NAME=%s' % (kernel_target),
+            defines=getattr(tgen, 'defines') + [
+                'MOTOR_KERNEL_ID=%s_%s' % (target_name.replace('.', '_'), kernel_target.replace('.', '_')),
+                'MOTOR_KERNEL_NAME=%s' % kernel_target,
                 'MOTOR_KERNEL_TARGET=%s' % kernel_type
             ],
-            includes=tgen.includes + [task_gen.bld.srcnode] + env.CLC_KERNEL_HEADER_PATH,
-            use=[tgen.target] + tgen.use + [env.ENV_PREFIX % 'plugin.compute.cl'],
-            uselib=tgen.uselib,
+            includes=getattr(tgen, 'includes') + [build_context.srcnode] + env.CLC_KERNEL_HEADER_PATH,
+            use=[tgen.target] + getattr(tgen, 'use') + [env.ENV_PREFIX % 'plugin.compute.cl'],
+            uselib=getattr(tgen, 'uselib'),
             source_nodes=[('', kernel_source)],
             nomaster=set()
         )
         kernel_task_gen.env.PLUGIN = task_gen.env.plugin_name
 
 
-@feature('motor:cl:kernel_create')
-@before_method('process_source')
-def create_cc_source(task_gen):
-    source = task_gen.kernel_node
-    cc_source = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.trampoline.cc')
+@waflib.TaskGen.feature('motor:cl:kernel_create')
+@waflib.TaskGen.before_method('process_source')
+def create_cc_source(task_gen: waflib.TaskGen.task_gen) -> None:
+    source = getattr(task_gen, 'kernel_node')  # type: waflib.Node.Node
+    cc_source = build_framework.make_bld_node(task_gen, 'src', source.parent,
+                                              source.name[:source.name.rfind('.')] + '.trampoline.cc')
     task_gen.create_task('embed_cl', [source], [cc_source])
     task_gen.source += [cc_source]
 
 
-@extension('.32.ll', '.64.ll')
-def cl_kernel_compile(task_gen, source):
+@waflib.TaskGen.extension('.32.ll', '.64.ll')
+def cl_kernel_compile(task_gen: waflib.TaskGen.task_gen, source: waflib.Node.Node) -> None:
     if 'motor:cl:kernel_create' in task_gen.features:
         ptr_size = source.name[-5:-3]
-        cl_source = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.generated.cl')
-        cl_cc = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.embedded.cc')
+        cl_source = build_framework.make_bld_node(task_gen, 'src', source.parent,
+                                                  source.name[:source.name.rfind('.')] + '.generated.cl')
+        cl_cc = build_framework.make_bld_node(task_gen, 'src', source.parent,
+                                              source.name[:source.name.rfind('.')] + '.embedded.cc')
 
         task_gen.create_task('ircc', [source], [cl_source], ircc_target=task_gen.bld.env.IRCC_CL_TARGET)
         task_gen.create_task(
             'bin2c', [cl_source], [cl_cc],
-            var='%scldata%s' % ('_'.join(task_gen.kernel_name), ptr_size),
+            var='%scldata%s' % ('_'.join(getattr(task_gen, 'kernel_name')), ptr_size),
             zero_terminate=True
         )
         task_gen.source += [cl_cc]
 
 
-def build(build_context):
+def build(build_context: build_framework.BuildContext) -> None:
     build_context.env.IRCC_CL_TARGET = build_context.path.find_node('ir2cl')
-    task_gen.kernel_processors.append(create_cl_kernel)
+    build_context.kernel_processors.append(create_cl_kernel)
     if build_context.env.PROJECTS:
         build_context.env.CLC_KERNEL_HEADER_PATH = [build_context.path.parent.make_node('api.cl').abspath()]

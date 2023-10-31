@@ -1,14 +1,19 @@
-from waflib.Errors import WafError
+import build_framework
+import waflib.Errors
 
 
-def setup(conf):
-    if 'posix' in conf.env.VALID_PLATFORMS:
-        conf.start_msg_setup()
+def setup(setup_context: build_framework.SetupContext) -> None:
+    if 'posix' in setup_context.env.VALID_PLATFORMS:
+        build_framework.start_msg_setup(setup_context)
         try:
-            conf.pkg_config('x11', var='X11')
-            conf.end_msg('from pkg-config')
-        except WafError:
-            if conf.check_lib(['X11'], includepath=['/usr/X11R6/include']):
-                conf.end_msg('from system')
+            build_framework.pkg_config(setup_context, 'x11', var='X11')
+            setup_context.end_msg('from pkg-config')
+        except waflib.Errors.WafError:
+            if build_framework.check_lib(
+                    setup_context,
+                    ['X11'],
+                    includepath=['/usr/X11R6/include']
+            ):
+                setup_context.end_msg('from system')
             else:
-                conf.end_msg('not found', color='RED')
+                setup_context.end_msg('not found', color='RED')
