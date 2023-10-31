@@ -56,7 +56,8 @@ def setup_prebuilt(setup_context: build_framework.SetupContext) -> bool:
 def setup_source(setup_context: build_framework.SetupContext) -> bool:
     try:
         freetype_node = build_framework.pkg_unpack(setup_context, 'freetype_src', FT_SOURCES)
-    except waflib.Errors.WafError:
+    except waflib.Errors.WafError as e:
+        print(e)
         return False
     else:
         setup_context.env.FREETYPE_SOURCE = freetype_node.path_from(setup_context.package_node)

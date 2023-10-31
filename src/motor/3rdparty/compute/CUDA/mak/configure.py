@@ -9,20 +9,24 @@ def _find_cuda_registry_paths(all_versions_key: Any) -> List[str]:
     bindirs = []  # type: List[str]
     if sys.platform == "win32":
         import winreg
-        root_path, _ = winreg.QueryValueEx(all_versions_key, 'RootInstallDir')
-        index = 0
-        while 1:
-            try:
-                version = waflib.Utils.winreg.EnumKey(all_versions_key, index)
-                version_key = waflib.Utils.winreg.OpenKey(all_versions_key, version)
-            except OSError:
-                break
-            index += 1
-            try:
-                full_path, _ = waflib.Utils.winreg.QueryValueEx(version_key, 'InstallDir')
-            except OSError:
-                full_path = os.path.join(root_path, version)
-            bindirs.append(os.path.join(full_path, 'bin'))
+        try:
+            root_path, _ = winreg.QueryValueEx(all_versions_key, 'RootInstallDir')
+        except OSError:
+            pass
+        else:
+            index = 0
+            while 1:
+                try:
+                    version = waflib.Utils.winreg.EnumKey(all_versions_key, index)
+                    version_key = waflib.Utils.winreg.OpenKey(all_versions_key, version)
+                except OSError:
+                    break
+                index += 1
+                try:
+                    full_path, _ = waflib.Utils.winreg.QueryValueEx(version_key, 'InstallDir')
+                except OSError:
+                    full_path = os.path.join(root_path, version)
+                bindirs.append(os.path.join(full_path, 'bin'))
     return bindirs
 
 

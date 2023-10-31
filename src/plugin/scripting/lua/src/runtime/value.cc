@@ -74,7 +74,7 @@ static bool convertNumberToValue(lua_State* state, int index, const Meta::Type& 
     }
     else if(floatInterface)
     {
-        new(buffer) Meta::Value((*floatInterface->construct)(lua_tonumber(state, index)));
+        new(buffer) Meta::Value((*floatInterface->construct)((float)lua_tonumber(state, index)));
         return true;
     }
     if(i64Interface)

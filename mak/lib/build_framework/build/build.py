@@ -22,7 +22,7 @@ waflib.Tools.ccroot.USELIB_VARS['cxx'].add('SYSTEM_INCLUDES')
 
 
 def _safe_target_name(target: str) -> str:
-    return re.sub('_+', '_', re.sub('[^a-zA-Z0-9_]*', '_', target.split('.')[-1]))
+    return re.sub('_+', '_', re.sub('[^a-zA-Z0-9_]+', '_', target.split('.')[-1]))
 
 
 @waflib.TaskGen.feature('motor:c', 'motor:cxx')
