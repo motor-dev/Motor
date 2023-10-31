@@ -137,7 +137,7 @@ def find_lib():
 	if w: return w
 
 	#waf-light
-	w = test(os.path.join(base, 'mak', 'libs'))
+	w = test(os.path.join(base, 'mak', 'vendor'))
 	if w: return w
 	err('waf-light requires waflib -> export WAFDIR=/folder')
 
@@ -156,7 +156,8 @@ def find_lib():
 	return dir
 
 wafdir = find_lib()
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'mak', 'libs'))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'mak', 'lib'))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'mak', 'vendor'))
 sys.path.insert(0, wafdir)
 
 if __name__ == '__main__':

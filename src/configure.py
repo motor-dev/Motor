@@ -1,4 +1,7 @@
-def configure(configuration_context):
+import build_framework
+
+
+def configure(configuration_context: build_framework.ConfigurationContext) -> None:
     third_party_node = configuration_context.path.make_node('motor/3rdparty')
     for category in third_party_node.listdir():
         if category[0] != '.':

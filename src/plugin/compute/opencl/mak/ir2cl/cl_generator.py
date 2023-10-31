@@ -1,7 +1,7 @@
 from ircc.generators import IrccCDeclaration, IrccCDefinition, IrccCExpression
 from ircc.generators.ircc_c_expressions import IrccCExpressionCast
 from ircc import IrccType
-from motor_typing import TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 
 class IrccClExpressionVectorValue(IrccCExpression):
@@ -129,10 +129,10 @@ class IrccClExpressionVectorIntegerBinaryOperation(IrccCExpression):
         if unsigned:
             self._left_operand = IrccClExpressionVectorCast(
                 left_operand, vector_type, unsigned=True
-            )                                                 # type: IrccExpression
+            )  # type: IrccExpression
             self._right_operand = IrccClExpressionVectorCast(
                 right_operand, vector_type, unsigned=True
-            )                                                 # type: IrccExpression
+            )  # type: IrccExpression
         else:
             self._left_operand = left_operand
             self._right_operand = right_operand
@@ -329,7 +329,7 @@ class ClDefinition(IrccCDefinition):
         return IrccCExpressionCast(IrccClExpressionVectorShuffle(source_size, v1, v2, mask), result)
 
     def make_expression_vector_integer_binary_op(
-        self, operation, result_type, vector_type, left_operand, right_operand
+            self, operation, result_type, vector_type, left_operand, right_operand
     ):
         # type: (str, IrccType, IrccType, IrccExpression, IrccExpression) -> IrccExpression
         return IrccClExpressionVectorIntegerBinaryOperation(

@@ -1,36 +1,33 @@
-from motor_typing import TYPE_CHECKING
+import sys
+import waflib.Options
+from typing import List, Tuple
 
 
-def options(opt):
-    # type: (Options.OptionsContext) -> None
-    dx_sdks = []
-    try:
-        try:
-            import _winreg as winreg
-        except:
-            import winreg
+def options(options_context: waflib.Options.OptionsContext) -> None:
+    dx_sdks = []  # type: List[Tuple[str, str]]
+    if sys.platform == "win32":
+        import winreg
         try:
             sdks = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Microsoft\\DirectX\\')
-        except WindowsError:
+        except OSError:
             sdks = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Microsoft\\DirectX\\')
         index = 0
         while 1:
             try:
                 version = winreg.EnumKey(sdks, index)
-            except WindowsError:
+            except OSError:
                 break
             index = index + 1
             try:
                 sdk_version = winreg.OpenKey(sdks, version)
-                version, type = winreg.QueryValueEx(sdk_version, 'InstalledVersion')
-                path, type = winreg.QueryValueEx(sdk_version, 'InstallPath')
+                version, _ = winreg.QueryValueEx(sdk_version, 'InstalledVersion')
+                path, _ = winreg.QueryValueEx(sdk_version, 'InstallPath')
                 dx_sdks.append((version, str(path)))
-            except:
+            except OSError:
                 pass
-    except:
-        pass
     dx_sdks.sort(key=lambda x: x[0])
-    gr = opt.get_option_group('SDK paths and options')
+    gr = options_context.get_option_group('SDK paths and options')
+    assert gr is not None
     gr.add_option(
         '--directx-sdk',
         action='store',
@@ -38,7 +35,3 @@ def options(opt):
         dest='dx_sdk',
         help='Location of the DirectX SDK'
     )
-
-
-if TYPE_CHECKING:
-    from waflib import Options

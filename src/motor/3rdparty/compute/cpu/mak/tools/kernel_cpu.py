@@ -1,21 +1,29 @@
-from waflib import Task, Errors
-from waflib.TaskGen import feature, task_gen, before_method
-
 import os
 import pickle
+import waflib.Task
+import waflib.Errors
+import waflib.TaskGen
+import waflib.Build
+import waflib.Node
+import build_framework
+import kernel_support
+from typing import List, Tuple
 
 
-class cpuc(Task.Task):
-    "Generates a C++ trampoline to call the CPU kernel"
+class cpuc(waflib.Task.Task):
+    """Generates a C++ trampoline to call the CPU kernel"""
     color = 'CYAN'
 
-    def scan(self):
-        return ([], [])
+    # noinspection PyMethodMayBeStatic
+    def scan(self) -> Tuple[List[waflib.Node.Node], List[str]]:
+        return [], []
 
-    def run(self):
-        with open(self.generator.kernel_node.abspath(), 'rb') as kernel_file:
-            namespace = pickle.load(kernel_file)
-        static_variant = ('_' + self.generator.variant_name[1:]) if self.env.STATIC else ''
+    def run(self) -> None:
+        kernel_node = getattr(self.generator, 'kernel_node')  # type: waflib.Node.Node
+        variant_name = getattr(self.generator, 'variant_name')  # type: str
+        with open(kernel_node.abspath(), 'rb') as kernel_file:
+            namespace = pickle.load(kernel_file)  # type: kernel_support.KernelNamespace
+        static_variant = ('_' + variant_name[1:]) if self.env.STATIC else ''
 
         with open(self.outputs[0].abspath(), 'w') as out:
             out.write(
@@ -37,13 +45,14 @@ class cpuc(Task.Task):
                 '    void* end;\n'
                 '};\n'
                 '\n'
-                'MOTOR_REGISTER_PLUGIN(MOTOR_KERNEL_ID, MOTOR_KERNEL_NAME);\n' % self.generator.kernel_source
+                'MOTOR_REGISTER_PLUGIN(MOTOR_KERNEL_ID, MOTOR_KERNEL_NAME);\n' % getattr(self.generator,
+                                                                                         'kernel_source')
             )
 
-            def write_kernels(ns, container):
-                for namespace_name, c in container[2].items():
+            def write_kernels(ns: List[str], container: kernel_support.KernelNamespace) -> None:
+                for namespace_name, c in container.children.items():
                     write_kernels(ns + [namespace_name], c)
-                for method, arguments in container[3].items():
+                for method, kernel in container.kernels.items():
                     args = {
                         'kernelname':
                             method,
@@ -54,11 +63,11 @@ class cpuc(Task.Task):
                             '\n    '.join(
                                 [
                                     'typedef %sarg_type_%d%s;' % (arg[:index[0]], i, arg[index[1]:])
-                                    for i, (arg, index) in enumerate(arguments[2:])
+                                    for i, (arg, index) in enumerate(kernel.parameters[2:])
                                 ]
                             ),
                         'arguments':
-                            ', '.join(['arg_type_%d(0, 0, 0)' % i for i, _ in enumerate(arguments[2:])])
+                            ', '.join(['arg_type_%d(0, 0, 0)' % i for i, _ in enumerate(kernel.parameters[2:])])
                     }
                     out.write(
                         'MOTOR_PLUGIN_EXPORT void _%(kernelname)s%(static_variant)s(const u32 index, const u32 total,\n'
@@ -69,95 +78,105 @@ class cpuc(Task.Task):
                         '    %(typedef)s'
                         '    %(kernelname)s(index, total, %(arguments)s);\n'
                         '}\n'
-                        'MOTOR_REGISTER_METHOD_NAMED(MOTOR_KERNEL_ID, _%(kernelname)s%(static_variant)s, _%(kernelname)s);\n'
+                        'MOTOR_REGISTER_METHOD_NAMED(MOTOR_KERNEL_ID, _'
+                        '%(kernelname)s%(static_variant)s, _%(kernelname)s);\n'
                         % args
                     )
 
             write_kernels([], namespace)
 
 
-@feature('motor:cpu:kernel_create')
-def build_cpu_kernels(task_gen):
-    out = task_gen.make_bld_node(
-        'src/kernels', None, '%s.cpu%s.cc' % (os.path.join(*task_gen.kernel_name), task_gen.variant_name)
-    )
-    task_gen.create_task('cpuc', [task_gen.kernel_node], [out])
+@waflib.TaskGen.feature('motor:cpu:kernel_create')
+def build_cpu_kernels(task_gen: waflib.TaskGen.task_gen) -> None:
+    out = build_framework.make_bld_node(task_gen,
+                                        'src/kernels', None,
+                                        '%s.cpu%s.cc' % (os.path.join(*getattr(task_gen, 'kernel_name')),
+                                                         getattr(task_gen, 'variant_name'))
+                                        )
+    task_gen.create_task('cpuc', [getattr(task_gen, 'kernel_node')], [out])
     task_gen.source.append(out)
 
 
-def create_cpu_kernel(task_gen, kernel_name, kernel_source, kernel_node, kernel_type):
+def create_cpu_kernel(
+        build_context: build_framework.BuildContext,
+        task_gen: waflib.TaskGen.task_gen,
+        kernel_name: List[str],
+        kernel_source: waflib.Node.Node,
+        kernel_node: waflib.Node.Node,
+        kernel_type: str
+) -> None:
     env = task_gen.env
+    target_name = getattr(task_gen, 'target_name')  # type: str
+
     if not env.PROJECTS:
         for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
             if kernel_type != 'cpu':
                 continue
-            kernel_env = task_gen.bld.all_envs[toolchain]
+            kernel_env = build_context.all_envs[toolchain]
             for variant in kernel_env.VECTOR_OPTIM_VARIANTS:
-                tgen = task_gen.bld.get_tgen_by_name(task_gen.name)
+                tgen = build_context.get_tgen_by_name(task_gen.name)
                 target_suffix = '.'.join([kernel_type] + ([variant[1:]] if variant else []))
-                kernel_target = task_gen.target_name + '.' + '.'.join(kernel_name) + '.' + target_suffix
-                kernel_task_gen = task_gen.bld(
+                kernel_target = target_name + '.' + '.'.join(kernel_name) + '.' + target_suffix
+                kernel_task_gen = build_context(
                     env=kernel_env.derive(),
                     bld_env=env,
                     target=env.ENV_PREFIX % kernel_target,
                     target_name=task_gen.name,
-                    safe_target_name=kernel_target.replace('.', '_').replace('-', '_'),
                     variant_name=variant,
                     kernel_source=kernel_source,
                     kernel_name=kernel_name,
                     kernel_node=kernel_node,
                     features=[
-                        'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel',
+                        'cxx', build_context.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel',
                         'motor:cpu:kernel_create'
                     ],
-                    defines=tgen.defines + [
+                    defines=getattr(tgen, 'defines') + [
                         'MOTOR_KERNEL_ID=%s_%s' % (
-                            task_gen.target_name.replace('.', '_'), kernel_target.replace('.', '_')),
-                        'MOTOR_KERNEL_NAME=%s' % (kernel_target),
+                            target_name.replace('.', '_'), kernel_target.replace('.', '_')),
+                        'MOTOR_KERNEL_NAME=%s' % kernel_target,
                         'MOTOR_KERNEL_TARGET=%s' % kernel_type,
                         'MOTOR_KERNEL_ARCH=%s' % variant
                     ],
-                    includes=tgen.includes + [task_gen.bld.srcnode],
-                    use=tgen.use + [env.ENV_PREFIX % 'plugin.compute.cpu'] + ([variant] if variant else []),
-                    uselib=tgen.uselib,
+                    includes=getattr(tgen, 'includes') + [build_context.srcnode],
+                    use=getattr(tgen, 'use') + [env.ENV_PREFIX % 'plugin.compute.cpu'] + ([variant] if variant else []),
+                    uselib=getattr(tgen, 'uselib'),
                     nomaster=set(),
                 )
                 kernel_task_gen.env.PLUGIN = task_gen.env.plugin_name
-                if task_gen.name != task_gen.target_name:
+                if task_gen.name != target_name:
                     try:
-                        multiarch = task_gen.bld.get_tgen_by_name(kernel_target)
-                    except Errors.WafError:
-                        task_gen.bld.multiarch(kernel_target, [kernel_task_gen])
+                        multiarch = build_context.get_tgen_by_name(kernel_target)
+                    except waflib.Errors.WafError:
+                        build_framework.multiarch(build_context, kernel_target, [kernel_task_gen])
                     else:
-                        multiarch.use.append(kernel_task_gen.target)
+                        getattr(multiarch, 'use').append(kernel_task_gen.target)
     else:
-        tgen = task_gen.bld.get_tgen_by_name(task_gen.name)
-        target_suffix = '.'.join([kernel_type])
+        tgen = build_context.get_tgen_by_name(task_gen.name)
         env = task_gen.env
-        kernel_target = task_gen.target_name + '.' + '.'.join(kernel_name) + '.cpu'
-        kernel_task_gen = task_gen.bld(
+        kernel_target = target_name + '.' + '.'.join(kernel_name) + '.cpu'
+        build_context(
             env=task_gen.env.derive(),
             bld_env=env,
             target=env.ENV_PREFIX % kernel_target,
             target_name=task_gen.name,
-            safe_target_name=kernel_target.replace('.', '_').replace('-', '_'),
             source=[kernel_source],
             kernel_name=kernel_name,
             kernel_node=kernel_node,
             features=[
-                'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel'
+                'cxx', build_context.env.STATIC and 'cxxobjects' or 'cxxshlib', 'motor:cxx', 'motor:kernel'
             ],
-            defines=tgen.defines + [
-                'MOTOR_KERNEL_ID=%s_%s' % (task_gen.target_name.replace('.', '_'), kernel_target.replace('.', '_')),
-                'MOTOR_KERNEL_NAME=%s' % (kernel_target),
+            defines=getattr(tgen, 'defines') + [
+                'MOTOR_KERNEL_ID=%s_%s' % (target_name.replace('.', '_'), kernel_target.replace('.', '_')),
+                'MOTOR_KERNEL_NAME=%s' % kernel_target,
                 'MOTOR_KERNEL_TARGET=%s' % kernel_type
             ],
-            includes=tgen.includes + [task_gen.bld.srcnode],
-            use=[tgen.target] + tgen.use + [env.ENV_PREFIX % 'plugin.compute.cpu'],
-            uselib=tgen.uselib,
+            includes=getattr(tgen, 'includes') + [build_context.srcnode],
+            use=[tgen.target] + getattr(tgen, 'use') + [env.ENV_PREFIX % 'plugin.compute.cpu'],
+            uselib=getattr(tgen, 'uselib'),
             source_nodes=[('', kernel_source)],
             nomaster=set(),
         )
 
-    def build(build_context):
-        task_gen.kernel_processors.append(create_cpu_kernel)
+
+def build(build_context: build_framework.BuildContext) -> None:
+    build_context.kernel_processors.append(create_cpu_kernel)

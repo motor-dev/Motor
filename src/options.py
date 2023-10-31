@@ -1,8 +1,10 @@
 import os
+import build_framework
 
 
-def options(option_context):
+def options(option_context: build_framework.OptionsContext) -> None:
     gr = option_context.get_option_group('build and install options')
+    assert gr is not None
     gr.add_option('--tests', action='store_true', default=True, dest='tests', help='enable tests')
     gr.add_option('--no-tests', action='store_false', default=True, dest='tests', help='disable tests')
     gr.add_option(

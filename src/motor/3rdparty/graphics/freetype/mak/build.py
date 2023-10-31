@@ -1,6 +1,10 @@
-from waflib import Options
-from waflib.TaskGen import feature, after_method
 import os
+import build_framework
+import waflib.TaskGen
+import waflib.Node
+import waflib.Task
+import waflib.ConfigSet
+from typing import Optional
 
 FT_SOURCE_LIST = [
     'src/autofit/autofit.c',
@@ -26,7 +30,7 @@ FT_SOURCE_LIST = [
     'src/base/ftwinfnt.c',
     'src/bdf/bdf.c',
     'src/bzip2/ftbzip2.c',
-                                   #'src/cache/ftcache.c',
+    # 'src/cache/ftcache.c',
     'src/cache/ftcbasic.c',
     'src/cache/ftccache.c',
     'src/cache/ftccmap.c',
@@ -56,48 +60,69 @@ FT_SOURCE_LIST = [
 ]
 
 
-@feature('motor:deploy:freetype')
-@after_method('install_step')
-@after_method('apply_link')
-def deploy_freetype_package(task_gen):
+@waflib.TaskGen.feature('motor:deploy:freetype')
+@waflib.TaskGen.after_method('install_step')
+@waflib.TaskGen.after_method('apply_link')
+def deploy_freetype_package(task_gen: waflib.TaskGen.task_gen) -> None:
+    assert isinstance(task_gen.bld, build_framework.BuildContext)
     if task_gen.env.PROJECTS:
         return
 
-    path = task_gen.source_nodes[0][1]
+    path = getattr(task_gen, 'source_nodes')[0][1]
     ft_dest = 'freetype-2.10.2-%s-multiarch-%s' % (task_gen.env.VALID_PLATFORMS[0], task_gen.env.COMPILER_ABI)
 
-    def deploy_to(file, subdir):
-        if task_gen.bld.__class__.optim == 'debug':
-            task_gen.deploy_as(
-                os.path.join('bld', 'packages', ft_dest, subdir, task_gen.bld.__class__.optim, file.name), file
+    def deploy_to(node: waflib.Node.Node, subdir: str) -> None:
+        if task_gen.bld.env.OPTIM == 'debug':
+            build_framework.install_as(
+                task_gen,
+                os.path.join('bld', 'packages', ft_dest, subdir, task_gen.bld.env.OPTIM, node.name),
+                node,
+                original_install=True
             )
         else:
-            task_gen.deploy_as(os.path.join('bld', 'packages', ft_dest, subdir, file.name), file)
+            build_framework.install_as(
+                task_gen,
+                os.path.join('bld', 'packages', ft_dest, subdir, node.name),
+                node,
+                original_install=True
+            )
 
     if task_gen.env.TOOLCHAIN == task_gen.bld.multiarch_envs[0].TOOLCHAIN:
         include = path.make_node('include')
         for h in include.ant_glob(['**/*.*']):
-            task_gen.deploy_as(os.path.join('bld', 'packages', ft_dest, 'api', h.path_from(include)), h)
+            build_framework.install_as(
+                task_gen,
+                os.path.join('bld', 'packages', ft_dest, 'api', h.path_from(include)),
+                h,
+                original_install=True
+            )
+    link_task = getattr(task_gen, 'link_task')  # type: waflib.Task.Task
     if task_gen.env.STATIC:
-        deploy_to(task_gen.link_task.outputs[0], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+        deploy_to(link_task.outputs[0], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
     else:
         if task_gen.env.DEST_BINFMT == 'pe':
-            for file in task_gen.link_task.outputs[:-1]:
+            for file in link_task.outputs[:-1]:
                 deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
-            deploy_to(task_gen.link_task.outputs[-1], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+            deploy_to(link_task.outputs[-1], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
         else:
-            for file in task_gen.link_task.outputs:
+            for file in link_task.outputs:
                 deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
 
 
-def build_source(bld, name, env, path):
+def build_source(
+        build_context: build_framework.BuildContext,
+        name: str,
+        env: waflib.ConfigSet.ConfigSet,
+        path: waflib.Node.Node
+) -> Optional[waflib.TaskGen.task_gen]:
     defines = ['FT2_BUILD_LIBRARY=1', 'FT_CONFIG_OPTION_SYSTEM_ZLIB=1', 'FT_CONFIG_OPTION_NO_ASSEMBLER']
     include_path = path.make_node('include')
     includes = []
     for i in include_path.listdir():
         includes.append(include_path.find_node(i))
-    if bld.env.STATIC:
-        return bld.static_library(
+    if build_context.env.STATIC:
+        return build_framework.static_library(
+            build_context,
             name, ['motor.3rdparty.system.zlib'],
             env=env,
             path=path,
@@ -111,13 +136,14 @@ def build_source(bld, name, env, path):
             source_list=FT_SOURCE_LIST
         )
     else:
-        if not bld.env.DISABLE_DLLEXPORT:
+        if not build_context.env.DISABLE_DLLEXPORT:
             dll_flags = ['DLL_EXPORT']
             dll_features = []
         else:
             dll_flags = []
             dll_features = ['motor:export_all']
-        return bld.shared_library(
+        return build_framework.shared_library(
+            build_context,
             name, ['motor.3rdparty.system.zlib'],
             env=env,
             path=path,
@@ -125,16 +151,27 @@ def build_source(bld, name, env, path):
             extra_public_includes=[include_path],
             extra_defines=defines + dll_flags,
             features=[
-                'motor:masterfiles:off', 'motor:warnings:off', 'motor:deploy:off', 'motor:deploy:freetype',
-                'motor:nortc'
-            ] + dll_features,
+                         'motor:masterfiles:off', 'motor:warnings:off', 'motor:deploy:off', 'motor:deploy:freetype',
+                         'motor:nortc'
+                     ] + dll_features,
             source_list=FT_SOURCE_LIST
         )
 
 
-def build_binary(bld, name, env, path):
-    return bld.thirdparty(name, source_node=path, use=['motor.3rdparty.system.zlib'], env=env)
+def build_binary(
+        build_context: build_framework.BuildContext,
+        name: str,
+        env: waflib.ConfigSet.ConfigSet,
+        path: waflib.Node.Node
+) -> Optional[waflib.TaskGen.task_gen]:
+    return build_framework.thirdparty(build_context, name, source_node=path, use=['motor.3rdparty.system.zlib'],
+                                      env=env)
 
 
-def build(bld):
-    bld.package('motor.3rdparty.graphics.freetype', 'FREETYPE_BINARY', build_binary, 'FREETYPE_SOURCE', build_source)
+def build(build_context: build_framework.BuildContext) -> None:
+    build_framework.package(
+        build_context,
+        'motor.3rdparty.graphics.freetype',
+        'FREETYPE_BINARY', build_binary,
+        'FREETYPE_SOURCE', build_source
+    )

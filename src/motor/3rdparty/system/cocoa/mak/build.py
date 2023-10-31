@@ -1,2 +1,5 @@
-def build(bld):
-    bld.thirdparty('motor.3rdparty.system.cocoa', feature_list=['GUI'])
+import build_framework
+
+
+def build(build_context: build_framework.BuildContext) -> None:
+    build_framework.thirdparty(build_context, 'motor.3rdparty.system.cocoa', feature_list=['GUI'])

@@ -1,9 +1,11 @@
 #! /usr/bin/env python
-# set iPhone(Simulator) specific options
+
+import build_framework
 
 
-def options(option_context):
-    gr = option_context.get_option_group('SDK paths and options')
+def options(options_context: build_framework.OptionsContext) -> None:
+    gr = options_context.get_option_group('SDK paths and options')
+    assert gr is not None
     gr.add_option('--iphone-sdk-min',
                   action='store',
                   default='',
@@ -14,32 +16,19 @@ def options(option_context):
                   default='',
                   dest='iphone_sdk_max',
                   help='Maximum version of the iPhone SDK to target')
-    #option_context.recurse('mak/device.py')
 
 
-def host_configure(configuration_context):
+def host_configure(configuration_context: build_framework.ConfigurationContext) -> None:
     configuration_context.recurse('mak/host_configure.py', name='host_configure')
 
 
-def configure(configuration_context):
+def configure(configuration_context: build_framework.ConfigurationContext) -> None:
     configuration_context.recurse('mak/configure.py', name='configure')
 
 
-def setup(configuration_context):
-    configuration_context.recurse('mak/setup.py', name='setup')
+def setup(setup_context: build_framework.SetupContext) -> None:
+    setup_context.recurse('mak/setup.py', name='setup')
 
 
-def build(build_context):
+def build(build_context: build_framework.BuildContext) -> None:
     build_context.recurse('mak/build.py', name='build')
-
-
-def deploy(build_context):
-    build_context.recurse('mak/deploy.py', name='deploy')
-
-
-def debug(build_context):
-    build_context.recurse('mak/debug.py', name='debug')
-
-
-def run(build_context):
-    build_context.recurse('mak/run.py', name='run')

@@ -4,58 +4,83 @@
 import os
 import re
 from copy import deepcopy
-from waflib import Context, Errors, Logs, Options, Configure
+import build_framework
+from build_framework.configure.target import Platform as _Platform
+from build_framework.configure.target.compiler import Compiler as _Compiler
+from build_framework.configure.target.compiler.clang import Clang as _Clang
+import waflib.Context
+import waflib.Errors
+import waflib.Logs
+import waflib.Options
+from typing import Dict, List, Optional, Tuple, Union
 
 
-def _get_android_arch(arch):
+def _get_android_arch(arch: str) -> str:
     archs = {'armv7a': 'arm', 'amd64': 'x86_64', 'i686': 'x86', 'aarch64': 'arm64'}
     return archs.get(arch, arch)
 
 
-class NdkConfig:
+def _tryint(s: str) -> Union[int, str]:
+    try:
+        return int(s)
+    except ValueError:
+        return s
 
-    def __init__(self, ndkroot, sysroot, ldsysroot, libpath, defines):
+
+def _alphanum_key(s: str) -> List[Union[int, str]]:
+    return [_tryint(c) for c in re.split('([0-9]+)', s)]
+
+
+def _valid_archs(platform_ndk: str, platform: str, archs: List[str]) -> List[str]:
+    result = []
+    for arch in archs:
+        a = _get_android_arch(arch)
+        p = os.path.join(platform_ndk, platform, 'arch-%s' % a)
+        if os.path.isdir(p):
+            result.append(arch)
+    return result
+
+
+class NdkConfig(object):
+
+    def __init__(self, ndkroot: str, sysroot: str, ldsysroot: str, libpath: List[str], defines: List[str]) -> None:
         self._ndkroot = ndkroot
         self._sysroot = sysroot
         self._ldsysroot = ldsysroot
         self._libpath = libpath
         self._defines = defines
 
-    def get_defines(self):
+    def get_defines(self) -> List[str]:
         return self._defines
 
-    def get_ndkroot(self):
+    def get_ndkroot(self) -> str:
         return self._ndkroot
 
-    def get_sysroot(self):
+    def get_sysroot(self) -> str:
         return self._sysroot
 
-    def get_ldsysroot(self):
+    def get_ldsysroot(self) -> str:
         return self._ldsysroot
 
-    def get_libpath(self):
+    def get_libpath(self) -> List[str]:
         return self._libpath
 
 
 class NdkArchConfig:
 
-    def __init__(self, archs):
-        self._archs = archs
+    def __init__(self, archs: Dict[str, NdkConfig]) -> None:
+        self.archs = archs
 
-    def get_ndk_config(self, arch):
-        return self._archs[_get_android_arch(arch)]
+    def get_ndk_config(self, arch: str) -> NdkConfig:
+        return self.archs[_get_android_arch(arch)]
 
-    def get_valid_archs(self, archs):
-        result = []
-        for arch in archs:
-            if _get_android_arch(arch) in self._archs:
-                result.append(arch)
-        return result
+    def get_valid_archs(self, archs: List[str]) -> List[str]:
+        return [arch for arch in archs if _get_android_arch(arch) in self.archs]
 
 
 class NdkVersionConfig:
 
-    def __init__(self, ndkroot):
+    def __init__(self, ndkroot: str) -> None:
         self._versions = {}
         platforms_directory = os.path.join(ndkroot, 'platforms')
         if os.path.isdir(platforms_directory):
@@ -96,11 +121,11 @@ class NdkVersionConfig:
                                     ['-D__ANDROID_API__=%s' % version]
                                 )
                                 try:
-                                    self._versions[int(version)]._archs[arch] = config
+                                    self._versions[int(version)].archs[arch] = config
                                 except KeyError:
                                     self._versions[int(version)] = NdkArchConfig({arch: config})
 
-    def get_ndk_for_sdk(self, sdk):
+    def get_ndk_for_sdk(self, sdk: str) -> Optional[NdkArchConfig]:
         sdk_number = int(sdk.split('-')[1])
         ndk_versions = sorted([v for v in self._versions.keys() if v <= sdk_number])
         try:
@@ -111,17 +136,24 @@ class NdkVersionConfig:
             return self._versions[best_ndk_version]
 
 
-class AndroidPlatform(Configure.ConfigurationContext.Platform):
+class AndroidPlatform(_Platform):
     NAME = 'android'
 
-    def __init__(self, conf, ndk_config, sdk_root, version):
-        Configure.ConfigurationContext.Platform.__init__(self)
+    def __init__(
+            self,
+            _: build_framework.ConfigurationContext,
+            ndk_config: NdkArchConfig,
+            sdk_root: str,
+            version: str
+    ) -> None:
+        _Platform.__init__(self)
         self.NAME = self.__class__.NAME + '_' + self.get_android_version(version)
         self.ndk_config = ndk_config
         self.sdk_path = sdk_root
         self.sdk_version = version
 
-    def get_android_version(self, sdk_version):
+    @staticmethod
+    def get_android_version(sdk_version: str) -> str:
         versions = {
             '1': '1.0',
             '2': '1.1',
@@ -156,11 +188,13 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         }
         return versions.get(sdk_version, 'api' + sdk_version)
 
-    def get_target_folder(self, arch):
+    @staticmethod
+    def get_target_folder(arch: str) -> str:
         archs = {'x86': 'x86', 'armv7a': 'armeabi-v7a', 'arm64': 'arm64-v8a', 'amd64': 'x86_64'}
         return archs[arch]
 
-    def get_android_c_flags(self, compiler):
+    @staticmethod
+    def get_android_c_flags(compiler: _Compiler) -> List[str]:
         arch_flags = {
             'gcc':
                 {
@@ -176,10 +210,11 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
                     'armv7a': ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'],
                     'arm64': [],
                 }
-        }
-        return arch_flags[compiler.NAMES[0].lower()][compiler.arch]
+        }  # type: Dict[str, Dict[str, List[str]]]
+        return arch_flags[compiler.NAMES[0].lower()].get(compiler.arch, [])
 
-    def get_android_ld_flags(self, compiler):
+    @staticmethod
+    def get_android_ld_flags(compiler: _Compiler) -> List[str]:
         arch_flags = {
             'gcc': {
                 'x86': [],
@@ -193,18 +228,22 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
                 'armv7a': ['-Wl,--fix-cortex-a8', ],
                 'arm64': [],
             }
-        }
-        return arch_flags[compiler.NAMES[0].lower()][compiler.arch]
+        }  # type: Dict[str, Dict[str, List[str]]]
+        return arch_flags[compiler.NAMES[0].lower()].get(compiler.arch, [])
 
-    def load_in_env(self, conf, compiler):
-        env = conf.env
+    def load_in_env(
+            self,
+            configuration_context: build_framework.ConfigurationContext,
+            compiler: _Compiler
+    ) -> None:
+        env = configuration_context.env
         arch = compiler.arch
         ndk_config = self.ndk_config.get_ndk_config(arch)
         target_folder = self.get_target_folder(arch)
 
         env.VALID_PLATFORMS = ['android']
         env.SYSTEM_NAME = 'linux-android'
-        appname = getattr(Context.g_module, Context.APPNAME, conf.srcnode.name)
+        appname = getattr(waflib.Context.g_module, waflib.Context.APPNAME, configuration_context.srcnode.name)
         env.cxxprogram_PATTERN = 'lib%s.so'
         env.append_unique('CFLAGS', ['-fPIC'])
         env.append_unique('CXXFLAGS', ['-fPIC'])
@@ -234,7 +273,7 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         env.ANDROID_SDK_PATH = self.sdk_path
         env.ANDROID_NDK_PATH = ndk_config.get_ndkroot()
         env.ANDROID_ARCH = _get_android_arch(arch)
-        conf.env.SYSROOT = ndk_config.get_sysroot()
+        env.SYSROOT = ndk_config.get_sysroot()
         compiler.sysroot = ndk_config.get_sysroot()
 
         sysroot_options = ndk_config.get_defines() + [
@@ -244,7 +283,7 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         env.append_unique('JAVACFLAGS', ['-bootclasspath', os.path.join(self.sdk_path, 'android.jar')])
         env.append_unique('AAPTFLAGS', ['-I', os.path.join(self.sdk_path, 'android.jar')])
         env.append_unique('COMPILER_CXX_INCLUDES', [
-            conf.motornode.make_node('extra/android/src/motor/3rdparty/android/libc++/api').abspath()])
+            configuration_context.motornode.make_node('extra/android/src/motor/3rdparty/android/libcxx/api').abspath()])
 
         # if not os.path.isfile(
         #    os.path.
@@ -252,64 +291,75 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         # ):
         #    raise Errors.WafError('could not find gdbserver for architecture %s' % env.ANDROID_ARCH)
 
-        conf.env.append_value('CFLAGS', sysroot_options)
-        conf.env.append_value('CXXFLAGS', sysroot_options)
-        conf.env.append_value(
+        env.append_value('CFLAGS', sysroot_options)
+        env.append_value('CXXFLAGS', sysroot_options)
+        env.append_value(
             'LINKFLAGS', ['--sysroot', ndk_config.get_ldsysroot(),
-                          '-B%s' % ndk_config.get_libpath()[0]] + ['-L%s' % l for l in ndk_config.get_libpath()]
+                          '-B%s' % ndk_config.get_libpath()[0]] + ['-L%s' % libpath for libpath in
+                                                                   ndk_config.get_libpath()]
         )
+        env.append_value('D8FLAGS', ['--lib', os.path.join(self.sdk_path, 'android.jar')])
 
 
-class AndroidLoader(Configure.ConfigurationContext.Platform):
+class AndroidLoader(_Platform):
     NAME = 'android'
 
-    def __init__(self, conf):
-        self.conf = conf
-        Configure.ConfigurationContext.Platform.__init__(self)
+    def __init__(self, configuration_context: build_framework.ConfigurationContext) -> None:
+        self.conf = configuration_context
+        _Platform.__init__(self)
 
-        if Options.options.android_jdk:
+        if waflib.Options.options.android_jdk:
             paths = [
-                os.path.join(Options.options.android_jdk, 'bin'),
-                os.path.join(Options.options.android_jdk, 'jre', 'bin')
+                os.path.join(waflib.Options.options.android_jdk, 'bin'),
+                os.path.join(waflib.Options.options.android_jdk, 'jre', 'bin')
             ]
-            conf.find_program('javac', path_list=paths)
-            conf.find_program('java', path_list=paths)
-            conf.find_program('jar', path_list=paths)
-            conf.find_program('javadoc', path_list=paths)
-        conf.load('javaw')
-        conf.env.append_value('JAVACFLAGS', ['-source', '1.7', '-target', '1.7'])
-        conf.env.ANDROID_DEBUGKEY = conf.path.parent.make_node('debug.keystore').abspath()
-        conf.env.JARSIGNER_FLAGS = [
-            '-sigalg', 'MD5withRSA', '-digestalg', 'SHA1', '-keystore', conf.env.ANDROID_DEBUGKEY, '-storepass',
+            configuration_context.find_program('javac', path_list=paths)
+            configuration_context.find_program('java', path_list=paths)
+            configuration_context.find_program('jar', path_list=paths)
+            configuration_context.find_program('javadoc', path_list=paths)
+        configuration_context.load('javaw')
+        configuration_context.env.append_value('JAVACFLAGS', ['-source', '1.7', '-target', '1.7'])
+        configuration_context.env.ANDROID_DEBUGKEY = configuration_context.path.parent.make_node(
+            'debug.keystore').abspath()
+        configuration_context.env.JARSIGNER_FLAGS = [
+            '-sigalg', 'MD5withRSA', '-digestalg', 'SHA1', '-keystore', configuration_context.env.ANDROID_DEBUGKEY,
+            '-storepass',
             'android', '-keypass', 'android'
         ]
-        conf.env.JARSIGNER_KEY = 'androiddebugkey'
-        conf.env.APKSIGNER_FLAGS = [
-            '--ks', conf.env.ANDROID_DEBUGKEY, '--ks-pass', 'pass:android', '--key-pass', 'pass:android'
+        configuration_context.env.JARSIGNER_KEY = 'androiddebugkey'
+        configuration_context.env.APKSIGNER_FLAGS = [
+            '--ks', configuration_context.env.ANDROID_DEBUGKEY, '--ks-pass', 'pass:android', '--key-pass',
+            'pass:android'
         ]
 
-        sdk_build_tool_path = self.get_build_tool_path(Options.options.android_sdk_path)
-        sdk_tools_paths = self.get_tools_paths(Options.options.android_sdk_path)
-        conf.find_program('adb', path_list=sdk_tools_paths)
-        conf.env.DEX = os.path.join(sdk_build_tool_path, 'lib', 'd8.jar')
-        if not os.path.isfile(conf.env.DEX):
-            conf.env.DEX = os.path.join(sdk_build_tool_path, 'lib', 'dx.jar')
-            if not os.path.isfile(conf.env.DEX):
-                raise Errors.WafError('Unable to locate dx.jar')
-        conf.find_program('zipalign', var='ZIPALIGN', path_list=sdk_tools_paths + [sdk_build_tool_path])
-        conf.find_program('jarsigner', var='JARSIGNER', mandatory=False)
-        conf.find_program('apksigner', var='APKSIGNER', path_list=[sdk_build_tool_path], mandatory=False)
-        if not conf.env.JARSIGNER and not conf.env.APKSIGNER:
-            raise Errors.WafError('Unable to locate jarsigner or apksigner')
-        conf.env.DEXCREATE = '--dex'
-        conf.env.DEX_TGT_PATTERN = '--output=%s'
-        conf.find_program('aapt', path_list=[sdk_build_tool_path])
-        conf.find_program('7z', var='_7Z', mandatory=False)
+        sdk_build_tool_path = self.get_build_tool_path(waflib.Options.options.android_sdk_path)
+        sdk_tools_paths = self.get_tools_paths(waflib.Options.options.android_sdk_path)
+        configuration_context.find_program('adb', path_list=sdk_tools_paths)
+        d8 = os.path.join(sdk_build_tool_path, 'lib', 'd8.jar')
+        if os.path.isfile(d8):
+            configuration_context.env.D8 = d8
+        else:
+            configuration_context.env.DEX = os.path.join(sdk_build_tool_path, 'lib', 'dx.jar')
+            configuration_context.env.DEXCREATE = '--dex'
+            configuration_context.env.DEX_TGT_PATTERN = ['--output=%s']
+            if not os.path.isfile(configuration_context.env.DEX):
+                raise waflib.Errors.WafError('Unable to locate d8.jar/dx.jar')
+        configuration_context.find_program('zipalign', var='ZIPALIGN',
+                                           path_list=sdk_tools_paths + [sdk_build_tool_path])
+        configuration_context.find_program('jarsigner', var='JARSIGNER', mandatory=False)
+        configuration_context.find_program('apksigner', var='APKSIGNER', path_list=[sdk_build_tool_path],
+                                           mandatory=False)
+        if not configuration_context.env.JARSIGNER and not configuration_context.env.APKSIGNER:
+            raise waflib.Errors.WafError('Unable to locate jarsigner or apksigner')
+        configuration_context.find_program('aapt', path_list=[sdk_build_tool_path])
+        configuration_context.find_program('7z', var='_7Z', mandatory=False)
 
-    def get_tools_paths(self, android_path):
+    @staticmethod
+    def get_tools_paths(android_path: str) -> List[str]:
         return [os.path.join(android_path, 'platform-tools'), os.path.join(android_path, 'tools')]
 
-    def get_build_tool_path(self, android_path):
+    @staticmethod
+    def get_build_tool_path(android_path: str) -> str:
         sdk_tools_path = os.path.join(android_path, 'build-tools')
         if os.path.isdir(sdk_tools_path):
             sdk_tools = sorted(os.listdir(sdk_tools_path))
@@ -317,39 +367,24 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                 sdk_tool = sdk_tools.pop(-1)
                 if os.path.isdir(os.path.join(sdk_tools_path, sdk_tool, 'lib')):
                     return os.path.join(sdk_tools_path, sdk_tool)
-        raise Errors.WafError('Android build-tools not installed')
+        raise waflib.Errors.WafError('Android build-tools not installed')
 
-    def find_android_sdk(self, ndk_path, sdk_path, archs):
-
-        def alphanum_key(s):
-
-            def tryint(s):
-                try:
-                    return int(s)
-                except Exception:
-                    return s
-
-            return [tryint(c) for c in re.split('([0-9]+)', s)]
-
-        def valid_archs(platform_ndk, platform, archs):
-            result = []
-            for arch in archs:
-                a = _get_android_arch(arch)
-                p = os.path.join(platform_ndk, platform, 'arch-%s' % a)
-                if os.path.isdir(p):
-                    result.append(arch)
-            return result
+    @staticmethod
+    def find_android_sdk(
+            ndk_path: str,
+            sdk_path: str,
+            archs: List[str]
+    ) -> List[Tuple[NdkArchConfig, str, List[str], str]]:
 
         ndk_version_config = NdkVersionConfig(ndk_path)
 
-        all_sdk_sdks = []
         platforms_sdk = os.path.join(sdk_path, 'platforms')
         all_sdk_sdks = [p for p in os.listdir(platforms_sdk)]
-        sdk_pairs = [(i, ndk_version_config.get_ndk_for_sdk(i)) for i in all_sdk_sdks]
-        sdk_pairs = [(i, j) for i, j in sdk_pairs if j]
-        sdk_pairs = sorted(sdk_pairs, key=lambda x: alphanum_key(x[0]))
+        sdk_pairs_unfiltered = [(i, ndk_version_config.get_ndk_for_sdk(i)) for i in all_sdk_sdks]
+        sdk_pairs = [(i, j) for i, j in sdk_pairs_unfiltered if j is not None]
+        sdk_pairs = sorted(sdk_pairs, key=lambda x: _alphanum_key(x[0]))
         if sdk_pairs:
-            prefered_sdk = Options.options.android_sdk
+            prefered_sdk = waflib.Options.options.android_sdk
             if prefered_sdk == 'all':
                 return [
                     (ndk, os.path.join(platforms_sdk, sdk), ndk.get_valid_archs(archs), sdk.split('-')[1])
@@ -359,23 +394,63 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                 if 'android-%s' % prefered_sdk in all_sdk_sdks:
                     sdk = 'android-%s' % prefered_sdk
                     ndk = dict(sdk_pairs)[sdk]
+                    return [
+                        (ndk, os.path.join(platforms_sdk, sdk), ndk.get_valid_archs(archs), sdk.split('-')[1])
+                    ]
                 else:
-                    Logs.warn(
-                        'could not find android SDK version %s in path %s; using %s' % (prefered_sdk, sdk_path, sdk)
+                    sdk, ndk = sdk_pairs[0]
+                    waflib.Logs.warn(
+                        'could not find android SDK version %s in path %s; using %s' % (
+                            prefered_sdk, sdk_path, sdk)
                     )
+                    return [
+                        (ndk, os.path.join(platforms_sdk, sdk), ndk.get_valid_archs(archs), sdk.split('-')[1])
+                    ]
             else:
                 sdk, ndk = sdk_pairs[0]
                 return [(ndk, os.path.join(platforms_sdk, sdk), ndk.get_valid_archs(archs), sdk.split('-')[1])]
         else:
-            raise Errors.WafError('no SDK for archs')
+            raise waflib.Errors.WafError('no SDK for archs')
 
-    def get_available_compilers(self, configuration_context, compiler_list):
-        result = []
-        compiler_sets = {}
+    def _add_compiler_set(
+            self,
+            k: Tuple[str, str, str],
+            compilers: List[_Compiler]
+    ) -> List[Tuple[_Compiler, List[_Compiler], _Platform]]:
+        result = []  # type: List[Tuple[_Compiler, List[_Compiler], _Platform]]
+        archs = [c.arch for c in compilers]
+        try:
+            android_sdks = self.find_android_sdk(k[2], waflib.Options.options.android_sdk_path, archs)
+        except waflib.Errors.WafError:
+            raise
+        else:
+            for ndk_config, sdk_root, archs, sdk_version in android_sdks:
+                valid_compilers = []
+                seen = set([])
+                for c in compilers:
+                    if c.arch in archs and c.arch not in seen:
+                        seen.add(c.arch)
+                        valid_compilers.append(c)
+                if len(valid_compilers) >= 1:
+                    result.append(
+                        (
+                            valid_compilers[0], valid_compilers,
+                            AndroidPlatform(self.conf, ndk_config, sdk_root, sdk_version)
+                        )
+                    )
+        return result
+
+    def get_available_compilers(
+            self,
+            configuration_context: build_framework.ConfigurationContext,
+            compiler_list: List[_Compiler]
+    ) -> List[Tuple[_Compiler, List[_Compiler], _Platform]]:
+        result = []  # type: List[Tuple[_Compiler, List[_Compiler], _Platform]]
+        compiler_sets = {}  # type: Dict[str, Dict[Tuple[str, str, str], List[_Compiler]]]
         for compiler in compiler_list:
             for c in [compiler] + compiler.siblings:
                 compiler_path = os.path.normpath(c.compiler_c)
-                for ndk_path in Options.options.android_ndk_path.split(','):
+                for ndk_path in waflib.Options.options.android_ndk_path.split(','):
                     ndk_path = os.path.normpath(os.path.abspath(ndk_path))
                     if compiler_path.startswith(ndk_path):
                         c_name = c.NAMES[0].lower()
@@ -390,28 +465,6 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                             subset[k] = [c]
                         break
 
-        def add_compiler_set(compilers):
-            archs = [c.arch for c in compilers]
-            try:
-                android_sdks = self.find_android_sdk(k[2], Options.options.android_sdk_path, archs)
-            except Errors.WafError:
-                raise
-            else:
-                for ndk_config, sdk_root, archs, sdk_version in android_sdks:
-                    valid_compilers = []
-                    seen = set([])
-                    for c in compilers:
-                        if c.arch in archs and c.arch not in seen:
-                            seen.add(c.arch)
-                            valid_compilers.append(c)
-                    if len(valid_compilers) >= 1:
-                        result.append(
-                            (
-                                valid_compilers[0], valid_compilers,
-                                AndroidPlatform(self.conf, ndk_config, sdk_root, sdk_version)
-                            )
-                        )
-
         # find all GCC targets
         seen = set([])
         all_gcc_compilers = sorted(compiler_sets.get('gcc', {}).items())
@@ -423,8 +476,8 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                 for target in os.listdir(prebuilt):
                     c.directories.append(os.path.join(prebuilt, target, 'bin'))
             try:
-                add_compiler_set(compilers)
-            except Errors.WafError as e:
+                result += self._add_compiler_set(k, compilers)
+            except waflib.Errors.WafError as e:
                 print(e)
                 continue
             else:
@@ -435,7 +488,7 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                 if (k[0], k[1]) in seen:
                     continue
                 c = compilers[0]
-                clang_compilers = []
+                clang_compilers = []  # type: List[_Compiler]
                 for gcc in all_gcc_compilers[-1][1]:
                     gcc_toolchain = os.path.dirname(os.path.dirname(gcc.compiler_c))
                     extra_args = deepcopy(c.extra_args)
@@ -443,8 +496,8 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                     extra_args['cxx'] += ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
                     extra_args['link'] += ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
                     try:
-                        clang_compiler = c.__class__(c.compiler_c, c.compiler_cxx, extra_args)
-                    except Exception:
+                        clang_compiler = _Clang(c.compiler_c, c.compiler_cxx, extra_args)
+                    except waflib.Errors.WafError:
                         pass
                     else:
                         prebuilt = os.path.join(k[2], 'prebuilt')
@@ -455,8 +508,8 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                         clang_compilers.append(clang_compiler)
                 if clang_compilers:
                     try:
-                        add_compiler_set(clang_compilers)
-                    except Errors.WafError as e:
+                        result += self._add_compiler_set(k, clang_compilers)
+                    except waflib.Errors.WafError as e:
                         print(e)
                         continue
                     else:
@@ -467,13 +520,13 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                     continue
                 c = compilers[0]
                 clang_compilers = []
-                targets = os.path.normpath(os.path.join(c.compiler_c, '..', '..', 'lib', 'gcc'))
+                target_dir = os.path.normpath(os.path.join(c.compiler_c, '..', '..', 'lib', 'gcc'))
                 try:
-                    targets = os.listdir(targets)
+                    targets = os.listdir(target_dir)
                 except FileNotFoundError:
-                    targets = os.path.normpath(os.path.join(c.compiler_c, '..', '..', 'sysroot', 'usr', 'lib'))
+                    target_dir = os.path.normpath(os.path.join(c.compiler_c, '..', '..', 'sysroot', 'usr', 'lib'))
                     try:
-                        targets = os.listdir(targets)
+                        targets = os.listdir(target_dir)
                     except FileNotFoundError:
                         targets = []
                 for target in targets:
@@ -482,8 +535,8 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                     extra_args['cxx'] += ['-target', target]
                     extra_args['link'] += ['-target', target]
                     try:
-                        clang_compiler = c.__class__(c.compiler_c, c.compiler_cxx, extra_args)
-                    except Exception:
+                        clang_compiler = _Clang(c.compiler_c, c.compiler_cxx, extra_args)
+                    except waflib.Errors.WafError:
                         pass
                     else:
                         for path in self.conf.env.EXTRA_PATH:
@@ -498,8 +551,8 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
 
                 if clang_compilers:
                     try:
-                        add_compiler_set(clang_compilers)
-                    except Errors.WafError as e:
+                        result += self._add_compiler_set(k, clang_compilers)
+                    except waflib.Errors.WafError as e:
                         print(e)
                         continue
                     else:
@@ -507,13 +560,15 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
         return result
 
 
-def configure(configuration_context):
-    if not Options.options.android_sdk_path or not Options.options.android_ndk_path:
-        return
-    configuration_context.start_msg('Checking for Android tools')
-    try:
-        configuration_context.platforms.append(AndroidLoader(configuration_context))
-    except Errors.WafError as e:
-        configuration_context.end_msg(str(e), color='YELLOW')
-    else:
-        configuration_context.end_msg('done')
+def configure(
+        configuration_context: build_framework.ConfigurationContext
+) -> None:
+    if waflib.Options.options.android_sdk_path or not waflib.Options.options.android_ndk_path:
+        configuration_context.start_msg('Checking for Android tools')
+        try:
+            platform = AndroidLoader(configuration_context)
+        except waflib.Errors.WafError as e:
+            configuration_context.end_msg(str(e), color='YELLOW')
+        else:
+            configuration_context.end_msg('done')
+            _Platform.platforms.append(platform)
