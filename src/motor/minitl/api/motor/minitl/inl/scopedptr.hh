@@ -7,19 +7,15 @@
 #include <motor/minitl/scopedptr.hh>
 
 #include <motor/minitl/features.hh>
-#if MOTOR_ENABLE_ASSERT
-#    include <typeinfo>
-#endif
 
 namespace minitl {
 
 template < typename T >
 scoped< T >::scoped(T* value, allocator& allocator) : m_ptr(value)
 {
-    motor_assert_format(
+    motor_assert(
         value->pointer::m_allocator == 0,
-        "value of type {0} already has a deleter; being refcounting multiple times?",
-        typeid(T).name());
+        "value already has a deleter; being refcounting multiple times?");
     value->pointer::m_allocator = &allocator;
 }
 

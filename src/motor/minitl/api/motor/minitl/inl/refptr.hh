@@ -8,9 +8,6 @@
 
 #include <motor/minitl/features.hh>
 #include <motor/minitl/format.hh>
-#if MOTOR_ENABLE_ASSERT
-#    include <typeinfo>
-#endif
 
 namespace minitl {
 
@@ -31,10 +28,8 @@ ref< T >::ref(T* value) : m_ptr(value)
 template < typename T >
 ref< T >::ref(T* value, allocator& deleter) : m_ptr(value)
 {
-    motor_assert_format(
-        value->pointer::m_allocator == 0,
-        "value of type {0} already has a deleter; being refcounting multiple times?",
-        typeid(T).name());
+    motor_assert(value->pointer::m_allocator == 0,
+        "value already has a deleter; being refcounting multiple times?");
     value->pointer::m_allocator = &deleter;
     if(m_ptr) m_ptr->addref();
 }

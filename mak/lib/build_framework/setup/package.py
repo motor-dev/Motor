@@ -20,6 +20,11 @@ def _remove_readonly(func: Callable[[str], None], path: str, _: Any) -> None:
     func(path)
 
 
+headers = {
+    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36',
+}
+
+
 def pkg_unpack(
         setup_context: SetupContext,
         package_id_template: str,
@@ -53,7 +58,7 @@ def pkg_unpack(
 
         for i in range(0, 3):
             try:
-                package = request.urlopen(package_url % args)
+                package = request.urlopen(request.Request(package_url % args, headers=headers))
             except HTTPError as e:
                 error = e
                 if e.code == 404:

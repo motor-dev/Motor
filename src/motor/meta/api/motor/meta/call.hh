@@ -162,8 +162,7 @@ CallInfo resolve(raw< const Method > method, minitl::view< ArgInfo< T > > argume
         namedArguments[i].parameter = indexSpans[indexBest][i];
     }
     minitl::sort(namedArguments.begin(), namedArguments.end(), ArgumentSort< T >());
-    freea(indices[1]);
-    freea(indices[0]);
+    freea(indices);
     return best;
 }
 

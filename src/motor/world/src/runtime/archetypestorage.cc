@@ -229,7 +229,7 @@ componentCount(const minitl::vector< minitl::vector< raw< const Meta::Class > > 
 {
     u32 result = 0;
     for(const auto& archetype: archetypes)
-        result += archetype.size();
+        result += u32(archetype.size());
     return result;
 }
 
@@ -274,7 +274,7 @@ ArchetypeStorage::createRuntime(weak< const KernelScheduler::ProducerLoader > lo
     weak< ComponentRegistry::Runtime > registryRuntime = m_registry->getRuntime(loader);
     motor_forceuse(registryRuntime);
     ref< Runtime > result
-        = ref< Runtime >::create(Arena::game(), loader->startTask(), m_components.size());
+        = ref< Runtime >::create(Arena::game(), loader->startTask(), u32(m_components.size()));
     u32 i = 0;
     for(minitl::vector< ref< KernelScheduler::IProduct > >::const_iterator it
         = m_components.begin();
