@@ -67,8 +67,8 @@ class XmlNode(object):
         self.file = parent.file  # type: IO[str]
         self.closed = False
         self.empty = True
-        self.open(text, attributes)
         parent.add(self)
+        self.open(text, attributes)
 
     def __enter__(self) -> "XmlNode":
         return self

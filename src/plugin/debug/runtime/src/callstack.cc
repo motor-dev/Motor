@@ -30,8 +30,6 @@ Callstack::Address& Callstack::Address::operator=(const Address& other)
     return *this;
 }
 
-Callstack::Address::~Address() = default;
-
 u64 Callstack::Address::address() const
 {
     return m_address;

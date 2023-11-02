@@ -53,8 +53,6 @@ SettingsProvider::SettingsRegistration::SettingsRegistration(SettingsBase& setti
     }
 }
 
-SettingsProvider::SettingsRegistration::~SettingsRegistration() = default;
-
 minitl::intrusive_list< SettingsProvider >&
 SettingsProvider::SettingsRegistration::getSettingsList()
 {

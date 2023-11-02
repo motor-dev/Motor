@@ -8,12 +8,12 @@
 namespace Motor { namespace Task {
 
 TaskItem::TaskItem(const weak< const ITask >& owner, const weak< const IExecutor >& executor,
-                   u32 taskCount)
+                   u32 totalCount)
     : m_owner(owner)
     , m_executor(executor)
     , m_started(i_u32::create(0))
     , m_finished(i_u32::create(0))
-    , m_total(taskCount)
+    , m_total(totalCount)
 {
 }
 

@@ -604,5 +604,5 @@ def options_commands(options_context: waflib.Options.OptionsContext) -> None:
     try:
         env = waflib.ConfigSet.ConfigSet('.waf_toolchains.cache')
         add_all_build_commands(env)
-    except waflib.Errors.WafError:
+    except OSError:
         pass

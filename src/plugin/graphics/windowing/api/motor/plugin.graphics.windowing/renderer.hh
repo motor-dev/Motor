@@ -27,7 +27,7 @@ protected:
     bool hasPlatformRenderer() const;
 
 public:
-    Renderer(minitl::allocator & allocator, const weak< Resource::ResourceManager >& manager);
+    Renderer(minitl::allocator & arena, const weak< Resource::ResourceManager >& manager);
     ~Renderer() override;
 
     knl::uint2 getScreenSize() const override;

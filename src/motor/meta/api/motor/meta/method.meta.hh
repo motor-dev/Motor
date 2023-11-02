@@ -58,7 +58,7 @@ public:
     minitl::view< Overload > overloads;
 
 public:
-    Value doCall(Value * params, u32 nparams) const;
+    Value doCall(Value * params, u32 paramCount) const;
 };
 
 }}  // namespace Motor::Meta

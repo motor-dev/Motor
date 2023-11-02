@@ -24,7 +24,7 @@ public:
     public:
         Address();
         Address(const Address& other);
-        ~Address();
+        ~Address() = default;
         Address& operator=(const Address& other);
         u64      address() const;
     };

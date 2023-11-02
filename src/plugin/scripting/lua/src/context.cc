@@ -427,13 +427,13 @@ void Context::unload(const weak< const Resource::IDescription >& /*description*/
 }
 
 void Context::runBuffer(const weak< const LuaScript >& script, Resource::Resource& /*resource*/,
-                        const minitl::allocator::block< u8 >& block)
+                        const minitl::allocator::block< u8 >& buffer)
 {
     int       result;
     ifilename filename = script->getScriptName();
     result
-        = luaL_loadbuffer(m_state, (const char*)block.data(),
-                          motor_checked_numcast< size_t >(block.count() - 1), filename.str().name);
+        = luaL_loadbuffer(m_state, (const char*)buffer.data(),
+                          motor_checked_numcast< size_t >(buffer.count() - 1), filename.str().name);
     if(result == 0)
     {
         result = lua_pcall(m_state, 0, LUA_MULTRET, 0);
@@ -442,13 +442,13 @@ void Context::runBuffer(const weak< const LuaScript >& script, Resource::Resourc
 }
 
 void Context::reloadBuffer(const weak< const LuaScript >& script, Resource::Resource& /*resource*/,
-                           const minitl::allocator::block< u8 >& block)
+                           const minitl::allocator::block< u8 >& buffer)
 {
     int       result;
     ifilename filename = script->getScriptName();
     result
-        = luaL_loadbuffer(m_state, (const char*)block.data(),
-                          motor_checked_numcast< size_t >(block.count() - 1), filename.str().name);
+        = luaL_loadbuffer(m_state, (const char*)buffer.data(),
+                          motor_checked_numcast< size_t >(buffer.count() - 1), filename.str().name);
     if(result == 0)
     {
         result = lua_pcall(m_state, 0, LUA_MULTRET, 0);

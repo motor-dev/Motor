@@ -18,7 +18,7 @@ private:
 
 public:
     Timer();
-    ~Timer();
+    ~Timer() = default;
 
     void start();
     u64  stop();

@@ -11,7 +11,7 @@
 namespace Motor { namespace Meta {
 
 motor_api(REFLECTION) ref< AST::Node > parseValue(minitl::allocator& arena,
-                                                  AST::MessageList& context, const char* strBegin,
+                                                  AST::MessageList& errors, const char* strBegin,
                                                   const char* strEnd = nullptr, u32 initialLine = 0,
                                                   u32 initialColumn = 0);
 

@@ -20,16 +20,16 @@
 
 namespace Motor { namespace Plugin {
 
-DynamicObject::Handle DynamicObject::load(const inamespace& pluginName, const ipath& pluginPath)
+DynamicObject::Handle DynamicObject::load(const inamespace& objectName, const ipath& objectPath)
 {
-    motor_forceuse(pluginPath);
+    motor_forceuse(objectPath);
     const minitl::format_buffer< 1024u > pluginFile
-        = minitl::format< 1024u >(FMT(PLUGIN_FILE_NAME), pluginName);
-    motor_info_format(Log::plugin(), "loading dynamic object {0}", pluginName);
+        = minitl::format< 1024u >(FMT(PLUGIN_FILE_NAME), objectName);
+    motor_info_format(Log::plugin(), "loading dynamic object {0}", objectName);
     void* handle = dlopen(pluginFile, RTLD_NOW | RTLD_LOCAL);
     if(!handle)
     {
-        motor_error_format(Log::plugin(), "Error loading dynamic object {0}: {1}", pluginName,
+        motor_error_format(Log::plugin(), "Error loading dynamic object {0}: {1}", objectName,
                            dlerror());
     }
     return handle;

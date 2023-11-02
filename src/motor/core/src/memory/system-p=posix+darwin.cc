@@ -50,21 +50,21 @@ byte* SystemAllocator::platformReserve(u32 size)
     return result;
 }
 
-void SystemAllocator::platformCommit(byte* ptr, u32 begin, u32 end)
+void SystemAllocator::platformCommit(byte* ptr, u32 start, u32 stop)
 {
     motor_assert_format((intptr_t)ptr % platformPageSize() == 0,
                         "pointer {0} is not aligned on a page boundary (page size = {1})", ptr,
                         platformPageSize());
-    motor_assert_format(begin % platformPageSize() == 0,
-                        "offset {0} is not aligned on a page boundary (page size = {1})", begin,
+    motor_assert_format(start % platformPageSize() == 0,
+                        "offset {0} is not aligned on a page boundary (page size = {1})", start,
                         platformPageSize());
-    motor_assert_format(end % platformPageSize() == 0,
-                        "offset {0} is not aligned on a page boundary (page size = {1})", end,
+    motor_assert_format(stop % platformPageSize() == 0,
+                        "offset {0} is not aligned on a page boundary (page size = {1})", stop,
                         platformPageSize());
-    int failed = mprotect((char*)ptr + begin + cacheAhead(), end - begin, PROT_READ | PROT_WRITE);
+    int failed = mprotect((char*)ptr + start + cacheAhead(), stop - start, PROT_READ | PROT_WRITE);
     motor_forceuse(failed);
     motor_assert_format(failed == 0, "failed to commit memory for {0} bytes at offset {1}: {2}",
-                        (end - begin), begin, strerror(errno));
+                        (stop - start), start, strerror(errno));
 }
 
 void SystemAllocator::platformFree(byte* ptr, u32 size)

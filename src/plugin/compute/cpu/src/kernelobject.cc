@@ -18,9 +18,9 @@ KernelObject::KernelObject(const weak< const CodeObject >& code, const istring n
 
 KernelObject::~KernelObject() = default;
 
-void KernelObject::run(const u32 index, const u32 total) const
+void KernelObject::run(const u32 partIndex, const u32 partCount) const
 {
-    (*m_entryPoint)(index, total);
+    (*m_entryPoint)(partIndex, partCount);
 }
 
 }}}  // namespace Motor::KernelScheduler::CPU

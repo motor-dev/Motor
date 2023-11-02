@@ -18,7 +18,7 @@ private:
     cl_kernel m_kernel;
 
 public:
-    KernelObject(const weak< const CodeObject >& context, istring name);
+    KernelObject(const weak< const CodeObject >& code, istring name);
     ~KernelObject() override;
 
     // void run(const minitl::vector< weak< const IMemoryBuffer > >& params);

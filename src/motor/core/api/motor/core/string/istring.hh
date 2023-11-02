@@ -19,7 +19,7 @@ private:
 
 public:
     istring();
-    explicit istring(const char* str);
+    explicit istring(const char* value);
     template < u32 BUFFER_SIZE >
     explicit istring(const minitl::format_buffer< BUFFER_SIZE >& str) : m_index(init(str.buffer))
     {

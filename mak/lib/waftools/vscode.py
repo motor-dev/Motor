@@ -31,16 +31,6 @@ class vscode_common(build_framework.BuildContext):
     SETTINGS = '  {\n' \
                '    "editor.formatOnSave": true,\n' \
                '    "editor.formatOnType": true,\n' \
-               '    "python.linting.mypyArgs": [\n' \
-               '      "--follow-imports=silent"\n' \
-               '    ],\n' \
-               '    "python.linting.mypyEnabled": true,\n' \
-               '    "python.linting.pylintEnabled": false,\n' \
-               '    "python.formatting.yapfArgs": [\n' \
-               '      "--style=%(motorpath)s/setup.cfg"\n' \
-               '    ],\n' \
-               '    "python.formatting.autopep8Path": "yapf",\n' \
-               '    "python.formatting.provider": "autopep8",\n' \
                '    "python.autoComplete.extraPaths": [\n' \
                '      "%(motorpath)s/mak/lib",\n' \
                '      "%(motorpath)s/mak/typeshed",\n' \
@@ -73,7 +63,11 @@ class vscode_common(build_framework.BuildContext):
                '    ],\n' \
                '    "C_Cpp.codeAnalysis.clangTidy.enabled": true,\n' \
                '    "cmake.buildDirectory": "${workspaceFolder}/%(projectpath)s/${buildKit}/${buildType}",\n' \
-               '    "cmake.showSystemKits": false\n' \
+               '    "cmake.showSystemKits": false,\n' \
+               '    "[python]": {\n' \
+               '        "editor.defaultFormatter": "eeyore.yapf",\n' \
+               '        "editor.formatOnSave": true\n' \
+               '    }\n' \
                '  }\n'
 
     def execute(self) -> Optional[str]:
@@ -107,6 +101,17 @@ class vscode_common(build_framework.BuildContext):
         self.write_workspace()
         return None
 
+    def write_settings(self, vscode_node: waflib.Node.Node) -> None:
+        settings_node = vscode_node.make_node('settings.json')
+
+        with open(settings_node.abspath(), 'w') as settings:
+            settings.write(
+                self.SETTINGS % {
+                    'motorpath': self.motornode.path_from(self.path),
+                    'projectpath': self.bldnode.path_from(self.path)
+                }
+            )
+
     def write_workspace(self) -> None:
         appname = getattr(waflib.Context.g_module, waflib.Context.APPNAME, self.srcnode.name)
 
@@ -127,14 +132,8 @@ class vscode_common(build_framework.BuildContext):
                 '    "recommendations": [\n'
                 '      %s\n'
                 '    ]\n'
-                '  },\n'
-                '  "settings": %s\n'
-                '}\n' % (
-                    ',\n      '.join(self.extensions), self.SETTINGS % {
-                        'motorpath': self.motornode.path_from(self.path),
-                        'projectpath': self.bldnode.path_from(self.path)
-                    }
-                )
+                '  }\n'
+                '}\n' % (',\n      '.join(self.extensions))
             )
 
 
@@ -142,7 +141,7 @@ class vscode(vscode_common):
     """creates projects for Visual Studio Code"""
     cmd = 'vscode'
     variant = 'projects/vscode'
-    extensions = ['"ms-vscode.cpptools"', '"ms-python.python"']
+    extensions = ['"ms-vscode.cpptools"', '"ms-python.python"', '"eeyore.yapf"', '"ms-python.mypy-type-checker"']
 
     def write_workspace(self) -> None:
         assert self.launcher is not None
@@ -151,6 +150,7 @@ class vscode(vscode_common):
         configurations = []
         vscode_node = self.srcnode.make_node('.vscode')
         vscode_node.mkdir()
+        self.write_settings(vscode_node)
 
         for env_name in self.env.ALL_TOOLCHAINS:
             toolchain_node = vscode_node.make_node('toolchains').make_node(env_name)
@@ -251,13 +251,20 @@ class vscode(vscode_common):
 
                 with open(variant_node.make_node('compile_commands.json').abspath(), 'w') as compile_commands:
                     json.dump(commands, compile_commands, indent=2)
-                seen = {self.srcnode, self.bldnode}                                                                     # type: Set[Union[str, waflib.Node.Node]]
+                seen = {self.srcnode, self.bldnode} # type: Set[Union[str, waflib.Node.Node]]
+
+                def add_seen(i: Union[str, waflib.Node.Node]) -> bool:
+                    seen.add(i)
+                    return True
+
                 configurations.append(
                     {
                         'name':
                             '%s - %s' % (env_name, variant),
-                        'includePath': [i for i in include_paths if i not in seen and not seen.add(i)],               # type: ignore
-                        'defines': [d for d in defines if d not in seen and not seen.add(d)],                         # type: ignore
+                                                                                                                        # type: ignore
+                        'includePath': [i for i in include_paths if i not in seen and add_seen(i)],
+                                                                                                                        # type: ignore
+                        'defines': [d for d in defines if d not in seen and add_seen(i)],
                         'compileCommands':
                             '${workspaceFolder}/.vscode/toolchains/%s/%s/compile_commands.json' % (env_name, variant),
                         'customConfigurationVariables':
@@ -463,24 +470,27 @@ class vscode_cmake(vscode_common):
     """creates projects for Visual Studio Code using CMake"""
     cmd = 'vscode_cmake'
     variant = 'projects/vscode'
-    extensions = ['"ms-vscode.cpptools"', '"ms-python.python"', '"ms-vscode.cmake-tools"']
+    extensions = [
+        '"ms-vscode.cpptools"', '"ms-python.python"', '"eeyore.yapf"', '"ms-python.mypy-type-checker"',
+        '"ms-vscode.cmake-tools"'
+    ]
 
     def write_workspace(self) -> None:
         vscode_common.write_workspace(self)
         toolchains = waftools_common.cmake.write_cmake_workspace(self, [a for a in sys.argv if a[0] == '-'])
         vscode_node = self.srcnode.make_node('.vscode')
         vscode_node.mkdir()
+        self.write_settings(vscode_node)
 
         with open(vscode_node.make_node('cmake-kits.json').abspath(), 'w') as kits:
             kits.write(
                 '[\n'
                 '%s\n'
-                ']' % ',\n'.join(
-                    '  {\n'
-                    '    "name": "%s",\n'
-                    '    "toolchainFile": "%s"\n'
-                    '  }' % t for t, _ in toolchains
-                )
+                ']' %
+                ',\n'.join('  {\n'
+                           '    "name": "%s",\n'
+                           '    "toolchainFile": "%s"\n'
+                           '  }' % t for t in toolchains)
             )
 
         with open(vscode_node.make_node('cmake-variants.json').abspath(), 'w') as variants:

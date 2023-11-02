@@ -57,21 +57,21 @@ WorldLoader::WorldLoader(const weak< Task::ITask >&                     loopTask
 
 WorldLoader::~WorldLoader(void) = default;
 
-void WorldLoader::load(const weak< const Resource::IDescription >& desc,
+void WorldLoader::load(const weak< const Resource::IDescription >& worldDescription,
                        Resource::Resource&                         resource)
 {
     m_worldCount++;
-    weak< const World >  world   = motor_checked_cast< const World >(desc);
+    weak< const World >  world   = motor_checked_cast< const World >(worldDescription);
     ref< WorldResource > runtime = ref< WorldResource >::create(Arena::resource(), m_producerLoader,
                                                                 m_pluginContext, world, m_loopTask);
     m_worlds.push_back(runtime);
     resource.setRefHandle(runtime);
 }
 
-void WorldLoader::unload(const weak< const Resource::IDescription >& desc,
+void WorldLoader::unload(const weak< const Resource::IDescription >& worldDescription,
                          Resource::Resource&                         resource)
 {
-    motor_forceuse(desc);
+    motor_forceuse(worldDescription);
     m_worldCount--;
     {
         weak< WorldResource > runtime = resource.getRefHandle< WorldResource >();

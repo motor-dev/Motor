@@ -27,7 +27,7 @@ private:
     {
         static minitl::intrusive_list< SettingsProvider >& getSettingsList();
         explicit SettingsRegistration(SettingsBase & settings);
-        ~SettingsRegistration();
+        ~SettingsRegistration() = default;
     };
     friend struct SettingsRegistration;
 

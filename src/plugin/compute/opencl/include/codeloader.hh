@@ -20,9 +20,9 @@ public:
     explicit CodeLoader(const weak< const Context >& context);
     ~CodeLoader() override;
 
-    void load(const weak< const Resource::IDescription >& codeDescription,
+    void load(const weak< const Resource::IDescription >& kernelDescription,
               Resource::Resource&                         resource) override;
-    void unload(const weak< const Resource::IDescription >& codeDescription,
+    void unload(const weak< const Resource::IDescription >& kernelDescription,
                 Resource::Resource&                         resource) override;
 };
 

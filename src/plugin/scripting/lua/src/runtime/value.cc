@@ -177,17 +177,17 @@ static bool convertTableToValue(lua_State* state, int index, const Meta::Type& t
     }
 }
 
-bool createValue(lua_State* state, int index, const Meta::Type& type, void* value)
+bool createValue(lua_State* state, int index, const Meta::Type& type, void* buffer)
 {
     int t = lua_type(state, index);
     switch(t)
     {
-    case LUA_TNIL: return convertNilToValue(state, index, type, value);
-    case LUA_TSTRING: return convertStringToValue(state, index, type, value);
-    case LUA_TBOOLEAN: return convertBooleanToValue(state, index, type, value);
-    case LUA_TNUMBER: return convertNumberToValue(state, index, type, value);
-    case LUA_TUSERDATA: return convertUserdataToValue(state, index, type, value);
-    case LUA_TTABLE: return convertTableToValue(state, index, type, value);
+    case LUA_TNIL: return convertNilToValue(state, index, type, buffer);
+    case LUA_TSTRING: return convertStringToValue(state, index, type, buffer);
+    case LUA_TBOOLEAN: return convertBooleanToValue(state, index, type, buffer);
+    case LUA_TNUMBER: return convertNumberToValue(state, index, type, buffer);
+    case LUA_TUSERDATA: return convertUserdataToValue(state, index, type, buffer);
+    case LUA_TTABLE: return convertTableToValue(state, index, type, buffer);
     default: return false;
     }
 }
