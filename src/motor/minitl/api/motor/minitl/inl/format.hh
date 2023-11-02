@@ -944,7 +944,7 @@ struct formatter< 'g' > : format_details::buffered_partial_formatter< formatter<
         return 0;
     }
     template < typename T >
-    static MOTOR_ALWAYS_INLINE u32 write(char* destination, T&& value,
+    static MOTOR_ALWAYS_INLINE u32 write(const char* destination, T&& value,
                                          const format_options& options, u32 reserved_length)
     {
         motor_forceuse(destination);

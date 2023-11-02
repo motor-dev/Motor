@@ -8,6 +8,7 @@
 namespace Motor { namespace Task {
 
 class ITask;
+class IExecutor;
 class TaskScheduler;
 
 class TaskItem

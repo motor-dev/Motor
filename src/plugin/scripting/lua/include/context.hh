@@ -22,7 +22,7 @@ public:
     ~Context() override;
 
     static minitl::format_buffer< 1024u > tostring(lua_State* state, int element);
-    static void                           printStack(lua_State* l);
+    static void                           printStack(lua_State* state);
     static void typeError(lua_State* state, int narg, const char* expected, const char* got);
     static void typeError(lua_State* state, int narg, const Meta::Type& expected, const char* got);
     static int  push(lua_State* state, const Meta::Value& v);

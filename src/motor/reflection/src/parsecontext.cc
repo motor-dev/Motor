@@ -9,10 +9,9 @@ namespace Motor { namespace Meta { namespace Parse {
 ParseContext* g_parseContext;
 static i_u32  s_useCount;
 
-ParseContext::ParseContext(minitl::allocator& allocator, const char* bufferStart,
-                           const char* bufferEnd, AST::MessageList& errors, u32 lineStart,
-                           u32 columnStart)
-    : arena(&allocator)
+ParseContext::ParseContext(minitl::allocator& arena, const char* bufferStart, const char* bufferEnd,
+                           AST::MessageList& errors, u32 lineStart, u32 columnStart)
+    : arena(&arena)
     , result()
     , bufferStart(bufferStart)
     , bufferEnd(bufferEnd)

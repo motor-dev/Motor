@@ -5,7 +5,7 @@ from typing import Any, List, Optional, Tuple
 
 class CMake(build_framework.BuildContext):
     """
-        creates CMake project structure. Used by ither CMake-based project generators.
+        Creates CMake project structure.
     """
     cmd = 'cmake'
     fun = 'build'

@@ -97,31 +97,31 @@ void ResourceManager::detach(raw< const Meta::Class >     classinfo,
 }
 
 void ResourceManager::load(raw< const Meta::Class >          classinfo,
-                           const weak< const IDescription >& description)
+                           const weak< const IDescription >& resource)
 {
     weak< LoaderInfo > info = getLoaderInfo(classinfo);
     for(minitl::vector< weak< ILoader > >::const_iterator it = info->loaders.begin();
         it != info->loaders.end(); ++it)
     {
-        description->load(*it);
+        resource->load(*it);
     }
-    info->resources.push_back(*description.operator->());
+    info->resources.push_back(*resource.operator->());
 }
 
 void ResourceManager::unload(raw< const Meta::Class >          classinfo,
-                             const weak< const IDescription >& description)
+                             const weak< const IDescription >& resource)
 {
-    description->unhook();
+    resource->unhook();
     weak< LoaderInfo > info = getLoaderInfo(classinfo);
     for(minitl::vector< weak< ILoader > >::const_iterator it = info->loaders.begin();
         it != info->loaders.end(); ++it)
     {
-        description->unload(*it);
+        resource->unload(*it);
     }
 
     for(auto& m_watche: m_watches)
     {
-        if(m_watche.resource == description)
+        if(m_watche.resource == resource)
         {
             m_watche.expired  = true;
             m_watche.file     = weak< const File >();

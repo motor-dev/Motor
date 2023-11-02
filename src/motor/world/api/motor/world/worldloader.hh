@@ -25,10 +25,10 @@ private:
     u32                                           m_worldCount;
 
 private:
-    void load(const weak< const Resource::IDescription >& world, Resource::Resource& resource)
-        override;
-    void unload(const weak< const Resource::IDescription >& world, Resource::Resource& resource)
-        override;
+    void load(const weak< const Resource::IDescription >& worldDescription,
+              Resource::Resource&                         resource) override;
+    void unload(const weak< const Resource::IDescription >& worldDescription,
+                Resource::Resource&                         resource) override;
 
 public:
     WorldLoader(const weak< Task::ITask >&                     loopTask,

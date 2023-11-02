@@ -242,7 +242,7 @@ class GnuCompiler(Compiler):
                     best = len(values)
                     arch = a
         if not best:
-            raise Exception('could not find architecture')
+            raise waflib.Errors.WafError('could not find architecture')
         return sysroot, names, targets, version, platform, arch
 
     def is_valid(

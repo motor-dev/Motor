@@ -3,6 +3,7 @@
 #ifndef MOTOR_CORE_STRING_TEXT_HH
 #define MOTOR_CORE_STRING_TEXT_HH
 
+#include <motor/core/coredefs.hh>
 #include <motor/minitl/format.hh>
 
 namespace Motor {
@@ -14,7 +15,7 @@ private:
     const u32   m_length;
 
 public:
-    text(const char* str);
+    explicit text(const char* str);
     text(const char* begin, const char* end);
     text(const text& other);
     ~text();
@@ -25,7 +26,7 @@ public:
     u32 length() const;
     u32 size() const;
 
-    operator const char*() const
+    explicit operator const char*() const
     {
         return begin();
     }

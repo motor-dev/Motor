@@ -8,10 +8,10 @@
 
 namespace Motor {
 
-IGPUResource::IGPUResource(const weak< const Resource::IDescription >& owner,
+IGPUResource::IGPUResource(const weak< const Resource::IDescription >& description,
                            const weak< const IRenderer >&              renderer)
     : m_renderer(renderer)
-    , m_resource(owner)
+    , m_resource(description)
     , m_index(-1)
 {
 }

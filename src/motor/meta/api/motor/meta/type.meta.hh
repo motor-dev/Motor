@@ -62,7 +62,7 @@ public:
 private:
     void* rawget(const void*) const;
     void  copy(const void* source, void* dest) const;
-    void  destroy(void* obj) const;
+    void  destroy(void* ptr) const;
 };
 
 }}  // namespace Motor::Meta

@@ -3,7 +3,8 @@ import os
 import datetime
 
 TimeoutExpired = subprocess.TimeoutExpired
-from typing import Any, AnyStr, Callable, Dict, Iterable, List, Optional, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, TypeVar, Union, overload
+from typing_extensions import Literal, TypeAlias
 from .ConfigSet import ConfigSet
 
 SIG_NIL: bytes = ...
@@ -15,12 +16,29 @@ rot_idx: int = ...
 
 is_win32: bool = ...
 
+_OpenTextModeWriting: TypeAlias = Literal["w", "wt", "tw", "a", "at", "ta", "x", "xt", "tx"]
+_OpenTextModeReading: TypeAlias = Literal["r", "rt", "tr", "U", "rU", "Ur", "rtU", "rUt", "Urt", "trU", "tUr", "Utr"]
+_OpenBinaryModeWriting: TypeAlias = Literal["wb", "bw", "ab", "ba", "xb", "bx"]
+_OpenBinaryModeReading: TypeAlias = Literal["rb", "br", "rbU", "rUb", "Urb", "brU", "bUr", "Ubr"]
 
-def readf(fname: str, m: str = ..., encoding: str = ...) -> AnyStr:
+
+@overload
+def readf(fname: str, m: _OpenTextModeReading = 'r', encoding: Optional[str] = ...) -> str:
     ...
 
 
-def writef(fname: str, data: AnyStr, m: str = ..., encoding: str = ...) -> None:
+@overload
+def readf(fname: str, m: _OpenBinaryModeReading, encoding: None = ...) -> bytes:
+    ...
+
+
+@overload
+def writef(fname: str, data: str, m: _OpenTextModeWriting = ..., encoding: Optional[str] = ...) -> None:
+    ...
+
+
+@overload
+def writef(fname: str, data: bytes, m: _OpenBinaryModeWriting, encoding: None = ...) -> None:
     ...
 
 

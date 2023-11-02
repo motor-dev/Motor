@@ -19,7 +19,7 @@ def setup_build_macos(build_context: BuildContext) -> None:
     def wrap_class(class_name: str) -> None:
         cls = waflib.Task.classes.get(class_name, None)
         assert cls is not None
-        derived = type(class_name, (cls,), {})
+        derived = type(class_name, (cls, ), {})
 
         def exec_command_clean(self: waflib.Task.Task, cmd: Union[List[str], str], **kw: Any) -> int:
             self.outputs[0].delete(evict=False)
@@ -37,8 +37,7 @@ def install_plist_darwin(self: waflib.TaskGen.task_gen, node: waflib.Node.Node) 
         bld_env = self.bld.env
         if bld_env.SUB_TOOLCHAINS:
             bld_env = self.bld.all_envs[bld_env.SUB_TOOLCHAINS[0]]
-        install_files(self, os.path.join(self.bld.env.PREFIX, self.bld.env.OPTIM, bld_env.DEPLOY_ROOTDIR),
-                      [node])
+        install_files(self, os.path.join(self.bld.env.PREFIX, self.bld.env.OPTIM, bld_env.DEPLOY_ROOTDIR), [node])
 
 
 @waflib.TaskGen.feature('cshlib', 'cxxshlib')
@@ -49,20 +48,18 @@ def set_darwin_shlib_name(self: waflib.TaskGen.task_gen) -> None:
         bin_path = os.path.join(self.env.PREFIX, self.env.DEPLOY_BINDIR)
         plugin_path = os.path.join(self.env.PREFIX, self.env.DEPLOY_PLUGINDIR)
         kernel_path = os.path.join(self.env.PREFIX, self.env.DEPLOY_KERNELDIR)
-        link_task = getattr(self, 'link_task')  # type: waflib.Task.Task
+        link_task = getattr(self, 'link_task')                                                       # type: waflib.Task.Task
         if 'motor:plugin' in self.features:
             rel_path = os.path.relpath(plugin_path, bin_path)
             self.env.append_unique(
-                'LINKFLAGS',
-                ['-install_name',
-                 os.path.join('@executable_path', rel_path, link_task.outputs[0].name)]
+                'LINKFLAGS', ['-install_name',
+                              os.path.join('@executable_path', rel_path, link_task.outputs[0].name)]
             )
         elif 'motor:kernel' in self.features:
             rel_path = os.path.relpath(kernel_path, bin_path)
             self.env.append_unique(
-                'LINKFLAGS',
-                ['-install_name',
-                 os.path.join('@executable_path', rel_path, link_task.outputs[0].name)]
+                'LINKFLAGS', ['-install_name',
+                              os.path.join('@executable_path', rel_path, link_task.outputs[0].name)]
             )
         else:
             self.env.append_unique(
@@ -121,7 +118,7 @@ class codesign(waflib.Task.Task):
 def _darwin_postlink_task(task_gen: waflib.TaskGen.task_gen, link_task: waflib.Task.Task) -> Optional[waflib.Task.Task]:
     if 'cxxtest' in task_gen.features:
         return None
-    appname = getattr(waflib.Context.g_module, waflib.Context.APPNAME, task_gen.bld.srcnode.name)  # type: str
+    appname = getattr(waflib.Context.g_module, waflib.Context.APPNAME, task_gen.bld.srcnode.name) # type: str
 
     bldnode = task_gen.bld.bldnode
     out_rootdir = os.path.join(appname + '.app.dSYM', 'Contents')
@@ -146,10 +143,10 @@ def _darwin_postlink_task(task_gen: waflib.TaskGen.task_gen, link_task: waflib.T
             infoplist = out_rootnode.make_node('Info.plist')
             dsymtask = task_gen.create_task('dsym', [], [infoplist])
             setattr(task_gen.bld, 'dsym_task', dsymtask)
-            install_as(task_gen,
-                       os.path.join(task_gen.bld.env.PREFIX, task_gen.bld.env.OPTIM,
-                                    infoplist.path_from(bldnode)),
-                       infoplist)
+            install_as(
+                task_gen, os.path.join(task_gen.bld.env.PREFIX, task_gen.bld.env.OPTIM, infoplist.path_from(bldnode)),
+                infoplist
+            )
 
         dsymtask.set_inputs(out_node)
         dsymtask.set_outputs(out_dsymdir.make_node(out_node.name))
@@ -157,8 +154,7 @@ def _darwin_postlink_task(task_gen: waflib.TaskGen.task_gen, link_task: waflib.T
             task_gen,
             os.path.join(
                 task_gen.bld.env.PREFIX, task_gen.bld.env.OPTIM, appname + '.app.dSYM', 'Contents', 'Resources',
-                'DWARF',
-                out_node.name
+                'DWARF', out_node.name
             ), dsymtask.outputs[-1]
         )
     return link_task
@@ -212,6 +208,7 @@ def apply_multiarch_darwin(self: waflib.TaskGen.task_gen) -> None:
         if link_task is not None:
             install_as(
                 self,
-                os.path.join(self.bld.env.PREFIX, self.bld.env.OPTIM, out_path, out_name), link_task.outputs[0],
+                os.path.join(self.bld.env.PREFIX, self.bld.env.OPTIM, out_path, out_name),
+                link_task.outputs[0],
                 chmod=waflib.Utils.O755
             )

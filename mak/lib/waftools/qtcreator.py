@@ -447,7 +447,7 @@ class QtCreator(build_framework.BuildContext):
 
     def __init__(self, **kw: Any) -> None:
         build_framework.BuildContext.__init__(self, **kw)
-        self.base_node = self.srcnode
+        self.base_node = self.motornode
         self.qt_cmake_tools = []  # type: List[QtCMakeTools]
         self.qt_cmake_tools_to_remove = []  # type: List[QtCMakeTools]
         self.qt_debuggers = []  # type: List[Tuple[str, QtDebugger]]
@@ -465,7 +465,10 @@ class QtCreator(build_framework.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
+
+        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
+        
         self.env.VARIANT = _to_var('Variant')
         self.env.TOOLCHAIN = _to_var('Toolchain')
         self.env.PREFIX = _to_var('Prefix')
@@ -1380,11 +1383,15 @@ class Qbs(QtCreator):
                     if 'android' in env.VALID_PLATFORMS:
                         ndk_root = env.ANDROID_NDK_PATH
                         host_name = os.path.split(os.path.dirname(os.path.dirname(env.CC[0])))[1]
-                        project_file.write('%s    Depends { name: "Android.ndk" }\n' % indent)
-                        project_file.write('%s    Depends { name: "codesign" }\n' % indent)
-                        project_file.write('%s    Android.ndk.hostArch: "%s"\n' % (indent, host_name))
-                        project_file.write('%s    Android.ndk.ndkDir: "%s"\n' % (indent, ndk_root))
-                        project_file.write('%s    codesign.debugKeystorePath: "%s"\n' % (indent, env.ANDROID_DEBUGKEY))
+                        project_file.write('%s    Properties\n' % indent)
+                        project_file.write('%s    {\n' % indent)
+                        project_file.write('%s        condition: qbs.targetOS.includes("android")\n' % indent)
+                        project_file.write('%s        Depends { name: "Android.ndk" }\n' % indent)
+                        project_file.write('%s        Depends { name: "codesign" }\n' % indent)
+                        project_file.write('%s        Android.ndk.hostArch: "%s"\n' % (indent, host_name))
+                        project_file.write('%s        Android.ndk.ndkDir: "%s"\n' % (indent, ndk_root))
+                        project_file.write('%s        codesign.debugKeystorePath: "%s"\n' % (indent, env.ANDROID_DEBUGKEY))
+                        project_file.write('%s    }\n' % indent)
                         break
 
                 project_file.write('%s    name: "%s"\n' % (indent, p.name))

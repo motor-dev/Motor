@@ -1,6 +1,11 @@
-from typing import AnyStr, Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, overload
+from typing_extensions import Literal, TypeAlias
 
 exclude_regs: str = ...
+_OpenTextModeWriting: TypeAlias = Literal["w", "wt", "tw", "a", "at", "ta", "x", "xt", "tx"]
+_OpenTextModeReading: TypeAlias = Literal["r", "rt", "tr", "U", "rU", "Ur", "rtU", "rUt", "Urt", "trU", "tUr", "Utr"]
+_OpenBinaryModeWriting: TypeAlias = Literal["wb", "bw", "ab", "ba", "xb", "bx"]
+_OpenBinaryModeReading: TypeAlias = Literal["rb", "br", "rbU", "rUb", "Urb", "brU", "bUr", "Ubr"]
 
 
 class Node(object):
@@ -16,10 +21,20 @@ class Node(object):
     def __repr__(self) -> str:
         ...
 
-    def read(self, flags: str = ..., encoding: str = ...) -> AnyStr:
+    @overload
+    def read(self, flags: _OpenTextModeReading = 'r', encoding: Optional[str] = ...) -> str:
         ...
 
-    def write(self, data: AnyStr, flags: str = ..., encoding: str = ...) -> None:
+    @overload
+    def read(self, flags: _OpenBinaryModeReading, encoding: None = ...) -> bytes:
+        ...
+
+    @overload
+    def write(self, data: str, flags: _OpenTextModeWriting = 'w', encoding: Optional[str] = ...) -> None:
+        ...
+
+    @overload
+    def write(self, data: bytes, flags: _OpenBinaryModeWriting, encoding: None = ...) -> None:
         ...
 
     def exists(self) -> bool:
@@ -68,16 +83,16 @@ class Node(object):
         ...
 
     def ant_glob(
-            self,
-            incl: Union[str, List[str]] = ...,
-            excl: Union[str, List[str]] = ...,
-            dir: bool = ...,
-            src: bool = ...,
-            maxdepth: int = ...,
-            ignorecase: bool = ...,
-            generator: bool = ...,
-            remove: bool = ...,
-            quiet: bool = ...
+        self,
+        incl: Union[str, List[str]] = ...,
+        excl: Union[str, List[str]] = ...,
+        dir: bool = ...,
+        src: bool = ...,
+        maxdepth: int = ...,
+        ignorecase: bool = ...,
+        generator: bool = ...,
+        remove: bool = ...,
+        quiet: bool = ...
     ) -> List["Node"]:
         ...
 

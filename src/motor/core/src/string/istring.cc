@@ -596,15 +596,15 @@ inamespace::inamespace(const char* _str) : igenericnamespace(_str, ".")
 {
 }
 
-inamespace& inamespace::operator+=(const istring& str2)
+inamespace& inamespace::operator+=(const istring& component)
 {
-    return this->operator+=(inamespace(str2));
+    return this->operator+=(inamespace(component));
 }
 
-inamespace& inamespace::operator+=(const inamespace& str2)
+inamespace& inamespace::operator+=(const inamespace& other)
 {
-    for(u32 i = 0; i < str2.size(); ++i)
-        push_back(str2[i]);
+    for(u32 i = 0; i < other.size(); ++i)
+        push_back(other[i]);
     return *this;
 }
 
@@ -653,10 +653,10 @@ ipath::ipath(const char* begin, const char* end) : igenericnamespace(begin, end,
 {
 }
 
-ipath& ipath::operator+=(const ipath& str2)
+ipath& ipath::operator+=(const ipath& other)
 {
-    for(u32 i = 0; i < str2.size(); ++i)
-        push_back(str2[i]);
+    for(u32 i = 0; i < other.size(); ++i)
+        push_back(other[i]);
     return *this;
 }
 

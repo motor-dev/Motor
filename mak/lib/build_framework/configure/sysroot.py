@@ -4,6 +4,7 @@ import elftools.common.exceptions
 import waflib.Options
 from ..options import ConfigurationContext
 from .target.compiler import get_sysroot_libpaths
+from typing import Optional
 
 PLATFORMS = {
     'ELFOSABI_LINUX': 'linux',
@@ -145,6 +146,10 @@ def configure_sysroot(configuration_context: ConfigurationContext) -> None:
                 else:
                     for item in content:
                         path = os.path.join(libpath, item)
+                        platform = None # type: Optional[str]
+                        arch = None     # type: Optional[str]
+                        suffix = None   # type: Optional[str]
+                        abi = None      # type: Optional[str]
                         if os.path.isfile(path):
                             with open(path, 'rb') as elffile:
                                 try:
@@ -152,8 +157,8 @@ def configure_sysroot(configuration_context: ConfigurationContext) -> None:
                                 except elftools.common.exceptions.ELFError:
                                     pass
                                 else:
-                                    platform = PLATFORMS.get(elf.header.e_ident['EI_OSABI'], platform)  # type: str
-                                    arch = ARCHITECTURES.get(elf.header.e_machine, arch)  # type: str
+                                    platform = PLATFORMS.get(elf.header.e_ident['EI_OSABI'], platform)
+                                    arch = ARCHITECTURES.get(elf.header.e_machine, arch)
                                     if arch == 'arm':
                                         abi_flags = elf.header.e_flags >> 24
                                         if abi_flags != 0:
@@ -168,15 +173,18 @@ def configure_sysroot(configuration_context: ConfigurationContext) -> None:
                                                             if attribute.tag == 'TAG_CPU_ARCH':
                                                                 arch += ARM_NAMES[attribute.value]
                                     if elf.header.e_ident['EI_DATA'] == 'ELFDATA2LSB':
-                                        arch = LITTLE_ENDIAN.get(arch, arch)
+                                        if arch is not None:
+                                            arch = LITTLE_ENDIAN.get(arch, arch)
                                     elif elf.header.e_ident['EI_DATA'] == 'ELFDATA2MSB':
-                                        arch = BIG_ENDIAN.get(arch, arch)
+                                        if arch is not None:
+                                            arch = BIG_ENDIAN.get(arch, arch)
                                     if suffix is not None:
                                         # arch = arch + suffix
                                         if abi is not None:
                                             abi = abi + suffix
                                     elif elf.header.e_flags & 0x00000400:
-                                        arch = arch + 'hf'
+                                        if arch is not None:
+                                            arch = arch + 'hf'
                                     if platform is not None and arch is not None:
                                         if abi is not None:
                                             targets.append('%s-%s-%s' % (arch, platform, abi))

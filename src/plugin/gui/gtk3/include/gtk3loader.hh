@@ -17,10 +17,10 @@ public:
     explicit Gtk3Loader(const Plugin::Context& pluginContext);
     ~Gtk3Loader() override;
 
-    void load(const weak< const Resource::IDescription >& script,
+    void load(const weak< const Resource::IDescription >& description,
               Resource::Resource&                         resource) override;
-    void reload(const weak< const Resource::IDescription >& oldScript,
-                const weak< const Resource::IDescription >& newScript,
+    void reload(const weak< const Resource::IDescription >& oldDescription,
+                const weak< const Resource::IDescription >& newDescription,
                 Resource::Resource&                         resource) override;
     void unload(const weak< const Resource::IDescription >& description,
                 Resource::Resource&                         resource) override;

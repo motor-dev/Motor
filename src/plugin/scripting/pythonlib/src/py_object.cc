@@ -171,10 +171,10 @@ PyObject* PyMotorObject::stealValue(PyObject* owner, Meta::Value& value)
     }
 }
 
-PyObject* PyMotorObject::newinst(PyTypeObject* type, PyObject* args, PyObject* kwds)
+PyObject* PyMotorObject::newinst(PyTypeObject* type, PyObject* args, PyObject* kwargs)
 {
     motor_forceuse(args);
-    motor_forceuse(kwds);
+    motor_forceuse(kwargs);
     auto* inst  = static_cast< PyMotorObject* >(type->tp_alloc(type, 0));
     inst->owner = nullptr;
     new(&inst->value) Meta::Value();

@@ -6,7 +6,7 @@
 
 namespace Motor {
 
-PythonScript::PythonScript(const weak< const File >& file) : Script< PythonScript >(file)
+PythonScript::PythonScript(const weak< const File >& script) : Script< PythonScript >(script)
 {
 }
 

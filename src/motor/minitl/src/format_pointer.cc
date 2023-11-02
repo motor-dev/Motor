@@ -8,13 +8,13 @@
 namespace minitl { namespace format_details { namespace pointer_format {
 
 motor_api(MINITL) u32
-    format_arg(char* destination, const void* pointer, const format_options& options)
+    format_arg(char* destination, const void* value, const format_options& options)
 {
     union
     {
         const void* pointer;
         u64         number;
-    } x          = {pointer};
+    } x          = {value};
     u32 result   = options.alternate;
     *destination = '@';
     destination += result;

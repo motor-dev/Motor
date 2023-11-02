@@ -65,17 +65,17 @@ void Node::Visitor::accept(const weak< const Property >& propertyValue)
 }
 
 void Node::Visitor::accept(const weak< const Reference >& referenceValue,
-                           const Value&                   resolvedValue)
+                           const Value&                   referencedValue)
 {
     motor_forceuse(referenceValue);
-    motor_forceuse(resolvedValue);
+    motor_forceuse(referencedValue);
 }
 
 void Node::Visitor::accept(const weak< const Reference >& referenceValue,
-                           const weak< const Node >&      resolvedNode)
+                           const weak< const Node >&      referencedNode)
 {
     motor_forceuse(referenceValue);
-    motor_forceuse(resolvedNode);
+    motor_forceuse(referencedNode);
 }
 
 void Node::Visitor::accept(const weak< const String >& stringValue)

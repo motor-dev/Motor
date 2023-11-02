@@ -29,11 +29,11 @@ ConversionCost IntrospectionHint::calculateConversionTo(const Type& targetType) 
     return m_callInfo.overload->returnType.calculateConversionTo(targetType);
 }
 
-Value IntrospectionHint::call(const ArgInfo parameters[], u32 argumentCount) const
+Value IntrospectionHint::call(const ArgInfo arguments[], u32 argumentCount) const
 {
     return Meta::call< weak< const Node > >(
-        m_method, m_callInfo, {parameters, parameters + m_argumentThis},
-        {parameters + m_argumentThis, parameters + argumentCount});
+        m_method, m_callInfo, {arguments, arguments + m_argumentThis},
+        {arguments + m_argumentThis, arguments + argumentCount});
 }
 
 minitl::raw< const Method > IntrospectionHint::getCall(DbContext& context) const

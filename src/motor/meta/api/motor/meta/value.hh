@@ -44,7 +44,7 @@ private:
         }
     };
     void* unpackAs(const Type& ti, ref< minitl::refcountable >& rptr,
-                   weak< minitl::refcountable >& wptr, minitl::refcountable*& ptr);
+                   weak< minitl::refcountable >& wptr, minitl::refcountable*& obj);
     void  store(const void* src);
 
 public:
@@ -70,7 +70,7 @@ public:
     explicit Value(ByRefType< T > t);
     Value(Type typeinfo, void* location);
     Value(Type typeinfo, const void* location, MakeCopyType);
-    Value(Type typeinfo, const Value& castedFrom);
+    Value(Type typeinfo, const Value& castFrom);
     ~Value();
 
     template < typename T >

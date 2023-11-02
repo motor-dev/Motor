@@ -11,7 +11,7 @@ class motor_api(NETWORK) Socket
 {
 public:
     Socket();
-    ~Socket();
+    ~Socket() = default;
 };
 
 }}  // namespace Motor::Network

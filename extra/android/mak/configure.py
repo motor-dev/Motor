@@ -341,7 +341,7 @@ class AndroidLoader(_Platform):
         else:
             configuration_context.env.DEX = os.path.join(sdk_build_tool_path, 'lib', 'dx.jar')
             configuration_context.env.DEXCREATE = '--dex'
-            configuration_context.env.DEX_TGT_PATTERN = ['--output=%s']
+            configuration_context.env.DEX_TGT_PATTERN = '--output=%s'
             if not os.path.isfile(configuration_context.env.DEX):
                 raise waflib.Errors.WafError('Unable to locate d8.jar/dx.jar')
         configuration_context.find_program('zipalign', var='ZIPALIGN',

@@ -11,11 +11,11 @@ extern "C"
 
 namespace Motor {
 
-MD5 digest(const void* buffer, u64 size)
+MD5 digest(const void* data, u64 size)
 {
     MD5_CTX context;
     MD5Init(&context);
-    MD5Update(&context, (unsigned char*)buffer, motor_checked_numcast< unsigned int >(size));
+    MD5Update(&context, (unsigned char*)data, motor_checked_numcast< unsigned int >(size));
     MD5Final(&context);
     MD5 result = {{0, 0, 0, 0}};
 

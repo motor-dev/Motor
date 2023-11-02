@@ -41,7 +41,10 @@ Value::Value(Type type, void* location) : m_type(type), m_buffer(), m_reference(
     m_buffer.m_ref.m_deallocate = false;
 }
 
-Value::Value(Type type, const Value& castFrom) : m_type(type), m_buffer(), m_reference(false)
+Value::Value(Type typeinfo, const Value& castFrom)
+    : m_type(typeinfo)
+    , m_buffer()
+    , m_reference(false)
 {
     motor_assert_format(m_type.metaclass->isA(castFrom.type().metaclass)
                             || castFrom.type().metaclass->isA(m_type.metaclass),
@@ -75,23 +78,23 @@ Value::~Value()
     }
 }
 
-Value& Value::operator=(const Value& v)
+Value& Value::operator=(const Value& other)
 {
     if(m_reference)
     {
-        if(motor_assert_format(m_type.isA(v.m_type),
+        if(motor_assert_format(m_type.isA(other.m_type),
                                "Value has type {0}; unable to copy from type {1}", m_type,
-                               v.m_type))
+                               other.m_type))
             return *this;
         if(motor_assert(m_type.constness != Type::Constness::Const, "Value is const")) return *this;
         void* mem = memory();
         m_type.destroy(mem);
-        m_type.copy(v.memory(), mem);
+        m_type.copy(other.memory(), mem);
     }
     else
     {
         this->~Value();
-        new((void*)this) Value(v);
+        new((void*)this) Value(other);
     }
     return *this;
 }
