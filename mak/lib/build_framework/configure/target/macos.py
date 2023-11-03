@@ -330,11 +330,11 @@ class Darwin(Platform):
                         if self.match(c, sdk.path, all_sdks) and c.arch == c.ARCHS[a]:
                             try:
                                 obj_node.delete()
-                            except OSError:
+                            except (OSError, KeyError):
                                 pass
                             try:
                                 exe_node.delete()
-                            except OSError:
+                            except (OSError, KeyError):
                                 pass
                             env = dict(os.environ)
                             env['PATH'] = os.path.pathsep.join(sdk_bin_paths + c.directories + [env['PATH']])
