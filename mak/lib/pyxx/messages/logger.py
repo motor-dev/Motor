@@ -3,16 +3,17 @@ import io
 import re
 import argparse
 import glrp
-from typing import Dict, Callable, Tuple, Any, List, Optional
-
-from typing_extensions import ParamSpec, Concatenate
-
-T = ParamSpec('T')
+from typing import Dict, Callable, Tuple, Any, List, Optional, TYPE_CHECKING
 
 
-def diagnostic(func: Callable[Concatenate["Logger", Tuple[int, int], T], Dict[str, Any]]) \
-        -> Callable[Concatenate["Logger", Tuple[int, int], T], None]:
-    def call(self: Logger, position: Tuple[int, int], *args: T.args, **kwargs: T.kwargs) -> None:
+def diagnostic(func: "Callable[Concatenate[Logger, Tuple[int, int], T], Dict[str, Any]]") \
+        -> "Callable[Concatenate[Logger, Tuple[int, int], T], None]":
+    def call(
+            self: "Logger",
+            position: Tuple[int, int],
+            *args: "T.args",
+            **kwargs: "T.kwargs"
+    ) -> None:
         if call in self._expected_diagnostics:
             self._expected_diagnostics.remove(call)
         format_values = func(self, position, *args, **kwargs)
@@ -26,16 +27,16 @@ def diagnostic(func: Callable[Concatenate["Logger", Tuple[int, int], T], Dict[st
 
 def warning(flag_name: str, enabled: bool = False, enabled_in: Optional[List[str]] = None) \
         -> Callable[
-            [Callable[Concatenate["Logger", Tuple[int, int], T], Dict[str, Any]]],
-            Callable[Concatenate["Logger", Tuple[int, int], T], bool]]:
-    def inner(func: Callable[Concatenate["Logger", Tuple[int, int], T], Dict[str, Any]]) \
-            -> Callable[Concatenate["Logger", Tuple[int, int], T], bool]:
+            ["Callable[Concatenate[Logger, Tuple[int, int], T], Dict[str, Any]]"],
+            "Callable[Concatenate[Logger, Tuple[int, int], T], bool]"]:
+    def inner(func: "Callable[Concatenate[Logger, Tuple[int, int], T], Dict[str, Any]]") \
+            -> "Callable[Concatenate[Logger, Tuple[int, int], T], bool]":
 
         def call(
                 self: "Logger",
                 position: Tuple[int, int],
-                *args: T.args,
-                **kw_args: T.kwargs
+                *args: "T.args",
+                **kw_args: "T.kwargs"
         ) -> bool:
 
             if not getattr(self._arguments, flag_name):
@@ -63,11 +64,13 @@ def warning(flag_name: str, enabled: bool = False, enabled_in: Optional[List[str
     return inner
 
 
-def error(func: Callable[Concatenate["Logger", Tuple[int, int], T], Dict[str, Any]]) \
-        -> Callable[Concatenate["Logger", Tuple[int, int], T], None]:
+def error(func: "Callable[Concatenate[Logger, Tuple[int, int], T], Dict[str, Any]]") \
+        -> "Callable[Concatenate[Logger, Tuple[int, int], T], None]":
     def call(
-            self: 'Logger', position: Tuple[int, int], *args: T.args,
-            **kw_args: T.kwargs
+            self: "Logger",
+            position: Tuple[int, int],
+            *args: "T.args",
+            **kw_args: "T.kwargs"
     ) -> None:
         self._error_count += 1
         format_values = func(self, position, *args, **kw_args)
@@ -232,3 +235,9 @@ class Logger(glrp.Logger):
 def c0002(self: Logger, position: Tuple[int, int]) -> Dict[str, Any]:
     """warning treated as error"""
     return locals()
+
+
+if TYPE_CHECKING:
+    from typing_extensions import ParamSpec, Concatenate
+
+    T = ParamSpec('T')
