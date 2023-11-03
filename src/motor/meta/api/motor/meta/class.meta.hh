@@ -22,9 +22,9 @@ class motor_api(META) Class
     friend class Value;
 
 public:
-    [[motor::meta(export = no)]] typedef void (*CopyConstructor)(const void* source,
-                                                                 void*       destination);
-    [[motor::meta(export = no)]] typedef void (*Destructor)(void* object);
+    [[motor::meta(noexport)]] typedef void (*CopyConstructor)(const void* source,
+                                                              void*       destination);
+    [[motor::meta(noexport)]] typedef void (*Destructor)(void* object);
 
 public:
     istring const               name;
@@ -38,9 +38,9 @@ public:
     raw< const Method >         constructor;
 
 public:
-    [[motor::meta(export = no)]] raw< const InterfaceTable > const interfaces;
-    [[motor::meta(export = no)]] const CopyConstructor             copyconstructor;
-    [[motor::meta(export = no)]] const Destructor                  destructor;
+    [[motor::meta(noexport)]] raw< const InterfaceTable > const interfaces;
+    [[motor::meta(noexport)]] const CopyConstructor             copyconstructor;
+    [[motor::meta(noexport)]] const Destructor                  destructor;
 
 public:
     Value getTag(const Type& type) const;
@@ -57,11 +57,11 @@ public:
     static Value          findClass(inamespace name);
 
 public:
-    [[motor::meta(export = no)]] typedef void (*EnumerateCallback)(const Value& v);
-    enum [[motor::meta(export = no)]] EnumerateRecursion {EnumerateOwn, EnumerateRecursive};
-    [[motor::meta(export = no)]] void enumerateObjects(EnumerateRecursion recursion,
-                                                       EnumerateCallback  callback) const;
-    [[motor::meta(export = no)]] bool distance(raw< const Class > other, u16 & result) const;
+    [[motor::meta(noexport)]] typedef void (*EnumerateCallback)(const Value& v);
+    enum [[motor::meta(noexport)]] EnumerateRecursion {EnumerateOwn, EnumerateRecursive};
+    [[motor::meta(noexport)]] void enumerateObjects(EnumerateRecursion recursion,
+                                                    EnumerateCallback  callback) const;
+    [[motor::meta(noexport)]] bool distance(raw< const Class > other, u16 & result) const;
 
 private:  // friend Value
     void copy(const void* src, void* dst) const;

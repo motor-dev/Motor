@@ -20,7 +20,7 @@ protected:
     bool                                                      m_upToDate;
 
 public:
-    class [[motor::meta(export = no)]] Watch : public minitl::refcountable
+    class [[motor::meta(noexport)]] Watch : public minitl::refcountable
     {
     private:
         weak< Folder > m_folder;

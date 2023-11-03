@@ -56,8 +56,8 @@ struct motor_api(META) Type
 
 public:
     template < typename T >
-    bool                                        isA() const;
-    [[motor::meta(export = no)]] ConversionCost calculateConversionTo(const Type& other) const;
+    bool                                     isA() const;
+    [[motor::meta(noexport)]] ConversionCost calculateConversionTo(const Type& other) const;
 
 private:
     void* rawget(const void*) const;
@@ -67,7 +67,7 @@ private:
 
 }}  // namespace Motor::Meta
 
-namespace motor_meta(export = no) Motor { namespace Meta {
+namespace motor_meta(noexport) Motor { namespace Meta {
 
 motor_api(META) bool         operator==(Type t1, Type t2);
 motor_api(META) bool         operator<=(Type t1, Type t2);
@@ -83,6 +83,6 @@ motor_api(META) u32
     format_arg_partial(char* destination, const Type& type, const minitl::format_options& options,
                        u32 reservedLength, u32 maxCapacity);
 
-}}  // namespace motor_meta(export=no)Motor::Meta
+}}  // namespace motor_meta(noexport)Motor::Meta
 
 #endif
