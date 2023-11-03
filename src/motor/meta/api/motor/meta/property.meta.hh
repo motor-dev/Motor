@@ -31,8 +31,8 @@ public:
     Value getTag(raw< const Class > tagType) const;
 
 public:
-    [[motor::meta(export = no)]] const Getter getter;
-    [[motor::meta(export = no)]] const Setter setter;
+    [[motor::meta(noexport)]] const Getter getter;
+    [[motor::meta(noexport)]] const Setter setter;
 };
 
 }}  // namespace Motor::Meta
