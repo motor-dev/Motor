@@ -253,7 +253,7 @@ class Darwin(Platform):
             '    }\n'
             '}\n'
         )
-        obj_node = src_node.change_ext('')
+        obj_node = src_node.change_ext('.o')
         exe_node = src_node.change_ext('')
         all_archs = []
         for compiler in sorted(compilers, key=lambda x: x.name()):
