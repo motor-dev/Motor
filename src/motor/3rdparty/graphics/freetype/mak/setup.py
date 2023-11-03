@@ -2,7 +2,7 @@ import build_framework
 import waflib.Errors
 import waflib.Options
 
-FT_SOURCES = 'https://download.savannah.gnu.org/releases/freetype/freetype-2.10.2.tar.gz'
+FT_SOURCES = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/freetype-2.10.2.tar.gz'
 FT_BINARIES = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/' \
               'freetype-2.10.2-%(platform)s-%(arch)s-%(abi)s.tgz'
 
