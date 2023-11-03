@@ -16,7 +16,7 @@ jobs:
       - run:
           name: Build Android Nougat Clang
           command: |
-            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:android_nougat_7.1-clang-5.0.300080:debug
+            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:android_nougat_7.1-clang-5.0.300080:debug --werror
 
   windows:
     executor:
@@ -30,19 +30,19 @@ jobs:
       - run:
           name: Build Windows MSVC x64
           command: |
-            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_amd64-msvc_x64-14.29:debug --tests
+            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_amd64-msvc_x64-14.29:debug --tests --werror
       - run:
           name: Build Windows MSVC x86
           command: |
-            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_x86-msvc_x86-14.29:debug
+            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_x86-msvc_x86-14.29:debug --werror
       - run:
           name: Build Windows MSVC ARM
           command: |
-            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_armv7a-msvc_arm-14.29:debug
+            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_armv7a-msvc_arm-14.29:debug --werror
       - run:
           name: Build Windows MSVC ARM64
           command: |
-            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_arm64-msvc_arm64-14.29:debug
+            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_arm64-msvc_arm64-14.29:debug --werror
 
   macOS:
     macos:
@@ -54,7 +54,7 @@ jobs:
           command: python3 waf configure
       - run:
           name: Build macOS
-          command: python3 waf build:macos11.3-appleclang-12.0.5:debug
+          command: python3 waf build:macos11.3-appleclang-12.0.5:debug --werror
 
   iOS:
     macos:
@@ -66,13 +66,13 @@ jobs:
           command: python3 waf configure
       - run:
           name: Build iOS
-          command: python3 waf build:iphone14.5-appleclang-12.0.5:debug
+          command: python3 waf build:iphone14.5-appleclang-12.0.5:debug --werror
       - run:
           name: Build iOS Simulator
-          command: python3 waf build:iphonesimulator14.5-appleclang-12.0.5:debug
+          command: python3 waf build:iphonesimulator14.5-appleclang-12.0.5:debug --werror
       - run:
           name: Build watchOS
-          command: python3 waf build:watchos7.4-appleclang-12.0.5:debug
+          command: python3 waf build:watchos7.4-appleclang-12.0.5:debug --werror
 
   linux:
     docker:
@@ -84,76 +84,76 @@ jobs:
           command: python3 waf configure
       - run:
           name: Build GCC Debug
-          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:debug --tests
+          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:debug --tests --werror
       - run:
           name: Build GCC Debug static
-          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:debug --tests --static
+          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:debug --tests --static --werror
       - run:
           name: Build GCC Debug dynamic
-          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:debug --tests --dynamic
+          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:debug --tests --dynamic --werror
       - run:
           name: Build GCC Debug without master
-          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:debug --tests --nomaster
+          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:debug --tests --nomaster --werror
       - run:
           name: Build GCC Profile
-          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:profile --tests
+          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:profile --tests --werror
       - run:
           name: Build GCC Profile static
-          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:profile --tests --static
+          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:profile --tests --static --werror
       - run:
           name: Build GCC Profile dynamic
-          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:profile --tests --dynamic
+          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:profile --tests --dynamic --werror
       - run:
           name: Build GCC Profile without master
-          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:profile --tests --nomaster
+          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:profile --tests --nomaster --werror
       - run:
           name: Build GCC Final
-          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:final --tests
+          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:final --tests --werror
       - run:
           name: Build GCC Final static
-          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:final --tests --static
+          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:final --tests --static --werror
       - run:
           name: Build GCC Final dynamic
-          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:final --tests --dynamic
+          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:final --tests --dynamic --werror
       - run:
           name: Build GCC Final without master
-          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:final --tests --nomaster
+          command: python3 waf build:redhat_linux_amd64-gcc_amd64-12.2.1:final --tests --nomaster --werror
       - run:
           name: Build Clang Debug
-          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:debug --tests
+          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:debug --tests --werror
       - run:
           name: Build Clang Debug static
-          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:debug --tests --static
+          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:debug --tests --static --werror
       - run:
           name: Build Clang Debug dynamic
-          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:debug --tests --dynamic
+          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:debug --tests --dynamic --werror
       - run:
           name: Build Clang Debug without master
-          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:debug --tests --nomaster
+          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:debug --tests --nomaster --werror
       - run:
           name: Build Clang Profile
-          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:profile --tests
+          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:profile --tests --werror
       - run:
           name: Build Clang Profile static
-          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:profile --tests --static
+          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:profile --tests --static --werror
       - run:
           name: Build Clang Profile dynamic
-          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:profile --tests --dynamic
+          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:profile --tests --dynamic --werror
       - run:
           name: Build Clang Profile without master
-          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:profile --tests --nomaster
+          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:profile --tests --nomaster --werror
       - run:
           name: Build Clang Final
-          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:final --tests
+          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:final --tests --werror
       - run:
           name: Build Clang Final static
-          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:final --tests --static
+          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:final --tests --static --werror
       - run:
           name: Build Clang Final dynamic
-          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:final --tests --dynamic
+          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:final --tests --dynamic --werror
       - run:
           name: Build Clang Final without master
-          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:final --tests --nomaster
+          command: python3 waf build:linux_gnu_amd64-clang_amd64-14.0.5:final --tests --nomaster --werror
 
 workflows:
   version: 2
