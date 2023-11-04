@@ -174,7 +174,7 @@ class Darwin(Platform):
         )
         if compiler.arch == 'x86':
             env.append_unique('CFLAGS', ['-msse2'])
-        env.append_unique('CXXFLAGS', ['-msse2'])
+            env.append_unique('CXXFLAGS', ['-msse2'])
         env.env = dict(os.environ)
 
     platform_sdk_re = re.compile(r'.*/Platforms/\w*\.platform/Developer/SDKs/[\.\w]*\.sdk')
