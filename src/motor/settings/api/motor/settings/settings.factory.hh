@@ -119,7 +119,7 @@ const Meta::Method::Overload Settings_RTTIHelper< T >::s_method_get_overloads
 
 template < typename T >
 const Meta::Method Settings_RTTIHelper< T >::s_method
-    = {{motor_class< void >()->methods},
+    = {motor_class< void >()->methods,
        istring("get"),
        {&s_method_get_overloads, &s_method_get_overloads + 1}};
 

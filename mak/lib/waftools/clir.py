@@ -85,7 +85,7 @@ def configure(configuration_context: build_framework.ConfigurationContext) -> No
         v.CLC_CXX_SRC_F = ''
         v.CLC_CXX_TGT_F = ['-o']
         v.CLC_ARCH_ST = ['-arch']
-        v.CLC_FRAMEWORKPATH_ST = ['-F%s']
+        v.CLC_FRAMEWORKPATH_ST = '-F%s'
         v.CLC_FRAMEWORK_ST = ['-framework']
         v.CLC_CPPPATH_ST = ['-I']
         v.CLC_DEFINES_ST = ['-D']

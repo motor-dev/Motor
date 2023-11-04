@@ -153,17 +153,17 @@ def setup(setup_context: build_framework.SetupContext) -> None:
                     'NVCC_CXXFLAGS', ['-gencode', 'arch=compute_{0}{1},code=compute_{0}{1}'.format(*archs[-1])]
                 )
 
-                v.append_value('NVCC_CXXFLAGS', ['-diag-suppress', '2803'])
+                v.append_value('NVCC_CXXFLAGS', ['-Xcudafe', '--diag_suppress=2803'])
                 setup_context.setenv(toolchain)
                 setup_context.env.append_value('check_CUDA_cxxflags', include_paths)
                 setup_context.env.append_value('check_CUDA_linkflags', lib_paths)
                 setup_context.env.append_value('check_CUDA_stlib', ['cudart_static'])
                 setup_context.env.append_value('FEATURES', ['CUDA'])
-                break
-        if cuda_toolchain is not None:
-            setup_context.env.append_value('KERNEL_TOOLCHAINS', [('cuda', cuda_toolchain)])
-            setup_context.env['check_CUDA'] = True
-            setup_context.end_msg(
-                'cuda {} [{}]'.format('.'.join(str(x) for x in version), ', '.join('{}.{}'.format(*a) for a in archs)))
-        else:
-            setup_context.end_msg('not found', color='YELLOW')
+            break
+    if cuda_toolchain is not None:
+        setup_context.env.append_value('KERNEL_TOOLCHAINS', [('cuda', cuda_toolchain)])
+        setup_context.env['check_CUDA'] = True
+        setup_context.end_msg(
+            'cuda {} [{}]'.format('.'.join(str(x) for x in version), ', '.join('{}.{}'.format(*a) for a in archs)))
+    else:
+        setup_context.end_msg('not found', color='YELLOW')
