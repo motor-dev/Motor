@@ -69,7 +69,8 @@ def _check_nvcc(setup_context: build_framework.SetupContext, nvcc: List[str]) \
     try:
         source_node.write(_CUDA_SNIPPET)
         out, err = _run_nvcc(
-            nvcc, setup_context.env.NVCC_CXXFLAGS + ['-v', source_node.abspath(), '-o', dest_node.abspath()]
+            nvcc,
+            setup_context.env.NVCC_CXXFLAGS + ['--std=c++14', '-v', source_node.abspath(), '-o', dest_node.abspath()]
         )
         target_includes = None
         target_libs = None
@@ -79,12 +80,13 @@ def _check_nvcc(setup_context: build_framework.SetupContext, nvcc: List[str]) \
             elif line.startswith('#$ INCLUDES='):
                 target_includes = shlex.split(line.split('=')[1].strip())
         if target_libs is None:
-            raise Exception('could not deduce target path')
+            raise NvccException('could not deduce target path')
         archs = []
         for a in ARCHS:
             try:
                 _run_nvcc(
-                    nvcc, setup_context.env.NVCC_CXXFLAGS + ['-arch', 'compute_{0}{1}'.format(*a), '--version']
+                    nvcc,
+                    setup_context.env.NVCC_CXXFLAGS + ['-std=c++14', '-arch', 'compute_{0}{1}'.format(*a), '--version']
                 )
             except NvccException:
                 pass
