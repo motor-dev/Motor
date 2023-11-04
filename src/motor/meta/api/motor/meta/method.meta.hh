@@ -31,7 +31,7 @@ public:
         static const Value s_noDefaultValue;
 
     public:
-        [[motor::meta(noexport)]] static constexpr raw< const Value > noDefaultValue {
+        [[motor::meta(export = no)]] static constexpr raw< const Value > noDefaultValue {
             &s_noDefaultValue};
     };
     class motor_api(META) Overload
@@ -48,8 +48,8 @@ public:
         Value getTag(raw< const Class > tagType) const;
 
     public:
-        [[motor::meta(noexport)]] Value (*call)(raw< const Method > method, Value* params,
-                                                u32 paramCount);
+        [[motor::meta(export = no)]] Value (*call)(raw< const Method > method, Value* params,
+                                                   u32 paramCount);
     };
 
 public:

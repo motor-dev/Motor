@@ -21,8 +21,8 @@ private:
     void onChanged() override;
 
 public:
-    [[motor::meta(noexport)]] ZipFolder(void* handle, const ipath& path,
-                                        Folder::ScanPolicy scanPolicy = Folder::ScanRecursive);
+    [[motor::meta(export = no)]] ZipFolder(void* handle, const ipath& path,
+                                           Folder::ScanPolicy scanPolicy = Folder::ScanRecursive);
 
 public:
     explicit ZipFolder(const ipath& zippath, Folder::ScanPolicy scanPolicy = Folder::ScanRecursive);
