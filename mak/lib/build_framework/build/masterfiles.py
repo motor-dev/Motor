@@ -7,7 +7,7 @@ import waflib.Task
 import waflib.TaskGen
 import waflib.Utils
 import waflib.Tools.ccroot
-from .build import create_compiled_task, make_bld_node
+from .features import create_compiled_task, make_bld_node
 
 
 @waflib.TaskGen.feature('motor:masterfiles:off', 'motor:masterfiles:folder')

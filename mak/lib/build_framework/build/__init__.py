@@ -7,7 +7,7 @@ import waflib.Options
 import waflib.TaskGen
 from ..options import BuildContext
 from .modules import *
-from .build import create_compiled_task, make_bld_node, apply_source_filter
+from .features import create_compiled_task, make_bld_node, apply_source_filter
 from .host import setup_build_host
 from .target import setup_build_target
 from .compiler import setup_build_compiler
