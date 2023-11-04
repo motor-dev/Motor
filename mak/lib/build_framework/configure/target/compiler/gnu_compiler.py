@@ -213,7 +213,7 @@ class GnuCompiler(Compiler):
                 if line.find('%s version ' % name.lower()) != -1:
                     words = line.split()
                     if 'Apple' in words:
-                        cls.NAMES = ('Apple' + cls.NAMES[0],) + cls.NAMES
+                        names = ('Apple' + cls.NAMES[0],) + cls.NAMES
                     while words[0] != name.lower() and words[1] != 'version':
                         words.pop(0)
                     version = words[2].split('-')[0]
