@@ -26,7 +26,7 @@ def setup_unit_tests(configuration_context: ConfigurationContext) -> None:
         waflib.Tools.c_config.check(
             configuration_context,
             msg='Checking if unit tests can be run on host',
-            features=['check_unit_test', 'c', 'cprogram'],
+            features=['check_unit_test', 'c', 'cprogram', 'cxxtest'],
             fragment='int main() { return 0; }'
         )
     except waflib.Errors.WafError:
