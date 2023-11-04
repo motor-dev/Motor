@@ -104,16 +104,16 @@ def link_framework_test(self: waflib.TaskGen.task_gen) -> None:
     libpath = getattr(self, 'libpath')  # type: List[str]
     includepath = getattr(self, 'includepath')  # type: List[str]
     frameworks = getattr(self, 'frameworks')  # type: List[str]
-    sdk = getattr(self, 'frameworks')  # type: str
+    sdk = getattr(self, 'sdk')  # type: str
     version = getattr(self, 'version')  # type: str
     use = getattr(self, 'use')  # type: List[str]
 
     bld(rule=_write_test_file, target='main.mm', code=code)
     env = self.env.derive()
     env.detach()
+    env.FRAMEWORKPATH_ST = '-F%s'
     env.FRAMEWORK = frameworks
     env.FRAMEWORK_ST = ['-framework']
-    env.append_unique('CXXFLAGS', ['-F%s' % f for f in frameworks])
     if sdk:
         env.append_unique('CXXFLAGS', ['-isysroot', sdk])
         env.append_unique('LINKFLAGS', ['-isysroot', sdk, '-L%s/usr/lib' % sdk])

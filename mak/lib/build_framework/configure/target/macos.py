@@ -311,19 +311,10 @@ class Darwin(Platform):
                                                   path_list=[os.path.dirname(otool)])
                 assert strip is not None
 
-                cflags = []
-                cxxflags = []
-                ldflags = []
-                for libcpp in ('libstdc++-static.a', 'libstdc++.6.dylib', 'libstdc++.tbd'):
-                    if os.path.isfile(os.path.join(sdk.path, 'usr', 'lib', libcpp)):
-                        break
-                else:
-                    sdk_option = '-m%s-version-min=%s' % (self.OS_NAME, '.'.join(os_version_min_libcpp))
-                    cxxflags.append('-stdlib=libc++')
-                    ldflags.append('-stdlib=libc++')
-                cflags.append(sdk_option)
-                cxxflags.append(sdk_option)
-                ldflags.append(sdk_option)
+                sdk_option = '-m%s-version-min=%s' % (self.OS_NAME, '.'.join(os_version_min_libcpp))
+                cflags = [sdk_option]
+                cxxflags = ['-stdlib=libc++', sdk_option]
+                ldflags = ['-stdlib=libc++', sdk_option]
 
                 for a in sdk.archs:
                     for c in compilers:

@@ -178,6 +178,9 @@ class GnuCompiler(Compiler):
                 line = line.strip()
                 if line.startswith('Target: '):
                     target = line[len('Target: '):]
+                    break
+            else:
+                raise waflib.Errors.WafError('error finding compielr target')
         targets = _get_actual_targets(target, extra_args.get('c', []), cls.MULTILIB_ARCH_MAP)
         for t in targets[:]:
             targets.append(t.replace('-unknown', ''))
