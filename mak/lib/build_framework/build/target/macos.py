@@ -19,7 +19,7 @@ def setup_build_macos(build_context: BuildContext) -> None:
     def wrap_class(class_name: str) -> None:
         cls = waflib.Task.classes.get(class_name, None)
         assert cls is not None
-        derived = type(class_name, (cls, ), {})
+        derived = type(class_name, (cls,), {})
 
         def exec_command_clean(self: waflib.Task.Task, cmd: Union[List[str], str], **kw: Any) -> int:
             self.outputs[0].delete(evict=False)
@@ -48,7 +48,7 @@ def set_darwin_shlib_name(self: waflib.TaskGen.task_gen) -> None:
         bin_path = os.path.join(self.env.PREFIX, self.env.DEPLOY_BINDIR)
         plugin_path = os.path.join(self.env.PREFIX, self.env.DEPLOY_PLUGINDIR)
         kernel_path = os.path.join(self.env.PREFIX, self.env.DEPLOY_KERNELDIR)
-        link_task = getattr(self, 'link_task')                                                       # type: waflib.Task.Task
+        link_task = getattr(self, 'link_task')  # type: waflib.Task.Task
         if 'motor:plugin' in self.features:
             rel_path = os.path.relpath(plugin_path, bin_path)
             self.env.append_unique(
@@ -76,13 +76,6 @@ def add_objc_lib(task_gen: waflib.TaskGen.task_gen) -> None:
             '-l',
             'objc',
         ])
-
-
-@waflib.TaskGen.feature('cprogram', 'cxxprogram')
-@waflib.TaskGen.after_method('apply_link')
-@waflib.TaskGen.after_method('process_use')
-def set_osx_program_name(_: waflib.TaskGen.task_gen) -> None:
-    pass
 
 
 @waflib.TaskGen.feature('cprogram', 'cxxprogram')
@@ -118,7 +111,7 @@ class codesign(waflib.Task.Task):
 def _darwin_postlink_task(task_gen: waflib.TaskGen.task_gen, link_task: waflib.Task.Task) -> Optional[waflib.Task.Task]:
     if 'cxxtest' in task_gen.features:
         return None
-    appname = getattr(waflib.Context.g_module, waflib.Context.APPNAME, task_gen.bld.srcnode.name) # type: str
+    appname = getattr(waflib.Context.g_module, waflib.Context.APPNAME, task_gen.bld.srcnode.name)  # type: str
 
     bldnode = task_gen.bld.bldnode
     out_rootdir = os.path.join(appname + '.app.dSYM', 'Contents')
