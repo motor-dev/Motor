@@ -159,11 +159,11 @@ def setup(setup_context: build_framework.SetupContext) -> None:
                 setup_context.env.append_value('check_CUDA_linkflags', lib_paths)
                 setup_context.env.append_value('check_CUDA_stlib', ['cudart_static'])
                 setup_context.env.append_value('FEATURES', ['CUDA'])
-            break
-    if cuda_toolchain is not None:
-        setup_context.env.append_value('KERNEL_TOOLCHAINS', [('cuda', cuda_toolchain)])
-        setup_context.env['check_CUDA'] = True
-        setup_context.end_msg(
-            'cuda {} [{}]'.format('.'.join(str(x) for x in version), ', '.join('{}.{}'.format(*a) for a in archs)))
-    else:
-        setup_context.end_msg('not found', color='YELLOW')
+                break
+        if cuda_toolchain is not None:
+            setup_context.env.append_value('KERNEL_TOOLCHAINS', [('cuda', cuda_toolchain)])
+            setup_context.env['check_CUDA'] = True
+            setup_context.end_msg(
+                'cuda {} [{}]'.format('.'.join(str(x) for x in version), ', '.join('{}.{}'.format(*a) for a in archs)))
+        else:
+            setup_context.end_msg('not found', color='YELLOW')
