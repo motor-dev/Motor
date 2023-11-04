@@ -230,7 +230,8 @@ class GnuCompiler(Compiler):
             if sysroot_index != -1:
                 sysroot = shlex.split(line[sysroot_index:].replace('\\', '\\\\'))[1]
                 sysroot = os.path.normpath(sysroot)
-                names = ('cross_' + cls.NAMES[0],) + cls.NAMES
+                if names is None:
+                    names = ('cross_' + cls.NAMES[0],) + cls.NAMES
 
         best = 0
         for values, a in cls.MACRO_ARCHS:
