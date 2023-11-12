@@ -14,21 +14,21 @@ from ......ast.constraints import TypeRequirement, ErrorRequirement
 @glrp.rule('type-requirement : "typename" "identifier" ";"')
 @cxx20
 def type_requirement_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    return TypeRequirement(TypeSpecifierReference(Reference([Id(p[1].value)])))
+    return TypeRequirement(TypeSpecifierReference(Reference([Id(p[1].position, p[1].value)])))
 
 
 @glrp.rule('type-requirement : "typename" template-name "<" template-argument-list? "#>" ";"')
 @cxx20
 def type_requirement_template_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    return TypeRequirement(TypeSpecifierReference(Reference([TemplateId(p[1], p[3])])))
+    return TypeRequirement(TypeSpecifierReference(Reference([TemplateId(p[4].position[1], p[1], p[3])])))
 
 
 @glrp.rule('type-requirement : "typename" nested-name-specifier template? "identifier" ";"')
 @cxx20
 def type_requirement_nested_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    id = Id(p[3].value)    # type: _Id
+    id = Id(p[3].position, p[3].value)  # type: _Id
     if p[2]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[2].position, id)
     return TypeRequirement(TypeSpecifierReference(Reference(p[1] + [id])))
 
 
@@ -37,9 +37,9 @@ def type_requirement_nested_cxx20(self: CxxParser, p: glrp.Production) -> Any:
 )
 @cxx20
 def type_requirement_nested_template_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    id = TemplateId(p[3], p[5])    # type: _Id
+    id = TemplateId(p[6].position[1], p[3], p[5])  # type: _Id
     if p[2]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[2].position, id)
     return TypeRequirement(TypeSpecifierReference(Reference(p[1] + [id])))
 
 

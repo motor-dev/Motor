@@ -129,31 +129,31 @@ def begin_parameter(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.rule('type-constraint : "identifier"')
 @cxx20
 def type_constraint_identifier_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    return Reference([Id(p[0].value)])
+    return Reference([Id(p[0].position, p[0].value)])
 
 
 @glrp.rule('type-constraint : template-name "<" template-argument-list? "#>"')
 @cxx20
 def type_constraint_template_name_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    return Reference([TemplateId(p[0], p[2])])
+    return Reference([TemplateId(p[3].position[1], p[0], p[2])])
 
 
 # TODO: template not allowed
 @glrp.rule('type-constraint : nested-name-specifier template? "identifier"')
 @cxx20
 def type_constraint_nested_identifier_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    id = Id(p[2].value)  # type: _Id
+    id = Id(p[2].position, p[2].value)  # type: _Id
     if p[1]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[1].position, id)
     return Reference(p[0] + [id])
 
 
 @glrp.rule('type-constraint : nested-name-specifier template? template-name "<" template-argument-list? "#>"')
 @cxx20
 def type_constraint_nested_template_id_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    id = TemplateId(p[2], p[4])  # type: _Id
+    id = TemplateId(p[5].position[1], p[2], p[4])  # type: _Id
     if p[1]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[1].position, id)
     return Reference(p[0] + [id])
 
 

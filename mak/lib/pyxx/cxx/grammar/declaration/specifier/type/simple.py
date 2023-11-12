@@ -33,12 +33,12 @@ from ......ast.reference import TemplateId, Id, Reference, TemplateSpecifierId, 
 from ......ast.type import PrimitiveTypeSpecifiers, TypeSpecifierReference, AmbiguousTypeSpecifier
 
 
-#@glrp.rule('simple-type-specifier-2 : type-name')
+# @glrp.rule('simple-type-specifier-2 : type-name')
 @glrp.rule('simple-type-specifier-2 : "identifier"[split:id_nontemplate]')
 @glrp.rule('simple-type-specifier-cast : "identifier"[split:simple_type_specifier_cast]')
 @cxx98
 def simple_type_specifier_identifier(self: CxxParser, p: glrp.Production) -> Any:
-    return TypeSpecifierReference(Reference([Id(p[0].value)]))
+    return TypeSpecifierReference(Reference([Id(p[0].position, p[0].value)]))
 
 
 @glrp.rule('simple-type-specifier-2 : template-name "<" template-argument-list? "#>"')
@@ -47,7 +47,7 @@ def simple_type_specifier_identifier(self: CxxParser, p: glrp.Production) -> Any
 )
 @cxx98
 def simple_type_specifier_template(self: CxxParser, p: glrp.Production) -> Any:
-    return TypeSpecifierReference(Reference([TemplateId(p[0], p[2])]))
+    return TypeSpecifierReference(Reference([TemplateId(p[3].position[1], p[0], p[2])]))
 
 
 # TODO: template? not allowed
@@ -57,9 +57,9 @@ def simple_type_specifier_template(self: CxxParser, p: glrp.Production) -> Any:
 )
 @cxx98
 def simple_type_specifier_qualified_name(self: CxxParser, p: glrp.Production) -> Any:
-    id = Id(p[2].value)    # type: _Id
+    id = Id(p[2].position, p[2].value)  # type: _Id
     if p[1]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[1].position, id)
     return TypeSpecifierReference(Reference(p[0] + [id]))
 
 
@@ -69,9 +69,9 @@ def simple_type_specifier_qualified_name(self: CxxParser, p: glrp.Production) ->
 )
 @cxx98
 def simple_type_specifier_qualified_template(self: CxxParser, p: glrp.Production) -> Any:
-    id = TemplateId(p[2], p[4])    # type: _Id
+    id = TemplateId(p[5].position[1], p[2], p[4])  # type: _Id
     if p[1]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[1].position, id)
     return TypeSpecifierReference(Reference(p[0] + [id]))
 
 
@@ -212,7 +212,7 @@ def simple_type_specifier_char8_t_cxx20(self: CxxParser, p: glrp.Production) -> 
 @glrp.merge('simple-type-specifier-2')
 @cxx98_merge
 def ambiguous_simple_type_specifier_2(
-    self: CxxParser, ambiguous_template_argument_list_ellipsis: List[Any], ambiguous_expression: List[Any]
+        self: CxxParser, ambiguous_template_argument_list_ellipsis: List[Any], ambiguous_expression: List[Any]
 ) -> Any:
     return AmbiguousTypeSpecifier(ambiguous_template_argument_list_ellipsis + ambiguous_expression)
 
@@ -220,6 +220,6 @@ def ambiguous_simple_type_specifier_2(
 @glrp.merge('simple-type-specifier-cast')
 @cxx98_merge
 def ambiguous_simple_type_specifier_cast(
-    self: CxxParser, ambiguous_template_argument_list_ellipsis: List[Any], ambiguous_expression: List[Any]
+        self: CxxParser, ambiguous_template_argument_list_ellipsis: List[Any], ambiguous_expression: List[Any]
 ) -> Any:
     return AmbiguousTypeSpecifier(ambiguous_template_argument_list_ellipsis + ambiguous_expression)

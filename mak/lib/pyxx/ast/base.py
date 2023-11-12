@@ -1,4 +1,5 @@
 from . import Visitor
+from typing import Tuple
 
 
 class Declaration(object):
@@ -51,6 +52,8 @@ class Declarator(object):
 
 
 class _Id(object):
+    def __init__(self, position: Tuple[int, int]):
+        self.position = position
 
     def accept(self, visitor: Visitor) -> None:
         raise NotImplementedError

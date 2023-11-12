@@ -17,7 +17,7 @@ from ....ast.reference import TemplateId
 @cxx17
 def deduction_guide_explicit_cxx17(self: CxxParser, p: glrp.Production) -> Any:
     if p[5] is not None:
-        return DeductionGuide(p[0], p[3], p[2], p[5], TemplateId(p[8], p[10]))
+        return DeductionGuide(p[0], p[3], p[2], p[5], TemplateId(p[11].position[1], p[8], p[10]))
     else:
         return ErrorDeclaration()
 

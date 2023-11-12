@@ -26,8 +26,10 @@ import glrp
 from typing import Any, List
 from ...parse import CxxParser, cxx98, cxx11, cxx20, cxx98_merge
 from ....ast.template import TemplateDeclaration
-from ....ast.expressions import BinaryExpression, IdExpression, ThisExpression, TypeTraitExpression, NullPtrExpression, ParenthesizedExpression, ErrorExpression
-from ....ast.literals import IntegerLiteral, UserDefinedIntegerLiteral, CharacterLiteral, UserDefinedCharacterLiteral, FloatingLiteral, UserDefinedFloatingLiteral, BooleanLiteral, StringList
+from ....ast.expressions import BinaryExpression, IdExpression, ThisExpression, TypeTraitExpression, NullPtrExpression, \
+    ParenthesizedExpression, ErrorExpression
+from ....ast.literals import IntegerLiteral, UserDefinedIntegerLiteral, CharacterLiteral, UserDefinedCharacterLiteral, \
+    FloatingLiteral, UserDefinedFloatingLiteral, BooleanLiteral, StringList
 from ....ast.reference import Reference, Id, TemplateSpecifierId
 from ....ast.constraints import RequiresClause
 from . import parameter
@@ -41,13 +43,13 @@ from . import guide
 @glrp.rule('"#>" : ">"')
 @cxx98
 def template_bracket(self: CxxParser, p: glrp.Production) -> Any:
-    pass
+    return p[0]
 
 
 @glrp.rule('"#>" : "%>"')
 @cxx11
 def template_bracket_cxx11(self: CxxParser, p: glrp.Production) -> Any:
-    pass
+    return p[0]
 
 
 @glrp.rule('template-declaration : attribute-specifier-seq? begin-declaration template-head declaration')
@@ -261,7 +263,7 @@ def constraint_id_expression_qualified_cxx20(self: CxxParser, p: glrp.Production
 @glrp.rule('constraint-unqualified-id : "identifier"')
 @cxx20
 def constraint_unqualified_id_identifier_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    return Id(p[0].text())
+    return Id(p[0].position, p[0].text())
 
 
 @glrp.rule('constraint-unqualified-id : template-id')
@@ -275,7 +277,7 @@ def constraint_unqualified_id_template_id_cxx20(self: CxxParser, p: glrp.Product
 def constraint_qualified_id_cxx20(self: CxxParser, p: glrp.Production) -> Any:
     id = p[2]
     if p[1]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[1].position, id)
     return p[0] + [id]
 
 
@@ -294,8 +296,8 @@ def identifier_opt_empty(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.merge('template-parameter-list')
 @cxx98_merge
 def ambiguous_template_parameter_list(
-    self: CxxParser, ambiguous_template_parameter_list: List[Any], ambiguous_template_parameter: List[Any],
-    ambiguous_initializer_clause: List[Any], ambiguous_simple_type_specifier_2: List[Any]
+        self: CxxParser, ambiguous_template_parameter_list: List[Any], ambiguous_template_parameter: List[Any],
+        ambiguous_initializer_clause: List[Any], ambiguous_simple_type_specifier_2: List[Any]
 ) -> Any:
     return sum(
         ambiguous_template_parameter_list + ambiguous_template_parameter + ambiguous_initializer_clause +

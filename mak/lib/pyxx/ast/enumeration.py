@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from . import Visitor
 from .base import Attribute, Expression
 from .reference import Reference
@@ -27,11 +27,12 @@ class Enumerator(object):
 class EnumSpecifier(TypeSpecifier):
 
     def __init__(
-            self, name: Optional[Reference], attributes: List[Attribute], is_scoped: bool,
+            self, position: Tuple[int, int], name: Optional[Reference], attributes: List[Attribute], is_scoped: bool,
             base_type: Optional[TypeSpecifierSeq],
             enumerator_list: List[Enumerator]
     ) -> None:
         TypeSpecifier.__init__(self)
+        self.position = position
         self.name = name
         self.attributes = attributes
         self.is_scoped = is_scoped

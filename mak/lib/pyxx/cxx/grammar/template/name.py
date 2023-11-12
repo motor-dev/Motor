@@ -29,13 +29,14 @@ from typing import Any, List
 from ...parse import CxxParser, cxx98, cxx11, cxx98_merge
 from ....ast.reference import Id, TemplateId, Reference, TypenameReference, TemplateSpecifierId, _Id
 from ....ast.type import TypeSpecifierReference
-from ....ast.template import AmbiguousTemplateArgument, TemplateArgumentPackExpand, TemplateArgumentConstant, TemplateArgumentTypeId
+from ....ast.template import AmbiguousTemplateArgument, TemplateArgumentPackExpand, TemplateArgumentConstant, \
+    TemplateArgumentTypeId
 
 
 @glrp.rule('template? : "template"')
 @cxx98
 def template_opt(self: CxxParser, p: glrp.Production) -> Any:
-    return True
+    return p[0]
 
 
 @glrp.rule('template? : ')
@@ -44,11 +45,11 @@ def template_empty_opt(self: CxxParser, p: glrp.Production) -> Any:
     return False
 
 
-#@glrp.rule(
+# @glrp.rule(
 #    'simple-template-id : template-name "<" template-argument-list? "#>"'
-#)
-#@cxx98
-#def simple_template_id(self: CxxParser, p: glrp.Production) -> Any:
+# )
+# @cxx98
+# def simple_template_id(self: CxxParser, p: glrp.Production) -> Any:
 #    # type: (CxxParser, glrp.Production) -> Any
 #    pass
 
@@ -57,19 +58,19 @@ def template_empty_opt(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.rule('template-id : operator-function-id [split:id_template]"<" template-argument-list? "#>"')
 @cxx98
 def template_id(self: CxxParser, p: glrp.Production) -> Any:
-    return TemplateId(p[0], p[2])
+    return TemplateId(p[3].position[1], p[0], p[2])
 
 
 @glrp.rule('template-id : literal-operator-id [split:id_template]"<" template-argument-list? "#>"')
 @cxx11
 def template_literal_id(self: CxxParser, p: glrp.Production) -> Any:
-    return TemplateId(p[0], p[2])
+    return TemplateId(p[3].position[1], p[0], p[2])
 
 
 @glrp.rule('template-name : "identifier" [split:id_template]')
 @cxx98
 def template_name(self: CxxParser, p: glrp.Production) -> Any:
-    return Id(p[0].value)
+    return Id(p[0].position, p[0].value)
 
 
 @glrp.rule('template-argument-list? : template-argument-list')
@@ -136,7 +137,7 @@ def template_argument_constant(self: CxxParser, p: glrp.Production) -> Any:
 
 
 @glrp.rule('template-argument : begin-template-argument-type type-id')
-#@glrp.rule('template-argument : id-expression')
+# @glrp.rule('template-argument : id-expression')
 @cxx98
 def template_argument(self: CxxParser, p: glrp.Production) -> Any:
     return TemplateArgumentTypeId(p[1])
@@ -146,9 +147,9 @@ def template_argument(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.rule('typename-specifier : "typename" nested-name-specifier "template"? "identifier" [split:id_nontemplate]')
 @cxx98
 def typename_specifier(self: CxxParser, p: glrp.Production) -> Any:
-    id = Id(p[3].value)    # type: _Id
+    id = Id(p[3].position, p[3].value)  # type: _Id
     if p[2]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[2].position, id)
     return TypeSpecifierReference(TypenameReference(Reference(p[1] + [id])))
 
 
@@ -157,9 +158,9 @@ def typename_specifier(self: CxxParser, p: glrp.Production) -> Any:
 )
 @cxx98
 def typename_specifier_template(self: CxxParser, p: glrp.Production) -> Any:
-    id = TemplateId(p[3], p[5])    # type: _Id
+    id = TemplateId(p[6].position[1], p[3], p[5])  # type: _Id
     if p[2]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[2].position, id)
     return TypeSpecifierReference(TypenameReference(Reference(p[1] + [id])))
 
 
@@ -173,7 +174,7 @@ def begin_template_argument(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.merge('template-argument')
 @cxx98_merge
 def ambiguous_template_argument(
-    self: CxxParser, template_argument_constant: List[Any], template_argument_type: List[Any]
+        self: CxxParser, template_argument_constant: List[Any], template_argument_type: List[Any]
 ) -> Any:
     return AmbiguousTemplateArgument(template_argument_constant + template_argument_type)
 
@@ -181,8 +182,8 @@ def ambiguous_template_argument(
 @glrp.merge('template-argument-list')
 @cxx98_merge
 def ambiguous_template_argument_list_ellipsis(
-    self: CxxParser, ambiguous_template_argument: List[Any], ambiguous_template_argument_list_ellipsis: List[Any],
-    end_declarator_list: List[Any], continue_declarator_list: List[Any], ambiguous_expression: List[Any]
+        self: CxxParser, ambiguous_template_argument: List[Any], ambiguous_template_argument_list_ellipsis: List[Any],
+        end_declarator_list: List[Any], continue_declarator_list: List[Any], ambiguous_expression: List[Any]
 ) -> Any:
     return sum(
         ambiguous_template_argument + ambiguous_template_argument_list_ellipsis + end_declarator_list +

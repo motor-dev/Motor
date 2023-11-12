@@ -110,10 +110,12 @@ class AmbiguousBaseClause(AbstractBaseClause):
 class ClassSpecifier(TypeSpecifier):
 
     def __init__(
-            self, class_type: str, attribute_list: List[Attribute], name: Optional[Reference], is_final: bool,
-            base_class_list: List[List[BaseSpecifier]], member_list: List[Tuple[AccessSpecifier, List[Declaration]]]
+            self, position: Tuple[int, int], class_type: str, attribute_list: List[Attribute],
+            name: Optional[Reference], is_final: bool, base_class_list: List[List[BaseSpecifier]],
+            member_list: List[Tuple[AccessSpecifier, List[Declaration]]]
     ) -> None:
         TypeSpecifier.__init__(self)
+        self.position = position
         self.is_defining_type_specifier = True
         self.class_type = class_type
         self.attribute_list = attribute_list

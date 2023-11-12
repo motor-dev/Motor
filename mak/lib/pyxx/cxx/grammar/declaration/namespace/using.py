@@ -23,5 +23,5 @@ def using_directive(self: CxxParser, p: glrp.Production) -> Any:
 def using_directive_nested(self: CxxParser, p: glrp.Production) -> Any:
     id = p[6]  # type: _Id
     if p[5]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[5].position, id)
     return UsingDirective(p[0], Reference(p[4] + [id]))

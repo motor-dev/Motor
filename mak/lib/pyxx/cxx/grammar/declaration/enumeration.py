@@ -43,9 +43,10 @@ from ....ast.type import ErrorTypeSpecifier
 from ....ast.declarations import OpaqueEnumDeclaration, ErrorDeclaration
 from ....ast.reference import Reference, Id, TemplateSpecifierId, _Id
 
-#@glrp.rule('enum-name[prec:right,1] : "identifier"')
-#@cxx98
-#def enum_name(self: CxxParser, p: glrp.Production) -> Any:
+
+# @glrp.rule('enum-name[prec:right,1] : "identifier"')
+# @cxx98
+# def enum_name(self: CxxParser, p: glrp.Production) -> Any:
 #    # type: (CxxParser, glrp.Production) -> Any
 #    pass
 
@@ -54,43 +55,45 @@ from ....ast.reference import Reference, Id, TemplateSpecifierId, _Id
 @glrp.rule('enum-specifier : enum-head "{" enumerator-list "," "}"')
 @cxx98
 def enum_specifier(self: CxxParser, p: glrp.Production) -> Any:
-    attributes, enum_is_scoped, name, base = p[0]
+    position, attributes, enum_is_scoped, name, base = p[0]
     if enum_is_scoped is None:
-        return ErrorTypeSpecifier()
+        return ErrorTypeSpecifier(position)
     else:
-        return EnumSpecifier(name, attributes, enum_is_scoped, base, p[2])
+        if name is not None:
+            position = (position[0], name.position[1])
+        return EnumSpecifier(position, name, attributes, enum_is_scoped, base, p[2])
 
 
 @glrp.rule('enum-head : enum-key attribute-specifier-seq? enum-base?')
 @cxx98
 def enum_head_unnamed(self: CxxParser, p: glrp.Production) -> Any:
-    return p[1], p[0], None, p[2]
+    return p[0][0], p[1], p[0][1], None, p[2]
 
 
 @glrp.rule('enum-head : enum-key "#error"')
 @cxx98
 def enum_head_error(self: CxxParser, p: glrp.Production) -> Any:
-    return [], None, None, None
+    return p[0][0], [], None, None, None
 
 
 @glrp.rule('enum-head : enum-key attribute-specifier-seq? enum-head-name enum-base?')
 @cxx98
 def enum_head(self: CxxParser, p: glrp.Production) -> Any:
-    return p[1], p[0], p[2], p[3]
+    return p[0][0], p[1], p[0][1], p[2], p[3]
 
 
 @glrp.rule('enum-head-name : "identifier" [split:id_nontemplate]')
 @cxx98
 def enum_head_name(self: CxxParser, p: glrp.Production) -> Any:
-    return Reference([Id(p[0].value)])
+    return Reference([Id(p[0].position, p[0].value)])
 
 
 @glrp.rule('enum-head-name : nested-name-specifier template? "identifier"[split:id_nontemplate]')
 @cxx98
 def enum_head_name_nested(self: CxxParser, p: glrp.Production) -> Any:
-    id = Id(p[2].value)    # type: _Id
+    id = Id(p[2].position, p[2].value)  # type: _Id
     if p[1]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[1].position, id)
     return Reference(p[0] + [id])
 
 
@@ -114,14 +117,14 @@ def opaque_enum_declaration_error_cxx11(self: CxxParser, p: glrp.Production) -> 
 @glrp.rule('enum-key : "enum"')
 @cxx98
 def enum_key(self: CxxParser, p: glrp.Production) -> Any:
-    return False
+    return p[0].position, False
 
 
 @glrp.rule('enum-key : "enum" "class"')
 @glrp.rule('enum-key : "enum" "struct"')
 @cxx11
 def enum_key_cxx11(self: CxxParser, p: glrp.Production) -> Any:
-    return True
+    return (p[0].position[0], p[1].position[1]), True
 
 
 @glrp.rule('enum-base? : [prec:right,1]')
