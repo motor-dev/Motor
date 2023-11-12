@@ -67,15 +67,15 @@ void ZipFile::Ticket::fillBuffer()
                         "buffer is not long enough to read entire file; "
                         "buffer size is {0}, requires {1} bytes",
                         buffer.byte_count(), total);
-    u8* buffer = this->buffer.begin();
+    u8* targetBuffer = buffer.begin();
     while(!done())
     {
         u32 bytesToRead = motor_checked_numcast< u32 >(total - processed);
-        u32 bytesRead   = unzReadCurrentFile(*m_handle, buffer, bytesToRead);
+        u32 bytesRead   = unzReadCurrentFile(*m_handle, targetBuffer, bytesToRead);
         if(bytesRead > 0)
         {
             processed += bytesRead;
-            buffer += bytesRead;
+            targetBuffer += bytesRead;
         }
         else
         {
