@@ -2,16 +2,12 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <motor/core/environment.hh>
-#include <motor/filesystem/diskfolder.meta.hh>
 #include <luasample.hh>
 
 namespace Motor {
 
 LuaSample::LuaSample(const Plugin::Context& context)
-    : Application(
-        ref< DiskFolder >::create(Arena::game(), Environment::getEnvironment().getDataDirectory()),
-        context.resourceManager, context.scheduler)
+    : Application(context.resourceManager, context.scheduler)
     , m_packageManager(inamespace("plugin.scripting.package"), pluginContext())
     , m_luaManager(inamespace("plugin.scripting.lua"), pluginContext())
     , m_mainPackage(ref< Package >::create(

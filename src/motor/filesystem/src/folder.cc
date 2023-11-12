@@ -116,9 +116,9 @@ weak< Folder > Folder::openFolderNoLock(ipath name)
 void Folder::mount(istring name, ref< Folder > folder)
 {
     ScopedCriticalSection lock(m_lock);
-    for(const auto& folder: m_folders)
+    for(const auto& f: m_folders)
     {
-        if(folder.first == name)
+        if(f.first == name)
         {
             motor_warning_format(Log::fs(), "mounting filesystem hides folder {0}", name);
         }

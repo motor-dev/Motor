@@ -2,16 +2,13 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <motor/filesystem/diskfolder.meta.hh>
 #include <motor/plugin.scripting.package/package.meta.hh>
 #include <editor.hh>
 
 namespace Motor { namespace Editor {
 
 Editor::Editor(const Plugin::Context& context)
-    : Application(
-        ref< DiskFolder >::create(Arena::game(), Environment::getEnvironment().getDataDirectory()),
-        context.resourceManager, context.scheduler)
+    : Application(context.resourceManager, context.scheduler)
     , m_renderer(inamespace("plugin.graphics.GL4"), pluginContext())
     , m_packageManager(inamespace("plugin.scripting.package"), pluginContext())
     , m_luaScripting(inamespace("plugin.scripting.lua"), pluginContext())

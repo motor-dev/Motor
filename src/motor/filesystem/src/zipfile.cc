@@ -56,9 +56,9 @@ void ZipFile::Ticket::fillBuffer()
 
     while(s_fileOffset < offset)
     {
-        u8  buffer[4096];
+        u8  discard[4096];
         i64 bytesToRead = minitl::min< i64 >(4096, offset - s_fileOffset);
-        i64 read        = unzReadCurrentFile(*m_handle, buffer,
+        i64 read        = unzReadCurrentFile(*m_handle, discard,
                                              motor_checked_numcast< unsigned int >(bytesToRead));
         s_fileOffset += read;
     }

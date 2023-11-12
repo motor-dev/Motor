@@ -2,16 +2,12 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <motor/core/environment.hh>
-#include <motor/filesystem/diskfolder.meta.hh>
 #include <gtksample.hh>
 
 namespace Motor {
 
 GtkSample::GtkSample(const Plugin::Context& context)
-    : Application(
-        ref< DiskFolder >::create(Arena::game(), Environment::getEnvironment().getDataDirectory()),
-        context.resourceManager, context.scheduler)
+    : Application(context.resourceManager, context.scheduler)
     , m_packageManager(inamespace("plugin.scripting.package"), pluginContext())
     , m_gtkManager(inamespace("plugin.gui.gtk3"), pluginContext())
     , m_mainPackage(ref< Package >::create(
