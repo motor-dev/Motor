@@ -93,9 +93,9 @@ ref< T >& ref< T >::operator=(ref< T >&& other) noexcept
 {
     if(m_payload && --m_payload->reference_count == 0)
     {
-        allocator& a = m_payload->allocator;
+        allocator& arena = m_payload->arena;
         m_payload->~ref_payload();
-        a.free(m_payload);
+        arena.free(m_payload);
     }
     m_payload       = other.m_payload;
     m_ptr           = other.m_ptr;
@@ -110,9 +110,9 @@ ref< T >& ref< T >::operator=(ref< U >&& other) noexcept
 {
     if(m_payload && --m_payload->reference_count == 0)
     {
-        allocator& a = m_payload->allocator;
+        allocator& arena = m_payload->arena;
         m_payload->~ref_payload();
-        a.free(m_payload);
+        arena.free(m_payload);
     }
     m_payload       = other.m_payload;
     m_ptr           = motor_implicit_cast< T >(other.m_ptr);
@@ -126,9 +126,9 @@ ref< T >::~ref()
 {
     if(m_payload && --m_payload->reference_count == 0)
     {
-        allocator& a = m_payload->allocator;
+        allocator& arena = m_payload->arena;
         m_payload->~ref_payload();
-        a.free(m_payload);
+        arena.free(m_payload);
     }
 }
 
@@ -161,9 +161,9 @@ void ref< T >::clear()
 {
     if(m_payload && --m_payload->reference_count == 0)
     {
-        allocator& a = m_payload->allocator;
+        allocator& arena = m_payload->arena;
         m_payload->~ref_payload();
-        a.free(m_payload);
+        arena.free(m_payload);
     }
     m_payload = nullptr;
     m_ptr     = nullptr;

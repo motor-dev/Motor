@@ -8,13 +8,15 @@
 
 namespace minitl {
 
+class allocator;
+
 namespace details {
 
 struct scoped_payload
 {
-    allocator& allocator;
+    allocator& arena;
 
-    MOTOR_ALWAYS_INLINE explicit scoped_payload(class allocator& allocator) : allocator(allocator)
+    MOTOR_ALWAYS_INLINE explicit scoped_payload(allocator& arena) : arena(arena)
     {
     }
     virtual ~scoped_payload() = default;
@@ -44,8 +46,8 @@ class scoped
         value_wrapper value;
 
         template < typename... ARGS >
-        MOTOR_ALWAYS_INLINE explicit payload(class allocator& allocator, ARGS&&... args)
-            : details::scoped_payload(allocator)
+        MOTOR_ALWAYS_INLINE explicit payload(allocator& arena, ARGS&&... args)
+            : details::scoped_payload(arena)
             , value(minitl::forward< ARGS >(args)...)
         {
         }
