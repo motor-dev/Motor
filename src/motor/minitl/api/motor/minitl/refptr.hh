@@ -9,16 +9,16 @@
 
 namespace minitl {
 
+class allocator;
+
 namespace details {
 
 struct ref_payload
 {
-    allocator& allocator;
+    allocator& arena;
     i_u32      reference_count;
 
-    MOTOR_ALWAYS_INLINE explicit ref_payload(class allocator& allocator)
-        : allocator(allocator)
-        , reference_count({})
+    MOTOR_ALWAYS_INLINE explicit ref_payload(allocator& arena) : arena(arena), reference_count({})
     {
     }
     virtual ~ref_payload() = default;
@@ -48,8 +48,8 @@ class ref
         value_wrapper value;
 
         template < typename... ARGS >
-        MOTOR_ALWAYS_INLINE explicit payload(class allocator& allocator, ARGS&&... args)
-            : details::ref_payload(allocator)
+        MOTOR_ALWAYS_INLINE explicit payload(allocator& arena, ARGS&&... args)
+            : details::ref_payload(arena)
             , value(minitl::forward< ARGS >(args)...)
         {
         }

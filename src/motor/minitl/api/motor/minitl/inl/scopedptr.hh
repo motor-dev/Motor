@@ -27,9 +27,9 @@ scoped< T >::~scoped()
 {
     if(m_payload)
     {
-        allocator& alloc = m_payload->allocator;
+        allocator& arena = m_payload->arena;
         m_payload->~scoped_payload();
-        alloc.free(m_payload);
+        arena.free(m_payload);
     }
 }
 
@@ -46,9 +46,9 @@ scoped< T >& scoped< T >::operator=(scoped&& other) noexcept
 {
     if(m_payload)
     {
-        allocator& alloc = m_payload->allocator;
+        allocator& arena = m_payload->arena;
         m_payload->~scoped_payload();
-        alloc.free(m_payload);
+        arena.free(m_payload);
     }
     m_payload       = other.m_payload;
     m_ptr           = other.m_ptr;
@@ -73,9 +73,9 @@ scoped< T >& scoped< T >::operator=(scoped< U >&& other) noexcept
 {
     if(m_payload)
     {
-        allocator& alloc = m_payload->allocator;
+        allocator& arena = m_payload->arena;
         m_payload->~scoped_payload();
-        alloc.free(m_payload);
+        arena.free(m_payload);
     }
     m_payload       = other.m_payload;
     m_ptr           = motor_implicit_cast< T >(other.m_ptr);
