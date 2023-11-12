@@ -18,8 +18,8 @@ public:
     ~PackageBuilder() override;
 
 public:
-    ref< Nodes::Package > createPackage(const ifilename&                      filename,
-                                        const minitl::allocator::block< u8 >& buffer);
+    scoped< Nodes::Package > createPackage(const ifilename&                      filename,
+                                           const minitl::allocator::block< u8 >& buffer);
 };
 
 }}  // namespace Motor::PackageBuilder

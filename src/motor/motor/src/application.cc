@@ -8,6 +8,7 @@
 #include <motor/core/timer.hh>
 #include <motor/filesystem/folder.meta.hh>
 #include <motor/plugin/plugin.hh>
+#include <motor/scheduler/kernel/ischeduler.hh>
 #include <motor/scheduler/kernel/producerloader.hh>
 #include <motor/scheduler/task/group.hh>
 #include <motor/scheduler/task/method.hh>

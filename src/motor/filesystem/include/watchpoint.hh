@@ -8,7 +8,7 @@
 
 namespace Motor { namespace FileSystem {
 
-class WatchPoint : public minitl::refcountable
+class WatchPoint : public minitl::pointer
 {
     friend class DiskFolder::Watch;
 

@@ -18,13 +18,13 @@ World::World(const ref< ComponentRegistry >&                           registry,
 
 World::~World() = default;
 
-ref< WorldRuntime >
+scoped< WorldRuntime >
 World::createRuntime(weak< const KernelScheduler::ProducerLoader > producerLoader,
                      const Plugin::Context&                        context) const
 {
-    return ref< WorldRuntime >::create(
+    return scoped< WorldRuntime >::create(
         Arena::game(), producerLoader, context, m_products,
-        m_registry->getResource(producerLoader).getRefHandle< ComponentRegistry::Runtime >());
+        m_registry->getResource(producerLoader).getHandle< ComponentRegistry::Runtime >());
 }
 
 }}  // namespace Motor::World

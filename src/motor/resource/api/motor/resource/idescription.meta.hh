@@ -5,7 +5,6 @@
 
 #include <motor/resource/stdafx.h>
 #include <motor/minitl/intrusive_list.hh>
-#include <motor/minitl/refcountable.hh>
 #include <motor/resource/resource.hh>
 
 namespace Motor { namespace Resource {
@@ -14,7 +13,7 @@ class ILoader;
 class ResourceManager;
 
 class motor_api(RESOURCE) IDescription
-    : public minitl::refcountable
+    : public minitl::pointer
     , public minitl::intrusive_list< const IDescription, 2 >::item
 {
     friend class ResourceManager;

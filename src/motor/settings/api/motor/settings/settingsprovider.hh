@@ -15,7 +15,7 @@ template < typename T >
 struct Settings;
 
 class motor_api(SETTINGS) SettingsProvider
-    : public minitl::refcountable
+    : public minitl::pointer
     , public minitl::intrusive_list< SettingsProvider >::item
 {
     friend struct SettingsBase;

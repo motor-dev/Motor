@@ -96,10 +96,10 @@ T Value::as()
 {
     typedef minitl::remove_reference_t< T > REALTYPE;
     Type                                    ti = motor_type< T >();
-    ref< minitl::refcountable >             rptr;
-    weak< minitl::refcountable >            wptr;
-    minitl::refcountable*                   obj;
-    return *(REALTYPE*)unpackAs(ti, rptr, wptr, obj);
+    ref< minitl::pointer >                  rptr;
+    weak< minitl::pointer >                 wptr;
+    minitl::pointer*                        obj;
+    return *static_cast< REALTYPE* >(unpackAs(ti, rptr, wptr, obj));
 }
 
 template <>

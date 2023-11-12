@@ -99,8 +99,8 @@ Value& Value::operator=(const Value& other)
     return *this;
 }
 
-void* Value::unpackAs(const Type& ti, ref< minitl::refcountable >& rptr,
-                      weak< minitl::refcountable >& wptr, minitl::refcountable*& obj)
+void* Value::unpackAs(const Type& ti, ref< minitl::pointer >& rptr, weak< minitl::pointer >& wptr,
+                      minitl::pointer*& obj)
 {
     motor_assert_format(m_type.isA(ti), "Value has type {0}; unable to unbox to type {1}", m_type,
                         ti);
@@ -109,19 +109,19 @@ void* Value::unpackAs(const Type& ti, ref< minitl::refcountable >& rptr,
     {
     case Type::Indirection::RefPtr:
         if(ti.indirection == Type::Indirection::RefPtr) break;
-        rptr = *(ref< minitl::refcountable >*)mem;
+        rptr = *static_cast< ref< minitl::pointer >* >(mem);
         wptr = rptr;
         mem  = (void*)&wptr;
         /* falls through */
     case Type::Indirection::WeakPtr:
         if(ti.indirection == Type::Indirection::WeakPtr) break;
-        wptr = *(weak< minitl::refcountable >*)mem;
+        wptr = *static_cast< weak< minitl::pointer >* >(mem);
         obj  = wptr.operator->();
         mem  = (void*)&obj;
         /* falls through */
     case Type::Indirection::RawPtr:
         if(ti.indirection == Type::Indirection::RawPtr) break;
-        mem = *(void**)mem;
+        mem = *static_cast< void** >(mem);
         /* falls through */
     default: break;
     }

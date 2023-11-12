@@ -4,61 +4,98 @@
 #define MOTOR_MINITL_REFPTR_HH
 
 #include <motor/minitl/stdafx.h>
-#include <motor/minitl/refcountable.hh>
+#include <motor/minitl/pointer.hh>
 #include <motor/minitl/utility.hh>
 
 namespace minitl {
+
+namespace details {
+
+struct ref_payload
+{
+    allocator& allocator;
+    i_u32      reference_count;
+
+    MOTOR_ALWAYS_INLINE explicit ref_payload(class allocator& allocator)
+        : allocator(allocator)
+        , reference_count({})
+    {
+    }
+    virtual ~ref_payload() = default;
+};
+
+}  // namespace details
 
 template < typename T >
 class ref
 {
     template < typename U, typename V >
-    friend ref< U > motor_checked_cast(ref< V > v);
-    friend class refcountable;
+    friend ref< U > motor_checked_cast(const ref< V >& v);
     template < typename U >
     friend class ref;
 
-private:
-    T* m_ptr;
+    struct payload : details::ref_payload
+    {
+        struct value_wrapper
+        {
+            T value;
+            template < typename... ARGS >
+            MOTOR_ALWAYS_INLINE explicit value_wrapper(ARGS&&... args)
+                : value(minitl::forward< ARGS >(args)...)
+            {
+            }
+        };
+        value_wrapper value;
+
+        template < typename... ARGS >
+        MOTOR_ALWAYS_INLINE explicit payload(class allocator& allocator, ARGS&&... args)
+            : details::ref_payload(allocator)
+            , value(minitl::forward< ARGS >(args)...)
+        {
+        }
+        MOTOR_ALWAYS_INLINE ~payload() override = default;
+    };
 
 private:
-    inline void swap(ref& other);
+    details::ref_payload* m_payload;
+    T*                    m_ptr;
 
 private:
-    inline explicit ref(T* value);
-    inline ref(T* value, allocator& deleter);
+    MOTOR_ALWAYS_INLINE void swap(ref& other);
+
+private:
+    MOTOR_ALWAYS_INLINE ref(details::ref_payload* payload, T* value);
 
 public:
-    inline ref();
-    inline ref(const ref& other);
+    MOTOR_ALWAYS_INLINE ref();
+    MOTOR_ALWAYS_INLINE ref(const ref& other);
     template < typename U >
-    inline ref(const ref< U >& other);  // NOLINT(google-explicit-constructor)
+    MOTOR_ALWAYS_INLINE ref(const ref< U >& other);  // NOLINT(google-explicit-constructor)
+    MOTOR_ALWAYS_INLINE ref(ref&& other) noexcept;
     template < typename U >
-    inline explicit ref(scoped< U >&& other) noexcept;
-    inline ref(ref&& other) noexcept;
-    template < typename U >
-    explicit inline ref(ref< U >&& other) noexcept;
+    explicit MOTOR_ALWAYS_INLINE ref(ref< U >&& other) noexcept;
 
-    inline ref& operator=(const ref& other);
+    MOTOR_ALWAYS_INLINE ref& operator=(const ref& other);
     template < typename U >
-    inline ref& operator=(const ref< U >& other);
-    inline ref& operator=(ref&& other) noexcept;
+    MOTOR_ALWAYS_INLINE ref& operator=(const ref< U >& other);
+    MOTOR_ALWAYS_INLINE ref& operator=(ref&& other) noexcept;
     template < typename U >
-    inline ref& operator=(ref< U >&& other) noexcept;
+    MOTOR_ALWAYS_INLINE ref& operator=(ref< U >&& other) noexcept;
 
-    inline ~ref();
+    MOTOR_ALWAYS_INLINE ~ref();
 
     MOTOR_ALWAYS_INLINE T* operator->() const;
-    inline operator const void*() const;  // NOLINT(google-explicit-constructor)
-    inline bool            operator!() const;
-    MOTOR_ALWAYS_INLINE T& operator*();
+    MOTOR_ALWAYS_INLINE operator const void*() const;  // NOLINT(google-explicit-constructor)
+    MOTOR_ALWAYS_INLINE bool operator!() const;
+    MOTOR_ALWAYS_INLINE T&   operator*();
 
     inline void clear();
     template < typename... ARGS >
-    static inline ref< T > create(allocator& allocator, ARGS&&... args)
+    static MOTOR_ALWAYS_INLINE ref< T > create(allocator& allocator, ARGS&&... args)
     {
-        void* mem = allocator.alloc(sizeof(T), motor_alignof(T));
-        return ref< T >(new(mem) T(minitl::forward< ARGS >(args)...), allocator);
+        auto* p = new(allocator.alloc(sizeof(payload)))
+            payload(allocator, minitl::forward< ARGS >(args)...);
+        return ref< T >(p, reinterpret_cast< T* >(&p->value));
     }
 };
 

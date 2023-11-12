@@ -11,7 +11,6 @@
 
 namespace Motor { namespace KernelScheduler {
 
-class IKernelScheduler;
 class ProducerLoader;
 
 }}  // namespace Motor::KernelScheduler
@@ -26,7 +25,7 @@ namespace Motor {
 
 class Folder;
 
-class motor_api(MOTOR) Application : public minitl::refcountable
+class motor_api(MOTOR) Application : public minitl::pointer
 {
 private:
     struct UpdateTask
@@ -37,18 +36,18 @@ private:
     };
 
 private:
-    ref< Folder > const                                 m_dataFolder;
-    weak< Scheduler >                                   m_scheduler;
-    weak< Resource::ResourceManager >                   m_resourceManager;
-    Plugin::Context const                               m_pluginContext;
-    ref< Task::TaskGroup >                              m_updateTask;
-    scoped< KernelScheduler::ProducerLoader > const     m_producerLoader;
-    scoped< World::WorldLoader > const                  m_worldLoader;
-    Plugin::Plugin< KernelScheduler::IKernelScheduler > m_cpuKernelScheduler;
-    minitl::vector< UpdateTask >                        m_tasks;
-    Task::ITask::CallbackConnection                     m_forceContinue;
-    u32                                                 m_resourceLoadingCount;
-    i_bool                                              m_runLoop;
+    ref< Folder > const                             m_dataFolder;
+    weak< Scheduler >                               m_scheduler;
+    weak< Resource::ResourceManager >               m_resourceManager;
+    Plugin::Context const                           m_pluginContext;
+    ref< Task::TaskGroup >                          m_updateTask;
+    scoped< KernelScheduler::ProducerLoader > const m_producerLoader;
+    scoped< World::WorldLoader > const              m_worldLoader;
+    Plugin::Plugin< KernelScheduler::IScheduler >   m_cpuKernelScheduler;
+    minitl::vector< UpdateTask >                    m_tasks;
+    Task::ITask::CallbackConnection                 m_forceContinue;
+    u32                                             m_resourceLoadingCount;
+    i_bool                                          m_runLoop;
 
 private:
     void updateResources();

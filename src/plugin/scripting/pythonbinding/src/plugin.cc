@@ -11,7 +11,7 @@
 #    error PYTHON_LIBRARY must be defined to the library name for this module
 #endif
 
-static minitl::ref< Motor::Python::Context > create(const Motor::Plugin::Context& context)
+static scoped< Motor::Python::Context > create(const Motor::Plugin::Context& context)
 {
     using namespace Motor::Python;
     ref< PythonLibrary > library = loadPython(MOTOR_STRINGIZE(PYTHON_LIBRARY));
@@ -21,7 +21,7 @@ static minitl::ref< Motor::Python::Context > create(const Motor::Plugin::Context
     }
     else
     {
-        return minitl::ref< Context >::create(Motor::Arena::general(), context, library);
+        return scoped< Motor::Python::Context >::create(Motor::Arena::general(), context, library);
     }
 }
 

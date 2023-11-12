@@ -21,7 +21,7 @@ class SubWorld;
 class WorldRuntime : public Resource::ILoader
 {
 private:
-    class SubWorldResource : public minitl::refcountable
+    class SubWorldResource : public minitl::pointer
     {
     public:
         SubWorldResource();

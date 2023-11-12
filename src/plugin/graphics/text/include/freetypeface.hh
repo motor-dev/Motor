@@ -12,7 +12,7 @@ namespace Motor {
 
 class FreetypeLibrary;
 
-class FreetypeFace : public minitl::refcountable
+class FreetypeFace : public minitl::pointer
 {
 public:
     FreetypeFace(const weak< FreetypeLibrary >&        freetype,

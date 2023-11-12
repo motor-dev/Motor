@@ -25,8 +25,8 @@ template < typename R >
 void GPUResourceLoader< R >::load(const weak< const Resource::IDescription >& description,
                                   Resource::Resource&                         resource)
 {
-    ref< IGPUResource > handle = m_renderer->create(motor_checked_cast< const R >(description));
-    resource.setRefHandle(handle);
+    scoped< IGPUResource > handle = m_renderer->create(motor_checked_cast< const R >(description));
+    resource.setHandle(minitl::move(handle));
     m_pending.push_back(*handle.operator->());
 }
 
@@ -35,11 +35,9 @@ void GPUResourceLoader< R >::unload(const weak< const Resource::IDescription >& 
                                     Resource::Resource&                         resource)
 {
     motor_forceuse(description);
-    weak< IGPUResource > gpuResource = resource.getRefHandle< IGPUResource >();
+    scoped< IGPUResource > gpuResource = resource.stealHandle< IGPUResource >();
     gpuResource->m_resource.clear();
-    gpuResource->addref();
-    m_deleted.push_back(gpuResource);
-    resource.clearRefHandle();
+    m_deleted.push_back(minitl::move(gpuResource));
 }
 
 template < typename R >
@@ -47,10 +45,8 @@ void GPUResourceLoader< R >::flush()
 {
     while(!m_deleted.empty())
     {
-        IGPUResource* resource = m_deleted.back().operator->();
+        m_deleted.back()->unload();
         m_deleted.pop_back();
-        resource->unload();
-        resource->decref();
     }
     for(minitl::intrusive_list< IGPUResource >::iterator it = m_pending.begin();
         it != m_pending.end();)

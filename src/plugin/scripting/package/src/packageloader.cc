@@ -20,12 +20,13 @@ minitl::allocator& package()
 
 namespace Motor { namespace PackageManager {
 
-class PackageInstance : public minitl::refcountable
+class PackageInstance : public minitl::pointer
 {
 public:
-    minitl::vector< Meta::Value > values;
+    minitl::vector< Plugin::Plugin< minitl::pointer > > plugins;
+    minitl::vector< Meta::Value >                       values;
 
-    PackageInstance() : values(Arena::package())
+    PackageInstance() : plugins(Arena::package()), values(Arena::package())
     {
     }
 };
@@ -43,7 +44,7 @@ void PackageLoader::unload(const weak< const Resource::IDescription >& /*descrip
                            Resource::Resource& handle)
 {
     {
-        weak< PackageInstance > instance = handle.getRefHandle< PackageInstance >();
+        weak< PackageInstance > instance = handle.getHandle< PackageInstance >();
         if(instance)
         {
             for(auto& value: minitl::reverse_view(instance->values))
@@ -55,9 +56,10 @@ void PackageLoader::unload(const weak< const Resource::IDescription >& /*descrip
                 }
             }
             instance->values.clear();
+            instance->plugins.clear();
         }
     }
-    handle.clearRefHandle();
+    handle.clearHandle();
 }
 
 void PackageLoader::runBuffer(const weak< const Package >& script, Resource::Resource& resource,
@@ -65,7 +67,7 @@ void PackageLoader::runBuffer(const weak< const Package >& script, Resource::Res
 {
     MD5 md5 = digest(buffer);
     motor_info_format(Log::package(), "md5 sum of package: {0}", md5);
-    ref< PackageBuilder::Nodes::Package > package
+    scoped< PackageBuilder::Nodes::Package > package
         = m_packageBuilder->createPackage(script->getScriptName(), buffer);
     for(const auto& message: package->context().messages)
     {
@@ -73,9 +75,9 @@ void PackageLoader::runBuffer(const weak< const Package >& script, Resource::Res
     }
     if(package->success())
     {
-        ref< PackageInstance > instance = ref< PackageInstance >::create(Arena::package());
-        resource.setRefHandle(instance);
-        package->createObjects(m_manager, instance->values);
+        scoped< PackageInstance > instance = scoped< PackageInstance >::create(Arena::package());
+        package->createObjects(m_manager, instance->plugins, instance->values);
+        resource.setHandle(minitl::move(instance));
     }
 }
 
@@ -84,14 +86,18 @@ void PackageLoader::reloadBuffer(const weak< const Package >& script, Resource::
 {
     MD5 md5 = digest(buffer);
     motor_info_format(Log::package(), "md5 sum of package: {0}", md5);
-    ref< PackageBuilder::Nodes::Package > newPackage
+    scoped< PackageBuilder::Nodes::Package > package
         = m_packageBuilder->createPackage(script->getScriptName(), buffer);
-    weak< PackageBuilder::Nodes::Package > oldPackage
-        = resource.getRefHandle< PackageBuilder::Nodes::Package >();
-    newPackage->diffFromPackage(oldPackage, m_manager);
-    oldPackage.clear();
-    resource.clearRefHandle();
-    resource.setRefHandle(newPackage);
+    for(const auto& message: package->context().messages)
+    {
+        Log::package()->log(message.severity, MOTOR_FILE, MOTOR_LINE, message.message.c_str());
+    }
+    if(package->success())
+    {
+        scoped< PackageInstance > instance = scoped< PackageInstance >::create(Arena::package());
+        package->createObjects(m_manager, instance->plugins, instance->values);
+        resource.setHandle(minitl::move(instance));
+    }
 }
 
 }}  // namespace Motor::PackageManager

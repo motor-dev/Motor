@@ -28,7 +28,7 @@ private:
     minitl::vector< weak< const KernelScheduler::IProduct > > m_products;
 
 public:
-    [[motor::meta(noexport)]] ref< WorldRuntime > createRuntime(
+    [[motor::meta(noexport)]] scoped< WorldRuntime > createRuntime(
         weak< const KernelScheduler::ProducerLoader > producerLoader,
         const Plugin::Context&                        context) const;
 

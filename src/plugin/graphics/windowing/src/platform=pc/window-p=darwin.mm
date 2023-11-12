@@ -18,7 +18,7 @@
 
 namespace Motor { namespace Windowing {
 
-class Window::PlatformWindow : public minitl::refcountable
+class Window::PlatformWindow : public minitl::pointer
 {
     friend class Window;
 
@@ -52,13 +52,12 @@ void Window::load(const weak< const Resource::IDescription >& /*renderWindowDesc
 {
     knl::uint2 dimensions
         = knl::uint2 {800, 600};  // motor_checked_cast<const RenderWindow>(resource)->dimensions;
-    m_window.reset(
-        scoped< PlatformWindow >::create(m_renderer->arena(), dimensions._0, dimensions._1));
+    m_window = scoped< PlatformWindow >::create(m_renderer->arena(), dimensions._0, dimensions._1);
 }
 
 void Window::unload()
 {
-    m_window.reset(scoped< PlatformWindow >());
+    m_window = scoped< PlatformWindow >();
 }
 
 void* Window::getWindowHandle() const

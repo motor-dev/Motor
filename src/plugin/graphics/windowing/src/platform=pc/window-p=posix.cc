@@ -12,7 +12,7 @@
 
 namespace Motor { namespace Windowing {
 
-class Window::PlatformWindow : public minitl::refcountable
+class Window::PlatformWindow : public minitl::pointer
 {
     friend class Window;
 
@@ -47,12 +47,12 @@ Window::~Window() = default;
 
 void Window::load(const weak< const Resource::IDescription >& /*renderWindowDescription*/)
 {
-    m_window.reset(
-        scoped< PlatformWindow >::create(m_renderer->arena(),
-                                         motor_checked_cast< const Renderer >(m_renderer)
-                                             ->m_platformRenderer->m_platformData.display,
-                                         motor_checked_cast< const Renderer >(m_renderer)
-                                             ->m_platformRenderer->createWindow(0, 0, 200, 200)));
+    m_window
+        = scoped< PlatformWindow >::create(m_renderer->arena(),
+                                           motor_checked_cast< const Renderer >(m_renderer)
+                                               ->m_platformRenderer->m_platformData.display,
+                                           motor_checked_cast< const Renderer >(m_renderer)
+                                               ->m_platformRenderer->createWindow(0, 0, 200, 200));
     Window* w = this;
     XChangeProperty(
         motor_checked_cast< const Renderer >(m_renderer)
@@ -65,7 +65,7 @@ void Window::load(const weak< const Resource::IDescription >& /*renderWindowDesc
 
 void Window::unload()
 {
-    m_window.reset(scoped< PlatformWindow >());
+    m_window = scoped< PlatformWindow >();
 }
 
 void* Window::getWindowHandle() const

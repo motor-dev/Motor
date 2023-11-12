@@ -33,9 +33,7 @@ void IDescription::load(const weak< ILoader >& loader) const
         auto* resourceBuffer = static_cast< Resource* >(Arena::resource().alloc(bufferSize));
         for(u32 i = 0; i < m_resourceCount - 1; ++i)
         {
-            new(&resourceBuffer[i]) Resource(resources[i]);
-            resources[i].m_handle.id.ptrId = nullptr;
-            resources[i].m_handle.owner    = 0;
+            new(&resourceBuffer[i]) Resource(minitl::move(resources[i]));
             resources[i].~Resource();
         }
         if(m_resourceCount > MaxResourceCount + 1)
@@ -45,7 +43,7 @@ void IDescription::load(const weak< ILoader >& loader) const
         m_resourceCache.m_resourcePointer = resources = resourceBuffer;
     }
     new(&resources[m_resourceCount - 1]) Resource;
-    resources[m_resourceCount - 1].m_handle.owner = loader->m_id;
+    resources[m_resourceCount - 1].m_owner = loader->m_id;
     loader->load(this, resources[m_resourceCount - 1]);
 }
 
@@ -54,12 +52,10 @@ void IDescription::unload(const weak< ILoader >& loader) const
     Resource* resources = getResourceBuffer();
     for(u32 i = 0; i < m_resourceCount; ++i)
     {
-        if(resources[i].m_handle.owner == loader->m_id)
+        if(resources[i].m_owner == loader->m_id)
         {
             loader->unload(this, resources[i]);
-            resources[i]                                     = resources[m_resourceCount - 1];
-            resources[m_resourceCount - 1].m_handle.id.ptrId = nullptr;
-            resources[m_resourceCount - 1].m_handle.owner    = 0;
+            resources[i] = minitl::move(resources[m_resourceCount - 1]);
             resources[m_resourceCount - 1].~Resource();
             --m_resourceCount;
             Resource* newBuffer = getResourceBuffer();
@@ -67,9 +63,7 @@ void IDescription::unload(const weak< ILoader >& loader) const
             {
                 for(u32 j = 0; j < m_resourceCount; ++j)
                 {
-                    new(&newBuffer[j]) Resource(resources[j]);
-                    resources[j].m_handle.id.ptrId = nullptr;
-                    resources[j].m_handle.owner    = 0;
+                    new(&newBuffer[j]) Resource(minitl::move(resources[j]));
                     resources[j].~Resource();
                 }
                 Arena::resource().free(resources);
@@ -85,7 +79,7 @@ Resource& IDescription::getResourceForWriting(const weak< const ILoader >& owner
     Resource* resources = getResourceBuffer();
     for(u32 i = 0; i < m_resourceCount; ++i)
     {
-        if(resources[i].m_handle.owner == owner->m_id)
+        if(resources[i].m_owner == owner->m_id)
         {
             return resources[i];
         }
@@ -98,7 +92,7 @@ const Resource& IDescription::getResource(const weak< const ILoader >& owner) co
     Resource* resources = getResourceBuffer();
     for(u32 i = 0; i < m_resourceCount; ++i)
     {
-        if(resources[i].m_handle.owner == owner->m_id)
+        if(resources[i].m_owner == owner->m_id)
         {
             return resources[i];
         }

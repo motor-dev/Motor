@@ -32,7 +32,7 @@ private:
     minitl::vector< ref< KernelScheduler::IProduct > > m_components;
 
 private:
-    ref< Runtime >
+    scoped< Runtime >
     createRuntime(weak< const KernelScheduler::ProducerLoader > loader) const override;
 
 public:

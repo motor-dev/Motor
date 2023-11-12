@@ -34,14 +34,14 @@ Producer::~Producer() = default;
 
 ref< Task::ITask > Producer::getTask(const weak< const ProducerLoader >& loader) const
 {
-    weak< Runtime > runtime = getResource(loader).getRefHandle< Runtime >();
+    weak< Runtime > runtime = getResource(loader).getHandle< Runtime >();
     return runtime->task;
 }
 
 ref< IParameter > Producer::getParameter(const weak< const ProducerLoader >& loader,
                                          const weak< const IProduct >&       product) const
 {
-    weak< Runtime > runtime = getResource(loader).getRefHandle< Runtime >();
+    weak< Runtime > runtime = getResource(loader).getHandle< Runtime >();
     for(const auto& parameter: runtime->parameters)
     {
         if(parameter.first == product) return parameter.second;

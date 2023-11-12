@@ -44,7 +44,7 @@ static const PIXELFORMATDESCRIPTOR s_pfd
        0,
        0};
 
-class GLRenderer::Context : public minitl::refcountable
+class GLRenderer::Context : public minitl::pointer
 {
     friend class GLRenderer;
 
@@ -177,7 +177,7 @@ GLRenderer::Context::~Context()
     DestroyWindow(m_dummyHwnd);
 }
 
-class GLWindow::Context : public minitl::refcountable
+class GLWindow::Context : public minitl::pointer
 {
     friend class GLWindow;
 
@@ -233,10 +233,9 @@ GLRenderer::~GLRenderer()
 void GLRenderer::attachWindow(const weak< GLWindow >& w) const
 {
     motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
-    HWND wnd = *(HWND*)w->getWindowHandle();
-    w->m_context.reset(scoped< GLWindow::Context >::create(Arena::general(), m_context->m_glContext,
-                                                           wnd, m_context->m_dummyDC,
-                                                           m_context->m_threadId));
+    HWND wnd     = *(HWND*)w->getWindowHandle();
+    w->m_context = scoped< GLWindow::Context >::create(
+        Arena::general(), m_context->m_glContext, wnd, m_context->m_dummyDC, m_context->m_threadId);
     w->setCurrent();
     if(m_context->m_setSwapInterval) (*m_context->m_setSwapInterval)(0);
     w->clearCurrent();
@@ -272,7 +271,7 @@ void GLWindow::unload()
 {
     motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     Window::unload();
-    m_context.reset(scoped< Context >());
+    m_context = scoped< Context >();
 }
 
 void GLWindow::setCurrent() const

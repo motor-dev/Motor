@@ -43,8 +43,8 @@ private:
         {
         }
     };
-    void* unpackAs(const Type& ti, ref< minitl::refcountable >& rptr,
-                   weak< minitl::refcountable >& wptr, minitl::refcountable*& obj);
+    void* unpackAs(const Type& ti, ref< minitl::pointer >& rptr, weak< minitl::pointer >& wptr,
+                   minitl::pointer*& obj);
     void  store(const void* src);
 
 public:

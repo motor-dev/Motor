@@ -12,7 +12,7 @@ namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
 class CodeObject;
 
-class KernelObject : public minitl::refcountable
+class KernelObject : public minitl::pointer
 {
 private:
     cl_kernel m_kernel;

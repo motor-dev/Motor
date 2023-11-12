@@ -8,7 +8,7 @@
 
 namespace Motor { namespace KernelScheduler {
 
-class motor_api(SCHEDULER) IMemoryBuffer : public minitl::refcountable
+class motor_api(SCHEDULER) IMemoryBuffer : public minitl::pointer
 {
 protected:
     weak< const IMemoryHost > const m_host;

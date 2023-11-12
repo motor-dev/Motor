@@ -16,8 +16,8 @@ u32 Type::size() const
     {
     case Indirection::Value: return metaclass->size;
     case Indirection::RawPtr: return sizeof(raw< char >);
-    case Indirection::RefPtr: return sizeof(ref< minitl::refcountable >);
-    case Indirection::WeakPtr: return sizeof(weak< minitl::refcountable >);
+    case Indirection::RefPtr: return sizeof(ref< minitl::pointer >);
+    case Indirection::WeakPtr: return sizeof(weak< minitl::pointer >);
     default: motor_notreached(); return 0;
     }
 }
@@ -28,8 +28,8 @@ void* Type::rawget(const void* data) const
     {
     case Indirection::Value: return (void*)data;
     case Indirection::RawPtr: return *(void**)data;
-    case Indirection::RefPtr: return ((ref< minitl::refcountable >*)data)->operator->();
-    case Indirection::WeakPtr: return ((weak< minitl::refcountable >*)data)->operator->();
+    case Indirection::RefPtr: return ((ref< minitl::pointer >*)data)->operator->();
+    case Indirection::WeakPtr: return ((weak< minitl::pointer >*)data)->operator->();
     default: motor_notreached(); return nullptr;
     }
 }
@@ -41,12 +41,12 @@ void Type::copy(const void* source, void* dest) const
     case Indirection::Value: return metaclass->copy(source, dest);
     case Indirection::RawPtr: memcpy(dest, source, sizeof(void*)); return;
     case Indirection::RefPtr:
-        new(dest) const ref< const minitl::refcountable >(
-            *(const ref< const minitl::refcountable >*)source);
+        new(dest) const ref< const minitl::pointer >(
+            *static_cast< const ref< const minitl::pointer >* >(source));
         return;
     case Indirection::WeakPtr:
-        new(dest) const weak< const minitl::refcountable >(
-            *(const weak< const minitl::refcountable >*)source);
+        new(dest) const weak< const minitl::pointer >(
+            *static_cast< const weak< const minitl::pointer >* >(source));
         return;
     default: motor_notreached(); return;
     }
@@ -58,8 +58,8 @@ void Type::destroy(void* ptr) const
     {
     case Indirection::Value: return metaclass->destroy(ptr);
     case Indirection::RawPtr: return;
-    case Indirection::RefPtr: ((ref< const minitl::refcountable >*)ptr)->~ref(); return;
-    case Indirection::WeakPtr: ((weak< const minitl::refcountable >*)ptr)->~weak(); return;
+    case Indirection::RefPtr: static_cast< ref< const minitl::pointer >* >(ptr)->~ref(); return;
+    case Indirection::WeakPtr: static_cast< weak< const minitl::pointer >* >(ptr)->~weak(); return;
     default: motor_notreached(); return;
     }
 }

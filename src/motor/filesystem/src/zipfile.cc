@@ -6,8 +6,8 @@
 
 namespace Motor {
 
-ZipFile::ZipFile(void* handle, const ifilename& filename, const unz_file_info& info,
-                 const unz_file_pos& filePos)
+ZipFile::ZipFile(const ref< ZipFolder::Handle >& handle, const ifilename& filename,
+                 const unz_file_info& info, const unz_file_pos& filePos)
     : File(filename, u64(info.uncompressed_size), u64(info.dosDate))
     , m_handle(handle)
     , m_filePos(filePos)
@@ -17,47 +17,64 @@ ZipFile::ZipFile(void* handle, const ifilename& filename, const unz_file_info& i
 
 ZipFile::~ZipFile() = default;
 
-void ZipFile::doFillBuffer(const weak< File::Ticket >& ticket) const
+ref< File::Ticket > ZipFile::doBeginOperation(minitl::allocator& ticketArena,
+                                              minitl::allocator& dataArena, const void* data,
+                                              u32 size, i64 offset, bool text) const
+{
+    return ref< Ticket >::create(ticketArena, m_filename, m_handle, m_filePos, dataArena, offset,
+                                 size, text, data);
+}
+
+ZipFile::Ticket::Ticket(const ifilename& filename, const ref< ZipFolder::Handle >& handle,
+                        const unz_file_pos& filePos, minitl::allocator& arena, i64 offset, u32 size,
+                        bool text, const void* data)
+    : File::Ticket(arena, offset, size, text, data)
+    , m_filename(filename)
+    , m_handle(handle)
+    , m_filePos(filePos)
+{
+}
+
+void ZipFile::Ticket::fillBuffer()
 {
     /* state of the previous read */
     static const unz_file_pos* s_currentFile = nullptr;
     static i64                 s_fileOffset  = 0;
     unz_file_pos               filePos       = m_filePos;
 
-    motor_assert(ticket->file == this, "trying to read wrong file");
-    if(s_currentFile != &m_filePos || s_fileOffset > ticket->offset)
+    if(s_currentFile != &m_filePos || s_fileOffset > offset)
     {
         s_currentFile = &m_filePos;
         s_fileOffset  = 0;
-        unzCloseCurrentFile(m_handle);
-        int result = unzGoToFilePos(m_handle, &filePos);
+        unzCloseCurrentFile(*m_handle);
+        int result = unzGoToFilePos(*m_handle, &filePos);
         motor_assert_format(result == UNZ_OK, "could not go to file {0}", m_filename);
-        result = unzOpenCurrentFile(m_handle);
+        result = unzOpenCurrentFile(*m_handle);
         motor_assert_format(result == UNZ_OK, "could not open file {0}", m_filename);
         motor_forceuse(result);
     }
 
-    while(s_fileOffset < ticket->offset)
+    while(s_fileOffset < offset)
     {
         u8  buffer[4096];
-        i64 bytesToRead = minitl::min< i64 >(4096, ticket->offset - s_fileOffset);
-        i64 read        = unzReadCurrentFile(m_handle, buffer,
+        i64 bytesToRead = minitl::min< i64 >(4096, offset - s_fileOffset);
+        i64 read        = unzReadCurrentFile(*m_handle, buffer,
                                              motor_checked_numcast< unsigned int >(bytesToRead));
         s_fileOffset += read;
     }
 
-    motor_assert_format(ticket->buffer.byte_count() > ticket->total,
+    motor_assert_format(buffer.byte_count() > total,
                         "buffer is not long enough to read entire file; "
                         "buffer size is {0}, requires {1} bytes",
-                        ticket->buffer.byte_count(), ticket->total);
-    u8* buffer = ticket->buffer.begin();
-    while(!ticket->done())
+                        buffer.byte_count(), total);
+    u8* buffer = this->buffer.begin();
+    while(!done())
     {
-        u32 bytesToRead = motor_checked_numcast< u32 >(ticket->total - ticket->processed);
-        u32 bytesRead   = unzReadCurrentFile(m_handle, buffer, bytesToRead);
+        u32 bytesToRead = motor_checked_numcast< u32 >(total - processed);
+        u32 bytesRead   = unzReadCurrentFile(*m_handle, buffer, bytesToRead);
         if(bytesRead > 0)
         {
-            ticket->processed += bytesRead;
+            processed += bytesRead;
             buffer += bytesRead;
         }
         else
@@ -71,9 +88,8 @@ void ZipFile::doFillBuffer(const weak< File::Ticket >& ticket) const
     s_currentFile = nullptr;
 }
 
-void ZipFile::doWriteBuffer(const weak< Ticket >& ticket) const
+void ZipFile::Ticket::writeBuffer()
 {
-    motor_forceuse(ticket);
     motor_notreached();
 }
 

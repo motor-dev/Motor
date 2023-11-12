@@ -12,14 +12,11 @@ class ref;
 template < typename T >
 class weak;
 
+template < typename U >
+inline U* motor_implicit_cast(U* value);
+
 template < typename U, typename T >
 inline U* motor_checked_cast(T* value);
-
-template < typename U, typename T >
-inline ref< U > motor_checked_cast(ref< T > value);
-
-template < typename U, typename T >
-inline weak< U > motor_checked_cast(weak< T > value);
 
 template < typename U, typename T >
 inline U motor_function_cast(T value);

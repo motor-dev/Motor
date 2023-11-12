@@ -15,11 +15,29 @@ PosixFile::PosixFile(const ifilename& filename, u64 size, time_t modifiedTime)
 
 PosixFile::~PosixFile() = default;
 
-void PosixFile::doFillBuffer(const weak< File::Ticket >& ticket) const
+void PosixFile::refresh(u64 size, time_t modifiedTime)
+{
+    File::refresh(size, modifiedTime);
+}
+
+ref< File::Ticket > PosixFile::doBeginOperation(minitl::allocator& ticketArena,
+                                                minitl::allocator& dataArena, const void* data,
+                                                u32 size, i64 offset, bool text) const
+{
+    return ref< Ticket >::create(ticketArena, m_filename, dataArena, offset, size, text, data);
+}
+
+PosixFile::Ticket::Ticket(const ifilename& filename, minitl::allocator& arena, i64 offset, u32 size,
+                          bool text, const void* data)
+    : File::Ticket(arena, offset, size, text, data)
+    , m_filename(filename)
+{
+}
+
+void PosixFile::Ticket::fillBuffer()
 {
     static const int g_bufferSize = 1024;
 
-    motor_assert(ticket->file == this, "trying to read wrong file");
     ifilename::Filename pathname = m_filename.str();
     FILE*               f        = fopen(pathname.name, "rb");
     if(!f)
@@ -28,46 +46,43 @@ void PosixFile::doFillBuffer(const weak< File::Ticket >& ticket) const
         motor_forceuse(errorMessage);
         motor_error_format(Log::fs(), "file {0} could not be opened: ({1}) {2}", m_filename, errno,
                            errorMessage);
-        ticket->error.set(true);
+        error.set(true);
     }
     else
     {
-        if(ticket->offset > 0)
+        if(offset > 0)
         {
-            fseek(f, (long)ticket->offset, SEEK_SET);
+            fseek(f, (long)offset, SEEK_SET);
         }
-        else if(ticket->offset < 0)
+        else if(offset < 0)
         {
-            fseek(f, (long)ticket->offset + 1, SEEK_END);
+            fseek(f, (long)offset + 1, SEEK_END);
         }
-        u8* data = ticket->buffer.data();
-        for(ticket->processed.set(0); !ticket->done();)
+        u8* data = buffer.data();
+        for(processed.set(0); !done();)
         {
-            size_t read
-                = (ticket->processed + g_bufferSize > ticket->total)
-                      ? fread(data, 1,
-                              motor_checked_numcast< u32 >(ticket->total - ticket->processed), f)
-                      : fread(data, 1, g_bufferSize, f);
-            ticket->processed += (u32)read;
+            size_t read = (processed + g_bufferSize > total)
+                              ? fread(data, 1, motor_checked_numcast< u32 >(total - processed), f)
+                              : fread(data, 1, g_bufferSize, f);
+            processed += (u32)read;
             data += read;
             if(read == 0)
             {
                 motor_error_format(
                     Log::fs(),
                     "reached premature end of file in {0} after reading {1} bytes (offset {2})",
-                    m_filename, ticket->processed, ticket->total);
-                ticket->error.set(true);
+                    m_filename, processed, total);
+                error.set(true);
             }
         }
         fclose(f);
     }
 }
 
-void PosixFile::doWriteBuffer(const weak< Ticket >& ticket) const
+void PosixFile::Ticket::writeBuffer()
 {
     static const int g_bufferSize = 1024;
 
-    motor_assert(ticket->file == this, "trying to write to wrong file");
     ifilename::Filename pathname = m_filename.str();
     FILE*               f        = fopen(pathname.name, "ab");
     if(!f)
@@ -76,27 +91,26 @@ void PosixFile::doWriteBuffer(const weak< Ticket >& ticket) const
         motor_forceuse(errorMessage);
         motor_error_format(Log::fs(), "file {0} could not be opened: ({1}) {2}", m_filename, errno,
                            errorMessage);
-        ticket->error.set(true);
+        error.set(true);
     }
     else
     {
-        if(ticket->offset > 0)
+        if(offset > 0)
         {
-            fseek(f, (long)ticket->offset, SEEK_SET);
+            fseek(f, (long)offset, SEEK_SET);
         }
-        else if(ticket->offset < 0)
+        else if(offset < 0)
         {
-            fseek(f, (long)ticket->offset + 1, SEEK_END);
+            fseek(f, (long)offset + 1, SEEK_END);
         }
-        u8* data = ticket->buffer.data();
-        for(ticket->processed.set(0); !ticket->done();)
+        u8* data = buffer.data();
+        for(processed.set(0); !done();)
         {
             size_t written
-                = (ticket->processed + g_bufferSize > ticket->total)
-                      ? fwrite(data, 1,
-                               motor_checked_numcast< u32 >(ticket->total - ticket->processed), f)
+                = (processed + g_bufferSize > total)
+                      ? fwrite(data, 1, motor_checked_numcast< u32 >(total - processed), f)
                       : fwrite(data, 1, g_bufferSize, f);
-            ticket->processed += (u32)written;
+            processed += (u32)written;
             data += written;
             if(written == 0)
             {
@@ -106,18 +120,13 @@ void PosixFile::doWriteBuffer(const weak< Ticket >& ticket) const
                     Log::fs(),
                     "could not write part of the buffer to file {0}; failed after processing "
                     "{1} bytes out of {2} ({3})",
-                    m_filename, ticket->processed, ticket->total, errorMessage);
-                ticket->error.set(true);
+                    m_filename, processed, total, errorMessage);
+                error.set(true);
             }
         }
     }
     fflush(f);
     fclose(f);
-}
-
-void PosixFile::refresh(u64 size, time_t modifiedTime)
-{
-    File::refresh(size, modifiedTime);
 }
 
 }  // namespace Motor

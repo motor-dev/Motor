@@ -4,7 +4,6 @@
 #define MOTOR_RESOURCE_RESOURCE_HH
 
 #include <motor/resource/stdafx.h>
-#include <motor/resource/handle.meta.hh>
 
 namespace Motor { namespace Resource {
 
@@ -13,24 +12,29 @@ struct motor_api(RESOURCE) Resource
     friend class IDescription;
 
 private:
-    Handle m_handle;
+    scoped< minitl::pointer > m_handle;
+    u32                       m_owner;
 
 private:
     Resource();
-    Resource(const Resource& other);
-    Resource& operator=(const Resource& other);
-
-    minitl::refcountable* getRefHandleInternal() const;
+    Resource(Resource && other) = default;
 
 public:
     ~Resource();
+    Resource& operator=(const Resource& other) = delete;
+    Resource& operator=(Resource&& other)      = default;
 
-    void setRefHandle(const ref< minitl::refcountable >& handle);
-    void clearRefHandle();
+    void setHandle(scoped< minitl::pointer > && handle);
+    void clearHandle();
     template < typename T >
-    weak< T > getRefHandle() const
+    weak< T > getHandle() const
     {
-        return motor_checked_cast< T >(getRefHandleInternal());
+        return motor_checked_cast< T >(weak< minitl::pointer >(m_handle));
+    }
+    template < typename T >
+    scoped< T > stealHandle()
+    {
+        return motor_checked_cast< T >(minitl::move(m_handle));
     }
 
     static Resource& null();

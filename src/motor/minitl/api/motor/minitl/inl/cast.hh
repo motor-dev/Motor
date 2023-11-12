@@ -8,30 +8,20 @@
 
 #include <motor/minitl/assert.hh>
 #include <motor/minitl/features.hh>
-#include <motor/minitl/refptr.hh>
-#include <motor/minitl/weakptr.hh>
 
 namespace minitl {
+
+template < typename U >
+inline U* motor_implicit_cast(U* value)
+{
+    return value;
+}
 
 template < typename U, typename T >
 inline U* motor_checked_cast(T* value)
 {
     motor_assert(!value || dynamic_cast< U* >(value), "invalid cast");
     return static_cast< U* >(value);
-}
-
-template < typename U, typename T >
-inline ref< U > motor_checked_cast(ref< T > value)
-{
-    motor_assert(!value || dynamic_cast< U* >(value.operator->()), "invalid cast");
-    return ref< U >(static_cast< U* >(value.operator->()));
-}
-
-template < typename U, typename T >
-inline weak< U > motor_checked_cast(weak< T > value)
-{
-    motor_assert(!value || dynamic_cast< U* >(value.operator->()), "invalid cast");
-    return weak< U >(static_cast< U* >(value.operator->()));
 }
 
 template < typename U, typename T >

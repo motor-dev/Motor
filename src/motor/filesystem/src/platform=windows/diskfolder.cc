@@ -117,10 +117,10 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                     u64 size = data.nFileSizeHigh;
                     size <<= 32;
                     size += data.nFileSizeLow;
-                    ref< Win32File > newFile
-                        = ref< Win32File >::create(Arena::filesystem(), m_path + ifilename(name),
-                                                   size, getTimeStamp(data.ftLastWriteTime));
-                    m_files.emplace_back(name, newFile);
+                    scoped< Win32File > newFile
+                        = scoped< Win32File >::create(Arena::filesystem(), m_path + ifilename(name),
+                                                      size, getTimeStamp(data.ftLastWriteTime));
+                    m_files.emplace_back(name, minitl::move(newFile));
                 }
             } while(FindNextFile(h, &data));
             FindClose(h);
@@ -154,17 +154,18 @@ weak< File > DiskFolder::createFile(const istring& name)
             return {};
         }
         FindClose(h);
-        ref< File > result = ref< Win32File >::create(Arena::filesystem(), m_path + ifilename(name),
-                                                      0, getTimeStamp(data.ftLastWriteTime));
+        scoped< File > file = scoped< Win32File >::create(
+            Arena::filesystem(), m_path + ifilename(name), 0, getTimeStamp(data.ftLastWriteTime));
+        weak< File > result = file;
         for(auto& m_file: m_files)
         {
             if(m_file.first == name)
             {
-                m_file.second = result;
+                m_file.second = minitl::move(file);
                 return result;
             }
         }
-        m_files.push_back(minitl::make_tuple(name, result));
+        m_files.emplace_back(name, minitl::move(file));
         return result;
     }
 }
@@ -223,10 +224,10 @@ void DiskFolder::onChanged()
                         u64 size = data.nFileSizeHigh;
                         size <<= 32;
                         size += data.nFileSizeLow;
-                        ref< Win32File > newFile = ref< Win32File >::create(
+                        scoped< Win32File > newFile = scoped< Win32File >::create(
                             Arena::filesystem(), m_path + ifilename(name), size,
                             getTimeStamp(data.ftLastWriteTime));
-                        m_files.emplace_back(name, newFile);
+                        m_files.emplace_back(name, minitl::move(newFile));
                     }
                 }
             } while(FindNextFile(h, &data));

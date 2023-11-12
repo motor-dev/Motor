@@ -13,7 +13,7 @@ namespace Motor { namespace World {
 class motor_api(WORLD) ComponentRegistry : public KernelScheduler::Producer
 {
 private:
-    ref< KernelScheduler::Producer::Runtime > createRuntime(
+    scoped< KernelScheduler::Producer::Runtime > createRuntime(
         weak< const KernelScheduler::ProducerLoader > loader) const override;
 
 public:

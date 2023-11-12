@@ -19,7 +19,7 @@ private:
 
 private:
     weak< Task::ITask >                           m_loopTask;
-    minitl::vector< ref< WorldResource > >        m_worlds;
+    minitl::vector< weak< WorldResource > >       m_worlds;
     weak< const KernelScheduler::ProducerLoader > m_producerLoader;
     Plugin::Context                               m_pluginContext;
     u32                                           m_worldCount;

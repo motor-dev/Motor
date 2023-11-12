@@ -43,7 +43,7 @@ namespace Motor { namespace Plugin {
     minitl::intrusive_list< Motor::Plugin::IPluginHook > g_pluginHooks_##id;                       \
     }                                                                                              \
     MOTOR_PLUGIN_EXPORT                                                                            \
-    minitl::refcountable* motor_createPlugin(const ::Motor::Plugin::Context& context)              \
+    minitl::pointer* motor_createPlugin(const ::Motor::Plugin::Context& context)                   \
     {                                                                                              \
         for(minitl::intrusive_list< Motor::Plugin::IPluginHook >::iterator it                      \
             = Motor::g_pluginHooks_##id.begin();                                                   \
@@ -52,7 +52,7 @@ namespace Motor { namespace Plugin {
         return 0;                                                                                  \
     }                                                                                              \
     MOTOR_PLUGIN_EXPORT void motor_destroyPlugin(                                                  \
-        minitl::refcountable* cls, const weak< Motor::Resource::ResourceManager >& manager)        \
+        minitl::pointer* cls, const weak< Motor::Resource::ResourceManager >& manager)             \
     {                                                                                              \
         motor_forceuse(cls);                                                                       \
         for(minitl::intrusive_list< Motor::Plugin::IPluginHook >::iterator it                      \
@@ -81,20 +81,19 @@ namespace Motor { namespace Plugin {
     minitl::intrusive_list< Motor::Plugin::IPluginHook > g_pluginHooks_##id;                       \
     }                                                                                              \
     MOTOR_PLUGIN_EXPORT                                                                            \
-    minitl::refcountable* motor_createPlugin(const ::Motor::Plugin::Context& context)              \
+    void motor_createPlugin(scoped< minitl::pointer >&      result,                                \
+                            const ::Motor::Plugin::Context& context)                               \
     {                                                                                              \
         for(minitl::intrusive_list< Motor::Plugin::IPluginHook >::iterator it                      \
             = Motor::g_pluginHooks_##id.begin();                                                   \
             it != Motor::g_pluginHooks_##id.end(); ++it)                                           \
             it->onload(context);                                                                   \
-        ref< minitl::refcountable > r = (*(create))(context);                                      \
-        if(r) r->addref();                                                                         \
-        return r.operator->();                                                                     \
+        result = (*(create))(context);                                                             \
     }                                                                                              \
     MOTOR_PLUGIN_EXPORT void motor_destroyPlugin(                                                  \
-        minitl::refcountable* cls, const weak< Motor::Resource::ResourceManager >& manager)        \
+        scoped< minitl::pointer >&& cls, const weak< Motor::Resource::ResourceManager >& manager)  \
     {                                                                                              \
-        if(cls) cls->decref();                                                                     \
+        cls = scoped< minitl::pointer >();                                                         \
         for(minitl::intrusive_list< Motor::Plugin::IPluginHook >::iterator it                      \
             = Motor::g_pluginHooks_##id.begin();                                                   \
             it != Motor::g_pluginHooks_##id.end(); ++it)                                           \
@@ -116,9 +115,9 @@ namespace Motor { namespace Plugin {
     MOTOR_PLUGIN_REGISTER_NAMED_1(MOTOR_PROJECTNAME, MOTOR_PROJECTID, create)
 
 #define MOTOR_PLUGIN_REGISTER_2(klass, project)                                                    \
-    static ref< klass > create(const Motor::Plugin::Context& context)                              \
+    static scoped< minitl::pointer > create(const Motor::Plugin::Context& context)                 \
     {                                                                                              \
-        return ref< klass >::create(Motor::Arena::game(), context);                                \
+        return scoped< klass >::create(Motor::Arena::game(), context);                             \
     }                                                                                              \
     MOTOR_PLUGIN_REGISTER_CREATE(&create)
 
@@ -127,11 +126,9 @@ namespace Motor { namespace Plugin {
 #define MOTOR_PLUGIN_REGISTER(klass) MOTOR_PLUGIN_REGISTER_1(klass, MOTOR_PROJECTID)
 
 template < typename T >
-Plugin< T >::Plugin()
-    : m_name("")
-    , m_dynamicObject()
-    , m_interface(0)
-    , m_refCount(new(Arena::general()) i_u32(i_u32::create(1)))
+Plugin< T >::Plugin() : m_name("")
+                      , m_dynamicObject()
+                      , m_interface()
 {
 }
 
@@ -139,8 +136,7 @@ template < typename T >
 Plugin< T >::Plugin(const inamespace& pluginName, PreloadType /*preload*/)
     : m_name(pluginName)
     , m_dynamicObject(new(Arena::general()) DynamicObject(pluginName, ipath("plugin")))
-    , m_interface(0)
-    , m_refCount(new(Arena::general()) i_u32(i_u32::create(1)))
+    , m_interface()
 {
 }
 
@@ -149,63 +145,51 @@ Plugin< T >::Plugin(const inamespace& pluginName, const Context& context)
     : m_name(pluginName)
     , m_resourceManager(context.resourceManager)
     , m_dynamicObject(new(Arena::general()) DynamicObject(pluginName, ipath("plugin")))
-    , m_interface(0)
-    , m_refCount(new(Arena::general()) i_u32(i_u32::create(1)))
+    , m_interface()
 {
     if(*m_dynamicObject)
     {
-        CreateFunction* create
-            = m_dynamicObject->getSymbol< CreateFunction >(istring("motor_createPlugin"));
+        auto* create = m_dynamicObject->getSymbol< CreateFunction >(istring("motor_createPlugin"));
         if(motor_assert(create, "could not load method motor_createPlugin")) return;
-        m_interface = (*create)(context);
+        (*create)(m_interface, context);
     }
+}
+
+template < typename T >
+Plugin< T >::Plugin(Plugin&& other) noexcept
+    : m_name(minitl::move(other.m_name))
+    , m_resourceManager(minitl::move(other.m_resourceManager))
+    , m_dynamicObject(other.m_dynamicObject)
+    , m_interface(minitl::move(other.m_interface))
+{
+    other.m_dynamicObject = nullptr;
 }
 
 template < typename T >
 Plugin< T >::~Plugin()
 {
-    if(--*m_refCount == 0)
+    if(m_interface)
     {
-        if(m_interface)
-        {
-            DestroyFunction* destroy
-                = m_dynamicObject->getSymbol< DestroyFunction >(istring("motor_destroyPlugin"));
-            motor_assert(destroy, "could not load method motor_destroyPlugin");
-            (*destroy)(m_interface, m_resourceManager);
-        }
-        if(m_dynamicObject)
-        {
-            m_dynamicObject->~DynamicObject();
-            Arena::general().free(m_dynamicObject);
-        }
-        Arena::general().free(m_refCount);
+        auto* destroy
+            = m_dynamicObject->getSymbol< DestroyFunction >(istring("motor_destroyPlugin"));
+        motor_assert(destroy, "could not load method motor_destroyPlugin");
+        (*destroy)(minitl::move(m_interface), m_resourceManager);
+    }
+    if(m_dynamicObject)
+    {
+        m_dynamicObject->~DynamicObject();
+        Arena::general().free(m_dynamicObject);
     }
 }
-
 template < typename T >
-Plugin< T >::Plugin(const Plugin& other)
-    : m_name(other.m_name)
-    , m_dynamicObject(other.m_dynamicObject)
-    , m_interface(other.m_interface)
-    , m_refCount(other.m_refCount)
+Plugin< T >& Plugin< T >::operator=(Plugin&& other) noexcept
 {
-    ++*m_refCount;
-}
-
-template < typename T >
-Plugin< T >& Plugin< T >::operator=(Plugin other)
-{
-    other.swap(*this);
+    m_name                = minitl::move(other.m_name);
+    m_resourceManager     = minitl::move(other.m_resourceManager);
+    m_dynamicObject       = other.m_dynamicObject;
+    other.m_dynamicObject = nullptr;
+    m_interface           = minitl::move(other.m_interface);
     return *this;
-}
-
-template < typename T >
-void Plugin< T >::swap(Plugin& other)
-{
-    minitl::swap(m_name, other.m_name);
-    minitl::swap(m_dynamicObject, other.m_dynamicObject);
-    minitl::swap(m_interface, other.m_interface);
-    minitl::swap(m_refCount, other.m_refCount);
 }
 
 template < typename T >

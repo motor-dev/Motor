@@ -59,10 +59,10 @@ void IOContext::processRequests(IORequest* head)
                 ticket->buffer.realloc(ticket->total);
             }
             ticket->processed.set(0);
-            ticket->file->fillBuffer(ticket);
+            ticket->fillBuffer();
         }
         break;
-    case File::Ticket::Write: ticket->file->writeBuffer(ticket); break;
+    case File::Ticket::Write: ticket->writeBuffer(); break;
     default: motor_error_format(Log::fs(), "unknown IO request: {0}", int(ticket->action)); break;
     }
 }
@@ -99,7 +99,7 @@ void IOContext::begin()
 {
     if(++s_contextUseCount == 1)
     {
-        s_context.reset(scoped< IOContext >::create(Arena::filesystem()));
+        s_context = scoped< IOContext >::create(Arena::filesystem());
     }
 }
 
@@ -107,7 +107,7 @@ void IOContext::end()
 {
     if(--s_contextUseCount == 0)
     {
-        s_context.reset(scoped< IOContext >());
+        s_context = scoped< IOContext >();
     }
 }
 

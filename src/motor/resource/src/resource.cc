@@ -6,21 +6,15 @@
 
 namespace Motor { namespace Resource {
 
-static const Handle s_nullHandle = {{nullptr}, 0};
-
-Resource::Resource() : m_handle(s_nullHandle)
+Resource::Resource() : m_handle(), m_owner(0)
 {
 }
 
 Resource::~Resource()
 {
-    motor_assert(m_handle.id.intId == 0,
+    motor_assert(m_handle == nullptr,
                  "resource handle destroyed but hasn't been properly unloaded");
 }
-
-Resource::Resource(const Resource& other) = default;
-
-Resource& Resource::operator=(const Resource& other) = default;
 
 Resource& Resource::null()
 {
@@ -28,32 +22,16 @@ Resource& Resource::null()
     return s_nullResource;
 }
 
-void Resource::setRefHandle(const ref< minitl::refcountable >& handle)
+void Resource::setHandle(scoped< minitl::pointer >&& handle)
 {
-    motor_assert(m_handle.id.ptrId == nullptr,
-                 "setRefHandle called but handle already has a value; use "
-                 "clearRefHandle before calling setRefHandle");
-    minitl::refcountable* object = handle.operator->();
-    if(object)
-    {
-        object->addref();
-        m_handle.id.ptrId = object;
-    }
+    motor_assert(m_handle == nullptr, "setRefHandle called but handle already has a value; use "
+                                      "clearRefHandle before calling setRefHandle");
+    m_handle = minitl::move(handle);
 }
 
-void Resource::clearRefHandle()
+void Resource::clearHandle()
 {
-    auto* object = (minitl::refcountable*)m_handle.id.ptrId;
-    if(object)
-    {
-        object->decref();
-        m_handle.id.ptrId = nullptr;
-    }
-}
-
-minitl::refcountable* Resource::getRefHandleInternal() const
-{
-    return (minitl::refcountable*)m_handle.id.ptrId;
+    m_handle = scoped< minitl::pointer >();
 }
 
 }}  // namespace Motor::Resource

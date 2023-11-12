@@ -43,12 +43,12 @@ private:
     inamespace                        m_name;
     weak< Resource::ResourceManager > m_resourceManager;
     DynamicObject*                    m_dynamicObject;
-    Interface*                        m_interface;
-    i_u32*                            m_refCount;
+    scoped< minitl::pointer >         m_interface;
 
 private:
-    typedef Interface*(CreateFunction)(const Context& context);
-    typedef void(DestroyFunction)(Interface* instance, weak< Resource::ResourceManager > manager);
+    typedef void(CreateFunction)(minitl::scoped< minitl::pointer >& result, const Context& context);
+    typedef void(DestroyFunction)(minitl::scoped< minitl::pointer >&& interface,
+                                  weak< Resource::ResourceManager >   manager);
     typedef const Meta::Class*(GetPluginNamespace)();
 
 public:
@@ -58,20 +58,24 @@ public:
     };
 
 public:
+    Plugin(const Plugin& other)            = delete;
+    Plugin& operator=(const Plugin& other) = delete;
+
+public:
     Plugin();
     Plugin(const inamespace& pluginName, PreloadType preload);
     Plugin(const inamespace& pluginName, const Context& context);
-    Plugin(const Plugin& other);
+    Plugin(Plugin&& other) noexcept;
     ~Plugin();
-    Plugin& operator=(Plugin other);
+    Plugin& operator=(Plugin&& other) noexcept;
 
     Interface* operator->()
     {
-        return m_interface;
+        return motor_checked_cast< Interface >(m_interface.operator->());
     }
     const Interface* operator->() const
     {
-        return m_interface;
+        return motor_checked_cast< const Interface >(m_interface.operator->());
     }
     operator const void*() const  // NOLINT(google-explicit-constructor)
     {
@@ -87,8 +91,6 @@ public:
     {
         return m_name;
     }
-
-    void swap(Plugin& other);
 };
 
 }  // namespace Plugin
