@@ -64,7 +64,7 @@ void WorldLoader::load(const weak< const Resource::IDescription >& worldDescript
     weak< const World >     world   = motor_checked_cast< const World >(worldDescription);
     scoped< WorldResource > runtime = scoped< WorldResource >::create(
         Arena::resource(), m_producerLoader, m_pluginContext, world, m_loopTask);
-    m_worlds.push_back(runtime);
+    m_worlds.emplace_back(runtime);
     resource.setHandle(minitl::move(runtime));
 }
 

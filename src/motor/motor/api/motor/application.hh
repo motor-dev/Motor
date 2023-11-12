@@ -66,7 +66,7 @@ protected:
         return m_pluginContext;
     }
     Application(const weak< Resource::ResourceManager >& resourceManager,
-                const weak< Scheduler >& scheduler, ipath dataSubDirectory = ipath());
+                const weak< Scheduler >& scheduler, const ipath& dataSubDirectory = ipath());
 
     weak< Task::ITask > applicationUpdateTask() const
     {
