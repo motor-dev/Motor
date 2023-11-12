@@ -199,7 +199,7 @@ class Logger(glrp.Logger):
         self._out_file.write(self._diagnostics_format.format(**locals()))
         for i, (text, original_text) in enumerate(zip(context[:-1], original_context[:-1])):
             self._out_file.write(
-                '%s%5d \u2502%s%s' % (self.COLOR_LIST['CYAN'], line + i, text, self.COLOR_LIST['NORMAL']))
+                '%s%5d \u2502%s%s' % (self.COLOR_LIST['CYAN'], line + i, self.COLOR_LIST['NORMAL'], text))
             range_highlight_start = replace_tab(' ', ' ', ' ', ' ',
                                                 re.sub(r'[^ \t]', ' ', original_text[:column - 1]))
             range_highlight_end = replace_tab('~', '~', '~', '~',
@@ -211,7 +211,7 @@ class Logger(glrp.Logger):
             )
             column = 1
         self._out_file.write('%s%5d \u2502%s%s' % (
-            self.COLOR_LIST['CYAN'], line + len(context) - 1, context[-1], self.COLOR_LIST['NORMAL']))
+            self.COLOR_LIST['CYAN'], line + len(context) - 1, self.COLOR_LIST['NORMAL'], context[-1]))
         range_highlight_start = replace_tab(' ', ' ', ' ', ' ',
                                             re.sub(r'[^ \t]', ' ', original_context[-1][:column - 1]))
         range_highlight_end = replace_tab('~', '~', '~', '~',

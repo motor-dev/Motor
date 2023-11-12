@@ -33,8 +33,8 @@ def using_declaration_nested_until_cxx17(self: CxxParser, p: glrp.Production) ->
     # using :: unqualified-id ; is covered here
     id = p[6]
     if p[5]:
-        id = TemplateSpecifierId(id)
-    reference = Reference(p[4] + [id]) # type: AbstractReference
+        id = TemplateSpecifierId(p[5].position, id)
+    reference = Reference(p[4] + [id])  # type: AbstractReference
     if p[3]:
         reference = TypenameReference(reference)
     return UsingDeclaration(p[0], [reference])
@@ -60,7 +60,7 @@ def using_declarator_list_last_cxx17(self: CxxParser, p: glrp.Production) -> Any
 @cxx17
 def using_declarator_list_cxx17(self: CxxParser, p: glrp.Production) -> Any:
     result = p[0]
-    reference = p[2]   # type: AbstractReference
+    reference = p[2]  # type: AbstractReference
     if p[3]:
         reference = PackExpandReference(reference)
     result.append(reference)
@@ -72,8 +72,8 @@ def using_declarator_list_cxx17(self: CxxParser, p: glrp.Production) -> Any:
 def using_declarator_cxx17(self: CxxParser, p: glrp.Production) -> Any:
     id = p[3]
     if p[2]:
-        id = TemplateSpecifierId(id)
-    reference = Reference(p[1] + [id]) # type: AbstractReference
+        id = TemplateSpecifierId(p[2].position, id)
+    reference = Reference(p[1] + [id])  # type: AbstractReference
     if p[0]:
         reference = TypenameReference(reference)
     return reference

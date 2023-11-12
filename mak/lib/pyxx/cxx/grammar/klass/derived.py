@@ -25,7 +25,8 @@ access-specifier:
 import glrp
 from typing import Any, List
 from ...parse import CxxParser, cxx98, cxx11, cxx98_merge
-from ....ast.klass import BaseSpecifier, AccessSpecifierDefault, AccessSpecifierPublic, AccessSpecifierProtected, AccessSpecifierPrivate, AccessSpecifierMacro
+from ....ast.klass import BaseSpecifier, AccessSpecifierDefault, AccessSpecifierPublic, AccessSpecifierProtected, \
+    AccessSpecifierPrivate, AccessSpecifierMacro
 from ....ast.reference import TemplateId, Id, Reference, TemplateSpecifierId, _Id
 from ....ast.type import TypeSpecifierReference
 
@@ -78,32 +79,32 @@ def base_specifier_access_specifier(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.rule('class-or-decltype[split:class_or_decltype] : "identifier"')
 @cxx98
 def class_or_decltype(self: CxxParser, p: glrp.Production) -> Any:
-    return TypeSpecifierReference(Reference([Id(p[0].value)]))
+    return TypeSpecifierReference(Reference([Id(p[0].position, p[0].value)]))
 
 
 @glrp.rule('class-or-decltype : template-name "<" template-argument-list? "#>"')
 @cxx98
 def class_or_decltype_template(self: CxxParser, p: glrp.Production) -> Any:
-    return TypeSpecifierReference(Reference([TemplateId(p[0], p[2])]))
+    return TypeSpecifierReference(Reference([TemplateId(p[3].position[1], p[0], p[2])]))
 
 
 @glrp.rule('class-or-decltype : nested-name-specifier template? identifier')
 @cxx98
 def class_or_decltype_nested(self: CxxParser, p: glrp.Production) -> Any:
-    id = Id(p[2].value)    # type: _Id
+    id = Id(p[2].position, p[2].value)  # type: _Id
     if p[1]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[1].position, id)
     return TypeSpecifierReference(Reference(p[0] + [id]))
 
 
 @glrp.rule('class-or-decltype : nested-name-specifier template? template-name "<" template-argument-list? "#>"')
 # TODO: already covered above
-#@glrp.rule('class-or-decltype : nested-name-specifier template? simple-template-id')
+# @glrp.rule('class-or-decltype : nested-name-specifier template? simple-template-id')
 @cxx98
 def class_or_decltype_nested_template(self: CxxParser, p: glrp.Production) -> Any:
-    id = TemplateId(p[2], p[4])    # type: _Id
+    id = TemplateId(p[5].position[1], p[2], p[4])  # type: _Id
     if p[1]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[1].position, id)
     return TypeSpecifierReference(Reference(p[0] + [id]))
 
 
@@ -169,6 +170,6 @@ def virtual_opt(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.merge('base-specifier-list')
 @cxx98_merge
 def ambiguous_base_specifier_list(
-    self: CxxParser, ambiguous_base_specifier_list: List[Any], ambiguous_template_argument_list_ellipsis: List[Any]
+        self: CxxParser, ambiguous_base_specifier_list: List[Any], ambiguous_template_argument_list_ellipsis: List[Any]
 ) -> Any:
     return sum(ambiguous_base_specifier_list + ambiguous_template_argument_list_ellipsis, [])

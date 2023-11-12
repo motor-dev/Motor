@@ -2,7 +2,7 @@
 namespace-alias:
     identifier
 
-s:
+namespace-alias-definition:
     namespace identifier = qualified-namespace-specifier ;
 
 qualified-namespace-specifier:
@@ -15,9 +15,10 @@ from ....parse import CxxParser, cxx98
 from .....ast.declarations import NamespaceAliasDeclaration
 from .....ast.reference import Reference, TemplateSpecifierId
 
-#@glrp.rule('namespace-alias : "identifier"')
-#@cxx98
-#def namespace_alias(self: CxxParser, p: glrp.Production) -> Any:
+
+# @glrp.rule('namespace-alias : "identifier"')
+# @cxx98
+# def namespace_alias(self: CxxParser, p: glrp.Production) -> Any:
 #    # type: (CxxParser, glrp.Production) -> Any
 #    pass
 
@@ -42,5 +43,5 @@ def qualified_namespace_specifier(self: CxxParser, p: glrp.Production) -> Any:
 def qualified_namespace_specifier_nested(self: CxxParser, p: glrp.Production) -> Any:
     id = p[2]
     if p[1]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[1].position, id)
     return Reference(p[0] + [id])

@@ -131,11 +131,13 @@ class AliasDeclaration(Declaration):
 class NamespaceDeclaration(Declaration):
 
     def __init__(
-            self, attribute_specifier_seq: List[Attribute], attribute_specifier_seq_namespace: List[Attribute],
+            self, position: Tuple[int, int], attribute_specifier_seq: List[Attribute],
+            attribute_specifier_seq_namespace: List[Attribute],
             attribute_specifier_seq_namespace_identifier: List[Attribute],
             inline: bool, nested_name: List[Tuple[bool, str]], namespace_name: Optional[str],
             declaration_seq: List[Declaration]
     ) -> None:
+        self.position = position
         self.attributes = attribute_specifier_seq
         self.attributes_namespace = attribute_specifier_seq_namespace + attribute_specifier_seq_namespace_identifier
         self.inline = inline

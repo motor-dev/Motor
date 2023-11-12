@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from . import Visitor
 from .base import TypeId, TemplateArgument, _Id
 
@@ -13,6 +13,7 @@ class Reference(AbstractReference):
 
     def __init__(self, name_list: List[_Id]) -> None:
         self.name_list = name_list
+        self.position = (name_list[0].position[0], name_list[-1].position[1])
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_reference(self)
@@ -51,7 +52,8 @@ class PackExpandReference(AbstractReference):
 
 class TemplateSpecifierId(_Id):
 
-    def __init__(self, identifier: _Id) -> None:
+    def __init__(self, position: Tuple[int, int], identifier: _Id) -> None:
+        _Id.__init__(self, (position[0], identifier.position[1]))
         self.id = identifier
 
     def accept(self, visitor: Visitor) -> None:
@@ -63,13 +65,17 @@ class TemplateSpecifierId(_Id):
 
 class RootId(_Id):
 
+    def __init__(self, position: Tuple[int, int]) -> None:
+        _Id.__init__(self, position)
+
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_root_id(self)
 
 
 class Id(_Id):
 
-    def __init__(self, name: str) -> None:
+    def __init__(self, position: Tuple[int, int], name: str) -> None:
+        _Id.__init__(self, position)
         self.name = name
 
     def accept(self, visitor: Visitor) -> None:
@@ -113,7 +119,13 @@ class AmbiguousTemplateArgumentList(AbstractTemplateArgumentList):
 
 class TemplateId(_Id):
 
-    def __init__(self, identifier: _Id, template_arguments: List[List["TemplateArgument"]]) -> None:
+    def __init__(
+            self,
+            closing_position: int,
+            identifier: _Id,
+            template_arguments: List[List["TemplateArgument"]]
+    ) -> None:
+        _Id.__init__(self, (identifier.position[0], closing_position))
         self.id = identifier
         if len(template_arguments) == 0:
             self.template_arguments = None  # type: Optional[AbstractTemplateArgumentList]
@@ -137,16 +149,21 @@ class TemplateId(_Id):
 
 class DestructorId(_Id):
 
-    def __init__(self, identifier: _Id) -> None:
+    def __init__(self, position: Tuple[int, int], identifier: _Id) -> None:
+        _Id.__init__(self, (position[0], identifier.position[1]))
         self.id = identifier
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_destructor_id(self)
 
+    def accept_id(self, visitor: Visitor) -> None:
+        self.id.accept(visitor)
+
 
 class OperatorId(_Id):
 
-    def __init__(self, operator: str) -> None:
+    def __init__(self, position: Tuple[int, int], operator: str) -> None:
+        _Id.__init__(self, position)
         self.operator = operator
 
     def accept(self, visitor: Visitor) -> None:
@@ -155,7 +172,8 @@ class OperatorId(_Id):
 
 class ConversionOperatorId(_Id):
 
-    def __init__(self, conversion_type: TypeId) -> None:
+    def __init__(self, position: Tuple[int, int], conversion_type: TypeId) -> None:
+        _Id.__init__(self, position)
         self.conversion_type = conversion_type
 
     def accept(self, visitor: Visitor) -> None:
@@ -167,7 +185,8 @@ class ConversionOperatorId(_Id):
 
 class LiteralOperatorId(_Id):
 
-    def __init__(self, literal_operator: str) -> None:
+    def __init__(self, position: Tuple[int, int], literal_operator: str) -> None:
+        _Id.__init__(self, position)
         self.literal_operator = literal_operator
 
     def accept(self, visitor: Visitor) -> None:

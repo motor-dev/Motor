@@ -33,10 +33,10 @@ from .....ast.reference import Id
 
 
 @glrp.rule('namespace-name : "identifier"')
-#lass-head-name@glrp.rule('namespace-name : namespace-alias')
+# @glrp.rule('namespace-name : namespace-alias')
 @cxx98
 def namespace_name(self: CxxParser, p: glrp.Production) -> Any:
-    return Id(p[0].value)
+    return Id(p[0].position, p[0].value)
 
 
 @glrp.rule('namespace-definition : named-namespace-definition')
@@ -74,7 +74,8 @@ def error_namespace_definition_cxx11(self: CxxParser, p: glrp.Production) -> Any
 )
 @cxx98
 def named_namespace_definition(self: CxxParser, p: glrp.Production) -> Any:
-    return NamespaceDeclaration(p[0], p[3], p[5], False, [], p[4].value, p[7])
+    position = p[2].position[0], p[4].position[1]
+    return NamespaceDeclaration(position, p[0], p[3], p[5], False, [], p[4].value, p[7])
 
 
 # amendment: attribute-specifier-seq? to simplify grammar.
@@ -83,7 +84,8 @@ def named_namespace_definition(self: CxxParser, p: glrp.Production) -> Any:
 )
 @cxx11
 def named_namespace_definition_cxx11(self: CxxParser, p: glrp.Production) -> Any:
-    return NamespaceDeclaration(p[0], p[5], p[7], True, [], p[6].value, p[9])
+    position = p[3].position[0], p[6].position[1]
+    return NamespaceDeclaration(position, p[0], p[5], p[7], True, [], p[6].value, p[9])
 
 
 # amendment: attribute-specifier-seq? to simplify grammar.
@@ -92,7 +94,8 @@ def named_namespace_definition_cxx11(self: CxxParser, p: glrp.Production) -> Any
 )
 @cxx98
 def unnamed_namespace_definition(self: CxxParser, p: glrp.Production) -> Any:
-    return NamespaceDeclaration(p[0], p[3], [], False, [], None, p[5])
+    position = p[2].position
+    return NamespaceDeclaration(position, p[0], p[3], [], False, [], None, p[5])
 
 
 # amendment: attribute-specifier-seq? to simplify grammar.
@@ -101,7 +104,8 @@ def unnamed_namespace_definition(self: CxxParser, p: glrp.Production) -> Any:
 )
 @cxx11
 def unnamed_namespace_definition_cxx11(self: CxxParser, p: glrp.Production) -> Any:
-    return NamespaceDeclaration(p[0], p[5], [], True, [], None, p[7])
+    position = p[3].position[0], p[4].position[1]
+    return NamespaceDeclaration(position, p[0], p[5], [], True, [], None, p[7])
 
 
 # amendment: attribute-specifier-seq? to simplify grammar.
@@ -110,7 +114,8 @@ def unnamed_namespace_definition_cxx11(self: CxxParser, p: glrp.Production) -> A
 )
 @cxx17
 def nested_namespace_definition_cxx17(self: CxxParser, p: glrp.Production) -> Any:
-    return NamespaceDeclaration(p[0], p[3], p[7], False, p[4], p[6].value, p[9])
+    position = p[2].position[0], p[6].position[1]
+    return NamespaceDeclaration(position, p[0], p[3], p[7], False, p[4], p[6].value, p[9])
 
 
 # amendment: attribute-specifier-seq? to simplify grammar.
@@ -119,7 +124,8 @@ def nested_namespace_definition_cxx17(self: CxxParser, p: glrp.Production) -> An
 )
 @cxx20
 def nested_namespace_definition_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    return NamespaceDeclaration(p[0], p[3], p[8], True, p[4], p[7].value, p[10])
+    position = p[2].position[0], p[7].position[1]
+    return NamespaceDeclaration(position, p[0], p[3], p[8], True, p[4], p[7].value, p[10])
 
 
 @glrp.rule('enclosing-namespace-specifier : "identifier"')

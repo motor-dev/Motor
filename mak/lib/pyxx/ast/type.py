@@ -1,13 +1,14 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 from . import Visitor
 from .base import Attribute, TypeId, TypeSpecifier, Declarator, ParameterClause, Expression, _Id
-from .reference import AbstractReference
+from .reference import AbstractReference, Reference
 
 
 class ErrorTypeSpecifier(TypeSpecifier):
 
-    def __init__(self) -> None:
+    def __init__(self, position: Tuple[int, int]) -> None:
         TypeSpecifier.__init__(self)
+        self.position = position
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_error_type_specifier(self)
@@ -117,7 +118,7 @@ class PrimitiveTypeSpecifiers(object):
 
 class ElaboratedClassTypeSpecifier(TypeSpecifier):
 
-    def __init__(self, class_type: str, attributes: List[Attribute], name: AbstractReference) -> None:
+    def __init__(self, class_type: str, attributes: List[Attribute], name: Reference) -> None:
         TypeSpecifier.__init__(self)
         self.attributes = attributes
         self.type = class_type
@@ -136,10 +137,12 @@ class ElaboratedClassTypeSpecifier(TypeSpecifier):
 
 class ElaboratedEnumTypeSpecifier(TypeSpecifier):
 
-    def __init__(self, enum_type: str, attributes: List[Attribute], name: AbstractReference):
+    def __init__(self, position: Tuple[int, int], is_scoped: bool, attributes: List[Attribute],
+                 name: Reference):
         TypeSpecifier.__init__(self)
+        self.position = position
         self.attributes = attributes
-        self.type = enum_type
+        self.is_scoped = is_scoped
         self.name = name
 
     def accept(self, visitor: Visitor) -> None:
@@ -164,8 +167,9 @@ class AutoTypeSpecifier(TypeSpecifier):
 
 class DecltypeTypeSpecifier(TypeSpecifier):
 
-    def __init__(self, decltype_kw: str, expression: Expression) -> None:
+    def __init__(self, position: Tuple[int, int], decltype_kw: str, expression: Expression) -> None:
         TypeSpecifier.__init__(self)
+        self.position = position
         self.decltype_kw = decltype_kw
         self.expression = expression
 
@@ -174,6 +178,19 @@ class DecltypeTypeSpecifier(TypeSpecifier):
 
     def accept_expression(self, visitor: Visitor) -> None:
         self.expression.accept(visitor)
+
+
+class DecltypeSpecifierId(_Id):
+
+    def __init__(self, decltype_specifier: Union[DecltypeTypeSpecifier, ErrorTypeSpecifier]) -> None:
+        _Id.__init__(self, decltype_specifier.position)
+        self.decltype_specifier = decltype_specifier
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.visit_decltype_specifier_id(self)
+
+    def accept_decltype_specifier(self, visitor: Visitor) -> None:
+        self.decltype_specifier.accept(visitor)
 
 
 class DecltypeAutoTypeSpecifier(TypeSpecifier):

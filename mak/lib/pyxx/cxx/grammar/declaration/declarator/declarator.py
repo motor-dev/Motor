@@ -56,6 +56,7 @@ from .....ast.type import (
     DeclaratorElementReference,
     DeclaratorElementRValueReference,
     DeclaratorElementMethod,
+    DeclaratorElementAbstract,
 )
 
 
@@ -162,13 +163,13 @@ def ptr_operator_qualified_ptr(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.rule('ptr-operator : [prec:left,1]"&" attribute-specifier-seq?')
 @cxx98
 def ptr_operator_ref(self: CxxParser, p: glrp.Production) -> Any:
-    return DeclaratorElementReference, (p[1], )
+    return DeclaratorElementReference, (p[1],)
 
 
 @glrp.rule('ptr-operator : [prec:left,1]"&&" attribute-specifier-seq?')
 @cxx11
 def ptr_operator_cxx11(self: CxxParser, p: glrp.Production) -> Any:
-    return DeclaratorElementRValueReference, (p[1], )
+    return DeclaratorElementRValueReference, (p[1],)
 
 
 @glrp.rule('cv-qualifier-seq? : cv-qualifier cv-qualifier-seq?')

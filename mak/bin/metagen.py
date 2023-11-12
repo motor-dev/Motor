@@ -77,6 +77,24 @@ def m0012(logger: messages.Logger, position: Tuple[int, int]) -> Dict[str, Any]:
     return locals()
 
 
+@messages.error
+def m0100(logger: messages.Logger, position: Tuple[int, int], entity_name: str, namespace_name: str) -> Dict[str, Any]:
+    """Cannot declare object {entity_name} here, as declaration of {namespace_name} is not visible in this translation unit"""
+    return locals()
+
+
+@messages.error
+def m0101(logger: messages.Logger, position: Tuple[int, int], entity_name: str, namespace_name: str) -> Dict[str, Any]:
+    """Object {entity_name} does not exist in {namespace_name}, or has been declared outside of this translation unit"""
+    return locals()
+
+
+@messages.error
+def m0102(logger: messages.Logger, position: Tuple[int, int], entity_name: str) -> Dict[str, Any]:
+    """redefinition of {entity_name}"""
+    return locals()
+
+
 class Attributes(object):
     def __init__(self) -> None:
         self.export = None  # type: Optional[Tuple[Tuple[int, int], bool]]
@@ -92,7 +110,7 @@ class Attributes(object):
 
 class MetaObject(object):
 
-    def __init__(self, attributes: Attributes, parent: Optional["MetaObject"]) -> None:
+    def __init__(self, position: Tuple[int, int], attributes: Attributes, parent: Optional["MetaObject"]) -> None:
         self._attributes = attributes
         self._parent = parent if parent is not None else self
         self._children = {}  # type: Dict[str, MetaObject]
@@ -101,6 +119,8 @@ class MetaObject(object):
         else:
             self._namespace = (parent._namespace[0][:], parent._namespace[1][:])
         self._objects = []  # type: List[MetaObject]
+        self._declared_objects = {}  # type: Dict[str, Tuple[bool, Attributes]]
+        self.position = position
 
     def file_name(self) -> str:
         return self._parent.file_name()
@@ -169,10 +189,16 @@ class MetaObject(object):
     def get_child(self, child_name: str) -> "MetaObject":
         return self._children[child_name]
 
+    def add_declared_object(self, name: str, exported: bool, attributes: Attributes) -> None:
+        self._declared_objects[name] = (exported, attributes)
+
+    def get_exported_object(self, name: str) -> Tuple[bool, Attributes]:
+        return self._declared_objects[name]
+
 
 class RootNamespace(MetaObject):
     def __init__(self, file_name: str, module_name: str):
-        super().__init__(Attributes(), None)
+        super().__init__((0, 0), Attributes(), None)
         self._file_name = file_name
         self._cpp_name = 'motor_%s_Namespace' % module_name
 
@@ -192,8 +218,8 @@ class RootNamespace(MetaObject):
 
 class Namespace(MetaObject):
 
-    def __init__(self, attributes: Attributes, name: str, parent: MetaObject):
-        super().__init__(attributes, parent)
+    def __init__(self, position: Tuple[int, int], attributes: Attributes, name: str, parent: MetaObject):
+        super().__init__(position, attributes, parent)
         self._name = name
         self._cpp_name = parent.cpp_name() + '_' + name
         parent._children[name] = self
@@ -219,9 +245,10 @@ class Namespace(MetaObject):
 
 class Class(MetaObject):
 
-    def __init__(self, attributes: Attributes, name: str, is_value_type: bool, superclass: Optional[str],
+    def __init__(self, position: Tuple[int, int], attributes: Attributes, name: str, is_value_type: bool,
+                 superclass: Optional[str],
                  parent: MetaObject):
-        super().__init__(attributes, parent)
+        super().__init__(position, attributes, parent)
         self._name = name
         parent._children[name] = self
         self._superclass = superclass if superclass is not None else 'void'
@@ -319,25 +346,25 @@ class Class(MetaObject):
 
 
 class Enum(Class):
-    def __init__(self, attributes: Attributes, name: str, parent: MetaObject):
-        super().__init__(attributes, name, True, None, parent)
+    def __init__(self, position: Tuple[int, int], attributes: Attributes, name: str, parent: MetaObject):
+        super().__init__(position, attributes, name, True, None, parent)
 
 
 class Method(MetaObject):
-    def __init__(self, attributes: Attributes, name: str, parent: MetaObject):
-        super().__init__(attributes, parent)
+    def __init__(self, position: Tuple[int, int], attributes: Attributes, name: str, parent: MetaObject):
+        super().__init__(position, attributes, parent)
         self._name = name
 
 
 class Variable(MetaObject):
-    def __init__(self, attributes: Attributes, name: str, parent: MetaObject):
-        super().__init__(attributes, parent)
+    def __init__(self, position: Tuple[int, int], attributes: Attributes, name: str, parent: MetaObject):
+        super().__init__(position, attributes, parent)
         self._name = name
 
 
 class TypeDef(MetaObject):
-    def __init__(self, attributes: Attributes, name: str, parent: MetaObject):
-        super().__init__(attributes, parent)
+    def __init__(self, position: Tuple[int, int], attributes: Attributes, name: str, parent: MetaObject):
+        super().__init__(position, attributes, parent)
         self._name = name
 
 
@@ -537,8 +564,34 @@ class DeclarationVisitor(ast.Visitor):
         init_declarator.accept_declarator(self)
 
     def visit_declarator_list(self, declarator_list: ast.DeclaratorList) -> None:
-        if declarator_list.is_method():
-            pass
+        element = declarator_list.declarator_element
+        while hasattr(element, 'next'):
+            element = element.next
+        if element.is_element_id():
+            assert isinstance(element, ast.DeclaratorElementId)
+            assert isinstance(element.name, ast.Reference)
+            namespace = self._namespace
+            index = 0
+            name = ''
+            if element.name.is_absolute():
+                index = 1
+                name = '::'
+                while namespace._parent != namespace:
+                    namespace = namespace._parent
+            for id in element.name.name_list[index:-1]:
+                sr = utils.StringRef()
+                id.accept(sr)
+                name = name + sr.result + '::'
+                try:
+                    namespace = namespace.get_child(sr.result)
+                except KeyError:
+                    sr = utils.StringRef()
+                    element.name.accept(sr)
+                    assert pyxx.logger is not None
+                    m0100(pyxx.logger, element.name.position, sr.result, name[:-2])
+                    break
+            else:
+                pass
 
 
 class Explorer(utils.RecursiveVisitor):
@@ -586,12 +639,13 @@ class Explorer(utils.RecursiveVisitor):
                         try:
                             self.namespace = self.namespace.get_child(name)
                         except KeyError:
-                            self.namespace = Namespace(Attributes(), name, self.namespace)
+                            self.namespace = Namespace(namespace_declaration.position, Attributes(), name,
+                                                       self.namespace)
                     try:
                         self.namespace = self.namespace.get_child(namespace_declaration.namespace_name)
                     except KeyError:
-                        self.namespace = Namespace(attribute_parser.attributes, namespace_declaration.namespace_name,
-                                                   self.namespace)
+                        self.namespace = Namespace(namespace_declaration.position, attribute_parser.attributes,
+                                                   namespace_declaration.namespace_name, self.namespace)
                     namespace_declaration.accept_children(self)
                     self.namespace = namespace
                 else:
@@ -631,6 +685,7 @@ class Explorer(utils.RecursiveVisitor):
             super().visit_declarator_element_method(declarator_element_method)
 
     def visit_class_specifier(self, class_specifier: ast.ClassSpecifier) -> None:
+        assert pyxx.logger is not None
         if self._publish[-1]:
             if class_specifier.name is not None:
                 attributes_parser = AttributeParser()
@@ -639,26 +694,59 @@ class Explorer(utils.RecursiveVisitor):
                     base_clause_visitor = BaseClauseVisitor(class_specifier.class_type != 'class')
                     class_specifier.accept_base_clause(base_clause_visitor)
                     namespace = self.namespace
-                    for name in class_specifier.name.name_list[:-1]:
+                    index = 0
+                    partial_name = ''
+                    if class_specifier.name.is_absolute():
+                        index = 1
+                        partial_name = '::'
+                        while self.namespace != self.namespace._parent:
+                            self.namespace = self.namespace._parent
+                    for name in class_specifier.name.name_list[index:-1]:
                         sr = utils.StringRef()
                         name.accept(sr)
+                        partial_name += sr.result + '::'
                         try:
                             self.namespace = self.namespace.get_child(sr.result)
                         except KeyError:
-                            self.namespace = Namespace(attributes_parser.attributes, sr.result, self.namespace)
-                    sr = utils.StringRef()
-                    class_specifier.name.name_list[-1].accept(sr)
-                    try:
-                        self.namespace = self.namespace.get_child(sr.result)
-                    except KeyError:
-                        self.namespace = Class(attributes_parser.attributes, sr.result,
-                                               class_specifier.class_type != 'class',
-                                               base_clause_visitor.base_clause, self.namespace)
-                    self._access_specifier.append(
-                        class_specifier.class_type in ('struct', 'union') and 'public' or 'private')
-                    class_specifier.accept_members(self)
-                    self._access_specifier.pop(-1)
-                    self.namespace = namespace
+                            sr = utils.StringRef()
+                            class_specifier.name.accept(sr)
+                            m0100(pyxx.logger, class_specifier.name.position, sr.result, partial_name[:-2])
+                            break
+                    else:
+                        sr = utils.StringRef()
+                        class_specifier.name.name_list[-1].accept(sr)
+                        try:
+                            self.namespace = self.namespace.get_child(sr.result)
+                        except KeyError:
+                            try:
+                                exported, attributes = self.namespace.get_exported_object(sr.result)
+                            except KeyError:
+                                if len(class_specifier.name.name_list) > 1:
+                                    m0101(pyxx.logger, class_specifier.name.position, sr.result, partial_name[:-2])
+                                else:
+                                    self.namespace = Class(class_specifier.position, attributes_parser.attributes,
+                                                           sr.result, class_specifier.class_type != 'class',
+                                                           base_clause_visitor.base_clause, self.namespace)
+                            else:
+                                if exported:
+                                    self.namespace = Class(class_specifier.position, attributes_parser.attributes,
+                                                           sr.result, class_specifier.class_type != 'class',
+                                                           base_clause_visitor.base_clause, self.namespace)
+                                else:
+                                    self._publish.append(False)
+                                    class_specifier.accept_name(self)
+                                    class_specifier.accept_base_clause(self)
+                                    class_specifier.accept_members(self)
+                                    self._publish.pop(-1)
+
+                        else:
+                            m0102(pyxx.logger, class_specifier.position, sr.result)
+                            m0012(pyxx.logger, self.namespace.position)
+                        self._access_specifier.append(
+                            class_specifier.class_type in ('struct', 'union') and 'public' or 'private')
+                        class_specifier.accept_members(self)
+                        self._access_specifier.pop(-1)
+                        self.namespace = namespace
                 else:
                     self._publish.append(False)
                     class_specifier.accept_name(self)
@@ -673,26 +761,60 @@ class Explorer(utils.RecursiveVisitor):
             super().visit_class_specifier(class_specifier)
 
     def visit_enum_specifier(self, enum_specifier: ast.EnumSpecifier) -> None:
+        assert pyxx.logger is not None
         if self._publish[-1]:
             if enum_specifier.name is not None:
                 attributes_parser = AttributeParser()
                 enum_specifier.accept_attributes(attributes_parser)
                 if attributes_parser.attributes.exported():
                     namespace = self.namespace
-                    for name in enum_specifier.name.name_list[:-1]:
+                    index = 0
+                    partial_name = ''
+                    if enum_specifier.name.is_absolute():
+                        index = 1
+                        partial_name = '::'
+                        while self.namespace != self.namespace._parent:
+                            self.namespace = self.namespace._parent
+                    for name in enum_specifier.name.name_list[index:-1]:
                         sr = utils.StringRef()
                         name.accept(sr)
+                        partial_name += sr.result + '::'
                         try:
                             self.namespace = self.namespace.get_child(sr.result)
                         except KeyError:
-                            self.namespace = Namespace(attributes_parser.attributes, sr.result, self.namespace)
-                    sr = utils.StringRef()
-                    enum_specifier.name.name_list[-1].accept(sr)
-                    try:
-                        self.namespace = self.namespace.get_child(sr.result)
-                    except KeyError:
-                        self.namespace = Enum(attributes_parser.attributes, sr.result, self.namespace)
-                    self.namespace = namespace
+                            sr = utils.StringRef()
+                            enum_specifier.name.accept(sr)
+                            m0100(pyxx.logger, enum_specifier.name.position, sr.result, partial_name[:-2])
+                            break
+                    else:
+                        sr = utils.StringRef()
+                        enum_specifier.name.name_list[-1].accept(sr)
+                        try:
+                            self.namespace = self.namespace.get_child(sr.result)
+                        except KeyError:
+                            try:
+                                exported, attributes = self.namespace.get_exported_object(sr.result)
+                            except KeyError:
+                                if len(enum_specifier.name.name_list) > 1:
+                                    m0101(pyxx.logger, enum_specifier.name.position, sr.result, partial_name[:-2])
+                                else:
+                                    self.namespace = Enum(enum_specifier.position, attributes_parser.attributes,
+                                                          sr.result, self.namespace)
+                            else:
+                                if exported:
+                                    self.namespace = Enum(enum_specifier.position, attributes_parser.attributes,
+                                                          sr.result, self.namespace)
+                                else:
+                                    self._publish.append(False)
+                                    enum_specifier.accept_name(self)
+                                    enum_specifier.accept_base_type(self)
+                                    enum_specifier.accept_enumerators(self)
+                                    self._publish.pop(-1)
+
+                        else:
+                            m0102(pyxx.logger, enum_specifier.position, sr.result)
+                            m0012(pyxx.logger, self.namespace.position)
+                        self.namespace = namespace
                 else:
                     self._publish.append(False)
                     enum_specifier.accept_name(self)
@@ -760,6 +882,34 @@ class Explorer(utils.RecursiveVisitor):
 
     def visit_access_specifier_macro(self, access_specifier: ast.AccessSpecifierMacro) -> None:
         self._access_specifier[-1] = access_specifier.name
+
+    def visit_elaborated_class_type_specifier(self,
+                                              elaborated_class_type_specifier: ast.ElaboratedClassTypeSpecifier) -> None:
+        if elaborated_class_type_specifier.name is not None:
+            if len(elaborated_class_type_specifier.name.name_list) == 1:
+                sr = utils.StringRef()
+                elaborated_class_type_specifier.name.name_list[-1].accept(sr)
+                attributes_parser = AttributeParser()
+                elaborated_class_type_specifier.accept_attributes(attributes_parser)
+                self.namespace.add_declared_object(sr.result,
+                                                   self._publish[-1] and attributes_parser.attributes.exported(),
+                                                   attributes_parser.attributes)
+        else:
+            super().visit_elaborated_class_type_specifier(elaborated_class_type_specifier)
+
+    def visit_elaborated_enum_type_specifier(self,
+                                             elaborated_enum_type_specifier: ast.ElaboratedEnumTypeSpecifier) -> None:
+        if elaborated_enum_type_specifier.name is not None:
+            if len(elaborated_enum_type_specifier.name.name_list) == 1:
+                sr = utils.StringRef()
+                elaborated_enum_type_specifier.name.name_list[-1].accept(sr)
+                attributes_parser = AttributeParser()
+                elaborated_enum_type_specifier.accept_attributes(attributes_parser)
+                self.namespace.add_declared_object(sr.result,
+                                                   self._publish[-1] and attributes_parser.attributes.exported(),
+                                                   attributes_parser.attributes)
+        else:
+            super().visit_elaborated_enum_type_specifier(elaborated_enum_type_specifier)
 
 
 def main() -> None:

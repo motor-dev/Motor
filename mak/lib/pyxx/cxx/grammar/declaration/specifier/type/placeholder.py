@@ -27,21 +27,21 @@ def placeholder_type_specifier_cxx14(self: CxxParser, p: glrp.Production) -> Any
 @glrp.rule('placeholder-type-specifier : "identifier" [prec:left,1]"auto"')
 @cxx20
 def placeholder_type_specifier_constraint_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    return ConstrainedTypeSpecifier(Reference([Id(p[0].value)]), AutoTypeSpecifier())
+    return ConstrainedTypeSpecifier(Reference([Id(p[0].position, p[0].value)]), AutoTypeSpecifier())
 
 
 @glrp.rule('placeholder-type-specifier : template-name "<" template-argument-list? "#>" [prec:left,1]"auto"')
 @cxx20
 def placeholder_type_specifier_constraint_template_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    return ConstrainedTypeSpecifier(Reference([TemplateId(p[0], p[2])]), AutoTypeSpecifier())
+    return ConstrainedTypeSpecifier(Reference([TemplateId(p[3].position[1], p[0], p[2])]), AutoTypeSpecifier())
 
 
 @glrp.rule('placeholder-type-specifier : nested-name-specifier "template"? "identifier" [prec:left,1]"auto"')
 @cxx20
 def placeholder_type_specifier_constraint_nested_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    id = Id(p[2].value)    # type: _Id
+    id = Id(p[2].position, p[2].value)  # type: _Id
     if p[1]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[1].position, id)
     return ConstrainedTypeSpecifier(Reference(p[0] + [id]), AutoTypeSpecifier())
 
 
@@ -50,9 +50,9 @@ def placeholder_type_specifier_constraint_nested_cxx20(self: CxxParser, p: glrp.
 )
 @cxx20
 def placeholder_type_specifier_constraint_template_nested_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    id = TemplateId(p[2], p[4])    # type: _Id
+    id = TemplateId(p[5].position[1], p[2], p[4])  # type: _Id
     if p[1]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[1].position, id)
     return ConstrainedTypeSpecifier(Reference(p[0] + [id]), AutoTypeSpecifier())
 
 
@@ -60,7 +60,7 @@ def placeholder_type_specifier_constraint_template_nested_cxx20(self: CxxParser,
 @glrp.rule('placeholder-type-specifier : "identifier" [prec:left,1]"decltype-macro" "(" "auto" ")"')
 @cxx20
 def placeholder_type_specifier_constraint_decltype_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    return ConstrainedTypeSpecifier(Reference([Id(p[0].value)]), DecltypeAutoTypeSpecifier(p[1].text()))
+    return ConstrainedTypeSpecifier(Reference([Id(p[0].position, p[0].value)]), DecltypeAutoTypeSpecifier(p[1].text()))
 
 
 @glrp.rule(
@@ -71,7 +71,8 @@ def placeholder_type_specifier_constraint_decltype_cxx20(self: CxxParser, p: glr
 )
 @cxx20
 def placeholder_type_specifier_constraint_template_decltype_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    return ConstrainedTypeSpecifier(Reference([TemplateId(p[0], p[2])]), DecltypeAutoTypeSpecifier(p[4].text()))
+    return ConstrainedTypeSpecifier(Reference([TemplateId(p[3].position[1], p[0], p[2])]),
+                                    DecltypeAutoTypeSpecifier(p[4].text()))
 
 
 @glrp.rule(
@@ -82,9 +83,9 @@ def placeholder_type_specifier_constraint_template_decltype_cxx20(self: CxxParse
 )
 @cxx20
 def placeholder_type_specifier_constraint_nested_decltype_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    id = Id(p[2].value)    # type: _Id
+    id = Id(p[2].position, p[2].value)  # type: _Id
     if p[1]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[1].position, id)
     return ConstrainedTypeSpecifier(Reference(p[0] + [id]), DecltypeAutoTypeSpecifier(p[3].text()))
 
 
@@ -96,7 +97,7 @@ def placeholder_type_specifier_constraint_nested_decltype_cxx20(self: CxxParser,
 )
 @cxx20
 def placeholder_type_specifier_constraint_template_nested_decltype_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    id = TemplateId(p[2], p[4])    # type: _Id
+    id = TemplateId(p[5].position[1], p[2], p[4])  # type: _Id
     if p[1]:
-        id = TemplateSpecifierId(id)
+        id = TemplateSpecifierId(p[1].position, id)
     return ConstrainedTypeSpecifier(Reference(p[0] + [id]), DecltypeAutoTypeSpecifier(p[6].text()))

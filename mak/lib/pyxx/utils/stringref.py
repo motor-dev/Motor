@@ -36,6 +36,9 @@ class StringRef(ast.Visitor):
         template_id.accept_template_arguments(self)
         self.result += '>'
 
+    def visit_decltype_specifier_id(self, decltype_specifier_id: ast.DecltypeSpecifierId) -> None:
+        decltype_specifier_id.accept_decltype_specifier(self)
+
     def visit_template_argument_list(self, template_argument_list: ast.TemplateArgumentList) -> None:
         for argument in template_argument_list.template_arguments[:-1]:
             argument.accept(self)
@@ -48,7 +51,8 @@ class StringRef(ast.Visitor):
         ambiguous_template_argument_list.accept_first(self)
 
     def visit_destructor_id(self, destructor_id: ast.DestructorId) -> None:
-        self.result += '~%s' % destructor_id.id
+        self.result += '~'
+        destructor_id.accept_id(self)
 
     def visit_operator_id(self, operator_id: ast.OperatorId) -> None:
         self.result += 'operator %s' % operator_id.operator

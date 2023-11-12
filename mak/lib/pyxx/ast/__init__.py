@@ -721,6 +721,9 @@ class Visitor(object):
     def visit_template_id(self, template_id: "TemplateId") -> None:
         pass
 
+    def visit_decltype_specifier_id(self, decltype_specifier_id: "DecltypeSpecifierId") -> None:
+        pass
+
     def visit_template_argument_list(self, template_argument_list: "TemplateArgumentList") -> None:
         pass
 
@@ -908,6 +911,7 @@ from .type import (
     ErrorTypeSpecifier,
     AutoTypeSpecifier,
     DecltypeTypeSpecifier,
+    DecltypeSpecifierId,
     DecltypeAutoTypeSpecifier,
     ConstrainedTypeSpecifier,
     TypeSpecifierReference,
