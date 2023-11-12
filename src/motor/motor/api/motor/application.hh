@@ -56,6 +56,8 @@ private:
     void        registerInterruptions();
     static void unregisterInterruptions();
 
+    static ref< Folder > createDataFolder(const ipath& dataSubDirectory);
+
 protected:
     void                   addTask(const ref< Task::ITask >& task);
     void                   removeTask(const ref< Task::ITask >& task);
@@ -63,9 +65,8 @@ protected:
     {
         return m_pluginContext;
     }
-    Application(const ref< Folder >&                     dataFolder,
-                const weak< Resource::ResourceManager >& resourceManager,
-                const weak< Scheduler >&                 scheduler);
+    Application(const weak< Resource::ResourceManager >& resourceManager,
+                const weak< Scheduler >& scheduler, ipath dataSubDirectory = ipath());
 
     weak< Task::ITask > applicationUpdateTask() const
     {

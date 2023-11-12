@@ -16,7 +16,7 @@ namespace Motor {
 
 Environment::Environment()
     : m_homeDirectory(s_dataDirectory)
-    , m_dataDirectory(ipath("apk:/assets"))
+    , m_dataDirectory(ipath("assets"))
     , m_game("")
     , m_user("android")
 {

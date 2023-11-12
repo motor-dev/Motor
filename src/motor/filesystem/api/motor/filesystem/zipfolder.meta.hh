@@ -45,7 +45,8 @@ public:
                                            Folder::ScanPolicy scanPolicy = Folder::ScanRecursive);
 
 public:
-    explicit ZipFolder(const ipath& zippath, Folder::ScanPolicy scanPolicy = Folder::ScanRecursive);
+    explicit ZipFolder(const ipath& zippath, const ipath& subFolder = ipath(),
+                       Folder::ScanPolicy scanPolicy = Folder::ScanRecursive);
     ~ZipFolder() override;
 };
 

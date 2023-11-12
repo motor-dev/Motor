@@ -33,9 +33,9 @@ ZipFolder::ZipFolder(const ref< Handle >& handle, const ipath& path, Folder::Sca
     }
 }
 
-ZipFolder::ZipFolder(const ipath& zippath, Folder::ScanPolicy scanPolicy)
+ZipFolder::ZipFolder(const ipath& zippath, const ipath& folderPath, Folder::ScanPolicy scanPolicy)
     : m_handle(ref< Handle >::create(Arena::filesystem(), unzOpen(zippath.str().name)))
-    , m_path("")
+    , m_path(folderPath)
 {
     if(!m_handle)
     {
@@ -48,9 +48,7 @@ ZipFolder::ZipFolder(const ipath& zippath, Folder::ScanPolicy scanPolicy)
     }
 }
 
-ZipFolder::~ZipFolder()
-{
-}
+ZipFolder::~ZipFolder() = default;
 
 void ZipFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 {

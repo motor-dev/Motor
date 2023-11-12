@@ -2,16 +2,12 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <motor/core/environment.hh>
-#include <motor/filesystem/diskfolder.meta.hh>
 #include <textsample.hh>
 
 namespace Motor {
 
 TextSample::TextSample(const Plugin::Context& context)
-    : Application(
-        ref< DiskFolder >::create(Arena::game(), Environment::getEnvironment().getDataDirectory()),
-        context.resourceManager, context.scheduler)
+    : Application(context.resourceManager, context.scheduler)
     , m_packageManager(inamespace("plugin.scripting.package"), pluginContext())
     , m_textManager(inamespace("plugin.graphics.text"), pluginContext())
     , m_3ddx(inamespace("plugin.graphics.Dx9"), pluginContext())

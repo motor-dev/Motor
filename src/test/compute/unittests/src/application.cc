@@ -2,17 +2,13 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <motor/filesystem/diskfolder.meta.hh>
 #include <motor/plugin/plugin.hh>
 #include <application.hh>
 
 namespace Motor { namespace Test { namespace Compute { namespace UnitTests {
 
 UnitTestsApplication::UnitTestsApplication(const Plugin::Context& context)
-    : Application(
-        ref< DiskFolder >::create(Arena::game(), Environment::getEnvironment().getDataDirectory()
-                                                     + ipath("test/compute/unittests")),
-        context.resourceManager, context.scheduler)
+    : Application(context.resourceManager, context.scheduler, ipath("test/compute/unittests"))
     , m_packageManager(inamespace("plugin.scripting.package"), pluginContext())
     , m_computeCudaModule(inamespace("plugin.compute.cuda"), pluginContext())
     , m_computeCLModule(inamespace("plugin.compute.opencl"), pluginContext())

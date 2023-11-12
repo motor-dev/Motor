@@ -17,10 +17,9 @@
 
 namespace Motor {
 
-Application::Application(const ref< Folder >&                     dataFolder,
-                         const weak< Resource::ResourceManager >& resourceManager,
-                         const weak< Scheduler >&                 scheduler)
-    : m_dataFolder(dataFolder)
+Application::Application(const weak< Resource::ResourceManager >& resourceManager,
+                         const weak< Scheduler >& scheduler, ipath dataSubDirectory)
+    : m_dataFolder(createDataFolder(dataSubDirectory))
     , m_scheduler(scheduler)
     , m_resourceManager(resourceManager)
     , m_pluginContext(resourceManager, m_dataFolder, m_scheduler)
