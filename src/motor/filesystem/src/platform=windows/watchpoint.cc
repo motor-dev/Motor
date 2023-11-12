@@ -47,7 +47,7 @@ public:
     }
 };
 
-class WatchThread : public minitl::refcountable
+class WatchThread : public minitl::pointer
 {
 private:
     static const u32 s_maximumWatchCount = MAXIMUM_WAIT_OBJECTS - 1;

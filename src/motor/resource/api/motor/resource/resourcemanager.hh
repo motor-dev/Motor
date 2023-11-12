@@ -8,7 +8,6 @@
 #include <motor/meta/class.meta.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/minitl/intrusive_list.hh>
-#include <motor/minitl/refcountable.hh>
 #include <motor/minitl/vector.hh>
 #include <motor/resource/idescription.meta.hh>
 #include <motor/resource/loader.hh>
@@ -18,7 +17,7 @@ namespace Motor { namespace Resource {
 class motor_api(RESOURCE) ResourceManager : public minitl::pointer
 {
 private:
-    class LoaderInfo : public minitl::refcountable
+    class LoaderInfo : public minitl::pointer
     {
     public:
         explicit LoaderInfo(raw< const Meta::Class > classinfo);

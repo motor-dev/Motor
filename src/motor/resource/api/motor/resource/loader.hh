@@ -11,7 +11,7 @@ namespace Motor { namespace Resource {
 
 class ResourceManager;
 
-class motor_api(RESOURCE) ILoader : public minitl::refcountable
+class motor_api(RESOURCE) ILoader : public minitl::pointer
 {
     friend class ResourceManager;
     friend class IDescription;

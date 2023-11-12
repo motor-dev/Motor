@@ -30,7 +30,7 @@ namespace Motor { namespace PackageBuilder {
 
 struct BuildContext
 {
-    ref< Nodes::Package > result;
+    scoped< Nodes::Package > result;
 
     BuildContext(const ifilename& filename, const minitl::allocator::block< u8 >& buffer,
                  ref< Folder > folder);

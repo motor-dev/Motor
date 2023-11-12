@@ -22,15 +22,14 @@ void KernelLoader::load(const weak< const Resource::IDescription >& kernelDescri
 {
     weak< const Kernel > kernel = motor_checked_cast< const Kernel >(kernelDescription);
     motor_info_format(Log::opencl(), "loading OpenCL kernel {0}", kernel->name());
-    weak< CodeObject > code
-        = kernel->code()->getResource(m_codeLoader).getRefHandle< CodeObject >();
-    resource.setRefHandle(ref< KernelObject >::create(Arena::task(), code, kernel->name()));
+    weak< CodeObject > code = kernel->code()->getResource(m_codeLoader).getHandle< CodeObject >();
+    resource.setHandle(scoped< KernelObject >::create(Arena::task(), code, kernel->name()));
 }
 
 void KernelLoader::unload(const weak< const Resource::IDescription >& /*kernelDescription*/,
                           Resource::Resource& resource)
 {
-    resource.clearRefHandle();
+    resource.clearHandle();
 }
 
 }}}  // namespace Motor::KernelScheduler::OpenCL

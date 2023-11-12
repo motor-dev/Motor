@@ -9,7 +9,7 @@
 namespace Motor { namespace Windowing {
 class Window;
 
-class Window::PlatformWindow : public minitl::refcountable
+class Window::PlatformWindow : public minitl::pointer
 {
     friend class Window;
 
@@ -19,7 +19,7 @@ private:
 
 public:
     PlatformWindow(const weak< const Renderer >& renderer, const weak< Window >& window);
-    ~PlatformWindow();
+    ~PlatformWindow() override;
 };
 
 }}  // namespace Motor::Windowing

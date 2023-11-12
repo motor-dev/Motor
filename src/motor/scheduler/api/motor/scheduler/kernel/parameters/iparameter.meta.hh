@@ -16,7 +16,7 @@ namespace Motor { namespace KernelScheduler {
 class IMemoryBuffer;
 class IMemoryHost;
 
-class motor_api(SCHEDULER) IParameter : public minitl::refcountable
+class motor_api(SCHEDULER) IParameter : public minitl::pointer
 {
 protected:
     typedef minitl::vector< minitl::tuple< raw< const Meta::Class >, raw< const Meta::Class > > >

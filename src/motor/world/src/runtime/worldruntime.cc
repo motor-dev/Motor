@@ -76,14 +76,14 @@ void WorldRuntime::load(const weak< const Resource::IDescription >& subworld,
                         Resource::Resource&                         resource)
 {
     motor_forceuse(subworld);
-    resource.setRefHandle(ref< SubWorldResource >::create(Arena::game()));
+    resource.setHandle(scoped< SubWorldResource >::create(Arena::game()));
 }
 
 void WorldRuntime::unload(const weak< const Resource::IDescription >& subworld,
                           Resource::Resource&                         resource)
 {
     motor_forceuse(subworld);
-    resource.clearRefHandle();
+    resource.clearHandle();
 }
 
 void WorldRuntime::addLogicComponentType(raw< const Meta::Class > type)
@@ -98,7 +98,7 @@ void WorldRuntime::spawn(const weak< const SubWorld >& subworld, u32 parentId,
     motor_forceuse(parentId);
     motor_forceuse(spawnParameters);
     weak< const SubWorldResource > subworldResource
-        = subworld->getResource(this).getRefHandle< SubWorldResource >();
+        = subworld->getResource(this).getHandle< SubWorldResource >();
 }
 
 }}  // namespace Motor::World

@@ -15,7 +15,7 @@ class BitmapFontManager;
 class FontList;
 class FreetypeLibrary;
 
-class TextPlugin : public minitl::refcountable
+class TextPlugin : public minitl::pointer
 {
 private:
     weak< Resource::ResourceManager > m_resourceManager;

@@ -254,7 +254,7 @@ ArchetypeStorage::ArchetypeStorage(
     const minitl::vector< minitl::vector< raw< const Meta::Class > > >& archetypes)
     : m_registry(registry)
     , m_componentClasses(std::move(componentClasses))
-    , m_components(Arena::game(), componentCount(archetypes) + componentClasses.size())
+    , m_components(Arena::game(), componentCount(archetypes) + m_componentClasses.size())
 {
     motor_forceuse(registry);
     motor_forceuse(archetypes);
@@ -268,13 +268,13 @@ ArchetypeStorage::ArchetypeStorage(
 
 ArchetypeStorage::~ArchetypeStorage() = default;
 
-ref< ArchetypeStorage::Runtime >
+scoped< ArchetypeStorage::Runtime >
 ArchetypeStorage::createRuntime(weak< const KernelScheduler::ProducerLoader > loader) const
 {
     weak< ComponentRegistry::Runtime > registryRuntime = m_registry->getRuntime(loader);
     motor_forceuse(registryRuntime);
-    ref< Runtime > result
-        = ref< Runtime >::create(Arena::game(), loader->startTask(), u32(m_components.size()));
+    auto result
+        = scoped< Runtime >::create(Arena::game(), loader->startTask(), u32(m_components.size()));
     u32 i = 0;
     for(minitl::vector< ref< KernelScheduler::IProduct > >::const_iterator it
         = m_components.begin();

@@ -11,7 +11,7 @@ namespace Motor { namespace KernelScheduler { namespace OpenCL {
 class Context;
 class KernelObject;
 
-class CodeObject : public minitl::refcountable
+class CodeObject : public minitl::pointer
 {
     friend class KernelObject;
 

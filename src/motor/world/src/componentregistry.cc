@@ -21,17 +21,17 @@ ComponentRegistry::ComponentRegistry() = default;
 
 ComponentRegistry::~ComponentRegistry() = default;
 
-ref< KernelScheduler::Producer::Runtime >
+scoped< KernelScheduler::Producer::Runtime >
 ComponentRegistry::createRuntime(weak< const KernelScheduler::ProducerLoader > loader) const
 {
-    ref< Runtime > result = ref< Runtime >::create(Arena::game(), loader->startTask(), 0);
+    auto result = scoped< Runtime >::create(Arena::game(), loader->startTask(), 0);
     return result;
 }
 
 weak< ComponentRegistry::Runtime >
 ComponentRegistry::getRuntime(const weak< const KernelScheduler::ProducerLoader >& loader) const
 {
-    return this->getResource(loader).getRefHandle< Runtime >();
+    return this->getResource(loader).getHandle< Runtime >();
 }
 
 void ComponentRegistry::addComponentStorage()

@@ -12,7 +12,7 @@ namespace Motor { namespace Meta { namespace AST {
 
 class Object;
 
-class motor_api(INTROSPECT) IntrospectionHint : public minitl::refcountable
+class motor_api(INTROSPECT) IntrospectionHint : public minitl::pointer
 {
 public:
     typedef Meta::ArgInfo< weak< const Node > > ArgInfo;

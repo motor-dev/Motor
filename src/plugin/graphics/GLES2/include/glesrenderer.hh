@@ -26,11 +26,11 @@ public:
     void flush() override;
 
 private:
-    ref< IGPUResource >
+    scoped< IGPUResource >
     create(weak< const RenderSurfaceDescription > renderSurfaceDescription) const override;
-    ref< IGPUResource >
+    scoped< IGPUResource >
     create(weak< const RenderWindowDescription > renderWindowDescription) const override;
-    ref< IGPUResource >
+    scoped< IGPUResource >
                create(weak< const ShaderProgramDescription > shaderDescription) const override;
     knl::uint2 getScreenSize() const override;
 };

@@ -10,7 +10,7 @@
 
 namespace Motor { namespace Python {
 
-class motor_api(PYTHONLIB) PythonLibrary : public minitl::refcountable
+class motor_api(PYTHONLIB) PythonLibrary : public minitl::pointer
 {
 public:
     explicit PythonLibrary(const char* pythonLibraryName);
@@ -94,12 +94,12 @@ public:
     Type__Py_TrueStruct             m__Py_TrueStruct {};   // NOLINT(bugprone-reserved-identifier)
     Type__Py_FalseStruct            m__Py_FalseStruct {};  // NOLINT(bugprone-reserved-identifier)
     Type__Py_NotImplementedStruct
-        m__Py_NotImplementedStruct {};                     // NOLINT(bugprone-reserved-identifier)
+        m__Py_NotImplementedStruct {};  // NOLINT(bugprone-reserved-identifier)
 
     Type_PyObject_SetAttrString m_PyObject_SetAttrString {};
     Type_PyObject_GetAttrString m_PyObject_GetAttrString {};
     Type__PyArg_ParseTuple_SizeT
-        m__PyArg_ParseTuple_SizeT {};             // NOLINT(bugprone-reserved-identifier)
+        m__PyArg_ParseTuple_SizeT {};  // NOLINT(bugprone-reserved-identifier)
     Type__PyArg_ParseTupleAndKeywords_SizeT
         m__PyArg_ParseTupleAndKeywords_SizeT {};  // NOLINT(bugprone-reserved-identifier)
     Type_PyObject_IsTrue     m_PyObject_IsTrue {};

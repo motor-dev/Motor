@@ -23,14 +23,14 @@ ProducerLoader::~ProducerLoader() = default;
 void ProducerLoader::load(const weak< const Resource::IDescription >& producer,
                           Resource::Resource&                         resource)
 {
-    resource.setRefHandle(motor_checked_cast< const Producer >(producer)->createRuntime(this));
+    resource.setHandle(motor_checked_cast< const Producer >(producer)->createRuntime(this));
 }
 
 void ProducerLoader::unload(const weak< const Resource::IDescription >& producer,
                             Resource::Resource&                         resource)
 {
     motor_forceuse(producer);
-    resource.clearRefHandle();
+    resource.clearHandle();
 }
 
 void ProducerLoader::start()

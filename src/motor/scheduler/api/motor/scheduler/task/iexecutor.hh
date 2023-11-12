@@ -7,7 +7,7 @@
 
 namespace Motor { namespace Task {
 
-class motor_api(SCHEDULER) IExecutor : public minitl::refcountable
+class motor_api(SCHEDULER) IExecutor : public minitl::pointer
 {
 protected:
     IExecutor() = default;

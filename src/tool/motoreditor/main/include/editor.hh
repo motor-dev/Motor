@@ -19,7 +19,7 @@ namespace Motor { namespace Editor {
 class Editor : public Application
 {
 private:
-    Plugin::Plugin< void > const              m_renderer;
+    Plugin::Plugin< minitl::pointer > const   m_renderer;
     Plugin::Plugin< Resource::ILoader > const m_packageManager;
     Plugin::Plugin< Resource::ILoader > const m_luaScripting;
     ref< const Package > const                m_mainPackage;

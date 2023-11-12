@@ -51,8 +51,7 @@ void Scheduler::run(weak< const Task::KernelTask > task)
     /* TODO: set option to use Neon/AVX/SSE */
     const u32            jobCount = m_scheduler->workerCount() * 4;
     weak< const Kernel > kernel   = task->kernel();
-    weak< KernelObject > object
-        = kernel->getResource(m_cpuLoaders[0]).getRefHandle< KernelObject >();
+    weak< KernelObject > object = kernel->getResource(m_cpuLoaders[0]).getHandle< KernelObject >();
     m_scheduler->queueTask(task, object, jobCount);
 }
 

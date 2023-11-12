@@ -18,7 +18,7 @@ class ProducerLoader;
 
 class Producer;
 
-class motor_api(SCHEDULER) IProduct : public minitl::refcountable
+class motor_api(SCHEDULER) IProduct : public minitl::pointer
 {
 protected:
     weak< const Producer > m_producer;
@@ -44,7 +44,7 @@ public:
 class motor_api(SCHEDULER) Producer : public Resource::Description< Producer >
 {
 protected:
-    class motor_api(SCHEDULER) Runtime : public minitl::refcountable
+    class motor_api(SCHEDULER) Runtime : public minitl::pointer
     {
     public:
         typedef minitl::vector< minitl::tuple< weak< const IProduct >, ref< IParameter > > >
@@ -64,10 +64,10 @@ protected:
     ~Producer() override;
 
 public:
-    virtual ref< Runtime > createRuntime(weak< const ProducerLoader > loader) const = 0;
-    ref< Task::ITask >     getTask(const weak< const ProducerLoader >& loader) const;
-    ref< IParameter >      getParameter(const weak< const ProducerLoader >& loader,
-                                        const weak< const IProduct >&       product) const;
+    virtual scoped< Runtime > createRuntime(weak< const ProducerLoader > loader) const = 0;
+    ref< Task::ITask >        getTask(const weak< const ProducerLoader >& loader) const;
+    ref< IParameter >         getParameter(const weak< const ProducerLoader >& loader,
+                                           const weak< const IProduct >&       product) const;
 };
 
 }}  // namespace Motor::KernelScheduler

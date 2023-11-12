@@ -11,51 +11,77 @@
 namespace minitl {
 
 template < typename T >
-scoped< T >::scoped(T* value, allocator& allocator) : m_ptr(value)
+scoped< T >::scoped(details::scoped_payload* payload, T* value) : m_payload(payload)
+                                                                , m_ptr(value)
 {
-    motor_assert(
-        value->pointer::m_allocator == 0,
-        "value already has a deleter; being refcounting multiple times?");
-    value->pointer::m_allocator = &allocator;
 }
 
 template < typename T >
-scoped< T >::scoped() : m_ptr(0)
+scoped< T >::scoped() : m_payload(nullptr)
+                      , m_ptr(nullptr)
 {
 }
 
 template < typename T >
 scoped< T >::~scoped()
 {
-    if(m_ptr) m_ptr->checked_delete();
-}
-
-template < typename T >
-scoped< T >::scoped(scoped&& other) noexcept : m_ptr(other.m_ptr)
-{
-    other.m_ptr = 0;
-}
-
-template < typename T >
-template < typename U >
-scoped< T >::scoped(scoped< U >&& other) : m_ptr(other.m_ptr)
-{
-    other.m_ptr = 0;
-}
-
-template < typename T >
-template < typename U >
-void scoped< T >::reset(scoped< U >&& other)
-{
-    if(m_ptr != other.m_ptr)
+    if(m_payload)
     {
-        if(m_ptr)
-        {
-            m_ptr->checked_delete();
-        }
-        m_ptr       = other.m_ptr;
-        other.m_ptr = 0;
+        allocator& alloc = m_payload->allocator;
+        m_payload->~scoped_payload();
+        alloc.free(m_payload);
     }
+}
+
+template < typename T >
+scoped< T >::scoped(scoped&& other) noexcept : m_payload(other.m_payload)
+                                             , m_ptr(other.m_ptr)
+{
+    other.m_payload = nullptr;
+    other.m_ptr     = nullptr;
+}
+
+template < typename T >
+scoped< T >& scoped< T >::operator=(scoped&& other) noexcept
+{
+    if(m_payload)
+    {
+        allocator& alloc = m_payload->allocator;
+        m_payload->~scoped_payload();
+        alloc.free(m_payload);
+    }
+    m_payload       = other.m_payload;
+    m_ptr           = other.m_ptr;
+    other.m_payload = nullptr;
+    other.m_ptr     = nullptr;
+    return *this;
+}
+
+template < typename T >
+template < typename U >
+scoped< T >::scoped(scoped< U >&& other)
+    : m_payload(other.m_payload)
+    , m_ptr(motor_implicit_cast< T >(other.m_ptr))
+{
+    other.m_payload = nullptr;
+    other.m_ptr     = nullptr;
+}
+
+template < typename T >
+template < typename U >
+scoped< T >& scoped< T >::operator=(scoped< U >&& other) noexcept
+{
+    if(m_payload)
+    {
+        allocator& alloc = m_payload->allocator;
+        m_payload->~scoped_payload();
+        alloc.free(m_payload);
+    }
+    m_payload       = other.m_payload;
+    m_ptr           = motor_implicit_cast< T >(other.m_ptr);
+    other.m_payload = nullptr;
+    other.m_ptr     = nullptr;
+    return *this;
 }
 
 template < typename T >
@@ -67,13 +93,13 @@ T* scoped< T >::operator->() const
 template < typename T >
 scoped< T >::operator const void*() const
 {
-    return m_ptr;
+    return static_cast< const void* >(m_ptr);
 }
 
 template < typename T >
 bool scoped< T >::operator!() const
 {
-    return m_ptr == 0;
+    return m_ptr == nullptr;
 }
 
 template < typename T >
@@ -92,6 +118,24 @@ template < typename T, typename U >
 bool operator!=(const scoped< T >& ref1, const scoped< U >& ref2)
 {
     return ref1.operator->() != ref2.operator->();
+}
+
+template < typename U, typename T >
+inline scoped< U > motor_checked_cast(scoped< T >&& value)
+{
+    motor_assert(!value || dynamic_cast< U* >(value.operator->()), "invalid cast");
+    details::scoped_payload* payload = value.m_payload;
+    U*                       ptr     = static_cast< U* >(value.m_ptr);
+    value.m_payload                  = nullptr;
+    value.m_ptr                      = nullptr;
+    return scoped< U >(payload, ptr);
+}
+
+template < typename U, typename T >
+inline weak< U > motor_checked_cast(const scoped< T >& value)
+{
+    motor_assert(!value || dynamic_cast< U* >(value.operator->()), "invalid cast");
+    return weak< U >(static_cast< U* >(value.operator->()));
 }
 
 }  // namespace minitl

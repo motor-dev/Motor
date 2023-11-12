@@ -21,13 +21,13 @@ void CodeLoader::load(const weak< const Resource::IDescription >& kernelDescript
                       motor_checked_cast< const Kernel >(kernelDescription)->name());
     inamespace name
         = motor_checked_cast< const Kernel >(kernelDescription)->name() + inamespace("cuda");
-    resource.setRefHandle(ref< KernelObject >::create(Arena::task(), name));
+    resource.setHandle(scoped< KernelObject >::create(Arena::task(), name));
 }
 
 void CodeLoader::unload(const weak< const Resource::IDescription >& /*kernelDescription*/,
                         Resource::Resource& resource)
 {
-    resource.clearRefHandle();
+    resource.clearHandle();
 }
 
 }}}  // namespace Motor::KernelScheduler::Cuda

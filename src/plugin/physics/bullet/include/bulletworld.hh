@@ -8,7 +8,7 @@
 
 namespace Motor { namespace Physics { namespace Bullet {
 
-class BulletWorld : public minitl::refcountable
+class BulletWorld : public minitl::pointer
 {
 public:
     explicit BulletWorld(const Plugin::Context& context);

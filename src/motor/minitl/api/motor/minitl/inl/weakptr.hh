@@ -6,10 +6,8 @@
 
 #include <motor/minitl/weakptr.hh>
 
+#include <motor/minitl/cast.hh>
 #include <motor/minitl/hash.hh>
-#include <motor/minitl/refcountable.hh>
-#include <motor/minitl/refptr.hh>
-#include <motor/minitl/scopedptr.hh>
 
 namespace minitl {
 
@@ -34,7 +32,7 @@ weak< T >::weak(T* p) : m_ptr(p)
 
 template < typename T >
 template < typename U >
-weak< T >::weak(const ref< U >& other) : m_ptr(check_is_a< T >(other.operator->()))
+weak< T >::weak(const ref< U >& other) : m_ptr(motor_implicit_cast< T >(other.operator->()))
 {
 #if MOTOR_ENABLE_WEAKCHECK
     if(m_ptr) m_ptr->add_weak();
@@ -43,7 +41,7 @@ weak< T >::weak(const ref< U >& other) : m_ptr(check_is_a< T >(other.operator->(
 
 template < typename T >
 template < typename U >
-weak< T >::weak(const scoped< U >& other) : m_ptr(check_is_a< T >(other.operator->()))
+weak< T >::weak(const scoped< U >& other) : m_ptr(motor_implicit_cast< T >(other.operator->()))
 {
 #if MOTOR_ENABLE_WEAKCHECK
     if(m_ptr) m_ptr->add_weak();
@@ -60,7 +58,7 @@ weak< T >::weak(const weak& other) : m_ptr(other.operator->())
 
 template < typename T >
 template < typename U >
-weak< T >::weak(const weak< U >& other) : m_ptr(check_is_a< T >(other.operator->()))
+weak< T >::weak(const weak< U >& other) : m_ptr(motor_implicit_cast< T >(other.operator->()))
 {
 #if MOTOR_ENABLE_WEAKCHECK
     if(m_ptr) m_ptr->add_weak();
@@ -132,6 +130,13 @@ void weak< T >::clear()
     if(m_ptr) m_ptr->dec_weak();
 #endif
     m_ptr = 0;
+}
+
+template < typename U, typename T >
+inline weak< U > motor_checked_cast(const weak< T >& value)
+{
+    motor_assert(!value || dynamic_cast< U* >(value.operator->()), "invalid cast");
+    return weak< U >(static_cast< U* >(value.operator->()));
 }
 
 }  // namespace minitl

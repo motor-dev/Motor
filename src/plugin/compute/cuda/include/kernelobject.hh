@@ -11,7 +11,7 @@ namespace Motor { namespace KernelScheduler { namespace Cuda {
 
 class Scheduler;
 
-class KernelObject : public minitl::refcountable
+class KernelObject : public minitl::pointer
 {
     friend class Scheduler;
 

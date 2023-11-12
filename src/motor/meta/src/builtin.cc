@@ -66,31 +66,6 @@ MOTOR_EXPORT raw< const Meta::Class > ClassID< minitl::pointer >::klass()
 }
 
 template <>
-MOTOR_EXPORT istring ClassID< minitl::refcountable >::name()
-{
-    static const istring s_name("refcountable");
-    return s_name;
-}
-
-template <>
-MOTOR_EXPORT raw< const Meta::Class > ClassID< minitl::refcountable >::klass()
-{
-    static Meta::Class s_refcountable = {name(),
-                                         0,
-                                         motor_class< minitl::pointer >(),
-                                         0,
-                                         {nullptr},
-                                         {nullptr},
-                                         {nullptr},
-                                         {nullptr},
-                                         {nullptr},
-                                         motor_class< minitl::pointer >()->interfaces,
-                                         &nullconstructor,
-                                         &nulldestructor};
-    return {&s_refcountable};
-}
-
-template <>
 MOTOR_EXPORT raw< const Class > ClassID< i8 >::klass()
 {
     return ClassID< motor_i8 >::klass();

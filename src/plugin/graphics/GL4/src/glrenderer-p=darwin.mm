@@ -52,7 +52,7 @@
 
 namespace Motor { namespace OpenGL {
 
-class GLRenderer::Context : public minitl::refcountable
+class GLRenderer::Context : public minitl::pointer
 {
     friend class GLRenderer;
     friend class GLWindow;
@@ -93,7 +93,7 @@ GLRenderer::Context::~Context()
     [m_pixelFormat release];
 }
 
-class GLWindow::Context : public minitl::refcountable
+class GLWindow::Context : public minitl::pointer
 {
     friend class GLRenderer;
     friend class GLWindow;
@@ -150,8 +150,8 @@ void GLRenderer::attachWindow(const weak< GLWindow >& w) const
     NSOpenGLContext* context = [[NSOpenGLContext alloc] initWithFormat:m_context->m_pixelFormat
                                                           shareContext:m_context->m_context];
     motor_assert(window, "No native window created for Motor window");
-    w->m_context.reset(scoped< GLWindow::Context >::create(Arena::general(), window, context,
-                                                           Thread::currentId()));
+    w->m_context = scoped< GLWindow::Context >::create(Arena::general(), window, context,
+                                                       Thread::currentId());
     [context release];
 }
 
@@ -185,7 +185,7 @@ void GLWindow::unload()
 {
     motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     Window::unload();
-    m_context.reset(scoped< Context >());
+    m_context = scoped< Context >();
 }
 
 void GLWindow::setCurrent() const

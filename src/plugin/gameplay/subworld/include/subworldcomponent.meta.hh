@@ -8,14 +8,11 @@
 #include <motor/world/entity/context.meta.hh>
 #include <motor/world/event/context.meta.hh>
 #include <motor/world/event/event.hh>
-#include <motor/world/resource/handle.meta.hh>
 
 namespace Motor { namespace World {
 
 struct [[motor::meta(tag = LogicComponent)]] SubWorldComponent
 {
-    ResourceHandle subworld;
-
     void load(const EntityContext& owner, EventContext& context);
     void unload(const EntityContext& owner, EventContext& context);
     void spawn(const EntityContext& owner, EventContext& context);

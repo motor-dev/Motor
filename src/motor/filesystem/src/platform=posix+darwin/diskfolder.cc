@@ -105,9 +105,9 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
             }
             else
             {
-                ref< File > newFile = ref< PosixFile >::create(
+                scoped< File > newFile = scoped< PosixFile >::create(
                     Arena::filesystem(), ipath(m_path) + ifilename(name), s.st_size, s.st_mtime);
-                m_files.push_back(minitl::make_tuple(name, newFile));
+                m_files.emplace_back(name, minitl::move(newFile));
             }
         }
     }
@@ -123,7 +123,7 @@ weak< File > DiskFolder::createFile(const istring& name)
     {
         motor_error_format(Log::fs(), "could not get real path of {0}: {1}({2})", m_path,
                            strerror(errno), errno);
-        return ref< File >();
+        return {};
     }
     strcat(fullPath, "/");
     strcat(fullPath, name.c_str());
@@ -132,29 +132,30 @@ weak< File > DiskFolder::createFile(const istring& name)
     {
         motor_error_format(Log::fs(), "could not create file {0}: {1}({2})", fullPath,
                            strerror(errno), errno);
-        return ref< File >();
+        return {};
     }
     fclose(f);
     if(stat(fullPath, &s) != 0)
     {
         motor_error_format(Log::fs(), "could not create file {0}: {1}({2})", fullPath,
                            strerror(errno), errno);
-        return ref< File >();
+        return {};
     }
 
     ScopedCriticalSection lock(m_lock);
-    ref< File > result = ref< PosixFile >::create(Arena::filesystem(), m_path + ifilename(name),
-                                                  s.st_size, s.st_mtime);
+    scoped< File > file = scoped< PosixFile >::create(Arena::filesystem(), m_path + ifilename(name),
+                                                      s.st_size, s.st_mtime);
+    weak< File >   result = file;
 
     for(auto& m_file: m_files)
     {
         if(m_file.first == name)
         {
-            m_file.second = result;
+            m_file.second = minitl::move(file);
             return result;
         }
     }
-    m_files.push_back(minitl::make_tuple(name, result));
+    m_files.emplace_back(name, minitl::move(file));
     return result;
 }
 
@@ -217,10 +218,10 @@ void DiskFolder::onChanged()
                 if(!exists)
                 {
                     motor_info_format(Log::fs(), "new file: {0}", p);
-                    ref< File > newFile = ref< PosixFile >::create(Arena::filesystem(),
-                                                                   ipath(m_path) + ifilename(name),
-                                                                   s.st_size, s.st_mtime);
-                    m_files.emplace_back(name, newFile);
+                    scoped< File > newFile = scoped< PosixFile >::create(
+                        Arena::filesystem(), ipath(m_path) + ifilename(name), s.st_size,
+                        s.st_mtime);
+                    m_files.emplace_back(name, minitl::move(newFile));
                 }
             }
         }

@@ -10,17 +10,17 @@
 
 namespace Motor {
 
-class motor_api(FILESYSTEM) Folder : public minitl::refcountable
+class motor_api(FILESYSTEM) Folder : public minitl::pointer
 {
 protected:
-    CriticalSection                                           m_lock;
-    minitl::vector< minitl::tuple< istring, ref< File > > >   m_files;
-    minitl::vector< minitl::tuple< istring, ref< Folder > > > m_folders;
-    minitl::vector< minitl::tuple< istring, ref< Folder > > > m_mounts;
-    bool                                                      m_upToDate;
+    CriticalSection                                            m_lock;
+    minitl::vector< minitl::tuple< istring, scoped< File > > > m_files;
+    minitl::vector< minitl::tuple< istring, ref< Folder > > >  m_folders;
+    minitl::vector< minitl::tuple< istring, ref< Folder > > >  m_mounts;
+    bool                                                       m_upToDate;
 
 public:
-    class [[motor::meta(export = no)]] Watch : public minitl::refcountable
+    class [[motor::meta(export = no)]] Watch : public minitl::pointer
     {
     private:
         weak< Folder > m_folder;

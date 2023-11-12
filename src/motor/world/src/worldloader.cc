@@ -9,10 +9,10 @@
 
 namespace Motor { namespace World {
 
-class WorldLoader::WorldResource : public minitl::refcountable
+class WorldLoader::WorldResource : public minitl::pointer
 {
 private:
-    ref< const WorldRuntime >       m_worldRuntime;
+    scoped< const WorldRuntime >    m_worldRuntime;
     Task::ITask::CallbackConnection m_startSceneUpdate;
     Task::ITask::CallbackConnection m_endSceneUpdate;
 
@@ -61,11 +61,11 @@ void WorldLoader::load(const weak< const Resource::IDescription >& worldDescript
                        Resource::Resource&                         resource)
 {
     m_worldCount++;
-    weak< const World >  world   = motor_checked_cast< const World >(worldDescription);
-    ref< WorldResource > runtime = ref< WorldResource >::create(Arena::resource(), m_producerLoader,
-                                                                m_pluginContext, world, m_loopTask);
+    weak< const World >     world   = motor_checked_cast< const World >(worldDescription);
+    scoped< WorldResource > runtime = scoped< WorldResource >::create(
+        Arena::resource(), m_producerLoader, m_pluginContext, world, m_loopTask);
     m_worlds.push_back(runtime);
-    resource.setRefHandle(runtime);
+    resource.setHandle(minitl::move(runtime));
 }
 
 void WorldLoader::unload(const weak< const Resource::IDescription >& worldDescription,
@@ -74,8 +74,8 @@ void WorldLoader::unload(const weak< const Resource::IDescription >& worldDescri
     motor_forceuse(worldDescription);
     m_worldCount--;
     {
-        weak< WorldResource > runtime = resource.getRefHandle< WorldResource >();
-        for(minitl::vector< ref< WorldResource > >::iterator it = m_worlds.begin();
+        weak< WorldResource > runtime = resource.getHandle< WorldResource >();
+        for(minitl::vector< weak< WorldResource > >::iterator it = m_worlds.begin();
             it != m_worlds.end(); ++it)
         {
             if(*it == runtime)
@@ -86,7 +86,7 @@ void WorldLoader::unload(const weak< const Resource::IDescription >& worldDescri
             }
         }
     }
-    resource.clearRefHandle();
+    resource.clearHandle();
 }
 
 void WorldLoader::disconnectWorlds()

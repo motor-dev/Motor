@@ -8,7 +8,7 @@ namespace Motor { namespace Debug {
 
 minitl::assertion_result assertionCallback(const char* file, int line, const char* expr,
                                            const char* message);
-class AssertSetup : public minitl::refcountable
+class AssertSetup : public minitl::pointer
 {
 private:
     minitl::assertion_callback_t m_previousAssertionCallback;

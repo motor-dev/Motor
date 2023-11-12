@@ -15,13 +15,13 @@
 
 namespace Motor { namespace PackageBuilder { namespace Nodes {
 
-class Package : public minitl::refcountable
+class Package : public minitl::pointer
 {
 private:
-    const ifilename                           m_filename;
-    Meta::AST::DbContext                      m_context;
-    minitl::vector< Plugin::Plugin< void* > > m_plugins;
-    minitl::vector< ref< Meta::AST::Node > >  m_nodes;
+    const ifilename                                     m_filename;
+    Meta::AST::DbContext                                m_context;
+    minitl::vector< Plugin::Plugin< minitl::pointer > > m_plugins;
+    minitl::vector< ref< Meta::AST::Node > >            m_nodes;
 
 public:
     Package(const ifilename& filename, const ref< Folder >& dataFolder);
@@ -33,8 +33,9 @@ public:
 
     void loadPlugin(const inamespace& plugin, const inamespace& name);
 
-    void createObjects(const weak< Resource::ResourceManager >& manager,
-                       minitl::vector< Meta::Value >&           values);
+    void createObjects(const weak< Resource::ResourceManager >&             manager,
+                       minitl::vector< Plugin::Plugin< minitl::pointer > >& plugins,
+                       minitl::vector< Meta::Value >&                       values);
     void diffFromPackage(const weak< Package >&                   previous,
                          const weak< Resource::ResourceManager >& manager);
 

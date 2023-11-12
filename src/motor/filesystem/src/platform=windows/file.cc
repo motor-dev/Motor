@@ -21,6 +21,20 @@ Win32File::Win32File(const ifilename& filename, u64 size, u64 timestamp)
 
 Win32File::~Win32File() = default;
 
+ref< File::Ticket > Win32File::doBeginOperation(minitl::allocator& ticketArena,
+                                                minitl::allocator& dataArena, const void* data,
+                                                u32 size, i64 offset, bool text) const
+{
+    return ref< Ticket >::create(ticketArena, m_filename, dataArena, offset, size, text, data);
+}
+
+Win32File::Ticket::Ticket(const ifilename& filename, minitl::allocator& arena, i64 offset, u32 size,
+                          bool text, const void* data)
+    : File::Ticket(arena, offset, size, text, data)
+    , m_filename(filename)
+{
+}
+
 static void setFilePointer(const char* debugName, HANDLE file, i64 wantedOffset)
 {
     LARGE_INTEGER setOffset;
@@ -40,9 +54,8 @@ static void setFilePointer(const char* debugName, HANDLE file, i64 wantedOffset)
     }
 }
 
-void Win32File::doFillBuffer(const weak< File::Ticket >& ticket) const
+void Win32File::Ticket::fillBuffer()
 {
-    motor_assert(ticket->file == this, "trying to read wrong file");
     ifilename::Filename pathname = m_filename.str('\\');
     HANDLE h = CreateFileA(pathname.name, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0,
                            nullptr);
@@ -52,77 +65,50 @@ void Win32File::doFillBuffer(const weak< File::Ticket >& ticket) const
         motor_info_format(Log::fs(),
                           "file {0} ({1}) could not be opened: CreateFile returned an error ({2})",
                           m_filename, pathname.name, errorCode);
-        ticket->error.set(true);
+        error.set(true);
     }
     else
     {
         static const int s_bufferSize = 1024;
-        static u8        buffer[s_bufferSize];
-        u8*              target    = ticket->buffer.data();
-        u32              processed = 0;
-        setFilePointer(pathname.name, h, ticket->offset);
-        for(ticket->processed.set(0); !ticket->done();)
+        u8*              target       = buffer.data();
+        setFilePointer(pathname.name, h, offset);
+        for(processed.set(0); !done();)
         {
             DWORD read;
-            if(ticket->text)
+            if(processed + s_bufferSize > total)
             {
-                if(ticket->processed + s_bufferSize > ticket->total)
-                {
-                    ReadFile(h, buffer,
-                             motor_checked_numcast< u32 >(ticket->total - ticket->processed), &read,
-                             nullptr);
-                }
-                else
-                {
-                    ReadFile(h, buffer, s_bufferSize, &read, nullptr);
-                }
-                for(u32 i = 0; i < read; ++i)
-                {
-                    if(buffer[i] != '\r')
-                    {
-                        target[processed++] = buffer[i];
-                    }
-                }
+                ReadFile(h, target + processed, motor_checked_numcast< u32 >(total - processed),
+                         &read, nullptr);
             }
             else
             {
-                if(ticket->processed + s_bufferSize > ticket->total)
-                {
-                    ReadFile(h, target + ticket->processed,
-                             motor_checked_numcast< u32 >(ticket->total - ticket->processed), &read,
-                             nullptr);
-                }
-                else
-                {
-                    ReadFile(h, target + ticket->processed, s_bufferSize, &read, nullptr);
-                }
+                ReadFile(h, target + processed, s_bufferSize, &read, nullptr);
             }
-            ticket->processed += read;
+            processed += read;
             if(read == 0)
             {
                 motor_error_format(
                     Log::fs(),
                     "reached premature end of file in {0} after reading {1} bytes (offset {2})",
-                    m_filename, ticket->processed, ticket->total);
-                ticket->error.set(true);
+                    m_filename, processed, total);
+                error.set(true);
             }
         }
-        if(ticket->text && !ticket->error)
+        if(text && !error)
         {
-            motor_assert_format(processed + 1 <= ticket->buffer.count(),
-                                "buffer size is {0}; bytes processed is {1}",
-                                ticket->buffer.count(), (processed + 1));
+            motor_assert_format(processed + 1 <= buffer.count(),
+                                "buffer size is {0}; bytes processed is {1}", buffer.count(),
+                                (processed + 1));
             // shrink buffer
-            ticket->buffer.realloc(processed + 1);
+            buffer.realloc(processed + 1);
             target[processed] = 0;
         }
     }
     CloseHandle(h);
 }
 
-void Win32File::doWriteBuffer(const weak< Ticket >& ticket) const
+void Win32File::Ticket::writeBuffer()
 {
-    motor_assert(ticket->file == this, "trying to read wrong file");
     ifilename::Filename pathname = m_filename.str('\\');
     HANDLE h = CreateFileA(pathname.name, GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
     if(h == INVALID_HANDLE_VALUE)
@@ -131,31 +117,29 @@ void Win32File::doWriteBuffer(const weak< Ticket >& ticket) const
         motor_info_format(Log::fs(),
                           "file {0} ({1}) could not be opened: CreateFile returned an error ({2})",
                           m_filename, pathname.name, errorCode);
-        ticket->error.set(true);
+        error.set(true);
     }
     else
     {
         static const int s_bufferSize = 1024;
-        setFilePointer(pathname.name, h, ticket->offset);
-        for(ticket->processed.set(0); !ticket->done();)
+        setFilePointer(pathname.name, h, offset);
+        for(processed.set(0); !done();)
         {
             DWORD written;
-            if(ticket->processed + s_bufferSize > ticket->total)
-                WriteFile(h, ticket->buffer.data() + ticket->processed,
-                          motor_checked_numcast< u32 >(ticket->total - ticket->processed), &written,
-                          nullptr);
+            if(processed + s_bufferSize > total)
+                WriteFile(h, buffer.data() + processed,
+                          motor_checked_numcast< u32 >(total - processed), &written, nullptr);
             else
-                WriteFile(h, ticket->buffer.data() + ticket->processed, s_bufferSize, &written,
-                          nullptr);
-            ticket->processed += written;
+                WriteFile(h, buffer.data() + processed, s_bufferSize, &written, nullptr);
+            processed += written;
             if(written == 0)
             {
                 motor_error_format(
                     Log::fs(),
                     "could not write part of the buffer to file {0}; failed after processing "
                     "{1} bytes out of {2}",
-                    m_filename, ticket->processed, ticket->total);
-                ticket->error.set(true);
+                    m_filename, processed, total);
+                error.set(true);
             }
         }
         CloseHandle(h);

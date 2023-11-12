@@ -12,9 +12,9 @@ namespace Motor { namespace Meta { namespace AST {
 class motor_api(INTROSPECT) Property : public Node
 {
 private:
-    const ref< const Object > m_owner;
-    const inamespace          m_propertyName;
-    Meta::Type                m_type;
+    const weak< const Object > m_owner;
+    const inamespace           m_propertyName;
+    Meta::Type                 m_type;
 
 protected:
     raw< const Meta::Method > getCall(DbContext & context) const override;
@@ -24,7 +24,7 @@ protected:
     void                      doVisit(Node::Visitor & visitor) const override;
 
 public:
-    Property(const ref< const Object >& owner, const inamespace& propertyName);
+    Property(const weak< const Object >& owner, const inamespace& propertyName);
     ~Property() override;
 };
 

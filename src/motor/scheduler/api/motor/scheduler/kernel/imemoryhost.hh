@@ -9,7 +9,7 @@ namespace Motor { namespace KernelScheduler {
 
 class IMemoryBuffer;
 
-class motor_api(SCHEDULER) IMemoryHost : public minitl::refcountable
+class motor_api(SCHEDULER) IMemoryHost : public minitl::pointer
 {
     friend class IMemoryBuffer;
 

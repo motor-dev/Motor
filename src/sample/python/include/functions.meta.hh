@@ -7,7 +7,7 @@
 
 namespace Motor { namespace TestCases {
 
-class Class : public minitl::refcountable
+class Class : public minitl::pointer
 {
 public:
     i32 x1;

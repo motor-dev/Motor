@@ -61,6 +61,7 @@ public:
     vector(const vector< T >& other);
     vector(vector< T >&& other) noexcept;
     vector& operator=(const vector< T >& other);
+    vector& operator=(vector< T >&& other) noexcept;
     template < typename ITERATOR >
     vector(allocator& allocator, ITERATOR first, ITERATOR last);
     ~vector();

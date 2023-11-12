@@ -21,7 +21,7 @@ class String;
 
 struct DbContext;
 
-class motor_api(INTROSPECT) Node : public minitl::refcountable
+class motor_api(INTROSPECT) Node : public minitl::pointer
 {
     friend class Array;
 

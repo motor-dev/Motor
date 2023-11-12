@@ -23,13 +23,13 @@ void CodeLoader::load(const weak< const Resource::IDescription >& codeDescriptio
                       motor_checked_cast< const Code >(codeDescription)->name());
     inamespace name = motor_checked_cast< const Code >(codeDescription)->name();
     name += m_cpuVariant;
-    resource.setRefHandle(ref< CodeObject >::create(Arena::task(), name));
+    resource.setHandle(scoped< CodeObject >::create(Arena::task(), name));
 }
 
 void CodeLoader::unload(const weak< const Resource::IDescription >& /*codeDescription*/,
                         Resource::Resource& resource)
 {
-    resource.clearRefHandle();
+    resource.clearHandle();
 }
 
 }}}  // namespace Motor::KernelScheduler::CPU

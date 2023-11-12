@@ -11,7 +11,7 @@ namespace Motor { namespace Shaders {
 
 class IShaderBuilder;
 
-class motor_api(3D) Node : public minitl::refcountable
+class motor_api(3D) Node : public minitl::pointer
 {
 protected:
     Node();

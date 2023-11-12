@@ -9,7 +9,7 @@
 
 namespace Motor { namespace Windowing {
 
-class Renderer::PlatformRenderer : public minitl::refcountable
+class Renderer::PlatformRenderer : public minitl::pointer
 {
 private:
     NSAutoreleasePool* m_pool;

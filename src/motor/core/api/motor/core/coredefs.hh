@@ -41,7 +41,6 @@ motor_api(CORE) minitl::allocator& general();
 
 #    include <motor/minitl/cast.hh>
 #    include <motor/minitl/rawptr.hh>
-#    include <motor/minitl/refcountable.hh>
 #    include <motor/minitl/refptr.hh>
 #    include <motor/minitl/scopedptr.hh>
 #    include <motor/minitl/weakptr.hh>

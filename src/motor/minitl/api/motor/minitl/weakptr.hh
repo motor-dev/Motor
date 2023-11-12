@@ -5,9 +5,7 @@
 
 #include <motor/minitl/stdafx.h>
 #include <motor/minitl/hash.hh>
-#include <motor/minitl/refcountable.hh>
-#include <motor/minitl/refptr.hh>
-#include <motor/minitl/scopedptr.hh>
+#include <motor/minitl/pointer.hh>
 
 namespace minitl {
 
@@ -15,7 +13,7 @@ template < typename T >
 class weak
 {
     template < typename U, typename V >
-    friend weak< U > motor_checked_cast(weak< V > v);
+    friend weak< U > motor_checked_cast(const weak< V >& v);
 
 private:
     T* m_ptr;
@@ -25,9 +23,9 @@ private:
 
 public:
     inline weak();
-    inline weak(T* p);                      // NOLINT(google-explicit-constructor)
+    inline weak(T* p);  // NOLINT(google-explicit-constructor)
     template < typename U >
-    inline weak(const ref< U >& other);     // NOLINT(google-explicit-constructor)
+    inline weak(const ref< U >& other);  // NOLINT(google-explicit-constructor)
     template < typename U >
     inline weak(const scoped< U >& other);  // NOLINT(google-explicit-constructor)
     inline weak(const weak& other);

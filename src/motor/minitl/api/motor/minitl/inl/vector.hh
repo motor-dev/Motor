@@ -230,6 +230,16 @@ vector< T >::vector(allocator& allocator, ITERATOR first, ITERATOR last)
 }
 
 template < typename T >
+vector< T >& vector< T >::operator=(vector< T >&& other) noexcept
+{
+    clear();
+    m_memory    = minitl::move(other.m_memory);
+    m_end       = other.m_end;
+    other.m_end = nullptr;
+    return *this;
+}
+
+template < typename T >
 vector< T >& vector< T >::operator=(const vector< T >& other)
 {
     if(this != &other)

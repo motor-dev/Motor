@@ -10,11 +10,11 @@
 
 namespace Motor { namespace Task {
 
-class motor_api(SCHEDULER) ITask : public minitl::refcountable
+class motor_api(SCHEDULER) ITask : public minitl::pointer
 {
 public:
     class CallbackConnection;
-    class motor_api(SCHEDULER) ICallback : public minitl::refcountable
+    class motor_api(SCHEDULER) ICallback : public minitl::pointer
     {
     protected:
         ICallback();

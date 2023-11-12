@@ -25,13 +25,13 @@ PackageBuilder::PackageBuilder(const ref< Folder >& dataFolder) : m_dataFolder(d
 
 PackageBuilder::~PackageBuilder() = default;
 
-ref< Nodes::Package > PackageBuilder::createPackage(const ifilename&                      filename,
-                                                    const minitl::allocator::block< u8 >& buffer)
+scoped< Nodes::Package > PackageBuilder::createPackage(const ifilename& filename,
+                                                       const minitl::allocator::block< u8 >& buffer)
 {
     BuildContext context(filename, buffer, m_dataFolder);
     motor_package_parse(&context);
     context.result->resolve();
-    return context.result;
+    return minitl::move(context.result);
 }
 
 }  // namespace PackageBuilder

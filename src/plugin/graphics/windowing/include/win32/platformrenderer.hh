@@ -19,7 +19,7 @@ struct WindowCreationFlags
     bool        fullscreen;
 };
 
-class Renderer::PlatformRenderer : public minitl::refcountable
+class Renderer::PlatformRenderer : public minitl::pointer
 {
 private:
     weak< Renderer > m_renderer;
@@ -28,7 +28,7 @@ private:
 
 public:
     PlatformRenderer(const weak< Renderer >& renderer);
-    ~PlatformRenderer();
+    ~PlatformRenderer() override;
 
     HWND           createWindowImplementation(const WindowCreationFlags& flags) const;
     void           destroyWindowImplementation(HWND hWnd);

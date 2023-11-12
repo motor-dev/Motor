@@ -7,7 +7,7 @@
 
 namespace Motor { namespace Input {
 
-class motor_api(INPUT) Controller : public minitl::refcountable
+class motor_api(INPUT) Controller : public minitl::pointer
 {
 protected:
     Controller();

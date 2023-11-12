@@ -22,13 +22,13 @@ void CodeLoader::load(const weak< const Resource::IDescription >& kernelDescript
                       motor_checked_cast< const Code >(kernelDescription)->name());
     inamespace name
         = motor_checked_cast< const Code >(kernelDescription)->name() + inamespace("cl");
-    resource.setRefHandle(ref< CodeObject >::create(Arena::task(), m_context, name));
+    resource.setHandle(scoped< CodeObject >::create(Arena::task(), m_context, name));
 }
 
 void CodeLoader::unload(const weak< const Resource::IDescription >& /*kernelDescription*/,
                         Resource::Resource& resource)
 {
-    resource.clearRefHandle();
+    resource.clearHandle();
 }
 
 }}}  // namespace Motor::KernelScheduler::OpenCL

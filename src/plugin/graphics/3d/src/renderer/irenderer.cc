@@ -66,19 +66,19 @@ void IRenderer::flush()
 weak< IGPUResource >
 IRenderer::getRenderSurface(const weak< const Resource::IDescription >& description) const
 {
-    return description->getResource(m_renderSurfaceLoader).getRefHandle< IGPUResource >();
+    return description->getResource(m_renderSurfaceLoader).getHandle< IGPUResource >();
 }
 
 weak< IGPUResource >
 IRenderer::getRenderWindow(const weak< const Resource::IDescription >& description) const
 {
-    return description->getResource(m_renderWindowLoader).getRefHandle< IGPUResource >();
+    return description->getResource(m_renderWindowLoader).getHandle< IGPUResource >();
 }
 
 weak< IGPUResource >
 IRenderer::getShaderProgram(const weak< const Resource::IDescription >& description) const
 {
-    return description->getResource(m_shaderProgramLoader).getRefHandle< IGPUResource >();
+    return description->getResource(m_shaderProgramLoader).getHandle< IGPUResource >();
 }
 
 }  // namespace Motor

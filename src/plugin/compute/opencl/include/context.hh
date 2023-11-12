@@ -10,7 +10,7 @@ namespace Motor { namespace KernelScheduler { namespace OpenCL {
 class Platform;
 class Scheduler;
 
-class Context : public minitl::refcountable
+class Context : public minitl::pointer
 {
     friend class Scheduler;
 

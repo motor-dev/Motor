@@ -20,7 +20,7 @@ struct PlatformData
     explicit PlatformData(::Display* display);
 };
 
-class Renderer::PlatformRenderer : public minitl::refcountable
+class Renderer::PlatformRenderer : public minitl::pointer
 {
     friend class Renderer;
     friend class Window;

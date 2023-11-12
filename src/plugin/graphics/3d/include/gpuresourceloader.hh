@@ -17,10 +17,10 @@ class GPUResourceLoader : public Resource::ILoader
     friend class IRenderer;
 
 private:
-    weak< const IRenderer >                m_renderer;
-    minitl::intrusive_list< IGPUResource > m_pending;
-    minitl::intrusive_list< IGPUResource > m_resources;
-    minitl::vector< weak< IGPUResource > > m_deleted;
+    weak< const IRenderer >                  m_renderer;
+    minitl::intrusive_list< IGPUResource >   m_pending;
+    minitl::intrusive_list< IGPUResource >   m_resources;
+    minitl::vector< scoped< IGPUResource > > m_deleted;
 
 public:
     explicit GPUResourceLoader(const weak< const IRenderer >& renderer);

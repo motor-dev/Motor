@@ -16,22 +16,22 @@ void GLRenderer::flush()
     Windowing::Renderer::flush();
 }
 
-ref< IGPUResource >
-    GLRenderer::create(weak< const RenderSurfaceDescription > /*renderSurfaceDescription*/) const
+scoped< IGPUResource >
+GLRenderer::create(weak< const RenderSurfaceDescription > /*renderSurfaceDescription*/) const
 {
-    return ref< GLSurface >();
+    return scoped< GLSurface >();
 }
 
-ref< IGPUResource >
+scoped< IGPUResource >
 GLRenderer::create(weak< const RenderWindowDescription > renderWindowDescription) const
 {
-    return ref< GLWindow >::create(m_allocator, renderWindowDescription, this);
+    return scoped< GLWindow >::create(m_allocator, renderWindowDescription, this);
 }
 
-ref< IGPUResource >
+scoped< IGPUResource >
 GLRenderer::create(weak< const ShaderProgramDescription > shaderDescription) const
 {
-    return ref< GLShaderProgram >::create(m_allocator, shaderDescription, this);
+    return scoped< GLShaderProgram >::create(m_allocator, shaderDescription, this);
 }
 
 }}  // namespace Motor::OpenGL

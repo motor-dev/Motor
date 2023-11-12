@@ -40,7 +40,7 @@ void Gtk3Loader::reload(const weak< const Resource::IDescription >& oldDescripti
 void Gtk3Loader::unload(const weak< const Resource::IDescription >& /*description*/,
                         Resource::Resource& resource)
 {
-    resource.clearRefHandle();
+    resource.clearHandle();
 }
 
 }}  // namespace Motor::Gtk3

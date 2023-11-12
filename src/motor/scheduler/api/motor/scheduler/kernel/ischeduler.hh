@@ -23,7 +23,7 @@ namespace Motor { namespace KernelScheduler {
 
 class IParameter;
 
-class motor_api(SCHEDULER) IScheduler : public minitl::refcountable
+class motor_api(SCHEDULER) IScheduler : public minitl::pointer
 {
 protected:
     const weak< Scheduler > m_scheduler;

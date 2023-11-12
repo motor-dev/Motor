@@ -13,7 +13,10 @@ class RenderWindowDescription;
 class MeshDescription;
 class TextureDescription;
 class ShaderProgramDescription;
-class IKernelScheduler;
+
+namespace Kernel {
+class IScheduler;
+}
 
 namespace OpenGL {
 
@@ -27,9 +30,9 @@ class GLRenderer : public Windowing::Renderer
 
 private:
     class Context;
-    scoped< Context >                  m_context;
-    scoped< GLMemoryHost >             m_openGLMemoryHost;
-    Plugin::Plugin< IKernelScheduler > m_openCLScheduler;
+    scoped< Context >                    m_context;
+    scoped< GLMemoryHost >               m_openGLMemoryHost;
+    Plugin::Plugin< Kernel::IScheduler > m_openCLScheduler;
 
 public:
     explicit GLRenderer(const Plugin::Context& context);
@@ -50,9 +53,11 @@ private:
     void attachWindow(const weak< GLWindow >& w) const;
 
 private:
-    ref< IGPUResource > create(weak< const RenderSurfaceDescription > rendersurface) const override;
-    ref< IGPUResource > create(weak< const RenderWindowDescription > renderwindow) const override;
-    ref< IGPUResource > create(weak< const ShaderProgramDescription > shader) const override;
+    scoped< IGPUResource >
+    create(weak< const RenderSurfaceDescription > rendersurface) const override;
+    scoped< IGPUResource >
+    create(weak< const RenderWindowDescription > renderwindow) const override;
+    scoped< IGPUResource > create(weak< const ShaderProgramDescription > shader) const override;
 };
 
 }  // namespace OpenGL

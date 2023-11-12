@@ -5,7 +5,6 @@
 
 #include <motor/plugin.graphics.3d/stdafx.h>
 #include <motor/minitl/intrusive_list.hh>
-#include <motor/minitl/refcountable.hh>
 #include <motor/resource/idescription.meta.hh>
 
 namespace Motor {
@@ -21,7 +20,7 @@ class GPUResourceLoader;
 class IRenderer;
 
 class motor_api(3D) IGPUResource
-    : public minitl::refcountable
+    : public minitl::pointer
     , public minitl::intrusive_list< IGPUResource >::item
 {
     template < typename T >

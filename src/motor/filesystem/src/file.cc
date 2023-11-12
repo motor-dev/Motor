@@ -12,41 +12,22 @@ static minitl::allocator& ticketPool()
     return Arena::filesystem();  // TODO
 }
 
-File::Ticket::Ticket(minitl::allocator& arena, const weak< const File >& file, i64 offset, u32 size,
-                     bool text)
-    : action(Read)
-    , file(file)
-    , buffer(arena, 0)
+File::Ticket::Ticket(minitl::allocator& arena, i64 offset, u32 size, bool text, const void* data)
+    : action(data == nullptr ? Read : Write)
+    , buffer(arena, data != nullptr ? size : 0)
     , processed(i_u32::create(0))
     , offset(offset)
     , total(size)
     , error(i_bool::create(false))
     , text(text)
 {
-    file->addref();
+    if(data)
+    {
+        memcpy(buffer.data(), data, size);
+    }
 }
 
-File::Ticket::Ticket(minitl::allocator& arena, const weak< const File >& file, i64 offset, u32 size,
-                     bool text, const void* data)
-    : action(Write)
-    , file(file)
-    , buffer(arena, size)
-    , processed(i_u32::create(0))
-    , offset(offset)
-    , total(size)
-    , error(i_bool::create(false))
-    , text(text)
-{
-    memcpy(buffer.data(), data, size);
-    file->addref();
-}
-
-File::Ticket::~Ticket()
-{
-    const File* f = file.operator->();
-    file          = weak< const File >();
-    f->decref();
-}
+File::Ticket::~Ticket() = default;
 
 File::File(const ifilename& filename, u64 size, u64 fileState)
     : m_filename(filename)
@@ -73,7 +54,7 @@ ref< const File::Ticket > File::beginRead(u32 size, i64 offset, bool text,
         motor_assert(m_size + offset + size + 1 <= m_size, "reading past end of file");
         s = size ? size : motor_checked_numcast< u32 >((i64)m_size + offset + (text ? 1 : 0));
     }
-    ref< Ticket > t = ref< Ticket >::create(ticketPool(), arena, this, offset, s, text);
+    ref< Ticket > t = doBeginOperation(ticketPool(), arena, nullptr, s, offset, text);
     IOProcess::IOContext::pushTicket(t);
     return t;
 }
@@ -84,22 +65,9 @@ ref< const File::Ticket > File::beginWrite(const void* data, u32 size, i64 offse
         motor_assert((u64)offset <= m_size, "writing past end of file");
     else if(offset < 0)
         motor_assert(offset + (i64)m_size + 1 >= 0, "writing past end of file");
-    ref< Ticket > t
-        = ref< Ticket >::create(ticketPool(), Arena::temporary(), this, offset, size, false, data);
+    ref< Ticket > t = doBeginOperation(ticketPool(), Arena::temporary(), data, size, offset, false);
     IOProcess::IOContext::pushTicket(t);
     return t;
-}
-
-void File::fillBuffer(const weak< Ticket >& ticket) const
-{
-    motor_assert(ticket->file == this, "trying to fill buffer of another file");
-    doFillBuffer(ticket);
-}
-
-void File::writeBuffer(const weak< Ticket >& ticket) const
-{
-    motor_assert(ticket->file == this, "trying to fill buffer of another file");
-    doWriteBuffer(ticket);
 }
 
 u64 File::getState() const

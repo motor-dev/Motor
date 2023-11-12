@@ -23,15 +23,15 @@ Package::~Package() = default;
 
 void Package::loadPlugin(const inamespace& plugin, const inamespace& name)
 {
-    Plugin::Plugin< void* > p(plugin, Plugin::Plugin< void* >::Preload);
+    Plugin::Plugin< minitl::pointer > p(plugin, Plugin::Plugin< minitl::pointer >::Preload);
     if(!p)
     {
         motor_notreached();
     }
     else
     {
-        m_plugins.push_back(p);
         m_context.rootNamespace->add(name, Meta::Value(p.pluginNamespace()));
+        m_plugins.push_back(minitl::move(p));
     }
 }
 
@@ -73,8 +73,9 @@ ref< Meta::AST::Node > Package::findByName(istring name) const
     return m_context.rootNamespace->getNode(name);
 }
 
-void Package::createObjects(const weak< Resource::ResourceManager >& manager,
-                            minitl::vector< Meta::Value >&           values)
+void Package::createObjects(const weak< Resource::ResourceManager >&             manager,
+                            minitl::vector< Plugin::Plugin< minitl::pointer > >& plugins,
+                            minitl::vector< Meta::Value >&                       values)
 {
     values.resize(m_nodes.size());
     for(size_t i = 0; i < m_nodes.size(); ++i)
@@ -86,6 +87,7 @@ void Package::createObjects(const weak< Resource::ResourceManager >& manager,
                           values[i].as< weak< const Resource::IDescription > >());
         }
     }
+    plugins = minitl::move(m_plugins);
 }
 
 void Package::diffFromPackage(const weak< Package >& /*previous*/,

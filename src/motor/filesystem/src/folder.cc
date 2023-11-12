@@ -116,11 +116,9 @@ weak< Folder > Folder::openFolderNoLock(ipath name)
 void Folder::mount(istring name, ref< Folder > folder)
 {
     ScopedCriticalSection lock(m_lock);
-    for(minitl::vector< minitl::tuple< istring, ref< Folder > > >::const_iterator it
-        = m_folders.begin();
-        it != m_folders.end(); ++it)
+    for(const auto& folder: m_folders)
     {
-        if(it->first == name)
+        if(folder.first == name)
         {
             motor_warning_format(Log::fs(), "mounting filesystem hides folder {0}", name);
         }
@@ -135,7 +133,7 @@ void Folder::mount(istring name, ref< Folder > folder)
             return;
         }
     }
-    m_mounts.push_back(minitl::make_tuple(name, folder));
+    m_mounts.emplace_back(name, folder);
 }
 
 void Folder::mount(ipath name, const ref< Folder >& folder)

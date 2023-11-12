@@ -23,7 +23,7 @@ enum LogLevel
 
 class Logger;
 
-class ILogListener : public minitl::refcountable
+class ILogListener : public minitl::pointer
 {
     friend class Logger;
 
@@ -35,7 +35,7 @@ protected:
         = 0;
 };
 
-class motor_api(CORE) Logger : public minitl::refcountable
+class motor_api(CORE) Logger : public minitl::pointer
 {
     friend class minitl::ref< Logger >;
     friend struct ScopedLogListener;

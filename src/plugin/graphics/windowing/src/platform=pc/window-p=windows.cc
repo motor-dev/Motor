@@ -73,13 +73,13 @@ Window::~Window() = default;
 void Window::load(const weak< const Resource::IDescription >& renderWindowDescription)
 {
     motor_forceuse(renderWindowDescription);
-    m_window.reset(scoped< PlatformWindow >::create(
-        m_renderer->arena(), motor_checked_cast< const Renderer >(m_renderer), this));
+    m_window = scoped< PlatformWindow >::create(
+        m_renderer->arena(), motor_checked_cast< const Renderer >(m_renderer), this);
 }
 
 void Window::unload()
 {
-    m_window.reset(scoped< PlatformWindow >());
+    m_window = scoped< PlatformWindow >();
 }
 
 knl::uint2 Window::getDimensions() const

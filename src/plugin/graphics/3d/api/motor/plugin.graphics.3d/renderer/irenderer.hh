@@ -27,7 +27,7 @@ class IGPUResource;
 template < typename R >
 class GPUResourceLoader;
 
-class motor_api(3D) IRenderer : public minitl::refcountable
+class motor_api(3D) IRenderer : public minitl::pointer
 {
     template < typename R >
     friend class GPUResourceLoader;
@@ -50,12 +50,12 @@ protected:
 protected:
     virtual void flush();
 
-    virtual ref< IGPUResource > create(weak< const RenderSurfaceDescription > rendertarget) const
+    virtual scoped< IGPUResource > create(weak< const RenderSurfaceDescription > rendertarget) const
         = 0;
-    virtual ref< IGPUResource > create(weak< const RenderWindowDescription > renderwindow) const
+    virtual scoped< IGPUResource > create(weak< const RenderWindowDescription > renderwindow) const
         = 0;
     // virtual ref<IGPUResource>   create(weak<const Mesh> mesh) const = 0;
-    virtual ref< IGPUResource > create(weak< const ShaderProgramDescription > shader) const = 0;
+    virtual scoped< IGPUResource > create(weak< const ShaderProgramDescription > shader) const = 0;
     // virtual ref<IGPUResource>   create(weak<const Texture> texture) = 0;
 public:
     weak< IGPUResource > getRenderSurface(const weak< const Resource::IDescription >& description)

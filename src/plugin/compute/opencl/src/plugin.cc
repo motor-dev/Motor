@@ -9,7 +9,7 @@
 
 namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
-class PlatformLoader : public minitl::refcountable
+class PlatformLoader : public minitl::pointer
 {
 private:
     minitl::vector< ref< Platform > >  m_platforms;

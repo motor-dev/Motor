@@ -70,7 +70,7 @@ Thread::ThreadParams::ThreadParams(const istring& name, ThreadFunction f, intptr
     , m_result(0)
     , m_id()
 {
-    // motor_info_format(Log::thread(), "starting thread {0}", name);
+    motor_info_format(Log::thread(), "starting thread {0}", name);
 #ifdef MOTOR_PLATFORM_INUX
     m_id = getttid();
 #endif

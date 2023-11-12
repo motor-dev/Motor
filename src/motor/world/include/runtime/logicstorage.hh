@@ -11,7 +11,7 @@
 
 namespace Motor { namespace World {
 
-class LogicStorage : public minitl::refcountable
+class LogicStorage : public minitl::pointer
 {
 private:
     raw< const Meta::Class > const     m_componentClass;

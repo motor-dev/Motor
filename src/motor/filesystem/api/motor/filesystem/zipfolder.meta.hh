@@ -12,16 +12,36 @@ class FileSystemWatch;
 
 class motor_api(FILESYSTEM) ZipFolder : public Folder
 {
+    friend class ZipFile;
+
 private:
-    void* m_handle;
-    ipath m_path;
+    class Handle : minitl::pointer
+    {
+    private:
+        void* m_handle;
+
+    public:
+        explicit Handle(void* handle);
+        ~Handle() override;
+
+        operator void*()  // NOLINT(google-explicit-constructor)
+        {
+            return m_handle;
+        }
+        bool operator!() const
+        {
+            return m_handle == nullptr;
+        }
+    };
+    ref< Handle > m_handle;
+    ipath         m_path;
 
 private:
     void doRefresh(Folder::ScanPolicy scanPolicy) override;
     void onChanged() override;
 
 public:
-    [[motor::meta(export = no)]] ZipFolder(void* handle, const ipath& path,
+    [[motor::meta(export = no)]] ZipFolder(const ref< Handle >& handle, const ipath& path,
                                            Folder::ScanPolicy scanPolicy = Folder::ScanRecursive);
 
 public:

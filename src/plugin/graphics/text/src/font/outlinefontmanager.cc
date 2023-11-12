@@ -62,7 +62,7 @@ void OutlineFontManager::unload(const weak< const Resource::IDescription >& /*de
                                 Resource::Resource& resource)
 {
     motor_info(Log::resource(), "unloading outline font");
-    resource.clearRefHandle();
+    resource.clearHandle();
 }
 
 void OutlineFontManager::onTicketLoaded(const weak< const Resource::IDescription >& /*description*/,
@@ -71,9 +71,9 @@ void OutlineFontManager::onTicketLoaded(const weak< const Resource::IDescription
                                         LoadType /*type*/)
 {
     motor_info(Log::resource(), "outline font file done loading");
-    ref< FreetypeFace > face = ref< FreetypeFace >::create(Arena::game(), m_freetype, buffer);
-    resource.clearRefHandle();
-    resource.setRefHandle(face);
+    scoped< FreetypeFace > face = scoped< FreetypeFace >::create(Arena::game(), m_freetype, buffer);
+    resource.clearHandle();
+    resource.setHandle(minitl::move(face));
 }
 
 }  // namespace Motor

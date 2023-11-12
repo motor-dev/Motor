@@ -9,7 +9,7 @@
 
 namespace Motor { namespace Meta { namespace AST {
 
-class motor_api(INTROSPECT) Namespace : public minitl::refcountable
+class motor_api(INTROSPECT) Namespace : public minitl::pointer
 {
 private:
     minitl::allocator&                           m_allocator;

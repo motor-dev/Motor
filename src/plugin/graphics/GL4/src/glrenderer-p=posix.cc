@@ -10,6 +10,7 @@
 #include <motor/plugin.graphics.3d/mesh/mesh.meta.hh>
 #include <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.hh>
 #include <motor/plugin.graphics.3d/shader/shader.meta.hh>
+#include <motor/scheduler/kernel/ischeduler.hh>
 #include <loaders/rendertarget/glwindow.hh>
 
 #include <GL/glx.h>
@@ -29,7 +30,7 @@ struct PlatformData
     ::XVisualInfo* visual;
 };
 
-class GLRenderer::Context : public minitl::refcountable
+class GLRenderer::Context : public minitl::pointer
 {
     friend class GLRenderer;
     friend class GLWindow;
@@ -141,7 +142,7 @@ GLRenderer::Context::~Context()
     XDestroyWindow(m_display, m_defaultWindow);
 }
 
-class GLWindow::Context : public minitl::refcountable
+class GLWindow::Context : public minitl::pointer
 {
     friend class GLRenderer;
     friend class GLWindow;
@@ -190,8 +191,8 @@ GLRenderer::~GLRenderer()
 void GLRenderer::attachWindow(const weak< GLWindow >& w) const
 {
     motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
-    w->m_context.reset(scoped< GLWindow::Context >::create(
-        Arena::general(), m_context->m_display, m_context->m_glContext, m_context->m_threadId));
+    w->m_context = scoped< GLWindow::Context >::create(
+        Arena::general(), m_context->m_display, m_context->m_glContext, m_context->m_threadId);
     if(m_context->glXSwapInterval)
     {
         w->setCurrent();
@@ -231,7 +232,7 @@ void GLWindow::unload()
 {
     motor_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     Window::unload();
-    m_context.reset(scoped< Context >());
+    m_context = scoped< Context >();
 }
 
 void GLWindow::setCurrent() const
