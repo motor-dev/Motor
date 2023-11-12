@@ -81,7 +81,7 @@ def write_cmake_workspace(
                 tg_path = tg.name.replace('.', '/')
                 for prefix, source_node in getattr(tg, 'source_nodes'):
                     if source_node.isdir():
-                        tg_files = source_node.ant_glob('**/*', excl='kernels/**')
+                        tg_files = source_node.ant_glob('**/*', excl=['kernels/**', '**/*.pyc'])
                         if tg_files:
                             all_files[(tg_path + '/' + prefix, source_node)] = [
                                 f.path_from(build_context.srcnode).replace('\\', '/') for f in tg_files]
