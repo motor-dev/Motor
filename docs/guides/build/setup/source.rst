@@ -8,14 +8,14 @@ Setting up a build environment
 In order to build the engine from source, the following components are required:
 
 - A host running Linux, macOS, FreeBSD, Solaris or Windows
-- Python (version 2.7 or 3.4+)
-- Flex and Bison
-- A C++ compiler in the path or installed in a standard location
-   - Clang version 2.9 or above
-   - GCC version 3.4 or above
-   - SunCC version 5.11 or above
-   - Microsoft Visual Studio 2003 or above
-   - Intel compiler, version 9 or above
+- Python (version 3.4+)
+- Flex and Bison (not mandatory on Windows)
+- A C++ compiler with C++14 support in the path or installed in a standard location
+   - Clang version 3.4 or above
+   - GCC version 8 or above
+   - SunCC version 5.15 or above
+   - Microsoft Visual Studio 2015 or above
+   - Intel compiler, version 17 or above
 - Many plugins require third party libraries in order to be enabled.
 
 The build system will usually automatically detect compilers, Flex and Bison from the environment
@@ -31,7 +31,7 @@ Building from the command line
 
 .. highlight:: console
 
-The Motor uses `WAF <https://waf.io/>`__ as the build system. The build happens in two phases:
+The Motor uses `WAF <https://waf.io/>`__ as t+he build system. The build happens in two phases:
 
 #. The build environments will be created. 
    This step detects all available compilers (including cross compilers) and creates toolchain
@@ -59,21 +59,21 @@ The Motor uses `WAF <https://waf.io/>`__ as the build system. The build happens 
          Looking for clang 10+                    : /usr/lib/llvm-12/bin/clang++ 
          Checking for Android tools               : done 
          + configuring for platform Linux 
-         `- linux_gnu_amd64-clang_amd64-11.0.1  : gnu {unit tests} 
-         `- linux_gnu_amd64-clang_amd64-12.0.0  : gnu {unit tests} 
-         `- linux_gnu_amd64-gcc_amd64-9.3.0     : gnu {unit tests} 
-         `- linux_gnu_amd64-gcc_amd64-10.2.1    : gnu {unit tests} 
-         `- linux_gnu_amd64-suncc_amd64-5.15    : sun {unit tests} 
-         `- linux_gnu_x86-clang_x86-11.0.1      : gnu {unit tests} 
-         `- linux_gnu_x86-clang_x86-12.0.0      : gnu {unit tests} 
-         `- linux_gnu_x86-gcc_x86-9.3.0         : gnu {unit tests} 
-         `- linux_gnu_x86-gcc_x86-10.2.1        : gnu {unit tests} 
-         `- linux_gnu_x86-suncc_x86-5.15        : sun {unit tests} 
+           `- linux_gnu_amd64-clang_amd64-11.0.1  : gnu {unit tests}
+           `- linux_gnu_amd64-clang_amd64-12.0.0  : gnu {unit tests}
+           `- linux_gnu_amd64-gcc_amd64-9.3.0     : gnu {unit tests}
+           `- linux_gnu_amd64-gcc_amd64-10.2.1    : gnu {unit tests}
+           `- linux_gnu_amd64-suncc_amd64-5.15    : sun {unit tests}
+           `- linux_gnu_x86-clang_x86-11.0.1      : gnu {unit tests}
+           `- linux_gnu_x86-clang_x86-12.0.0      : gnu {unit tests}
+           `- linux_gnu_x86-gcc_x86-9.3.0         : gnu {unit tests}
+           `- linux_gnu_x86-gcc_x86-10.2.1        : gnu {unit tests}
+           `- linux_gnu_x86-suncc_x86-5.15        : sun {unit tests}
          + configuring for platform windows 
-         `- mingw_amd64-gcc_amd64-10            : mingw 
-         `- mingw_x86-gcc_x86-10                : mingw 
+           `- mingw_amd64-gcc_amd64-10            : mingw
+           `- mingw_x86-gcc_x86-10                : mingw
          + configuring for platform android 
-         `- android_nougat_7.0-clang-9.0.8      : androideabi 
+           `- android_nougat_7.0-clang-9.0.8      : androideabi
              `- arm64                             : androideabi 
              `- armv7a                            : androideabi 
              `- amd64                             : androideabi 
