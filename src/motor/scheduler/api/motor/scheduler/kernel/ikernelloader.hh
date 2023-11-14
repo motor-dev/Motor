@@ -14,10 +14,10 @@ class ICodeLoader;
 class motor_api(SCHEDULER) IKernelLoader : public Resource::ILoader
 {
 protected:
-    const ref< ICodeLoader > m_codeLoader;
+    const scoped< ICodeLoader > m_codeLoader;
 
 protected:
-    explicit IKernelLoader(const ref< ICodeLoader >& codeLoader);
+    explicit IKernelLoader(scoped< ICodeLoader > && codeLoader);
     ~IKernelLoader() override;
 
 public:

@@ -15,9 +15,9 @@ IRenderer::IRenderer(minitl::allocator& allocator, const weak< Resource::Resourc
                      Scheduler::Affinity affinity)
     : m_allocator(allocator)
     , m_resourceManager(manager)
-    , m_syncTask(ref< Task::Task< Task::MethodCaller< IRenderer, &IRenderer::flush > > >::create(
+    , m_syncTask(scoped< Task::Task< Task::MethodCaller< IRenderer, &IRenderer::flush > > >::create(
           Arena::task(), istring("flush"), knl::Colors::Red::Red,
-          ref< Task::MethodCaller< IRenderer, &IRenderer::flush > >::create(Arena::task(), this),
+          scoped< Task::MethodCaller< IRenderer, &IRenderer::flush > >::create(Arena::task(), this),
           affinity))
     , m_renderSurfaceLoader(
           scoped< GPUResourceLoader< RenderSurfaceDescription > >::create(Arena::resource(), this))

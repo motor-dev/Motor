@@ -17,7 +17,7 @@ class PythonSample : public Application
 private:
     Plugin::Plugin< Resource::ILoader > const m_packageManager;
     Plugin::Plugin< Resource::ILoader > const m_pythonManager;
-    ref< const Package > const                m_mainPackage;
+    scoped< const Package > const             m_mainPackage;
 
 public:
     explicit PythonSample(const Plugin::Context& context);

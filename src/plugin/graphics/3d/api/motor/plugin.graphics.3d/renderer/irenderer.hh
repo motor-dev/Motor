@@ -35,7 +35,7 @@ class motor_api(3D) IRenderer : public minitl::pointer
 protected:
     minitl::allocator&                                      m_allocator;
     weak< Resource::ResourceManager >                       m_resourceManager;
-    ref< Task::ITask >                                      m_syncTask;
+    scoped< Task::ITask >                                   m_syncTask;
     scoped< GPUResourceLoader< RenderSurfaceDescription > > m_renderSurfaceLoader;
     scoped< GPUResourceLoader< RenderWindowDescription > >  m_renderWindowLoader;
     scoped< GPUResourceLoader< ShaderProgramDescription > > m_shaderProgramLoader;

@@ -17,7 +17,7 @@ namespace Motor { namespace Python {
 class motor_api(PYTHON) Context : public ScriptEngine< PythonScript >
 {
 public:
-    Context(const Plugin::Context& context, const ref< PythonLibrary >& library);
+    Context(const Plugin::Context& context, scoped< PythonLibrary >&& library);
     ~Context() override;
 
 private:
@@ -32,8 +32,8 @@ private:
     void runCode(const char* buffer, const ifilename& filename);
 
 private:
-    ref< PythonLibrary > m_library;
-    PyThreadState*       m_pythonState;
+    scoped< PythonLibrary > m_library;
+    PyThreadState*          m_pythonState;
 };
 
 }}  // namespace Motor::Python

@@ -57,18 +57,6 @@ public:
         return *this;
     }
 
-    tls& operator=(ref< T > t)
-    {
-        Motor::ThreadLocal::tlsSet(m_tlsKey, reinterpret_cast< void* >(t.operator->()));
-        return *this;
-    }
-
-    tls& operator=(scoped< T > t)
-    {
-        Motor::ThreadLocal::tlsSet(m_tlsKey, reinterpret_cast< void* >(t.operator->()));
-        return *this;
-    }
-
     operator T*()  // NOLINT(google-explicit-constructor)
     {
         return reinterpret_cast< T* >(Motor::ThreadLocal::tlsGet(m_tlsKey));

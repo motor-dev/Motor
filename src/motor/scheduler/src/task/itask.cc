@@ -11,7 +11,7 @@ ITask::ITask(istring name, knl::color32 color, Scheduler::Affinity affinity)
     , color(color)
     , affinity(affinity)
     , m_callbacks(Arena::task())
-    , m_start(ref< ChainCallback >::create(Arena::task(), this))
+    , m_start(scoped< ChainCallback >::create(Arena::task(), this))
 {
 }
 

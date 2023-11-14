@@ -36,7 +36,7 @@ ResourceManager::getLoaderInfo(raw< const Meta::Class > classinfo)
     {
         if(resourceType == m_loader->classinfo) return m_loader;
     }
-    m_loaders.push_back(ref< LoaderInfo >::create(Arena::resource(), resourceType));
+    m_loaders.push_back(scoped< LoaderInfo >::create(Arena::resource(), resourceType));
     return m_loaders.back();
 }
 

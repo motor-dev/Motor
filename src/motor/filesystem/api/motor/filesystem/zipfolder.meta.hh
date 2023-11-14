@@ -8,8 +8,6 @@
 
 namespace Motor {
 
-class FileSystemWatch;
-
 class motor_api(FILESYSTEM) ZipFolder : public Folder
 {
     friend class ZipFile;

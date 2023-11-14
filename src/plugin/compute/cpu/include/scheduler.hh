@@ -18,9 +18,9 @@ class CPUKernelTaskItem;
 class Scheduler : public IScheduler
 {
 private:
-    weak< Resource::ResourceManager >     m_resourceManager;
-    minitl::vector< ref< KernelLoader > > m_cpuLoaders;
-    scoped< MemoryHost >                  m_memoryHost;
+    weak< Resource::ResourceManager >        m_resourceManager;
+    minitl::vector< scoped< KernelLoader > > m_cpuLoaders;
+    scoped< MemoryHost >                     m_memoryHost;
 
 public:
     explicit Scheduler(const Plugin::Context& context);

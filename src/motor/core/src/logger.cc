@@ -38,15 +38,14 @@ Logger::Logger(const weak< Logger >& parent, const istring& name, LogLevel minLo
 
 Logger::~Logger() = default;
 
-ref< Logger > Logger::getChild(const istring& name)
+weak< Logger > Logger::getChild(const istring& name)
 {
-    ScopedCriticalSection                               _(m_cs);
-    minitl::hashmap< istring, ref< Logger > >::iterator it = m_children.find(name);
+    ScopedCriticalSection                                  _(m_cs);
+    minitl::hashmap< istring, scoped< Logger > >::iterator it = m_children.find(name);
     if(it == m_children.end())
     {
-        ref< Logger > next = ref< Logger >::create(Arena::debug(), this, name);
-        m_children.insert(name, next);
-        return next;
+        scoped< Logger > next = scoped< Logger >::create(Arena::debug(), this, name);
+        return m_children.insert(name, minitl::move(next)).first->second;
     }
     else
         return it->second;
@@ -63,9 +62,9 @@ weak< Logger > Logger::instance(const inamespace& name)
     return result;
 }
 
-ref< Logger > Logger::root()
+weak< Logger > Logger::root()
 {
-    static ref< Logger > s_rootLogger = ref< Logger >::create(Arena::debug());
+    static scoped< Logger > s_rootLogger = scoped< Logger >::create(Arena::debug());
     return s_rootLogger;
 }
 

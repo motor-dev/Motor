@@ -94,9 +94,9 @@ static void registerModule()
     }
 }
 
-ref< PythonLibrary > loadPython(const char* pythonPath)
+scoped< PythonLibrary > loadPython(const char* pythonPath)
 {
-    ref< PythonLibrary > library = ref< PythonLibrary >::create(Arena::general(), pythonPath);
+    scoped< PythonLibrary > library = scoped< PythonLibrary >::create(Arena::general(), pythonPath);
     if(library)
     {
         setCurrentContext(library);

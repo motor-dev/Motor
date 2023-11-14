@@ -15,10 +15,10 @@ static CLStringInfo getPlatformInfo(cl_platform_id platform, cl_platform_info na
     return result;
 }
 
-minitl::vector< ref< Platform > > Platform::loadPlatforms()
+minitl::vector< scoped< Platform > > Platform::loadPlatforms()
 {
-    minitl::vector< ref< Platform > > result(Arena::task());
-    cl_uint                           platformCount = 0;
+    minitl::vector< scoped< Platform > > result(Arena::task());
+    cl_uint                              platformCount = 0;
     checkResult(clGetPlatformIDs(0, nullptr, &platformCount));
     if(platformCount)
     {
@@ -29,7 +29,7 @@ minitl::vector< ref< Platform > > Platform::loadPlatforms()
         for(cl_uint i = 0; i < platformCount; ++i)
         {
             cl_platform_id p = platforms[i];
-            result.push_back(ref< Platform >::create(Arena::task(), p));
+            result.emplace_back(scoped< Platform >::create(Arena::task(), p));
         }
         freea(platforms);
     }
@@ -75,7 +75,7 @@ Platform::Platform(cl_platform_id platformId) : m_platformId(platformId), m_cont
                 else
                 {
                     m_contexts.push_back(
-                        ref< Context >::create(Arena::task(), this, device, context));
+                        scoped< Context >::create(Arena::task(), this, device, context));
                 }
             }
             freea(devices);

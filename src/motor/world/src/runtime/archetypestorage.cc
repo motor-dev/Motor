@@ -234,7 +234,7 @@ componentCount(const minitl::vector< minitl::vector< raw< const Meta::Class > > 
 }
 
 ref< Meta::AST::IntrospectionHint > ArchetypeStorage::Policy::verify(
-    Meta::AST::DbContext& context, weak< const Meta::AST::Object > object,
+    Meta::AST::DbContext& context, const weak< const Meta::AST::Object >& object,
     raw< const Meta::Method > method, const Meta::CallInfo& callInfo, u32 argumentThis) const
 {
     Visitor visitor(object, context);

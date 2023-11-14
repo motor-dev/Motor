@@ -39,10 +39,10 @@ private:
 private:
     scoped< Resource::ResourceManager >               m_resourceManager;
     Plugin::Context                                   m_context;
-    minitl::vector< ref< LogicStorage > >             m_logicComponentStorage;
+    minitl::vector< scoped< LogicStorage > >          m_logicComponentStorage;
     weak< ComponentRegistry::Runtime >                m_registryRuntime;
-    ref< Task::ITask >                                m_updateTask;
-    ref< Task::ITask >                                m_eventTask;
+    scoped< Task::ITask >                             m_updateTask;
+    scoped< Task::ITask >                             m_eventTask;
     Task::ITask::CallbackConnection                   m_startEvent;
     minitl::vector< Task::ITask::CallbackConnection > m_productEnds;
 

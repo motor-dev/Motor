@@ -10,7 +10,8 @@
 namespace Motor { namespace Settings {
 
 void SettingsProvider::addSetting(minitl::hashmap< istring, SettingsList >& container,
-                                  istring category, istring name, ref< Meta::AST::Node > value)
+                                  istring category, istring name,
+                                  const ref< Meta::AST::Node >& value)
 {
     minitl::hashmap< istring, SettingsList >::iterator where;
     where = container.insert(category, SettingsList(Arena::general())).first;
@@ -30,9 +31,9 @@ void SettingsProvider::addSetting(minitl::hashmap< istring, SettingsList >& cont
         value));
 }
 
-SettingsProvider::SettingsProvider(const minitl::hashmap< istring, SettingsList >& initialSettings,
-                                   const ref< Folder >&                            folder)
-    : m_settings(Arena::general(), initialSettings)
+SettingsProvider::SettingsProvider(minitl::hashmap< istring, SettingsList >&& initialSettings,
+                                   const ref< Folder >&                       folder)
+    : m_settings(minitl::move(initialSettings))
     , m_folder(folder)
 {
     SettingsRegistration::getSettingsList().push_back(*this);

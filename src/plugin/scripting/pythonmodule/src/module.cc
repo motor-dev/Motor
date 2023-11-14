@@ -91,8 +91,8 @@ extern "C" MOTOR_EXPORT void initpy_motor()
     /* python 2.x module initialisation */
     Environment::getEnvironment().init();
     motor_info(Log::python(), "loading module py_motor (Python 2)");
-    static ref< PythonLibrary > s_loadedLibrary
-        = ref< PythonLibrary >::create(Arena::general(), (const char*)nullptr);
+    static scoped< PythonLibrary > s_loadedLibrary
+        = scoped< PythonLibrary >::create(Arena::general(), (const char*)nullptr);
     setCurrentContext(s_loadedLibrary);
     init2_py_motor(false);
 }
@@ -103,8 +103,8 @@ extern "C" MOTOR_EXPORT Motor::Python::PyObject* PyInit_py_motor()
     using namespace Motor::Python;
     /* python 3.x module initialisation */
     Environment::getEnvironment().init();
-    static ref< PythonLibrary > s_loadedLibrary
-        = ref< PythonLibrary >::create(Arena::general(), (const char*)nullptr);
+    static scoped< PythonLibrary > s_loadedLibrary
+        = scoped< PythonLibrary >::create(Arena::general(), (const char*)nullptr);
     setCurrentContext(s_loadedLibrary);
     motor_info(Log::python(), "loading module py_motor (Python 3)");
     PyObject* module = init3_py_motor(false);

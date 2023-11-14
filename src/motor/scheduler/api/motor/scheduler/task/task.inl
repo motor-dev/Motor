@@ -11,10 +11,10 @@
 namespace Motor { namespace Task {
 
 template < typename Executor >
-Task< Executor >::Task(istring name, knl::color32 color, ref< Executor > executor,
+Task< Executor >::Task(istring name, knl::color32 color, scoped< Executor >&& executor,
                        Scheduler::Affinity affinity)
     : ITask(name, color, affinity)
-    , executor(executor)
+    , executor(minitl::move(executor))
 {
 }
 

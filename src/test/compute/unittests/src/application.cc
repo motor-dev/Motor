@@ -12,7 +12,7 @@ UnitTestsApplication::UnitTestsApplication(const Plugin::Context& context)
     , m_packageManager(inamespace("plugin.scripting.package"), pluginContext())
     , m_computeCudaModule(inamespace("plugin.compute.cuda"), pluginContext())
     , m_computeCLModule(inamespace("plugin.compute.opencl"), pluginContext())
-    , m_mainPackage(ref< Package >::create(
+    , m_mainPackage(scoped< Package >::create(
           Arena::game(), pluginContext().dataFolder->openFile(ifilename("unittests.pkg"))))
 {
     pluginContext().resourceManager->load(m_mainPackage);

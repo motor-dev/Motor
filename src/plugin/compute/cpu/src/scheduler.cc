@@ -28,17 +28,18 @@ Scheduler::Scheduler(const Plugin::Context& context)
             motor_info_format(Log::cpu(), "registering {0} CPU kernel loader", s_cpuVariants[i]);
         else
             motor_info(Log::cpu(), "registering CPU kernel loader");
-        ref< CodeLoader > codeLoader
-            = ref< CodeLoader >::create(Arena::task(), inamespace(s_cpuVariants[i]));
-        m_cpuLoaders.push_back(ref< KernelLoader >::create(Arena::task(), codeLoader));
+        scoped< CodeLoader > codeLoader
+            = scoped< CodeLoader >::create(Arena::task(), inamespace(s_cpuVariants[i]));
         m_resourceManager->attach< Code >(codeLoader);
+        m_cpuLoaders.push_back(
+            scoped< KernelLoader >::create(Arena::task(), minitl::move(codeLoader)));
         m_resourceManager->attach< Kernel >(m_cpuLoaders[i]);
     }
 }
 
 Scheduler::~Scheduler()
 {
-    for(minitl::vector< ref< KernelLoader > >::const_reverse_iterator it = m_cpuLoaders.rbegin();
+    for(minitl::vector< scoped< KernelLoader > >::const_reverse_iterator it = m_cpuLoaders.rbegin();
         it != m_cpuLoaders.rend(); ++it)
     {
         m_resourceManager->detach< Kernel >(*it);

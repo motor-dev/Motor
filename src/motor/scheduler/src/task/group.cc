@@ -10,7 +10,7 @@ TaskGroup::TaskGroup(istring name, knl::color32 color)
     : ITask(name, color, Scheduler::WorkerThread)
     , m_startTasks(Arena::task())
     , m_endTaskCount(i_u32::create(0))
-    , m_completionCallback(ref< Callback >::create(Arena::task(), this))
+    , m_completionCallback(scoped< Callback >::create(Arena::task(), this))
 {
 }
 

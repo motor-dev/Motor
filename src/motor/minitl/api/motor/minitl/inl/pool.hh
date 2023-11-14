@@ -30,7 +30,7 @@ T* pool< T >::allocate(ARGS&&... args)
     void* result = (void*)m_items.pop();
     motor_assert(result >= m_pool && result < m_end,
                  "allocated a node that is outside the node range");
-    return new(result) T(forward< ARGS >(args)...);
+    return new(result) T(minitl::forward< ARGS >(args)...);
 }
 
 template < typename T >

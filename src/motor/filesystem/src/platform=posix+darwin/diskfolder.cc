@@ -5,7 +5,6 @@
 #include <motor/filesystem/diskfolder.meta.hh>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <watchpoint.hh>
 #include DIRENT_H
 #include <errno.h>
 #include <limits.h>
@@ -38,7 +37,6 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy,
     : m_path(diskpath)
     , m_handle()
     , m_index(0)
-    , m_watch()
 {
     motor_forceuse(m_index);
     if(createPolicy != Folder::CreateNone)
@@ -51,10 +49,6 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy,
     {
         motor_error_format(Log::fs(), "Could not open directory {0}: {1}", diskpath,
                            strerror(errno));
-    }
-    else
-    {
-        m_watch = FileSystem::WatchPoint::addWatch(this, diskpath);
     }
 
     if(scanPolicy != Folder::ScanNone)

@@ -5,6 +5,7 @@
 #pragma once
 
 #include <motor/minitl/type_traits.hh>
+#include <motor/minitl/utility.hh>
 
 namespace minitl {
 
@@ -174,7 +175,7 @@ private:
 template < class T >
 reference_wrapper< T > byref(T& t) noexcept
 {
-    return reference_wrapper< T >(move(t));
+    return reference_wrapper< T >(minitl::move(t));
 }
 
 template < typename T1, typename T2 >

@@ -32,7 +32,7 @@ Producer::Producer() = default;
 
 Producer::~Producer() = default;
 
-ref< Task::ITask > Producer::getTask(const weak< const ProducerLoader >& loader) const
+weak< Task::ITask > Producer::getTask(const weak< const ProducerLoader >& loader) const
 {
     weak< Runtime > runtime = getResource(loader).getHandle< Runtime >();
     return runtime->task;

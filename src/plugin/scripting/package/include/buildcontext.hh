@@ -33,7 +33,7 @@ struct BuildContext
     scoped< Nodes::Package > result;
 
     BuildContext(const ifilename& filename, const minitl::allocator::block< u8 >& buffer,
-                 ref< Folder > folder);
+                 const ref< Folder >& folder);
     ~BuildContext();
 };
 

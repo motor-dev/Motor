@@ -11,7 +11,7 @@ namespace Motor { namespace Settings {
 minitl::hashmap< istring, SettingsProvider::SettingsList >
 CommandLineSettingsProvider::buildSettings(int argc, const char* argv[])
 {
-    minitl::hashmap< istring, SettingsProvider::SettingsList > result(Arena::temporary());
+    minitl::hashmap< istring, SettingsProvider::SettingsList > result(Arena::general());
     static const char*                                         s_true = "true";
     for(int i = 1; i < argc; ++i)
     {
@@ -75,7 +75,7 @@ CommandLineSettingsProvider::buildSettings(int argc, const char* argv[])
 
 CommandLineSettingsProvider::CommandLineSettingsProvider(int argc, const char* argv[],
                                                          const ref< Folder >& folder)
-    : SettingsProvider(minitl::move(buildSettings(argc, argv)), folder)
+    : SettingsProvider(buildSettings(argc, argv), folder)
 {
 }
 

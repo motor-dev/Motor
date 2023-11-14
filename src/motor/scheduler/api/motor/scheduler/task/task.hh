@@ -13,11 +13,11 @@ template < typename Executor >
 class Task : public ITask
 {
 public:
-    ref< Executor > const executor;
+    scoped< Executor > const executor;
 
 public:
     /* todo: perfect forwarding of arguments to executor */
-    Task(istring name, knl::color32 color, ref< Executor > executor,
+    Task(istring name, knl::color32 color, scoped< Executor >&& executor,
          Scheduler::Affinity affinity = Scheduler::WorkerThread);
     void schedule(weak< Scheduler > sc) const override;
 };

@@ -23,7 +23,7 @@ public:
     ~WorldResource() override;
 
     void disconnect();
-};  // namespace Application::WorldResource:publicminitl::refcountable
+};
 
 WorldLoader::WorldResource::WorldResource(
     const weak< const KernelScheduler::ProducerLoader >& producerLoader,

@@ -14,14 +14,15 @@
 static scoped< Motor::Python::Context > create(const Motor::Plugin::Context& context)
 {
     using namespace Motor::Python;
-    ref< PythonLibrary > library = loadPython(MOTOR_STRINGIZE(PYTHON_LIBRARY));
+    scoped< PythonLibrary > library = loadPython(MOTOR_STRINGIZE(PYTHON_LIBRARY));
     if(!library)
     {
         return {};
     }
     else
     {
-        return scoped< Motor::Python::Context >::create(Motor::Arena::general(), context, library);
+        return scoped< Motor::Python::Context >::create(Motor::Arena::general(), context,
+                                                        minitl::move(library));
     }
 }
 

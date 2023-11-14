@@ -19,10 +19,10 @@ public:
     struct Policy : public Meta::AST::Policy
     {
     private:
-        ref< Meta::AST::IntrospectionHint > verify(Meta::AST::DbContext&           context,
-                                                   weak< const Meta::AST::Object > object,
-                                                   raw< const Meta::Method >       method,
-                                                   const Meta::CallInfo&           callInfo,
+        ref< Meta::AST::IntrospectionHint > verify(Meta::AST::DbContext&                  context,
+                                                   const weak< const Meta::AST::Object >& object,
+                                                   raw< const Meta::Method >              method,
+                                                   const Meta::CallInfo&                  callInfo,
                                                    u32 argumentThis) const override;
     };
 

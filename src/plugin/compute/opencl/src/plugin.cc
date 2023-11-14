@@ -12,8 +12,8 @@ namespace Motor { namespace KernelScheduler { namespace OpenCL {
 class PlatformLoader : public minitl::pointer
 {
 private:
-    minitl::vector< ref< Platform > >  m_platforms;
-    minitl::vector< ref< Scheduler > > m_schedulers;
+    minitl::vector< scoped< Platform > >  m_platforms;
+    minitl::vector< scoped< Scheduler > > m_schedulers;
 
 public:
     explicit PlatformLoader(const Plugin::Context& context);
@@ -24,13 +24,13 @@ PlatformLoader::PlatformLoader(const Plugin::Context& context)
     : m_platforms(Platform::loadPlatforms())
     , m_schedulers(Arena::task())
 {
-    for(minitl::vector< ref< Platform > >::const_iterator it = m_platforms.begin();
+    for(minitl::vector< scoped< Platform > >::const_iterator it = m_platforms.begin();
         it != m_platforms.end(); ++it)
     {
-        for(minitl::vector< ref< Context > >::const_iterator ctxIt = (*it)->contextBegin();
+        for(minitl::vector< scoped< Context > >::const_iterator ctxIt = (*it)->contextBegin();
             ctxIt != (*it)->contextEnd(); ++ctxIt)
         {
-            m_schedulers.push_back(ref< Scheduler >::create(Arena::task(), context, *ctxIt));
+            m_schedulers.push_back(scoped< Scheduler >::create(Arena::task(), context, *ctxIt));
         }
     }
 }

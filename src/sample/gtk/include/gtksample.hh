@@ -18,7 +18,7 @@ private:
     Plugin::Plugin< Resource::ILoader > const         m_packageManager;
     Plugin::Plugin< minitl::pointer > const           m_textManager;
     Plugin::Plugin< Resource::ResourceManager > const m_gtkManager;
-    ref< const Package > const                        m_mainPackage;
+    scoped< const Package > const                     m_mainPackage;
 
 public:
     explicit GtkSample(const Plugin::Context& context);

@@ -30,7 +30,7 @@ class motor_api(MOTOR) Application : public minitl::pointer
 private:
     struct UpdateTask
     {
-        ref< Task::ITask >                   task;
+        scoped< Task::ITask >                task;
         Task::TaskGroup::TaskStartConnection start;
         Task::TaskGroup::TaskEndConnection   end;
     };
@@ -40,7 +40,7 @@ private:
     weak< Scheduler >                               m_scheduler;
     weak< Resource::ResourceManager >               m_resourceManager;
     Plugin::Context const                           m_pluginContext;
-    ref< Task::TaskGroup >                          m_updateTask;
+    scoped< Task::TaskGroup >                       m_updateTask;
     scoped< KernelScheduler::ProducerLoader > const m_producerLoader;
     scoped< World::WorldLoader > const              m_worldLoader;
     Plugin::Plugin< KernelScheduler::IScheduler >   m_cpuKernelScheduler;
@@ -59,8 +59,8 @@ private:
     static ref< Folder > createDataFolder(const ipath& dataSubDirectory);
 
 protected:
-    void                   addTask(const ref< Task::ITask >& task);
-    void                   removeTask(const ref< Task::ITask >& task);
+    void                   addTask(scoped< Task::ITask > && task);
+    void                   removeTask(const weak< Task::ITask >& task);
     const Plugin::Context& pluginContext() const
     {
         return m_pluginContext;

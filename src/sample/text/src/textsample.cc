@@ -12,7 +12,7 @@ TextSample::TextSample(const Plugin::Context& context)
     , m_textManager(inamespace("plugin.graphics.text"), pluginContext())
     , m_3ddx(inamespace("plugin.graphics.Dx9"), pluginContext())
     , m_3dgl(inamespace("plugin.graphics.GL4"), pluginContext())
-    , m_mainPackage(ref< Package >::create(
+    , m_mainPackage(scoped< Package >::create(
           Arena::game(), pluginContext().dataFolder->openFile(istring("sample-text.pkg"))))
 {
     pluginContext().resourceManager->load(m_mainPackage);

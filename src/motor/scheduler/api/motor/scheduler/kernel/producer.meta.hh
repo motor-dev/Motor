@@ -65,7 +65,7 @@ protected:
 
 public:
     virtual scoped< Runtime > createRuntime(weak< const ProducerLoader > loader) const = 0;
-    ref< Task::ITask >        getTask(const weak< const ProducerLoader >& loader) const;
+    weak< Task::ITask >       getTask(const weak< const ProducerLoader >& loader) const;
     ref< IParameter >         getParameter(const weak< const ProducerLoader >& loader,
                                            const weak< const IProduct >&       product) const;
 };

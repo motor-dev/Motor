@@ -3,7 +3,6 @@
 
 #include <motor/filesystem/stdafx.h>
 #include <motor/filesystem/diskfolder.meta.hh>
-#include <watchpoint.hh>
 #include <windows/file.hh>
 
 #define WIN32_LEAN_AND_MEAN
@@ -51,7 +50,6 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy,
     : m_path(diskpath)
     , m_handle()
     , m_index(s_diskIndex++)
-    , m_watch()
 {
     if(createPolicy != Folder::CreateNone)
     {
@@ -66,10 +64,6 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy,
         DWORD errorCode = ::GetLastError();
         motor_info_format(Log::fs(), "Directory {0} could not be opened: ({1})", pathname.name,
                           errorCode);
-    }
-    else
-    {
-        m_watch = FileSystem::WatchPoint::addWatch(this, diskpath);
     }
 
     if(scanPolicy != Folder::ScanNone)

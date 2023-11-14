@@ -17,13 +17,14 @@ private:
 
 public:
     MethodCaller& operator=(const MethodCaller& other) = delete;
+    MethodCaller(const MethodCaller& other)            = delete;
 
 public:
-    explicit MethodCaller(Ptr< Owner > owner) : m_owner(owner)
+    explicit MethodCaller(Ptr< Owner >&& owner) : m_owner(minitl::move(owner))
     {
     }
     ~MethodCaller() override = default;
-    MethodCaller(const MethodCaller& other) : m_owner(other.m_owner)
+    MethodCaller(MethodCaller&& other) noexcept : m_owner(minitl::move(other.m_owner))
     {
     }
 
