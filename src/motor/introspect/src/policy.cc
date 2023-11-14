@@ -11,8 +11,8 @@ namespace Motor { namespace Meta { namespace AST {
 
 Policy::~Policy() = default;
 
-ref< IntrospectionHint > Policy::verify(Meta::AST::DbContext&           context,
-                                        weak< const Meta::AST::Object > object,
+ref< IntrospectionHint > Policy::verify(Meta::AST::DbContext&                  context,
+                                        const weak< const Meta::AST::Object >& object,
                                         raw< const Method > method, const CallInfo& callInfo,
                                         u32 argumentThis) const
 {

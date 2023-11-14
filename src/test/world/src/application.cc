@@ -11,7 +11,7 @@ namespace Motor { namespace Test { namespace World {
 WorldTestApplication::WorldTestApplication(const Plugin::Context& context)
     : Application(context.resourceManager, context.scheduler, ipath("test/world"))
     , m_packageManager(inamespace("plugin.scripting.package"), pluginContext())
-    , m_mainPackage(ref< Package >::create(
+    , m_mainPackage(scoped< Package >::create(
           Arena::game(), pluginContext().dataFolder->openFile(ifilename("worldtest.pkg"))))
 {
     pluginContext().resourceManager->load(m_mainPackage);

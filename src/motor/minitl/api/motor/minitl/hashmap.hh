@@ -48,7 +48,7 @@ private:
         explicit item(const value_t& value) : value(value)
         {
         }
-        explicit item(value_t&& value) : value(move(value))
+        explicit item(value_t&& value) : value(minitl::move(value))
         {
         }
     };
@@ -70,7 +70,7 @@ public:
     explicit hashmap(allocator& allocator, u32 reserved = 0);
     ~hashmap();
     hashmap(const hashmap& other);
-    hashmap(hashmap&& other) = default;             // NOLINT(performance-noexcept-move-constructor)
+    hashmap(hashmap&& other) = default;  // NOLINT(performance-noexcept-move-constructor)
     hashmap(allocator& allocator, const hashmap& other);
     hashmap& operator=(hashmap&& other) = default;  // NOLINT(performance-noexcept-move-constructor)
     hashmap& operator=(hashmap other);

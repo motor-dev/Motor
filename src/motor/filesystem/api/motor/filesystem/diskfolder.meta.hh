@@ -8,24 +8,17 @@
 
 namespace Motor {
 
-class FileSystemWatch;
-
 class motor_api(FILESYSTEM) DiskFolder : public Folder
 {
-public:
-    class Watch;
-    friend class Watch;
-
 private:
     union Handle
     {
         void* ptrHandle;
         u64   intHandle;
     };
-    ipath                m_path;
-    Handle               m_handle;
-    u32                  m_index;
-    ref< Folder::Watch > m_watch;
+    ipath  m_path;
+    Handle m_handle;
+    u32    m_index;
 
 private:
     void doRefresh(Folder::ScanPolicy scanPolicy) override;

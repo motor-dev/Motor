@@ -42,11 +42,11 @@ private:
     ref< Folder >       m_folder;
 
 protected:
-    SettingsProvider(const SettingsCategoryMap& initialSettings, const ref< Folder >& folder);
+    SettingsProvider(SettingsCategoryMap && initialSettings, const ref< Folder >& folder);
     ~SettingsProvider() override;
 
     static void  addSetting(SettingsCategoryMap & container, istring category, istring name,
-                            ref< Meta::AST::Node > value);
+                            const ref< Meta::AST::Node >& value);
     virtual void log(const Meta::AST::Message& message) const = 0;
 
 private:

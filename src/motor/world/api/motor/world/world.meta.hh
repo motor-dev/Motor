@@ -29,8 +29,8 @@ private:
 
 public:
     [[motor::meta(noexport)]] scoped< WorldRuntime > createRuntime(
-        weak< const KernelScheduler::ProducerLoader > producerLoader,
-        const Plugin::Context&                        context) const;
+        const weak< const KernelScheduler::ProducerLoader >& producerLoader,
+        const Plugin::Context&                               context) const;
 
 public:
     World(const ref< ComponentRegistry >&                           registry,

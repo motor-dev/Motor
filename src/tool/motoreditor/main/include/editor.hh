@@ -22,7 +22,7 @@ private:
     Plugin::Plugin< minitl::pointer > const   m_renderer;
     Plugin::Plugin< Resource::ILoader > const m_packageManager;
     Plugin::Plugin< Resource::ILoader > const m_luaScripting;
-    ref< const Package > const                m_mainPackage;
+    scoped< const Package > const             m_mainPackage;
 
 public:
     explicit Editor(const Plugin::Context& context);

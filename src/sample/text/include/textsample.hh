@@ -20,7 +20,7 @@ private:
     Plugin::Plugin< minitl::pointer > const   m_textManager;
     Plugin::Plugin< IRenderer > const         m_3ddx;
     Plugin::Plugin< IRenderer > const         m_3dgl;
-    ref< const Package > const                m_mainPackage;
+    scoped< const Package > const             m_mainPackage;
     Task::ITask::CallbackConnection           m_startRenderDx;
     Task::ITask::CallbackConnection           m_startNextUpdateDx;
     Task::ITask::CallbackConnection           m_startRenderGL;

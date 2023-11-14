@@ -18,7 +18,7 @@ static i_u32                          s_useCount                 = i_u32::create
 namespace Motor { namespace PackageBuilder {
 
 BuildContext::BuildContext(const ifilename& filename, const minitl::allocator::block< u8 >& buffer,
-                           ref< Folder > folder)
+                           const ref< Folder >& folder)
     : result(scoped< Nodes::Package >::create(Arena::packageBuilder(), filename, folder))
 {
     motor_assert(s_useCount++ == 0, "non reentrant parser used by two threads");

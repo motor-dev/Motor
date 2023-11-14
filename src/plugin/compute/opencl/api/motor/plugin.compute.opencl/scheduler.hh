@@ -17,7 +17,7 @@ class CLKernelTaskItem;
 class motor_api(OPENCL) Scheduler : public IScheduler
 {
 private:
-    ref< Context >                    m_context;
+    weak< const Context >             m_context;
     weak< Resource::ResourceManager > m_resourceManager;
     scoped< KernelLoader >            m_loader;
     scoped< MemoryHost >              m_memoryHost;
@@ -25,7 +25,7 @@ private:
     cl_command_queue                  m_commandQueue;
 
 public:
-    Scheduler(const Plugin::Context& pluginContext, const ref< Context >& clContext);
+    Scheduler(const Plugin::Context& pluginContext, const weak< Context >& clContext);
     ~Scheduler() override;
     void run(weak< const Task::KernelTask > task) override;
 };

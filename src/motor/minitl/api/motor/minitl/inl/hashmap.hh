@@ -239,7 +239,7 @@ void hashmap< KEY, VALUE, HASH >::grow(u32 size)
             list_iterator item_to_copy = object++;
             item*         i            = static_cast< item* >(item_to_copy.operator->());
             u32           hash         = HASH()(i->value.first) % (u32)(new_index.count() - 1);
-            item*         new_item     = new_pool.allocate(move(i->value));
+            item*         new_item     = new_pool.allocate(minitl::move(i->value));
             new_list.insert(new_index[hash].second, *new_item);
             m_itemPool.release(i);
         }
@@ -247,9 +247,9 @@ void hashmap< KEY, VALUE, HASH >::grow(u32 size)
     }
     (m_index.end() - 1)->~index_item_t();
 
-    m_itemPool = move(new_pool);
-    m_items    = move(new_list);
-    m_index    = move(new_index);
+    m_itemPool = minitl::move(new_pool);
+    m_items    = minitl::move(new_list);
+    m_index    = minitl::move(new_index);
 }
 
 template < typename KEY, typename VALUE, typename HASH >
@@ -363,21 +363,21 @@ template < typename KEY, typename VALUE, typename HASH >
 tuple< typename hashmap< KEY, VALUE, HASH >::iterator, bool >
 hashmap< KEY, VALUE, HASH >::insert(KEY&& key, VALUE&& value)
 {
-    return insert(tuple< const KEY, VALUE >(move(key), move(value)));
+    return insert(tuple< const KEY, VALUE >(minitl::move(key), minitl::move(value)));
 }
 
 template < typename KEY, typename VALUE, typename HASH >
 tuple< typename hashmap< KEY, VALUE, HASH >::iterator, bool >
 hashmap< KEY, VALUE, HASH >::insert(KEY&& key, const VALUE& value)
 {
-    return insert(tuple< const KEY, VALUE >(move(key), value));
+    return insert(tuple< const KEY, VALUE >(minitl::move(key), value));
 }
 
 template < typename KEY, typename VALUE, typename HASH >
 tuple< typename hashmap< KEY, VALUE, HASH >::iterator, bool >
 hashmap< KEY, VALUE, HASH >::insert(const KEY& key, VALUE&& value)
 {
-    return insert(tuple< const KEY, VALUE >(key, move(value)));
+    return insert(tuple< const KEY, VALUE >(key, minitl::move(value)));
 }
 
 template < typename KEY, typename VALUE, typename HASH >
@@ -414,7 +414,7 @@ hashmap< KEY, VALUE, HASH >::insert(tuple< const KEY, VALUE >&& v)
         it = m_index[hash % (m_index.count() - 1)].second;
     }
     m_count++;
-    item* i = m_itemPool.allocate(move(v));
+    item* i = m_itemPool.allocate(minitl::move(v));
     return make_tuple(iterator(*this, m_items.insert(it, *i)), true);
 }
 

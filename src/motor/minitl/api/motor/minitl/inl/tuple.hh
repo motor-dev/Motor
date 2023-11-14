@@ -21,7 +21,7 @@ struct tuple_field
     constexpr explicit tuple_field(const T& t) : m_field(t)
     {
     }
-    constexpr explicit tuple_field(T&& t) : m_field(move(t))
+    constexpr explicit tuple_field(T&& t) : m_field(minitl::move(t))
     {
     }
     constexpr tuple_field()                         = default;
@@ -43,7 +43,7 @@ struct tuple_field
     }
     constexpr T&& get() &&
     {
-        return move(m_field);
+        return minitl::move(m_field);
     }
 };
 
@@ -55,7 +55,7 @@ struct tuple_field< 0, T >
     constexpr explicit tuple_field(const T& t) : first(t)
     {
     }
-    constexpr explicit tuple_field(T&& t) : first(move(t))
+    constexpr explicit tuple_field(T&& t) : first(minitl::move(t))
     {
     }
     constexpr tuple_field()                         = default;
@@ -77,7 +77,7 @@ struct tuple_field< 0, T >
     }
     T&& get() &&
     {
-        return move(first);
+        return minitl::move(first);
     }
 };
 
@@ -89,7 +89,7 @@ struct tuple_field< 1, T >
     constexpr explicit tuple_field(const T& t) : second(t)
     {
     }
-    constexpr explicit tuple_field(T&& t) : second(move(t))
+    constexpr explicit tuple_field(T&& t) : second(minitl::move(t))
     {
     }
     constexpr tuple_field()                         = default;
@@ -111,7 +111,7 @@ struct tuple_field< 1, T >
     }
     constexpr T&& get() &&
     {
-        return move(second);
+        return minitl::move(second);
     }
 };
 
@@ -123,7 +123,7 @@ struct tuple_field< 2, T >
     constexpr explicit tuple_field(const T& t) : third(t)
     {
     }
-    constexpr explicit tuple_field(T&& t) : third(move(t))
+    constexpr explicit tuple_field(T&& t) : third(minitl::move(t))
     {
     }
     constexpr tuple_field()                         = default;
@@ -145,7 +145,7 @@ struct tuple_field< 2, T >
     }
     constexpr T&& get() &&
     {
-        return move(third);
+        return minitl::move(third);
     }
 };
 
@@ -165,8 +165,8 @@ struct tuple_helper
     }
     template < typename T1, typename... TAIL1 >
     constexpr explicit tuple_helper(T1&& t, TAIL1&&... tail)
-        : tuple_field< INDEX, T >(forward< T1 >(t))
-        , tuple_helper< INDEX + 1, TAIL... >(forward< TAIL1 >(tail)...)
+        : tuple_field< INDEX, T >(minitl::forward< T1 >(t))
+        , tuple_helper< INDEX + 1, TAIL... >(minitl::forward< TAIL1 >(tail)...)
     {
     }
     template < typename T1, typename... TAIL1 >
@@ -200,7 +200,7 @@ struct tuple_helper< INDEX, T > : public tuple_field< INDEX, T >
     constexpr explicit tuple_helper(const T& t) : tuple_field< INDEX, T >(t)
     {
     }
-    constexpr explicit tuple_helper(T&& t) : tuple_field< INDEX, T >(forward< T >(t))
+    constexpr explicit tuple_helper(T&& t) : tuple_field< INDEX, T >(minitl::forward< T >(t))
     {
     }
     template < typename T1 >
@@ -212,7 +212,7 @@ struct tuple_helper< INDEX, T > : public tuple_field< INDEX, T >
     template < typename T1 >
     constexpr tuple_helper(  // NOLINT(google-explicit-constructor)
         tuple_helper< INDEX, T1 >&& tuple)
-        : tuple_field< INDEX, T >(move(tuple).tuple_field< INDEX, T1 >::get())
+        : tuple_field< INDEX, T >(minitl::move(tuple).tuple_field< INDEX, T1 >::get())
     {
     }
     ~tuple_helper() = default;

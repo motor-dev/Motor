@@ -47,7 +47,7 @@ public:
 private:
     minitl::vector< weak< ITask > > m_startTasks;
     i_u32                           m_endTaskCount;
-    ref< Callback >                 m_completionCallback;
+    scoped< Callback >              m_completionCallback;
 };
 
 class motor_api(SCHEDULER) TaskGroup::TaskStartConnection

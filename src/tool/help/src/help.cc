@@ -10,7 +10,7 @@ Help::Help(const Plugin::Context& context)
     : Application(context.resourceManager, context.scheduler)
     , m_packageManager(inamespace("plugin.scripting.package"), pluginContext())
     , m_ui(inamespace("plugin.ui.console"), pluginContext())
-    , m_mainPackage(ref< Package >::create(
+    , m_mainPackage(scoped< Package >::create(
           Arena::game(), pluginContext().dataFolder->openFile(istring("help.pkg"))))
 {
     pluginContext().resourceManager->load(m_mainPackage);

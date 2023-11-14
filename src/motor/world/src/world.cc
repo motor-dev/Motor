@@ -19,8 +19,8 @@ World::World(const ref< ComponentRegistry >&                           registry,
 World::~World() = default;
 
 scoped< WorldRuntime >
-World::createRuntime(weak< const KernelScheduler::ProducerLoader > producerLoader,
-                     const Plugin::Context&                        context) const
+World::createRuntime(const weak< const KernelScheduler::ProducerLoader >& producerLoader,
+                     const Plugin::Context&                               context) const
 {
     return scoped< WorldRuntime >::create(
         Arena::game(), producerLoader, context, m_products,

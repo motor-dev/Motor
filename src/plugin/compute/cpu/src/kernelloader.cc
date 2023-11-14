@@ -11,7 +11,8 @@
 
 namespace Motor { namespace KernelScheduler { namespace CPU {
 
-KernelLoader::KernelLoader(const ref< CodeLoader >& codeLoader) : IKernelLoader(codeLoader)
+KernelLoader::KernelLoader(scoped< CodeLoader >&& codeLoader)
+    : IKernelLoader(minitl::move(codeLoader))
 {
 }
 

@@ -37,16 +37,16 @@ protected:
 
 class motor_api(CORE) Logger : public minitl::pointer
 {
-    friend class minitl::ref< Logger >;
+    friend class minitl::scoped< Logger >;
     friend struct ScopedLogListener;
 
 private:
-    CriticalSection                                   m_cs;
-    minitl::vector< minitl::weak< ILogListener > >    m_listeners;
-    minitl::hashmap< istring, minitl::ref< Logger > > m_children;
-    minitl::weak< Logger >                            m_parent;
-    inamespace                                        m_name;
-    LogLevel                                          m_logFilter;
+    CriticalSection                                      m_cs;
+    minitl::vector< minitl::weak< ILogListener > >       m_listeners;
+    minitl::hashmap< istring, minitl::scoped< Logger > > m_children;
+    minitl::weak< Logger >                               m_parent;
+    inamespace                                           m_name;
+    LogLevel                                             m_logFilter;
 
 private:
     Logger();
@@ -56,9 +56,9 @@ private:
 public:
     ~Logger() override;
 
-    minitl::ref< Logger >         getChild(const istring& name);
+    minitl::weak< Logger >        getChild(const istring& name);
     static minitl::weak< Logger > instance(const inamespace& name);
-    static minitl::ref< Logger >  root();
+    static minitl::weak< Logger > root();
 
     inline bool willLog(LogLevel level) const
     {

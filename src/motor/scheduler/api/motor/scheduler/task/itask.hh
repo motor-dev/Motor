@@ -62,7 +62,7 @@ public:
 
 private:
     minitl::vector< weak< ICallback > > m_callbacks;
-    ref< ICallback >                    m_start;
+    scoped< ICallback >                 m_start;
     CriticalSection                     m_cs;
 
 private:

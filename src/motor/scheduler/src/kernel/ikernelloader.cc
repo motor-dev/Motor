@@ -8,7 +8,8 @@
 
 namespace Motor { namespace KernelScheduler {
 
-IKernelLoader::IKernelLoader(const ref< ICodeLoader >& codeLoader) : m_codeLoader(codeLoader)
+IKernelLoader::IKernelLoader(scoped< ICodeLoader >&& codeLoader)
+    : m_codeLoader(minitl::move(codeLoader))
 {
 }
 

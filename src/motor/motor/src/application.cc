@@ -23,8 +23,8 @@ Application::Application(const weak< Resource::ResourceManager >& resourceManage
     , m_scheduler(scheduler)
     , m_resourceManager(resourceManager)
     , m_pluginContext(resourceManager, m_dataFolder, m_scheduler)
-    , m_updateTask(ref< Task::TaskGroup >::create(Arena::task(), istring("application:update"),
-                                                  knl::Colors::Yellow::Yellow))
+    , m_updateTask(scoped< Task::TaskGroup >::create(Arena::task(), istring("application:update"),
+                                                     knl::Colors::Yellow::Yellow))
     , m_producerLoader(scoped< KernelScheduler::ProducerLoader >::create(Arena::game()))
     , m_worldLoader(scoped< World::WorldLoader >::create(Arena::game(), m_updateTask,
                                                          m_producerLoader, m_pluginContext))
@@ -38,13 +38,14 @@ Application::Application(const weak< Resource::ResourceManager >& resourceManage
     m_resourceManager->attach< World::World >(m_worldLoader);
 
     addTask(
-        ref< Task::Task< Task::MethodCaller< Application, &Application::updateResources > > >::
-            create(Arena::task(), istring("application:update_resource"), knl::Colors::Green::Green,
-                   ref< Task::MethodCaller< Application, &Application::updateResources > >::create(
-                       Arena::task(), this)));
-    addTask(ref< Task::Task< Task::ProcedureCaller< &Application::frameUpdate > > >::create(
+        scoped< Task::Task< Task::MethodCaller< Application, &Application::updateResources > > >::
+            create(
+                Arena::task(), istring("application:update_resource"), knl::Colors::Green::Green,
+                scoped< Task::MethodCaller< Application, &Application::updateResources > >::create(
+                    Arena::task(), this)));
+    addTask(scoped< Task::Task< Task::ProcedureCaller< &Application::frameUpdate > > >::create(
         Arena::task(), istring("application:update_sync"), knl::Colors::Green::Green,
-        ref< Task::ProcedureCaller< &Application::frameUpdate > >::create(Arena::task())));
+        scoped< Task::ProcedureCaller< &Application::frameUpdate > >::create(Arena::task())));
     registerInterruptions();
 }
 
@@ -55,16 +56,15 @@ Application::~Application()
     m_resourceManager->detach< KernelScheduler::Producer >(m_producerLoader);
 }
 
-void Application::addTask(const ref< Task::ITask >& task)
+void Application::addTask(scoped< Task::ITask >&& task)
 {
-    UpdateTask t;
-    t.task  = task;
-    t.start = Task::TaskGroup::TaskStartConnection(m_updateTask, task);
-    t.end   = Task::TaskGroup::TaskEndConnection(m_updateTask, task);
-    m_tasks.push_back(t);
+    weak< Task::ITask > weakTask(task);
+    m_tasks.emplace_back(UpdateTask({minitl::move(task),
+                                     Task::TaskGroup::TaskStartConnection(m_updateTask, weakTask),
+                                     Task::TaskGroup::TaskEndConnection(m_updateTask, weakTask)}));
 }
 
-void Application::removeTask(const ref< Task::ITask >& task)
+void Application::removeTask(const weak< Task::ITask >& task)
 {
     for(size_t i = 0; i < m_tasks.size(); ++i)
     {

@@ -13,7 +13,7 @@ class CodeLoader;
 class KernelLoader : public IKernelLoader
 {
 public:
-    explicit KernelLoader(const ref< CodeLoader >& codeLoader);
+    explicit KernelLoader(scoped< CodeLoader >&& codeLoader);
     ~KernelLoader() override;
 
     void load(const weak< const Resource::IDescription >& kernelDescription,

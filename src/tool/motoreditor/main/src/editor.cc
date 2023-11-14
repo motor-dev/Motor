@@ -12,7 +12,7 @@ Editor::Editor(const Plugin::Context& context)
     , m_renderer(inamespace("plugin.graphics.GL4"), pluginContext())
     , m_packageManager(inamespace("plugin.scripting.package"), pluginContext())
     , m_luaScripting(inamespace("plugin.scripting.lua"), pluginContext())
-    , m_mainPackage(ref< Package >::create(
+    , m_mainPackage(scoped< Package >::create(
           Arena::game(), pluginContext().dataFolder->openFile(istring("main.pkg"))))
 {
     pluginContext().resourceManager->load(m_mainPackage);

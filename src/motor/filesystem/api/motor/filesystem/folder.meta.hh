@@ -19,20 +19,6 @@ protected:
     minitl::vector< minitl::tuple< istring, ref< Folder > > >  m_mounts;
     bool                                                       m_upToDate;
 
-public:
-    class [[motor::meta(export = no)]] Watch : public minitl::pointer
-    {
-    private:
-        weak< Folder > m_folder;
-
-    public:
-        explicit Watch(const weak< Folder >& folder);
-        ~Watch() override;
-
-        void signal();
-    };
-    friend class Watch;
-
 protected:
     Folder();
     ~Folder() override;
@@ -66,7 +52,7 @@ public:
     weak< File >   openFile(const ifilename& name);
     weak< Folder > openFolder(istring name);
     weak< Folder > openFolder(const ipath& name);
-    void           mount(istring name, ref< Folder > folder);
+    void           mount(istring name, const ref< Folder >& folder);
     void           mount(ipath name, const ref< Folder >& folder);
     void           umount(istring name);
     void           umount(ipath name);

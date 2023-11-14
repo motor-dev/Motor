@@ -18,7 +18,7 @@ class Scheduler : public IScheduler
 {
 private:
     weak< Resource::ResourceManager > m_resourceManager;
-    ref< CodeLoader >                 m_cudaLoader;
+    scoped< CodeLoader >              m_cudaLoader;
     scoped< MemoryHost >              m_memoryHost;
 
 public:

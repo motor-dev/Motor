@@ -6,10 +6,10 @@
 
 namespace Motor { namespace Python {
 
-Context::Context(const Plugin::Context& context, const ref< PythonLibrary >& library)
+Context::Context(const Plugin::Context& context, scoped< PythonLibrary >&& library)
     : ScriptEngine< PythonScript >(Arena::python(), context.resourceManager)
-    , m_library(library)
-    , m_pythonState(library->createThread())
+    , m_library(minitl::move(library))
+    , m_pythonState(m_library->createThread())
 {
 }
 

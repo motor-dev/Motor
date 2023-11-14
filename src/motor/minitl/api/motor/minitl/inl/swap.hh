@@ -6,14 +6,16 @@
 
 #include <motor/minitl/swap.hh>
 
+#include <motor/minitl/utility.hh>
+
 namespace minitl {
 
 template < typename T >
 MOTOR_ALWAYS_INLINE void swap(T& a, T& b)
 {
-    T c = a;
-    a   = b;
-    b   = c;
+    T c = minitl::move(a);
+    a   = minitl::move(b);
+    b   = minitl::move(c);
 }
 
 }  // namespace minitl

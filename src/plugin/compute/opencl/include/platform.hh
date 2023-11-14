@@ -14,20 +14,20 @@ class Platform : public minitl::pointer
     friend class Context;
 
 private:
-    cl_platform_id                   m_platformId;
-    minitl::vector< ref< Context > > m_contexts;
+    cl_platform_id                      m_platformId;
+    minitl::vector< scoped< Context > > m_contexts;
 
 public:
     explicit Platform(cl_platform_id platformId);
     ~Platform() override;
 
 public:
-    static minitl::vector< ref< Platform > >         loadPlatforms();
-    minitl::vector< ref< Context > >::const_iterator contextBegin()
+    static minitl::vector< scoped< Platform > >         loadPlatforms();
+    minitl::vector< scoped< Context > >::const_iterator contextBegin()
     {
         return m_contexts.begin();
     }
-    minitl::vector< ref< Context > >::const_iterator contextEnd()
+    minitl::vector< scoped< Context > >::const_iterator contextEnd()
     {
         return m_contexts.end();
     }

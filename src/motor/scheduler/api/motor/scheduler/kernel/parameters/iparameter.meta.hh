@@ -28,7 +28,7 @@ private:
         BufferCount = 2
     };
 
-    ref< const IMemoryBuffer > m_buffers[BufferCount];
+    scoped< const IMemoryBuffer > m_buffers[BufferCount];
 
 protected:
     IParameter();

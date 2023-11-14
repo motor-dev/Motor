@@ -14,7 +14,7 @@ class WorldTestApplication : public Application
 {
 private:
     Plugin::Plugin< Resource::ILoader > const m_packageManager;
-    ref< const Package > const                m_mainPackage;
+    scoped< const Package > const             m_mainPackage;
 
 public:
     explicit WorldTestApplication(const Plugin::Context& context);

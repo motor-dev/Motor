@@ -11,7 +11,8 @@
 
 namespace Motor { namespace KernelScheduler { namespace OpenCL {
 
-KernelLoader::KernelLoader(const ref< CodeLoader >& codeLoader) : IKernelLoader(codeLoader)
+KernelLoader::KernelLoader(scoped< CodeLoader >&& codeLoader)
+    : IKernelLoader(minitl::move(codeLoader))
 {
 }
 

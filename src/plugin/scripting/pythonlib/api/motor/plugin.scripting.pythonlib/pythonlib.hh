@@ -183,7 +183,7 @@ extern tls< PythonLibrary > s_library;
 
 motor_api(PYTHONLIB) PyObject* init2_py_motor(bool registerLog);
 motor_api(PYTHONLIB) PyObject* init3_py_motor(bool registerLog);
-motor_api(PYTHONLIB) ref< PythonLibrary > loadPython(const char* pythonPath);
+motor_api(PYTHONLIB) scoped< PythonLibrary > loadPython(const char* pythonPath);
 motor_api(PYTHONLIB) void setCurrentContext(const weak< PythonLibrary >& library);
 motor_api(PYTHONLIB) void clearCurrentContext();
 

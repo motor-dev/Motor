@@ -113,7 +113,7 @@ weak< Folder > Folder::openFolderNoLock(ipath name)
     }
 }
 
-void Folder::mount(istring name, ref< Folder > folder)
+void Folder::mount(istring name, const ref< Folder >& folder)
 {
     ScopedCriticalSection lock(m_lock);
     for(const auto& f: m_folders)

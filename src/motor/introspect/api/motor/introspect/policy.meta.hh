@@ -20,7 +20,7 @@ struct motor_api(INTROSPECT) Policy
 public:
     virtual ~Policy();
     virtual ref< IntrospectionHint > verify(
-        Meta::AST::DbContext & context, weak< const Meta::AST::Object > object,
+        Meta::AST::DbContext & context, const weak< const Meta::AST::Object >& object,
         raw< const Method > method, const CallInfo& callInfo, u32 argumentThis) const;
 };
 

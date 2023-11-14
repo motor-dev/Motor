@@ -40,10 +40,10 @@ private:
     };
 
 private:
-    minitl::vector< ref< LoaderInfo > > m_loaders;
-    minitl::vector< Ticket >            m_tickets;
-    minitl::vector< Ticket >            m_pendingTickets;
-    minitl::vector< Ticket >            m_watches;
+    minitl::vector< scoped< LoaderInfo > > m_loaders;
+    minitl::vector< Ticket >               m_tickets;
+    minitl::vector< Ticket >               m_pendingTickets;
+    minitl::vector< Ticket >               m_watches;
 
 private:
     weak< LoaderInfo > getLoaderInfo(raw< const Meta::Class > classinfo);
@@ -68,22 +68,33 @@ public:
         detach(motor_class< T >(), loader);
     }
     template < typename T >
-    void load(weak< const T > resource)
+    void load(const weak< const T >& resource)
     {
         load(motor_class< T >(), resource);
     }
     template < typename T >
-    void load(ref< const T > resource)
-    {
-        load(motor_class< T >(), resource);
-    }
-    template < typename T >
-    void unload(weak< const T > resource)
+    void unload(const weak< const T >& resource)
     {
         unload(motor_class< T >(), resource);
     }
     template < typename T >
-    void unload(ref< const T > resource)
+    void load(const ref< const T >& resource)
+    {
+        load(motor_class< T >(), resource);
+    }
+    template < typename T >
+    void unload(const ref< const T >& resource)
+    {
+        unload(motor_class< T >(), resource);
+    }
+
+    template < typename T >
+    void load(const scoped< const T >& resource)
+    {
+        load(motor_class< T >(), resource);
+    }
+    template < typename T >
+    void unload(const scoped< const T >& resource)
     {
         unload(motor_class< T >(), resource);
     }
