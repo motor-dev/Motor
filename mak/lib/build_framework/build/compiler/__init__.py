@@ -114,7 +114,7 @@ def _compiler_deps_sig_implicit_deps(
             return original_sig_implicit_deps(self)
         try:
             return waflib.Task.Task.sig_implicit_deps(self)
-        except waflib.Errors.WafError:
+        except OSError:
             return waflib.Utils.SIG_NIL
 
     return sig_implicit_deps
