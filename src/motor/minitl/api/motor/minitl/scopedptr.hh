@@ -19,7 +19,9 @@ struct scoped_payload
     MOTOR_ALWAYS_INLINE explicit scoped_payload(allocator& arena) : arena(arena)
     {
     }
-    virtual ~scoped_payload() = default;
+    virtual ~scoped_payload()  // NOLINT(modernize-use-equals-default)
+    {
+    }
 };
 
 }  // namespace details
@@ -51,7 +53,6 @@ class scoped
             , value(minitl::forward< ARGS >(args)...)
         {
         }
-        MOTOR_ALWAYS_INLINE ~payload() override = default;
     };
 
 private:
