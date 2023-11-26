@@ -1,3 +1,4 @@
+import threading
 from typing import List, Optional, Tuple, Union, overload
 from typing_extensions import Literal, TypeAlias
 
@@ -83,16 +84,16 @@ class Node(object):
         ...
 
     def ant_glob(
-        self,
-        incl: Union[str, List[str]] = ...,
-        excl: Union[str, List[str]] = ...,
-        dir: bool = ...,
-        src: bool = ...,
-        maxdepth: int = ...,
-        ignorecase: bool = ...,
-        generator: bool = ...,
-        remove: bool = ...,
-        quiet: bool = ...
+            self,
+            incl: Union[str, List[str]] = ...,
+            excl: Union[str, List[str]] = ...,
+            dir: bool = ...,
+            src: bool = ...,
+            maxdepth: int = ...,
+            ignorecase: bool = ...,
+            generator: bool = ...,
+            remove: bool = ...,
+            quiet: bool = ...
     ) -> List["Node"]:
         ...
 
@@ -138,3 +139,7 @@ class Node(object):
 
     def get_bld_sig(self) -> bytes:
         ...
+
+
+Nod3 = Node
+pickle_lock: threading.Lock

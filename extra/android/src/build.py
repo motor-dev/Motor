@@ -6,17 +6,19 @@ import waflib.Context
 def build(build_context: build_framework.BuildContext) -> None:
     if not build_context.env.PROJECTS:
         root = build_context.path.parent
-        tg = build_context(target='package')
+        tg = build_context(group=build_context.motor_variant, target='package')
 
         source_node = root.find_node('src/motor/launcher/src')
         resource_node = root.find_node('src/motor/launcher/res')
         resources = build_context(
+            group=build_context.motor_variant,
             target='motor.android.resource',
             features=['motor:android:aapt_resource'],
             resource=resource_node,
             destfile=build_framework.make_bld_node(tg, 'apk', '', 'resources.apk')
         )
         build_context(
+            group=build_context.motor_variant,
             target='motor.android.launcher',
             features=['cxx', 'javac', 'dex'],
             source_nodes=[source_node, resource_node],
@@ -35,8 +37,6 @@ def build(build_context: build_framework.BuildContext) -> None:
         else:
             tg.create_task('apksigner', [package_unsigned], [package_unaligned])
         tg.create_task('zipalign', [package_unaligned], [package_final])
-
-        build_context.add_to_group(tg)
         build_framework.install_files(tg, os.path.join(build_context.env.PREFIX, build_context.env.OPTIM),
                                       [package_final],
                                       original_install=True)

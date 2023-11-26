@@ -47,7 +47,7 @@ def _get_define(d: str) -> str:
         return '%s:' % d
 
 
-class CLion(build_framework.BuildContext):
+class CLion(build_framework.ProjectGenerator):
     """
         creates projects for IntelliJ CLion
     """
@@ -55,7 +55,7 @@ class CLion(build_framework.BuildContext):
     fun = 'build'
     optim = 'debug'
     motor_toolchain = 'projects'
-    motor_variant = 'projects.setup'
+    motor_variant = 'projects.clion'
     variant = 'projects/clion'
 
     def __init__(self, **kw: Any) -> None:
@@ -83,7 +83,6 @@ class CLion(build_framework.BuildContext):
         self._run_configs_dir = self.srcnode
         self._idea_dir = self.srcnode
 
-        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '${input:motor-Variant}'
@@ -133,11 +132,13 @@ class CLion(build_framework.BuildContext):
         with open(self._idea_dir.make_node('modules.xml').abspath(), 'w') as modules_xml_file:
             modules_xml_file.write(modules_xml)
         with open(self._idea_dir.make_node('misc.xml').abspath(), 'w') as misc_xml_file:
-            misc_xml_file.write(misc_xml % (
-                self.motornode.make_node('mak/lib').path_from(self.path),
-                self.motornode.make_node('mak/typeshed').path_from(self.path),
-                self.bldnode.parent.parent.path_from(self.path)
-            ))
+            misc_xml_file.write(
+                misc_xml % (
+                    self.motornode.make_node('mak/lib').path_from(self.path),
+                    self.motornode.make_node('mak/typeshed').path_from(self.path),
+                    self.bldnode.path_from(self.path),
+                )
+            )
         with open(self._scopes_dir.make_node('Motor.xml').abspath(), 'w') as scopes:
             prefix = (self.motornode.path_from(self.srcnode) + '/') if self.motornode != self.srcnode else ''
             scopes.write(
@@ -147,9 +148,7 @@ class CLion(build_framework.BuildContext):
                 '!file[motor]:%(prefix)ssrc/motor/3rdparty//*'
                 '||file[motor]:%(prefix)sextra/*)&amp;&amp;!file[motor]:'
                 '%(prefix)sextra/android/src/motor/3rdparty//*" />\n'
-                '</component>\n' % {
-                    'prefix': prefix
-                }
+                '</component>\n' % {'prefix': prefix}
             )
         if not os.path.exists(self._idea_dir.make_node('motor.iml').abspath()):
             with open(self._idea_dir.make_node('motor.iml').abspath(), 'w') as motor_iml:
@@ -197,16 +196,15 @@ class CLion(build_framework.BuildContext):
                         'toolchain_name': toolchain_name,
                         'arch': env.ARCHITECTURE,
                         'system': env.SYSTEM_NAME,
-                        'includes_c': '\n      - '.join(
-                            [i for i in env.COMPILER_C_INCLUDES]),
+                        'includes_c': '\n      - '.join([i for i in env.COMPILER_C_INCLUDES]),
                         'defines_c': '\n      '.join([_get_define(d) for d in env.COMPILER_C_DEFINES]),
-                        'includes_cxx': '\n      - '.join(
-                            [i for i in env.COMPILER_CXX_INCLUDES]),
+                        'includes_cxx': '\n      - '.join([i for i in env.COMPILER_CXX_INCLUDES]),
                         'defines_cxx': '\n      '.join([_get_define(d) for d in env.COMPILER_CXX_DEFINES]),
-                    })
+                    }
+                )
 
     def write_cmake_xml(self, configurations: List[Tuple[str, str]]) -> None:
-        bld_path = self.bldnode.path_from(self.srcnode).replace('\\', '/')
+        bld_path = self.bldnode.make_node(self.motor_variant).path_from(self.srcnode).replace('\\', '/')
         with open(self._idea_dir.make_node('cmake.xml').abspath(), 'w') as cmake_xml:
             cmake_xml.write(
                 '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -295,8 +293,7 @@ class CLion(build_framework.BuildContext):
                 if 'motor:game' in tg.features:
                     node = self._run_configs_dir.make_node('motor_%s.xml' % tg.name)
                     launch_files.append(node)
-                    with open(node.path_from(self.path),
-                              'w') as run_file:
+                    with open(node.path_from(self.path), 'w') as run_file:
                         run_file.write(
                             '<component name="ProjectRunConfigurationManager">\n'
                             '  <configuration default="false" name="%(target)s"'
@@ -328,7 +325,8 @@ class CLion(build_framework.BuildContext):
             for variant in self.env.ALL_VARIANTS:
                 for arg in ['', 'nomaster', 'static', 'dynamic']:
                     build_filename = self._run_configs_dir.make_node(
-                        'motor_build_%s_%s%s.xml' % (env_name, variant, arg))
+                        'motor_build_%s_%s%s.xml' % (env_name, variant, arg)
+                    )
                     launch_files.append(build_filename)
                     with open(build_filename.abspath(), 'w') as run_config:
                         run_config.write(
@@ -364,8 +362,7 @@ class CLion(build_framework.BuildContext):
                             }
                         )
 
-                build_filename = self._run_configs_dir.make_node(
-                    'motor_clean_%s_%s%s.xml' % (env_name, variant, arg))
+                build_filename = self._run_configs_dir.make_node('motor_clean_%s_%s%s.xml' % (env_name, variant, arg))
                 launch_files.append(build_filename)
                 with open(build_filename.abspath(), 'w') as run_config:
                     run_config.write(

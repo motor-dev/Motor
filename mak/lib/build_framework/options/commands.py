@@ -10,10 +10,11 @@ import waflib.Utils
 import waflib.Errors
 import waflib.Node
 import waflib.Build
+import waflib.Task
 import waflib.TaskGen
 from .display import clear_status_line
 
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union
 
 T = TypeVar('T', bound=waflib.Context.Context)
 
@@ -24,6 +25,15 @@ OPTION_CONTEXT = None  # type: Optional[waflib.Options.OptionsContext]
 
 KernelProcessor = Callable[
     ["BuildContext", waflib.TaskGen.task_gen, List[str], waflib.Node.Node, waflib.Node.Node, str], None]
+
+task_uid = waflib.Task.Task.uid
+
+
+def new_task_uid(task: waflib.Task.Task) -> Tuple[str, bytes]:
+    return getattr(task.generator, 'group', ''), task_uid(task)
+
+
+setattr(waflib.Task.Task, 'uid', new_task_uid)
 
 
 def autoreconfigure(execute_method: Callable[[T], Optional[str]]) -> Callable[[T], Optional[str]]:
@@ -46,7 +56,7 @@ def autoreconfigure(execute_method: Callable[[T], Optional[str]]) -> Callable[[T
             if env.run_dir != waflib.Context.run_dir:
                 do_config = True
             else:
-                hash_value = 0  # type: Union[bytes, int]
+                hash_value = 0     # type: Union[bytes, int]
                 for filename in env.files:
                     try:
                         hash_value = waflib.Utils.h_list((hash_value, waflib.Utils.readf(filename, 'rb')))
@@ -75,13 +85,14 @@ def schedule_setup(context: 'BuildContext') -> bool:
     do_setup = False
     try:
         lock = waflib.ConfigSet.ConfigSet()
-        lock.load(os.path.join(context.cache_dir, waflib.Options.lockfile + '.%s' % context.motor_variant))
+        lockfile = os.path.join(context.cache_dir, waflib.Options.lockfile + '.%s.setup' % context.motor_toolchain)
+        lock.load(lockfile)
     except (AttributeError, IOError):
         waflib.Logs.warn('setup not run; setting up the toolchain')
         do_setup = True
     else:
         env = waflib.ConfigSet.ConfigSet()
-        env.load(os.path.join(context.cache_dir, '%s_cache.py' % context.motor_variant))
+        env.load(os.path.join(context.cache_dir, '%s_cache.py' % context.motor_toolchain))
         for option_name, value in env.SETUP_OPTIONS:
             new_value = getattr(waflib.Options.options, option_name)
             if new_value != value:
@@ -89,7 +100,7 @@ def schedule_setup(context: 'BuildContext') -> bool:
                 waflib.Logs.warn(
                     'value of %s has changed (%s => %s); setting up the toolchain' % (option_name, value, new_value)
                 )
-        hash_value = 0  # type: Union[bytes, int]
+        hash_value = 0     # type: Union[bytes, int]
         for filename in lock.files:
             try:
                 hash_value = waflib.Utils.h_list((hash_value, waflib.Utils.readf(filename, 'rb')))
@@ -140,18 +151,16 @@ def tidy_build(execute_method: Callable[["BuildContext"], Optional[str]]) -> Cal
         finally:
             clear_status_line(context)
         if waflib.Options.options.tidy == 'force' or (
-                waflib.Options.options.tidy == 'auto'
-                and waflib.Options.options.nomaster is False
-                and waflib.Options.options.static is False
-                and waflib.Options.options.dynamic is False
-                and waflib.Options.options.targets == ''
-                and waflib.Options.options.tests
+            waflib.Options.options.tidy == 'auto' and waflib.Options.options.nomaster is False
+            and waflib.Options.options.static is False and waflib.Options.options.dynamic is False
+            and waflib.Options.options.targets == '' and waflib.Options.options.tests
         ):
             all_nodes = set(
-                context.bldnode.ant_glob('**', remove=False) +
+                sum([context.bldnode.ant_glob('%s/**' % g, remove=False) for g in context.motor_groups[1:]], []) +
                 context.srcnode.ant_glob(os.path.join(context.env.PREFIX, context.optim, '**'))
             )
-            all_nodes.discard(context.bldnode.make_node(waflib.Context.DBFILE))
+            for group_name in context.motor_groups:
+                all_nodes.discard(context.bldnode.make_node(group_name + waflib.Context.DBFILE))
             for group in context.groups:
                 for task_gen in group:
                     install_task = getattr(task_gen, 'motor_install_task', None)
@@ -200,9 +209,8 @@ class ConfigurationContext(waflib.Configure.ConfigurationContext):
         super(ConfigurationContext, self).execute()
         self.store_options()
         if waflib.Options.options.tidy == 'force' or (
-                waflib.Options.options.tidy == 'auto'
-                and waflib.Options.options.compilers == []
-                and waflib.Options.options.platforms == []
+            waflib.Options.options.tidy == 'auto' and waflib.Options.options.compilers == []
+            and waflib.Options.options.platforms == []
         ):
             all_toolchains = self.bldnode.ant_glob('*', dir=True)
             for node in all_toolchains:
@@ -328,10 +336,10 @@ class SetupContext(waflib.Configure.ConfigurationContext):
         self.package_env = self.all_envs['packages']
 
     def setup(
-            self,
-            tool: Union[str, List[str]],
-            tooldir: Optional[List[str]] = None,
-            funs: Optional[List[str]] = None
+        self,
+        tool: Union[str, List[str]],
+        tooldir: Optional[List[str]] = None,
+        funs: Optional[List[str]] = None
     ) -> None:
         if isinstance(tool, list):
             for i in tool:
@@ -341,7 +349,7 @@ class SetupContext(waflib.Configure.ConfigurationContext):
         module = waflib.Context.load_tool(tool, tooldir)
         if hasattr(module, "setup"):
             module.setup(self)
-        self.tools.append({'tool': tool, 'tooldir': tooldir, 'funs': funs})  # type: ignore
+        self.tools.append({'tool': tool, 'tooldir': tooldir, 'funs': funs}) # type: ignore
 
     @autoreconfigure
     def execute(self) -> Optional[str]:
@@ -355,7 +363,8 @@ class SetupContext(waflib.Configure.ConfigurationContext):
         else:
             if env.version < waflib.Context.HEXVERSION:
                 raise waflib.Errors.WafError(
-                    'Project was configured with a different version of Waf, please reconfigure it')
+                    'Project was configured with a different version of Waf, please reconfigure it'
+                )
 
             for t in env.tools:
                 self.setup(**t)
@@ -372,7 +381,7 @@ class SetupContext(waflib.Configure.ConfigurationContext):
         env.store(
             os.path.join(
                 self.bldnode.make_node(waflib.Build.CACHE_DIR).abspath(),
-                waflib.Options.lockfile + '.%s.setup' % self.motor_variant
+                waflib.Options.lockfile + '.%s.setup' % self.motor_toolchain
             )
         )
         clear_status_line(self)
@@ -388,6 +397,7 @@ class SetupContext(waflib.Configure.ConfigurationContext):
 
 
 def add_setup_command(toolchain: str) -> None:
+
     class _(SetupContext):
         cmd = 'setup:%s' % toolchain
         motor_variant = toolchain
@@ -396,23 +406,36 @@ def add_setup_command(toolchain: str) -> None:
         fun = 'multiarch_setup'
 
 
+SAVED_ATTRS = 'node_sigs task_sigs imp_sigs raw_deps node_deps'.split()
+
+
 class BuildContext(waflib.Build.BuildContext):
     optim = ''
     motor_toolchain = ''
     motor_variant = ''
+    motor_optimisation = ''
     cmd = 'build'
 
     def __init__(self, **kw: Any) -> None:
         waflib.Build.BuildContext.__init__(self, **kw)
         self.motornode = waflib.Node.Node('motor', None)
-        self.platforms = []  # type: List[str]
+        self.platforms = []            # type: List[str]
         self.package_env = waflib.ConfigSet.ConfigSet()
         self.package_node = self.motornode
         self.common_env = waflib.ConfigSet.ConfigSet()
-        self.multiarch_envs = []  # type: List[waflib.ConfigSet.ConfigSet]
-        self.kernel_processors = []  # type: List[KernelProcessor]
-        self.launcher = None  # type: Optional[waflib.TaskGen.task_gen]
-        self.pyxx_nodes = []  # type: List[waflib.Node.Node]
+        self.multiarch_envs = []       # type: List[waflib.ConfigSet.ConfigSet]
+        self.kernel_processors = []    # type: List[KernelProcessor]
+        self.launcher = None           # type: Optional[waflib.TaskGen.task_gen]
+        self.pyxx_nodes = []           # type: List[waflib.Node.Node]
+        self.post_mode = waflib.Build.POST_AT_ONCE
+        self.motor_groups = ['', 'preprocess']
+        if self.motor_variant:
+            self.motor_groups.append(self.motor_variant)
+
+    def get_variant_dir(self) -> str:
+        return self.out_dir
+
+    variant_dir = property(get_variant_dir, None)
 
     def load_envs(self) -> None:
         waflib.Build.BuildContext.load_envs(self)
@@ -420,6 +443,7 @@ class BuildContext(waflib.Build.BuildContext):
         self.package_env = self.all_envs['packages']
         for env in self.all_envs.values():
             env.OPTIM = self.optim
+        self.env = self.all_envs[self.motor_toolchain + '.setup']
 
     @autoreconfigure
     @autosetup
@@ -430,6 +454,98 @@ class BuildContext(waflib.Build.BuildContext):
         finally:
             clear_status_line(self)
         return result
+
+    def init_dirs(self) -> None:
+        waflib.Build.BuildContext.init_dirs(self)
+        self.motornode = self.path
+
+    def store(self) -> None:
+        data = {}                      # type: Dict[Any, Dict[Any, Any]]
+        for group in self.motor_groups:
+            data[group] = {
+                'node_sigs': {},
+                'task_sigs': {},
+                'imp_sigs': {},
+                'raw_deps': {},
+                'node_deps': {},
+            }
+        for node, uid in self.node_sigs.items():
+            data[uid[0]]['node_sigs'][str(node)] = uid
+        for attr in 'task_sigs', 'imp_sigs', 'raw_deps':
+            for uid, value in getattr(self, attr).items():
+                data[uid[0]][attr][uid] = value
+        attr = 'node_deps'
+        for uid, value in getattr(self, attr).items():
+            data[uid[0]][attr][uid] = [str(v) for v in value]
+
+        for group in self.motor_groups:
+            db = os.path.join(self.variant_dir, group + waflib.Context.DBFILE)
+            x = pickle.dumps(data[group], waflib.Build.PROTOCOL)
+            waflib.Utils.writef(db + '.tmp', x, m='wb')
+            try:
+                st = os.stat(db)
+                os.remove(db)
+                if not waflib.Utils.is_win32: # win32 has no chown but we're paranoid
+                    os.chown(db + '.tmp', st.st_uid, st.st_gid)
+            except (AttributeError, OSError):
+                pass
+
+            # do not use shutil.move (copy is not thread-safe)
+            os.rename(db + '.tmp', db)
+
+    def restore(self) -> None:
+        cache = {}     # type: Dict[str, waflib.Node.Node]
+
+        def get_node(node_name: str) -> waflib.Node.Node:
+            try:
+                node = cache[node_name]
+            except KeyError:
+                node = self.root.make_node(node_name)
+                cache[node_name] = node
+            return node
+
+        try:
+            env = waflib.ConfigSet.ConfigSet(os.path.join(self.cache_dir, 'build.config.py'))
+        except EnvironmentError:
+            pass
+        else:
+            if env.version < waflib.Context.HEXVERSION:
+                raise waflib.Errors.WafError(
+                    'Project was configured with a different version of Waf, please reconfigure it'
+                )
+
+            for t in env.tools:
+                self.setup(**t)
+
+        for group in self.motor_groups:
+            dbfn = os.path.join(self.variant_dir, group + waflib.Context.DBFILE)
+            try:
+                file_data = waflib.Utils.readf(dbfn, 'rb')
+            except (EnvironmentError, EOFError):
+                # handle missing file/empty file
+                waflib.Logs.debug('build: Could not load the build cache %s (missing)' % dbfn)
+            else:
+                try:
+                    data = pickle.loads(file_data)
+                except Exception as e:
+                    waflib.Logs.debug('build: Could not pickle the build cache %s: %r' % (dbfn, e))
+                else:
+                    for attr, values in data.items():
+                        x = getattr(self, attr)
+                        if attr == 'node_sigs':
+                            for node, uid in values.items():
+                                x[get_node(node)] = uid
+                        elif attr == 'node_deps':
+                            for uid, nodes in values.items():
+                                x[uid] = [get_node(n) for n in nodes]
+                        else:
+                            x.update(values)
+        self.init_dirs()
+
+
+class ProjectGenerator(BuildContext):
+
+    pass
 
 
 class CleanContext(BuildContext):
@@ -463,7 +579,7 @@ class CleanContext(BuildContext):
                 n.delete()
         elif self.bldnode != self.srcnode:
             # would lead to a disaster if top == out
-            lst = []  # type: List[waflib.Node.Node]
+            lst = []   # type: List[waflib.Node.Node]
             for env in self.all_envs.values():
                 lst.extend(self.root.find_or_declare(f) for f in env[waflib.Build.CFG_FILES])
             nodes = list(self.bldnode.ant_glob('**/*', excl='.lock* *conf_check_*/** config.log c4che/*', quiet=True))
@@ -502,27 +618,27 @@ class ListContext(waflib.Build.ListContext):
 
 
 def add_build_command(toolchain: str, optimisation: str) -> None:
-    c = {}  # type: Dict[object, object]
+    c = {}     # type: Dict[object, object]
 
     class BuildCommand(BuildContext):
         optim = optimisation
         cmd = 'build:' + toolchain + ':' + optimisation
         motor_toolchain = toolchain
-        motor_variant = toolchain + '.setup'
+        motor_variant = toolchain + '.' + optimisation
         variant = os.path.join(toolchain, optimisation)
 
     class CleanCommand(CleanContext):
         optim = optimisation
         cmd = 'clean:' + toolchain + ':' + optimisation
         motor_toolchain = toolchain
-        motor_variant = toolchain + '.setup'
+        motor_variant = toolchain + '.' + optimisation
         variant = os.path.join(toolchain, optimisation)
 
     class ListCommand(ListContext):
         optim = optimisation
         cmd = 'list:' + toolchain + ':' + optimisation
         motor_toolchain = toolchain
-        motor_variant = toolchain + '.setup'
+        motor_variant = toolchain + '.' + optimisation
         variant = os.path.join(toolchain, optimisation)
 
     c[waflib.Build.BuildContext] = BuildCommand
@@ -552,7 +668,6 @@ for command in ['build', 'clean']:
                     build_cmd, _, build_variant = self.cmd.split(':')
                     waflib.Options.commands.append('%s:%s:%s' % (build_cmd, toolchain, build_variant))
                 return None
-
 
     class BuildWrapperAll(waflib.Build.BuildContext):
         cmd = '%s:all' % command

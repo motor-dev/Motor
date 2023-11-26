@@ -167,6 +167,7 @@ def create_cuda_kernel(
             kernel_env = build_context.all_envs[toolchain]
 
             kernel_task_gen = build_context(
+                group=build_context.motor_variant,
                 env=kernel_env.derive(),
                 bld_env=env,
                 target=env.ENV_PREFIX % kernel_target,
@@ -203,6 +204,7 @@ def create_cuda_kernel(
 
         kernel_target = getattr(task_gen, 'target_name') + '.' + '.'.join(kernel_name) + '.cuda'
         kernel_task_gen = build_context(
+            group=build_context.motor_variant,
             env=task_gen.env.derive(),
             bld_env=env,
             target=env.ENV_PREFIX % kernel_target,

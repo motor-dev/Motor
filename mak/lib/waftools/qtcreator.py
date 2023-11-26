@@ -440,7 +440,7 @@ def _to_var(name: str) -> str:
     return VAR_PATTERN % name
 
 
-class QtCreator(build_framework.BuildContext):
+class QtCreator(build_framework.ProjectGenerator):
     cmd = '_qtcreator'
     PROJECT_TYPE = 'GenericProjectManager.GenericBuildConfiguration'
     version = (0, 0)
@@ -466,9 +466,8 @@ class QtCreator(build_framework.BuildContext):
         if not self.all_envs:
             self.load_envs()
 
-        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
-        
+
         self.env.VARIANT = _to_var('Variant')
         self.env.TOOLCHAIN = _to_var('Toolchain')
         self.env.PREFIX = _to_var('Prefix')
@@ -1390,7 +1389,8 @@ class Qbs(QtCreator):
                         project_file.write('%s        Depends { name: "codesign" }\n' % indent)
                         project_file.write('%s        Android.ndk.hostArch: "%s"\n' % (indent, host_name))
                         project_file.write('%s        Android.ndk.ndkDir: "%s"\n' % (indent, ndk_root))
-                        project_file.write('%s        codesign.debugKeystorePath: "%s"\n' % (indent, env.ANDROID_DEBUGKEY))
+                        project_file.write(
+                            '%s        codesign.debugKeystorePath: "%s"\n' % (indent, env.ANDROID_DEBUGKEY))
                         project_file.write('%s    }\n' % indent)
                         break
 
@@ -1428,7 +1428,7 @@ class QCMake(QtCreator):
     fun = 'build'
     optim = 'debug'
     motor_toolchain = 'projects'
-    motor_variant = 'projects.setup'
+    motor_variant = 'projects.qcmake'
     variant = 'projects/qcmake'
     version = (4, 18)
 
@@ -1586,7 +1586,7 @@ class QtCreator2(QtCreator):
     fun = 'build'
     optim = 'debug'
     motor_toolchain = 'projects'
-    motor_variant = 'projects.setup'
+    motor_variant = 'projects.qtcreator2'
     variant = 'projects/qtcreator2'
     version = (2, 12)
 
@@ -1597,7 +1597,7 @@ class QtCreator3(QtCreator):
     fun = 'build'
     optim = 'debug'
     motor_toolchain = 'projects'
-    motor_variant = 'projects.setup'
+    motor_variant = 'projects.qtcreator3'
     variant = 'projects/qtcreator3'
     version = (3, 15)
 
@@ -1608,7 +1608,7 @@ class QtCreator4(QtCreator):
     fun = 'build'
     optim = 'debug'
     motor_toolchain = 'projects'
-    motor_variant = 'projects.setup'
+    motor_variant = 'projects.qtcreator4'
     variant = 'projects/qtcreator4'
     version = (4, 18)
 
@@ -1619,7 +1619,7 @@ class Qbs2(Qbs):
     fun = 'build'
     optim = 'debug'
     motor_toolchain = 'projects'
-    motor_variant = 'projects.setup'
+    motor_variant = 'projects.qbs2'
     variant = 'projects/qbs2'
     version = (2, 12)
 
@@ -1630,7 +1630,7 @@ class Qbs3(Qbs):
     fun = 'build'
     optim = 'debug'
     motor_toolchain = 'projects'
-    motor_variant = 'projects.setup'
+    motor_variant = 'projects.qbs3'
     variant = 'projects/qbs3'
     version = (3, 15)
 
@@ -1641,6 +1641,6 @@ class Qbs4(Qbs):
     fun = 'build'
     optim = 'debug'
     motor_toolchain = 'projects'
-    motor_variant = 'projects.setup'
+    motor_variant = 'projects.qbs4'
     variant = 'projects/qbs4'
     version = (4, 18)

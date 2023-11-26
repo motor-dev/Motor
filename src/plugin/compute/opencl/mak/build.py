@@ -61,6 +61,7 @@ def create_cl_kernel(
             kernel_env = build_context.all_envs[toolchain]
 
             kernel_task_gen = build_context(
+                group=build_context.motor_variant,
                 env=kernel_env.derive(),
                 bld_env=env,
                 target=env.ENV_PREFIX % kernel_target,
@@ -98,6 +99,7 @@ def create_cl_kernel(
         target_name = getattr(task_gen, 'target_name')
         kernel_target = target_name + '.' + '.'.join(kernel_name) + '.cl'
         kernel_task_gen = build_context(
+            group=build_context.motor_variant,
             env=task_gen.env.derive(),
             bld_env=env,
             target=env.ENV_PREFIX % kernel_target,

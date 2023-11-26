@@ -38,7 +38,7 @@ class metagen(waflib.Task.Task):
                 '--root',
                 getattr(self.generator, 'root_namespace'),
                 '--tmp',
-                self.generator.bld.bldnode.parent.parent.abspath(),
+                self.generator.bld.bldnode.abspath(),
             ] + extra_options + [
                 self.inputs[0].path_from(self.generator.bld.bldnode),
                 self.inputs[0].path_from(self.generator.bld.srcnode),
@@ -174,14 +174,12 @@ def dummy_feature_module(_: waflib.TaskGen.task_gen) -> None:
     pass
 
 
-@waflib.TaskGen.feature('motor:shared_lib', 'motor:launcher', 'motor:unit_test', 'motor:python_module')
+@waflib.TaskGen.feature('motor:module')
 @waflib.TaskGen.before_method('process_source')
 @waflib.TaskGen.before_method('filter_sources')
-@waflib.TaskGen.after_method('static_dependencies')
+@waflib.TaskGen.after_method('static_preprocess_dependencies')
 def namespace_exports_gen(task_gen: waflib.TaskGen.task_gen) -> None:
     # gather all exports of dependencies
-    preprocess = getattr(task_gen, 'preprocess')
-    preprocess.post()
     seen = set([])
     use = getattr(task_gen, 'use', [])[:]
     while use:
@@ -195,13 +193,11 @@ def namespace_exports_gen(task_gen: waflib.TaskGen.task_gen) -> None:
             pass
         else:
             y.post()
-            y_p = getattr(y, 'preprocess', None)
-            if y_p is not None:
-                if 'motor:module' not in y_p.features:
-                    use += getattr(y, 'use', [])
-                    for s in y_p.source:
-                        if s.name.endswith('.namespace_exports'):
-                            preprocess.add_namespace_export_file(s)
+            if 'motor:module' not in y.features:
+                use += getattr(y, 'use', [])
+                for s in y.source:
+                    if s.name.endswith('.namespace_exports'):
+                        add_namespace_export_file(task_gen, s)
 
 
 @waflib.TaskGen.extension('.namespace_exports')

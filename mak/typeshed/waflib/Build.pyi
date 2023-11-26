@@ -59,6 +59,7 @@ class BuildContext(Context):
         self.bldnode: Node = ...
         self.path: Node = ...
         self.producer: _Producer = ...
+        self.node_class = Node
 
     def get_variant_dir(self) -> str:
         return self.path.name
@@ -169,6 +170,7 @@ class BuildContext(Context):
         ...
 
     env = property(BuildContext.get_env, BuildContext.set_env)
+    variant_dir = property(BuildContext.get_variant_dir, None)
 
 
 def process_install_task(self: task_gen) -> None:

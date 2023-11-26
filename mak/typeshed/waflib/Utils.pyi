@@ -1,6 +1,7 @@
 import subprocess as subprocess
 import os
 import datetime
+import threading
 
 TimeoutExpired = subprocess.TimeoutExpired
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, TypeVar, Union, overload
@@ -126,3 +127,6 @@ def run_once(fun: F) -> F:
 
 def lib64() -> str:
     ...
+
+
+Lock = threading.Lock

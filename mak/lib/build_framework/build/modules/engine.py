@@ -31,7 +31,14 @@ def engine(
             raise waflib.Errors.WafError('Only one engine launcher can be defined')
         p = preprocess(
             build_context,
-            name, path, root_namespace, 'motor', depends=depends, uselib=uselib, extra_features=['motor:module']
+            name,
+            path,
+            root_namespace,
+            'motor',
+            depends=depends,
+            uselib=uselib,
+            conditions=conditions,
+            extra_features=['motor:module', 'motor:preprocess:launcher']
         )
         build_context.launcher = multiarch(
             build_context,
@@ -54,6 +61,7 @@ def engine(
                 'motor',
                 depends=depends,
                 uselib=uselib,
+                conditions=conditions,
                 extra_features=['motor:module']
             )
             multiarch(

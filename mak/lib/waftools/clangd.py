@@ -12,6 +12,7 @@ _PATTERN = re.compile(r'\${([^}]+)}')
 
 
 def _expand_cmd(input_task: waflib.Task.Task, env: waflib.ConfigSet.ConfigSet) -> List[str]:
+
     def get_var(name: str) -> str:
         if name == 'SRC':
             return 'task.inputs'
@@ -54,13 +55,13 @@ def _expand_cmd(input_task: waflib.Task.Task, env: waflib.ConfigSet.ConfigSet) -
     return cmd
 
 
-class clangd(build_framework.BuildContext):
+class clangd(build_framework.ProjectGenerator):
     """creates clangd compile_commands.json"""
     cmd = 'clangd'
     fun = 'build'
     optim = 'debug'
     motor_toolchain = 'projects'
-    motor_variant = 'projects.setup'
+    motor_variant = 'projects.clangd'
     variant = 'projects/clangd'
 
     def execute(self) -> Optional[str]:
@@ -73,7 +74,6 @@ class clangd(build_framework.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '${Variant}'
@@ -115,12 +115,14 @@ class clangd(build_framework.BuildContext):
                                     bld_env = env.derive()
                                 includes, defines = waftools_common.utils.gather_includes_defines(tg)
                                 if task.__class__.__name__ in ('cxx', 'objcxx'):
-                                    bld_env.append_value('INCPATHS',
-                                                         includes + bld_env.INCLUDES + bld_env.COMPILER_CXX_INCLUDES)
+                                    bld_env.append_value(
+                                        'INCPATHS', includes + bld_env.INCLUDES + bld_env.COMPILER_CXX_INCLUDES
+                                    )
                                     bld_env.append_value('DEFINES', defines + bld_env.COMPILER_CXX_DEFINES)
                                 else:
-                                    bld_env.append_value('INCPATHS',
-                                                         includes + bld_env.INCLUDES + bld_env.COMPILER_C_INCLUDES)
+                                    bld_env.append_value(
+                                        'INCPATHS', includes + bld_env.INCLUDES + bld_env.COMPILER_C_INCLUDES
+                                    )
                                     bld_env.append_value('DEFINES', defines + bld_env.COMPILER_C_DEFINES)
                                 cmd = _expand_cmd(task, bld_env)
                                 for variant in self.env.ALL_VARIANTS:

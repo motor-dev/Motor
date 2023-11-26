@@ -27,7 +27,7 @@ class kernel(waflib.Task.Task):
                 '--name',
                 kernel_name,
                 '--tmp',
-                self.generator.bld.bldnode.parent.parent.abspath(),
+                self.generator.bld.bldnode.abspath(),
                 '--module',
                 getattr(self.generator, 'parent'),
                 self.inputs[0].path_from(self.generator.bld.bldnode),

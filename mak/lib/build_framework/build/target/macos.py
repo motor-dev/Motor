@@ -112,8 +112,10 @@ def _darwin_postlink_task(task_gen: waflib.TaskGen.task_gen, link_task: waflib.T
     if 'cxxtest' in task_gen.features:
         return None
     appname = getattr(waflib.Context.g_module, waflib.Context.APPNAME, task_gen.bld.srcnode.name)  # type: str
-
+    group = getattr(task_gen, 'group', '')
     bldnode = task_gen.bld.bldnode
+    if group:
+        bldnode = bldnode.make_node(group)
     out_rootdir = os.path.join(appname + '.app.dSYM', 'Contents')
     out_rootnode = bldnode.make_node(out_rootdir)
     out_dsymdir = out_rootnode.make_node('Resources/DWARF')

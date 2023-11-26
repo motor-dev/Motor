@@ -3,7 +3,7 @@ import waftools_common.cmake
 from typing import Any, List, Optional, Tuple
 
 
-class CMake(build_framework.BuildContext):
+class CMake(build_framework.ProjectGenerator):
     """
         Creates CMake project structure.
     """
@@ -11,7 +11,7 @@ class CMake(build_framework.BuildContext):
     fun = 'build'
     optim = 'debug'
     motor_toolchain = 'projects'
-    motor_variant = 'projects.setup'
+    motor_variant = 'projects.cmake'
     variant = 'projects/cmake'
 
     def __init__(self, **kw: Any) -> None:
@@ -27,7 +27,6 @@ class CMake(build_framework.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '${input:motor-Variant}'
