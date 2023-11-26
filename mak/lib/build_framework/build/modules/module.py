@@ -47,14 +47,21 @@ def preprocess(
         plugin_name: str,
         depends: Optional[List[str]],
         uselib: Optional[List[str]],
+        conditions: Optional[List[str]],
         extra_features: Optional[List[str]]
-) -> waflib.TaskGen.task_gen:
+) -> Optional[waflib.TaskGen.task_gen]:
     depends = depends or []
     uselib = uselib or []
     extra_features = extra_features or []
     source_nodes = _get_source_nodes(build_context, path, name)
     pp_env = build_context.common_env.derive()
     pp_env.PLUGIN = plugin_name.replace('.', '_')
+    conditions = conditions or []
+
+    if not build_context.env.PROJECTS:
+        for condition in conditions:
+            if condition not in build_context.env.FEATURES:
+                return None
 
     preprocess_sources = []
     if build_context.env.PROJECTS:
@@ -74,6 +81,7 @@ def preprocess(
             use.append(tgen.target)
 
     preprocess_tgen = build_context(
+        group='preprocess',
         env=pp_env,
         target=name + '.preprocess',
         parent=name,
@@ -174,6 +182,7 @@ def module(
             module_path = path_node.path_from(build_context.motornode).replace('/', '.').replace('\\', '. ')
 
     task_gen = build_context(
+        group=build_context.motor_variant,
         env=env.derive(),
         target=env.ENV_PREFIX % name,
         target_name=name,
@@ -209,7 +218,8 @@ def module(
                     test_name_list = re.split('[\\\\/]', test_name)
                     target_name = 'unittest.%s.%s' % (name, '.'.join(test_name_list))
                     try:
-                        p = build_context.get_tgen_by_name(target_name + '.preprocess')
+                        p = build_context.get_tgen_by_name(
+                            target_name + '.preprocess')  # type: Optional[waflib.TaskGen.task_gen]
                     except waflib.Errors.WafError:
                         p = preprocess(
                             build_context,
@@ -219,10 +229,13 @@ def module(
                             getattr(preprocess_taskgen, 'plugin_name'),
                             depends=[task_gen.target],
                             uselib=uselib,
-                            extra_features=['motor:module']
+                            conditions=conditions,
+                            extra_features=['motor:module', 'motor:preprocess:unit_test']
                         )
+                    assert p is not None
 
                     build_context(
+                        group=build_context.motor_variant,
                         env=env.derive(),
                         preprocess=p,
                         target=env.ENV_PREFIX % target_name,
@@ -258,6 +271,7 @@ def multiarch(
             task_gen = modules[0]
         else:
             task_gen = build_context(
+                group=build_context.motor_variant,
                 target=name,
                 features=['motor:multiarch'],
                 use=[arch_module.target for arch_module in modules],

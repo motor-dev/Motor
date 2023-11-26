@@ -24,10 +24,10 @@ class XmlFile:
         self.document = xml.dom.minidom.Document()
 
     def add(
-            self,
-            node: xml.dom.minidom.Node,
-            child_node: str,
-            value: Union[None, str, Dict[str, str]] = None
+        self,
+        node: xml.dom.minidom.Node,
+        child_node: str,
+        value: Union[None, str, Dict[str, str]] = None
     ) -> xml.dom.minidom.Element:
         el = self.document.createElement(child_node)
         if value is not None:
@@ -52,12 +52,8 @@ class XmlFile:
 class Solution:
 
     def __init__(
-            self,
-            bld: build_framework.BuildContext,
-            version_number: str,
-            version_name: str,
-            use_folders: bool,
-            vstudio_ide_version: str
+        self, bld: build_framework.BuildContext, version_number: str, version_name: str, use_folders: bool,
+        vstudio_ide_version: str
     ) -> None:
         self.header = '\xef\xbb\xbf\r\nMicrosoft Visual Studio Solution File, Format Version %s\r\n# %s' % (
             version_number, version_name
@@ -66,13 +62,13 @@ class Solution:
             self.header += '\r\nVisualStudioVersion = %s\r\nMinimumVIsualStudioVersion = %s' % (
                 vstudio_ide_version, vstudio_ide_version
             )
-        self.projects = []  # type: List[str]
-        self.project_configs = []  # type: List[str]
+        self.projects = []                                                                                   # type: List[str]
+        self.project_configs = []                                                                            # type: List[str]
         self.configs = [
             '\t\t%s|%s = %s|%s' % (v, t, v, t) for v in bld.env.ALL_VARIANTS for t in bld.env.ALL_TOOLCHAINS
         ]
-        self.folders = []  # type: List[Tuple[str, str]]
-        self.folders_made = {}  # type: Dict[str, str]
+        self.folders = []                                                                                    # type: List[Tuple[str, str]]
+        self.folders_made = {}                                                                               # type: Dict[str, str]
         self.use_folders = use_folders
         self.master = ''
 
@@ -97,16 +93,11 @@ class Solution:
             return None
 
     def add(
-            self,
-            task_gen: waflib.TaskGen.task_gen,
-            project: "VCxproj",
-            project_path: str,
-            build: bool = False
+        self, task_gen: waflib.TaskGen.task_gen, project: "VCxproj", project_path: str, build: bool = False
     ) -> None:
         assert isinstance(task_gen.bld, VisualStudio)
         self.projects.append(
-            'Project("%s") = "%s", "%s", "%s"\r\nEndProject' %
-            (project.GUID, project.name, project_path, project.guid)
+            'Project("%s") = "%s", "%s", "%s"\r\nEndProject' % (project.GUID, project.name, project_path, project.guid)
         )
         project_config = []
         for t in task_gen.bld.env.ALL_TOOLCHAINS:
@@ -163,11 +154,7 @@ class VCxproj:
     extensions = ['vcxproj', 'vcxproj.filters']
 
     def __init__(
-            self,
-            task_gen: waflib.TaskGen.task_gen,
-            version: str,
-            version_project: Tuple[str, str, str],
-            use_folders: bool
+        self, task_gen: waflib.TaskGen.task_gen, version: str, version_project: Tuple[str, str, str], use_folders: bool
     ) -> None:
         assert isinstance(task_gen.bld, VisualStudio)
         assert task_gen.bld.launcher is not None
@@ -300,22 +287,19 @@ class VCxproj:
                 if command:
                     command = command % {'toolchain': toolchain, 'variant': variant}
                     self.vcxproj.add(
-                        properties, 'NMakeBuildCommandLine',
-                        'cd "$(SolutionDir)" && "%s" "%s" %s %s' % (
-                            sys.executable, sys.argv[0], command, ' '.join(options))
+                        properties, 'NMakeBuildCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" %s %s' %
+                        (sys.executable, sys.argv[0], command, ' '.join(options))
                     )
                     clean_command = getattr(task_gen, 'clean_command', '')
                     if clean_command:
                         clean_command = clean_command % {'toolchain': toolchain, 'variant': variant}
                         self.vcxproj.add(
                             properties, 'NMakeCleanCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" %s %s' %
-                                                                 (sys.executable, sys.argv[0], clean_command,
-                                                                  ' '.join(options))
+                            (sys.executable, sys.argv[0], clean_command, ' '.join(options))
                         )
                         self.vcxproj.add(
                             properties, 'NMakeReBuildCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" %s %s %s' %
-                                                                   (sys.executable, sys.argv[0], clean_command, command,
-                                                                    ' '.join(options))
+                            (sys.executable, sys.argv[0], clean_command, command, ' '.join(options))
                         )
                 else:
                     self.vcxproj.add(
@@ -343,8 +327,7 @@ class VCxproj:
                     elif 'motor:game' in task_gen.features:
                         self.vcxproj.add(
                             properties, 'NMakeOutput', '$(OutDir)\\%s\\%s' %
-                                                       (env.DEPLOY_BINDIR,
-                                                        sub_env.cxxprogram_PATTERN % task_gen.bld.launcher.target)
+                            (env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % task_gen.bld.launcher.target)
                         )
                         self.vcxproj.add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
                         self.vcxproj.add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
@@ -363,8 +346,8 @@ class VCxproj:
                         includes.append('%s/usr/include' % sub_env.SYSROOT or '')
                     self.vcxproj.add(
                         properties, 'NMakeIncludeSearchPath', ';'.join(
-                            [path_from(i, task_gen.bld.srcnode) for i in
-                             includes] + sub_env.INCLUDES + sub_env.COMPILER_CXX_INCLUDES
+                            [path_from(i, task_gen.bld.srcnode)
+                             for i in includes] + sub_env.INCLUDES + sub_env.COMPILER_CXX_INCLUDES
                         )
                     )
         self.vcxproj.add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.props'})
@@ -394,12 +377,8 @@ class VCxproj:
         self.vcxfilters.write(nodes[1])
 
     def add_node(
-            self,
-            root_node: waflib.Node.Node,
-            project_node: waflib.Node.Node,
-            root_filter: str,
-            node: waflib.Node.Node,
-            files: xml.dom.minidom.Element
+        self, root_node: waflib.Node.Node, project_node: waflib.Node.Node, root_filter: str, node: waflib.Node.Node,
+        files: xml.dom.minidom.Element
     ) -> None:
         path = node.abspath()
         if os.path.isdir(path):
@@ -407,16 +386,12 @@ class VCxproj:
             if root_filter:
                 rel_path = root_filter + '\\' + rel_path
                 filter_guid = generate_guid(root_filter)
-                n = self.vcxfilters.add(
-                    self.filter_nodes, 'Filter', {'Include': root_filter}
-                )
+                n = self.vcxfilters.add(self.filter_nodes, 'Filter', {'Include': root_filter})
                 self.vcxfilters.add(n, 'UniqueIdentifier', filter_guid)
 
             if project_node != node:
                 filter_guid = generate_guid(rel_path)
-                n = self.vcxfilters.add(
-                    self.filter_nodes, 'Filter', {'Include': rel_path}
-                )
+                n = self.vcxfilters.add(self.filter_nodes, 'Filter', {'Include': rel_path})
                 self.vcxfilters.add(n, 'UniqueIdentifier', filter_guid)
             for subdir in node.listdir():
                 self.add_node(root_node, project_node, root_filter, node.make_node(subdir), files)
@@ -436,13 +411,14 @@ class VCxproj:
             self.vcxfilters.add(n, 'Filter', rel_path)
 
 
-class VisualStudio(build_framework.BuildContext):
+class VisualStudio(build_framework.ProjectGenerator):
     """creates projects for Visual Studio"""
     optim = 'debug'
     motor_toolchain = 'projects'
-    motor_variant = 'projects.setup'
+    motor_variant = 'projects.vs'
     variant = 'projects/vs'
     version = (('Visual Studio 15', '12.00', True, '15.0.00000.0'), (VCxproj, ('6.0', '14.1', '15.0')))
+    cmd = '_vs'
 
     def get_platform(self, platform_name: str) -> str:
         return platform_name if platform_name in self.__class__.platforms else self.__class__.platforms[0]
@@ -456,7 +432,6 @@ class VisualStudio(build_framework.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '$(Variant)'
@@ -497,7 +472,8 @@ class VisualStudio(build_framework.BuildContext):
                 clean_command=clean_command,
                 all_sources=[],
                 features=[],
-                project_name=target)
+                project_name=target
+            )
             nodes = [projects.make_node("%s.%s" % (target, ext)) for ext in klass.extensions]
             project = klass(task_gen, version, version_project, folders)
             project.write(nodes)
@@ -546,13 +522,13 @@ class vs2022(VisualStudio):
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
 
-class vs_cmake(build_framework.BuildContext):
+class vs_cmake(build_framework.ProjectGenerator):
     """creates projects for Visual Studio using CMake"""
     cmd = 'vs-cmake'
     fun = 'build'
     optim = 'debug'
     motor_toolchain = 'projects'
-    motor_variant = 'projects.setup'
+    motor_variant = 'projects.vs-cmake'
     variant = 'projects/vs-cmake'
 
     def execute(self) -> Optional[str]:
@@ -564,7 +540,6 @@ class vs_cmake(build_framework.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '${env .Variant}'
@@ -597,20 +572,14 @@ class vs_cmake(build_framework.BuildContext):
                 'appliesTo': '/',
                 'type': 'launch',
                 'command': sys.executable.replace('\\', '/'),
-                'args': [
-                    sys.argv[0],
-                    self.cmd
-                ]
+                'args': [sys.argv[0], self.cmd]
             },
             {
                 'taskLabel': 'motor:reconfigure',
                 'appliesTo': '/',
                 'type': 'launch',
                 'command': sys.executable.replace('\\', '/'),
-                'args': [
-                    sys.argv[0],
-                    'reconfigure'
-                ]
+                'args': [sys.argv[0], 'reconfigure']
             },
             {
                 'taskLabel': 'motor:setup',
@@ -618,10 +587,7 @@ class vs_cmake(build_framework.BuildContext):
                 'type': 'launch',
                 'command': sys.executable.replace('\\', '/'),
                 'inheritEnvironments': ['${cpp.activeConfiguration}'],
-                'args': [
-                    sys.argv[0],
-                    'setup:${env.TOOLCHAIN}:${env.BUILD_TYPE}'
-                ]
+                'args': [sys.argv[0], 'setup:${env.TOOLCHAIN}:${env.BUILD_TYPE}']
             },
             {
                 'taskLabel': 'motor:clean',
@@ -630,10 +596,7 @@ class vs_cmake(build_framework.BuildContext):
                 'contextType': 'clean',
                 'command': sys.executable.replace('\\', '/'),
                 'inheritEnvironments': ['${cpp.activeConfiguration}'],
-                'args': [
-                    sys.argv[0],
-                    'clean:${env.TOOLCHAIN}:${env.BUILD_TYPE}'
-                ]
+                'args': [sys.argv[0], 'clean:${env.TOOLCHAIN}:${env.BUILD_TYPE}']
             },
             {
                 'taskLabel': 'motor:build',
@@ -642,11 +605,7 @@ class vs_cmake(build_framework.BuildContext):
                 'contextType': 'build',
                 'command': sys.executable.replace('\\', '/'),
                 'inheritEnvironments': ['${cpp.activeConfiguration}'],
-                'args': [
-                    sys.argv[0],
-                    'build:${env.TOOLCHAIN}:${env.BUILD_TYPE}',
-                    '--werror'
-                ]
+                'args': [sys.argv[0], 'build:${env.TOOLCHAIN}:${env.BUILD_TYPE}', '--werror']
             },
             {
                 'taskLabel': 'motor:build[nomaster]',
@@ -654,12 +613,7 @@ class vs_cmake(build_framework.BuildContext):
                 'type': 'launch',
                 'command': sys.executable.replace('\\', '/'),
                 'inheritEnvironments': ['${cpp.activeConfiguration}'],
-                'args': [
-                    sys.argv[0],
-                    'build:${env.TOOLCHAIN}:${env.BUILD_TYPE}',
-                    '--nomaster',
-                    '--werror'
-                ]
+                'args': [sys.argv[0], 'build:${env.TOOLCHAIN}:${env.BUILD_TYPE}', '--nomaster', '--werror']
             },
             {
                 'taskLabel': 'motor:build[dynamic]',
@@ -667,12 +621,7 @@ class vs_cmake(build_framework.BuildContext):
                 'type': 'launch',
                 'command': sys.executable.replace('\\', '/'),
                 'inheritEnvironments': ['${cpp.activeConfiguration}'],
-                'args': [
-                    sys.argv[0],
-                    'build:${env.TOOLCHAIN}:${env.BUILD_TYPE}',
-                    '--dynamic',
-                    '--werror'
-                ]
+                'args': [sys.argv[0], 'build:${env.TOOLCHAIN}:${env.BUILD_TYPE}', '--dynamic', '--werror']
             },
             {
                 'taskLabel': 'motor:build[static]',
@@ -680,12 +629,7 @@ class vs_cmake(build_framework.BuildContext):
                 'type': 'launch',
                 'command': sys.executable.replace('\\', '/'),
                 'inheritEnvironments': ['${cpp.activeConfiguration}'],
-                'args': [
-                    sys.argv[0],
-                    'build:${env.TOOLCHAIN}:${env.BUILD_TYPE}',
-                    '--static',
-                    '--werror'
-                ]
+                'args': [sys.argv[0], 'build:${env.TOOLCHAIN}:${env.BUILD_TYPE}', '--static', '--werror']
             },
         ]
         try:
@@ -701,10 +645,7 @@ class vs_cmake(build_framework.BuildContext):
                     task_list.append(motor_task)
         except (IOError, KeyError, json.decoder.JSONDecodeError):
             tasks_file.parent.mkdir()
-            tasks = {
-                'version': '0.2',
-                'tasks': motor_tasks
-            }
+            tasks = {'version': '0.2', 'tasks': motor_tasks}
 
         with open(tasks_file.abspath(), 'w') as tasks_content:
             json.dump(tasks, tasks_content, indent=2)
@@ -724,11 +665,16 @@ class vs_cmake(build_framework.BuildContext):
             for variant in env.ALL_VARIANTS:
                 for target in targets:
                     launch_item = {
-                        'project': 'CMakeLists.txt',
-                        'projectTarget': '%s (%s)' % (executable,
-                                                      os.path.join(self.path.abspath(), env.PREFIX, env.DEPLOY_BINDIR,
-                                                                   variant, executable).replace('/', '\\')),
-                        'name': target,
+                        'project':
+                            'CMakeLists.txt',
+                        'projectTarget':
+                            '%s (%s)' % (
+                                executable,
+                                os.path.join(self.path.abspath(), env.PREFIX, env.DEPLOY_BINDIR, variant,
+                                             executable).replace('/', '\\')
+                            ),
+                        'name':
+                            target,
                         'args': [target]
                     }
                     if env.LLDB:
@@ -790,7 +736,8 @@ class vs_cmake(build_framework.BuildContext):
                             'toolchain': configuration,
                             'variant': variant,
                             'toolchain_file': toolchain.replace('\\', '/'),
-                            'blddir': self.bldnode.abspath().replace('\\', '/'),
-                            'comma_opt': ',' if not last else ''}
+                            'blddir': self.bldnode.make_node(self.motor_variant).abspath().replace('\\', '/'),
+                            'comma_opt': ',' if not last else ''
+                        }
                     )
             settings_file.write('  ]\n}\n')

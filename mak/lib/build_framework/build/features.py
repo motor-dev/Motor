@@ -51,6 +51,23 @@ def set_building_name_inherits(task_gen: waflib.TaskGen.task_gen) -> None:
                 task_gen.env.append_unique('DEFINES', 'building_%s' % _safe_target_name(y.target))
 
 
+@waflib.TaskGen.feature('motor:preprocess:launcher', 'motor:preprocess:unit_test', 'motor:preprocess:python_module')
+@waflib.TaskGen.before_method('apply_link')
+@waflib.TaskGen.before_method('process_use')
+def static_preprocess_dependencies(task_gen: waflib.TaskGen.task_gen) -> None:
+    if task_gen.bld.env.STATIC:
+        for g in task_gen.bld.groups:
+            for dependency in g:
+                if not isinstance(dependency, waflib.TaskGen.task_gen):
+                    continue
+                if (
+                        'motor:preprocess:kernel' in dependency.features or 'motor:preprocess:plugin' in dependency.features
+                ):
+                    dependency.post()
+                    if dependency.env.TOOLCHAIN == task_gen.env.TOOLCHAIN:
+                        getattr(task_gen, 'use').append(dependency.target)
+
+
 @waflib.TaskGen.feature('motor:launcher', 'motor:unit_test', 'motor:python_module')
 @waflib.TaskGen.before_method('apply_link')
 @waflib.TaskGen.before_method('process_use')
@@ -86,6 +103,11 @@ def makefile_feature(_: waflib.TaskGen.task_gen) -> None:
 
 @waflib.TaskGen.feature('motor:warnings:off', 'motor:nortc')
 def warning_feature(_: waflib.TaskGen.task_gen) -> None:
+    pass
+
+
+@waflib.TaskGen.feature('motor:preprocess:plugin')
+def preprocess_plugin_feature(_: waflib.TaskGen.task_gen) -> None:
     pass
 
 
@@ -263,8 +285,9 @@ def _make_bld_node(
     if not path:
         node = node.make_node(name)
     elif isinstance(path, waflib.Node.Node):
-        if path.is_child_of(task_gen.bld.bldnode):
-            out_dir = path.path_from(task_gen.bld.bldnode)
+        group = getattr(task_gen, 'group', '')
+        if group and path.is_child_of(task_gen.bld.bldnode.make_node(group)):
+            out_dir = path.path_from(task_gen.bld.bldnode.make_node(group))
             # skip variant
             # out_dir = out_dir[out_dir.find(os.path.sep)+1:]
             # skip optim
@@ -275,8 +298,8 @@ def _make_bld_node(
             out_dir = out_dir[out_dir.find(os.path.sep) + 1:]
             node = node.make_node(out_dir)
             node = node.make_node(name)
-        elif path.is_child_of(task_gen.bld.bldnode.parent.parent):
-            out_dir = path.path_from(task_gen.bld.bldnode.parent.parent)
+        elif path.is_child_of(task_gen.bld.bldnode):
+            out_dir = path.path_from(task_gen.bld.bldnode)
             # skip variant
             # out_dir = out_dir[out_dir.find(os.path.sep)+1:]
             # skip optim
@@ -320,7 +343,11 @@ def make_bld_node(
         constructs a path from the target build node:
             build_node/variant/optim/target/category/path/name
     """
-    return _make_bld_node(task_gen, task_gen.bld.bldnode.make_node(task_gen.target), category, path, name)
+    bld_node = task_gen.bld.bldnode
+    variant = getattr(task_gen, 'group', '')
+    if variant:
+        bld_node = bld_node.make_node(variant)
+    return _make_bld_node(task_gen, bld_node.make_node(task_gen.target), category, path, name)
 
 
 def apply_source_filter(
@@ -475,7 +502,11 @@ def apply_link(task_gen: waflib.TaskGen.task_gen) -> None:
     if not pattern:
         pattern = '%s'
     path, name = os.path.split(task_gen.target)
-    out_node = _make_bld_node(task_gen, task_gen.bld.bldnode, 'bin', None, os.path.join(path, pattern % name))
+    bld_node = task_gen.bld.bldnode
+    variant = getattr(task_gen, 'group', '')
+    if variant:
+        bld_node = bld_node.make_node(variant)
+    out_node = _make_bld_node(task_gen, bld_node, 'bin', None, os.path.join(path, pattern % name))
     link_task.set_outputs(out_node)
 
 

@@ -65,6 +65,7 @@ def thirdparty(
                     add_feature(build_context, feature, env)
                 var_id = var.upper().replace('+', 'P').replace('-', '_')
                 tg = build_context(
+                    group=build_context.motor_variant,
                     target=target_name,
                     features=['c', 'cxx'],
                     export_includes=env['check_%s_includes' % var],
@@ -109,7 +110,12 @@ def thirdparty(
 
         if tg is not None:
             if internal_deps:
-                tg = build_context(target=name, features=['motor:multiarch'], use=[d.name for d in internal_deps])
+                tg = build_context(
+                    group=build_context.motor_variant,
+                    target=name,
+                    features=['motor:multiarch'],
+                    use=[d.name for d in internal_deps]
+                )
 
             if name not in build_context.env.THIRDPARTIES_FIRST:
                 bin_paths = [
@@ -130,6 +136,7 @@ def thirdparty(
                 add_feature(build_context, feature, env)
             var_id = var.upper().replace('+', 'P').replace('-', '_')
             tg = build_context(
+                group=build_context.motor_variant,
                 target=target_name,
                 features=['c', 'cxx'],
                 export_includes=env['check_%s_includes' % var],

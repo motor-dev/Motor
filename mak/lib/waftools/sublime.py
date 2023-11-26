@@ -5,16 +5,14 @@ import build_framework
 from typing import Optional
 
 
-class sublime3(build_framework.BuildContext):
+class sublime3(build_framework.ProjectGenerator):
     """creates workspace for Sublime Text"""
     cmd = 'sublime'
     fun = 'build'
     optim = 'debug'
     motor_toolchain = 'projects'
-    motor_variant = 'projects.setup'
+    motor_variant = 'projects.sublime'
     variant = 'projects/sublime'
-
-    # motor_variant = '%(motor_variant)s'
 
     def execute(self) -> Optional[str]:
         """
@@ -26,7 +24,6 @@ class sublime3(build_framework.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '${Variant}'

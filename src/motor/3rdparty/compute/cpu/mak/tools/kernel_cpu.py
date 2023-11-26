@@ -118,6 +118,7 @@ def create_cpu_kernel(
                 target_suffix = '.'.join([kernel_type] + ([variant[1:]] if variant else []))
                 kernel_target = target_name + '.' + '.'.join(kernel_name) + '.' + target_suffix
                 kernel_task_gen = build_context(
+                    group=build_context.motor_variant,
                     env=kernel_env.derive(),
                     bld_env=env,
                     target=env.ENV_PREFIX % kernel_target,
@@ -155,6 +156,7 @@ def create_cpu_kernel(
         env = task_gen.env
         kernel_target = target_name + '.' + '.'.join(kernel_name) + '.cpu'
         build_context(
+            group=build_context.motor_variant,
             env=task_gen.env.derive(),
             bld_env=env,
             target=env.ENV_PREFIX % kernel_target,

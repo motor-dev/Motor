@@ -19,13 +19,13 @@ def _vscode_path_from(path: Union[str, waflib.Node.Node], node: waflib.Node.Node
         return os.path.join('${workspaceFolder}', path.path_from(node))
 
 
-class vscode_common(build_framework.BuildContext):
+class vscode_common(build_framework.ProjectGenerator):
     """creates common plumbing for VSCode projects"""
     cmd = '_vscode'
     fun = 'build'
     optim = 'debug'
     motor_toolchain = 'projects'
-    motor_variant = 'projects.setup'
+    motor_variant = 'projects.vscode'
     extensions = []    # type: List[str]
 
     SETTINGS = '  {\n' \
@@ -80,7 +80,6 @@ class vscode_common(build_framework.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.variant = self.__class__.motor_variant
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '${input:motor-Variant}'

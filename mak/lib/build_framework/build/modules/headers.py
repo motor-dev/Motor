@@ -26,7 +26,16 @@ def headers(
         env: Optional[waflib.ConfigSet.ConfigSet] = None
 ) -> Optional[waflib.TaskGen.task_gen]:
     if env is None:
-        preprocess(build_context, name, path, root_namespace, 'motor', depends, uselib, [])
+        preprocess(
+            build_context,
+            name,
+            path,
+            root_namespace,
+            'motor',
+            depends,
+            uselib,
+            conditions,
+            [])
         return multiarch(
             build_context,
             name, [

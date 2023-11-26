@@ -34,6 +34,7 @@ def library(
             'motor',
             depends=depends,
             uselib=uselib,
+            conditions=conditions,
             extra_features=build_context.env.DYNAMIC and ['motor:module'] or []
         )
         return multiarch(

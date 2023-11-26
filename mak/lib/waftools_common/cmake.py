@@ -11,7 +11,7 @@ def write_cmake_workspace(
         build_options: Optional[List[str]] = None
 ) -> List[Tuple[str, str]]:
     appname = getattr(waflib.Context.g_module, waflib.Context.APPNAME, build_context.srcnode.name)
-    cmake_dir = build_context.bldnode.parent.make_node('cmake')
+    cmake_dir = build_context.bldnode.make_node('cmake')
     cmake_dir.mkdir()
     configurations = []
 

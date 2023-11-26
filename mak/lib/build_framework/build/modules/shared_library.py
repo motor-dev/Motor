@@ -34,6 +34,7 @@ def shared_library(
             'motor',
             depends=depends,
             uselib=uselib,
+            conditions=conditions,
             extra_features=(not build_context.env.STATIC) and ['motor:module'] or []
         )
         return multiarch(

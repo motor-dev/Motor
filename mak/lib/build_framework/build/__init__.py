@@ -19,7 +19,6 @@ from .install import install_directory, install_files, install_as
 
 
 def build_framework(build_context: BuildContext) -> None:
-    setup_display(build_context)
     if getattr(build_context, 'motor_variant', None) is None:
         raise waflib.Errors.WafError(
             'Call %s %s %s:toolchain:variant\n'
@@ -29,7 +28,12 @@ def build_framework(build_context: BuildContext) -> None:
                 '\n    '.join(build_context.env.ALL_VARIANTS)
             )
         )
-    build_context.env = build_context.all_envs[build_context.motor_variant]
+    for group in build_context.motor_groups[1:-1]:
+        build_context.add_group(group, False)
+    build_context.add_group(build_context.motor_groups[-1], True)
+    setup_display(build_context)
+
+    build_context.env = build_context.all_envs[build_context.motor_toolchain + '.setup']
     build_context.package_env = build_context.all_envs['packages']
     build_context.package_node = build_context.root.make_node(build_context.out_dir)
     build_context.package_node = build_context.package_node.make_node('packages')

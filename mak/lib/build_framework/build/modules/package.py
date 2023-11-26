@@ -25,7 +25,15 @@ def package(
                 path = build_context.package_node.make_node(env[source_var])
                 if pp is None:
                     pp = preprocess(
-                        build_context, name, path, '', name, [], [], extra_features=['motor:deploy:off']
+                        build_context,
+                        name,
+                        path,
+                        '',
+                        name,
+                        [],
+                        [],
+                        [],
+                        extra_features=['motor:deploy:off']
                     )
                 arch_list.append(source_build(build_context, name, env, path))
         else:

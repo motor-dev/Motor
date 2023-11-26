@@ -34,7 +34,8 @@ def plugin(
             name,
             depends=depends,
             uselib=uselib,
-            extra_features=(not build_context.env.STATIC) and ['motor:module'] or []
+            conditions=conditions,
+            extra_features=['motor:preprocess:plugin'] + ((not build_context.env.STATIC) and ['motor:module'] or [])
         )
         return multiarch(
             build_context,
