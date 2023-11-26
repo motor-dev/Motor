@@ -21,7 +21,9 @@ struct ref_payload
     MOTOR_ALWAYS_INLINE explicit ref_payload(allocator& arena) : arena(arena), reference_count({})
     {
     }
-    virtual ~ref_payload() = default;
+    virtual ~ref_payload()  // NOLINT(modernize-use-equals-default)
+    {
+    }
 };
 
 }  // namespace details
@@ -53,7 +55,6 @@ class ref
             , value(minitl::forward< ARGS >(args)...)
         {
         }
-        MOTOR_ALWAYS_INLINE ~payload() override = default;
     };
 
 private:

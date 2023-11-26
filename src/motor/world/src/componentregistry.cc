@@ -24,8 +24,7 @@ ComponentRegistry::~ComponentRegistry() = default;
 scoped< KernelScheduler::Producer::Runtime >
 ComponentRegistry::createRuntime(weak< const KernelScheduler::ProducerLoader > loader) const
 {
-    auto result = scoped< Runtime >::create(Arena::game(), loader->startTask(), 0);
-    return result;
+    return scoped< Runtime >::create(Arena::game(), loader->startTask(), 0);
 }
 
 weak< ComponentRegistry::Runtime >
