@@ -21,7 +21,7 @@ class motor_api(FILESYSTEM) File : public minitl::pointer
     friend class Folder;
 
 public:
-    class Ticket;
+    class [[motor::meta(export = no)]] Ticket;
     friend class Ticket;
 
 protected:
@@ -41,7 +41,7 @@ public:
     ~File() override;
 
 public:
-    class Ticket : public minitl::pointer
+    class [[motor::meta(export = no)]] Ticket : public minitl::pointer
     {
         friend class IOProcess::IOContext;
 
@@ -73,13 +73,15 @@ public:
         virtual void writeBuffer() = 0;
     };
 
-    ref< const Ticket > beginRead(u32 size = 0, i64 offset = 0, bool text = false,
-                                  minitl::allocator& arena = Arena::temporary()) const;
-    ref< const Ticket > beginWrite(const void* data, u32 size, i64 offset = -1) const;
+    [[motor::meta(export = no)]] ref< const Ticket > beginRead(
+        u32 size = 0, i64 offset = 0, bool text = false,
+        minitl::allocator& arena = Arena::temporary()) const;
+    [[motor::meta(export = no)]] ref< const Ticket > beginWrite(const void* data, u32 size,
+                                                                i64 offset = -1) const;
 
-    u64  getState() const;
-    bool isDeleted() const;
-    void refresh(u64 fileSize, u64 state);
+    [[motor::meta(export = no)]] u64  getState() const;
+    [[motor::meta(export = no)]] bool isDeleted() const;
+    [[motor::meta(export = no)]] void refresh(u64 fileSize, u64 state);
 
     ifilename getFileName() const
     {
