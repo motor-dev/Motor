@@ -195,6 +195,9 @@ class MetaObject(object):
     def get_exported_object(self, name: str) -> Tuple[bool, Attributes]:
         return self._declared_objects[name]
 
+    def add_using_declaration(self, namespace: str, name: str) -> None:
+        print(namespace, name)
+
 
 class RootNamespace(MetaObject):
     def __init__(self, file_name: str, module_name: str):
@@ -910,6 +913,37 @@ class Explorer(utils.RecursiveVisitor):
                                                    attributes_parser.attributes)
         else:
             super().visit_elaborated_enum_type_specifier(elaborated_enum_type_specifier)
+
+    def visit_using_declaration(self, using_declaration: ast.UsingDeclaration) -> None:
+        if self._publish[-1]:
+            attributes_parser = AttributeParser()
+            using_declaration.accept_attributes(attributes_parser)
+            if attributes_parser.attributes.exported():
+                for using_reference in using_declaration.reference_list:
+                    if not isinstance(using_reference, ast.Reference):
+                        # only allowed syntax is using ParentClass::MemberName
+                        continue
+                    start = 0
+                    namespace = ''
+                    if using_reference.is_absolute():
+                        start = 1
+                        namespace = '::'
+                    if len(using_reference.name_list) - start < 2:
+                        # only allowed syntax is using ParentClass::MemberName
+                        continue
+                    for name in using_reference.name_list[start:-2]:
+                        sr = utils.StringRef()
+                        name.accept(sr)
+                        namespace += sr.result + '::'
+                    sr = utils.StringRef()
+                    using_reference.name_list[-2].accept(sr)
+                    namespace += sr.result
+                    name_sr = utils.StringRef()
+                    using_reference.name_list[-1].accept(name_sr)
+                    self.namespace.add_using_declaration(namespace, name_sr.result)
+
+        else:
+            super().visit_using_declaration(using_declaration)
 
 
 def main() -> None:
