@@ -202,5 +202,9 @@ class d8(dex):
     run_str = '${JAVA} -cp ${D8} com.android.tools.r8.D8 ${D8FLAGS} ${INPUT_FILES}'
 
 
+dex_uid = dex.uid
+setattr(dex, 'uid', lambda x: (getattr(x.generator, 'group', ''), dex_uid(x)))
+
+
 def build(_: build_framework.BuildContext) -> None:
     pass

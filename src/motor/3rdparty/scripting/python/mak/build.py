@@ -93,22 +93,23 @@ def build(build_context: build_framework.BuildContext) -> None:
             path = env['PYTHON%s_BINARY' % version_number]
             if path:
                 path = build_context.package_node.make_node(path)
-                build_framework.thirdparty(
-                    build_context,
-                    'motor.3rdparty.scripting.python%s' % version_number,
-                    var='python%s' % version_number,
-                    source_node=path,
-                    private_use=['motor.3rdparty.scripting.tcltk'],
-                    feature_list=['python', 'python' + version],
-                    env=env
-                )
-                build_framework.add_feature(build_context, 'python', env)
+                if build_framework.thirdparty(
+                        build_context,
+                        'motor.3rdparty.scripting.python%s' % version_number,
+                        var='python%s' % version_number,
+                        source_node=path,
+                        private_use=['motor.3rdparty.scripting.tcltk'],
+                        feature_list=['python', 'python' + version],
+                        env=env
+                ) is not None:
+                    build_framework.add_feature(build_context, 'python', env)
             else:
-                build_framework.thirdparty(
-                    build_context,
-                    'motor.3rdparty.scripting.python%s' % version_number,
-                    var='python%s' % version_number,
-                    private_use=['motor.3rdparty.scripting.tcltk'],
-                    feature_list=['python', 'python' + version],
-                    env=env
-                )
+                if build_framework.thirdparty(
+                        build_context,
+                        'motor.3rdparty.scripting.python%s' % version_number,
+                        var='python%s' % version_number,
+                        private_use=['motor.3rdparty.scripting.tcltk'],
+                        feature_list=['python', 'python' + version],
+                        env=env
+                ) is not None:
+                    build_framework.add_feature(build_context, 'python', env)
