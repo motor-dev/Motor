@@ -5,7 +5,17 @@ import waflib.Options
 import waflib.Task
 import waflib.TaskGen
 import waflib.Utils
-from typing import Optional
+from typing import Optional, Tuple
+from waflib.Tools import javaw
+
+orig_uid = javaw.javac.uid
+
+
+def uid(task: javaw.javac) -> Tuple[str, bytes]:
+    return getattr(task.generator, 'group', ''), orig_uid(task)
+
+
+setattr(javaw.javac, 'uid', uid)
 
 
 @waflib.TaskGen.feature('motor:android:aapt_resource')
