@@ -238,9 +238,8 @@ def build_plugins(build_context: build_framework.BuildContext) -> None:
     build_framework.plugin(build_context, 'plugin.gameplay.logic', ['motor'], uselib=['cxx14'])
     build_framework.plugin(build_context, 'plugin.gameplay.time', ['motor'], uselib=['cxx14'])
 
-    if build_context.env.check_gtk3 or build_context.env.PROJECTS:
-        build_framework.plugin(build_context, 'plugin.gui.gtk3', ['motor'], ['motor.3rdparty.gui.gtk3'],
-                               uselib=['cxx14'])
+    build_framework.plugin(build_context, 'plugin.gui.gtk3', ['motor'], ['motor.3rdparty.gui.gtk3'],
+                           uselib=['cxx14'], conditions=['gtk3'])
     build_framework.plugin(build_context, 'tool.motoreditor.ui', ['motor'], uselib=['cxx14'])
 
 

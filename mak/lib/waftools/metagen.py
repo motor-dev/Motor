@@ -177,11 +177,11 @@ def dummy_feature_module(_: waflib.TaskGen.task_gen) -> None:
 @waflib.TaskGen.feature('motor:module')
 @waflib.TaskGen.before_method('process_source')
 @waflib.TaskGen.before_method('filter_sources')
-@waflib.TaskGen.after_method('static_preprocess_dependencies')
 def namespace_exports_gen(task_gen: waflib.TaskGen.task_gen) -> None:
     # gather all exports of dependencies
     seen = set([])
     use = getattr(task_gen, 'use', [])[:]
+
     while use:
         x = use.pop()
         if x in seen:

@@ -138,7 +138,8 @@ def build_cuda_kernels(task_gen: waflib.TaskGen.task_gen) -> None:
     kernel_node = getattr(task_gen, 'kernel_node')  # type: waflib.Node.Node
     cuda_source = getattr(task_gen, 'kernel_source')  # type: waflib.Node.Node
     kernel_name = getattr(task_gen, 'kernel_name')  # type: str
-    out_cc = kernel_node.change_ext('.cudacall.cc')
+    out_cc = build_framework.make_bld_node(task_gen, 'src/kernels', '/'.join(kernel_name),
+                                           kernel_node.name + '.cuda.cc')
     task_gen.create_task('cudac', [kernel_node], [out_cc])
     task_gen.source.append(out_cc)
     cuda_bin = build_framework.make_bld_node(task_gen, 'obj', cuda_source.parent, cuda_source.name[:-2] + 'fatbin')

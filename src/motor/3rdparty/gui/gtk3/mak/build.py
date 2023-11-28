@@ -26,7 +26,8 @@ def build_binary(
         var='gtk3',
         source_node=path,
         env=env,
-        use=getattr(build_context, 'platforms'))
+        use=getattr(build_context, 'platforms'),
+        feature_list=['gtk3'])
 
 
 def build(build_context: build_framework.BuildContext) -> None:

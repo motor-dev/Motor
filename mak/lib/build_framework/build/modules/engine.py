@@ -37,8 +37,7 @@ def engine(
             'motor',
             depends=depends,
             uselib=uselib,
-            conditions=conditions,
-            extra_features=['motor:module', 'motor:preprocess:launcher']
+            extra_features=['motor:module']
         )
         build_context.launcher = multiarch(
             build_context,
@@ -61,7 +60,6 @@ def engine(
                 'motor',
                 depends=depends,
                 uselib=uselib,
-                conditions=conditions,
                 extra_features=['motor:module']
             )
             multiarch(

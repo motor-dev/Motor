@@ -9,9 +9,9 @@
 #include <android/log.h>
 #include <jni.h>
 
-MOTOR_EXPORT const char* s_packagePath   = nullptr;
-MOTOR_EXPORT const char* s_dataDirectory = nullptr;
-MOTOR_EXPORT const char* s_plugin        = nullptr;
+extern MOTOR_IMPORT const char* s_dataDirectory;
+MOTOR_EXPORT const char*        s_packagePath = nullptr;
+MOTOR_EXPORT const char*        s_plugin      = nullptr;
 
 int beMain(int argc, const char* argv[]);
 
