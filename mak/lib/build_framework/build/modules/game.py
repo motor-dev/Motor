@@ -34,8 +34,7 @@ def game(
             name,
             depends=depends,
             uselib=uselib,
-            conditions=conditions,
-            extra_features=['motor:preprocess:plugin'] + ((not build_context.env.STATIC) and ['motor:module'] or [])
+            extra_features=['motor:preprocess:plugin', 'motor:module']
         )
         return multiarch(
             build_context,

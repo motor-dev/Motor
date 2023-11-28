@@ -47,7 +47,6 @@ def preprocess(
         plugin_name: str,
         depends: Optional[List[str]],
         uselib: Optional[List[str]],
-        conditions: Optional[List[str]],
         extra_features: Optional[List[str]]
 ) -> Optional[waflib.TaskGen.task_gen]:
     depends = depends or []
@@ -56,12 +55,6 @@ def preprocess(
     source_nodes = _get_source_nodes(build_context, path, name)
     pp_env = build_context.common_env.derive()
     pp_env.PLUGIN = plugin_name.replace('.', '_')
-    conditions = conditions or []
-
-    if not build_context.env.PROJECTS:
-        for condition in conditions:
-            if condition not in build_context.env.FEATURES:
-                return None
 
     preprocess_sources = []
     if build_context.env.PROJECTS:
@@ -139,11 +132,14 @@ def module(
     extra_public_defines = extra_public_defines or []
     conditions = conditions or []
     uselib = uselib or []
+    do_build = True
+    task_gen = None  # type: Optional[waflib.TaskGen.task_gen]
 
     if not env.PROJECTS:
         for condition in conditions:
             if condition not in env.FEATURES:
-                return None
+                do_build = False
+
     source_nodes = _get_source_nodes(build_context, path, name)
     source_filter = ['src/**/*.%s' % ext for ext in COMPILE_EXTENSIONS]
     includes = []  # type: List[waflib.Node.Node]
@@ -181,59 +177,58 @@ def module(
         elif path_node.is_child_of(build_context.motornode):
             module_path = path_node.path_from(build_context.motornode).replace('/', '.').replace('\\', '. ')
 
-    task_gen = build_context(
-        group=build_context.motor_variant,
-        env=env.derive(),
-        target=env.ENV_PREFIX % name,
-        target_name=name,
-        features=features[:],
-        use=[env.ENV_PREFIX % d for d in depends],
-        private_use=[env.ENV_PREFIX % d for d in private_depends],
-        uselib=[build_context.__class__.optim] + (build_context.env.STATIC and ['static'] or ['dynamic']) + uselib,
-        preprocess=preprocess_taskgen,
-        source_nodes=source_nodes,
-        source=source_files,
-        defines=[
-                    'building_%s' % _safe_name(name.split('.')[-1]),
-                    'MOTOR_PROJECTID=%s' % _safe_name(name.replace('.', '_')),
-                    'MOTOR_PROJECTNAME=%s' % name
-                ] + extra_defines,
-        export_defines=extra_public_defines[:],
-        includes=extra_includes + includes + api + [build_context.srcnode],
-        export_includes=extra_public_includes + api,
-        export_system_includes=extra_system_includes,
-        project_name=project_name or name,
-        conditions=conditions,
-        nomaster=getattr(preprocess_taskgen, 'nomaster') if preprocess_taskgen is not None else set(),
-    )
-    if module_path is not None:
-        setattr(task_gen, 'module_path', module_path)
+    if do_build:
+        task_gen = build_context(
+            group=build_context.motor_variant,
+            env=env.derive(),
+            target=env.ENV_PREFIX % name,
+            target_name=name,
+            features=features[:],
+            use=[env.ENV_PREFIX % d for d in depends],
+            private_use=[env.ENV_PREFIX % d for d in private_depends],
+            uselib=[build_context.__class__.optim] + (build_context.env.STATIC and ['static'] or ['dynamic']) + uselib,
+            preprocess=preprocess_taskgen,
+            source_nodes=source_nodes,
+            source=source_files,
+            defines=[
+                        'building_%s' % _safe_name(name.split('.')[-1]),
+                        'MOTOR_PROJECTID=%s' % _safe_name(name.replace('.', '_')),
+                        'MOTOR_PROJECTNAME=%s' % name
+                    ] + extra_defines,
+            export_defines=extra_public_defines[:],
+            includes=extra_includes + includes + api + [build_context.srcnode],
+            export_includes=extra_public_includes + api,
+            export_system_includes=extra_system_includes,
+            project_name=project_name or name,
+            conditions=conditions,
+            nomaster=getattr(preprocess_taskgen, 'nomaster') if preprocess_taskgen is not None else set(),
+        )
+        if module_path is not None:
+            setattr(task_gen, 'module_path', module_path)
 
-    if waflib.Options.options.tests and env.BUILD_UNIT_TESTS:
-        for _, source_node in source_nodes:
-            if os.path.isdir(os.path.join(source_node.abspath(), 'tests')):
-                test_path = source_node.make_node('tests')
-                for test in test_path.ant_glob('**', excl=[]):
-                    test_name = os.path.splitext(test.path_from(test_path))[0]
-                    test_name_list = re.split('[\\\\/]', test_name)
-                    target_name = 'unittest.%s.%s' % (name, '.'.join(test_name_list))
-                    try:
-                        p = build_context.get_tgen_by_name(
-                            target_name + '.preprocess')  # type: Optional[waflib.TaskGen.task_gen]
-                    except waflib.Errors.WafError:
-                        p = preprocess(
-                            build_context,
-                            target_name,
-                            test_path,
-                            getattr(preprocess_taskgen, 'root_namespace'),
-                            getattr(preprocess_taskgen, 'plugin_name'),
-                            depends=[task_gen.target],
-                            uselib=uselib,
-                            conditions=conditions,
-                            extra_features=['motor:module', 'motor:preprocess:unit_test']
-                        )
-                    assert p is not None
+    for _, source_node in source_nodes:
+        if os.path.isdir(os.path.join(source_node.abspath(), 'tests')):
+            test_path = source_node.make_node('tests')
+            for test in test_path.ant_glob('**', excl=[]):
+                test_name = os.path.splitext(test.path_from(test_path))[0]
+                test_name_list = re.split('[\\\\/]', test_name)
+                target_name = 'unittest.%s.%s' % (name, '.'.join(test_name_list))
+                try:
+                    p = build_context.get_tgen_by_name(
+                        target_name + '.preprocess')  # type: Optional[waflib.TaskGen.task_gen]
+                except waflib.Errors.WafError:
+                    p = preprocess(
+                        build_context,
+                        target_name,
+                        test_path,
+                        getattr(preprocess_taskgen, 'root_namespace'),
+                        getattr(preprocess_taskgen, 'plugin_name'),
+                        depends=[name],
+                        uselib=uselib,
+                        extra_features=['motor:module']
+                    )
 
+                if do_build and waflib.Options.options.tests and env.BUILD_UNIT_TESTS:
                     build_context(
                         group=build_context.motor_variant,
                         env=env.derive(),

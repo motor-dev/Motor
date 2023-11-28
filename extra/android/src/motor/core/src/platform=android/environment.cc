@@ -10,7 +10,7 @@
 #include <string.h>
 #include <unistd.h>
 
-extern MOTOR_IMPORT const char* s_dataDirectory;
+MOTOR_EXPORT const char* s_dataDirectory = nullptr;
 
 namespace Motor {
 

@@ -51,24 +51,7 @@ def set_building_name_inherits(task_gen: waflib.TaskGen.task_gen) -> None:
                 task_gen.env.append_unique('DEFINES', 'building_%s' % _safe_target_name(y.target))
 
 
-@waflib.TaskGen.feature('motor:preprocess:launcher', 'motor:preprocess:unit_test', 'motor:preprocess:python_module')
-@waflib.TaskGen.before_method('apply_link')
-@waflib.TaskGen.before_method('process_use')
-def static_preprocess_dependencies(task_gen: waflib.TaskGen.task_gen) -> None:
-    if task_gen.bld.env.STATIC:
-        for g in task_gen.bld.groups:
-            for dependency in g:
-                if not isinstance(dependency, waflib.TaskGen.task_gen):
-                    continue
-                if (
-                        'motor:preprocess:kernel' in dependency.features or 'motor:preprocess:plugin' in dependency.features
-                ):
-                    dependency.post()
-                    if dependency.env.TOOLCHAIN == task_gen.env.TOOLCHAIN:
-                        getattr(task_gen, 'use').append(dependency.target)
-
-
-@waflib.TaskGen.feature('motor:launcher', 'motor:unit_test', 'motor:python_module')
+@waflib.TaskGen.feature('motor:launcher', 'motor:python_module')
 @waflib.TaskGen.before_method('apply_link')
 @waflib.TaskGen.before_method('process_use')
 def static_dependencies(task_gen: waflib.TaskGen.task_gen) -> None:

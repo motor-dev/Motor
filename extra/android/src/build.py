@@ -20,7 +20,7 @@ def build(build_context: build_framework.BuildContext) -> None:
         build_context(
             group=build_context.motor_variant,
             target='motor.android.launcher',
-            features=['cxx', 'javac', 'dex'],
+            features=['javac', 'dex'],
             source_nodes=[source_node, resource_node],
             destfile='classes.dex'
         )

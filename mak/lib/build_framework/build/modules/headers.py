@@ -34,7 +34,6 @@ def headers(
             'motor',
             depends,
             uselib,
-            conditions,
             [])
         return multiarch(
             build_context,

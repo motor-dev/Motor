@@ -32,7 +32,6 @@ def package(
                         name,
                         [],
                         [],
-                        [],
                         extra_features=['motor:deploy:off']
                     )
                 arch_list.append(source_build(build_context, name, env, path))

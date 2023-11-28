@@ -54,8 +54,7 @@ def python_module(
         name,
         depends=depends,
         uselib=uselib,
-        conditions=conditions,
-        extra_features=['motor:preprocess:python_module']
+        extra_features=[]
     )
     multiarch_module = build_framework.multiarch(
         build_context,
