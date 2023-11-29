@@ -14,7 +14,7 @@ import waflib.Task
 import waflib.TaskGen
 from .display import clear_status_line
 
-from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, TypeVar, Union
 
 T = TypeVar('T', bound=waflib.Context.Context)
 
@@ -549,7 +549,7 @@ class ProjectGenerator(BuildContext):
     motor_toolchain = 'projects'
     motor_variant = 'projects'
 
-    def get_build_iterator(self):
+    def get_build_iterator(self) -> Iterator[List[waflib.Task.Task]]:
         for self.current_group, _ in enumerate(self.groups):
             group_name = self.get_group_name(self.current_group)
             if group_name is None or group_name != self.motor_variant:

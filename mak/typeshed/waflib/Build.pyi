@@ -4,7 +4,7 @@ from .ConfigSet import ConfigSet
 from .Node import Node
 from .Task import Task
 from .TaskGen import task_gen
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
 
 CACHE_DIR: str = ...
 CACHE_SUFFIX: str = ...
@@ -157,7 +157,7 @@ class BuildContext(Context):
     def get_tasks_group(self, idx: int) -> List[Task]:
         ...
 
-    def get_build_iterator(self) -> List[Task]:
+    def get_build_iterator(self) -> Iterator[List[Task]]:
         ...
 
     def install_files(self, dest: Union[str, Node], files: List[Union[str, Node]], **kw: Any) -> task_gen:
