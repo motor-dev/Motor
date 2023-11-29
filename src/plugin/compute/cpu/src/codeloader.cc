@@ -8,9 +8,9 @@
 
 namespace Motor { namespace KernelScheduler { namespace CPU {
 
-CodeLoader::CodeLoader(const inamespace& cpuVariant)
+CodeLoader::CodeLoader(inamespace&& cpuVariant)
     : ICodeLoader()
-    , m_cpuVariant(inamespace("cpu") + cpuVariant)
+    , m_cpuVariant(minitl::move(cpuVariant))
 {
 }
 

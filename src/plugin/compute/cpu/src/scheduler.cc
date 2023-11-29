@@ -7,32 +7,41 @@
 #include <memoryhost.hh>
 #include <scheduler.hh>
 
+#include <motor/core/preproc.hh>
 #include <motor/scheduler/kernel/ischeduler.hh>
 #include <motor/scheduler/kernel/kernel.meta.hh>
 #include <motor/scheduler/task/kerneltask.hh>
 
-#include <kernel_variants.hh>
 #include <kernelobject.hh>
+
+#ifndef MOTOR_VECTOR_OPTIM_VARIANTS
+#    define MOTOR_VECTOR_OPTIM_VARIANTS
+#endif
 
 namespace Motor { namespace KernelScheduler { namespace CPU {
 
 Scheduler::Scheduler(const Plugin::Context& context)
     : IScheduler(istring("CPU"), context.scheduler, CPUType)
     , m_resourceManager(context.resourceManager)
-    , m_cpuLoaders(Arena::task(), s_cpuVariantCount + 1)
+    , m_cpuLoaders(Arena::task())
     , m_memoryHost(scoped< MemoryHost >::create(Arena::task()))
 {
-    for(i32 i = 0; i < s_cpuVariantCount; ++i)
+    motor_info(Log::cpu(), "registering CPU kernel loader");
+    const char* variants = MOTOR_STRINGIZE(MOTOR_VECTOR_OPTIM_VARIANTS);
+    for(i32 i = 0; *variants; ++i)
     {
-        if(*s_cpuVariants[i])
-            motor_info_format(Log::cpu(), "registering {0} CPU kernel loader", s_cpuVariants[i]);
-        else
-            motor_info(Log::cpu(), "registering CPU kernel loader");
-        scoped< CodeLoader > codeLoader
-            = scoped< CodeLoader >::create(Arena::task(), inamespace(s_cpuVariants[i]));
-        m_resourceManager->attach< Code >(codeLoader);
+        const char* variantEnd = variants;
+        while(*variantEnd and *variantEnd != '+')
+            variantEnd++;
+        istring variantName(variants, variantEnd);
+        variants = variantEnd + u32(*variantEnd == '+');
+        motor_info_format(Log::cpu(), "registering {0} CPU kernel loader", variantName);
+
+        scoped< CodeLoader > variantCodeLoader
+            = scoped< CodeLoader >::create(Arena::task(), inamespace(variantName));
+        m_resourceManager->attach< Code >(variantCodeLoader);
         m_cpuLoaders.push_back(
-            scoped< KernelLoader >::create(Arena::task(), minitl::move(codeLoader)));
+            scoped< KernelLoader >::create(Arena::task(), minitl::move(variantCodeLoader)));
         m_resourceManager->attach< Kernel >(m_cpuLoaders[i]);
     }
 }

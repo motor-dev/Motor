@@ -58,23 +58,25 @@ class GnuCompiler(Compiler):
     }
     VECTORIZED_FLAGS = {
         'x86': (
+            ('', []),
             ('.avx', ['-mavx']),
             ('.avx2', ['-mavx2']),
         ),
         'amd64': (
+            ('', []),
             ('.avx', ['-mavx']),
             ('.avx2', ['-mavx2']),
         ),
-        'ppc': (('.altivec', ['-maltivec']),),
-        'ppc64': (('.altivec', ['-maltivec']),),
-        'armv6': (('.neon', ['-mfpu=neon']),),
-        'armv7a': (('.neon', ['-mfpu=neon']),),
-        'armv7s': (('.neon', ['-mfpu=neon']),),
-        'armv7k': (('.neon', ['-mfpu=neon']),),
-        'armv7l': (('.neon', ['-mfpu=neon']),),
-        'arm64': (('.neon', []),),
-        'arm64e': (('.neon', []),),
-        'aarch32': (('.neon', []),),
+        'ppc': (('', []), ('.altivec', ['-maltivec']),),
+        'ppc64': (('', []), ('.altivec', ['-maltivec']),),
+        'armv6': (('', []), ('.neon', ['-mfpu=neon']),),
+        'armv7a': (('', []), ('.neon', ['-mfpu=neon']),),
+        'armv7s': (('', []), ('.neon', ['-mfpu=neon']),),
+        'armv7k': (('', []), ('.neon', ['-mfpu=neon']),),
+        'armv7l': (('', []), ('.neon', ['-mfpu=neon']),),
+        'arm64': (('', []), ('.neon', []),),
+        'arm64e': (('', []), ('.neon', []),),
+        'aarch32': (('', []), ('.neon', []),),
     }
     MULTILIBS = {
         'x86': ((['-m64'], 'amd64'),),
