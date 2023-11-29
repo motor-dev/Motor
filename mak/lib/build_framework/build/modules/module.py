@@ -227,6 +227,7 @@ def module(
                     )
 
                 if do_build and waflib.Options.options.tests and env.BUILD_UNIT_TESTS:
+                    assert task_gen is not None
                     build_context(
                         group=build_context.motor_variant,
                         env=env.derive(),
