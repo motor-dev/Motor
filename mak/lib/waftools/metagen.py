@@ -208,6 +208,7 @@ def add_namespace_export_file(task_gen: waflib.TaskGen.task_gen, node: waflib.No
         getattr(task_gen, 'namespace_exports_task').set_inputs([node])
     except AttributeError:
         out_node = build_framework.make_bld_node(task_gen, 'src', None, 'meta_namespace_export.cc')
+        out_node.parent.mkdir()
         getattr(task_gen, 'out_sources').append(out_node)
         getattr(task_gen, 'nomaster').add(out_node)
         setattr(task_gen, 'namespace_exports_task', task_gen.create_task('ns_export', [node], [out_node]))

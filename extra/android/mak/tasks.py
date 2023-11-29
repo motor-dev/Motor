@@ -107,8 +107,9 @@ class aapt_pkg(waflib.Task.Task):
 
     def run(self) -> Optional[int]:
         bld = self.generator.bld
-        root = bld.bldnode
+        root = bld.bldnode.make_node(getattr(self.generator, 'group'))
         root = root.make_node('zip')
+        root.mkdir()
         self.outputs[0].write(self.inputs[0].read(flags='rb'), flags='wb')
         if self.env['_7Z']:
             compression_level = 2 if bld.env.OPTIM != 'final' else 9

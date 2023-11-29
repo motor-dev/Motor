@@ -12,7 +12,6 @@ _PATTERN = re.compile(r'\${([^}]+)}')
 
 
 def _expand_cmd(input_task: waflib.Task.Task, env: waflib.ConfigSet.ConfigSet) -> List[str]:
-
     def get_var(name: str) -> str:
         if name == 'SRC':
             return 'task.inputs'
@@ -58,22 +57,10 @@ def _expand_cmd(input_task: waflib.Task.Task, env: waflib.ConfigSet.ConfigSet) -
 class clangd(build_framework.ProjectGenerator):
     """creates clangd compile_commands.json"""
     cmd = 'clangd'
-    fun = 'build'
-    optim = 'debug'
-    motor_toolchain = 'projects'
-    motor_variant = 'projects.clangd'
-    variant = 'projects/clangd'
+    variant = 'clangd'
 
-    def execute(self) -> Optional[str]:
-        """
-        Entry point
-        """
-        if build_framework.schedule_setup(self):
-            return "SKIP"
-
-        self.restore()
-        if not self.all_envs:
-            self.load_envs()
+    def load_envs(self) -> None:
+        build_framework.ProjectGenerator.load_envs(self)
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '${Variant}'
@@ -88,9 +75,13 @@ class clangd(build_framework.ProjectGenerator):
         self.env.DEPLOY_DATADIR = '${Deploy_DataDir}'
         self.env.DEPLOY_PLUGINDIR = '${Deploy_PluginDir}'
         self.env.DEPLOY_KERNELDIR = '${Deploy_KernelDir}'
-        setattr(self, 'features', ['GUI'])
+        build_framework.add_feature(self, 'GUI')
 
-        self.recurse([self.run_dir])
+    def execute(self) -> Optional[str]:
+        result = build_framework.ProjectGenerator.execute(self)
+        if result is not None:
+            return result
+
         self.write_workspace()
         return None
 

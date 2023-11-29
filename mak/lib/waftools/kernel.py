@@ -14,6 +14,7 @@ class kernel(waflib.Task.Task):
         kernel_node = getattr(self, 'kernel')  # type: waflib.Node.Node
         macros = getattr(self, 'macros')  # type: waflib.Node.Node
         kernel_name = getattr(self, 'kernel_name')  # type: str
+
         return self.exec_command(
             [
                 sys.executable,

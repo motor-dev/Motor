@@ -22,11 +22,7 @@ def _vscode_path_from(path: Union[str, waflib.Node.Node], node: waflib.Node.Node
 class vscode_common(build_framework.ProjectGenerator):
     """creates common plumbing for VSCode projects"""
     cmd = '_vscode'
-    fun = 'build'
-    optim = 'debug'
-    motor_toolchain = 'projects'
-    motor_variant = 'projects.vscode'
-    extensions = []    # type: List[str]
+    extensions = []  # type: List[str]
 
     SETTINGS = '  {\n' \
                '    "editor.formatOnSave": true,\n' \
@@ -70,16 +66,8 @@ class vscode_common(build_framework.ProjectGenerator):
                '    }\n' \
                '  }\n'
 
-    def execute(self) -> Optional[str]:
-        """
-        Entry point
-        """
-        if build_framework.schedule_setup(self):
-            return "SKIP"
-
-        self.restore()
-        if not self.all_envs:
-            self.load_envs()
+    def load_envs(self) -> None:
+        build_framework.ProjectGenerator.load_envs(self)
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '${input:motor-Variant}'
@@ -96,7 +84,10 @@ class vscode_common(build_framework.ProjectGenerator):
         self.env.DEPLOY_KERNELDIR = '${input:motor-Deploy_KernelDir}'
         build_framework.add_feature(self, 'GUI')
 
-        self.recurse([self.run_dir])
+    def execute(self) -> Optional[str]:
+        result = build_framework.ProjectGenerator.execute(self)
+        if result is not None:
+            return result
         self.write_workspace()
         return None
 
@@ -139,7 +130,7 @@ class vscode_common(build_framework.ProjectGenerator):
 class vscode(vscode_common):
     """creates projects for Visual Studio Code"""
     cmd = 'vscode'
-    variant = 'projects/vscode'
+    variant = 'vscode'
     extensions = ['"ms-vscode.cpptools"', '"ms-python.python"', '"eeyore.yapf"', '"ms-python.mypy-type-checker"']
 
     def write_workspace(self) -> None:
@@ -217,7 +208,7 @@ class vscode(vscode_common):
                                 )
 
                         if len(commands) != mark:
-                            tg_includes = [] # type: List[Union[str, waflib.Node.Node]]
+                            tg_includes = []  # type: List[Union[str, waflib.Node.Node]]
                             tg_defines = []  # type: List[str]
                             tg_includes += getattr(tg, 'includes', [])
                             tg_includes += getattr(tg, 'export_includes', [])
@@ -250,7 +241,7 @@ class vscode(vscode_common):
 
                 with open(variant_node.make_node('compile_commands.json').abspath(), 'w') as compile_commands:
                     json.dump(commands, compile_commands, indent=2)
-                seen = {self.srcnode, self.bldnode} # type: Set[Union[str, waflib.Node.Node]]
+                seen = {self.srcnode, self.bldnode}  # type: Set[Union[str, waflib.Node.Node]]
 
                 def add_seen(i: Union[str, waflib.Node.Node]) -> bool:
                     seen.add(i)
@@ -260,9 +251,9 @@ class vscode(vscode_common):
                     {
                         'name':
                             '%s - %s' % (env_name, variant),
-                                                                                                                        # type: ignore
+                        # type: ignore
                         'includePath': [i for i in include_paths if i not in seen and add_seen(i)],
-                                                                                                                        # type: ignore
+                        # type: ignore
                         'defines': [d for d in defines if d not in seen and add_seen(i)],
                         'compileCommands':
                             '${workspaceFolder}/.vscode/toolchains/%s/%s/compile_commands.json' % (env_name, variant),
@@ -301,30 +292,31 @@ class vscode(vscode_common):
         for action, command, is_default in [
             ('build', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '-p', '--werror'], True),
             (
-                'build[fail-tests=no]',
-                ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--no-fail-on-tests', '-p', '--werror'], False
+                    'build[fail-tests=no]',
+                    ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--no-fail-on-tests', '-p', '--werror'],
+                    False
             ),
             (
-                'build[static]',
-                ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--static', '-p', '--werror'], False
+                    'build[static]',
+                    ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--static', '-p', '--werror'], False
             ),
             (
-                'build[dynamic]',
-                ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--dynamic', '-p', '--werror'], False
+                    'build[dynamic]',
+                    ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--dynamic', '-p', '--werror'], False
             ),
             (
-                'build[nomaster]',
-                ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--nomaster', '-p', '--werror'], False
+                    'build[nomaster]',
+                    ['build:${input:motor-Toolchain}:${input:motor-Variant}', '--nomaster', '-p', '--werror'], False
             ),
             (
-                'build[single]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '-j', '1', '-p',
-                                  '--werror'], False
+                    'build[single]', ['build:${input:motor-Toolchain}:${input:motor-Variant}', '-j', '1', '-p',
+                                      '--werror'], False
             ), ('clean', ['clean:${input:motor-Toolchain}:${input:motor-Variant}', '-p'], False),
             (
-                'rebuild', [
-                    'clean:${input:motor-Toolchain}:${input:motor-Variant}',
-                    'build:${input:motor-Toolchain}:${input:motor-Variant}', '-p', '--werror'
-                ], False
+                    'rebuild', [
+                        'clean:${input:motor-Toolchain}:${input:motor-Variant}',
+                        'build:${input:motor-Toolchain}:${input:motor-Variant}', '-p', '--werror'
+                    ], False
             ), ('setup', ['setup:${input:motor-Toolchain}'], False), ('reconfigure', ['reconfigure'], False),
             (self.cmd, [self.cmd], False)
         ]:
@@ -425,7 +417,7 @@ class vscode(vscode_common):
                         }
                     )
                 if 'motor:unit_test' in tg.features:
-                    link_task = getattr(tg, 'link_task')                                                # type: waflib.Task.Task
+                    link_task = getattr(tg, 'link_task')  # type: waflib.Task.Task
                     unit_test = link_task.outputs[0].path_from(tg.bld.bldnode)
                     launch_configs['configurations'].append(
                         {
@@ -445,8 +437,9 @@ class vscode(vscode_common):
                     )
 
         for input_variable in (
-            'Toolchain', 'Variant', 'Prefix', 'Deploy_RunBinDir', 'Deploy_BinDir', 'Launcher', 'Python', 'DebuggerPath',
-            'DebuggerMode', 'TmpDir'
+                'Toolchain', 'Variant', 'Prefix', 'Deploy_RunBinDir', 'Deploy_BinDir', 'Launcher', 'Python',
+                'DebuggerPath',
+                'DebuggerMode', 'TmpDir'
         ):
             launch_configs['inputs'].append(
                 {
@@ -468,7 +461,7 @@ class vscode(vscode_common):
 class vscode_cmake(vscode_common):
     """creates projects for Visual Studio Code using CMake"""
     cmd = 'vscode_cmake'
-    variant = 'projects/vscode'
+    variant = 'vscode_cmake'
     extensions = [
         '"ms-vscode.cpptools"', '"ms-python.python"', '"eeyore.yapf"', '"ms-python.mypy-type-checker"',
         '"ms-vscode.cmake-tools"'

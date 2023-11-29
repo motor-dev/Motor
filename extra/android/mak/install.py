@@ -23,8 +23,7 @@ def install_files(
         base = os.path.dirname(filename)
         if base != out_dir:
             dest_node = task_gen.bld.bldnode
-            # dest_node = dest_node.make_node(self.bld.motor_variant)
-            # dest_node = dest_node.make_node(self.bld.optim)
+            dest_node = dest_node.make_node(task_gen.bld.motor_variant)
             dest_node = dest_node.make_node('zip')
             dest_node = dest_node.make_node(out_dir)
             dest_node.mkdir()
@@ -48,8 +47,7 @@ def install_as(
     if not target_path.startswith(root_path):
         raise waflib.Errors.WafError('Does not know how to deploy to %s' % target_path)
     dest_node = task_gen.bld.bldnode
-    # dest_node = dest_node.make_node(self.bld.motor_variant)
-    # dest_node = dest_node.make_node(self.bld.optim)
+    dest_node = dest_node.make_node(task_gen.bld.motor_variant)
     dest_node = dest_node.make_node('zip')
     dest_node = dest_node.find_or_declare(target_path[len(root_path) + 1:])
     package_task.generator.create_task('copy', [file], [dest_node])

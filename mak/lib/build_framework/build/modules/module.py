@@ -57,10 +57,7 @@ def preprocess(
     pp_env.PLUGIN = plugin_name.replace('.', '_')
 
     preprocess_sources = []
-    if build_context.env.PROJECTS:
-        globs = ['nothing']
-    else:
-        globs = ['src/**/*.yy', 'src/**/*.ll', 'src/**/*.plist', 'api/**/*.meta.hh', 'include/**/*.meta.hh']
+    globs = ['src/**/*.yy', 'src/**/*.ll', 'src/**/*.plist', 'api/**/*.meta.hh', 'include/**/*.meta.hh']
     for _, source_node in source_nodes:
         preprocess_sources += source_node.ant_glob(globs, excl=[])
 
@@ -87,7 +84,8 @@ def preprocess(
         root_namespace=root_namespace,
         uselib=uselib,
         out_sources=[],
-        generated_include_node=build_context.bldnode.make_node(name + '.preprocess/include'),
+        generated_include_node=build_context.bldnode.make_node('preprocess').make_node(name + '.preprocess/include'),
+        generated_api_node=build_context.bldnode.make_node('preprocess').make_node(name + '.preprocess/api'),
         use=use,
         nomaster=set([])
     )
@@ -164,8 +162,8 @@ def module(
     else:
         source_files = []
     preprocess_taskgen = build_context.get_tgen_by_name('%s.preprocess' % name)
-    if not env.PROJECTS:
-        extra_includes = extra_includes + [getattr(preprocess_taskgen, 'generated_include_node')]
+    extra_includes = extra_includes + [getattr(preprocess_taskgen, 'generated_include_node')]
+    extra_public_includes = extra_public_includes + [getattr(preprocess_taskgen, 'generated_api_node')]
 
     module_path = None
     if path:

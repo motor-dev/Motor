@@ -1,4 +1,5 @@
 #! /Usr/bin/env python
+# ! /Usr/bin/env python
 # encoding: utf-8
 
 import os
@@ -458,14 +459,8 @@ class QtCreator(build_framework.ProjectGenerator):
         self.qt_platforms = []  # type: List[Tuple[str, QtPlatform]]
         self.qt_platforms_to_remove = []  # type: List[QtPlatform]
 
-    def execute(self) -> Optional[str]:
-        if build_framework.schedule_setup(self):
-            return "SKIP"
-
-        self.restore()
-        if not self.all_envs:
-            self.load_envs()
-
+    def load_envs(self) -> None:
+        build_framework.ProjectGenerator.load_envs(self)
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = _to_var('Variant')
@@ -481,7 +476,10 @@ class QtCreator(build_framework.ProjectGenerator):
         self.env.DEPLOY_KERNELDIR = _to_var('Deploy_KernelDir')
         build_framework.add_feature(self, 'GUI')
 
-        self.recurse([self.run_dir])
+    def execute(self) -> Optional[str]:
+        result = build_framework.ProjectGenerator.execute(self)
+        if result is not None:
+            return result
 
         self.write_ini_file()
         self.build_platform_list()
@@ -1134,11 +1132,11 @@ class QtCreator(build_framework.ProjectGenerator):
             'ProjectExplorer.Target.BuildConfiguration.%d' % build_configuration_index, [
                 (
                     'ProjectExplorer.BuildConfiguration.BuildDirectory',
-                    self.bldnode.make_node('qtcreator').abspath()
+                    self.bldnode.make_node(self.variant).abspath()
                 ),
                 (
                     'GenericProjectManager.GenericBuildConfiguration.BuildDirectory',
-                    self.bldnode.make_node('qtcreator').abspath()
+                    self.bldnode.make_node(self.variant).abspath()
                 ),
                 (
                     'ProjectExplorer.BuildConfiguration.BuildStepList.0', [
@@ -1480,11 +1478,11 @@ class QCMake(QtCreator):
                      variant, self.cmake_toolchains[env_name])),
                 (
                     'ProjectExplorer.BuildConfiguration.BuildDirectory',
-                    self.bldnode.make_node('%s/%s' % (env_name, variant)).abspath()
+                    self.bldnode.make_node('%s/%s/%s' % (self.variant, env_name, variant)).abspath()
                 ),
                 (
                     'GenericProjectManager.GenericBuildConfiguration.BuildDirectory',
-                    self.bldnode.make_node('%s/%s' % (env_name, variant)).abspath()
+                    self.bldnode.make_node('%s/%s/%s' % (self.variant, env_name, variant)).abspath()
                 ),
                 (
                     'ProjectExplorer.BuildConfiguration.BuildStepList.0', [
@@ -1583,64 +1581,40 @@ class QCMake(QtCreator):
 class QtCreator2(QtCreator):
     """creates projects for QtCreator 2.x"""
     cmd = 'qtcreator2'
-    fun = 'build'
-    optim = 'debug'
-    motor_toolchain = 'projects'
-    motor_variant = 'projects.qtcreator2'
-    variant = 'projects/qtcreator2'
+    variant = 'qtcreator2'
     version = (2, 12)
 
 
 class QtCreator3(QtCreator):
     """creates projects for QtCreator 3.x"""
     cmd = 'qtcreator3'
-    fun = 'build'
-    optim = 'debug'
-    motor_toolchain = 'projects'
-    motor_variant = 'projects.qtcreator3'
-    variant = 'projects/qtcreator3'
+    variant = 'qtcreator3'
     version = (3, 15)
 
 
 class QtCreator4(QtCreator):
     """creates projects for QtCreator 4.x"""
     cmd = 'qtcreator4'
-    fun = 'build'
-    optim = 'debug'
-    motor_toolchain = 'projects'
-    motor_variant = 'projects.qtcreator4'
-    variant = 'projects/qtcreator4'
+    variant = 'qtcreator4'
     version = (4, 18)
 
 
 class Qbs2(Qbs):
     """creates Qbs projects for QtCreator 2.x"""
     cmd = 'qbs2'
-    fun = 'build'
-    optim = 'debug'
-    motor_toolchain = 'projects'
-    motor_variant = 'projects.qbs2'
-    variant = 'projects/qbs2'
+    variant = 'qbs2'
     version = (2, 12)
 
 
 class Qbs3(Qbs):
     """creates Qbs projects for QtCreator 3.x"""
     cmd = 'qbs3'
-    fun = 'build'
-    optim = 'debug'
-    motor_toolchain = 'projects'
-    motor_variant = 'projects.qbs3'
-    variant = 'projects/qbs3'
+    variant = 'qbs3'
     version = (3, 15)
 
 
 class Qbs4(Qbs):
     """creates Qbs projects for QtCreator 4.x"""
     cmd = 'qbs4'
-    fun = 'build'
-    optim = 'debug'
-    motor_toolchain = 'projects'
-    motor_variant = 'projects.qbs4'
-    variant = 'projects/qbs4'
+    variant = 'qbs4'
     version = (4, 18)

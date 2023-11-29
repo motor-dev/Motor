@@ -14,16 +14,8 @@ class sublime3(build_framework.ProjectGenerator):
     motor_variant = 'projects.sublime'
     variant = 'projects/sublime'
 
-    def execute(self) -> Optional[str]:
-        """
-        Entry point
-        """
-        if build_framework.schedule_setup(self):
-            return "SKIP"
-
-        self.restore()
-        if not self.all_envs:
-            self.load_envs()
+    def load_envs(self) -> None:
+        build_framework.ProjectGenerator.load_envs(self)
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '${Variant}'
@@ -40,7 +32,11 @@ class sublime3(build_framework.ProjectGenerator):
         self.env.DEPLOY_KERNELDIR = '${Deploy_KernelDir}'
         build_framework.add_feature(self, 'GUI')
 
-        self.recurse([self.run_dir])
+    def execute(self) -> Optional[str]:
+        result = build_framework.ProjectGenerator.execute(self)
+        if result is not None:
+            return result
+
         self.write_workspace()
         return None
 
