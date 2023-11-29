@@ -36,6 +36,12 @@ class SunCC(GnuCompiler):
     VECTORIZED_FLAGS = {
         'x86':
             (
+                (
+                    '', [
+                        '-xarch=sse4_2', '-D__MMX__=1', '-DSSE__=1', '-DSSE2__=1', '-D__SSE3__=1', '-D__SSSE3__=1',
+                        '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1'
+                    ]
+                ),
                 ('.avx', ['-xarch=sse4_2', '-xarch=avx', '-D__AVX__=1', '-D__XSAVE__=1']),
                 ('.avx2', ['-xarch=sse4_2', '-xarch=avx2', '-D__AVX__=1', '-D__XSAVE__=1', '-D__AVX2__=1']),
             ),

@@ -23,7 +23,7 @@ class cpuc(waflib.Task.Task):
         variant_name = getattr(self.generator, 'variant_name')  # type: str
         with open(kernel_node.abspath(), 'rb') as kernel_file:
             namespace = pickle.load(kernel_file)  # type: kernel_support.KernelNamespace
-        static_variant = ('_' + variant_name[1:]) if self.env.STATIC else ''
+        static_variant = ('_' + variant_name.replace('.', '_')) if self.env.STATIC else ''
 
         with open(self.outputs[0].abspath(), 'w') as out:
             out.write(
@@ -90,8 +90,7 @@ class cpuc(waflib.Task.Task):
 def build_cpu_kernels(task_gen: waflib.TaskGen.task_gen) -> None:
     out = build_framework.make_bld_node(task_gen,
                                         'src/kernels', None,
-                                        '%s.cpu%s.cc' % (os.path.join(*getattr(task_gen, 'kernel_name')),
-                                                         getattr(task_gen, 'variant_name'))
+                                        '%s.cc' % os.path.join(*getattr(task_gen, 'kernel_name'))
                                         )
     task_gen.create_task('cpuc', [getattr(task_gen, 'kernel_node')], [out])
     task_gen.source.append(out)
@@ -115,7 +114,7 @@ def create_cpu_kernel(
             kernel_env = build_context.all_envs[toolchain]
             for variant in kernel_env.VECTOR_OPTIM_VARIANTS:
                 tgen = build_context.get_tgen_by_name(task_gen.name)
-                target_suffix = '.'.join([kernel_type] + ([variant[1:]] if variant else []))
+                target_suffix = env.ARCH_NAME + variant
                 kernel_target = target_name + '.' + '.'.join(kernel_name) + '.' + target_suffix
                 kernel_task_gen = build_context(
                     group=build_context.motor_variant,
@@ -123,7 +122,7 @@ def create_cpu_kernel(
                     bld_env=env,
                     target=env.ENV_PREFIX % kernel_target,
                     target_name=task_gen.name,
-                    variant_name=variant,
+                    variant_name=env.ARCH_NAME + variant,
                     kernel_source=kernel_source,
                     kernel_name=kernel_name,
                     kernel_node=kernel_node,
@@ -135,8 +134,7 @@ def create_cpu_kernel(
                         'MOTOR_KERNEL_ID=%s_%s' % (
                             target_name.replace('.', '_'), kernel_target.replace('.', '_')),
                         'MOTOR_KERNEL_NAME=%s' % kernel_target,
-                        'MOTOR_KERNEL_TARGET=%s' % kernel_type,
-                        'MOTOR_KERNEL_ARCH=%s' % variant
+                        'MOTOR_KERNEL_TARGET=%s' % kernel_type + '.' + env.ARCH_NAME + variant,
                     ],
                     includes=getattr(tgen, 'includes') + [build_context.srcnode],
                     use=getattr(tgen, 'use') + [env.ENV_PREFIX % 'plugin.compute.cpu'] + ([variant] if variant else []),

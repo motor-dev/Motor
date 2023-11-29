@@ -21,18 +21,12 @@ class ICC(GnuCompiler):
     TOOLS = ['icc', 'icpc']
     VECTORIZED_FLAGS = {
         'x86': (
-            ('.sse3', ['-mssse3']),
-            ('.sse4', [
-                '-msse4.2',
-            ]),
+            ('', ['-msse4.2']),
             ('.avx', ['-mavx']),
             ('.avx2', ['-march=core-avx2']),
         ),
         'amd64': (
-            ('.sse3', ['-mssse3']),
-            ('.sse4', [
-                '-msse4.2',
-            ]),
+            ('', ['-msse4.2']),
             ('.avx', ['-mavx']),
             ('.avx2', ['-march=core-avx2']),
         ),

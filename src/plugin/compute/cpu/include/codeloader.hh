@@ -14,7 +14,7 @@ private:
     const inamespace m_cpuVariant;
 
 public:
-    explicit CodeLoader(const inamespace& cpuVariant);
+    explicit CodeLoader(inamespace&& cpuVariant);
     ~CodeLoader() override;
 
     void load(const weak< const Resource::IDescription >& codeDescription,
