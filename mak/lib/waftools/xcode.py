@@ -25,10 +25,10 @@ class XmlNode(object):
         self.document.encoding = 'UTF-8'
 
     def _add(
-        self,
-        node: xml.dom.minidom.Node,
-        child_node: str,
-        value: Union[None, str, Dict[str, str]] = None
+            self,
+            node: xml.dom.minidom.Node,
+            child_node: str,
+            value: Union[None, str, Dict[str, str]] = None
     ) -> xml.dom.minidom.Element:
 
         def set_attributes(n: xml.dom.minidom.Element, attrs: Dict[str, str]) -> None:
@@ -286,10 +286,10 @@ class PBXGroup(XCodeNode):
 
     def __init__(self, name: str, sourcetree: str = "<group>"):
         XCodeNode.__init__(self)
-        self.children = []     # type: List[Union["PBXGroup", PBXFileReference]]
+        self.children = []  # type: List[Union["PBXGroup", PBXFileReference]]
         self.name = name
         self.sourceTree = sourcetree
-        self._groups = {}      # type: Dict[str, "PBXGroup"]
+        self._groups = {}  # type: Dict[str, "PBXGroup"]
 
     def add_group(self, group: "PBXGroup") -> "PBXGroup":
         self._groups[group.name] = group
@@ -298,7 +298,7 @@ class PBXGroup(XCodeNode):
         return group
 
     def add(self, root_node: waflib.Node.Node, source_node: waflib.Node.Node) -> List[PBXFileReference]:
-        result = []    # type: List[PBXFileReference]
+        result = []  # type: List[PBXFileReference]
         try:
             file_list = source_node.listdir()
         except OSError:
@@ -347,10 +347,10 @@ class PBXLegacyTarget(XCodeNode):
             ]
         )
         self.buildArgumentsString = "%s %s" % (sys.argv[0], action)
-        self.buildPhases = []      # type: List[_PBXBuildPhase]
+        self.buildPhases = []  # type: List[_PBXBuildPhase]
         self.buildToolPath = sys.executable
         self.buildWorkingDirectory = ""
-        self.dependencies = []     # type: List[PBXLegacyTarget]
+        self.dependencies = []  # type: List[PBXLegacyTarget]
         self.name = action
         self.productName = target or action
         self.passBuildSettingsInEnvironment = 0
@@ -361,14 +361,14 @@ class _PBXBuildPhase(XCodeNode):
     def __init__(self) -> None:
         XCodeNode.__init__(self)
         self.buildActionMask = 2147483647
-        self.files = []    # type: List[PBXBuildFile]
+        self.files = []  # type: List[PBXBuildFile]
 
 
 class PBXShellScriptBuildPhase(_PBXBuildPhase):
 
     def __init__(self, action: str) -> None:
         _PBXBuildPhase.__init__(self)
-        self.inputPaths = []   # type: List[None]
+        self.inputPaths = []  # type: List[None]
         self.outputPaths = []  # type: List[None]
         self.runOnlyForDeploymentPostProcessing = 0
         self.shellPath = "/bin/sh"
@@ -392,14 +392,14 @@ class PBXFrameworksBuildPhase(PBXSourcesBuildPhase):
 class PBXNativeTarget(XCodeNode):
 
     def __init__(
-        self, name: str, product: PBXFileReference, product_type: str, build: List[_PBXBuildPhase],
-        configs: List[XCBuildConfiguration]
+            self, name: str, product: PBXFileReference, product_type: str, build: List[_PBXBuildPhase],
+            configs: List[XCBuildConfiguration]
     ) -> None:
         XCodeNode.__init__(self)
         self.buildConfigurationList = XCConfigurationList(configs)
         self.buildPhases = build
-        self.buildRules = []       # type: List[None]
-        self.dependencies = []     # type: List[None]
+        self.buildRules = []  # type: List[None]
+        self.dependencies = []  # type: List[None]
         self.name = name
         self.productName = name
         self.productType = product_type
@@ -456,7 +456,7 @@ class PBXProject(XCodeNode):
         self.mainGroup.children.append(self._mainGroup)
         self.projectRoot = ""
         self.projectDirPath = ""
-        self.targets = []                                                                                            # type: List[Union[PBXNativeTarget, PBXLegacyTarget]]
+        self.targets = []  # type: List[Union[PBXNativeTarget, PBXLegacyTarget]]
         self._objectVersion = version[1]
         self._output = PBXGroup('Products')
         self._output2 = PBXGroup('Dummies')
@@ -464,7 +464,7 @@ class PBXProject(XCodeNode):
         self._output.children.append(self._output2)
         self._frameworks = PBXGroup('Frameworks')
         self.mainGroup.children.append(self._frameworks)
-        self._frameworks_seen = {}                                                                                   # type: Dict[str, Tuple[List[str], PBXGroup]]
+        self._frameworks_seen = {}  # type: Dict[str, Tuple[List[str], PBXGroup]]
         self._frameworks_files = []
         for env_name in builder.env.ALL_TOOLCHAINS:
             env = builder.all_envs[env_name]
@@ -504,8 +504,8 @@ class PBXProject(XCodeNode):
         w("}\n")
 
     def add(
-        self, bld: build_framework.BuildContext, p: waflib.TaskGen.task_gen, schemes: waflib.Node.Node,
-        schememanagement: XCodeSchemeList, project_name: str
+            self, bld: build_framework.BuildContext, p: waflib.TaskGen.task_gen, schemes: waflib.Node.Node,
+            schememanagement: XCodeSchemeList, project_name: str
     ) -> str:
 
         def get_include_path(i: Union[str, waflib.Node.Node]) -> str:
@@ -581,23 +581,11 @@ class PBXProject(XCodeNode):
 class xcode(build_framework.ProjectGenerator):
     """creates projects for XCode 3.x and 4.x"""
     cmd = 'xcode'
-    fun = 'build'
-    optim = 'debug'
     version = ('Xcode 3.1', 45)
-    motor_toolchain = 'projects'
-    motor_variant = 'projects.xcode'
-    variant = 'projects/xcode'
+    variant = 'xcode'
 
-    def execute(self) -> Optional[str]:
-        """
-        Entry point
-        """
-        if build_framework.schedule_setup(self):
-            return "SKIP"
-
-        self.restore()
-        if not self.all_envs:
-            self.load_envs()
+    def load_envs(self) -> None:
+        build_framework.ProjectGenerator.load_envs(self)
         self.env.PROJECTS = [self.__class__.cmd]
         self.env.TOOLCHAIN = '$(TOOLCHAIN)'
         self.env.VARIANT = '$(CONFIG)'
@@ -611,7 +599,12 @@ class xcode(build_framework.ProjectGenerator):
         self.env.DEPLOY_PLUGINDIR = '$(DEPLOY_PLUGINDIR)'
         self.env.DEPLOY_KERNELDIR = '$(DEPLOY_KERNELDIR)'
         build_framework.add_feature(self, 'GUI')
-        self.recurse([self.run_dir])
+
+    def execute(self) -> Optional[str]:
+        result = build_framework.ProjectGenerator.execute(self)
+        if result is not None:
+            return result
+
         appname = getattr(waflib.Context.g_module, waflib.Context.APPNAME, os.path.basename(self.srcnode.abspath()))
         import getpass
 
@@ -695,6 +688,4 @@ class xcode(build_framework.ProjectGenerator):
 class xcode5(xcode):
     """creates projects for XCode version 5.x"""
     cmd = 'xcode5'
-    fun = 'build'
-    optim = 'debug'
     version = ('Xcode 3.2', 46)

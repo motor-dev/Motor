@@ -543,7 +543,30 @@ class BuildContext(waflib.Build.BuildContext):
 
 
 class ProjectGenerator(BuildContext):
-    pass
+    cmd = '_project'
+    fun = 'build'
+    optim = 'debug'
+    motor_toolchain = 'projects'
+    motor_variant = 'projects'
+
+    def get_build_iterator(self):
+        for self.current_group, _ in enumerate(self.groups):
+            group_name = self.get_group_name(self.current_group)
+            if group_name is None or group_name != self.motor_variant:
+                self.post_group()
+
+                tasks = self.get_tasks_group(self.current_group)
+
+                waflib.Task.set_file_constraints(tasks)
+                waflib.Task.set_precedence_constraints(tasks)
+
+                self.cur_tasks = tasks
+                if tasks:
+                    yield tasks
+
+        while 1:
+            # the build stops once there are no tasks to process
+            yield []
 
 
 class CleanContext(BuildContext):
@@ -580,7 +603,12 @@ class CleanContext(BuildContext):
             lst = []  # type: List[waflib.Node.Node]
             for env in self.all_envs.values():
                 lst.extend(self.root.find_or_declare(f) for f in env[waflib.Build.CFG_FILES])
-            nodes = list(self.bldnode.ant_glob('**/*', excl='.lock* *conf_check_*/** config.log c4che/*', quiet=True))
+            nodes = []
+            for group_name in self.motor_groups:
+                if group_name:
+                    nodes += list(
+                        self.bldnode.ant_glob('%s/**/*' % group_name, excl='.lock* *conf_check_*/** config.log c4che/*',
+                                              quiet=True))
             c = len(nodes)
             for i, n in enumerate(nodes):
                 if n in lst:
@@ -593,12 +621,10 @@ class CleanContext(BuildContext):
                 m = self.progress_line(c, c, waflib.Logs.colors.BLUE, waflib.Logs.colors.NORMAL)
                 self.set_status_line(m)
 
-        setattr(self.root, 'children', {})
-
-        for v in waflib.Build.SAVED_ATTRS:
-            if v == 'root':
-                continue
-            setattr(self, v, {})
+    def store(self) -> None:
+        for group in self.motor_groups:
+            db = os.path.join(self.variant_dir, group + waflib.Context.DBFILE)
+            os.remove(db)
 
 
 class ListContext(waflib.Build.ListContext):

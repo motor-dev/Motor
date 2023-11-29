@@ -8,25 +8,13 @@ class CMake(build_framework.ProjectGenerator):
         Creates CMake project structure.
     """
     cmd = 'cmake'
-    fun = 'build'
-    optim = 'debug'
-    motor_toolchain = 'projects'
-    motor_variant = 'projects.cmake'
-    variant = 'projects/cmake'
+    variant = 'cmake'
 
     def __init__(self, **kw: Any) -> None:
         build_framework.BuildContext.__init__(self, **kw)
 
-    def execute(self) -> Optional[str]:
-        """
-        Entry point
-        """
-        if build_framework.schedule_setup(self):
-            return "SKIP"
-
-        self.restore()
-        if not self.all_envs:
-            self.load_envs()
+    def load_envs(self) -> None:
+        build_framework.ProjectGenerator.load_envs(self)
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '${input:motor-Variant}'
@@ -43,7 +31,11 @@ class CMake(build_framework.ProjectGenerator):
         self.env.DEPLOY_KERNELDIR = '${input:motor-Deploy_KernelDir}'
         build_framework.add_feature(self, 'GUI')
 
-        self.recurse([self.run_dir])
+    def execute(self) -> Optional[str]:
+        result = build_framework.ProjectGenerator.execute(self)
+        if result is not None:
+            return result
+
         self.write_workspace()
         return None
 

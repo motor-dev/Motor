@@ -52,11 +52,7 @@ class CLion(build_framework.ProjectGenerator):
         creates projects for IntelliJ CLion
     """
     cmd = 'clion'
-    fun = 'build'
-    optim = 'debug'
-    motor_toolchain = 'projects'
-    motor_variant = 'projects.clion'
-    variant = 'projects/clion'
+    variant = 'clion'
 
     def __init__(self, **kw: Any) -> None:
         build_framework.BuildContext.__init__(self, **kw)
@@ -66,23 +62,8 @@ class CLion(build_framework.ProjectGenerator):
         self._run_configs_dir = self.motornode
         self._idea_dir = self.motornode
 
-    def execute(self) -> Optional[str]:
-        """
-        Entry point
-        """
-        if build_framework.schedule_setup(self):
-            return "SKIP"
-
-        self.restore()
-        if not self.all_envs:
-            self.load_envs()
-
-        self._scopes_dir = self.srcnode
-        self._inspections_dir = self.srcnode
-        self._code_styles_dir = self.srcnode
-        self._run_configs_dir = self.srcnode
-        self._idea_dir = self.srcnode
-
+    def load_envs(self) -> None:
+        build_framework.ProjectGenerator.load_envs(self)
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '${input:motor-Variant}'
@@ -99,7 +80,11 @@ class CLion(build_framework.ProjectGenerator):
         self.env.DEPLOY_KERNELDIR = '${input:motor-Deploy_KernelDir}'
         build_framework.add_feature(self, 'GUI')
 
-        self.recurse([self.run_dir])
+    def execute(self) -> Optional[str]:
+        result = build_framework.ProjectGenerator.execute(self)
+        if result is not None:
+            return result
+        
         self.write_workspace()
         return None
 
@@ -204,7 +189,7 @@ class CLion(build_framework.ProjectGenerator):
                 )
 
     def write_cmake_xml(self, configurations: List[Tuple[str, str]]) -> None:
-        bld_path = self.bldnode.make_node(self.motor_variant).path_from(self.srcnode).replace('\\', '/')
+        bld_path = self.bldnode.make_node('clion').path_from(self.srcnode).replace('\\', '/')
         with open(self._idea_dir.make_node('cmake.xml').abspath(), 'w') as cmake_xml:
             cmake_xml.write(
                 '<?xml version="1.0" encoding="UTF-8"?>\n'

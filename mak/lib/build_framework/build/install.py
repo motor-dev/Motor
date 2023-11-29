@@ -124,7 +124,7 @@ def dummy_features(_: waflib.TaskGen.task_gen) -> None:
 
 @waflib.TaskGen.feature('motor:preprocess')
 def install_module_files(task_gen: waflib.TaskGen.task_gen) -> None:
-    if 'motor:deploy:off' not in task_gen.features:
+    if 'motor:deploy:off' not in task_gen.features and not task_gen.env.PROJECTS:
         env = task_gen.env
         for _, source_node in getattr(task_gen, 'source_nodes', []):
             bin_paths = [

@@ -24,10 +24,10 @@ class XmlFile:
         self.document = xml.dom.minidom.Document()
 
     def add(
-        self,
-        node: xml.dom.minidom.Node,
-        child_node: str,
-        value: Union[None, str, Dict[str, str]] = None
+            self,
+            node: xml.dom.minidom.Node,
+            child_node: str,
+            value: Union[None, str, Dict[str, str]] = None
     ) -> xml.dom.minidom.Element:
         el = self.document.createElement(child_node)
         if value is not None:
@@ -52,8 +52,8 @@ class XmlFile:
 class Solution:
 
     def __init__(
-        self, bld: build_framework.BuildContext, version_number: str, version_name: str, use_folders: bool,
-        vstudio_ide_version: str
+            self, bld: build_framework.BuildContext, version_number: str, version_name: str, use_folders: bool,
+            vstudio_ide_version: str
     ) -> None:
         self.header = '\xef\xbb\xbf\r\nMicrosoft Visual Studio Solution File, Format Version %s\r\n# %s' % (
             version_number, version_name
@@ -62,13 +62,13 @@ class Solution:
             self.header += '\r\nVisualStudioVersion = %s\r\nMinimumVIsualStudioVersion = %s' % (
                 vstudio_ide_version, vstudio_ide_version
             )
-        self.projects = []                                                                                   # type: List[str]
-        self.project_configs = []                                                                            # type: List[str]
+        self.projects = []  # type: List[str]
+        self.project_configs = []  # type: List[str]
         self.configs = [
             '\t\t%s|%s = %s|%s' % (v, t, v, t) for v in bld.env.ALL_VARIANTS for t in bld.env.ALL_TOOLCHAINS
         ]
-        self.folders = []                                                                                    # type: List[Tuple[str, str]]
-        self.folders_made = {}                                                                               # type: Dict[str, str]
+        self.folders = []  # type: List[Tuple[str, str]]
+        self.folders_made = {}  # type: Dict[str, str]
         self.use_folders = use_folders
         self.master = ''
 
@@ -93,7 +93,7 @@ class Solution:
             return None
 
     def add(
-        self, task_gen: waflib.TaskGen.task_gen, project: "VCxproj", project_path: str, build: bool = False
+            self, task_gen: waflib.TaskGen.task_gen, project: "VCxproj", project_path: str, build: bool = False
     ) -> None:
         assert isinstance(task_gen.bld, VisualStudio)
         self.projects.append(
@@ -154,7 +154,8 @@ class VCxproj:
     extensions = ['vcxproj', 'vcxproj.filters']
 
     def __init__(
-        self, task_gen: waflib.TaskGen.task_gen, version: str, version_project: Tuple[str, str, str], use_folders: bool
+            self, task_gen: waflib.TaskGen.task_gen, version: str, version_project: Tuple[str, str, str],
+            use_folders: bool
     ) -> None:
         assert isinstance(task_gen.bld, VisualStudio)
         assert task_gen.bld.launcher is not None
@@ -288,18 +289,20 @@ class VCxproj:
                     command = command % {'toolchain': toolchain, 'variant': variant}
                     self.vcxproj.add(
                         properties, 'NMakeBuildCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" %s %s' %
-                        (sys.executable, sys.argv[0], command, ' '.join(options))
+                                                             (sys.executable, sys.argv[0], command, ' '.join(options))
                     )
                     clean_command = getattr(task_gen, 'clean_command', '')
                     if clean_command:
                         clean_command = clean_command % {'toolchain': toolchain, 'variant': variant}
                         self.vcxproj.add(
                             properties, 'NMakeCleanCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" %s %s' %
-                            (sys.executable, sys.argv[0], clean_command, ' '.join(options))
+                                                                 (sys.executable, sys.argv[0], clean_command,
+                                                                  ' '.join(options))
                         )
                         self.vcxproj.add(
                             properties, 'NMakeReBuildCommandLine', 'cd "$(SolutionDir)" && "%s" "%s" %s %s %s' %
-                            (sys.executable, sys.argv[0], clean_command, command, ' '.join(options))
+                                                                   (sys.executable, sys.argv[0], clean_command, command,
+                                                                    ' '.join(options))
                         )
                 else:
                     self.vcxproj.add(
@@ -327,7 +330,8 @@ class VCxproj:
                     elif 'motor:game' in task_gen.features:
                         self.vcxproj.add(
                             properties, 'NMakeOutput', '$(OutDir)\\%s\\%s' %
-                            (env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % task_gen.bld.launcher.target)
+                                                       (env.DEPLOY_BINDIR,
+                                                        sub_env.cxxprogram_PATTERN % task_gen.bld.launcher.target)
                         )
                         self.vcxproj.add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
                         self.vcxproj.add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
@@ -377,8 +381,8 @@ class VCxproj:
         self.vcxfilters.write(nodes[1])
 
     def add_node(
-        self, root_node: waflib.Node.Node, project_node: waflib.Node.Node, root_filter: str, node: waflib.Node.Node,
-        files: xml.dom.minidom.Element
+            self, root_node: waflib.Node.Node, project_node: waflib.Node.Node, root_filter: str, node: waflib.Node.Node,
+            files: xml.dom.minidom.Element
     ) -> None:
         path = node.abspath()
         if os.path.isdir(path):
@@ -413,25 +417,15 @@ class VCxproj:
 
 class VisualStudio(build_framework.ProjectGenerator):
     """creates projects for Visual Studio"""
-    optim = 'debug'
-    motor_toolchain = 'projects'
-    motor_variant = 'projects.vs'
-    variant = 'projects/vs'
+    variant = 'vs'
     version = (('Visual Studio 15', '12.00', True, '15.0.00000.0'), (VCxproj, ('6.0', '14.1', '15.0')))
     cmd = '_vs'
 
     def get_platform(self, platform_name: str) -> str:
         return platform_name if platform_name in self.__class__.platforms else self.__class__.platforms[0]
 
-    def execute(self) -> Optional[str]:
-        """
-        Entry point
-        """
-        if build_framework.schedule_setup(self):
-            return "SKIP"
-        self.restore()
-        if not self.all_envs:
-            self.load_envs()
+    def load_envs(self) -> None:
+        build_framework.ProjectGenerator.load_envs(self)
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '$(Variant)'
@@ -448,7 +442,10 @@ class VisualStudio(build_framework.ProjectGenerator):
         self.env.DEPLOY_KERNELDIR = '$(Deploy_KernelDir)'
         build_framework.add_feature(self, 'GUI')
 
-        self.recurse([self.run_dir])
+    def execute(self) -> Optional[str]:
+        result = build_framework.ProjectGenerator.execute(self)
+        if result is not None:
+            return result
 
         version = self.__class__.cmd
         version_name, version_number, folders, ide_version = self.__class__.version[0]
@@ -501,7 +498,7 @@ class VisualStudio(build_framework.ProjectGenerator):
 class vs2017(VisualStudio):
     """creates projects for Visual Studio 2017"""
     cmd = 'vs2017'
-    fun = 'build'
+    variant = 'vs2017'
     version = (('Visual Studio 15', '12.00', True, '15.0.00000.0'), (VCxproj, ('6.0', '14.1', '15.0')))
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
@@ -509,7 +506,7 @@ class vs2017(VisualStudio):
 class vs2019(VisualStudio):
     """creates projects for Visual Studio 2019"""
     cmd = 'vs2019'
-    fun = 'build'
+    variant = 'vs2019'
     version = (('Visual Studio 16', '12.00', True, '16.0.00000.0'), (VCxproj, ('6.0', '14.2', '16.0')))
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
@@ -517,7 +514,7 @@ class vs2019(VisualStudio):
 class vs2022(VisualStudio):
     """creates projects for Visual Studio 2022"""
     cmd = 'vs2022'
-    fun = 'build'
+    variant = 'vs2022'
     version = (('Visual Studio 17', '12.00', True, '17.0.00000.0'), (VCxproj, ('6.0', '14.3', '17.0')))
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
@@ -525,21 +522,10 @@ class vs2022(VisualStudio):
 class vs_cmake(build_framework.ProjectGenerator):
     """creates projects for Visual Studio using CMake"""
     cmd = 'vs-cmake'
-    fun = 'build'
-    optim = 'debug'
-    motor_toolchain = 'projects'
-    motor_variant = 'projects.vs-cmake'
-    variant = 'projects/vs-cmake'
+    variant = 'vs-cmake'
 
-    def execute(self) -> Optional[str]:
-        """
-        Entry point
-        """
-        if build_framework.schedule_setup(self):
-            return "SKIP"
-        self.restore()
-        if not self.all_envs:
-            self.load_envs()
+    def load_envs(self) -> None:
+        build_framework.ProjectGenerator.load_envs(self)
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '${env .Variant}'
@@ -556,7 +542,10 @@ class vs_cmake(build_framework.ProjectGenerator):
         self.env.DEPLOY_KERNELDIR = '${env.Deploy_KernelDir}'
         build_framework.add_feature(self, 'GUI')
 
-        self.recurse([self.run_dir])
+    def execute(self) -> Optional[str]:
+        result = build_framework.ProjectGenerator.execute(self)
+        if result is not None:
+            return result
 
         configurations = waftools_common.cmake.write_cmake_workspace(self)
         self.write_tasks()
@@ -736,7 +725,7 @@ class vs_cmake(build_framework.ProjectGenerator):
                             'toolchain': configuration,
                             'variant': variant,
                             'toolchain_file': toolchain.replace('\\', '/'),
-                            'blddir': self.bldnode.make_node(self.motor_variant).abspath().replace('\\', '/'),
+                            'blddir': self.bldnode.make_node(self.variant).abspath().replace('\\', '/'),
                             'comma_opt': ',' if not last else ''
                         }
                     )
