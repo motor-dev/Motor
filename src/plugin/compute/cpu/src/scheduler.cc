@@ -31,7 +31,7 @@ Scheduler::Scheduler(const Plugin::Context& context)
     for(i32 i = 0; *variants; ++i)
     {
         const char* variantEnd = variants;
-        while(*variantEnd and *variantEnd != '+')
+        while(*variantEnd && *variantEnd != '+')
             variantEnd++;
         istring variantName(variants, variantEnd);
         variants = variantEnd + u32(*variantEnd == '+');
