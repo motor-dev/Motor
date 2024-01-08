@@ -101,8 +101,8 @@ def _check_nvcc(setup_context: build_framework.SetupContext, nvcc: List[str]) \
 
 def setup(setup_context: build_framework.SetupContext) -> None:
     if setup_context.env.PROJECTS:
-        return
-    if setup_context.env.NVCC_COMPILERS:
+        setup_context.env['check_CUDA'] = True
+    elif setup_context.env.NVCC_COMPILERS:
         build_framework.start_msg_setup(setup_context)
         if setup_context.env.COMPILER_NAME == 'suncc':
             setup_context.end_msg('not available with sunCC', color='YELLOW')

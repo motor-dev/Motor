@@ -18,7 +18,8 @@ def python_module(
         depends: Optional[List[str]] = None,
         path: Optional[waflib.Node.Node] = None,
         uselib: Optional[List[str]] = None,
-        conditions: Optional[List[str]] = None
+        conditions: Optional[List[str]] = None,
+        project_name: Optional[str] = None
 ) -> Optional[waflib.TaskGen.task_gen]:
     assert isinstance(build_context, build_framework.BuildContext)
 
@@ -39,7 +40,7 @@ def python_module(
             [],
             [],
             conditions,
-            None,
+            project_name,
             uselib
         )
         if result is not None:

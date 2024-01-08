@@ -85,9 +85,7 @@ class Clang(GnuCompiler):
                 configuration_context.env.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
     def get_clang_multilib_compilers(
-            self,
-            vs_install_paths: List[Tuple[str, str]],
-            sysroots: List[Tuple[str, List[str]]]
+            self, vs_install_paths: List[Tuple[str, str]], sysroots: List[Tuple[str, List[str]]]
     ) -> List[GnuCompiler]:
         result = []  # type: List[GnuCompiler]
         seen = {self.arch}
@@ -244,19 +242,7 @@ class Clang(GnuCompiler):
     def load_in_env(self, configuration_context: ConfigurationContext, platform: Platform) -> None:
         GnuCompiler.load_in_env(self, configuration_context, platform)
         env = configuration_context.env
-        if self.version_number < (3, 1):
-            env.append_value(
-                'CXXFLAGS', [
-                    '-include', 'bits/c++config.h', '-include',
-                    os.path.join(configuration_context.motornode.abspath(), 'mak/compiler/clang/no_atomic_builtin.h')
-                ]
-            )
-        # Typedef of __float128 on older clangs
-        if self.version_number < (3, 9):
-            env.append_value(
-                'CXXFLAGS',
-                ['-include', os.path.join(configuration_context.motornode.abspath(), 'mak/compiler/clang/float128.h')]
-            )
+
         # Add multiarch directories
         sysroot = env.SYSROOT or '/'
         for target in self.targets:

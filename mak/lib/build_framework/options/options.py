@@ -78,8 +78,7 @@ def options_framework(options_context: waflib.Options.OptionsContext) -> None:
     options_context.load('xcode', tooldir=[tool_dir])
     options_context.load('qtcreator', tooldir=[tool_dir])
     options_context.load('vscode', tooldir=[tool_dir])
-    options_context.load('sublime', tooldir=[tool_dir])
-    options_context.load('clangd', tooldir=[tool_dir])
+    options_context.load('cmake', tooldir=[tool_dir])
     options_context.load('clion', tooldir=[tool_dir])
 
     gr = options_context.add_option_group('configure options')

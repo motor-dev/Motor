@@ -79,7 +79,7 @@ def objects_feature(_: waflib.TaskGen.task_gen) -> None:
     pass
 
 
-@waflib.TaskGen.feature('Makefile')
+@waflib.TaskGen.feature('motor:makefile')
 def makefile_feature(_: waflib.TaskGen.task_gen) -> None:
     pass
 
@@ -260,11 +260,12 @@ def process_use(task_gen: waflib.TaskGen.task_gen) -> None:
 def _make_bld_node(
         task_gen: waflib.TaskGen.task_gen,
         node: waflib.Node.Node,
-        category: str,
+        category: Optional[str],
         path: Optional[Union[waflib.Node.Node, str]],
         name: str
 ) -> waflib.Node.Node:
-    node = node.make_node(category)
+    if category is not None:
+        node = node.make_node(category)
     if not path:
         node = node.make_node(name)
     elif isinstance(path, waflib.Node.Node):
@@ -318,8 +319,8 @@ def _make_bld_node(
 
 def make_bld_node(
         task_gen: waflib.TaskGen.task_gen,
-        category: str,
-        path: Optional[Union[waflib.Node.Node, str]],
+        category: Optional[str],
+        path: Union[waflib.Node.Node, str, None],
         name: str
 ) -> waflib.Node.Node:
     """

@@ -6,6 +6,8 @@ import waflib.ConfigSet
 import waflib.Errors
 import waflib.Options
 from ...options import BuildContext
+from ..features import create_compiled_task
+
 from typing import Optional, List, Tuple, Union
 
 COMPILE_EXTENSIONS = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm', 'def', 'masm']
@@ -59,7 +61,7 @@ def preprocess(
     preprocess_sources = []
     globs = ['src/**/*.yy', 'src/**/*.ll', 'src/**/*.plist', 'api/**/*.meta.hh', 'include/**/*.meta.hh']
     for _, source_node in source_nodes:
-        preprocess_sources += source_node.ant_glob(globs, excl=[])
+        preprocess_sources += source_node.ant_glob(globs, excl=[], remove=False)
 
     use = []
     for d in depends:
@@ -93,7 +95,7 @@ def preprocess(
     for _, source_node in source_nodes:
         if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
             kernelspath = source_node.make_node('kernels')
-            for kernel in kernelspath.ant_glob('**', excl=[]):
+            for kernel in kernelspath.ant_glob('**', excl=[], remove=False):
                 kernel_name, kernel_ext = os.path.splitext(kernel.path_from(kernelspath))
                 kernel_name_list = re.split('[\\\\/]', kernel_name)
                 getattr(preprocess_tgen, 'kernels').append((kernel_name_list, kernel))
@@ -132,6 +134,7 @@ def module(
     uselib = uselib or []
     do_build = True
     task_gen = None  # type: Optional[waflib.TaskGen.task_gen]
+    project_name = project_name or name
 
     if not env.PROJECTS:
         for condition in conditions:
@@ -149,7 +152,7 @@ def module(
     if source_list is None:
         source_files = []
         for _, node in source_nodes:
-            source_files += node.ant_glob(source_filter)
+            source_files += node.ant_glob(source_filter, remove=False)
             for suffix in platform_specific:
                 include_node = node.find_node('include%s' % suffix)
                 if include_node is not None:
@@ -158,22 +161,12 @@ def module(
                 if include_node is not None:
                     api.append(include_node)
     elif source_list:
-        source_files = source_nodes[0][1].ant_glob(source_list)
+        source_files = source_nodes[0][1].ant_glob(source_list, remove=False)
     else:
         source_files = []
     preprocess_taskgen = build_context.get_tgen_by_name('%s.preprocess' % name)
     extra_includes = extra_includes + [getattr(preprocess_taskgen, 'generated_include_node')]
     extra_public_includes = extra_public_includes + [getattr(preprocess_taskgen, 'generated_api_node')]
-
-    module_path = None
-    if path:
-        path_node = source_nodes[0][1]
-        if path_node.is_child_of(build_context.path):
-            module_path = path_node.path_from(build_context.path).replace('/', '.').replace('\\', '. ')
-        elif path_node.is_child_of(build_context.package_node):
-            pass
-        elif path_node.is_child_of(build_context.motornode):
-            module_path = path_node.path_from(build_context.motornode).replace('/', '.').replace('\\', '. ')
 
     if do_build:
         task_gen = build_context(
@@ -194,20 +187,18 @@ def module(
                         'MOTOR_PROJECTNAME=%s' % name
                     ] + extra_defines,
             export_defines=extra_public_defines[:],
-            includes=extra_includes + includes + api + [build_context.srcnode],
+            includes=extra_includes + includes + api,
             export_includes=extra_public_includes + api,
             export_system_includes=extra_system_includes,
-            project_name=project_name or name,
+            project_name=project_name,
             conditions=conditions,
             nomaster=getattr(preprocess_taskgen, 'nomaster') if preprocess_taskgen is not None else set(),
         )
-        if module_path is not None:
-            setattr(task_gen, 'module_path', module_path)
 
     for _, source_node in source_nodes:
         if os.path.isdir(os.path.join(source_node.abspath(), 'tests')):
             test_path = source_node.make_node('tests')
-            for test in test_path.ant_glob('**', excl=[]):
+            for test in test_path.ant_glob('**', excl=[], remove=False):
                 test_name = os.path.splitext(test.path_from(test_path))[0]
                 test_name_list = re.split('[\\\\/]', test_name)
                 target_name = 'unittest.%s.%s' % (name, '.'.join(test_name_list))
@@ -226,7 +217,7 @@ def module(
                         extra_features=['motor:module']
                     )
 
-                if do_build and waflib.Options.options.tests and env.BUILD_UNIT_TESTS:
+                if do_build and waflib.Options.options.tests and (env.BUILD_UNIT_TESTS or env.PROJECTS):
                     assert task_gen is not None
                     build_context(
                         group=build_context.motor_variant,
@@ -239,16 +230,17 @@ def module(
                         uselib=([build_context.__class__.optim] +
                                 (build_context.env.STATIC and ['static'] or ['dynamic']) + uselib),
                         source=[test],
-                        source_nodes=source_nodes,
+                        source_nodes=[('', test)],
                         defines=[
                             'building_%s' % _safe_name(test_name_list[-1]),
                             'MOTOR_PROJECTID=%s' % _safe_name('_'.join(test_name_list)),
                             'MOTOR_PROJECTNAME=%s' % target_name
                         ],
                         includes=extra_includes + includes + api + [p
-                                                                    for _, p in source_nodes] + [build_context.srcnode],
+                                                                    for _, p in source_nodes],
                         conditions=conditions,
-                        nomaster=getattr(p, 'nomaster')
+                        nomaster=getattr(p, 'nomaster'),
+                        project_name=project_name + '.unittest.' + '.'.join(test_name_list)
                     )
 
     return task_gen
@@ -276,5 +268,6 @@ def multiarch(
 
 
 @waflib.TaskGen.extension('.cl')
-def handle_cl(_: waflib.TaskGen.task_gen, __: waflib.Node.Node) -> None:
-    pass
+def handle_cl(task_gen: waflib.TaskGen.task_gen, node: waflib.Node.Node) -> None:
+    if task_gen.env.PROJECTS:
+        create_compiled_task(task_gen, 'cxx', node)

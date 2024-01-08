@@ -104,26 +104,28 @@ def build_source(
     else:
         dll_flags = []
         dll_features = ['motor:export_all']
+    extra_defines = ['LUA_LIB']
+    if not build_context.env.PROJECTS:
+        extra_defines.append('lua_getlocaledecpoint()=0x2e')
     if build_context.env.STATIC:
         return build_framework.static_library(
             build_context,
             name,
             env=env,
             path=path,
-            extra_defines=['LUA_LIB', 'lua_getlocaledecpoint()=0x2e'],
+            extra_defines=extra_defines,
             extra_includes=[path.make_node('src')],
             extra_public_includes=[path.make_node('src')],
             features=['motor:masterfiles:off', 'motor:deploy:off', 'motor:deploy:lua', 'motor:warnings:off'],
             source_list=LUA_SOURCES
         )
-
     else:
         return build_framework.shared_library(
             build_context,
             name,
             env=env,
             path=path,
-            extra_defines=['LUA_LIB', 'lua_getlocaledecpoint()=0x2e'] + dll_flags,
+            extra_defines=extra_defines + dll_flags,
             extra_includes=[path.make_node('src')],
             extra_public_includes=[path.make_node('src')],
             features=dll_features + ['motor:masterfiles:off', 'motor:deploy:off', 'motor:deploy:lua',

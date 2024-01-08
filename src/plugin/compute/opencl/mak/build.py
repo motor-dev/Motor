@@ -98,6 +98,8 @@ def create_cl_kernel(
 
         target_name = getattr(task_gen, 'target_name')
         kernel_target = target_name + '.' + '.'.join(kernel_name) + '.cl'
+        project_name = getattr(tgen, 'project_name')  # type: str
+        project_name += '.' + '.'.join(kernel_name) + '.cl'
         kernel_task_gen = build_context(
             group=build_context.motor_variant,
             env=task_gen.env.derive(),
@@ -115,10 +117,11 @@ def create_cl_kernel(
                 'MOTOR_KERNEL_NAME=%s' % kernel_target,
                 'MOTOR_KERNEL_TARGET=%s' % kernel_type
             ],
-            includes=getattr(tgen, 'includes') + [build_context.srcnode] + env.CLC_KERNEL_HEADER_PATH,
+            includes=getattr(tgen, 'includes') + [build_context.root.make_node(i) for i in env.CLC_KERNEL_HEADER_PATH],
             use=[tgen.target] + getattr(tgen, 'use') + [env.ENV_PREFIX % 'plugin.compute.cl'],
             uselib=getattr(tgen, 'uselib'),
             source_nodes=[('', kernel_source)],
+            project_name=project_name,
             nomaster=set()
         )
         kernel_task_gen.env.PLUGIN = task_gen.env.plugin_name

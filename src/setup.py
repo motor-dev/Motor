@@ -32,6 +32,7 @@ def setup(setup_context: build_framework.SetupContext) -> None:
         setup_context.set_status_line(m)
 
     setup_context.recurse('plugin/compute/opencl/mak/setup.py')
+    setup_context.recurse('plugin/compute/cuda/mak/setup.py')
     if waflib.Options.options.progress_bar == 1 and sys.stdout.isatty():
         m = build_framework.progress_line(setup_context, len(setups) + 1, len(setups) + 1, waflib.Logs.colors.BLUE,
                                           waflib.Logs.colors.NORMAL)
