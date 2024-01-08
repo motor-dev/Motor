@@ -1457,7 +1457,7 @@ formatter< '{' > format_as(format_details::brace_format);
 template < u32 SIZE, typename T, typename... ARGS >
 MOTOR_ALWAYS_INLINE format_buffer< SIZE > format(T format_string, ARGS&&... arguments)
 {
-    format_buffer< SIZE > result;
+    format_buffer< SIZE > result {};
     format_to(result.buffer, SIZE, format_string, minitl::forward< ARGS >(arguments)...);
     return result;
 }

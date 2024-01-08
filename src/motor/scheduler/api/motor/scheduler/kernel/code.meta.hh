@@ -14,7 +14,7 @@ protected:
     const inamespace m_name;
 
 public:
-    explicit Code(const inamespace& name);
+    explicit Code(inamespace name);
     ~Code() override;
 
     inamespace name() const

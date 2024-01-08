@@ -67,8 +67,8 @@ static HWND createDummyWnd(const weak< const GLRenderer >& renderer)
 {
     minitl::format_buffer< 128u > classname
         = minitl::format< 128u >(FMT("__motor__{0}__"), (const void*)renderer);
-    HWND hWnd = CreateWindowEx(0, classname.c_str(), "", WS_POPUP, 0, 0, 1, 1, nullptr, nullptr,
-                               (HINSTANCE)::GetModuleHandle(nullptr), nullptr);
+    HWND hWnd = CreateWindowExA(0, classname.c_str(), "", WS_POPUP, 0, 0, 1, 1, nullptr, nullptr,
+                                (HINSTANCE)::GetModuleHandle(nullptr), nullptr);
     if(!hWnd)
     {
         char* errorMessage;
@@ -254,9 +254,9 @@ bool GLRenderer::success() const
 
 //------------------------------------------------------------------------
 
-GLWindow::GLWindow(const weak< const RenderWindowDescription >& renderwindow,
+GLWindow::GLWindow(const weak< const RenderWindowDescription >& windowDescription,
                    const weak< const GLRenderer >&              renderer)
-    : Windowing::Window(renderwindow, renderer)
+    : Windowing::Window(windowDescription, renderer)
     , m_context(scoped< Context >())
 {
 }

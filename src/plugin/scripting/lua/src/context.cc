@@ -251,8 +251,8 @@ extern "C" int luaPrint(lua_State* L)
     for(i = 1; i <= n; i++)
     {
         const char* s;
-        lua_pushvalue(L, -1);    /* function to be called */
-        lua_pushvalue(L, i);     /* value to print */
+        lua_pushvalue(L, -1); /* function to be called */
+        lua_pushvalue(L, i);  /* value to print */
         lua_call(L, 1, 1);
         s = lua_tostring(L, -1); /* get result */
         if(s == nullptr) return luaL_error(L, "'tostring' must return a string to 'print'");
@@ -400,9 +400,8 @@ Context::Context(const Plugin::Context& context)
     lua_settable(m_state, -3);
     luaL_setfuncs(m_state, s_resourceLoaderMetaTable, 0);
 
-    void* udata   = lua_newuserdata(m_state, sizeof(weak< Resource::ResourceManager >));
-    auto* manager = (weak< Resource::ResourceManager >*)udata;
-    new(manager) weak< Resource::ResourceManager >(context.resourceManager);
+    void* udata = lua_newuserdata(m_state, sizeof(weak< Resource::ResourceManager >));
+    new(udata) weak< Resource::ResourceManager >(context.resourceManager);
     luaL_getmetatable(m_state, "Motor.ResourceManager");
     lua_setmetatable(m_state, -2);
     lua_setglobal(m_state, "resources");

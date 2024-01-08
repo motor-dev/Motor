@@ -26,7 +26,7 @@ private:
         ifilename m_filename;
 
     public:
-        Ticket(const ifilename& filename, minitl::allocator& arena, i64 offset, u32 size, bool text,
+        Ticket(ifilename filename, minitl::allocator& arena, i64 offset, u32 size, bool text,
                const void* data);
 
     private:

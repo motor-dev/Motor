@@ -16,7 +16,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
                    ? dlopen(minitl::format< 1024u >(FMT("lib{0}.dylib"), m_pythonLibraryName),
                             RTLD_LAZY | RTLD_GLOBAL)
                    : RTLD_DEFAULT)
-    , m_status(m_handle != 0)
+    , m_status(m_handle != nullptr)
     , m_api(1013)
     , m_version(0)
 {
@@ -63,8 +63,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         }
         else
         {
-            m_Py_InitModule4    = 0;
-            m_Py_InitModule4_64 = 0;
+            m_Py_InitModule4    = nullptr;
+            m_Py_InitModule4_64 = nullptr;
             motor_get_func_opt(Py_InitModule4);
             motor_get_func_opt(Py_InitModule4_64);
             motor_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab2);
@@ -72,12 +72,12 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         }
         if(m_version >= 32)
         {
-            m_Py_CompileStringFlags = 0;
+            m_Py_CompileStringFlags = nullptr;
             motor_get_func(Py_CompileStringExFlags);
         }
         else
         {
-            m_Py_CompileStringExFlags = 0;
+            m_Py_CompileStringExFlags = nullptr;
             motor_get_func(Py_CompileStringFlags);
         }
         motor_get_func(PyEval_EvalCodeEx);

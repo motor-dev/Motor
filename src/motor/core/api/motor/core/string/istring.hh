@@ -60,10 +60,12 @@ protected:
     igenericnamespace();
     explicit igenericnamespace(const istring& onlycomponent);
     igenericnamespace(const igenericnamespace& other);
+    igenericnamespace(igenericnamespace && other) noexcept;
     igenericnamespace(const char* str, const char* sep);
     igenericnamespace(const char* begin, const char* end, const char* sep);
     ~igenericnamespace();
-    igenericnamespace& operator=(const igenericnamespace& other);
+    igenericnamespace& operator=(const igenericnamespace& other) noexcept;
+    igenericnamespace& operator=(igenericnamespace&& other) noexcept;
     void               str(char* buffer, char separator, u32 size) const;
 
 public:
@@ -98,7 +100,11 @@ public:
     inamespace();
     explicit inamespace(const istring& onlycomponent);
     explicit inamespace(const char* str);
-    ~inamespace() = default;
+    inamespace(const inamespace& other)                     = default;
+    inamespace(inamespace && other) noexcept                = default;
+    ~inamespace()                                           = default;
+    inamespace& operator=(const inamespace& other) noexcept = default;
+    inamespace& operator=(inamespace&& other) noexcept      = default;
     inamespace& operator+=(const inamespace& other);
     inamespace& operator+=(const istring& component);
 
@@ -131,7 +137,11 @@ public:
     explicit ifilename(const istring& onlycomponent);
     explicit ifilename(const char* str);
     explicit ifilename(const ipath& path);
-    ~ifilename() = default;
+    ifilename(const ifilename& other)                     = default;
+    ifilename(ifilename && other) noexcept                = default;
+    ~ifilename()                                          = default;
+    ifilename& operator=(const ifilename& other) noexcept = default;
+    ifilename& operator=(ifilename&& other) noexcept      = default;
 
     Filename str(char separator = Separator) const;
 };

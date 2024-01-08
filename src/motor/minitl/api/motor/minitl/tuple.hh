@@ -5,6 +5,8 @@
 
 #include <motor/minitl/stdafx.h>
 
+#include <motor/minitl/type_traits.hh>
+
 namespace minitl {
 
 namespace details {

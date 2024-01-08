@@ -2,8 +2,10 @@
    see LICENSE for detail */
 
 #include <motor/filesystem/stdafx.h>
-#include <errno.h>
+
 #include <posix/file.hh>
+
+#include <errno.h>
 #include <stdio.h>
 
 namespace Motor {
@@ -27,10 +29,10 @@ ref< File::Ticket > PosixFile::doBeginOperation(minitl::allocator& ticketArena,
     return ref< Ticket >::create(ticketArena, m_filename, dataArena, offset, size, text, data);
 }
 
-PosixFile::Ticket::Ticket(const ifilename& filename, minitl::allocator& arena, i64 offset, u32 size,
+PosixFile::Ticket::Ticket(ifilename filename, minitl::allocator& arena, i64 offset, u32 size,
                           bool text, const void* data)
     : File::Ticket(arena, offset, size, text, data)
-    , m_filename(filename)
+    , m_filename(minitl::move(filename))
 {
 }
 

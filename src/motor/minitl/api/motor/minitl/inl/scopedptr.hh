@@ -6,7 +6,9 @@
 
 #include <motor/minitl/scopedptr.hh>
 
+#include <motor/minitl/allocator.hh>
 #include <motor/minitl/features.hh>
+#include <motor/minitl/weakptr.hh>
 
 namespace minitl {
 
@@ -129,6 +131,15 @@ inline scoped< U > motor_checked_cast(scoped< T >&& value)
     value.m_payload                  = nullptr;
     value.m_ptr                      = nullptr;
     return scoped< U >(payload, ptr);
+}
+
+template < typename T >
+template < typename... ARGS >
+scoped< T > scoped< T >::create(allocator& allocator, ARGS&&... args)
+{
+    auto* p = new(allocator.alloc(sizeof(payload)))
+        payload(allocator, minitl::forward< ARGS >(args)...);
+    return scoped< T >(p, reinterpret_cast< T* >(&p->value));
 }
 
 template < typename U, typename T >

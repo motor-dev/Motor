@@ -20,5 +20,3 @@ DynamicObject::~DynamicObject()
 }
 
 }}  // namespace Motor::Plugin
-
-

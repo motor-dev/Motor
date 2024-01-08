@@ -18,7 +18,7 @@ motor_api(MINITL) u32
     u32 result   = options.alternate;
     *destination = '@';
     destination += result;
-#if _LP64
+#ifdef _LP64
     result += hexadecimal_format::format_hexadecimal_whole(destination + result, x.number);
 #else
     result += hexadecimal_format::format_hexadecimal_whole(destination + result, u32(x.number));

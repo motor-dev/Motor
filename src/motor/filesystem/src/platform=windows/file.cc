@@ -28,10 +28,10 @@ ref< File::Ticket > Win32File::doBeginOperation(minitl::allocator& ticketArena,
     return ref< Ticket >::create(ticketArena, m_filename, dataArena, offset, size, text, data);
 }
 
-Win32File::Ticket::Ticket(const ifilename& filename, minitl::allocator& arena, i64 offset, u32 size,
+Win32File::Ticket::Ticket(ifilename filename, minitl::allocator& arena, i64 offset, u32 size,
                           bool text, const void* data)
     : File::Ticket(arena, offset, size, text, data)
-    , m_filename(filename)
+    , m_filename(minitl::move(filename))
 {
 }
 

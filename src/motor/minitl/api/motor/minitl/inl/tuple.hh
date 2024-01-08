@@ -6,7 +6,6 @@
 
 #include <motor/minitl/tuple.hh>
 
-#include <motor/minitl/type_traits.hh>
 #include <motor/minitl/utility.hh>
 
 namespace minitl {

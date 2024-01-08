@@ -11,7 +11,7 @@
 
 namespace Motor { namespace Meta { namespace AST {
 
-Reference::Reference(const inamespace& name) : Node(), m_referenceName(name)
+Reference::Reference(inamespace name) : Node(), m_referenceName(minitl::move(name))
 {
 }
 

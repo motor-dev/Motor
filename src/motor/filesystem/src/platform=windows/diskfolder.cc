@@ -82,9 +82,9 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
     Folder::doRefresh(scanPolicy);
     if(m_handle.ptrHandle)
     {
-        WIN32_FIND_DATA     data;
+        WIN32_FIND_DATAA    data;
         ifilename::Filename pathname = (m_path + ifilename("*")).str('\\');
-        HANDLE              h        = FindFirstFile(pathname.name, &data);
+        HANDLE              h        = FindFirstFileA(pathname.name, &data);
         if(h != INVALID_HANDLE_VALUE)
         {
             do
@@ -116,7 +116,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                                                       size, getTimeStamp(data.ftLastWriteTime));
                     m_files.emplace_back(name, minitl::move(newFile));
                 }
-            } while(FindNextFile(h, &data));
+            } while(FindNextFileA(h, &data));
             FindClose(h);
         }
     }
@@ -137,8 +137,8 @@ weak< File > DiskFolder::createFile(const istring& name)
     else
     {
         CloseHandle(h);
-        WIN32_FIND_DATA data;
-        h = FindFirstFile(path.name, &data);
+        WIN32_FIND_DATAA data;
+        h = FindFirstFileA(path.name, &data);
         if(h == INVALID_HANDLE_VALUE)
         {
             DWORD errorCode = ::GetLastError();
@@ -168,9 +168,9 @@ void DiskFolder::onChanged()
 {
     if(m_handle.ptrHandle)
     {
-        WIN32_FIND_DATA     data;
+        WIN32_FIND_DATAA    data;
         ifilename::Filename pathname = (m_path + ifilename("*")).str('\\');
-        HANDLE              h        = FindFirstFile(pathname.name, &data);
+        HANDLE              h        = FindFirstFileA(pathname.name, &data);
         if(h != INVALID_HANDLE_VALUE)
         {
             do
@@ -224,7 +224,7 @@ void DiskFolder::onChanged()
                         m_files.emplace_back(name, minitl::move(newFile));
                     }
                 }
-            } while(FindNextFile(h, &data));
+            } while(FindNextFileA(h, &data));
             FindClose(h);
         }
     }
