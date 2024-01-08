@@ -217,12 +217,12 @@ void swap(allocator::block< T >& a, allocator::block< T >& b)
 
 #include <new>
 
-inline void* operator new(size_t size, minitl::allocator& allocator)
+inline void* operator new(std::size_t size, minitl::allocator& allocator)
 {
     return allocator.alloc(size);
 }
 
-inline void* operator new(size_t size, minitl::allocator& allocator, size_t align)
+inline void* operator new(std::size_t size, minitl::allocator& allocator, std::size_t align)
 {
     return allocator.alloc(size, align);
 }
@@ -232,17 +232,17 @@ inline void operator delete(void* ptr, minitl::allocator& allocator)
     allocator.free(ptr);
 }
 
-inline void operator delete(void* ptr, minitl::allocator& allocator, size_t /*align*/)
+inline void operator delete(void* ptr, minitl::allocator& allocator, std::size_t /*align*/)
 {
     allocator.free(ptr);
 }
 
-inline void* operator new[](size_t size, minitl::allocator& allocator)
+inline void* operator new[](std::size_t size, minitl::allocator& allocator)
 {
     return allocator.alloc(size);
 }
 
-inline void* operator new[](size_t size, minitl::allocator& allocator, size_t align)
+inline void* operator new[](std::size_t size, minitl::allocator& allocator, std::size_t align)
 {
     return allocator.alloc(size, align);
 }
@@ -252,7 +252,7 @@ inline void operator delete[](void* ptr, minitl::allocator& allocator)
     allocator.free(ptr);
 }
 
-inline void operator delete[](void* ptr, minitl::allocator& allocator, size_t /*align*/)
+inline void operator delete[](void* ptr, minitl::allocator& allocator, std::size_t /*align*/)
 {
     allocator.free(ptr);
 }

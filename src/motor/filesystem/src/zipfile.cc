@@ -25,11 +25,11 @@ ref< File::Ticket > ZipFile::doBeginOperation(minitl::allocator& ticketArena,
                                  size, text, data);
 }
 
-ZipFile::Ticket::Ticket(const ifilename& filename, const ref< ZipFolder::Handle >& handle,
+ZipFile::Ticket::Ticket(ifilename filename, const ref< ZipFolder::Handle >& handle,
                         const unz_file_pos& filePos, minitl::allocator& arena, i64 offset, u32 size,
                         bool text, const void* data)
     : File::Ticket(arena, offset, size, text, data)
-    , m_filename(filename)
+    , m_filename(minitl::move(filename))
     , m_handle(handle)
     , m_filePos(filePos)
 {

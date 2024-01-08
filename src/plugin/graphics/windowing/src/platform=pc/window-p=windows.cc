@@ -19,7 +19,7 @@ static inline void displayError()
     char* msg;
     ::FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr,
                      ::GetLastError(), 0, (char*)&msg, 0, nullptr);
-    MessageBox(nullptr, msg, "Win32 error", MB_OK);
+    MessageBoxA(nullptr, msg, "Win32 error", MB_OK);
     ::LocalFree(msg);
 }
 

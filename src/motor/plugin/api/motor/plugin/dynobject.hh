@@ -23,7 +23,7 @@ private:
     Handle m_handle;
 
 private:
-    static Handle load(const inamespace& objectName, const ipath& objectPath);
+    static Handle load(const inamespace& pluginName, const ipath& pluginPath);
     static void   unload(Handle handle);
     static void*  getSymbolInternal(Handle handle, const istring& symbolName);
 

@@ -9,7 +9,11 @@ see LICENSE for detail */
 namespace minitl {
 
 template < typename T >
-using view = span< const T >;
+class view : public span< const T >
+{
+public:
+    using span< const T >::span;
+};
 
 }  // namespace minitl
 

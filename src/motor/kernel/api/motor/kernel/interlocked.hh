@@ -58,7 +58,7 @@ private:
 public:
     __host __device static interlocked< T > create(T value)
     {
-        interlocked< T > result;
+        interlocked< T > result {};
         result.m_value = value_t(value);
         return result;
     }

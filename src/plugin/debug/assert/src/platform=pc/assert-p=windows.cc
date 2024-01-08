@@ -56,7 +56,7 @@ minitl::assertion_result assertionCallback(const char* file, int line, const cha
         (void)_snprintf(outMessage, BUFFER_SIZE - 1, "%s:%d : Assertion %s failed - %s\r\n", file,
                         line, expr, message);
         outMessage[BUFFER_SIZE - 1] = 0;
-        OutputDebugString(outMessage);
+        OutputDebugStringA(outMessage);
     }
 
     *callstack = 0;
@@ -70,7 +70,7 @@ minitl::assertion_result assertionCallback(const char* file, int line, const cha
         {
             minitl::format_to(buffer, sizeof(buffer), FMT("[{0: #x}]\r\n"), a->address());
             strcat(callstack, buffer);
-            OutputDebugString(buffer);
+            OutputDebugStringA(buffer);
         }
     }
 
@@ -81,8 +81,8 @@ minitl::assertion_result assertionCallback(const char* file, int line, const cha
         char* errorMessage;
         (void)::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr,
                               ::GetLastError(), 0, (LPTSTR)&errorMessage, 0, nullptr);
-        (void)MessageBox(nullptr, outMessage, "Failed to open assertion dialog",
-                         MB_ICONERROR | MB_OK);
+        (void)MessageBoxA(nullptr, outMessage, "Failed to open assertion dialog",
+                          MB_ICONERROR | MB_OK);
         (void)LocalFree(errorMessage);
         return minitl::assertion_result::ignore;
     }

@@ -28,7 +28,7 @@ Environment::Environment()
     OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token);
     char  profile[MAX_PATH];
     DWORD size = sizeof(profile);
-    GetUserName(profile, &size);
+    GetUserNameA(profile, &size);
     m_user    = istring(profile);
     size      = sizeof(profile);
     HMODULE h = LoadLibraryA("userenv.dll");

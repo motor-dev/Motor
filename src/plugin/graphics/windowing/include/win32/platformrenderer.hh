@@ -4,6 +4,8 @@
 #define MOTOR_PLUGIN_GRAPHICS_WINDOWING_WIN32_PLATFORMRENDERER_HH
 
 #include <motor/plugin.graphics.windowing/stdafx.h>
+#include <motor/plugin.graphics.windowing/renderer.hh>
+
 #include <motor/core/threads/thread.hh>
 #include <windows.h>
 
@@ -24,10 +26,10 @@ class Renderer::PlatformRenderer : public minitl::pointer
 private:
     weak< Renderer > m_renderer;
     istring          m_windowClassName;
-    WNDCLASSEX       m_wndClassEx;
+    WNDCLASSEXA      m_wndClassEx;
 
 public:
-    PlatformRenderer(const weak< Renderer >& renderer);
+    explicit PlatformRenderer(const weak< Renderer >& renderer);
     ~PlatformRenderer() override;
 
     HWND           createWindowImplementation(const WindowCreationFlags& flags) const;

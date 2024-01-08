@@ -30,15 +30,15 @@
 #    include <motor/config/compilers/syntax.hh>
 #endif
 
-#ifdef __host
+#ifdef __host  // NOLINT(bugprone-reserved-identifier)
 #    undef __host
 #endif
-#define __host  // NOLINT(bugprone-reserved-identifier)
-#ifdef __device
+#define __host   // NOLINT(bugprone-reserved-identifier)
+#ifdef __device  // NOLINT(bugprone-reserved-identifier)
 #    undef __device
 #endif
 #define __device  // NOLINT(bugprone-reserved-identifier)
-#ifdef __kernel
+#ifdef __kernel   // NOLINT(bugprone-reserved-identifier)
 #    undef __kernel
 #endif
 #define __kernel static inline  // NOLINT(bugprone-reserved-identifier)
@@ -49,7 +49,7 @@
 #define kernel_private
 #define kernel_generic
 
-#if defined(__clang_analyzer__)
+#if defined(__clang_analyzer__) /*  */
 #    define MOTOR_FILE "dummy"
 #    define MOTOR_LINE 0
 #else

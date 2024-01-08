@@ -30,10 +30,10 @@ void* ThreadLocal::tlsGet(void* key)
     return TlsGetValue(k);
 }
 
-void ThreadLocal::tlsSet(void* key, void* value)
+void ThreadLocal::tlsSet(void* key, void* data)
 {
     auto k = static_cast< DWORD >((uintptr_t)key);
-    TlsSetValue(k, value);
+    TlsSetValue(k, data);
 }
 
 }  // namespace Motor

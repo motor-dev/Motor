@@ -6,7 +6,7 @@
 
 namespace Motor { namespace KernelScheduler {
 
-Code::Code(const inamespace& name) : m_name(name)
+Code::Code(inamespace name) : m_name(minitl::move(name))
 {
 }
 

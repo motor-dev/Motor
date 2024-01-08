@@ -25,14 +25,14 @@ DynamicObject::Handle DynamicObject::load(const inamespace& pluginName, const ip
     const ipath&        pluginDir = Environment::getEnvironment().getDataDirectory();
     ifilename::Filename fullPath  = (pluginDir + pluginPath + ifilename(plugingFile.c_str())).str();
     motor_info_format(Log::plugin(), "loading dynamic object {0} ({1})", pluginName, fullPath.name);
-    HANDLE h = LoadLibrary(fullPath.name);
+    HANDLE h = LoadLibraryA(fullPath.name);
     if(!h)
     {
         char* errorMessage = nullptr;
         DWORD errorCode    = ::GetLastError();
-        FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr,
-                      errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                      reinterpret_cast< LPSTR >(&errorMessage), 0, nullptr);
+        FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr,
+                       errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                       reinterpret_cast< LPSTR >(&errorMessage), 0, nullptr);
         motor_error_format(Log::plugin(), "Error loading dynamic object {0}: {1}", pluginName,
                            errorMessage);
         ::LocalFree(errorMessage);

@@ -50,13 +50,13 @@ bool convertMetaValueToGValue(const Meta::Value& value, GType type, GValue* targ
         if(i64Interface)
         {
             g_value_init(target, type);
-            g_value_set_schar(target, (i8)(*i64Interface->get)(value));
+            g_value_set_schar(target, (signed char)(*i64Interface->get)(value));
             return true;
         }
         else if(u64Interface)
         {
             g_value_init(target, type);
-            g_value_set_schar(target, (i8)(*u64Interface->get)(value));
+            g_value_set_schar(target, (signed char)(*u64Interface->get)(value));
             return true;
         }
         else

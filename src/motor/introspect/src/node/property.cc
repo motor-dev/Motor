@@ -9,10 +9,10 @@
 
 namespace Motor { namespace Meta { namespace AST {
 
-Property::Property(const weak< const Object >& owner, const inamespace& propertyName)
+Property::Property(const weak< const Object >& owner, inamespace propertyName)
     : Node()
     , m_owner(owner)
-    , m_propertyName(propertyName)
+    , m_propertyName(minitl::move(propertyName))
     , m_type()
 {
 }

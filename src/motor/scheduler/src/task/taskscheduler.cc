@@ -143,7 +143,7 @@ intptr_t TaskScheduler::Worker::work(intptr_t p1, intptr_t p2)
         if(sc->m_workerTaskPool.m_poolSignal.wait() == Threads::Waitable::Finished)
         {
             sc->m_workerTaskPool.m_poolLock.wait();
-            bool end = w->doWork(sc);
+            bool end = doWork(sc);
             sc->m_workerTaskPool.m_poolLock.release(1);
             if(end)
             {

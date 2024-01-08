@@ -22,7 +22,7 @@ protected:
     void           doVisit(Node::Visitor & visitor) const override;
 
 public:
-    explicit FileName(const ifilename& value);
+    explicit FileName(ifilename value);
     ~FileName() override;
 };
 

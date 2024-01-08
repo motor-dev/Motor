@@ -26,8 +26,8 @@ void GPUResourceLoader< R >::load(const weak< const Resource::IDescription >& de
                                   Resource::Resource&                         resource)
 {
     scoped< IGPUResource > handle = m_renderer->create(motor_checked_cast< const R >(description));
-    resource.setHandle(minitl::move(handle));
     m_pending.push_back(*handle.operator->());
+    resource.setHandle(minitl::move(handle));
 }
 
 template < typename R >

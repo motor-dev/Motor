@@ -46,7 +46,7 @@ protected:
         minitl::format_buffer< 1024u > message = minitl::format< 1024u >(
             FMT("{0}({1}): {2}\t({3}) {4}{5}"), filename, line, logname, getLogLevelName(level),
             msg, (msg[strlen(msg) - 1] == '\n' ? "" : "\n"));
-        OutputDebugString(message);
+        OutputDebugStringA(message);
 #    define isatty(x) 1
 #endif
         static const char* term = Motor::Environment::getEnvironmentVariable("TERM");

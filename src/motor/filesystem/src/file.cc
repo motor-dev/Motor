@@ -29,8 +29,8 @@ File::Ticket::Ticket(minitl::allocator& arena, i64 offset, u32 size, bool text, 
 
 File::Ticket::~Ticket() = default;
 
-File::File(const ifilename& filename, u64 size, u64 fileState)
-    : m_filename(filename)
+File::File(ifilename filename, u64 size, u64 fileState)
+    : m_filename(minitl::move(filename))
     , m_size(size)
     , m_state(fileState)
 {

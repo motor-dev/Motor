@@ -214,12 +214,12 @@ bool GLRenderer::success() const
 
 //------------------------------------------------------------------------
 
-GLWindow::GLWindow(const weak< const RenderWindowDescription >& renderwindow,
+GLWindow::GLWindow(const weak< const RenderWindowDescription >& windowDescription,
                    const weak< const GLRenderer >&              renderer)
-    : Windowing::Window(renderwindow, renderer)
+    : Windowing::Window(windowDescription, renderer)
     , m_context(scoped< Context >())
 {
-    motor_info_format(Log::gl(), "creating window {0}", renderwindow->title);
+    motor_info_format(Log::gl(), "creating window {0}", windowDescription->title);
 }
 
 void GLWindow::load(const weak< const Resource::IDescription >& description)

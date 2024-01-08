@@ -10,8 +10,8 @@ namespace Motor { namespace PackageBuilder { namespace Nodes {
 
 static const istring s_name("name");
 
-Package::Package(const ifilename& filename, const ref< Folder >& dataFolder)
-    : m_filename(filename)
+Package::Package(ifilename filename, const ref< Folder >& dataFolder)
+    : m_filename(minitl::move(filename))
     , m_context(Arena::packageBuilder(), dataFolder)
     , m_plugins(Arena::packageBuilder())
     , m_nodes(Arena::packageBuilder())

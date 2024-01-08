@@ -187,7 +187,7 @@ StringInfo::StringInfoBufferCache& StringInfo::getCache()
 
 StringInfo::StringInfoBufferCache::StringInfoBufferCache()
     : m_buffers(
-        reinterpret_cast< iptr< StringInfo::StringInfoBuffer >* >(Arena::string().allocate()))
+          reinterpret_cast< iptr< StringInfo::StringInfoBuffer >* >(Arena::string().allocate()))
     , m_bufferCount(i_u32::create(0))
 {
     m_buffers[0] = nullptr;
@@ -410,6 +410,25 @@ igenericnamespace::igenericnamespace(const igenericnamespace& other)
     }
 }
 
+igenericnamespace::igenericnamespace(igenericnamespace&& other) noexcept
+    : m_namespace(other.m_capacity > MaxNamespaceSize ? other.m_namespace : (istring*)(m_buffer))
+    , m_buffer()
+    , m_size(other.m_size)
+    , m_capacity(other.m_capacity)
+{
+    if(other.m_capacity <= MaxNamespaceSize)
+    {
+        for(u16 i = 0; i < m_size; ++i)
+        {
+            new(&m_namespace[i]) istring(other.m_namespace[i]);
+            other.m_namespace[i].~istring();
+        }
+    }
+    other.m_namespace = nullptr;
+    other.m_size      = 0;
+    other.m_capacity  = 0;
+}
+
 igenericnamespace::igenericnamespace(const istring& onlycomponent)
     : m_namespace((istring*)(m_buffer))
     , m_buffer()
@@ -440,7 +459,7 @@ igenericnamespace::igenericnamespace(const char* str, const char* sep)
     }
 }
 
-igenericnamespace& igenericnamespace::operator=(const igenericnamespace& other)
+igenericnamespace& igenericnamespace::operator=(const igenericnamespace& other) noexcept
 {
     if(&other != this)
     {
@@ -458,6 +477,41 @@ igenericnamespace& igenericnamespace::operator=(const igenericnamespace& other)
             new(&m_namespace[i]) istring(other.m_namespace[i]);
         }
         m_size = other.m_size;
+    }
+    return *this;
+}
+
+igenericnamespace& igenericnamespace::operator=(igenericnamespace&& other) noexcept
+{
+    if(&other != this)
+    {
+        for(u16 i = 0; i < m_size; ++i)
+        {
+            m_namespace[m_size - i - 1].~istring();
+        }
+        if(m_capacity > MaxNamespaceSize)
+        {
+            Arena::general().free(m_namespace);
+        }
+
+        m_size     = other.m_size;
+        m_capacity = other.m_capacity;
+        if(other.m_capacity <= MaxNamespaceSize)
+        {
+            m_namespace = reinterpret_cast< istring* >(m_buffer);
+            for(u16 i = 0; i < m_size; ++i)
+            {
+                new(&m_namespace[i]) istring(other.m_namespace[i]);
+                other.m_namespace[i].~istring();
+            }
+        }
+        else
+        {
+            m_namespace = other.m_namespace;
+        }
+        other.m_size      = 0;
+        other.m_capacity  = 0;
+        other.m_namespace = (istring*)(other.m_buffer);
     }
     return *this;
 }

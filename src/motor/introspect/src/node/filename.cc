@@ -9,7 +9,7 @@
 
 namespace Motor { namespace Meta { namespace AST {
 
-FileName::FileName(const ifilename& value) : Node(), m_value(value), m_file()
+FileName::FileName(ifilename value) : Node(), m_value(minitl::move(value)), m_file()
 {
     motor_forceuse(m_value);
 }

@@ -24,7 +24,7 @@ private:
     minitl::vector< ref< Meta::AST::Node > >            m_nodes;
 
 public:
-    Package(const ifilename& filename, const ref< Folder >& dataFolder);
+    Package(ifilename filename, const ref< Folder >& dataFolder);
     ~Package() override;
 
     void                   insertNode(istring name, const ref< Meta::AST::Node >& object);

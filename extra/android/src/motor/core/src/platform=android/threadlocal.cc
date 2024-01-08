@@ -30,10 +30,10 @@ void* ThreadLocal::tlsGet(void* key)
     return const_cast< void* >(pthread_getspecific(k));
 }
 
-void ThreadLocal::tlsSet(void* key, void* value)
+void ThreadLocal::tlsSet(void* key, void* data)
 {
     auto k = static_cast< pthread_key_t >((uintptr_t)key);
-    pthread_setspecific(k, value);
+    pthread_setspecific(k, data);
 }
 
 }  // namespace Motor

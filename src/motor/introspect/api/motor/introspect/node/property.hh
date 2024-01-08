@@ -24,7 +24,7 @@ protected:
     void                      doVisit(Node::Visitor & visitor) const override;
 
 public:
-    Property(const weak< const Object >& owner, const inamespace& propertyName);
+    Property(const weak< const Object >& owner, inamespace propertyName);
     ~Property() override;
 };
 

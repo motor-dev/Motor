@@ -54,17 +54,17 @@ Renderer::PlatformRenderer::PlatformRenderer(const weak< Renderer >& renderer)
     m_wndClassEx.cbClsExtra    = 0;
     m_wndClassEx.cbWndExtra    = sizeof(Window*);  // NOLINT(bugprone-sizeof-expression)
 
-    RegisterClassEx(&m_wndClassEx);
+    RegisterClassExA(&m_wndClassEx);
 }
 
 Renderer::PlatformRenderer::~PlatformRenderer()
 {
-    UnregisterClass(m_windowClassName.c_str(), (HINSTANCE)::GetModuleHandle(nullptr));
+    UnregisterClassA(m_windowClassName.c_str(), (HINSTANCE)::GetModuleHandle(nullptr));
 }
 
 HWND Renderer::PlatformRenderer::createWindowImplementation(const WindowCreationFlags& flags) const
 {
-    HWND hWnd = CreateWindowEx(
+    HWND hWnd = CreateWindowExA(
         flags.fullscreen ? WS_EX_TOPMOST : 0, m_windowClassName.c_str(), flags.title, flags.flags,
         flags.x, flags.y, flags.size.right - flags.size.left, flags.size.bottom - flags.size.top,
         nullptr, nullptr, (HINSTANCE)::GetModuleHandle(nullptr), nullptr);
@@ -84,9 +84,9 @@ void Renderer::PlatformRenderer::destroyWindowImplementation(HWND hWnd)
 
 //-----------------------------------------------------------------------------
 
-Renderer::Renderer(minitl::allocator& allocator, const weak< Resource::ResourceManager >& manager)
-    : IRenderer(allocator, manager, Scheduler::MainThread)
-    , m_platformRenderer(scoped< PlatformRenderer >::create(allocator, this))
+Renderer::Renderer(minitl::allocator& arena, const weak< Resource::ResourceManager >& manager)
+    : IRenderer(arena, manager, Scheduler::MainThread)
+    , m_platformRenderer(scoped< PlatformRenderer >::create(arena, this))
 {
 }
 

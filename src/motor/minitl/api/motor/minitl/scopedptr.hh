@@ -86,12 +86,7 @@ public:
     MOTOR_ALWAYS_INLINE T&   operator*();
 
     template < typename... ARGS >
-    static MOTOR_ALWAYS_INLINE scoped< T > create(allocator& allocator, ARGS&&... args)
-    {
-        auto* p = new(allocator.alloc(sizeof(payload)))
-            payload(allocator, minitl::forward< ARGS >(args)...);
-        return scoped< T >(p, reinterpret_cast< T* >(&p->value));
-    }
+    static MOTOR_ALWAYS_INLINE scoped< T > create(allocator& allocator, ARGS&&... args);
 };
 
 }  // namespace minitl

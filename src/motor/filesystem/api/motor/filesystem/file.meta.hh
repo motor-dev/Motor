@@ -30,7 +30,7 @@ protected:
     u64             m_state;
 
 protected:
-    File(const ifilename& filename, u64 size, u64 state);
+    File(ifilename filename, u64 size, u64 state);
 
     virtual ref< Ticket > doBeginOperation(minitl::allocator & ticketArena,
                                            minitl::allocator & dataArena, const void* data,

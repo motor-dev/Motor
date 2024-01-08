@@ -39,7 +39,7 @@ private:
         unz_file_pos             m_filePos;
 
     public:
-        Ticket(const ifilename& filename, const ref< ZipFolder::Handle >& handle,
+        Ticket(ifilename filename, const ref< ZipFolder::Handle >& handle,
                const unz_file_pos& filePos, minitl::allocator& arena, i64 offset, u32 size,
                bool text, const void* data);
 

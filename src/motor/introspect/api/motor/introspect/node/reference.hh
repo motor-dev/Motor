@@ -27,7 +27,7 @@ protected:
     void                      doVisit(Node::Visitor & visitor) const override;
 
 public:
-    explicit Reference(const inamespace& name);
+    explicit Reference(inamespace name);
     ~Reference() override;
 
     const inamespace& name() const
