@@ -4,7 +4,15 @@ import waflib.Errors
 
 
 def setup(setup_context: build_framework.SetupContext) -> None:
-    if not setup_context.env.PROJECTS:
+    if setup_context.env.PROJECTS:
+        build_framework.start_msg_setup(setup_context)
+        setup_context.env['check_OpenGLES2'] = True
+        setup_context.env.append_unique(
+            'check_OpenGLES2_includes',
+            [os.path.join(setup_context.path.parent.abspath(), 'api')]
+        )
+        setup_context.end_msg('headers for code completion')
+    else:
         build_framework.start_msg_setup(setup_context)
         if 'darwin' in setup_context.env.VALID_PLATFORMS:
             if build_framework.check_framework(setup_context, ['OpenGLES']):

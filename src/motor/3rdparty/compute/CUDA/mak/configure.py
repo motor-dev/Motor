@@ -119,7 +119,7 @@ def configure(configuration_context: build_framework.ConfigurationContext) -> No
         v.NVCC_CXXFLAGS_cxx17 = ['-std=c++17']
         v.NVCC_CXXFLAGS_cxx20 = ['-std=c++17']
         v.NVCC_CXXFLAGS_cxx23 = ['-std=c++17']
-        v.NVCC_CXXFLAGS = ['-c', '-x', 'cu', '-I%s' % configuration_context.path.parent.make_node('api.cuda').abspath()]
+        v.NVCC_CXXFLAGS = ['-c', '-x', 'cu']
         v.NVCC_CXX_SRC_F = ''
         v.NVCC_CXX_TGT_F = ['-o']
         v.NVCC_ARCH_ST = ['-arch']

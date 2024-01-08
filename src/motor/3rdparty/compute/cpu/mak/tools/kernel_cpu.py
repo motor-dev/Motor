@@ -153,6 +153,8 @@ def create_cpu_kernel(
         tgen = build_context.get_tgen_by_name(task_gen.name)
         env = task_gen.env
         kernel_target = target_name + '.' + '.'.join(kernel_name) + '.cpu'
+        project_name = getattr(tgen, 'project_name')  # type: str
+        project_name += '.' + '.'.join(kernel_name) + '.cpu'
         build_context(
             group=build_context.motor_variant,
             env=task_gen.env.derive(),
@@ -174,6 +176,7 @@ def create_cpu_kernel(
             use=[tgen.target] + getattr(tgen, 'use') + [env.ENV_PREFIX % 'plugin.compute.cpu'],
             uselib=getattr(tgen, 'uselib'),
             source_nodes=[('', kernel_source)],
+            project_name=project_name,
             nomaster=set(),
         )
 

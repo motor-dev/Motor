@@ -157,7 +157,8 @@ def tidy_build(execute_method: Callable[["BuildContext"], Optional[str]]) -> Cal
         ):
             all_nodes = set(
                 sum([context.bldnode.ant_glob('%s/**' % g, remove=False) for g in context.motor_groups[1:]], []) +
-                context.srcnode.ant_glob(os.path.join(context.env.PREFIX, context.optim, '**'))
+                context.srcnode.ant_glob(os.path.join(context.env.PREFIX, context.optim, '**')) +
+                context.tidy_nodes()
             )
             for group_name in context.motor_groups:
                 all_nodes.discard(context.bldnode.make_node(group_name + waflib.Context.DBFILE))
@@ -166,7 +167,10 @@ def tidy_build(execute_method: Callable[["BuildContext"], Optional[str]]) -> Cal
                     install_task = getattr(task_gen, 'motor_install_task', None)
                     if install_task is not None:
                         for _, dest_file, _ in install_task.install_step:
-                            all_nodes.discard(context.srcnode.make_node(dest_file))
+                            if os.path.isabs(dest_file):
+                                all_nodes.discard(context.root.make_node(dest_file))
+                            else:
+                                all_nodes.discard(context.srcnode.make_node(dest_file))
                     for task in task_gen.tasks:
                         for output in task.outputs:
                             all_nodes.discard(output)
@@ -541,6 +545,8 @@ class BuildContext(waflib.Build.BuildContext):
                             x.update(values)
         self.init_dirs()
 
+    def tidy_nodes(self) -> List[waflib.Node.Node]:
+        return []
 
 class ProjectGenerator(BuildContext):
     cmd = '_project'
@@ -549,12 +555,25 @@ class ProjectGenerator(BuildContext):
     motor_toolchain = 'projects'
     motor_variant = 'projects'
 
+    def total(self) -> int:
+        total = 0
+        for group_index, group in enumerate(self.groups):
+            group_name = self.get_group_name(group_index)
+            if group_name is None or group_name != self.motor_variant:
+                for tg in group:
+                    try:
+                        total += len(tg.tasks)
+                    except AttributeError:
+                        total += 1
+        return total
+
     def get_build_iterator(self) -> Iterator[List[waflib.Task.Task]]:
+        for self.current_group, _ in enumerate(self.groups):
+            self.post_group()
+
         for self.current_group, _ in enumerate(self.groups):
             group_name = self.get_group_name(self.current_group)
             if group_name is None or group_name != self.motor_variant:
-                self.post_group()
-
                 tasks = self.get_tasks_group(self.current_group)
 
                 waflib.Task.set_file_constraints(tasks)

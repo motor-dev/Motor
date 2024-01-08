@@ -16,6 +16,8 @@ from .unit_test import setup_unit_test
 from .masterfiles import setup_masterfiles as _setup_masterfiles
 from .strip import create_strip_task
 from .install import install_directory, install_files, install_as
+from .utils import generate_guid
+from .task import autosig_env, autosig_vars, autosig_generator
 
 
 def build_framework(build_context: BuildContext) -> None:
@@ -46,7 +48,12 @@ def build_framework(build_context: BuildContext) -> None:
     build_context.load('bin2c', tooldir=[tool_dir])
     build_context.load('clir', tooldir=[tool_dir])
     build_context.load('ir_compiler', tooldir=[tool_dir])
+    build_context.load('visualstudio', tooldir=[tool_dir])
+    build_context.load('xcode', tooldir=[tool_dir])
+    build_context.load('qtcreator', tooldir=[tool_dir])
+    build_context.load('vscode', tooldir=[tool_dir])
     build_context.load('cmake', tooldir=[tool_dir])
+    build_context.load('clion', tooldir=[tool_dir])
     build_context.env.STATIC = build_context.env.STATIC or waflib.Options.options.static
     build_context.env.DYNAMIC = waflib.Options.options.dynamic
     if build_context.env.STATIC and build_context.env.DYNAMIC:

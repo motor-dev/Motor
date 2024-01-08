@@ -11,11 +11,15 @@ old_log_display = waflib.Task.Task.log_display
 
 def _to_string(task: waflib.Task.Task) -> str:
     if task.outputs:
-        tgt_str = ' '.join([a.name for a in task.outputs][:1])
+        tgt_str = '/' + task.outputs[0].name
+    elif task.inputs:
+        tgt_str = '/' + task.inputs[0].name
     else:
-        tgt_str = ' '.join([a.name for a in task.inputs][:1])
-    task_name = task.__class__.__name__.replace('_task', '')
-    return '{%s}%s%s/%s' % (task_name, (12 - len(task_name)) * ' ', task.generator.target, tgt_str)
+        tgt_str = ''
+    task_name = task.__class__.__name__
+    if task_name.endswith('_task'):
+        task_name = task_name[:-5]
+    return '{%s}%s%s%s' % (task_name, (20 - len(task_name)) * ' ', task.generator.target, tgt_str)
 
 
 def _log_display(task: waflib.Task.Task, build_context: waflib.Build.BuildContext) -> None:

@@ -67,16 +67,46 @@ class GnuCompiler(Compiler):
             ('.avx', ['-mavx']),
             ('.avx2', ['-mavx2']),
         ),
-        'ppc': (('', []), ('.altivec', ['-maltivec']),),
-        'ppc64': (('', []), ('.altivec', ['-maltivec']),),
-        'armv6': (('', []), ('.neon', ['-mfpu=neon']),),
-        'armv7a': (('', []), ('.neon', ['-mfpu=neon']),),
-        'armv7s': (('', []), ('.neon', ['-mfpu=neon']),),
-        'armv7k': (('', []), ('.neon', ['-mfpu=neon']),),
-        'armv7l': (('', []), ('.neon', ['-mfpu=neon']),),
-        'arm64': (('', []), ('.neon', []),),
-        'arm64e': (('', []), ('.neon', []),),
-        'aarch32': (('', []), ('.neon', []),),
+        'ppc': (
+            ('', []),
+            ('.altivec', ['-maltivec']),
+        ),
+        'ppc64': (
+            ('', []),
+            ('.altivec', ['-maltivec']),
+        ),
+        'armv6': (
+            ('', []),
+            ('.neon', ['-mfpu=neon']),
+        ),
+        'armv7a': (
+            ('', []),
+            ('.neon', ['-mfpu=neon']),
+        ),
+        'armv7s': (
+            ('', []),
+            ('.neon', ['-mfpu=neon']),
+        ),
+        'armv7k': (
+            ('', []),
+            ('.neon', ['-mfpu=neon']),
+        ),
+        'armv7l': (
+            ('', []),
+            ('.neon', ['-mfpu=neon']),
+        ),
+        'arm64': (
+            ('', []),
+            ('.neon', []),
+        ),
+        'arm64e': (
+            ('', []),
+            ('.neon', []),
+        ),
+        'aarch32': (
+            ('', []),
+            ('.neon', []),
+        ),
     }
     MULTILIBS = {
         'x86': ((['-m64'], 'amd64'),),
@@ -128,13 +158,14 @@ class GnuCompiler(Compiler):
         (('__arm__', '__ARM_ARCH_7A__'), 'armv7a'),
     )
     ARCHIVER = 'ar'
-    DEFINES = ['_WIN32', '_WIN64', '_M_AMD64', '_M_ARM', '_M_ARM_ARMV7VE', '_M_ARM_FP', '_M_ARM64', '_M_ARM64EC',
-               '_M_IX86', '_M_IX86_FP', '_M_X64', '__LP64__', '__ILP32__', '__BIG_ENDIAN__', '__LITTLE_ENDIAN__',
-               '__x86_64__', '__i386__', '__i486__', '__i586__', '__i686__', '__powerpc__', '__powerpc64__',
-               '__POWERPC__', '__ppc64__', '__arm64e__', '__aarch64__', '__aarch64__', '__aarch64', '__aarch32__',
-               '__arm__', '__ARM_ARCH_5__', '__ARM_ARCH_6__', '__ARM_ARCH_6K__', '__ARM_ARCH_6Z__', '__ARM_ARCH_6KZ__',
-               '__ARM_ARCH_6ZK__', '__ARM_ARCH_7A__', '__ARM_ARCH_7K__', '__ARM_ARCH_7S__', '__ARM_ARCH_7A__',
-               '_CALL_ELF']
+    DEFINES = [
+        '_WIN32', '_WIN64', '_M_AMD64', '_M_ARM', '_M_ARM_ARMV7VE', '_M_ARM_FP', '_M_ARM64', '_M_ARM64EC', '_M_IX86',
+        '_M_IX86_FP', '_M_X64', '__LP64__', '__ILP32__', '__BIG_ENDIAN__', '__LITTLE_ENDIAN__', '__x86_64__',
+        '__i386__', '__i486__', '__i586__', '__i686__', '__powerpc__', '__powerpc64__', '__POWERPC__', '__ppc64__',
+        '__arm64e__', '__aarch64__', '__aarch64__', '__aarch64', '__aarch32__', '__arm__', '__ARM_ARCH_5__',
+        '__ARM_ARCH_6__', '__ARM_ARCH_6K__', '__ARM_ARCH_6Z__', '__ARM_ARCH_6KZ__', '__ARM_ARCH_6ZK__',
+        '__ARM_ARCH_7A__', '__ARM_ARCH_7K__', '__ARM_ARCH_7S__', '__ARM_ARCH_7A__', '_CALL_ELF'
+    ]
     ERROR_FLAGS = ['-Werror']
 
     def __init__(
@@ -142,15 +173,14 @@ class GnuCompiler(Compiler):
             compiler_c: str,
             compiler_cxx: str,
             extra_args: Optional[Dict[str, List[str]]] = None,
-            extra_env: Optional[Dict[str, str]] = None) -> None:
+            extra_env: Optional[Dict[str, str]] = None
+    ) -> None:
         extra_env = dict(extra_env or {})
         extra_env['LC_ALL'] = 'C'
         extra_env['LANG'] = 'C'
         extra_args = deepcopy(extra_args or {})
         sysroot, names, targets, version, platform, arch = self._get_version(compiler_cxx, extra_args, extra_env or {})
-        Compiler.__init__(
-            self, compiler_c, compiler_cxx, version, platform, arch, extra_args, extra_env
-        )
+        Compiler.__init__(self, compiler_c, compiler_cxx, version, platform, arch, extra_args, extra_env)
         self.sysroot = sysroot
         if names is not None:
             self.NAMES = names
@@ -159,10 +189,7 @@ class GnuCompiler(Compiler):
 
     @classmethod
     def _get_version(
-            cls,
-            compiler_c: str,
-            extra_args: Dict[str, List[str]],
-            extra_env: Dict[str, str]
+            cls, compiler_c: str, extra_args: Dict[str, List[str]], extra_env: Dict[str, str]
     ) -> Tuple[Optional[str], Optional[Tuple[str, ...]], List[str], str, str, str]:
         names = None  # type: Optional[Tuple[str, ...]]
         sysroot = None  # type: Optional[str]
@@ -211,7 +238,8 @@ class GnuCompiler(Compiler):
         version = ''
         if result != 0:
             raise waflib.Errors.WafError(
-                'Error running %s:\nresult: %d\nstdout: %s\nstderr: %s\n' % (compiler_c, result, out, err))
+                'Error running %s:\nresult: %d\nstdout: %s\nstderr: %s\n' % (compiler_c, result, out, err)
+            )
         lines = err.split('\n') + out.split('\n')
         for line in lines:
             for name in cls.NAMES:
@@ -251,17 +279,14 @@ class GnuCompiler(Compiler):
             raise waflib.Errors.WafError('could not find architecture')
         return sysroot, names, targets, version, platform, arch
 
-    def is_valid(
-            self,
-            configuration_context: ConfigurationContext,
-            extra_flags: Optional[List[str]] = None
-    ) -> bool:
+    def is_valid(self, configuration_context: ConfigurationContext, extra_flags: Optional[List[str]] = None) -> bool:
         node = configuration_context.bldnode.make_node('main.cxx')
         tgtnode = node.change_ext('')
         node.write('int main() {}\n')
         try:
             result, out, err = self.run_cxx(
-                [node.abspath(), '-std=c++14', '-c', '-o', tgtnode.abspath()] + (extra_flags or []))
+                [node.abspath(), '-std=c++14', '-c', '-o', tgtnode.abspath()] + (extra_flags or [])
+            )
         except OSError:
             # print(e)
             return False
@@ -409,16 +434,11 @@ class GnuCompiler(Compiler):
         env.CXXFLAGS_cxx20 = ['-std=c++20']
         env.CXXFLAGS_cxx23 = ['-std=c++23']
 
-    def populate_useful_variables(
-            self,
-            configuration_context: ConfigurationContext,
-            sysroot: Optional[str]
-    ) -> None:
+    def populate_useful_variables(self, configuration_context: ConfigurationContext, sysroot: Optional[str]) -> None:
         env = configuration_context.env
         sysroot_flags = sysroot and ['--sysroot', sysroot] or []
 
-        result, out, err = self.run_c(
-            sysroot_flags + env['CFLAGS'] + ['-x', 'c', '-v', '-dM', '-E', '-'], '\n')
+        result, out, err = self.run_c(sysroot_flags + env['CFLAGS'] + ['-x', 'c', '-v', '-dM', '-E', '-'], '\n')
         if result != 0:
             print('could not retrieve system includes: %s' % err)
         else:
@@ -444,6 +464,7 @@ class GnuCompiler(Compiler):
             env.append_unique('SYSTEM_LIBPATHS', libs)
         env.COMPILER_C_FLAGS = env.CFLAGS
         env.COMPILER_CXX_FLAGS = env.CXXFLAGS
+        env.COMPILER_TARGET = self.target
 
     @staticmethod
     def split_path_list(line: str) -> List[str]:

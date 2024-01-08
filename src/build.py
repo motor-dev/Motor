@@ -31,8 +31,10 @@ def build_motor(build_context: build_framework.BuildContext) -> None:
     """
     if build_context.env.PROJECTS:
         build_framework.headers(
-            build_context, 'motor.mak', path=build_context.motornode.find_node('mak'),
-            features=['Makefile'], uselib=['cxx14']
+            build_context, 'motor.mak',
+            path=build_context.motornode.find_node('mak'),
+            project_name='motor.mak',
+            features=['motor:makefile'], uselib=['cxx14']
         )
     build_framework.headers(build_context, 'motor.config', [])
     build_framework.headers(
@@ -105,6 +107,7 @@ def build_plugins(build_context: build_framework.BuildContext) -> None:
         Declares all plugins
     """
     build_context.recurse('plugin/compute/opencl/mak/build.py')
+    build_context.recurse('plugin/compute/cuda/mak/build.py')
 
     build_framework.plugin(build_context, 'plugin.debug.runtime', ['motor'], uselib=['cxx14'])
     build_framework.plugin(build_context, 'plugin.debug.assert', ['motor', 'plugin.debug.runtime'], uselib=['cxx14'])
@@ -162,7 +165,8 @@ def build_plugins(build_context: build_framework.BuildContext) -> None:
         'py_motor', ['motor', 'plugin.scripting.pythonlib'],
         path=build_context.path.find_node('plugin/scripting/pythonmodule'),
         conditions=['python'],
-        uselib=['cxx14']
+        uselib=['cxx14'],
+        project_name='plugin.scripting.pythonlib.py_motor'
     )
     if build_context.env.PROJECTS:
         build_framework.plugin(
@@ -251,7 +255,8 @@ def build_games(build_context: build_framework.BuildContext) -> None:
         build_context,
         'motoreditor', ['motor', 'tool.motoreditor.ui', 'plugin.scripting.package'],
         path=build_context.path.find_node('tool/motoreditor/main'),
-        uselib=['cxx14']
+        uselib=['cxx14'],
+        project_name='tool.motoreditor.motoreditor'
     )
     build_framework.game(
         build_context, 'sample.text', ['motor', 'plugin.scripting.package', 'plugin.graphics.3d'],
@@ -269,7 +274,8 @@ def build_games(build_context: build_framework.BuildContext) -> None:
         )
     build_framework.game(
         build_context, 'help', ['motor', 'plugin.scripting.package'], path=build_context.path.find_node('tool/help'),
-        uselib=['cxx14']
+        uselib=['cxx14'],
+        project_name='tool.help'
     )
     if waflib.Options.options.tests:
         build_framework.game(

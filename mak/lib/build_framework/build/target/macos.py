@@ -8,7 +8,7 @@ import waflib.Node
 import waflib.Context
 from typing import Any, List, Optional, Union
 from ..features import make_bld_node
-from ..modules import external
+from ..modules.external import external
 from ..install import install_files, install_as
 from ...options import BuildContext
 

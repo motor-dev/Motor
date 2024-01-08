@@ -62,7 +62,7 @@ def setup_api(setup_context: build_framework.SetupContext) -> bool:
         return False
     else:
         setup_context.env.GTK3_SOURCE = gtk3_node.path_from(setup_context.package_node)
-        setup_context.end_msg('from API')
+        setup_context.end_msg('headers for code completion')
         return True
 
 

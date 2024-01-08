@@ -1,4 +1,5 @@
 ---
+HeaderFilterRegex: '*'
 Checks: '-*,
 bugprone-argument-comment,
 bugprone-assert-side-effect,

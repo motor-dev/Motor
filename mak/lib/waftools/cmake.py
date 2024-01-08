@@ -1,6 +1,5 @@
 import build_framework
-import waftools_common.cmake
-from typing import Any, List, Optional, Tuple
+from typing import Any
 
 
 class CMake(build_framework.ProjectGenerator):
@@ -11,7 +10,8 @@ class CMake(build_framework.ProjectGenerator):
     variant = 'cmake'
 
     def __init__(self, **kw: Any) -> None:
-        build_framework.BuildContext.__init__(self, **kw)
+        build_framework.ProjectGenerator.__init__(self, **kw)
+        self.motor_groups.append('cmake')
 
     def load_envs(self) -> None:
         build_framework.ProjectGenerator.load_envs(self)
@@ -31,13 +31,6 @@ class CMake(build_framework.ProjectGenerator):
         self.env.DEPLOY_KERNELDIR = '${input:motor-Deploy_KernelDir}'
         build_framework.add_feature(self, 'GUI')
 
-    def execute(self) -> Optional[str]:
-        result = build_framework.ProjectGenerator.execute(self)
-        if result is not None:
-            return result
 
-        self.write_workspace()
-        return None
-
-    def write_workspace(self) -> List[Tuple[str, str]]:
-        return waftools_common.cmake.write_cmake_workspace(self)
+def build(cmake: CMake) -> None:
+    cmake.recurse('mak/lib/waftools/build/cmake.py')
