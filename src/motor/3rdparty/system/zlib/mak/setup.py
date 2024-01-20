@@ -123,7 +123,7 @@ def setup_source_zlib(setup_context: build_framework.SetupContext) -> bool:
             setup_context,
             'zlib_src',
             ZLIB_SOURCES,
-            setup_context.path.parent.ant_glob(['patches/*.*'])
+            setup_context.path.parent.ant_glob(['patches/*.*'], remove=False)
         ).path_from(setup_context.package_node)
     except waflib.Errors.WafError:
         return False
@@ -138,7 +138,7 @@ def setup_source_minizip(setup_context: build_framework.SetupContext) -> bool:
             setup_context,
             'zlib_src',
             ZLIB_SOURCES,
-            setup_context.path.parent.ant_glob(['patches/*.*'])
+            setup_context.path.parent.ant_glob(['patches/*.*'], remove=False)
         ).path_from(setup_context.package_node)
     except waflib.Errors.WafError:
         return False

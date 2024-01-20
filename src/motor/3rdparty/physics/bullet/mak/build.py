@@ -37,7 +37,8 @@ def deploy_bullet_package(task_gen: waflib.TaskGen.task_gen) -> None:
 
     if task_gen.env.TOOLCHAIN == task_gen.bld.multiarch_envs[0].TOOLCHAIN:
         for h in src.ant_glob(
-                ['*.h', 'BulletCollision/**/*.h', 'BulletDynamics/**/*.h', 'BulletSoftBody/**/*.h', 'LinearMath/**/*.h']
+                ['*.h', 'BulletCollision/**/*.h', 'BulletDynamics/**/*.h', 'BulletSoftBody/**/*.h',
+                 'LinearMath/**/*.h'], remove=False
         ):
             build_framework.install_as(
                 task_gen,
@@ -70,7 +71,7 @@ def build_source(
             name,
             getattr(build_context, 'platforms'),
             path=path.make_node('src'),
-            features=['motor:warnings:off', 'motor:deploy:off', 'motor:deploy:bullet', 'motor:nortc'],
+            features=['motor:warnings:off', 'motor:deploy:off', 'motor:deploy:bullet'],
             extra_includes=[path.make_node('src')],
             extra_public_includes=[path.make_node('src')],
             extra_defines=[
@@ -90,7 +91,7 @@ def build_source(
             name,
             getattr(build_context, 'platforms'),
             path=path,
-            features=['motor:warnings:off', 'motor:deploy:off', 'motor:deploy:bullet', 'motor:nortc'],
+            features=['motor:warnings:off', 'motor:deploy:off', 'motor:deploy:bullet'],
             extra_includes=[path.make_node('src')],
             extra_system_includes=[path.make_node('src')],
             extra_defines=[

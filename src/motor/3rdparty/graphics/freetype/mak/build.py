@@ -89,7 +89,7 @@ def deploy_freetype_package(task_gen: waflib.TaskGen.task_gen) -> None:
 
     if task_gen.env.TOOLCHAIN == task_gen.bld.multiarch_envs[0].TOOLCHAIN:
         include = path.make_node('include')
-        for h in include.ant_glob(['**/*.*']):
+        for h in include.ant_glob(['**/*.*'], remove=False):
             build_framework.install_as(
                 task_gen,
                 os.path.join('bld', 'packages', ft_dest, 'api', h.path_from(include)),
@@ -130,8 +130,7 @@ def build_source(
             extra_public_includes=[include_path],
             extra_defines=defines,
             features=[
-                'motor:masterfiles:off', 'motor:warnings:off', 'motor:deploy:off', 'motor:deploy:freetype',
-                'motor:nortc'
+                'motor:masterfiles:off', 'motor:warnings:off', 'motor:deploy:off', 'motor:deploy:freetype'
             ],
             source_list=FT_SOURCE_LIST
         )
@@ -151,8 +150,7 @@ def build_source(
             extra_public_includes=[include_path],
             extra_defines=defines + dll_flags,
             features=[
-                         'motor:masterfiles:off', 'motor:warnings:off', 'motor:deploy:off', 'motor:deploy:freetype',
-                         'motor:nortc'
+                         'motor:masterfiles:off', 'motor:warnings:off', 'motor:deploy:off', 'motor:deploy:freetype'
                      ] + dll_features,
             source_list=FT_SOURCE_LIST
         )
