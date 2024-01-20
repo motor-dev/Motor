@@ -7,27 +7,27 @@
 
 namespace Motor { namespace TestCases {
 
-class Class : public minitl::pointer
+class TestClass : public minitl::pointer
 {
 public:
     i32 x1;
     i32 y1;
 
-    explicit Class(i32 x1 = 0, i32 y1 = 0) : x1(x1), y1(y1)
+    explicit TestClass(i32 x1 = 0, i32 y1 = 0) : x1(x1), y1(y1)
     {
     }
-    ~Class() override = default;
+    ~TestClass() override = default;
 
     void doStuff(float v1, float v2 = 5.0f);
     void doStuff(u32 v1, u32 v2, bool done);
     void doStuff(u32 v1, u32 v2 = 5, u32 v3 = 7);
 };
 
-struct Struct
+struct TestStruct
 {
 };
 
-enum Enum
+enum TestEnum
 {
     Value1,
     Value2,
