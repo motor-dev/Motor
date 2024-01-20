@@ -60,7 +60,7 @@ if __name__ == '__main__':
     help(Motor.DiskFolder)
 
     sample = Plugin('sample.python')
-    c = sample.TestCases.Class(y1=1, x1=3)
+    c = sample.TestCases.TestClass(y1=1, x1=3)
     assert c is not None
     c.doStuff(1, 2, True)
     print('%d - %d' % (c.x1, c.y1))
