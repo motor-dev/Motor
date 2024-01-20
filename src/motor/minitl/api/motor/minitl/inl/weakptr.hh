@@ -66,6 +66,19 @@ weak< T >::weak(const weak< U >& other) : m_ptr(motor_implicit_cast< T >(other.o
 }
 
 template < typename T >
+weak< T >::weak(weak&& other) noexcept : m_ptr(other.operator->())
+{
+    other.m_ptr = nullptr;
+}
+
+template < typename T >
+template < typename U >
+weak< T >::weak(weak< U >&& other) noexcept : m_ptr(motor_implicit_cast< T >(other.operator->()))
+{
+    other.m_ptr = nullptr;
+}
+
+template < typename T >
 weak< T >::~weak()
 {
 #if MOTOR_ENABLE_WEAKCHECK
@@ -74,7 +87,7 @@ weak< T >::~weak()
 }
 
 template < typename T >
-weak< T >& weak< T >::operator=(const weak& other)
+weak< T >& weak< T >::operator=(const weak& other)  // NOLINT(bugprone-unhandled-self-assignment)
 {
     if(this != &other)
     {
@@ -88,6 +101,23 @@ template < typename U >
 weak< T >& weak< T >::operator=(const weak< U >& other)
 {
     weak(other).swap(*this);
+    return *this;
+}
+
+template < typename T >
+weak< T >& weak< T >::operator=(weak&& other) noexcept
+{
+    m_ptr       = other.m_ptr;
+    other.m_ptr = nullptr;
+    return *this;
+}
+
+template < typename T >
+template < typename U >
+weak< T >& weak< T >::operator=(weak< U >&& other) noexcept
+{
+    m_ptr       = other.m_ptr;
+    other.m_ptr = nullptr;
     return *this;
 }
 

@@ -19,8 +19,8 @@ template < typename INTROSPECTION_HINT >
 struct SimplePolicy : public Policy
 {
 public:
-    ref< IntrospectionHint > verify(Meta::AST::DbContext&           context,
-                                    weak< const Meta::AST::Object > object,
+    ref< IntrospectionHint > verify(Meta::AST::DbContext&                  context,
+                                    const weak< const Meta::AST::Object >& object,
                                     raw< const Method > method, const CallInfo& callInfo,
                                     u32 argumentThis) const override
     {

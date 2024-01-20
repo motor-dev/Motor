@@ -73,10 +73,12 @@ ref< T >::ref(ref< U >&& other) noexcept
 }
 
 template < typename T >
-ref< T >& ref< T >::operator=(const ref< T >& other)
+ref< T >& ref< T >::operator=(const ref< T >& other)  // NOLINT(bugprone-unhandled-self-assignment)
 {
-    if(this == &other) return *this;
-    ref(other).swap(*this);
+    if(this != &other)
+    {
+        ref(other).swap(*this);
+    }
     return *this;
 }
 

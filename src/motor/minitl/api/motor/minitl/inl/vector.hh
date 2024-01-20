@@ -240,7 +240,8 @@ vector< T >& vector< T >::operator=(vector< T >&& other) noexcept
 }
 
 template < typename T >
-vector< T >& vector< T >::operator=(const vector< T >& other)
+vector< T >&
+vector< T >::operator=(const vector< T >& other)  // NOLINT(bugprone-unhandled-self-assignment)
 {
     if(this != &other)
     {

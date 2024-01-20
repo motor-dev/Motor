@@ -3,6 +3,7 @@
 
 #include <stdafx.h>
 #include <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.hh>
+#include <motor/plugin.graphics.3d/shader/shader.meta.hh>
 #include <motor/scheduler/scheduler.hh>
 #include <glesrenderer.hh>
 

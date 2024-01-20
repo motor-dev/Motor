@@ -2,16 +2,15 @@
 #include <motor/core/environment.hh>
 #include <motor/core/logger.hh>
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>
-#include <unistd.h>
 
 #ifdef MOTOR_PLATFORM_WIN32
-
 #    define WIN32_LEAN_AND_MEAN
 #    ifndef NOMINMAX
 #        define NOMINMAX
 #    endif
 #    include <windows.h>
-
+#else
+#   include <unistd.h>
 #endif
 
 class ConsoleLogListener : public Motor::ILogListener
