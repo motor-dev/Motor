@@ -18,7 +18,7 @@ USE_LIBRARY_CODE = """
 extern "C" {
 %(include_externc)s
 }
-#if defined(_WIN32) && !defined(__clang__)
+#if defined(_MSC_VER)
 __declspec(dllexport) int motor_test()
 {
     return 0;

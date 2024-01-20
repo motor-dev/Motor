@@ -126,30 +126,30 @@ class Clang(GnuCompiler):
             else:
                 result.append(c)
                 result += GnuCompiler.get_multilib_compilers(c)
-                if c.version_number >= (5,):
-                    for product, path in vs_install_paths:
-                        try:
-                            c = self.__class__(
-                                self.compiler_c,
-                                self.compiler_cxx, {
-                                    'c': self.extra_args.get('c', []),
-                                    'cxx': self.extra_args.get('cxx', []) + ['-fms-compatibility-version=19'],
-                                    'link': self.extra_args.get('link', []),
-                                },
-                                extra_env={'VCToolsInstallDir': str(path)}
-                            )
-                        except waflib.Errors.WafError:
-                            pass
-                        else:
-                            c.NAMES = ('clang_%s' % product,) + c.NAMES
-                            result.append(c)
-                            for compiler in GnuCompiler.get_multilib_compilers(c):
-                                compiler.NAMES = ('clang_%s' % product,) + compiler.NAMES
-                                result.append(compiler)
-                else:
-                    result.append(self)
-                    for compiler in GnuCompiler.get_multilib_compilers(c):
-                        result.append(compiler)
+            if self.version_number >= (5,):
+                for product, path in vs_install_paths:
+                    try:
+                        c = self.__class__(
+                            self.compiler_c,
+                            self.compiler_cxx, {
+                                'c': self.extra_args.get('c', []),
+                                'cxx': self.extra_args.get('cxx', []) + ['-fms-compatibility-version=19'],
+                                'link': self.extra_args.get('link', []),
+                            },
+                            extra_env={'VCToolsInstallDir': str(path)}
+                        )
+                    except waflib.Errors.WafError:
+                        pass
+                    else:
+                        c.NAMES = ('clang_%s' % product,) + c.NAMES
+                        result.append(c)
+                        for compiler in GnuCompiler.get_multilib_compilers(c):
+                            compiler.NAMES = ('clang_%s' % product,) + compiler.NAMES
+                            result.append(compiler)
+            else:
+                result.append(self)
+                for compiler in GnuCompiler.get_multilib_compilers(c):
+                    result.append(compiler)
         else:
             result.append(self)
 
@@ -231,11 +231,11 @@ class Clang(GnuCompiler):
         v = configuration_context.env
         if self.arch in ('amd64', 'arm64', 'ppc64'):
             if self.version_number >= (3, 2):
-                v.append_unique('CLAGS_tsan', ['-fsanitize=thread', '-DBE_THREAD_SANITIZER=1'])
+                v.append_unique('CFLAGS_tsan', ['-fsanitize=thread', '-DBE_THREAD_SANITIZER=1'])
                 v.append_unique('CXXFLAGS_tsan', ['-fsanitize=thread', '-DBE_THREAD_SANITIZER=1'])
                 v.append_unique('LINKFLAGS_tsan', ['-fsanitize=thread', '-static-libsan'])
             if self.version_number >= (3, 2):
-                v.append_unique('CLAGS_asan', ['-fsanitize=address'])
+                v.append_unique('CFLAGS_asan', ['-fsanitize=address'])
                 v.append_unique('CXXFLAGS_asan', ['-fsanitize=address'])
                 v.append_unique('LINKFLAGS_asan', ['-fsanitize=address', '-static-libsan'])
 
@@ -261,6 +261,21 @@ class Clang(GnuCompiler):
                 env.CXXFLAGS_exportall = ['-fvisibility=default']
         if self.version_number < (3, 7):
             env.DISABLE_DLLEXPORT = True
+        if self.target.endswith('msvc'):
+            env.append_unique('CFLAGS_debug', ['-fms-runtime-lib=dll_dbg'])
+            env.append_unique('CFLAGS_profile', ['-fms-runtime-lib=dll'])
+            env.append_unique('CFLAGS_final', ['-fms-runtime-lib=dll'])
+            env.append_unique('CXXFLAGS_debug', ['-fms-runtime-lib=dll_dbg'])
+            env.append_unique('CXXFLAGS_profile', ['-fms-runtime-lib=dll'])
+            env.append_unique('CXXFLAGS_final', ['-fms-runtime-lib=dll'])
+            # Setup does not use vthe dbeug/profile/final features,
+            # so avoid adding this flag in teh general flags section
+            env.append_unique('LDFLAGS_debug', ['-Wl,-nodefaultlib'])
+            env.append_unique('LDFLAGS_profile', ['-Wl,-nodefaultlib'])
+            env.append_unique('LDFLAGS_final', ['-Wl,-nodefaultlib'])
+            env.append_unique('STLIB_debug', ['msvcrtd', 'vcruntimed', 'ucrtd', 'kernel32'])
+            env.append_unique('STLIB_profile', ['msvcrt', 'vcruntime', 'ucrt', 'kernel32'])
+            env.append_unique('STLIB_final', ['msvcrt', 'vcruntime', 'ucrt', 'kernel32'])
 
     @staticmethod
     def split_path_list(line: str) -> List[str]:
@@ -291,6 +306,30 @@ def detect_clang(configuration_context: ConfigurationContext) -> List[GnuCompile
                             libdirs.append(b)
 
     seen = {}  # type: Dict[str, GnuCompiler]
+    msvc_versions = _get_msvc_build_tools(configuration_context)
+    for _, msvc_path in msvc_versions:
+        llvmdir = os.path.split(msvc_path)[0]
+        llvmdir = os.path.split(llvmdir)[0]
+        llvmdir = os.path.join(llvmdir, 'Llvm')
+        if os.path.isdir(llvmdir):
+            bindirs.append(os.path.join(llvmdir, 'bin'))
+            for directory in os.listdir(llvmdir):
+                if os.path.isdir(os.path.join(llvmdir, directory, 'bin')):
+                    bindirs.append(os.path.join(llvmdir, directory, 'bin'))
+    if sys.platform == 'win32':
+        import winreg
+        for p in (r'SOFTWARE\Wow6432node\LLVM\LLVM', r'SOFTWARE\LLVM\LLVM'):
+            try:
+                llvm_path = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, p)
+            except OSError:
+                pass
+            else:
+                try:
+                    path, _ = winreg.QueryValueEx(llvm_path, '')
+                except OSError:
+                    pass
+                else:
+                    bindirs.append(os.path.join(path, 'bin'))
     versions = []
     for libdir in get_sysroot_libpaths('/'):
         clang_dir = os.path.join(libdir, 'clang')
@@ -315,7 +354,6 @@ def detect_clang(configuration_context: ConfigurationContext) -> List[GnuCompile
                         seen[c.name()].add_sibling(c)
                     except KeyError:
                         clangs.append(c)
-    msvc_versions = _get_msvc_build_tools(configuration_context)
     for c in clangs:
         for multilib_compiler in c.get_clang_multilib_compilers(msvc_versions, configuration_context.env.SYSROOTS):
             if not multilib_compiler.is_valid(configuration_context):

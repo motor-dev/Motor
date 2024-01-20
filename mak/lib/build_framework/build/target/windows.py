@@ -74,7 +74,7 @@ def apply_implib(self: waflib.TaskGen.task_gen) -> None:
         link_task = getattr(self, 'link_task')  # type: waflib.Task.Task
         implib_node = link_task.outputs[0].parent.make_node(target_file)
         link_task.outputs.append(implib_node)
-        if self.env.COMPILER_NAME == 'msvc':
+        if self.env.COMPILER_ABI == 'msvc':
             link_task.outputs.append(implib_node.change_ext('.exp'))
         link_task.env.append_value('LINKFLAGS', [self.env.IMPLIB_ST % implib_node.abspath()])
 

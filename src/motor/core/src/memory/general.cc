@@ -24,7 +24,7 @@ GeneralAllocator::~GeneralAllocator() noexcept = default;
 
 void* GeneralAllocator::internal_alloc(u64 size, u64 alignment)
 {
-#ifdef _MSC_VER
+#ifdef MOTOR_COMPILER_MSVC
     return size > 0 ? ::_aligned_malloc(motor_checked_numcast< size_t >(size),
                                         motor_checked_numcast< size_t >(alignment))
                     : nullptr;
@@ -41,7 +41,7 @@ bool GeneralAllocator::internal_resize(void* /*ptr*/, u64 /*size*/)
 
 void* GeneralAllocator::internal_realloc(void* ptr, u64 size, u64 alignment)
 {
-#ifdef _MSC_VER
+#ifdef MOTOR_COMPILER_MSVC
     return ::_aligned_realloc(ptr, motor_checked_numcast< size_t >(size),
                               motor_checked_numcast< size_t >(alignment));
 #else
@@ -52,7 +52,7 @@ void* GeneralAllocator::internal_realloc(void* ptr, u64 size, u64 alignment)
 
 void GeneralAllocator::internal_free(const void* pointer)
 {
-#ifdef _MSC_VER
+#ifdef MOTOR_COMPILER_MSVC
     ::_aligned_free(const_cast< void* >(pointer));
 #else
     ::free(const_cast< void* >(pointer));

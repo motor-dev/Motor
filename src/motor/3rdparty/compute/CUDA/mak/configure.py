@@ -36,7 +36,10 @@ def find_cuda_paths(configuration_context: build_framework.ConfigurationContext)
     v = configuration_context.env
     environ = getattr(configuration_context, 'environ', os.environ)
     bindirs = environ['PATH'].split(os.pathsep) + v.EXTRA_PATH
-    if sys.platform == "win32":
+    for key, value in os.environ.items():
+        if key.startswith('CUDA_PATH'):
+            bindirs.append(os.path.join(value, 'bin'))
+    if sys.platform == 'win32':
         import winreg
         try:
             all_versions = winreg.OpenKey(

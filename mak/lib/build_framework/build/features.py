@@ -84,7 +84,7 @@ def makefile_feature(_: waflib.TaskGen.task_gen) -> None:
     pass
 
 
-@waflib.TaskGen.feature('motor:warnings:off', 'motor:nortc')
+@waflib.TaskGen.feature('motor:warnings:off')
 def warning_feature(_: waflib.TaskGen.task_gen) -> None:
     pass
 
@@ -156,24 +156,6 @@ def _check_use_taskgens(task_gen: waflib.TaskGen.task_gen) -> None:
 
 
 def _process_use_flags(task_gen: waflib.TaskGen.task_gen) -> None:
-    if 'motor:nortc' not in task_gen.features:
-        task_gen.env.append_unique('CFLAGS', task_gen.env.CFLAGS_rtc)
-        task_gen.env.append_unique('CFLAGS_debug', task_gen.env.CFLAGS_debug_rtc)
-        task_gen.env.append_unique('CFLAGS_profile', task_gen.env.CFLAGS_profile_rtc)
-        task_gen.env.append_unique('CFLAGS_final', task_gen.env.CFLAGS_final_rtc)
-        task_gen.env.append_unique('CXXFLAGS', task_gen.env.CXXFLAGS_rtc)
-        task_gen.env.append_unique('CXXFLAGS_debug', task_gen.env.CXXFLAGS_debug_rtc)
-        task_gen.env.append_unique('CXXFLAGS_profile', task_gen.env.CXXFLAGS_profile_rtc)
-        task_gen.env.append_unique('CXXFLAGS_final', task_gen.env.CXXFLAGS_final_rtc)
-    else:
-        task_gen.env.append_unique('CFLAGS', task_gen.env.CFLAGS_nortc)
-        task_gen.env.append_unique('CFLAGS_debug', task_gen.env.CFLAGS_debug_nortc)
-        task_gen.env.append_unique('CFLAGS_profile', task_gen.env.CFLAGS_profile_nortc)
-        task_gen.env.append_unique('CFLAGS_final', task_gen.env.CFLAGS_final_nortc)
-        task_gen.env.append_unique('CXXFLAGS', task_gen.env.CXXFLAGS_nortc)
-        task_gen.env.append_unique('CXXFLAGS_debug', task_gen.env.CXXFLAGS_debug_nortc)
-        task_gen.env.append_unique('CXXFLAGS_profile', task_gen.env.CXXFLAGS_profile_nortc)
-        task_gen.env.append_unique('CXXFLAGS_final', task_gen.env.CXXFLAGS_final_nortc)
     dependencies = [task_gen.bld.get_tgen_by_name(i) for i in
                     getattr(task_gen, 'use', []) + getattr(task_gen, 'private_use', [])]
     seen = {task_gen}
@@ -185,7 +167,8 @@ def _process_use_flags(task_gen: waflib.TaskGen.task_gen) -> None:
             dependencies += [task_gen.bld.get_tgen_by_name(i) for i in getattr(dep, 'use', [])]
             for var in waflib.Tools.ccroot.get_uselib_vars(task_gen):
                 value = getattr(dep, 'export_%s' % var.lower(), [])
-                task_gen.env.append_value(var, waflib.Utils.to_list(value))
+                if value:
+                    task_gen.env.append_unique(var, waflib.Utils.to_list(value))
 
 
 def _add_objects_from_tgen(task_gen: waflib.TaskGen.task_gen, depends: waflib.TaskGen.task_gen) -> None:
@@ -223,21 +206,18 @@ def _process_use_link(task_gen: waflib.TaskGen.task_gen) -> None:
                     all_deps.append((d, link_objects))
                 dependencies += [(i, link_objects) for i in new_deps]
         for d, link_objects in all_deps:
-            for var in 'LIB', 'LIBPATH', 'STLIB', 'STLIBPATH', 'LINKFLAGS', 'FRAMEWORK':
-                value = getattr(d, 'export_%s' % var.lower(), [])
-                task_gen.env.append_value(var, waflib.Utils.to_list(value))
             if 'cxxstlib' in d.features or 'cstlib' in d.features:
                 dep_link_task = getattr(d, 'link_task')  # type: waflib.Task.Task
-                task_gen.env.append_value('STLIB', [os.path.basename(d.target)])
+                task_gen.env.append_unique('STLIB', [os.path.basename(d.target)])
                 link_task.dep_nodes.extend(dep_link_task.outputs)
                 tmp_path = dep_link_task.outputs[0].parent.path_from(task_gen.bld.bldnode)
-                task_gen.env.append_value('STLIBPATH', [tmp_path])
+                task_gen.env.append_unique('STLIBPATH', [tmp_path])
             elif 'cxxshlib' in d.features or 'cshlib' in d.features:
                 dep_link_task = getattr(d, 'link_task')
-                task_gen.env.append_value('LIB', [os.path.basename(d.target)])
+                task_gen.env.append_unique('LIB', [os.path.basename(d.target)])
                 link_task.dep_nodes.extend(dep_link_task.outputs)
                 tmp_path = dep_link_task.outputs[0].parent.path_from(task_gen.bld.bldnode)
-                task_gen.env.append_value('LIBPATH', [tmp_path])
+                task_gen.env.append_unique('LIBPATH', [tmp_path])
             elif link_objects and ('cxxobjects' in d.features or 'cobjects' in d.features):
                 _add_objects_from_tgen(task_gen, d)
 

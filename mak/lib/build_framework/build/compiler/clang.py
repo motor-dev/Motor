@@ -45,5 +45,5 @@ def setup_compiler_clang(build_context: BuildContext) -> None:
             env['ENABLE_COMPILER_DEPS'] = True
             env.append_unique('CFLAGS', ['-MMD'])
             env.append_unique('CXXFLAGS', ['-MMD'])
-    for cls_name in 'c', 'cxx', 'cshlib', 'cxxshlib', 'cprogram', 'cxxprogram':
-        _wrap_class(cls_name)
+    # for cls_name in 'c', 'cxx', 'cshlib', 'cxxshlib', 'cprogram', 'cxxprogram':
+    #    _wrap_class(cls_name)
