@@ -98,6 +98,7 @@ class cmake_toolchain(waflib.Task.Task):
             arch_env = env
         with open(self.outputs[0].abspath(), 'w') as toolchain:
             toolchain.write(
+                'set(CMAKE_CONFIGURATION_TYPES "%(configs)s" CACHE STRING "" FORCE)\n'
                 'set(CMAKE_C_COMPILER "%(CC)s" CACHE STRING "")\n'
                 'set(CMAKE_CXX_COMPILER "%(CXX)s"  CACHE STRING "")\n'
                 'set(MOTOR_TOOLCHAIN %(ENV)s CACHE INTERNAL "" FORCE)\n'
@@ -113,6 +114,8 @@ class cmake_toolchain(waflib.Task.Task):
                 '  include_directories("%(COMPILER_INCLUDES)s")\n'
                 'endif()\n'
                 '' % {
+                    'configs':
+                        ';'.join(self.generator.bld.env.ALL_VARIANTS),
                     'CC':
                         env.CC[0].replace('\\', '/'),
                     'CXX':
@@ -170,7 +173,6 @@ class cmake(waflib.Task.Task):
                 'set(CMAKE_CXX_COMPILER_ARG1 "%(true)s")\n'
                 'set(CMAKE_C_LINKER_LAUNCHER "%(python)s;%(true)s;--")\n'
                 'set(CMAKE_CXX_LINKER_LAUNCHER "%(python)s;%(true)s;--")\n'
-                'set(CMAKE_CONFIGURATION_TYPES "%(configs)s" CACHE STRING "" FORCE)\n\n'
                 'set(CMAKE_CXX_STANDARD 14)\n'
                 'set(CMAKE_CXX_STANDARD_REQUIRED ON)\n'
                 'set(CMAKE_CXX_EXTENSIONS OFF)\n'
@@ -180,8 +182,6 @@ class cmake(waflib.Task.Task):
                 'message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}")\n'
                 'include(%(cmake_dir)s/project.txt)\n'
                 '' % {
-                    'configs':
-                        ';'.join(self.generator.bld.env.ALL_VARIANTS),
                     'cmake_dir':
                         cmake_dir,
                     'python':
