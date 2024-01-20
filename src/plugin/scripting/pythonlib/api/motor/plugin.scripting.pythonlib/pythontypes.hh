@@ -3,6 +3,7 @@
 #ifndef MOTOR_PLUGIN_SCRIPTING_PYTHONLIB_PYTHONTYPES_HH
 #define MOTOR_PLUGIN_SCRIPTING_PYTHONLIB_PYTHONTYPES_HH
 
+#include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <stdio.h>
 
 namespace Motor { namespace Python {

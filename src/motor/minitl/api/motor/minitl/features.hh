@@ -28,7 +28,7 @@
 #    define MOTOR_ENABLE_LOGGING             1
 #    define MOTOR_ENABLE_MEMORY_TRACKING     1
 #    define MOTOR_ENABLE_MEMORY_DEBUGGING    1
-#    define MOTOR_ENABLE_EXCEPTIONS          MOTOR_SUPPORTS_EXCEPTIONS
+#    define MOTOR_ENABLE_EXCEPTIONS          0
 #    define MOTOR_ENABLE_COMPONENT_DEBUGGING 1
 #else
 #    define MOTOR_ENABLE_ASSERT              0

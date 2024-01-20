@@ -12,6 +12,8 @@ namespace minitl {
 template < typename T >
 class weak
 {
+    template < typename U >
+    friend class weak;
     template < typename U, typename V >
     friend weak< U > motor_checked_cast(const weak< V >& v);
 
@@ -23,19 +25,25 @@ private:
 
 public:
     inline weak();
-    inline weak(T* p);  // NOLINT(google-explicit-constructor)
+    inline weak(T* p);                      // NOLINT(google-explicit-constructor)
     template < typename U >
-    inline weak(const ref< U >& other);  // NOLINT(google-explicit-constructor)
+    inline weak(const ref< U >& other);     // NOLINT(google-explicit-constructor)
     template < typename U >
     inline weak(const scoped< U >& other);  // NOLINT(google-explicit-constructor)
     inline weak(const weak& other);
+    inline weak(weak&& other) noexcept;
     template < typename U >
-    inline weak(const weak< U >& other);  // NOLINT(google-explicit-constructor)
+    inline weak(const weak< U >& other);      // NOLINT(google-explicit-constructor)
+    template < typename U >
+    inline weak(weak< U >&& other) noexcept;  // NOLINT(google-explicit-constructor)
     inline ~weak();
 
     inline weak& operator=(const weak& other);
     template < typename U >
     inline weak& operator=(const weak< U >& other);
+    inline weak& operator=(weak&& other) noexcept;
+    template < typename U >
+    inline weak& operator=(weak< U >&& other) noexcept;
     template < typename U >
     inline weak& operator=(U* other);
 

@@ -16,7 +16,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #ifdef MOTOR_PLATFORM_WIN32
 /* todo: move to separate file */
@@ -25,7 +24,8 @@
 #        define NOMINMAX
 #    endif
 #    include <windows.h>
-
+#else
+#    include <unistd.h>
 #endif
 
 namespace {

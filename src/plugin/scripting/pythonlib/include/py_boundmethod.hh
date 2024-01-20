@@ -6,6 +6,10 @@
 #include <motor/plugin.scripting.pythonlib/stdafx.h>
 #include <motor/plugin.scripting.pythonlib/pythontypes.hh>
 
+namespace Motor { namespace Meta {
+class Method;
+}}  // namespace Motor::Meta
+
 namespace Motor { namespace Python {
 
 struct PyMotorObject;
