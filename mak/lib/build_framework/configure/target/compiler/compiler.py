@@ -223,7 +223,7 @@ class Compiler(object):
         env.cprogram_env = extra_env
         env.cxxprogram_env = extra_env
         env.append_unique('TARGETS', list(self.targets) + [self.target])
-        env.append_value('CPPFLAGS', self.extra_args.get('c', []))
+        env.append_value('CPPFLAGS', self.extra_args.get('cpp', []))
         env.append_value('CFLAGS', self.extra_args.get('c', []))
         env.append_value('CXXFLAGS', self.extra_args.get('cxx', []))
         env.append_value('LINKFLAGS', self.extra_args.get('link', []))

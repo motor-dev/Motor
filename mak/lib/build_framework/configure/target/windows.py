@@ -30,7 +30,7 @@ def _is_valid_msvc(
 ) -> bool:
     assert isinstance(compiler, MSVC)
     node = configuration_context.bldnode.make_node('main.cxx')
-    tgtnode = node.change_ext('obj')
+    tgtnode = node.change_ext('.obj')
     node.write('#include <cstdio>\n#include <cfloat>\n#include <new>\nint main() {}\n')
     try:
         result, out, err = compiler.run_cxx(
@@ -63,6 +63,13 @@ def _find_winres(configuration_context: ConfigurationContext, compiler: Compiler
             configuration_context.env.append_unique('WINRCFLAGS', ['--target=pe-i386'])
         elif compiler.arch == 'amd64':
             configuration_context.env.append_unique('WINRCFLAGS', ['--target=pe-x86-64'])
+    elif not configuration_context.env.WINRC:
+        winres = configuration_context.find_program(
+            'llvm-rc', var='WINRC', path_list=compiler.directories, mandatory=True
+        )
+        configuration_context.env.WINRC_TGT_F = '/fo'
+        configuration_context.env.WINRC_SRC_F = ''
+        configuration_context.load('winres')
 
 
 class Windows(Platform):
@@ -159,10 +166,7 @@ class Windows_Clang(Windows):
             env.cstlib_PATTERN = '%s.lib'
             env.cxxstlib_PATTERN = '%s.lib'
             env.implib_PATTERN = '%s.lib'
-            env.append_unique('DEFINES', ['_DLL'])
             env.append_unique('CXXFLAGS_warnall', ['-Wno-microsoft-enum-value', '-Wno-deprecated-register'])
-            env.append_unique('LINKFLAGS', ['-Wl,-nodefaultlib:libcmt'])
-            env.append_unique('LIB', ['msvcrt'])
             env.IMPLIB_ST = '-Wl,-implib:%s'
             env.LINKFLAGS_console = ['-Wl,-subsystem:console']
             env.COMPILER_ABI = 'msvc'

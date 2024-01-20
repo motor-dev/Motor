@@ -52,8 +52,13 @@ def _populate_var(env: waflib.ConfigSet.ConfigSet, language: str, out_text: str,
 class GnuCompiler(Compiler):
     ALL_ARM_ARCHS = ('armv7a', 'armv7k', 'armv7s')
     ARCH_FLAGS = {
-        'x86': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2'],
-        'amd64': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2'],
+        'x86': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2', '-mcx16'],
+        'i386': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2', '-mcx16'],
+        'i486': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2', '-mcx16'],
+        'i586': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2', '-mcx16'],
+        'i686': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2', '-mcx16'],
+        'amd64': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2', '-mcx16'],
+        'x86_64': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2', '-mcx16'],
         'arm': ['-march=armv7-a'],
     }
     VECTORIZED_FLAGS = {
@@ -181,6 +186,9 @@ class GnuCompiler(Compiler):
         extra_args = deepcopy(extra_args or {})
         sysroot, names, targets, version, platform, arch = self._get_version(compiler_cxx, extra_args, extra_env or {})
         Compiler.__init__(self, compiler_c, compiler_cxx, version, platform, arch, extra_args, extra_env)
+        self.add_flags('c', self.ARCH_FLAGS.get(arch, []))
+        self.add_flags('cxx', self.ARCH_FLAGS.get(arch, []))
+        self.add_flags('link', self.ARCH_FLAGS.get(arch, []))
         self.sysroot = sysroot
         if names is not None:
             self.NAMES = names
@@ -218,21 +226,12 @@ class GnuCompiler(Compiler):
             arch, platform = _split_triple(targets[0])
         else:
             platform = targets[0]
+        arch_flags = []
         if arch:
-            try:
-                extra_args['c'] += cls.ARCH_FLAGS.get(arch, [])
-            except KeyError:
-                extra_args['c'] = cls.ARCH_FLAGS.get(arch, [])
-            try:
-                extra_args['cxx'] += cls.ARCH_FLAGS.get(arch, [])
-            except KeyError:
-                extra_args['cxx'] = cls.ARCH_FLAGS.get(arch, [])
-            try:
-                extra_args['link'] += cls.ARCH_FLAGS.get(arch, [])
-            except KeyError:
-                extra_args['link'] = cls.ARCH_FLAGS.get(arch, [])
+            arch_flags += cls.ARCH_FLAGS.get(arch, [])
         result, out, err = cls.run(
-            [compiler_c] + extra_args.get('c', []) + ['-v', '-dM', '-E', '-'], input_text='\n', env=env
+            [compiler_c] + extra_args.get('c', []) + arch_flags + ['-v', '-dM', '-E', '-'],
+            input_text='\n', env=env
         )
         macros = set()
         version = ''
@@ -334,7 +333,6 @@ class GnuCompiler(Compiler):
         v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.CXXFLAGS_debug
         v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.ASFLAGS_debug
         v.LINKFLAGS_debug = ['-pipe', '-g'] + v.LINKFLAGS_debug
-        v.CXXFLAGS_debug_nortc = ['-fno-exceptions']
 
         v.CPPFLAGS_profile = ['-DNDEBUG'] + v.CPPFLAGS_profile
         v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.CFLAGS_profile
@@ -426,9 +424,14 @@ class GnuCompiler(Compiler):
         env.COMPILER_TARGET = self.arch + '-' + self.platform
         self.populate_useful_variables(configuration_context, env.SYSROOT)
 
-        env.CXXFLAGS_cxx98 = ['-std=c++98']
-        env.CXXFLAGS_cxx03 = ['-std=c++03']
-        env.CXXFLAGS_cxx11 = ['-std=c++11']
+        if self.target.endswith('msvc'):
+            env.CXXFLAGS_cxx98 = ['-std=c++14']
+            env.CXXFLAGS_cxx03 = ['-std=c++14']
+            env.CXXFLAGS_cxx11 = ['-std=c++14']
+        else:
+            env.CXXFLAGS_cxx98 = ['-std=c++98']
+            env.CXXFLAGS_cxx03 = ['-std=c++03']
+            env.CXXFLAGS_cxx11 = ['-std=c++11']
         env.CXXFLAGS_cxx14 = ['-std=c++14']
         env.CXXFLAGS_cxx17 = ['-std=c++17']
         env.CXXFLAGS_cxx20 = ['-std=c++20']

@@ -94,7 +94,8 @@ class MSVC(Compiler):
             args: str,
             path: List[str],
             includes: List[str],
-            libdirs: List[str]
+            libdirs: List[str],
+            env_changes: Dict[str, str]
     ) -> None:
         self.NAMES = (name, 'msvc')
         Compiler.__init__(
@@ -112,6 +113,7 @@ class MSVC(Compiler):
         self.target = self.platform
         self.platform_name = 'windows'
         self.targets = [self.target]
+        self.env_changes = env_changes
 
     def set_optimisation_options(self, configuration_context: ConfigurationContext) -> None:
         env = configuration_context.env
@@ -189,8 +191,18 @@ class MSVC(Compiler):
         env.MSVC_MANIFEST = 0
         env.MSVC_TARGETS = [self.arch_name]
         env.MSVC_BATFILE = [self.batfile, self.args]
+        env.MSVC_ENV = self.env_changes
+        msvc_version = ''
+        if self.version.startswith('14.3'):
+            msvc_version = '17'
+        elif self.version.startswith('14.2'):
+            msvc_version = '16'
+        elif self.version.startswith('14.1'):
+            msvc_version = '15'
+        elif self.version.startswith('14'):
+            msvc_version = '14'
         env.COMPILER_NAME = 'msvc'
-        env.COMPILER_TARGET = 'windows-win32-msvc-%s' % version
+        env.COMPILER_TARGET = '%s-pc-windows-msvc%s' % (self.arch, msvc_version)
         configuration_context.load(['msvc'])
         if self.NAMES[0] == 'intel':
             env.append_value('CFLAGS', ['/Qmultibyte-chars-'])
@@ -208,10 +220,20 @@ class MSVC(Compiler):
             configuration_context.find_program('ml', var='ML', path_list=env.PATH, mandatory=False)
         env.SYSTEM_INCLUDE_PATTERN = '/I%s'
         env.IDIRAFTER = '/I'
-        if os_platform().endswith('64'):
-            configuration_context.find_program('cdb64', var='CDB', mandatory=False)
-        else:
-            configuration_context.find_program('cdb', var='CDB', mandatory=False)
+        windows_sdk_path = env.MOTOR_WINDOWS_SDK_PATH
+        if windows_sdk_path:
+            if self.arch == 'amd64':
+                configuration_context.find_program('cdb', var='CDB', mandatory=False,
+                                                   path_list=[os.path.join(windows_sdk_path, 'Debuggers', 'x64')])
+            elif self.arch == 'x86':
+                configuration_context.find_program('cdb', var='CDB', mandatory=False,
+                                                   path_list=[os.path.join(windows_sdk_path, 'Debuggers', 'x86')])
+            elif self.arch == 'arm64':
+                configuration_context.find_program('cdb', var='CDB', mandatory=False,
+                                                   path_list=[os.path.join(windows_sdk_path, 'Debuggers', 'ARM64')])
+            elif self.arch == 'armv7a':
+                configuration_context.find_program('cdb', var='CDB', mandatory=False,
+                                                   path_list=[os.path.join(windows_sdk_path, 'Debuggers', 'ARM')])
 
         env.COMPILER_C_INCLUDES = self.includes
         env.COMPILER_CXX_INCLUDES = self.includes
@@ -268,12 +290,12 @@ all_icl_platforms = (
     ('ia64', 'ia64', 'ia64'),
 )
 
-_MsvcVersion = Tuple[str, str, str, str, List[str], List[str], List[str]]
+_MsvcVersion = Tuple[str, str, str, str, List[str], List[str], List[str], Dict[str, str]]
 _MsvcVersionDict = Dict[str, Dict[str, waflib.Tools.msvc.target_compiler]]
 
 
-def gather_vswhere_versions(configuration_context: ConfigurationContext,
-                            versions: _MsvcVersionDict) -> None:
+def _gather_vswhere_versions(configuration_context: ConfigurationContext,
+                             versions: _MsvcVersionDict) -> None:
     import json
     prg_path = os.environ.get('ProgramFiles(x86)', os.environ.get('ProgramFiles', 'C:\\Program Files (x86)'))
 
@@ -300,8 +322,27 @@ def gather_vswhere_versions(configuration_context: ConfigurationContext,
             waflib.Tools.msvc.gather_msvc_targets(configuration_context, versions, ver, path, product)
 
 
-def gather_intel_composer_versions(configuration_context: ConfigurationContext,
-                                   versions: _MsvcVersionDict) -> None:
+def _gather_debugging_tools_path(configuration_context: ConfigurationContext) -> None:
+    if sys.platform == "win32":
+        import winreg
+        try:
+            key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                                 r'SOFTWARE\Wow6432node\Microsoft\Microsoft SDKs\Windows\v10.0')
+        except OSError:
+            try:
+                key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\Microsoft SDKs\Windows\v10.0')
+            except OSError:
+                return
+        try:
+            path, _ = winreg.QueryValueEx(key, 'InstallationFolder')
+        except OSError:
+            pass
+        else:
+            configuration_context.env.MOTOR_WINDOWS_SDK_PATH = path
+
+
+def _gather_intel_composer_versions(configuration_context: ConfigurationContext,
+                                    versions: _MsvcVersionDict) -> None:
     if sys.platform == "win32":
         import winreg
 
@@ -353,7 +394,7 @@ def gather_intel_composer_versions(configuration_context: ConfigurationContext,
                     versions['intel ' + version_str] = targets
 
 
-def gather_vstudio_compilers(configuration_context: ConfigurationContext) -> List[_MsvcVersion]:
+def _gather_vstudio_compilers(configuration_context: ConfigurationContext) -> List[_MsvcVersion]:
     try:
         import json
     except ImportError:
@@ -393,57 +434,51 @@ def gather_vstudio_compilers(configuration_context: ConfigurationContext) -> Lis
                                     version, installation_path, toolset_short, host_arch, target)
         for version, installationPath, toolset_short, host_arch, target in sorted(compilers.values()):
             result.append(
-                get_msvc_version_new(configuration_context, installationPath, toolset_short, host_arch, target))
+                _get_msvc_version_new(configuration_context, installationPath, toolset_short, host_arch, target))
         return result
 
 
-_msvc_cnt = 0
-
-
-def get_msvc_version_new(
+def _get_msvc_version_new(
         configuration_context: ConfigurationContext,
         install_dir: str,
         version: str,
         host: str,
         target: str
 ) -> _MsvcVersion:
-    global _msvc_cnt
-    _msvc_cnt += 1
-    batfile = configuration_context.bldnode.make_node('waf-print-msvc-%d.bat' % _msvc_cnt)
-    batfile.write("""@echo off
-set INCLUDE=
-set LIB=
-call "%s\\Common7\\Tools\\vsdevcmd.bat" -arch=%s -host_arch=%s -vcvars_ver=%s -no_logo
-echo PATH=%%PATH%%
-echo INCLUDE=%%INCLUDE%%
-echo LIB=%%LIB%%;%%LIBPATH%%
-""" % (install_dir, target, host, version))
-    sout = configuration_context.cmd_and_log(['cmd.exe', '/E:on', '/V:on', '/C', batfile.abspath()])
+    env = os.environ
+    changes = {}
+    marker = 'MOTOR_MARKER'
+    cmdline = "\"%s\\Common7\\Tools\\vsdevcmd.bat\" -arch=%s -host_arch=%s -vcvars_ver=%s" % (
+        install_dir, target, host, version)
+    sout = configuration_context.cmd_and_log(
+        'cmd.exe /E:on /V:on /S /C "call %s && echo %s && set"' % (cmdline, marker))
     assert isinstance(sout, str)
+    sout = sout[sout.find(marker) + len(marker):].strip()
     lines = sout.splitlines()
+
+    for line in lines:
+        pair = line.strip().split('=', 1)
+        try:
+            original_value = env[pair[0]]
+        except KeyError:
+            changes[pair[0]] = pair[1]
+        else:
+            if pair[1] != original_value:
+                changes[pair[0]] = pair[1]
 
     if not lines[0]:
         lines.pop(0)
     existing_paths = os.environ['PATH'].split(';')
 
-    path = ''
-    msvc_path = msvc_incdir = msvc_libdir = []  # type: List[str]
-    for line in lines:
-        if line.startswith('PATH='):
-            path = line[5:]
-            msvc_path = [p for p in path.split(';') if p not in existing_paths]
-        elif line.startswith('INCLUDE='):
-            msvc_incdir = [i for i in line[8:].split(';') if i]
-        elif line.startswith('LIB='):
-            msvc_libdir = [i for i in line[4:].split(';') if i]
-    if None in (msvc_path, msvc_incdir, msvc_libdir):
-        configuration_context.fatal('msvc: Could not find a valid architecture for building (get_msvc_version_new)')
+    msvc_path = [p for p in changes.get('PATH', '').split(';') if p not in existing_paths]
+    msvc_incdir = [i for i in changes.get('INCLUDE', '').split(';') if i]
+    msvc_libdir = [i for i in changes.get('LIB', '').split(';') if i]
 
     # Check if the compiler is usable at all.
     # The detection may return 64-bit versions even on 32-bit systems, and these would fail to run.
     env = dict(os.environ)
-    if path:
-        env.update(PATH=path)
+    if 'PATH' in changes:
+        env.update(PATH=changes['PATH'])
     try:
         cxx = configuration_context.find_program('cl', path_list=msvc_path)
     except waflib.Errors.WafError:
@@ -469,7 +504,8 @@ echo LIB=%%LIB%%;%%LIBPATH%%
         target,
         msvc_path,
         msvc_incdir,
-        msvc_libdir
+        msvc_libdir,
+        changes
     )
 
 
@@ -477,25 +513,16 @@ echo LIB=%%LIB%%;%%LIBPATH%%
 def get_msvc_versions(configuration_context: waflib.Context.Context) -> _MsvcVersionDict:
     dct = {}  # type: _MsvcVersionDict
     assert isinstance(configuration_context, ConfigurationContext)
-    gather_intel_composer_versions(configuration_context, dct)
+    _gather_intel_composer_versions(configuration_context, dct)
     waflib.Logs.debug('msvc: detected versions %r' % list(dct.keys()))
     return dct
-
-
-def os_platform() -> str:
-    true_platform = os.environ['PROCESSOR_ARCHITECTURE']
-    try:
-        true_platform = os.environ["PROCESSOR_ARCHITEW6432"]
-    except KeyError:
-        pass
-        # true_platform not assigned to if this does not exist
-    return true_platform
 
 
 def configure_compiler_msvc(configuration_context: ConfigurationContext) -> List[MSVC]:
     seen = set()  # type: Set[Union[str, Tuple[str, str]]]
     result = []
     configuration_context.start_msg('Looking for msvc compilers')
+    _gather_debugging_tools_path(configuration_context)
     try:
         versions = get_msvc_versions(configuration_context)
     except waflib.Errors.WafError:
@@ -519,16 +546,16 @@ def configure_compiler_msvc(configuration_context: ConfigurationContext) -> List
                     seen.add(c.name())
                     result.append(c)
 
-    compilers = gather_vstudio_compilers(configuration_context)
-    for batfile, version, host_arch, target_arch, path, incdir, libdir in compilers:
+    compilers = _gather_vstudio_compilers(configuration_context)
+    for batfile, version, host_arch, target_arch, path, incdir, libdir, changes in compilers:
         if (version, target_arch) in seen:
             continue
         cl = detect_executable(configuration_context, 'cl', path)
         assert cl is not None
         c = MSVC(
             cl, 'msvc', version, target_arch, target_arch, batfile,
-            "-arch=%s -host_arch=%s -vcvars_ver=%s -no_logo" % (target_arch, host_arch, version),
-            path, incdir, libdir
+            "-arch=%s -host_arch=%s -vcvars_ver=%s" % (target_arch, host_arch, version),
+            path, incdir, libdir, changes
         )
         if c.name() in seen:
             continue
