@@ -353,6 +353,7 @@ class QtToolchain(QtObject):
         ('ProjectExplorer.MsvcToolChain.VarsBat', False),
         ('ProjectExplorer.MsvcToolChain.VarsBatArg', False),
         ('ProjectExplorer.MsvcToolChain.SupportedAbi', False),
+        ('ProjectExplorer.MsvcToolChain.environmentModifications', False),
         ('ProjectExplorer.ToolChain.Language', False),
         ('ProjectExplorer.ToolChain.Autodetect', False),
         ('ProjectExplorer.ToolChain.DisplayName', True),
@@ -376,15 +377,12 @@ class QtToolchain(QtObject):
         supported_platform = (
             ('android', 'android'),
             ('mingw', 'msys'),
-            ('msvc 7.0', 'msvc2002'),
-            ('msvc 7.1', 'msvc2003'),
-            ('msvc 8.0', 'msvc2005'),
-            ('msvc 9.0', 'msvc2008'),
-            ('msvc 10.0', 'msvc2010'),
-            ('msvc 11.0', 'msvc2012'),
-            ('msvc 12.0', 'msvc2013'),
-            ('msvc 14.0', 'msvc2015'),
-            ('msvc 15.', 'msvc2017'),
+            ('windows-gnu', 'msys'),
+            ('msvc14', 'msvc2015'),
+            ('msvc15', 'msvc2017'),
+            ('msvc16', 'msvc2019'),
+            ('msvc17', 'msvc2022'),
+            ('msvc', 'msvc2013'),
             ('freebsd', 'freebsd'),
         )
         for o, o_name in supported_os:
@@ -421,37 +419,90 @@ class QtToolchain(QtObject):
                 if f == '-target':
                     f = original_flags.pop(0)
                     flags.append('--target=%s' % f)
+                else:
+                    flags.append(f)
+            flags.append('-DTOOLCHAIN=%s' % env_name)
             if isinstance(compiler, list):
+                flags = compiler[1:] + flags
                 compiler = compiler[0]
-            if compiler == 1:
-                defines = env.COMPILER_C_DEFINES
-                includes = env.COMPILER_C_INCLUDES
-            else:
-                defines = env.COMPILER_CXX_DEFINES
-                includes = env.COMPILER_CXX_INCLUDES
-            for define in env.DEFINES + defines:
-                flags.append(env.DEFINES_ST % define)
-            for include in env.INCLUDES + includes:
-                flags.append(env.SYSTEM_INCLUDE_PATTERN % include)
 
-            self.ProjectExplorer_CustomToolChain_CompilerPath = compiler
-            self.ProjectExplorer_CustomToolChain_Cxx11Flags = tuple(env.COMPILER_CXX_FLAGS + ['-std=c++14'])
-            self.ProjectExplorer_CustomToolChain_ErrorPattern = ''
-            self.ProjectExplorer_CustomToolChain_FileNameCap = 1
-            self.ProjectExplorer_CustomToolChain_HeaderPaths = tuple(
-                i.replace('\\', '/') for i in env.INCLUDES + includes
-            )
-            self.ProjectExplorer_CustomToolChain_LineNumberCap = 2
-            self.ProjectExplorer_CustomToolChain_MakePath = ''
-            self.ProjectExplorer_CustomToolChain_MessageCap = 3
-            self.ProjectExplorer_CustomToolChain_Mkspecs = ''
-            self.ProjectExplorer_CustomToolChain_OutputParser = 0
-            toolchain_id = 'ProjectExplorer.ToolChain.Custom:%s' % build_framework.generate_guid(
-                'Motor:toolchain:%s:%d' % (env_name, language)
-            )
-            self.ProjectExplorer_CustomToolChain_PredefinedMacros = tuple(
-                '#define %s' % ' '.join(d.split('=', 1)) for d in env.DEFINES + defines)
-            self.ProjectExplorer_CustomToolChain_TargetAbi = abi
+            if env.COMPILER_NAME == 'gcc':
+                self.ProjectExplorer_GccToolChain_Path = compiler
+                self.ProjectExplorer_GccToolChain_TargetAbi = abi
+                self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
+                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
+                if platform == 'android':
+                    toolchain_id = 'Qt4ProjectManager.ToolChain.Android:%s' % build_framework.generate_guid(
+                        'Motor:toolchain:%s:%d' % (env_name, language)
+                    )
+                    self.Qt4ProjectManager_Android_NDK_TC_VERION = env_name.split('-')[-1]
+                else:
+                    toolchain_id = 'ProjectExplorer.ToolChain.Gcc:%s' % build_framework.generate_guid(
+                        'Motor:toolchain:%s:%d' % (env_name, language)
+                    )
+            elif env.COMPILER_NAME in ('clang', 'llvm'):
+                self.ProjectExplorer_GccToolChain_Path = compiler
+                self.ProjectExplorer_GccToolChain_TargetAbi = abi
+                self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
+                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
+                if platform == 'android':
+                    toolchain_id = 'Qt4ProjectManager.ToolChain.Android:%s' % build_framework.generate_guid(
+                        'Motor:toolchain:%s:%d' % (env_name, language)
+                    )
+                    self.Qt4ProjectManager_Android_NDK_TC_VERION = env_name.split('-')[-1]
+                else:
+                    toolchain_id = 'ProjectExplorer.ToolChain.Clang:%s' % build_framework.generate_guid(
+                        'Motor:toolchain:%s:%d' % (env_name, language)
+                    )
+            elif env.COMPILER_NAME == 'icc':
+                self.ProjectExplorer_GccToolChain_Path = compiler
+                self.ProjectExplorer_GccToolChain_TargetAbi = abi
+                toolchain_id = 'ProjectExplorer.ToolChain.LinuxIcc:%s' % build_framework.generate_guid(
+                    'Motor:toolchain:%s:%d' % (env_name, language)
+                )
+            elif env.COMPILER_NAME == 'suncc':
+                self.ProjectExplorer_GccToolChain_Path = compiler
+                self.ProjectExplorer_GccToolChain_TargetAbi = abi
+                self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
+                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
+                toolchain_id = 'ProjectExplorer.ToolChain.Gcc:%s' % build_framework.generate_guid(
+                    'Motor:toolchain:%s:%d' % (env_name, language)
+                )
+            elif env.COMPILER_NAME == 'msvc' and env.MSVC_COMPILER != 'intel':
+                self.ProjectExplorer_MsvcToolChain_VarsBat = env.MSVC_BATFILE[0].replace('\\', '/')
+                self.ProjectExplorer_MsvcToolChain_VarsBatArg = env.MSVC_BATFILE[1] or ''
+                self.ProjectExplorer_MsvcToolChain_SupportedAbi = abi
+                toolchain_id = 'ProjectExplorer.ToolChain.Msvc:%s' % build_framework.generate_guid(
+                    'Motor:toolchain:%s:%d' % (env_name, language)
+                )
+                self.ProjectExplorer_MsvcToolChain_environmentModifications = tuple(
+                    (variable, 0, value) for variable, value in env.MSVC_ENV.items()
+                )
+            else:
+                if compiler == 1:
+                    defines = env.COMPILER_C_DEFINES
+                    includes = env.COMPILER_C_INCLUDES
+                else:
+                    defines = env.COMPILER_CXX_DEFINES
+                    includes = env.COMPILER_CXX_INCLUDES
+                self.ProjectExplorer_CustomToolChain_CompilerPath = compiler
+                self.ProjectExplorer_CustomToolChain_Cxx11Flags = tuple(flags + ['-std=c++14'])
+                self.ProjectExplorer_CustomToolChain_ErrorPattern = ''
+                self.ProjectExplorer_CustomToolChain_FileNameCap = 1
+                self.ProjectExplorer_CustomToolChain_HeaderPaths = tuple(
+                    i.replace('\\', '/') for i in includes
+                )
+                self.ProjectExplorer_CustomToolChain_LineNumberCap = 2
+                self.ProjectExplorer_CustomToolChain_MakePath = ''
+                self.ProjectExplorer_CustomToolChain_MessageCap = 3
+                self.ProjectExplorer_CustomToolChain_Mkspecs = ''
+                self.ProjectExplorer_CustomToolChain_OutputParser = 0
+                toolchain_id = 'ProjectExplorer.ToolChain.Custom:%s' % build_framework.generate_guid(
+                    'Motor:toolchain:%s:%d' % (env_name, language)
+                )
+                self.ProjectExplorer_CustomToolChain_PredefinedMacros = tuple(
+                    '#define %s' % ' '.join(d.split('=', 1)) for d in defines)
+                self.ProjectExplorer_CustomToolChain_TargetAbi = abi
             self.ProjectExplorer_ToolChain_Language = language
             self.ProjectExplorer_ToolChain_Autodetect = False
             self.ProjectExplorer_ToolChain_DisplayName = 'Motor:toolchain:' + env_name
@@ -462,7 +513,7 @@ class QtDebugger(QtObject):
     published_vars = [
         ('Abis', False),
         ('AutoDetected', False),
-        ('Binary', True),
+        ('Binary', False),
         ('DisplayName', True),
         ('EngineType', True),
         ('Id', False),
@@ -484,6 +535,14 @@ class QtDebugger(QtObject):
             elif env.CDB:
                 self.Binary = env.CDB[0]
                 self.EngineType = 4
+                if env.ARCH_NAME == 'amd64':
+                    self.Abis = ('x86-windows-msvc2017-pe-64bit',)
+                elif env.ARCH_NAME == 'x86':
+                    self.Abis = ('x86-windows-msvc2017-pe-32bit',)
+                elif env.ARCH_NAME == 'arm64':
+                    self.Abis = ('arm-windows-msvc2017-pe-64bit',)
+                elif env.ARCH_NAME.startswith('arm'):
+                    self.Abis = ('arm-windows-msvc2017-pe-32bit',)
             elif env.LLDB:
                 self.Binary = env.LLDB[0]
                 self.EngineType = 256
@@ -873,7 +932,7 @@ class qtcreator_ini(waflib.Task.Task):
                                 return None
         except IOError:
             print('QtCreator ini file not found; creating one')
-            with open(self.outputs[0].abspath(), 'w') as ini_file:
+            with open(INI_FILE, 'w') as ini_file:
                 ini_file.write('[ClangTools]\n')
                 ini_file.write(CLANG_TIDY_CONFIG.format(1))
                 ini_file.write('ClangDiagnosticConfigs\\size=1\n')
@@ -891,7 +950,7 @@ class qtcreator_ini(waflib.Task.Task):
                 content[config_line:config_line] = [CLANG_TIDY_CONFIG.format(max_index + 1),
                                                     'ClangDiagnosticConfigs\\size=%d\n' % (max_index + 1)]
 
-            with open(self.outputs[0].abspath(), 'w') as ini_file:
+            with open(INI_FILE, 'w') as ini_file:
                 ini_file.write(''.join(content))
 
         return None
@@ -1057,16 +1116,9 @@ class qtcreator_user(waflib.Task.Task):
                                                 ),
                                                 ('PE.EnvironmentAspect.Base', 2),
                                                 ('PE.EnvironmentAspect.Changes', ()),
-                                                ('ProjectExplorer.CustomExecutableRunConfiguration.Arguments',
-                                                 arguments),
                                                 ('ProjectExplorer.CustomExecutableRunConfiguration.Executable',
                                                  executable),
                                                 ('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', False),
-                                                (
-                                                    'ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory',
-                                                    os.path.join(build_context.srcnode.abspath(), bld_env.PREFIX,
-                                                                 '%{ActiveProject:BuildConfig:Name}')
-                                                ),
                                                 (
                                                     'ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
                                                     'Run %s' % task_gen.target
@@ -1079,9 +1131,15 @@ class qtcreator_user(waflib.Task.Task):
                                                     'ProjectExplorer.ProjectConfiguration.Id',
                                                     'ProjectExplorer.CustomExecutableRunConfiguration'
                                                 ),
+                                                ('RunConfiguration.Arguments', arguments),
+                                                (
+                                                    'RunConfiguration.WorkingDirectory',
+                                                    os.path.join(build_context.srcnode.abspath(), bld_env.PREFIX,
+                                                                 '%{ActiveProject:BuildConfig:Name}')
+                                                ),
                                                 ('RunConfiguration.QmlDebugServerPort', 3768),
                                                 ('RunConfiguration.UseCppDebugger', True),
-                                                ('RunConfiguration.UseCppDebuggerAuto', False),
+                                                ('RunConfiguration.UseCppDebuggerAuto', True),
                                                 ('RunConfiguration.UseMultiProcess', False),
                                                 ('RunConfiguration.UseQmlDebugger', False),
                                                 ('RunConfiguration.UseQmlDebuggerAuto', True),
@@ -1146,7 +1204,7 @@ class qtcreator_user(waflib.Task.Task):
                                                 ),
                                                 ('RunConfiguration.QmlDebugServerPort', 3768),
                                                 ('RunConfiguration.UseCppDebugger', True),
-                                                ('RunConfiguration.UseCppDebuggerAuto', False),
+                                                ('RunConfiguration.UseCppDebuggerAuto', True),
                                                 ('RunConfiguration.UseMultiProcess', False),
                                                 ('RunConfiguration.UseQmlDebugger', False),
                                                 ('RunConfiguration.UseQmlDebuggerAuto', True),
@@ -1218,10 +1276,13 @@ class qbs(waflib.Task.Task):
         projects = getattr(self, 'projects')  # type: _ProjectMap
 
         with open(self.outputs[0].abspath(), 'w') as pfile:
-            pfile.write('import qbs\n\n')
-            pfile.write('Project {\n')
-            pfile.write('    name: "%s"\n' % appname)
-            pfile.write('    property string toolchain: undefined\n')
+            pfile.write(
+                'import qbs\n\n'
+                'Project {\n'
+                '    name: "%s"\n'
+                '    property string toolchain: undefined\n'
+                '' % appname
+            )
             self.write_project_list(pfile, projects)
             pfile.write('}\n')
 
@@ -1245,6 +1306,10 @@ class qbs(waflib.Task.Task):
                 defines = tg.env.DEFINES
                 includes = [include.path_from(build_context.srcnode) for include in getattr(tg, 'includes_nodes')]
                 project_file.write('%sProduct {\n' % indent)
+                project_file.write('%s    qbsSearchPaths: "%s/qbs/qbs/" + project.toolchain\n' % (
+                    indent, build_context.bldnode.path_from(build_context.path)
+                ))
+                project_file.write('%s    Depends { name: "motor_module" }\n' % indent)
                 project_file.write('%s    Depends { name: "cpp" }\n' % indent)
                 for env_name in build_context.env.ALL_TOOLCHAINS:
                     env = build_context.all_envs[env_name]
@@ -1267,15 +1332,15 @@ class qbs(waflib.Task.Task):
 
                 project_file.write('%s    name: "%s"\n' % (indent, tg.name))
                 project_file.write('%s    targetName: "%s"\n' % (indent, tg.name.split('.')[-1]))
-                project_file.write('%s    cpp._skipAllChecks: true\n' % (indent,))
-                project_file.write('%s    cpp.includePaths: [\n' % indent)
+                project_file.write('%s    type: "Dummy"\n' % (indent,))
+                project_file.write('%s    cpp.includePaths: motor_module.includePaths.concat([\n' % indent)
                 for include in includes:
                     project_file.write('%s        "%s",\n' % (indent, include.replace('\\', '/')))
-                project_file.write('%s    ]\n' % indent)
-                project_file.write('%s    cpp.defines: [\n' % indent)
+                project_file.write('%s    ])\n' % indent)
+                project_file.write('%s    cpp.defines: motor_module.defines.concat([\n' % indent)
                 for define in defines:
                     project_file.write('%s        "%s",\n' % (indent, define))
-                project_file.write('%s    ]\n' % indent)
+                project_file.write('%s    ])\n' % indent)
                 project_file.write('%s    files: [\n' % indent)
                 delayed = []
                 for name, source_node in getattr(tg, 'source_nodes', []):
@@ -1312,6 +1377,28 @@ class qbs(waflib.Task.Task):
                         project_file.write('%s        ]\n' % indent)
                         project_file.write('%s     }\n' % indent)
                 project_file.write('%s}\n' % indent)
+
+
+@build_framework.autosig_vars('includes', 'defines')
+class qbs_toolchain(waflib.Task.Task):
+    def run(self):
+        with open(self.outputs[0].abspath(), 'w') as module:
+            includes = getattr(self, 'includes')
+            defines = getattr(self, 'defines')
+            module.write(
+                'Module {\n'
+                '    property stringList includePaths: [\n')
+            for include in includes:
+                module.write('        "%s",\n' % (include.replace('\\', '/')))
+            module.write(
+                '    ]\n'
+                '    property stringList defines: [\n')
+            for define in defines:
+                module.write('        "%s",\n' % (define.replace('"', '\\"')))
+            module.write(
+                '    ]\n'
+                '}\n'
+            )
 
 
 class qbs_user(qtcreator_user):
@@ -1362,7 +1449,6 @@ class qbs_user(qtcreator_user):
                                 ), ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
                                 (
                                     'Qbs.Configuration', [
-                                        ('qbs.buildVariant', variant),
                                         ('qbs.architecture', _qbs_arch(env.TARGET_ARCH)),
                                         ('qbs.targetPlatform', _qbs_platform(env)),
                                         ('projects.%s.toolchain' % appname, env_name),
@@ -1393,7 +1479,8 @@ class qbs_user(qtcreator_user):
                                     'ProjectExplorer.ProcessStep'
                                 ),
                             ]
-                        ), ('ProjectExplorer.BuildStepList.StepsCount', 2),
+                        ),
+                        ('ProjectExplorer.BuildStepList.StepsCount', 2),
                         ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Build'),
                         ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
                         (
@@ -1451,7 +1538,8 @@ class qbs_user(qtcreator_user):
                     )
                 ), ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),
                 ('ProjectExplorer.ProjectConfiguration.DisplayName', variant),
-                ('ProjectExplorer.ProjectConfiguration.Id', 'Qbs.QbsBuildConfiguration')
+                ('ProjectExplorer.ProjectConfiguration.Id', 'Qbs.QbsBuildConfiguration'),
+                ('Qbs.configName', '%s-%s' % (env_name, variant))
             ]
         )
 
@@ -1459,6 +1547,7 @@ class qbs_user(qtcreator_user):
 class qcmake_user(qtcreator_user):
 
     def sig_vars(self) -> None:
+        qtcreator_user.sig_vars(self)
         self.m.update(inspect.getsource(self.make_build_configuration).encode())
 
     def make_build_configuration(
@@ -1472,6 +1561,7 @@ class qcmake_user(qtcreator_user):
         bld = self.generator.bld
         assert isinstance(bld, build_framework.BuildContext)
         assert bld.launcher is not None
+        options = [a for a in sys.argv if a[0] == '-']
         cmake_toolchains = getattr(self, 'cmake_toolchains')  # type: Dict[str, str]
         return (
             'ProjectExplorer.Target.BuildConfiguration.%d' % build_configuration_index, [
@@ -1479,11 +1569,13 @@ class qcmake_user(qtcreator_user):
                 ('CMake.Configure.ClearSystemEnvironment', False),
                 ('CMake.Configure.UserEnvironmentChanges', tuple()),
                 ('CMake.Initial.Parameters',
-                 '-DCMAKE_BUILD_TYPE:STRING=%s\n'
-                 '-DCMAKE_TOOLCHAIN_FILE:STRING=%s\n'
+                 '-DCMAKE_BUILD_TYPE:STRING=%(variant)s\n'
+                 '-DCMAKE_TOOLCHAIN_FILE:STRING=%(toolchain)s\n'
                  '-DCMAKE_C_COMPILER:FILEPATH=%%{Compiler:Executable:C}\n'
-                 '-DCMAKE_CXX_COMPILER:FILEPATH=%%{Compiler:Executable:Cxx}' % (
-                     variant, cmake_toolchains[env_name])),
+                 '-DCMAKE_CXX_COMPILER:FILEPATH=%%{Compiler:Executable:Cxx}' % {
+                     'variant': variant,
+                     'toolchain': cmake_toolchains[env_name],
+                 }),
                 (
                     'ProjectExplorer.BuildConfiguration.BuildDirectory',
                     bld.bldnode.make_node('qcmake.build/%s/%s' % (env_name, variant)).abspath()
@@ -1500,12 +1592,36 @@ class qcmake_user(qtcreator_user):
                                 ('CMakeProjectManager.MakeStep.BuildTargets', ('all',)),
                                 ('CMakeProjectManager.MakeStep.ClearSystemEnvironment', False),
                                 ('CMakeProjectManager.MakeStep.UserEnvironmentChanges', tuple()),
-                                ('ProjectExplorer.BuildStep.Enabled', True),
+                                ('ProjectExplorer.BuildStep.Enabled', False),
                                 ('ProjectExplorer.ProjectConfiguration.DisplayName', 'Build'),
                                 ('ProjectExplorer.ProjectConfiguration.Id', 'CMakeProjectManager.MakeStep')
                             ]
                         ),
-                        ('ProjectExplorer.BuildStepList.StepsCount', 1),
+                        (
+                            'ProjectExplorer.BuildStepList.Step.1', [
+                                ('ProjectExplorer.BuildStep.Enabled', True),
+                                (
+                                    'ProjectExplorer.ProcessStep.Arguments',
+                                    '%s build:%s:%s %s --werror' %
+                                    (sys.argv[0], env_name, variant, ' '.join(options))
+                                ),
+                                ('ProjectExplorer.ProcessStep.Command', sys.executable),
+                                (
+                                    'ProjectExplorer.ProcessStep.WorkingDirectory',
+                                    bld.srcnode.abspath()
+                                ),
+                                (
+                                    'ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                    'Waf configuration'
+                                ),
+                                ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                (
+                                    'ProjectExplorer.ProjectConfiguration.Id',
+                                    'ProjectExplorer.ProcessStep'
+                                ),
+                            ]
+                        ),
+                        ('ProjectExplorer.BuildStepList.StepsCount', 2),
                         ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Build'),
                         ('ProjectExplorer.ProjectConfiguration.DisplayName', 'Build'),
                         (
@@ -1571,7 +1687,19 @@ class qcmake_user(qtcreator_user):
                         'Python="%s"' % sys.executable,
                         'SrcDir="%s"' % bld.srcnode.abspath(),
                         'Variant=%s' % variant,
-                        'PATH=%s' % os.environ['PATH']
+                        'PATH=%s' % os.environ['PATH'],
+                        'CMAKE_C_COMPILER_LAUNCHER:STRING=%s;%s/mak/bin/true.py;--' % (
+                            sys.executable.replace('\\', '/'),
+                            bld.motornode.abspath().replace('\\', '/')),
+                        'CMAKE_CXX_COMPILER_LAUNCHER:STRING=%s;%s/mak/bin/true.py;--' % (
+                            sys.executable.replace('\\', '/'),
+                            bld.motornode.abspath().replace('\\', '/')),
+                        'CMAKE_C_LINKER_LAUNCHER:STRING=%s;%s/mak/bin/true.py;--' % (
+                            sys.executable.replace('\\', '/'),
+                            bld.motornode.abspath().replace('\\', '/')),
+                        'CMAKE_CXX_LINKER_LAUNCHER:STRING=%s;%s/mak/bin/true.py;--' % (
+                            sys.executable.replace('\\', '/'),
+                            bld.motornode.abspath().replace('\\', '/')),
                     )
                 ), ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),
                 ('ProjectExplorer.ProjectConfiguration.DisplayName', variant),
@@ -1625,6 +1753,13 @@ def create_qbs(task_gen: waflib.TaskGen.task_gen) -> None:
     qbs_file.parent.mkdir()
     task_gen.create_task('qbs', [], [qbs_file], projects=projects)
     task_gen.create_task('qbs_user', [], [qbs_user_file])
+    for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+        env = task_gen.bld.all_envs[toolchain]
+        if env.SUB_TOOLCHAINS:
+            env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
+        toolchain_file = build_framework.make_bld_node(task_gen, toolchain, 'modules/motor_module', 'MotorModule.qbs')
+        toolchain_file.parent.mkdir()
+        task_gen.create_task('qbs_toolchain', [], [toolchain_file], includes=env.INCLUDES, defines=env.DEFINES)
     build_framework.install_files(task_gen, task_gen.bld.srcnode.abspath(), [qbs_file, qbs_user_file])
 
 
