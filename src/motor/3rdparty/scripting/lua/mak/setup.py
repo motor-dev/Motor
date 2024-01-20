@@ -56,7 +56,7 @@ def setup_prebuilt(setup_context: build_framework.SetupContext) -> bool:
 def setup_source(setup_context: build_framework.SetupContext) -> bool:
     try:
         node = build_framework.pkg_unpack(setup_context, 'lua_src', LUA_SOURCES,
-                                          setup_context.path.parent.ant_glob(['patches/*.*']))
+                                          setup_context.path.parent.ant_glob(['patches/*.*'], remove=False))
     except waflib.Errors.WafError:
         return False
     else:

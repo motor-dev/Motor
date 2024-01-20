@@ -28,7 +28,7 @@ def _python_package(
         setup_context.env['check_python%s' % version_number] = True
         python_library = 'python%s' % version
         python_library_short = 'python%s' % version_number
-        for n in node.ant_glob('**/*'):
+        for n in node.ant_glob('**/*', remove=False):
             index = n.name.find(python_library)
             if index != -1:
                 python_library = os.path.splitext(n.name[index:])[0]

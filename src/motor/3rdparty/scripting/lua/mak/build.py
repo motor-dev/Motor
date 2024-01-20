@@ -72,7 +72,7 @@ def deploy_lua_package(task_gen: waflib.TaskGen.task_gen) -> None:
             )
 
     if task_gen.env.TOOLCHAIN == task_gen.bld.multiarch_envs[0].TOOLCHAIN:
-        for h in path.ant_glob(LUA_HEADERS):
+        for h in path.ant_glob(LUA_HEADERS, remove=False):
             build_framework.install_as(
                 task_gen,
                 os.path.join('bld/packages', lua_dest, 'api', h.path_from(src)),
