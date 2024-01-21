@@ -59,7 +59,7 @@ class cmake_project(waflib.Task.Task):
                     env.cxxprogram_PATTERN % target,
                     bld_env.PREFIX.replace('\\', '/'),
                     env.DEPLOY_BINDIR.replace('\\', '/'),
-                    self.generator.bld.bldnode.abspath(),
+                    self.generator.bld.bldnode.abspath().replace('\\', '/'),
                     toolchain,
                     target,
                     sys.executable.replace('\\', '/'),
@@ -217,7 +217,8 @@ class cmakelists(waflib.Task.Task):
                 '' % (
                     motor_target,
                     '\n    ${PROJECT_SOURCE_DIR}/'.join(
-                        [f.path_from(self.generator.bld.srcnode) for _, _, file_list in all_nodes for f in file_list]
+                        [f.path_from(self.generator.bld.srcnode).replace('\\', '/') for _, _, file_list in all_nodes for
+                         f in file_list]
                     ),
                     motor_target,
                     motor_target,

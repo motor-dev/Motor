@@ -46,6 +46,7 @@ class clion_compiler(waflib.Task.Task):
     color = 'PINK'
 
     def sig_vars(self) -> None:
+        waflib.Task.Task.sig_vars(self)
         for toolchain_name in self.env.ALL_TOOLCHAINS:
             bld_env = self.generator.bld.all_envs[toolchain_name]
             if bld_env.SUB_TOOLCHAINS:
@@ -344,6 +345,14 @@ class clion_completion(waflib.Task.Task):
 class clion_build(waflib.Task.Task):
     color = 'PINK'
 
+    def sig_vars(self) -> None:
+        waflib.Task.Task.sig_vars(self)
+        self.m.update(getattr(self, 'module', '').encode())
+        self.m.update(getattr(self, 'command', '').encode())
+        self.m.update(getattr(self, 'command_name', '').encode())
+        self.m.update(getattr(self, 'arg', '').encode())
+        self.m.update(getattr(self, 'arg_name', '').encode())
+
     def run(self) -> Optional[int]:
         with open(self.outputs[0].abspath(), 'w') as run_file:
             appname = getattr(waflib.Context.g_module, waflib.Context.APPNAME, self.generator.bld.srcnode.name)
@@ -351,6 +360,7 @@ class clion_build(waflib.Task.Task):
             command = getattr(self, 'command', '')  # type: str
             command_name = getattr(self, 'command_name', command or module)  # type: str
             arg = getattr(self, 'arg', '')  # type: str
+            arg_name = getattr(self, 'arg_name', '')  # type: str
             folder = getattr(self, 'folder')  # type: str
             if folder:
                 folder = ' folderName="%s"' % folder
@@ -369,7 +379,7 @@ class clion_build(waflib.Task.Task):
                 '    <option name="ADD_CONTENT_ROOTS" value="true" />\n'
                 '    <option name="ADD_SOURCE_ROOTS" value="true" />\n'
                 '    <option name="SCRIPT_NAME" value="%(module)s" />\n'
-                '    <option name="PARAMETERS" value="%(command)s" />\n'
+                '    <option name="PARAMETERS" value="%(command)s %(arg)s" />\n'
                 '    <option name="SHOW_COMMAND_LINE" value="false" />\n'
                 '    <option name="EMULATE_TERMINAL" value="true" />\n'
                 '    <option name="MODULE_MODE" value="%(module_mode)s" />\n'
@@ -378,7 +388,8 @@ class clion_build(waflib.Task.Task):
                 '    <method v="2" />\n'
                 '  </configuration>\n'
                 '</component>\n' % {
-                    'type': arg and ('[%s]' % arg) or '',
+                    'type': arg_name,
+                    'arg': arg,
                     'module': module,
                     'command': command,
                     'command_name': command_name,
@@ -468,9 +479,11 @@ def make_clion_project(task_gen: waflib.TaskGen.task_gen) -> None:
     for env_name in task_gen.env.ALL_TOOLCHAINS:
         for variant in task_gen.env.ALL_VARIANTS:
             for arg in ['', 'nomaster', 'static', 'dynamic']:
-                folder = 'build'
                 if arg:
-                    folder = folder + '[' + arg + ']'
+                    arg_name = '[' + arg + ']'
+                else:
+                    arg_name = ''
+                folder = 'build' + arg_name
                 launch_file = build_framework.make_bld_node(task_gen, 'runConfigurations', None,
                                                             'motor_build_%s_%s%s.xml' % (env_name, variant, arg))
                 launch_file.parent.mkdir()
@@ -479,8 +492,9 @@ def make_clion_project(task_gen: waflib.TaskGen.task_gen) -> None:
                     [],
                     [launch_file],
                     command='build:%s:%s' % (env_name, variant),
-                    command_name='build:%s:%s[%s]' % (env_name, variant, arg),
-                    arg=' --werror %s' % arg,
+                    command_name='build:%s:%s%s' % (env_name, variant, arg_name),
+                    arg=' --werror --%s' % arg,
+                    arg_name=arg_name,
                     folder=folder
                 )
                 run_files.append(launch_file)
