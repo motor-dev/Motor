@@ -540,9 +540,18 @@ class AndroidLoader(_Platform):
                         targets = []
                 for target in targets:
                     extra_args = deepcopy(c.extra_args)
-                    extra_args['c'] += ['-target', target]
-                    extra_args['cxx'] += ['-target', target]
-                    extra_args['link'] += ['-target', target]
+                    try:
+                        extra_args['c'] += ['-target', target]
+                    except KeyError:
+                        extra_args['c'] = ['-target', target]
+                    try:
+                        extra_args['cxx'] += ['-target', target]
+                    except KeyError:
+                        extra_args['cxx'] = ['-target', target]
+                    try:
+                        extra_args['link'] += ['-target', target]
+                    except KeyError:
+                        extra_args['link'] = ['-target', target]
                     try:
                         clang_compiler = _Clang(c.compiler_c, c.compiler_cxx, extra_args)
                     except waflib.Errors.WafError:
