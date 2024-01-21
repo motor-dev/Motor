@@ -142,14 +142,5 @@ def cc_hook(task_gen: waflib.TaskGen.task_gen, node: waflib.Node.Node) -> None:
         create_compiled_task(task_gen, 'cxx', node)
 
 
-@waflib.TaskGen.feature('motor:c', 'motor:cxx')
-@waflib.TaskGen.after_method('apply_incpaths')
-def incpath_master(task_gen: waflib.TaskGen.task_gen) -> None:
-    if not waflib.Options.options.nomaster and 'motor:masterfiles:off' not in task_gen.features \
-            and not task_gen.env.PROJECTS:
-        task_gen.env.INCPATHS = [task_gen.bld.srcnode.abspath()] + task_gen.env.INCPATHS
-        getattr(task_gen, 'includes_nodes').append(task_gen.bld.srcnode)
-
-
 def setup_masterfiles(_: waflib.Build.BuildContext) -> None:
     pass
