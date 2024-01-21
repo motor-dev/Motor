@@ -13,6 +13,8 @@ def _wrap_class(cls_name: str) -> None:
     def exec_command_response_file(task: waflib.Task.Task, cmd: List[str], **kw_args: Any) -> int:
         exec_command = getattr(cls, 'exec_command')
         if task.env.COMPILER_NAME == 'clang':
+            if task.env.COMPILER_ABI == 'msvc':
+                kw_args['filter_stdout'] = lambda x: x[1:]
             command = []
             resp_file_arguments = []
             inputs = set((x.bldpath() for x in task.inputs))
@@ -45,5 +47,5 @@ def setup_compiler_clang(build_context: BuildContext) -> None:
             env['ENABLE_COMPILER_DEPS'] = True
             env.append_unique('CFLAGS', ['-MMD'])
             env.append_unique('CXXFLAGS', ['-MMD'])
-    # for cls_name in 'c', 'cxx', 'cshlib', 'cxxshlib', 'cprogram', 'cxxprogram':
-    #    _wrap_class(cls_name)
+    for cls_name in 'c', 'cxx', 'cshlib', 'cxxshlib', 'cprogram', 'cxxprogram':
+        _wrap_class(cls_name)
