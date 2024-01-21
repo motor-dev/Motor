@@ -168,7 +168,7 @@ def _process_use_flags(task_gen: waflib.TaskGen.task_gen) -> None:
             for var in waflib.Tools.ccroot.get_uselib_vars(task_gen):
                 value = getattr(dep, 'export_%s' % var.lower(), [])
                 if value:
-                    task_gen.env.append_unique(var, waflib.Utils.to_list(value))
+                    task_gen.env.append_value(var, waflib.Utils.to_list(value))
 
 
 def _add_objects_from_tgen(task_gen: waflib.TaskGen.task_gen, depends: waflib.TaskGen.task_gen) -> None:
