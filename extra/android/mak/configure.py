@@ -492,9 +492,18 @@ class AndroidLoader(_Platform):
                 for gcc in all_gcc_compilers[-1][1]:
                     gcc_toolchain = os.path.dirname(os.path.dirname(gcc.compiler_c))
                     extra_args = deepcopy(c.extra_args)
-                    extra_args['c'] += ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
-                    extra_args['cxx'] += ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
-                    extra_args['link'] += ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
+                    try:
+                        extra_args['c'] += ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
+                    except KeyError:
+                        extra_args['c'] = ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
+                    try:
+                        extra_args['cxx'] += ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
+                    except KeyError:
+                        extra_args['cxx'] = ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
+                    try:
+                        extra_args['link'] += ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
+                    except KeyError:
+                        extra_args['link'] = ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
                     try:
                         clang_compiler = _Clang(c.compiler_c, c.compiler_cxx, extra_args)
                     except waflib.Errors.WafError:
