@@ -208,6 +208,7 @@ def _process_use_link(task_gen: waflib.TaskGen.task_gen) -> None:
         for d, link_objects in all_deps:
             for var in 'LIB', 'LIBPATH', 'STLIB', 'STLIBPATH', 'FRAMEWORK':
                 value = getattr(d, 'export_%s' % var.lower(), [])
+                task_gen.env.append_unique(var, waflib.Utils.to_list(value))
             value = getattr(d, 'export_linkflags', [])
             task_gen.env.append_value('LINKFLAGS', waflib.Utils.to_list(value))
             if 'cxxstlib' in d.features or 'cstlib' in d.features:
