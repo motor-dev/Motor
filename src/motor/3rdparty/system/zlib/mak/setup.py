@@ -33,8 +33,7 @@ def setup_pkgconfig_minizip(setup_context: build_framework.SetupContext) -> bool
                 directory = setup_context.env.check_minizip_cxxflags[i + 1]
                 minizip_dir = os.path.join(directory, 'minizip')
                 if os.path.isdir(minizip_dir):
-                    extra_dirs.append(flag)
-                    extra_dirs.append(minizip_dir)
+                    extra_dirs.append(flag + minizip_dir)
         setup_context.env.append_value('check_minizip_cflags', extra_dirs)
         setup_context.env.append_value('check_minizip_cxxflags', extra_dirs)
         setup_context.env.MINIZIP_BINARY = True
