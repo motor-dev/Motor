@@ -145,6 +145,8 @@ def module(
     source_filter = ['src/**/*.%s' % ext for ext in COMPILE_EXTENSIONS]
     includes = []  # type: List[waflib.Node.Node]
     api = []  # type: List[waflib.Node.Node]
+    if not env.PROJECTS:
+        includes.append(build_context.srcnode)
     platform_specific = ['']
     platform_specific += ['.%s' % p for p in env.VALID_PLATFORMS]
     platform_specific += ['.%s' % a for a in env.VALID_ARCHITECTURES]
