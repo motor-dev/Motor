@@ -168,7 +168,7 @@ def _process_use_flags(task_gen: waflib.TaskGen.task_gen) -> None:
             for var in waflib.Tools.ccroot.get_uselib_vars(task_gen):
                 value = getattr(dep, 'export_%s' % var.lower(), [])
                 if value:
-                    task_gen.env.append_unique(var, waflib.Utils.to_list(value))
+                    task_gen.env.append_value(var, waflib.Utils.to_list(value))
 
 
 def _add_objects_from_tgen(task_gen: waflib.TaskGen.task_gen, depends: waflib.TaskGen.task_gen) -> None:
@@ -206,9 +206,10 @@ def _process_use_link(task_gen: waflib.TaskGen.task_gen) -> None:
                     all_deps.append((d, link_objects))
                 dependencies += [(i, link_objects) for i in new_deps]
         for d, link_objects in all_deps:
-            for var in 'LIB', 'LIBPATH', 'STLIB', 'STLIBPATH', 'LINKFLAGS', 'FRAMEWORK':
+            for var in 'LIB', 'LIBPATH', 'STLIB', 'STLIBPATH', 'FRAMEWORK':
                 value = getattr(d, 'export_%s' % var.lower(), [])
-                task_gen.env.append_unique(var, waflib.Utils.to_list(value))
+            value = getattr(d, 'export_linkflags', [])
+            task_gen.env.append_value('LINKFLAGS', waflib.Utils.to_list(value))
             if 'cxxstlib' in d.features or 'cstlib' in d.features:
                 dep_link_task = getattr(d, 'link_task')  # type: waflib.Task.Task
                 task_gen.env.append_unique('STLIB', [os.path.basename(d.target)])
