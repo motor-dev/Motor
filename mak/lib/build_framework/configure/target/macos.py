@@ -102,8 +102,13 @@ class Darwin(Platform):
         return result
 
     @staticmethod
-    def get_root_dirs(appname: str) -> Tuple[str, str]:
-        return os.path.join(appname + '.app', 'Contents'), os.path.join(appname + '.app', 'Contents', 'MacOS')
+    def get_root_dirs(appname: str) -> Tuple[str, str, str, str]:
+        return (
+            os.path.join(appname + '.app', 'Contents'),
+            os.path.join(appname + '.app', 'Contents', 'MacOS'),
+            os.path.join(appname + '.app', 'Contents', 'Plugins'),
+            os.path.join(appname + '.app', 'Contents', 'Resources'),
+        )
 
     def load_in_env(self, configuration_context: ConfigurationContext, compiler: Compiler) -> None:
         assert self.sdk is not None
@@ -119,7 +124,8 @@ class Darwin(Platform):
         if not configuration_context.env.DSYMUTIL:
             configuration_context.find_program('dsymutil', mandatory=False)
         if not configuration_context.env.DSYMUTIL:
-            compiler.find_target_program(configuration_context, self, 'llvm-dsymutil', var='DSYMUTIL', mandatory=False)
+            compiler.find_target_program(configuration_context, self, 'llvm-dsymutil', var='DSYMUTIL',
+                                         mandatory=False)
         if not configuration_context.env.DSYMUTIL:
             configuration_context.find_program('llvm-dsymutil', var='DSYMUTIL', mandatory=False)
         environ = getattr(configuration_context, 'environ', os.environ)
@@ -149,15 +155,15 @@ class Darwin(Platform):
         env.pymodule_PATTERN = '%s.so'
 
         appname = getattr(waflib.Context.g_module, waflib.Context.APPNAME, configuration_context.srcnode.name)
-        root_dir, bin_dir = self.get_root_dirs(appname)
+        root_dir, bin_dir, runlib_dir, resources_dir = self.get_root_dirs(appname)
         env.DEPLOY_ROOTDIR = root_dir
         env.DEPLOY_BINDIR = bin_dir
-        env.DEPLOY_RUNBINDIR = bin_dir
+        env.DEPLOY_RUNBINDIR = runlib_dir
         env.DEPLOY_LIBDIR = 'lib'
         env.DEPLOY_INCLUDEDIR = 'include'
-        env.DEPLOY_DATADIR = os.path.join(root_dir, 'data')
-        env.DEPLOY_PLUGINDIR = os.path.join(root_dir, 'plugins')
-        env.DEPLOY_KERNELDIR = os.path.join(root_dir, 'kernels')
+        env.DEPLOY_DATADIR = resources_dir
+        env.DEPLOY_PLUGINDIR = os.path.join(runlib_dir, 'plugins')
+        env.DEPLOY_KERNELDIR = os.path.join(runlib_dir, 'kernels')
         env.append_unique('DEFINES', ['_BSD_SOURCE'])
 
         env.MACOSX_SDK = os.path.splitext(os.path.basename(self.sdk.sdk_path))[0]
@@ -295,7 +301,8 @@ class Darwin(Platform):
                         os.path.normpath(os.path.join(sdk.path, '..', '..', '..', '..', '..', 'usr', 'bin')),
                         os.path.normpath(
                             os.path.join(
-                                sdk.path, '..', '..', '..', '..', '..', 'Toolchains', 'XcodeDefault.xctoolchain', 'usr',
+                                sdk.path, '..', '..', '..', '..', '..', 'Toolchains', 'XcodeDefault.xctoolchain',
+                                'usr',
                                 'bin'
                             )
                         ),

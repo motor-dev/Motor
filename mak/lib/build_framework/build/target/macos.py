@@ -38,6 +38,9 @@ def install_plist_darwin(self: waflib.TaskGen.task_gen, node: waflib.Node.Node) 
         if bld_env.SUB_TOOLCHAINS:
             bld_env = self.bld.all_envs[bld_env.SUB_TOOLCHAINS[0]]
         install_files(self, os.path.join(self.bld.env.PREFIX, self.bld.env.OPTIM, bld_env.DEPLOY_ROOTDIR), [node])
+    elif self.bld.env.PROJECTS:
+        bld_env = self.bld.env
+        bld_env.append_value('PLIST_FILES', [(self, node)])
 
 
 @waflib.TaskGen.feature('cshlib', 'cxxshlib')
@@ -64,7 +67,7 @@ def set_darwin_shlib_name(self: waflib.TaskGen.task_gen) -> None:
         else:
             self.env.append_unique(
                 'LINKFLAGS',
-                ['-install_name', os.path.join('@executable_path', link_task.outputs[0].name)]
+                ['-install_name', os.path.join('@rpath', link_task.outputs[0].name)]
             )
 
 
@@ -83,13 +86,16 @@ def add_objc_lib(task_gen: waflib.TaskGen.task_gen) -> None:
 def set_osx_rpath(task_gen: waflib.TaskGen.task_gen) -> None:
     if 'darwin' in task_gen.env.VALID_PLATFORMS:
         bin_path = os.path.join(task_gen.env.PREFIX, task_gen.env.DEPLOY_BINDIR)
+        runbin_path = os.path.join(task_gen.env.PREFIX, task_gen.env.DEPLOY_RUNBINDIR)
         plugin_path = os.path.join(task_gen.env.PREFIX, task_gen.env.DEPLOY_PLUGINDIR)
         kernel_path = os.path.join(task_gen.env.PREFIX, task_gen.env.DEPLOY_KERNELDIR)
+        rel_runbin_path = os.path.relpath(runbin_path, bin_path)
+        task_gen.env.append_unique('RPATH', [os.path.join('@executable_path', rel_runbin_path)])
         rel_plugin_path = os.path.relpath(plugin_path, bin_path)
-        task_gen.env.append_unique('RPATH', '@executable_path')
-        task_gen.env.append_unique('RPATH', [os.path.join('@executable_path', rel_plugin_path)])
+        if rel_plugin_path != rel_runbin_path:
+            task_gen.env.append_unique('RPATH', [os.path.join('@executable_path', rel_plugin_path)])
         rel_kernel_path = os.path.relpath(kernel_path, bin_path)
-        if rel_kernel_path != rel_plugin_path:
+        if rel_kernel_path != rel_plugin_path and rel_kernel_path != rel_runbin_path:
             task_gen.env.append_unique('RPATH', [os.path.join('@executable_path', rel_kernel_path)])
 
 

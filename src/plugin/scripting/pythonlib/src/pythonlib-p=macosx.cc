@@ -5,6 +5,7 @@
 #include <motor/plugin.scripting.pythonlib/pythonlib.hh>
 
 #include <motor/core/environment.hh>
+#include <motor/minitl/array.hh>
 
 #include <dlfcn.h>
 
@@ -200,16 +201,30 @@ void PythonLibrary::platformInitialize()
 {
     ifilename programPath = Environment::getEnvironment().getProgramPath();
     programPath.pop_back();
+    programPath.pop_back();
+    programPath.push_back(istring("Plugins"));
+    ifilename::Filename f1        = programPath.str();
+    u32                 charCount = strlen(f1);
+    programPath.pop_back();
+    programPath.push_back(istring("Resources"));
+    ifilename::Filename f2 = programPath.str();
+    charCount += strlen(f2) + 1;
+
     if(m_version < 30)
     {
-        static ifilename::Filename f = programPath.str();
-        (*m_Py_SetPythonHome2)(f.name);
+        static minitl::vector< char > s_programPath(Arena::python(), charCount + 1);
+        s_programPath.resize(charCount + 1);
+        minitl::format_to(s_programPath.data(), s_programPath.size(), FMT("{1}:{0}"), f1, f2);
+        (*m_Py_SetPythonHome2)(s_programPath.data());
     }
     else
     {
-        static wchar_t s_programPath[1024];
-        mbstowcs(s_programPath, programPath.str(), sizeof(s_programPath));
-        (*m_Py_SetPythonHome3)(s_programPath);
+        static minitl::vector< wchar_t > s_programPathMB(Arena::python(), charCount + 1);
+        s_programPathMB.resize(charCount + 1);
+        u32 offset              = mbstowcs(s_programPathMB.data(), f2, s_programPathMB.size());
+        s_programPathMB[offset] = L':';
+        mbstowcs(s_programPathMB.data() + offset + 1, f1, s_programPathMB.size() - offset - 1);
+        (*m_Py_SetPythonHome3)(s_programPathMB.data());
     }
 }
 

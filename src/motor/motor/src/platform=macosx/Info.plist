@@ -23,6 +23,6 @@
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.games</string>
 	<key>LSMinimumSystemVersion</key>
-	<string>macos10.5</string>
+	<string>10.5</string>
 </dict>
 </plist>

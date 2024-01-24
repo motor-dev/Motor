@@ -19,8 +19,7 @@ public:
 
 static scoped< PythonVersion > create(const Motor::Plugin::Context& context)
 {
-    static const char* versions[]
-        = {"310", "39", "38", "37", "36", "35", "34", "33", "32", "31", "30", "27", "26"};
+    static const char* versions[] = {"312", "311", "310", "39", "38", "37", "36", "35"};
     for(auto& version: versions)
     {
         minitl::format_buffer< 1024u > pluginName

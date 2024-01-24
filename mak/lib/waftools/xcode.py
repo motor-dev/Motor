@@ -33,7 +33,7 @@ class xcode(build_framework.ProjectGenerator):
     def tidy_nodes(self) -> List[waflib.Node.Node]:
         appname = getattr(waflib.Context.g_module, waflib.Context.APPNAME, os.path.basename(self.srcnode.abspath()))
         xcodeproj = self.srcnode.make_node('%s.xcodeproj' % appname)
-        return xcodeproj.ant_glob('**/*')
+        return xcodeproj.ant_glob('**/*', excl=['project.xcworkspace/**/*'])
 
 
 def build(build_context: build_framework.BuildContext) -> None:

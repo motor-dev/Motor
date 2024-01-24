@@ -509,7 +509,18 @@ def make_clion_project(task_gen: waflib.TaskGen.task_gen) -> None:
                 folder='clean'
             )
             run_files.append(launch_file)
-
+        launch_file = build_framework.make_bld_node(task_gen, 'runConfigurations', None,
+                                                    'motor_setup_%s.xml' % (env_name))
+        launch_file.parent.mkdir()
+        task_gen.create_task(
+            'clion_build',
+            [],
+            [launch_file],
+            command='setup:%s' % (env_name),
+            folder='setup'
+        )
+        run_files.append(launch_file)
+        
     launch_file = build_framework.make_bld_node(task_gen, 'runConfigurations', None, 'motor_clion.xml')
     launch_file.parent.mkdir()
     task_gen.create_task('clion_build', [], [launch_file], command='clion', folder='')

@@ -183,15 +183,6 @@ def _qbs_platform(env: waflib.ConfigSet.ConfigSet) -> str:
         return env.VALID_PLATFORMS[0]
 
 
-def _qbs_platform_list(env: waflib.ConfigSet.ConfigSet) -> Optional[str]:
-    if 'iphonesimulator' in env.VALID_PLATFORMS:
-        return '["ios-simulator","ios","darwin","bsd","unix"]'
-    elif 'iphone' in env.VALID_PLATFORMS:
-        return '["ios","darwin","bsd","unix"]'
-    else:
-        return None
-
-
 def _convert_value(key: str, v: Any) -> Tuple[str, str]:
     if isinstance(v, bool):
         return 'bool', v and 'true' or 'false'
@@ -373,6 +364,7 @@ class QtToolchain(QtObject):
             ('windows', 'windows'),
             ('mingw', 'windows'),
             ('freebsd', 'bsd'),
+            ('darwin', 'darwin'),
         )
         supported_platform = (
             ('android', 'android'),
@@ -384,6 +376,7 @@ class QtToolchain(QtObject):
             ('msvc17', 'msvc2022'),
             ('msvc', 'msvc2013'),
             ('freebsd', 'freebsd'),
+            ('darwin', 'generic'),
         )
         for o, o_name in supported_os:
             if target.find(o) != -1:
@@ -397,7 +390,17 @@ class QtToolchain(QtObject):
                 break
         else:
             platform = 'unknown'
-        return os_name, platform
+
+        supported_abis = (
+            ('mac-o', 'mach_o'),
+        )
+        for abi, a_name in supported_abis:
+            if env.DEST_BINFMT.find(abi) != -1:
+                abi = a_name
+                break
+        else:
+            abi = env.DEST_BINFMT
+        return os_name, platform, abi
 
     def __init__(
             self,
@@ -409,8 +412,8 @@ class QtToolchain(QtObject):
             assert env is not None
             assert language is not None
             arch, variant = self.get_architecture(env)
-            os_name, platform = self.get_platform(env)
-            abi = '%s-%s-%s-%s-%s' % (arch, os_name, platform, env.DEST_BINFMT, variant)
+            os_name, platform, abi = self.get_platform(env)
+            abi = '%s-%s-%s-%s-%s' % (arch, os_name, platform, abi, variant)
             compiler = env.CC if language == 1 else env.CXX
             original_flags = env.CFLAGS[:] if language == 1 else env.CXXFLAGS[:]
             flags = []
@@ -1333,6 +1336,7 @@ class qbs(waflib.Task.Task):
                 project_file.write('%s    name: "%s"\n' % (indent, tg.name))
                 project_file.write('%s    targetName: "%s"\n' % (indent, tg.name.split('.')[-1]))
                 project_file.write('%s    type: "Dummy"\n' % (indent,))
+                project_file.write('%s    cpp.cxxLanguageVersion: "c++14"\n' % (indent,))
                 project_file.write('%s    cpp.includePaths: motor_module.includePaths.concat([\n' % indent)
                 for include in includes:
                     project_file.write('%s        "%s",\n' % (indent, include.replace('\\', '/')))
@@ -1368,7 +1372,7 @@ class qbs(waflib.Task.Task):
                         project_file.write('%s    Group {\n' % indent)
                         project_file.write('%s        name: "%s"\n' % (indent, env_name))
                         project_file.write(
-                            '%s        condition: project.toolchain.includes("%s")\n' % (indent, env_name)
+                            '%s        condition: project.toolchain === "%s"\n' % (indent, env_name)
                         )
                         project_file.write('%s        files: [\n' % indent)
                         for node in active:
@@ -1421,10 +1425,7 @@ class qbs_user(qtcreator_user):
 
         appname = getattr(waflib.Context.g_module, waflib.Context.APPNAME, bld.srcnode.name)
         options = [a for a in sys.argv if a[0] == '-']
-        target_os = _qbs_platform_list(env)
         extra_platform_flags = []
-        if target_os:
-            extra_platform_flags.append(('qbs.targetOS', target_os))
         if env.COMPILER_TARGET:
             extra_platform_flags.append(('modules.cpp.cxxFlags', "--target=%s" % env.COMPILER_TARGET))
 

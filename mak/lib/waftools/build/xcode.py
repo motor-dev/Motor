@@ -164,11 +164,11 @@ class PBXFileReference(XCodeNode):
 class PBXGroup(XCodeNode):
     sort_prefix = 'a'
 
-    def __init__(self, name: str, sourcetree: str = "<group>"):
+    def __init__(self, name: str, source_tree: str = "<group>"):
         XCodeNode.__init__(self)
         self.children = []  # type: List[Union["PBXGroup", PBXFileReference]]
         self.name = name
-        self.sourceTree = sourcetree
+        self.sourceTree = source_tree
         self._groups = {}  # type: Dict[str, "PBXGroup"]
 
     def add_group(self, group: "PBXGroup") -> "PBXGroup":
@@ -194,18 +194,16 @@ class PBXGroup(XCodeNode):
                 try:
                     g = parent_group[node.name]
                 except KeyError:
-                    g = parent_group.add_group(PBXGroup(self.name))
-                else:
-                    assert isinstance(g, PBXGroup)
+                    g = parent_group.add_group(PBXGroup(node.name))
                 return g
 
         for file in all_sub_nodes:
             f = file.name
             group = get_group(file.parent)
             f_ref = PBXFileReference(f, file.path_from(root_node))
-            self.children.append(f_ref)
+            group.children.append(f_ref)
             result.append(f_ref)
-            self.sort()
+            group.sort()
         return result
 
     def sort(self) -> None:
@@ -224,7 +222,7 @@ class PBXBuildFile(XCodeNode):
 
 class PBXLegacyTarget(XCodeNode):
 
-    def __init__(self, identifier: str, action: str, target: str = '') -> None:
+    def __init__(self, identifier: str, action: str, target: str, bldnode: waflib.Node.Node) -> None:
         XCodeNode.__init__(self, identifier)
         self.buildConfigurationList = XCConfigurationList(
             [
@@ -236,7 +234,7 @@ class PBXLegacyTarget(XCodeNode):
         self.buildArgumentsString = "%s %s" % (sys.argv[0], action)
         self.buildPhases = []  # type: List[_PBXBuildPhase]
         self.buildToolPath = sys.executable
-        self.buildWorkingDirectory = ""
+        self.buildWorkingDirectory = bldnode.abspath()
         self.dependencies = []  # type: List[PBXLegacyTarget]
         self.name = action
         self.productName = target or action
@@ -258,6 +256,7 @@ class PBXShellScriptBuildPhase(_PBXBuildPhase):
         self.inputPaths = []  # type: List[None]
         self.outputPaths = []  # type: List[None]
         self.runOnlyForDeploymentPostProcessing = 0
+        self.alwaysOutOfDate = 1
         self.shellPath = "/bin/sh"
         self.shellScript = "%s %s %s" % (sys.executable, sys.argv[0], action)
 
@@ -415,7 +414,7 @@ class PBXProject(XCodeNode):
                     g = group.add_group(PBXGroup(name))
             else:
                 g = group
-            sources += group.add(srcnode, source_node)
+            sources += g.add(srcnode, source_node)
 
         variants = []
         for variant in variant_names:
@@ -579,7 +578,7 @@ class xcode_schememgmt(waflib.Task.Task):
 _ProjectList = List[Tuple[str, str, List[waflib.Node.Node], List[str], List[Tuple[str, waflib.Node.Node]]]]
 
 
-@build_framework.autosig_generator('projects')
+@build_framework.autosig_generator('targets')
 @build_framework.autosig_env('ALL_TOOLCHAINS', 'ALL_VARIANTS')
 class xcode_project(waflib.Task.Task):
 
@@ -587,7 +586,7 @@ class xcode_project(waflib.Task.Task):
         build_context = self.generator.bld
         assert isinstance(build_context, build_framework.ProjectGenerator)
         appname = getattr(waflib.Context.g_module, waflib.Context.APPNAME,
-                          os.path.basename(self.generator.bld.srcnode.abspath()))
+                          os.path.basename(build_context.srcnode.abspath()))
 
         p = PBXProject(appname, ('Xcode 3.2', 46), build_context)
 
@@ -600,30 +599,37 @@ class xcode_project(waflib.Task.Task):
                 defines,
                 source_nodes,
                 build_context.srcnode,
-                self.generator.bld.env.ALL_VARIANTS
+                build_context.env.ALL_VARIANTS
             )
 
-        for toolchain in self.generator.bld.env.ALL_TOOLCHAINS:
-            env = self.generator.bld.all_envs[toolchain]
+        for toolchain in build_context.env.ALL_TOOLCHAINS:
+            env = build_context.all_envs[toolchain]
             if env.SUB_TOOLCHAINS:
-                bld_env = self.generator.bld.all_envs[env.SUB_TOOLCHAINS[0]]
-                all_envs = [self.generator.bld.all_envs[t] for t in env.SUB_TOOLCHAINS]
+                bld_env = build_context.all_envs[env.SUB_TOOLCHAINS[0]]
+                all_envs = [build_context.all_envs[t] for t in env.SUB_TOOLCHAINS]
             else:
                 bld_env = env
                 all_envs = [env]
             identifier = bld_env._XCODE_TARGET_ID
             if bld_env.XCODE_ABI == 'mach_o':
                 variants = []
+                plist_filename = ''
+                for task_gen, plist_node in self.generator.env.PLIST_FILES:
+                    if build_framework.apply_source_filter(task_gen, bld_env, plist_node)[0]:
+                        plist_filename = plist_node.path_from(build_context.srcnode)
+                        print(plist_filename)
                 for variant in self.env.ALL_VARIANTS:
                     variants.append(
                         XCBuildConfiguration(
                             variant, {
                                 'PRODUCT_NAME':
                                     appname,
+                                'PRODUCT_BUNDLE_IDENTIFIER':
+                                    'Motor.motor',
                                 'BUILT_PRODUCTS_DIR':
-                                    os.path.join(env.PREFIX, variant),
+                                    os.path.join(build_context.srcnode.abspath(), env.PREFIX, variant),
                                 'CONFIGURATION_BUILD_DIR':
-                                    os.path.join(env.PREFIX, variant),
+                                    os.path.join(build_context.srcnode.abspath(), env.PREFIX, variant),
                                 'ARCHS':
                                     ' '.join([_macarch(e.VALID_ARCHITECTURES[0]) for e in all_envs]),
                                 'VALID_ARCHS':
@@ -633,7 +639,9 @@ class xcode_project(waflib.Task.Task):
                                 '%s_DEPLOYMENT_TARGET' % bld_env.XCODE_SUPPORTEDPLATFORMS.upper():
                                     bld_env.MACOSX_SDK_MIN,
                                 'SUPPORTED_PLATFORMS':
-                                    bld_env.XCODE_SUPPORTEDPLATFORMS
+                                    bld_env.XCODE_SUPPORTEDPLATFORMS,
+                                'INFOPLIST_FILE':
+                                    plist_filename
                             }
                         )
                     )
@@ -646,7 +654,8 @@ class xcode_project(waflib.Task.Task):
                 p.targets.append(native_target)
                 getattr(p, '_output').children.append(native_target.productReference)
             else:
-                legacy_target = PBXLegacyTarget(identifier, 'build:%s:$(CONFIG) --werror' % toolchain, toolchain)
+                legacy_target = PBXLegacyTarget(identifier, 'build:%s:$(CONFIG) --werror' % toolchain, toolchain,
+                                                build_context.bldnode)
                 p.targets.append(legacy_target)
         p.write(open(self.outputs[0].abspath(), 'w'))
         return None
