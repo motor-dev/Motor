@@ -87,7 +87,6 @@ def install_python_module(task_gen: waflib.TaskGen.task_gen) -> None:
 def build(build_context: build_framework.BuildContext) -> None:
     build_context.env.PYTHON_VERSIONS = waflib.Options.options.python_versions.split(',')
     for version in build_context.env.PYTHON_VERSIONS:
-        build_context.recurse('tcltk/build.py')
         version_number = version.replace('.', '')
         for env in build_context.multiarch_envs:
             path = env['PYTHON%s_BINARY' % version_number]
@@ -98,7 +97,7 @@ def build(build_context: build_framework.BuildContext) -> None:
                         'motor.3rdparty.scripting.python%s' % version_number,
                         var='python%s' % version_number,
                         source_node=path,
-                        private_use=['motor.3rdparty.scripting.tcltk'],
+                        private_use=[],
                         feature_list=['python', 'python' + version],
                         env=env
                 ) is not None:
@@ -108,7 +107,7 @@ def build(build_context: build_framework.BuildContext) -> None:
                         build_context,
                         'motor.3rdparty.scripting.python%s' % version_number,
                         var='python%s' % version_number,
-                        private_use=['motor.3rdparty.scripting.tcltk'],
+                        private_use=[],
                         feature_list=['python', 'python' + version],
                         env=env
                 ) is not None:

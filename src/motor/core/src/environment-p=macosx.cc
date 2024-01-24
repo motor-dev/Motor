@@ -13,7 +13,7 @@ namespace Motor {
 
 Environment::Environment()
     : m_homeDirectory(getenv("HOME"))
-    , m_dataDirectory(ipath("data"))
+    , m_dataDirectory(ipath("Resources"))
     , m_game("")
     , m_user(getenv("USER"))
     , m_programPath()

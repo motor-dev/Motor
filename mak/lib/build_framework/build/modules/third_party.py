@@ -104,8 +104,15 @@ def thirdparty(
                                    [source_node.make_node('bin.%s' % platform) for platform in platform_specific]
                         if os.path.isdir(i.abspath())
                     ]
+                    data_paths = [
+                        i for i in [source_node.make_node('data')] +
+                                   [source_node.make_node('data.%s' % platform) for platform in platform_specific]
+                        if os.path.isdir(i.abspath())
+                    ]
                     for bin_path in bin_paths:
                         install_directory(tg, env, bin_path, '', 'DEPLOY_RUNBINDIR')
+                    for data_path in data_paths:
+                        install_directory(tg, env, data_path, '', 'DEPLOY_DATADIR')
                     build_context.env.append_unique('THIRDPARTIES_FIRST', name)
 
         if tg is not None:
@@ -123,8 +130,15 @@ def thirdparty(
                                [source_node.make_node('bin.%s' % platform) for platform in platform_specific]
                     if os.path.isdir(i.abspath())
                 ]
+                data_paths = [
+                    i for i in [source_node.make_node('data')] +
+                               [source_node.make_node('data.%s' % platform) for platform in platform_specific]
+                    if os.path.isdir(i.abspath())
+                ]
                 for bin_path in bin_paths:
                     install_directory(tg, build_context.env, bin_path, '', 'DEPLOY_RUNBINDIR')
+                for data_path in data_paths:
+                    install_directory(tg, env, data_path, '', 'DEPLOY_DATADIR')
                 build_context.env.append_unique('THIRDPARTIES_FIRST', name)
             return tg
         else:
@@ -177,8 +191,15 @@ def thirdparty(
                                     for platform in platform_specific] if os.path.isdir(i.abspath())
                     ]
                 )
+                data_paths = [
+                    i for i in [source_node.make_node('data')] +
+                               [source_node.make_node('data.%s' % platform) for platform in platform_specific]
+                    if os.path.isdir(i.abspath())
+                ]
                 for bin_path in bin_paths:
                     install_directory(tg, env, bin_path, '', 'DEPLOY_RUNBINDIR')
+                for data_path in data_paths:
+                    install_directory(tg, env, data_path, '', 'DEPLOY_DATADIR')
                 build_context.env.append_unique('THIRDPARTIES_FIRST', name)
             return tg
         else:

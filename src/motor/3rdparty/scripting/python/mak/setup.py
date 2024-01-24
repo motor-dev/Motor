@@ -107,7 +107,6 @@ def _python_config(
 
 def setup(setup_context: build_framework.SetupContext) -> None:
     if not setup_context.env.PROJECTS:
-        setup_context.recurse('tcltk/setup.py')
         build_framework.start_msg_setup(setup_context)
         py_versions = []
         for version in waflib.Options.options.python_versions.split(','):
