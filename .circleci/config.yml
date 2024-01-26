@@ -32,14 +32,6 @@ jobs:
           command: |
             & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_amd64-msvc_x64-14.29:debug --tests --werror
       - run:
-          name: Build Windows MSVC x86
-          command: |
-            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_x86-msvc_x86-14.29:debug --werror
-      - run:
-          name: Build Windows MSVC ARM
-          command: |
-            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_armv7a-msvc_arm-14.29:debug --werror
-      - run:
           name: Build Windows MSVC ARM64
           command: |
             & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_arm64-msvc_arm64-14.29:debug --werror
@@ -70,9 +62,6 @@ jobs:
       - run:
           name: Build iOS Simulator
           command: python3 waf build:iphonesimulator14.5-appleclang-12.0.5:debug --werror
-      - run:
-          name: Build watchOS
-          command: python3 waf build:watchos7.4-appleclang-12.0.5:debug --werror
 
   linux:
     docker:
