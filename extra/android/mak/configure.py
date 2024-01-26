@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 
 def _get_android_arch(arch: str) -> str:
-    archs = {'armv7a': 'arm', 'amd64': 'x86_64', 'i686': 'x86', 'aarch64': 'arm64'}
+    archs = {'amd64': 'x86_64', 'aarch64': 'arm64'}
     return archs.get(arch, arch)
 
 
