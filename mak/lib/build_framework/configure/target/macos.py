@@ -178,9 +178,6 @@ class Darwin(Platform):
             ['-isysroot', self.sdk.sdk_path, '-L%s/usr/lib' % self.sdk.sdk_path] + self.sdk.ldflags +
             ['-B%s' % bin_path for bin_path in self.directories]
         )
-        if compiler.arch == 'x86':
-            env.append_unique('CFLAGS', ['-msse2'])
-            env.append_unique('CXXFLAGS', ['-msse2'])
         env.env = dict(os.environ)
 
     platform_sdk_re = re.compile(r'.*/Platforms/\w*\.platform/Developer/SDKs/[\.\w]*\.sdk')
@@ -408,20 +405,20 @@ _CPU_ARCH_ABI64 = 0x01000000
 
 _CPU_TYPE_NAMES = {
     -1: "any",
-    1: "vax",
-    6: "mc680x0",
-    7: "x86",
+    # 1: "vax",
+    # 6: "mc680x0",
+    # 7: "x86",
     _CPU_ARCH_ABI64 | 7: "x86_64",
-    8: "mips",
-    10: "mc98000",
-    11: "hppa",
-    12: "arm",
+    # 8: "mips",
+    # 10: "mc98000",
+    # 11: "hppa",
+    # 12: "arm",
     _CPU_ARCH_ABI64 | 12: "arm64",
-    13: "mc88000",
-    14: "sparc",
-    15: "i860",
-    16: "alpha",
-    18: "ppc",
+    # 13: "mc88000",
+    # 14: "sparc",
+    # 15: "i860",
+    # 16: "alpha",
+    # 18: "ppc",
     _CPU_ARCH_ABI64 | 18: "ppc64",
 }
 

@@ -548,6 +548,7 @@ class BuildContext(waflib.Build.BuildContext):
     def tidy_nodes(self) -> List[waflib.Node.Node]:
         return []
 
+
 class ProjectGenerator(BuildContext):
     cmd = '_project'
     fun = 'build'
@@ -643,7 +644,10 @@ class CleanContext(BuildContext):
     def store(self) -> None:
         for group in self.motor_groups:
             db = os.path.join(self.variant_dir, group + waflib.Context.DBFILE)
-            os.remove(db)
+            try:
+                os.remove(db)
+            except OSError:
+                pass
 
 
 class ListContext(waflib.Build.ListContext):
@@ -703,6 +707,20 @@ for command in ['build', 'clean']:
         class BuildWrapperVariant(waflib.Build.BuildContext):
             cmd = '%s:all:%s' % (command, variant)
 
+            def restore(self) -> None:
+                try:
+                    env = waflib.ConfigSet.ConfigSet(os.path.join(self.cache_dir, 'build.config.py'))
+                except EnvironmentError:
+                    pass
+                else:
+                    if env.version < waflib.Context.HEXVERSION:
+                        raise waflib.Errors.WafError(
+                            'Project was configured with a different version of Waf, please reconfigure it'
+                        )
+
+                    for t in env.tools:
+                        self.setup(**t)
+
             def execute(self) -> Optional[str]:
                 self.restore()
                 if not self.all_envs:
@@ -715,6 +733,20 @@ for command in ['build', 'clean']:
 
     class BuildWrapperAll(waflib.Build.BuildContext):
         cmd = '%s:all' % command
+
+        def restore(self) -> None:
+            try:
+                env = waflib.ConfigSet.ConfigSet(os.path.join(self.cache_dir, 'build.config.py'))
+            except EnvironmentError:
+                pass
+            else:
+                if env.version < waflib.Context.HEXVERSION:
+                    raise waflib.Errors.WafError(
+                        'Project was configured with a different version of Waf, please reconfigure it'
+                    )
+
+                for t in env.tools:
+                    self.setup(**t)
 
         def execute(self) -> Optional[str]:
             self.restore()

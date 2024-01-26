@@ -6,16 +6,10 @@
 #include <motor/kernel/stdafx.h>
 
 #if defined(MOTOR_COMPILER_MSVC) || (defined(MOTOR_COMPILER_INTEL) && defined(_WIN32))
-#    if defined(_X86)
-#        include <motor/kernel/msvc/x86/interlocked.inl>
-#    elif defined(_AMD64)
+#    if defined(_AMD64)
 #        include <motor/kernel/msvc/amd64/interlocked.inl>
-#    elif defined(_PPC)
-#        include <motor/kernel/msvc/ppc/interlocked.inl>
 #    elif defined(_ARM64)
 #        include <motor/kernel/msvc/arm64/interlocked.inl>
-#    elif defined(_ARM)
-#        include <motor/kernel/msvc/arm/interlocked.inl>
 #    else
 #        error Architecture not implemented on MSVC
 #    endif
@@ -26,16 +20,12 @@
 #elif defined(MOTOR_COMPILER_INTEL) || defined(MOTOR_COMPILER_GCC) || defined(MOTOR_COMPILER_CLANG)
 #    if defined(BE_THREAD_SANITIZER)
 #        include <motor/kernel/gcc/tsan/interlocked.inl>
-#    elif defined(_X86) || defined(_AMD64)
-#        include <motor/kernel/gcc/x86/interlocked.inl>
+#    elif defined(_AMD64)
+#        include <motor/kernel/gcc/amd64/interlocked.inl>
 #    elif defined(_POWERPC)
-#        include <motor/kernel/gcc/ppc/interlocked.inl>
-#    elif defined(_ARM64) && defined(_ILP32)
-#        include <motor/kernel/gcc/arm64_32/interlocked.inl>
+#        include <motor/kernel/gcc/ppc64/interlocked.inl>
 #    elif defined(_ARM64)
 #        include <motor/kernel/gcc/arm64/interlocked.inl>
-#    elif defined(_ARM)
-#        include <motor/kernel/gcc/arm/interlocked.inl>
 #    else
 #        error Architecture not implemented on GCC
 #    endif

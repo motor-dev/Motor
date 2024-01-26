@@ -65,6 +65,8 @@ class Solaris(Platform):
     ) -> List[Tuple["Compiler", List["Compiler"], "Platform"]]:
         result = []  # type: List[Tuple[Compiler, List[Compiler], Platform]]
         for c in compiler_list:
+            if c.arch not in c.SUPPORTED_ARCHS:
+                continue
             for regexp in self.SUPPORTED_TARGETS:
                 if regexp.match(c.platform):
                     if _is_valid(configuration_context, c, ['-std=c++98'] if 'Clang' in c.NAMES else []):

@@ -1,9 +1,9 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 #ifndef MOTOR_KERNEL_GCC_X86_INTERLOCKED_INL
-#define MOTOR_KERNEL_GCC_X86_INTERLOCKED_INL
+#    define MOTOR_KERNEL_GCC_X86_INTERLOCKED_INL
 
-#include <motor/kernel/stdafx.h>
+#    include <motor/kernel/stdafx.h>
 
 // NOLINTBEGIN(readability-non-const-parameter)
 
@@ -58,7 +58,6 @@ struct InterlockedType< 2 > : public InterlockedType< 4 >
 {
 };
 
-#ifdef _AMD64
 template <>
 struct InterlockedType< 8 >
 {
@@ -94,7 +93,6 @@ struct InterlockedType< 8 >
     static inline bool            set_conditional(tagged_t* p, tagged_t::value_t v,
                                                   const tagged_t::tag_t& condition);
 };
-#endif
 
 InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch(const value_t* p)
 {
@@ -174,8 +172,6 @@ bool InterlockedType< 4 >::tagged_t::operator==(tagged_t& other) const
     return (tagged_value.tag == other.tagged_value.tag)
            && (tagged_value.value == other.tagged_value.value);
 }
-
-#ifdef _AMD64
 
 InterlockedType< 8 >::tagged_t::tagged_t(value_t value) : tagged_value {0, value}
 {
@@ -269,5 +265,3 @@ bool InterlockedType< 8 >::set_conditional(tagged_t* p, tagged_t::value_t v,
 }  // namespace knl
 
 // NOLINTEND(readability-non-const-parameter)
-
-#endif

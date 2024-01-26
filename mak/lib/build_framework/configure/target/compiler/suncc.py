@@ -22,11 +22,6 @@ class SunCC(GnuCompiler):
     }
     TOOLS = ['suncc', 'suncxx']
     ARCH_FLAGS = {
-        'x86':
-            [
-                '-xarch=sse4_2', '-D__MMX__=1', '-DSSE__=1', '-DSSE2__=1', '-D__SSE3__=1', '-D__SSSE3__=1',
-                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1'
-            ],
         'amd64':
             [
                 '-xarch=sse4_2', '-D__MMX__=1', '-DSSE__=1', '-DSSE2__=1', '-D__SSE3__=1', '-D__SSSE3__=1',
@@ -34,17 +29,6 @@ class SunCC(GnuCompiler):
             ],
     }
     VECTORIZED_FLAGS = {
-        'x86':
-            (
-                (
-                    '', [
-                        '-xarch=sse4_2', '-D__MMX__=1', '-DSSE__=1', '-DSSE2__=1', '-D__SSE3__=1', '-D__SSSE3__=1',
-                        '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1'
-                    ]
-                ),
-                ('.avx', ['-xarch=sse4_2', '-xarch=avx', '-D__AVX__=1', '-D__XSAVE__=1']),
-                ('.avx2', ['-xarch=sse4_2', '-xarch=avx2', '-D__AVX__=1', '-D__XSAVE__=1', '-D__AVX2__=1']),
-            ),
         'amd64':
             (
                 (
@@ -189,15 +173,7 @@ class SunCC(GnuCompiler):
         v['RPATH_ST'] = '-R%s'
         v.IDIRAFTER = '-I'
         if platform.NAME == 'Linux':
-            if self.arch == 'x86':
-                v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib', '=/usr/lib/i386-linux-gnu'])
-                v.CFLAGS += ['-I/usr/include/i386-linux-gnu']
-                v.CXXFLAGS += [
-                    os.path.join(configuration_context.motornode.abspath(), 'mak/compiler/suncc/interlocked-a=x86.il'),
-                    '-xarch=sse2',
-                    '-xchip=generic', '-I/usr/include/i386-linux-gnu', '-include', 'math.h'
-                ]
-            elif self.arch == 'amd64':
+            if self.arch == 'amd64':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib64', '=/usr/lib/x86_64-linux-gnu'])
                 v.CFLAGS += ['-I/usr/include/x86_64-linux-gnu']
                 v.CXXFLAGS += [
@@ -206,13 +182,7 @@ class SunCC(GnuCompiler):
                     '-xchip=generic', '-I/usr/include/x86_64-linux-gnu', '-include', 'math.h'
                 ]
         else:
-            if self.arch == 'x86':
-                v.CXXFLAGS += [
-                    os.path.join(configuration_context.motornode.abspath(), 'mak/compiler/suncc/interlocked-a=x86.il'),
-                    '-xarch=sse2',
-                    '-xchip=generic',
-                ]
-            elif self.arch == 'amd64':
+            if self.arch == 'amd64':
                 v.CXXFLAGS += [
                     os.path.join(configuration_context.motornode.abspath(),
                                  'mak/compiler/suncc/interlocked-a=amd64.il'),
@@ -236,6 +206,7 @@ class SunCC(GnuCompiler):
         v.CXXFLAGS_cxx20 = ['-std=c++20']
         v.CXXFLAGS_cxx23 = ['-std=c++23']
 
+        v.DEST_BINFMT = 'elf'
         v.TARGETS = self.targets
 
     def populate_useful_variables(

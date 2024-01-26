@@ -139,9 +139,6 @@ class MSVC(Compiler):
         env.append_unique('LINKFLAGS_final', ['/INCREMENTAL:no'])
         env.append_unique('ARFLAGS_final', [])
 
-        if self.arch == 'x86':
-            env.append_unique('CFLAGS', ['/arch:SSE2'])
-            env.append_unique('CXXFLAGS', ['/arch:SSE2'])
         if self.NAMES[0] != 'msvc' or self.version_number >= (8,):
             env.append_unique('CFLAGS_profile', ['/GS-'])
             env.append_unique('CXXFLAGS_profile', ['/GS-'])
@@ -216,8 +213,6 @@ class MSVC(Compiler):
         env = configuration_context.env
         if self.arch == 'amd64':
             configuration_context.find_program('ml64', var='ML', path_list=env.PATH, mandatory=False)
-        if self.arch == 'x86':
-            configuration_context.find_program('ml', var='ML', path_list=env.PATH, mandatory=False)
         env.SYSTEM_INCLUDE_PATTERN = '/I%s'
         env.IDIRAFTER = '/I'
         windows_sdk_path = env.MOTOR_WINDOWS_SDK_PATH
@@ -225,15 +220,9 @@ class MSVC(Compiler):
             if self.arch == 'amd64':
                 configuration_context.find_program('cdb', var='CDB', mandatory=False,
                                                    path_list=[os.path.join(windows_sdk_path, 'Debuggers', 'x64')])
-            elif self.arch == 'x86':
-                configuration_context.find_program('cdb', var='CDB', mandatory=False,
-                                                   path_list=[os.path.join(windows_sdk_path, 'Debuggers', 'x86')])
             elif self.arch == 'arm64':
                 configuration_context.find_program('cdb', var='CDB', mandatory=False,
                                                    path_list=[os.path.join(windows_sdk_path, 'Debuggers', 'ARM64')])
-            elif self.arch == 'armv7a':
-                configuration_context.find_program('cdb', var='CDB', mandatory=False,
-                                                   path_list=[os.path.join(windows_sdk_path, 'Debuggers', 'ARM')])
 
         env.COMPILER_C_INCLUDES = self.includes
         env.COMPILER_CXX_INCLUDES = self.includes

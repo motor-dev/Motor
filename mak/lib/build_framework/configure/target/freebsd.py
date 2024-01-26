@@ -23,13 +23,20 @@ class FreeBSD(Platform):
     ) -> List[Tuple["Compiler", List["Compiler"], "Platform"]]:
         result = []  # type: List[Tuple[Compiler, List[Compiler], Platform]]
         for c in compiler_list:
+            if c.arch not in c.SUPPORTED_ARCHS:
+                continue
             for regexp in self.SUPPORTED_TARGETS:
                 if regexp.match(c.platform):
                     # FreeBSD is not really multiarch, check that proper libs are installed
                     tmpnode = configuration_context.bldnode.make_node('a.out')
+                    options = []
+                    if 'Clang' in c.NAMES:
+                        options.append('-std=c++14')
+                        options.append('-stdlib=libc++')
                     try:
-                        return_code, out, err = c.run_c(
-                            ['-x', 'c', '-o', tmpnode.abspath(), '-'], 'int main(int argc, char* argv[]) {  }'
+                        return_code, out, err = c.run_cxx(
+                            ['-x', 'c++', '-o', tmpnode.abspath()] + options + ['-'],
+                            '#include <iostream>\nint main(int argc, char* argv[]) {  }'
                         )
                         if return_code == 0:
                             result.append((c, [], self))
@@ -48,28 +55,8 @@ class FreeBSD(Platform):
         env.VALID_PLATFORMS = ['freebsd', 'posix', 'pc']
         env.SYSTEM_NAME = 'pc-freebsd'
         sysroot = compiler.sysroot if compiler.sysroot is not None else ''
-        if '-m32' in compiler.extra_args['cxx']:
-            env.PKGCONFIG_DISABLE = True
-            ldconfig = '%s/usr/local/libdata/ldconfig32' % sysroot
-            if 'GCC' in compiler.NAMES:
-                gcc_name = 'gcc' + compiler.compiler_c.split('gcc')[-1]
-                gcc_libpath = os.path.join(os.path.dirname(os.path.dirname(compiler.compiler_c)), 'lib32')
-                if os.path.isdir(sysroot + gcc_libpath):
-                    env.append_unique('LINKFLAGS', ['-B%s%s' % (sysroot, gcc_libpath)])
-                if os.path.isdir(sysroot + os.path.join(gcc_libpath, gcc_name)):
-                    env.append_unique('LINKFLAGS', ['-B%s%s' % (sysroot, os.path.join(gcc_libpath, gcc_name))])
-                if os.path.isdir('%s/usr/lib32' % sysroot):
-                    env.append_unique('LINKFLAGS', ['-B%s/usr/lib32' % sysroot])
-                if os.path.isdir('%s/usr/local/lib32' % sysroot):
-                    env.append_unique('LINKFLAGS', ['-B%s/usr/local/lib32' % sysroot])
-            else:
-                if os.path.isdir('%s/usr/lib32' % sysroot):
-                    env.append_unique('LINKFLAGS', ['-L%s/usr/lib32' % sysroot])
-                if os.path.isdir('%s/usr/local/lib32' % sysroot):
-                    env.append_unique('LINKFLAGS', ['-L%s/usr/local/lib32' % sysroot])
-        else:
-            env.append_unique('LINKFLAGS', ['-L%s/usr/local/lib' % sysroot])
-            ldconfig = '%s/usr/local/libdata/ldconfig' % (compiler.sysroot or '')
+        env.append_unique('LINKFLAGS', ['-L%s/usr/local/lib' % sysroot])
+        ldconfig = '%s/usr/local/libdata/ldconfig' % (compiler.sysroot or '')
         libpaths = []
         try:
             ldconfig_confs = os.listdir(ldconfig)
@@ -81,25 +68,6 @@ class FreeBSD(Platform):
                     for line in conf_file:
                         if line not in libpaths:
                             libpaths.append('%s%s' % (compiler.sysroot or '', line))
-        if compiler.arch.startswith('arm') and compiler.arch != 'arm64':
-            if 'GCC' in compiler.NAMES:
-                env.append_value('CXXFLAGS', ['-nostdinc++', '-isystem/usr/include/c++/v1'])
-                env.LINK_CC = ['/usr/bin/cc']
-                env.LINK_CXX = ['/usr/bin/c++']
-            elif 'Clang' in compiler.NAMES:
-                env.append_unique('CPPFLAGS', ['-mfloat-abi=hard', '-mfpu=vfp'])
-                env.append_unique('CFLAGS', ['-mfloat-abi=hard', '-mfpu=vfp'])
-                env.append_unique('CXXFLAGS', ['-std=gnu++11', '-mfloat-abi=hard', '-mfpu=vfp'])
-                if compiler.version_number < (3, 4):
-                    env.append_unique('CXXFLAGS', ['-std=gnu++11'])
-                if compiler.version_number < (3, 5):
-                    env.append_unique('CFLAGS', ['-Wa,-meabi=5'])
-                    env.append_unique('CXXFLAGS', ['-Wa,-meabi=5'])
-                if '-target' not in env.CFLAGS and not env.SYSROOT and env.FREEBSD_HOST_TRIPLE:
-                    env.append_unique('CPPFLAGS', ['-target', env.FREEBSD_HOST_TRIPLE])
-                    env.append_unique('CFLAGS', ['-target', env.FREEBSD_HOST_TRIPLE])
-                    env.append_unique('CXXFLAGS', ['-target', env.FREEBSD_HOST_TRIPLE])
-                    env.append_unique('LINKFLAGS', ['-target', env.FREEBSD_HOST_TRIPLE])
         if 'Clang' in compiler.NAMES:
             env.append_unique('CXXFLAGS', ['-stdlib=libc++'])
             env.append_unique('LINKFLAGS', ['-stdlib=libc++'])

@@ -70,6 +70,13 @@ def get_sysroot_libpaths(sysroot: str) -> List[str]:
 class Compiler(object):
     NAMES = tuple()  # type: Tuple[str,...]
     TOOLS = []  # type: List[str]
+    SUPPORTED_ARCHS = [
+        'amd64',
+        'arm64',
+        'arm64e',
+        'ppc64',
+        'ppc64le',
+    ]
     ARCHS = {
         'x86': 'x86',
         'i386': 'x86',

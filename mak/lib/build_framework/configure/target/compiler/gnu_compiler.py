@@ -50,55 +50,19 @@ def _populate_var(env: waflib.ConfigSet.ConfigSet, language: str, out_text: str,
 
 
 class GnuCompiler(Compiler):
-    ALL_ARM_ARCHS = ('armv7a', 'armv7k', 'armv7s')
     ARCH_FLAGS = {
-        'x86': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2', '-mcx16'],
-        'i386': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2', '-mcx16'],
-        'i486': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2', '-mcx16'],
-        'i586': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2', '-mcx16'],
-        'i686': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2', '-mcx16'],
         'amd64': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2', '-mcx16'],
         'x86_64': ['-msse3', '-mssse3', '-msse4.1', '-msse4.2', '-mcx16'],
-        'arm': ['-march=armv7-a'],
     }
     VECTORIZED_FLAGS = {
-        'x86': (
-            ('', []),
-            ('.avx', ['-mavx']),
-            ('.avx2', ['-mavx2']),
-        ),
         'amd64': (
             ('', []),
             ('.avx', ['-mavx']),
             ('.avx2', ['-mavx2']),
         ),
-        'ppc': (
-            ('', []),
-            ('.altivec', ['-maltivec']),
-        ),
         'ppc64': (
             ('', []),
             ('.altivec', ['-maltivec']),
-        ),
-        'armv6': (
-            ('', []),
-            ('.neon', ['-mfpu=neon']),
-        ),
-        'armv7a': (
-            ('', []),
-            ('.neon', ['-mfpu=neon']),
-        ),
-        'armv7s': (
-            ('', []),
-            ('.neon', ['-mfpu=neon']),
-        ),
-        'armv7k': (
-            ('', []),
-            ('.neon', ['-mfpu=neon']),
-        ),
-        'armv7l': (
-            ('', []),
-            ('.neon', ['-mfpu=neon']),
         ),
         'arm64': (
             ('', []),
@@ -108,31 +72,16 @@ class GnuCompiler(Compiler):
             ('', []),
             ('.neon', []),
         ),
-        'aarch32': (
-            ('', []),
-            ('.neon', []),
-        ),
     }
     MULTILIBS = {
         'x86': ((['-m64'], 'amd64'),),
-        'amd64': ((['-m32'], 'x86'),),
         'ppc': ((['-m64'], 'ppc64'),),
-        'ppc64': ((['-m32'], 'ppc'),),
-        'ppc64le': ((['-m32'], 'ppc'),),
-        'arm': [(['-march=%s' % a], a) for a in ALL_ARM_ARCHS],
-        # 'armv4':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        # 'armv5':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        # 'armv7':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        'armv7a': [(['-march=%s' % a], a) for a in ALL_ARM_ARCHS],
-        'armv7k': [(['-march=%s' % a], a) for a in ALL_ARM_ARCHS],
-        'armv7l': [(['-march=%s' % a], a) for a in ALL_ARM_ARCHS],
     }
     MULTILIB_ARCH_MAP = (
         ('i386', '-m64', ['x86_64']),
         ('i486', '-m64', ['x86_64']),
         ('i586', '-m64', ['x86_64']),
         ('i686', '-m64', ['x86_64']),
-        ('x86_64', '-m32', ['i386', 'i486', 'i586', 'i686']),
     )
     MACRO_ARCHS = (
         (('__x86_64__',), 'amd64'),
