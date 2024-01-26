@@ -463,14 +463,14 @@ class QtToolchain(QtObject):
                 toolchain_id = 'ProjectExplorer.ToolChain.LinuxIcc:%s' % build_framework.generate_guid(
                     'Motor:toolchain:%s:%d' % (env_name, language)
                 )
-            elif env.COMPILER_NAME == 'suncc':
-                self.ProjectExplorer_GccToolChain_Path = compiler
-                self.ProjectExplorer_GccToolChain_TargetAbi = abi
-                self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
-                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
-                toolchain_id = 'ProjectExplorer.ToolChain.Gcc:%s' % build_framework.generate_guid(
-                    'Motor:toolchain:%s:%d' % (env_name, language)
-                )
+            # elif env.COMPILER_NAME == 'suncc':
+            #    self.ProjectExplorer_GccToolChain_Path = compiler
+            #    self.ProjectExplorer_GccToolChain_TargetAbi = abi
+            #    self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
+            #    self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
+            #    toolchain_id = 'ProjectExplorer.ToolChain.Gcc:%s' % build_framework.generate_guid(
+            #        'Motor:toolchain:%s:%d' % (env_name, language)
+            #    )
             elif env.COMPILER_NAME == 'msvc' and env.MSVC_COMPILER != 'intel':
                 self.ProjectExplorer_MsvcToolChain_VarsBat = env.MSVC_BATFILE[0].replace('\\', '/')
                 self.ProjectExplorer_MsvcToolChain_VarsBatArg = env.MSVC_BATFILE[1] or ''
@@ -1426,9 +1426,6 @@ class qbs_user(qtcreator_user):
         appname = getattr(waflib.Context.g_module, waflib.Context.APPNAME, bld.srcnode.name)
         options = [a for a in sys.argv if a[0] == '-']
         extra_platform_flags = []
-        if env.COMPILER_TARGET:
-            extra_platform_flags.append(('modules.cpp.cxxFlags', "--target=%s" % env.COMPILER_TARGET))
-
         return (
             'ProjectExplorer.Target.BuildConfiguration.%d' % build_configuration_index, [
                 (

@@ -59,9 +59,7 @@ def _find_winres(configuration_context: ConfigurationContext, compiler: Compiler
             ['winres_patch'],
             tooldir=[os.path.join(configuration_context.motornode.abspath(), 'mak', 'lib', 'waftools')]
         )
-        if compiler.arch == 'x86':
-            configuration_context.env.append_unique('WINRCFLAGS', ['--target=pe-i386'])
-        elif compiler.arch == 'amd64':
+        if compiler.arch == 'amd64':
             configuration_context.env.append_unique('WINRCFLAGS', ['--target=pe-x86-64'])
     elif not configuration_context.env.WINRC:
         winres = configuration_context.find_program(
@@ -90,6 +88,8 @@ class Windows(Platform):
     ) -> List[Tuple["Compiler", List["Compiler"], "Platform"]]:
         result = []  # type: List[Tuple[Compiler, List[Compiler], Platform]]
         for c in compiler_list:
+            if c.arch not in c.SUPPORTED_ARCHS:
+                continue
             for regexp in self.SUPPORTED_TARGETS:
                 if regexp.match(c.platform):
                     if 'Clang' in c.NAMES:
@@ -122,6 +122,8 @@ class Windows(Platform):
 
         if compiler.arch == 'arm':
             env.MS_PROJECT_PLATFORM = 'ARM'
+        elif compiler.arch == 'arm64':
+            env.MS_PROJECT_PLATFORM = 'ARM64'
         elif compiler.arch == 'amd64':
             env.MS_PROJECT_PLATFORM = 'x64'
         else:
@@ -229,10 +231,6 @@ class Windows_MSVC(Windows):
     def load_in_env(self, configuration_context: ConfigurationContext, compiler: Compiler) -> None:
         Windows.load_in_env(self, configuration_context, compiler)
         env = configuration_context.env
-        if compiler.arch == 'arm':
-            env.CPPFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
-            env.CFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
-            env.CXXFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
         env.DEFINES_console = ['_CONSOLE=1']
         env.LINKFLAGS_console = ['/SUBSYSTEM:console']
         env.IMPLIB_ST = '/IMPLIB:%s'

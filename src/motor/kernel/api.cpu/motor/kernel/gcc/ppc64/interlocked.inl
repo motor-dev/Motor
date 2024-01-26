@@ -1,9 +1,9 @@
 /* Motor <motor.devel@gmail.com>
    see LICENSE for detail */
 #ifndef MOTOR_KERNEL_GCC_PPC_INTERLOCKED_INL
-#define MOTOR_KERNEL_GCC_PPC_INTERLOCKED_INL
+#    define MOTOR_KERNEL_GCC_PPC_INTERLOCKED_INL
 
-#include <motor/kernel/stdafx.h>
+#    include <motor/kernel/stdafx.h>
 
 namespace knl {
 
@@ -50,7 +50,6 @@ struct InterlockedType< 2 > : public InterlockedType< 4 >
 {
 };
 
-#ifdef _PPC64
 template <>
 struct InterlockedType< 8 >
 {
@@ -81,7 +80,6 @@ struct InterlockedType< 8 >
     static inline bool            set_conditional(tagged_t* p, tagged_t::value_t v,
                                                   const tagged_t::tag_t& /*condition*/);
 };
-#endif
 
 InterlockedType< 4 >::tagged_t::tagged_t(value_t value) : m_value(value)
 {
@@ -202,8 +200,6 @@ bool InterlockedType< 4 >::set_conditional(tagged_t* p, tagged_t::value_t v,
                          : "memory", "cc");
     return result;
 }
-
-#ifdef _PPC64
 
 InterlockedType< 8 >::tagged_t::tagged_t(value_t value) : m_value(value)
 {
@@ -328,5 +324,3 @@ bool InterlockedType< 8 >::set_conditional(tagged_t* p, tagged_t::value_t v,
 #endif
 
 }  // namespace knl
-
-#endif

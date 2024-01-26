@@ -39,6 +39,8 @@ class Linux(Platform):
     ) -> List[Tuple["Compiler", List["Compiler"], "Platform"]]:
         result = []  # type: List[Tuple[Compiler, List[Compiler], Platform]]
         for c in compiler_list:
+            if c.arch not in c.SUPPORTED_ARCHS:
+                continue
             for regexp in self.SUPPORTED_TARGETS:
                 if regexp.match(c.platform) and _is_valid(configuration_context, c):
                     result.append((c, [], self))
