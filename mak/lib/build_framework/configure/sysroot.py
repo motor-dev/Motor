@@ -7,6 +7,7 @@ from .target.compiler import get_sysroot_libpaths
 from typing import Optional
 
 PLATFORMS = {
+    'ELFOSABI_SYSV': 'linux',
     'ELFOSABI_LINUX': 'linux',
     'ELFOSABI_FREEBSD': 'pc-freebsd',
     'ELFOSABI_SOLARIS': 'solaris',
@@ -146,10 +147,10 @@ def configure_sysroot(configuration_context: ConfigurationContext) -> None:
                 else:
                     for item in content:
                         path = os.path.join(libpath, item)
-                        platform = None # type: Optional[str]
-                        arch = None     # type: Optional[str]
-                        suffix = None   # type: Optional[str]
-                        abi = None      # type: Optional[str]
+                        platform = None  # type: Optional[str]
+                        arch = None  # type: Optional[str]
+                        suffix = None  # type: Optional[str]
+                        abi = None  # type: Optional[str]
                         if os.path.isfile(path):
                             with open(path, 'rb') as elffile:
                                 try:
