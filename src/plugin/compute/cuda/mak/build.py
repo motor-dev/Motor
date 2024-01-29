@@ -44,7 +44,8 @@ waflib.Tools.ccroot.USELIB_VARS['cxx'].add('NVCC_CXXFLAGS')
 class nvcc(waflib.Task.Task):
     """nvcc"""
     run_str = '${NVCC_CXX} ${NVCC_CXXFLAGS} --fatbin ${NVCC_FRAMEWORKPATH_ST:FRAMEWORKPATH} ' \
-              '${NVCC_CPPPATH_ST:INCPATHS} -DMOTOR_COMPUTE=2 ${NVCC_DEFINES_ST:DEFINES} -D_NVCC=1 ' \
+              '${NVCC_CPPPATH_ST:CUDA_KERNEL_HEADER_PATH} ${NVCC_CPPPATH_ST:INCPATHS} ' \
+              '-DMOTOR_COMPUTE=2 ${NVCC_DEFINES_ST:DEFINES} -D_NVCC=1 ' \
               '${NVCC_CXX_SRC_F}${SRC[0].abspath()} ${NVCC_CXX_TGT_F} ${TGT}'
     ext_out = ['.fatbin']
 
@@ -224,8 +225,8 @@ def create_cuda_kernel(
                 'MOTOR_KERNEL_NAME=%s' % kernel_target,
                 'MOTOR_KERNEL_TARGET=%s' % kernel_type
             ],
-            includes=getattr(tgen, 'includes') + [build_context.root.make_node(i) for i in
-                                                  build_context.env.CUDA_KERNEL_HEADER_PATH],
+            includes=[build_context.root.make_node(i) for i in
+                      build_context.env.CUDA_KERNEL_HEADER_PATH] + getattr(tgen, 'includes'),
             use=[tgen.target] + getattr(tgen, 'use') + [env.ENV_PREFIX % 'plugin.compute.cuda'],
             uselib=getattr(tgen, 'uselib'),
             source_nodes=[('', kernel_source)],
