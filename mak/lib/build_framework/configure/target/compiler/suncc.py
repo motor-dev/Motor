@@ -51,20 +51,14 @@ class SunCC(GnuCompiler):
     ) -> None:
         GnuCompiler.__init__(self, suncc, suncxx, extra_args, extra_env)
         if self.platform == 'linux-gnu':
-            if self.version_number <= (5, 13, 0):
-                self.add_flags('cxx', ['-library=Crun,stlport4'])
-                self.add_flags('link', ['-library=Crun,stlport4', '-staticlib=Crun,stlport4'])
             if self.arch == 'amd64':
                 if os.path.isdir('/lib/x86_64-linux-gnu'):
                     self.add_flags('link', ['-L/lib/x86_64-linux-gnu'])
                 if os.path.isdir('/usr/lib/x86_64-linux-gnu'):
                     self.add_flags('link', ['-L/usr/lib/x86_64-linux-gnu'])
-            elif self.arch == 'x86':
-                for arch in ('i386', 'i486', 'i586', 'i686'):
-                    if os.path.isdir('/lib/%s-linux-gnu' % arch):
-                        self.add_flags('link', ['-L/lib/%s-linux-gnu' % arch])
-                    if os.path.isdir('/usr/lib/%s-linux-gnu' % arch):
-                        self.add_flags('link', ['-L/usr/lib/%s-linux-gnu' % arch])
+                if os.path.isdir('/usr/include/x86_64-linux-gnu'):
+                    self.add_flags('c', ['-I/usr/include/x86_64-linux-gnu'])
+                    self.add_flags('cxx', ['-I/usr/include/x86_64-linux-gnu'])
 
     @classmethod
     def _get_version(
@@ -152,7 +146,7 @@ class SunCC(GnuCompiler):
     ) -> bool:
         node = configuration_context.bldnode.make_node('main.cxx')
         tgtnode = node.change_ext('')
-        node.write('#include <cstdlib>\n#include <iostream>\nint main() {}\n')
+        node.write('int main() {}\n')
         try:
             result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()] + (extra_flags or []))
         except waflib.Errors.WafError:
