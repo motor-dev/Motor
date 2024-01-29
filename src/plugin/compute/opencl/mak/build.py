@@ -117,7 +117,7 @@ def create_cl_kernel(
                 'MOTOR_KERNEL_NAME=%s' % kernel_target,
                 'MOTOR_KERNEL_TARGET=%s' % kernel_type
             ],
-            includes=getattr(tgen, 'includes') + [build_context.root.make_node(i) for i in env.CLC_KERNEL_HEADER_PATH],
+            includes=[build_context.root.make_node(i) for i in env.CLC_KERNEL_HEADER_PATH] + getattr(tgen, 'includes'),
             use=[tgen.target] + getattr(tgen, 'use') + [env.ENV_PREFIX % 'plugin.compute.cl'],
             uselib=getattr(tgen, 'uselib'),
             source_nodes=[('', kernel_source)],
