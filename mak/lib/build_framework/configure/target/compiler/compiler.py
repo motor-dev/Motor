@@ -38,33 +38,33 @@ def detect_executable(
 
 
 def get_sysroot_libpaths(sysroot: str) -> List[str]:
+    ld_confs = [os.path.join(sysroot, 'etc', 'ld.so.conf')]
     try:
-        ld_confs = [os.path.join(sysroot, 'etc', 'ld.so.conf')] + os.listdir(
-            os.path.join(sysroot, 'etc', 'ld.so.conf.d'))
+        ld_confs += [os.path.join(sysroot, 'etc', 'ld.so.conf.d', conf) for conf in
+                     os.listdir(os.path.join(sysroot, 'etc', 'ld.so.conf.d'))]
     except OSError:
-        return [os.path.join(sysroot, 'usr', x) for x in ('lib32', 'lib64', 'libx32', 'lib')]
-    else:
-        libpaths = [
-            os.path.join(sysroot, 'lib'),
-            os.path.join(sysroot, 'lib64'),
-            os.path.join(sysroot, 'usr/lib'),
-            os.path.join(sysroot, 'usr/lib64')
-        ]
-        for ld_conf in ld_confs:
-            try:
-                f = open(os.path.join(sysroot, 'etc', 'ld.so.conf.d', ld_conf), 'r')
-            except OSError:
-                pass
-            else:
-                for line in f:
-                    line = line.split('#')[0].strip()
-                    if not line:
-                        continue
-                    elif line.startswith('include'):
-                        continue
-                    elif os.path.isdir(os.path.join(sysroot, line)):
-                        libpaths.append(os.path.join(sysroot, line))
-        return libpaths
+        pass
+    libpaths = [
+        os.path.join(sysroot, 'lib'),
+        os.path.join(sysroot, 'lib64'),
+        os.path.join(sysroot, 'usr/lib'),
+        os.path.join(sysroot, 'usr/lib64')
+    ]
+    for ld_conf in ld_confs:
+        try:
+            f = open(ld_conf, 'r')
+        except OSError:
+            pass
+        else:
+            for line in f:
+                line = line.split('#')[0].strip()
+                if not line:
+                    continue
+                elif line.startswith('include'):
+                    continue
+                elif os.path.isdir(os.path.join(sysroot, line)):
+                    libpaths.append(os.path.join(sysroot, line[1:]))
+    return libpaths
 
 
 class Compiler(object):
