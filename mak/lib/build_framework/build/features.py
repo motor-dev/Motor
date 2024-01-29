@@ -206,20 +206,21 @@ def _process_use_link(task_gen: waflib.TaskGen.task_gen) -> None:
                     all_deps.append((d, link_objects))
                 dependencies += [(i, link_objects) for i in new_deps]
         for d, link_objects in all_deps:
-            for var in 'LIB', 'LIBPATH', 'STLIB', 'STLIBPATH', 'FRAMEWORK':
+            for var in 'LIBPATH', 'STLIBPATH', 'FRAMEWORK':
                 value = getattr(d, 'export_%s' % var.lower(), [])
                 task_gen.env.append_unique(var, waflib.Utils.to_list(value))
-            value = getattr(d, 'export_linkflags', [])
-            task_gen.env.append_value('LINKFLAGS', waflib.Utils.to_list(value))
+            for var in 'LIB', 'STLIB', 'LINKFLAGS':
+                value = getattr(d, 'export_%s' % var.lower(), [])
+                task_gen.env.append_value(var, waflib.Utils.to_list(value))
             if 'cxxstlib' in d.features or 'cstlib' in d.features:
                 dep_link_task = getattr(d, 'link_task')  # type: waflib.Task.Task
-                task_gen.env.append_unique('STLIB', [os.path.basename(d.target)])
+                task_gen.env.append_value('STLIB', [os.path.basename(d.target)])
                 link_task.dep_nodes.extend(dep_link_task.outputs)
                 tmp_path = dep_link_task.outputs[0].parent.path_from(task_gen.bld.bldnode)
                 task_gen.env.append_unique('STLIBPATH', [tmp_path])
             elif 'cxxshlib' in d.features or 'cshlib' in d.features:
                 dep_link_task = getattr(d, 'link_task')
-                task_gen.env.append_unique('LIB', [os.path.basename(d.target)])
+                task_gen.env.append_value('LIB', [os.path.basename(d.target)])
                 link_task.dep_nodes.extend(dep_link_task.outputs)
                 tmp_path = dep_link_task.outputs[0].parent.path_from(task_gen.bld.bldnode)
                 task_gen.env.append_unique('LIBPATH', [tmp_path])
