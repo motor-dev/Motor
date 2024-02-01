@@ -133,9 +133,15 @@ class cmake_toolchain(waflib.Task.Task):
                     'COMPILER_DEFINES':
                         ';'.join(d.replace('"', '\\"') for d in env.COMPILER_C_DEFINES + env.COMPILER_CXX_DEFINES),
                     'COMPILER_INCLUDES':
-                        ';'.join(i.replace('\\', '/') for i in env.COMPILER_C_INCLUDES + env.COMPILER_CXX_INCLUDES)
+                        ';'.join(i.replace('\\', '/') for i in env.COMPILER_C_INCLUDES + env.COMPILER_CXX_INCLUDES),
                 }
             )
+            defines = env.DEFINES + env.c_DEFINES + env.c_INCLUDES
+            if defines:
+                toolchain.write('add_compile_definitions("%s")\n' % ';'.join(d.replace('"', '\\"') for d in defines))
+            includes = env.INCLUDES + env.c_INCLUDES + env.cxx_INCLUDES
+            if includes:
+                toolchain.write('include_directories("%s")\n' % ';'.join(i.replace('\\', '/') for i in includes))
 
         return 0
 
