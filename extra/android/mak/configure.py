@@ -16,8 +16,8 @@ from typing import Dict, List, Optional, Tuple, Union
 
 
 def _get_android_arch(arch: str) -> str:
-    archs = {'amd64': 'x86_64', 'aarch64': 'arm64'}
-    return archs.get(arch, arch)
+    archs = {'amd64': 'x86_64', 'aarch64': 'arm64', 'arm64': 'arm64'}
+    return archs[arch]
 
 
 def _tryint(s: str) -> Union[int, str]:
@@ -34,10 +34,14 @@ def _alphanum_key(s: str) -> List[Union[int, str]]:
 def _valid_archs(platform_ndk: str, platform: str, archs: List[str]) -> List[str]:
     result = []
     for arch in archs:
-        a = _get_android_arch(arch)
-        p = os.path.join(platform_ndk, platform, 'arch-%s' % a)
-        if os.path.isdir(p):
-            result.append(arch)
+        try:
+            a = _get_android_arch(arch)
+        except KeyError:
+            pass
+        else:
+            p = os.path.join(platform_ndk, platform, 'arch-%s' % a)
+            if os.path.isdir(p):
+                result.append(arch)
     return result
 
 
@@ -75,7 +79,16 @@ class NdkArchConfig:
         return self.archs[_get_android_arch(arch)]
 
     def get_valid_archs(self, archs: List[str]) -> List[str]:
-        return [arch for arch in archs if _get_android_arch(arch) in self.archs]
+        result = []
+        for arch in archs:
+            try:
+                real_arch = _get_android_arch(arch)
+            except KeyError:
+                pass
+            else:
+                if real_arch in self.archs:
+                    result.append(arch)
+        return result
 
 
 class NdkVersionConfig:
@@ -185,51 +198,18 @@ class AndroidPlatform(_Platform):
             '28': 'Pie_9.0',
             '29': '10',
             '30': '11',
+            '31': '12',
+            '32': '12L',
+            '33': '13',
+            '34': '14',
+            '35': '15',
         }
         return versions.get(sdk_version, 'api' + sdk_version)
 
     @staticmethod
     def get_target_folder(arch: str) -> str:
-        archs = {'x86': 'x86', 'armv7a': 'armeabi-v7a', 'arm64': 'arm64-v8a', 'amd64': 'x86_64'}
+        archs = {'arm64': 'arm64-v8a', 'amd64': 'x86_64'}
         return archs[arch]
-
-    @staticmethod
-    def get_android_c_flags(compiler: _Compiler) -> List[str]:
-        arch_flags = {
-            'gcc':
-                {
-                    'x86': [],
-                    'amd64': [],
-                    'armv7a': ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'],
-                    'arm64': [],
-                },
-            'clang':
-                {
-                    'x86': [],
-                    'amd64': [],
-                    'armv7a': ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'],
-                    'arm64': [],
-                }
-        }  # type: Dict[str, Dict[str, List[str]]]
-        return arch_flags[compiler.NAMES[0].lower()].get(compiler.arch, [])
-
-    @staticmethod
-    def get_android_ld_flags(compiler: _Compiler) -> List[str]:
-        arch_flags = {
-            'gcc': {
-                'x86': [],
-                'amd64': [],
-                'armv7a': ['-Wl,--fix-cortex-a8', ],
-                'arm64': [],
-            },
-            'clang': {
-                'x86': [],
-                'amd64': [],
-                'armv7a': ['-Wl,--fix-cortex-a8', ],
-                'arm64': [],
-            }
-        }  # type: Dict[str, Dict[str, List[str]]]
-        return arch_flags[compiler.NAMES[0].lower()].get(compiler.arch, [])
 
     def load_in_env(
             self,
@@ -265,9 +245,7 @@ class AndroidPlatform(_Platform):
         env.DEPLOY_PLUGINDIR = os.path.join('lib', target_folder)
         env.DEPLOY_KERNELDIR = os.path.join('lib', target_folder)
 
-        env.append_value('CFLAGS', self.get_android_c_flags(compiler))
-        env.append_value('CXXFLAGS', self.get_android_c_flags(compiler) + ['-nostdinc++'])
-        env.append_value('LDFLAGS', self.get_android_ld_flags(compiler))
+        env.append_value('CXXFLAGS', ['-nostdinc++'])
 
         env.ANDROID_SDK = self.sdk_version
         env.ANDROID_SDK_PATH = self.sdk_path
@@ -282,7 +260,7 @@ class AndroidPlatform(_Platform):
         ]
         env.append_unique('JAVACFLAGS', ['-bootclasspath', os.path.join(self.sdk_path, 'android.jar')])
         env.append_unique('AAPTFLAGS', ['-I', os.path.join(self.sdk_path, 'android.jar')])
-        env.append_unique('COMPILER_CXX_INCLUDES', [
+        env.append_unique('cxx_INCLUDES', [
             configuration_context.motornode.make_node('extra/android/src/motor/3rdparty/android/libcxx/api').abspath()])
 
         # if not os.path.isfile(
