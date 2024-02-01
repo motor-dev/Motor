@@ -1189,7 +1189,8 @@ class qtcreator_user(waflib.Task.Task):
                                                 (
                                                     'ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory',
                                                     os.path.join(
-                                                        build_context.srcnode.abspath(), bld_env.PREFIX, variant,
+                                                        build_context.srcnode.abspath(), bld_env.PREFIX,
+                                                        '%{ActiveProject:BuildConfig:Name}',
                                                         env.DEPLOY_RUNBINDIR
                                                     )
                                                 ),
