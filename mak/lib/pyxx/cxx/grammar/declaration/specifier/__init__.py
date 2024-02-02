@@ -46,6 +46,8 @@ def decl_specifier_storage_class_specifier(self: CxxParser, p: glrp.Production) 
 
 
 @glrp.rule('decl-specifier : "friend"')
+@glrp.rule('decl-specifier : "friend" [prec:left,0]"attribute-specifier-macro"')
+@glrp.rule('decl-specifier : "friend" [prec:left,0]"attribute-specifier-macro-function" "(" balanced-token-seq? ")"')
 @cxx98
 def decl_specifier_friend(self: CxxParser, p: glrp.Production) -> Any:
     return (DeclarationSpecifiers.FRIEND, None)

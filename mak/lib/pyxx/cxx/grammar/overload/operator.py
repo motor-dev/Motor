@@ -68,7 +68,7 @@ def overloadable_operator(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.rule('overloadable-operator : ">>"')
 @cxx98
 def overloadable_operator_rshift(self: CxxParser, p: glrp.Production) -> Any:
-    return p[0].position, p[0]
+    return p[0].position, '>>'
 
 
 @glrp.rule('overloadable-operator : "new"    [prec:left,1]"[" "]"')

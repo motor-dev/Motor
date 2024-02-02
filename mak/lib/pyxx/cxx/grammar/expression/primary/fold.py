@@ -87,4 +87,4 @@ def fold_operator_cxx17(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.rule('fold-operator : ">>"')
 @cxx17
 def fold_operator_rshift_cxx17(self: CxxParser, p: glrp.Production) -> Any:
-    return p[0]
+    return '>>'
