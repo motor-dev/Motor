@@ -15,10 +15,11 @@ class ParseError(Exception):
 
 
 class SplitContext(object):
+    __slots__ = ('_contexts', '_index')
     INDEX = 0
 
     def __init__(self) -> None:
-        self._contexts = set()     # type: Set[Context]
+        self._contexts = set()  # type: Set[Context]
         self._index = SplitContext.INDEX
         SplitContext.INDEX += 1
 
@@ -39,12 +40,13 @@ SplitName = Tuple[SplitContext, str, int]
 
 
 class Operation(object):
+    __slots__ = ('_result_context', '_state', '_cache', '_cache_debug')
 
     def __init__(self, context: "Context", state: int):
         self._result_context = context
         self._state = state
-        self._cache = None         # type: Optional[Tuple[Any]]
-        self._cache_debug = None   # type: Optional[Tuple[Any, Symbol]]
+        self._cache = None  # type: Optional[Tuple[Any]]
+        self._cache_debug = None  # type: Optional[Tuple[Any, Symbol]]
 
     def undo(self, context: "Context", operation: "Operation") -> None:
         pass
@@ -52,7 +54,7 @@ class Operation(object):
     def run(self) -> Any:
         if self._cache is None:
             try:
-                self._cache = (self._run(), )
+                self._cache = (self._run(),)
             except SyntaxError:
                 raise ParseError(self)
         return self._cache[0]
@@ -84,10 +86,10 @@ class Operation(object):
             self.discard()
             return result
         else:
-            return (self, )
+            return (self,)
 
     def reduce(
-        self, rule: Tuple[int, Tuple[int, ...], Callable[[Production], None], Dict[str, "MergeAction.MergeCall"]]
+            self, rule: Tuple[int, Tuple[int, ...], Callable[[Production], None], Dict[str, "MergeAction.MergeCall"]]
     ) -> "Operation":
         pop_count = len(rule[1])
         return Reduce(self, pop_count, self._state, rule)
@@ -97,6 +99,7 @@ class Operation(object):
 
 
 class Reduce(Operation):
+    __slots__ = ('_states', '_rule', '_predecessor')
 
     def __init__(self, origin, pop_count, state, rule):
         # type: (Operation, int, int, Tuple[int, Tuple[int, ...], Callable[[Production], None], Dict[str, MergeAction.MergeCall]]) -> None
@@ -140,6 +143,7 @@ class Reduce(Operation):
 
 
 class Goto(Operation):
+    __slots__ = ('_predecessor', '_result_context')
 
     def __init__(self, origin: Operation, target_state: int) -> None:
         Operation.__init__(self, origin._result_context, target_state)
@@ -163,6 +167,7 @@ class Goto(Operation):
 
 
 class ConsumeToken(Operation):
+    __slots__ = ('_predecessor', '_symbol', '_result_context')
 
     def __init__(self, origin: Operation, token: Token, target_state: int) -> None:
         if target_state == 440:
@@ -189,6 +194,7 @@ class ConsumeToken(Operation):
 
 
 class Split(Operation):
+    __slots__ = ('_predecessor')
     split_counter = 0
 
     def __init__(self, origin: Operation, name: str, split_context: SplitContext) -> None:
@@ -209,9 +215,10 @@ class Split(Operation):
 
 
 class Merge(Operation):
+    __slots__ = ('_operations', '_original_operation', '_action', '_split_context', '_do_run')
 
     def __init__(
-        self, operation: Operation, action: "MergeAction.MergeCall", name: str, split_context: SplitContext
+            self, operation: Operation, action: "MergeAction.MergeCall", name: str, split_context: SplitContext
     ) -> None:
         Operation.__init__(self, operation._result_context, operation._state)
         for i, st in enumerate(operation._result_context._names):
@@ -233,8 +240,8 @@ class Merge(Operation):
 
     def add_operation(self, operation: Operation, name: str, split_context: SplitContext) -> None:
         assert split_context == self._split_context
-        #print('[%d] merge %s -> %s' % (split_context._index, name, self._action._result))
-        #assert name == '_' or name not in self._operations
+        # print('[%d] merge %s -> %s' % (split_context._index, name, self._action._result))
+        # assert name == '_' or name not in self._operations
         self._do_run = True
         operation.discard()
         try:
@@ -244,11 +251,11 @@ class Merge(Operation):
 
     def _run(self) -> Any:
         if self._do_run:
-            first_error = None     # type: Optional[ParseError]
+            first_error = None  # type: Optional[ParseError]
             prod_count = 0
             values = dict(self._action._arguments)
             for key, operations in self._operations.items():
-                prods = []         # type: List[Any]
+                prods = []  # type: List[Any]
                 values[key] = prods
                 for operation in operations:
                     try:
@@ -271,12 +278,12 @@ class Merge(Operation):
 
     def _run_debug(self) -> Tuple[Any, Symbol]:
         if self._do_run:
-            first_error = None     # type: Optional[ParseError]
+            first_error = None  # type: Optional[ParseError]
             prod_count = 0
             debug_symbols = []
             values = dict(self._action._arguments)
             for key, operations in self._operations.items():
-                prods = []         # type: List[Any]
+                prods = []  # type: List[Any]
                 values[key] = prods
                 for operation in operations:
                     try:
@@ -301,6 +308,7 @@ class Merge(Operation):
 
 
 class RootOperation(Operation):
+    __slots__ = ('_token')
 
     def __init__(self, context: "Context", token: Token) -> None:
         Operation.__init__(self, context, context._state)
@@ -317,6 +325,8 @@ class RootOperation(Operation):
 
 
 class Context(object):
+    __slots__ = ('_refcount', '_parent', '_prod_parent', '_state_stack', '_sym_len', '_state',
+                 '_names', '_prod_stack', '_debug_stack')
 
     def __init__(self, parent: Optional["Context"], param_name: Optional[SplitName]) -> None:
         self._refcount = 1
@@ -324,16 +334,16 @@ class Context(object):
         self._prod_parent = parent
         if parent is not None:
             parent._refcount += 1
-            self._state_stack = []          # type: List[int]
-            self._sym_len = parent._sym_len # type: int
-            self._state = parent._state     # type: int
+            self._state_stack = []  # type: List[int]
+            self._sym_len = parent._sym_len  # type: int
+            self._state = parent._state  # type: int
         else:
             self._state_stack = [0]
             self._sym_len = 0
             self._state = 0
-        self._names = []                    # type: List[SplitName]
-        self._prod_stack = []               # type: List[Any]
-        self._debug_stack = []              # type: List[Symbol]
+        self._names = []  # type: List[SplitName]
+        self._prod_stack = []  # type: List[Any]
+        self._debug_stack = []  # type: List[Symbol]
         if param_name is not None:
             self._names.append(param_name)
             param_name[0].register(self)
