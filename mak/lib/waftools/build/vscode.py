@@ -8,7 +8,7 @@ import waflib.ConfigSet
 import waflib.Node
 import waflib.TaskGen
 import waflib.Utils
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 
 def _get_define(define: str) -> str:
@@ -807,6 +807,7 @@ class vscode_kits(waflib.Task.Task):
                 getattr(self, 'toolchains')]
         with open(self.outputs[0].abspath(), 'w') as kits_file:
             json.dump(kits, kits_file, indent=2)
+        return 0
 
 
 @build_framework.autosig_vars('variants')
@@ -830,6 +831,7 @@ class vscode_variants(waflib.Task.Task):
         }
         with open(self.outputs[0].abspath(), 'w') as variants_file:
             json.dump(variants, variants_file, indent=2)
+        return 0
 
 
 @waflib.TaskGen.feature('motor:vscode', 'motor:vscode:cmake')

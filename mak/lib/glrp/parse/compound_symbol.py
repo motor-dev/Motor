@@ -3,6 +3,7 @@ from typing import List, Tuple
 
 
 class CompoundSymbol(Symbol):
+    __slots__ = ('_production')
 
     def __init__(self, id: int, position: Tuple[int, int], production_values: List[Symbol]) -> None:
         Symbol.__init__(self, id, position)
@@ -19,6 +20,7 @@ class CompoundSymbol(Symbol):
 
 
 class AmbiguousSymbol(Symbol):
+    __slots__ = ('_productions')
 
     def __init__(self, productions: List[Symbol]) -> None:
         production = productions[0]

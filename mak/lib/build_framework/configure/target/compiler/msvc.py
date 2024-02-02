@@ -434,7 +434,7 @@ def _get_msvc_version_new(
         host: str,
         target: str
 ) -> _MsvcVersion:
-    env = os.environ
+    env = dict(os.environ)
     changes = {}
     marker = 'MOTOR_MARKER'
     cmdline = "\"%s\\Common7\\Tools\\vsdevcmd.bat\" -arch=%s -host_arch=%s -vcvars_ver=%s" % (
@@ -465,7 +465,6 @@ def _get_msvc_version_new(
 
     # Check if the compiler is usable at all.
     # The detection may return 64-bit versions even on 32-bit systems, and these would fail to run.
-    env = dict(os.environ)
     if 'PATH' in changes:
         env.update(PATH=changes['PATH'])
     try:
@@ -528,7 +527,7 @@ def configure_compiler_msvc(configuration_context: ConfigurationContext) -> List
                     c = MSVC(
                         cl, name, version, target_name, target_compiler.cpu, target_compiler.bat,
                         target_compiler.bat_target, target_compiler.bindirs, target_compiler.incdirs,
-                        target_compiler.libdirs
+                        target_compiler.libdirs, {}
                     )
                     if c.name() in seen:
                         continue

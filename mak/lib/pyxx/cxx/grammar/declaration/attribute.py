@@ -159,6 +159,7 @@ def attribute_list_end_cxx11(_: CxxParser, p: glrp.Production) -> Any:
 
 
 @glrp.rule('attribute-list : attribute-list "," attribute?')
+@cxx11
 def attribute_list_cxx11(_: CxxParser, p: glrp.Production) -> Any:
     result = p[0]
     if p[2] is not None:
@@ -379,6 +380,7 @@ def balanced_token_seq_opt(_: CxxParser, __: glrp.Production) -> Any:
 @glrp.rule('balanced-token : "decltype-macro"')
 @glrp.rule('balanced-token : "type-trait-macro"')
 @glrp.rule('balanced-token : "type-trait-macro-function"')
+@glrp.rule('balanced-token : "alignof-macro"')
 @cxx98
 def balanced_token(_: CxxParser, p: glrp.Production) -> Any:
     return p[0]
