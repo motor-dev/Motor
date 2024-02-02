@@ -3,6 +3,17 @@
 """
 import build_framework
 import waflib.Options
+import waflib.TaskGen
+
+
+@waflib.TaskGen.feature('motor:python_versions')
+@waflib.TaskGen.before_method('process_source')
+def define_python_versions(task_gen: waflib.TaskGen.task_gen) -> None:
+    defines = getattr(task_gen, 'defines')
+    env = task_gen.env
+    versions = [v.replace('.', '') for v in env.PYTHON_VERSIONS[::-1]]
+    versions = [v for v in versions if env['check_python%s' % v]]
+    defines.append('MOTOR_PYTHON_VERSIONS=%s' % ','.join(versions))
 
 
 def build_externals(build_context: build_framework.BuildContext) -> None:
@@ -39,41 +50,61 @@ def build_motor(build_context: build_framework.BuildContext) -> None:
     build_framework.headers(build_context, 'motor.config', [])
     build_framework.headers(
         build_context,
-        'motor.kernel', ['motor.config'],
+        'motor.kernel',
+        ['motor.config'],
         extra_public_includes=[build_context.path.make_node('motor/kernel/api.cpu')],
         uselib=['cxx14']
     )
     build_framework.library(
-        build_context, 'motor.minitl', build_context.platforms + ['motor.mak', 'motor.kernel'],
-        uselib=['cxx14']
-    )
-    build_framework.library(build_context, 'motor.core', ['motor.minitl', 'motor.kernel'], uselib=['cxx14'])
-    build_framework.library(build_context, 'motor.network', ['motor.core'], uselib=['cxx14'])
-    build_framework.library(
-        build_context, 'motor.meta', ['motor.core', 'motor.network'],
-        ['motor.3rdparty.system.zlib'], uselib=['cxx14']
-    )
-    build_framework.library(
-        build_context, 'motor.filesystem', ['motor.core', 'motor.meta'],
-        ['motor.3rdparty.system.minizip'], uselib=['cxx14']
-    )
-    build_framework.library(
-        build_context, 'motor.introspect', ['motor.core', 'motor.meta', 'motor.filesystem'],
+        build_context,
+        'motor.minitl',
+        build_context.platforms + ['motor.mak', 'motor.kernel'],
         uselib=['cxx14']
     )
     build_framework.library(
         build_context,
-        'motor.reflection', ['motor.core', 'motor.meta', 'motor.filesystem', 'motor.introspect'],
+        'motor.core',
+        ['motor.minitl', 'motor.kernel'],
+        uselib=['cxx14'])
+    build_framework.library(build_context, 'motor.network', ['motor.core'], uselib=['cxx14'])
+    build_framework.library(
+        build_context,
+        'motor.meta',
+        ['motor.core', 'motor.network'],
+        ['motor.3rdparty.system.zlib'],
+        uselib=['cxx14']
+    )
+    build_framework.library(
+        build_context,
+        'motor.filesystem',
+        ['motor.core', 'motor.meta'],
+        ['motor.3rdparty.system.minizip'],
+        uselib=['cxx14']
+    )
+    build_framework.library(
+        build_context,
+        'motor.introspect',
+        ['motor.core', 'motor.meta', 'motor.filesystem'],
+        uselib=['cxx14']
+    )
+    build_framework.library(
+        build_context,
+        'motor.reflection',
+        ['motor.core', 'motor.meta', 'motor.filesystem', 'motor.introspect'],
         uselib=['cxx14']
     )
     build_framework.library(build_context, 'motor.settings', ['motor.meta', 'motor.reflection'], uselib=['cxx14'])
     build_framework.library(
-        build_context, 'motor.resource', ['motor.core', 'motor.meta', 'motor.filesystem'],
+        build_context,
+        'motor.resource',
+        ['motor.core', 'motor.meta', 'motor.filesystem'],
         uselib=['cxx14']
     )
     build_framework.library(
-        build_context, 'motor.scheduler',
-        ['motor.core', 'motor.meta', 'motor.resource', 'motor.settings'], uselib=['cxx14']
+        build_context,
+        'motor.scheduler',
+        ['motor.core', 'motor.meta', 'motor.resource', 'motor.settings'],
+        uselib=['cxx14']
     )
     build_framework.library(
         build_context,
@@ -89,7 +120,8 @@ def build_motor(build_context: build_framework.BuildContext) -> None:
     )
     build_framework.shared_library(
         build_context,
-        'motor', [
+        'motor',
+        [
             'motor.core', 'motor.meta', 'motor.introspect', 'motor.reflection',
             'motor.settings', 'motor.scheduler',
             'motor.filesystem', 'motor.world', 'motor.plugin'
@@ -159,7 +191,7 @@ def build_plugins(build_context: build_framework.BuildContext) -> None:
     build_framework.plugin(
         build_context,
         'plugin.scripting.python', ['motor', 'plugin.scripting.pythonlib'], conditions=['python'],
-        uselib=['cxx14']
+        uselib=['cxx14'], features=['motor:python_versions']
     )
     getattr(build_context, 'python_module')(
         'py_motor', ['motor', 'plugin.scripting.pythonlib'],
