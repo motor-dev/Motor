@@ -357,7 +357,7 @@ class QtToolchain(QtObject):
         return env.ARCH_FAMILY, env.ARCH_LP64 and '64bit' or '32bit'
 
     @staticmethod
-    def get_platform(env: waflib.ConfigSet.ConfigSet) -> Tuple[str, str]:
+    def get_platform(env: waflib.ConfigSet.ConfigSet) -> Tuple[str, str, str]:
         target = env.COMPILER_TARGET
         supported_os = (
             ('linux', 'linux'),
@@ -433,7 +433,7 @@ class QtToolchain(QtObject):
                 self.ProjectExplorer_GccToolChain_Path = compiler
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
                 self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
-                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
+                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()  # type: Tuple[str,...]
                 if platform == 'android':
                     toolchain_id = 'Qt4ProjectManager.ToolChain.Android:%s' % build_framework.generate_guid(
                         'Motor:toolchain:%s:%d' % (env_name, language)
@@ -1386,7 +1386,7 @@ class qbs(waflib.Task.Task):
 
 @build_framework.autosig_vars('includes', 'defines')
 class qbs_toolchain(waflib.Task.Task):
-    def run(self):
+    def run(self) -> Optional[int]:
         with open(self.outputs[0].abspath(), 'w') as module:
             includes = getattr(self, 'includes')
             defines = getattr(self, 'defines')
@@ -1404,6 +1404,7 @@ class qbs_toolchain(waflib.Task.Task):
                 '    ]\n'
                 '}\n'
             )
+        return 0
 
 
 class qbs_user(qtcreator_user):
