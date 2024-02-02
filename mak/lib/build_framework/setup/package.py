@@ -43,7 +43,7 @@ def pkg_unpack(
     if setup_context.env.COMPILER_ABI:
         args['abi'] = setup_context.env.COMPILER_ABI
     found = False
-    package = None
+    archive_name = None
     error = None  # type: Optional[Exception]
     for arch in archs:
         args['arch'] = arch
@@ -56,36 +56,41 @@ def pkg_unpack(
             if pkg_node.isdir():
                 return pkg_node
 
-        for i in range(0, 3):
-            try:
-                package = request.urlopen(request.Request(package_url % args, headers=headers))
-            except HTTPError as e:
-                error = e
-                if e.code == 404:
-                    break
-                time.sleep(2)
-            except Exception as e:
-                error = e
-            else:
-                found = True
-                break
-        else:
-            raise waflib.Errors.WafError('failed to download package "%s": %s' % (package_url, error))
-        if found:
+        archive_name = os.path.join(setup_context.package_node.abspath(), os.path.basename(package_url % args))
+        if os.path.isfile(archive_name):
             break
+        else:
+            for i in range(0, 3):
+                try:
+                    package = request.urlopen(request.Request(package_url % args, headers=headers))
+                except HTTPError as e:
+                    error = e
+                    if e.code == 404:
+                        break
+                    time.sleep(2)
+                except Exception as e:
+                    error = e
+                else:
+                    found = True
+                    break
+            else:
+                raise waflib.Errors.WafError('failed to download package "%s": %s' % (package_url, error))
+            if found:
+                with open(archive_name, 'wb') as archive_file:
+                    waflib.Logs.pprint('PINK', 'downloading...', sep=' ')
+                    archive_file.write(package.read())
+                    break
+
     else:
         raise waflib.Errors.WafError('failed to download package "%s": %s' % (package_url, error))
 
-    assert package is not None
+    assert archive_name is not None
     try:
         shutil.rmtree(os.path.join(setup_context.package_node.abspath(), package_id), onerror=_remove_readonly)
     except OSError:
         pass
 
-    with tempfile.TemporaryFile(mode='w+b') as archive_file:
-        waflib.Logs.pprint('PINK', 'downloading...', sep=' ')
-        archive_file.write(package.read())
-        archive_file.seek(0)
+    with open(archive_name, 'rb') as archive_file:
         waflib.Logs.pprint('PINK', 'unpacking...', sep=' ')
         archive = tarfile.open(fileobj=archive_file, mode='r')
         info = archive.getmembers()[0]
