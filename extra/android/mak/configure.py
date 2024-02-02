@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 
 def _get_android_arch(arch: str) -> str:
-    archs = {'amd64': 'x86_64', 'aarch64': 'arm64', 'arm64': 'arm64'}
+    archs = {'amd64': 'x86_64', 'x86_64': 'x86_64', 'aarch64': 'arm64', 'arm64': 'arm64'}
     return archs[arch]
 
 
@@ -124,19 +124,23 @@ class NdkVersionConfig:
                 sysroot_dir = os.path.join(ndkroot, 'toolchains', 'llvm', 'prebuilt', toolchain, 'sysroot')
                 if os.path.isdir(sysroot_dir):
                     for target in os.listdir(os.path.join(sysroot_dir, 'usr', 'lib')):
-                        arch = _get_android_arch(target.split('-')[0])
-                        lib_dir = os.path.join(sysroot_dir, 'usr', 'lib', target)
-                        for version in os.listdir(lib_dir):
-                            lib_dir_version = os.path.join(lib_dir, version)
-                            if os.path.isdir(lib_dir_version):
-                                config = NdkConfig(
-                                    ndkroot, sysroot_dir, sysroot_dir, [lib_dir_version, lib_dir],
-                                    ['-D__ANDROID_API__=%s' % version]
-                                )
-                                try:
-                                    self._versions[int(version)].archs[arch] = config
-                                except KeyError:
-                                    self._versions[int(version)] = NdkArchConfig({arch: config})
+                        try:
+                            arch = _get_android_arch(target.split('-')[0])
+                        except KeyError:
+                            pass
+                        else:
+                            lib_dir = os.path.join(sysroot_dir, 'usr', 'lib', target)
+                            for version in os.listdir(lib_dir):
+                                lib_dir_version = os.path.join(lib_dir, version)
+                                if os.path.isdir(lib_dir_version):
+                                    config = NdkConfig(
+                                        ndkroot, sysroot_dir, sysroot_dir, [lib_dir_version, lib_dir],
+                                        ['-D__ANDROID_API__=%s' % version]
+                                    )
+                                    try:
+                                        self._versions[int(version)].archs[arch] = config
+                                    except KeyError:
+                                        self._versions[int(version)] = NdkArchConfig({arch: config})
 
     def get_ndk_for_sdk(self, sdk: str) -> Optional[NdkArchConfig]:
         sdk_number = int(sdk.split('-')[1])

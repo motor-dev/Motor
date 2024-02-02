@@ -107,6 +107,7 @@ weak< T >& weak< T >::operator=(const weak< U >& other)
 template < typename T >
 weak< T >& weak< T >::operator=(weak&& other) noexcept
 {
+    if(m_ptr) m_ptr->dec_weak();
     m_ptr       = other.m_ptr;
     other.m_ptr = nullptr;
     return *this;
@@ -116,6 +117,7 @@ template < typename T >
 template < typename U >
 weak< T >& weak< T >::operator=(weak< U >&& other) noexcept
 {
+    if(m_ptr) m_ptr->dec_weak();
     m_ptr       = other.m_ptr;
     other.m_ptr = nullptr;
     return *this;
@@ -159,7 +161,7 @@ void weak< T >::clear()
 #if MOTOR_ENABLE_WEAKCHECK
     if(m_ptr) m_ptr->dec_weak();
 #endif
-    m_ptr = 0;
+    m_ptr = nullptr;
 }
 
 template < typename U, typename T >

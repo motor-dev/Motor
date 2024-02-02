@@ -14,7 +14,7 @@ class iOS(build_framework.configure.target.macos.Darwin):
     OS_NAME = 'iphoneos'
 
     @staticmethod
-    def get_root_dirs(appname: str) -> Tuple[str, str]:
+    def get_root_dirs(appname: str) -> Tuple[str, str, str, str]:
         return (appname + '.app',
                 appname + '.app',
                 appname + '.app',
