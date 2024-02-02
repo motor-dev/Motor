@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 
 
 class Production(object):
+    __slots__ = ('_context', '_index')
 
     def __init__(self, context, prod_len):
         # type: (Context, int) -> None
