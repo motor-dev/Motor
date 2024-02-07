@@ -98,7 +98,7 @@ def function_body_delete_cxx11(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.merge('function-definition')
 @cxx98_merge
 def ambiguous_function_definition(
-    self: CxxParser, decl_specifier_seq_end: List[Any], decl_specifier_seq_continue: List[Any]
+        self: CxxParser, decl_specifier_seq_end: List[Any], decl_specifier_seq_continue: List[Any]
 ) -> Any:
     return AmbiguousDeclaration(decl_specifier_seq_end + decl_specifier_seq_continue)
 

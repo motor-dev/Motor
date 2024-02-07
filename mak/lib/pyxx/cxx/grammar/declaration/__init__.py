@@ -58,7 +58,8 @@ identifier-list:
 import glrp
 from typing import Any, List
 from ...parse import CxxParser, cxx98, cxx11, cxx17, cxx20, cxx98_merge
-from ....ast.declarations import AmbiguousDeclaration, SimpleDeclaration, StructuredBindingDeclaration, StaticAssert, AliasDeclaration, ErrorDeclaration
+from ....ast.declarations import AmbiguousDeclaration, SimpleDeclaration, StructuredBindingDeclaration, StaticAssert, \
+    AliasDeclaration, ErrorDeclaration
 from . import specifier
 from . import declarator
 from . import initializer
@@ -95,7 +96,7 @@ def declaration_seq_recursive(self: CxxParser, p: glrp.Production) -> Any:
 
 
 @glrp.rule('declaration : block-declaration')
-#@glrp.rule('declaration : nodeclspec-function-declaration')
+# @glrp.rule('declaration : nodeclspec-function-declaration')
 @glrp.rule('declaration : function-definition')
 @glrp.rule('declaration : template-declaration')
 @glrp.rule('declaration : explicit-instantiation')
@@ -151,11 +152,11 @@ def block_declaration_cxx20(self: CxxParser, p: glrp.Production) -> Any:
     return p[0]
 
 
-#@glrp.rule(
+# @glrp.rule(
 #    'nodeclspec-function-declaration : attribute-specifier-seq? begin-declaration declarator ";"'
-#)
-#@cxx98
-#def nodeclspec_function_declaration(self: CxxParser, p: glrp.Production) -> Any:
+# )
+# @cxx98
+# def nodeclspec_function_declaration(self: CxxParser, p: glrp.Production) -> Any:
 #    # type: (CxxParser, glrp.Production) -> Any
 #    return SimpleDeclaration(p[0], None, [InitDeclarator(p[3], p[2], None)])
 
@@ -175,7 +176,7 @@ def alias_declaration_error(self: CxxParser, p: glrp.Production) -> Any:
     return ErrorDeclaration()
 
 
-@glrp.rule('simple-declaration : attribute-specifier-seq? begin-declaration decl-specifier-seq "#error" ";"')
+@glrp.rule('simple-declaration : attribute-specifier-seq? begin-declaration "#error" ";"')
 @cxx98
 def simple_declaration_error(self: CxxParser, p: glrp.Production) -> Any:
     return ErrorDeclaration()
@@ -270,7 +271,7 @@ def begin_decl_cxx17(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.merge('declaration')
 @cxx98_merge
 def ambiguous_declaration(
-    self: CxxParser, continue_declarator_list: List[Any], ambiguous_init_declarator_initializer: List[Any]
+        self: CxxParser, continue_declarator_list: List[Any], ambiguous_init_declarator_initializer: List[Any]
 ) -> Any:
     return AmbiguousDeclaration(continue_declarator_list + ambiguous_init_declarator_initializer)
 
@@ -278,8 +279,8 @@ def ambiguous_declaration(
 @glrp.merge('declaration')
 @cxx98_merge
 def ambiguous_declaration_deduction(
-    self: CxxParser, ambiguous_simple_declaration: List[Any], ambiguous_function_definition: List[Any],
-    decl_deduction_guide: List[Any]
+        self: CxxParser, ambiguous_simple_declaration: List[Any], ambiguous_function_definition: List[Any],
+        decl_deduction_guide: List[Any]
 ) -> Any:
     return AmbiguousDeclaration(ambiguous_simple_declaration + ambiguous_function_definition + decl_deduction_guide)
 
@@ -298,8 +299,8 @@ def ambiguous_declaration_2(self: CxxParser, initializer: List[Any], function_bo
 @glrp.merge('simple-declaration')
 @cxx98_merge
 def ambiguous_simple_declaration(
-    self: CxxParser, simple_declaration: List[Any], decl_specifier_seq_end: List[Any],
-    decl_specifier_seq_continue: List[Any]
+        self: CxxParser, simple_declaration: List[Any], decl_specifier_seq_end: List[Any],
+        decl_specifier_seq_continue: List[Any]
 ) -> Any:
     return AmbiguousDeclaration(simple_declaration + decl_specifier_seq_end + decl_specifier_seq_continue)
 

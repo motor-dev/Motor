@@ -10,15 +10,8 @@ from ....parse import CxxParser, cxx98, cxx20
 from .....ast.expressions import BinaryExpression
 
 
-@glrp.rule('compare-expression : shift-expression')
-@glrp.rule('"compare-expression#" : "shift-expression#"')
-@cxx98
-def compare_expression(self: CxxParser, p: glrp.Production) -> Any:
-    return p[0]
-
-
-@glrp.rule('compare-expression : compare-expression "<=>" shift-expression')
-@glrp.rule('"compare-expression#" : "compare-expression#" "<=>" "shift-expression#"')
+@glrp.rule('constant-expression[prec:left,10] : constant-expression [prec:left,10]"<=>" constant-expression')
+@glrp.rule('constant-expression#[prec:left,10] : constant-expression# [prec:left,10]"<=>" constant-expression#')
 @cxx20
 def compare_expression_cxx20(self: CxxParser, p: glrp.Production) -> Any:
     return BinaryExpression(p[0], p[2], p[1].text())

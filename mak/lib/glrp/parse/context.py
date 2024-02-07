@@ -170,8 +170,6 @@ class ConsumeToken(Operation):
     __slots__ = ('_predecessor', '_symbol', '_result_context')
 
     def __init__(self, origin: Operation, token: Token, target_state: int) -> None:
-        if target_state == 440:
-            pass
         Operation.__init__(self, origin._result_context, target_state)
         self._predecessor = origin
         self._symbol = token

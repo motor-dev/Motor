@@ -1,7 +1,8 @@
 from typing import Any, List, Tuple
 
 
-class Symbol:
+class Symbol(object):
+    __slots__ = ('_id', 'position', 'value')
 
     def __init__(self, id: int, position: Tuple[int, int]) -> None:
         self._id = id

@@ -29,6 +29,6 @@ def C0001(self: Logger, position: Tuple[int, int], token: str, current_rules: st
 @glrp.error_handler
 def p_error(parser: CxxParser, token: glrp.Token, parsing_rules: Set[str]) -> None:
     if parsing_rules:
-        C0001(parser.logger, token.position, parser.symbol_name(token), ', '.join(sorted(parsing_rules)))
+        C0001(parser.logger, token.position, parser.symbol_name(token), "'%s'" % "', '".join(sorted(parsing_rules)))
     else:
-        C0000(parser.logger, token.position, parser.symbol_name(token))
+        C0000(parser.logger, token.position, "'%s'" % parser.symbol_name(token))

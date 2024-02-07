@@ -30,7 +30,8 @@ from ......ast.lambdas import LambdaExpression, TemplateLambdaExpression, Lambda
 from ......ast.expressions import ErrorExpression
 
 
-@glrp.rule('lambda-expression : lambda-introducer attribute-specifier-seq? lambda-declarator compound-statement')
+@glrp.rule('constant-expression : lambda-introducer attribute-specifier-seq? lambda-declarator compound-statement')
+@glrp.rule('constant-expression# : lambda-introducer attribute-specifier-seq? lambda-declarator compound-statement')
 @cxx11
 def lambda_expression_cxx11(self: CxxParser, p: glrp.Production) -> Any:
     if p[0] is not None and p[2] is not None:
@@ -39,14 +40,18 @@ def lambda_expression_cxx11(self: CxxParser, p: glrp.Production) -> Any:
         return ErrorExpression()
 
 
-@glrp.rule('lambda-expression : lambda-introducer "#error" compound-statement')
+@glrp.rule('constant-expression : lambda-introducer "#error" compound-statement')
+@glrp.rule('constant-expression# : lambda-introducer "#error" compound-statement')
 @cxx11
 def lambda_expression_error_cxx11(self: CxxParser, p: glrp.Production) -> Any:
     return ErrorExpression()
 
 
 @glrp.rule(
-    'lambda-expression : lambda-introducer "<" template-parameter-list "#>"  requires-clause? attribute-specifier-seq? lambda-declarator compound-statement'
+    'constant-expression : lambda-introducer "<" template-parameter-list "#>"  requires-clause? attribute-specifier-seq? lambda-declarator compound-statement'
+)
+@glrp.rule(
+    'constant-expression# : lambda-introducer "<" template-parameter-list "#>"  requires-clause? attribute-specifier-seq? lambda-declarator compound-statement'
 )
 @cxx20
 def lambda_expression_cxx20(self: CxxParser, p: glrp.Production) -> Any:
@@ -56,19 +61,20 @@ def lambda_expression_cxx20(self: CxxParser, p: glrp.Production) -> Any:
         return ErrorExpression()
 
 
-@glrp.rule('lambda-expression : lambda-introducer "<" template-parameter-list "#>" "#error" compound-statement')
-@cxx11
+@glrp.rule('constant-expression : lambda-introducer "<" template-parameter-list "#>" "#error" compound-statement')
+@glrp.rule('constant-expression# : lambda-introducer "<" template-parameter-list "#>" "#error" compound-statement')
+@cxx20
 def lambda_expression_error_cxx20(self: CxxParser, p: glrp.Production) -> Any:
     return ErrorExpression()
 
 
-@glrp.rule('lambda-introducer : "[" lambda-capture? "]"')
+@glrp.rule('lambda-introducer : [prec:left,16]"[" lambda-capture? "]"')
 @cxx11
 def lambda_introducer_cxx11(self: CxxParser, p: glrp.Production) -> Any:
     return p[1]
 
 
-@glrp.rule('lambda-introducer : "[" "#error" "]"')
+@glrp.rule('lambda-introducer : [prec:left,16]"[" "#error" "]"')
 @cxx11
 def lambda_introducer_error_cxx11(self: CxxParser, p: glrp.Production) -> Any:
     return None
@@ -113,8 +119,6 @@ def lambda_declarator_requires_cxx20(self: CxxParser, p: glrp.Production) -> Any
 @glrp.rule(
     'lambda-declarator : "(" "#error" ")" lambda-specifier-seq? noexcept-specification? attribute-specifier-seq? trailing-return-type?'
 )
-@glrp.rule('lambda-declarator : "(" parameter-declaration-clause ")" "#error"')
-@glrp.rule('lambda-declarator : "(" "#error" ")" "#error"')
 @cxx11
 def lambda_declarator_error_cxx11(self: CxxParser, p: glrp.Production) -> Any:
     return None

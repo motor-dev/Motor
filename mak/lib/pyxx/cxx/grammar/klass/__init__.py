@@ -45,13 +45,16 @@ from . import conversion
 @glrp.rule('class-specifier : class-head "{" member-specification? "}"')
 @cxx98
 def class_specifier(self: CxxParser, p: glrp.Production) -> Any:
-    if p[0][1] is not None:
-        position = p[0][0]
-        if p[0][3] is not None:
-            position = position[0], p[0][3].position[1]
-        return ClassSpecifier(position, p[0][1], p[0][2], p[0][3], p[0][4], p[0][5], p[2])
-    else:
-        return ErrorTypeSpecifier(p[0][0])
+    position = p[0][0]
+    if p[0][3] is not None:
+        position = position[0], p[0][3].position[1]
+    return ClassSpecifier(position, p[0][1], p[0][2], p[0][3], p[0][4], p[0][5], p[2])
+
+
+@glrp.rule('class-specifier : class-key #error "{" member-specification? "}"')
+@cxx98
+def class_specifier_error(self: CxxParser, p: glrp.Production) -> Any:
+    return ErrorTypeSpecifier(p[1].position)
 
 
 @glrp.rule('class-head : class-key attribute-specifier-seq? class-head-name base-clause?')
@@ -70,12 +73,6 @@ def class_head_unnamed(self: CxxParser, p: glrp.Production) -> Any:
 @cxx11
 def class_head_cxx11(self: CxxParser, p: glrp.Production) -> Any:
     return (p[0][0], p[0][1], p[1], p[2], p[3], p[4])
-
-
-@glrp.rule('class-head : class-key "#error"')
-@cxx98
-def class_head_error(self: CxxParser, p: glrp.Production) -> Any:
-    return p[0][0], None
 
 
 # @glrp.rule('class-head-name : class-name')

@@ -11,17 +11,10 @@ from ....parse import CxxParser, cxx98
 from .....ast.expressions import BinaryExpression
 
 
-@glrp.rule('equality-expression : [no-merge-warning] relational-expression')
-@glrp.rule('"equality-expression#" : [no-merge-warning] "relational-expression#"')
-@cxx98
-def equality_expression_stop(self: CxxParser, p: glrp.Production) -> Any:
-    return p[0]
-
-
-@glrp.rule('equality-expression : equality-expression "==" [no-merge-warning] relational-expression')
-@glrp.rule('equality-expression : equality-expression "!=" [no-merge-warning] relational-expression')
-@glrp.rule('"equality-expression#" : "equality-expression#" "==" [no-merge-warning] "relational-expression#"')
-@glrp.rule('"equality-expression#" : "equality-expression#" "!=" [no-merge-warning] "relational-expression#"')
+@glrp.rule('constant-expression[prec:left,8] : constant-expression [prec:left,8]"==" constant-expression')
+@glrp.rule('constant-expression[prec:left,8] : constant-expression [prec:left,8]"!=" constant-expression')
+@glrp.rule('constant-expression#[prec:left,8] : constant-expression# [prec:left,8]"==" constant-expression#')
+@glrp.rule('constant-expression#[prec:left,8] : constant-expression# [prec:left,8]"!=" constant-expression#')
 @cxx98
 def equality_expression(self: CxxParser, p: glrp.Production) -> Any:
     return BinaryExpression(p[0], p[2], p[1].text())
