@@ -13,7 +13,7 @@ nested-name-specifier:
 
 import glrp
 from typing import Any
-from .....parse import CxxParser, cxx98, cxx11
+from .....parse import CxxParser, cxx98, cxx11, cxx20
 from ......ast.reference import Id, RootId, TemplateId, TemplateSpecifierId, _Id
 from ......ast.type import DecltypeSpecifierId
 
@@ -21,6 +21,17 @@ from ......ast.type import DecltypeSpecifierId
 @glrp.rule('qualified-id : nested-name-specifier "template"? unqualified-id')
 @cxx98
 def qualified_id(self: CxxParser, p: glrp.Production) -> Any:
+    name_list = p[0]
+    id = p[2]  # type: _Id
+    if p[1]:
+        id = TemplateSpecifierId(p[1].position, id)
+    name_list.append(id)
+    return name_list
+
+
+@glrp.rule('constraint-qualified-id : nested-name-specifier "template"? constraint-unqualified-id')
+@cxx20
+def qualified_id_cxx20(self: CxxParser, p: glrp.Production) -> Any:
     name_list = p[0]
     id = p[2]  # type: _Id
     if p[1]:

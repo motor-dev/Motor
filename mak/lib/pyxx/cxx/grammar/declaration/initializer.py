@@ -75,8 +75,8 @@ def brace_or_equal_initializer_cxx11(self: CxxParser, p: glrp.Production) -> Any
 
 @glrp.rule('initializer-clause : assignment-expression')
 @glrp.rule('initializer-clause : braced-init-list')
-@glrp.rule('"initializer-clause#" : "assignment-expression#"')
-@glrp.rule('"initializer-clause#" : braced-init-list')
+@glrp.rule('initializer-clause# : assignment-expression#')
+@glrp.rule('initializer-clause# : braced-init-list')
 @cxx98
 def initializer_clause(self: CxxParser, p: glrp.Production) -> Any:
     return p[0]
@@ -199,6 +199,6 @@ def ambiguous_initializer_clause_ext(self: CxxParser, ambiguous_expression: List
 @glrp.merge('initializer-list')
 @cxx98_merge
 def ambiguous_initializer_list(
-    self: CxxParser, ambiguous_initializer_list: List[Any], ambiguous_initializer_clause: List[Any]
+        self: CxxParser, ambiguous_initializer_list: List[Any], ambiguous_initializer_clause: List[Any]
 ) -> Any:
     return sum(ambiguous_initializer_list + ambiguous_initializer_clause, [])

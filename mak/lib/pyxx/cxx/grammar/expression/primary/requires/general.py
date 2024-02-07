@@ -26,7 +26,9 @@ from ......ast.constraints import RequiresExpression, RequirementBody, Ambiguous
 from ......ast.expressions import ErrorExpression
 
 
-@glrp.rule('requires-expression : requires requirement-parameter-list? requirement-body')
+@glrp.rule('constant-expression : requires requirement-parameter-list? requirement-body')
+@glrp.rule('constant-expression# : requires requirement-parameter-list? requirement-body')
+@glrp.rule('constraint-logical-expression : requires requirement-parameter-list? requirement-body')
 @cxx20
 def requires_expression_cxx20(self: CxxParser, p: glrp.Production) -> Any:
     if p[1] is not None and p[2] is not None:

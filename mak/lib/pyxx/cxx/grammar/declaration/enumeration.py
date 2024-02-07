@@ -56,24 +56,22 @@ from ....ast.reference import Reference, Id, TemplateSpecifierId, _Id
 @cxx98
 def enum_specifier(self: CxxParser, p: glrp.Production) -> Any:
     position, attributes, enum_is_scoped, name, base = p[0]
-    if enum_is_scoped is None:
-        return ErrorTypeSpecifier(position)
-    else:
-        if name is not None:
-            position = (position[0], name.position[1])
-        return EnumSpecifier(position, name, attributes, enum_is_scoped, base, p[2])
+    if name is not None:
+        position = (position[0], name.position[1])
+    return EnumSpecifier(position, name, attributes, enum_is_scoped, base, p[2])
+
+
+@glrp.rule('enum-specifier : enum-key #error "{" enumerator-list? "}"')
+@glrp.rule('enum-specifier : enum-key #error "{" enumerator-list "," "}"')
+@cxx98
+def enum_specifier_error(self: CxxParser, p: glrp.Production) -> Any:
+    return ErrorTypeSpecifier(p[1].position)
 
 
 @glrp.rule('enum-head : enum-key attribute-specifier-seq? enum-base?')
 @cxx98
 def enum_head_unnamed(self: CxxParser, p: glrp.Production) -> Any:
     return p[0][0], p[1], p[0][1], None, p[2]
-
-
-@glrp.rule('enum-head : enum-key "#error"')
-@cxx98
-def enum_head_error(self: CxxParser, p: glrp.Production) -> Any:
-    return p[0][0], [], None, None, None
 
 
 @glrp.rule('enum-head : enum-key attribute-specifier-seq? enum-head-name enum-base?')

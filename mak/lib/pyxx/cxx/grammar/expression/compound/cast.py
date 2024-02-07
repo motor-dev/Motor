@@ -6,23 +6,19 @@ cast-expression:
 
 import glrp
 from typing import Any
-from ....parse import CxxParser, cxx98
+from ....parse import CxxParser, cxx98, cxx20
 from .....ast.expressions import CastExpression, ErrorExpression
 
 
-@glrp.rule('cast-expression : unary-expression')
-@cxx98
-def cast_expression_stop(self: CxxParser, p: glrp.Production) -> Any:
-    return p[0]
-
-
-@glrp.rule('cast-expression : "(" begin-type-id type-id ")" cast-expression')
+@glrp.rule('constant-expression[prec:right,15] : [prec:right,15]"(" begin-type-id type-id ")" constant-expression')
+@glrp.rule('constant-expression#[prec:right,15] : [prec:right,15]"(" begin-type-id type-id ")" constant-expression#')
 @cxx98
 def cast_expression(self: CxxParser, p: glrp.Production) -> Any:
     return CastExpression(p[4], p[2])
 
 
-@glrp.rule('cast-expression : "(" begin-type-id "#error" ")" cast-expression')
+@glrp.rule('constant-expression[prec:right,15] : [prec:right,15]"(" begin-type-id "#error" ")" constant-expression')
+@glrp.rule('constant-expression#[prec:right,15] : [prec:right,15]"(" begin-type-id "#error" ")" constant-expression#')
 @cxx98
 def cast_expression_error(self: CxxParser, p: glrp.Production) -> Any:
     return ErrorExpression()

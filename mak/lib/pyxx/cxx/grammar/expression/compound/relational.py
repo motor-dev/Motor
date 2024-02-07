@@ -13,20 +13,14 @@ from ....parse import CxxParser, cxx98
 from .....ast.expressions import BinaryExpression
 
 
-@glrp.rule('relational-expression : compare-expression')
-@glrp.rule('"relational-expression#" : "compare-expression#"')
-@cxx98
-def relational_expression_stop(self: CxxParser, p: glrp.Production) -> Any:
-    return p[0]
-
-
-@glrp.rule('relational-expression : [no-merge-warning] relational-expression "<" compare-expression')
-@glrp.rule('relational-expression : [no-merge-warning] relational-expression ">" compare-expression')
-@glrp.rule('relational-expression : [no-merge-warning] relational-expression "<=" compare-expression')
-@glrp.rule('relational-expression : [no-merge-warning] relational-expression ">=" compare-expression')
-@glrp.rule('"relational-expression#" : [no-merge-warning] "relational-expression#" "<" "compare-expression#"')
-@glrp.rule('"relational-expression#" : [no-merge-warning] "relational-expression#" "<=" "compare-expression#"')
-@glrp.rule('"relational-expression#" : [no-merge-warning] "relational-expression#" ">=" "compare-expression#"')
+@glrp.rule('constant-expression[prec:left,9] : constant-expression [prec:left,9]"<" constant-expression')
+@glrp.rule('constant-expression[prec:left,9] : constant-expression [prec:left,9]">" constant-expression')
+@glrp.rule('constant-expression[prec:left,9] : constant-expression [prec:left,9]"<=" constant-expression')
+@glrp.rule('constant-expression[prec:left,9] : constant-expression [prec:left,9]">=" constant-expression')
+@glrp.rule('constant-expression#[prec:left,9] : constant-expression# [prec:left,9]"<" constant-expression#')
+# @glrp.rule('constant-expression# : constant-expression# ">" constant-expression#')
+@glrp.rule('constant-expression#[prec:left,9] : constant-expression# [prec:left,9]"<=" constant-expression#')
+@glrp.rule('constant-expression#[prec:left,9] : constant-expression# [prec:left,9]">=" constant-expression#')
 @cxx98
 def relational_expression(self: CxxParser, p: glrp.Production) -> Any:
     return BinaryExpression(p[0], p[2], p[1].text())

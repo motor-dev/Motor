@@ -16,8 +16,11 @@ for-range-initializer:
 import glrp
 from typing import Any, List
 from ...parse import CxxParser, cxx98, cxx11, cxx17, cxx20, cxx98_merge
-from ....ast.statements import WhileStatement, DoWhileStatement, ForStatement, AmbiguousForCondition, ForConditionInit, ForConditionRange, ErrorStatement
-from ....ast.declarations import SimpleDeclaration, AmbiguousDeclaration, InitDeclarator, InitDeclaratorList, StructuredBindingDeclaration
+from ....ast.statements import WhileStatement, DoWhileStatement, ForStatement, AmbiguousForCondition, ForConditionInit, \
+    ForConditionRange, ErrorStatement
+from ....ast.declarations import SimpleDeclaration, AmbiguousDeclaration, InitDeclarator, InitDeclaratorList, \
+    StructuredBindingDeclaration
+from ....ast.expressions import ErrorExpression
 
 
 @glrp.rule('iteration-statement : "while" "(" condition ")" statement')
@@ -47,6 +50,12 @@ def iteration_statement_for(self: CxxParser, p: glrp.Production) -> Any:
 @cxx98
 def for_range(self: CxxParser, p: glrp.Production) -> Any:
     return ForConditionInit(p[0], p[1], p[3])
+
+
+@glrp.rule('for-range : init-statement condition? ";" #error')
+@cxx98
+def for_range_error(self: CxxParser, p: glrp.Production) -> Any:
+    return ForConditionInit(p[0], p[1], ErrorExpression())
 
 
 @glrp.rule('for-range : for-range-declaration-declarator')
@@ -101,7 +110,7 @@ def statement_error(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.merge('for-range-declaration-declarator')
 @cxx98_merge
 def ambiguous_for_range_declaration(
-    self: CxxParser, decl_specifier_seq_end: List[Any], decl_specifier_seq_continue: List[Any]
+        self: CxxParser, decl_specifier_seq_end: List[Any], decl_specifier_seq_continue: List[Any]
 ) -> Any:
     return AmbiguousDeclaration(decl_specifier_seq_end + decl_specifier_seq_continue)
 
@@ -109,7 +118,7 @@ def ambiguous_for_range_declaration(
 @glrp.merge('for-range-declaration-no-declarator')
 @cxx98_merge
 def ambiguous_for_range_declaration_no_declarator_final(
-    self: CxxParser, final_keyword: List[Any], final_identifier: List[Any]
+        self: CxxParser, final_keyword: List[Any], final_identifier: List[Any]
 ) -> Any:
     if len(final_keyword) == 1:
         return final_keyword[0]
@@ -123,7 +132,7 @@ def ambiguous_for_range_declaration_no_declarator_final(
 @glrp.merge('for-range-declaration-declarator')
 @cxx98_merge
 def ambiguous_for_range_declaration_final(
-    self: CxxParser, final_keyword: List[Any], final_identifier: List[Any]
+        self: CxxParser, final_keyword: List[Any], final_identifier: List[Any]
 ) -> Any:
     if len(final_keyword) == 1:
         return final_keyword[0]
@@ -137,9 +146,10 @@ def ambiguous_for_range_declaration_final(
 @glrp.merge('for-range')
 @cxx98_merge
 def ambiguous_for_range(
-    self: CxxParser, ambiguous_for_range_declaration: List[Any], ambiguous_init_statement: List[Any],
-    ambiguous_condition_opt: List[Any], ambiguous_condition_opt_2: List[Any], decl_specifier_seq_continue: List[Any],
-    ambiguous_simple_declaration: List[Any]
+        self: CxxParser, ambiguous_for_range_declaration: List[Any], ambiguous_init_statement: List[Any],
+        ambiguous_condition_opt: List[Any], ambiguous_condition_opt_2: List[Any],
+        decl_specifier_seq_continue: List[Any],
+        ambiguous_simple_declaration: List[Any]
 ) -> Any:
     return AmbiguousForCondition(
         ambiguous_for_range_declaration + ambiguous_init_statement + ambiguous_condition_opt +
@@ -150,6 +160,6 @@ def ambiguous_for_range(
 @glrp.merge('for-range')
 @cxx98_merge
 def ambiguous_for_range_2(
-    self: CxxParser, continue_declarator_list: List[Any], ambiguous_init_declarator_initializer: List[Any]
+        self: CxxParser, continue_declarator_list: List[Any], ambiguous_init_declarator_initializer: List[Any]
 ) -> Any:
     return AmbiguousForCondition(continue_declarator_list + ambiguous_init_declarator_initializer)

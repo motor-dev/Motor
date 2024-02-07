@@ -11,22 +11,16 @@ from .....ast.expressions import BinaryExpression
 from typing import TYPE_CHECKING
 
 
-@glrp.rule('expression : expression-proxy')
-@glrp.rule('expression? : expression')
+@glrp.rule('expression[prec:left,1] : assignment-expression')
+@glrp.rule('expression?[prec:left,1] : expression')
 @cxx98
 def expression(self: CxxParser, p: glrp.Production) -> Any:
     return p[0]
 
 
-@glrp.rule('expression-proxy : assignment-expression')
+@glrp.rule('expression[prec:left,1] : expression [prec:left,1]"," assignment-expression')
 @cxx98
-def expression_proxy_stop(self: CxxParser, p: glrp.Production) -> Any:
-    return p[0]
-
-
-@glrp.rule('expression-proxy : expression-proxy "," assignment-expression')
-@cxx98
-def expression_proxy(self: CxxParser, p: glrp.Production) -> Any:
+def expression_comma(self: CxxParser, p: glrp.Production) -> Any:
     return BinaryExpression(p[0], p[2], p[1].text())
 
 

@@ -11,7 +11,7 @@ unqualified-id:
 
 import glrp
 from typing import Any
-from .....parse import CxxParser, cxx98, cxx11
+from .....parse import CxxParser, cxx98, cxx11, cxx20
 from ......ast.reference import Id, TemplateId, DestructorId
 
 
@@ -31,6 +31,12 @@ def identifier_cxx11(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.rule('unqualified-id : "identifier" [split:id_nontemplate]')
 @cxx98
 def unqualified_id(self: CxxParser, p: glrp.Production) -> Any:
+    return Id(p[0].position, p[0].value)
+
+
+@glrp.rule('constraint-unqualified-id : "identifier" [split:id_nontemplate]')
+@cxx20
+def unqualified_id_cxx20(self: CxxParser, p: glrp.Production) -> Any:
     return Id(p[0].position, p[0].value)
 
 
@@ -61,6 +67,12 @@ def unqualified_destructor_template_id(self: CxxParser, p: glrp.Production) -> A
 @glrp.rule('unqualified-id : template-id')
 @cxx98
 def unqualified_template_id(self: CxxParser, p: glrp.Production) -> Any:
+    return p[0]
+
+
+@glrp.rule('constraint-unqualified-id : template-id')
+@cxx20
+def unqualified_template_id_cxx20(self: CxxParser, p: glrp.Production) -> Any:
     return p[0]
 
 
