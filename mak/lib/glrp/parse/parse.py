@@ -1,6 +1,5 @@
 from .production import Production
 from .grammar import Grammar
-from .context import Context, Merge, SplitContext, ParseError
 from .compound_symbol import CompoundSymbol
 import os
 import re
@@ -10,8 +9,7 @@ import gc
 
 from typing import Any, Dict, Callable, Iterator, List, Optional, Tuple, Set, TypeVar, Union
 from ..lex import Lexer, Token
-from .context import Operation
-from . import context_v2
+from . import context
 
 LOAD_OPTIMIZED = 0
 GENERATE = 1
@@ -55,10 +53,10 @@ class MergeAction(object):
 
         def __init__(self, call: Callable[..., Any], arguments: Tuple[str, ...], result: str) -> None:
             self._call = call
-            self._arguments = dict((a, []) for a in arguments)  # type: Dict[str, Any]
+            self._arguments = dict((a, []) for a in arguments)  # type: Dict[str, List[Any]]
             self._result = result
 
-        def __call__(self, **kw: Dict[str, Any]) -> Any:
+        def __call__(self, **kw: List[Any]) -> Any:
             arguments = dict(self._arguments)
             for a, v in kw.items():
                 arguments[a] = v
@@ -150,8 +148,6 @@ class Parser(object):
         return self._grammar._name_map[token._id]
 
     def parse_debug(self, filename: str) -> List[Any]:
-        contexts = [Context(None, None)]
-
         name_map = self._grammar._name_map
         action_table = self._grammar._action_table
         goto_table = self._grammar._goto_table
@@ -165,437 +161,47 @@ class Parser(object):
 
         rules = [(r[0], r[1], r[2](self), _merge_dict(r[3])) for r in self._grammar._rules]
 
-        tokens = self._lexer.input(filename, True)
-        for token in tokens:
-            # print(self._grammar._name_map[token._id])
-            # print(len(contexts))
-            while True:
-                operations = [context.input(token) for context in contexts]
-
-                next_contexts = []  # type: List[Operation]
-                merges = {}  # type: Dict[Tuple[SplitContext, int, int, int, Callable[[], None]], Merge]
-                merge_opportunities = {}  # type: Dict[Tuple[SplitContext, int, int, int], List[Tuple[Operation, str]]]
-                recovery_operations = []  # type: List[Operation]
-                recovery_contexts = []  # type: List[Context]
-
-                while operations:
-                    parent = operations.pop(-1)
-                    actions = action_table[parent._state].get(token._id, tuple())
-                    if len(actions) == 0:
-                        recovery_operations.append(parent)
-                        parent.discard()
-                    else:
-                        for operation, (action, _) in zip(parent.split(actions), actions):
-                            if action < 0:
-                                rule = rules[-action - 1]
-                                operation = operation.reduce(rule)
-                                end = False
-                                seen = set()  # type:Set[SplitContext]
-
-                                while not end:
-                                    for i, split_task in enumerate(operation._result_context._names[::-1]):
-                                        sym_len = operation._result_context._sym_len
-                                        scontext = split_task[0]
-                                        name = split_task[1]
-                                        if split_task[2] >= sym_len:
-                                            operation._result_context._names[-i - 1] = (scontext, name, sym_len)
-                                            if scontext in seen:
-                                                continue
-                                            try:
-                                                merge_action = rule[3][name]
-                                            except KeyError:
-                                                pass
-                                            else:
-                                                seen.add(scontext)
-                                                try:
-                                                    merge_op = merges[(
-                                                        scontext, rule[0], operation._state, sym_len, merge_action._call
-                                                    )]
-                                                except KeyError:
-                                                    merge_op = Merge(operation, merge_action, name, scontext)
-                                                    merges[(
-                                                        scontext, rule[0], operation._state, sym_len, merge_action._call
-                                                    )] = merge_op
-                                                    operation = merge_op
-                                                else:
-                                                    merge_op.add_operation(operation, name, scontext)
-                                                    end = True
-                                                break
-                                    else:
-                                        for split_task in operation._result_context._names[::-1]:
-                                            scontext = split_task[0]
-                                            name = split_task[1]
-                                            if split_task[2] < sym_len:
-                                                break
-                                            try:
-                                                merge_opportunities[(scontext, rule[0], operation._state,
-                                                                     sym_len)].append((operation, name))
-                                            except KeyError:
-                                                merge_opportunities[(scontext, rule[0], operation._state, sym_len)] = [
-                                                    (operation, name)
-                                                ]
-                                        break
-                                if not end:
-                                    # goto symbol, then loop back for another round
-                                    target_state = goto_table[operation._state][rule[0]]
-                                    operations.append(operation.goto(target_state))
-                            else:
-                                operation = operation.consume_token(token, action)
-                                next_contexts.append(operation)
-
-                for (split_context, _, _, _), ops in merge_opportunities.items():
-                    if len(ops) > 1:
-                        reduced_ops = []
-                        for reduce_op, name in ops:
-                            try:
-                                reduced_ops.append((reduce_op.run_debug()[1], name))
-                            except ParseError:
-                                pass
-                        if len(reduced_ops) > 1:
-                            print('potential merge:')
-                            for debug_sym, name in reduced_ops:
-                                print('\u250f %s\n\u2503 %s' % (name, '\u2501' * len(name)))
-                                debug_sym.debug_print(self._grammar._name_map, '\u2503 ', '\u2503 ')
-                                print('\u2517')
-                        print('')
-
-                if len(next_contexts) != 0:
-                    contexts = []
-                    for operation in next_contexts:
-                        try:
-                            operation.run_debug()
-                        except ParseError as error:
-                            operation._result_context = operation._result_context.flatten().flatten()
-                            operation.undo(operation._result_context, error.recovery_operation)
-                            recovery_contexts.append(operation._result_context)
-                            operation.discard()
-                        else:
-                            contexts.append(operation._result_context)
-
-                    # break to get a new token
-                    if contexts:
-                        break
-
-                for recovery_operation in recovery_operations:
-                    recovery_operation._result_context = recovery_operation._result_context.flatten()
-                    try:
-                        recovery_operation.run_debug()
-                    except ParseError as error:
-                        recovery_operation.undo(recovery_operation._result_context, error.recovery_operation)
-                    recovery_contexts.append(recovery_operation._result_context.flatten())
-
-                # Syntax error: try to recover
-                current_rules = set()
-                for recovery_context in recovery_contexts:
-                    states = [(recovery_context._state, 0)]
-                    seen_states = set([recovery_context._state])
-                    while states:
-                        state, depth = states.pop(0)
-                        for actions in action_table[state].values():
-                            for action, _ in actions:
-                                if action < 0:
-                                    rule = rules[-action - 1]
-                                    if len(rule[1]) > depth:
-                                        current_rules.add(self._grammar._name_map[rule[0]])
-                                else:
-                                    if action not in seen_states:
-                                        seen_states.add(action)
-                                        states.append((action, depth + 1))
-                        for dest in goto_table[state].values():
-                            if dest not in seen_states:
-                                seen_states.add(dest)
-                                states.append((dest, depth + 1))
-
-                self.error(token, current_rules)
-
-                error_token = token.duplicate()
-                self._lexer.set_token_type(error_token, '#error')
-                contexts = []
-                for context in recovery_contexts:
-                    while context._state_stack:
-                        if error_token._id in action_table[context._state]:
-                            action = action_table[context._state][error_token._id][0][0]
-                            if action < 0:
-                                rule = rules[-action - 1]
-                                pop_count = len(rule[1])
-                                p = Production(context, pop_count)
-                                symbol = rule[2](p)
-                                if pop_count:
-                                    debug_sym = CompoundSymbol(rule[0], (0, 0), context._debug_stack[-pop_count:])
-                                else:
-                                    debug_sym = CompoundSymbol(rule[0], (0, 0), [])
-                                context.reduce_debug(pop_count)
-                                context.pop(pop_count)
-                                context.add_prod_debug(symbol, debug_sym)
-                                context.goto(goto_table[context._state][rule[0]])
-                            else:
-                                context.add_prod_debug(error_token, error_token)
-                                context.goto(action)
-                                contexts.append(context)
-                                break
-                        else:
-                            context.reduce_debug(1)
-                            context.pop(1)
-
-                if not contexts:
-                    return []
-                contexts.sort(key=lambda x: x._sym_len)
-                while True:
-                    for context in contexts:
-                        if token._id in action_table[context._state]:
-                            contexts = [context]
-                            break
-                    else:
-                        try:
-                            token = next(tokens)
-                        except StopIteration:
-                            # reach end of file, return no result
-                            return []
-                        continue
-                    # found a new token, go back to beginning and continue
-                    break
-
-        results = []  # type: List[Any]
-        for context in contexts:
-            actions = action_table[context._state].get(-1, tuple())
-            if len(actions) == 1:
-                for action, _ in actions:
-                    rule = rules[-action - 1]
-                    results.append(rule[2](Production(context, len(rule[1]))))
-                    # context._debug_stack[0].debug_print(name_map)
-        if results:
-            return results
-        else:
-            raise SyntaxError('unexpected end of file')
-
-    def parse_opt(self, filename: str) -> List[Any]:
-        contexts = [Context(None, None)]
-
-        name_map = self._grammar._name_map
-        action_table = self._grammar._action_table
-        goto_table = self._grammar._goto_table
-
-        def _merge_dict(merge):
-            # type: (Dict[str, Grammar.Merge]) -> Dict[str, MergeAction.MergeCall]
-            result = {}
-            for key, value in merge.items():
-                result[key] = value._action(self)
-            return result
-
-        rules = [(r[0], r[1], r[2](self), _merge_dict(r[3])) for r in self._grammar._rules]
-
-        tokens = self._lexer.input(filename, True)
-        for token in tokens:
-            # print(len(contexts))
-            # print(token.text())
-            while True:
-                operations = [context.input(token) for context in contexts]
-
-                next_contexts = []  # type: List[Operation]
-                merges = {}  # type: Dict[Tuple[SplitContext, int, int, int, Callable[[], None]], Merge]
-                recovery_operations = []  # type: List[Operation]
-                recovery_contexts = []  # type: List[Context]
-
-                while operations:
-                    parent = operations.pop(-1)
-                    actions = action_table[parent._state].get(token._id, tuple())
-                    if len(actions) == 0:
-                        recovery_operations.append(parent)
-                        parent.discard()
-                    else:
-                        for operation, (action, _) in zip(parent.split(actions), actions):
-                            if action < 0:
-                                rule = rules[-action - 1]
-                                operation = operation.reduce(rule)
-                                end = False
-                                seen = set()  # type:Set[SplitContext]
-
-                                while not end:
-                                    sym_len = operation._result_context._sym_len
-                                    for i, split_task in enumerate(operation._result_context._names[::-1]):
-                                        scontext = split_task[0]
-                                        name = split_task[1]
-                                        if split_task[2] >= sym_len:
-                                            operation._result_context._names[-i - 1] = (scontext, name, sym_len)
-                                            if scontext in seen:
-                                                continue
-                                            try:
-                                                merge_action = rule[3][name]
-                                            except KeyError:
-                                                pass
-                                            else:
-                                                seen.add(scontext)
-                                                try:
-                                                    merge_op = merges[(
-                                                        scontext, rule[0], operation._state, sym_len, merge_action._call
-                                                    )]
-                                                except KeyError:
-                                                    merge_op = Merge(operation, merge_action, name, scontext)
-                                                    merges[(
-                                                        scontext, rule[0], operation._state, sym_len, merge_action._call
-                                                    )] = merge_op
-                                                    operation = merge_op
-                                                else:
-                                                    merge_op.add_operation(operation, name, scontext)
-                                                    end = True
-                                                break
-                                    else:
-                                        break
-                                if not end:
-                                    # goto symbol, then loop back for another round
-                                    target_state = goto_table[operation._state][rule[0]]
-                                    operations.append(operation.goto(target_state))
-                            else:
-                                operation = operation.consume_token(token, action)
-                                next_contexts.append(operation)
-
-                if len(next_contexts) != 0:
-                    contexts = []
-                    for operation in next_contexts:
-                        try:
-                            operation.run()
-                        except ParseError as error:
-                            operation.undo(operation._result_context, error.recovery_operation)
-                            recovery_contexts.append(operation._result_context.flatten())
-                        else:
-                            contexts.append(operation._result_context)
-
-                    # break to get a new token
-                    if contexts:
-                        break
-
-                for recovery_operation in recovery_operations:
-                    try:
-                        recovery_operation.run()
-                    except ParseError as error:
-                        recovery_operation.undo(recovery_operation._result_context, error.recovery_operation)
-                        recovery_contexts.append(recovery_operation._result_context.flatten())
-                    else:
-                        recovery_contexts.append(recovery_operation._result_context.flatten())
-
-                # Syntax error: try to recover
-                current_rules = set()
-                for recovery_context in recovery_contexts:
-                    states = [(recovery_context._state, 0)]
-                    seen_states = set([recovery_context._state])
-                    while states:
-                        state, depth = states.pop(0)
-                        for actions in action_table[state].values():
-                            for action, _ in actions:
-                                if action < 0:
-                                    rule = rules[-action - 1]
-                                    if len(rule[1]) > depth:
-                                        current_rules.add(self._grammar._name_map[rule[0]])
-                                else:
-                                    if action not in seen_states:
-                                        seen_states.add(action)
-                                        states.append((action, depth + 1))
-                        for dest in goto_table[state].values():
-                            if dest not in seen_states:
-                                seen_states.add(dest)
-                                states.append((dest, depth + 1))
-
-                self.error(token, current_rules)
-
-                error_token = token.duplicate()
-                self._lexer.set_token_type(error_token, '#error')
-                contexts = []
-                for context in recovery_contexts:
-                    while context._state_stack:
-                        if error_token._id in action_table[context._state]:
-                            context.add_prod(error_token)
-                            context.goto(action_table[context._state][error_token._id][0][0])
-                            contexts.append(context)
-                            break
-                        else:
-                            context.reduce(1)
-                            context.pop(1)
-
-                if not contexts:
-                    return []
-                contexts.sort(key=lambda x: x._sym_len)
-                while True:
-                    for context in contexts:
-                        if token._id in action_table[context._state]:
-                            contexts = [context]
-                            break
-                    else:
-                        try:
-                            token = next(tokens)
-                        except StopIteration:
-                            # reach end of file, return no result
-                            return []
-                        continue
-                    # found a new token, go back to beginning and continue
-                    break
-
-        results = []  # type: List[Any]
-        # print(len(contexts))
-        for context in contexts:
-            actions = action_table[context._state].get(-1, tuple())
-            if len(actions) == 1:
-                for action, _ in actions:
-                    rule = rules[-action - 1]
-                    results.append(rule[2](Production(context, len(rule[1]))))
-        if results:
-            return results
-        else:
-            raise SyntaxError('unexpected end of file')
-
-    def parse_v2(self, filename: str) -> List[Any]:
-        name_map = self._grammar._name_map
-        action_table = self._grammar._action_table
-        goto_table = self._grammar._goto_table
-
-        def _merge_dict(merge):
-            # type: (Dict[str, Grammar.Merge]) -> Dict[str, MergeAction.MergeCall]
-            result = {}
-            for key, value in merge.items():
-                result[key] = value._action(self)
-            return result
-
-        rules = [(r[0], r[1], r[2](self), _merge_dict(r[3])) for r in self._grammar._rules]
-
-        RootOperation = context_v2.RootOperation
-        InputToken = context_v2.InputToken
-        GoTo = context_v2.GoTo
-        Reduce = context_v2.Reduce
-        Split = context_v2.Split
-        SplitContext = context_v2.SplitContext
-        Merge = context_v2.Merge
-        ParseError = context_v2.ParseError
+        RootOperation = context.RootOperation
+        InputToken = context.InputToken
+        GoTo = context.GoTo
+        Reduce = context.Reduce
+        Split = context.Split
+        SplitContext = context.SplitContext
+        Merge = context.Merge
+        ParseError = context.ParseError
         InputOperation = Union[
-            context_v2.InputToken,
-            context_v2.GoTo,
-            context_v2.Split
+            context.RootOperation,
+            context.GoTo,
+            context.Split
         ]
 
-        root_operations = [RootOperation(context_v2.State(None, 0), None)]
+        root_operations = [RootOperation(context.State(None, 0), None)]
 
         def get_actions(
-                operation: Union[context_v2.InputToken, context_v2.GoTo],
+                operation: Union[context.RootOperation, context.GoTo],
                 actions: Tuple[Tuple[int, Optional[str]], ...]
         ) -> Iterator[Tuple[InputOperation, int]]:
             action_count = len(actions)
             if action_count > 1:
                 split_context = SplitContext(action_count)
-                return ((Split(operation, split_context, name, operation._state._depth), action) for action, name in
+                return ((Split(operation, split_context, str(name), operation._state._depth), action) for action, name
+                        in
                         actions)
             else:
                 return ((operation, action[0]) for action in actions)
 
-        recovery_operations = []  # type: List[InputOperation]
+        recovery_operations = []  # type: List[Union[context.RootOperation, context.GoTo]]
         tokens = self._lexer.input(filename, True)
         process_error = False
         for token in tokens:
             while True:
                 # print(len(root_operations))
                 # print(token.text())
-                operations = [InputToken(o, token) for o in
-                              root_operations]  # type: List[Union[context_v2.InputToken, context_v2.GoTo]]
-                root_operations.clear()
-                next_operations = []  # type: List[context_v2.GoTo]
-                merges = {}
+                operations = [o for o in root_operations]  # type: List[Union[context.RootOperation, context.GoTo]]
+                root_operations = []
+                next_operations = []  # type: List[context.GoTo]
+                merges = {}  # type: Dict[context.SplitContext, Dict[Tuple[context.State, int, Callable[..., Any]], context.Merge]]
+                merge_opportunities = {}  # type: Dict[Tuple[context.SplitContext, int, context.State, int], List[Tuple[Union[context.Merge, context.Reduce], str]]]
 
                 while operations:
                     parent = operations.pop(-1)
@@ -608,16 +214,16 @@ class Parser(object):
                         for input_operation, action in get_actions(parent, actions):
                             if action < 0:
                                 target_state, arguments, callback, merge_rules = rules[-action - 1]
-                                operation = Reduce(input_operation, len(arguments),
-                                                   callback)  # type: Union[Reduce, Merge]
+                                operation = Reduce(input_operation, target_state, len(arguments),
+                                                   callback)  # type: Union[context.Reduce, context.Merge]
                                 # merge
                                 depth = operation._state._depth
-                                split_parent = operation  # type: Union[context_v2.Reduce, context_v2.Merge, context_v2.SplitInfo]
+                                split_parent = operation  # type: Union[context.Reduce, context.Merge, context.SplitInfo]
                                 split = operation._split
                                 found = False
                                 while split:
-                                    context = split._context
-                                    if context._ref_count == 1:
+                                    split_context = split._context
+                                    if split_context._ref_count == 1:
                                         split_parent._split = split._split
                                         split = split._split
                                         continue
@@ -626,21 +232,31 @@ class Parser(object):
                                         try:
                                             merge_call = merge_rules[split._name]
                                         except KeyError:
+                                            try:
+                                                merge_opportunities[
+                                                    (split_context, target_state, operation._state, depth)].append(
+                                                    (operation, split._name))
+                                            except KeyError:
+                                                merge_opportunities[
+                                                    (split_context, target_state, operation._state, depth)] = [
+                                                    (operation, split._name)
+                                                ]
                                             split_parent = split
                                             split = split._split
                                             continue
                                         else:
                                             try:
-                                                merge_dict = merges[context]
+                                                merge_dict = merges[split_context]
                                             except KeyError:
                                                 merge_dict = {}
-                                                merges[context] = merge_dict
+                                                merges[split_context] = merge_dict
                                             try:
                                                 merge = merge_dict[(operation._state, target_state, merge_call._call)]
                                             except KeyError:
                                                 operation = Merge(operation, split, merge_call)
                                                 merge_dict[
                                                     (operation._state, target_state, merge_call._call)] = operation
+                                                assert operation._split is not None
                                                 split_parent = operation._split
                                                 split = split._split
                                                 del merge_dict
@@ -661,7 +277,270 @@ class Parser(object):
                                 del operation
                                 del input_operation
                             else:
-                                next_operations.append(GoTo(InputToken(input_operation, token), action))
+                                next_operations.append(GoTo(context.InputToken(input_operation, token), action))
+                                del input_operation
+                        del parent
+
+                for (split_context, _, state, _), ops in merge_opportunities.items():
+                    if len(ops) > 1:
+                        reduced_ops = []
+                        for reduce_op, name in ops:
+                            try:
+                                reduce_op.run_debug()
+                            except ParseError:
+                                pass
+                            else:
+                                assert reduce_op._debug_value is not None
+                                reduced_ops.append((reduce_op._debug_value, name))
+                        if len(reduced_ops) > 1:
+                            print('potential merge:')
+                            for debug_sym, name in reduced_ops:
+                                print('\u250f %s\n\u2503 %s' % (name, '\u2501' * len(name)))
+                                debug_sym.debug_print(self._grammar._name_map, '\u2503 ', '\u2503 ')
+                                print('\u2517')
+                        print('')
+
+                del merges
+                for op in next_operations:
+                    try:
+                        op.run_debug()
+                    except ParseError as error:
+                        # error returns the last GoTo/Root operation that succeeded
+                        recovery_operations += error._recovery_operations
+                    else:
+                        root_operations.append(RootOperation(op._state, op._split))
+                    del op
+
+                next_operations.clear()
+                # break to get a new token
+                if root_operations:
+                    recovery_operations.clear()
+                    if process_error:
+                        # swallow tokens until one can be used
+                        process_error = False
+                        while True:
+                            try:
+                                token = next(tokens)
+                            except StopIteration:
+                                # woops, fatal error
+                                return []
+                            else:
+                                tentative_roots = root_operations
+                                root_operations = []
+                                for tentative_op in tentative_roots:
+                                    if token._id in action_table[tentative_op._state._state_id]:
+                                        root_operations.append(tentative_op)
+                                del tentative_op
+                                if root_operations:
+                                    # found some contexts that were willing to process this token, resume
+                                    del tentative_roots
+                                    break
+                                # no operation would handle this token, throw it away abd get a new one
+                                root_operations = tentative_roots
+                                del tentative_roots
+                        continue
+                    else:
+                        break
+
+                # Syntax error: try to recover
+                # first, flatten all operations
+                recovery_root_operations = [RootOperation(recovery_operation._state, recovery_operation._split) for
+                                            recovery_operation in recovery_operations]
+                recovery_operations.clear()
+
+                # find all grammar rules that were being parsed
+                current_rules = set()
+                for recovery_operation in recovery_root_operations:
+                    states = [(recovery_operation._state._state_id, 0)]
+                    seen_states = set()
+                    while states:
+                        state_id, depth = states.pop(0)
+                        for actions in action_table[state_id].values():
+                            for action, _ in actions:
+                                if action < 0:
+                                    rule = rules[-action - 1]
+                                    if len(rule[1]) > depth:
+                                        current_rules.add(self._grammar._name_map[rule[0]])
+                                else:
+                                    if action not in seen_states:
+                                        seen_states.add(action)
+                                        states.append((action, depth + 1))
+                        for dest in goto_table[state_id].values():
+                            if dest not in seen_states:
+                                seen_states.add(dest)
+                                states.append((dest, depth + 1))
+
+                # print error message
+                self.error(token, current_rules)
+
+                # replace current token by an error token
+                error_token = token.duplicate()
+                self._lexer.set_token_type(error_token, '#error')
+                process_error = True
+
+                # rewind all ops to a state where they can handle the error token.
+                # discard duplicate contexts
+                seen = set()
+                while recovery_root_operations:
+                    recovery_operation = recovery_root_operations.pop(-1)
+                    while recovery_operation._state != recovery_operation._state._parent:
+                        if recovery_operation._state in seen:
+                            break
+                        seen.add(recovery_operation._state)
+                        actions = action_table[recovery_operation._state._state_id].get(error_token._id, tuple())
+                        if actions:
+                            root_operations.append(recovery_operation)
+                            break
+                        recovery_operation._state = recovery_operation._state._parent
+                    del recovery_operation
+                if root_operations:
+                    # resume, using the error token
+                    token = error_token
+                    continue
+                # no recovery action at this stage; we can only exit
+                return []
+        results = []  # type: List[Any]
+        #
+        # print(len(root_operations))
+        for accepted_operation in root_operations:
+            actions = action_table[accepted_operation._state._state_id].get(-1, tuple())
+            if len(actions) == 1:
+                for action, _ in actions:
+                    rule = rules[-action - 1]
+                    results.append(rule[2](Production(accepted_operation._state, len(rule[1]))))
+                    debug_values = []
+                    state = accepted_operation._state
+                    for _ in range(0, len(rule[1])):
+                        assert state._debug_value is not None
+                        debug_values.append(state._debug_value)
+                        state = state._parent
+                    CompoundSymbol(rule[0], (0, 0), debug_values[::-1]).debug_print(name_map)
+        if results:
+            return results
+        else:
+            raise SyntaxError('unexpected end of file')
+
+    def parse_opt(self, filename: str) -> List[Any]:
+        name_map = self._grammar._name_map
+        action_table = self._grammar._action_table
+        goto_table = self._grammar._goto_table
+
+        def _merge_dict(merge):
+            # type: (Dict[str, Grammar.Merge]) -> Dict[str, MergeAction.MergeCall]
+            result = {}
+            for key, value in merge.items():
+                result[key] = value._action(self)
+            return result
+
+        rules = [(r[0], r[1], r[2](self), _merge_dict(r[3])) for r in self._grammar._rules]
+
+        RootOperation = context.RootOperation
+        InputToken = context.InputToken
+        GoTo = context.GoTo
+        Reduce = context.Reduce
+        Split = context.Split
+        SplitContext = context.SplitContext
+        Merge = context.Merge
+        ParseError = context.ParseError
+        InputOperation = Union[
+            context.RootOperation,
+            context.GoTo,
+            context.Split
+        ]
+
+        root_operations = [RootOperation(context.State(None, 0), None)]
+
+        def get_actions(
+                operation: Union[context.RootOperation, context.GoTo],
+                actions: Tuple[Tuple[int, Optional[str]], ...]
+        ) -> Iterator[Tuple[InputOperation, int]]:
+            action_count = len(actions)
+            if action_count > 1:
+                split_context = SplitContext(action_count)
+                return ((Split(operation, split_context, str(name), operation._state._depth), action) for action, name
+                        in
+                        actions)
+            else:
+                return ((operation, action[0]) for action in actions)
+
+        recovery_operations = []  # type: List[Union[context.RootOperation, context.GoTo]]
+        tokens = self._lexer.input(filename, True)
+        process_error = False
+        for token in tokens:
+            while True:
+                # print(len(root_operations))
+                # print(token.text())
+                operations = [o for o in root_operations]  # type: List[Union[context.RootOperation, context.GoTo]]
+                root_operations = []
+                next_operations = []  # type: List[context.GoTo]
+                merges = {}  # type: Dict[context.SplitContext, Dict[Tuple[context.State, int, Callable[..., Any]], context.Merge]]
+
+                while operations:
+                    parent = operations.pop(-1)
+                    actions = action_table[parent._state._state_id].get(token._id, tuple())
+                    action_count = len(actions)
+                    if action_count == 0:
+                        recovery_operations.append(parent)
+                        del parent
+                    else:
+                        for input_operation, action in get_actions(parent, actions):
+                            if action < 0:
+                                target_state, arguments, callback, merge_rules = rules[-action - 1]
+                                operation = Reduce(input_operation, target_state, len(arguments),
+                                                   callback)  # type: Union[context.Reduce, context.Merge]
+                                # merge
+                                depth = operation._state._depth
+                                split_parent = operation  # type: Union[context.Reduce, context.Merge, context.SplitInfo]
+                                split = operation._split
+                                found = False
+                                while split:
+                                    split_context = split._context
+                                    if split_context._ref_count == 1:
+                                        split_parent._split = split._split
+                                        split = split._split
+                                        continue
+                                    elif depth <= split._min_depth:
+                                        split._min_depth = depth
+                                        try:
+                                            merge_call = merge_rules[split._name]
+                                        except KeyError:
+                                            split_parent = split
+                                            split = split._split
+                                            continue
+                                        else:
+                                            try:
+                                                merge_dict = merges[split_context]
+                                            except KeyError:
+                                                merge_dict = {}
+                                                merges[split_context] = merge_dict
+                                            try:
+                                                merge = merge_dict[(operation._state, target_state, merge_call._call)]
+                                            except KeyError:
+                                                operation = Merge(operation, split, merge_call)
+                                                merge_dict[
+                                                    (operation._state, target_state, merge_call._call)] = operation
+                                                assert operation._split is not None
+                                                split_parent = operation._split
+                                                split = split._split
+                                                del merge_dict
+                                            else:
+                                                merge.add_predecessor(operation, split)
+                                                found = True
+                                                del merge
+                                                del merge_dict
+                                                break
+                                    else:
+                                        break
+                                del split_parent
+                                del split
+                                if not found:
+                                    # goto symbol, then loop back for another round
+                                    operations.append(
+                                        GoTo(operation, goto_table[operation._state._state_id][target_state]))
+                                del operation
+                                del input_operation
+                            else:
+                                next_operations.append(GoTo(context.InputToken(input_operation, token), action))
                                 del input_operation
                         del parent
 
@@ -692,10 +571,10 @@ class Parser(object):
                             else:
                                 tentative_roots = root_operations
                                 root_operations = []
-                                for op in tentative_roots:
-                                    if token._id in action_table[op._state._state_id]:
-                                        root_operations.append(op)
-                                del op
+                                for tentative_op in tentative_roots:
+                                    if token._id in action_table[tentative_op._state._state_id]:
+                                        root_operations.append(tentative_op)
+                                del tentative_op
                                 if root_operations:
                                     # found some contexts that were willing to process this token, resume
                                     del tentative_roots
@@ -709,17 +588,18 @@ class Parser(object):
 
                 # Syntax error: try to recover
                 # first, flatten all operations
-                recovery_operations = [RootOperation(recovery_operation._state, recovery_operation._split) for
-                                       recovery_operation in recovery_operations]
+                recovery_root_operations = [RootOperation(recovery_operation._state, recovery_operation._split) for
+                                            recovery_operation in recovery_operations]
+                recovery_operations.clear()
 
                 # find all grammar rules that were being parsed
                 current_rules = set()
-                for recovery_operation in recovery_operations:
+                for recovery_operation in recovery_root_operations:
                     states = [(recovery_operation._state._state_id, 0)]
                     seen_states = set()
                     while states:
-                        state, depth = states.pop(0)
-                        for actions in action_table[state].values():
+                        state_id, depth = states.pop(0)
+                        for actions in action_table[state_id].values():
                             for action, _ in actions:
                                 if action < 0:
                                     rule = rules[-action - 1]
@@ -729,7 +609,7 @@ class Parser(object):
                                     if action not in seen_states:
                                         seen_states.add(action)
                                         states.append((action, depth + 1))
-                        for dest in goto_table[state].values():
+                        for dest in goto_table[state_id].values():
                             if dest not in seen_states:
                                 seen_states.add(dest)
                                 states.append((dest, depth + 1))
@@ -745,8 +625,8 @@ class Parser(object):
                 # rewind all ops to a state where they can handle the error token.
                 # discard duplicate contexts
                 seen = set()
-                while recovery_operations:
-                    recovery_operation = recovery_operations.pop(-1)
+                while recovery_root_operations:
+                    recovery_operation = recovery_root_operations.pop(-1)
                     while recovery_operation._state != recovery_operation._state._parent:
                         if recovery_operation._state in seen:
                             break
@@ -761,7 +641,8 @@ class Parser(object):
                     # resume, using the error token
                     token = error_token
                     continue
-                assert False
+                # no recovery action at this stage; we can only exit
+                return []
         results = []  # type: List[Any]
         #
         # print(len(root_operations))
@@ -770,7 +651,7 @@ class Parser(object):
             if len(actions) == 1:
                 for action, _ in actions:
                     rule = rules[-action - 1]
-                    results.append(rule[2](context_v2.Production(accepted_operation._state, len(rule[1]))))
+                    results.append(rule[2](Production(accepted_operation._state, len(rule[1]))))
         if results:
             return results
         else:
@@ -780,7 +661,7 @@ class Parser(object):
         if debug:
             return self.parse_debug(filename)
         else:
-            return self.parse_v2(filename)
+            return self.parse_opt(filename)
 
     def accept(self, p: Production) -> Any:
         return p[0]

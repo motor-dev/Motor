@@ -109,7 +109,7 @@ def class_or_decltype_nested_template(self: CxxParser, p: glrp.Production) -> An
 
 
 @glrp.rule('class-or-decltype : decltype-specifier')
-@cxx11
+@cxx98
 def class_or_decltype_cxx11(self: CxxParser, p: glrp.Production) -> Any:
     return p[0]
 

@@ -173,7 +173,7 @@ def simple_type_specifier_primitive_void(self: CxxParser, p: glrp.Production) ->
 
 @glrp.rule('simple-type-specifier-2 : decltype-specifier')
 @glrp.rule('simple-type-specifier-cast : decltype-specifier')
-@cxx11
+@cxx98
 def simple_type_specifier_decltype_cxx11(self: CxxParser, p: glrp.Production) -> Any:
     return p[0]
 

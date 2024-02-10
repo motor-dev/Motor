@@ -10,7 +10,8 @@ selection-statement:
 import glrp
 from typing import Any, List
 from ...parse import CxxParser, cxx98, cxx17, cxx23, cxx98_merge
-from ....ast.statements import SwitchStatement, IfStatement, IfConstevalStatement, SelectionCondition, AmbiguousSelectionCondition, ErrorStatement
+from ....ast.statements import SwitchStatement, IfStatement, IfConstevalStatement, SelectionCondition, \
+    AmbiguousSelectionCondition, ErrorStatement
 
 
 @glrp.rule('selection-statement : "switch" "(" selection-condition ")" statement')
@@ -22,6 +23,7 @@ def selection_statement(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.rule('selection-statement : "switch" "(" [prec:right,-1]"#error" ")" statement')
 @glrp.rule('selection-statement : "if" "(" [prec:right,-1]"#error" ")" statement')
 @glrp.rule('selection-statement : "if" "(" [prec:right,-1]"#error" ")" statement [prec:left,1]"else" statement')
+@glrp.rule('selection-statement : "if" "#error" [prec:left,1]"else" statement')
 @cxx98
 def selection_statement_error(self: CxxParser, p: glrp.Production) -> Any:
     return ErrorStatement()
@@ -99,7 +101,7 @@ def not_opt_cxx23(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.merge('selection-condition')
 @cxx98_merge
 def ambiguous_selection_condition(
-    self: CxxParser, ambiguous_init_statement: List[Any], ambiguous_condition: List[Any]
+        self: CxxParser, ambiguous_init_statement: List[Any], ambiguous_condition: List[Any]
 ) -> Any:
     return AmbiguousSelectionCondition(ambiguous_init_statement + ambiguous_condition)
 
@@ -107,7 +109,7 @@ def ambiguous_selection_condition(
 @glrp.merge('selection-condition')
 @cxx98_merge
 def ambiguous_selection_condition_2(
-    self: CxxParser, ambiguous_simple_declaration: List[Any], ambiguous_condition_2: List[Any]
+        self: CxxParser, ambiguous_simple_declaration: List[Any], ambiguous_condition_2: List[Any]
 ) -> Any:
     return AmbiguousSelectionCondition(ambiguous_simple_declaration + ambiguous_condition_2)
 
@@ -115,6 +117,6 @@ def ambiguous_selection_condition_2(
 @glrp.merge('selection-condition')
 @cxx98_merge
 def ambiguous_selection_condition_3(
-    self: CxxParser, continue_declarator_list: List[Any], ambiguous_init_declarator_initializer: List[Any]
+        self: CxxParser, continue_declarator_list: List[Any], ambiguous_init_declarator_initializer: List[Any]
 ) -> Any:
     return AmbiguousSelectionCondition(continue_declarator_list + ambiguous_init_declarator_initializer)
