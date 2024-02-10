@@ -91,7 +91,7 @@ def nested_name_specifier_element_template(self: CxxParser, p: glrp.Production) 
 
 
 @glrp.rule('nested-name-specifier : decltype-specifier [prec:left,2]"::"')
-@cxx11
+@cxx98
 def nested_name_specifier_cxx11(self: CxxParser, p: glrp.Production) -> Any:
     return [DecltypeSpecifierId(p[0])]
 

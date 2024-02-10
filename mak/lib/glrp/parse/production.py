@@ -1,27 +1,25 @@
-from ..symbol import Symbol
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from .context import State
 
 
 class Production(object):
-    __slots__ = ('_context', '_index')
+    __slots__ = ('_state', '_length')
 
-    def __init__(self, context, prod_len):
-        # type: (Context, int) -> None
-        self._context = context
-        self._index = len(self._context._prod_stack) - prod_len
+    def __init__(self, state: "State", prod_len: int) -> None:
+        self._state = state
+        self._length = prod_len
 
     def __len__(self):
         # type: () -> int
-        return len(self._context._prod_stack) - self._index
+        return self._length
 
     def __getitem__(self, index):
         # type: (int) -> Any
-        context = self._context
-        index += self._index
-        assert index >= 0
-        return context._prod_stack[index]
-
-
-if TYPE_CHECKING:
-    from typing import Any
-    from .context import Context
+        state = self._state
+        index += 1
+        while index < self._length:
+            state = state._parent
+            index += 1
+        return state._value

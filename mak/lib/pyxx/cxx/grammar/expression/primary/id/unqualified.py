@@ -83,7 +83,7 @@ def unqualified_literal_operator_id_cxx11(self: CxxParser, p: glrp.Production) -
 
 
 @glrp.rule('unqualified-id : "~" destructor-disambiguation decltype-specifier')
-@cxx11
+@cxx98
 def unqualified_destructor_decltype_id_cxx11(self: CxxParser, p: glrp.Production) -> Any:
     return DestructorId(p[0].position, p[2])
 

@@ -21,7 +21,7 @@ defining-type-specifier-seq:
 
 import glrp
 from typing import Any
-from .....parse import CxxParser, cxx98
+from .....parse import CxxParser, cxx98, cxx11
 from ......ast.type import TypeSpecifierSeq, DefiningTypeSpecifierSeq
 from . import simple
 from . import elaborated
@@ -60,16 +60,21 @@ def type_specifier_seq_end(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.rule('defining-type-specifier-2 : type-specifier-2')
 @glrp.rule('defining-type-specifier-2 : class-specifier')
 @glrp.rule('defining-type-specifier-2 : enum-specifier')
-@glrp.rule('defining-type-specifier-3 : type-specifier-3')
 @cxx98
 def defining_type_specifier(self: CxxParser, p: glrp.Production) -> Any:
+    return p[0]
+
+
+@glrp.rule('defining-type-specifier-3 : type-specifier-3')
+@cxx11
+def defining_type_specifier_cxx11(self: CxxParser, p: glrp.Production) -> Any:
     return p[0]
 
 
 @glrp.rule('defining-type-specifier-seq : defining-type-specifier-1 defining-type-specifier-seq')
 @glrp.rule('defining-type-specifier-seq : defining-type-specifier-2 defining-type-specifier-seq-tail')
 @glrp.rule('defining-type-specifier-seq-tail : defining-type-specifier-3 defining-type-specifier-seq-tail')
-@cxx98
+@cxx11
 def defining_type_specifier_seq(self: CxxParser, p: glrp.Production) -> Any:
     result = p[1]
     result.add(p[0])
@@ -77,6 +82,6 @@ def defining_type_specifier_seq(self: CxxParser, p: glrp.Production) -> Any:
 
 
 @glrp.rule('defining-type-specifier-seq-tail : attribute-specifier-seq?')
-@cxx98
+@cxx11
 def defining_type_specifier_seq_end(self: CxxParser, p: glrp.Production) -> Any:
     return DefiningTypeSpecifierSeq(p[0])

@@ -294,6 +294,7 @@ class Cxx98Lexer(glrp.Lexer):
             '__restrict': 'attribute-specifier-macro',
             '__extension__': 'attribute-specifier-macro',
             '__typeof': 'decltype-macro',
+            '__typeof__': 'decltype-macro',
             '__inline': 'decl-specifier-macro',
             '__inline__': 'decl-specifier-macro',
             '__has_unique_object_representations': 'type-trait-macro-function',
@@ -346,7 +347,8 @@ class Cxx98Lexer(glrp.Lexer):
             '__is_union': 'type-trait-macro-function',
             '__is_unsigned': 'type-trait-macro-function',
             '__is_volatile': 'type-trait-macro-function',
-            '__reference_binds_to_temporary': 'type-trait-macro-function'
+            '__reference_binds_to_temporary': 'type-trait-macro-function',
+            '__reference_constructs_from_temporary': 'type-trait-macro-function',
         }
 
     def add_macro(self, name: str, value: str) -> None:

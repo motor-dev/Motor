@@ -236,8 +236,8 @@ def primary_expression_nullptr_cxx20(self: CxxParser, p: glrp.Production) -> Any
 
 @glrp.rule('string-literal-list : "string-literal" string-literal-list?')
 @glrp.rule('string-literal-list? : "string-literal" string-literal-list?')
-@cxx11
-def string_literal_list_cxx11(self: CxxParser, p: glrp.Production) -> Any:
+@cxx98
+def string_literal_list(self: CxxParser, p: glrp.Production) -> Any:
     result = p[1]
     result.insert(0, StringLiteral(p[0].value))
     return result

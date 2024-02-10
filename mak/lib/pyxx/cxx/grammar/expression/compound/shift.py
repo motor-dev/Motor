@@ -30,7 +30,7 @@ def shift_expression_right(self: CxxParser, p: glrp.Production) -> Any:
     return BinaryExpression(p[0], p[2], '>>')
 
 
-@glrp.rule('constant-expression#[prec:left,11] : constant-expression# [prec:left,11]">>" constant-expression')
+@glrp.rule('constant-expression#[prec:left,11] : constant-expression# [prec:left,11]">>" constant-expression#')
 @cxx98
 @deprecated_cxx11
 def shift_expression_right_cxx98_only(self: CxxParser, p: glrp.Production) -> Any:

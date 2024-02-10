@@ -172,9 +172,6 @@ def _create_productions(rules, merges, index, log, name_map, terminals, start_id
             except KeyError:
                 productions[prod_symbol] = Grammar.Production(prod_symbol, [rule])
 
-    if not errors:
-        pass
-
     if errors:
         raise SyntaxError('Unable to build grammar')
 
@@ -192,6 +189,49 @@ def _create_productions(rules, merges, index, log, name_map, terminals, start_id
                 log.warning(
                     '%s:%d: Rule %r defined, but not used', prod[0]._filename, prod[0]._lineno, prod[0]._prod_name
                 )
+
+    # check infinite cycles
+    terminates = [True for _ in terminals] + [False for _ in productions]
+
+    # Then propagate termination until no change:
+    change = True
+    while change:
+        change = False
+        for n, prods in productions.items():
+            for rule in prods:
+                # Production p terminates iff all of its rhs symbols terminate.
+                for x in rule:
+                    if not terminates[x]:
+                        # The symbol s does not terminate,
+                        # so production p does not terminate.
+                        p_terminates = False
+                        break
+                else:
+                    # didn't break from the loop,
+                    # so every symbol s terminates
+                    # so production p terminates.
+                    p_terminates = True
+
+                if p_terminates:
+                    # symbol n terminates!
+                    if not terminates[n]:
+                        terminates[n] = True
+                        change = True
+                    # Don't need to consider any more productions for this n.
+                    break
+
+        if not change:
+            break
+
+    for s, term in enumerate(terminates):
+        if not term:
+            log.error('infinite cycle detected for symbol %s' % name_map[s])
+            prod = productions[s]
+            for rule in prod:
+                log.note('%s:%d: %s' % (rule._filename, rule._lineno, rule.to_string(name_map)))
+            errors = True
+    if errors:
+        raise SyntaxError('Unable to build grammar')
 
     changed = True
     while changed:
