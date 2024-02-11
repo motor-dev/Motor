@@ -14,9 +14,13 @@ jobs:
           command: |
             & 'python' waf configure
       - run:
-          name: Build Android Nougat Clang
+          name: Build Android 13 Clang
           command: |
-            & 'python' waf build:android_nougat_7.1-clang-5.0.300080:debug --werror
+            & 'python' waf build:android_13-clang-12.0.9:debug --werror
+      - run:
+          name: Build Android 14 Clang
+          command: |
+            & 'python' waf build:android_14-clang-12.0.9:debug --werror
 
   windows:
     executor:
@@ -28,11 +32,27 @@ jobs:
           command: |
             & 'python' waf configure
       - run:
-          name: Build Windows MSVC x64
+          name: Build Windows MSVC 2017 x64
+          command: |
+            & 'python' waf build:windows_amd64-msvc_x64-14.16:debug --tests --werror
+      - run:
+          name: Build Windows MSVC 2017 ARM64
+          command: |
+            & 'python' waf build:windows_arm64-msvc_arm64-14.16:debug --werror
+      - run:
+          name: Build Windows MSVC 2019 x64
+          command: |
+            & 'python' waf build:windows_amd64-msvc_x64-14.29:debug --tests --werror
+      - run:
+          name: Build Windows MSVC 2019 ARM64
+          command: |
+            & 'python' waf build:windows_arm64-msvc_arm64-14.29:debug --werror
+      - run:
+          name: Build Windows MSVC 2022 x64
           command: |
             & 'python' waf build:windows_amd64-msvc_x64-14.38:debug --tests --werror
       - run:
-          name: Build Windows MSVC ARM64
+          name: Build Windows MSVC 2022 ARM64
           command: |
             & 'python' waf build:windows_arm64-msvc_arm64-14.38:debug --werror
 
