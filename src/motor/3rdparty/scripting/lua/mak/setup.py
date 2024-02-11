@@ -57,7 +57,8 @@ def setup_source(setup_context: build_framework.SetupContext) -> bool:
     try:
         node = build_framework.pkg_unpack(setup_context, 'lua_src', LUA_SOURCES,
                                           setup_context.path.parent.ant_glob(['patches/*.*'], remove=False))
-    except waflib.Errors.WafError:
+    except waflib.Errors.WafError as e:
+        print(e)
         return False
     else:
         setup_context.env.LUA_SOURCE = node.path_from(setup_context.package_node)
