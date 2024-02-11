@@ -281,6 +281,7 @@ class AndroidPlatform(_Platform):
                                                                    ndk_config.get_libpath()]
         )
         env.append_value('D8FLAGS', ['--lib', os.path.join(self.sdk_path, 'android.jar')])
+        env.DEST_BINFMT = 'efl'
 
 
 class AndroidLoader(_Platform):

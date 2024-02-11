@@ -10,6 +10,28 @@ def options(option_context: build_framework.OptionsContext) -> None:
     option_group = option_context.get_option_group('SDK paths and options')
     assert option_group is not None
 
+    jdk_path = os.environ.get('JAVA_HOME', '')
+    if sys.platform == 'win32':
+        import winreg
+        try:
+            try:
+                key = winreg.OpenKey(
+                    winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Wow6432Node\Microsoft\VisualStudio\Android'
+                )
+            except OSError:
+                try:
+                    key = winreg.OpenKey(
+                        winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\VisualStudio\Android'
+                    )
+                except OSError:
+                    key = winreg.OpenKey(
+                        winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\VisualStudio\Android', 0,
+                        winreg.KEY_READ | winreg.KEY_WOW64_64KEY
+                    )
+            jdk_path = winreg.QueryValueEx(key, 'JavaHome')[0]
+        except OSError:
+            pass
+
     sdk_path = ''
     ndk_paths = []
 
@@ -27,10 +49,15 @@ def options(option_context: build_framework.OptionsContext) -> None:
     path_list = os.environ.get('PATH', '').split(os.pathsep)
     if os.path.isdir('/usr/lib/android-sdk'):
         path_list.append('/usr/lib/android-sdk/tools/bin')
-    for vstudio_root_path in (r'C:\Microsoft\AndroidSDK', r'C:\ProgramData\Microsoft\AndroidSDK'):
+    for vstudio_root_path in (
+            r'C:\Microsoft\AndroidSDK',
+            r'C:\ProgramData\Microsoft\AndroidSDK',
+            r'C:\Program Files\Android',
+            r'C:\Program Files (x86)\Android'
+    ):
         try:
             for p in os.listdir(vstudio_root_path):
-                path_list.append(os.path.join(vstudio_root_path, p, 'tools'))
+                path_list.append(os.path.join(vstudio_root_path, p, 'platform-tools'))
         except OSError:
             pass
     for vstudio_root_path in (
@@ -61,27 +88,6 @@ def options(option_context: build_framework.OptionsContext) -> None:
             p = os.path.realpath(os.path.join(path, 'ndk-build' + ext))
             if os.path.isfile(p):
                 ndk_paths.append(path)
-    jdk_path = ''
-    if sys.platform == 'win32':
-        import winreg
-        try:
-            try:
-                key = winreg.OpenKey(
-                    winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Wow6432Node\Microsoft\VisualStudio\Android'
-                )
-            except OSError:
-                try:
-                    key = winreg.OpenKey(
-                        winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\VisualStudio\Android'
-                    )
-                except OSError:
-                    key = winreg.OpenKey(
-                        winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\VisualStudio\Android', 0,
-                        winreg.KEY_READ | winreg.KEY_WOW64_64KEY
-                    )
-            jdk_path = winreg.QueryValueEx(key, 'JavaHome')[0]
-        except OSError:
-            pass
     option_group.add_option(
         '--android-jdk', action='store', default=jdk_path, dest='android_jdk', help='Path to the android JDK home'
     )
