@@ -17,7 +17,7 @@ import re
 
 
 def json_minify(string, strip_space=True):
-    tokenizer = re.compile('"|(/\*)|(\*/)|(//)|\n|\r')
+    tokenizer = re.compile(r'"|(/\*)|(\*/)|(//)|\n|\r')
     end_slashes_re = re.compile(r'(\\)*$')
 
     in_string = False
@@ -33,7 +33,7 @@ def json_minify(string, strip_space=True):
             tmp = string[index:match.start()]
             if not in_string and strip_space:
                 # replace white space as defined in standard
-                tmp = re.sub('[ \t\n\r]+', '', tmp)
+                tmp = re.sub(r'[ \t\n\r]+', '', tmp)
             new_str.append(tmp)
         elif not strip_space:
             # Replace comments with white space so that the JSON parser reports
