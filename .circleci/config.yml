@@ -12,11 +12,11 @@ jobs:
       - run:
           name: Configure
           command: |
-            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf configure
+            & 'python' waf configure
       - run:
           name: Build Android Nougat Clang
           command: |
-            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:android_nougat_7.1-clang-5.0.300080:debug --werror
+            & 'python' waf build:android_nougat_7.1-clang-5.0.300080:debug --werror
 
   windows:
     executor:
@@ -26,15 +26,15 @@ jobs:
       - run:
           name: Configure
           command: |
-            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf configure
+            & 'python' waf configure
       - run:
           name: Build Windows MSVC x64
           command: |
-            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_amd64-msvc_x64-14.29:debug --tests --werror
+            & 'python' waf build:windows_amd64-msvc_x64-14.29:debug --tests --werror
       - run:
           name: Build Windows MSVC ARM64
           command: |
-            & 'C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python39_64\python' waf build:windows_arm64-msvc_arm64-14.29:debug --werror
+            & 'python' waf build:windows_arm64-msvc_arm64-14.29:debug --werror
 
   macOS:
     macos:
