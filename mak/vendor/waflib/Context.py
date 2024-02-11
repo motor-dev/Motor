@@ -6,7 +6,7 @@
 Classes and functions enabling the command system
 """
 
-import os, re, imp, sys
+import os, re, types, sys
 from waflib import Utils, Errors, Logs
 import waflib.Node
 
@@ -643,7 +643,7 @@ class Context(ctx):
 		is typically called once for a programming language group, see for
 		example :py:mod:`waflib.Tools.compiler_c`
 
-		:param var: glob expression, for example 'cxx\_\*.py'
+		:param var: glob expression, for example 'cxx/*.py'
 		:type var: string
 		:param ban: list of exact file names to exclude
 		:type ban: list of string
@@ -690,7 +690,7 @@ def load_module(path, encoding=None):
 	except KeyError:
 		pass
 
-	module = imp.new_module(WSCRIPT_FILE)
+	module = types.ModuleType(WSCRIPT_FILE)
 	try:
 		code = Utils.readf(path, m='r', encoding=encoding)
 	except EnvironmentError:
