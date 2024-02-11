@@ -275,7 +275,7 @@ def gather_wince_supported_platforms():
 
 def gather_msvc_detected_versions():
 	#Detected MSVC versions!
-	version_pattern = re.compile('^(\d\d?\.\d\d?)(Exp)?$')
+	version_pattern = re.compile(r'^(\d\d?\.\d\d?)(Exp)?$')
 	detected_versions = []
 	for vcver,vcvar in (('VCExpress','Exp'), ('VisualStudio','')):
 		prefix = 'SOFTWARE\\Wow6432node\\Microsoft\\' + vcver
@@ -355,7 +355,7 @@ class target_compiler(object):
 
 @conf
 def gather_wsdk_versions_from_root(conf, versions, all_versions):
-	version_pattern = re.compile('^v..?.?\...?.?')
+	version_pattern = re.compile(r'^v..?.?\...?.?')
 	index = 0
 	while 1:
 		try:
@@ -529,7 +529,7 @@ def gather_icl_versions(conf, versions):
 	:param versions: list to modify
 	:type versions: list
 	"""
-	version_pattern = re.compile('^...?.?\....?.?')
+	version_pattern = re.compile(r'^...?.?\....?.?')
 	try:
 		all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Intel\\Compilers\\C++')
 	except OSError:
@@ -584,7 +584,7 @@ def gather_intel_composer_versions(conf, versions):
 	:param versions: list to modify
 	:type versions: list
 	"""
-	version_pattern = re.compile('^...?.?\...?.?.?')
+	version_pattern = re.compile(r'^...?.?\...?.?.?')
 	try:
 		all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Intel\\Suites')
 	except OSError:
@@ -688,7 +688,7 @@ def find_lt_names_msvc(self, libname, is_static=False):
 				if not is_static and ltdict.get('library_names', ''):
 					dllnames=ltdict['library_names'].split()
 					dll=dllnames[0].lower()
-					dll=re.sub('\.dll$', '', dll)
+					dll=re.sub(r'\.dll$', '', dll)
 					return (lt_libdir, dll, False)
 				elif ltdict.get('old_library', ''):
 					olib=ltdict['old_library']
@@ -705,7 +705,7 @@ def find_lt_names_msvc(self, libname, is_static=False):
 @conf
 def libname_msvc(self, libname, is_static=False):
 	lib = libname.lower()
-	lib = re.sub('\.lib$','',lib)
+	lib = re.sub(r'\.lib$','',lib)
 
 	if lib in g_msvc_systemlibs:
 		return lib
@@ -752,11 +752,11 @@ def libname_msvc(self, libname, is_static=False):
 		for libn in libnames:
 			if os.path.exists(os.path.join(path, libn)):
 				Logs.debug('msvc: lib found: %s', os.path.join(path,libn))
-				return re.sub('\.lib$', '',libn)
+				return re.sub(r'\.lib$', '',libn)
 
 	#if no lib can be found, just return the libname as msvc expects it
 	self.fatal('The library %r could not be found' % libname)
-	return re.sub('\.lib$', '', libname)
+	return re.sub(r'\.lib$', '', libname)
 
 @conf
 def check_lib_msvc(self, libname, is_static=False, uselib_store=None):
