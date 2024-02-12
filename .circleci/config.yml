@@ -36,10 +36,6 @@ jobs:
           command: |
             & 'python' waf build:windows_amd64-msvc_x64-14.16:debug --tests --werror
       - run:
-          name: Build Windows MSVC 2017 ARM64
-          command: |
-            & 'python' waf build:windows_arm64-msvc_arm64-14.16:debug --werror
-      - run:
           name: Build Windows MSVC 2019 x64
           command: |
             & 'python' waf build:windows_amd64-msvc_x64-14.29:debug --tests --werror
