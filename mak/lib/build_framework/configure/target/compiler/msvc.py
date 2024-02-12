@@ -7,7 +7,7 @@ import waflib.Errors
 import waflib.Logs
 import waflib.Utils
 import waflib.Tools.msvc
-from typing import Dict, List, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 from ....options import ConfigurationContext
 from .compiler import Compiler, detect_executable
 from ..platform import Platform
@@ -82,6 +82,13 @@ MSVC_PREDEFINED_MACROS = (
 
 
 class MSVC(Compiler):
+    VECTORIZED_FLAGS = {
+        'amd64': (
+            ('.avx2', ['/arch:avx2']),
+        ),
+        'arm64': (
+        ),
+    }
 
     def __init__(
             self,
@@ -267,6 +274,29 @@ class MSVC(Compiler):
         env.CXXFLAGS_cxx17 = ['/std:c++17']
         env.CXXFLAGS_cxx20 = ['/std:c++20']
         env.CXXFLAGS_cxx23 = ['/std:c++latest']
+
+        env.append_unique('VECTOR_OPTIM_VARIANTS', [''])
+        for variant_name, flags in self.VECTORIZED_FLAGS.get(self.arch, []):
+            if self.is_valid(configuration_context, flags + ['/WX']):
+                env.append_unique('VECTOR_OPTIM_VARIANTS', [variant_name])
+                env['CFLAGS_%s' % variant_name] = flags
+                env['CXXFLAGS_%s' % variant_name] = flags
+
+    def is_valid(self, configuration_context: ConfigurationContext, extra_flags: Optional[List[str]] = None) -> bool:
+        node = configuration_context.bldnode.make_node('main.cxx')
+        tgtnode = node.change_ext('')
+        node.write('int main() {}\n')
+        try:
+            result, out, err = self.run_cxx(
+                [node.abspath(), '/c', '/Fo:' + tgtnode.abspath()] + (extra_flags or [])
+            )
+        except OSError:
+            # print(e)
+            return False
+        finally:
+            node.delete()
+            tgtnode.delete()
+        return result == 0
 
 
 all_icl_platforms = (
