@@ -268,8 +268,8 @@ class Clang(GnuCompiler):
             env.append_unique('CXXFLAGS_debug', ['-fms-runtime-lib=dll_dbg'])
             env.append_unique('CXXFLAGS_profile', ['-fms-runtime-lib=dll'])
             env.append_unique('CXXFLAGS_final', ['-fms-runtime-lib=dll'])
-            # Setup does not use vthe dbeug/profile/final features,
-            # so avoid adding this flag in teh general flags section
+            # Setup does not use the debug/profile/final features,
+            # so avoid adding this flag in the general flags section
             env.append_unique('LDFLAGS_debug', ['-Wl,-nodefaultlib'])
             env.append_unique('LDFLAGS_profile', ['-Wl,-nodefaultlib'])
             env.append_unique('LDFLAGS_final', ['-Wl,-nodefaultlib'])

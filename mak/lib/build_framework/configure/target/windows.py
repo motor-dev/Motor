@@ -30,12 +30,13 @@ def _is_valid_msvc(
 ) -> bool:
     assert isinstance(compiler, MSVC)
     node = configuration_context.bldnode.make_node('main.cxx')
-    tgtnode = node.change_ext('.obj')
+    tgtnode = node.change_ext('.exe')
     node.write('#include <cstdio>\n#include <cfloat>\n#include <new>\nint main() {}\n')
     try:
         result, out, err = compiler.run_cxx(
-            [node.abspath(), '/nologo', '/c', '/Fo%s' % tgtnode.abspath()] +
-            ['/I%s' % i for i in compiler.includes]
+            [node.abspath(), '/nologo'] +
+            ['/I%s' % i for i in compiler.includes] +
+            ['/link', '/out:%s' % tgtnode.abspath()] + ['/LIBPATH:%s' % l for l in compiler.libdirs]
         )
     except OSError:
         return False
