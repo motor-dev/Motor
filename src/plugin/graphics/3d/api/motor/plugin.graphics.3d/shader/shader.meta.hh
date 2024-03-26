@@ -40,4 +40,5 @@ public:
 
 }  // namespace Motor
 
+#include <motor/plugin.graphics.3d/shader/shader.meta.factory.hh>
 #endif

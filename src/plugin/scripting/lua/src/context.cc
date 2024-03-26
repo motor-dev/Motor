@@ -3,6 +3,7 @@
 
 #include <stdafx.h>
 
+#include <motor/meta/interfacetable.hh>
 #include <context.hh>
 #include <runtime/object.hh>
 #include <runtime/plugin.hh>
@@ -194,8 +195,8 @@ minitl::format_buffer< 1024u > Context::tostring(lua_State* state, int element)
         {
             lua_pop(state, 2);
             auto* userdata = (Meta::Value*)lua_touserdata(state, element);
-            return minitl::format<>(FMT("({0}[{1}]"), userdata->type().metaclass->name.c_str(),
-                                    userdata);
+            return minitl::format<>(FMT("({0}[{1}]"),
+                                    userdata->type().metaclass->fullname().str().c_str(), userdata);
         }
         lua_pop(state, 1);
         luaL_getmetatable(state, "Motor.Plugin");

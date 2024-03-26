@@ -17,4 +17,5 @@ public:
 
 }  // namespace Motor
 
+#include <motor/plugin.graphics.3d/mesh/mesh.meta.factory.hh>
 #endif

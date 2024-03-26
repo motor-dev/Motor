@@ -21,7 +21,7 @@ from . import function
 @glrp.rule('init-declarator-list : init-declarator')
 @cxx98
 def init_declarator_list_end(self: CxxParser, p: glrp.Production) -> Any:
-    return [[p[0]]]
+    return [[((0, 0), p[0])]]
 
 
 @glrp.rule('init-declarator-list : init-declarator-list "," init-declarator')
@@ -29,7 +29,7 @@ def init_declarator_list_end(self: CxxParser, p: glrp.Production) -> Any:
 def init_declarator_list(self: CxxParser, p: glrp.Production) -> Any:
     result = p[0]
     for r in result:
-        r.append(p[2])
+        r.append((p[1].position, p[2]))
     return result
 
 
@@ -54,7 +54,7 @@ def init_declarator_cxx20(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.merge('init-declarator')
 @cxx98_merge
 def ambiguous_init_declarator_initializer(
-    self: CxxParser, continue_declarator_list: List[Any], end_declarator_list: List[Any]
+        self: CxxParser, continue_declarator_list: List[Any], end_declarator_list: List[Any]
 ) -> Any:
     return AmbiguousInitDeclarator(continue_declarator_list + end_declarator_list)
 
@@ -62,8 +62,8 @@ def ambiguous_init_declarator_initializer(
 @glrp.merge('init-declarator-list')
 @cxx98_merge
 def ambiguous_init_declarator_list(
-    self: CxxParser, ambiguous_template_argument_list_ellipsis: List[Any], id_template: List[Any],
-    ambiguous_initializer_clause: List[Any], ambiguous_init_declarator_list: List[Any], ambiguous_type_id: List[Any]
+        self: CxxParser, ambiguous_template_argument_list_ellipsis: List[Any], id_template: List[Any],
+        ambiguous_initializer_clause: List[Any], ambiguous_init_declarator_list: List[Any], ambiguous_type_id: List[Any]
 ) -> Any:
     return sum(
         ambiguous_template_argument_list_ellipsis + id_template + ambiguous_initializer_clause +

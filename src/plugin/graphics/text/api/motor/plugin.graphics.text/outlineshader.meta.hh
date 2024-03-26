@@ -21,4 +21,5 @@ public:
 
 }  // namespace Motor
 
+#include <motor/plugin.graphics.text/outlineshader.meta.factory.hh>
 #endif

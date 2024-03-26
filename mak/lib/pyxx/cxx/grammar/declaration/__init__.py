@@ -56,7 +56,7 @@ identifier-list:
 """
 
 import glrp
-from typing import Any, List
+from typing import Any, Dict, List, Tuple
 from ...parse import CxxParser, cxx98, cxx11, cxx17, cxx20, cxx98_merge
 from ....ast.declarations import AmbiguousDeclaration, SimpleDeclaration, StructuredBindingDeclaration, StaticAssert, \
     AliasDeclaration, ErrorDeclaration
@@ -71,6 +71,13 @@ from . import using
 from . import asm
 from . import linkage
 from . import attribute
+from ....messages import Logger, error
+
+
+@error
+def invalid_attribute_alias(self: Logger, position: Tuple[int, int]) -> Dict[str, Any]:
+    """an attribute cannot appear before an alias declaration"""
+    return locals()
 
 
 @glrp.rule('declaration-seq? : ')
@@ -161,13 +168,16 @@ def block_declaration_cxx20(self: CxxParser, p: glrp.Production) -> Any:
 #    return SimpleDeclaration(p[0], None, [InitDeclarator(p[3], p[2], None)])
 
 
-# todo: attribute-specifier-seq?, typename? not allowed
 @glrp.rule(
     'alias-declaration : attribute-specifier-seq? begin-declaration "using" "typename"? "identifier" attribute-specifier-seq? "=" defining-type-id ";"'
 )
 @cxx11
 def alias_declaration(self: CxxParser, p: glrp.Production) -> Any:
-    return AliasDeclaration(p[0], p[4], p[5], p[7])
+    for attribute in p[0]:
+        if not attribute.is_extended():
+            invalid_attribute_alias(self.logger, attribute.position)
+            break
+    return AliasDeclaration(p[0] + p[5], p[4], p[7])
 
 
 @glrp.rule('alias-declaration : attribute-specifier-seq? begin-declaration "using" "#error" ";"')

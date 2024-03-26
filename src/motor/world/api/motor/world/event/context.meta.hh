@@ -13,4 +13,5 @@ struct EventContext
 
 }}  // namespace Motor::World
 
+#include <motor/world/event/context.meta.factory.hh>
 #endif

@@ -48,10 +48,13 @@ class AmbiguousTemplateParameterList(AbstractTemplateParameterList):
 class TemplateDeclaration(Declaration):
 
     def __init__(
-            self, attributes: List[Attribute], parameters: List[List[TemplateParameter]],
-            requires_clause: Optional["RequiresClause"], is_extern: bool, declaration: Declaration
+            self,
+            parameters: List[List[TemplateParameter]],
+            requires_clause: Optional["RequiresClause"],
+            is_extern: bool,
+            declaration: Declaration
     ) -> None:
-        self.attributes = attributes
+        Declaration.__init__(self, [])
         if len(parameters) == 1:
             self.parameters = TemplateParameterList(parameters[0])  # type: AbstractTemplateParameterList
         else:
@@ -59,6 +62,9 @@ class TemplateDeclaration(Declaration):
         self.requires_clause = requires_clause
         self.declaration = declaration
         self.is_extern = is_extern
+
+    def add_attributes(self, attributes: List[Attribute]) -> None:
+        self.declaration.add_attributes(attributes)
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_template_declaration(self)

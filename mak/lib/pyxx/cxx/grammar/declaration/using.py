@@ -17,13 +17,19 @@ using-declarator:
 """
 
 import glrp
-from typing import Any
+from typing import Any, Dict, Tuple
 from ...parse import CxxParser, cxx98, cxx17, deprecated_cxx17
 from ....ast.declarations import UsingDeclaration
 from ....ast.reference import AbstractReference, Reference, TypenameReference, PackExpandReference, TemplateSpecifierId
+from ....messages import error, Logger
 
 
-# TODO:attribute-specifier-seq? empty, template?
+@error
+def invalid_attribute_using_declaration(self: Logger, position: Tuple[int, int]) -> Dict[str, Any]:
+    """an attribute cannot appear before a using declaration"""
+    return locals()
+
+
 @glrp.rule(
     'using-declaration : attribute-specifier-seq? begin-declaration "using" "typename"? nested-name-specifier template? unqualified-id ";"'
 )
@@ -31,20 +37,23 @@ from ....ast.reference import AbstractReference, Reference, TypenameReference, P
 @deprecated_cxx17
 def using_declaration_nested_until_cxx17(self: CxxParser, p: glrp.Production) -> Any:
     # using :: unqualified-id ; is covered here
+    if p[0]:
+        invalid_attribute_using_declaration(self.logger, p[0][0].position)
     id = p[6]
     if p[5]:
         id = TemplateSpecifierId(p[5].position, id)
     reference = Reference(p[4] + [id])  # type: AbstractReference
     if p[3]:
         reference = TypenameReference(reference)
-    return UsingDeclaration(p[0], [reference])
+    return UsingDeclaration([reference])
 
 
-# TODO:attribute-specifier-seq? empty
 @glrp.rule('using-declaration : attribute-specifier-seq? begin-declaration "using" using-declarator-list ";"')
 @cxx17
 def using_declaration_cxx17(self: CxxParser, p: glrp.Production) -> Any:
-    return UsingDeclaration(p[0], p[3])
+    if p[0]:
+        invalid_attribute_using_declaration(self.logger, p[0][0].position)
+    return UsingDeclaration(p[3])
 
 
 @glrp.rule('using-declarator-list : using-declarator "..."?')

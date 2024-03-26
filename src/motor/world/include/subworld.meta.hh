@@ -17,4 +17,5 @@ public:
 
 }}  // namespace Motor::World
 
+#include <subworld.meta.factory.hh>
 #endif

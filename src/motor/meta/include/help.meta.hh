@@ -20,4 +20,6 @@ void help(const Meta::Value& v);
 
 }  // namespace Motor
 
+#include <help.meta.factory.hh>
+
 #endif

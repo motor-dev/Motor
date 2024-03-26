@@ -85,4 +85,5 @@ motor_api(META) u32
 
 }}  // namespace motor_meta(export=no)Motor::Meta
 
+#include <motor/meta/type.meta.factory.hh>
 #endif

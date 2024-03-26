@@ -70,7 +70,7 @@ static int resourceToString(lua_State* state)
 {
     Context::checkArg(state, 1, "Motor.Resource");
     auto* userdata = (ResourceToken*)lua_touserdata(state, 1);
-    lua_pushfstring(state, "Resource<%s>[%p]", userdata->type->name.c_str(),
+    lua_pushfstring(state, "Resource<%s>[%p]", userdata->type->fullname().str().c_str(),
                     userdata->description.operator->());
     return 1;
 }

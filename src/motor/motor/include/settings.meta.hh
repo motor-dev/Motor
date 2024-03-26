@@ -4,7 +4,7 @@
 #define MOTOR_MOTOR_SETTINGS_META_HH
 
 #include <motor/stdafx.h>
-#include <motor/settings/settings.factory.hh>
+#include <motor/settings/settings.meta.hh>
 
 namespace Motor { namespace MainSettings {
 
@@ -20,4 +20,5 @@ struct Log : public Settings::Settings< Log >
 
 }}  // namespace Motor::MainSettings
 
+#include <settings.meta.factory.hh>
 #endif

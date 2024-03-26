@@ -21,4 +21,5 @@ public:
 
 }  // namespace Motor
 
+#include <motor/plugin.scripting.python/pythonscript.meta.factory.hh>
 #endif

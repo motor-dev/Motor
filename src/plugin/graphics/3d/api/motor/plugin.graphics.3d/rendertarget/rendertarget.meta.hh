@@ -40,4 +40,5 @@ public:
 
 }  // namespace Motor
 
+#include <motor/plugin.graphics.3d/rendertarget/rendertarget.meta.factory.hh>
 #endif

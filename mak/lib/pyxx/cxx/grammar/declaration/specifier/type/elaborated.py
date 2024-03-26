@@ -10,9 +10,17 @@ elaborated-enum-specifier:
 """
 
 import glrp
-from typing import Any
+from typing import Any, Dict, Tuple
 from .....parse import CxxParser, cxx98
 from ......ast.type import ElaboratedClassTypeSpecifier, ElaboratedEnumTypeSpecifier
+
+from ......messages import error, Logger
+
+
+@error
+def invalid_attribute_elaborated_enum_specifier(self: Logger, position: Tuple[int, int]) -> Dict[str, Any]:
+    """an attribute cannot appear in an elaborated enum specifier"""
+    return locals()
 
 
 # amendment: make elaborated-type-specifier look like class-head
@@ -32,11 +40,13 @@ def elaborated_type_specifier(self: CxxParser, p: glrp.Production) -> Any:
     return p[0]
 
 
-# TODO: enum-key & attribute not allowed
+# TODO: enum-key not allowed
 # @glrp.rule('elaborated-enum-specifier : enum attribute-specifier-seq? identifier')
 @glrp.rule('elaborated-enum-specifier : enum-key attribute-specifier-seq? enum-head-name')
 @cxx98
 def elaborated_enum_specifier(self: CxxParser, p: glrp.Production) -> Any:
+    if p[1]:
+        invalid_attribute_elaborated_enum_specifier(self.logger, p[1][0].position)
     position, is_scoped = p[0]
     position = (position[0], p[2].position[1])
-    return ElaboratedEnumTypeSpecifier(position, is_scoped, p[1], p[2])
+    return ElaboratedEnumTypeSpecifier(position, is_scoped, p[2])

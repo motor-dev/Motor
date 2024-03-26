@@ -20,10 +20,10 @@ namespace Motor { namespace Plugin {
     raw< Meta::Class > motor_##name##_Namespace()                                                  \
     {                                                                                              \
         static Meta::Class ci = {                                                                  \
-            istring(#name),                                                                        \
             0,                                                                                     \
             motor_class< void >(),                                                                 \
             0,                                                                                     \
+            {nullptr},                                                                             \
             motor_class< void >()->objects,                                                        \
             motor_class< void >()->tags,                                                           \
             motor_class< void >()->properties,                                                     \

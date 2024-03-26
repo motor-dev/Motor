@@ -27,4 +27,5 @@ public:
 
 }  // namespace Motor
 
+#include <motor/plugin.graphics.text/bitmapfont.meta.factory.hh>
 #endif

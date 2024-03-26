@@ -120,10 +120,10 @@ bool registerGObjectClass(Gtk3Plugin& plugin, GType type)
         g_type_set_qdata(type, plugin.quark(), cls);
         raw< const Meta::Class > parentClass
             = parent ? getGObjectClass(plugin, parent) : motor_class< GObjectWrapper >();
-        Meta::Class clsTemplate = {istring(g_type_name(type)),
-                                   parentClass->size,
+        Meta::Class clsTemplate = {parentClass->size,
                                    parentClass,
                                    0,
+                                   {nullptr},
                                    parentClass->objects,
                                    parentClass->tags,
                                    parentClass->properties,
@@ -136,7 +136,7 @@ bool registerGObjectClass(Gtk3Plugin& plugin, GType type)
         new(cls) Meta::Class(clsTemplate);
         completeGObjectClass(plugin, cls, type);
         raw< const Meta::Class > registry = {cls};
-        plugin.registerValue(cls->name, Meta::Value(registry));
+        cls->owner = plugin.registerValue(istring(g_type_name(type)), Meta::Value(registry));
         return true;
     }
     else
@@ -156,10 +156,10 @@ raw< const Meta::Class > getGObjectClass(Gtk3Plugin& plugin, GType type)
         g_type_set_qdata(type, plugin.quark(), cls);
         raw< const Meta::Class > parentClass
             = parent ? getGObjectClass(plugin, parent) : motor_class< GObjectWrapper >();
-        Meta::Class clsTemplate = {istring(g_type_name(type)),
-                                   parentClass->size,
+        Meta::Class clsTemplate = {parentClass->size,
                                    parentClass,
                                    0,
+                                   {nullptr},
                                    parentClass->objects,
                                    parentClass->tags,
                                    parentClass->properties,
@@ -172,7 +172,7 @@ raw< const Meta::Class > getGObjectClass(Gtk3Plugin& plugin, GType type)
         new(cls) Meta::Class(clsTemplate);
         completeGObjectClass(plugin, cls, type);
         raw< const Meta::Class > registry = {cls};
-        plugin.registerValue(cls->name, Meta::Value(registry));
+        cls->owner = plugin.registerValue(istring(g_type_name(type)), Meta::Value(registry));
     }
     return raw< const Meta::Class > {cls};
 }

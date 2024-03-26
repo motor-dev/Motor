@@ -139,7 +139,7 @@ def create_cpu_kernel(
                     includes=getattr(tgen, 'includes') + [build_context.srcnode],
                     use=getattr(tgen, 'use') + [env.ENV_PREFIX % 'plugin.compute.cpu'] + ([variant] if variant else []),
                     uselib=getattr(tgen, 'uselib'),
-                    nomaster=set(),
+                    masterfiles={}
                 )
                 kernel_task_gen.env.PLUGIN = task_gen.env.plugin_name
                 if task_gen.name != target_name:
@@ -177,7 +177,7 @@ def create_cpu_kernel(
             uselib=getattr(tgen, 'uselib'),
             source_nodes=[('', kernel_source)],
             project_name=project_name,
-            nomaster=set(),
+            masterfiles={}
         )
 
 

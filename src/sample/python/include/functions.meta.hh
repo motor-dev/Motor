@@ -36,4 +36,5 @@ enum TestEnum
 
 }}  // namespace Motor::TestCases
 
+#include <functions.meta.factory.hh>
 #endif

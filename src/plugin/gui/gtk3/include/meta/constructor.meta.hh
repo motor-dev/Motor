@@ -21,4 +21,5 @@ public:
 
 }}  // namespace Motor::Gtk3
 
+#include <meta/constructor.meta.factory.hh>
 #endif

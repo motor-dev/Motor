@@ -54,9 +54,9 @@ public:
         return m_motorQuark;
     }
 
-    void        registerValue(const istring& name, const Meta::Value& value);
-    Meta::Type  fromGType(GType type);
-    Meta::Value fromGValue(const GValue* value);
+    raw< Meta::Object > registerValue(const istring& name, const Meta::Value& value);
+    Meta::Type          fromGType(GType type);
+    Meta::Value         fromGValue(const GValue* value);
 };
 
 }}  // namespace Motor::Gtk3

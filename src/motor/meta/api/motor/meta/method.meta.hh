@@ -63,4 +63,5 @@ public:
 
 }}  // namespace Motor::Meta
 
+#include <motor/meta/method.meta.factory.hh>
 #endif

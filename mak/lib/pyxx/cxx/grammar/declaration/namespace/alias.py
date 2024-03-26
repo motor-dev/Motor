@@ -10,10 +10,17 @@ qualified-namespace-specifier:
 """
 
 import glrp
-from typing import Any
+from typing import Any, Dict, Tuple
 from ....parse import CxxParser, cxx98
 from .....ast.declarations import NamespaceAliasDeclaration
 from .....ast.reference import Reference, TemplateSpecifierId
+from .....messages import error, Logger
+
+
+@error
+def invalid_attribute_namespace_alias(self: Logger, position: Tuple[int, int]) -> Dict[str, Any]:
+    """an attribute cannot appear before a namespace alias definition"""
+    return locals()
 
 
 # @glrp.rule('namespace-alias : "identifier"')
@@ -23,13 +30,16 @@ from .....ast.reference import Reference, TemplateSpecifierId
 #    pass
 
 
-# TODO: attribute-specifier-seq? -> empty
 @glrp.rule(
     'namespace-alias-definition : attribute-specifier-seq? begin-declaration "namespace" attribute-specifier-seq? "identifier" "=" qualified-namespace-specifier ";"'
 )
 @cxx98
 def namespace_alias_definition(self: CxxParser, p: glrp.Production) -> Any:
-    return NamespaceAliasDeclaration(p[0], p[3], p[4].value, p[6])
+    for attribute in p[0]:
+        if not attribute.is_extended():
+            invalid_attribute_namespace_alias(self.logger, attribute.position)
+            break
+    return NamespaceAliasDeclaration(p[0] + p[3], p[4].value, p[6])
 
 
 @glrp.rule('qualified-namespace-specifier : namespace-name')

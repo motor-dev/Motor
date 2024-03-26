@@ -23,7 +23,7 @@ constraint-logical-and-expression:
 """
 
 import glrp
-from typing import Any, List
+from typing import Any, Dict, List, Tuple
 from ...parse import CxxParser, cxx98, cxx11, cxx20, cxx98_merge
 from ....ast.template import TemplateDeclaration
 from ....ast.expressions import BinaryExpression, IdExpression, ThisExpression, TypeTraitExpression, NullPtrExpression, \
@@ -38,6 +38,19 @@ from . import explicit
 from . import concept
 from . import constraint
 from . import guide
+from ....messages import error, Logger
+
+
+@error
+def invalid_attribute_template(self: Logger, position: Tuple[int, int]) -> Dict[str, Any]:
+    """an attribute cannot appear before a template declaration"""
+    return locals()
+
+
+@error
+def template_declaration_multiple_entities(self: Logger, position: Tuple[int, int]) -> Dict[str, Any]:
+    """a template declaration can only declare a single entity"""
+    return locals()
 
 
 @glrp.rule('"#>" : ">"')
@@ -55,7 +68,14 @@ def template_bracket_cxx11(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.rule('template-declaration : attribute-specifier-seq? begin-declaration template-head declaration')
 @cxx98
 def template_declaration(self: CxxParser, p: glrp.Production) -> Any:
-    return TemplateDeclaration(p[0], p[2][0], p[2][1], False, p[3])
+    for attribute in p[0]:
+        if not attribute.is_extended():
+            invalid_attribute_template(self.logger, attribute.position)
+            break
+    if p[3].declared_entity_count() > 1:
+        template_declaration_multiple_entities(self.logger, p[3].declared_entity_position(1))
+    p[3].add_attributes(p[0])
+    return TemplateDeclaration(p[2][0], p[2][1], False, p[3])
 
 
 @glrp.rule(
@@ -63,13 +83,25 @@ def template_declaration(self: CxxParser, p: glrp.Production) -> Any:
 )
 @cxx98
 def template_declaration_extern(self: CxxParser, p: glrp.Production) -> Any:
-    return TemplateDeclaration(p[0], p[4][0], p[4][1], True, p[5])
+    for attribute in p[0]:
+        if not attribute.is_extended():
+            invalid_attribute_template(self.logger, attribute.position)
+            break
+    if p[5].declared_entity_count() > 1:
+        template_declaration_multiple_entities(self.logger, p[5].declared_entity_position(1))
+    p[5].add_attributes(p[0])
+    return TemplateDeclaration(p[4][0], p[4][1], True, p[5])
 
 
 @glrp.rule('template-declaration : attribute-specifier-seq? begin-declaration template-head concept-definition')
 @cxx20
 def template_declaration_concept_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    return TemplateDeclaration(p[0], p[2][0], p[2][1], False, p[3])
+    for attribute in p[0]:
+        if not attribute.is_extended():
+            invalid_attribute_template(self.logger, attribute.position)
+            break
+    p[3].add_attributes(p[0])
+    return TemplateDeclaration(p[2][0], p[2][1], False, p[3])
 
 
 @glrp.rule(
@@ -77,7 +109,12 @@ def template_declaration_concept_cxx20(self: CxxParser, p: glrp.Production) -> A
 )
 @cxx20
 def template_declaration_concept_extern_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    return TemplateDeclaration(p[0], p[4][0], p[4][1], True, p[5])
+    for attribute in p[0]:
+        if not attribute.is_extended():
+            invalid_attribute_template(self.logger, attribute.position)
+            break
+    p[5].add_attributes(p[0])
+    return TemplateDeclaration(p[4][0], p[4][1], True, p[5])
 
 
 @glrp.rule('template-head : "template" "<" template-parameter-list "#>"')

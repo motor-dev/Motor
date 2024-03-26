@@ -31,22 +31,22 @@ class Logger:
     COLOR_PATTERN = {
         'note':
             (
-                COLOR_LIST['BBLACK'], COLOR_LIST['BWHITE'], COLOR_LIST['NORMAL'], COLOR_LIST['BGREEN'],
+                COLOR_LIST['BBLACK'], COLOR_LIST['BOLD'], COLOR_LIST['NORMAL'], COLOR_LIST['BGREEN'],
                 COLOR_LIST['NORMAL']
             ),
         'info':
             (
-                COLOR_LIST['BWHITE'], COLOR_LIST['BWHITE'], COLOR_LIST['NORMAL'], COLOR_LIST['BGREEN'],
+                COLOR_LIST['BWHITE'], COLOR_LIST['BOLD'], COLOR_LIST['NORMAL'], COLOR_LIST['BGREEN'],
                 COLOR_LIST['NORMAL']
             ),
         'warning':
             (
-                COLOR_LIST['BYELLOW'], COLOR_LIST['BWHITE'], COLOR_LIST['NORMAL'], COLOR_LIST['BGREEN'],
+                COLOR_LIST['BYELLOW'], COLOR_LIST['BOLD'], COLOR_LIST['NORMAL'], COLOR_LIST['BGREEN'],
                 COLOR_LIST['NORMAL']
             ),
         'error':
             (
-                COLOR_LIST['BRED'], COLOR_LIST['BWHITE'], COLOR_LIST['BOLD'], COLOR_LIST['BGREEN'],
+                COLOR_LIST['BRED'], COLOR_LIST['BOLD'], COLOR_LIST['BOLD'], COLOR_LIST['BGREEN'],
                 COLOR_LIST['NORMAL']
             ),
     }

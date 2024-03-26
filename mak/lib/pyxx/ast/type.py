@@ -137,20 +137,14 @@ class ElaboratedClassTypeSpecifier(TypeSpecifier):
 
 class ElaboratedEnumTypeSpecifier(TypeSpecifier):
 
-    def __init__(self, position: Tuple[int, int], is_scoped: bool, attributes: List[Attribute],
-                 name: Reference):
+    def __init__(self, position: Tuple[int, int], is_scoped: bool, name: Reference):
         TypeSpecifier.__init__(self)
         self.position = position
-        self.attributes = attributes
         self.is_scoped = is_scoped
         self.name = name
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_elaborated_enum_type_specifier(self)
-
-    def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.attributes:
-            attribute.accept(visitor)
 
     def accept_name(self, visitor: Visitor) -> None:
         self.name.accept(visitor)

@@ -19,6 +19,4 @@ protected:
 
 }}  // namespace Motor::Resource
 
-#include <motor/resource/description.factory.hh>
-
 #endif

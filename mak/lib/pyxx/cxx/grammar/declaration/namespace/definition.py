@@ -26,10 +26,17 @@ namespace-body:
 """
 
 import glrp
-from typing import Any
+from typing import Any, Dict, Tuple
 from ....parse import CxxParser, cxx98, cxx11, cxx17, cxx20
 from .....ast.declarations import NamespaceDeclaration, ErrorDeclaration
 from .....ast.reference import Id
+from .....messages import error, Logger
+
+
+@error
+def invalid_attribute_namespace_declaration(self: Logger, position: Tuple[int, int]) -> Dict[str, Any]:
+    """an attribute cannot appear before a namespace declaration"""
+    return locals()
 
 
 @glrp.rule('namespace-name : "identifier"')
@@ -68,64 +75,82 @@ def error_namespace_definition_cxx11(self: CxxParser, p: glrp.Production) -> Any
     return ErrorDeclaration()
 
 
-# amendment: attribute-specifier-seq? to simplify grammar.
 @glrp.rule(
     'named-namespace-definition : attribute-specifier-seq? begin-declaration "namespace" attribute-specifier-seq? "identifier" attribute-specifier-seq? "{" namespace-body "}"'
 )
 @cxx98
 def named_namespace_definition(self: CxxParser, p: glrp.Production) -> Any:
+    for attribute in p[0] + p[5]:
+        if not attribute.is_extended():
+            invalid_attribute_namespace_declaration(self.logger, attribute.position)
+            break
     position = p[2].position[0], p[4].position[1]
-    return NamespaceDeclaration(position, p[0], p[3], p[5], False, [], p[4].value, p[7])
+    return NamespaceDeclaration(position, p[0] + p[3] + p[5], False, [], p[4].value, p[7])
 
 
-# amendment: attribute-specifier-seq? to simplify grammar.
 @glrp.rule(
     'named-namespace-definition : attribute-specifier-seq? begin-declaration decl-specifier-seq-continue "inline" "namespace" attribute-specifier-seq? "identifier" attribute-specifier-seq? "{" namespace-body "}"'
 )
 @cxx11
 def named_namespace_definition_cxx11(self: CxxParser, p: glrp.Production) -> Any:
+    for attribute in p[0] + p[7]:
+        if not attribute.is_extended():
+            invalid_attribute_namespace_declaration(self.logger, attribute.position)
+            break
     position = p[3].position[0], p[6].position[1]
-    return NamespaceDeclaration(position, p[0], p[5], p[7], True, [], p[6].value, p[9])
+    return NamespaceDeclaration(position, p[0] + p[5] + p[7], True, [], p[6].value, p[9])
 
 
-# amendment: attribute-specifier-seq? to simplify grammar.
 @glrp.rule(
     'unnamed-namespace-definition : attribute-specifier-seq? begin-declaration "namespace" attribute-specifier-seq? "{" namespace-body "}"'
 )
 @cxx98
 def unnamed_namespace_definition(self: CxxParser, p: glrp.Production) -> Any:
+    for attribute in p[0]:
+        if not attribute.is_extended():
+            invalid_attribute_namespace_declaration(self.logger, attribute.position)
+            break
     position = p[2].position
-    return NamespaceDeclaration(position, p[0], p[3], [], False, [], None, p[5])
+    return NamespaceDeclaration(position, p[0] + p[3], False, [], None, p[5])
 
 
-# amendment: attribute-specifier-seq? to simplify grammar.
 @glrp.rule(
     'unnamed-namespace-definition : attribute-specifier-seq? begin-declaration decl-specifier-seq-continue "inline" "namespace" attribute-specifier-seq? "{" namespace-body "}"'
 )
 @cxx11
 def unnamed_namespace_definition_cxx11(self: CxxParser, p: glrp.Production) -> Any:
+    for attribute in p[0]:
+        if not attribute.is_extended():
+            invalid_attribute_namespace_declaration(self.logger, attribute.position)
+            break
     position = p[3].position[0], p[4].position[1]
-    return NamespaceDeclaration(position, p[0], p[5], [], True, [], None, p[7])
+    return NamespaceDeclaration(position, p[0] + p[5], True, [], None, p[7])
 
 
-# amendment: attribute-specifier-seq? to simplify grammar.
 @glrp.rule(
     'nested-namespace-definition : attribute-specifier-seq? begin-declaration "namespace" attribute-specifier-seq? enclosing-namespace-specifier "::" "identifier" attribute-specifier-seq? "{" namespace-body "}"'
 )
 @cxx17
 def nested_namespace_definition_cxx17(self: CxxParser, p: glrp.Production) -> Any:
+    for attribute in p[0] + p[7]:
+        if not attribute.is_extended():
+            invalid_attribute_namespace_declaration(self.logger, attribute.position)
+            break
     position = p[2].position[0], p[6].position[1]
-    return NamespaceDeclaration(position, p[0], p[3], p[7], False, p[4], p[6].value, p[9])
+    return NamespaceDeclaration(position, p[0] + p[3] + p[7], False, p[4], p[6].value, p[9])
 
 
-# amendment: attribute-specifier-seq? to simplify grammar.
 @glrp.rule(
     'nested-namespace-definition : attribute-specifier-seq? begin-declaration "namespace" attribute-specifier-seq? enclosing-namespace-specifier "::" "inline" "identifier" attribute-specifier-seq? "{" namespace-body "}"'
 )
 @cxx20
 def nested_namespace_definition_cxx20(self: CxxParser, p: glrp.Production) -> Any:
+    for attribute in p[0] + p[8]:
+        if not attribute.is_extended():
+            invalid_attribute_namespace_declaration(self.logger, attribute.position)
+            break
     position = p[2].position[0], p[7].position[1]
-    return NamespaceDeclaration(position, p[0], p[3], p[8], True, p[4], p[7].value, p[10])
+    return NamespaceDeclaration(position, p[0] + p[3] + p[8], True, p[4], p[7].value, p[10])
 
 
 @glrp.rule('enclosing-namespace-specifier : "identifier"')

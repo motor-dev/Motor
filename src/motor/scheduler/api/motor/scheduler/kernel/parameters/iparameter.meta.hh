@@ -193,4 +193,5 @@ public:
 
 }}  // namespace Motor::KernelScheduler
 
+#include <motor/scheduler/kernel/parameters/iparameter.meta.factory.hh>
 #endif

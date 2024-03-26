@@ -562,7 +562,7 @@ if __name__ == '__main__':
             '\n'
             '#include    <motor/scheduler/kernel/kernel.meta.hh>\n'
             '#include    <motor/scheduler/task/itask.hh>\n'
-            '#include    <motor/scheduler/kernel/product.hh>\n'
+            '#include    <motor/scheduler/kernel/product.meta.hh>\n'
             '#include    <motor/scheduler/kernel/producer.meta.hh>\n'
             '#include    <motor/scheduler/kernel/producerloader.hh>\n'
             '#include    <motor/scheduler/kernel/parameters/parameters.hh>\n'
@@ -574,4 +574,4 @@ if __name__ == '__main__':
         for include in translation_unit.included_files:
             header_file.write('#include %s\n' % include)
         write_hh(collector.root_namespace, header_file, [])
-        header_file.write('\n#endif\n')
+        header_file.write('\n#include <%s.factory.hh>\n#endif\n' % os.path.splitext(arguments.rel_hh)[0])

@@ -13,4 +13,5 @@ struct EntityContext
 
 }}  // namespace Motor::World
 
+#include <motor/world/entity/context.meta.factory.hh>
 #endif

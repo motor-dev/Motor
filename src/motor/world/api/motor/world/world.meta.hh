@@ -40,4 +40,5 @@ public:
 
 }}  // namespace Motor::World
 
+#include <motor/world/world.meta.factory.hh>
 #endif

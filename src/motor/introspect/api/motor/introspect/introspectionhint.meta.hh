@@ -40,5 +40,6 @@ public:
 }}}  // namespace Motor::Meta::AST
 
 #include <motor/introspect/introspectionhint.inl>
+#include <motor/introspect/introspectionhint.meta.factory.hh>
 
 #endif

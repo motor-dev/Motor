@@ -22,4 +22,5 @@ public:
 
 }  // namespace Motor
 
+#include <motor/plugin.scripting.package/package.meta.factory.hh>
 #endif

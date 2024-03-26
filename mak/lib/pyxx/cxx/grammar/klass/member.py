@@ -66,7 +66,7 @@ def member_specification_opt(self: CxxParser, p: glrp.Production) -> Any:
     return [(AccessSpecifierDefault(), [])]
 
 
-#@glrp.rule('member-declaration : attribute-specifier-seq? begin-declaration ";"')
+# @glrp.rule('member-declaration : attribute-specifier-seq? begin-declaration ";"')
 @glrp.rule('member-declaration : attribute-specifier-seq? begin-declaration decl-specifier-seq? ";"')
 @cxx98
 def member_declaration_no_declarator(self: CxxParser, p: glrp.Production) -> Any:
@@ -120,7 +120,7 @@ def member_declaration_cxx20(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.rule('member-declarator-list : member-declarator')
 @cxx98
 def member_declarator_list_end(self: CxxParser, p: glrp.Production) -> Any:
-    return [[p[0]]]
+    return [[((0, 0), p[0])]]
 
 
 @glrp.rule('member-declarator-list : member-declarator-list "," member-declarator')
@@ -128,7 +128,7 @@ def member_declarator_list_end(self: CxxParser, p: glrp.Production) -> Any:
 def member_declarator_list(self: CxxParser, p: glrp.Production) -> Any:
     result = p[0]
     for r in result:
-        r.append(p[2])
+        r.append((p[1].position, p[2]))
     return result
 
 
@@ -239,8 +239,8 @@ def pure_specifier(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.merge('member-declarator-list')
 @cxx98_merge
 def ambiguous_member_declarator_list(
-    self: CxxParser, ambiguous_template_argument_list_ellipsis: List[Any], id_template: List[Any],
-    ambiguous_initializer_clause: List[Any], ambiguous_member_declarator_list: List[Any]
+        self: CxxParser, ambiguous_template_argument_list_ellipsis: List[Any], id_template: List[Any],
+        ambiguous_initializer_clause: List[Any], ambiguous_member_declarator_list: List[Any]
 ) -> Any:
     return sum(
         ambiguous_template_argument_list_ellipsis + id_template + ambiguous_initializer_clause +
@@ -251,7 +251,7 @@ def ambiguous_member_declarator_list(
 @glrp.merge('member-declaration')
 @cxx98_merge
 def ambiguous_member_declaration_deduction(
-    self: CxxParser, ambiguous_simple_declaration: List[Any], decl_deduction_guide: List[Any]
+        self: CxxParser, ambiguous_simple_declaration: List[Any], decl_deduction_guide: List[Any]
 ) -> Any:
     return AmbiguousDeclaration(ambiguous_simple_declaration + decl_deduction_guide)
 
@@ -259,8 +259,8 @@ def ambiguous_member_declaration_deduction(
 @glrp.merge('member-declaration')
 @cxx98_merge
 def ambiguous_member_declaration(
-    self: CxxParser, decl_specifier_seq_end: List[Any], decl_specifier_seq_continue: List[Any],
-    ambiguous_function_definition: List[Any]
+        self: CxxParser, decl_specifier_seq_end: List[Any], decl_specifier_seq_continue: List[Any],
+        ambiguous_function_definition: List[Any]
 ) -> Any:
     return AmbiguousDeclaration(decl_specifier_seq_end + decl_specifier_seq_continue + ambiguous_function_definition)
 

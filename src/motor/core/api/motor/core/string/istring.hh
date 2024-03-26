@@ -91,7 +91,11 @@ public:
 
     struct Path
     {
-        char name[MaxPathLength];
+        char        name[MaxPathLength];
+        const char* c_str() const
+        {
+            return name;
+        }
         operator const char*() const  // NOLINT(google-explicit-constructor)
         {
             return name;
@@ -128,6 +132,10 @@ public:
     {
         char name[MaxFilenameLength];
 
+        const char* c_str() const
+        {
+            return name;
+        }
         operator const char*() const  // NOLINT(google-explicit-constructor)
         {
             return name;
@@ -156,6 +164,10 @@ public:
     {
         char name[MaxFilenameLength];
 
+        const char* c_str() const
+        {
+            return name;
+        }
         operator const char*() const  // NOLINT(google-explicit-constructor)
         {
             return name;

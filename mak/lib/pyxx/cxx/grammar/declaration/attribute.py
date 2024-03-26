@@ -80,7 +80,8 @@ def attribute_specifier_seq_opt(_: CxxParser, __: glrp.Production) -> Any:
 @glrp.rule('attribute-specifier : [prec:left,1]"doxycomment-block-start" "doxycomment-block-end"')
 @cxx98
 def attribute_specifier_documentation(_: CxxParser, p: glrp.Production) -> Any:
-    return AttributeDocumentation(p[0])
+    position = (p[0].position[0], p[1].position[1])
+    return AttributeDocumentation(position, p[0])
 
 
 @glrp.rule('attribute-specifier : [prec:left,1]"attribute-specifier-macro"')
@@ -92,19 +93,21 @@ def attribute_specifier_macro(_: CxxParser, p: glrp.Production) -> Any:
 @glrp.rule('attribute-specifier : [prec:left,1]"attribute-specifier-macro-function" "(" balanced-token-seq? ")"')
 @cxx98
 def attribute_specifier_macro_function(_: CxxParser, p: glrp.Production) -> Any:
-    return AttributeMacro(p[0].position, p[0].text(), p[2])
+    return AttributeMacro((p[0].position[0], p[3].position[1]), p[0].text(), p[2])
 
 
 @glrp.rule('attribute-specifier : [prec:left,1]"[[" attribute-using-prefix? attribute-list "]" "]"')
 @cxx11
 def attribute_specifier_named_cxx11(_: CxxParser, p: glrp.Production) -> Any:
-    return AttributeNamedList(p[1], p[2])
+    position = (p[0].position[0], p[4].position[1])
+    return AttributeNamedList(position, p[1], p[2])
 
 
 @glrp.rule('attribute-specifier : [prec:left,1]"[[" "#error" "]" "]"')
 @cxx11
-def attribute_error_cxx11(_: CxxParser, __: glrp.Production) -> Any:
-    return InvalidAttribute()
+def attribute_error_cxx11(_: CxxParser, p: glrp.Production) -> Any:
+    position = (p[0].position[0], p[3].position[1])
+    return InvalidAttribute(position)
 
 
 @glrp.rule('attribute-specifier : alignment-specifier')
@@ -116,25 +119,28 @@ def attribute_specifier_alignment_specifier_cxx11(_: CxxParser, p: glrp.Producti
 @glrp.rule('alignment-specifier : [prec:left,1]"alignas" "(" begin-type-id [no-merge-warning] type-id "..."? ")"')
 @cxx11
 def alignment_specifier_alignment_specifier_type_cxx11(_: CxxParser, p: glrp.Production) -> Any:
+    position = (p[0].position[0], p[5].position[1])
     if p[4]:
-        return AttributeAlignAsType(PackExpandType(p[3]))
+        return AttributeAlignAsType(position, PackExpandType(p[3]))
     else:
-        return AttributeAlignAsType(p[3])
+        return AttributeAlignAsType(position, p[3])
 
 
 @glrp.rule('alignment-specifier : [prec:left,1]"alignas" "(" begin-expression constant-expression "..."? ")"')
 @cxx11
 def alignment_specifier_alignment_specifier_expression_cxx11(_: CxxParser, p: glrp.Production) -> Any:
+    position = (p[0].position[0], p[5].position[1])
     if p[4]:
-        return AttributeAlignAsExpression(PackExpandExpression(p[3]))
+        return AttributeAlignAsExpression(position, PackExpandExpression(p[3]))
     else:
-        return AttributeAlignAsExpression(p[3])
+        return AttributeAlignAsExpression(position, p[3])
 
 
 @glrp.rule('alignment-specifier : [prec:left,1]"alignas" "(" "#error" ")"')
 @cxx11
-def alignment_specifier_alignment_specifier_error_cxx11(_: CxxParser, __: glrp.Production) -> Any:
-    return InvalidAttribute()
+def alignment_specifier_alignment_specifier_error_cxx11(_: CxxParser, p: glrp.Production) -> Any:
+    position = (p[0].position[0], p[3].position[1])
+    return InvalidAttribute(position)
 
 
 @glrp.rule('attribute-using-prefix? : "using" attribute-namespace ":"')
@@ -247,6 +253,17 @@ def balanced_token_seq_bracket(_: CxxParser, p: glrp.Production) -> Any:
     result.append(p[1])
     result += p[2]
     result.append(p[3])
+    return result
+
+
+@glrp.rule('balanced-token-seq? : balanced-token-seq? "[[" balanced-token-seq? "]" "]"')
+@cxx11
+def balanced_token_seq_double_bracket(_: CxxParser, p: glrp.Production) -> Any:
+    result = p[0]
+    result.append(p[1])
+    result += p[2]
+    result.append(p[3])
+    result.append(p[4])
     return result
 
 

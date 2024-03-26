@@ -17,4 +17,5 @@ public:
 
 }  // namespace Motor
 
+#include <motor/plugin.graphics.text/text.meta.factory.hh>
 #endif

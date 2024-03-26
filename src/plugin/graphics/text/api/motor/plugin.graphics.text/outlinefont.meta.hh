@@ -27,4 +27,5 @@ public:
 
 }  // namespace Motor
 
+#include <motor/plugin.graphics.text/outlinefont.meta.factory.hh>
 #endif

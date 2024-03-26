@@ -34,7 +34,7 @@ static raw< const Meta::Class > findProductType(raw< const Meta::Class > compone
         else
         {
             motor_error_format(Log::world(), "class {0} has not registered a {1}",
-                               parameterClass->name,
+                               parameterClass->fullname(),
                                KernelScheduler::IParameter::getProductTypePropertyName());
             return motor_class< KernelScheduler::IProduct >();
         }
@@ -43,7 +43,7 @@ static raw< const Meta::Class > findProductType(raw< const Meta::Class > compone
     {
         motor_error_format(Log::world(),
                            "class {0} has not been registered as a segments parameter",
-                           componentType->name);
+                           componentType->fullname());
         return motor_class< KernelScheduler::IProduct >();
     }
 }
@@ -106,7 +106,7 @@ struct Visitor : public Meta::AST::Node::Visitor
                         owner,
                         minitl::format< 512 >(
                             FMT("Component {0} specified at index {1}, duplicate at index {2}"),
-                            cls->name, i, index));
+                            cls->fullname(), i, index));
                     errorCount++;
                 }
             }
@@ -129,7 +129,7 @@ struct Visitor : public Meta::AST::Node::Visitor
                 context.error(
                     owner, minitl::format< 512 >(
                                FMT("Archetype member {0} is not part of the input component types"),
-                               cls->name));
+                               cls->fullname()));
                 errorCount++;
             }
         }
@@ -166,7 +166,7 @@ public:
             Meta::Type type = motor_type< ref< KernelScheduler::IProduct > >();
             for(auto m_parameter: m_parameters)
             {
-                if(propertyName == m_parameter->name)
+                if(propertyName == m_parameter->name())
                 {
                     type.metaclass = findProductType(m_parameter);
                     propertyType   = type;
@@ -191,7 +191,7 @@ public:
                 = m_parameters.begin();
                 it != m_parameters.end(); ++it, ++i)
             {
-                if(propertyName == (*it)->name)
+                if(propertyName == (*it)->name())
                 {
                     result = Meta::Value(storage->getProduct(i));
                     found  = true;
@@ -214,10 +214,10 @@ createProduct(raw< const Meta::Class >                       componentClass,
         return {};
     }
     motor_assert_format(productClass->constructor, "product class {0} does not have a constructor",
-                        productClass->name);
+                        productClass->fullname());
     motor_assert_format(productClass->constructor->overloads.size() == 1,
                         "product class {0} has more than one constructor overload",
-                        productClass->name);
+                        productClass->fullname());
     Meta::Value                   parameter(producer);
     const Meta::Method::Overload& overload = productClass->constructor->overloads[0];
     return (overload.call)(productClass->constructor, &parameter, 1)

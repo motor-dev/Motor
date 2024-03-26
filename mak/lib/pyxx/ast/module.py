@@ -6,36 +6,29 @@ from .base import Attribute, Declaration
 class ModuleDeclaration(Declaration):
 
     def __init__(self, name: List[str], partition: Optional[List[str]], attributes: List[Attribute], export: bool):
+        Declaration.__init__(self, attributes)
         self.name = name
         self.partition = partition
-        self.attributes = attributes
         self.export = export
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_module_declaration(self)
 
-    def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.attributes:
-            attribute.accept(visitor)
-
 
 class ModuleImportDeclaration(Declaration):
 
     def __init__(self, name: List[str], attributes: List[Attribute]) -> None:
+        Declaration.__init__(self, attributes)
         self.name = name
-        self.attributes = attributes
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_module_import_declaration(self)
-
-    def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.attributes:
-            attribute.accept(visitor)
 
 
 class PrivateModuleFragment(Declaration):
 
     def __init__(self, declaration_seq: List[Declaration]) -> None:
+        Declaration.__init__(self, [])
         self.declaration_seq = declaration_seq
 
     def accept(self, visitor: Visitor) -> None:
@@ -49,6 +42,7 @@ class PrivateModuleFragment(Declaration):
 class ExportDeclaration(Declaration):
 
     def __init__(self, declaration_seq: List[Declaration]) -> None:
+        Declaration.__init__(self, [])
         self.declaration_seq = declaration_seq
 
     def accept(self, visitor: Visitor) -> None:

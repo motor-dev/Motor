@@ -4,7 +4,7 @@ from . import Visitor
 from .base import Attribute, TypeId, Expression
 
 
-class InvalidAttribute(object):
+class InvalidAttribute(Attribute):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_invalid_attribute(self)
@@ -25,7 +25,9 @@ class AttributeNamed(object):
 
 class AttributeNamedList(Attribute):
 
-    def __init__(self, using_namespace: Optional[str], attributes: List[AttributeNamed]) -> None:
+    def __init__(self, position: Tuple[int, int], using_namespace: Optional[str],
+                 attributes: List[AttributeNamed]) -> None:
+        Attribute.__init__(self, position)
         self.using_namespace = using_namespace
         self.attributes = attributes
 
@@ -39,7 +41,8 @@ class AttributeNamedList(Attribute):
 
 class AttributeAlignAsType(Attribute):
 
-    def __init__(self, typeid: TypeId) -> None:
+    def __init__(self, position: Tuple[int, int], typeid: TypeId) -> None:
+        Attribute.__init__(self, position)
         self.typeid = typeid
 
     def accept(self, visitor: Visitor) -> None:
@@ -51,7 +54,8 @@ class AttributeAlignAsType(Attribute):
 
 class AttributeAlignAsExpression(Attribute):
 
-    def __init__(self, expression: Expression) -> None:
+    def __init__(self, position: Tuple[int, int], expression: Expression) -> None:
+        Attribute.__init__(self, position)
         self.expression = expression
 
     def accept(self, visitor: Visitor) -> None:
@@ -64,6 +68,7 @@ class AttributeAlignAsExpression(Attribute):
 class AttributeAlignAsAmbiguous(Attribute):
 
     def __init__(self, align_as_type: AttributeAlignAsType, align_as_expression: AttributeAlignAsExpression) -> None:
+        Attribute.__init__(self, align_as_type.position)
         self.align_as_type = align_as_type
         self.align_as_expression = align_as_expression
 
@@ -83,7 +88,9 @@ class Documentation(object):
 
 class AttributeDocumentation(Attribute):
 
-    def __init__(self, documentation: Documentation) -> None:
+    def __init__(self, position: Tuple[int, int], documentation: Documentation) -> None:
+        Attribute.__init__(self, position)
+        self._is_extended_attribute = True
         self.documentation = documentation
 
     def accept(self, visitor: Visitor) -> None:
@@ -93,6 +100,8 @@ class AttributeDocumentation(Attribute):
 class AttributeMacro(Attribute):
 
     def __init__(self, position: Tuple[int, int], attribute: str, values: Optional[List[Token]]) -> None:
+        Attribute.__init__(self, position)
+        self._is_extended_attribute = True
         self.position = position
         self.attribute = attribute
         self.values = values

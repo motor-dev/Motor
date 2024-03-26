@@ -82,7 +82,7 @@ def for_range_init_cxx11(self: CxxParser, p: glrp.Production) -> Any:
 )
 @cxx11
 def for_range_declaration_cxx11(self: CxxParser, p: glrp.Production) -> Any:
-    return SimpleDeclaration(p[0], p[2], [[InitDeclarator(p[3], p[5], None)]])
+    return SimpleDeclaration(p[0], p[2], [[((0, 0), InitDeclarator(p[3], p[5], None))]])
 
 
 @glrp.rule(
