@@ -13,15 +13,17 @@
 namespace Motor {
 namespace Meta {
 
+const istring Class::s_anonymousName("<anonymous>");
+
 void Class::copy(const void* src, void* dst) const
 {
-    if(motor_assert_format(copyconstructor, "no copy for type {0}", name)) return;
+    if(motor_assert_format(copyconstructor, "no copy for type {0}", name())) return;
     (*copyconstructor)(src, dst);
 }
 
 void Class::destroy(void* src) const
 {
-    if(motor_assert_format(destructor, "no destructor for type {0}", name)) return;
+    if(motor_assert_format(destructor, "no destructor for type {0}", name())) return;
     (*destructor)(src);
 }
 
@@ -165,6 +167,17 @@ bool Class::isA(raw< const Class > klass) const
     return false;
 }
 
+istring Class::name() const
+{
+    return owner ? owner->name : s_anonymousName;
+}
+
+inamespace Class::fullname() const
+{
+    inamespace result(name());
+    return result;
+}
+
 Value Class::getTag(const Type& type) const
 {
     for(raw< const Tag > tag = tags; tag; tag = tag->next)
@@ -207,18 +220,12 @@ Value Class::findClass(inamespace name)
 
 raw< Meta::Class > motor_motor_Namespace()
 {
-    static Meta::Class ci     = {istring("Motor"),
-                                 0,
-                                 motor_class< void >(),
-                                 0,
-                                 {nullptr},
-                                 {nullptr},
-                                 {nullptr},
-                                 {nullptr},
-                                 {nullptr},
-                                 motor_class< void >()->interfaces,
-                                 nullptr,
-                                 nullptr};
+    static Meta::Class ci     = {0,         motor_class< void >(),
+                                 0,         {nullptr},
+                                 {nullptr}, {nullptr},
+                                 {nullptr}, {nullptr},
+                                 {nullptr}, motor_class< void >()->interfaces,
+                                 nullptr,   nullptr};
     raw< Meta::Class > result = {&ci};
     return result;
 }

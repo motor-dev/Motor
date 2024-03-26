@@ -48,4 +48,5 @@ public:
 
 }}  // namespace Motor::World
 
+#include <runtime/archetypestorage.meta.factory.hh>
 #endif

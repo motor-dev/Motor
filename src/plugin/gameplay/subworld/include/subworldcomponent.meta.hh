@@ -7,7 +7,7 @@
 #include <motor/world/component/component.meta.hh>
 #include <motor/world/entity/context.meta.hh>
 #include <motor/world/event/context.meta.hh>
-#include <motor/world/event/event.hh>
+#include <motor/world/event/event.meta.hh>
 
 namespace Motor { namespace World {
 
@@ -26,4 +26,5 @@ struct [[motor::meta(tag = LogicComponent)]] SubWorldComponent
 
 }}  // namespace Motor::World
 
+#include <subworldcomponent.meta.factory.hh>
 #endif

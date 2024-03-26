@@ -8,10 +8,15 @@
 
 namespace Motor { namespace Test { namespace World {
 
-struct [[motor::meta(tag = LogicComponent())]] Component {};
+struct [[motor::meta(tag = LogicComponent())]] Component
+{
+};
 
-struct [[motor::meta(tag = LogicComponent())]] Component2 {};
+struct [[motor::meta(tag = LogicComponent())]] Component2
+{
+};
 
 }}}  // namespace Motor::Test::World
 
+#include <component.meta.factory.hh>
 #endif

@@ -55,6 +55,16 @@ def preprocess(
     uselib = uselib or []
     extra_features = extra_features or []
     source_nodes = _get_source_nodes(build_context, path, name)
+
+    includes = []  # type: List[waflib.Node.Node]
+    api = []  # type: List[waflib.Node.Node]
+    for _, node in source_nodes:
+        include_node = node.find_node('include')
+        if include_node is not None:
+            includes.append(include_node)
+        include_node = node.find_node('api')
+        if include_node is not None:
+            api.append(include_node)
     pp_env = build_context.common_env.derive()
     pp_env.PLUGIN = plugin_name.replace('.', '_')
 
@@ -86,10 +96,11 @@ def preprocess(
         root_namespace=root_namespace,
         uselib=uselib,
         out_sources=[],
+        includes=includes + api,
         generated_include_node=build_context.bldnode.make_node('preprocess').make_node(name + '.preprocess/include'),
         generated_api_node=build_context.bldnode.make_node('preprocess').make_node(name + '.preprocess/api'),
         use=use,
-        nomaster=set([])
+        masterfiles={}
     )
 
     for _, source_node in source_nodes:
@@ -167,7 +178,8 @@ def module(
     else:
         source_files = []
     preprocess_taskgen = build_context.get_tgen_by_name('%s.preprocess' % name)
-    extra_includes = extra_includes + [getattr(preprocess_taskgen, 'generated_include_node')]
+    extra_includes = extra_includes + [getattr(preprocess_taskgen, 'generated_include_node'),
+                                       getattr(preprocess_taskgen, 'generated_api_node')]
     extra_public_includes = extra_public_includes + [getattr(preprocess_taskgen, 'generated_api_node')]
 
     if do_build:
@@ -194,7 +206,7 @@ def module(
             export_system_includes=extra_system_includes,
             project_name=project_name,
             conditions=conditions,
-            nomaster=getattr(preprocess_taskgen, 'nomaster') if preprocess_taskgen is not None else set(),
+            masterfiles=getattr(preprocess_taskgen, 'masterfiles') if preprocess_taskgen is not None else {},
         )
 
     for _, source_node in source_nodes:
@@ -241,7 +253,7 @@ def module(
                         includes=extra_includes + includes + api + [p
                                                                     for _, p in source_nodes],
                         conditions=conditions,
-                        nomaster=getattr(p, 'nomaster'),
+                        masterfiles=getattr(p, 'masterfiles'),
                         project_name=project_name + '.unittest.' + '.'.join(test_name_list)
                     )
 

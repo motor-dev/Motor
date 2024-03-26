@@ -15,4 +15,5 @@ struct ResourceHandle
 
 }}  // namespace Motor::World
 
+#include <motor/world/resource/handle.meta.factory.hh>
 #endif

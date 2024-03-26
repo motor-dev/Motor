@@ -41,4 +41,5 @@ protected:
 
 }}  // namespace Motor::Gtk3
 
+#include <gtkresourcedescription.meta.factory.hh>
 #endif

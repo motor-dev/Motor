@@ -27,14 +27,15 @@ raw< const Meta::Class > getGBoxedClass(Gtk3Plugin& plugin, GType type)
     if(!cls)
     {
         GType parent = g_type_parent(type);
-        cls          = plugin.allocate< Meta::Class >();
+
+        cls = plugin.allocate< Meta::Class >();
         g_type_set_qdata(type, plugin.quark(), cls);
         raw< const Meta::Class > parentClass
             = parent ? getGBoxedClass(plugin, parent) : motor_class< GBoxedWrapper >();
-        Meta::Class clsTemplate = {istring(g_type_name(type)),
-                                   parentClass->size,
+        Meta::Class clsTemplate = {parentClass->size,
                                    parentClass,
                                    0,
+                                   {nullptr},
                                    parentClass->objects,
                                    parentClass->tags,
                                    parentClass->properties,
@@ -47,7 +48,7 @@ raw< const Meta::Class > getGBoxedClass(Gtk3Plugin& plugin, GType type)
         new(cls) Meta::Class(clsTemplate);
         completeGBoxedClass(plugin, cls, type);
         raw< const Meta::Class > registry = {cls};
-        plugin.registerValue(cls->name, Meta::Value(registry));
+        cls->owner = plugin.registerValue(istring(g_type_name(type)), Meta::Value(registry));
     }
     raw< const Meta::Class > result = {cls};
     return result;

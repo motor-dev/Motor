@@ -152,32 +152,6 @@ def build_plugins(build_context: build_framework.BuildContext) -> None:
     )
 
     build_framework.plugin(build_context, 'plugin.graphics.3d', ['motor'], uselib=['cxx14'])
-    build_framework.plugin(
-        build_context, 'plugin.graphics.shadermodel1', ['motor', 'plugin.graphics.3d'],
-        uselib=['cxx14']
-    )
-    build_framework.plugin(
-        build_context,
-        'plugin.graphics.shadermodel2',
-        ['motor', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1'],
-        uselib=['cxx14']
-    )
-    build_framework.plugin(
-        build_context,
-        'plugin.graphics.shadermodel3',
-        ['motor', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1',
-         'plugin.graphics.shadermodel2'],
-        uselib=['cxx14']
-    )
-    build_framework.plugin(
-        build_context,
-        'plugin.graphics.shadermodel4', [
-            'motor', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1',
-            'plugin.graphics.shadermodel2',
-            'plugin.graphics.shadermodel3'
-        ],
-        uselib=['cxx14']
-    )
 
     build_framework.plugin(
         build_context, 'plugin.scripting.lua', ['motor'], ['motor.3rdparty.scripting.lua'],
@@ -237,10 +211,7 @@ def build_plugins(build_context: build_framework.BuildContext) -> None:
 
     build_framework.plugin(
         build_context,
-        'plugin.graphics.nullrender', [
-            'motor', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1', 'plugin.graphics.shadermodel2',
-            'plugin.graphics.shadermodel3', 'plugin.graphics.shadermodel4'
-        ],
+        'plugin.graphics.nullrender', ['motor', 'plugin.graphics.3d'],
         uselib=['cxx14']
     )
     build_framework.plugin(

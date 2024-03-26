@@ -95,6 +95,12 @@ def m0102(logger: messages.Logger, position: Tuple[int, int], entity_name: str) 
     return locals()
 
 
+@messages.error
+def m0200(logger: messages.Logger, position: Tuple[int, int], include_name: str) -> Dict[str, Any]:
+    """Meta file needs to #include {include_name}"""
+    return locals()
+
+
 class Attributes(object):
     def __init__(self) -> None:
         self.export = None  # type: Optional[Tuple[Tuple[int, int], bool]]
@@ -106,6 +112,11 @@ class Attributes(object):
 
     def exported(self) -> bool:
         return self.export is None or self.export[1]
+
+
+class Template(object):
+    def __init__(self) -> None:
+        self._parameters = []
 
 
 class MetaObject(object):
@@ -125,20 +136,19 @@ class MetaObject(object):
     def file_name(self) -> str:
         return self._parent.file_name()
 
-    def dump_exports(self, namespace: List[str], out_classes: BinaryIO,
-                     out_namespace: BinaryIO) -> None:
+    def dump_exports(self, namespace: List[str], out_namespace: BinaryIO) -> None:
         for name, child in self._children.items():
             namespace.append(name)
-            child.dump_exports(namespace, out_classes, out_namespace)
+            child.dump_exports(namespace, out_namespace)
             namespace.pop(-1)
 
-    def write_declarations(self, namespace: List[str], out: TextIO) -> None:
+    def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> None:
         for name, child in self._children.items():
             namespace.append(name)
-            child.write_declarations(namespace, out)
+            child.write_declarations(namespace, out_cc, out_hh)
             namespace.pop(-1)
 
-    def _write_object_names(self, object_names: List[Tuple[str, str]], chain_name: str, out: TextIO) -> str:
+    def _write_object_names(self, object_names: List[Tuple[str, str]], owner: str, out: TextIO) -> str:
         file_name = self.file_name()
         out.write('MOTOR_EXPORT ::Motor::Meta::Object s_%s_objects[%d] = {\n' % (file_name, len(object_names)))
         object_count = len(object_names)
@@ -148,34 +158,35 @@ class MetaObject(object):
                 next_objects = '{&s_%s_objects[%d]}' % (file_name, i + 1)
                 comma = ','
             else:
-                next_objects = chain_name.format('s_%s_objects' % file_name)
+                next_objects = '{%s->objects.exchange(s_%s_objects)}' % (owner, file_name)
                 comma = ''
             out.write('    {\n'
                       '        %s,\n'
                       '        %s,\n'
+                      '        %s,\n'
                       '        ::Motor::Meta::Value(%s)\n'
-                      '    }%s\n' % (next_objects, object_name, object_value, comma))
+                      '    }%s\n' % (next_objects, owner, object_name, object_value, comma))
             i += 1
         out.write('};\n')
         return '{s_%s_objects}' % file_name
 
-    def write_metaclasses(self, namespace: List[str], out: TextIO) -> None:
+    def write_metaclasses(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> None:
         object_names = []
         for name, child in self._children.items():
             namespace.append(name)
-            child.write_metaclasses(namespace, out)
+            child.write_metaclasses(namespace, out_cc, out_hh)
             o = child.object_name()
             if o is not None:
                 object_names.append(o)
             namespace.pop(-1)
         if object_names:
             if namespace:
-                out.write('\nnamespace %s\n'
-                          '{\n'
-                          '\n' % (' { namespace '.join(namespace)))
-            self._write_object_names(object_names, '{{%s->objects.exchange({0})}}' % (self._parent.name()), out)
+                out_cc.write('\nnamespace %s\n'
+                             '{\n'
+                             '\n' % (' { namespace '.join(namespace)))
+            self._write_object_names(object_names, self._parent.name(), out_cc)
             if namespace:
-                out.write('%s\n' % ('}' * len(namespace)))
+                out_cc.write('%s\n' % ('}' * len(namespace)))
 
     def object_name(self) -> Optional[Tuple[str, str]]:
         return None
@@ -214,9 +225,10 @@ class RootNamespace(MetaObject):
     def name(self) -> str:
         return '::Motor::' + self._cpp_name + '()'
 
-    def write_declarations(self, namespace: List[str], out: TextIO) -> None:
-        out.write('namespace Motor { raw<Meta::Class> %s(); }\n' % self._cpp_name)
-        super().write_declarations(namespace, out)
+    def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> None:
+        out_hh.write('namespace Motor\n{\n\nraw<Meta::Class> %s();\n' % self._cpp_name)
+        super().write_declarations(namespace, out_cc, out_hh)
+        out_hh.write('\n}\n')
 
 
 class Namespace(MetaObject):
@@ -234,13 +246,13 @@ class Namespace(MetaObject):
     def cpp_name(self) -> str:
         return self._cpp_name
 
-    def dump_exports(self, namespace: List[str], out_classes: BinaryIO, out_namespace: BinaryIO) -> None:
+    def dump_exports(self, namespace: List[str], out_namespace: BinaryIO) -> None:
         pickle.dump(namespace, out_namespace)
-        super().dump_exports(namespace, out_classes, out_namespace)
+        super().dump_exports(namespace, out_namespace)
 
-    def write_declarations(self, namespace: List[str], out: TextIO) -> None:
-        out.write('namespace Motor { raw<Meta::Class> %s(); }\n' % self._cpp_name)
-        super().write_declarations(namespace, out)
+    def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> None:
+        out_hh.write('raw<Meta::Class> %s();\n' % self._cpp_name)
+        super().write_declarations(namespace, out_cc, out_hh)
 
     def name(self) -> str:
         return '::Motor::' + self._cpp_name + '()'
@@ -248,9 +260,15 @@ class Namespace(MetaObject):
 
 class Class(MetaObject):
 
-    def __init__(self, position: Tuple[int, int], attributes: Attributes, name: str, is_value_type: bool,
-                 superclass: Optional[str],
-                 parent: MetaObject):
+    def __init__(
+            self,
+            position: Tuple[int, int],
+            attributes: Attributes,
+            name: str,
+            is_value_type: bool,
+            superclass: Optional[str],
+            parent: MetaObject
+    ):
         super().__init__(position, attributes, parent)
         self._name = name
         parent._children[name] = self
@@ -263,89 +281,20 @@ class Class(MetaObject):
 
     def object_name(self) -> Tuple[str, str]:
         return (
-            '%s_Meta::name()' % self._name,
-            'static_cast<raw<const ::Motor::Meta::Class>>(%s_Meta::klass())' % self._name
+            '::Motor::Meta::ClassID< %s >::name()' % self._name,
+            '::Motor::Meta::ClassID< %s >::klass()' % self._name
         )
 
-    def dump_exports(self, namespace: List[str], out_classes: BinaryIO, out_namespace: BinaryIO) -> None:
-        pickle.dump(self._namespace, out_classes)
-        super().dump_exports(namespace, out_classes, out_namespace)
+    def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> None:
+        out_hh.write(
+            '\nnamespace Meta\n'
+            '{\n\n'
+            'MOTOR_DECLARE_CLASS_ID(::%s)\n\n'
+            '}\n\n' % '::'.join(namespace))
+        super().write_declarations(namespace, out_cc, out_hh)
 
-    def write_metaclasses(self, namespace: List[str], out: TextIO) -> None:
-        full_name = '::'.join(namespace)
-
-        object_names = []
-        for name, child in self._children.items():
-            namespace.append(name)
-            child.write_metaclasses(namespace, out)
-            o = child.object_name()
-            if o is not None:
-                object_names.append(o)
-            namespace.pop(-1)
-
-        if self._namespace[0]:
-            out.write('\nnamespace %s { namespace %s_Meta\n{\n' % (
-                ' { namespace '.join(self._namespace[0]), '_Meta { namespace '.join(self._namespace[1])))
-        else:
-            out.write('\nnamespace %s_Meta\n{\n' % ('_Meta { namespace '.join(self._namespace[1])))
-
-        objects = '::Motor::Meta::ClassID<%s>::klass()->objects' % self._superclass
-        if object_names:
-            objects = self._write_object_names(object_names, objects, out)
-        if self._superclass != 'void':
-            offset = 'static_cast<i32>(reinterpret_cast<char*>(static_cast<%s*>' \
-                     '(reinterpret_cast<%s*>(1)))-reinterpret_cast<char*>(1))' % (
-                         self._superclass, full_name)
-        else:
-            offset = '0'
-        parent = '::Motor::Meta::ClassID<%s>::klass()' % self._superclass
-        properties = '::Motor::Meta::ClassID<%s>::klass()->properties' % self._superclass
-        methods = '::Motor::Meta::ClassID<%s>::klass()->methods' % self._superclass
-        tags = '::Motor::Meta::ClassID<%s>::klass()->tags' % self._superclass
-        interfaces = '::Motor::Meta::ClassID<%s>::klass()->interfaces' % self._superclass
-
-        if self._is_value_type:
-            copyconstructor = '&copyconstructor'
-            destructor = '&destructor'
-        else:
-            copyconstructor = 'nullptr'
-            destructor = 'nullptr'
-        if self._is_value_type:
-            out.write('static void copyconstructor(const void* source, void* destination)\n'
-                      '{\n'
-                      '    new(destination) %s(*(const %s*)source);\n'
-                      '}\n'
-                      'static void destructor(void* value)\n'
-                      '{\n'
-                      '    typedef %s T;\n'
-                      '    ((T*)value)->~T();\n'
-                      '}\n' % (full_name, full_name, full_name))
-
-        out.write('::Motor::istring name()\n'
-                  '{\n'
-                  '    static const ::Motor::istring s_name("%s");\n'
-                  '    return s_name;\n'
-                  '}\n' % self._name)
-        out.write('raw<::Motor::Meta::Class> klass()\n'
-                  '{\n'
-                  '    static ::Motor::Meta::Class s_klass = {\n'
-                  '        name(),\n'
-                  '        sizeof(%s),\n'
-                  '        %s,\n'
-                  '        %s,\n'
-                  '        %s,\n'
-                  '        %s,\n'
-                  '        %s,\n'
-                  '        %s,\n'
-                  '        {nullptr},\n'
-                  '        %s,\n'
-                  '        %s,\n'
-                  '        %s\n'
-                  '    };\n'
-                  '    return {&s_klass};\n'
-                  '}\n' % (full_name, parent, offset, objects, tags, properties, methods, interfaces, copyconstructor,
-                           destructor))
-        out.write('%s\n\n' % ('}' * (len(namespace))))
+    def write_metaclasses(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> None:
+        pass
 
 
 class Enum(Class):
@@ -542,9 +491,91 @@ class AttributeParser(ast.Visitor):
                 self.parse_meta_attributes(attribute_macro.values)
 
 
-class DeclarationVisitor(ast.Visitor):
+class NameParser(ast.Visitor):
     def __init__(self, attributes: Attributes, namespace: MetaObject):
+        self._attributes = attributes
+        self._namespace = namespace
+        self._name = ''
+        self._export = False
+        self._force_find = False
+
+    def visit_declarator_list(self, declarator_list: ast.DeclaratorList) -> None:
+        declarator_list.accept_element(self)
+
+    # these should not happen as they are only valid for method parameter declarations
+    def visit_declarator_element_abstract(self, declarator_element_abstract: ast.DeclaratorElementAbstract) -> None:
+        raise NotImplementedError
+
+    # these should not happen as they are only valid for template parameter declarations
+    def visit_declarator_element_abstract_pack(self,
+                                               declarator_element_abstract_pack: ast.DeclaratorElementAbstractPack) -> None:
+        raise NotImplementedError
+
+    def visit_declarator_element_pack_id(self, declarator_element_pack_id: ast.DeclaratorElementPackId) -> None:
+        raise NotImplementedError
+
+    def visit_declarator_element_id(self, declarator_element_id: ast.DeclaratorElementId) -> None:
+        declarator_element_id.accept_name(self)
+
+    def visit_declarator_element_group(self, declarator_element_group: ast.DeclaratorElementGroup) -> None:
+        declarator_element_group.accept_next(self)
+
+    def visit_declarator_element_pointer(self, declarator_element_pointer: ast.DeclaratorElementPointer) -> None:
+        declarator_element_pointer.accept_next(self)
+
+    def visit_declarator_element_reference(self, declarator_element_reference: ast.DeclaratorElementReference) -> None:
+        declarator_element_reference.accept_next(self)
+
+    def visit_declarator_element_rvalue_reference(self,
+                                                  declarator_element_rvalue_reference: ast.DeclaratorElementRValueReference) -> None:
+        declarator_element_rvalue_reference.accept_next(self)
+
+    def visit_declarator_element_array(self, declarator_element_array: ast.DeclaratorElementArray) -> None:
+        declarator_element_array.accept_next(self)
+
+    def visit_declarator_element_method(self, declarator_element_method: ast.DeclaratorElementMethod) -> None:
+        declarator_element_method.accept_next(self)
+
+    def visit_reference(self, ref: ast.Reference) -> None:
+        if len(ref.name_list) > 1:
+            self._force_find = True
+            for id in ref.name_list[:-1]:
+                id.accept(self)
+                self._name += '::'
+        ref.name_list[-1].accept(self)
+
+    def visit_root_id(self, root_id: ast.RootId) -> None:
+        self._name += '::'
+        while self._namespace._parent != self._namespace:
+            self._namespace = self._namespace._parent
+
+    def visit_id(self, identifier: ast.Id) -> None:
+        self._name += identifier.name
+
+    def visit_template_id(self, template_id: ast.TemplateId) -> None:
+        template_id.accept_id(self)
+
+    def visit_destructor_id(self, destructor_id: ast.DestructorId) -> None:
+        # TODO: not exported
+        pass
+
+    def visit_operator_id(self, operator_id: ast.OperatorId) -> None:
+        # TODO: not exported
+        pass
+
+    def visit_conversion_operator_id(self, conversion_operator_id: ast.ConversionOperatorId) -> None:
+        # TODO: not exported
+        pass
+
+    def visit_literal_operator_id(self, literal_operator_id: ast.LiteralOperatorId) -> None:
+        # TODO: not exported
+        pass
+
+
+class DeclarationVisitor(ast.Visitor):
+    def __init__(self, template_stack: List[Template], attributes: Attributes, namespace: MetaObject):
         super().__init__()
+        self._template_stack = template_stack
         self._attributes = attributes
         self._namespace = namespace
         self._static = False
@@ -560,13 +591,15 @@ class DeclarationVisitor(ast.Visitor):
             self._static = True
 
     def visit_init_declarator_list(self, init_declarator_list: ast.InitDeclaratorList) -> None:
-        for init_declarator in init_declarator_list.init_declarators:
+        for _, init_declarator in init_declarator_list.init_declarators:
             init_declarator.accept(self)
 
     def visit_init_declarator(self, init_declarator: ast.InitDeclarator) -> None:
         init_declarator.accept_declarator(self)
 
     def visit_declarator_list(self, declarator_list: ast.DeclaratorList) -> None:
+        visitor = NameParser(self._attributes, self._namespace)
+        declarator_list.accept(visitor)
         element = declarator_list.declarator_element
         while hasattr(element, 'next'):
             element = element.next
@@ -603,6 +636,7 @@ class Explorer(utils.RecursiveVisitor):
         self.namespace = RootNamespace(file_name, module_name)  # type: MetaObject
         self._access_specifier = []  # type: List[str]
         self._publish = [True]
+        self._template_stack = []  # type: List[Template]
 
     def visit_attribute_named(self, using_namespace: Optional[str], attribute_named: ast.AttributeNamed) -> None:
         assert pyxx.logger is not None
@@ -620,11 +654,6 @@ class Explorer(utils.RecursiveVisitor):
         if attribute_macro.attribute != 'motor_meta':
             return
         m0004(pyxx.logger, attribute_macro.position)
-
-    def visit_template_declaration(self, template_declaration: ast.TemplateDeclaration) -> None:
-        self._publish.append(False)
-        super().visit_template_declaration(template_declaration)
-        self._publish.pop(-1)
 
     def visit_compound_statement(self, compound_statement: ast.CompoundStatement) -> None:
         self._publish.append(False)
@@ -671,7 +700,7 @@ class Explorer(utils.RecursiveVisitor):
                 simple_declaration.accept_decl_specifier_seq(self)
 
                 # also export declaration itself
-                visitor = DeclarationVisitor(attribute_parser.attributes, self.namespace)
+                visitor = DeclarationVisitor(self._template_stack, attribute_parser.attributes, self.namespace)
                 simple_declaration.accept_decl_specifier_seq(visitor)
                 simple_declaration.accept_init_declarator_list(visitor)
                 simple_declaration.accept_init_declarator_list(self)
@@ -738,7 +767,10 @@ class Explorer(utils.RecursiveVisitor):
                                 else:
                                     self._publish.append(False)
                                     class_specifier.accept_name(self)
+                                    self._access_specifier.append(
+                                        class_specifier.class_type in ('struct', 'union') and 'public' or 'private')
                                     class_specifier.accept_base_clause(self)
+                                    self._access_specifier.pop(-1)
                                     class_specifier.accept_members(self)
                                     self._publish.pop(-1)
 
@@ -852,7 +884,7 @@ class Explorer(utils.RecursiveVisitor):
                 function_definition.accept_decl_specifier_seq(self)
 
                 # also export declaration itself
-                visitor = DeclarationVisitor(attributes_parser.attributes, self.namespace)
+                visitor = DeclarationVisitor(self._template_stack, attributes_parser.attributes, self.namespace)
                 function_definition.accept_decl_specifier_seq(visitor)
                 function_definition.accept_declarator(visitor)
                 function_definition.accept_declarator(self)
@@ -875,16 +907,20 @@ class Explorer(utils.RecursiveVisitor):
         pass
 
     def visit_access_specifier_public(self, access_specifier: ast.AccessSpecifierPublic) -> None:
-        self._access_specifier[-1] = 'public'
+        if self._publish[-1]:
+            self._access_specifier[-1] = 'public'
 
     def visit_access_specifier_protected(self, access_specifier: ast.AccessSpecifierProtected) -> None:
-        self._access_specifier[-1] = 'protected'
+        if self._publish[-1]:
+            self._access_specifier[-1] = 'protected'
 
     def visit_access_specifier_private(self, access_specifier: ast.AccessSpecifierPrivate) -> None:
-        self._access_specifier[-1] = 'private'
+        if self._publish[-1]:
+            self._access_specifier[-1] = 'private'
 
     def visit_access_specifier_macro(self, access_specifier: ast.AccessSpecifierMacro) -> None:
-        self._access_specifier[-1] = access_specifier.name
+        if self._publish[-1]:
+            self._access_specifier[-1] = access_specifier.name
 
     def visit_elaborated_class_type_specifier(self,
                                               elaborated_class_type_specifier: ast.ElaboratedClassTypeSpecifier) -> None:
@@ -907,7 +943,6 @@ class Explorer(utils.RecursiveVisitor):
                 sr = utils.StringRef()
                 elaborated_enum_type_specifier.name.name_list[-1].accept(sr)
                 attributes_parser = AttributeParser()
-                elaborated_enum_type_specifier.accept_attributes(attributes_parser)
                 self.namespace.add_declared_object(sr.result,
                                                    self._publish[-1] and attributes_parser.attributes.exported(),
                                                    attributes_parser.attributes)
@@ -915,35 +950,15 @@ class Explorer(utils.RecursiveVisitor):
             super().visit_elaborated_enum_type_specifier(elaborated_enum_type_specifier)
 
     def visit_using_declaration(self, using_declaration: ast.UsingDeclaration) -> None:
-        if self._publish[-1]:
-            attributes_parser = AttributeParser()
-            using_declaration.accept_attributes(attributes_parser)
-            if attributes_parser.attributes.exported():
-                for using_reference in using_declaration.reference_list:
-                    if not isinstance(using_reference, ast.Reference):
-                        # only allowed syntax is using ParentClass::MemberName
-                        continue
-                    start = 0
-                    namespace = ''
-                    if using_reference.is_absolute():
-                        start = 1
-                        namespace = '::'
-                    if len(using_reference.name_list) - start < 2:
-                        # only allowed syntax is using ParentClass::MemberName
-                        continue
-                    for name in using_reference.name_list[start:-2]:
-                        sr = utils.StringRef()
-                        name.accept(sr)
-                        namespace += sr.result + '::'
-                    sr = utils.StringRef()
-                    using_reference.name_list[-2].accept(sr)
-                    namespace += sr.result
-                    name_sr = utils.StringRef()
-                    using_reference.name_list[-1].accept(name_sr)
-                    self.namespace.add_using_declaration(namespace, name_sr.result)
+        # TODO: can be used to bring a method into this struct/class.
+        # nothing happens if the using member is not a method, or if no new overload is introduced.
+        super().visit_using_declaration(using_declaration)
 
-        else:
-            super().visit_using_declaration(using_declaration)
+    def visit_template_declaration(self, template_declaration: ast.TemplateDeclaration) -> None:
+        pass
+        # self._template_stack.append(Template())
+        # template_declaration.accept_declaration(self)
+        # assert not self._template_stack
 
 
 def main() -> None:
@@ -955,28 +970,38 @@ def main() -> None:
     argument_context.add_argument("-r", "--root", dest="root", help="Namespace root")
     argument_context.add_argument(
         "in_relative",
-        help="Input file relative to srcnode",
+        help="Include file relative to include node",
         metavar="INREL",
     )
     argument_context.add_argument(
-        "out",
+        "out_relative",
+        help="Output file relative to include node",
+        metavar="OUTREL",
+    )
+    argument_context.add_argument(
+        "out_cc",
         help="Output cc file",
-        metavar="OUT",
+        metavar="OUT_CC",
+    )
+    argument_context.add_argument(
+        "out_typeid_cc",
+        help="Output typeid.cc file",
+        metavar="OUT_TYPEID_CC",
+    )
+    argument_context.add_argument(
+        "out_hh",
+        help="Output header file",
+        metavar="OUT_HH",
     )
     argument_context.add_argument(
         "doc",
         help="Output doc file",
-        metavar="DOC",
-    )
-    argument_context.add_argument(
-        "class_exports",
-        help="Output class export file",
-        metavar="CLS_EXPORT",
+        metavar="OUT_DOC",
     )
     argument_context.add_argument(
         "namespace_exports",
         help="Output namespace export file",
-        metavar="NAMESPACE_EXPORT",
+        metavar="OUT_NAMESPACE_EXPORT",
     )
 
     arguments = argument_context.parse_args()
@@ -988,29 +1013,42 @@ def main() -> None:
     results[0].accept(explorer)
 
     assert pyxx.logger is not None
+
+    include_file = '<%s>' % arguments.out_relative
+    if include_file not in results[0].included_files:
+        m0200(pyxx.logger, (0, 0), include_file)
+
     if pyxx.logger.error_count:
         sys.exit(pyxx.logger.error_count)
     else:
-        with open(arguments.out, 'w') as out:
-            out.write('#include <motor/meta/typeinfo.hh>\n'
-                      '#include "%s"\n'
-                      '#include <motor/meta/object.meta.hh>\n'
-                      '#include <motor/meta/value.hh>\n'
-                      '#include <motor/meta/interfacetable.hh>\n'
-                      '#include <motor/meta/factories/array.factory.hh>\n'
-                      '%s\n\n' % (
-                          arguments.in_relative, '\n'.join('#include %s' % i for i in results[0].included_files)))
-            explorer.namespace.write_declarations([], out)
-            explorer.namespace.write_metaclasses([], out)
+        with open(arguments.out_cc, 'w') as out_cc:
+            with open(arguments.out_typeid_cc, 'w') as out_typeid_cc:
+                with open(arguments.out_hh, 'w') as out_hh:
+                    out_cc.write('#include <%s>\n'
+                                 '#include <motor/meta/object.meta.hh>\n'
+                                 '#include <motor/meta/value.hh>\n'
+                                 '' % arguments.out_relative)
+                    out_typeid_cc.write('#include <%s>\n'
+                                        '#include <motor/meta/object.meta.hh>\n'
+                                        '#include <motor/meta/value.hh>\n'
+                                        '' % arguments.out_relative)
+                    out_hh.write('#ifndef MOTOR_COMPUTE\n'
+                                 '#include <motor/meta/classinfo.hh>\n'
+                                 '#include <%s>\n'
+                                 '#include <motor/meta/builtins/numbers.hh>\n'
+                                 '#include <motor/meta/builtins/strings.meta.hh>\n'
+                                 '#include <motor/meta/builtins/value.meta.hh>\n'
+                                 '\n' % (arguments.in_relative))
+                    explorer.namespace.write_declarations([], out_cc, out_hh)
+                    explorer.namespace.write_metaclasses([], out_typeid_cc, out_hh)
+                    out_hh.write('#endif\n')
 
         with open(arguments.doc, 'w'):
             pass
 
-        with open(arguments.class_exports, 'wb') as class_exports:
-            with open(arguments.namespace_exports, 'wb') as namespace_exports:
-                pickle.dump((arguments.module, arguments.root, arguments.in_relative), class_exports)
-                pickle.dump((arguments.module, arguments.root, arguments.in_relative), namespace_exports)
-                explorer.namespace.dump_exports([], class_exports, namespace_exports)
+        with open(arguments.namespace_exports, 'wb') as namespace_exports:
+            pickle.dump((arguments.module, arguments.root, arguments.in_relative), namespace_exports)
+            explorer.namespace.dump_exports([], namespace_exports)
 
 
 if __name__ == '__main__':

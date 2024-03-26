@@ -75,4 +75,5 @@ struct ComponentDouble
 
 }}}}  // namespace Motor::Test::Compute::UnitTests
 
+#include <component.meta.factory.hh>
 #endif

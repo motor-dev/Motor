@@ -28,4 +28,5 @@ struct Location
 
 }}}  // namespace Motor::Meta::Parse
 
+#include <motor/reflection/location.meta.factory.hh>
 #endif

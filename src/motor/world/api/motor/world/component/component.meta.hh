@@ -24,6 +24,7 @@ struct motor_api(WORLD) LogicComponent
 
 }}  // namespace Motor::World
 
+#    include <motor/world/component/component.meta.factory.hh>
 #endif
 
 #endif

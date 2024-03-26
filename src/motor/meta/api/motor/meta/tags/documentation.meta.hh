@@ -23,4 +23,5 @@ public:
 
 }}  // namespace Motor::Meta
 
+#include <motor/meta/tags/documentation.meta.factory.hh>
 #endif

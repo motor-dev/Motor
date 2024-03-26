@@ -15,4 +15,5 @@ struct LuaTest
 
 }  // namespace Motor
 
+#include <luatest.meta.factory.hh>
 #endif

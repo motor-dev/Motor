@@ -106,7 +106,7 @@ bool operator<=(Type t1, Type t2)
 
 u32 format_length(const Type& type, const minitl::format_options& options)
 {
-    u32 result = format_length(type.metaclass->name, options);
+    u32 result = format_length(type.metaclass->fullname(), options);
     if(type.access == Type::Constness::Const) result += 6;
     if(type.constness == Type::Constness::Const && type.indirection != Type::Indirection::Value)
         result += 6;
@@ -152,7 +152,7 @@ u32 format_arg(char* destination, const Type& type, const minitl::format_options
         offset += 6;
         reservedLength -= 6;
     }
-    offset += format_arg(destination + offset, type.metaclass->name, options, reservedLength);
+    offset += format_arg(destination + offset, type.metaclass->fullname(), options, reservedLength);
     if(type.indirection != Type::Indirection::Value) destination[offset++] = '>';
 
     return offset;

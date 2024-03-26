@@ -47,4 +47,5 @@ public:
 
 }}  // namespace Motor::Resource
 
+#include <motor/resource/idescription.meta.factory.hh>
 #endif

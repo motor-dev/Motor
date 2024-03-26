@@ -5,7 +5,7 @@
 
 #include <stdafx.h>
 #include <motor/world/component/component.meta.hh>
-#include <motor/world/event/event.hh>
+#include <motor/world/event/event.meta.hh>
 
 namespace Motor { namespace Gameplay {
 
@@ -23,4 +23,5 @@ struct [[motor::meta(tag = LogicComponent())]] Delay
 
 }}  // namespace Motor::Gameplay
 
+#include <delay.meta.factory.hh>
 #endif

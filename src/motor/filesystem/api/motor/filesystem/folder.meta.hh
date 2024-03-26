@@ -60,4 +60,5 @@ public:
 
 }  // namespace Motor
 
+#include <motor/filesystem/folder.meta.factory.hh>
 #endif

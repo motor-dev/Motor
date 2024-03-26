@@ -27,4 +27,5 @@ struct motor_api(META) OutputNode
 
 }}  // namespace Motor::EditHint
 
+#include <motor/meta/tags/editor.meta.factory.hh>
 #endif

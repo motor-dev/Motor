@@ -21,4 +21,5 @@ protected:
 
 }}  // namespace Motor::World
 
+#include <motor/world/event/baseevent.meta.factory.hh>
 #endif

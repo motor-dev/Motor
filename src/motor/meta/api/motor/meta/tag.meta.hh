@@ -17,4 +17,6 @@ public:
 
 }}  // namespace Motor::Meta
 
+#include <motor/meta/tag.meta.factory.hh>
+
 #endif

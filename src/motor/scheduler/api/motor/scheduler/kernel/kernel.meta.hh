@@ -37,4 +37,5 @@ public:
 
 }}  // namespace Motor::KernelScheduler
 
+#include <motor/scheduler/kernel/kernel.meta.factory.hh>
 #endif

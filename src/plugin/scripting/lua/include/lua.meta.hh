@@ -21,4 +21,5 @@ public:
 
 }  // namespace Motor
 
+#include <lua.meta.factory.hh>
 #endif

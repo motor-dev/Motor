@@ -27,4 +27,5 @@ public:
 }  // namespace AST
 }}  // namespace Motor::Meta
 
+#include <motor/introspect/policy.meta.factory.hh>
 #endif

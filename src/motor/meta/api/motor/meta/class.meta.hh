@@ -27,10 +27,10 @@ public:
     [[motor::meta(export = no)]] typedef void (*Destructor)(void* object);
 
 public:
-    istring const               name;
     u32 const                   size;
     raw< const Class > const    base;
     i32 const                   baseOffset;
+    raw< const Object >         owner;
     raw< const Object >         objects;
     raw< const Tag > const      tags;
     raw< const Property > const properties;
@@ -43,8 +43,10 @@ public:
     [[motor::meta(export = no)]] const Destructor                  destructor;
 
 public:
-    Value getTag(const Type& type) const;
-    Value getTag(raw< const Class > type) const;
+    istring    name() const;
+    inamespace fullname() const;
+    Value      getTag(const Type& type) const;
+    Value      getTag(raw< const Class > type) const;
 
     Value get(Value & from, istring name, bool& found) const;
     Value get(const Value& from, istring name, bool& found) const;
@@ -63,6 +65,9 @@ public:
                                                        EnumerateCallback  callback) const;
     [[motor::meta(export = no)]] bool distance(raw< const Class > other, u16 & result) const;
 
+private:
+    static const istring s_anonymousName;
+
 private:  // friend Value
     void copy(const void* src, void* dst) const;
     void destroy(void* src) const;
@@ -74,5 +79,7 @@ MOTOR_EXPORT raw< Meta::Class > motor_motor_Namespace();
 MOTOR_EXPORT raw< Meta::Class > motor_motor_Namespace_Motor();
 
 }  // namespace Motor
+
+#include <motor/meta/class.meta.factory.hh>
 
 #endif

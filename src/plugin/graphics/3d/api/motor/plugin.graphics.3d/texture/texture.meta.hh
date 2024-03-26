@@ -17,4 +17,5 @@ public:
 
 }  // namespace Motor
 
+#include <motor/plugin.graphics.3d/texture/texture.meta.factory.hh>
 #endif

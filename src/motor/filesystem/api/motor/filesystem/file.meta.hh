@@ -91,4 +91,5 @@ public:
 
 }  // namespace Motor
 
+#include <motor/filesystem/file.meta.factory.hh>
 #endif

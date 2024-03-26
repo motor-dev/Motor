@@ -41,4 +41,5 @@ public:
 
 }}  // namespace Motor::World
 
+#include <motor/world/componentregistry.meta.factory.hh>
 #endif

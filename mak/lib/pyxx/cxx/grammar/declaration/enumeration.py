@@ -36,12 +36,13 @@ enumerator:
 """
 
 import glrp
-from typing import Any
+from typing import Any, Tuple, Dict
 from ...parse import CxxParser, cxx98, cxx11
 from ....ast.enumeration import EnumSpecifier, Enumerator
 from ....ast.type import ErrorTypeSpecifier
 from ....ast.declarations import OpaqueEnumDeclaration, ErrorDeclaration
 from ....ast.reference import Reference, Id, TemplateSpecifierId, _Id
+from ....messages import error, Logger
 
 
 # @glrp.rule('enum-name[prec:right,1] : "identifier"')
@@ -49,6 +50,11 @@ from ....ast.reference import Reference, Id, TemplateSpecifierId, _Id
 # def enum_name(self: CxxParser, p: glrp.Production) -> Any:
 #    # type: (CxxParser, glrp.Production) -> Any
 #    pass
+
+@error
+def invalid_attribute_opaque_enum(self: Logger, position: Tuple[int, int]) -> Dict[str, Any]:
+    """an attribute cannot appear before an opaque enum declaration"""
+    return locals()
 
 
 @glrp.rule('enum-specifier : enum-head "{" enumerator-list? "}"')
@@ -95,13 +101,16 @@ def enum_head_name_nested(self: CxxParser, p: glrp.Production) -> Any:
     return Reference(p[0] + [id])
 
 
-# TODO: attribute-specifier-seq? empty
 @glrp.rule(
     'opaque-enum-declaration : attribute-specifier-seq? begin-declaration decl-specifier-seq-continue enum-key attribute-specifier-seq? enum-head-name enum-base? ";"'
 )
 @cxx11
 def opaque_enum_declaration_cxx11(self: CxxParser, p: glrp.Production) -> Any:
-    return OpaqueEnumDeclaration(p[5], p[0], p[4], p[3], p[6])
+    for attribute in p[0]:
+        if not attribute.is_extended():
+            invalid_attribute_opaque_enum(self.logger, attribute.position)
+            break
+    return OpaqueEnumDeclaration(p[5], p[0] + p[4], p[3], p[6])
 
 
 @glrp.rule(

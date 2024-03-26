@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <motor/settings/stdafx.h>
-#include <motor/settings/settings.factory.hh>
+#include <motor/settings/settings.meta.hh>
 #include <motor/settings/settingsprovider.hh>
 
 #include <motor/minitl/type_traits.hh>
@@ -69,7 +69,7 @@ void SettingsProvider::apply(SettingsBase& settings) const
     Meta::Value settingsValue = Meta::Value(type, &settings);
     for(const auto& category: m_settings)
     {
-        if(category.first == settings.m_settingsClass->name)
+        if(category.first == settings.m_settingsClass->name())
         {
             for(const auto& setting: category.second)
             {

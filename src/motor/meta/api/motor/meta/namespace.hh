@@ -12,23 +12,20 @@
     raw< Meta::Class > motor_##plugin##_Namespace();                                               \
     raw< Meta::Class > motor_##plugin##_Namespace_##n()                                            \
     {                                                                                              \
-        static Meta::Class ci  = {istring(#n),                                                     \
-                                  0,                                                               \
-                                  motor_class< void >(),                                           \
-                                  0,                                                               \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  motor_class< void >()->interfaces,                               \
-                                  nullptr,                                                         \
-                                  nullptr};                                                        \
+        MOTOR_EXPORT extern Meta::Object s_##plugin##_Namespace_##n##_ob;                          \
+                                                                                                   \
+        static Meta::Class ci  = {0,         motor_class< void >(),                                \
+                                  0,         {&s_##plugin##_Namespace_##n##_ob},                   \
+                                  {nullptr}, {nullptr},                                            \
+                                  {nullptr}, {nullptr},                                            \
+                                  {nullptr}, motor_class< void >()->interfaces,                    \
+                                  nullptr,   nullptr};                                             \
         raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
     MOTOR_EXPORT Meta::Object s_##plugin##_Namespace_##n##_ob                                      \
         = {{motor_##plugin##_Namespace()->objects.exchange(&s_##plugin##_Namespace_##n##_ob)},     \
+           motor_##plugin##_Namespace(),                                                           \
            istring(#n),                                                                            \
            Meta::Value(motor_##plugin##_Namespace_##n())};                                         \
     }
@@ -38,24 +35,21 @@
     raw< Meta::Class > motor_##plugin##_Namespace_##n1();                                          \
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2()                                    \
     {                                                                                              \
-        static Meta::Class ci  = {istring(#n2),                                                    \
-                                  0,                                                               \
-                                  motor_class< void >(),                                           \
-                                  0,                                                               \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  motor_class< void >()->interfaces,                               \
-                                  nullptr,                                                         \
-                                  nullptr};                                                        \
+        MOTOR_EXPORT extern Meta::Object s_##plugin##_Namespace_##n1##_##n2##_ob;                  \
+                                                                                                   \
+        static Meta::Class ci  = {0,         motor_class< void >(),                                \
+                                  0,         {&s_##plugin##_Namespace_##n1##_##n2##_ob},           \
+                                  {nullptr}, {nullptr},                                            \
+                                  {nullptr}, {nullptr},                                            \
+                                  {nullptr}, motor_class< void >()->interfaces,                    \
+                                  nullptr,   nullptr};                                             \
         raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
     MOTOR_EXPORT Meta::Object s_##plugin##_Namespace_##n1##_##n2##_ob                              \
         = {{motor_##plugin##_Namespace_##n1()->objects.exchange(                                   \
                &s_##plugin##_Namespace_##n1##_##n2##_ob)},                                         \
+           motor_##plugin##_Namespace_##n1(),                                                      \
            istring(#n2),                                                                           \
            Meta::Value(motor_##plugin##_Namespace_##n1##_##n2())};                                 \
     }
@@ -65,24 +59,21 @@
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2();                                   \
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3()                             \
     {                                                                                              \
-        static Meta::Class ci  = {istring(#n3),                                                    \
-                                  0,                                                               \
-                                  motor_class< void >(),                                           \
-                                  0,                                                               \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  motor_class< void >()->interfaces,                               \
-                                  nullptr,                                                         \
-                                  nullptr};                                                        \
+        MOTOR_EXPORT extern Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_ob;           \
+                                                                                                   \
+        static Meta::Class ci  = {0,         motor_class< void >(),                                \
+                                  0,         {&s_##plugin##_Namespace_##n1##_##n2##_##n3##_ob},    \
+                                  {nullptr}, {nullptr},                                            \
+                                  {nullptr}, {nullptr},                                            \
+                                  {nullptr}, motor_class< void >()->interfaces,                    \
+                                  nullptr,   nullptr};                                             \
         raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
     MOTOR_EXPORT Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_ob                       \
         = {{motor_##plugin##_Namespace_##n1##_##n2()->objects.exchange(                            \
                &s_##plugin##_Namespace_##n1##_##n2##_##n3##_ob)},                                  \
+           motor_##plugin##_Namespace_##n1##_##n2(),                                               \
            istring(#n3),                                                                           \
            Meta::Value(motor_##plugin##_Namespace_##n1##_##n2##_##n3())};                          \
     }
@@ -92,24 +83,22 @@
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3();                            \
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()                      \
     {                                                                                              \
-        static Meta::Class ci  = {istring(#n4),                                                    \
-                                  0,                                                               \
-                                  motor_class< void >(),                                           \
-                                  0,                                                               \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  motor_class< void >()->interfaces,                               \
-                                  nullptr,                                                         \
-                                  nullptr};                                                        \
+        MOTOR_EXPORT extern Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_ob;    \
+                                                                                                   \
+        static Meta::Class ci                                                                      \
+            = {0,         motor_class< void >(),                                                   \
+               0,         {&s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_ob},                \
+               {nullptr}, {nullptr},                                                               \
+               {nullptr}, {nullptr},                                                               \
+               {nullptr}, motor_class< void >()->interfaces,                                       \
+               nullptr,   nullptr};                                                                \
         raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
     MOTOR_EXPORT Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_ob                \
         = {{motor_##plugin##_Namespace_##n1##_##n2##_##n3()->objects.exchange(                     \
                &Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_ob)},              \
+           motor_##plugin##_Namespace_##n1##_##n2##_##n3(),                                        \
            istring(#n4),                                                                           \
            Meta::Value(motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4())};                   \
     }
@@ -119,24 +108,23 @@
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4();                     \
     raw< Meta::Class > motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5()               \
     {                                                                                              \
-        static Meta::Class ci  = {istring(#n5),                                                    \
-                                  0,                                                               \
-                                  motor_class< void >(),                                           \
-                                  0,                                                               \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  {nullptr},                                                       \
-                                  motor_class< void >()->interfaces,                               \
-                                  nullptr,                                                         \
-                                  nullptr};                                                        \
+        MOTOR_EXPORT extern Meta::Object                                                           \
+            s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_ob;                          \
+                                                                                                   \
+        static Meta::Class ci                                                                      \
+            = {0,         motor_class< void >(),                                                   \
+               0,         {&s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_ob},         \
+               {nullptr}, {nullptr},                                                               \
+               {nullptr}, {nullptr},                                                               \
+               {nullptr}, motor_class< void >()->interfaces,                                       \
+               nullptr,   nullptr};                                                                \
         raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
     MOTOR_EXPORT Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_ob         \
         = {{motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()->objects.exchange(              \
                &Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_ob)},       \
+           motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4(),                                 \
            istring(#n5),                                                                           \
            Meta::Value(motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5())};            \
     }
@@ -168,6 +156,7 @@
     }                                                                                              \
     MOTOR_EXPORT Meta::Object ob##id##parent##_##name                                              \
         = {{motor_##id##_Namespace##parent()->objects.exchange(&ob##id##parent##_##name)},         \
+           motor_##id##_Namespace##parent(),                                                       \
            istring(#name),                                                                         \
            Meta::Value(motor_##id##_Namespace())};                                                 \
     }

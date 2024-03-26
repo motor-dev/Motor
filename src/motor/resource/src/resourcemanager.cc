@@ -2,8 +2,10 @@
    see LICENSE for detail */
 
 #include <motor/resource/stdafx.h>
-#include <motor/resource/loader.hh>
 #include <motor/resource/resourcemanager.hh>
+
+#include <motor/meta/interfacetable.hh>
+#include <motor/resource/loader.hh>
 
 namespace Motor { namespace Resource {
 
@@ -28,9 +30,9 @@ weak< ResourceManager::LoaderInfo >
 ResourceManager::getLoaderInfo(raw< const Meta::Class > classinfo)
 {
     motor_assert_format(classinfo->interfaces, "Resource class {0} does not have an operator table",
-                        classinfo->name);
+                        classinfo->fullname());
     motor_assert_format(classinfo->interfaces->resourceType,
-                        "Resource class {0} does not have a resource class", classinfo->name);
+                        "Resource class {0} does not have a resource class", classinfo->fullname());
     raw< const Meta::Class > resourceType = classinfo->interfaces->resourceType;
     for(auto& m_loader: m_loaders)
     {
@@ -47,11 +49,11 @@ void ResourceManager::attach(raw< const Meta::Class > classinfo, const weak< ILo
     for(auto& it: info->loaders)
     {
         if(motor_assert_format(it != loader, "registering twice the same loader for class {0}",
-                               classinfo->name))
+                               classinfo->fullname()))
             return;
     }
 #endif
-    motor_info_format(Log::resource(), "registering loader for type {0}", classinfo->name);
+    motor_info_format(Log::resource(), "registering loader for type {0}", classinfo->fullname());
     info->loaders.push_back(loader);
     for(const auto& resource: info->resources)
     {
@@ -79,7 +81,7 @@ void ResourceManager::detach(raw< const Meta::Class >     classinfo,
         if(*it == loader)
         {
             motor_info_format(Log::resource(), "unregistering loader for type {0}",
-                              classinfo->name);
+                              classinfo->fullname());
             for(const auto& resource: info->resources)
             {
                 resource.unload(*it);
@@ -93,7 +95,7 @@ void ResourceManager::detach(raw< const Meta::Class >     classinfo,
         }
     }
     motor_error_format(Log::resource(), "loader was not in the list of loaders for type {0}",
-                       classinfo->name);
+                       classinfo->fullname());
 }
 
 void ResourceManager::load(raw< const Meta::Class >          classinfo,

@@ -9,6 +9,9 @@ from glrp import Token
 
 class ErrorDeclaration(Declaration):
 
+    def __init__(self) -> None:
+        Declaration.__init__(self, [])
+
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_error_declaration(self)
 
@@ -16,7 +19,18 @@ class ErrorDeclaration(Declaration):
 class AmbiguousDeclaration(Declaration):
 
     def __init__(self, declarations: List[Declaration]) -> None:
-        self.declarations = declarations
+        Declaration.__init__(self, [])
+        self.declarations = sorted(declarations, key=lambda x: x.declared_entity_count())
+
+    def declared_entity_count(self) -> int:
+        return self.declarations[0].declared_entity_count()
+
+    def declared_entity_position(self, index: int) -> Tuple[int, int]:
+        return self.declarations[0].declared_entity_position(index)
+
+    def add_attributes(self, attributes: List[Attribute]) -> None:
+        for declaration in self.declarations:
+            declaration.add_attributes(attributes)
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_ambiguous_declaration(self)
@@ -31,9 +45,13 @@ class AmbiguousDeclaration(Declaration):
 
 class SimpleDeclaration(Declaration):
 
-    def __init__(self, attribute_specifier_seq: List[Attribute], decl_specifier_seq: Optional["DeclSpecifierSeq"],
-                 declarator_lists: List[List["_InitDeclarator"]]):
-        self.attributes = attribute_specifier_seq
+    def __init__(
+            self,
+            attribute_specifier_seq: List[Attribute],
+            decl_specifier_seq: Optional["DeclSpecifierSeq"],
+            declarator_lists: List[List[Tuple[Tuple[int, int], "_InitDeclarator"]]]
+    ):
+        Declaration.__init__(self, attribute_specifier_seq)
         self.decl_specifier_seq = decl_specifier_seq
         if len(declarator_lists) == 1:
             self.declarators = InitDeclaratorList(declarator_lists[0])  # type: _InitDeclaratorList
@@ -42,12 +60,14 @@ class SimpleDeclaration(Declaration):
                 [InitDeclaratorList(declarator_list) for declarator_list in declarator_lists]
             )
 
+    def declared_entity_count(self) -> int:
+        return self.declarators.declarator_list_count()
+
+    def declared_entity_position(self, index: int) -> Tuple[int, int]:
+        return self.declarators.declarator_list_position(index)
+
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_simple_declaration(self)
-
-    def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.attributes:
-            attribute.accept(visitor)
 
     def accept_decl_specifier_seq(self, visitor: Visitor) -> None:
         if self.decl_specifier_seq is not None:
@@ -62,7 +82,7 @@ class StructuredBindingDeclaration(Declaration):
 
     def __init__(self, attribute_specifier_seq: List[Attribute], decl_specifier_seq: Optional["DeclSpecifierSeq"],
                  ref_qualifier: Optional[RefQualifier], names: List[str], initializer: Expression) -> None:
-        self.attributes = attribute_specifier_seq
+        Declaration.__init__(self, attribute_specifier_seq)
         self.decl_specifier_seq = decl_specifier_seq
         self.ref_qualifier = ref_qualifier
         self.names = names
@@ -70,10 +90,6 @@ class StructuredBindingDeclaration(Declaration):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_structured_binding_declaration(self)
-
-    def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.attributes:
-            attribute.accept(visitor)
 
     def accept_decl_specifier_seq(self, visitor: Visitor) -> None:
         if self.decl_specifier_seq is not None:
@@ -90,6 +106,7 @@ class StructuredBindingDeclaration(Declaration):
 class StaticAssert(Declaration):
 
     def __init__(self, condition: Expression, message: Optional[Expression]):
+        Declaration.__init__(self, [])
         self.condition = condition
         self.message = message
 
@@ -106,23 +123,13 @@ class StaticAssert(Declaration):
 
 class AliasDeclaration(Declaration):
 
-    def __init__(self, attribute_specifier_seq: List[Attribute], name: str,
-                 attribute_specifier_seq_alias: List[Attribute], type_id: TypeId) -> None:
-        self.attributes = attribute_specifier_seq
+    def __init__(self, attribute_specifier_seq: List[Attribute], name: str, type_id: TypeId) -> None:
+        Declaration.__init__(self, attribute_specifier_seq)
         self.alias = name
-        self.alias_attributes = attribute_specifier_seq_alias
         self.type_id = type_id
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_alias_declaration(self)
-
-    def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.attributes:
-            attribute.accept(visitor)
-
-    def accept_alias_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.alias_attributes:
-            attribute.accept(visitor)
 
     def accept_type_id(self, visitor: Visitor) -> None:
         self.type_id.accept(visitor)
@@ -131,15 +138,16 @@ class AliasDeclaration(Declaration):
 class NamespaceDeclaration(Declaration):
 
     def __init__(
-            self, position: Tuple[int, int], attribute_specifier_seq: List[Attribute],
-            attribute_specifier_seq_namespace: List[Attribute],
-            attribute_specifier_seq_namespace_identifier: List[Attribute],
-            inline: bool, nested_name: List[Tuple[bool, str]], namespace_name: Optional[str],
+            self,
+            position: Tuple[int, int],
+            attribute_specifier_seq: List[Attribute],
+            inline: bool,
+            nested_name: List[Tuple[bool, str]],
+            namespace_name: Optional[str],
             declaration_seq: List[Declaration]
     ) -> None:
+        Declaration.__init__(self, attribute_specifier_seq)
         self.position = position
-        self.attributes = attribute_specifier_seq
-        self.attributes_namespace = attribute_specifier_seq_namespace + attribute_specifier_seq_namespace_identifier
         self.inline = inline
         self.nested_name = nested_name
         self.namespace_name = namespace_name
@@ -148,10 +156,6 @@ class NamespaceDeclaration(Declaration):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_namespace_declaration(self)
 
-    def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.attributes + self.attributes_namespace:
-            attribute.accept(visitor)
-
     def accept_children(self, visitor: Visitor) -> None:
         for decl in self.declaration_seq:
             decl.accept(visitor)
@@ -159,19 +163,18 @@ class NamespaceDeclaration(Declaration):
 
 class NamespaceAliasDeclaration(Declaration):
 
-    def __init__(self, attribute_specifier_seq: List[Attribute], attribute_specifier_seq_namespace: List[Attribute],
-                 alias_name: str, target_name: AbstractReference) -> None:
-        self.attributes = attribute_specifier_seq
-        self.attributes_namespace = attribute_specifier_seq_namespace
+    def __init__(
+            self,
+            attribute_specifier_seq: List[Attribute],
+            alias_name: str,
+            target_name: AbstractReference
+    ) -> None:
+        Declaration.__init__(self, attribute_specifier_seq)
         self.alias_name = alias_name
         self.target_name = target_name
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_namespace_alias_declaration(self)
-
-    def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.attributes:
-            attribute.accept(visitor)
 
     def accept_reference(self, visitor: Visitor) -> None:
         self.target_name.accept(visitor)
@@ -180,15 +183,11 @@ class NamespaceAliasDeclaration(Declaration):
 class UsingDirective(Declaration):
 
     def __init__(self, attribute_specifier_seq: List[Attribute], reference: AbstractReference):
-        self.attributes = attribute_specifier_seq
+        Declaration.__init__(self, attribute_specifier_seq)
         self.reference = reference
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_using_directive(self)
-
-    def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.attributes:
-            attribute.accept(visitor)
 
     def accept_reference(self, visitor: Visitor) -> None:
         self.reference.accept(visitor)
@@ -196,16 +195,12 @@ class UsingDirective(Declaration):
 
 class UsingDeclaration(Declaration):
 
-    def __init__(self, attribute_specifier_seq: List[Attribute], reference_list: List[AbstractReference]) -> None:
-        self.attributes = attribute_specifier_seq
+    def __init__(self, reference_list: List[AbstractReference]) -> None:
+        Declaration.__init__(self, [])
         self.reference_list = reference_list
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_using_declaration(self)
-
-    def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.attributes:
-            attribute.accept(visitor)
 
     def accept_reference_list(self, visitor: Visitor) -> None:
         for reference in self.reference_list:
@@ -214,16 +209,12 @@ class UsingDeclaration(Declaration):
 
 class UsingEnumDeclaration(Declaration):
 
-    def __init__(self, attribute_specifier_seq: List[Attribute], enum_specifier: ElaboratedEnumTypeSpecifier) -> None:
-        self.attributes = attribute_specifier_seq
+    def __init__(self, enum_specifier: ElaboratedEnumTypeSpecifier) -> None:
+        Declaration.__init__(self, [])
         self.enum_specifier = enum_specifier
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_using_enum_declaration(self)
-
-    def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.attributes:
-            attribute.accept(visitor)
 
     def accept_enum_specifier(self, visitor: Visitor) -> None:
         self.enum_specifier.accept(visitor)
@@ -232,31 +223,23 @@ class UsingEnumDeclaration(Declaration):
 class AsmDeclaration(Declaration):
 
     def __init__(self, attribute_specifier_seq: List[Attribute], asm_string: str) -> None:
-        self.attributes = attribute_specifier_seq
+        Declaration.__init__(self, attribute_specifier_seq)
         self.asm_string = asm_string
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_asm_declaration(self)
 
-    def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.attributes:
-            attribute.accept(visitor)
-
 
 class LinkageSpecification(Declaration):
 
-    def __init__(self, attribute_specifier_seq: List[Attribute], linkage_type: str,
+    def __init__(self, linkage_type: str,
                  declaration_seq: List[Declaration]) -> None:
-        self.attributes = attribute_specifier_seq
+        Declaration.__init__(self, [])
         self.linkage_type = linkage_type
         self.declaration_seq = declaration_seq
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_linkage_specification(self)
-
-    def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.attributes:
-            attribute.accept(visitor)
 
     def accept_declarations(self, visitor: Visitor) -> None:
         for decl in self.declaration_seq:
@@ -265,19 +248,15 @@ class LinkageSpecification(Declaration):
 
 class OpaqueEnumDeclaration(Declaration):
 
-    def __init__(self, name: AbstractReference, decl_attributes: List[Attribute], attributes: List[Attribute],
-                 is_scoped: bool, base_type: Optional[TypeSpecifierSeq]):
+    def __init__(self, name: AbstractReference, attributes: List[Attribute], is_scoped: bool,
+                 base_type: Optional[TypeSpecifierSeq]):
+        Declaration.__init__(self, attributes)
         self.name = name
-        self.attributes = decl_attributes + attributes
         self.is_scoped = is_scoped
         self.base_type = base_type
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_opaque_enum_declaration(self)
-
-    def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.attributes:
-            attribute.accept(visitor)
 
     def accept_name(self, visitor: Visitor) -> None:
         self.name.accept(visitor)
@@ -295,8 +274,12 @@ class _InitDeclarator(object):
 
 class InitDeclarator(_InitDeclarator):
 
-    def __init__(self, declarator: Optional[Declarator], init_value: Optional[Expression],
-                 constraint: Optional[RequiresClause]) -> None:
+    def __init__(
+            self,
+            declarator: Optional[Declarator],
+            init_value: Optional[Expression],
+            constraint: Optional[RequiresClause]
+    ) -> None:
         self.declarator = declarator
         self.init_value = init_value
         self.constraint = constraint
@@ -335,9 +318,14 @@ class AmbiguousInitDeclarator(_InitDeclarator):
 
 class MemberInitDeclarator(InitDeclarator):
 
-    def __init__(self, declarator: Optional[Declarator], init_value: Optional[Expression],
-                 constraint: Optional[RequiresClause], virt_specifier_seq: List["VirtSpecifier"],
-                 bitfield_width: Optional[Expression]) -> None:
+    def __init__(
+            self,
+            declarator: Optional[Declarator],
+            init_value: Optional[Expression],
+            constraint: Optional[RequiresClause],
+            virt_specifier_seq: List["VirtSpecifier"],
+            bitfield_width: Optional[Expression]
+    ) -> None:
         InitDeclarator.__init__(self, declarator, init_value, constraint)
         self.virt_specifier_seq = virt_specifier_seq
         self.bitfield_width = bitfield_width
@@ -362,18 +350,30 @@ class _InitDeclaratorList:
     def accept(self, visitor: Visitor) -> None:
         raise NotImplementedError
 
+    def declarator_list_count(self) -> int:
+        raise NotImplementedError
+
+    def declarator_list_position(self, index: int) -> Tuple[int, int]:
+        raise NotImplementedError
+
 
 class InitDeclaratorList(_InitDeclaratorList):
 
-    def __init__(self, init_declarators: List[_InitDeclarator]) -> None:
+    def __init__(self, init_declarators: List[Tuple[Tuple[int, int], _InitDeclarator]]) -> None:
         super().__init__()
         self.init_declarators = init_declarators
+
+    def declarator_list_count(self) -> int:
+        return len(self.init_declarators)
+
+    def declarator_list_position(self, index: int) -> Tuple[int, int]:
+        return self.init_declarators[index][0]
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_init_declarator_list(self)
 
     def accept_init_declarators(self, visitor: Visitor) -> None:
-        for declarator in self.init_declarators:
+        for _, declarator in self.init_declarators:
             declarator.accept(visitor)
 
 
@@ -384,6 +384,12 @@ class AmbiguousInitDeclaratorList(_InitDeclaratorList):
         self.init_declarator_lists = list(
             sorted(ambigous_init_declarator_lists, key=lambda x: len(x.init_declarators))
         )
+
+    def declarator_list_count(self) -> int:
+        return self.init_declarator_lists[0].declarator_list_count()
+
+    def declarator_list_position(self, index: int) -> Tuple[int, int]:
+        return self.init_declarator_lists[0].declarator_list_position(index)
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_ambiguous_init_declarator_list(self)
@@ -513,7 +519,8 @@ class ExplicitSpecifier(DeclarationSpecifier):
 
 class ConceptDefinition(Declaration):
 
-    def __init__(self, name: str, constraint_expression: Expression) -> None:
+    def __init__(self, attributes: List[Attribute], name: str, constraint_expression: Expression) -> None:
+        Declaration.__init__(self, attributes)
         self.name = name
         self.constraint_expression = constraint_expression
 
@@ -527,7 +534,11 @@ class ConceptDefinition(Declaration):
 class ExplicitSpecialization(Declaration):
 
     def __init__(self, declaration: Declaration) -> None:
+        Declaration.__init__(self, [])
         self.declaration = declaration
+
+    def add_attributes(self, attributes: List[Attribute]) -> None:
+        self.declaration.add_attributes(attributes)
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_explicit_specialization(self)
@@ -539,8 +550,12 @@ class ExplicitSpecialization(Declaration):
 class ExplicitInstantiation(Declaration):
 
     def __init__(self, declaration: Declaration, is_extern: bool) -> None:
+        Declaration.__init__(self, [])
         self.declaration = declaration
         self.is_extern = is_extern
+
+    def add_attributes(self, attributes: List[Attribute]) -> None:
+        self.declaration.add_attributes(attributes)
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_explicit_instantiation(self)
@@ -551,9 +566,14 @@ class ExplicitInstantiation(Declaration):
 
 class DeductionGuide(Declaration):
 
-    def __init__(self, attributes: List[Attribute], name: str, explicit_specifier: Optional[ExplicitSpecifier],
-                 parameter_clause: "ParameterClause", template_id: TemplateId) -> None:
-        self.attributes = attributes
+    def __init__(
+            self,
+            name: str,
+            explicit_specifier: Optional[ExplicitSpecifier],
+            parameter_clause: "ParameterClause",
+            template_id: TemplateId
+    ) -> None:
+        Declaration.__init__(self, [])
         self.name = name
         self.explicit_specifier = explicit_specifier
         self.parameter_clause = parameter_clause
@@ -561,10 +581,6 @@ class DeductionGuide(Declaration):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_deduction_guide(self)
-
-    def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.attributes:
-            attribute.accept(visitor)
 
     def accept_explicit_specifier(self, visitor: Visitor) -> None:
         if self.explicit_specifier is not None:

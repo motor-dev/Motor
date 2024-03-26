@@ -48,7 +48,6 @@ class RecursiveVisitor(ast.Visitor):
 
     def visit_alias_declaration(self, alias_declaration: ast.AliasDeclaration) -> None:
         alias_declaration.accept_attributes(self)
-        alias_declaration.accept_alias_attributes(self)
         alias_declaration.accept_type_id(self)
 
     def visit_namespace_declaration(self, namespace_declaration: ast.NamespaceDeclaration) -> None:
@@ -64,18 +63,15 @@ class RecursiveVisitor(ast.Visitor):
         using_directive.accept_reference(self)
 
     def visit_using_declaration(self, using_declaration: ast.UsingDeclaration) -> None:
-        using_declaration.accept_attributes(self)
         using_declaration.accept_reference_list(self)
 
     def visit_using_enum_declaration(self, using_enum_declaration: ast.UsingEnumDeclaration) -> None:
-        using_enum_declaration.accept_attributes(self)
         using_enum_declaration.accept_enum_specifier(self)
 
     def visit_asm_declaration(self, asm_declaration: ast.AsmDeclaration) -> None:
         asm_declaration.accept_attributes(self)
 
     def visit_linkage_specification(self, linkage_specification: ast.LinkageSpecification) -> None:
-        linkage_specification.accept_attributes(self)
         linkage_specification.accept_declarations(self)
 
     def visit_opaque_enum_declaration(self, opaque_enum_declaration: ast.OpaqueEnumDeclaration) -> None:
@@ -410,7 +406,6 @@ class RecursiveVisitor(ast.Visitor):
     def visit_elaborated_enum_type_specifier(
             self, elaborated_enum_type_specifier: ast.ElaboratedEnumTypeSpecifier
     ) -> None:
-        elaborated_enum_type_specifier.accept_attributes(self)
         elaborated_enum_type_specifier.accept_name(self)
 
     def visit_decltype_type_specifier(self, decltype_type_specifier: ast.DecltypeTypeSpecifier) -> None:

@@ -10,7 +10,7 @@ import waflib.Tools.ccroot
 from .features import create_compiled_task, make_bld_node
 
 
-@waflib.TaskGen.feature('motor:masterfiles:off', 'motor:masterfiles:folder')
+@waflib.TaskGen.feature('motor:masterfiles:off')
 def masterfiles_feature(_: waflib.TaskGen.task_gen) -> None:
     pass
 
@@ -34,35 +34,29 @@ setattr(MasterTask, 'sig_explicit_deps', _master_sig_deps)
 @waflib.TaskGen.extension('.c', '.m')
 def c_hook(task_gen: waflib.TaskGen.task_gen, node: waflib.Node.Node) -> None:
     extension = getattr(task_gen, 'objc', False) and 'm' or 'c'
-    if 'motor:c' in task_gen.features and node not in getattr(task_gen, 'nomaster', []):
-        if 'motor:masterfiles:folder' in task_gen.features and not waflib.Options.options.nomaster \
-                and not task_gen.env.PROJECTS:
+    if 'motor:c' in task_gen.features:
+        category = getattr(task_gen, 'masterfiles').get(node, '')
+        if category and not waflib.Options.options.nomaster and not task_gen.env.PROJECTS:
             try:
-                mastertask_c = getattr(task_gen, 'mastertasks_c_folders')[node.parent]
+                mastertask_c = getattr(task_gen, 'mastertasks_c_%s' % category)
             except AttributeError:
                 output = make_bld_node(
                     task_gen,
-                    'src', None,
-                    'master-c-%s-0.%s' % (node.parent.name, extension)
+                    'src',
+                    None,
+                    'master-c-%s.%s' % (category, extension)
                 )
                 mastertask_c = task_gen.create_task('master', [node], [output])
-                setattr(task_gen, 'mastertasks_c_folders', {node.parent: mastertask_c})
-                create_compiled_task(task_gen, 'c', output)
-            except KeyError:
-                output = make_bld_node(
-                    task_gen,
-                    'src', None,
-                    'master-c-%s-%d.%s' % (
-                        node.parent.name, len(getattr(task_gen, 'mastertasks_c_folders')),
-                        extension)
-                )
-                mastertask_c = task_gen.create_task('master', [node], [output])
-                getattr(task_gen, 'mastertasks_c_folders')[node.parent] = mastertask_c
+                setattr(task_gen, 'mastertasks_c_%s' % category, mastertask_c)
                 create_compiled_task(task_gen, 'c', output)
             else:
                 mastertask_c.set_inputs([node])
-        elif 'motor:masterfiles:off' not in task_gen.features and not waflib.Options.options.nomaster \
-                and not task_gen.env.PROJECTS:
+        elif (
+                category is not None
+                and 'motor:masterfiles:off' not in task_gen.features
+                and not waflib.Options.options.nomaster
+                and not task_gen.env.PROJECTS
+        ):
             try:
                 mastertask_c = getattr(task_gen, 'mastertasks_c')[-1]
             except AttributeError:
@@ -92,32 +86,29 @@ def c_hook(task_gen: waflib.TaskGen.task_gen, node: waflib.Node.Node) -> None:
 @waflib.TaskGen.extension('.cc', '.cxx', '.cpp', '.mm')
 def cc_hook(task_gen: waflib.TaskGen.task_gen, node: waflib.Node.Node) -> None:
     extension = getattr(task_gen, 'objc', False) and 'mm' or 'cc'
-    if 'motor:cxx' in task_gen.features and node not in getattr(task_gen, 'nomaster', []):
-        if 'motor:masterfiles:folder' in task_gen.features and not waflib.Options.options.nomaster \
-                and not task_gen.env.PROJECTS:
+    if 'motor:cxx' in task_gen.features:
+        category = getattr(task_gen, 'masterfiles').get(node, '')
+        if category and not waflib.Options.options.nomaster and not task_gen.env.PROJECTS:
             try:
-                mastertask_cxx = getattr(task_gen, 'mastertasks_cxx_folders')[node.parent]
+                mastertask_cxx = getattr(task_gen, 'mastertasks_cxx_%s' % category)
             except AttributeError:
                 output = make_bld_node(
                     task_gen,
-                    'src', None, 'master-c-%s-0.%s' % (node.parent.name, extension)
+                    'src',
+                    None,
+                    'master-cxx-%s.%s' % (category, extension)
                 )
                 mastertask_cxx = task_gen.create_task('master', [node], [output])
-                setattr(task_gen, 'mastertasks_cxx_folders', {node.parent: mastertask_cxx})
-                create_compiled_task(task_gen, 'cxx', output)
-            except KeyError:
-                output = make_bld_node(
-                    task_gen,
-                    'src', None, 'master-c-%s-%d.%s' %
-                                 (node.parent.name, len(getattr(task_gen, 'mastertasks_cxx_folders')), extension)
-                )
-                mastertask_cxx = task_gen.create_task('master', [node], [output])
-                getattr(task_gen, 'mastertasks_cxx_folders')[node.parent] = mastertask_cxx
+                setattr(task_gen, 'mastertasks_cxx_%s' % category, mastertask_cxx)
                 create_compiled_task(task_gen, 'cxx', output)
             else:
                 mastertask_cxx.set_inputs([node])
-        elif 'motor:masterfiles:off' not in task_gen.features and not waflib.Options.options.nomaster \
-                and not task_gen.env.PROJECTS:
+        elif (
+                category is not None
+                and 'motor:masterfiles:off' not in task_gen.features
+                and not waflib.Options.options.nomaster
+                and not task_gen.env.PROJECTS
+        ):
             try:
                 mastertask_cxx = getattr(task_gen, 'mastertasks_cxx')[-1]
             except AttributeError:

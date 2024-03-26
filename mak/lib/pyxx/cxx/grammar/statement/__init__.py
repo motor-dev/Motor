@@ -88,7 +88,7 @@ def condition(self: CxxParser, p: glrp.Production) -> Any:
 )
 @cxx98
 def condition_decl(self: CxxParser, p: glrp.Production) -> Any:
-    return DeclarationStatement(SimpleDeclaration(p[0], p[2], [[InitDeclarator(p[3], p[4], None)]]))
+    return DeclarationStatement(SimpleDeclaration(p[0], p[2], [[((0, 0), InitDeclarator(p[3], p[4], None))]]))
 
 
 @glrp.rule('condition? :')
@@ -106,8 +106,8 @@ def begin_statement(self: CxxParser, p: glrp.Production) -> Any:
 @glrp.merge('condition')
 @cxx98_merge
 def ambiguous_condition(
-    self: CxxParser, expression_statement: List[Any], simple_declaration: List[Any],
-    ambiguous_simple_declaration: List[Any]
+        self: CxxParser, expression_statement: List[Any], simple_declaration: List[Any],
+        ambiguous_simple_declaration: List[Any]
 ) -> Any:
     return AmbiguousStatement(expression_statement + simple_declaration + ambiguous_simple_declaration)
 
@@ -115,7 +115,7 @@ def ambiguous_condition(
 @glrp.merge('condition')
 @cxx98_merge
 def ambiguous_condition_2(
-    self: CxxParser, decl_specifier_seq_end: List[Any], decl_specifier_seq_continue: List[Any]
+        self: CxxParser, decl_specifier_seq_end: List[Any], decl_specifier_seq_continue: List[Any]
 ) -> Any:
     return AmbiguousStatement(decl_specifier_seq_end + decl_specifier_seq_continue)
 
@@ -135,8 +135,8 @@ def ambiguous_condition_final(self: CxxParser, final_keyword: List[Any], final_i
 @glrp.merge('condition?')
 @cxx98_merge
 def ambiguous_condition_opt(
-    self: CxxParser, expression_statement: List[Any], simple_declaration: List[Any],
-    ambiguous_simple_declaration: List[Any]
+        self: CxxParser, expression_statement: List[Any], simple_declaration: List[Any],
+        ambiguous_simple_declaration: List[Any]
 ) -> Any:
     return AmbiguousStatement(expression_statement + simple_declaration + ambiguous_simple_declaration)
 
@@ -144,7 +144,7 @@ def ambiguous_condition_opt(
 @glrp.merge('condition?')
 @cxx98_merge
 def ambiguous_condition_opt_2(
-    self: CxxParser, decl_specifier_seq_end: List[Any], decl_specifier_seq_continue: List[Any]
+        self: CxxParser, decl_specifier_seq_end: List[Any], decl_specifier_seq_continue: List[Any]
 ) -> Any:
     return AmbiguousStatement(decl_specifier_seq_end + decl_specifier_seq_continue)
 
@@ -164,7 +164,7 @@ def ambiguous_condition_ext_final(self: CxxParser, final_keyword: List[Any], fin
 @glrp.merge('init-statement')
 @cxx98_merge
 def ambiguous_init_statement(
-    self: CxxParser, expression_statement: List[Any], ambiguous_simple_declaration: List[Any]
+        self: CxxParser, expression_statement: List[Any], ambiguous_simple_declaration: List[Any]
 ) -> Any:
     return AmbiguousStatement(expression_statement + ambiguous_simple_declaration)
 
@@ -172,6 +172,6 @@ def ambiguous_init_statement(
 @glrp.merge('statement')
 @cxx98_merge
 def ambiguous_statement(
-    self: CxxParser, expression_statement: List[Any], ambiguous_simple_declaration: List[Any]
+        self: CxxParser, expression_statement: List[Any], ambiguous_simple_declaration: List[Any]
 ) -> Any:
     return AmbiguousStatement(expression_statement + ambiguous_simple_declaration)

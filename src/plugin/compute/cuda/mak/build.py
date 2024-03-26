@@ -190,7 +190,7 @@ def create_cuda_kernel(
                 use=getattr(task_gen, 'use', []) + [env.ENV_PREFIX % 'plugin.compute.cuda'],
                 uselib=getattr(task_gen, 'uselib', []),
                 source_nodes=getattr(task_gen, 'source_nodes', []),
-                nomaster=set()
+                masterfiles={}
             )
             kernel_task_gen.env.PLUGIN = kernel_task_gen.env.plugin_name
 
@@ -231,7 +231,7 @@ def create_cuda_kernel(
             uselib=getattr(tgen, 'uselib'),
             source_nodes=[('', kernel_source)],
             project_name=project_name,
-            nomaster=set()
+            masterfiles={}
         )
         kernel_task_gen.env.PLUGIN = task_gen.env.plugin_name
 

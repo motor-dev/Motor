@@ -351,7 +351,7 @@ class vs_solution(waflib.Task.Task):
                     guid = build_framework.generate_guid(sub_path)
                     solution_file.write(
                         ('Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "%s", "%s", "%s"\r\n'
-                         'EndProject\r\n' % (name, name, guid)
+                         'EndProject\r\n' % (sub_path, name, guid)
                          ).encode())
                     write_project(sub_projects, sub_path)
                 if task is not None:
@@ -386,7 +386,7 @@ class vs_solution(waflib.Task.Task):
                     guid = build_framework.generate_guid(sub_path)
                     if parent_guid:
                         solution_file.write(('\t\t%s = %s\r\n' % (guid, parent_guid)).encode())
-                    write_project_nesting(sub_projects, path, guid)
+                    write_project_nesting(sub_projects, sub_path, guid)
                 if task is not None and parent_guid:
                     tg_guid = getattr(task, 'guid')  # type: str
                     solution_file.write(('\t\t%s = %s\r\n' % (tg_guid, parent_guid)).encode())

@@ -35,4 +35,5 @@ public:
 
 }  // namespace Motor
 
+#include <motor/filesystem/diskfolder.meta.factory.hh>
 #endif

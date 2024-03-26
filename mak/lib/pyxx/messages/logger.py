@@ -91,8 +91,8 @@ class Logger(glrp.Logger):
             '{color_filename}{filename}{color_off}({line:d},{column:d}) : '
             '{color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
         'unix':
-            '{color_filename}{filename}{color_off}:{line:d}:{column:d}: '
-            '{color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
+            '{color_filename}{filename}:{line:d}:{column:d}:{color_off} '
+            '{color_error_type}{error_type}:{color_off} {color_message}{message}{color_off}\n',
         'vi':
             '{color_filename}{filename}{color_off} +{line:d}:{column:d}: '
             '{color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',

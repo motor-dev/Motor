@@ -18,6 +18,8 @@ class metagen(waflib.Task.Task):
     def run(self) -> int:
         metagen_node = getattr(self, 'metagen')  # type: waflib.Node.Node
         macros_node = getattr(self, 'macros')  # type: waflib.Node.Node
+        relative_input = getattr(self, 'relative_input')  # type: str
+        relative_output = getattr(self, 'relative_output')  # type: str
         extra_options = []
         if waflib.Options.options.werror:
             extra_options.append('-Werror')
@@ -40,12 +42,14 @@ class metagen(waflib.Task.Task):
                 '--tmp',
                 self.generator.bld.bldnode.abspath(),
             ] + extra_options + [
-                self.inputs[0].path_from(self.generator.bld.bldnode),
-                self.inputs[0].path_from(self.generator.bld.srcnode),
+                self.inputs[0].abspath(),
+                relative_input,
+                relative_output,
                 self.outputs[0].path_from(self.generator.bld.bldnode),
                 self.outputs[1].path_from(self.generator.bld.bldnode),
                 self.outputs[2].path_from(self.generator.bld.bldnode),
                 self.outputs[3].path_from(self.generator.bld.bldnode),
+                self.outputs[4].path_from(self.generator.bld.bldnode),
             ]
         )
 
@@ -102,71 +106,52 @@ class ns_export(waflib.Task.Task):
         return 0
 
 
-class cls_export(waflib.Task.Task):
-
-    def run(self) -> int:
-        with open(self.outputs[0].abspath(), 'w') as export_file:
-            pch = getattr(self, 'pch', '')
-            if pch:
-                export_file.write('#include <%s>\n' % pch)
-            export_file.write('#include <motor/meta/typeinfo.hh>\n')
-            for input_node in self.inputs:
-                with open(input_node.abspath(), 'rb') as in_file:
-                    plugin, root_namespace, include = pickle.load(in_file)
-                    export_file.write('#include <%s>\n' % include)
-                    while True:
-                        try:
-                            namespace, class_name = pickle.load(in_file)
-                            namespace_name = namespace + ['%s_Meta' % s for s in class_name]
-                            class_name = '::'.join(namespace + class_name)
-                            export_file.write(
-                                'namespace %s {\n'
-                                'extern raw<Motor::Meta::Class> klass();\n'
-                                'extern Motor::istring name();\n'
-                                '%s\n'
-                                'template<>\n'
-                                'MOTOR_EXPORT raw< const ::Motor::Meta::Class > Motor::Meta::ClassID<%s>::klass()\n'
-                                '{\n'
-                                '    return %s::klass();\n'
-                                '};\n'
-                                'template<>\n'
-                                'MOTOR_EXPORT Motor::istring Motor::Meta::ClassID<::%s>::name()\n'
-                                '{\n'
-                                '    static const istring s_name = %s::name();\n'
-                                '    return s_name;\n'
-                                '};\n' % (
-                                    ' { namespace '.join(namespace_name), '}' * len(namespace_name),
-                                    class_name, '::'.join(namespace_name), class_name, '::'.join(namespace_name))
-                            )
-                        except EOFError:
-                            break
-        return 0
-
-
 @waflib.TaskGen.extension('.h', '.hh', '.hxx')
 def datagen(task_gen: waflib.TaskGen.task_gen, node: waflib.Node.Node) -> None:
     assert isinstance(task_gen.bld, build_framework.BuildContext)
+    relative_include = ''
+    category = ''
+    generated_paths = [getattr(task_gen, 'generated_include_node'), getattr(task_gen, 'generated_api_node')]
+    for include_node in getattr(task_gen, 'includes') + generated_paths:
+        if node.is_child_of(include_node):
+            relative_input = node.path_from(include_node)
+            category = include_node.name
+            break
+    else:
+        raise waflib.Errors.WafError('unable to locate include path for %s' % node)
     outs = []
     out_node = build_framework.make_bld_node(task_gen, 'src', node.parent, '%s.cc' % node.name[:node.name.rfind('.')])
+    header_node = build_framework.make_bld_node(task_gen, category, node.parent,
+                                                '%s.factory.hh' % node.name[:node.name.rfind('.')])
     out_node.parent.mkdir()
     outs.append(out_node)
+    outs.append(out_node.change_ext('.typeid.cc'))
+    outs.append(header_node)
     outs.append(out_node.change_ext('.doc'))
-    outs.append(out_node.change_ext('.class_exports'))
     outs.append(out_node.change_ext('.namespace_exports'))
+    for include_node in generated_paths:
+        if outs[2].is_child_of(include_node):
+            relative_output = outs[2].path_from(include_node)
+            break
+    else:
+        raise waflib.Errors.WafError('unable to locate include path for %s' % outs[2])
 
     tsk = task_gen.create_task(
         'metagen',
         [node],
         outs,
+        relative_input=relative_input,
+        relative_output=relative_output,
         metagen=task_gen.bld.motornode.make_node('mak/bin/metagen.py'),
         macros=task_gen.bld.motornode.make_node('mak/tools/macros_def.json'),
     )
     tsk.dep_nodes = task_gen.bld.pyxx_nodes + [task_gen.bld.motornode.make_node('mak/bin/metagen.py')]
 
-    getattr(task_gen, 'out_sources').append(out_node)
-    task_gen.source.append(outs[1])
-    task_gen.source.append(outs[2])
+    getattr(task_gen, 'out_sources').append(outs[0])
+    getattr(task_gen, 'out_sources').append(outs[1])
+    # getattr(task_gen, 'masterfiles')[outs[1]] = 'typeid'
     task_gen.source.append(outs[3])
+    task_gen.source.append(outs[4])
 
 
 @waflib.TaskGen.feature('motor:module')
@@ -210,19 +195,8 @@ def add_namespace_export_file(task_gen: waflib.TaskGen.task_gen, node: waflib.No
         out_node = build_framework.make_bld_node(task_gen, 'src', None, 'meta_namespace_export.cc')
         out_node.parent.mkdir()
         getattr(task_gen, 'out_sources').append(out_node)
-        getattr(task_gen, 'nomaster').add(out_node)
+        # getattr(task_gen, 'masterfiles')[out_node] = None
         setattr(task_gen, 'namespace_exports_task', task_gen.create_task('ns_export', [node], [out_node]))
-
-
-@waflib.TaskGen.extension('.class_exports')
-def add_class_export_file(task_gen: waflib.TaskGen.task_gen, node: waflib.Node.Node) -> None:
-    try:
-        getattr(task_gen, 'class_exports_task').set_inputs([node])
-    except AttributeError:
-        out_node = build_framework.make_bld_node(task_gen, 'src', None, 'meta_class_export.cc')
-        getattr(task_gen, 'out_sources').append(out_node)
-        getattr(task_gen, 'nomaster').add(out_node)
-        setattr(task_gen, 'class_exports_task', task_gen.create_task('cls_export', [node], [out_node]))
 
 
 @waflib.TaskGen.extension('.doc')

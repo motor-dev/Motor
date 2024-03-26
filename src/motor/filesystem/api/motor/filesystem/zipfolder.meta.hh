@@ -50,4 +50,5 @@ public:
 
 }  // namespace Motor
 
+#include <motor/filesystem/zipfolder.meta.factory.hh>
 #endif

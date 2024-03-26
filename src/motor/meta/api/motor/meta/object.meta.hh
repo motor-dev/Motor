@@ -9,15 +9,18 @@
 namespace Motor { namespace Meta {
 
 class Tag;
+class Class;
 
 class motor_api(META) Object
 {
 public:
     raw< const Object > const next;
+    raw< const Class > const  owner;
     istring const             name;
     mutable Value             value;
 };
 
 }}  // namespace Motor::Meta
 
+#include <motor/meta/object.meta.factory.hh>
 #endif

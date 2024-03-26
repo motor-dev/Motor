@@ -10,13 +10,15 @@ from .klass import MemberInitializer
 class FunctionDefinition(Declaration):
 
     def __init__(
-            self, attribute_specifier_seq: List[Attribute], decl_specifier_seq: Optional["DeclSpecifierSeq"],
-            declarator: Declarator, requires_clause: Optional[RequiresClause],
+            self,
+            attribute_specifier_seq: List[Attribute],
+            decl_specifier_seq: Optional["DeclSpecifierSeq"],
+            declarator: Declarator,
+            requires_clause: Optional[RequiresClause],
             virt_specifier_seq: List["VirtSpecifier"],
             function_body: "FunctionBody"
     ) -> None:
-        Declaration.__init__(self)
-        self.attributes = attribute_specifier_seq
+        Declaration.__init__(self, attribute_specifier_seq)
         self.decl_specifier_seq = decl_specifier_seq
         self.declarator = declarator
         self.requires_clause = requires_clause
@@ -25,10 +27,6 @@ class FunctionDefinition(Declaration):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_function_definition(self)
-
-    def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.attributes:
-            attribute.accept(visitor)
 
     def accept_decl_specifier_seq(self, visitor: Visitor) -> None:
         if self.decl_specifier_seq is not None:
@@ -51,10 +49,15 @@ class FunctionDefinition(Declaration):
 
 class ParameterDeclaration(Declaration):
 
-    def __init__(self, attribute_specifier_seq: List[Attribute], decl_specifier_seq: Optional["DeclSpecifierSeq"],
-                 declarator: Optional[Declarator], default_value: Optional[Expression],
-                 this_specifier: bool) -> None:
-        self.attributes = attribute_specifier_seq
+    def __init__(
+            self,
+            attribute_specifier_seq: List[Attribute],
+            decl_specifier_seq: Optional["DeclSpecifierSeq"],
+            declarator: Optional[Declarator],
+            default_value: Optional[Expression],
+            this_specifier: bool
+    ) -> None:
+        Declaration.__init__(self, attribute_specifier_seq)
         self.decl_specifier_seq = decl_specifier_seq
         self.declarator = declarator
         self.default_value = default_value
@@ -62,10 +65,6 @@ class ParameterDeclaration(Declaration):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_parameter_declaration(self)
-
-    def accept_attributes(self, visitor: Visitor) -> None:
-        for attribute in self.attributes:
-            attribute.accept(visitor)
 
     def accept_decl_specifier_seq(self, visitor: Visitor) -> None:
         if self.decl_specifier_seq is not None:

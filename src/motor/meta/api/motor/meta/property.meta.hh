@@ -15,7 +15,7 @@ class motor_api(META) Property
 {
     friend class Value;
     typedef Value (*Getter)(raw< const Property > property, void* data);
-    typedef void (*Setter)(raw< const Property > property, void* data, const Value& value);
+    typedef void  (*Setter)(raw< const Property > property, void* data, const Value& value);
 
 public:
     raw< const Property > next;
@@ -37,4 +37,5 @@ public:
 
 }}  // namespace Motor::Meta
 
+#include <motor/meta/property.meta.factory.hh>
 #endif

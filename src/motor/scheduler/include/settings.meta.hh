@@ -4,7 +4,7 @@
 #define MOTOR_SCHEDULER_SETTINGS_META_HH
 
 #include <motor/scheduler/stdafx.h>
-#include <motor/settings/settings.factory.hh>
+#include <motor/settings/settings.meta.hh>
 
 namespace Motor { namespace SchedulerSettings {
 
@@ -27,4 +27,5 @@ struct Scheduler : public Settings::Settings< Scheduler >
 
 }}  // namespace Motor::SchedulerSettings
 
+#include <settings.meta.factory.hh>
 #endif
