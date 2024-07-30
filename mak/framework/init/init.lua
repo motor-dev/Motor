@@ -1,0 +1,3 @@
+context = ...
+context:declare_command("configure", "configure", context.env)
+context.settings:add_value("test", "Testing", "test", nil, "Test value", 1)
