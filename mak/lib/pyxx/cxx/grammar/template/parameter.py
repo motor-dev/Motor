@@ -62,14 +62,14 @@ def type_parameter_type_default(self: CxxParser, p: glrp.Production) -> Any:
 @cxx98
 def type_parameter_template(self: CxxParser, p: glrp.Production) -> Any:
     # TODO: attribute-specifier-seq? not allowed
-    return TemplateParameterTemplate(p[2], p[1][0], p[1][1], p[3], None, False)
+    return TemplateParameterTemplate(p[2], p[1][1], p[1][2], p[3], None, False)
 
 
 @glrp.rule('type-parameter : attribute-specifier-seq? template-head type-parameter-key "identifier"? "=" id-expression')
 @cxx98
 def type_parameter_template_default(self: CxxParser, p: glrp.Production) -> Any:
     # TODO: attribute-specifier-seq? not allowed
-    return TemplateParameterTemplate(p[2], p[1][0], p[1][1], p[3], p[5], False)
+    return TemplateParameterTemplate(p[2], p[1][1], p[1][2], p[3], p[5], False)
 
 
 # amendment: @glrp.rule('type-parameter : type-parameter-key "..." "identifier"?')
@@ -85,7 +85,7 @@ def type_parameter_type_pack_cxx11(self: CxxParser, p: glrp.Production) -> Any:
 @cxx11
 def type_parameter_template_pack_cxx11(self: CxxParser, p: glrp.Production) -> Any:
     # TODO: attribute-specifier-seq? not allowed
-    return TemplateParameterTemplate(p[2], p[1][0], p[1][1], p[4], None, True)
+    return TemplateParameterTemplate(p[2], p[1][1], p[1][2], p[4], None, True)
 
 
 # amendment: @glrp.rule('type-parameter : type-constraint "identifier"?')

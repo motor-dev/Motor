@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from . import Visitor
 from .base import TemplateArgument, Attribute, TypeId, Expression, Declaration
 from .reference import Reference
@@ -49,12 +49,14 @@ class TemplateDeclaration(Declaration):
 
     def __init__(
             self,
+            position: Tuple[int, int],
             parameters: List[List[TemplateParameter]],
             requires_clause: Optional["RequiresClause"],
             is_extern: bool,
             declaration: Declaration
     ) -> None:
         Declaration.__init__(self, [])
+        self.position = position
         if len(parameters) == 1:
             self.parameters = TemplateParameterList(parameters[0])  # type: AbstractTemplateParameterList
         else:

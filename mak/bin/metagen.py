@@ -79,7 +79,7 @@ def m0012(logger: messages.Logger, position: Tuple[int, int]) -> Dict[str, Any]:
 
 @messages.error
 def m0100(logger: messages.Logger, position: Tuple[int, int], entity_name: str, namespace_name: str) -> Dict[str, Any]:
-    """Cannot declare object {entity_name} here, as declaration of {namespace_name} is not visible in this translation unit"""
+    """Cannot declare object {entity_name} here, as the definition of {namespace_name} is not visible in this translation unit"""
     return locals()
 
 
@@ -96,9 +96,43 @@ def m0102(logger: messages.Logger, position: Tuple[int, int], entity_name: str) 
 
 
 @messages.error
+def m0103(logger: messages.Logger, position: Tuple[int, int], entity_name: str) -> Dict[str, Any]:
+    """{entity_name} is explicitely marked as exported but cannot be exported."""
+    return locals()
+
+
+@messages.warning('implicit-export', True)
+def m0104(logger: messages.Logger, position: Tuple[int, int], entity_name: str) -> Dict[str, Any]:
+    """{entity_name} is implicitely marked as exported but cannot be exported."""
+    return locals()
+
+
+@messages.error
 def m0200(logger: messages.Logger, position: Tuple[int, int], include_name: str) -> Dict[str, Any]:
     """Meta file needs to #include {include_name}"""
     return locals()
+
+
+@messages.error
+def m0300(logger: messages.Logger, position: Tuple[int, int]) -> Dict[str, Any]:
+    """Extraneous template parameter list in template specialization or out-of-line template definition"""
+    return locals()
+
+
+class NotFoundException(Exception):
+    pass
+
+
+class NotDefinedException(Exception):
+    pass
+
+
+class NotExportedException(Exception):
+    pass
+
+
+class IgnoredException(Exception):
+    pass
 
 
 class Attributes(object):
@@ -291,6 +325,19 @@ class Class(MetaObject):
             '{\n\n'
             'MOTOR_DECLARE_CLASS_ID(::%s)\n\n'
             '}\n\n' % '::'.join(namespace))
+        out_cc.write(
+            '\nnamespace Motor { namespace Meta\n'
+            '{\n\n'
+            'template<>\nistring ClassID<::%(cpp_name)s>::name()\n'
+            '{\n'
+            '    static istring s_name("%(name)s");\n'
+            '    return s_name;\n'
+            '}\n\n'
+            'template<>\nconst Class ClassID<::%(cpp_name)s>::s_class = {\n'
+            '};\n\n'
+            '}}\n\n'
+            '' % {'cpp_name': '::'.join(namespace), 'name': self._name}
+        )
         super().write_declarations(namespace, out_cc, out_hh)
 
     def write_metaclasses(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> None:
@@ -302,16 +349,28 @@ class Enum(Class):
         super().__init__(position, attributes, name, True, None, parent)
 
 
+class Parameter(object):
+    def __init__(self) -> None:
+        pass
+
+
+class Overload(object):
+    def __init__(self) -> None:
+        self._parameters = []  # type: List[Overload]
+
+
 class Method(MetaObject):
     def __init__(self, position: Tuple[int, int], attributes: Attributes, name: str, parent: MetaObject):
         super().__init__(position, attributes, parent)
         self._name = name
+        self._overloads = []  # type: List[Overload]
 
 
 class Variable(MetaObject):
     def __init__(self, position: Tuple[int, int], attributes: Attributes, name: str, parent: MetaObject):
         super().__init__(position, attributes, parent)
         self._name = name
+        self._type = ()
 
 
 class TypeDef(MetaObject):
@@ -492,12 +551,14 @@ class AttributeParser(ast.Visitor):
 
 
 class NameParser(ast.Visitor):
-    def __init__(self, attributes: Attributes, namespace: MetaObject):
-        self._attributes = attributes
-        self._namespace = namespace
-        self._name = ''
-        self._export = False
-        self._force_find = False
+    def __init__(self, namespace: MetaObject):
+        self.position = (0, 0)
+        self.namespace = namespace  # type: MetaObject
+        self.object = namespace  # type: Optional[MetaObject]
+        self.namespace_name = 'the enclosing namespace'
+        self.name = ''
+        self.identifier = ''
+        self.qualified = False
 
     def visit_declarator_list(self, declarator_list: ast.DeclaratorList) -> None:
         declarator_list.accept_element(self)
@@ -537,39 +598,75 @@ class NameParser(ast.Visitor):
         declarator_element_method.accept_next(self)
 
     def visit_reference(self, ref: ast.Reference) -> None:
+        self.position = ref.position
         if len(ref.name_list) > 1:
-            self._force_find = True
+            self.qualified = True
             for id in ref.name_list[:-1]:
+                if self.object is None:
+                    sr = utils.StringRef()
+                    id.accept(sr)
+                    self.name += sr.result
+                    raise NotDefinedException()
+                self.namespace = self.object
                 id.accept(self)
-                self._name += '::'
+                self.namespace_name = self.name
+                self.name += '::'
+        if self.object is None:
+            sr = utils.StringRef()
+            ref.name_list[-1].accept(sr)
+            self.name += sr.result
+            raise NotDefinedException()
         ref.name_list[-1].accept(self)
 
     def visit_root_id(self, root_id: ast.RootId) -> None:
-        self._name += '::'
-        while self._namespace._parent != self._namespace:
-            self._namespace = self._namespace._parent
+        self.name += '::'
+        self.object = self.namespace
+        while self.object._parent != self.object:
+            self.object = self.object._parent
 
     def visit_id(self, identifier: ast.Id) -> None:
-        self._name += identifier.name
+        self.name += identifier.name
+        self.identifier = identifier.name
+        try:
+            self.object = self.namespace.get_child(identifier.name)
+        except KeyError:
+            self.object = None
+            try:
+                self.namespace.get_exported_object(identifier.name)
+            except KeyError:
+                if self.qualified:
+                    raise NotFoundException()
 
     def visit_template_id(self, template_id: ast.TemplateId) -> None:
         template_id.accept_id(self)
 
     def visit_destructor_id(self, destructor_id: ast.DestructorId) -> None:
-        # TODO: not exported
-        pass
+        visitor = pyxx.utils.StringRef()
+        destructor_id.accept(visitor)
+        self.name += visitor.result
+        self.identifier = visitor.result
+        raise IgnoredException()
 
     def visit_operator_id(self, operator_id: ast.OperatorId) -> None:
-        # TODO: not exported
-        pass
+        visitor = pyxx.utils.StringRef()
+        operator_id.accept(visitor)
+        self.name += visitor.result
+        self.identifier = visitor.result
+        raise NotExportedException()
 
     def visit_conversion_operator_id(self, conversion_operator_id: ast.ConversionOperatorId) -> None:
-        # TODO: not exported
-        pass
+        visitor = pyxx.utils.StringRef()
+        conversion_operator_id.accept(visitor)
+        self.name += visitor.result
+        self.identifier = visitor.result
+        raise NotExportedException()
 
     def visit_literal_operator_id(self, literal_operator_id: ast.LiteralOperatorId) -> None:
-        # TODO: not exported
-        pass
+        visitor = pyxx.utils.StringRef()
+        literal_operator_id.accept(visitor)
+        self.name += visitor.result
+        self.identifier = visitor.result
+        raise NotExportedException()
 
 
 class DeclarationVisitor(ast.Visitor):
@@ -597,37 +694,39 @@ class DeclarationVisitor(ast.Visitor):
     def visit_init_declarator(self, init_declarator: ast.InitDeclarator) -> None:
         init_declarator.accept_declarator(self)
 
+    def visit_member_init_declarator(self, member_init_declarator: ast.MemberInitDeclarator) -> None:
+        member_init_declarator.accept_declarator(self)
+
     def visit_declarator_list(self, declarator_list: ast.DeclaratorList) -> None:
-        visitor = NameParser(self._attributes, self._namespace)
-        declarator_list.accept(visitor)
-        element = declarator_list.declarator_element
-        while hasattr(element, 'next'):
-            element = element.next
-        if element.is_element_id():
-            assert isinstance(element, ast.DeclaratorElementId)
-            assert isinstance(element.name, ast.Reference)
-            namespace = self._namespace
-            index = 0
-            name = ''
-            if element.name.is_absolute():
-                index = 1
-                name = '::'
-                while namespace._parent != namespace:
-                    namespace = namespace._parent
-            for id in element.name.name_list[index:-1]:
-                sr = utils.StringRef()
-                id.accept(sr)
-                name = name + sr.result + '::'
-                try:
-                    namespace = namespace.get_child(sr.result)
-                except KeyError:
-                    sr = utils.StringRef()
-                    element.name.accept(sr)
-                    assert pyxx.logger is not None
-                    m0100(pyxx.logger, element.name.position, sr.result, name[:-2])
-                    break
+        assert pyxx.logger is not None
+        visitor = NameParser(self._namespace)
+        try:
+            declarator_list.accept(visitor)
+        except NotExportedException as e:
+            if self._attributes.export:
+                m0103(pyxx.logger, visitor.position, visitor.name)
             else:
-                pass
+                m0104(pyxx.logger, visitor.position, visitor.name)
+        except IgnoredException as e:
+            if self._attributes.export:
+                m0103(pyxx.logger, visitor.position, visitor.name)
+        except NotFoundException:
+            m0101(pyxx.logger, visitor.position, visitor.name, visitor.namespace_name)
+        except NotDefinedException:
+            m0100(pyxx.logger, visitor.position, visitor.name, visitor.namespace_name)
+        else:
+            # methods and variables are exported when declared in their namespace/container
+            if not visitor.qualified:
+                if self._template_stack:
+                    # cannot eport template methods/variables.
+                    if self._attributes.exported():
+                        m0103(pyxx.logger, visitor.position, visitor.name)
+                    else:
+                        m0104(pyxx.logger, visitor.position, visitor.name)
+                else:
+                    print(visitor.identifier)
+                    if declarator_list.is_method():
+                        pass
 
 
 class Explorer(utils.RecursiveVisitor):
@@ -955,10 +1054,12 @@ class Explorer(utils.RecursiveVisitor):
         super().visit_using_declaration(using_declaration)
 
     def visit_template_declaration(self, template_declaration: ast.TemplateDeclaration) -> None:
-        pass
-        # self._template_stack.append(Template())
-        # template_declaration.accept_declaration(self)
-        # assert not self._template_stack
+        self._template_stack.append(Template())
+        template_declaration.accept_declaration(self)
+        if self._template_stack:
+            assert pyxx.logger is not None
+            m0300(pyxx.logger, template_declaration.position)
+            # self._template_stack.clear()
 
 
 def main() -> None:

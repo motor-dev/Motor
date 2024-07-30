@@ -75,7 +75,7 @@ def template_declaration(self: CxxParser, p: glrp.Production) -> Any:
     if p[3].declared_entity_count() > 1:
         template_declaration_multiple_entities(self.logger, p[3].declared_entity_position(1))
     p[3].add_attributes(p[0])
-    return TemplateDeclaration(p[2][0], p[2][1], False, p[3])
+    return TemplateDeclaration(p[2][0], p[2][1], p[2][2], False, p[3])
 
 
 @glrp.rule(
@@ -90,7 +90,7 @@ def template_declaration_extern(self: CxxParser, p: glrp.Production) -> Any:
     if p[5].declared_entity_count() > 1:
         template_declaration_multiple_entities(self.logger, p[5].declared_entity_position(1))
     p[5].add_attributes(p[0])
-    return TemplateDeclaration(p[4][0], p[4][1], True, p[5])
+    return TemplateDeclaration(p[4][0], p[4][1], p[4][2], True, p[5])
 
 
 @glrp.rule('template-declaration : attribute-specifier-seq? begin-declaration template-head concept-definition')
@@ -101,7 +101,7 @@ def template_declaration_concept_cxx20(self: CxxParser, p: glrp.Production) -> A
             invalid_attribute_template(self.logger, attribute.position)
             break
     p[3].add_attributes(p[0])
-    return TemplateDeclaration(p[2][0], p[2][1], False, p[3])
+    return TemplateDeclaration(p[2][0], p[2][1], p[2][2], False, p[3])
 
 
 @glrp.rule(
@@ -114,19 +114,19 @@ def template_declaration_concept_extern_cxx20(self: CxxParser, p: glrp.Productio
             invalid_attribute_template(self.logger, attribute.position)
             break
     p[5].add_attributes(p[0])
-    return TemplateDeclaration(p[4][0], p[4][1], True, p[5])
+    return TemplateDeclaration(p[4][0], p[4][1], p[4][2], True, p[5])
 
 
 @glrp.rule('template-head : "template" "<" template-parameter-list "#>"')
 @cxx98
 def template_head(self: CxxParser, p: glrp.Production) -> Any:
-    return (p[2], None)
+    return ((p[0].position[0], p[3].position[1]), p[2], None)
 
 
 @glrp.rule('template-head : "template" "<" template-parameter-list "#>" requires-clause')
 @cxx20
 def template_head_cxx20(self: CxxParser, p: glrp.Production) -> Any:
-    return (p[2], p[4])
+    return ((p[0].position[0], p[3].position[1]), p[2], p[4])
 
 
 @glrp.rule('template-parameter-list : template-parameter')

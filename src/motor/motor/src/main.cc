@@ -51,7 +51,6 @@ protected:
                 = minitl::format< 1024u >(FMT("{0}:{1} ({2})\t({3}:{4}) {5}\n"), filename, line,
                                           logname.str().name, getLogLevelName(level), thread, msg);
             const char* str = message.c_str();
-            // TODO: does not appear to be threadsafe at all
             m_logFile->beginWrite(str, motor_checked_numcast< u32 >(strlen(str)));
         }
         return true;

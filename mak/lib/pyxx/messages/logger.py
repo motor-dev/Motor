@@ -197,29 +197,33 @@ class Logger(glrp.Logger):
             ]
 
         self._out_file.write(self._diagnostics_format.format(**locals()))
+        marker = '^'
         for i, (text, original_text) in enumerate(zip(context[:-1], original_context[:-1])):
             self._out_file.write(
-                '%s%5d \u2502%s%s' % (self.COLOR_LIST['CYAN'], line + i, self.COLOR_LIST['NORMAL'], text))
-            range_highlight_start = replace_tab(' ', ' ', ' ', ' ',
-                                                re.sub(r'[^ \t]', ' ', original_text[:column - 1]))
-            range_highlight_end = replace_tab('~', '~', '~', '~',
-                                              re.sub(r'[^\t]', '~', original_text[column:]))
-            self._out_file.write(
-                '\n%s      \u2502%s%s%s^%s%s\n' % (
-                    self.COLOR_LIST['CYAN'], self.COLOR_LIST['NORMAL'], range_highlight_start, color_caret,
-                    range_highlight_end, color_off)
-            )
+                '%s%5d \u2502%s%s\n' % (self.COLOR_LIST['CYAN'], line + i, self.COLOR_LIST['NORMAL'], text))
+            if original_text:
+                range_highlight_start = replace_tab(' ', ' ', ' ', ' ',
+                                                    re.sub(r'[^ \t]', ' ', original_text[:column - 1]))
+                range_highlight_end = replace_tab('~', '~', '~', '~',
+                                                  re.sub(r'[^\t]', '~', original_text[column:]))
+                self._out_file.write(
+                    '%s      \u2502%s%s%s%s%s%s\n' % (
+                        self.COLOR_LIST['CYAN'], self.COLOR_LIST['NORMAL'], range_highlight_start, color_caret, marker,
+                        range_highlight_end, color_off)
+                )
             column = 1
+            marker = '~'
         self._out_file.write('%s%5d \u2502%s%s' % (
-            self.COLOR_LIST['CYAN'], line + len(context) - 1, self.COLOR_LIST['NORMAL'], context[-1]))
+            self.COLOR_LIST['CYAN'], line + len(context) - 1,
+            self.COLOR_LIST['NORMAL'], context[-1]))
         range_highlight_start = replace_tab(' ', ' ', ' ', ' ',
                                             re.sub(r'[^ \t]', ' ', original_context[-1][:column - 1]))
         range_highlight_end = replace_tab('~', '~', '~', '~',
                                           re.sub(r'[^\t]', '~', original_context[-1][column - 1:end_column - 1]))
         self._out_file.write(
-            '\n%s      \u2502%s%s%s^%s%s\n' % (
+            '\n%s      \u2502%s%s%s%s%s%s\n' % (
                 self.COLOR_LIST['CYAN'], self.COLOR_LIST['NORMAL'], range_highlight_start, color_caret,
-                range_highlight_end[:-1], color_off,)
+                marker, range_highlight_end[:-1], color_off,)
         )
 
     def push_expected_diagnostics(self, diagnostics: List[Callable[..., Any]]) -> None:
