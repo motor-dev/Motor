@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = [
+    "mak/bin/rswaf",
+    "mak/lib/rsglr",
+    "mak/lib/rsyacc",
+    "mak/lib/rustixx",
+    "mak/bin/metagen",
+]
