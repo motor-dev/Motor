@@ -92,10 +92,11 @@ class StringRef(ast.Visitor):
 
     def visit_type_specifier_seq(self, type_specifier_seq: ast.TypeSpecifierSeq) -> None:
         all_specifiers = type_specifier_seq.types + type_specifier_seq.qualifiers
-        for type_specifier in all_specifiers[:-1]:
-            type_specifier.accept(self)
-            self.result += ' '
-        all_specifiers[-1].accept(self)
+        if all_specifiers:
+            for type_specifier in all_specifiers[:-1]:
+                type_specifier.accept(self)
+                self.result += ' '
+            all_specifiers[-1].accept(self)
 
     def visit_cv_qualifier(self, cv_qualifier: ast.CvQualifier) -> None:
         self.result += cv_qualifier.qualifier
@@ -415,8 +416,8 @@ class StringRef(ast.Visitor):
         declarator_element_id.accept_name(self)
 
     def visit_declarator_element_pack_id(self, declarator_element_pack_id: ast.DeclaratorElementPackId) -> None:
-        declarator_element_pack_id.accept_name(self)
         self.result += '...'
+        declarator_element_pack_id.accept_name(self)
 
     def visit_declarator_element_abstract(self, declarator_element_abstract: ast.DeclaratorElementAbstract) -> None:
         pass

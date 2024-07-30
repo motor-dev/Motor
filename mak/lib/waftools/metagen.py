@@ -124,6 +124,7 @@ def datagen(task_gen: waflib.TaskGen.task_gen, node: waflib.Node.Node) -> None:
     header_node = build_framework.make_bld_node(task_gen, category, node.parent,
                                                 '%s.factory.hh' % node.name[:node.name.rfind('.')])
     out_node.parent.mkdir()
+    header_node.parent.mkdir()
     outs.append(out_node)
     outs.append(out_node.change_ext('.typeid.cc'))
     outs.append(header_node)
