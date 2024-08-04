@@ -8,6 +8,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
+use std::env;
 
 pub struct Application {
     options: Arc<Mutex<Environment>>,
@@ -39,6 +40,22 @@ impl Application {
         parser.add_setting(
             "out".to_string(),
             EnvironmentValue::Node(Node::from(&PathBuf::from("build/.rswaf"))),
+        )?;
+        let mut paths = vec![EnvironmentValue::Node(Node::from(&PathBuf::from(env::current_exe()?)).parent())];
+        if let Some(path_env) = env::var_os("PATH") {
+            paths.append(&mut env::split_paths(&path_env).map(|x| EnvironmentValue::Node(Node::from(&x))).collect::<Vec<EnvironmentValue>>());
+        }
+        parser.add_setting(
+            "path".to_string(),
+            EnvironmentValue::Vec(paths),
+        )?;
+        parser.add_setting(
+            "exe_suffix".to_string(),
+            EnvironmentValue::String(if cfg!(target_os="windows") { ".exe" } else { "" }.to_string()),
+        )?;
+        parser.add_setting(
+            "OS".to_string(),
+            EnvironmentValue::String(env::consts::OS.to_string()),
         )?;
         parser.add_list(
             "commands".to_string(),
@@ -76,6 +93,24 @@ impl Application {
             false,
             EnvironmentValue::None,
         )?;
+        parser.add_list(
+            "target".to_string(),
+            Some("Options controlling task execution".to_string()),
+            Some("target".to_string()),
+            Some("t".to_string()),
+            "Target to be built.\nUse this option multiple times to build several targets.".to_string(),
+            false,
+            EnvironmentValue::None,
+        )?;
+        parser.add_value(
+            "tidy".to_string(),
+            Some("Options controlling task execution".to_string()),
+            Some("tidy".to_string()),
+            None,
+            "Keeps build folder tidy.\nFiles in the build folder that do not belong to a task are deleted.".to_string(),
+            false,
+            EnvironmentValue::Bool(true),
+        )?;
         parser.add_count(
             "progress".to_string(),
             Some("Options controlling task execution".to_string()),
@@ -98,7 +133,7 @@ impl Application {
         let options_context = Options::from_parser(parser_ptr.clone());
         let mut init_command = Command::init()?;
         let mut all_commands = HashMap::from([("init".to_string(), vec!["init".to_string()])]);
-        init_command.run(
+        let mut logger = init_command.run(
             options_context.clone(),
             &vec![Arc::new(Mutex::new(Environment::new()))],
             vec!["init".to_string()],
@@ -124,7 +159,9 @@ impl Application {
             let commands_file = PathBuf::from(out_dir).join("cache.json");
             let result = fs::File::open(commands_file);
             if let Ok(file) = result {
-                init_command.load_from_file(file, &mut all_commands)?;
+                if let Err(err) = init_command.load_from_file(file, &mut all_commands) {
+                    logger.error(err.message.as_str());
+                }
             }
         }
 

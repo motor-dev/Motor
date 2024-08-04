@@ -15,15 +15,15 @@ impl Node {
         }
     }
 
-    pub(crate) fn path(self: &Self) -> &PathBuf {
+    pub(crate) fn path(&self) -> &PathBuf {
         &self.path
     }
 
-    pub(crate) fn abspath(self: &Self) -> &Path {
+    pub(crate) fn abspath(&self) -> &Path {
         self.path.as_path()
     }
 
-    pub(crate) fn make_node(self: &Self, path: &PathBuf) -> Node {
+    pub(crate) fn make_node(&self, path: &PathBuf) -> Node {
         let mut result = Node {
             path: self.path.clone(),
         };
@@ -65,15 +65,14 @@ impl UserData for Node {
         methods.add_meta_method(MetaMethod::ToString, |_lua, this: &Node, ()| {
             Ok(this.abspath().to_string_lossy().to_string())
         });
-        methods.add_method("make_node", |_lua, this, lua_path: mlua::String| {
-            let str_path = lua_path.to_string_lossy();
-            let path = Path::new(&*str_path);
+        methods.add_method("make_node", |_lua, this, lua_path: String| {
+            let path = Path::new(lua_path.as_str());
             let mut result = this.clone();
             result.path.push(path);
             Ok(result)
         });
         methods.add_method("abspath", |_lua, this, ()| {
-            Ok(String::from(this.path.as_os_str().to_string_lossy()))
+            Ok(this.path.to_string_lossy().to_string())
         });
         methods.add_method("path_from", |_, this: &Node, base: UserDataRef<Node>| {
             use std::path::Component;
@@ -96,7 +95,7 @@ impl UserData for Node {
                     (Some(a), Some(b)) if b == Component::CurDir => comps.push(a),
                     (Some(_), Some(b)) if b == Component::ParentDir => {
                         return Err(mlua::Error::RuntimeError(String::from(
-                            "can't get relative path from {} tp {}",
+                            "can't get relative path from {} to {}",
                         )))
                     }
                     (Some(a), Some(_)) => {
@@ -115,6 +114,7 @@ impl UserData for Node {
                 PathBuf::from_iter(comps.iter().map(|c| c.as_os_str())).to_string_lossy(),
             ))
         });
+        methods.add_method("name", |_lua, this: &Node, ()| Ok(this.path.file_name().and_then(|x| Some(x.to_string_lossy().to_string()))));
         methods.add_method("is_dir", |_lua, this: &Node, ()| Ok(this.is_dir()));
         methods.add_method("is_file", |_lua, this: &Node, ()| Ok(this.is_file()));
     }

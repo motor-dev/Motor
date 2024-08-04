@@ -7,11 +7,12 @@ default-run = "rswaf"
 [dependencies]
 mlua = { version = "~0.9.9", features = ["lua54", "vendored"] }
 colored = "2.1"
-clap = "4.5"
-crossterm = "0.27"
+clap = { version = "4.5", features = ["string"] }
+crossterm = "0.28"
 crossbeam = "0.8"
-walkdir = "2.5"
+glob = "0.3"
 blake3 = "1.5"
 regex = "1.10"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+subprocess = "0.2"
