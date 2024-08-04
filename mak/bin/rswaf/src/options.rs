@@ -1,6 +1,6 @@
 use crate::environment::{Environment, EnvironmentValue};
 use clap::ArgAction;
-use mlua::{MetaMethod, UserData, UserDataMethods};
+use mlua::{IntoLua, MetaMethod, UserData, UserDataMethods};
 use std::sync::{Arc, Mutex};
 
 #[derive(Clone)]
@@ -24,6 +24,7 @@ struct Interface {
     category: Option<String>,
     help: String,
     required: bool,
+    choice_list: Option<Vec<String>>,
     action: ArgAction,
 }
 
@@ -55,7 +56,7 @@ impl CommandLineParser {
                     "'{}': an option is already registered with this name",
                     &name
                 )
-                .to_string(),
+                    .to_string(),
             ))
         } else {
             self.options.push(Argument {
@@ -76,6 +77,7 @@ impl CommandLineParser {
         help: String,
         required: bool,
         default: EnvironmentValue,
+        choice_list: Option<Vec<String>>,
         action: ArgAction,
     ) -> mlua::Result<()> {
         if let Some(_) = self.options.iter().position(|x| x.name.eq(&name)) {
@@ -84,7 +86,7 @@ impl CommandLineParser {
                     "'{}': an option is already registered with this name",
                     &name
                 )
-                .to_string(),
+                    .to_string(),
             ))
         } else {
             self.options.push(Argument {
@@ -95,6 +97,7 @@ impl CommandLineParser {
                     category,
                     help,
                     required,
+                    choice_list,
                     action,
                 }),
                 default,
@@ -121,6 +124,7 @@ impl CommandLineParser {
             help,
             required,
             default,
+            None,
             ArgAction::SetTrue,
         )
     }
@@ -143,6 +147,7 @@ impl CommandLineParser {
             help,
             required,
             default,
+            None,
             ArgAction::Set,
         )
     }
@@ -165,7 +170,32 @@ impl CommandLineParser {
             help,
             required,
             default,
+            None,
             ArgAction::Count,
+        )
+    }
+
+    pub(crate) fn add_choice(
+        self: &mut Self,
+        name: String,
+        category: Option<String>,
+        long: Option<String>,
+        short: Option<String>,
+        help: String,
+        required: bool,
+        choice_list: Vec<String>,
+        default: EnvironmentValue,
+    ) -> mlua::Result<()> {
+        self.add_option(
+            name,
+            category,
+            long,
+            short,
+            help,
+            required,
+            default,
+            Some(choice_list),
+            ArgAction::Set,
         )
     }
 
@@ -187,13 +217,12 @@ impl CommandLineParser {
             help,
             required,
             default,
+            None,
             ArgAction::Append,
         )
     }
 
     pub(crate) fn parse_command_line(self: &Self) -> Environment {
-        // clap insists all arguments should be &'static str even though the parser only exists here.
-        // this means leaking all command line options.
         let mut env = Environment::new();
         for option in &self.options {
             env.set(option.name.as_str(), option.default.clone());
@@ -203,21 +232,24 @@ impl CommandLineParser {
     }
 
     pub(crate) fn parse_command_line_into(self: &Self, env: &mut Environment) {
-        use clap::{Arg, Command};
+        use clap::{Arg, Command, builder::PossibleValuesParser, builder::PossibleValue};
         let mut cmd = Command::new("rswaf");
         for option in &self.options {
             if let Some(interface) = &option.interface {
-                let mut arg = Arg::new(Box::leak(option.name.clone().into_boxed_str()).trim());
+                let mut arg = Arg::new(&option.name);
                 if let Some(category) = &interface.category {
-                    arg = arg.help_heading(Box::leak(category.clone().into_boxed_str()).trim());
+                    arg = arg.help_heading(category);
                 }
                 if let Some(long) = &interface.long {
-                    arg = arg.long(Box::leak(long.clone().into_boxed_str()).trim());
+                    arg = arg.long(long);
                 }
                 if let Some(short) = &interface.short {
-                    arg = arg.short(short.as_str().trim().chars().next().unwrap());
+                    arg = arg.short(short.chars().next().unwrap());
                 }
-                arg = arg.help(Box::leak(interface.help.clone().into_boxed_str()).trim());
+                if let Some(choice) = &interface.choice_list {
+                    arg = arg.value_parser(PossibleValuesParser::new(choice.iter().map(|x| PossibleValue::new(x)).collect::<Vec<PossibleValue>>()));
+                }
+                arg = arg.help(&interface.help);
                 arg = arg.action(interface.action.clone());
                 arg = arg.required(interface.required);
                 cmd = cmd.arg(arg);
@@ -278,18 +310,30 @@ impl UserData for CommandLineParser {
                 }
             },
         );
+        methods.add_meta_method_mut(
+            MetaMethod::Index,
+            |lua, this, key: String| -> mlua::Result<mlua::Value> {
+                if let Some(index) = this.options.iter().position(|x| x.name.eq(&key)) {
+                    this.options[index].default.into_lua(lua)
+                } else {
+                    Err(mlua::Error::RuntimeError(
+                        format!("'{}': no option registered with this name", key).to_string(),
+                    ))
+                }
+            },
+        );
         methods.add_method_mut(
-            "add_option",
+            "add_flag",
             |_lua,
              this,
              args: (
-                String,
-                Option<String>,
-                Option<String>,
-                Option<String>,
-                String,
-                mlua::Value,
-            )|
+                 String,
+                 Option<String>,
+                 Option<String>,
+                 Option<String>,
+                 String,
+                 Option<bool>,
+             )|
              -> mlua::Result<()> {
                 this.add_flag(
                     args.0,
@@ -298,7 +342,11 @@ impl UserData for CommandLineParser {
                     args.3,
                     args.4,
                     false,
-                    EnvironmentValue::from_lua(&args.5)?,
+                    if let Some(value) = args.5 {
+                        EnvironmentValue::Bool(value)
+                    } else {
+                        EnvironmentValue::None
+                    },
                 )
             },
         );
@@ -307,13 +355,13 @@ impl UserData for CommandLineParser {
             |_lua,
              this,
              args: (
-                String,
-                Option<String>,
-                Option<String>,
-                Option<String>,
-                String,
-                mlua::Value,
-            )|
+                 String,
+                 Option<String>,
+                 Option<String>,
+                 Option<String>,
+                 String,
+                 mlua::Value,
+             )|
              -> mlua::Result<()> {
                 this.add_value(
                     args.0,
@@ -331,13 +379,13 @@ impl UserData for CommandLineParser {
             |_lua,
              this,
              args: (
-                String,
-                Option<String>,
-                Option<String>,
-                Option<String>,
-                String,
-                mlua::Value,
-            )|
+                 String,
+                 Option<String>,
+                 Option<String>,
+                 Option<String>,
+                 String,
+                 mlua::Value,
+             )|
              -> mlua::Result<()> {
                 this.add_count(
                     args.0,
@@ -347,6 +395,56 @@ impl UserData for CommandLineParser {
                     args.4,
                     false,
                     EnvironmentValue::from_lua(&args.5)?,
+                )
+            },
+        );
+        methods.add_method_mut(
+            "add_list",
+            |_lua,
+             this,
+             args: (
+                 String,
+                 Option<String>,
+                 Option<String>,
+                 Option<String>,
+                 String,
+                 mlua::Value,
+             )|
+             -> mlua::Result<()> {
+                this.add_list(
+                    args.0,
+                    args.1,
+                    args.2,
+                    args.3,
+                    args.4,
+                    false,
+                    EnvironmentValue::from_lua(&args.5)?,
+                )
+            },
+        );
+        methods.add_method_mut(
+            "add_choice",
+            |_lua,
+             this,
+             args: (
+                 String,
+                 Option<String>,
+                 Option<String>,
+                 Option<String>,
+                 String,
+                 Vec<String>,
+                 mlua::Value,
+             )|
+             -> mlua::Result<()> {
+                this.add_choice(
+                    args.0,
+                    args.1,
+                    args.2,
+                    args.3,
+                    args.4,
+                    false,
+                    args.5,
+                    EnvironmentValue::from_lua(&args.6)?,
                 )
             },
         );

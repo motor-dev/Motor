@@ -5,12 +5,12 @@ use crate::error::{MakeError, Result};
 use crate::log::Logger;
 use crate::node::Node;
 use crate::options::{CommandLineParser, Options};
-use blake3::Hash;
-use mlua::{AnyUserData, FromLua, IntoLua, Lua, Table, UserData, UserDataFields, UserDataMethods};
+use crate::context::Context;
+use blake3::{Hash, Hasher};
+use mlua::{Lua, Table};
 use serde::de::{DeserializeSeed, Error, MapAccess, SeqAccess, Visitor};
-use serde::{de, Serializer};
-use serde::{Deserialize, Deserializer, Serialize};
-use std::collections::hash_map::Entry;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::ser::SerializeStruct;
 use std::collections::HashMap;
 use std::fmt;
 use std::iter::zip;
@@ -20,19 +20,16 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 
 use mlua::Error as LuaError;
-use mlua::Function as LuaFunction;
-use mlua::Result as LuaResult;
-use mlua::String as LuaString;
 use mlua::Value as LuaValue;
-use serde::ser::SerializeStruct;
 use std::result::Result as StdResult;
+
 
 #[derive(Serialize)]
 pub(crate) struct Command {
-    spec: CommandSpec,
-    output: Option<CommandOutput>,
+    pub(crate) spec: CommandSpec,
+    pub(crate) output: Option<CommandOutput>,
     #[serde(skip_serializing)]
-    up_to_date: bool,
+    pub(crate) up_to_date: bool,
 }
 
 impl Command {
@@ -60,35 +57,31 @@ impl Command {
     where
         Iter: Iterator,
         <Iter as Iterator>::Item: PartialEq<String>,
-        <Iter as Iterator>::Item: std::fmt::Display,
+        <Iter as Iterator>::Item: fmt::Display,
     {
         current_path.push(self.spec.name.clone());
         let next_item = path.next();
 
         if !self.up_to_date {
-            let options = if self.output.is_some() && (run_implicit || next_item.is_some()) {
-                let options = self
-                    .output
-                    .as_ref()
-                    .unwrap()
-                    .options
-                    .as_ref()
-                    .unwrap()
-                    .clone();
-                command_line
-                    .lock()
-                    .unwrap()
-                    .parse_command_line_into(options.lock().unwrap().deref_mut());
-                options
-            } else {
-                options.clone()
-            };
+            let options = if run_implicit || next_item.is_some() {
+                if let Some(output) = &self.output {
+                    if let Some(options) = &output.options {
+                        let options = options.clone();
+                        command_line
+                            .lock()
+                            .unwrap()
+                            .parse_command_line_into(options.lock().unwrap().deref_mut());
+
+                        options
+                    } else { options.clone() }
+                } else { options.clone() }
+            } else { options.clone() };
 
             let do_run = if let Some(output) = &mut self.output {
                 if let Some(stored_hash) = &output.stored_hash.hash {
                     let hash_result = output.hash(&Some(options.clone()), envs);
                     if let Ok(hash) = hash_result {
-                        if !hash.0 .0.eq(&stored_hash.0 .0) {
+                        if !hash.0.0.eq(&stored_hash.0.0) {
                             if log_why {
                                 logger.debug(
                                     format!(
@@ -98,17 +91,17 @@ impl Command {
                                 );
                             }
                             true
-                        } else if !hash.1 .0.eq(&stored_hash.1 .0) {
+                        } else if !hash.1.0.eq(&stored_hash.1.0) {
                             if log_why {
                                 logger.debug(
-                                format!(
-                                    "evaluating command `{}` because command-line options have changed",
-                                    self.spec.name
+                                    format!(
+                                        "evaluating command `{}` because command-line options have changed",
+                                        self.spec.name
                                     ).as_str(),
                                 );
                             }
                             true
-                        } else if !hash.2 .0.eq(&stored_hash.2 .0) {
+                        } else if !hash.2.0.eq(&stored_hash.2.0) {
                             if log_why {
                                 logger.debug(
                                     format!(
@@ -119,7 +112,49 @@ impl Command {
                             }
                             true
                         } else {
-                            false
+                            let mut pattern_changed = false;
+                            for (path, pattern, hash) in &output.stored_hash.glob_dependencies {
+                                if !path.is_dir() {
+                                    logger.debug(
+                                        format!(
+                                            "evaluating command `{}` because the directory `{}` used in file search `{}` has been deleted.",
+                                            self.spec.name,
+                                            path.path().to_string_lossy(),
+                                            pattern
+                                        ).as_str(),
+                                    );
+                                    pattern_changed = true;
+                                    break;
+                                } else {
+                                    let paths = glob::glob(
+                                        path.path()
+                                            .join(&pattern)
+                                            .to_string_lossy()
+                                            .deref()
+                                    ).unwrap();
+                                    let mut hasher = Hasher::new();
+                                    for path in paths {
+                                        if let Ok(path) = path {
+                                            hasher.update(path.as_os_str().as_encoded_bytes());
+                                        }
+                                    }
+                                    if !hasher.finalize().eq(&hash.0) {
+                                        if log_why {
+                                            logger.debug(
+                                                format!(
+                                                    "evaluating command `{}` because the result of file search `{}/{}` has changed.",
+                                                    self.spec.name,
+                                                    path.path().to_string_lossy(),
+                                                    pattern
+                                                ).as_str(),
+                                            );
+                                        }
+                                        pattern_changed = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            pattern_changed
                         }
                     } else {
                         if log_why {
@@ -127,8 +162,7 @@ impl Command {
                                 format!(
                                     "evaluating command `{}` because the hash could not be computed",
                                     self.spec.name
-                                )
-                                    .as_str(),
+                                ).as_str(),
                             );
                         }
                         true
@@ -139,8 +173,7 @@ impl Command {
                             format!(
                                 "evaluating command `{}` because the hash does not exist",
                                 self.spec.name
-                            )
-                            .as_str(),
+                            ).as_str(),
                         );
                     }
                     true
@@ -151,8 +184,7 @@ impl Command {
                         format!(
                             "evaluating command `{}` because the command was never run",
                             self.spec.name
-                        )
-                        .as_str(),
+                        ).as_str(),
                     );
                 }
                 true
@@ -166,6 +198,11 @@ impl Command {
                     registered_commands,
                     logger,
                 )?;
+            } else {
+                self.up_to_date = true;
+                if next_item.is_none() {
+                    logger.debug(format!("`{}` is up-to-date", self.spec.name).as_str());
+                }
             }
         }
 
@@ -355,6 +392,7 @@ impl Command {
                     file_dependencies: Vec::new(),
                     option_dependencies: Vec::new(),
                     variable_dependencies: Vec::new(),
+                    glob_dependencies: Vec::new(),
                     hash: None,
                 },
             },
@@ -463,12 +501,12 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
 
                     fn visit_str<E>(self, value: &str) -> StdResult<Field, E>
                     where
-                        E: de::Error,
+                        E: Error,
                     {
                         match value {
                             "spec" => Ok(Field::Spec),
                             "output" => Ok(Field::Output),
-                            _ => Err(de::Error::unknown_field(value, &["spec", "output"])),
+                            _ => Err(Error::unknown_field(value, &["spec", "output"])),
                         }
                     }
                 }
@@ -492,8 +530,10 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
             {
                 let spec = seq
                     .next_element()?
-                    .ok_or_else(|| de::Error::invalid_length(0, &self))?;
-                let output = seq.next_element_seed(CommandOutputSeed(self.0))?;
+                    .ok_or_else(|| Error::invalid_length(0, &self))?;
+                let output = seq
+                    .next_element_seed(CommandOutputSeed(self.0))?
+                    .ok_or_else(|| Error::invalid_length(0, &self))?;
                 Ok(Command {
                     spec,
                     output,
@@ -511,19 +551,20 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
                     match key {
                         Field::Spec => {
                             if spec.is_some() {
-                                return Err(de::Error::duplicate_field("spec"));
+                                return Err(Error::duplicate_field("spec"));
                             }
                             spec = Some(map.next_value()?);
                         }
                         Field::Output => {
                             if output.is_some() {
-                                return Err(de::Error::duplicate_field("output"));
+                                return Err(Error::duplicate_field("output"));
                             }
                             output = Some(map.next_value_seed(CommandOutputSeed(self.0))?);
                         }
                     }
                 }
-                let spec = spec.ok_or_else(|| de::Error::missing_field("spec"))?;
+                let spec = spec.ok_or_else(|| Error::missing_field("spec"))?;
+                let output = output.ok_or_else(|| Error::missing_field("output"))?;
                 Ok(Command {
                     spec,
                     output,
@@ -574,14 +615,14 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSequenceSeed<'a> {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-struct CommandSpec {
+pub(crate) struct CommandSpec {
     /* the name of the command. Must be unique */
-    name: String,
+    pub(crate) name: String,
     /* the name of the context in Lua. Usually a prefix of the command. */
-    function: String,
+    pub(crate) function: String,
     /* the index/id of the environment. Commands create and save environments when they run.
     The combination command/ID allows to retrieve an environment. */
-    envs: Vec<usize>,
+    pub(crate) envs: Vec<usize>,
 }
 
 impl CommandSpec {
@@ -594,11 +635,11 @@ impl CommandSpec {
     }
 }
 
-struct CommandOutput {
-    environments: Vec<Arc<Mutex<Environment>>>,
-    commands: Vec<Command>,
-    options: Option<Arc<Mutex<Environment>>>,
-    stored_hash: CommandHash,
+pub(crate) struct CommandOutput {
+    pub(crate) environments: Vec<Arc<Mutex<Environment>>>,
+    pub(crate) commands: Vec<Command>,
+    pub(crate) options: Option<Arc<Mutex<Environment>>>,
+    pub(crate) stored_hash: CommandHash,
 }
 
 impl CommandOutput {
@@ -659,7 +700,7 @@ impl Serialize for CommandOutput {
 struct CommandOutputSeed<'a>(&'a mut Vec<Vec<Arc<Mutex<Environment>>>>);
 
 impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
-    type Value = CommandOutput;
+    type Value = Option<CommandOutput>;
 
     fn deserialize<D>(self, deserializer: D) -> StdResult<Self::Value, D::Error>
     where
@@ -689,14 +730,14 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
 
                     fn visit_str<E>(self, value: &str) -> StdResult<Field, E>
                     where
-                        E: de::Error,
+                        E: Error,
                     {
                         match value {
                             "environments" => Ok(Field::Environments),
                             "commands" => Ok(Field::Commands),
                             "options" => Ok(Field::Options),
                             "stored_hash" => Ok(Field::StoredHash),
-                            _ => Err(de::Error::unknown_field(
+                            _ => Err(Error::unknown_field(
                                 value,
                                 &["environments", "commands", "options", "stored_hash"],
                             )),
@@ -711,38 +752,56 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
         struct CommandOutputVisitor<'a>(&'a mut Vec<Vec<Arc<Mutex<Environment>>>>);
 
         impl<'de, 'a> Visitor<'de> for CommandOutputVisitor<'a> {
-            type Value = CommandOutput;
+            type Value = Option<CommandOutput>;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter.write_str("struct CommandOutput")
             }
 
-            fn visit_seq<V>(self, mut seq: V) -> StdResult<CommandOutput, V::Error>
+            fn visit_none<E>(self) -> StdResult<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(None)
+            }
+
+            fn visit_some<D>(self, deserializer: D) -> StdResult<Self::Value, D::Error>
+            where
+                D: Deserializer<'de>,
+            {
+                deserializer.deserialize_struct(
+                    "Command",
+                    &["environments", "commands", "options", "stored_hash"],
+                    self,
+                )
+            }
+
+            fn visit_seq<V>(self, mut seq: V) -> StdResult<Self::Value, V::Error>
             where
                 V: SeqAccess<'de>,
             {
                 (*self.0).push(Vec::new());
                 seq.next_element_seed(EnvironmentSequenceSeed(self.0))?
-                    .ok_or_else(|| de::Error::invalid_length(0, &self))?;
+                    .ok_or_else(|| Error::invalid_length(0, &self))?;
                 let commands = seq
                     .next_element_seed(CommandSequenceSeed(self.0))?
-                    .ok_or_else(|| de::Error::invalid_length(1, &self))?;
+                    .ok_or_else(|| Error::invalid_length(1, &self))?;
                 let options = seq
                     .next_element_seed(EnvironmentSeed(self.0))?
-                    .ok_or_else(|| de::Error::invalid_length(2, &self))?;
+                    .ok_or_else(|| Error::invalid_length(2, &self))?;
                 let stored_hash = seq
                     .next_element()?
-                    .ok_or_else(|| de::Error::invalid_length(3, &self))?;
+                    .ok_or_else(|| Error::invalid_length(3, &self))?;
                 let environments = self.0.pop().unwrap();
-                Ok(CommandOutput {
+                Ok(Some(CommandOutput {
                     environments,
                     commands,
                     options: Some(options),
                     stored_hash,
-                })
+                }))
             }
 
-            fn visit_map<V>(self, mut map: V) -> StdResult<CommandOutput, V::Error>
+            fn visit_map<V>(self, mut map: V) -> StdResult<Self::Value, V::Error>
             where
                 V: MapAccess<'de>,
             {
@@ -755,69 +814,68 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                     match key {
                         Field::Environments => {
                             if environment_tag.is_some() {
-                                return Err(de::Error::duplicate_field("environments"));
+                                return Err(Error::duplicate_field("environments"));
                             }
                             environment_tag =
                                 Some(map.next_value_seed(EnvironmentSequenceSeed(self.0))?);
                         }
                         Field::Commands => {
                             if commands.is_some() {
-                                return Err(de::Error::duplicate_field("commands"));
+                                return Err(Error::duplicate_field("commands"));
                             }
                             commands = Some(map.next_value_seed(CommandSequenceSeed(self.0))?);
                         }
                         Field::Options => {
                             if options.is_some() {
-                                return Err(de::Error::duplicate_field("options"));
+                                return Err(Error::duplicate_field("options"));
                             }
                             options = Some(map.next_value_seed(EnvironmentSeed(self.0))?);
                         }
                         Field::StoredHash => {
                             if stored_hash.is_some() {
-                                return Err(de::Error::duplicate_field("stored_hash"));
+                                return Err(Error::duplicate_field("stored_hash"));
                             }
                             stored_hash = Some(map.next_value()?);
                         }
                     }
                 }
                 let environments = self.0.pop().unwrap();
-                environment_tag.ok_or_else(|| de::Error::missing_field("environments"))?;
-                let commands = commands.ok_or_else(|| de::Error::missing_field("commands"))?;
+                environment_tag.ok_or_else(|| Error::missing_field("environments"))?;
+                let commands = commands.ok_or_else(|| Error::missing_field("commands"))?;
                 let stored_hash =
-                    stored_hash.ok_or_else(|| de::Error::missing_field("stored_hash"))?;
-                Ok(CommandOutput {
+                    stored_hash.ok_or_else(|| Error::missing_field("stored_hash"))?;
+                Ok(Some(CommandOutput {
                     environments,
                     commands,
                     options,
                     stored_hash,
-                })
+                }))
             }
         }
 
-        deserializer.deserialize_struct(
-            "Command",
-            &["environments", "commands", "options", "stored_hash"],
+        deserializer.deserialize_option(
             CommandOutputVisitor(self.0),
         )
     }
 }
 
 #[derive(Serialize, Deserialize)]
-struct CommandHash {
-    file_dependencies: Vec<PathBuf>,
-    option_dependencies: Vec<String>,
-    variable_dependencies: Vec<Vec<String>>,
-    hash: Option<(SerializedHash, SerializedHash, SerializedHash)>,
+pub(crate) struct CommandHash {
+    pub(crate) file_dependencies: Vec<PathBuf>,
+    pub(crate) option_dependencies: Vec<String>,
+    pub(crate) variable_dependencies: Vec<Vec<String>>,
+    pub(crate) glob_dependencies: Vec<(Node, String, SerializedHash)>,
+    pub(crate) hash: Option<(SerializedHash, SerializedHash, SerializedHash)>,
 }
 
-struct SerializedHash(pub Hash);
+pub(crate) struct SerializedHash(pub Hash);
 
 impl Serialize for SerializedHash {
     fn serialize<S>(&self, serializer: S) -> StdResult<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        serializer.serialize_bytes(self.0.as_bytes())
+        serializer.serialize_str(self.0.to_hex().as_str())
     }
 }
 
@@ -832,283 +890,26 @@ impl<'de> Deserialize<'de> for SerializedHash {
             type Value = SerializedHash;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("an array of 32 bytes")
+                formatter.write_str("a byte string")
             }
 
-            fn visit_seq<A>(self, mut seq: A) -> StdResult<Self::Value, A::Error>
+            fn visit_str<E>(self, v: &str) -> StdResult<Self::Value, E>
             where
-                A: SeqAccess<'de>,
+                E: Error,
             {
-                let mut bytes = Vec::new();
-                if let Some(size_hint) = seq.size_hint() {
-                    bytes.reserve(size_hint);
-                }
-                while let Some(elem) = seq.next_element()? {
-                    bytes.push(elem);
-                }
-
-                if bytes.len() != 32 {
-                    Err(Error::invalid_length(32, &self))
-                } else {
-                    Ok(SerializedHash(Hash::from_bytes(
-                        bytes[0..32].try_into().unwrap(),
-                    )))
-                }
+                Ok(SerializedHash(Hash::from_hex(v).map_err(|x| Error::custom(x))?))
             }
 
-            fn visit_bytes<E>(self, bytes: &[u8]) -> StdResult<SerializedHash, E>
+            fn visit_string<E>(self, v: String) -> StdResult<Self::Value, E>
             where
-                E: de::Error,
+                E: Error,
             {
-                if bytes.len() != 32 {
-                    Err(E::invalid_length(32, &self))
-                } else {
-                    Ok(SerializedHash(Hash::from_bytes(
-                        bytes[0..32].try_into().unwrap(),
-                    )))
-                }
+                Ok(SerializedHash(Hash::from_hex(v).map_err(|x| Error::custom(x))?))
             }
         }
 
-        deserializer.deserialize_bytes(HashVisitor)
+        deserializer.deserialize_string(HashVisitor)
     }
-}
-
-struct DeclaredCommand {
-    path: Vec<usize>,
 }
 
 const ROOT_SCRIPT: &str = "make.lua";
-
-struct Context {
-    spec: CommandSpec,
-    output: CommandOutput,
-    environment: Arc<Mutex<Environment>>,
-    path: Node,
-    src_dir: Node,
-    bld_dir: Node,
-    options: Options,
-    logger: Logger,
-    command_path: Vec<String>,
-    commands: HashMap<String, Vec<String>>,
-}
-
-impl Context {
-    fn declare_command(
-        self: &mut Context,
-        name: &str,
-        function: &str,
-        envs: Vec<usize>,
-    ) -> LuaResult<Vec<usize>> {
-        match self.commands.entry(name.to_string()) {
-            Entry::Occupied(e) => Err(LuaError::RuntimeError(format!(
-                "command '{}' already declared with full path: '{}'",
-                name,
-                e.get().join("::")
-            ))),
-            Entry::Vacant(v) => {
-                let spec = CommandSpec {
-                    name: name.to_string(),
-                    function: function.to_string(),
-                    envs,
-                };
-                self.output.commands.push(Command {
-                    spec,
-                    output: None,
-                    up_to_date: false,
-                });
-                let mut full_path = self.command_path.clone();
-                full_path.push(name.to_string());
-                v.insert(full_path);
-                Ok(vec![self.output.commands.len()])
-            }
-        }
-    }
-
-    fn declare_chain(
-        self: &mut Context,
-        path: &DeclaredCommand,
-        name: &str,
-        function: &str,
-    ) -> LuaResult<Vec<usize>> {
-        match self.commands.entry(name.to_string()) {
-            Entry::Occupied(e) => Err(LuaError::RuntimeError(format!(
-                "command '{}' already declared with full path: '{}'",
-                name,
-                e.get().join("::")
-            ))),
-            Entry::Vacant(v) => {
-                let mut cmd = &self.output.commands[path.path[0]];
-                for &index in (&path.path).into_iter().skip(1) {
-                    cmd = &cmd.output.as_ref().unwrap().commands[index];
-                }
-                for command in &cmd.output.as_ref().unwrap().commands {
-                    if command.spec.name == name {
-                        return Err(LuaError::RuntimeError(format!(
-                            "command '{}' already declared",
-                            name,
-                        )));
-                    }
-                }
-                let spec = CommandSpec {
-                    name: name.to_string(),
-                    function: function.to_string(),
-                    envs: Vec::new(),
-                };
-                self.output.commands.push(Command {
-                    spec,
-                    output: None,
-                    up_to_date: false,
-                });
-                let mut full_path = self.command_path.clone();
-                full_path.push(name.to_string());
-                v.insert(full_path);
-                Ok(vec![self.output.commands.len()])
-            }
-        }
-    }
-}
-
-impl UserData for DeclaredCommand {}
-
-impl UserData for Context {
-    fn add_fields<'lua, F: UserDataFields<'lua, Self>>(fields: &mut F) {
-        fields.add_field_method_get("name", |_, this| Ok(this.spec.name.clone()));
-        fields.add_field_method_get("fun", |_, this| Ok(this.spec.function.clone()));
-        fields.add_field_method_get("env", |_, this| Ok(this.environment.clone()));
-        fields.add_field_method_get("envs", |_, this| Ok(this.output.environments.clone()));
-        fields.add_field_method_get("path", |_, this| Ok(this.path.clone()));
-        fields.add_field_method_get("src_dir", |_, this| Ok(this.src_dir.clone()));
-        fields.add_field_method_get("bld_dir", |_, this| Ok(this.bld_dir.clone()));
-        fields.add_field_method_get("settings", |lua, this| match &this.options {
-            Options::CommandLineParser(context) => context.clone().into_lua(lua),
-            Options::Environment(env) => env.clone().into_lua(lua),
-        });
-    }
-
-    fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(methods: &mut M) {
-        methods.add_function("recurse", |lua, args: (AnyUserData, LuaString)| {
-            let (old_path, script) = {
-                let mut this = args.0.borrow_mut::<Context>()?;
-                let mut script = this.path.make_node(&PathBuf::from(args.1.to_str()?));
-                if script.is_dir() {
-                    let mut script_path = PathBuf::from(&this.spec.function);
-                    script_path.set_extension("lua");
-                    script = script.make_node(&script_path);
-                }
-                let mut old_path = script.parent();
-                swap(&mut old_path, &mut this.path);
-                this.output
-                    .stored_hash
-                    .file_dependencies
-                    .push(script.path().clone());
-                (old_path, script)
-            };
-            let result: LuaResult<()> = lua.load(script.abspath()).call(&args.0);
-            {
-                let mut this = args.0.borrow_mut::<Context>()?;
-                this.path = old_path;
-            }
-            result
-        });
-        methods.add_method_mut(
-            "declare_command",
-            |lua, this: &mut Context, args: (String, String, LuaValue)| {
-                let mut envs = Vec::new();
-                if args.2.is_table() {
-                    for env in Vec::<AnyUserData>::from_lua(args.2, lua)? {
-                        envs.push(
-                            env.borrow::<Arc<Mutex<Environment>>>()?
-                                .lock()
-                                .unwrap()
-                                .index,
-                        );
-                    }
-                } else {
-                    let env = args
-                        .2
-                        .as_userdata()
-                        .unwrap()
-                        .borrow::<Arc<Mutex<Environment>>>()?;
-                    envs.push(env.lock().unwrap().index);
-                }
-                let path = this.declare_command(args.0.as_str(), args.1.as_str(), envs)?;
-                Ok(DeclaredCommand { path })
-            },
-        );
-        methods.add_method_mut(
-            "chain_command",
-            |_lua, this: &mut Context, args: (AnyUserData, String, String)| {
-                let path = args.0.borrow_mut::<DeclaredCommand>()?;
-                let sub_path =
-                    this.declare_chain(path.deref(), args.1.as_str(), args.2.as_str())?;
-                Ok(DeclaredCommand { path: sub_path })
-            },
-        );
-        methods.add_method_mut("derive", |_lua, this: &mut Context, env: AnyUserData| {
-            let env_ref = env.borrow::<Arc<Mutex<Environment>>>()?;
-            let new_env = Arc::new(Mutex::new(Environment::derive(
-                &env_ref.clone(),
-                this.output.environments.len(),
-            )));
-            this.output.environments.push(new_env.clone());
-            Ok(new_env)
-        });
-        methods.add_method_mut("debug", |_lua, this, message: String| {
-            this.logger.debug(message.as_str());
-            Ok(())
-        });
-        methods.add_method_mut("warn", |_lua, this, message: String| {
-            this.logger.warning(message.as_str());
-            Ok(())
-        });
-        methods.add_method_mut("error", |_lua, this, message: String| {
-            this.logger.error(message.as_str());
-            Ok(())
-        });
-        methods.add_method_mut("set_status", |_lua, this, message: String| {
-            this.logger.set_status(message.as_str());
-            Ok(())
-        });
-        methods.add_method_mut("clear_status", |_lua, this, ()| {
-            this.logger.clear_status();
-            Ok(())
-        });
-        methods.add_method_mut("fatal", |_lua, _this, message: String| -> LuaResult<()> {
-            Err(LuaError::RuntimeError(message))
-        });
-        methods.add_function(
-            "try",
-            |_lua, args: (AnyUserData, String, LuaFunction)| -> LuaResult<()> {
-                {
-                    let mut this = args.0.borrow_mut::<Context>()?;
-                    this.logger.begin(args.1.as_str());
-                }
-                let result: LuaResult<LuaValue> = args.2.call(());
-                {
-                    let mut this = args.0.borrow_mut::<Context>()?;
-                    match result {
-                        Ok(v) => {
-                            if v.is_nil() {
-                                Ok(this.logger.end("Ok", true))
-                            } else {
-                                Ok(this.logger.end(v.to_string().unwrap().as_str(), true))
-                            }
-                        }
-                        Err(e) => match &e {
-                            LuaError::RuntimeError(s) => Ok(this.logger.end(s.as_str(), false)),
-                            LuaError::CallbackError {
-                                traceback: _,
-                                cause,
-                            } => match cause.as_ref() {
-                                LuaError::RuntimeError(s) => Ok(this.logger.end(s.as_str(), false)),
-                                _ => Ok(this.logger.end(e.to_string().as_str(), false)),
-                            },
-                            _ => Ok(this.logger.end(e.to_string().as_str(), false)),
-                        },
-                    }
-                }
-            },
-        );
-    }
-}

@@ -50,6 +50,10 @@ impl Logger {
                     .unwrap()
                     .queue(style::SetForegroundColor(style::Color::Reset))
                     .unwrap();
+            } else {
+                self.output
+                    .queue(style::Print(message))
+                    .unwrap();
             }
             self.log("", true);
         }

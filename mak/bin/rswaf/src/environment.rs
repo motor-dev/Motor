@@ -36,7 +36,7 @@ impl Environment {
         self: &'a mut Self,
         lua: &'lua Lua,
         key: &'a str,
-    ) -> mlua::Result<Value<'lua>> {
+    ) -> Result<Value<'lua>> {
         self.used_keys.insert(key.to_string());
         match self.values.get(key) {
             None => match &self.parent {
@@ -95,7 +95,7 @@ pub(crate) enum EnvironmentValue {
 }
 
 impl EnvironmentValue {
-    pub(crate) fn from_lua(value: &Value) -> mlua::Result<Self> {
+    pub(crate) fn from_lua(value: &Value) -> Result<Self> {
         match value {
             Value::Nil => Ok(EnvironmentValue::None),
             Value::Boolean(b) => Ok(EnvironmentValue::Bool(*b)),
@@ -198,7 +198,7 @@ impl EnvironmentValue {
 }
 
 impl<'lua> IntoLua<'lua> for &EnvironmentValue {
-    fn into_lua(self: Self, lua: &'lua Lua) -> mlua::Result<Value<'lua>> {
+    fn into_lua(self: Self, lua: &'lua Lua) -> Result<Value<'lua>> {
         match &self {
             EnvironmentValue::None => Ok(mlua::Nil),
             EnvironmentValue::Bool(value) => Ok(value.into_lua(lua)?),
