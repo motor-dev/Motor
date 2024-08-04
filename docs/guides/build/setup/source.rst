@@ -31,7 +31,7 @@ Building from the command line
 
 .. highlight:: console
 
-The Motor uses `WAF <https://waf.io/>`__ as t+he build system. The build happens in two phases:
+Motor uses `WAF <https://waf.io/>`__ as t+he build system. The build happens in two phases:
 
 #. The build environments will be created. 
    This step detects all available compilers (including cross compilers) and creates toolchain
