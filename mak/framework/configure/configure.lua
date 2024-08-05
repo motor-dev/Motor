@@ -34,6 +34,13 @@ context.ARCHS = {
     --['itanium'] = 'ia64',
 }
 
+context:recurse('host/' .. context.settings.OS .. '.lua')
+context.compilers = {}
+
 for _, compiler in ipairs(context.settings.compiler or { 'clang', 'gcc', 'msvc', 'suncc' }) do
     context:recurse('compiler/' .. compiler .. '.lua')
+end
+
+for _, platform in ipairs(context.settings.platform or { 'linux', 'freebsd', 'macos', 'windows', 'solaris' }) do
+    context:recurse('target/' .. platform .. '.lua')
 end

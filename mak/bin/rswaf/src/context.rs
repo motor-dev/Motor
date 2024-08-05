@@ -233,6 +233,23 @@ impl UserData for Context {
         methods.add_method_mut("fatal", |_lua, _this, message: String| -> LuaResult<()> {
             Err(LuaError::RuntimeError(message))
         });
+        methods.add_function_mut(
+            "with",
+            |_lua, (context, env, function): (AnyUserData, AnyUserData, LuaFunction)| {
+                let prev_env = {
+                    let mut context = context.borrow_mut::<Context>()?;
+                    let env = env.borrow_mut::<Arc<Mutex<Environment>>>()?;
+                    let prev_env = context.environment.clone();
+                    context.environment = env.clone();
+                    drop(env);
+                    prev_env
+                };
+                let result: LuaResult<LuaValue> = function.call(());
+                let mut context = context.borrow_mut::<Context>()?;
+                context.environment = prev_env;
+                result
+            },
+        );
         methods.add_function(
             "try",
             |_lua, args: (AnyUserData, String, LuaFunction)| -> LuaResult<()> {
