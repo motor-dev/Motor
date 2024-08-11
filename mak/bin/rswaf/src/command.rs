@@ -51,7 +51,6 @@ impl Command {
         mut current_path: Vec<String>,
         registered_commands: &mut HashMap<String, Vec<String>>,
         mut logger: Logger,
-        log_why: bool,
         run_implicit: bool,
     ) -> Result<Logger>
     where
@@ -82,40 +81,34 @@ impl Command {
                     let hash_result = output.hash(&Some(options.clone()), envs);
                     if let Ok(hash) = hash_result {
                         if !hash.0.0.eq(&stored_hash.0.0) {
-                            if log_why {
-                                logger.debug(
-                                    format!(
-                                        "evaluating command `{}` because files have changed on disc",
-                                        self.spec.name
-                                    ).as_str(),
-                                );
-                            }
+                            logger.why(
+                                format!(
+                                    "evaluating command `{}` because files have changed on disc",
+                                    self.spec.name
+                                ).as_str(),
+                            );
                             true
                         } else if !hash.1.0.eq(&stored_hash.1.0) {
-                            if log_why {
-                                logger.debug(
-                                    format!(
-                                        "evaluating command `{}` because command-line options have changed",
-                                        self.spec.name
-                                    ).as_str(),
-                                );
-                            }
+                            logger.why(
+                                format!(
+                                    "evaluating command `{}` because command-line options have changed",
+                                    self.spec.name
+                                ).as_str(),
+                            );
                             true
                         } else if !hash.2.0.eq(&stored_hash.2.0) {
-                            if log_why {
-                                logger.debug(
-                                    format!(
-                                        "evaluating command `{}` because the environment has changed",
-                                        self.spec.name
-                                    ).as_str(),
-                                );
-                            }
+                            logger.why(
+                                format!(
+                                    "evaluating command `{}` because the environment has changed",
+                                    self.spec.name
+                                ).as_str(),
+                            );
                             true
                         } else {
                             let mut pattern_changed = false;
                             for (path, pattern, hash) in &output.stored_hash.glob_dependencies {
                                 if !path.is_dir() {
-                                    logger.debug(
+                                    logger.why(
                                         format!(
                                             "evaluating command `{}` because the directory `{}` used in file search `{}` has been deleted.",
                                             self.spec.name,
@@ -139,16 +132,14 @@ impl Command {
                                         }
                                     }
                                     if !hasher.finalize().eq(&hash.0) {
-                                        if log_why {
-                                            logger.debug(
-                                                format!(
-                                                    "evaluating command `{}` because the result of file search `{}/{}` has changed.",
-                                                    self.spec.name,
-                                                    path.path().to_string_lossy(),
-                                                    pattern
-                                                ).as_str(),
-                                            );
-                                        }
+                                        logger.why(
+                                            format!(
+                                                "evaluating command `{}` because the result of file search `{}/{}` has changed.",
+                                                self.spec.name,
+                                                path.path().to_string_lossy(),
+                                                pattern
+                                            ).as_str(),
+                                        );
                                         pattern_changed = true;
                                         break;
                                     }
@@ -157,36 +148,30 @@ impl Command {
                             pattern_changed
                         }
                     } else {
-                        if log_why {
-                            logger.debug(
-                                format!(
-                                    "evaluating command `{}` because the hash could not be computed",
-                                    self.spec.name
-                                ).as_str(),
-                            );
-                        }
-                        true
-                    }
-                } else {
-                    if log_why {
-                        logger.debug(
+                        logger.why(
                             format!(
-                                "evaluating command `{}` because the hash does not exist",
+                                "evaluating command `{}` because the hash could not be computed",
                                 self.spec.name
                             ).as_str(),
                         );
+                        true
                     }
-                    true
-                }
-            } else {
-                if log_why {
-                    logger.debug(
+                } else {
+                    logger.why(
                         format!(
-                            "evaluating command `{}` because the command was never run",
+                            "evaluating command `{}` because the hash does not exist",
                             self.spec.name
                         ).as_str(),
                     );
+                    true
                 }
+            } else {
+                logger.why(
+                    format!(
+                        "evaluating command `{}` because the command was never run",
+                        self.spec.name
+                    ).as_str(),
+                );
                 true
             };
 
@@ -201,7 +186,7 @@ impl Command {
             } else {
                 self.up_to_date = true;
                 if next_item.is_none() {
-                    logger.debug(format!("`{}` is up-to-date", self.spec.name).as_str());
+                    logger.why(format!("`{}` is up-to-date", self.spec.name).as_str());
                 }
             }
         }
@@ -218,7 +203,6 @@ impl Command {
                             current_path,
                             registered_commands,
                             logger,
-                            log_why,
                             run_implicit,
                         );
                     }
@@ -299,6 +283,7 @@ impl Command {
                         command.output,
                         command_map,
                         &mut path,
+                        true,
                     );
                     break;
                 }
@@ -312,10 +297,18 @@ impl Command {
         cached_output: Option<CommandOutput>,
         command_map: &mut HashMap<String, Vec<String>>,
         path: &mut Vec<String>,
+        register: bool,
     ) {
         self.spec = cached_spec;
         path.push(self.spec.name.clone());
         if self.output.is_none() {
+            if register {
+                if let Some(output) = &cached_output {
+                    for new_cmd in &output.commands {
+                        new_cmd.register(command_map, path);
+                    }
+                }
+            }
             self.output = cached_output;
         } else if let Some(cached_output) = cached_output {
             let output = self.output.as_mut().unwrap();
@@ -332,10 +325,12 @@ impl Command {
                     .position(|x| x.spec.name.eq(&new_cmd.spec.name))
                 {
                     let mut old_cmd = old_commands.swap_remove(index);
-                    old_cmd.merge_with(new_cmd.spec, new_cmd.output, command_map, path);
+                    old_cmd.merge_with(new_cmd.spec, new_cmd.output, command_map, path, register);
                     output.commands.push(old_cmd);
                 } else {
-                    new_cmd.register(command_map, path);
+                    if register {
+                        new_cmd.register(command_map, path);
+                    }
                     output.commands.push(new_cmd);
                 }
             }
@@ -464,7 +459,7 @@ impl Command {
             cmd.output.stored_hash.hash = Some(cmd.output.hash(&cmd.output.options, envs)?);
         }
         *commands = cmd.commands;
-        self.merge_with(cmd.spec, Some(cmd.output), commands, &mut cmd.command_path);
+        self.merge_with(cmd.spec, Some(cmd.output), commands, &mut cmd.command_path, false);
 
         self.up_to_date = true;
         Ok(cmd.logger)

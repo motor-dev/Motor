@@ -15,14 +15,14 @@ pub struct Application {
     command_line: Arc<Mutex<CommandLineParser>>,
     init_command: Command,
     command_list: HashMap<String, Vec<String>>,
+    verbosity: u32,
     log_why: bool,
     log_colors: Option<bool>,
 }
 
 impl Application {
     pub fn init() -> Result<Self> {
-        let root_dir = std::env::current_dir()
-            .unwrap()
+        let root_dir = env::current_dir()?
             .file_name()
             .unwrap()
             .to_string_lossy()
@@ -50,6 +50,10 @@ impl Application {
             EnvironmentValue::Vec(paths),
         )?;
         parser.add_setting(
+            "flavors".to_string(),
+            EnvironmentValue::Vec(vec![EnvironmentValue::String("debug".to_string()), EnvironmentValue::String("final".to_string())]),
+        )?;
+        parser.add_setting(
             "exe_suffix".to_string(),
             EnvironmentValue::String(if cfg!(target_os="windows") { ".exe" } else { "" }.to_string()),
         )?;
@@ -59,73 +63,73 @@ impl Application {
         )?;
         parser.add_list(
             "commands".to_string(),
-            None,
-            None,
-            None,
             "The command(s) to execute".to_string(),
+            None,
+            None,
+            None,
             true,
             EnvironmentValue::Vec(Vec::new()),
         )?;
         parser.add_count(
             "verbose".to_string(),
+            "Controls how much information is displayed.\nVerbosity increases with each occurrence of the option.".to_string(),
             Some("Options controlling logging".to_string()),
             None,
             Some("v".to_string()),
-            "Controls how much information is displayed.\nVerbosity increases with each occurrence of the option.".to_string(),
             false,
             EnvironmentValue::Integer(0),
         )?;
         parser.add_flag(
             "why".to_string(),
+            "Print an explanation for every action.\nFor every command, task generator and task considered, the program will print the reason why it considers it out of date.".to_string(),
             Some("Options controlling logging".to_string()),
             Some("why".to_string()),
             Some("w".to_string()),
-            "Print an explanation for every action.\nFor every command, task generator and task considered, the program will print the reason why it considers it out of date.".to_string(),
             false,
             EnvironmentValue::Bool(false),
         )?;
         parser.add_flag(
             "color".to_string(),
+            "Whether to use colors in the output. Defaults to automatic.".to_string(),
             Some("Options controlling logging".to_string()),
             Some("color".to_string()),
             Some("c".to_string()),
-            "Whether to use colors in the output. Defaults to automatic.".to_string(),
             false,
             EnvironmentValue::None,
         )?;
         parser.add_list(
             "target".to_string(),
+            "Target to be built.\nUse this option multiple times to build several targets.".to_string(),
             Some("Options controlling task execution".to_string()),
             Some("target".to_string()),
             Some("t".to_string()),
-            "Target to be built.\nUse this option multiple times to build several targets.".to_string(),
             false,
             EnvironmentValue::None,
         )?;
         parser.add_value(
             "tidy".to_string(),
+            "Keeps build folder tidy.\nFiles in the build folder that do not belong to a task are deleted.".to_string(),
             Some("Options controlling task execution".to_string()),
             Some("tidy".to_string()),
             None,
-            "Keeps build folder tidy.\nFiles in the build folder that do not belong to a task are deleted.".to_string(),
             false,
             EnvironmentValue::Bool(true),
         )?;
         parser.add_count(
             "progress".to_string(),
+            "Controls how progress is reported.\n-p adds a progress bar.\n-pp shows the progress bar and removes the individual task logging.".to_string(),
             Some("Options controlling task execution".to_string()),
             None,
             Some("p".to_string()),
-            "Controls how progress is reported.\n-p adds a progress bar.\n-pp shows the progress bar and removes the individual task logging.".to_string(),
             false,
             EnvironmentValue::Integer(0),
         )?;
         parser.add_value(
             "job_count".to_string(),
+            "Controls the maximum number of tasks that can run in parallel. Defaults to the number of processors.".to_string(),
             Some("Options controlling task execution".to_string()),
             Some("jobs".to_string()),
             Some("j".to_string()),
-            "Controls the maximum number of tasks that can run in parallel. Defaults to the number of processors.".to_string(),
             false,
             EnvironmentValue::None,
         )?;
@@ -138,7 +142,7 @@ impl Application {
             &vec![Arc::new(Mutex::new(Environment::new()))],
             vec!["init".to_string()],
             &mut all_commands,
-            Logger::new(None),
+            Logger::new(None, 0, false),
         )?;
 
         let parser = parser_ptr.lock().unwrap();
@@ -165,6 +169,10 @@ impl Application {
             }
         }
 
+        let verbosity: u32 = match options.get_raw("verbose") {
+            EnvironmentValue::Integer(v) => v as u32,
+            _ => 0,
+        };
         let log_colors: Option<bool> = match options.get_raw("color") {
             EnvironmentValue::Bool(b) => Some(b),
             _ => None,
@@ -180,13 +188,14 @@ impl Application {
             command_line: parser_ptr,
             init_command,
             command_list: all_commands,
+            verbosity,
             log_colors,
             log_why,
         })
     }
 
     pub fn run(&mut self) -> Result<()> {
-        let mut logger = Logger::new(self.log_colors);
+        let mut logger = Logger::new(self.log_colors, self.verbosity, self.log_why);
         let commands = self.options.lock().unwrap().get_raw("commands").as_vec();
         let out_value = self.options.lock().unwrap().get_raw("out");
         let out_dir_string = out_value.as_string();
@@ -220,7 +229,6 @@ impl Application {
                 Vec::new(),
                 &mut self.command_list,
                 logger,
-                self.log_why,
                 implicit,
             )?;
             let result = fs::File::create(&commands_file)?;
