@@ -1,6 +1,7 @@
+---@type Context
 local context = ...
 
-context.ARCHS = {
+context.ARCHITECTURES = {
     --['x86'] = 'x86',
     --['i386'] = 'x86',
     --['i486'] = 'x86',
@@ -37,10 +38,12 @@ context.ARCHS = {
 context:recurse('host/' .. context.settings.OS .. '.lua')
 context.compilers = {}
 
-for _, compiler in ipairs(context.settings.compiler or { 'clang', 'gcc', 'msvc', 'suncc' }) do
+local compilers = --[[---@type string[] ]] context.settings.compiler or { 'clang', 'gcc', 'msvc', 'suncc' }
+local platforms = --[[---@type string[] ]] context.settings.platform or { 'linux', 'freebsd', 'macos', 'windows', 'solaris' }
+for _, compiler in ipairs(compilers) do
     context:recurse('compiler/' .. compiler .. '.lua')
 end
 
-for _, platform in ipairs(context.settings.platform or { 'linux', 'freebsd', 'macos', 'windows', 'solaris' }) do
+for _, platform in ipairs(platforms) do
     context:recurse('target/' .. platform .. '.lua')
 end

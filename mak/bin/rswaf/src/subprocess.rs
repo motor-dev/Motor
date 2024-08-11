@@ -50,9 +50,12 @@ impl UserData for Popen {
 
 impl UserData for Out {
     fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(methods: &mut M) {
-        methods.add_meta_method(MetaMethod::Concat, |_lua, this, other: AnyUserData| {
+        methods.add_meta_method(MetaMethod::Add, |_lua, this, other: AnyUserData| {
             let other = other.borrow::<Out>()?;
             Ok(Out([this.0.as_str(), other.0.as_str()].join(""), this.1))
+        });
+        methods.add_meta_method(MetaMethod::ToString, |_lua, this, ()| {
+            Ok(this.0.clone())
         });
         methods.add_function_mut("lines", |lua, this: AnyUserData| {
             { let _ = this.borrow::<Out>()?; }

@@ -71,10 +71,10 @@ impl CommandLineParser {
     fn add_option(
         self: &mut Self,
         name: String,
+        help: String,
         category: Option<String>,
         long: Option<String>,
         short: Option<String>,
-        help: String,
         required: bool,
         default: EnvironmentValue,
         choice_list: Option<Vec<String>>,
@@ -109,19 +109,19 @@ impl CommandLineParser {
     pub(crate) fn add_flag(
         self: &mut Self,
         name: String,
+        help: String,
         category: Option<String>,
         long: Option<String>,
         short: Option<String>,
-        help: String,
         required: bool,
         default: EnvironmentValue,
     ) -> mlua::Result<()> {
         self.add_option(
             name,
+            help,
             category,
             long,
             short,
-            help,
             required,
             default,
             None,
@@ -132,19 +132,19 @@ impl CommandLineParser {
     pub(crate) fn add_value(
         self: &mut Self,
         name: String,
+        help: String,
         category: Option<String>,
         long: Option<String>,
         short: Option<String>,
-        help: String,
         required: bool,
         default: EnvironmentValue,
     ) -> mlua::Result<()> {
         self.add_option(
             name,
+            help,
             category,
             long,
             short,
-            help,
             required,
             default,
             None,
@@ -155,19 +155,19 @@ impl CommandLineParser {
     pub(crate) fn add_count(
         self: &mut Self,
         name: String,
+        help: String,
         category: Option<String>,
         long: Option<String>,
         short: Option<String>,
-        help: String,
         required: bool,
         default: EnvironmentValue,
     ) -> mlua::Result<()> {
         self.add_option(
             name,
+            help,
             category,
             long,
             short,
-            help,
             required,
             default,
             None,
@@ -178,20 +178,20 @@ impl CommandLineParser {
     pub(crate) fn add_choice(
         self: &mut Self,
         name: String,
+        help: String,
         category: Option<String>,
         long: Option<String>,
         short: Option<String>,
-        help: String,
         required: bool,
         choice_list: Vec<String>,
         default: EnvironmentValue,
     ) -> mlua::Result<()> {
         self.add_option(
             name,
+            help,
             category,
             long,
             short,
-            help,
             required,
             default,
             Some(choice_list),
@@ -202,19 +202,19 @@ impl CommandLineParser {
     pub(crate) fn add_list(
         self: &mut Self,
         name: String,
+        help: String,
         category: Option<String>,
         long: Option<String>,
         short: Option<String>,
-        help: String,
         required: bool,
         default: EnvironmentValue,
     ) -> mlua::Result<()> {
         self.add_option(
             name,
+            help,
             category,
             long,
             short,
-            help,
             required,
             default,
             None,
@@ -328,10 +328,10 @@ impl UserData for CommandLineParser {
              this,
              args: (
                  String,
-                 Option<String>,
-                 Option<String>,
-                 Option<String>,
                  String,
+                 Option<String>,
+                 Option<String>,
+                 Option<String>,
                  Option<bool>,
              )|
              -> mlua::Result<()> {
@@ -356,10 +356,10 @@ impl UserData for CommandLineParser {
              this,
              args: (
                  String,
-                 Option<String>,
-                 Option<String>,
-                 Option<String>,
                  String,
+                 Option<String>,
+                 Option<String>,
+                 Option<String>,
                  mlua::Value,
              )|
              -> mlua::Result<()> {
@@ -380,10 +380,10 @@ impl UserData for CommandLineParser {
              this,
              args: (
                  String,
-                 Option<String>,
-                 Option<String>,
-                 Option<String>,
                  String,
+                 Option<String>,
+                 Option<String>,
+                 Option<String>,
                  mlua::Value,
              )|
              -> mlua::Result<()> {
@@ -404,10 +404,10 @@ impl UserData for CommandLineParser {
              this,
              args: (
                  String,
-                 Option<String>,
-                 Option<String>,
-                 Option<String>,
                  String,
+                 Option<String>,
+                 Option<String>,
+                 Option<String>,
                  mlua::Value,
              )|
              -> mlua::Result<()> {
@@ -428,22 +428,22 @@ impl UserData for CommandLineParser {
              this,
              args: (
                  String,
-                 Option<String>,
-                 Option<String>,
-                 Option<String>,
                  String,
                  Vec<String>,
+                 Option<String>,
+                 Option<String>,
+                 Option<String>,
                  mlua::Value,
              )|
              -> mlua::Result<()> {
                 this.add_choice(
                     args.0,
                     args.1,
-                    args.2,
                     args.3,
                     args.4,
-                    false,
                     args.5,
+                    false,
+                    args.2,
                     EnvironmentValue::from_lua(&args.6)?,
                 )
             },

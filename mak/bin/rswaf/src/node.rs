@@ -19,7 +19,7 @@ impl Node {
         &self.path
     }
 
-    pub(crate) fn abspath(&self) -> &Path {
+    pub(crate) fn abs_path(&self) -> &Path {
         self.path.as_path()
     }
 
@@ -63,7 +63,7 @@ impl UserData for Node {
 
     fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(methods: &mut M) {
         methods.add_meta_method(MetaMethod::ToString, |_lua, this: &Node, ()| {
-            Ok(this.abspath().to_string_lossy().to_string())
+            Ok(this.abs_path().to_string_lossy().to_string())
         });
         methods.add_method("make_node", |_lua, this, lua_path: String| {
             let path = Path::new(lua_path.as_str());
@@ -71,7 +71,7 @@ impl UserData for Node {
             result.path.push(path);
             Ok(result)
         });
-        methods.add_method("abspath", |_lua, this, ()| {
+        methods.add_method("abs_path", |_lua, this, ()| {
             Ok(this.path.to_string_lossy().to_string())
         });
         methods.add_method("path_from", |_, this: &Node, base: UserDataRef<Node>| {

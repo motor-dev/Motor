@@ -6,21 +6,31 @@ use std::io::{Stdout, Write};
 pub(crate) struct Logger {
     output: Stdout,
     depth: u32,
+    verbosity: u32,
     width: usize,
     use_colors: bool,
+    show_why: bool,
     status: Option<Vec<StatusCommand>>,
 }
 
 impl Logger {
-    pub(crate) fn new(use_colors: Option<bool>) -> Self {
+    pub(crate) fn new(use_colors: Option<bool>, verbosity: u32, show_why: bool) -> Self {
         let stdout = std::io::stdout();
         let use_colors = use_colors.or(Some(stdout.is_tty())).unwrap();
         Self {
             output: stdout,
             depth: 0,
+            verbosity,
             width: 20,
             use_colors,
+            show_why,
             status: None,
+        }
+    }
+
+    pub(crate) fn why(&mut self, message: &str) {
+        if self.show_why {
+            self.do_log(message, style::Color::Reset, true);
         }
     }
 
@@ -30,7 +40,7 @@ impl Logger {
                 self.width = message.len() + 1;
             }
             let message = format!("{}{}: ", message, " ".repeat(self.width - message.len()));
-            self.log(message.as_str(), false);
+            self.do_log(message.as_str(), style::Color::Reset, false);
         }
         self.depth += 1;
     }
@@ -44,122 +54,105 @@ impl Logger {
                         style::Color::Green
                     } else {
                         style::Color::Yellow
-                    }))
-                    .unwrap()
-                    .queue(style::Print(message))
-                    .unwrap()
-                    .queue(style::SetForegroundColor(style::Color::Reset))
-                    .unwrap();
+                    })).unwrap()
+                    .queue(style::Print(message)).unwrap()
+                    .queue(style::SetForegroundColor(style::Color::Reset)).unwrap();
             } else {
                 self.output
-                    .queue(style::Print(message))
-                    .unwrap();
+                    .queue(style::Print(message)).unwrap();
             }
-            self.log("", true);
+            self.do_log("", style::Color::Reset, true);
         }
     }
 
     pub(crate) fn debug(&mut self, message: &str) {
-        if self.depth == 0 {
-            self.log(message, true);
+        if self.depth == 0 && self.verbosity >= 2 {
+            self.do_log(message, style::Color::Grey, true);
+        }
+    }
+
+    pub(crate) fn info(&mut self, message: &str) {
+        if self.depth == 0 && self.verbosity >= 1 {
+            self.do_log(message, style::Color::Reset, true);
         }
     }
 
     pub(crate) fn warning(&mut self, message: &str) {
         if self.depth == 0 {
-            if self.use_colors {
-                self.output
-                    .queue(style::SetForegroundColor(style::Color::Yellow))
-                    .unwrap()
-                    .queue(style::Print("warn: "))
-                    .unwrap()
-                    .queue(style::SetForegroundColor(style::Color::Reset))
-                    .unwrap();
-            } else {
-                self.output.queue(style::Print("warn: ")).unwrap();
-            }
-            self.log(message, true);
+            self.do_log("warn: ", style::Color::Yellow, false);
+            self.do_log(message, style::Color::Reset, true);
         }
     }
 
     pub(crate) fn error(&mut self, message: &str) {
         if self.depth == 0 {
-            if self.use_colors {
-                self.output
-                    .queue(style::SetForegroundColor(style::Color::Red))
-                    .unwrap()
-                    .queue(style::Print("error: "))
-                    .unwrap()
-                    .queue(style::SetForegroundColor(style::Color::Reset))
-                    .unwrap();
-            } else {
-                self.output.queue(style::Print("error: ")).unwrap();
-            }
-            self.log(message, true);
+            self.do_log("error: ", style::Color::Red, false);
+            self.do_log(message, style::Color::Reset, true);
         }
     }
 
     pub(crate) fn set_status(&mut self, message: &str) {
         if self.use_colors && self.status.is_none() {
             self.output
-                .queue(cursor::MoveDown(1))
-                .unwrap()
-                .queue(cursor::MoveUp(1))
-                .unwrap();
+                .queue(cursor::MoveDown(1)).unwrap()
+                .queue(cursor::MoveUp(1)).unwrap();
         }
         self.status = Some(StatusCommand::parse(message));
-        self.log("", false);
+        self.do_log("", style::Color::Reset, false);
     }
 
     pub(crate) fn clear_status(&mut self) {
         if self.use_colors && self.status.is_some() {
             self.output
-                .queue(cursor::MoveDown(1))
-                .unwrap()
-                .queue(terminal::Clear(terminal::ClearType::CurrentLine))
-                .unwrap()
-                .queue(cursor::MoveUp(1))
-                .unwrap()
-                .flush()
-                .unwrap();
+                .queue(cursor::MoveDown(1)).unwrap()
+                .queue(terminal::Clear(terminal::ClearType::CurrentLine)).unwrap()
+                .queue(cursor::MoveUp(1)).unwrap()
+                .flush().unwrap();
         }
         self.status = None;
     }
 
-    fn log(&mut self, message: &str, mut add_newline: bool) {
-        if self.use_colors && self.status.is_some() {
-            if !add_newline {
-                add_newline = message.as_bytes().iter().filter(|&&c| c == b'\n').count() != 0;
+    fn do_log(&mut self, message: &str, color: style::Color, mut add_newline: bool) {
+        if self.use_colors {
+            if self.status.is_some()
+            {
+                if !add_newline {
+                    add_newline = message.as_bytes().iter().filter(|&&c| c == b'\n').count() != 0;
+                }
+                if add_newline {
+                    self.output
+                        .queue(cursor::SavePosition).unwrap()
+                        .queue(cursor::MoveDown(1)).unwrap()
+                        .queue(terminal::Clear(terminal::ClearType::CurrentLine)).unwrap()
+                        .queue(cursor::RestorePosition).unwrap();
+                }
             }
+            self.output
+                .queue(style::SetForegroundColor(color)).unwrap()
+                .queue(style::Print(message)).unwrap()
+                .queue(style::SetForegroundColor(style::Color::Reset)).unwrap();
             if add_newline {
+                self.output.queue(style::Print("\n")).unwrap();
+            }
+            if self.status.is_some() {
                 self.output
                     .queue(cursor::SavePosition)
                     .unwrap()
-                    .queue(cursor::MoveDown(1))
-                    .unwrap()
-                    .queue(terminal::Clear(terminal::ClearType::CurrentLine))
-                    .unwrap()
-                    .queue(cursor::RestorePosition)
+                    .queue(cursor::MoveToNextLine(1))
                     .unwrap();
-            }
-        }
-        self.output.queue(style::Print(message)).unwrap();
-        if add_newline {
-            self.output.queue(style::Print("\n")).unwrap();
-        }
-        if self.use_colors && self.status.is_some() {
-            self.output
-                .queue(cursor::SavePosition)
-                .unwrap()
-                .queue(cursor::MoveToNextLine(1))
-                .unwrap();
-            for cmd in self.status.as_mut().unwrap() {
-                cmd.write(&mut self.output);
-            }
+                for cmd in self.status.as_mut().unwrap() {
+                    cmd.write(&mut self.output);
+                }
 
-            self.output.queue(cursor::RestorePosition).unwrap();
+                self.output.queue(cursor::RestorePosition).unwrap();
+            }
+        } else {
+            self.output.queue(style::Print(message)).unwrap();
+            if add_newline {
+                self.output.queue(style::Print("\n")).unwrap();
+            }
+            self.output.flush().unwrap();
         }
-        self.output.flush().unwrap();
     }
 }
 
@@ -230,107 +223,73 @@ impl StatusCommand {
         match &self {
             StatusCommand::Text(s) => out.queue(style::Print(s.as_str())).unwrap(),
             StatusCommand::FgReset => out
-                .queue(style::SetForegroundColor(style::Color::Reset))
-                .unwrap(),
+                .queue(style::SetForegroundColor(style::Color::Reset)).unwrap(),
             StatusCommand::FgDarkGrey => out
-                .queue(style::SetForegroundColor(style::Color::DarkGrey))
-                .unwrap(),
+                .queue(style::SetForegroundColor(style::Color::DarkGrey)).unwrap(),
             StatusCommand::FgRed => out
-                .queue(style::SetForegroundColor(style::Color::Red))
-                .unwrap(),
+                .queue(style::SetForegroundColor(style::Color::Red)).unwrap(),
             StatusCommand::FgGreen => out
-                .queue(style::SetForegroundColor(style::Color::Green))
-                .unwrap(),
+                .queue(style::SetForegroundColor(style::Color::Green)).unwrap(),
             StatusCommand::FgYellow => out
-                .queue(style::SetForegroundColor(style::Color::Yellow))
-                .unwrap(),
+                .queue(style::SetForegroundColor(style::Color::Yellow)).unwrap(),
             StatusCommand::FgBlue => out
-                .queue(style::SetForegroundColor(style::Color::Blue))
-                .unwrap(),
+                .queue(style::SetForegroundColor(style::Color::Blue)).unwrap(),
             StatusCommand::FgMagenta => out
-                .queue(style::SetForegroundColor(style::Color::Magenta))
-                .unwrap(),
+                .queue(style::SetForegroundColor(style::Color::Magenta)).unwrap(),
             StatusCommand::FgCyan => out
-                .queue(style::SetForegroundColor(style::Color::Cyan))
-                .unwrap(),
+                .queue(style::SetForegroundColor(style::Color::Cyan)).unwrap(),
             StatusCommand::FgWhite => out
-                .queue(style::SetForegroundColor(style::Color::White))
-                .unwrap(),
+                .queue(style::SetForegroundColor(style::Color::White)).unwrap(),
             StatusCommand::FgBlack => out
-                .queue(style::SetForegroundColor(style::Color::Black))
-                .unwrap(),
+                .queue(style::SetForegroundColor(style::Color::Black)).unwrap(),
             StatusCommand::FgDarkRed => out
-                .queue(style::SetForegroundColor(style::Color::DarkRed))
-                .unwrap(),
+                .queue(style::SetForegroundColor(style::Color::DarkRed)).unwrap(),
             StatusCommand::FgDarkGreen => out
-                .queue(style::SetForegroundColor(style::Color::DarkGreen))
-                .unwrap(),
+                .queue(style::SetForegroundColor(style::Color::DarkGreen)).unwrap(),
             StatusCommand::FgDarkYellow => out
-                .queue(style::SetForegroundColor(style::Color::DarkYellow))
-                .unwrap(),
+                .queue(style::SetForegroundColor(style::Color::DarkYellow)).unwrap(),
             StatusCommand::FgDarkBlue => out
-                .queue(style::SetForegroundColor(style::Color::DarkBlue))
-                .unwrap(),
+                .queue(style::SetForegroundColor(style::Color::DarkBlue)).unwrap(),
             StatusCommand::FgDarkMagenta => out
-                .queue(style::SetForegroundColor(style::Color::DarkMagenta))
-                .unwrap(),
+                .queue(style::SetForegroundColor(style::Color::DarkMagenta)).unwrap(),
             StatusCommand::FgDarkCyan => out
-                .queue(style::SetForegroundColor(style::Color::DarkCyan))
-                .unwrap(),
+                .queue(style::SetForegroundColor(style::Color::DarkCyan)).unwrap(),
             StatusCommand::FgGrey => out
-                .queue(style::SetForegroundColor(style::Color::Grey))
-                .unwrap(),
+                .queue(style::SetForegroundColor(style::Color::Grey)).unwrap(),
             StatusCommand::BgReset => out
-                .queue(style::SetBackgroundColor(style::Color::Reset))
-                .unwrap(),
+                .queue(style::SetBackgroundColor(style::Color::Reset)).unwrap(),
             StatusCommand::BgDarkGrey => out
-                .queue(style::SetBackgroundColor(style::Color::DarkGrey))
-                .unwrap(),
+                .queue(style::SetBackgroundColor(style::Color::DarkGrey)).unwrap(),
             StatusCommand::BgRed => out
-                .queue(style::SetBackgroundColor(style::Color::Red))
-                .unwrap(),
+                .queue(style::SetBackgroundColor(style::Color::Red)).unwrap(),
             StatusCommand::BgGreen => out
-                .queue(style::SetBackgroundColor(style::Color::Green))
-                .unwrap(),
+                .queue(style::SetBackgroundColor(style::Color::Green)).unwrap(),
             StatusCommand::BgYellow => out
-                .queue(style::SetBackgroundColor(style::Color::Yellow))
-                .unwrap(),
+                .queue(style::SetBackgroundColor(style::Color::Yellow)).unwrap(),
             StatusCommand::BgBlue => out
-                .queue(style::SetBackgroundColor(style::Color::Blue))
-                .unwrap(),
+                .queue(style::SetBackgroundColor(style::Color::Blue)).unwrap(),
             StatusCommand::BgMagenta => out
-                .queue(style::SetBackgroundColor(style::Color::Magenta))
-                .unwrap(),
+                .queue(style::SetBackgroundColor(style::Color::Magenta)).unwrap(),
             StatusCommand::BgCyan => out
-                .queue(style::SetBackgroundColor(style::Color::Cyan))
-                .unwrap(),
+                .queue(style::SetBackgroundColor(style::Color::Cyan)).unwrap(),
             StatusCommand::BgWhite => out
-                .queue(style::SetBackgroundColor(style::Color::White))
-                .unwrap(),
+                .queue(style::SetBackgroundColor(style::Color::White)).unwrap(),
             StatusCommand::BgBlack => out
-                .queue(style::SetBackgroundColor(style::Color::Black))
-                .unwrap(),
+                .queue(style::SetBackgroundColor(style::Color::Black)).unwrap(),
             StatusCommand::BgDarkRed => out
-                .queue(style::SetBackgroundColor(style::Color::DarkRed))
-                .unwrap(),
+                .queue(style::SetBackgroundColor(style::Color::DarkRed)).unwrap(),
             StatusCommand::BgDarkGreen => out
-                .queue(style::SetBackgroundColor(style::Color::DarkGreen))
-                .unwrap(),
+                .queue(style::SetBackgroundColor(style::Color::DarkGreen)).unwrap(),
             StatusCommand::BgDarkYellow => out
-                .queue(style::SetBackgroundColor(style::Color::DarkYellow))
-                .unwrap(),
+                .queue(style::SetBackgroundColor(style::Color::DarkYellow)).unwrap(),
             StatusCommand::BgDarkBlue => out
-                .queue(style::SetBackgroundColor(style::Color::DarkBlue))
-                .unwrap(),
+                .queue(style::SetBackgroundColor(style::Color::DarkBlue)).unwrap(),
             StatusCommand::BgDarkMagenta => out
-                .queue(style::SetBackgroundColor(style::Color::DarkMagenta))
-                .unwrap(),
+                .queue(style::SetBackgroundColor(style::Color::DarkMagenta)).unwrap(),
             StatusCommand::BgDarkCyan => out
-                .queue(style::SetBackgroundColor(style::Color::DarkCyan))
-                .unwrap(),
+                .queue(style::SetBackgroundColor(style::Color::DarkCyan)).unwrap(),
             StatusCommand::BgGrey => out
-                .queue(style::SetBackgroundColor(style::Color::Grey))
-                .unwrap(),
+                .queue(style::SetBackgroundColor(style::Color::Grey)).unwrap(),
         }
     }
 }

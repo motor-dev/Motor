@@ -123,7 +123,6 @@ impl UserData for Context {
         fields.add_field_method_get("name", |_, this| Ok(this.spec.name.clone()));
         fields.add_field_method_get("fun", |_, this| Ok(this.spec.function.clone()));
         fields.add_field_method_get("env", |_, this| Ok(this.environment.clone()));
-        fields.add_field_method_get("envs", |_, this| Ok(this.output.environments.clone()));
         fields.add_field_method_get("path", |_, this| Ok(this.path.clone()));
         fields.add_field_method_get("src_dir", |_, this| Ok(this.src_dir.clone()));
         fields.add_field_method_get("bld_dir", |_, this| Ok(this.bld_dir.clone()));
@@ -160,7 +159,7 @@ impl UserData for Context {
                     .push(script.path().clone());
                 (old_path, script)
             };
-            let result: LuaResult<()> = lua.load(script.abspath()).call(&args.0);
+            let result: LuaResult<()> = lua.load(script.abs_path()).call(&args.0);
             {
                 let mut this = args.0.borrow_mut::<Context>()?;
                 this.path = old_path;
@@ -214,6 +213,10 @@ impl UserData for Context {
             this.logger.debug(message.as_str());
             Ok(())
         });
+        methods.add_method_mut("info", |_lua, this, message: String| {
+            this.logger.info(message.as_str());
+            Ok(())
+        });
         methods.add_method_mut("warn", |_lua, this, message: String| {
             this.logger.warning(message.as_str());
             Ok(())
@@ -222,6 +225,9 @@ impl UserData for Context {
             this.logger.error(message.as_str());
             Ok(())
         });
+        methods.add_method_mut("fatal", |_lua, _this, message: String| -> LuaResult<()> {
+            Err(LuaError::RuntimeError(message))
+        });
         methods.add_method_mut("set_status", |_lua, this, message: String| {
             this.logger.set_status(message.as_str());
             Ok(())
@@ -229,9 +235,6 @@ impl UserData for Context {
         methods.add_method_mut("clear_status", |_lua, this, ()| {
             this.logger.clear_status();
             Ok(())
-        });
-        methods.add_method_mut("fatal", |_lua, _this, message: String| -> LuaResult<()> {
-            Err(LuaError::RuntimeError(message))
         });
         methods.add_function_mut(
             "with",
