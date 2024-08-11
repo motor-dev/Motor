@@ -3,7 +3,7 @@ use mlua::{IntoLua, Lua, MetaMethod, Result, UserData, UserDataMethods, Value};
 use serde::de::{DeserializeSeed, MapAccess, SeqAccess, Visitor};
 use serde::ser::SerializeStruct;
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, BTreeMap};
 use std::fmt;
 use std::path::PathBuf;
 use std::result::Result as StdResult;
@@ -252,7 +252,7 @@ impl<'a> Serialize for SerializedEnvironment<'a> {
                 }
             },
         )?;
-        s.serialize_field("values", &self.0.lock().unwrap().values)?;
+        s.serialize_field("values", &self.0.lock().unwrap().values.iter().collect::<BTreeMap<_, _>>())?;
         s.end()
     }
 }
@@ -348,7 +348,7 @@ impl<'de, 'a> DeserializeSeed<'de> for EnvironmentSeed<'a> {
                     parent,
                     values,
                     used_keys: HashSet::new(),
-                    index: 0,
+                    index: self.0.last().unwrap().len(),
                 })))
             }
 
@@ -397,7 +397,7 @@ impl<'de, 'a> DeserializeSeed<'de> for EnvironmentSeed<'a> {
                     parent,
                     values,
                     used_keys: HashSet::new(),
-                    index: 0,
+                    index: self.0.last().unwrap().len(),
                 })))
             }
         }
