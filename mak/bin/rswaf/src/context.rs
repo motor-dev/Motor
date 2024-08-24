@@ -8,7 +8,7 @@ use std::sync::{Arc, Mutex};
 use blake3::Hasher;
 use mlua::prelude::{LuaError, LuaFunction, LuaResult, LuaString, LuaTable, LuaValue};
 use mlua::{AnyUserData, FromLua, IntoLua, Lua, MetaMethod, Table, UserData, UserDataFields, UserDataMethods};
-use crate::command::{Command, CommandSpec, CommandHash, CommandOutput, CommandStatus};
+use crate::command::{Command, CommandSpec, CommandHash, CommandOutput, CommandStatus, StageStatus};
 use crate::environment::ReadWriteEnvironment;
 use crate::error::Result;
 use crate::generator::Generator;
@@ -80,6 +80,7 @@ impl Context {
                     glob_dependencies: Vec::new(),
                     hash: None,
                 },
+                stages: vec![(spec.name.clone(), StageStatus::Enabled)],
             },
             environment: start_env,
             path: current_dir.clone(),
@@ -250,6 +251,7 @@ impl Context {
                             glob_dependencies: Vec::new(),
                             hash: None,
                         },
+                        stages: Vec::new(),
                     });
                 }
                 cmd.output.as_mut().unwrap().commands.push(Command {
@@ -643,6 +645,12 @@ impl UserData for Context {
         methods.add_meta_function(
             MetaMethod::Call,
             |lua, (this, name, features, stage): (AnyUserData, String, LuaValue, Option<String>)| {
+                if let Some(stage) = &stage {
+                    let context = this.borrow::<Context>()?;
+                    if let None = context.output.stages.iter().position(|x| x.0.eq(&name)) {
+                        return Err(LuaError::RuntimeError(format!("When creating generator `{}`: `{}`: stage was not declared", &name, stage)));
+                    }
+                }
                 let features = match &features {
                     LuaValue::String(s) => s.to_string_lossy().to_string().split(',').map(|x| x.trim().to_string()).collect(),
                     LuaValue::Table(_) => { Vec::<String>::from_lua(features, lua)? }
@@ -709,5 +717,24 @@ impl UserData for Context {
         );
 
         methods.add_function("post", |lua, (this, generator): (AnyUserData, AnyUserData)| post(lua, (&this, &generator)));
+
+        methods.add_method_mut(
+            "declare_stage",
+            |_lua, this, (name, enabled): (String, LuaValue)| {
+                if let Some(_) = this.output.stages.iter().position(|x| x.0.eq(&name)) {
+                    Err(LuaError::RuntimeError(format!("`{}`: build stage already registered", &name)))
+                } else {
+                    let status = match enabled {
+                        LuaValue::Nil => StageStatus::Enabled,
+                        LuaValue::Integer(i) => if i == 0 { StageStatus::Disabled } else { StageStatus::Enabled },
+                        LuaValue::Boolean(b) => if b { StageStatus::Enabled } else { StageStatus::Disabled },
+                        LuaValue::String(s) => StageStatus::Conditional(s.to_string_lossy().to_string()),
+                        _ => return Err(LuaError::RuntimeError("Parameter `enabled` of method `declare_stage` should be nil, a boolean, or a string".to_string())),
+                    };
+                    this.output.stages.push((name.clone(), status));
+                    Ok(())
+                }
+            },
+        )
     }
 }

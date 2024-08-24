@@ -580,12 +580,20 @@ impl CommandSpec {
     }
 }
 
+#[derive(Serialize, Deserialize)]
+pub(crate) enum StageStatus {
+    Enabled,
+    Disabled,
+    Conditional(String),
+}
+
 pub(crate) struct CommandOutput {
     pub(crate) environments: Vec<Arc<Mutex<ReadWriteEnvironment>>>,
     pub(crate) commands: Vec<Command>,
     pub(crate) options: Option<Environment>,
     pub(crate) tools: Vec<Node>,
     pub(crate) stored_hash: CommandHash,
+    pub(crate) stages: Vec<(String, StageStatus)>,
 }
 
 impl CommandOutput {
@@ -656,6 +664,7 @@ impl Serialize for CommandOutput {
         s.serialize_field("options", &self.options)?;
         s.serialize_field("tools", &self.tools)?;
         s.serialize_field("stored_hash", &self.stored_hash)?;
+        s.serialize_field("stages", &self.stages)?;
         s.end()
     }
 }
@@ -675,6 +684,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
             Options,
             Tools,
             StoredHash,
+            Stages,
         }
 
         impl<'de> Deserialize<'de> for Field {
@@ -702,9 +712,10 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                             "options" => Ok(Field::Options),
                             "tools" => Ok(Field::Tools),
                             "stored_hash" => Ok(Field::StoredHash),
+                            "stages" => Ok(Field::Stages),
                             _ => Err(Error::unknown_field(
                                 value,
-                                &["environments", "commands", "options", "stored_hash"],
+                                &["environments", "commands", "options", "tools", "stored_hash", "stages"],
                             )),
                         }
                     }
@@ -736,7 +747,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
             {
                 deserializer.deserialize_struct(
                     "Command",
-                    &["environments", "commands", "options", "tools", "stored_hash"],
+                    &["environments", "commands", "options", "tools", "stored_hash", "stages"],
                     self,
                 )
             }
@@ -760,6 +771,9 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                 let stored_hash = seq
                     .next_element()?
                     .ok_or_else(|| Error::invalid_length(4, &self))?;
+                let stages = seq
+                    .next_element()?
+                    .ok_or_else(|| Error::invalid_length(5, &self))?;
                 let environments = self.0.pop().unwrap();
                 Ok(Some(CommandOutput {
                     environments,
@@ -767,6 +781,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                     options,
                     tools,
                     stored_hash,
+                    stages,
                 }))
             }
 
@@ -779,6 +794,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                 let mut options = None;
                 let mut tools = None;
                 let mut stored_hash = None;
+                let mut stages = None;
                 self.0.push(Vec::new());
                 while let Some(key) = map.next_key()? {
                     match key {
@@ -813,6 +829,12 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                             }
                             stored_hash = Some(map.next_value()?);
                         }
+                        Field::Stages => {
+                            if stages.is_some() {
+                                return Err(Error::duplicate_field("stages"));
+                            }
+                            stages = Some(map.next_value()?);
+                        }
                     }
                 }
                 let environments = self.0.pop().unwrap();
@@ -822,12 +844,15 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                 let options = options.ok_or_else(|| Error::missing_field("options"))?;
                 let stored_hash =
                     stored_hash.ok_or_else(|| Error::missing_field("stored_hash"))?;
+                let stages =
+                    stages.ok_or_else(|| Error::missing_field("stages"))?;
                 Ok(Some(CommandOutput {
                     environments,
                     commands,
                     options,
                     tools,
                     stored_hash,
+                    stages,
                 }))
             }
         }

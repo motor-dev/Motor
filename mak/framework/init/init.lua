@@ -25,6 +25,7 @@ context.settings:add_flag(
         nil,
         false
 )
+
 context.settings:add_flag(
         'dynamic',
         'Build a completely dynamic executables.\nAll engine components, plugins, samples and kernels will be built into shared objects.',
@@ -33,6 +34,7 @@ context.settings:add_flag(
         nil,
         false
 )
+
 context.settings:add_flag(
         'bulk',
         'Disable or enable bulk files.\nBulk files help speed up the build, they are enabled by default.',
@@ -41,6 +43,7 @@ context.settings:add_flag(
         nil,
         true
 )
+
 context.settings:add_flag(
         'werror',
         'Treat compilation warnings as error.',
