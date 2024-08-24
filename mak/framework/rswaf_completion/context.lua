@@ -95,3 +95,47 @@ function Context:chain_command(depending, name, fun)
     use(name) use(fun)
     return depending
 end
+
+---Loads a tool file. Tools work in a similar way to `recurse`, but they are also automatically loaded by dependent commands.
+---@param tool_name string The name of the tool. RsWaf wil lscan through the tools_dir setting to find a file called `tool_name`.lua
+---@param reload boolean? Whether the tool should be loaded again if it was already loaded. If not specified, the tool is not reloaded.
+function Context:load_tool(tool_name, reload)
+    use(tool_name) use(reload)
+end
+
+---Create a task generator of the specified name.
+---@param name string The name of the generator.
+---@param features? string|string[] The initial list of features.
+---@param stage? string The stage this generator belongs to. If not set, teh stage is `Context.fun`.
+function Context:__call(name, features, stage)
+    use(name) use(features) use(stage)
+    return Generator
+end
+
+---Retrieves a generator by its name
+---@param name string The name of the generator to search for
+---@return Generator?
+function Context:get_generator_by_name(name)
+    use(name)
+    return nil
+end
+
+---Registers a feature callback.
+---@param feature string|string[] A list of features that this callback is attached to.
+---@param name string The name of this step.
+---@param callback function(generator: Generator) The function attached to the feature.
+---@param after string[]? An optional list of steps that this step comes after, i.e. must have been executed before this step.
+---@param before string[]? An optional list of steps that this step comes before, i.e. must be executed after this step.
+function Context:feature(feature, name, callback, after, before)
+    use(feature)
+    use(name)
+    use(callback)
+    use(after)
+    use(before)
+end
+
+---Posts a generator. Calls all methods associated with the features, which can in turn post other generators or create tasks.
+---@param generator Generator the generator to post. Posting the generator more than once has no effect.
+function Context:post(generator)
+    use(generator)
+end

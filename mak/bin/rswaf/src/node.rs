@@ -1,9 +1,10 @@
-use mlua::{MetaMethod, UserData, UserDataMethods, UserDataRef};
+use std::fmt::Display;
+use mlua::{Error, FromLua, Lua, MetaMethod, UserData, UserDataMethods, UserDataRef, Value};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Component, Path, PathBuf};
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, PartialEq)]
 pub(crate) struct Node {
     path: PathBuf,
 }
@@ -117,6 +118,25 @@ impl UserData for Node {
         methods.add_method("name", |_lua, this: &Node, ()| Ok(this.path.file_name().and_then(|x| Some(x.to_string_lossy().to_string()))));
         methods.add_method("is_dir", |_lua, this: &Node, ()| Ok(this.is_dir()));
         methods.add_method("is_file", |_lua, this: &Node, ()| Ok(this.is_file()));
+    }
+}
+
+impl<'lua> FromLua<'lua> for Node {
+    fn from_lua(value: Value<'lua>, _lua: &'lua Lua) -> mlua::Result<Self> {
+        match value {
+            Value::UserData(userdata) => userdata.take::<Node>(),
+            _ => Err(Error::FromLuaConversionError {
+                from: value.type_name(),
+                to: "Node",
+                message: None,
+            }),
+        }
+    }
+}
+
+impl Display for Node {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.path.to_string_lossy().to_string())
     }
 }
 

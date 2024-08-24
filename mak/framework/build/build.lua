@@ -1,1 +1,3 @@
-print('build')
+local context = ...
+
+context:recurse('module/library.lua')

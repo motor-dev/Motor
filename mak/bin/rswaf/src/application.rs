@@ -1,5 +1,5 @@
 use crate::command::Command;
-use crate::environment::{Environment, EnvironmentValue};
+use crate::environment::{Environment, ReadWriteEnvironment, EnvironmentValue};
 use crate::error::Result;
 use crate::log::Logger;
 use crate::node::Node;
@@ -11,7 +11,7 @@ use std::sync::{Arc, Mutex};
 use std::env;
 
 pub struct Application {
-    options: Arc<Mutex<Environment>>,
+    options: Environment,
     command_line: Arc<Mutex<CommandLineParser>>,
     init_command: Command,
     command_list: HashMap<String, Vec<String>>,
@@ -48,6 +48,10 @@ impl Application {
         parser.add_setting(
             "path".to_string(),
             EnvironmentValue::Vec(paths),
+        )?;
+        parser.add_setting(
+            "tools_dir".to_string(),
+            EnvironmentValue::Vec(Vec::new()),
         )?;
         parser.add_setting(
             "flavors".to_string(),
@@ -139,7 +143,8 @@ impl Application {
         let mut all_commands = HashMap::from([("init".to_string(), vec!["init".to_string()])]);
         let mut logger = init_command.run(
             options_context.clone(),
-            &vec![Arc::new(Mutex::new(Environment::new()))],
+            &vec![Arc::new(Mutex::new(ReadWriteEnvironment::new()))],
+            &Vec::new(),
             vec!["init".to_string()],
             &mut all_commands,
             Logger::new(None, 0, false),
@@ -184,7 +189,7 @@ impl Application {
         drop(parser);
 
         Ok(Self {
-            options: Arc::new(Mutex::new(options)),
+            options,
             command_line: parser_ptr,
             init_command,
             command_list: all_commands,
@@ -196,8 +201,8 @@ impl Application {
 
     pub fn run(&mut self) -> Result<()> {
         let mut logger = Logger::new(self.log_colors, self.verbosity, self.log_why);
-        let commands = self.options.lock().unwrap().get_raw("commands").as_vec();
-        let out_value = self.options.lock().unwrap().get_raw("out");
+        let commands = self.options.get_raw("commands").as_vec();
+        let out_value = self.options.get_raw("out");
         let out_dir_string = out_value.as_string();
         let out_dir = std::path::Path::new(&out_dir_string);
         let commands_file = PathBuf::from(out_dir).join("cache.json");
@@ -224,7 +229,8 @@ impl Application {
             logger = self.init_command.run_with_deps(
                 command_path.into_iter().skip(1),
                 &Vec::new(),
-                self.options.clone(),
+                &Vec::new(),
+                &self.options,
                 self.command_line.clone(),
                 Vec::new(),
                 &mut self.command_list,

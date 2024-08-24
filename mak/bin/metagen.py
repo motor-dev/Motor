@@ -97,13 +97,13 @@ def m0102(logger: messages.Logger, position: Tuple[int, int], entity_name: str) 
 
 @messages.error
 def m0103(logger: messages.Logger, position: Tuple[int, int], entity_name: str) -> Dict[str, Any]:
-    """{entity_name} is explicitely marked as exported but cannot be exported."""
+    """{entity_name} is explicitly marked as exported but cannot be exported."""
     return locals()
 
 
 @messages.warning('implicit-export', True)
 def m0104(logger: messages.Logger, position: Tuple[int, int], entity_name: str) -> Dict[str, Any]:
-    """{entity_name} is implicitely marked as exported but cannot be exported."""
+    """{entity_name} is implicitly marked as exported but cannot be exported."""
     return locals()
 
 
@@ -241,7 +241,8 @@ class MetaObject(object):
         return self._declared_objects[name]
 
     def add_using_declaration(self, namespace: str, name: str) -> None:
-        print(namespace, name)
+        # print(namespace, name)
+        pass
 
 
 class RootNamespace(MetaObject):
@@ -704,12 +705,15 @@ class DeclarationVisitor(ast.Visitor):
             declarator_list.accept(visitor)
         except NotExportedException as e:
             if self._attributes.export:
-                m0103(pyxx.logger, visitor.position, visitor.name)
+                # m0103(pyxx.logger, visitor.position, visitor.name)
+                pass
             else:
-                m0104(pyxx.logger, visitor.position, visitor.name)
+                # m0104(pyxx.logger, visitor.position, visitor.name)
+                pass
         except IgnoredException as e:
             if self._attributes.export:
-                m0103(pyxx.logger, visitor.position, visitor.name)
+                # m0103(pyxx.logger, visitor.position, visitor.name)
+                pass
         except NotFoundException:
             m0101(pyxx.logger, visitor.position, visitor.name, visitor.namespace_name)
         except NotDefinedException:
@@ -720,11 +724,12 @@ class DeclarationVisitor(ast.Visitor):
                 if self._template_stack:
                     # cannot eport template methods/variables.
                     if self._attributes.exported():
-                        m0103(pyxx.logger, visitor.position, visitor.name)
+                        pass
+                        # m0103(pyxx.logger, visitor.position, visitor.name)
                     else:
-                        m0104(pyxx.logger, visitor.position, visitor.name)
+                        pass
+                        # m0104(pyxx.logger, visitor.position, visitor.name)
                 else:
-                    print(visitor.identifier)
                     if declarator_list.is_method():
                         pass
 
@@ -1058,7 +1063,7 @@ class Explorer(utils.RecursiveVisitor):
         template_declaration.accept_declaration(self)
         if self._template_stack:
             assert pyxx.logger is not None
-            m0300(pyxx.logger, template_declaration.position)
+            #m0300(pyxx.logger, template_declaration.position)
             # self._template_stack.clear()
 
 

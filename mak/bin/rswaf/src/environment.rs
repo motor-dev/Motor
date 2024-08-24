@@ -11,24 +11,33 @@ use std::sync::{Arc, Mutex};
 
 enum EnvironmentParent {
     None,
-    Current(Arc<Mutex<Environment>>),
-    Parent(Arc<Mutex<Environment>>),
+    Current(Arc<Mutex<ReadWriteEnvironment>>),
+    Parent(Arc<Mutex<ReadWriteEnvironment>>),
 }
 
+#[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct Environment {
-    parent: EnvironmentParent,
     values: HashMap<String, EnvironmentValue>,
+    #[serde(skip_serializing, skip_deserializing)]
     pub(crate) used_keys: HashSet<String>,
-    pub(crate) index: usize,
 }
 
 impl Environment {
     pub(crate) fn new() -> Self {
         Self {
-            parent: EnvironmentParent::None,
             values: HashMap::new(),
             used_keys: HashSet::new(),
-            index: 0,
+        }
+    }
+
+    pub(crate) fn get_into_list(
+        self: &mut Self,
+        key: &str,
+    ) -> Vec<EnvironmentValue> {
+        self.used_keys.insert(key.to_string());
+        match self.values.get(key) {
+            None => Vec::new(),
+            Some(v) => v.clone().into_list(),
         }
     }
 
@@ -39,10 +48,66 @@ impl Environment {
     ) -> Result<Value<'lua>> {
         self.used_keys.insert(key.to_string());
         match self.values.get(key) {
+            None => Ok(mlua::Nil),
+            Some(v) => v.into_lua(lua),
+        }
+    }
+
+    pub(crate) fn get_raw(self: &Self, key: &str) -> EnvironmentValue {
+        match self.values.get(key) {
+            None => EnvironmentValue::None,
+            Some(v) => v.clone(),
+        }
+    }
+
+    pub(crate) fn set(self: &mut Self, name: &str, value: EnvironmentValue) {
+        self.values.insert(name.into(), value);
+    }
+}
+
+pub(crate) struct ReadWriteEnvironment {
+    parent: EnvironmentParent,
+    pub(crate) index: usize,
+    pub(crate) environment: Environment,
+}
+
+
+impl ReadWriteEnvironment {
+    pub(crate) fn new() -> Self {
+        Self {
+            parent: EnvironmentParent::None,
+            index: 0,
+            environment: Environment::new(),
+        }
+    }
+
+    pub(crate) fn get_into_list(
+        self: &mut Self,
+        key: &str,
+    ) -> Vec<EnvironmentValue> {
+        self.environment.used_keys.insert(key.to_string());
+        match self.environment.values.get(key) {
+            None => match &self.parent {
+                EnvironmentParent::None => Vec::new(),
+                EnvironmentParent::Current(e) | EnvironmentParent::Parent(e) => {
+                    e.lock().unwrap().get_into_list(key)
+                }
+            },
+            Some(v) => v.clone().into_list(),
+        }
+    }
+
+    fn get_into_lua<'a, 'lua>(
+        self: &'a mut Self,
+        lua: &'lua Lua,
+        key: &'a str,
+    ) -> Result<Value<'lua>> {
+        self.environment.used_keys.insert(key.to_string());
+        match self.environment.values.get(key) {
             None => match &self.parent {
                 EnvironmentParent::None => Ok(mlua::Nil),
                 EnvironmentParent::Current(e) | EnvironmentParent::Parent(e) => {
-                    e.lock().unwrap().get_into_lua(lua, key).clone()
+                    e.lock().unwrap().get_into_lua(lua, key)
                 }
             },
             Some(v) => v.into_lua(lua),
@@ -50,7 +115,7 @@ impl Environment {
     }
 
     pub(crate) fn get_raw(self: &Self, key: &str) -> EnvironmentValue {
-        match self.values.get(key) {
+        match self.environment.values.get(key) {
             None => match &self.parent {
                 EnvironmentParent::None => EnvironmentValue::None,
                 EnvironmentParent::Current(e) | EnvironmentParent::Parent(e) => {
@@ -61,26 +126,24 @@ impl Environment {
         }
     }
 
-    pub(crate) fn derive(from: &Arc<Mutex<Environment>>, index: usize) -> Self {
+    pub(crate) fn derive(from: &Arc<Mutex<ReadWriteEnvironment>>, index: usize) -> Self {
         Self {
             parent: EnvironmentParent::Current(from.clone()),
-            values: HashMap::new(),
-            used_keys: HashSet::new(),
             index,
+            environment: Environment::new(),
         }
     }
 
-    pub(crate) fn derive_from_parent(from: &Arc<Mutex<Environment>>, index: usize) -> Self {
+    pub(crate) fn derive_from_parent(from: &Arc<Mutex<ReadWriteEnvironment>>, index: usize) -> Self {
         Self {
             parent: EnvironmentParent::Parent(from.clone()),
-            values: HashMap::new(),
-            used_keys: HashSet::new(),
             index,
+            environment: Environment::new(),
         }
     }
 
     pub(crate) fn set(self: &mut Self, name: &str, value: EnvironmentValue) {
-        self.values.insert(name.into(), value);
+        self.environment.values.insert(name.into(), value);
     }
 }
 
@@ -143,7 +206,7 @@ impl EnvironmentValue {
         }
     }
 
-    pub(crate) fn as_node(&self) -> Result<Node> {
+    pub(crate) fn as_node(&self, current_dir: &Node) -> Result<Node> {
         match self {
             EnvironmentValue::None => Err(mlua::Error::RuntimeError(
                 "can't unpack value Nil as Node".to_string(),
@@ -154,7 +217,7 @@ impl EnvironmentValue {
             EnvironmentValue::Integer(_) => Err(mlua::Error::RuntimeError(
                 "can't unpack Integer value as Node".to_string(),
             )),
-            EnvironmentValue::String(s) => Ok(Node::from(&PathBuf::from(s))),
+            EnvironmentValue::String(s) => Ok(current_dir.make_node(&PathBuf::from(s))),
             EnvironmentValue::Node(n) => Ok(n.clone()),
             EnvironmentValue::Vec(_) => Err(mlua::Error::RuntimeError(
                 "can't unpack Vector value as Node".to_string(),
@@ -195,6 +258,14 @@ impl EnvironmentValue {
             }
         };
     }
+
+    pub(crate) fn into_list(self) -> Vec<EnvironmentValue> {
+        match self {
+            EnvironmentValue::None => Vec::new(),
+            EnvironmentValue::Vec(v) => v,
+            _ => vec![self],
+        }
+    }
 }
 
 impl<'lua> IntoLua<'lua> for &EnvironmentValue {
@@ -223,6 +294,23 @@ impl UserData for Environment {
         methods.add_meta_method_mut(MetaMethod::Index, |lua, this, key: String| {
             this.get_into_lua(lua, key.as_str())
         });
+    }
+}
+
+impl UserData for ReadWriteEnvironment {
+    fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(methods: &mut M) {
+        methods.add_method_mut(
+            "append",
+            |_lua, this, (key, value): (String, Value)| {
+                let mut original_value = this.get_into_list(key.as_str());
+                let value = EnvironmentValue::from_lua(&value)?;
+                original_value.push(value);
+                Ok(this.set(key.as_str(), EnvironmentValue::Vec(original_value)))
+            },
+        );
+        methods.add_meta_method_mut(MetaMethod::Index, |lua, this, key: String| {
+            this.get_into_lua(lua, key.as_str())
+        });
         methods.add_meta_method_mut(
             MetaMethod::NewIndex,
             |_lua, this, (key, value): (String, Value)| {
@@ -232,9 +320,9 @@ impl UserData for Environment {
     }
 }
 
-pub(crate) struct SerializedEnvironment<'a>(pub(crate) &'a Arc<Mutex<Environment>>);
+pub(crate) struct SerializedReadWriteEnvironment<'a>(pub(crate) &'a Arc<Mutex<ReadWriteEnvironment>>);
 
-impl<'a> Serialize for SerializedEnvironment<'a> {
+impl<'a> Serialize for SerializedReadWriteEnvironment<'a> {
     fn serialize<S>(&self, serializer: S) -> StdResult<S::Ok, S::Error>
     where
         S: Serializer,
@@ -252,12 +340,12 @@ impl<'a> Serialize for SerializedEnvironment<'a> {
                 }
             },
         )?;
-        s.serialize_field("values", &self.0.lock().unwrap().values.iter().collect::<BTreeMap<_, _>>())?;
+        s.serialize_field("values", &self.0.lock().unwrap().environment.values.iter().collect::<BTreeMap<_, _>>())?;
         s.end()
     }
 }
 
-pub(crate) struct EnvironmentSeed<'a>(pub &'a Vec<Vec<Arc<Mutex<Environment>>>>);
+pub(crate) struct ReadWriteEnvironmentSeed<'a>(pub &'a Vec<Vec<Arc<Mutex<ReadWriteEnvironment>>>>);
 
 #[derive(Serialize, Deserialize)]
 enum SerializedEnvironmentParent {
@@ -266,8 +354,8 @@ enum SerializedEnvironmentParent {
     Parent(usize),
 }
 
-impl<'de, 'a> DeserializeSeed<'de> for EnvironmentSeed<'a> {
-    type Value = Arc<Mutex<Environment>>;
+impl<'de, 'a> DeserializeSeed<'de> for ReadWriteEnvironmentSeed<'a> {
+    type Value = Arc<Mutex<ReadWriteEnvironment>>;
 
     fn deserialize<D>(self, deserializer: D) -> StdResult<Self::Value, D::Error>
     where
@@ -308,16 +396,16 @@ impl<'de, 'a> DeserializeSeed<'de> for EnvironmentSeed<'a> {
             }
         }
 
-        struct EnvironmentVisitor<'a>(&'a Vec<Vec<Arc<Mutex<Environment>>>>);
+        struct ReadWriteEnvironmentVisitor<'a>(&'a Vec<Vec<Arc<Mutex<ReadWriteEnvironment>>>>);
 
-        impl<'de, 'a> Visitor<'de> for EnvironmentVisitor<'a> {
-            type Value = Arc<Mutex<Environment>>;
+        impl<'de, 'a> Visitor<'de> for ReadWriteEnvironmentVisitor<'a> {
+            type Value = Arc<Mutex<ReadWriteEnvironment>>;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter.write_str("struct Environment")
             }
 
-            fn visit_seq<V>(self, mut seq: V) -> StdResult<Arc<Mutex<Environment>>, V::Error>
+            fn visit_seq<V>(self, mut seq: V) -> StdResult<Self::Value, V::Error>
             where
                 V: SeqAccess<'de>,
             {
@@ -344,15 +432,17 @@ impl<'de, 'a> DeserializeSeed<'de> for EnvironmentSeed<'a> {
                         EnvironmentParent::Parent(environments[index].clone())
                     }
                 };
-                Ok(Arc::new(Mutex::new(Environment {
+                Ok(Arc::new(Mutex::new(ReadWriteEnvironment {
                     parent,
-                    values,
-                    used_keys: HashSet::new(),
                     index: self.0.last().unwrap().len(),
+                    environment: Environment {
+                        values,
+                        used_keys: HashSet::new(),
+                    },
                 })))
             }
 
-            fn visit_map<V>(self, mut map: V) -> StdResult<Arc<Mutex<Environment>>, V::Error>
+            fn visit_map<V>(self, mut map: V) -> StdResult<Self::Value, V::Error>
             where
                 V: MapAccess<'de>,
             {
@@ -393,11 +483,13 @@ impl<'de, 'a> DeserializeSeed<'de> for EnvironmentSeed<'a> {
                     }
                 };
                 let values = values.ok_or_else(|| de::Error::missing_field("values"))?;
-                Ok(Arc::new(Mutex::new(Environment {
+                Ok(Arc::new(Mutex::new(ReadWriteEnvironment {
                     parent,
-                    values,
-                    used_keys: HashSet::new(),
                     index: self.0.last().unwrap().len(),
+                    environment: Environment {
+                        values,
+                        used_keys: HashSet::new(),
+                    },
                 })))
             }
         }
@@ -405,21 +497,21 @@ impl<'de, 'a> DeserializeSeed<'de> for EnvironmentSeed<'a> {
         deserializer.deserialize_struct(
             "Environment",
             &["parent", "values"],
-            EnvironmentVisitor(self.0),
+            ReadWriteEnvironmentVisitor(self.0),
         )
     }
 }
 
-pub(crate) struct EnvironmentSequenceSeed<'a>(pub &'a mut Vec<Vec<Arc<Mutex<Environment>>>>);
+pub(crate) struct ReadWriteEnvironmentSequenceSeed<'a>(pub &'a mut Vec<Vec<Arc<Mutex<ReadWriteEnvironment>>>>);
 
-impl<'de, 'a> DeserializeSeed<'de> for EnvironmentSequenceSeed<'a> {
+impl<'de, 'a> DeserializeSeed<'de> for ReadWriteEnvironmentSequenceSeed<'a> {
     type Value = ();
 
     fn deserialize<D>(self, deserializer: D) -> StdResult<Self::Value, D::Error>
     where
         D: Deserializer<'de>,
     {
-        struct EnvironmentSequenceVisitor<'a>(&'a mut Vec<Vec<Arc<Mutex<Environment>>>>);
+        struct EnvironmentSequenceVisitor<'a>(&'a mut Vec<Vec<Arc<Mutex<ReadWriteEnvironment>>>>);
 
         impl<'de, 'a> Visitor<'de> for EnvironmentSequenceVisitor<'a> {
             type Value = ();
@@ -438,7 +530,7 @@ impl<'de, 'a> DeserializeSeed<'de> for EnvironmentSequenceSeed<'a> {
                         envs.reserve(size_hint);
                     }
                 }
-                while let Some(elem) = seq.next_element_seed(EnvironmentSeed(self.0))? {
+                while let Some(elem) = seq.next_element_seed(ReadWriteEnvironmentSeed(self.0))? {
                     self.0.last_mut().unwrap().push(elem);
                 }
                 Ok(())
