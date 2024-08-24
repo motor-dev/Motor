@@ -36,7 +36,52 @@ context.ARCHITECTURES = {
 }
 
 context:recurse('host/' .. context.settings.OS .. '.lua')
-context.compilers = {}
+
+context.compilers = --[[---@type Compiler[] ]] {}
+
+---@class Compiler
+---@field name string
+---@field target string
+---@field arch string
+---@field version string
+---@field setup function():void
+context.Compiler = {}
+function context.Compiler:new(o)
+    o = o or {}
+    setmetatable(o, self)
+    self.__index = self
+    return o
+end
+
+---@class Platform
+---@field name string
+---@field setup function(compiler:Compiler):nil
+context.Platform = {}
+function context.Platform:new(o)
+    o = o or {}
+    setmetatable(o, self)
+    self.__index = self
+    return o
+end
+
+---@param compiler Compiler
+---@param platform Platform
+function context:create_toolchain(compiler, platform)
+    local target_name = platform.name .. '-' .. compiler.arch .. '-' .. compiler.name .. '-' .. compiler.version
+
+    context:with(context:derive(context.env), function()
+        context.env.TARGET = target_name
+        print(target_name)
+
+        local setup = context:declare_command('setup:' .. target_name, 'setup', context.env)
+        local flavors = --[[---@type string[] ]] context.settings.flavors
+        for _, flavor in ipairs(flavors) do
+            context:chain_command(setup, 'build:' .. target_name .. ':' .. flavor, 'build')
+        end
+    end)
+    compiler.setup()
+    platform.setup(compiler)
+end
 
 local compilers = --[[---@type string[] ]] context.settings.compiler or { 'clang', 'gcc', 'msvc', 'suncc' }
 local platforms = --[[---@type string[] ]] context.settings.platform or { 'linux', 'freebsd', 'macos', 'windows', 'solaris' }

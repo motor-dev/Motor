@@ -44,7 +44,18 @@ local function detect_clang_target(node, arch, target)
                 end
             end
         end
-        context.compilers[1 + #context.compilers] = table.pack('clang', node, arch, target, version, includes, defines)
+
+        context.compilers[1 + #context.compilers] = context.Compiler:new {
+            name = 'clang',
+            arch = arch,
+            target = target,
+            version = version[1] .. '.' .. version[2] .. '.' .. version[3],
+            setup = function()
+                context.env.CC = { node, '-x', 'c', '-target', target }
+                context.env.CXX = { node, '-x', 'c++', 'target', target }
+                context:load_tool('clang', true)
+            end
+        }
     end
 end
 

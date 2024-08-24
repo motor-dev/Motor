@@ -1,13 +1,13 @@
 use crate::environment::{
-    Environment, EnvironmentSeed, EnvironmentSequenceSeed, SerializedEnvironment,
+    Environment,
+    ReadWriteEnvironment, ReadWriteEnvironmentSequenceSeed, SerializedReadWriteEnvironment,
 };
-use crate::error::{MakeError, Result};
+use crate::error::Result;
 use crate::log::Logger;
 use crate::node::Node;
 use crate::options::{CommandLineParser, Options};
 use crate::context::Context;
 use blake3::{Hash, Hasher};
-use mlua::{Lua, Table};
 use serde::de::{DeserializeSeed, Error, MapAccess, SeqAccess, Visitor};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde::ser::SerializeStruct;
@@ -15,21 +15,26 @@ use std::collections::HashMap;
 use std::fmt;
 use std::iter::zip;
 use std::mem::swap;
-use std::ops::{Deref, DerefMut};
-use std::path::{Path, PathBuf};
+use std::ops::Deref;
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
-use mlua::Error as LuaError;
-use mlua::Value as LuaValue;
 use std::result::Result as StdResult;
 
+
+#[derive(Serialize, Deserialize)]
+pub(crate) enum CommandStatus {
+    ForwardDeclared,
+    Defined,
+    Cached,
+    UpToDate,
+}
 
 #[derive(Serialize)]
 pub(crate) struct Command {
     pub(crate) spec: CommandSpec,
     pub(crate) output: Option<CommandOutput>,
-    #[serde(skip_serializing)]
-    pub(crate) up_to_date: bool,
+    pub(crate) status: CommandStatus,
 }
 
 impl Command {
@@ -37,7 +42,7 @@ impl Command {
         let init_command = Command {
             spec: CommandSpec::create_init(),
             output: None,
-            up_to_date: false,
+            status: CommandStatus::Defined,
         };
         Ok(init_command)
     }
@@ -45,8 +50,9 @@ impl Command {
     pub(crate) fn run_with_deps<Iter>(
         &mut self,
         mut path: Iter,
-        envs: &Vec<Arc<Mutex<Environment>>>,
-        options: Arc<Mutex<Environment>>,
+        envs: &Vec<Arc<Mutex<ReadWriteEnvironment>>>,
+        tools: &Vec<Node>,
+        options: &Environment,
         command_line: Arc<Mutex<CommandLineParser>>,
         mut current_path: Vec<String>,
         registered_commands: &mut HashMap<String, Vec<String>>,
@@ -61,80 +67,71 @@ impl Command {
         current_path.push(self.spec.name.clone());
         let next_item = path.next();
 
-        if !self.up_to_date {
-            let options = if run_implicit || next_item.is_some() {
-                if let Some(output) = &self.output {
-                    if let Some(options) = &output.options {
-                        let options = options.clone();
-                        command_line
-                            .lock()
-                            .unwrap()
-                            .parse_command_line_into(options.lock().unwrap().deref_mut());
-
-                        options
+        match &self.status {
+            CommandStatus::UpToDate => {}
+            _ => {
+                let options = if run_implicit || next_item.is_some() {
+                    if let Some(output) = &self.output {
+                        if let Some(options) = &output.options {
+                            let mut options = options.clone();
+                            command_line
+                                .lock()
+                                .unwrap()
+                                .parse_command_line_into(&mut options);
+                            options
+                        } else { options.clone() }
                     } else { options.clone() }
-                } else { options.clone() }
-            } else { options.clone() };
+                } else { options.clone() };
 
-            let do_run = if let Some(output) = &mut self.output {
-                if let Some(stored_hash) = &output.stored_hash.hash {
-                    let hash_result = output.hash(&Some(options.clone()), envs);
-                    if let Ok(hash) = hash_result {
-                        if !hash.0.0.eq(&stored_hash.0.0) {
-                            logger.why(
-                                format!(
-                                    "evaluating command `{}` because files have changed on disc",
-                                    self.spec.name
-                                ).as_str(),
-                            );
-                            true
-                        } else if !hash.1.0.eq(&stored_hash.1.0) {
-                            logger.why(
-                                format!(
-                                    "evaluating command `{}` because command-line options have changed",
-                                    self.spec.name
-                                ).as_str(),
-                            );
-                            true
-                        } else if !hash.2.0.eq(&stored_hash.2.0) {
-                            logger.why(
-                                format!(
-                                    "evaluating command `{}` because the environment has changed",
-                                    self.spec.name
-                                ).as_str(),
-                            );
-                            true
-                        } else {
-                            let mut pattern_changed = false;
-                            for (path, pattern, hash) in &output.stored_hash.glob_dependencies {
-                                if !path.is_dir() {
-                                    logger.why(
-                                        format!(
-                                            "evaluating command `{}` because the directory `{}` used in file search `{}` has been deleted.",
-                                            self.spec.name,
-                                            path.path().to_string_lossy(),
-                                            pattern
-                                        ).as_str(),
-                                    );
-                                    pattern_changed = true;
-                                    break;
-                                } else {
-                                    let paths = glob::glob(
-                                        path.path()
-                                            .join(&pattern)
-                                            .to_string_lossy()
-                                            .deref()
-                                    ).unwrap();
-                                    let mut hasher = Hasher::new();
-                                    for path in paths {
-                                        if let Ok(path) = path {
-                                            hasher.update(path.as_os_str().as_encoded_bytes());
-                                        }
-                                    }
-                                    if !hasher.finalize().eq(&hash.0) {
+                let do_run = if let Some(output) = &mut self.output {
+                    if let Some(stored_hash) = &output.stored_hash.hash {
+                        let mut tools_list = tools.clone();
+                        for node in &output.tools {
+                            if !tools.contains(node) {
+                                tools_list.push(node.clone());
+                            }
+                        }
+                        let hash_result = output.hash(Some(&options), envs, &tools_list);
+                        if let Ok(hash) = hash_result {
+                            if !hash.0.0.eq(&stored_hash.0.0) {
+                                logger.why(
+                                    format!(
+                                        "evaluating command `{}` because files have changed on disc",
+                                        self.spec.name
+                                    ).as_str(),
+                                );
+                                true
+                            } else if !hash.1.0.eq(&stored_hash.1.0) {
+                                logger.why(
+                                    format!(
+                                        "evaluating command `{}` because tools implementation have changed",
+                                        self.spec.name
+                                    ).as_str(),
+                                );
+                                true
+                            } else if !hash.2.0.eq(&stored_hash.2.0) {
+                                logger.why(
+                                    format!(
+                                        "evaluating command `{}` because command-line options have changed",
+                                        self.spec.name
+                                    ).as_str(),
+                                );
+                                true
+                            } else if !hash.3.0.eq(&stored_hash.3.0) {
+                                logger.why(
+                                    format!(
+                                        "evaluating command `{}` because the environment has changed",
+                                        self.spec.name
+                                    ).as_str(),
+                                );
+                                true
+                            } else {
+                                let mut pattern_changed = false;
+                                for (path, pattern, hash) in &output.stored_hash.glob_dependencies {
+                                    if !path.is_dir() {
                                         logger.why(
                                             format!(
-                                                "evaluating command `{}` because the result of file search `{}/{}` has changed.",
+                                                "evaluating command `{}` because the directory `{}` used in file search `{}` has been deleted.",
                                                 self.spec.name,
                                                 path.path().to_string_lossy(),
                                                 pattern
@@ -142,15 +139,48 @@ impl Command {
                                         );
                                         pattern_changed = true;
                                         break;
+                                    } else {
+                                        let paths = glob::glob(
+                                            path.path()
+                                                .join(&pattern)
+                                                .to_string_lossy()
+                                                .deref()
+                                        ).unwrap();
+                                        let mut hasher = Hasher::new();
+                                        for path in paths {
+                                            if let Ok(path) = path {
+                                                hasher.update(path.as_os_str().as_encoded_bytes());
+                                            }
+                                        }
+                                        if !hasher.finalize().eq(&hash.0) {
+                                            logger.why(
+                                                format!(
+                                                    "evaluating command `{}` because the result of file search `{}/{}` has changed.",
+                                                    self.spec.name,
+                                                    path.path().to_string_lossy(),
+                                                    pattern
+                                                ).as_str(),
+                                            );
+                                            pattern_changed = true;
+                                            break;
+                                        }
                                     }
                                 }
+                                pattern_changed
                             }
-                            pattern_changed
+                        } else {
+                            logger.why(
+                                format!(
+                                    "evaluating command `{}` because the hash could not be computed",
+                                    self.spec.name
+                                ).as_str(),
+                            );
+                            true
                         }
                     } else {
                         logger.why(
                             format!(
-                                "evaluating command `{}` because the hash could not be computed",
+                                "evaluating command `{}` because the hash does not exist",
                                 self.spec.name
                             ).as_str(),
                         );
@@ -159,34 +189,27 @@ impl Command {
                 } else {
                     logger.why(
                         format!(
-                            "evaluating command `{}` because the hash does not exist",
+                            "evaluating command `{}` because the command was never run",
                             self.spec.name
                         ).as_str(),
                     );
                     true
-                }
-            } else {
-                logger.why(
-                    format!(
-                        "evaluating command `{}` because the command was never run",
-                        self.spec.name
-                    ).as_str(),
-                );
-                true
-            };
+                };
 
-            if do_run {
-                logger = self.run(
-                    Options::from_env(options),
-                    envs,
-                    current_path.clone(),
-                    registered_commands,
-                    logger,
-                )?;
-            } else {
-                self.up_to_date = true;
-                if next_item.is_none() {
-                    logger.why(format!("`{}` is up-to-date", self.spec.name).as_str());
+                if do_run {
+                    logger = self.run(
+                        Options::from_env(options),
+                        envs,
+                        tools,
+                        current_path.clone(),
+                        registered_commands,
+                        logger,
+                    )?;
+                } else {
+                    self.status = CommandStatus::UpToDate;
+                    if next_item.is_none() {
+                        logger.why(format!("`{}` is up-to-date", self.spec.name).as_str());
+                    }
                 }
             }
         }
@@ -198,6 +221,7 @@ impl Command {
                         return command.run_with_deps(
                             path,
                             &output.environments,
+                            &output.tools,
                             options,
                             command_line,
                             current_path,
@@ -221,7 +245,7 @@ impl Command {
         file: std::fs::File,
         command_map: &mut HashMap<String, Vec<String>>,
     ) -> Result<()> {
-        struct CommandCacheSeed(Vec<Vec<Arc<Mutex<Environment>>>>);
+        struct CommandCacheSeed(Vec<Vec<Arc<Mutex<ReadWriteEnvironment>>>>);
 
         impl<'de> DeserializeSeed<'de> for CommandCacheSeed {
             type Value = Vec<Command>;
@@ -230,7 +254,7 @@ impl Command {
             where
                 D: Deserializer<'de>,
             {
-                struct CommandCacheVisitor(Vec<Vec<Arc<Mutex<Environment>>>>);
+                struct CommandCacheVisitor(Vec<Vec<Arc<Mutex<ReadWriteEnvironment>>>>);
 
                 impl<'de> Visitor<'de> for CommandCacheVisitor {
                     type Value = Vec<Command>;
@@ -283,7 +307,6 @@ impl Command {
                         command.output,
                         command_map,
                         &mut path,
-                        true,
                     );
                     break;
                 }
@@ -297,44 +320,41 @@ impl Command {
         cached_output: Option<CommandOutput>,
         command_map: &mut HashMap<String, Vec<String>>,
         path: &mut Vec<String>,
-        register: bool,
     ) {
-        self.spec = cached_spec;
+        match &self.status {
+            CommandStatus::ForwardDeclared => { self.spec = cached_spec; }
+            _ => ()
+        }
         path.push(self.spec.name.clone());
-        if self.output.is_none() {
-            if register {
+        match &mut self.output {
+            None => {
                 if let Some(output) = &cached_output {
                     for new_cmd in &output.commands {
                         new_cmd.register(command_map, path);
                     }
                 }
+                self.output = cached_output;
             }
-            self.output = cached_output;
-        } else if let Some(cached_output) = cached_output {
-            let output = self.output.as_mut().unwrap();
-            output.environments = cached_output.environments;
-            output.options = cached_output.options;
-            output.stored_hash = cached_output.stored_hash;
+            Some(output) => {
+                if let Some(cached_output) = cached_output {
+                    output.environments = cached_output.environments;
+                    output.tools = cached_output.tools;
+                    output.options = cached_output.options;
+                    output.stored_hash = cached_output.stored_hash;
 
-            let mut old_commands = Vec::new();
-            swap(&mut output.commands, &mut old_commands);
-
-            for new_cmd in cached_output.commands {
-                if let Some(index) = old_commands
-                    .iter()
-                    .position(|x| x.spec.name.eq(&new_cmd.spec.name))
-                {
-                    let mut old_cmd = old_commands.swap_remove(index);
-                    old_cmd.merge_with(new_cmd.spec, new_cmd.output, command_map, path, register);
-                    output.commands.push(old_cmd);
-                } else {
-                    if register {
-                        new_cmd.register(command_map, path);
+                    for new_cmd in cached_output.commands {
+                        if let Some(index) = output.commands
+                            .iter()
+                            .position(|x| x.spec.name.eq(&new_cmd.spec.name))
+                        {
+                            output.commands[index].merge_with(new_cmd.spec, new_cmd.output, command_map, path);
+                        } else {
+                            new_cmd.register(command_map, path);
+                            output.commands.push(new_cmd);
+                        }
                     }
-                    output.commands.push(new_cmd);
                 }
             }
-            output.commands.append(&mut old_commands);
         }
         path.pop();
     }
@@ -353,120 +373,33 @@ impl Command {
     pub(crate) fn run(
         &mut self,
         options_context: Options,
-        envs: &Vec<Arc<Mutex<Environment>>>,
+        envs: &Vec<Arc<Mutex<ReadWriteEnvironment>>>,
+        tools: &Vec<Node>,
         command_path: Vec<String>,
         commands: &mut HashMap<String, Vec<String>>,
         logger: Logger,
     ) -> Result<Logger> {
-        let current_dir = std::env::current_dir().unwrap();
-        let bld_dir = if let Options::Environment(options) = &options_context {
-            options.lock().unwrap().get_raw("out").as_node()?
-        } else {
-            Node::from(&current_dir)
-        };
         commands.retain(|_, v| !v.starts_with(command_path.as_slice()));
-        bld_dir.mkdir()?;
-        let run_envs: Vec<Arc<Mutex<Environment>>> = self
-            .spec
-            .envs
-            .iter()
-            .enumerate()
-            .map(|(i, &x)| Arc::new(Mutex::new(Environment::derive_from_parent(&envs[x], i))))
-            .collect();
-        let start_env = run_envs[0].clone();
-        let mut cmd = Context {
-            spec: self.spec.clone(),
-            output: CommandOutput {
-                environments: run_envs,
-                options: match &options_context {
-                    Options::CommandLineParser(_) => None,
-                    Options::Environment(e) => Some(e.clone()),
-                },
-                commands: Vec::new(),
-                stored_hash: CommandHash {
-                    file_dependencies: Vec::new(),
-                    option_dependencies: Vec::new(),
-                    variable_dependencies: Vec::new(),
-                    glob_dependencies: Vec::new(),
-                    hash: None,
-                },
-            },
-            environment: start_env,
-            path: Node::from(&current_dir),
-            src_dir: Node::from(&current_dir),
-            bld_dir,
-            options: options_context,
-            logger,
-            command_path,
-            commands: commands.clone(),
-        };
+        let mut cmd = Context::new(self.spec.clone(), options_context, envs, tools, command_path)?;
+        let logger = cmd.run(envs, tools, commands, logger)?;
 
-        {
-            let lua = Lua::new();
-            let chunk = lua.load(Path::new(ROOT_SCRIPT));
-            let globals = lua.globals();
-            {
-                lua.scope(|scope| chunk.call(scope.create_userdata_ref_mut(&mut cmd).unwrap()))
-                    .map_err(|err| match err {
-                        LuaError::ExternalError(_) => MakeError {
-                            location: None,
-                            message: String::from(std::format!(
-                                "could not find root script {}.",
-                                ROOT_SCRIPT
-                            )),
-                        },
-                        _ => MakeError::from(err),
-                    })?;
-            }
-
-            /* retrieve a list of modules */
-            let package: Table = globals.get("package")?;
-            let package_path: String = package.get("path")?;
-            let packages: Table = package.get("loaded")?;
-            packages.for_each(|key: String, _: LuaValue| {
-                for path in package_path.split(';') {
-                    let module_path = path.replace("?", key.replace(".", "/").as_str());
-
-                    if Path::new(module_path.as_str()).is_file() {
-                        cmd.output
-                            .stored_hash
-                            .file_dependencies
-                            .push(PathBuf::from(module_path));
-                        break;
-                    }
-                }
-                Ok(())
-            })?;
-            for env in envs {
-                cmd.output.stored_hash.variable_dependencies.push(
-                    env.lock()
-                        .unwrap()
-                        .used_keys
-                        .iter()
-                        .map(|x| x.clone())
-                        .collect(),
-                )
-            }
-            if let Some(options_env) = &cmd.output.options {
-                cmd.output.stored_hash.option_dependencies = options_env
-                    .lock()
-                    .unwrap()
-                    .used_keys
-                    .iter()
-                    .map(|x| x.clone())
-                    .collect();
-            }
-            cmd.output.stored_hash.hash = Some(cmd.output.hash(&cmd.output.options, envs)?);
+        if let Some(output) = &mut self.output {
+            swap(&mut output.commands, &mut cmd.output.commands);
+            output.tools = cmd.output.tools;
+            output.options = cmd.output.options;
+            output.environments = cmd.output.environments;
+            output.stored_hash = cmd.output.stored_hash;
+            self.merge_cache(cmd.output.commands, commands);
+        } else {
+            self.output = Some(cmd.output);
         }
-        *commands = cmd.commands;
-        self.merge_with(cmd.spec, Some(cmd.output), commands, &mut cmd.command_path, false);
 
-        self.up_to_date = true;
-        Ok(cmd.logger)
+        self.status = CommandStatus::UpToDate;
+        Ok(logger)
     }
 }
 
-pub(crate) struct CommandSeed<'a>(pub &'a mut Vec<Vec<Arc<Mutex<Environment>>>>);
+pub(crate) struct CommandSeed<'a>(pub &'a mut Vec<Vec<Arc<Mutex<ReadWriteEnvironment>>>>);
 
 impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
     type Value = Command;
@@ -478,6 +411,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
         enum Field {
             Spec,
             Output,
+            Status,
         }
 
         impl<'de> Deserialize<'de> for Field {
@@ -491,7 +425,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
                     type Value = Field;
 
                     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                        formatter.write_str("`spec` or `output`")
+                        formatter.write_str("`spec`, `output` or `status`")
                     }
 
                     fn visit_str<E>(self, value: &str) -> StdResult<Field, E>
@@ -501,7 +435,8 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
                         match value {
                             "spec" => Ok(Field::Spec),
                             "output" => Ok(Field::Output),
-                            _ => Err(Error::unknown_field(value, &["spec", "output"])),
+                            "status" => Ok(Field::Status),
+                            _ => Err(Error::unknown_field(value, &["spec", "output", "status"])),
                         }
                     }
                 }
@@ -510,7 +445,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
             }
         }
 
-        struct CommandVisitor<'a>(&'a mut Vec<Vec<Arc<Mutex<Environment>>>>);
+        struct CommandVisitor<'a>(&'a mut Vec<Vec<Arc<Mutex<ReadWriteEnvironment>>>>);
 
         impl<'de, 'a> Visitor<'de> for CommandVisitor<'a> {
             type Value = Command;
@@ -529,10 +464,17 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
                 let output = seq
                     .next_element_seed(CommandOutputSeed(self.0))?
                     .ok_or_else(|| Error::invalid_length(0, &self))?;
+                let status = seq
+                    .next_element()?
+                    .ok_or_else(|| Error::invalid_length(0, &self))?;
+                let status = match status {
+                    CommandStatus::UpToDate => CommandStatus::Cached,
+                    other => other
+                };
                 Ok(Command {
                     spec,
                     output,
-                    up_to_date: false,
+                    status,
                 })
             }
 
@@ -542,6 +484,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
             {
                 let mut spec = None;
                 let mut output = None;
+                let mut status = None;
                 while let Some(key) = map.next_key()? {
                     match key {
                         Field::Spec => {
@@ -556,14 +499,25 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
                             }
                             output = Some(map.next_value_seed(CommandOutputSeed(self.0))?);
                         }
+                        Field::Status => {
+                            if status.is_some() {
+                                return Err(Error::duplicate_field("status"));
+                            }
+                            status = Some(map.next_value()?);
+                        }
                     }
                 }
                 let spec = spec.ok_or_else(|| Error::missing_field("spec"))?;
                 let output = output.ok_or_else(|| Error::missing_field("output"))?;
+                let status = status.ok_or_else(|| Error::missing_field("status"))?;
+                let status = match status {
+                    CommandStatus::UpToDate => CommandStatus::Cached,
+                    other => other
+                };
                 Ok(Command {
                     spec,
                     output,
-                    up_to_date: false,
+                    status,
                 })
             }
         }
@@ -572,7 +526,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
     }
 }
 
-struct CommandSequenceSeed<'a>(&'a mut Vec<Vec<Arc<Mutex<Environment>>>>);
+struct CommandSequenceSeed<'a>(&'a mut Vec<Vec<Arc<Mutex<ReadWriteEnvironment>>>>);
 
 impl<'de, 'a> DeserializeSeed<'de> for CommandSequenceSeed<'a> {
     type Value = Vec<Command>;
@@ -581,7 +535,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSequenceSeed<'a> {
     where
         D: Deserializer<'de>,
     {
-        struct CommandSequenceVisitor<'a>(&'a mut Vec<Vec<Arc<Mutex<Environment>>>>);
+        struct CommandSequenceVisitor<'a>(&'a mut Vec<Vec<Arc<Mutex<ReadWriteEnvironment>>>>);
 
         impl<'de, 'a> Visitor<'de> for CommandSequenceVisitor<'a> {
             type Value = Vec<Command>;
@@ -611,12 +565,8 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSequenceSeed<'a> {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub(crate) struct CommandSpec {
-    /* the name of the command. Must be unique */
     pub(crate) name: String,
-    /* the name of the context in Lua. Usually a prefix of the command. */
     pub(crate) function: String,
-    /* the index/id of the environment. Commands create and save environments when they run.
-    The combination command/ID allows to retrieve an environment. */
     pub(crate) envs: Vec<usize>,
 }
 
@@ -631,41 +581,60 @@ impl CommandSpec {
 }
 
 pub(crate) struct CommandOutput {
-    pub(crate) environments: Vec<Arc<Mutex<Environment>>>,
+    pub(crate) environments: Vec<Arc<Mutex<ReadWriteEnvironment>>>,
     pub(crate) commands: Vec<Command>,
-    pub(crate) options: Option<Arc<Mutex<Environment>>>,
+    pub(crate) options: Option<Environment>,
+    pub(crate) tools: Vec<Node>,
     pub(crate) stored_hash: CommandHash,
 }
 
 impl CommandOutput {
-    fn hash(
+    pub(crate) fn hash(
         &self,
-        options: &Option<Arc<Mutex<Environment>>>,
-        envs: &Vec<Arc<Mutex<Environment>>>,
-    ) -> std::io::Result<(SerializedHash, SerializedHash, SerializedHash)> {
-        let mut hasher = blake3::Hasher::new();
-        for file in &self.stored_hash.file_dependencies {
-            hasher.update(file.as_os_str().as_encoded_bytes());
-            hasher.update_reader(std::fs::File::open(file)?)?;
-        }
-        let hash1 = SerializedHash(hasher.finalize());
-        hasher = blake3::Hasher::new();
-        if let Some(options_env_arc) = options {
-            let options_env = options_env_arc.lock().unwrap();
-            for env_var in &self.stored_hash.option_dependencies {
-                options_env.get_raw(env_var.as_str()).hash(&mut hasher);
+        options: Option<&Environment>,
+        envs: &Vec<Arc<Mutex<ReadWriteEnvironment>>>,
+        tools: &Vec<Node>,
+    ) -> std::io::Result<(SerializedHash, SerializedHash, SerializedHash, SerializedHash)> {
+        let hash1 = {
+            let mut hasher = Hasher::new();
+            for file in &self.stored_hash.file_dependencies {
+                hasher.update(file.as_os_str().as_encoded_bytes());
+                hasher.update_reader(std::fs::File::open(file)?)?;
             }
-        }
-        let hash2 = SerializedHash(hasher.finalize());
-        hasher = blake3::Hasher::new();
-        for (vars, env_arc) in zip(self.stored_hash.variable_dependencies.iter(), envs.iter()) {
-            let env = env_arc.lock().unwrap();
-            for var in vars {
-                env.get_raw(var.as_str()).hash(&mut hasher);
+            SerializedHash(hasher.finalize())
+        };
+
+        let hash2 = {
+            let mut hasher = Hasher::new();
+            for file in tools {
+                hasher.update(file.path().as_os_str().as_encoded_bytes());
+                hasher.update_reader(std::fs::File::open(file.path())?)?;
             }
-        }
-        let hash3 = SerializedHash(hasher.finalize());
-        Ok((hash1, hash2, hash3))
+            SerializedHash(hasher.finalize())
+        };
+
+        let hash3 = {
+            let mut hasher = Hasher::new();
+            if let Some(env) = options {
+                for env_var in &self.stored_hash.option_dependencies {
+                    env.get_raw(env_var.as_str()).hash(&mut hasher);
+                }
+            }
+            SerializedHash(hasher.finalize())
+        };
+
+        let hash4 = {
+            let mut hasher = Hasher::new();
+            for (vars, env_arc) in zip(self.stored_hash.variable_dependencies.iter(), envs.iter()) {
+                let env = env_arc.lock().unwrap();
+                for var in vars {
+                    env.get_raw(var.as_str()).hash(&mut hasher);
+                }
+            }
+            SerializedHash(hasher.finalize())
+        };
+
+        Ok((hash1, hash2, hash3, hash4))
     }
 }
 
@@ -680,19 +649,18 @@ impl Serialize for CommandOutput {
             &self
                 .environments
                 .iter()
-                .map(|v| SerializedEnvironment(v))
-                .collect::<Vec<SerializedEnvironment>>(),
+                .map(|v| SerializedReadWriteEnvironment(v))
+                .collect::<Vec<SerializedReadWriteEnvironment>>(),
         )?;
         s.serialize_field("commands", &self.commands)?;
-        if let Some(options) = &self.options {
-            s.serialize_field("options", &Some(SerializedEnvironment(&options)))?;
-        }
+        s.serialize_field("options", &self.options)?;
+        s.serialize_field("tools", &self.tools)?;
         s.serialize_field("stored_hash", &self.stored_hash)?;
         s.end()
     }
 }
 
-struct CommandOutputSeed<'a>(&'a mut Vec<Vec<Arc<Mutex<Environment>>>>);
+struct CommandOutputSeed<'a>(&'a mut Vec<Vec<Arc<Mutex<ReadWriteEnvironment>>>>);
 
 impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
     type Value = Option<CommandOutput>;
@@ -705,6 +673,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
             Environments,
             Commands,
             Options,
+            Tools,
             StoredHash,
         }
 
@@ -731,6 +700,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                             "environments" => Ok(Field::Environments),
                             "commands" => Ok(Field::Commands),
                             "options" => Ok(Field::Options),
+                            "tools" => Ok(Field::Tools),
                             "stored_hash" => Ok(Field::StoredHash),
                             _ => Err(Error::unknown_field(
                                 value,
@@ -744,7 +714,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
             }
         }
 
-        struct CommandOutputVisitor<'a>(&'a mut Vec<Vec<Arc<Mutex<Environment>>>>);
+        struct CommandOutputVisitor<'a>(&'a mut Vec<Vec<Arc<Mutex<ReadWriteEnvironment>>>>);
 
         impl<'de, 'a> Visitor<'de> for CommandOutputVisitor<'a> {
             type Value = Option<CommandOutput>;
@@ -766,7 +736,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
             {
                 deserializer.deserialize_struct(
                     "Command",
-                    &["environments", "commands", "options", "stored_hash"],
+                    &["environments", "commands", "options", "tools", "stored_hash"],
                     self,
                 )
             }
@@ -776,22 +746,26 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                 V: SeqAccess<'de>,
             {
                 (*self.0).push(Vec::new());
-                seq.next_element_seed(EnvironmentSequenceSeed(self.0))?
+                seq.next_element_seed(ReadWriteEnvironmentSequenceSeed(self.0))?
                     .ok_or_else(|| Error::invalid_length(0, &self))?;
                 let commands = seq
                     .next_element_seed(CommandSequenceSeed(self.0))?
                     .ok_or_else(|| Error::invalid_length(1, &self))?;
                 let options = seq
-                    .next_element_seed(EnvironmentSeed(self.0))?
+                    .next_element::<Option<Environment>>()?
                     .ok_or_else(|| Error::invalid_length(2, &self))?;
+                let tools = seq
+                    .next_element::<Vec<Node>>()?
+                    .ok_or_else(|| Error::invalid_length(3, &self))?;
                 let stored_hash = seq
                     .next_element()?
-                    .ok_or_else(|| Error::invalid_length(3, &self))?;
+                    .ok_or_else(|| Error::invalid_length(4, &self))?;
                 let environments = self.0.pop().unwrap();
                 Ok(Some(CommandOutput {
                     environments,
                     commands,
-                    options: Some(options),
+                    options,
+                    tools,
                     stored_hash,
                 }))
             }
@@ -803,6 +777,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                 let mut environment_tag = None;
                 let mut commands = None;
                 let mut options = None;
+                let mut tools = None;
                 let mut stored_hash = None;
                 self.0.push(Vec::new());
                 while let Some(key) = map.next_key()? {
@@ -812,7 +787,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                                 return Err(Error::duplicate_field("environments"));
                             }
                             environment_tag =
-                                Some(map.next_value_seed(EnvironmentSequenceSeed(self.0))?);
+                                Some(map.next_value_seed(ReadWriteEnvironmentSequenceSeed(self.0))?);
                         }
                         Field::Commands => {
                             if commands.is_some() {
@@ -824,7 +799,13 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                             if options.is_some() {
                                 return Err(Error::duplicate_field("options"));
                             }
-                            options = Some(map.next_value_seed(EnvironmentSeed(self.0))?);
+                            options = Some(map.next_value::<Option<Environment>>()?);
+                        }
+                        Field::Tools => {
+                            if tools.is_some() {
+                                return Err(Error::duplicate_field("tools"));
+                            }
+                            tools = Some(map.next_value::<Vec<Node>>()?);
                         }
                         Field::StoredHash => {
                             if stored_hash.is_some() {
@@ -837,12 +818,15 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                 let environments = self.0.pop().unwrap();
                 environment_tag.ok_or_else(|| Error::missing_field("environments"))?;
                 let commands = commands.ok_or_else(|| Error::missing_field("commands"))?;
+                let tools = tools.ok_or_else(|| Error::missing_field("tools"))?;
+                let options = options.ok_or_else(|| Error::missing_field("options"))?;
                 let stored_hash =
                     stored_hash.ok_or_else(|| Error::missing_field("stored_hash"))?;
                 Ok(Some(CommandOutput {
                     environments,
                     commands,
                     options,
+                    tools,
                     stored_hash,
                 }))
             }
@@ -860,7 +844,7 @@ pub(crate) struct CommandHash {
     pub(crate) option_dependencies: Vec<String>,
     pub(crate) variable_dependencies: Vec<Vec<String>>,
     pub(crate) glob_dependencies: Vec<(Node, String, SerializedHash)>,
-    pub(crate) hash: Option<(SerializedHash, SerializedHash, SerializedHash)>,
+    pub(crate) hash: Option<(SerializedHash, SerializedHash, SerializedHash, SerializedHash)>,
 }
 
 pub(crate) struct SerializedHash(pub Hash);
@@ -906,5 +890,3 @@ impl<'de> Deserialize<'de> for SerializedHash {
         deserializer.deserialize_string(HashVisitor)
     }
 }
-
-const ROOT_SCRIPT: &str = "make.lua";

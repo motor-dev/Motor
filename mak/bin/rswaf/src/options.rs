@@ -1,19 +1,19 @@
 use crate::environment::{Environment, EnvironmentValue};
 use clap::ArgAction;
-use mlua::{IntoLua, MetaMethod, UserData, UserDataMethods};
+use mlua::{Result, IntoLua, MetaMethod, UserData, UserDataMethods};
 use std::sync::{Arc, Mutex};
 
 #[derive(Clone)]
 pub(crate) enum Options {
     CommandLineParser(Arc<Mutex<CommandLineParser>>),
-    Environment(Arc<Mutex<Environment>>),
+    Environment(Environment),
 }
 
 impl Options {
     pub(crate) fn from_parser(context: Arc<Mutex<CommandLineParser>>) -> Self {
         Options::CommandLineParser(context)
     }
-    pub(crate) fn from_env(env: Arc<Mutex<Environment>>) -> Self {
+    pub(crate) fn from_env(env: Environment) -> Self {
         Options::Environment(env)
     }
 }
@@ -42,6 +42,16 @@ impl CommandLineParser {
     pub(crate) fn new() -> Self {
         Self {
             options: Vec::new(),
+        }
+    }
+
+    pub(crate) fn get_value(&self, name: &str) -> Result<EnvironmentValue> {
+        if let Some(index) = self.options.iter().position(|x| x.name.eq(name)) {
+            Ok(self.options[index].default.clone())
+        } else {
+            Err(mlua::Error::RuntimeError(
+                format!("'{}': no option registered with this name", name).to_string(),
+            ))
         }
     }
 
