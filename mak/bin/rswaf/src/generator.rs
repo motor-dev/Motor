@@ -3,14 +3,14 @@ use mlua::prelude::{LuaError, LuaValue};
 
 pub(crate) struct Generator {
     pub(crate) name: String,
-    pub(crate) stage: String,
+    pub(crate) group: String,
     pub(crate) features: Vec<String>,
     pub(crate) posted: bool,
 }
 
 impl Generator {
-    pub(crate) fn new(name: String, stage: String, features: Vec<String>) -> Self {
-        Self { name, stage, features, posted: false }
+    pub(crate) fn new(name: String, group: String, features: Vec<String>) -> Self {
+        Self { name, group, features, posted: false }
     }
 }
 
