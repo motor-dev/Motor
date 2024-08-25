@@ -1059,12 +1059,13 @@ class Explorer(utils.RecursiveVisitor):
         super().visit_using_declaration(using_declaration)
 
     def visit_template_declaration(self, template_declaration: ast.TemplateDeclaration) -> None:
-        self._template_stack.append(Template())
-        template_declaration.accept_declaration(self)
-        if self._template_stack:
-            assert pyxx.logger is not None
-            #m0300(pyxx.logger, template_declaration.position)
-            # self._template_stack.clear()
+        pass
+        # self._template_stack.append(Template())
+        # template_declaration.accept_declaration(self)
+        # if self._template_stack:
+        #    assert pyxx.logger is not None
+        #    #m0300(pyxx.logger, template_declaration.position)
+        #    # self._template_stack.clear()
 
 
 def main() -> None:
