@@ -8,7 +8,7 @@ use std::sync::{Arc, Mutex};
 use blake3::Hasher;
 use mlua::prelude::{LuaError, LuaFunction, LuaResult, LuaString, LuaTable, LuaValue};
 use mlua::{AnyUserData, FromLua, IntoLua, Lua, MetaMethod, Table, UserData, UserDataFields, UserDataMethods};
-use crate::command::{Command, CommandSpec, CommandHash, CommandOutput, CommandStatus, StageStatus};
+use crate::command::{Command, CommandSpec, CommandHash, CommandOutput, CommandStatus, GroupStatus};
 use crate::environment::ReadWriteEnvironment;
 use crate::error::Result;
 use crate::generator::Generator;
@@ -80,7 +80,7 @@ impl Context {
                     glob_dependencies: Vec::new(),
                     hash: None,
                 },
-                stages: vec![(spec.name.clone(), StageStatus::Enabled)],
+                groups: vec![(spec.name.clone(), GroupStatus::Enabled)],
             },
             environment: start_env,
             path: current_dir.clone(),
@@ -251,7 +251,7 @@ impl Context {
                             glob_dependencies: Vec::new(),
                             hash: None,
                         },
-                        stages: Vec::new(),
+                        groups: Vec::new(),
                     });
                 }
                 cmd.output.as_mut().unwrap().commands.push(Command {
@@ -644,11 +644,11 @@ impl UserData for Context {
 
         methods.add_meta_function(
             MetaMethod::Call,
-            |lua, (this, name, features, stage): (AnyUserData, String, LuaValue, Option<String>)| {
-                if let Some(stage) = &stage {
+            |lua, (this, name, features, group): (AnyUserData, String, LuaValue, Option<String>)| {
+                if let Some(group) = &group {
                     let context = this.borrow::<Context>()?;
-                    if let None = context.output.stages.iter().position(|x| x.0.eq(&name)) {
-                        return Err(LuaError::RuntimeError(format!("When creating generator `{}`: `{}`: stage was not declared", &name, stage)));
+                    if let None = context.output.groups.iter().position(|x| x.0.eq(&name)) {
+                        return Err(LuaError::RuntimeError(format!("When creating generator `{}`: `{}`: group was not declared", &name, group)));
                     }
                 }
                 let features = match &features {
@@ -660,11 +660,11 @@ impl UserData for Context {
 
                 let generator = {
                     let this = this.borrow::<Context>()?;
-                    let stage = match stage {
+                    let group = match group {
                         Some(x) => x,
                         None => this.spec.function.clone(),
                     };
-                    lua.create_userdata(Arc::new(Mutex::new(Generator::new(name, stage, features))))?
+                    lua.create_userdata(Arc::new(Mutex::new(Generator::new(name, group, features))))?
                 };
 
                 this.named_user_value::<LuaTable>(":generators")?.push(generator.clone())?;
@@ -719,19 +719,19 @@ impl UserData for Context {
         methods.add_function("post", |lua, (this, generator): (AnyUserData, AnyUserData)| post(lua, (&this, &generator)));
 
         methods.add_method_mut(
-            "declare_stage",
+            "declare_group",
             |_lua, this, (name, enabled): (String, LuaValue)| {
-                if let Some(_) = this.output.stages.iter().position(|x| x.0.eq(&name)) {
-                    Err(LuaError::RuntimeError(format!("`{}`: build stage already registered", &name)))
+                if let Some(_) = this.output.groups.iter().position(|x| x.0.eq(&name)) {
+                    Err(LuaError::RuntimeError(format!("`{}`: build group already registered", &name)))
                 } else {
                     let status = match enabled {
-                        LuaValue::Nil => StageStatus::Enabled,
-                        LuaValue::Integer(i) => if i == 0 { StageStatus::Disabled } else { StageStatus::Enabled },
-                        LuaValue::Boolean(b) => if b { StageStatus::Enabled } else { StageStatus::Disabled },
-                        LuaValue::String(s) => StageStatus::Conditional(s.to_string_lossy().to_string()),
-                        _ => return Err(LuaError::RuntimeError("Parameter `enabled` of method `declare_stage` should be nil, a boolean, or a string".to_string())),
+                        LuaValue::Nil => GroupStatus::Enabled,
+                        LuaValue::Integer(i) => if i == 0 { GroupStatus::Disabled } else { GroupStatus::Enabled },
+                        LuaValue::Boolean(b) => if b { GroupStatus::Enabled } else { GroupStatus::Disabled },
+                        LuaValue::String(s) => GroupStatus::Conditional(s.to_string_lossy().to_string()),
+                        _ => return Err(LuaError::RuntimeError("Parameter `enabled` of method `declare_group` should be nil, a boolean, or a string".to_string())),
                     };
-                    this.output.stages.push((name.clone(), status));
+                    this.output.groups.push((name.clone(), status));
                     Ok(())
                 }
             },
