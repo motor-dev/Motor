@@ -27,3 +27,13 @@ function Node:is_dir() return false end
 ---Checks if the filesystem object exists and is a file object.
 ---@return boolean true if the node represents an existing file.
 function Node:is_file() return false end
+
+---Creates a directory.
+function Node:mkdir() end
+
+---Deletes a file on disk. Raises an error if the operation cannot be completed.
+function Node:delete() end
+
+---Deletes a file on disk. Ignores any error.
+function Node:try_delete() end
+

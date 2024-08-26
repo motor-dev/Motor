@@ -1,57 +1,8 @@
-use std::fmt::Display;
+use super::Node;
+
+use std::path::{Path, PathBuf};
 use mlua::{Error, FromLua, Lua, MetaMethod, UserData, UserDataMethods, UserDataRef, Value};
-use serde::{Deserialize, Serialize};
-use std::fs;
-use std::path::{Component, Path, PathBuf};
-
-#[derive(Clone, Serialize, Deserialize, PartialEq)]
-pub(crate) struct Node {
-    path: PathBuf,
-}
-
-impl Node {
-    pub(crate) fn from(path: &PathBuf) -> Node {
-        Node {
-            path: normalize_path(path),
-        }
-    }
-
-    pub(crate) fn path(&self) -> &PathBuf {
-        &self.path
-    }
-
-    pub(crate) fn abs_path(&self) -> &Path {
-        self.path.as_path()
-    }
-
-    pub(crate) fn make_node(&self, path: &PathBuf) -> Node {
-        let mut result = Node {
-            path: self.path.clone(),
-        };
-        result.path.push(path);
-        result
-    }
-
-    pub(crate) fn parent(self: &Self) -> Node {
-        let mut result = Node {
-            path: self.path.clone(),
-        };
-        result.path.pop();
-        result
-    }
-
-    pub(crate) fn is_dir(self: &Self) -> bool {
-        self.path.is_dir()
-    }
-
-    pub(crate) fn is_file(self: &Self) -> bool {
-        self.path.is_file()
-    }
-
-    pub(crate) fn mkdir(self: &Self) -> std::io::Result<()> {
-        fs::create_dir_all(&self.path)
-    }
-}
+use mlua::prelude::LuaError;
 
 impl UserData for Node {
     fn add_fields<'lua, F: mlua::UserDataFields<'lua, Self>>(fields: &mut F) {
@@ -95,7 +46,7 @@ impl UserData for Node {
                     (Some(a), Some(b)) if comps.is_empty() && a == b => (),
                     (Some(a), Some(b)) if b == Component::CurDir => comps.push(a),
                     (Some(_), Some(b)) if b == Component::ParentDir => {
-                        return Err(mlua::Error::RuntimeError(String::from(
+                        return Err(Error::RuntimeError(String::from(
                             "can't get relative path from {} to {}",
                         )))
                     }
@@ -118,6 +69,15 @@ impl UserData for Node {
         methods.add_method("name", |_lua, this: &Node, ()| Ok(this.path.file_name().and_then(|x| Some(x.to_string_lossy().to_string()))));
         methods.add_method("is_dir", |_lua, this: &Node, ()| Ok(this.is_dir()));
         methods.add_method("is_file", |_lua, this: &Node, ()| Ok(this.is_file()));
+        methods.add_method("delete", |_lua, this: &Node, ()|
+            this.delete().map_err(|x| LuaError::RuntimeError(x.to_string())),
+        );
+        methods.add_method("try_delete", |_lua, this: &Node, ()|
+            this.delete().or(Ok(())),
+        );
+        methods.add_method("mkdir", |_lua, this: &Node, ()|
+            this.mkdir().map_err(|x| LuaError::RuntimeError(x.to_string())),
+        );
     }
 }
 
@@ -132,37 +92,4 @@ impl<'lua> FromLua<'lua> for Node {
             }),
         }
     }
-}
-
-impl Display for Node {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.path.to_string_lossy().to_string())
-    }
-}
-
-fn normalize_path(path: &PathBuf) -> PathBuf {
-    let mut components = path.components().peekable();
-    let mut ret = if let Some(c @ Component::Prefix(..)) = components.peek().cloned() {
-        components.next();
-        PathBuf::from(c.as_os_str())
-    } else {
-        PathBuf::new()
-    };
-
-    for component in components {
-        match component {
-            Component::Prefix(..) => unreachable!(),
-            Component::RootDir => {
-                ret.push(component.as_os_str());
-            }
-            Component::CurDir => {}
-            Component::ParentDir => {
-                ret.pop();
-            }
-            Component::Normal(c) => {
-                ret.push(c);
-            }
-        }
-    }
-    ret
 }
