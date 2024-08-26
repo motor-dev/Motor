@@ -1,22 +1,6 @@
-use crate::environment::{Environment, EnvironmentValue};
+use super::CommandLineParser;
 use clap::ArgAction;
-use mlua::{Result, IntoLua, MetaMethod, UserData, UserDataMethods};
-use std::sync::{Arc, Mutex};
-
-#[derive(Clone)]
-pub(crate) enum Options {
-    CommandLineParser(Arc<Mutex<CommandLineParser>>),
-    Environment(Environment),
-}
-
-impl Options {
-    pub(crate) fn from_parser(context: Arc<Mutex<CommandLineParser>>) -> Self {
-        Options::CommandLineParser(context)
-    }
-    pub(crate) fn from_env(env: Environment) -> Self {
-        Options::Environment(env)
-    }
-}
+use crate::environment::{Environment, EnvironmentValue};
 
 struct Interface {
     long: Option<String>,
@@ -28,14 +12,10 @@ struct Interface {
     action: ArgAction,
 }
 
-struct Argument {
-    name: String,
+pub(super) struct Argument {
+    pub(super) name: String,
     interface: Option<Interface>,
-    default: EnvironmentValue,
-}
-
-pub(crate) struct CommandLineParser {
-    options: Vec<Argument>,
+    pub(super) default: EnvironmentValue,
 }
 
 impl CommandLineParser {
@@ -45,7 +25,7 @@ impl CommandLineParser {
         }
     }
 
-    pub(crate) fn get_value(&self, name: &str) -> Result<EnvironmentValue> {
+    pub(crate) fn get_value(&self, name: &str) -> mlua::Result<EnvironmentValue> {
         if let Some(index) = self.options.iter().position(|x| x.name.eq(name)) {
             Ok(self.options[index].default.clone())
         } else {
@@ -302,161 +282,5 @@ impl CommandLineParser {
                 }
             }
         }
-    }
-}
-
-impl UserData for CommandLineParser {
-    fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(methods: &mut M) {
-        methods.add_meta_method_mut(
-            MetaMethod::NewIndex,
-            |_lua, this, (key, value): (String, mlua::Value)| -> mlua::Result<()> {
-                if let Some(index) = this.options.iter().position(|x| x.name.eq(&key)) {
-                    this.options[index].default = EnvironmentValue::from_lua(&value)?;
-                    Ok(())
-                } else {
-                    Err(mlua::Error::RuntimeError(
-                        format!("'{}': no option registered with this name", key).to_string(),
-                    ))
-                }
-            },
-        );
-        methods.add_meta_method_mut(
-            MetaMethod::Index,
-            |lua, this, key: String| -> mlua::Result<mlua::Value> {
-                if let Some(index) = this.options.iter().position(|x| x.name.eq(&key)) {
-                    this.options[index].default.into_lua(lua)
-                } else {
-                    Err(mlua::Error::RuntimeError(
-                        format!("'{}': no option registered with this name", key).to_string(),
-                    ))
-                }
-            },
-        );
-        methods.add_method_mut(
-            "add_flag",
-            |_lua,
-             this,
-             args: (
-                 String,
-                 String,
-                 Option<String>,
-                 Option<String>,
-                 Option<String>,
-                 Option<bool>,
-             )|
-             -> mlua::Result<()> {
-                this.add_flag(
-                    args.0,
-                    args.1,
-                    args.2,
-                    args.3,
-                    args.4,
-                    false,
-                    if let Some(value) = args.5 {
-                        EnvironmentValue::Bool(value)
-                    } else {
-                        EnvironmentValue::None
-                    },
-                )
-            },
-        );
-        methods.add_method_mut(
-            "add_value",
-            |_lua,
-             this,
-             args: (
-                 String,
-                 String,
-                 Option<String>,
-                 Option<String>,
-                 Option<String>,
-                 mlua::Value,
-             )|
-             -> mlua::Result<()> {
-                this.add_value(
-                    args.0,
-                    args.1,
-                    args.2,
-                    args.3,
-                    args.4,
-                    false,
-                    EnvironmentValue::from_lua(&args.5)?,
-                )
-            },
-        );
-        methods.add_method_mut(
-            "add_count",
-            |_lua,
-             this,
-             args: (
-                 String,
-                 String,
-                 Option<String>,
-                 Option<String>,
-                 Option<String>,
-                 mlua::Value,
-             )|
-             -> mlua::Result<()> {
-                this.add_count(
-                    args.0,
-                    args.1,
-                    args.2,
-                    args.3,
-                    args.4,
-                    false,
-                    EnvironmentValue::from_lua(&args.5)?,
-                )
-            },
-        );
-        methods.add_method_mut(
-            "add_list",
-            |_lua,
-             this,
-             args: (
-                 String,
-                 String,
-                 Option<String>,
-                 Option<String>,
-                 Option<String>,
-                 mlua::Value,
-             )|
-             -> mlua::Result<()> {
-                this.add_list(
-                    args.0,
-                    args.1,
-                    args.2,
-                    args.3,
-                    args.4,
-                    false,
-                    EnvironmentValue::from_lua(&args.5)?,
-                )
-            },
-        );
-        methods.add_method_mut(
-            "add_choice",
-            |_lua,
-             this,
-             args: (
-                 String,
-                 String,
-                 Vec<String>,
-                 Option<String>,
-                 Option<String>,
-                 Option<String>,
-                 mlua::Value,
-             )|
-             -> mlua::Result<()> {
-                this.add_choice(
-                    args.0,
-                    args.1,
-                    args.3,
-                    args.4,
-                    args.5,
-                    false,
-                    args.2,
-                    EnvironmentValue::from_lua(&args.6)?,
-                )
-            },
-        );
     }
 }

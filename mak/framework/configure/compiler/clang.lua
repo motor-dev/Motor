@@ -2,7 +2,7 @@
 local context = ...
 
 local function detect_clang_target(node, arch, target)
-    local handle = context:popen({ node, '-x', 'c++', '--std', 'c++14', '-v', '-dM', '-E', '-target', target, '-' })
+    local handle = context:popen({ node, '-x', 'c++', '--std', 'c++20', '-v', '-dM', '-E', '-target', target, '-' })
     local success, out, err = handle:communicate()
     if success then
         ---@type table<string, string>
@@ -50,6 +50,8 @@ local function detect_clang_target(node, arch, target)
             arch = arch,
             target = target,
             version = version[1] .. '.' .. version[2] .. '.' .. version[3],
+            command_c = { node, '-x', 'c', '-target', target },
+            command_cxx = { node, '-x', 'c++', '-target', target },
             setup = function()
                 context.env.CC = { node, '-x', 'c', '-target', target }
                 context.env.CXX = { node, '-x', 'c++', 'target', target }

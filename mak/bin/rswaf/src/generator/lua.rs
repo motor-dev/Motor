@@ -1,18 +1,7 @@
+use super::Generator;
+
 use mlua::{AnyUserData, MetaMethod, UserData, UserDataFields, UserDataMethods};
 use mlua::prelude::{LuaError, LuaValue};
-
-pub(crate) struct Generator {
-    pub(crate) name: String,
-    pub(crate) group: String,
-    pub(crate) features: Vec<String>,
-    pub(crate) posted: bool,
-}
-
-impl Generator {
-    pub(crate) fn new(name: String, group: String, features: Vec<String>) -> Self {
-        Self { name, group, features, posted: false }
-    }
-}
 
 impl UserData for Generator {
     fn add_fields<'lua, F: UserDataFields<'lua, Self>>(fields: &mut F) {

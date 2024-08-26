@@ -44,6 +44,7 @@ context.compilers = --[[---@type Compiler[] ]] {}
 ---@field target string
 ---@field arch string
 ---@field version string
+---@field command string[]
 ---@field setup function():void
 context.Compiler = {}
 function context.Compiler:new(o)
@@ -51,6 +52,20 @@ function context.Compiler:new(o)
     setmetatable(o, self)
     self.__index = self
     return o
+end
+
+---Runs the compiler, returns a success flag, the output and error log.
+---@param command_line string[] Extra arguments to pass to the compiler
+---@param input? string Optional input to pass to the compiler through standard input
+function context.Compiler:run_cxx(command_line, input)
+    local cl = {}
+    for _, arg in ipairs(self.command_cxx) do
+        cl[1+#cl] = arg
+    end
+    for _, arg in ipairs(command_line) do
+        cl[1+#cl] = arg
+    end
+    return context:popen(cl):communicate(input)
 end
 
 ---@class Platform
@@ -69,18 +84,21 @@ end
 function context:create_toolchain(compiler, platform)
     local target_name = platform.name .. '-' .. compiler.arch .. '-' .. compiler.name .. '-' .. compiler.version
 
-    context:with(context:derive(context.env), function()
-        context.env.TARGET = target_name
-        print(target_name)
+    context:try(target_name, function()
 
-        local setup = context:declare_command('setup:' .. target_name, 'setup', context.env)
-        local flavors = --[[---@type string[] ]] context.settings.flavors
-        for _, flavor in ipairs(flavors) do
-            context:chain_command(setup, 'build:' .. target_name .. ':' .. flavor, 'build')
-        end
+        context:with(context:derive(), function()
+            context.env.TARGET = target_name
+
+
+            local setup = context:declare_command('setup:' .. target_name, 'setup', context.env)
+            local flavors = --[[---@type string[] ]] context.settings.flavors
+            for _, flavor in ipairs(flavors) do
+                context:chain_command(setup, 'build:' .. target_name .. ':' .. flavor, 'build')
+            end
+        end)
+        compiler.setup()
+        platform.setup(compiler)
     end)
-    compiler.setup()
-    platform.setup(compiler)
 end
 
 local compilers = --[[---@type string[] ]] context.settings.compiler or { 'clang', 'gcc', 'msvc', 'suncc' }

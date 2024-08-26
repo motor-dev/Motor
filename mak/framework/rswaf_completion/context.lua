@@ -19,7 +19,7 @@ Context = {}
 function Context:recurse(path)use(path) end
 
 ---Creates a new environment that inherits from the specified environment.
----@param env Environment the base environment.
+---@param env? Environment the base environment. If not specified, then derives the current environment.
 ---@return Environment a new Environment that inherits the values from env.
 function Context:derive(env) return env end
 
