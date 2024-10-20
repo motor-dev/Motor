@@ -1,6 +1,9 @@
 ---@type(Context)
 local context = ...
 
+---@param node Node
+---@param arch string
+---@param target string
 local function detect_clang_target(node, arch, target)
     local handle = context:popen({ node, '-x', 'c++', '--std', 'c++20', '-v', '-dM', '-E', '-target', target, '-' })
     local success, out, err = handle:communicate()
@@ -61,6 +64,7 @@ local function detect_clang_target(node, arch, target)
     end
 end
 
+---@param node Node
 local function detect_clang(node)
     local _, out, err = context:popen({ node, '-x', 'c++', '-v', '-E', '-' }):communicate()
     local search_paths = false

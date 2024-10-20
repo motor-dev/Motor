@@ -7,10 +7,12 @@ local context = ...
 ---@param name string name of the library.
 ---@param dependencies string[] libaries that this library depends on.
 function context:library(name, dependencies)
-    generator = context(name, 'c,cxx')
+    local generator = context(name, 'c,cxx,shlib')
     generator.dependencies = dependencies
 
     local path = string.split(name, '.')
     path = string.join('/', path)
     path = context.path:make_node(path)
+
+    generator.source = context:search(path, "src/**/*.cc")
 end
