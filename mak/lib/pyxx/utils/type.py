@@ -23,7 +23,6 @@ class TypeExtractor(StringRef):
             p2 = len(self.result)
             self._position = (p1, p2)
         else:
-            print('caca')
             declarator_element_id.accept_name(self)
 
     def visit_declarator_element_pack_id(self, declarator_element_pack_id: ast.DeclaratorElementPackId) -> None:

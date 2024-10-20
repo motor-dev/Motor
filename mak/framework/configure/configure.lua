@@ -88,6 +88,8 @@ function context:create_toolchain(compiler, platform)
 
         context:with(context:derive(), function()
             context.env.TARGET = target_name
+            compiler.setup()
+            platform.setup(compiler)
 
 
             local setup = context:declare_command('setup:' .. target_name, 'setup', context.env)
@@ -95,13 +97,20 @@ function context:create_toolchain(compiler, platform)
             for _, flavor in ipairs(flavors) do
                 context:chain_command(setup, 'build:' .. target_name .. ':' .. flavor, 'build')
             end
+            if context.env.WITH_ASAN ~= nil then
+                context:chain_command(setup, 'build:' .. target_name .. ':asan', 'build')
+            end
+            if context.env.WITH_TSAN ~= nil then
+                context:chain_command(setup, 'build:' .. target_name .. ':tsan', 'build')
+            end
+            if context.env.WITH_UBSAN ~= nil then
+                context:chain_command(setup, 'build:' .. target_name .. ':ubsan', 'build')
+            end
         end)
-        compiler.setup()
-        platform.setup(compiler)
     end)
 end
 
-local compilers = --[[---@type string[] ]] context.settings.compiler or { 'clang', 'gcc', 'msvc', 'suncc' }
+local compilers = --[[---@type string[] ]] context.settings.compiler or { 'clang', 'gcc', 'msvc' }
 local platforms = --[[---@type string[] ]] context.settings.platform or { 'linux', 'freebsd', 'macos', 'windows', 'solaris' }
 for _, compiler in ipairs(compilers) do
     context:recurse('compiler/' .. compiler .. '.lua')
