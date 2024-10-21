@@ -11,12 +11,20 @@ pub(crate) struct Logger {
     use_colors: bool,
     show_why: bool,
     status: Option<Vec<StatusCommand>>,
+    term_width: u16,
 }
 
 impl Logger {
     pub(crate) fn new(use_colors: Option<bool>, verbosity: u32, show_why: bool) -> Self {
-        let stdout = std::io::stdout();
+        let mut stdout = std::io::stdout();
         let use_colors = use_colors.unwrap_or(stdout.is_tty());
+        stdout
+            .queue(cursor::MoveRight(9999)).unwrap()
+            .flush().unwrap();
+        let pos = cursor::position().unwrap_or((80, 25));
+        stdout
+            .queue(cursor::MoveLeft(9999)).unwrap()
+            .flush().unwrap();
         Self {
             output: stdout,
             depth: 0,
@@ -25,11 +33,22 @@ impl Logger {
             use_colors,
             show_why,
             status: None,
+            term_width: pos.0,
         }
     }
 
-    pub(crate) fn terminal_width() -> usize {
-        terminal::size().unwrap_or((80, 20)).0 as usize
+    pub(crate) fn terminal_width(&self) -> usize {
+        if let Ok(size) = terminal::size() {
+            if size.0 == 0 {
+                self.term_width as usize
+            } else if size.0 < 1000 {
+                size.0 as usize
+            } else {
+                self.term_width as usize
+            }
+        } else {
+            self.term_width as usize
+        }
     }
 
     pub(crate) fn why(&mut self, message: &str) {
@@ -110,11 +129,12 @@ impl Logger {
     pub(crate) fn set_status(&mut self, message: &str) {
         if self.use_colors && self.status.is_none() {
             self.output
-                .queue(cursor::MoveDown(1)).unwrap()
                 .queue(cursor::SavePosition).unwrap()
                 .queue(style::Print("\n")).unwrap()
                 .queue(cursor::RestorePosition).unwrap()
-                .queue(cursor::MoveUp(1)).unwrap();
+                .queue(cursor::MoveDown(1)).unwrap()
+                .queue(cursor::MoveUp(1)).unwrap()
+            ;
         }
         self.status = Some(StatusCommand::parse(message));
         self.do_log("", style::Color::Reset, false);
@@ -124,7 +144,7 @@ impl Logger {
         if self.use_colors && self.status.is_some() {
             self.output
                 .queue(cursor::SavePosition).unwrap()
-                .queue(cursor::MoveDown(1)).unwrap()
+                .queue(cursor::MoveDown(999)).unwrap()
                 .queue(terminal::Clear(terminal::ClearType::CurrentLine)).unwrap()
                 .queue(cursor::RestorePosition).unwrap()
                 .flush().unwrap();
@@ -138,7 +158,7 @@ impl Logger {
             if self.status.is_some() && clear_status {
                 self.output
                     .queue(cursor::SavePosition).unwrap()
-                    .queue(cursor::MoveDown(1)).unwrap()
+                    .queue(cursor::MoveDown(999)).unwrap()
                     .queue(terminal::Clear(terminal::ClearType::CurrentLine)).unwrap()
                     .queue(cursor::RestorePosition).unwrap();
             }
@@ -153,15 +173,16 @@ impl Logger {
                 if clear_status {
                     /* creates a new line */
                     self.output
-                        .queue(cursor::MoveDown(1)).unwrap()
                         .queue(cursor::SavePosition).unwrap()
                         .queue(style::Print("\n")).unwrap()
                         .queue(cursor::RestorePosition).unwrap()
-                        .queue(cursor::MoveUp(1)).unwrap();
+                        .queue(cursor::MoveDown(1)).unwrap()
+                        .queue(cursor::MoveUp(1)).unwrap()
+                    ;
                 }
                 self.output
                     .queue(cursor::SavePosition).unwrap()
-                    .queue(cursor::MoveToNextLine(1)).unwrap();
+                    .queue(cursor::MoveDown(999)).unwrap();
                 for cmd in self.status.as_mut().unwrap() {
                     cmd.write(&mut self.output);
                 }
