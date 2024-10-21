@@ -240,7 +240,7 @@ impl Serialize for CommandOutput {
     where
         S: Serializer,
     {
-        let mut s = serializer.serialize_struct("Command", 7)?;
+        let mut s = serializer.serialize_struct("Command", 8)?;
         s.serialize_field(
             "environments",
             &self
@@ -261,6 +261,7 @@ impl Serialize for CommandOutput {
             TaskSeq::List(_) => return Err(serde::ser::Error::custom("Task list should be serialized in a separate cache")),
         };
         s.serialize_field("tasks", &tasks)?;
+        s.serialize_field("drivers", &self.drivers)?;
         s.end()
     }
 }
@@ -282,6 +283,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
             StoredHash,
             Groups,
             Tasks,
+            Drivers,
         }
 
         impl<'de> Deserialize<'de> for Field {
@@ -296,7 +298,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
 
                     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                         formatter
-                            .write_str("`environments`, `commands`, `options`, `tools`, `stored_hash`, `groups` or `tasks`")
+                            .write_str("`environments`, `commands`, `options`, `tools`, `stored_hash`, `groups`, `tasks` or `drivers`")
                     }
 
                     fn visit_str<E>(self, value: &str) -> Result<Field, E>
@@ -311,9 +313,10 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                             "stored_hash" => Ok(Field::StoredHash),
                             "groups" => Ok(Field::Groups),
                             "tasks" => Ok(Field::Tasks),
+                            "drivers" => Ok(Field::Drivers),
                             _ => Err(Error::unknown_field(
                                 value,
-                                &["environments", "commands", "options", "tools", "stored_hash", "groups", "tasks"],
+                                &["environments", "commands", "options", "tools", "stored_hash", "groups", "tasks", "drivers"],
                             )),
                         }
                     }
@@ -374,6 +377,9 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                 let tasks = seq
                     .next_element::<Option<PathBuf>>()?
                     .ok_or_else(|| Error::invalid_length(6, &self))?;
+                let drivers = seq
+                    .next_element()?
+                    .ok_or_else(|| Error::invalid_length(7, &self))?;
                 Ok(Some(CommandOutput {
                     environments,
                     commands,
@@ -385,6 +391,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                         None => TaskSeq::None,
                         Some(path) => TaskSeq::Cached(path)
                     },
+                    drivers,
                 }))
             }
 
@@ -399,6 +406,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                 let mut stored_hash = None;
                 let mut groups = None;
                 let mut tasks = None;
+                let mut drivers = None;
                 while let Some(key) = map.next_key()? {
                     match key {
                         Field::Environments => {
@@ -446,6 +454,12 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                             }
                             tasks = Some(map.next_value::<Option<PathBuf>>()?);
                         }
+                        Field::Drivers => {
+                            if drivers.is_some() {
+                                return Err(Error::duplicate_field("drivers"));
+                            }
+                            drivers = Some(map.next_value()?);
+                        }
                     }
                 }
                 let environments = environments.ok_or_else(|| Error::missing_field("environments"))?;
@@ -455,6 +469,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                 let stored_hash = stored_hash.ok_or_else(|| Error::missing_field("stored_hash"))?;
                 let groups = groups.ok_or_else(|| Error::missing_field("groups"))?;
                 let tasks = tasks.ok_or_else(|| Error::missing_field("tasks"))?;
+                let drivers = drivers.ok_or_else(|| Error::missing_field("drivers"))?;
                 Ok(Some(CommandOutput {
                     environments,
                     commands,
@@ -466,6 +481,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                         None => TaskSeq::None,
                         Some(path) => TaskSeq::Cached(path),
                     },
+                    drivers,
                 }))
             }
         }

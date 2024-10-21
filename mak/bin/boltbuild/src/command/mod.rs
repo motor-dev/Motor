@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use blake3::Hash;
@@ -5,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::environment::{Environment, ReadWriteEnvironment};
 use crate::node::Node;
 use crate::task::Task;
+use crate::driver::Driver;
 
 mod run;
 mod scheduler;
@@ -56,6 +58,7 @@ pub(crate) struct CommandOutput {
     pub(crate) stored_hash: CommandHash,
     pub(crate) groups: Vec<(String, GroupStatus)>,
     pub(crate) tasks: TaskSeq,
+    pub(crate) drivers: HashMap<String, Driver>,
 }
 
 #[derive(Serialize, Deserialize)]

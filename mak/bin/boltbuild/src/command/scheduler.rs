@@ -3,6 +3,7 @@ use crate::node::Node;
 use crate::error::Result;
 use crate::log::Logger;
 use crate::task::Task;
+use crate::driver::Driver;
 
 use std::collections::{HashMap, HashSet};
 use std::iter::zip;
@@ -29,8 +30,7 @@ impl Command {
         let output = self.output.as_ref().unwrap();
         if let TaskSeq::List(tasks_pool) = &output.tasks
         {
-            let mut scheduler = Scheduler::new(tasks_pool);
-
+            let mut scheduler = Scheduler::new(tasks_pool, &output.drivers);
 
             for (i, task) in tasks_pool.iter().enumerate() {
                 if groups.iter().any(|x| x.eq(&task.group)) || generators.iter().any(|x| x.eq(&task.generator)) {
@@ -94,6 +94,7 @@ type BuildCache = HashMap<SerializedHash, TaskCacheEntry>;
 
 struct Scheduler<'command> {
     tasks_pool: &'command Vec<Task>,
+    drivers: &'command HashMap<String, Driver>,
     inputs: HashSet<PathBuf>,
     outputs: HashSet<PathBuf>,
     tasks_cache: Vec<Option<TaskCacheEntry>>,
@@ -102,11 +103,12 @@ struct Scheduler<'command> {
 }
 
 impl<'command> Scheduler<'command> {
-    fn new(tasks_pool: &'command Vec<Task>) -> Self {
+    fn new(tasks_pool: &'command Vec<Task>, drivers: &'command HashMap<String, Driver>) -> Self {
         let mut tasks_cache = Vec::new();
         tasks_cache.resize_with(tasks_pool.len(), || None);
         Self {
             tasks_pool,
+            drivers,
             inputs: HashSet::new(),
             outputs: HashSet::new(),
             tasks_cache,
@@ -215,8 +217,8 @@ impl<'command> Scheduler<'command> {
 
                     if do_run {
                         result_pipe.send(WorkResult::TaskStart(task_index, thread_index, reason)).unwrap();
-                        /* todo: actual run */
-                        thread::sleep_ms(762);
+                        let task = &self.tasks_pool[task_index];
+                        if let Some(driver) = self.drivers.get(&task.name) { driver.execute(); }
 
                         let dependencies: Vec<PathBuf> = Vec::new();
                         let mut hashes = Vec::new();
@@ -229,7 +231,7 @@ impl<'command> Scheduler<'command> {
 
                         let environment_dependencies: Vec<String> = Vec::new();
                         let mut env_hasher = blake3::Hasher::new();
-                        let env = &self.tasks_pool[task_index].env;
+                        let env = &task.env;
                         let env = env.lock().unwrap();
                         for var in &environment_dependencies {
                             env.get_raw(var.as_str()).hash(&mut env_hasher);
@@ -523,6 +525,9 @@ fn log_task_end(logger: &mut Logger, result: i32, input: &PathBuf, message: &str
     }
 }
 
+const GRAPH_EIGTHS: [char; 7] = [
+    '▏', '▎', '▍', '▌', '▋', '▊', '▉'];
+
 fn log_progress(logger: &mut Logger, title: &str, thread_activity: &[char], finished_tasks: usize, task_count: usize, elapsed: Duration) {
     let (f1, unit, f2) = if elapsed.as_secs() > 60 {
         if elapsed.as_secs() > 60 * 60 {
@@ -539,36 +544,40 @@ fn log_progress(logger: &mut Logger, title: &str, thread_activity: &[char], fini
     let v1 = elapsed.as_millis() / f1;
     let v2 = (elapsed.as_millis() - f1 * v1) / f2;
 
-    let terminal_width = Logger::terminal_width();
-    if terminal_width > 12 + thread_activity.len() {
-        let progress_width = terminal_width - 9 - thread_activity.len();
-        let progress_bar = if title.len() > progress_width {
-            let mut title = title[..progress_width - 3].to_string();
-            title.push('.');
-            title.push('.');
-            title.push('.');
-            title
-        } else {
-            let mut title = title.to_string();
-            while title.len() < progress_width {
-                title.push(' ');
-            }
-            title
-        };
+    let terminal_width = logger.terminal_width();
+    let progress_width = terminal_width - 9 - thread_activity.len();
+    let progress_bar = if title.len() > progress_width {
+        let mut title = title[..progress_width - 3].to_string();
+        title.push('.');
+        title.push('.');
+        title.push('.');
+        title
+    } else {
+        let mut title = title.to_string();
+        while title.len() < progress_width {
+            title.push(' ');
+        }
+        title
+    };
 
-        let progress = (finished_tasks * progress_width) / task_count;
+    let progress = (finished_tasks * progress_width * 8) / task_count;
+    let remainder = progress % 8;
+    let progress = progress / 8;
+
+    if remainder == 0 {
         logger.set_status(format!(
             "{{bg:green}}{{black}}{}{{green}}{{bg:black}}{}{{reset}}{{bg:reset}}[{{red}}{}{{reset}}][{{green}}{:2}{}{:02}{{reset}}]",
             &progress_bar[0..progress],
             &progress_bar[progress..progress_bar.len()],
             thread_activity.iter().collect::<String>(),
-            v1, unit, v2
-        ).as_str());
+            v1, unit, v2).as_str());
     } else {
         logger.set_status(format!(
-            "[{{red}}{}{{reset}}][{{green}}{:2}{}{:02}{{reset}}]",
+            "{{bg:green}}{{black}}{}{{green}}{{bg:black}}{}{}{{reset}}{{bg:reset}}[{{red}}{}{{reset}}][{{green}}{:2}{}{:02}{{reset}}]",
+            &progress_bar[0..progress],
+            GRAPH_EIGTHS[remainder - 1],
+            &progress_bar[progress + 1..progress_bar.len()],
             thread_activity.iter().collect::<String>(),
-            v1, unit, v2
-        ).as_str());
+            v1, unit, v2).as_str());
     }
 }

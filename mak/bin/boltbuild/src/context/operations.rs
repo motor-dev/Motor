@@ -65,6 +65,7 @@ impl Context {
                 },
                 groups: vec![(spec.name.clone(), GroupStatus::Enabled)],
                 tasks: TaskSeq::None,
+                drivers: HashMap::new(),
             },
             environment: start_env,
             tasks: Vec::new(),
@@ -133,7 +134,7 @@ impl Context {
             }
             for (hasher, task) in zip(&self.signatures, &mut self.tasks) {
                 task.signature = SerializedHash(hasher.finalize());
-            } 
+            }
 
             /* retrieve a list of modules */
             let package: Table = globals.get("package")?;
@@ -260,6 +261,7 @@ impl Context {
                         },
                         groups: Vec::new(),
                         tasks: TaskSeq::None,
+                        drivers: HashMap::new(),
                     });
                 }
                 cmd.output.as_mut().unwrap().commands.push(Command {
