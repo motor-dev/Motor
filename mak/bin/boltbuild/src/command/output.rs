@@ -4,6 +4,7 @@ use blake3::Hasher;
 use crate::command::{CommandOutput, SerializedHash};
 use crate::environment::{Environment, ReadWriteEnvironment};
 use crate::node::Node;
+use crate::context::TOOLS_DIR;
 
 impl CommandOutput {
     pub(crate) fn hash(
@@ -25,7 +26,11 @@ impl CommandOutput {
             let mut hasher = Hasher::new();
             for file in tools {
                 hasher.update(file.path().as_os_str().as_encoded_bytes());
-                hasher.update_reader(std::fs::File::open(file.path())?)?;
+                if let Ok(file) = std::fs::File::open(file.path()) {
+                    hasher.update_reader(file)?;
+                } else {
+                    hasher.update(TOOLS_DIR.get_file(file.path()).unwrap().contents());
+                }
             }
             SerializedHash(hasher.finalize())
         };

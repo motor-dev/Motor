@@ -17,3 +17,4 @@ serde = { version = "~1.0", features = ["derive"] }
 serde_json = "~1.0"
 subprocess = "~0.2"
 bincode = { version = "2.0.0-rc.3", features = ["serde"] }
+include_dir = { version = "~0" }

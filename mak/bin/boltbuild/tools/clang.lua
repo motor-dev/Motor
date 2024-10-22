@@ -9,6 +9,7 @@ if context.fun == 'configure' then
         context.env.CXX = context:find_program('clang')
     end
 end
+
 -- load build rules for C and C++
 context:load_tool('c')
 context:load_tool('cxx')

@@ -1,4 +1,4 @@
-use super::Context;
+use super::{Context, TOOLS_DIR};
 use super::operations::{DeclaredCommand, Feature, post};
 use super::subprocess::Popen;
 
@@ -376,9 +376,10 @@ impl UserData for Context {
                     }
                     nodes
                 };
+                let tool_file = tool.to_owned() + ".lua";
 
                 for node in &paths {
-                    let node = node.make_node(&PathBuf::from(tool.to_owned() + ".lua"));
+                    let node = node.make_node(&PathBuf::from(&tool_file));
                     if node.is_file() {
                         let do_run =
                             {
@@ -396,6 +397,24 @@ impl UserData for Context {
                         }
                         return Ok(());
                     }
+                }
+
+                if let Some(file) = TOOLS_DIR.get_file(&tool_file) {
+                    let do_run =
+                        {
+                            let tool_node = Node::from(&PathBuf::from(&tool_file));
+                            let mut this = this.borrow_mut::<Context>()?;
+                            if !this.output.tools.iter().any(|x| x == &tool_node) {
+                                this.output.tools.push(tool_node);
+                                true
+                            } else {
+                                again.is_some() && again.unwrap()
+                            }
+                        };
+                    if do_run {
+                        lua.load(file.contents()).set_name(tool_file).call::<AnyUserData, ()>(this)?;
+                    }
+                    return Ok(());
                 }
 
 
@@ -505,3 +524,4 @@ impl UserData for Context {
         );
     }
 }
+

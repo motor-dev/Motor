@@ -15,6 +15,7 @@ use crate::generator::Generator;
 use crate::log::Logger;
 use crate::node::Node;
 use crate::options::Options;
+use crate::context::TOOLS_DIR;
 
 const ROOT_SCRIPT: &str = "make.lua";
 
@@ -101,9 +102,11 @@ impl Context {
 
             let run = |userdata: &mut AnyUserData, path| -> LuaResult<()> {
                 let chunk = lua.load(path);
-                {
-                    chunk.call(userdata.clone())
-                }
+                chunk.call(userdata.clone())
+            };
+            let run_content = |userdata: &mut AnyUserData, tool_path: &PathBuf| -> LuaResult<()> {
+                let chunk = lua.load(TOOLS_DIR.get_file(tool_path).unwrap().contents()).set_name(tool_path.to_string_lossy());
+                chunk.call(userdata.clone())
             };
 
             self.output.stored_hash.file_dependencies.push(ROOT_SCRIPT.into());
@@ -112,7 +115,11 @@ impl Context {
                 userdata.set_named_user_value(":features", lua.create_table()?)?;
                 userdata.set_named_user_value(":generators", lua.create_table()?)?;
                 for path in tools {
-                    run(&mut userdata, path.abs_path())?;
+                    if path.is_file() {
+                        run(&mut userdata, path.abs_path())?;
+                    } else {
+                        run_content(&mut userdata, path.path())?;
+                    }
                 }
 
                 run(&mut userdata, Path::new(ROOT_SCRIPT))?;
