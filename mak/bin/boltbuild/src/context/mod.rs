@@ -6,12 +6,15 @@ mod task;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::path::PathBuf;
+use include_dir::{Dir, include_dir};
 use crate::command::{CommandSpec, CommandOutput};
 use crate::environment::ReadWriteEnvironment;
 use crate::log::Logger;
 use crate::node::Node;
 use crate::options::Options;
 use crate::task::Task;
+
+pub(crate) static TOOLS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/tools");
 
 pub(crate) struct Context {
     spec: CommandSpec,
