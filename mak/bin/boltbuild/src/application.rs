@@ -1,4 +1,4 @@
-use crate::command::{Command, GroupStatus};
+use crate::command::{Command, GroupStatus, Targets};
 use crate::environment::{Environment, ReadWriteEnvironment, EnvironmentValue};
 use crate::error::Result;
 use crate::log::Logger;
@@ -292,7 +292,12 @@ impl Application {
                         }
                     }
                 }
-                current_command.run_tasks(&self.out_dir, &groups, &self.generators, &self.files, self.thread_count, &mut logger, self.progress_mode)?;
+                let targets = Targets {
+                    groups: &groups,
+                    generators: &self.generators,
+                    files: &self.files,
+                };
+                current_command.run_tasks(&self.out_dir, targets, self.thread_count, &mut logger, self.progress_mode)?;
             }
 
             match next_item {

@@ -14,7 +14,7 @@ impl Serialize for Task {
         S: Serializer,
     {
         let mut s = serializer.serialize_struct("Task", 9)?;
-        s.serialize_field("name", &self.name)?;
+        s.serialize_field("driver", &self.driver)?;
         s.serialize_field("generator", &self.generator)?;
         s.serialize_field("group", &self.group)?;
         s.serialize_field("env", &SerializedReadWriteEnvironment(&self.env))?;
@@ -35,7 +35,7 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
         D: Deserializer<'de>,
     {
         enum Field {
-            Name,
+            Driver,
             Generator,
             Group,
             Env,
@@ -58,7 +58,7 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
 
                     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                         formatter
-                            .write_str("`name`, `generator`, `group`, `env`, `inputs`, `outputs`, `predecessors`, `successors` or `signature`")
+                            .write_str("`driver`, `generator`, `group`, `env`, `inputs`, `outputs`, `predecessors`, `successors` or `signature`")
                     }
 
                     fn visit_str<E>(self, value: &str) -> Result<Field, E>
@@ -66,7 +66,7 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
                         E: Error,
                     {
                         match value {
-                            "name" => Ok(Field::Name),
+                            "driver" => Ok(Field::Driver),
                             "generator" => Ok(Field::Generator),
                             "group" => Ok(Field::Group),
                             "env" => Ok(Field::Env),
@@ -77,7 +77,7 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
                             "signature" => Ok(Field::Signature),
                             _ => Err(Error::unknown_field(
                                 value,
-                                &["name", "generator", "group", "env", "inputs", "outputs", "predecessors", "successors", "signature"],
+                                &["driver", "generator", "group", "env", "inputs", "outputs", "predecessors", "successors", "signature"],
                             )),
                         }
                     }
@@ -100,7 +100,7 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
             where
                 V: SeqAccess<'de>,
             {
-                let name = seq
+                let driver = seq
                     .next_element()?
                     .ok_or_else(|| Error::invalid_length(0, &self))?;
                 let generator = seq
@@ -128,7 +128,7 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
                     .next_element()?
                     .ok_or_else(|| Error::invalid_length(8, &self))?;
                 Ok(Task {
-                    name,
+                    driver,
                     generator,
                     group,
                     env,
@@ -144,7 +144,7 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
             where
                 V: MapAccess<'de>,
             {
-                let mut name = None;
+                let mut driver = None;
                 let mut generator = None;
                 let mut group = None;
                 let mut env = None;
@@ -155,11 +155,11 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
                 let mut signature = None;
                 while let Some(key) = map.next_key()? {
                     match key {
-                        Field::Name => {
-                            if name.is_some() {
-                                return Err(Error::duplicate_field("name"));
+                        Field::Driver => {
+                            if driver.is_some() {
+                                return Err(Error::duplicate_field("driver"));
                             }
-                            name =
+                            driver =
                                 Some(map.next_value()?);
                         }
                         Field::Generator => {
@@ -212,7 +212,7 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
                         }
                     }
                 }
-                let name = name.ok_or_else(|| Error::missing_field("name"))?;
+                let driver = driver.ok_or_else(|| Error::missing_field("driver"))?;
                 let generator = generator.ok_or_else(|| Error::missing_field("generator"))?;
                 let group = group.ok_or_else(|| Error::missing_field("group"))?;
                 let env = env.ok_or_else(|| Error::missing_field("env"))?;
@@ -222,7 +222,7 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
                 let successors = successors.ok_or_else(|| Error::missing_field("successors"))?;
                 let signature = signature.ok_or_else(|| Error::missing_field("signature"))?;
                 Ok(Task {
-                    name,
+                    driver,
                     generator,
                     group,
                     env,
@@ -237,7 +237,7 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
 
         deserializer.deserialize_struct(
             "Task",
-            &["name", "generator", "group", "env", "inputs", "outputs", "predecessors", "successors", "signature"],
+            &["driver", "generator", "group", "env", "inputs", "outputs", "predecessors", "successors", "signature"],
             TaskVisitor(self.0),
         )
     }

@@ -26,10 +26,12 @@ impl UserData for Generator {
             let result = generator.named_user_value::<LuaValue<'lua>>(name.as_str())?;
             if result.is_nil() {
                 Err(LuaError::RuntimeError(format!("Context does not have a user value `{}`", name)))
-            } else { Ok(result) }
+            } else {
+                Ok(result)
+            }
         });
 
-        methods.add_meta_function_mut(MetaMethod::Call, |lua, (generator, tool, inputs, outputs, env): (AnyUserData, String, Value, Value, Option<AnyUserData>)| {
+        methods.add_meta_function_mut(MetaMethod::Call, |lua, (generator, driver, inputs, outputs, env): (AnyUserData, String, Value, Value, Option<AnyUserData>)| {
             let inputs = match &inputs {
                 Value::Nil => Vec::new(),
                 Value::Table(_) => Vec::<Node>::from_lua(inputs, lua)?,
@@ -49,6 +51,9 @@ impl UserData for Generator {
                 let generator = generator.lock().unwrap();
                 let group = generator.group.clone();
                 let mut context = context.borrow_mut::<Context>()?;
+                if !context.output.drivers.contains_key(&driver) {
+                    return Err(LuaError::RuntimeError(format!("Context has no driver for tasks of type `{}`", &driver)));
+                }
                 let task_index = context.tasks.len();
 
                 let from_env = if let Some(env) = env {
@@ -59,7 +64,7 @@ impl UserData for Generator {
 
                 let env = Arc::new(Mutex::new(ReadWriteEnvironment::derive_leaf(&from_env)?));
                 let task = Task {
-                    name: tool,
+                    driver,
                     generator: generator.name.clone(),
                     group,
                     env,
@@ -78,7 +83,7 @@ impl UserData for Generator {
                 }
 
                 let mut hasher = blake3::Hasher::new();
-                hasher.update(task.name.as_bytes());
+                hasher.update(task.driver.as_bytes());
                 hasher.update(task.generator.as_bytes());
                 hasher.update(task.group.as_bytes());
                 for input in &task.inputs {

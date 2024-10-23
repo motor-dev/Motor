@@ -6,11 +6,11 @@ use super::TaskHandle;
 
 impl UserData for TaskHandle {
     fn add_fields<'lua, F: UserDataFields<'lua, Self>>(fields: &mut F) {
-        fields.add_field_function_get("name", |_lua, this: AnyUserData| {
+        fields.add_field_function_get("driver", |_lua, this: AnyUserData| {
             let context = this.user_value::<AnyUserData>()?;
             let context = context.borrow_mut::<Context>()?;
             let index = this.borrow::<TaskHandle>()?.0;
-            Ok(context.tasks[index].name.clone())
+            Ok(context.tasks[index].driver.clone())
         });
         fields.add_field_function_get("inputs", |_lua, this: AnyUserData| {
             let context = this.user_value::<AnyUserData>()?;

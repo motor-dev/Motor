@@ -112,6 +112,15 @@ impl Logger {
         }
     }
 
+    pub(crate) fn colored_print(&mut self, message: &str) {
+        if self.depth == 0 {
+            for command in StatusCommand::parse(message) {
+                command.write(&mut self.output);
+            }
+            self.do_log("", style::Color::Reset, true);
+        }
+    }
+
     pub(crate) fn warning(&mut self, message: &str) {
         if self.depth == 0 {
             self.do_log("warning: ", style::Color::Yellow, false);

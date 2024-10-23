@@ -12,6 +12,7 @@ use mlua::{FromLua, IntoLua, AnyUserData, MetaMethod, UserData, UserDataFields, 
 use mlua::prelude::{LuaError, LuaFunction, LuaResult, LuaString, LuaTable, LuaValue};
 
 use crate::command::{GroupStatus, SerializedHash};
+use crate::driver::Driver;
 use crate::environment::ReadWriteEnvironment;
 use crate::generator::Generator;
 use crate::node::Node;
@@ -520,6 +521,46 @@ impl UserData for Context {
                     this.output.groups.push((name.clone(), status));
                     Ok(())
                 }
+            },
+        );
+
+        methods.add_method_mut(
+            "command_driver",
+            |_lua, this, (name, color, command): (String, String, String)| {
+                if this.output.drivers.insert(name.clone(), Driver::from_command(color, command)).is_some() {
+                    this.logger.info(format!("Overriding tool {}", name).as_str());
+                }
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
+            "gcc_driver",
+            |_lua, this, (name, color, command): (String, String, String)| {
+                if this.output.drivers.insert(name.clone(), Driver::from_gcc_command(color, command)).is_some() {
+                    this.logger.info(format!("Overriding tool {}", name).as_str());
+                }
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
+            "msvc_driver",
+            |_lua, this, (name, color, command): (String, String, String)| {
+                if this.output.drivers.insert(name.clone(), Driver::from_msvc_command(color, command)).is_some() {
+                    this.logger.info(format!("Overriding tool {}", name).as_str());
+                }
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
+            "lua_driver",
+            |_lua, this, (name, color, script): (String, String, Node)| {
+                if this.output.drivers.insert(name.clone(), Driver::from_lua_script(color, script)).is_some() {
+                    this.logger.info(format!("Overriding tool {}", name).as_str());
+                }
+                Ok(())
             },
         );
     }
