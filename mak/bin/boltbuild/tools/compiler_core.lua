@@ -100,17 +100,28 @@ end
 
 
 
-context        :feature('c,cxx', 'prepare', prepare)
-context        :feature('c,cxx', 'process_dependencies', process_dependencies)
+context
+        :feature('c,cxx', 'prepare', prepare)
+context
+        :feature('c,cxx', 'process_dependencies', process_dependencies)
         :set_run_after({"prepare"})
-context        :feature('c,cxx', 'process_flags', process_flags)
+context
+        :feature('c,cxx', 'process_flags', process_flags)
         :set_run_after({"process_dependencies"})
-context        :feature('c,cxx', 'process_source', process_source)
+context
+        :feature('c,cxx', 'process_source', process_source)
         :set_run_after({"process_flags"})
 
-context        :feature('program', 'process_link_program', process_link_program)
+context
+        :feature('program', 'process_link_program', process_link_program)
         :set_run_after({"process_source"})
-context        :feature('shlib', 'process_link_shlib', process_link_shlib)
+context
+        :feature('shlib', 'process_link_shlib', process_link_shlib)
         :set_run_after({"process_source"})
-context        :feature('stlib', 'process_link_stlib', process_link_stlib)
+context
+        :feature('stlib', 'process_link_stlib', process_link_stlib)
         :set_run_after({"process_source"})
+
+context:command_driver('shlib', 'yellow', '${LINK} ${LINKFLAGS} ${LINK_SRC_FLAG:SRC} ${LIB_TGT_F:TGT[0]}')
+context:command_driver('stlib', 'yellow', '${LIB} ${LIBFLAGS} ${LIB_SRC_FLAG:SRC} ${LIB_TGT_F:TGT[0]}')
+context:command_driver('program', 'yellow', '${LINK} ${LINKFLAGS} ${LINK_SRC_FLAG:SRC} ${LIB_TGT_F:TGT[0]}')

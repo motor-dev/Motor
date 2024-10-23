@@ -83,3 +83,9 @@ impl Command {
         Ok(init_command)
     }
 }
+
+pub(crate) struct Targets<'a> {
+    pub(crate) groups: &'a [String],
+    pub(crate) generators: &'a [String],
+    pub(crate) files: &'a [Node],
+}

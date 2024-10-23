@@ -8,7 +8,7 @@ use crate::environment::{ReadWriteEnvironment, ReadWriteEnvironmentVec};
 use crate::node::Node;
 
 pub(crate) struct Task {
-    pub(crate) name: String,
+    pub(crate) driver: String,
     pub(crate) generator: String,
     pub(crate) group: String,
     pub(crate) env: Arc<Mutex<ReadWriteEnvironment>>,
@@ -25,7 +25,7 @@ pub(crate) struct TaskSeed<'a>(pub &'a ReadWriteEnvironmentVec);
 
 impl Display for Task {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "[{}/{}] {} ", self.group, self.generator, self.name)?;
+        write!(f, "[{}/{}] {} ", self.group, self.generator, self.driver)?;
         for (index, path) in self.inputs.iter().enumerate() {
             if index != 0 { write!(f, ", ")?; }
             write!(f, "{}", path)?;
