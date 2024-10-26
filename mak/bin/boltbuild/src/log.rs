@@ -175,23 +175,22 @@ impl Logger {
                 .queue(style::SetForegroundColor(color)).unwrap()
                 .queue(style::Print(message)).unwrap()
                 .queue(style::SetForegroundColor(style::Color::Reset)).unwrap();
+            self.output.flush().unwrap();
             if add_newline {
                 self.output.queue(style::Print("\n")).unwrap();
             }
             if self.status.is_some() {
-                if clear_status {
-                    /* creates a new line */
-                    self.output
-                        .queue(cursor::SavePosition).unwrap()
-                        .queue(style::Print("\n")).unwrap()
-                        .queue(cursor::RestorePosition).unwrap()
-                        .queue(cursor::MoveDown(1)).unwrap()
-                        .queue(cursor::MoveUp(1)).unwrap()
-                    ;
-                }
+                /* creates a new line */
                 self.output
                     .queue(cursor::SavePosition).unwrap()
-                    .queue(cursor::MoveDown(999)).unwrap();
+                    .queue(style::Print("\n")).unwrap()
+                    .queue(cursor::RestorePosition).unwrap()
+                    .queue(cursor::MoveDown(1)).unwrap()
+                    .queue(cursor::MoveUp(1)).unwrap();
+                self.output
+                    .queue(cursor::SavePosition).unwrap()
+                    .queue(cursor::MoveDown(999)).unwrap()
+                    .queue(cursor::MoveToColumn(0)).unwrap();
                 for cmd in self.status.as_mut().unwrap() {
                     cmd.write(&mut self.output);
                 }

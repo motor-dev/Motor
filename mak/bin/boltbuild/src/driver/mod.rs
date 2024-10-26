@@ -1,17 +1,24 @@
+use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use crate::node::Node;
+use crate::task::Task;
 
 mod command;
 mod lua;
-mod msvc;
-mod gcc;
+mod dependency;
 
 #[derive(Serialize, Deserialize)]
 enum DriverConfiguration {
     Command(command::CommandDriverConfiguration),
-    GccCommand(gcc::GccCommandDriverConfiguration),
-    MsvcCommand(msvc::MsvcCommandDriverConfiguration),
+    DependencyCommand(dependency::DependencyCommandDriverConfiguration),
     Lua(lua::LuaDriverConfiguration),
+}
+
+pub(crate) struct Output {
+    pub(crate) exit_code: u32,
+    pub(crate) command: String,
+    pub(crate) log: String,
+    pub(crate) dependencies: Vec<PathBuf>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -28,17 +35,10 @@ impl Driver {
         }
     }
 
-    pub(crate) fn from_gcc_command(color: String, command: String) -> Self {
+    pub(crate) fn from_dependency_command(color: String, command: String) -> Self {
         Self {
             color,
-            configuration: DriverConfiguration::GccCommand(gcc::GccCommandDriverConfiguration::new(command)),
-        }
-    }
-
-    pub(crate) fn from_msvc_command(color: String, command: String) -> Self {
-        Self {
-            color,
-            configuration: DriverConfiguration::MsvcCommand(msvc::MsvcCommandDriverConfiguration::new(command)),
+            configuration: DriverConfiguration::DependencyCommand(dependency::DependencyCommandDriverConfiguration::new(command)),
         }
     }
 
@@ -48,17 +48,16 @@ impl Driver {
             configuration: DriverConfiguration::Lua(lua::LuaDriverConfiguration::new(script)),
         }
     }
-    
+
     pub(crate) fn get_color(&self) -> &str {
         self.color.as_str()
     }
 
-    pub(crate) fn execute(&self) {
+    pub(crate) fn execute(&self, task: &Task) -> Output {
         match &self.configuration {
-            DriverConfiguration::Command(cmd) => cmd.execute(),
-            DriverConfiguration::GccCommand(cmd) => cmd.execute(),
-            DriverConfiguration::MsvcCommand(cmd) => cmd.execute(),
-            DriverConfiguration::Lua(cmd) => cmd.execute(),
+            DriverConfiguration::Command(cmd) => cmd.execute(task),
+            DriverConfiguration::DependencyCommand(cmd) => cmd.execute(task),
+            DriverConfiguration::Lua(cmd) => cmd.execute(task),
         }
     }
 }

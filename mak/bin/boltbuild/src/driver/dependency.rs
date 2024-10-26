@@ -4,11 +4,11 @@ use crate::task::Task;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
-pub(super) struct CommandDriverConfiguration {
+pub(super) struct DependencyCommandDriverConfiguration {
     command: String,
 }
 
-impl CommandDriverConfiguration {
+impl DependencyCommandDriverConfiguration {
     pub(super) fn new(command: String) -> Self {
         Self {
             command

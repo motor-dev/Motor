@@ -1,11 +1,19 @@
 mod lua_binding;
 mod serialization;
+mod run;
 
 use std::fmt::{Display, Formatter};
 use std::sync::{Arc, Mutex};
+use lazy_static::lazy_static;
+use regex::Regex;
 use crate::command::SerializedHash;
 use crate::environment::{ReadWriteEnvironment, ReadWriteEnvironmentVec};
 use crate::node::Node;
+
+lazy_static! {
+    pub(crate) static ref SPLIT_RE: Regex = Regex::new(r"\s+").unwrap();
+    pub(crate) static ref ENV_RE: Regex = Regex::new(r"\$\{([^:\.}\[]+:)?([^:\[\.}]+)(\[(\d+)])?\}").unwrap();
+}
 
 pub(crate) struct Task {
     pub(crate) driver: String,

@@ -5,8 +5,9 @@ use std::fmt::Display;
 use std::fs;
 use serde::{Deserialize, Serialize};
 use std::path::{Component, Path, PathBuf};
+use crate::environment::EnvironmentValue;
 
-#[derive(Clone, Serialize, Deserialize, Hash, Eq, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Hash, Eq, PartialEq, Ord, PartialOrd)]
 pub(crate) struct Node {
     path: PathBuf,
 }
@@ -48,6 +49,15 @@ impl Node {
 
     pub(crate) fn is_file(&self) -> bool {
         self.path.is_file()
+    }
+
+    pub(crate) fn read_link(&self) -> Self {
+        let mut rel_path = self.path.clone();
+        while let Ok(path) = fs::read_link(&rel_path) {
+            rel_path.pop();
+            rel_path.push(path);
+        }
+        Node::from(&rel_path)
     }
 
     pub(crate) fn mkdir(&self) -> std::io::Result<()> {
@@ -94,4 +104,16 @@ fn normalize_path(path: &Path) -> PathBuf {
         }
     }
     ret
+}
+
+impl From<&Node> for EnvironmentValue {
+    fn from(value: &Node) -> Self {
+        EnvironmentValue::Node(value.clone())
+    }
+}
+
+impl From<&Vec<Node>> for EnvironmentValue {
+    fn from(value: &Vec<Node>) -> Self {
+        EnvironmentValue::Vec(value.iter().map(|x| x.into()).collect::<Vec<EnvironmentValue>>())
+    }
 }

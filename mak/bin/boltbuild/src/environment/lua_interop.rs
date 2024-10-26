@@ -50,6 +50,24 @@ impl Environment {
 }
 
 impl ReadWriteEnvironment {
+    pub(crate) fn get(
+        &mut self,
+        key: &str,
+    ) -> EnvironmentValue {
+        self.environment.used_keys.insert(key.to_string());
+        match self.environment.values.get(key) {
+            None => match &self.parent {
+                EnvironmentParent::None => EnvironmentValue::None,
+                EnvironmentParent::Current(e)
+                | EnvironmentParent::Parent(e)
+                | EnvironmentParent::Leaf(e) => {
+                    e.lock().unwrap().get(key)
+                }
+            },
+            Some(v) => v.clone(),
+        }
+    }
+
     pub(crate) fn get_into_list(
         &mut self,
         key: &str,
@@ -269,5 +287,10 @@ impl EnvironmentValue {
             EnvironmentValue::Vec(v) => v,
             _ => vec![self],
         }
+    }
+
+    pub(crate) fn is_none(&self) -> bool { matches!(&self, EnvironmentValue::None) }
+    pub(crate) fn is_list(&self) -> bool {
+        matches!(&self, EnvironmentValue::Vec(_))
     }
 }

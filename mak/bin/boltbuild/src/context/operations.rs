@@ -141,6 +141,9 @@ impl Context {
             }
             for (hasher, task) in zip(&self.signatures, &mut self.tasks) {
                 task.signature = SerializedHash(hasher.finalize());
+                let mut env = task.env.lock().unwrap();
+                env.set("SRC", (&task.inputs).into());
+                env.set("TGT", (&task.outputs).into());
             }
 
             /* retrieve a list of modules */

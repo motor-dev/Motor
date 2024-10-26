@@ -10,7 +10,6 @@ use std::sync::{Arc, Mutex};
 use blake3::Hasher;
 use mlua::{FromLua, IntoLua, AnyUserData, MetaMethod, UserData, UserDataFields, UserDataMethods};
 use mlua::prelude::{LuaError, LuaFunction, LuaResult, LuaString, LuaTable, LuaValue};
-
 use crate::command::{GroupStatus, SerializedHash};
 use crate::driver::Driver;
 use crate::environment::ReadWriteEnvironment;
@@ -345,6 +344,7 @@ impl UserData for Context {
                         this.output.stored_hash.glob_dependencies.push((path.clone(), pattern, SerializedHash(hash)));
                     }
                 }
+                result.sort();
                 Ok(result)
             },
         );
@@ -527,30 +527,28 @@ impl UserData for Context {
         methods.add_method_mut(
             "command_driver",
             |_lua, this, (name, color, command): (String, String, String)| {
-                if this.output.drivers.insert(name.clone(), Driver::from_command(color, command)).is_some() {
-                    this.logger.info(format!("Overriding tool {}", name).as_str());
+                if is_command_valid(command.as_str()) {
+                    if this.output.drivers.insert(name.clone(), Driver::from_command(color, command)).is_some() {
+                        this.logger.info(format!("Overriding tool {}", name).as_str());
+                    }
+                    Ok(())
+                } else {
+                    Err(LuaError::RuntimeError(format!("invalid syntax in command {}", command).to_string()))
                 }
-                Ok(())
             },
         );
 
         methods.add_method_mut(
-            "gcc_driver",
+            "dependency_driver",
             |_lua, this, (name, color, command): (String, String, String)| {
-                if this.output.drivers.insert(name.clone(), Driver::from_gcc_command(color, command)).is_some() {
-                    this.logger.info(format!("Overriding tool {}", name).as_str());
+                if is_command_valid(command.as_str()) {
+                    if this.output.drivers.insert(name.clone(), Driver::from_dependency_command(color, command)).is_some() {
+                        this.logger.info(format!("Overriding tool {}", name).as_str());
+                    }
+                    Ok(())
+                } else {
+                    Err(LuaError::RuntimeError(format!("invalid syntax in command {}", command).to_string()))
                 }
-                Ok(())
-            },
-        );
-
-        methods.add_method_mut(
-            "msvc_driver",
-            |_lua, this, (name, color, command): (String, String, String)| {
-                if this.output.drivers.insert(name.clone(), Driver::from_msvc_command(color, command)).is_some() {
-                    this.logger.info(format!("Overriding tool {}", name).as_str());
-                }
-                Ok(())
             },
         );
 
@@ -566,3 +564,14 @@ impl UserData for Context {
     }
 }
 
+use crate::task::{SPLIT_RE, ENV_RE};
+
+fn is_command_valid(command: &str) -> bool {
+    for argument in SPLIT_RE.split(command) {
+        let mut iter = ENV_RE.find_iter(argument);
+        if iter.next().is_some() && iter.next().is_some() {
+            return false;
+        }
+    }
+    true
+}
