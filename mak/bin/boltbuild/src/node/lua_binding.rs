@@ -81,6 +81,7 @@ impl UserData for Node {
         methods.add_method("name", |_lua, this: &Node, ()| Ok(this.path.file_name().map(|x| x.to_string_lossy().to_string())));
         methods.add_method("is_dir", |_lua, this: &Node, ()| Ok(this.is_dir()));
         methods.add_method("is_file", |_lua, this: &Node, ()| Ok(this.is_file()));
+        methods.add_method("read_link", |_lua, this: &Node, ()| Ok(this.read_link()));
         methods.add_method("delete", |_lua, this: &Node, ()|
             this.delete().map_err(|x| LuaError::RuntimeError(x.to_string())),
         );

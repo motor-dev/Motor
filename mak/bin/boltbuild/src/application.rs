@@ -16,6 +16,7 @@ pub struct Application {
     command_line: Arc<Mutex<CommandLineParser>>,
     init_command: Command,
     command_list: HashMap<String, Vec<String>>,
+    force: bool,
     verbosity: u32,
     log_why: bool,
     log_colors: Option<bool>,
@@ -60,6 +61,14 @@ impl Application {
         )?
             .set_required();
 
+        parser.add_flag(
+            "force".to_string(),
+            "Force execution of the commands".to_string(),
+            EnvironmentValue::Bool(false),
+        )?
+            .set_long("force")
+            .set_short("f");
+
         parser.add_count(
             "verbose".to_string(),
             "Controls how much information is displayed.\nVerbosity increases with each occurrence of the option.".to_string(),
@@ -101,8 +110,7 @@ impl Application {
             EnvironmentValue::None,
         )?
             .set_category("Options controlling task execution")
-            .set_long("file")
-            .set_short("f");
+            .set_long("file");
 
         parser.add_value(
             "tidy".to_string(),
@@ -180,6 +188,10 @@ impl Application {
             EnvironmentValue::Bool(b) => b,
             _ => false,
         };
+        let force: bool = match options.get_raw("force") {
+            EnvironmentValue::Bool(b) => b,
+            _ => false,
+        };
         drop(parser);
 
         let out_value = options.get_raw("out");
@@ -203,6 +215,7 @@ impl Application {
             command_line: parser_ptr,
             init_command,
             command_list: all_commands,
+            force,
             verbosity,
             log_colors,
             log_why,
@@ -247,29 +260,47 @@ impl Application {
                     self.options.clone()
                 };
 
-                let result = current_command.verify_hash(&options, envs, tools.clone());
-                match result {
-                    Err(reason) => {
-                        logger.why(
-                            format!(
-                                "command `{}`: running lua scripts because {}",
-                                current_command.spec.name,
-                                reason
-                            ).as_str(),
-                        );
+                if self.force {
+                    logger.why(
+                        format!(
+                            "command `{}`: running lua scripts forced by command line option",
+                            current_command.spec.name,
+                        ).as_str(),
+                    );
 
-                        logger = current_command.run(
-                            Options::from_env(options),
-                            envs,
-                            tools,
-                            command_path.clone(),
-                            &mut self.command_list,
-                            logger,
-                        )?;
-                    }
+                    logger = current_command.run(
+                        Options::from_env(options),
+                        envs,
+                        tools,
+                        command_path.clone(),
+                        &mut self.command_list,
+                        logger,
+                    )?;
+                } else {
+                    let result = current_command.verify_hash(&options, envs, tools.clone());
+                    match result {
+                        Err(reason) => {
+                            logger.why(
+                                format!(
+                                    "command `{}`: running lua scripts because {}",
+                                    current_command.spec.name,
+                                    reason
+                                ).as_str(),
+                            );
 
-                    Ok(_) => {
-                        logger.why(format!("command `{}`: lua files are up-to-date", current_command.spec.name).as_str());
+                            logger = current_command.run(
+                                Options::from_env(options),
+                                envs,
+                                tools,
+                                command_path.clone(),
+                                &mut self.command_list,
+                                logger,
+                            )?;
+                        }
+
+                        Ok(_) => {
+                            logger.why(format!("command `{}`: lua files are up-to-date", current_command.spec.name).as_str());
+                        }
                     }
                 }
 

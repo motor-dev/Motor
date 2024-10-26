@@ -2,7 +2,7 @@ use super::{Command, TaskSeq, CommandStatus, SerializedHash, Targets};
 use crate::error::Result;
 use crate::log::Logger;
 use crate::task::Task;
-use crate::driver::Driver;
+use crate::driver::{Driver, Output};
 
 use std::collections::{HashMap, HashSet};
 use std::iter::zip;
@@ -77,7 +77,7 @@ enum WorkResult<'a> {
     FileHashResult(usize, Vec<blake3::Hash>),
     TaskSkipped(usize, Vec<(&'a PathBuf, blake3::Hash)>),
     TaskStart(usize, usize, &'static str, &'a str),
-    TaskResult(usize, usize, i32, String, Vec<(&'a PathBuf, blake3::Hash)>, blake3::Hash, Vec<String>, Vec<PathBuf>, blake3::Hash),
+    TaskResult(usize, usize, Output, Vec<(&'a PathBuf, blake3::Hash)>, blake3::Hash, Vec<String>, blake3::Hash),
     TaskCanceled(usize),
     Panic(),
 }
@@ -214,7 +214,7 @@ impl<'command> Scheduler<'command> {
                                 if !hasher.finalize().eq(&cache.environment_hash.0) {
                                     (true, "the environment has been modified")
                                 } else {
-                                    (false, "the task is up-to-date")
+                                    (true, "the task is up-to-date")
                                 }
                             }
                         } else {
@@ -225,9 +225,8 @@ impl<'command> Scheduler<'command> {
                             let task = &self.tasks_pool[task_index];
                             let driver = self.drivers.get(&task.driver).unwrap();
                             result_pipe.send(WorkResult::TaskStart(task_index, thread_index, reason, driver.get_color())).unwrap();
-                            driver.execute();
+                            let output = driver.execute(task);
 
-                            let dependencies: Vec<PathBuf> = Vec::new();
                             let mut hashes = Vec::new();
                             for output in &self.tasks_pool[task_index].outputs {
                                 if dependency_nodes.contains(output.path()) {
@@ -246,12 +245,10 @@ impl<'command> Scheduler<'command> {
                             result_pipe.send(WorkResult::TaskResult(
                                 task_index,
                                 thread_index,
-                                0,
-                                "".to_string(),
+                                output,
                                 hashes,
                                 input_hash,
                                 environment_dependencies,
-                                dependencies,
                                 env_hasher.finalize(),
                             )).unwrap();
                         } else {
@@ -418,12 +415,10 @@ impl<'command> Scheduler<'command> {
                         WorkResult::TaskResult(
                             task_index,
                             thread_index,
-                            result,
-                            log,
+                            output,
                             output_hashes,
                             input_hash,
                             environment_dependencies,
-                            file_dependencies,
                             environment_hash
                         ) => {
                             for (file, hash) in output_hashes {
@@ -432,8 +427,10 @@ impl<'command> Scheduler<'command> {
                             processed_tasks += 1;
                             thread_activity.switch_off(thread_index);
                             let task = &self.tasks_pool[task_index];
-                            log_task_end(logger, result, task.inputs[0].path(), log.as_str());
-                            //self.abort.store(true, Ordering::Release);
+                            log_task_end(logger, output.exit_code, output.command.as_str(), output.log.as_str());
+                            if output.exit_code != 0 {
+                                self.abort.store(true, Ordering::Release);
+                            }
                             for &successor in &task.successors {
                                 task_work[successor].0 -= 1;
                                 if task_work[successor].0 == 0 {
@@ -447,7 +444,7 @@ impl<'command> Scheduler<'command> {
                             let hasher = blake3::Hasher::new();
                             task_work[task_index].1 = Some(TaskCacheEntry {
                                 environment_dependencies,
-                                file_dependencies,
+                                file_dependencies: output.dependencies,
                                 environment_hash: SerializedHash(environment_hash),
                                 input_hash: SerializedHash(input_hash),
                                 dependency_hash: SerializedHash(hasher.finalize()),
@@ -560,11 +557,12 @@ fn log_task_start(logger: &mut Logger, index: usize, task_count: &str, message: 
     logger.colored_print(format!("[{:width$}/{}] {}", index, task_count, message, width = task_count.len()).as_str());
 }
 
-fn log_task_end(logger: &mut Logger, result: i32, input: &PathBuf, message: &str) {
+fn log_task_end(logger: &mut Logger, result: u32, command: &str, message: &str) {
     if result != 0 {
-        logger.error(format!("{:?}:\n{}", input, message).as_str());
+        logger.error(format!("{} returned exit code {} (0x{:08x})\n{}", command, result, result, message).as_str());
     } else if !message.is_empty() {
-        logger.print(format!("{:?};\n{}", input, message).as_str());
+        logger.colored_print(format!("{{bright_white}}{}{{reset}}", command).as_str());
+        logger.print(format!("\n{}", message).as_str());
     }
 }
 

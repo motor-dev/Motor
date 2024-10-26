@@ -5,16 +5,17 @@ edition = "2021"
 default-run = "boltbuild"
 
 [dependencies]
-mlua = { version = "~0.9.9", features = ["lua54", "vendored"] }
-colored = "2.1"
-clap = { version = "~4.5", features = ["string"] }
-crossterm = "~0.28"
-crossbeam = "~0.8"
-glob = "~0.3"
-blake3 = "~1.5"
-regex = "~1.11"
-serde = { version = "~1.0", features = ["derive"] }
-serde_json = "~1.0"
-subprocess = "~0.2"
+mlua = { version = "~0", features = ["lua54", "vendored"] }
+colored = "~2"
+clap = { version = "~4", features = ["string"] }
+crossterm = "~0"
+crossbeam = "~0"
+glob = "~0"
+blake3 = "~1"
+regex = "~1"
+serde = { version = "~1", features = ["derive"] }
+serde_json = "~1"
+subprocess = "~0"
 bincode = { version = "2.0.0-rc.3", features = ["serde"] }
 include_dir = { version = "~0" }
+lazy_static = "~1"
