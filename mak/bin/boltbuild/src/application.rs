@@ -167,7 +167,7 @@ impl Application {
             }
             fs::create_dir_all(out_dir)?;
         } else {
-            let commands_file = PathBuf::from(out_dir).join("cache.json");
+            let commands_file = PathBuf::from(out_dir).join("cache.bin");
             let result = fs::File::open(commands_file);
             if let Ok(file) = result {
                 if let Err(err) = init_command.load_from_file(file, &mut all_commands) {
@@ -358,7 +358,7 @@ impl Application {
         let mut logger = Logger::new(self.log_colors, self.verbosity, self.log_why);
         let commands = self.options.get_raw("commands").as_vec();
 
-        let commands_file = self.out_dir.join("cache.json");
+        let commands_file = self.out_dir.join("cache.bin");
 
         for command in commands {
             let command_path: Vec<String>;

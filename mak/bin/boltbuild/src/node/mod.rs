@@ -19,6 +19,12 @@ impl Node {
         }
     }
 
+    fn new() -> Node {
+        Node {
+            path: PathBuf::new()
+        }
+    }
+
     pub(crate) fn path(&self) -> &PathBuf {
         &self.path
     }
@@ -58,6 +64,15 @@ impl Node {
             rel_path.push(path);
         }
         Node::from(&rel_path)
+    }
+
+    pub(crate) fn canonicalize(&self) -> Self {
+        let mut result = Self::new();
+        for c in self.path.iter() {
+            result.path.push(c);
+            result = result.read_link();
+        }
+        result
     }
 
     pub(crate) fn mkdir(&self) -> std::io::Result<()> {

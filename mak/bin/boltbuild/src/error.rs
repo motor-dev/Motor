@@ -52,6 +52,15 @@ impl From<serde_json::Error> for MakeError {
     }
 }
 
+impl From<bincode::error::DecodeError> for MakeError {
+    fn from(error: bincode::error::DecodeError) -> Self {
+        Self {
+            location: None,
+            message: error.to_string(),
+        }
+    }
+}
+
 impl From<bincode::error::EncodeError> for MakeError {
     fn from(error: bincode::error::EncodeError) -> Self {
         Self {

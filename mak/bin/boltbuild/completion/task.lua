@@ -1,6 +1,8 @@
 ---@meta
 
-local function use(var)return var end
+local function use(var)
+    return var
+end
 
 ---@class Task
 ---@field name string The name of the driver that will execute the task.

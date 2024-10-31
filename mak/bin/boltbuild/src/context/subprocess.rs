@@ -1,20 +1,23 @@
+use std::io::{Read, Write};
+use std::mem::swap;
+use std::process::Stdio;
 use mlua::{AnyUserData, MetaMethod, UserData, UserDataMethods};
 use mlua::Result as LuaResult;
 use mlua::Error as LuaError;
 
-pub(crate) struct Popen(subprocess::Popen);
+pub(crate) struct Process(std::process::Child);
 
-impl Popen {
+impl Process {
     pub(crate) fn create(command: &[String]) -> LuaResult<Self> {
-        Ok(Self(subprocess::Popen::create(
-            command,
-            subprocess::PopenConfig {
-                stdin: subprocess::Redirection::Pipe,
-                stdout: subprocess::Redirection::Pipe,
-                stderr: subprocess::Redirection::Pipe,
-                ..subprocess::PopenConfig::default()
-            },
-        ).map_err(|e| LuaError::RuntimeError(format!("Popen error: {}", e)))?))
+        let process = std::process::Command::new(&command[0])
+            .args(&command[1..command.len()])
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .map_err(|e| LuaError::RuntimeError(format!("Process creation error error: {}", e)))?
+            ;
+        Ok(Self(process))
     }
 }
 
@@ -29,20 +32,43 @@ impl Out {
     }
 }
 
-impl Drop for Popen {
+impl Drop for Process {
     fn drop(&mut self) {
-        if self.0.poll().is_none() {
-            self.0.terminate().unwrap();
-        }
+        self.0.wait().unwrap();
     }
 }
 
-impl UserData for Popen {
+impl UserData for Process {
     fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(methods: &mut M) {
         methods.add_method_mut("communicate", |_lua, this, input: Option<String>| {
-            let result = this.0.communicate(input.as_deref().or( Some("") ))?;
-            let exit_status = this.0.wait().map_err(|x| LuaError::RuntimeError(format!("Subprocess error `{}`", x)))?;
-            Ok((exit_status.success(), Out::new(result.0), Out::new(result.1)))
+            std::thread::scope(|scope| {
+                let mut stdout = None;
+                swap(&mut stdout, &mut this.0.stdout);
+                let mut stderr = None;
+                swap(&mut stderr, &mut this.0.stderr);
+
+                let stdout_reader = scope.spawn(move || {
+                    let mut output = Vec::new();
+                    stdout.as_mut().unwrap().read_to_end(&mut output).unwrap();
+                    output
+                });
+                let stderr_reader = scope.spawn(move || {
+                    let mut output = Vec::new();
+                    stderr.as_mut().unwrap().read_to_end(&mut output).unwrap();
+                    output
+                });
+                if let Some(input) = input {
+                    this.0.stdin.as_mut().unwrap().write_all(input.as_bytes()).unwrap();
+                }
+                this.0.stdin = None;
+                let exit_status = this.0.wait().map_err(|x| LuaError::RuntimeError(format!("Subprocess error `{}`", x)))?;
+                let stdout = stdout_reader.join().unwrap();
+                let stdout = String::from_utf8(stdout).map_err(|x| LuaError::RuntimeError(format!("Utf8 decode error `{}`", x)))?;
+                let stderr = stderr_reader.join().unwrap();
+                let stderr = String::from_utf8(stderr).map_err(|x| LuaError::RuntimeError(format!("Utf8 decode error `{}`", x)))?;
+
+                Ok((exit_status.success(), Out::new(Some(stdout)), Out::new(Some(stderr))))
+            })
         })
     }
 }
