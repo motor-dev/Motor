@@ -1,6 +1,6 @@
 use super::{Context, TOOLS_DIR};
 use super::operations::{DeclaredCommand, Feature, post};
-use super::subprocess::Popen;
+use super::subprocess::Process;
 
 use std::fs;
 use std::ops::Deref;
@@ -349,14 +349,15 @@ impl UserData for Context {
             },
         );
 
-        methods.add_method(
+        methods.add_method_mut(
             "popen",
-            |_lua, _this, command: Vec<LuaValue>| {
+            |_lua, this, command: Vec<LuaValue>| {
                 let mut cmd = Vec::new();
+                this.logger.info(format!("running command {}", command.iter().map(|x| x.to_string().unwrap()).collect::<Vec<String>>().join(" ")).as_str());
                 for x in command {
                     cmd.push(x.to_string()?);
                 }
-                Popen::create(&cmd)
+                Process::create(&cmd)
             },
         );
 

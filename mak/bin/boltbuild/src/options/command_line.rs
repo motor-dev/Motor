@@ -202,7 +202,7 @@ impl CommandLineParser {
 
     pub(crate) fn parse_command_line_into(&self, env: &mut Environment) {
         use clap::{Arg, Command, builder::PossibleValuesParser, builder::PossibleValue, parser::ValueSource};
-        let mut cmd = Command::new("rswaf");
+        let mut cmd = Command::new("boltbuild");
         for option in &self.options {
             if let Some(interface) = &option.interface {
                 let mut arg = Arg::new(&option.name);

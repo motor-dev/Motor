@@ -1,113 +1,90 @@
 ---@type Context
 local context = ...
 
+context:load_tool('compiler_gnu')
+
 Clang = {}
 
----Add defaul Clang flags into the environment
-function Clang.configure()
-    context.env.COMPILER = 'clang'
-    context.env.CXX_TGT_F = '-o'
+---@param c_flags (string|Node)[]) The flags to pass to the compiler.
+function Clang.load_clang_c(c_flags)
+    local env = context.env
+    env.CFLAGS = c_flags
+    env.C_COMPILER_NAME = 'clang'
+    env.C_TGT_F = '-o'
+    env.DEFINE_ST = '-I'
+    env.INCLUDE_ST = '-I'
+    env.SYSTEM_INCLUDE_ST = '-isystem%s'
 
-    context.env.DEFINE_ST = '-I'
-    context.env.INCLUDE_ST = '-I'
-    context.env.SYSTEM_INCLUDE_ST = '-isystem%s'
-end
+    local defines = GnuCompiler.get_specs(env.CC, "C")
+    local version = { 0, 0, 0 }
 
----@param clang_command string|Node[]
----@param arch string
----@param target string
----@return Environment a new environment, derived from the current context environment, with Clang setup.
-function Clang.detect_clang_target(clang_command, arch, target)
-    local full_command = {}
-    for i, arg in ipairs(clang_command) do
-        full_command[i] = arg
-    end
-    full_command[1 + #full_command] = '-x'
-    full_command[1 + #full_command] = 'c++'
-    full_command[1 + #full_command] = '-v'
-    full_command[1 + #full_command] = '-dM'
-    full_command[1 + #full_command] = '-E'
-    full_command[1 + #full_command] = '-target'
-    full_command[1 + #full_command] = target
-    full_command[1 + #full_command] = '-'
-    local handle = context:popen(full_command)
-    local success, out, err = handle:communicate()
-    if not success then
-        error(err)
-    end
-
-    return context:with(context:derive(), function()
-        context.env.CC = clang_command
-        context.env.CXX = clang_command
-        Clang.configure()
-
-        ---@type table<string, string>
-        local defines = {}
-        ---@type Node[]
-        local includes = {}
-        local version = { 0, 0, 0 }
-        local search_paths = false
-
-        for line in (err + out):lines() do
-            if string.starts_with(line, "#include <...>") then
-                search_paths = true
-            elseif search_paths then
-                if string.starts_with(line, "End of search list") then
-                    search_paths = false
-                else
-                    local path = context.path:make_node(string.trim(line))
-                    includes[#includes + 1] = path
-                end
-            elseif line:find('__clang_major__') then
-                local s, _, v = line:find('__clang_major__%s+(%d+)')
-                if s then
-                    version[1] = tonumber(v)
-                end
-            elseif line:find('__clang_minor__') then
-                local s, _, v = line:find('__clang_minor__%s+(%d+)')
-                if s then
-                    version[2] = tonumber(v)
-                end
-            elseif line:find('__clang_patchlevel__') then
-                local s, _, v = line:find('__clang_patchlevel__%s+(%d+)')
-                if s then
-                    version[3] = tonumber(v)
-                end
-            else
-                local s, _, name, value = line:find('%s*#define%s+([%w_]+)%s*(.*)')
-                if s then
-                    defines[tostring(name)] = tostring(value)
-                end
-            end
+    for name, value in pairs(defines) do
+        if name == '__clang_major__' then
+            version[1] = tonumber(value)
+        elseif name == '__clang_minor__' then
+            version[2] = tonumber(value)
+        elseif name == '__clang_patchlevel__' then
+            version[3] = tonumber(value)
         end
+    end
 
-        local node = clang_command[1]
-        context.compilers[1 + #context.compilers] = context.Compiler:new {
-            name = 'clang',
-            arch = arch,
-            target = target,
-            version = version[1] .. '.' .. version[2] .. '.' .. version[3],
-            command_c = { node, '-x', 'c', '-target', target },
-            command_cxx = { node, '-x', 'c++', '-target', target },
-            setup = function()
-                context.env.CC = { node, '-x', 'c', '-target', target }
-                context.env.CXX = { node, '-x', 'c++', '-target', target }
-                context:load_tool('clang', true)
-            end
-        }
-        return context.env
-    end)
+    env.CLANG_C_VERSION = version[1] .. '.' .. version[2] .. '.' .. version[3]
 end
 
----@param clang_command (string|Node)[] The clang command to run.
----@param result Environment[] An array to store discovered Clang compilers.
-function Clang.detect_clang_targets(clang_command, result)
-    local full_command = {}
-    for i, arg in ipairs(clang_command) do
-        full_command[i] = arg
+---@param cxx_flags (string|Node)[]) The flags to pass to the compiler.
+function Clang.load_clang_cxx(cxx_flags)
+    local env = context.env
+    -- if a  Clang C compiler is loaded, use that
+    if env.CC and env.C_COMPILER_NAME == 'clang' then
+        env.CXX = env.CC
+        env:append('CXX', '-x')
+        env:append('CXX', 'c++')
+    else
+        -- todo
+        context:error('Could not find a valid Clang c++ compiler')
+    end
+
+    env.CXXFLAGS = cxx_flags
+    env.CXX_COMPILER_NAME = 'clang'
+    env.CXX_TGT_F = '-o'
+    env.DEFINE_ST = '-I'
+    env.INCLUDE_ST = '-I'
+    env.SYSTEM_INCLUDE_ST = '-isystem%s'
+
+    local defines = GnuCompiler.get_specs(env.CXX, "CXX")
+    local version = { 0, 0, 0 }
+
+    for name, value in pairs(defines) do
+        if name == '__clang_major__' then
+            version[1] = tonumber(value)
+        elseif name == '__clang_minor__' then
+            version[2] = tonumber(value)
+        elseif name == '__clang_patchlevel__' then
+            version[3] = tonumber(value)
+        end
+    end
+    env.CLANG_CXX_VERSION = version[1] .. '.' .. version[2] .. '.' .. version[3]
+end
+
+---@param clang Node the path to the Clang executable
+---@param c_flags (string|Node)[]? Extra flags that the C compiler should support
+---@param cxx_flags (string|Node)[]? Extra flags that the C++ compiler should support
+---@return Environment[] An array to store discovered Clang compilers.
+function Clang.detect_clang_targets(clang, c_flags, cxx_flags)
+    if c_flags == nil then
+        c_flags = {}
+    end
+    if cxx_flags == nil then
+        cxx_flags = {}
+    end
+    local result = {}
+
+    local full_command = { clang }
+    for _, arg in ipairs(c_flags) do
+        full_command[1 + #full_command] = arg
     end
     full_command[1 + #full_command] = '-x'
-    full_command[1 + #full_command] = 'c++'
+    full_command[1 + #full_command] = 'c'
     full_command[1 + #full_command] = '-v'
     full_command[1 + #full_command] = '-E'
     full_command[1 + #full_command] = '-'
@@ -133,8 +110,25 @@ function Clang.detect_clang_targets(clang_command, result)
                         local arch = context.ARCHITECTURES[triple_components[1]]
                         if arch and seen[arch] == nil then
                             seen[arch] = arch
-                            context:try('running clang ' .. clang_command[1]:abs_path(), function()
-                                result[1 + #result] = Clang.detect_clang_target(clang_command, arch, triple:name())
+                            context:try('running clang ' .. clang:abs_path() .. ' for target ' .. triple:name(), function()
+                                context:with(context:derive(), function()
+                                    local c_target_flags = {}
+                                    local cxx_target_flags = {}
+                                    for _, f in ipairs(c_flags) do
+                                        c_target_flags[1+ #c_target_flags] = f
+                                    end
+                                    for _, f in ipairs(cxx_flags) do
+                                        cxx_target_flags[1+ #cxx_target_flags] = f
+                                    end
+                                    c_target_flags[1+ #c_target_flags] = '-target'
+                                    c_target_flags[1+ #c_target_flags] = triple:name()
+                                    cxx_target_flags[1+ #cxx_target_flags] = '-target'
+                                    cxx_target_flags[1+ #cxx_target_flags] = triple:name()
+                                    context.env.CC = { clang }
+                                    Clang.load_clang_c(clang, c_target_flags)
+                                    Clang.load_clang_cxx(clang, cxx_target_flags)
+                                    result[1 + #result] = context.env
+                                end)
                             end)
                         end
                     end
@@ -144,32 +138,35 @@ function Clang.detect_clang_targets(clang_command, result)
             end
         end
     end
+    return result
 end
 
 ---Discover as many Clang compilers as possible, including extra triples where applicable. When clang compilers are found,
 ---load the compiler in a new environment derived from the current environment.
----@param flags (string|Node)[] Extra flags that the compiler should support
+---@param c_flags (string|Node)[]? Extra flags that the C compiler should support
+---@param cxx_flags (string|Node)[]? Extra flags that the C++ compiler should support
 ---@return Environment[] A list of environments where a Clang compiler has been loaded.
-function Clang.discover(flags)
-    if flags == nil then
-        flags = {}
-    end
+function Clang.discover(c_flags, cxx_flags)
     local result = {}
     context:try('Looking for Clang compilers', function()
         ---@type table<string, Node>
         local seen = {}
-        for _, path in ipairs(--[[---@type Node[] ]] context.settings.path) do
+        local paths = context.settings.path
+
+        for _, path in ipairs(--[[---@type Node[] ]] paths) do
             for _, node in ipairs(context:search(path, 'clang*' .. context.settings.exe_suffix)) do
-                if string.match(node:name(), "^clang%-?%d*" .. context.settings.exe_suffix .. "$") then
-                    node = node:read_link()
-                    local absolute_path = node:abs_path()
-                    if seen[absolute_path] == nil then
-                        seen[absolute_path] = node
-                        local command = { node }
-                        for i, arg in ipairs(flags) do
-                            command[i + 1] = arg
+                local version = string.match(node:name(), "^clang%-?(%d*)" .. context.settings.exe_suffix .. "$")
+                if version ~= nil then
+                    if node:is_file() then
+                        node = node:read_link()
+                        local absolute_path = node:abs_path()
+                        if seen[absolute_path] == nil then
+                            seen[absolute_path] = node
+                            for _, env in ipairs(Clang.detect_clang_targets(node, c_flags, cxx_flags)) do
+                                env.CLANG_VERSION = version
+                                result[1 + #result] = env
+                            end
                         end
-                        Clang.detect_clang_targets(command, result)
                     end
                 end
             end

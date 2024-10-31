@@ -52,5 +52,11 @@ impl UserData for ReadWriteEnvironment {
                 Ok(())
             },
         );
+        methods.add_meta_method_mut(
+            MetaMethod::ToString,
+            |_lua, this, ()| {
+                Ok(format!("env {}", this.index))
+            },
+        );
     }
 }

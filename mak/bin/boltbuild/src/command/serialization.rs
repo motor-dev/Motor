@@ -5,6 +5,7 @@ use crate::task::{Task, TaskSeed};
 
 use std::collections::HashMap;
 use std::fmt;
+use std::io::Read;
 use std::path::PathBuf;
 use blake3::Hash;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -14,7 +15,7 @@ use serde::ser::SerializeStruct;
 impl Command {
     pub(crate) fn load_from_file(
         &mut self,
-        file: std::fs::File,
+        mut file: std::fs::File,
         command_map: &mut HashMap<String, Vec<String>>,
     ) -> crate::error::Result<()> {
         struct CommandCacheSeed<'a>(&'a ReadWriteEnvironmentVec);
@@ -55,18 +56,23 @@ impl Command {
         }
 
         let output = self.output.as_ref().unwrap();
-        let reader = std::io::BufReader::new(file);
-        let commands = CommandCacheSeed(&output.environments)
-            .deserialize(&mut serde_json::Deserializer::from_reader(reader))?;
+        let mut content = Vec::new();
+        file.read_to_end(&mut content)?;
+        let commands = bincode::serde::decode_seed_from_slice(CommandCacheSeed(&output.environments), content.as_slice(), bincode::config::standard())?;
+        //let reader = std::io::BufReader::new(file);
+        //let commands = CommandCacheSeed(&output.environments)
+        //    .deserialize(&mut serde_json::Deserializer::from_reader(reader))?;
         self.merge_cache(commands, command_map);
         Ok(())
     }
 
-    pub(crate) fn save_to_file(&self, file: std::fs::File) -> crate::error::Result<()> {
-        Ok(serde_json::to_writer_pretty(
+    pub(crate) fn save_to_file(&self, mut file: std::fs::File) -> crate::error::Result<()> {
+        bincode::serde::encode_into_std_write(&self.output.as_ref().unwrap().commands, &mut file, bincode::config::standard())?;
+        Ok(())
+        /*Ok(serde_json::to_writer_pretty(
             file,
             &self.output.as_ref().unwrap().commands,
-        )?)
+        )?)*/
     }
 }
 
@@ -194,7 +200,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
             }
         }
 
-        deserializer.deserialize_struct("Command", &["spec", "output"], CommandVisitor(self.0))
+        deserializer.deserialize_struct("Command", &["spec", "output", "status"], CommandVisitor(self.0))
     }
 }
 
@@ -348,7 +354,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
             {
                 deserializer.deserialize_struct(
                     "Command",
-                    &["environments", "commands", "options", "tools", "stored_hash", "groups", "tasks"],
+                    &["environments", "commands", "options", "tools", "stored_hash", "groups", "tasks", "drivers"],
                     self,
                 )
             }
