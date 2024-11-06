@@ -1,6 +1,7 @@
 ---@type Context
 local context = ...
 
+context:load_tool('string_ext')
 context._extensions = {}
 
 ---Register a function that processes an extension

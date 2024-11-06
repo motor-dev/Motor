@@ -235,8 +235,18 @@ impl UserData for Context {
             Ok(())
         });
 
-        methods.add_method_mut("fatal", |_lua, _this, message: String| -> LuaResult<()> {
+        methods.add_method_mut("fatal", |_lua, this, message: String| -> LuaResult<()> {
             Err(LuaError::RuntimeError(message))
+        });
+
+        methods.add_method_mut("print", |_lua, this, message: String| -> LuaResult<()> {
+            this.logger.print(message.as_str());
+            Ok(())
+        });
+
+        methods.add_method_mut("colored_print", |_lua, this, message: String| -> LuaResult<()> {
+            this.logger.colored_print(message.as_str());
+            Ok(())
         });
 
         methods.add_method_mut("set_status", |_lua, this, message: String| {

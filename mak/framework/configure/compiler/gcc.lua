@@ -9,6 +9,6 @@ for _, env in ipairs(Gcc.discover({}, { '--std=c++20' })) do
     else
         version = '_' .. version
     end
-    env.COMPILER_ID = env.CXX_COMPILER_NAME .. '-' .. env.GCC_CXX_VERSION:gsub('-', '_') .. version
+    env.TOOLCHAIN_ID = env.TARGET_OS .. '-' .. env.ARCHITECTURE .. '-' .. env.CXX_COMPILER_NAME .. '-' .. env.GCC_CXX_VERSION:gsub('-', '_') .. version
     Motor.add_compiler(env)
 end

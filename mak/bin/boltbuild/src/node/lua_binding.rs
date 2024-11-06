@@ -1,6 +1,7 @@
+use std::io::{Read, Write};
 use super::Node;
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use mlua::{Error, FromLua, Lua, MetaMethod, UserData, UserDataMethods, UserDataRef, Value};
 use mlua::prelude::LuaError;
 
@@ -18,10 +19,7 @@ impl UserData for Node {
             Ok(this.abs_path().to_string_lossy().to_string())
         });
         methods.add_method("make_node", |_lua, this, lua_path: String| {
-            let path = Path::new(lua_path.as_str());
-            let mut result = this.clone();
-            result.path.push(path);
-            Ok(result)
+            Ok(this.make_node(&PathBuf::from(lua_path)))
         });
         methods.add_method("abs_path", |_lua, this, ()| {
             Ok(this.path.to_string_lossy().to_string())
@@ -79,6 +77,7 @@ impl UserData for Node {
             ))
         });
         methods.add_method("name", |_lua, this: &Node, ()| Ok(this.path.file_name().map(|x| x.to_string_lossy().to_string())));
+        methods.add_method("basename", |_lua, this: &Node, ()| Ok(this.path.with_extension("").file_name().map(|x| x.to_string_lossy().to_string())));
         methods.add_method("is_dir", |_lua, this: &Node, ()| Ok(this.is_dir()));
         methods.add_method("is_file", |_lua, this: &Node, ()| Ok(this.is_file()));
         methods.add_method("read_link", |_lua, this: &Node, ()| Ok(this.read_link()));
@@ -92,6 +91,15 @@ impl UserData for Node {
         methods.add_method("mkdir", |_lua, this: &Node, ()|
             this.mkdir().map_err(|x| LuaError::RuntimeError(x.to_string())),
         );
+        methods.add_method("read", |_lua, this: &Node, ()| {
+            let mut result = String::new();
+            std::fs::File::create(&this.path)?.read_to_string(&mut result)?;
+            Ok(result)
+        });
+        methods.add_method("write", |_lua, this: &Node, content: String| {
+            std::fs::File::create(&this.path)?.write_all(content.as_bytes())?;
+            Ok(())
+        });
     }
 }
 
