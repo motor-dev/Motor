@@ -38,6 +38,7 @@ impl Node {
             path: self.path.clone(),
         };
         result.path.push(path);
+        result.path = normalize_path(&result.path);
         result
     }
 

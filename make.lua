@@ -15,10 +15,8 @@ if context.fun == "init" then
     context.settings.out = context.src_dir:make_node('build/.bolt')
     context.settings.tools_dir = {
         context.motor_node:make_node("mak/framework/tools"),
-        context.motor_node:make_node("mak/framework/utils")
     }
 end
 
-context:load_tool('string_ext')
 context:recurse('mak/framework/' .. context.fun)
 context:recurse('src')

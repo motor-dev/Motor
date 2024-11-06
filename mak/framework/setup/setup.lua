@@ -1,5 +1,5 @@
 local context = ...
-local target_name = context.env.TARGET
+local target_name = context.env.TOOLCHAIN_ID
 ---@type string[]
 local flavors = context.settings.flavors
 for _, flavor in ipairs(flavors) do

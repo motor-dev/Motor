@@ -34,7 +34,9 @@ function GnuCompiler.get_specs(command, language)
     local sizeof_pointer = nil
 
     for line in (err + out):lines() do
-        if string.starts_with(line, "#include <...>") then
+        if string.starts_with(line, 'Target: ') then
+            env.TARGET = line:sub(9, -1)
+        elseif string.starts_with(line, "#include <...>") then
             search_paths = true
         elseif search_paths then
             if string.starts_with(line, "End of search list") then
@@ -80,7 +82,7 @@ function GnuCompiler.get_specs(command, language)
                 elseif name == '__SIZEOF_POINTER__' then
                     sizeof_pointer = tonumber(value) * 8
                 elseif name == '__x86_64__' then
-                    arch = 'amd64'
+                    arch = 'x86_64'
                 elseif name == '__i386__' then
                     arch = 'x86'
                 elseif name == '__powerpc64__' then
@@ -127,7 +129,7 @@ function GnuCompiler.get_specs(command, language)
         if arch == 'arm64' and sizeof_pointer == 32 then
             arch = 'arm64_32'
         end
-        if arch == 'amd64' and sizeof_pointer == 32 then
+        if arch == 'x86_64' and sizeof_pointer == 32 then
             arch = 'x32'
         end
 

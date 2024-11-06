@@ -2,6 +2,7 @@
 local context = ...
 
 context:load_tool('compiler_gnu')
+context:load_tool('string_ext')
 
 Clang = {}
 
@@ -91,51 +92,66 @@ function Clang.detect_clang_targets(clang, c_flags, cxx_flags)
     local _, out, err = context:popen(full_command):communicate()
 
     local search_paths = false
-    local seen = {}
+    local paths = {}
     for line in (err + out):lines() do
         line = string.trim(line)
         if string.starts_with(line, "#include <...>") then
             search_paths = true
+        elseif string.starts_with(line, "ignoring nonexistent directory \"") then
+            local path = context.path:make_node(line:sub(33, -2))
+            paths[1+#paths] = path
         elseif search_paths and string.starts_with(line, "End of search list") then
             break
         elseif search_paths then
             local path = context.path:make_node(line)
-            local component = path:name()
-            while component do
-                path = path.parent
-                local component_list = string.split(component, '-')
-                if #component_list >= 2 and context.ARCHITECTURES[component_list[1]] then
-                    for _, triple in ipairs(context:search(path, '*-*')) do
-                        local triple_components = string.split(triple:name(), '-')
-                        local arch = context.ARCHITECTURES[triple_components[1]]
-                        if arch and seen[arch] == nil then
-                            seen[arch] = arch
-                            context:try('running clang ' .. clang:abs_path() .. ' for target ' .. triple:name(), function()
-                                context:with(context:derive(), function()
-                                    local c_target_flags = {}
-                                    local cxx_target_flags = {}
-                                    for _, f in ipairs(c_flags) do
-                                        c_target_flags[1+ #c_target_flags] = f
-                                    end
-                                    for _, f in ipairs(cxx_flags) do
-                                        cxx_target_flags[1+ #cxx_target_flags] = f
-                                    end
-                                    c_target_flags[1+ #c_target_flags] = '-target'
-                                    c_target_flags[1+ #c_target_flags] = triple:name()
-                                    cxx_target_flags[1+ #cxx_target_flags] = '-target'
-                                    cxx_target_flags[1+ #cxx_target_flags] = triple:name()
-                                    context.env.CC = { clang }
-                                    Clang.load_clang_c(clang, c_target_flags)
-                                    Clang.load_clang_cxx(clang, cxx_target_flags)
-                                    result[1 + #result] = context.env
-                                end)
+            paths[1+#paths] = path
+        end
+    end
+
+    local seen = {}
+    for _, path in ipairs(paths) do
+        local component = path:name()
+        local relpath = ''
+        local component_count = 1
+        while component do
+            path = path.parent
+            local component_list = string.split(component, '-')
+            if #component_list >= 2 then
+                for _, triple in ipairs(context:search(path, '*-*/'..relpath..'/sys')) do
+                    for i = 1, component_count do
+                        triple = triple.parent
+                    end
+                    triple = triple:name()
+                    if seen[triple] == nil then
+                        seen[triple] = triple
+                        if context:try('running clang ' .. clang:abs_path() .. ' for target ' .. triple, function()
+                            context:with(context:derive(), function()
+                                local c_target_flags = {}
+                                local cxx_target_flags = {}
+                                for _, f in ipairs(c_flags) do
+                                    c_target_flags[1 + #c_target_flags] = f
+                                end
+                                for _, f in ipairs(cxx_flags) do
+                                    cxx_target_flags[1 + #cxx_target_flags] = f
+                                end
+                                c_target_flags[1+ #c_target_flags] = '-target'
+                                c_target_flags[1+ #c_target_flags] = triple
+                                cxx_target_flags[1+ #cxx_target_flags] = '-target'
+                                cxx_target_flags[1+ #cxx_target_flags] = triple
+                                context.env.CC = { clang }
+                                Clang.load_clang_c(c_target_flags)
+                                Clang.load_clang_cxx(cxx_target_flags)
+                                result[1 + #result] = context.env
                             end)
+                        end) then
+                            break
                         end
                     end
-                    break
                 end
-                component = path:name()
             end
+            relpath = component..'/'..relpath
+            component_count = component_count + 1
+            component = path:name()
         end
     end
     return result
