@@ -8,12 +8,14 @@ Gcc = {}
 ---@param c_flags (string|Node)[]) The flags to pass to the compiler.
 function Gcc.load_gcc_c(c_flags)
     local env = context.env
-    env.CFLAGS = c_flags
+
+    env.CFLAGS = {'-x', 'c', '-c'}
+    env:append('CFLAGS', c_flags)
     env.C_COMPILER_NAME = 'gcc'
-    env.C_TGT_F = '-o'
-    env.DEFINE_ST = '-I'
-    env.INCLUDE_ST = '-I'
-    env.SYSTEM_INCLUDE_ST = '-isystem%s'
+    env.CC_TGT_F = '-o'
+    env.CC_DEFINE_ST = '-D'
+    env.CC_INCLUDE_ST = '-I'
+    env.CC_SYSTEM_INCLUDE_ST = '-isystem%s'
 
     local defines = GnuCompiler.get_specs(env.CC, "C")
     local version = { 0, 0, 0 }
@@ -37,19 +39,18 @@ function Gcc.load_gcc_cxx(cxx_flags)
     -- if a  GCC C compiler is loaded, use that
     if env.CC and env.C_COMPILER_NAME == 'gcc' then
         env.CXX = env.CC
-        env:append('CXX', '-x')
-        env:append('CXX', 'c++')
     else
         -- todo
         context:error('Could not find a valid GCC c++ compiler')
     end
 
-    env.CXXFLAGS = cxx_flags
+    env.CXXFLAGS = {'-x', 'c++', '-c'}
+    env:append('CXXFLAGS', cxx_flags)
     env.CXX_COMPILER_NAME = 'gcc'
     env.CXX_TGT_F = '-o'
-    env.DEFINE_ST = '-I'
-    env.INCLUDE_ST = '-I'
-    env.SYSTEM_INCLUDE_ST = '-isystem%s'
+    env.CXX_DEFINE_ST = '-D'
+    env.CXX_INCLUDE_ST = '-I'
+    env.CXX_SYSTEM_INCLUDE_ST = '-isystem%s'
 
     local defines = GnuCompiler.get_specs(env.CXX, "CXX")
     local version = { 0, 0, 0 }

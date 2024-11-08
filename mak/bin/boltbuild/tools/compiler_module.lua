@@ -102,7 +102,7 @@ local function module(name, link_type, languages)
     g.add_internal_include = add_internal_include
     g.add_public_define = add_public_define
     g.add_internal_define = add_internal_define
-    g.add_public_include = add_public_dependency
+    g.add_public_dependency = add_public_dependency
     g.add_internal_dependency = add_internal_dependency
     return g
 end

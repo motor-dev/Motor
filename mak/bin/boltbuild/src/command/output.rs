@@ -16,8 +16,13 @@ impl CommandOutput {
         let hash1 = {
             let mut hasher = Hasher::new();
             for file in &self.stored_hash.file_dependencies {
-                hasher.update(file.as_os_str().as_encoded_bytes());
-                hasher.update_reader(std::fs::File::open(file)?)?;
+                if file.is_file() {
+                    hasher.update(file.as_os_str().as_encoded_bytes());
+                    hasher.update_reader(std::fs::File::open(file)?)?;
+                } else {
+                    hasher.update("!file_not_found!".as_bytes());
+                    hasher.update(file.as_os_str().as_encoded_bytes());
+                }
             }
             SerializedHash(hasher.finalize())
         };
