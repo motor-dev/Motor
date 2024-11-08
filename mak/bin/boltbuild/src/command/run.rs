@@ -13,7 +13,6 @@ use std::ops::Deref;
 use std::sync::{Arc, Mutex};
 
 impl Command {
-
     pub(crate) fn is_up_to_date(&self) -> bool {
         matches!(&self.status, CommandStatus::UpToDate)
     }
@@ -117,7 +116,7 @@ impl Command {
         logger: Logger,
     ) -> Result<Logger> {
         commands.retain(|_, v| !v.starts_with(command_path.as_slice()));
-        let mut context = Context::new(self.spec.clone(), options_context, envs, tools, command_path)?;
+        let mut context = Context::new(self.spec.clone(), options_context, envs, command_path)?;
         let logger = context.run(envs, tools, commands, logger)?;
 
         if let Some(output) = &mut self.output {

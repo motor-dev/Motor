@@ -87,13 +87,13 @@ function Gcc.discover(c_flags, cxx_flags)
         for _, path in ipairs(--[[---@type Node[] ]] paths) do
             for _, crtbegin in ipairs(context:search(path.parent, 'lib/gcc*/*/*/crtbegin.o')) do
                 crtbegin = crtbegin:canonicalize()
-                if seen[tostring(crtbegin)] == nil then
-                    seen[tostring(crtbegin)] = crtbegin
+                if seen[crtbegin:abs_path()] == nil then
                     local node = crtbegin.parent
                     local version = node:name()
                     node = node.parent
                     local target = node:name()
                     for _, gcc in ipairs(context:search(path, target .. '-gcc-' .. version .. context.settings.exe_suffix)) do
+                        seen[crtbegin:abs_path()] = crtbegin
                         if pcall(function()
                             context:with(context:derive(), function()
                                 context.env.CC = { gcc }

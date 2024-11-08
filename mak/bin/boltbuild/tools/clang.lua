@@ -117,7 +117,7 @@ function Clang.detect_clang_targets(clang, c_flags, cxx_flags)
             path = path.parent
             local component_list = string.split(component, '-')
             if #component_list >= 2 then
-                for _, triple in ipairs(context:search(path, '*-*/'..relpath..'/sys')) do
+                for _, triple in ipairs(context:search(path, '*-*/'..relpath..'/sys', true)) do
                     for i = 1, component_count do
                         triple = triple.parent
                     end

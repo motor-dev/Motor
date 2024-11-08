@@ -235,7 +235,7 @@ impl UserData for Context {
             Ok(())
         });
 
-        methods.add_method_mut("fatal", |_lua, this, message: String| -> LuaResult<()> {
+        methods.add_method_mut("fatal", |_lua, _this, message: String| -> LuaResult<()> {
             Err(LuaError::RuntimeError(message))
         });
 
@@ -327,9 +327,10 @@ impl UserData for Context {
 
         methods.add_method_mut(
             "search",
-            |_lua, this, (path, pattern): (Node, String)| {
+            |_lua, this, (path, pattern, include_directories): (Node, String, Option<bool>)| {
                 let mut result = Vec::new();
                 if path.is_dir() {
+                    let include_directories = include_directories.unwrap_or(false);
                     let path = Node::from(&fs::canonicalize(path.path()).unwrap());
                     let paths = glob::glob(
                         path.path()
@@ -340,7 +341,9 @@ impl UserData for Context {
                     let mut hasher = Hasher::new();
                     for path in paths.flatten() {
                         hasher.update(path.as_os_str().as_encoded_bytes());
-                        result.push(Node::from(&path));
+                        if include_directories || !path.is_dir() {
+                            result.push(Node::from(&path));
+                        }
                     }
                     let mut store = true;
                     let hash = hasher.finalize();

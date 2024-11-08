@@ -49,13 +49,15 @@ end
 
 ---@param generator Generator
 local function process_source(generator)
-    for _, source in ipairs(generator.source) do
-        local ext = source:extension()
-        local source_processor = context._extensions[ext]
-        if source_processor == nil then
-            context:fatal("No tool that can handle files with extension "..ext..".")
+    for _, pattern in ipairs(generator.source) do
+        for _, source in ipairs(context:search(generator.path, pattern)) do
+            local ext = source:extension()
+            local source_processor = context._extensions[ext]
+            if source_processor == nil then
+                context:fatal("No tool that can handle file " .. tostring(source) .. " with extension "..ext..".")
+            end
+            source_processor(generator, source)
         end
-        source_processor(generator, source)
     end
 end
 
