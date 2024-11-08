@@ -29,7 +29,7 @@ impl Logger {
             output: stdout,
             depth: 0,
             verbosity,
-            width: 20,
+            width: 30,
             use_colors,
             show_why,
             status: None,

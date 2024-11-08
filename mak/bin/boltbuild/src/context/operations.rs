@@ -30,7 +30,6 @@ impl Context {
         spec: CommandSpec,
         options_context: Options,
         envs: &[Arc<Mutex<ReadWriteEnvironment>>],
-        tools: &[Node],
         command_path: Vec<String>,
     ) -> crate::error::Result<Context> {
         let current_dir = Node::from(&std::env::current_dir()?);
@@ -56,7 +55,7 @@ impl Context {
                     Options::Environment(e) => Some(e.clone()),
                 },
                 commands: Vec::new(),
-                tools: Vec::from(tools),
+                tools: Vec::new(),
                 stored_hash: CommandHash {
                     file_dependencies: Vec::new(),
                     option_dependencies: Vec::new(),
@@ -115,10 +114,14 @@ impl Context {
                 userdata.set_named_user_value(":features", lua.create_table()?)?;
                 userdata.set_named_user_value(":generators", lua.create_table()?)?;
                 for path in tools {
-                    if path.is_file() {
-                        run(&mut userdata, path.abs_path())?;
-                    } else {
-                        run_content(&mut userdata, path.path())?;
+                    if !userdata.borrow_mut::<Context>()?.output.tools.iter().any(|x| x.eq(path))
+                    {
+                        userdata.borrow_mut::<Context>()?.output.tools.push(path.clone());
+                        if path.is_file() {
+                            run(&mut userdata, path.abs_path())?;
+                        } else {
+                            run_content(&mut userdata, path.path())?;
+                        }
                     }
                 }
 

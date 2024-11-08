@@ -9,10 +9,12 @@ end
 ---up-to-date in a subsequent run of the tool.
 ---@param directory Node The root directory of the search
 ---@param pattern string A glob pattern
+---@param include_directories boolean? Wether directories are returned
 ---@return Node[] A list of nodes that matched the pattern.
-function Context:search(directory, pattern)
+function Context:search(directory, pattern, include_directories)
     use(directory)
     use(pattern)
+    use(include_directories)
     return {}
 end
 

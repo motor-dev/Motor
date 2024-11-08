@@ -1,6 +1,7 @@
 local context = ...
 
-local minitl = context:library('motor.minitl', {})
-local core = context:library('motor.core', { minitl })
-local meta = context:library('motor.meta', { minitl, core })
-local filesystem = context:library('motor.filesystem', { minitl, core, meta })
+local config = Motor.library('motor.config', {})
+local minitl = Motor.library('motor.minitl', {})
+local core = Motor.library('motor.core', { minitl })
+local meta = Motor.library('motor.meta', { minitl, core })
+local filesystem = Motor.library('motor.filesystem', { minitl, core, meta })

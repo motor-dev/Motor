@@ -5,14 +5,20 @@ local context = ...
 ---flags: when `static` is used, libraries are linked into an archive. When `dynamic` is used, then libraries are linked
 ---into a shared object. When neither is used, libraries are reated as a collection of object files.
 ---@param name string name of the library.
----@param dependencies string[] libaries that this library depends on.
-function context:library(name, dependencies)
-    local generator = context(name, 'c,cxx,shlib')
-    generator.dependencies = dependencies
-
+function Motor.library(name)
     local path = string.split(name, '.')
     path = string.join('/', path)
     path = context.path:make_node(path)
 
-    generator.source = context:search(path, "src/**/*.cc")
+    local generator = Bolt.shared_library(name, { 'c', 'cxx' })
+                          :set_path(path)
+                          :add_source('src/**/*')
+    for _, include in ipairs(context:search(path, 'include', true)) do
+        generator = generator:add_internal_include(include)
+    end
+    for _, include in ipairs(context:search(path, 'api', true)) do
+        generator = generator:add_public_include(include)
+    end
+
+    return generator
 end
