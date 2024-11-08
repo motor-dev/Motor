@@ -37,7 +37,11 @@ impl UserData for ReadWriteEnvironment {
             |_lua, this, (key, value): (String, Value)| {
                 let mut original_value = this.get_into_list(key.as_str());
                 let value = EnvironmentValue::from_lua(&value)?;
-                original_value.push(value);
+                if value.is_list() {
+                    original_value.extend(value.into_list());
+                } else {
+                    original_value.push(value);
+                }
                 this.set(key.as_str(), EnvironmentValue::Vec(original_value));
                 Ok(())
             },

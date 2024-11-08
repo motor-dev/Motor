@@ -9,12 +9,17 @@ Clang = {}
 ---@param c_flags (string|Node)[]) The flags to pass to the compiler.
 function Clang.load_clang_c(c_flags)
     local env = context.env
-    env.CFLAGS = c_flags
+    env.CXXFLAGS = {'-x', 'c', '-c'}
+    env:append('CFLAGS', c_flags)
     env.C_COMPILER_NAME = 'clang'
-    env.C_TGT_F = '-o'
-    env.DEFINE_ST = '-I'
-    env.INCLUDE_ST = '-I'
-    env.SYSTEM_INCLUDE_ST = '-isystem%s'
+    env.CC_TGT_F = '-o'
+    env.CC_DEFINE_ST = '-D'
+    env.CC_INCLUDE_ST = '-I'
+    env.CC_SYSTEM_INCLUDE_ST = '-isystem%s'
+    env.LINK = env.CC
+    env.LINK_TGT_F = '-o'
+    env.LINK_LIB_F = '-l'
+    env.LINK_LIBPATH_F = '-L'
 
     local defines = GnuCompiler.get_specs(env.CC, "C")
     local version = { 0, 0, 0 }
@@ -38,19 +43,22 @@ function Clang.load_clang_cxx(cxx_flags)
     -- if a  Clang C compiler is loaded, use that
     if env.CC and env.C_COMPILER_NAME == 'clang' then
         env.CXX = env.CC
-        env:append('CXX', '-x')
-        env:append('CXX', 'c++')
     else
         -- todo
         context:error('Could not find a valid Clang c++ compiler')
     end
 
-    env.CXXFLAGS = cxx_flags
+    env.CXXFLAGS = {'-x', 'c++', '-c'}
+    env:append('CXXFLAGS', cxx_flags)
     env.CXX_COMPILER_NAME = 'clang'
     env.CXX_TGT_F = '-o'
-    env.DEFINE_ST = '-I'
-    env.INCLUDE_ST = '-I'
-    env.SYSTEM_INCLUDE_ST = '-isystem%s'
+    env.CXX_DEFINE_ST = '-D'
+    env.CXX_INCLUDE_ST = '-I'
+    env.CXX_SYSTEM_INCLUDE_ST = '-isystem%s'
+    env.LINK = env.CXX
+    env.LINK_TGT_F = '-o'
+    env.LINK_LIB_F = '-l'
+    env.LINK_LIBPATH_F = '-L'
 
     local defines = GnuCompiler.get_specs(env.CXX, "CXX")
     local version = { 0, 0, 0 }

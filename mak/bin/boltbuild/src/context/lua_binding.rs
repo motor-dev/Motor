@@ -517,6 +517,16 @@ impl UserData for Context {
             },
         );
 
+        methods.add_function("get_generator_by_name", |_lua, (this, generator_name): (AnyUserData, String)| {
+            let generators = this.named_user_value::<Vec<AnyUserData>>(":generators")?;
+            for generator in generators {
+                if generator.borrow::<Generator>()?.name.eq(&generator_name) {
+                    return Ok(generator);
+                }
+            }
+            Err(LuaError::RuntimeError(format!("no generator named `{}` was declared", &generator_name)))
+        });
+
         methods.add_function("post", |lua, (this, generator): (AnyUserData, AnyUserData)| post(lua, (&this, &generator)));
 
         methods.add_method_mut(
