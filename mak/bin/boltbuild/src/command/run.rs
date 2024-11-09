@@ -94,6 +94,10 @@ impl Command {
                         }
                     }
                     output.tasks = tasks;
+                    for env in &output.environments {
+                        let mut env = env.lock().unwrap();
+                        env.update_parent(envs);
+                    }
                     Ok(())
                 } else {
                     Err("the hash could not be computed".to_string())

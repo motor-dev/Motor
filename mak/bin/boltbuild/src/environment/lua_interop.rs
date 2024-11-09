@@ -86,6 +86,20 @@ impl ReadWriteEnvironment {
         }
     }
 
+    pub(crate) fn update_parent(&mut self, parents: &[Arc<Mutex<ReadWriteEnvironment>>]) {
+        match &self.parent {
+            EnvironmentParent::Parent(env) => {
+                let index = env.lock().unwrap().index;
+                self.parent = EnvironmentParent::Parent(parents[index].clone());
+            }
+            EnvironmentParent::Leaf(env) => {
+                let index = env.lock().unwrap().index;
+                self.parent = EnvironmentParent::Leaf(parents[index].clone());
+            }
+            _ => ()
+        }
+    }
+
     pub(super) fn get_into_lua<'a, 'lua>(
         &'a mut self,
         lua: &'lua Lua,
