@@ -16,12 +16,13 @@ impl CommandDriverConfiguration {
     }
 
     pub(super) fn execute(&self, task: &Task) -> Output {
-        let (command, log, exit_code) = task.run_command(self.command.as_str());
+        let (command, log, exit_code) = task.run_command(self.command.as_str(), Vec::new());
         Output {
             exit_code,
             command,
             log,
-            dependencies: Vec::new(),
+            file_dependencies: Vec::new(),
+            extra_output: Vec::new(),
         }
     }
 }

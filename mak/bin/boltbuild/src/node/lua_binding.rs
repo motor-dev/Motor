@@ -32,9 +32,9 @@ impl UserData for Node {
             }
         });
         methods.add_method("change_ext", |_lua, this, new_ext: String| {
-            let mut path = this.path.clone();
-            path.set_extension(new_ext);
-            Ok(Node::from(&path))
+            let mut node = this.clone();
+            node.change_ext(new_ext.as_str());
+            Ok(node)
         });
         methods.add_method("path_from", |_, this: &Node, base: UserDataRef<Node>| {
             use std::path::Component;

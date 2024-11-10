@@ -7,9 +7,10 @@ context:load_tool('string_ext')
 Clang = {}
 
 ---@param c_flags (string|Node)[]) The flags to pass to the compiler.
-function Clang.load_clang_c(c_flags)
+---@param link_flags (string|Node)[]) The flags to pass to the linker.
+function Clang.load_clang_c(c_flags, link_flags)
     local env = context.env
-    env.CXXFLAGS = {'-x', 'c', '-c'}
+    env.CFLAGS = {'-x', 'c', '-c', '-fPIC'}
     env:append('CFLAGS', c_flags)
     env.C_COMPILER_NAME = 'clang'
     env.CC_TGT_F = '-o'
@@ -17,9 +18,11 @@ function Clang.load_clang_c(c_flags)
     env.CC_INCLUDE_ST = '-I'
     env.CC_SYSTEM_INCLUDE_ST = '-isystem%s'
     env.LINK = env.CC
+    env.LINKFLAGS = link_flags or {}
     env.LINK_TGT_F = '-o'
     env.LINK_LIB_F = '-l'
     env.LINK_LIBPATH_F = '-L'
+    env.LINKFLAGS_shlib = '-shared'
 
     local defines = GnuCompiler.get_specs(env.CC, "C")
     local version = { 0, 0, 0 }
@@ -38,7 +41,8 @@ function Clang.load_clang_c(c_flags)
 end
 
 ---@param cxx_flags (string|Node)[]) The flags to pass to the compiler.
-function Clang.load_clang_cxx(cxx_flags)
+---@param link_flags (string|Node)[]) The flags to pass to the linker.
+function Clang.load_clang_cxx(cxx_flags, link_flags)
     local env = context.env
     -- if a  Clang C compiler is loaded, use that
     if env.CC and env.C_COMPILER_NAME == 'clang' then
@@ -48,7 +52,7 @@ function Clang.load_clang_cxx(cxx_flags)
         context:error('Could not find a valid Clang c++ compiler')
     end
 
-    env.CXXFLAGS = {'-x', 'c++', '-c'}
+    env.CXXFLAGS = {'-x', 'c++', '-c', '-fPIC'}
     env:append('CXXFLAGS', cxx_flags)
     env.CXX_COMPILER_NAME = 'clang'
     env.CXX_TGT_F = '-o'
@@ -56,9 +60,11 @@ function Clang.load_clang_cxx(cxx_flags)
     env.CXX_INCLUDE_ST = '-I'
     env.CXX_SYSTEM_INCLUDE_ST = '-isystem%s'
     env.LINK = env.CXX
+    env.LINKFLAGS = link_flags or {}
     env.LINK_TGT_F = '-o'
     env.LINK_LIB_F = '-l'
     env.LINK_LIBPATH_F = '-L'
+    env.LINKFLAGS_shlib = '-shared'
 
     local defines = GnuCompiler.get_specs(env.CXX, "CXX")
     local version = { 0, 0, 0 }
@@ -147,8 +153,8 @@ function Clang.detect_clang_targets(clang, c_flags, cxx_flags)
                                 cxx_target_flags[1+ #cxx_target_flags] = '-target'
                                 cxx_target_flags[1+ #cxx_target_flags] = triple
                                 context.env.CC = { clang }
-                                Clang.load_clang_c(c_target_flags)
-                                Clang.load_clang_cxx(cxx_target_flags)
+                                Clang.load_clang_c(c_target_flags, {'-target', triple})
+                                Clang.load_clang_cxx(cxx_target_flags, {'-target', triple})
                                 result[1 + #result] = context.env
                             end)
                         end) then

@@ -4,19 +4,19 @@ local context = ...
 Bolt = { }
 
 ---@param generator Generator
+---@param path Node
 ---@param pattern string
 ---@return Generator
-local function add_source(generator, pattern)
-    generator.source[1 + #generator.source] = pattern
+local function add_source(generator, path, pattern)
+    generator.source[1 + #generator.source] = { path, pattern }
     return generator
 end
 
-
 ---@param generator Generator
----@param path Node
+---@param filter function(Node,Environment)->boolean,boolean
 ---@return Generator
-local function set_path(generator, path)
-    generator.path = path
+local function set_source_filter(generator, filter)
+    generator.source_filter = filter
     return generator
 end
 
@@ -48,7 +48,7 @@ end
 ---@param value string?
 ---@return Generator
 local function add_internal_define(generator, define, value)
-    generator.public_defines[1 + #generator.public_defines] = { define, value }
+    generator.defines[1 + #generator.defines] = { define, value }
     return generator
 end
 
@@ -69,8 +69,9 @@ end
 
 ---@param _env Environment
 ---@param _file Node
+---@return boolean,boolean
 local function default_filter(_env, _file)
-    return true
+    return true, false
 end
 
 ---@param name string
@@ -85,7 +86,6 @@ local function module(name, link_type, languages)
     features[1 + #features] = link_type
     local g = context(name, features)
 
-    g.path = context.path
     g.objects = { }
     g.source = { }
     g.source_filter = default_filter
@@ -97,7 +97,7 @@ local function module(name, link_type, languages)
     g.public_dependencies = { }
 
     g.add_source = add_source
-    g.set_path = set_path
+    g.set_source_filter = set_source_filter
     g.add_public_include = add_public_include
     g.add_internal_include = add_internal_include
     g.add_public_define = add_public_define

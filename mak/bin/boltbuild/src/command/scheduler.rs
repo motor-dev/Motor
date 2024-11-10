@@ -2,7 +2,7 @@ use super::{Command, TaskSeq, CommandStatus, SerializedHash, Targets};
 use crate::error::Result;
 use crate::log::Logger;
 use crate::task::Task;
-use crate::driver::{Driver, Output};
+use crate::driver::Driver;
 
 use std::collections::{HashMap, HashSet};
 use std::iter::zip;
@@ -13,6 +13,8 @@ use std::thread;
 use std::time;
 use std::time::Duration;
 use std::cmp::max;
+use std::collections::hash_map::Entry;
+use std::fs::File;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use crossbeam::channel::{Sender, Receiver};
@@ -53,7 +55,7 @@ impl Command {
             /* save tasks */
             let safe_file_name = scheduler.invalid_chars.replace_all(self.spec.name.as_str(), "_");
             let task_file = out_dir.join(format!("{}.bin", safe_file_name));
-            let mut file = std::fs::File::create(&task_file)?;
+            let mut file = File::create(&task_file)?;
             bincode::serde::encode_into_std_write(tasks_pool, &mut file, bincode::config::standard())?;
             //serde_json::to_writer_pretty(file, &tasks)?;
             if let Some(output) = &mut self.output {
@@ -73,11 +75,28 @@ enum WorkRequest<'a> {
     Run(usize, blake3::Hash, blake3::Hash),
 }
 
+struct DependencyRequest {
+    file_dependencies: Vec<PathBuf>,
+    input_hash: blake3::Hash,
+    environment_dependencies: Vec<String>,
+    environment_hash: blake3::Hash,
+}
+
+struct TaskResult<'a> {
+    task_index: usize,
+    thread_index: usize,
+    exit_code: u32,
+    command: String,
+    log: String,
+    output_hashes: Vec<(&'a PathBuf, blake3::Hash)>,
+}
+
 enum WorkResult<'a> {
     FileHashResult(usize, Vec<blake3::Hash>),
     TaskSkipped(usize, Vec<(&'a PathBuf, blake3::Hash)>),
     TaskStart(usize, usize, &'static str, &'a str),
-    TaskResult(usize, usize, Output, Vec<(&'a PathBuf, blake3::Hash)>, blake3::Hash, Vec<String>, blake3::Hash),
+    TaskResult(TaskResult<'a>),
+    DependencyResult(usize, TaskCacheEntry),
     TaskCanceled(usize),
     Panic(),
 }
@@ -140,7 +159,7 @@ impl<'command> Scheduler<'command> {
         for group in groups {
             let safe_file_name = self.invalid_chars.replace_all(group.0.as_str(), "_");
             let group_cache = out_dir.join(format!("{}.cache", safe_file_name));
-            if let Ok(mut file) = std::fs::File::open(&group_cache) {
+            if let Ok(mut file) = File::open(&group_cache) {
                 match bincode::serde::decode_from_std_read(&mut file, bincode::config::standard()) as std::result::Result<BuildCache, _> {
                     Ok(group_cache) => { build_cache.extend(group_cache); }
                     Err(error) => { logger.warning(format!("Unable to deserialize build cache {:?} ({})", group_cache, error).as_str()); }
@@ -168,7 +187,7 @@ impl<'command> Scheduler<'command> {
                 }
             }
             let cache_filename = out_dir.join(format!("{}.cache", safe_file_name));
-            match std::fs::File::create(&cache_filename) {
+            match File::create(&cache_filename) {
                 Ok(mut file) => {
                     if let Err(e) = bincode::serde::encode_into_std_write(group_cache, &mut file, bincode::config::standard()) {
                         logger.warning(format!("Unable to serialize build cache {:?} ({})", cache_filename, e).as_str());
@@ -178,18 +197,47 @@ impl<'command> Scheduler<'command> {
                     logger.warning(format!("Unable to serialize build cache {:?} ({})", cache_filename, e).as_str());
                 }
             }
-            ;
         }
     }
 
-    fn execute_thread(&self, dependency_nodes: &HashSet<&PathBuf>, thread_index: usize, work_pipe: Receiver<WorkRequest>, result_pipe: Sender<WorkResult<'command>>) {
+    fn execute_dependency_thread(&self, work_pipe: Receiver<(usize, DependencyRequest)>, result_pipe: Sender<WorkResult<'command>>) {
+        let mut dependency_hashes = HashMap::new();
+        while let Ok((task_index, request)) = work_pipe.recv() {
+            let mut hasher = blake3::Hasher::new();
+            for dependency in &request.file_dependencies {
+                match dependency_hashes.entry(dependency.clone()) {
+                    Entry::Vacant(entry) => {
+                        let mut dep_hasher = blake3::Hasher::new();
+                        if let Ok(file) = File::open(dependency) {
+                            dep_hasher.update_reader(file).unwrap();
+                        }
+                        let hash = dep_hasher.finalize();
+                        hasher.update(hash.as_bytes());
+                        entry.insert(hash);
+                    }
+                    Entry::Occupied(entry) => {
+                        hasher.update(entry.get().as_bytes());
+                    }
+                }
+            }
+            result_pipe.send(WorkResult::DependencyResult(task_index, TaskCacheEntry {
+                environment_dependencies: request.environment_dependencies,
+                file_dependencies: request.file_dependencies,
+                environment_hash: SerializedHash(request.environment_hash),
+                input_hash: SerializedHash(request.input_hash),
+                dependency_hash: SerializedHash(hasher.finalize()),
+            })).unwrap();
+        }
+    }
+
+    fn execute_thread(&self, dependency_nodes: &HashSet<&PathBuf>, thread_index: usize, work_pipe: Receiver<WorkRequest>, result_pipe: Sender<WorkResult<'command>>, dependency_pipe: Sender<(usize, DependencyRequest)>) {
         while let Ok(request) = work_pipe.recv() {
             match request {
                 WorkRequest::FileHash(start, path_bufs) => {
                     let mut result = Vec::with_capacity(path_bufs.len());
                     for &path_buf in path_bufs {
                         let mut hasher = blake3::Hasher::new();
-                        let file = std::fs::File::open(path_buf).unwrap();
+                        let file = File::open(path_buf).unwrap();
                         let hash = hasher.update_reader(file).unwrap().finalize();
                         result.push(hash);
                     }
@@ -199,6 +247,7 @@ impl<'command> Scheduler<'command> {
                     if self.abort.load(Ordering::Acquire) {
                         result_pipe.send(WorkResult::TaskCanceled(task_index)).unwrap();
                     } else {
+                        let mut hashes = Vec::new();
                         let (do_run, reason) = if let Some(cache) = &self.tasks_cache[task_index] {
                             if input_hash != cache.input_hash.0 {
                                 (true, "an input file has changed")
@@ -214,7 +263,29 @@ impl<'command> Scheduler<'command> {
                                 if !hasher.finalize().eq(&cache.environment_hash.0) {
                                     (true, "the environment has been modified")
                                 } else {
-                                    (true, "the task is up-to-date")
+                                    let mut outputs = self.tasks_pool[task_index].outputs.iter();
+                                    loop {
+                                        if let Some(output) = outputs.next() {
+                                            if dependency_nodes.contains(output.path()) {
+                                                let mut hasher = blake3::Hasher::new();
+                                                if let Ok(file) = File::open(output.path()) {
+                                                    if hasher.update_reader(file).is_ok() {
+                                                        hashes.push((output.path(), hasher.finalize()));
+                                                    } else {
+                                                        hashes.clear();
+                                                        break (true, "an output file could not be opened for read");
+                                                    }
+                                                } else {
+                                                    hashes.clear();
+                                                    break (true, "an output file is missing");
+                                                }
+                                            } else if !output.is_file() {
+                                                break (true, "an output file is missing");
+                                            }
+                                        } else {
+                                            break (false, "the task is up-to-date");
+                                        }
+                                    }
                                 }
                             }
                         } else {
@@ -225,41 +296,52 @@ impl<'command> Scheduler<'command> {
                             let task = &self.tasks_pool[task_index];
                             let driver = self.drivers.get(&task.driver).unwrap();
                             result_pipe.send(WorkResult::TaskStart(task_index, thread_index, reason, driver.get_color())).unwrap();
-                            let output = driver.execute(task);
+                            let mut output = driver.execute(task);
 
                             let mut hashes = Vec::new();
-                            for output in &self.tasks_pool[task_index].outputs {
-                                if dependency_nodes.contains(output.path()) {
-                                    let hasher = blake3::Hasher::new();
-                                    hashes.push((output.path(), hasher.finalize()));
+                            if output.exit_code == 0 {
+                                for node in &self.tasks_pool[task_index].outputs {
+                                    if dependency_nodes.contains(node.path()) {
+                                        let mut hasher = blake3::Hasher::new();
+                                        if let Ok(file) = File::open(node.path()) {
+                                            if hasher.update_reader(file).is_ok() {
+                                                hashes.push((node.path(), hasher.finalize()));
+                                            } else {
+                                                output.exit_code = 1;
+                                                output.log.push_str(format!("output file {:?} could not be read\n", node.path()).as_str());
+                                            }
+                                        } else {
+                                            output.exit_code = 1;
+                                            output.log.push_str(format!("output file {:?} is missing\n", node.path()).as_str());
+                                        }
+                                    }
                                 }
                             }
 
-                            let environment_dependencies: Vec<String> = Vec::new();
                             let mut env_hasher = blake3::Hasher::new();
                             let env = &task.env;
                             let env = env.lock().unwrap();
+                            let environment_dependencies = env.environment.used_keys.iter().map(String::clone).collect::<Vec<String>>();
                             for var in &environment_dependencies {
                                 env.get_raw(var.as_str()).hash(&mut env_hasher);
                             }
-                            result_pipe.send(WorkResult::TaskResult(
+                            result_pipe.send(WorkResult::TaskResult(TaskResult {
                                 task_index,
                                 thread_index,
-                                output,
-                                hashes,
-                                input_hash,
-                                environment_dependencies,
-                                env_hasher.finalize(),
-                            )).unwrap();
-                        } else {
-                            let mut hashes = Vec::new();
-                            for output in &self.tasks_pool[task_index].outputs {
-                                if dependency_nodes.contains(output.path()) {
-                                    let hasher = blake3::Hasher::new();
-                                    hashes.push((output.path(), hasher.finalize()));
-                                }
+                                exit_code: output.exit_code,
+                                command: output.command,
+                                log: output.log,
+                                output_hashes: hashes,
+                            })).unwrap();
+                            if output.exit_code == 0 {
+                                dependency_pipe.send((task_index, DependencyRequest {
+                                    file_dependencies: output.file_dependencies,
+                                    input_hash,
+                                    environment_dependencies,
+                                    environment_hash: env_hasher.finalize(),
+                                })).unwrap();
                             }
-
+                        } else {
                             result_pipe.send(WorkResult::TaskSkipped(task_index, hashes)).unwrap();
                         }
                     }
@@ -280,7 +362,19 @@ impl<'command> Scheduler<'command> {
 
         let mut input_hashes = Vec::new();
         let mut task_work = Vec::new();
-        task_work.resize(self.tasks_pool.len(), (usize::MAX, None));
+        task_work.resize(self.tasks_pool.len(), (usize::MAX, None, false));
+
+        fn cancel(index: usize, tasks: &[Task], task_work: &mut Vec<(usize, Option<TaskCacheEntry>, bool)>) -> usize {
+            let mut result = 0;
+            if !task_work[index].2 {
+                task_work[index].2 = true;
+                result += 1;
+                for &index in &tasks[index].successors {
+                    result += cancel(index, tasks, task_work);
+                }
+            }
+            result
+        }
 
         let mut longest_group = 1;
 
@@ -295,6 +389,7 @@ impl<'command> Scheduler<'command> {
         thread::scope(|scope| {
             let (send_request, receive_request) = crossbeam::channel::unbounded::<WorkRequest>();
             let (send_result, receive_result) = crossbeam::channel::unbounded::<WorkResult>();
+            let (send_dep_request, receive_dep_request) = crossbeam::channel::unbounded::<(usize, DependencyRequest)>();
             let timer = time::Instant::now();
             let task_count: usize = self.target_tasks.len();
             let mut processed_tasks: usize = 0;
@@ -316,15 +411,29 @@ impl<'command> Scheduler<'command> {
                 }
             }
 
+            {
+                /* captured values */
+                let send = send_result.clone();
+                let send_panic = send_result.clone();
+                let receive = receive_dep_request.clone();
+
+                scope.spawn(move || {
+                    if let Err(_error) = std::panic::catch_unwind(|| this.execute_dependency_thread(receive, send)) {
+                        send_panic.send(WorkResult::Panic()).unwrap();
+                    }
+                });
+            }
+
             for thread_index in 0..thread_count {
                 /* captured values */
                 let send = send_result.clone();
                 let send_panic = send_result.clone();
                 let receive = receive_request.clone();
+                let dependency = send_dep_request.clone();
                 let dependency_nodes = &dependency_nodes;
 
                 scope.spawn(move || {
-                    if let Err(_error) = std::panic::catch_unwind(|| this.execute_thread(dependency_nodes, thread_index, receive, send)) {
+                    if let Err(_error) = std::panic::catch_unwind(|| this.execute_thread(dependency_nodes, thread_index, receive, send, dependency)) {
                         send_panic.send(WorkResult::Panic()).unwrap();
                     }
                 });
@@ -352,7 +461,7 @@ impl<'command> Scheduler<'command> {
                             }
                         }
                         WorkResult::Panic() => {
-                            logger.error("Worker thread paniqued")
+                            logger.error("Worker thread panicked")
                         }
                         _ => unreachable!()
                     }
@@ -401,66 +510,51 @@ impl<'command> Scheduler<'command> {
                             thread_activity.switch_on(thread_index);
                             let task = &self.tasks_pool[task_index];
                             logger.why_verbose(format!("Running task {} because {}", task, reason).as_str());
-                            let id = if task.inputs.is_empty() {
-                                if task.outputs.is_empty() {
+                            let id = if task.outputs.is_empty() {
+                                if task.inputs.is_empty() {
                                     task.driver.clone()
                                 } else {
-                                    task.outputs[0].name()
+                                    task.inputs[0].name()
                                 }
                             } else {
-                                task.inputs[0].name()
+                                task.outputs[0].name()
                             };
                             log_task_start(logger, work_index, task_count_str.as_str(), format!("{{{}}}{:<width$}{{reset}} {}/{}", color, task.driver, task.generator, id, width = longest_group).as_str());
                         }
-                        WorkResult::TaskResult(
-                            task_index,
-                            thread_index,
-                            output,
-                            output_hashes,
-                            input_hash,
-                            environment_dependencies,
-                            environment_hash
-                        ) => {
-                            for (file, hash) in output_hashes {
+                        WorkResult::DependencyResult(task_index, result) => {
+                            processed_tasks += 1;
+                            task_work[task_index].1 = Some(result);
+                        }
+                        WorkResult::TaskResult(result) => {
+                            for (file, hash) in result.output_hashes {
                                 file_hashes.insert(file, hash);
                             }
-                            processed_tasks += 1;
-                            thread_activity.switch_off(thread_index);
-                            let task = &self.tasks_pool[task_index];
-                            log_task_end(logger, output.exit_code, output.command.as_str(), output.log.as_str());
-                            if output.exit_code != 0 {
+                            thread_activity.switch_off(result.thread_index);
+                            let task = &self.tasks_pool[result.task_index];
+                            log_task_end(logger, result.exit_code, result.command.as_str(), result.log.as_str());
+                            if result.exit_code != 0 {
                                 self.abort.store(true, Ordering::Release);
-                            }
-                            for &successor in &task.successors {
-                                task_work[successor].0 -= 1;
-                                if task_work[successor].0 == 0 {
-                                    if !self.abort.load(Ordering::Acquire) {
+                                processed_tasks += 1;
+                                for &successor in &task.successors {
+                                    processed_tasks += cancel(successor, self.tasks_pool, &mut task_work);
+                                }
+                            } else {
+                                for &successor in &task.successors {
+                                    task_work[successor].0 -= 1;
+                                    if task_work[successor].0 == 0 {
                                         self.on_task_ready(&send_request, successor, &file_hashes);
-                                    } else {
-                                        processed_tasks += 1;
                                     }
                                 }
                             }
-                            let hasher = blake3::Hasher::new();
-                            task_work[task_index].1 = Some(TaskCacheEntry {
-                                environment_dependencies,
-                                file_dependencies: output.dependencies,
-                                environment_hash: SerializedHash(environment_hash),
-                                input_hash: SerializedHash(input_hash),
-                                dependency_hash: SerializedHash(hasher.finalize()),
-                            });
                         }
                         WorkResult::TaskCanceled(task_index) => {
                             processed_tasks += 1;
                             for &successor in &self.tasks_pool[task_index].successors {
-                                task_work[successor].0 -= 1;
-                                if task_work[successor].0 == 0 {
-                                    processed_tasks += 1;
-                                }
+                                processed_tasks += cancel(successor, self.tasks_pool, &mut task_work);
                             }
                         }
                         WorkResult::Panic() => {
-                            logger.error("Worker thread paniqued");
+                            logger.error("Worker thread panicked");
                             break;
                         }
                         _ => unreachable!()

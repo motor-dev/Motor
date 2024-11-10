@@ -87,6 +87,10 @@ impl Node {
     pub(crate) fn name(&self) -> String {
         self.path.file_name().unwrap_or(OsStr::new("")).to_string_lossy().to_string()
     }
+    
+    pub(crate) fn change_ext(&mut self, extension: &str) {
+        self.path.set_extension(extension);
+    }
 }
 
 impl Display for Node {

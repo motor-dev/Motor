@@ -18,6 +18,7 @@ if #compilers then
                 if Motor.test_compiler(env, '#include <cstdio>\n#include <cfloat>\n#include <new>\nint main() {}\n') then
                     context:try(' `- ' .. env.TOOLCHAIN_ID, function()
                         Motor.create_toolchain(env)
+                        env:append('MOTOR_PLATFORMS', { 'linux', 'posix', 'pc' })
                         env:append('DEFINES', 'MOTOR_PLATFORM=platform_linux')
                         return 'OK'
                     end)
