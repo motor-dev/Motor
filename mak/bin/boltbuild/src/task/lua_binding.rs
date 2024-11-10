@@ -126,7 +126,7 @@ impl UserData for Task {
         methods.add_method(
             "run_command",
             |_lua, this, command: String| {
-                Ok(this.run_command(command.as_str()))
+                Ok(this.run_command(command.as_str(), Vec::new()))
             },
         );
     }

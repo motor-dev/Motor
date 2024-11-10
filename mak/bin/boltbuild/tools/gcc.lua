@@ -9,13 +9,19 @@ Gcc = {}
 function Gcc.load_gcc_c(c_flags)
     local env = context.env
 
-    env.CFLAGS = {'-x', 'c', '-c'}
+    env.CFLAGS = {'-x', 'c', '-c', '-fPIC'}
     env:append('CFLAGS', c_flags)
     env.C_COMPILER_NAME = 'gcc'
     env.CC_TGT_F = '-o'
     env.CC_DEFINE_ST = '-D'
     env.CC_INCLUDE_ST = '-I'
     env.CC_SYSTEM_INCLUDE_ST = '-isystem%s'
+    env.LINK = env.CC
+    env.LINKFLAGS = {}
+    env.LINK_TGT_F = '-o'
+    env.LINK_LIB_F = '-l'
+    env.LINK_LIBPATH_F = '-L'
+    env.LINKFLAGS_shlib = '-shared'
 
     local defines = GnuCompiler.get_specs(env.CC, "C")
     local version = { 0, 0, 0 }
@@ -44,13 +50,19 @@ function Gcc.load_gcc_cxx(cxx_flags)
         context:error('Could not find a valid GCC c++ compiler')
     end
 
-    env.CXXFLAGS = {'-x', 'c++', '-c'}
+    env.CXXFLAGS = {'-x', 'c++', '-c', '-fPIC'}
     env:append('CXXFLAGS', cxx_flags)
     env.CXX_COMPILER_NAME = 'gcc'
     env.CXX_TGT_F = '-o'
     env.CXX_DEFINE_ST = '-D'
     env.CXX_INCLUDE_ST = '-I'
     env.CXX_SYSTEM_INCLUDE_ST = '-isystem%s'
+    env.LINK = env.CXX
+    env.LINKFLAGS = {}
+    env.LINK_TGT_F = '-o'
+    env.LINK_LIB_F = '-l'
+    env.LINK_LIBPATH_F = '-L'
+    env.LINKFLAGS_shlib = '-shared'
 
     local defines = GnuCompiler.get_specs(env.CXX, "CXX")
     local version = { 0, 0, 0 }

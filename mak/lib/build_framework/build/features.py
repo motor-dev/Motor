@@ -332,46 +332,49 @@ def apply_source_filter(
     add_compiler = True
     had_filter = False
 
-    platform = file.name.find('-p=')
+    platform = file.name.find('-p{')
     if platform != -1:
         had_filter = True
         add_platform = False
-        platforms = basename[platform + 3:].split('+')
+        end_platform = file.name.find('}', platform)
+        platforms = basename[platform + 3:end_platform].split('+')
         for p in platforms:
             add_platform = add_platform or p in env.VALID_PLATFORMS
-    arch = file.name.find('-a=')
+    arch = file.name.find('-a{')
     if arch != -1:
         had_filter = True
         add_arch = False
-        architectures = basename[arch + 3:].split('+')
+        end_arch = file.name.find('}', arch)
+        architectures = basename[arch + 3:end_arch].split('+')
         for a in architectures:
             add_arch = add_arch or a in env.VALID_ARCHITECTURES
-    compiler = file.name.find('-c=')
+    compiler = file.name.find('-c{')
     if compiler != -1:
         had_filter = True
         add_compiler = False
+        end_compiler = file.name.find('}', compiler)
         compilers = basename[compiler + 3:].split('+')
         for c in compilers:
             add_compiler = add_compiler or c == env.COMPILER_NAME
     node = file.parent
     while (add_platform and add_arch and add_compiler
            and node and node != task_gen.path and node != task_gen.bld.srcnode):
-        if node.name.startswith('platform='):
+        if node.name.startswith('platform{'):
             had_filter = True
             add_platform = False
-            platforms = node.name[9:].split('+')
+            platforms = node.name[9:-2].split('+')
             for p in platforms:
                 add_platform = add_platform or p in env.VALID_PLATFORMS
-        elif node.name.startswith('arch='):
+        elif node.name.startswith('arch{'):
             had_filter = True
             add_arch = False
-            architectures = node.name[5:].split('+')
+            architectures = node.name[5:-2].split('+')
             for a in architectures:
                 add_arch = add_arch or a in env.VALID_ARCHITECTURES
-        elif node.name.startswith('compiler='):
+        elif node.name.startswith('compiler{'):
             had_filter = True
             add_compiler = False
-            compilers = node.name[9:].split('+')
+            compilers = node.name[9:-2].split('+')
             for c in compilers:
                 add_compiler = add_compiler or c == env.COMPILER_NAME
         elif node.parent.name == 'extra' and node.parent.parent == task_gen.bld.motornode:

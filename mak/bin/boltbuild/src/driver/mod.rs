@@ -18,7 +18,8 @@ pub(crate) struct Output {
     pub(crate) exit_code: u32,
     pub(crate) command: String,
     pub(crate) log: String,
-    pub(crate) dependencies: Vec<PathBuf>,
+    pub(crate) file_dependencies: Vec<PathBuf>,
+    pub(crate) extra_output: Vec<Node>,
 }
 
 #[derive(Serialize, Deserialize)]

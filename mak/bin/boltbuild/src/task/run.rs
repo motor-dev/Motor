@@ -4,7 +4,7 @@ use regex::Captures;
 use subprocess::ExitStatus;
 
 impl Task {
-    pub(crate) fn run_command(&self, command: &str) -> (String, String, u32) {
+    pub(crate) fn run_command(&self, command: &str, extra_args: Vec<String>) -> (String, String, u32) {
         let mut command_line = Vec::new();
 
         for argument in SPLIT_RE.split(command) {
@@ -15,6 +15,7 @@ impl Task {
                 }
             }
         }
+        command_line.extend(extra_args);
 
         let command = command_line.join(" ");
 
@@ -101,6 +102,10 @@ impl Task {
                         if !pattern.contains("%s") {
                             for a in &mut result {
                                 *a = format!("{}{}{}{}", &argument[0..start], pattern, a, &argument[end..argument.len()]);
+                            }
+                        } else {
+                            for a in &mut result {
+                                *a = format!("{}{}{}", &argument[0..start], pattern.replace("%s", a), &argument[end..argument.len()]);
                             }
                         }
                     }

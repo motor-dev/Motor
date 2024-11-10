@@ -32,11 +32,12 @@ impl LuaDriverConfiguration {
                 exit_code: 1,
                 command: self.script.to_string(),
                 log: err.to_string(),
-                dependencies: Vec::new(),
+                file_dependencies: Vec::new(),
+                extra_output: Vec::new(),
             }
         } else {
             /* retrieve a list of modules */
-            let mut dependencies = Vec::new();
+            let mut file_dependencies = Vec::new();
 
             let package: Table = globals.get("package").unwrap();
             let package_path: String = package.get("path").unwrap();
@@ -46,7 +47,7 @@ impl LuaDriverConfiguration {
                     let module_path = path.replace("?", key.replace(".", "/").as_str());
 
                     if Path::new(module_path.as_str()).is_file() {
-                        dependencies.push(PathBuf::from(module_path));
+                        file_dependencies.push(PathBuf::from(module_path));
                         break;
                     }
                 }
@@ -56,16 +57,19 @@ impl LuaDriverConfiguration {
                     exit_code: 1,
                     command: self.script.to_string(),
                     log: err.to_string(),
-                    dependencies: Vec::new(),
+                    file_dependencies: Vec::new(),
+                    extra_output: Vec::new(),
                 }
             } else {
                 Output {
                     exit_code: 0,
                     command: self.script.to_string(),
                     log: "".to_string(),
-                    dependencies,
+                    file_dependencies,
+                    extra_output: Vec::new(),
                 }
             }
         }
     }
 }
+
