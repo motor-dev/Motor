@@ -5,15 +5,29 @@ local function use(var)
 end
 
 ---@class Context
----@field name string The name of the command
----@field fun string The name of the function to run.
----@field env Environment
----@field path Node
----@field src_dir Node
----@field bld_dir Node
----@field settings Settings
----@field [string] any
+--- The `Context` class provides core functions for managing build commands, environments, tasks, and filesystem access.
+--- It centralizes the configuration and execution settings needed across commands in the build system.
+---
+---@field name string The name of the command being executed.
+---@field fs_name string The filesystem name associated with the command.
+---@field fun string The function name to run in this context.
+---@field env Environment The environment object with configuration details for the command.
+---@field path Node The current path of the context's operation.
+---@field src_dir Node The source directory for this command or build.
+---@field bld_dir Node The build directory for storing output.
+---@field settings Settings Command-line options and settings shared across contexts.
+---@field [string] any Used to support dynamic indexing within the context object.
 Context = {}
+
+--- Recursively loads or executes the script at the specified `path`.
+--- - If `path` is a file, it will be executed directly.
+--- - If `path` is a directory, the function will search for a file named after the `context.fun` basename in that directory
+---   (e.g., if `context.fun` is `"build"`, it will look for `build.lua`).
+---
+---@param path string The path to the file or directory, either absolute or relative to the context's current path.
+function Context:recurse(path)
+    use(path)
+end
 
 ---Loads a tool file. Tools work in a similar way to `recurse`, but they are also automatically loaded by dependent commands.
 ---@param tool_name string The name of the tool. RsWaf wil lscan through the tools_dir setting to find a file called `tool_name`.lua
@@ -23,12 +37,7 @@ function Context:load_tool(tool_name, reload)
     use(reload)
 end
 
----Executes the script located at `path`.
----If `path` is a directory, the function will look for a file with the basename `context.fun` in that directory.
----@param path string A path, absolute or relative to the current context's path
-function Context:recurse(path)
-    use(path)
-end
+
 
 ---A commend that has been declared
 ---@class DeclaredCommand

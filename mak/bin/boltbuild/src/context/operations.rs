@@ -8,6 +8,8 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use mlua::{AnyUserData, Lua, Table};
 use mlua::prelude::{LuaError, LuaFunction, LuaResult, LuaValue};
+use lazy_static::lazy_static;
+use regex::Regex;
 
 use crate::command::{Command, CommandHash, CommandOutput, CommandSpec, CommandStatus, GroupStatus, SerializedHash, TaskSeq};
 use crate::environment::ReadWriteEnvironment;
@@ -18,6 +20,10 @@ use crate::options::Options;
 use crate::context::TOOLS_DIR;
 
 const ROOT_SCRIPT: &str = "make.lua";
+
+lazy_static! {
+    pub(crate) static ref INVALID_CHARS: Regex = Regex::new(r"[<>:/\\|\?\*]+").unwrap();
+}
 
 pub(super) struct DeclaredCommand {
     pub(super) path: Vec<usize>,
@@ -63,7 +69,7 @@ impl Context {
                     glob_dependencies: Vec::new(),
                     hash: None,
                 },
-                groups: vec![(spec.name.clone(), GroupStatus::Enabled)],
+                groups: vec![(spec.fs_name.clone(), GroupStatus::Enabled)],
                 tasks: TaskSeq::None,
                 drivers: HashMap::new(),
             },
@@ -219,6 +225,7 @@ impl Context {
                 let mut full_path = self.command_path.clone();
                 let spec = CommandSpec {
                     name: name.to_string(),
+                    fs_name: INVALID_CHARS.replace_all(name, "_").to_string(),
                     function: function.to_string(),
                     envs,
                 };
@@ -256,6 +263,7 @@ impl Context {
                 }
                 let spec = CommandSpec {
                     name: name.to_string(),
+                    fs_name: INVALID_CHARS.replace_all(name, "_").to_string(),
                     function: function.to_string(),
                     envs: Vec::new(),
                 };

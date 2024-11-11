@@ -1,3 +1,4 @@
+---@type Context
 local context = ...
 
 local config = Motor.library('motor.config')
