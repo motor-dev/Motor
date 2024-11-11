@@ -15,7 +15,6 @@ use std::time::Duration;
 use std::cmp::max;
 use std::collections::hash_map::Entry;
 use std::fs::File;
-use regex::Regex;
 use serde::{Deserialize, Serialize};
 use crossbeam::channel::{Sender, Receiver};
 
@@ -53,8 +52,7 @@ impl Command {
             scheduler.save_cache(logger, out_dir, &output.groups);
 
             /* save tasks */
-            let safe_file_name = scheduler.invalid_chars.replace_all(self.spec.name.as_str(), "_");
-            let task_file = out_dir.join(format!("{}.bin", safe_file_name));
+            let task_file = out_dir.join(format!("{}.bin", self.spec.fs_name));
             let mut file = File::create(&task_file)?;
             bincode::serde::encode_into_std_write(tasks_pool, &mut file, bincode::config::standard())?;
             //serde_json::to_writer_pretty(file, &tasks)?;
@@ -119,7 +117,6 @@ struct Scheduler<'command> {
     outputs: HashSet<PathBuf>,
     tasks_cache: Vec<Option<TaskCacheEntry>>,
     target_tasks: Vec<usize>,
-    invalid_chars: Regex,
     abort: AtomicBool,
 }
 
@@ -134,7 +131,6 @@ impl<'command> Scheduler<'command> {
             outputs: HashSet::new(),
             tasks_cache,
             target_tasks: Vec::new(),
-            invalid_chars: Regex::new(r"[<>:/\\|\?\*]+").unwrap(),
             abort: AtomicBool::new(false),
         }
     }
@@ -157,8 +153,7 @@ impl<'command> Scheduler<'command> {
     fn load_cache<T>(&mut self, logger: &mut Logger, out_dir: &Path, groups: &[(String, T)]) {
         let mut build_cache = BuildCache::new();
         for group in groups {
-            let safe_file_name = self.invalid_chars.replace_all(group.0.as_str(), "_");
-            let group_cache = out_dir.join(format!("{}.cache", safe_file_name));
+            let group_cache = out_dir.join(format!("{}.cache", group.0));
             if let Ok(mut file) = File::open(&group_cache) {
                 match bincode::serde::decode_from_std_read(&mut file, bincode::config::standard()) as std::result::Result<BuildCache, _> {
                     Ok(group_cache) => { build_cache.extend(group_cache); }
@@ -175,7 +170,6 @@ impl<'command> Scheduler<'command> {
     fn save_cache<T>(&mut self, logger: &mut Logger, out_dir: &Path, groups: &[(String, T)]) {
         /* save all caches */
         for (group, _) in groups {
-            let safe_file_name = self.invalid_chars.replace_all(group.as_str(), "_");
             let mut group_cache = BuildCache::new();
             for (i, task) in self.tasks_pool.iter().enumerate() {
                 if task.group.eq(group) {
@@ -186,7 +180,7 @@ impl<'command> Scheduler<'command> {
                     }
                 }
             }
-            let cache_filename = out_dir.join(format!("{}.cache", safe_file_name));
+            let cache_filename = out_dir.join(format!("{}.cache", group));
             match File::create(&cache_filename) {
                 Ok(mut file) => {
                     if let Err(e) = bincode::serde::encode_into_std_write(group_cache, &mut file, bincode::config::standard()) {

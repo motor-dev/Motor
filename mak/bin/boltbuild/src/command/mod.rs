@@ -32,6 +32,7 @@ pub(crate) enum CommandStatus {
 #[derive(Clone, Serialize, Deserialize)]
 pub(crate) struct CommandSpec {
     pub(crate) name: String,
+    pub(crate) fs_name: String,
     pub(crate) function: String,
     pub(crate) envs: Vec<usize>,
 }

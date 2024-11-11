@@ -1,5 +1,5 @@
 use super::{Context, TOOLS_DIR};
-use super::operations::{DeclaredCommand, Feature, post};
+use super::operations::{DeclaredCommand, Feature, post, INVALID_CHARS};
 use super::subprocess::Process;
 
 use std::fs;
@@ -117,6 +117,7 @@ impl UserData for DeclaredCommand {}
 impl UserData for Context {
     fn add_fields<'lua, F: UserDataFields<'lua, Self>>(fields: &mut F) {
         fields.add_field_method_get("name", |_, this| Ok(this.spec.name.clone()));
+        fields.add_field_method_get("fs_name", |_, this| Ok(this.spec.fs_name.clone()));
         fields.add_field_method_get("fun", |_, this| Ok(this.spec.function.clone()));
         fields.add_field_method_get("env", |_, this| Ok(this.environment.clone()));
         fields.add_field_method_get("path", |_, this| Ok(this.path.clone()));
@@ -446,12 +447,14 @@ impl UserData for Context {
         methods.add_meta_function(
             MetaMethod::Call,
             |lua, (this, name, features, env, group): (AnyUserData, String, LuaValue, Option<AnyUserData>, Option<String>)| {
-                if let Some(group) = &group {
+                let group = {
                     let context = this.borrow::<Context>()?;
-                    if !context.output.groups.iter().any(|x| x.0.eq(&name)) {
+                    let group = group.unwrap_or_else(|| context.spec.fs_name.clone());
+                    if !context.output.groups.iter().any(|x| x.0.eq(&group)) {
                         return Err(LuaError::RuntimeError(format!("When creating generator `{}`: `{}`: group was not declared", &name, group)));
                     }
-                }
+                    group
+                };
                 let features = match &features {
                     LuaValue::String(s) => s.to_string_lossy().split(',').map(|x| x.trim().to_string()).collect(),
                     LuaValue::Table(_) => { Vec::<String>::from_lua(features, lua)? }
@@ -468,10 +471,6 @@ impl UserData for Context {
                     };
                     let env = Arc::new(Mutex::new(ReadWriteEnvironment::derive(&from_env, this.output.environments.len())?));
                     this.output.environments.push(env.clone());
-                    let group = match group {
-                        Some(x) => x,
-                        None => this.spec.name.clone(),
-                    };
                     lua.create_userdata(Arc::new(Mutex::new(Generator::new(name, env, group, features))))?
                 };
 
@@ -532,7 +531,9 @@ impl UserData for Context {
         methods.add_method_mut(
             "declare_group",
             |_lua, this, (name, enabled): (String, LuaValue)| {
-                if this.output.groups.iter().any(|x| x.0.eq(&name)) {
+                if INVALID_CHARS.find(&name).is_some() {
+                    Err(LuaError::RuntimeError(format!("`{}`: invalid characters in group name", &name)))
+                } else if this.output.groups.iter().any(|x| x.0.eq(&name)) {
                     Err(LuaError::RuntimeError(format!("`{}`: build group already registered", &name)))
                 } else {
                     let status = match enabled {
@@ -542,7 +543,7 @@ impl UserData for Context {
                         LuaValue::String(s) => GroupStatus::Conditional(s.to_string_lossy().to_string()),
                         _ => return Err(LuaError::RuntimeError("Parameter `enabled` of method `declare_group` should be nil, a boolean, or a string".to_string())),
                     };
-                    this.output.groups.push((name.clone(), status));
+                    this.output.groups.push((name.to_string(), status));
                     Ok(())
                 }
             },
