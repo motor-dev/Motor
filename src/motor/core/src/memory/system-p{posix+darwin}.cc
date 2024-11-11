@@ -22,7 +22,7 @@ u32 SystemAllocator::platformPageSize()
 
 static inline u32 cacheAhead()
 {
-    static constexpr u32 s_cacheAhead =
+    static const u32 s_cacheAhead =
 #if MOTOR_ENABLE_MEMORY_DEBUGGING
         0;
 #else
@@ -36,7 +36,7 @@ byte* SystemAllocator::platformReserve(u32 size)
     motor_assert_format(size % platformPageSize() == 0,
                         "size {0} is not aligned on a page boundary (page size = {1})", size,
                         platformPageSize());
-    byte* result
+    const auto result
         = static_cast< byte* >(mmap(nullptr, size + platformPageSize(), PROT_NONE,
                                     MAP_PRIVATE | MAP_ANON, -1,
                                     0));
@@ -59,8 +59,8 @@ void SystemAllocator::platformCommit(byte* ptr, u32 start, u32 stop)
     motor_assert_format(stop % platformPageSize() == 0,
                         "offset {0} is not aligned on a page boundary (page size = {1})", stop,
                         platformPageSize());
-    int failed = mprotect(reinterpret_cast< char* >(ptr) + start + cacheAhead(), stop - start,
-                          PROT_READ | PROT_WRITE);
+    const int failed = mprotect(reinterpret_cast< char* >(ptr) + start + cacheAhead(), stop - start,
+                                PROT_READ | PROT_WRITE);
     motor_forceuse(failed);
     motor_assert_format(failed == 0, "failed to commit memory for {0} bytes at offset {1}: {2}",
                         (stop - start), start, strerror(errno));
