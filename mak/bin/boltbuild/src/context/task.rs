@@ -19,7 +19,7 @@ impl Context {
             }
         }
 
-        self.add_dependencies(&new_dependencies, new_task)?;
+        self.add_dependencies(new_dependencies, new_task)?;
 
         for node in nodes {
             /* in case the same node is added twice */

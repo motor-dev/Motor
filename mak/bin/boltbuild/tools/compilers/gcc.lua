@@ -1,7 +1,7 @@
 ---@type Context
 local context = ...
 
-context:load_tool('compiler_gnu')
+context:load_tool('internal/compiler_gnu')
 
 Gcc = {}
 
@@ -37,6 +37,10 @@ function Gcc.load_gcc_c(c_flags)
     end
 
     env.GCC_C_VERSION = version[1] .. '.' .. version[2] .. '.' .. version[3]
+
+    -- load build rules for C
+    context:load_tool('internal/c')
+    context:load_tool('internal/link')
 end
 
 ---@param cxx_flags (string|Node)[]) The flags to pass to the compiler.
@@ -77,6 +81,10 @@ function Gcc.load_gcc_cxx(cxx_flags)
         end
     end
     env.GCC_CXX_VERSION = version[1] .. '.' .. version[2] .. '.' .. version[3]
+
+    -- load build rules for C++
+    context:load_tool('internal/cxx')
+    context:load_tool('internal/link')
 end
 
 ---Discover as many Gcc compilers as possible, including extra triples where applicable. When gcc compilers are found,
@@ -148,7 +156,3 @@ function Gcc.discover(c_flags, cxx_flags)
     end)
     return result
 end
-
--- load build rules for C and C++
-context:load_tool('c')
-context:load_tool('cxx')

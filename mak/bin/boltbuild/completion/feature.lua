@@ -4,43 +4,50 @@ local function use(var)
     return var
 end
 
----Registers a feature callback.
----@param feature string|string[] A list of features that this callback is attached to.
----@param name string The name of this step.
----@param callback function(generator: Generator) The function attached to the feature.
----@return Feature A new feature object that can be used to set predecence
+--- Registers a callback function associated with a specific build feature or set of features.
+--- - Features represent specific steps or capabilities within the build process, and each feature can have associated callbacks.
+--- - This allows modular steps to be registered for execution when the given feature(s) are triggered.
+---
+---@param feature string|string[] A single feature or list of features that this callback is associated with.
+---@param name string The name of this step, used for dependency management.
+---@param callback function(generator: Generator) The function to execute when this feature is triggered.
+---@return Feature A new Feature object that allows setting dependency order.
 function Context:feature(feature, name, callback)
     use(feature)
     use(name)
     use(callback)
-    use(after)
-    use(before)
     return Feature
 end
 
----Posts a generator. Calls all methods associated with the features, which can in turn post other generators or create tasks.
----@param generator Generator the generator to post. Posting the generator more than once has no effect.
-function Context:post(generator)
-    use(generator)
-end
-
+--- Represents a feature in the build system, allowing configuration of its execution order in relation to other features.
 ---@class Feature
 Feature = {}
 
----Adds a list of steps that are prerequisites for this step. The function returns an error if setting the dependencies
----would create a dependency cycle. In this case, no dependency is added.
----@param predecessors string[] An optional list of steps that this step comes after, i.e. must have been executed before this step.
----@return Feature the same object for further editing
+--- Specifies steps that must be completed before this feature can execute.
+--- - Attempts to set up a dependency cycle will cause an error, preventing any dependencies from being added.
+---
+---@param predecessors string[] An optional list of steps that must complete before this step runs.
+---@return Feature The same Feature object for chaining further configurations.
 function Feature:set_run_after(predecessors)
     use(predecessors)
     return self
 end
 
----Adds a list of steps that the current step is a prerequisite of. The function returns an error if setting the dependencies
----would create a dependency cycle. In this case, no dependency is added.
----@param successors string[] An optional list of steps that this step comes before, i.e. must be executed after this step.
----@return Feature the same object for further editing
+--- Specifies steps that will run after this feature, making this step a prerequisite.
+--- - Attempts to set up a dependency cycle will cause an error, preventing any dependencies from being added.
+---
+---@param successors string[] An optional list of steps that must execute after this step completes.
+---@return Feature The same Feature object for chaining further configurations.
 function Feature:set_run_before(successors)
     use(successors)
     return self
+end
+
+--- Posts a generator, triggering execution of all callbacks associated with the generator's features.
+--- - Each registered feature callback for the generator is called in dependency order, potentially creating tasks or posting other generators.
+--- - Posting the same generator multiple times has no additional effect.
+---
+---@param generator Generator The generator to post for execution.
+function Context:post(generator)
+    use(generator)
 end

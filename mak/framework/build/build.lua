@@ -1,6 +1,6 @@
 ---@type Context
 local context = ...
-context:load_tool('compiler_module')
+context:load_tool('product')
 
 Motor = { }
 

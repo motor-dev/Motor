@@ -4,65 +4,69 @@ local function use(var)
     return var
 end
 
----A container for command-line options or settings. The methods `add_*` are only accessible during the `init` stage.
+---A container for managing command-line options or general settings for a program.
+---Settings allow values to be configured via command-line arguments, and each setting type can be declared with methods prefixed by `add_*`.
+---These `add_*` methods are only available during the `init` stage of the tool's lifecycle.
 ---@class Settings
----@field [string] EnvironmentValue
+---@field [string] EnvironmentValue Holds environment values mapped to string keys, for storing any program-defined settings.
 Settings = {}
 
----A command-line option.
+---Represents a command-line option that has been declared within `Settings`.
+---The option may be of various types, such as a boolean flag, string, integer count, list, or an enumerated choice.
 ---@class CommandLineOption
 CommandLineOption = {}
 
----Declares a new boolean setting with optional command-line access.
----@param name string The name of the setting
----@param help string A help message that can be displayed using `--help`
----@param default_value? boolean The default value if the setting is not passed on the command line
----@return CommandLineOption the new option, for further editing.
+---Declares a new boolean setting, representing a flag that can be toggled on or off.
+---This setting can optionally be configured from the command line.
+---@param name string The name of the setting, used as a key for retrieval.
+---@param help string A help message displayed in the `--help` output, describing the setting's purpose.
+---@param default_value boolean|nil The default value of the flag if it is not specified on the command line; defaults to `false` if unspecified.
+---@return CommandLineOption A `CommandLineOption` object for further configuration.
 function Settings:add_flag(name, help, default_value)
     use(name)
     use(help)
     use(default_value)
 end
 
----Declares a new string setting with optional command-line access.
----@param name string The name of the setting
----@param help string A help message that can be displayed using `--help`
----@param default_value? string The default value if the setting is not passed on the command line
----@return CommandLineOption the new option, for further editing.
+---Declares a new string setting, allowing users to input arbitrary text values.
+---@param name string The name of the setting, used as a key for retrieval.
+---@param help string A help message displayed in the `--help` output, describing the setting's purpose.
+---@param default_value string|nil The default value if the setting is not specified on the command line.
+---@return CommandLineOption A `CommandLineOption` object for further configuration.
 function Settings:add_value(name, help, default_value)
     use(name)
     use(help)
     use(default_value)
 end
 
----Declares a new integer setting with optional command-line access.
----@param name string The name of the setting
----@param help string A help message that can be displayed using `--help`
----@param default_value? number The default value if the setting is not passed on the command line
----@return CommandLineOption the new option, for further editing.
+---Declares a new integer setting, often used for counters or specifying numerical values.
+---@param name string The name of the setting, used as a key for retrieval.
+---@param help string A help message displayed in the `--help` output, describing the setting's purpose.
+---@param default_value number|nil The default value if the setting is not specified on the command line.
+---@return CommandLineOption A `CommandLineOption` object for further configuration.
 function Settings:add_count(name, help, default_value)
     use(name)
     use(help)
     use(default_value)
 end
 
----Declares a new list setting with optional command-line access.
----@param name string The name of the setting
----@param help string A help message that can be displayed using `--help`
----@param default_value? string[] The default value if the setting is not passed on the command line
----@return CommandLineOption the new option, for further editing.
+---Declares a new list setting, allowing multiple values to be provided as a comma-separated list.
+---@param name string The name of the setting, used as a key for retrieval.
+---@param help string A help message displayed in the `--help` output, describing the setting's purpose.
+---@param default_value string[]|nil The default list of values if none are provided on the command line.
+---@return CommandLineOption A `CommandLineOption` object for further configuration.
 function Settings:add_list(name, help, default_value)
     use(name)
     use(help)
     use(default_value)
 end
 
----Declares a new enum setting with optional command-line access.
----@param name string The name of the setting
----@param help string A help message that can be displayed using `--help`
----@param possible_values string[] The list of values to pick from
----@param default_value? string The default value if the setting is not passed on the command line
----@return CommandLineOption the new option, for further editing.
+---Declares a new enum setting, restricting input to a defined set of valid string values.
+---@param name string The name of the setting, used as a key for retrieval.
+---@param help string A help message displayed in the `--help` output, describing the setting's purpose.
+---@param possible_values string[] An array of valid values that this setting can accept.
+---@param default_value string|nil The default value if the setting is not specified on the command line.
+---@return CommandLineOption A `CommandLineOption` object for further configuration.
 function Settings:add_choice(name, help, possible_values, default_value)
     use(name)
     use(help)
@@ -70,29 +74,31 @@ function Settings:add_choice(name, help, possible_values, default_value)
     use(possible_values)
 end
 
----Sets the category of the option. This helps sorting options in the help menu.
----@param category string The header to use when listing options using `--help`
----@return CommandLineOption the same option, for further editing.
+---Specifies a category for the command-line option, helping to organize options within `--help` output.
+---@param category string The category name under which this option will appear in help documentation.
+---@return CommandLineOption The current `CommandLineOption` object, allowing method chaining.
 function CommandLineOption:set_category(category)
     use(category)
 end
 
----Sets the long version of the flag on the command line.
----@param long string The command-line option in its long form
----@return CommandLineOption the same option, for further editing.
+---Sets the full (long) form of the option as it will appear on the command line.
+---For example, setting `--verbose` as the long form of a flag.
+---@param long string The long version of the option (e.g., `--verbose`).
+---@return CommandLineOption The current `CommandLineOption` object, allowing method chaining.
 function CommandLineOption:set_long(long)
     use(long)
 end
 
----Sets the short version of the flag on the command line.
----@param short string The command-line option in its short form
----@return CommandLineOption the same option, for further editing.
+---Sets the abbreviated (short) form of the option as it will appear on the command line.
+---For example, setting `-v` as the short form of a flag.
+---@param short string The short version of the option (e.g., `-v`).
+---@return CommandLineOption The current `CommandLineOption` object, allowing method chaining.
 function CommandLineOption:set_short(short)
     use(short)
 end
 
----Makes the option a required option.
----@return CommandLineOption the same option, for further editing.
+---Marks this option as required, meaning that the program will enforce that it is specified at runtime.
+---If omitted, the program will produce an error indicating the option must be provided.
+---@return CommandLineOption The current `CommandLineOption` object, allowing method chaining.
 function CommandLineOption:set_required()
-
 end

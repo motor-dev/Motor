@@ -1,12 +1,13 @@
 use std::io::{Read, Write};
+use std::ops::Deref;
 use super::Node;
 
 use std::path::PathBuf;
 use mlua::{Error, FromLua, Lua, MetaMethod, UserData, UserDataMethods, UserDataRef, Value};
-use mlua::prelude::LuaError;
+use mlua::prelude::{LuaError, LuaString};
 
 impl UserData for Node {
-    fn add_fields<'lua, F: mlua::UserDataFields<'lua, Self>>(fields: &mut F) {
+    fn add_fields<F: mlua::UserDataFields<Self>>(fields: &mut F) {
         fields.add_field_method_get("parent", |_lua, this| {
             let mut result = this.clone();
             result.path.pop();
@@ -14,7 +15,7 @@ impl UserData for Node {
         })
     }
 
-    fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(methods: &mut M) {
+    fn add_methods<'lua, M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_meta_method(MetaMethod::ToString, |_lua, this: &Node, ()| {
             Ok(this.abs_path().to_string_lossy().to_string())
         });
@@ -92,24 +93,24 @@ impl UserData for Node {
             this.mkdir().map_err(|x| LuaError::RuntimeError(x.to_string())),
         );
         methods.add_method("read", |_lua, this: &Node, ()| {
-            let mut result = String::new();
-            std::fs::File::create(&this.path)?.read_to_string(&mut result)?;
-            Ok(result)
+            let mut content = Vec::new();
+            std::fs::File::create(&this.path)?.read_to_end(&mut content)?;
+            _lua.create_string(content)
         });
-        methods.add_method("write", |_lua, this: &Node, content: String| {
-            std::fs::File::create(&this.path)?.write_all(content.as_bytes())?;
+        methods.add_method("write", |_lua, this: &Node, content: LuaString| {
+            std::fs::File::create(&this.path)?.write_all(content.as_bytes().deref())?;
             Ok(())
         });
     }
 }
 
-impl<'lua> FromLua<'lua> for Node {
-    fn from_lua(value: Value<'lua>, _lua: &'lua Lua) -> mlua::Result<Self> {
+impl FromLua for Node {
+    fn from_lua(value: Value, _lua: &Lua) -> mlua::Result<Self> {
         match value {
             Value::UserData(userdata) => Ok(userdata.borrow::<Node>()?.clone()),
             _ => Err(Error::FromLuaConversionError {
                 from: value.type_name(),
-                to: "Node",
+                to: "Node".to_string(),
                 message: None,
             }),
         }

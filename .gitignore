@@ -3,6 +3,7 @@
 !/extra/android
 !/extra/ios
 /bld/*
+/build/*
 /nbproject/*
 *.pyc
 /.lock-*

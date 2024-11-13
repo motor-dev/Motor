@@ -16,7 +16,7 @@ impl CommandDriverConfiguration {
     }
 
     pub(super) fn execute(&self, task: &Task) -> Output {
-        let (command, log, exit_code) = task.run_command(self.command.as_str(), Vec::new());
+        let (exit_code, log, command) = task.run_command(self.command.as_str(), Vec::new());
         Output {
             exit_code,
             command,

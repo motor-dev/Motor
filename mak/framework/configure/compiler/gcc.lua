@@ -1,7 +1,7 @@
 ---@type(Context)
 local context = ...
 
-context:load_tool('gcc')
+context:load_tool('compilers/gcc')
 for _, env in ipairs(Gcc.discover({}, { '--std=c++20' })) do
     local _, _, version = string.find(env.GCC_VERSION, '-(.*)')
     if version == nil then

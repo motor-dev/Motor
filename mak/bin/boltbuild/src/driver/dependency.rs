@@ -22,7 +22,7 @@ impl DependencyCommandDriverConfiguration {
     pub(super) fn execute(&self, task: &Task) -> Output {
         let mut dep_node = task.outputs[0].clone();
         dep_node.change_ext("d");
-        let (command, log, exit_code) = task.run_command(self.command.as_str(), vec![String::from("-MD")]);
+        let (exit_code, log, command) = task.run_command(self.command.as_str(), vec![String::from("-MD")]);
         if exit_code == 0 {
             Output {
                 exit_code,

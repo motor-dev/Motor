@@ -4,14 +4,14 @@ use regex::Captures;
 use subprocess::ExitStatus;
 
 impl Task {
-    pub(crate) fn run_command(&self, command: &str, extra_args: Vec<String>) -> (String, String, u32) {
+    pub(crate) fn run_command(&self, command: &str, extra_args: Vec<String>) -> (u32, String, String) {
         let mut command_line = Vec::new();
 
         for argument in SPLIT_RE.split(command) {
             if let Some(captures) = ENV_RE.captures(argument) {
                 match self.expand(argument, captures) {
                     Ok(value) => command_line.extend(value),
-                    Err(message) => return (command.to_string(), message, 1),
+                    Err(message) => return (1, message, command.to_string()),
                 }
             }
         }
@@ -34,21 +34,21 @@ impl Task {
                         match subprocess.wait() {
                             Ok(status) => {
                                 match status {
-                                    ExitStatus::Exited(return_code) => (command, result.0.unwrap(), return_code),
-                                    _ => (command, result.0.unwrap(), 1),
+                                    ExitStatus::Exited(return_code) => (return_code, result.0.unwrap(), command),
+                                    _ => (1, result.0.unwrap(), command),
                                 }
                             }
                             Err(error) => {
-                                (command, error.to_string(), 1)
+                                (1, error.to_string(), command)
                             }
                         }
                     }
                     Err(error) => {
-                        (command, error.to_string(), 1)
+                        (1, error.to_string(), command)
                     }
                 }
             }
-            Err(error) => (command, error.to_string(), 1),
+            Err(error) => (1, error.to_string(), command),
         }
     }
 

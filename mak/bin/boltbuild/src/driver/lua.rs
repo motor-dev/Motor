@@ -26,7 +26,7 @@ impl LuaDriverConfiguration {
         if let Err(err) = lua.scope(|scope| {
             let userdata = scope.create_userdata_ref(task).unwrap();
             let chunk = lua.load(self.script.path().as_path());
-            chunk.call::<_, ()>(userdata)
+            chunk.call::<()>(userdata)
         }) {
             Output {
                 exit_code: 1,
