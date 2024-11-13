@@ -1,20 +1,8 @@
 ---@type Context
 local context = ...
 
-context:load_tool('string_ext')
-context._extensions = {}
-
----Register a function that processes an extension
----@param extensions string|string[] an extension, comma-separated extensions or a list of extensions
----@param callback function(task_gen:Generator, node:Node, path:Node) a function that will be called for every file that matches one of the extensions
-function context:extension(extensions, callback)
-    if type(extensions) == "string" then
-        extensions = extensions:split(',')
-    end
-    for _, ext in ipairs(extensions) do
-        context._extensions[ext] = callback
-    end
-end
+context:load_tool('internal/product_core')
+context:load_tool('internal/product_process')
 
 ---@param generator Generator
 ---@param node Node
@@ -165,6 +153,139 @@ context
         :feature('stlib', 'process_link_stlib', process_link_stlib)
         :set_run_after({ "process_source" })
 
-context:command_driver('shlib', 'yellow', '${LINK} ${LINKFLAGS} ${LINKFLAGS_shlib} ${LINK_SRC_F:SRC} ${LINK_TGT_F:TGT[0]} ${LINK_LIBPATH_F:LIBPATHS} ${LINK_LIB_F:LIBS}')
-context:command_driver('program', 'yellow', '${LINK} ${LINKFLAGS} ${LINKFLAGS_program} ${LINK_SRC_F:SRC} ${LIB_TGT_F:TGT[0]}')
-context:command_driver('stlib', 'yellow', '${LIB} ${LIBFLAGS} ${LINK_SRC_F:SRC} ${LINK_TGT_F:TGT[0]} ${LINK_LIBPATH_F:LIBPATHS} ${LINK_LIBS_F:LIBS}')
+---@type Context
+local context = ...
+
+Bolt = { }
+
+---@param generator Generator
+---@param path Node
+---@param pattern string
+---@return Generator
+local function add_source(generator, path, pattern)
+    generator.source[1 + #generator.source] = { path, pattern }
+    return generator
+end
+
+---@param generator Generator
+---@param filter function(Node,Environment)->boolean,boolean
+---@return Generator
+local function set_source_filter(generator, filter)
+    generator.source_filter = filter
+    return generator
+end
+
+---@param generator Generator
+---@param path Node
+---@return Generator
+local function add_public_include(generator, path)
+    generator.public_includes[1 + #generator.public_includes] = path
+    return generator
+end
+---@param generator Generator
+---@param path Node
+---@return Generator
+local function add_internal_include(generator, path)
+    generator.includes[1 + #generator.includes] = path
+    return generator
+end
+
+---@param generator Generator
+---@param define string
+---@param value string?
+---@return Generator
+local function add_public_define(generator, define, value)
+    generator.public_defines[1 + #generator.public_defines] = { define, value }
+    return generator
+end
+---@param generator Generator
+---@param define string
+---@param value string?
+---@return Generator
+local function add_internal_define(generator, define, value)
+    generator.defines[1 + #generator.defines] = { define, value }
+    return generator
+end
+
+---@param generator Generator
+---@param dependency Generator
+---@return Generator
+local function add_public_dependency(generator, dependency)
+    generator.public_dependencies[1 + #generator.public_dependencies] = dependency
+    return generator
+end
+---@param generator Generator
+---@param dependency Generator
+---@return Generator
+local function add_internal_dependency(generator, dependency)
+    generator.dependencies[1 + #generator.dependencies] = dependency
+    return generator
+end
+
+---@param _env Environment
+---@param _file Node
+---@return boolean,boolean
+local function default_filter(_env, _file)
+    return true, false
+end
+
+---@param name string
+---@param link_type string?
+---@param languages string[]
+---@return Generator
+local function module(name, link_type, languages)
+    local features = { }
+    for _, l in ipairs(languages) do
+        features[1 + #features] = l
+    end
+    features[1 + #features] = link_type
+    local g = context(name, features)
+
+    g.objects = { }
+    g.source = { }
+    g.source_filter = default_filter
+    g.includes = { }
+    g.public_includes = { }
+    g.defines = { }
+    g.public_defines = { }
+    g.dependencies = { }
+    g.public_dependencies = { }
+
+    g.add_source = add_source
+    g.set_source_filter = set_source_filter
+    g.add_public_include = add_public_include
+    g.add_internal_include = add_internal_include
+    g.add_public_define = add_public_define
+    g.add_internal_define = add_internal_define
+    g.add_public_dependency = add_public_dependency
+    g.add_internal_dependency = add_internal_dependency
+    return g
+end
+
+---@param name string
+---@param languages string[]
+---@return Generator
+function Bolt.shared_library(name, languages)
+    return module(name, 'shlib', languages)
+end
+
+---@param name string
+---@param languages string[]
+---@return Generator
+function Bolt.static_library(name, languages)
+    return module(name, 'stlib', languages)
+end
+
+---@param name string
+---@param languages string[]
+---@return Generator
+function Bolt.object_library(name, languages)
+    return module(name, 'objects', languages)
+end
+
+---@param name string
+---@param languages string[]
+---@return Generator
+function Bolt.program(name, languages)
+    return module(name, 'program', languages)
+end

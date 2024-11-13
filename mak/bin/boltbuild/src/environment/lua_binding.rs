@@ -1,8 +1,8 @@
 use mlua::{IntoLua, Lua, MetaMethod, UserData, UserDataMethods, Value};
 use crate::environment::{Environment, EnvironmentValue, ReadWriteEnvironment};
 
-impl<'lua> IntoLua<'lua> for &EnvironmentValue {
-    fn into_lua(self, lua: &'lua Lua) -> mlua::Result<Value<'lua>> {
+impl IntoLua for &EnvironmentValue {
+    fn into_lua(self, lua: &Lua) -> mlua::Result<Value> {
         match &self {
             EnvironmentValue::None => Ok(mlua::Nil),
             EnvironmentValue::Bool(value) => Ok(value.into_lua(lua)?),
@@ -23,7 +23,7 @@ impl<'lua> IntoLua<'lua> for &EnvironmentValue {
 }
 
 impl UserData for Environment {
-    fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(methods: &mut M) {
+    fn add_methods<'lua, M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_meta_method_mut(MetaMethod::Index, |lua, this, key: String| {
             this.get_into_lua(lua, key.as_str())
         });
@@ -31,7 +31,7 @@ impl UserData for Environment {
 }
 
 impl UserData for ReadWriteEnvironment {
-    fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(methods: &mut M) {
+    fn add_methods<'lua, M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method_mut(
             "append",
             |_lua, this, (key, value): (String, Value)| {

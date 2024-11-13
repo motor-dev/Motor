@@ -2,6 +2,13 @@ mod operations;
 mod lua_binding;
 mod subprocess;
 mod task;
+mod log;
+mod driver;
+mod generator;
+mod command;
+mod environment;
+mod node;
+mod feature;
 
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};

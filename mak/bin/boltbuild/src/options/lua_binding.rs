@@ -6,7 +6,7 @@ use mlua::{IntoLua, Result, MetaMethod, UserData, UserDataMethods, AnyUserData};
 struct InterfaceIndex(usize);
 
 impl UserData for InterfaceIndex {
-    fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(methods: &mut M) {
+    fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_function("set_long", |_lua, (this, long): (AnyUserData, String)| {
             let parser = this.user_value::<AnyUserData>()?;
             let parser = parser.borrow_mut::<Arc<Mutex<CommandLineParser>>>()?;
@@ -47,7 +47,7 @@ impl UserData for InterfaceIndex {
 }
 
 impl UserData for CommandLineParser {
-    fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(methods: &mut M) {
+    fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_meta_method_mut(
             MetaMethod::NewIndex,
             |_lua, this, (key, value): (String, mlua::Value)| -> Result<()> {

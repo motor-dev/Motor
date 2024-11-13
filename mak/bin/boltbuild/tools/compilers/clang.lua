@@ -1,8 +1,8 @@
 ---@type Context
 local context = ...
 
-context:load_tool('compiler_gnu')
-context:load_tool('string_ext')
+context:load_tool('internal/compiler_gnu')
+context:load_tool('utils/string_ext')
 
 Clang = {}
 
@@ -38,6 +38,10 @@ function Clang.load_clang_c(c_flags, link_flags)
     end
 
     env.CLANG_C_VERSION = version[1] .. '.' .. version[2] .. '.' .. version[3]
+
+    -- load build rules for C
+    context:load_tool('internal/c')
+    context:load_tool('internal/link')
 end
 
 ---@param cxx_flags (string|Node)[]) The flags to pass to the compiler.
@@ -79,6 +83,10 @@ function Clang.load_clang_cxx(cxx_flags, link_flags)
         end
     end
     env.CLANG_CXX_VERSION = version[1] .. '.' .. version[2] .. '.' .. version[3]
+
+    -- load build rules for C++
+    context:load_tool('internal/cxx')
+    context:load_tool('internal/link')
 end
 
 ---@param clang Node the path to the Clang executable
@@ -205,7 +213,3 @@ function Clang.discover(c_flags, cxx_flags)
     end)
     return result
 end
-
--- load build rules for C and C++
-context:load_tool('c')
-context:load_tool('cxx')

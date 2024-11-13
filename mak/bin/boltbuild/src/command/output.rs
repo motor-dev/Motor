@@ -33,8 +33,10 @@ impl CommandOutput {
                 hasher.update(file.path().as_os_str().as_encoded_bytes());
                 if let Ok(file) = std::fs::File::open(file.path()) {
                     hasher.update_reader(file)?;
+                } else if let Some(file) = TOOLS_DIR.get_file(file.path()) {
+                    hasher.update(file.contents());
                 } else {
-                    hasher.update(TOOLS_DIR.get_file(file.path()).unwrap().contents());
+                    hasher.update("!file_not_found!".as_bytes());
                 }
             }
             SerializedHash(hasher.finalize())

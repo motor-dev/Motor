@@ -11,19 +11,19 @@ use crate::node::Node;
 use crate::task::{Task, TaskHandle};
 
 impl UserData for Generator {
-    fn add_fields<'lua, F: UserDataFields<'lua, Self>>(fields: &mut F) {
+    fn add_fields<F: UserDataFields<Self>>(fields: &mut F) {
         fields.add_field_method_get("name", |_lua, this| Ok(this.name.clone()));
         fields.add_field_method_get("group", |_lua, this| Ok(this.group.clone()));
         fields.add_field_method_get("env", |_lua, this| Ok(this.env.clone()));
     }
 
-    fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(methods: &mut M) {
+    fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_meta_function_mut(MetaMethod::NewIndex, |_lua, (context, name, value): (AnyUserData, String, LuaValue)| {
             context.set_named_user_value(name.as_str(), value)
         });
 
         methods.add_meta_function_mut(MetaMethod::Index, |_lua, (generator, name): (AnyUserData, String)| {
-            let result = generator.named_user_value::<LuaValue<'lua>>(name.as_str())?;
+            let result = generator.named_user_value::<LuaValue>(name.as_str())?;
             if result.is_nil() {
                 Err(LuaError::RuntimeError(format!("Context does not have a user value `{}`", name)))
             } else {
@@ -46,11 +46,10 @@ impl UserData for Generator {
             };
 
             let context = generator.named_user_value::<AnyUserData>(":context")?;
-            let handle = {
+            let handle = context.borrow_mut_scoped::<Context, _>(|context| {
                 let generator = generator.borrow::<Arc<Mutex<Generator>>>()?;
                 let generator = generator.lock().unwrap();
                 let group = generator.group.clone();
-                let mut context = context.borrow_mut::<Context>()?;
                 if !context.output.drivers.contains_key(&driver) {
                     return Err(LuaError::RuntimeError(format!("Context has no driver for tasks of type `{}`", &driver)));
                 }
@@ -98,8 +97,8 @@ impl UserData for Generator {
 
                 context.tasks.push(task);
                 context.signatures.push(hasher);
-                task_index
-            };
+                Ok(task_index)
+            })??;
 
             let result = lua.create_userdata(TaskHandle(handle))?;
             result.set_user_value(context)?;

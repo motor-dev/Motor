@@ -25,11 +25,11 @@ impl Environment {
         }
     }
 
-    pub(super) fn get_into_lua<'a, 'lua>(
-        &'a mut self,
-        lua: &'lua Lua,
-        key: &'a str,
-    ) -> Result<Value<'lua>> {
+    pub(super) fn get_into_lua(
+        &mut self,
+        lua: &Lua,
+        key: &str,
+    ) -> Result<Value> {
         self.used_keys.insert(key.to_string());
         match self.values.get(key) {
             None => Ok(mlua::Nil),
@@ -104,7 +104,7 @@ impl ReadWriteEnvironment {
         &'a mut self,
         lua: &'lua Lua,
         key: &'a str,
-    ) -> Result<Value<'lua>> {
+    ) -> Result<Value> {
         self.environment.used_keys.insert(key.to_string());
         match self.environment.values.get(key) {
             None => match &self.parent {

@@ -1,11 +1,22 @@
 use std::io::{Read, Write};
 use std::mem::swap;
 use std::process::Stdio;
-use mlua::{AnyUserData, MetaMethod, UserData, UserDataMethods};
+use mlua::{AnyUserData, Lua, MetaMethod, UserData, UserDataMethods};
 use mlua::Result as LuaResult;
 use mlua::Error as LuaError;
+use mlua::prelude::LuaValue;
+use crate::context::Context;
 
-pub(crate) struct Process(std::process::Child);
+pub(super) struct Process(std::process::Child);
+
+pub(super) fn popen(_lua: &Lua, this: &mut Context, command: Vec<LuaValue>) -> LuaResult<Process> {
+    let mut cmd = Vec::new();
+    this.logger.info(format!("running command {}", command.iter().map(|x| x.to_string().unwrap()).collect::<Vec<String>>().join(" ")).as_str());
+    for x in command {
+        cmd.push(x.to_string()?);
+    }
+    Process::create(&cmd)
+}
 
 impl Process {
     pub(crate) fn create(command: &[String]) -> LuaResult<Self> {
@@ -39,7 +50,7 @@ impl Drop for Process {
 }
 
 impl UserData for Process {
-    fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(methods: &mut M) {
+    fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method_mut("communicate", |_lua, this, input: Option<String>| {
             std::thread::scope(|scope| {
                 let mut stdout = None;
@@ -75,7 +86,7 @@ impl UserData for Process {
 
 
 impl UserData for Out {
-    fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(methods: &mut M) {
+    fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_meta_method(MetaMethod::Add, |_lua, this, other: AnyUserData| {
             let other = other.borrow::<Out>()?;
             Ok(Out([this.0.as_str(), other.0.as_str()].join(""), this.1))

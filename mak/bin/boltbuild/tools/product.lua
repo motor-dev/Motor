@@ -1,6 +1,8 @@
 ---@type Context
 local context = ...
 
+context:load_tool('internal/product_process')
+
 Bolt = { }
 
 ---@param generator Generator
