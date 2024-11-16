@@ -1,14 +1,15 @@
 ---@type Context
 local context = ...
 
+context:load_tool('bolt')
 context:load_tool('internal/compiler_gnu')
 context:load_tool('utils/string_ext')
 
-Clang = {}
+Bolt.Clang = {}
 
 ---@param c_flags (string|Node)[]) The flags to pass to the compiler.
 ---@param link_flags (string|Node)[]) The flags to pass to the linker.
-function Clang.load_clang_c(c_flags, link_flags)
+function Bolt.Clang.load_clang_c(c_flags, link_flags)
     local env = context.env
     env.CFLAGS = {'-x', 'c', '-c', '-fPIC'}
     env:append('CFLAGS', c_flags)
@@ -46,7 +47,7 @@ end
 
 ---@param cxx_flags (string|Node)[]) The flags to pass to the compiler.
 ---@param link_flags (string|Node)[]) The flags to pass to the linker.
-function Clang.load_clang_cxx(cxx_flags, link_flags)
+function Bolt.Clang.load_clang_cxx(cxx_flags, link_flags)
     local env = context.env
     -- if a  Clang C compiler is loaded, use that
     if env.CC and env.C_COMPILER_NAME == 'clang' then
@@ -90,10 +91,10 @@ function Clang.load_clang_cxx(cxx_flags, link_flags)
 end
 
 ---@param clang Node the path to the Clang executable
----@param c_flags (string|Node)[]? Extra flags that the C compiler should support
----@param cxx_flags (string|Node)[]? Extra flags that the C++ compiler should support
+---@param c_flags (string|Node)[]|nil Extra flags that the C compiler should support
+---@param cxx_flags (string|Node)[]|nil Extra flags that the C++ compiler should support
 ---@return Environment[] An array to store discovered Clang compilers.
-function Clang.detect_clang_targets(clang, c_flags, cxx_flags)
+function Bolt.Clang.detect_clang_targets(clang, c_flags, cxx_flags)
     if c_flags == nil then
         c_flags = {}
     end
@@ -161,8 +162,8 @@ function Clang.detect_clang_targets(clang, c_flags, cxx_flags)
                                 cxx_target_flags[1+ #cxx_target_flags] = '-target'
                                 cxx_target_flags[1+ #cxx_target_flags] = triple
                                 context.env.CC = { clang }
-                                Clang.load_clang_c(c_target_flags, {'-target', triple})
-                                Clang.load_clang_cxx(cxx_target_flags, {'-target', triple})
+                                Bolt.Clang.load_clang_c(c_target_flags, {'-target', triple})
+                                Bolt.Clang.load_clang_cxx(cxx_target_flags, {'-target', triple})
                                 result[1 + #result] = context.env
                             end)
                         end) then
@@ -181,10 +182,10 @@ end
 
 ---Discover as many Clang compilers as possible, including extra triples where applicable. When clang compilers are found,
 ---load the compiler in a new environment derived from the current environment.
----@param c_flags (string|Node)[]? Extra flags that the C compiler should support
----@param cxx_flags (string|Node)[]? Extra flags that the C++ compiler should support
+---@param c_flags (string|Node)[]|nil Extra flags that the C compiler should support
+---@param cxx_flags (string|Node)[]|nil Extra flags that the C++ compiler should support
 ---@return Environment[] A list of environments where a Clang compiler has been loaded.
-function Clang.discover(c_flags, cxx_flags)
+function Bolt.Clang.discover(c_flags, cxx_flags)
     local result = {}
     context:try('Looking for Clang compilers', function()
         ---@type table<string, Node>
@@ -200,7 +201,7 @@ function Clang.discover(c_flags, cxx_flags)
                         local absolute_path = node:abs_path()
                         if seen[absolute_path] == nil then
                             seen[absolute_path] = node
-                            for _, env in ipairs(Clang.detect_clang_targets(node, c_flags, cxx_flags)) do
+                            for _, env in ipairs(Bolt.Clang.detect_clang_targets(node, c_flags, cxx_flags)) do
                                 env.CLANG_VERSION = version
                                 result[1 + #result] = env
                             end

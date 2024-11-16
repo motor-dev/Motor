@@ -55,3 +55,5 @@ function context.add_3rd_party_flag(self, name)
     )   :set_category('Options controlling 3rd party libraries')
         :set_long('with-' .. name)
 end
+
+context:load_tool('lang/python')

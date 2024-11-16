@@ -70,9 +70,13 @@ impl Command {
                     } else {
                         for (path, pattern, hash) in &output.stored_hash.glob_dependencies {
                             if !path.is_dir() {
-                                return Err(format!("the directory `{}` used in file search `{}` has been deleted.",
-                                                   path.path().to_string_lossy(),
-                                                   pattern));
+                                let hasher = Hasher::new();
+                                if !hasher.finalize().eq(&hash.0) {
+                                    return Err(format!(
+                                        "the result of file search `{}/{}` has changed.",
+                                        path.path().to_string_lossy(),
+                                        pattern));
+                                }
                             } else {
                                 let paths = glob::glob(
                                     path.path()

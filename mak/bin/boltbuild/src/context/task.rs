@@ -6,7 +6,7 @@ use crate::node::Node;
 use crate::task::Task;
 
 impl Context {
-    pub(crate) fn declare_products(&mut self, nodes: &Vec<Node>, new_dependencies: &mut Vec<(usize, usize)>, task_index: usize, new_task: Option<&Task>) -> LuaResult<()> {
+    pub(crate) fn declare_products(&mut self, nodes: &Vec<Node>, mut new_dependencies: Vec<(usize, usize, String)>, task_index: usize, new_task: Option<&Task>) -> LuaResult<()> {
         for node in nodes {
             if self.products.contains_key(node.path()) {
                 let task = &self.tasks[self.products[node.path()]];
@@ -14,7 +14,7 @@ impl Context {
             }
             for (index, task) in self.tasks.iter().enumerate() {
                 if task.inputs.iter().any(|x| x == node) {
-                    new_dependencies.push((task_index, index));
+                    new_dependencies.push((task_index, index, format!("dependency on {}", node)));
                 }
             }
         }
@@ -33,15 +33,23 @@ impl Context {
         Ok(())
     }
 
-    pub(crate) fn add_dependencies(&mut self, new_dependencies: &[(usize, usize)], new_task: Option<&Task>) -> Result<()> {
+    pub(crate) fn add_dependencies(&mut self, new_dependencies: Vec<(usize, usize, String)>, new_task: Option<&Task>) -> Result<()> {
         if !new_dependencies.is_empty() {
             let mut result = Vec::new();
             let mut edges = self.task_dependencies.clone();
-            edges.extend(new_dependencies);
+            edges.extend(new_dependencies.clone());
 
             let mut roots = Vec::new();
 
             for i in 0..self.tasks.len() {
+                if !edges.iter().any(|edge| edge.1 == i) {
+                    roots.push(i);
+                }
+            }
+
+
+            if new_task.is_some() {
+                let i = self.tasks.len();
                 if !edges.iter().any(|edge| edge.1 == i) {
                     roots.push(i);
                 }
@@ -60,7 +68,11 @@ impl Context {
             if !edges.is_empty() {
                 edges.sort();
                 Err(LuaError::RuntimeError(format!("Cycle detected in task dependency:\n  {}",
-                                                   edges.iter().map(|x| self.tasks.get(x.0).or(new_task).unwrap().to_string()).collect::<Vec<_>>().join("\n  "))))
+                                                   edges.iter()
+                                                       .map(|x| format!("{}\n  {}\n    ({})",
+                                                                        self.tasks.get(x.0).or(new_task).unwrap(),
+                                                                        self.tasks.get(x.1).or(new_task).unwrap(),
+                                                                        x.2)).collect::<Vec<_>>().join("\n  "))))
             } else {
                 self.task_dependencies.extend(new_dependencies);
                 Ok(())

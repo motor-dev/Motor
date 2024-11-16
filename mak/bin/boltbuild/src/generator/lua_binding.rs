@@ -77,7 +77,23 @@ impl UserData for Generator {
                 let mut dependencies = Vec::new();
                 for node in &task.inputs {
                     if let Some(&producer) = context.products.get(node.path()) {
-                        dependencies.push((producer, task_index));
+                        dependencies.push((producer, task_index, format!("dependency on {}", node)));
+                    }
+                }
+
+                for (predecessor, successor) in &context.driver_order {
+                    if predecessor.eq(&task.driver) {
+                        if let Some(tasks) = context.driver_tasks.get(successor) {
+                            for &task in tasks {
+                                dependencies.push((task_index, task, format!("dependency {} -> {}", predecessor, successor)));
+                            }
+                        }
+                    } else if successor.eq(&task.driver) {
+                        if let Some(tasks) = context.driver_tasks.get(predecessor) {
+                            for &task in tasks {
+                                dependencies.push((task, task_index, format!("dependency {} -> {}", predecessor, successor)));
+                            }
+                        }
                     }
                 }
 
@@ -93,7 +109,8 @@ impl UserData for Generator {
                 }
 
                 /* side effects start here. The function is not allowed to fail if declare_product is successful. */
-                context.declare_products(&task.outputs, &mut dependencies, task_index, Some(&task))?;
+                context.declare_products(&task.outputs, dependencies, task_index, Some(&task))?;
+                context.driver_tasks.entry(task.driver.clone()).or_default().push(task_index);
 
                 context.tasks.push(task);
                 context.signatures.push(hasher);

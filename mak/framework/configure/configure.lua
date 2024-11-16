@@ -1,6 +1,8 @@
 ---@type Context
 local context = ...
 
+context:recurse('metagen.lua')
+
 Motor = {
     compilers = {}
 }
@@ -73,7 +75,6 @@ end
 table.sort(Motor.compilers, function(env1, env2)
     return env1.TOOLCHAIN_ID < env2.TOOLCHAIN_ID
 end)
-
 for _, platform in ipairs(platforms) do
     context:recurse('target/' .. platform .. '.lua')
 end

@@ -14,6 +14,14 @@ pub(super) enum EnvironmentParent {
 }
 
 impl Environment {
+    pub(crate) fn get(
+        &mut self,
+        key: &str,
+    ) -> Option<EnvironmentValue> {
+        self.used_keys.insert(key.to_string());
+        self.values.get(key).cloned()
+    }
+
     pub(crate) fn get_into_list(
         &mut self,
         key: &str,

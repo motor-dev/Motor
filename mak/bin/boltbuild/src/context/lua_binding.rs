@@ -57,6 +57,7 @@ impl UserData for Context {
         methods.add_function_mut("with", with);
         methods.add_function("try", lua_try);
         methods.add_method_mut("search", search);
+        methods.add_method_mut("find_program", find_program);
         methods.add_method_mut("popen", popen);
         methods.add_function("load_tool", load_tool);
         methods.add_meta_function(MetaMethod::Call, call);

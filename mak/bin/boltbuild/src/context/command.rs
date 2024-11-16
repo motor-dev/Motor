@@ -43,7 +43,7 @@ pub(super) fn load_tool(lua: &Lua, (this, tool, again): (AnyUserData, String, Op
             Options::Environment(e) => e.get_into_list("tools_dir"),
             Options::CommandLineParser(cl) => {
                 let cl = cl.lock().unwrap();
-                cl.get_value("tools_dir")?.into_list()
+                cl.get_value_lua("tools_dir")?.into_list()
             }
         } {
             nodes.push(x.as_node(&this.path)?);

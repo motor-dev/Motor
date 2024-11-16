@@ -10,7 +10,7 @@ end
 ---
 ---@param feature string|string[] A single feature or list of features that this callback is associated with.
 ---@param name string The name of this step, used for dependency management.
----@param callback function(generator: Generator) The function to execute when this feature is triggered.
+---@param callback fun(generator:Generator):void The function to execute when this feature is triggered.
 ---@return Feature A new Feature object that allows setting dependency order.
 function Context:feature(feature, name, callback)
     use(feature)

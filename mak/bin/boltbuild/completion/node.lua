@@ -4,18 +4,34 @@ local function use(var)
     return var
 end
 
----Search for files on the filesystem. Using `directory` as a starting point, returns all files (as `Node` objects) that
----match the given pattern. Search results returned by this function are stored and will be used to check if a context is
----up-to-date in a subsequent run of the tool.
+--- Search for files on the filesystem. Using `directory` as a starting point, returns all files (as `Node` objects) that
+--- match the given pattern. Search results returned by this function are verified again on every run, and the command will
+--- be reevaluated if the search results change.
+---
 ---@param directory Node The root directory of the search
 ---@param pattern string A glob pattern
----@param include_directories boolean? Wether directories are returned
+---@param include_directories boolean|nil Optional. Wether directories are returned
 ---@return Node[] A list of nodes that matched the pattern.
 function Context:search(directory, pattern, include_directories)
     use(directory)
     use(pattern)
     use(include_directories)
     return {}
+end
+
+--- Finds a program by name within the specified paths.
+--- This function searches for an executable program with the given `name` in the provided `paths`.
+--- If `paths` is not provided, the `context.options.path` variable will be used, which defaults to the environment PATH variable.
+--- Search results returned by this function are verified again on every run, and the command will
+--- be reevaluated if the search results change.
+---
+---@param name string The name of the program to find.
+---@param paths string[]|nil Optional. A list of paths to search for the program. If not specified, the `context.options.path` variable is used.
+---@return Node The node representing the found program.
+function Context:find_program(name, paths)
+    use(name)
+    use(paths)
+    return Node
 end
 
 --- Represents a filesystem object, either a directory or a file, which may or may not exist yet.
@@ -60,7 +76,7 @@ end
 --- Returns the path of the filesystem object relative to a specified starting Node.
 ---@param from Node The node from which to calculate the relative path.
 ---@return string The relative path from the specified starting node.
-function Node:rel_path(from)
+function Node:path_from(from)
     return ''
 end
 
