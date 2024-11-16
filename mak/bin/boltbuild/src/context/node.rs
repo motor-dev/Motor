@@ -5,6 +5,7 @@ use mlua::Lua;
 use mlua::prelude::{LuaError, LuaResult};
 use crate::command::SerializedHash;
 use crate::context::Context;
+use crate::environment::EnvironmentValue;
 use crate::node::Node;
 
 pub(super) fn search(_lua: &Lua, this: &mut Context, (path, pattern, include_directories): (Node, String, Option<bool>)) -> LuaResult<Vec<Node>> {
@@ -39,4 +40,37 @@ pub(super) fn search(_lua: &Lua, this: &mut Context, (path, pattern, include_dir
     }
     result.sort();
     Ok(result)
+}
+
+pub(super) fn find_program(_lua: &Lua, this: &mut Context, (program, paths): (String, Option<Vec<Node>>)) -> LuaResult<Option<Node>> {
+    let paths = paths.unwrap_or_else(|| {
+        let paths = this.options.get_value("path");
+        if let Some(paths) = paths {
+            paths.into_list().into_iter().flat_map(|x| x.as_node(&this.path)).collect()
+        } else {
+            Vec::new()
+        }
+    });
+    let suffix = this.options.get_value("exe_suffix").unwrap_or(EnvironmentValue::String("".to_string())).as_string();
+    let pattern = program + suffix.as_str();
+
+    for path in paths {
+        let canonical_path = fs::canonicalize(path.path());
+        if let Ok(canonical_path) = canonical_path {
+            let path = Node::from(&canonical_path);
+            let executable = path.path().join(&pattern);
+            let mut hasher = Hasher::new();
+            if executable.is_file() {
+                hasher.update(executable.as_os_str().as_encoded_bytes());
+                this.output.stored_hash.glob_dependencies.push((path.clone(), pattern.clone(), SerializedHash(hasher.finalize())));
+                return Ok(Some(Node::from(&executable)));
+            } else {
+                this.output.stored_hash.glob_dependencies.push((path.clone(), pattern.clone(), SerializedHash(hasher.finalize())));
+            }
+        } else {
+            let hasher = Hasher::new();
+            this.output.stored_hash.glob_dependencies.push((path.clone(), pattern.clone(), SerializedHash(hasher.finalize())));
+        }
+    }
+    Ok(None)
 }

@@ -24,8 +24,11 @@ local function prepare(generator)
 end
 
 ---@param generator Generator
-local function process_dependencies(generator)
-    for _, dependency in ipairs(generator.dependencies) do
+---@param dependency Generator
+---@param seen table<Generator,boolean>
+local function process_dependency(generator, dependency, seen)
+    if not seen[dependency] then
+        seen[dependency] = true
         context:post(dependency)
         for _, include in ipairs(dependency.public_includes) do
             generator.includes[1 + #generator.includes] = include
@@ -33,15 +36,17 @@ local function process_dependencies(generator)
         for _, define in ipairs(dependency.public_defines) do
             generator.defines[1 + #generator.defines] = define
         end
+        for _, dep in ipairs(dependency.public_dependencies) do
+            process_dependency(generator, dep, seen)
+        end
     end
+end
+
+---@param generator Generator
+local function process_dependencies(generator)
+    local seen = { }
     for _, dependency in ipairs(generator.public_dependencies) do
-        context:post(dependency)
-        for _, include in ipairs(dependency.public_includes) do
-            generator.public_includes[1 + #generator.public_includes] = include
-        end
-        for _, define in ipairs(dependency.public_defines) do
-            generator.public_defines[1 + #generator.public_defines] = define
-        end
+        process_dependency(generator, dependency, seen)
     end
 end
 
@@ -153,9 +158,6 @@ context
         :feature('stlib', 'process_link_stlib', process_link_stlib)
         :set_run_after({ "process_source" })
 
----@type Context
-local context = ...
-
 Bolt = { }
 
 ---@param generator Generator
@@ -168,7 +170,7 @@ local function add_source(generator, path, pattern)
 end
 
 ---@param generator Generator
----@param filter function(Node,Environment)->boolean,boolean
+---@param filter fun(Node,Environment):boolean,boolean
 ---@return Generator
 local function set_source_filter(generator, filter)
     generator.source_filter = filter
@@ -192,7 +194,7 @@ end
 
 ---@param generator Generator
 ---@param define string
----@param value string?
+---@param value string|nil
 ---@return Generator
 local function add_public_define(generator, define, value)
     generator.public_defines[1 + #generator.public_defines] = { define, value }
@@ -200,7 +202,7 @@ local function add_public_define(generator, define, value)
 end
 ---@param generator Generator
 ---@param define string
----@param value string?
+---@param value string|nil
 ---@return Generator
 local function add_internal_define(generator, define, value)
     generator.defines[1 + #generator.defines] = { define, value }
@@ -222,15 +224,15 @@ local function add_internal_dependency(generator, dependency)
     return generator
 end
 
----@param _env Environment
----@param _file Node
+---@param env Environment
+---@param file Node
 ---@return boolean,boolean
-local function default_filter(_env, _file)
+local function default_filter(env, file)
     return true, false
 end
 
 ---@param name string
----@param link_type string?
+---@param link_type string|nil
 ---@param languages string[]
 ---@return Generator
 local function module(name, link_type, languages)

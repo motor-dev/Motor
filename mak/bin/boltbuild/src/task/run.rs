@@ -13,6 +13,8 @@ impl Task {
                     Ok(value) => command_line.extend(value),
                     Err(message) => return (1, message, command.to_string()),
                 }
+            } else {
+                command_line.push(argument.to_string());
             }
         }
         command_line.extend(extra_args);

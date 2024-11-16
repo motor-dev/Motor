@@ -53,13 +53,20 @@ impl CommandLineParser {
         }
     }
 
-    pub(crate) fn get_value(&self, name: &str) -> mlua::Result<EnvironmentValue> {
+    pub(crate) fn get_value_lua(&self, name: &str) -> mlua::Result<EnvironmentValue> {
         if let Some(index) = self.options.iter().position(|x| x.name.eq(name)) {
             Ok(self.options[index].default.clone())
         } else {
             Err(mlua::Error::RuntimeError(
                 format!("'{}': no option registered with this name", name).to_string(),
             ))
+        }
+    }
+    pub(crate) fn get_value(&self, name: &str) -> Option<EnvironmentValue> {
+        if let Some(index) = self.options.iter().position(|x| x.name.eq(name)) {
+            Some(self.options[index].default.clone())
+        } else {
+            None
         }
     }
 

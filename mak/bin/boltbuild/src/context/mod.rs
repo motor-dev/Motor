@@ -30,7 +30,7 @@ pub(crate) struct Context {
     pub(crate) tasks: Vec<Task>,
     pub(crate) products: HashMap<PathBuf, usize>,
     pub(crate) signatures: Vec<blake3::Hasher>,
-    task_dependencies: Vec<(usize, usize)>,
+    task_dependencies: Vec<(usize, usize, String)>,
     path: Node,
     src_dir: Node,
     bld_dir: Node,
@@ -40,5 +40,7 @@ pub(crate) struct Context {
     commands: HashMap<String, Vec<String>>,
     sorted_features: Vec<String>,
     partial_order: Vec<(String, String)>,
+    pub(crate) driver_order: Vec<(String, String)>,
+    pub(crate) driver_tasks: HashMap<String, Vec<usize>>,
     in_post: usize,
 }

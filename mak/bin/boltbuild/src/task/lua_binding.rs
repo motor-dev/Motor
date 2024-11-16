@@ -65,11 +65,11 @@ impl UserData for TaskHandle {
                 let mut dependencies = Vec::new();
                 for node in &nodes {
                     if let Some(&producer) = context.products.get(node.path()) {
-                        dependencies.push((producer, index));
+                        dependencies.push((producer, index, format!("dependency on {}", node)));
                     }
                 }
 
-                context.add_dependencies(&dependencies, None)?;
+                context.add_dependencies(dependencies, None)?;
 
                 let hasher = &mut context.signatures[index];
                 for input in &nodes {
@@ -93,7 +93,7 @@ impl UserData for TaskHandle {
                     _ => return Err(LuaError::RuntimeError("outputs should be a node or a list of nodes".to_string())),
                 };
 
-                context.declare_products(&nodes, &mut Vec::new(), index, None)?;
+                context.declare_products(&nodes, Vec::new(), index, None)?;
 
                 let hasher = &mut context.signatures[index];
                 for output in &nodes {
@@ -102,6 +102,26 @@ impl UserData for TaskHandle {
                 let task = &mut context.tasks[index];
                 task.outputs.extend(nodes);
                 Ok(())
+            })?
+        });
+
+        methods.add_function_mut("set_run_before", |_lua, (this, other): (AnyUserData, AnyUserData)| {
+            let context = this.user_value::<AnyUserData>()?;
+            context.borrow_mut_scoped::<Context, _>(|context| {
+                let index = this.borrow::<TaskHandle>()?.0;
+                let other = other.borrow::<TaskHandle>()?.0;
+
+                context.add_dependencies(vec![(index, other, "run before".to_string())], None)
+            })?
+        });
+
+        methods.add_function_mut("set_run_after", |_lua, (this, other): (AnyUserData, AnyUserData)| {
+            let context = this.user_value::<AnyUserData>()?;
+            context.borrow_mut_scoped::<Context, _>(|context| {
+                let index = this.borrow::<TaskHandle>()?.0;
+                let other = other.borrow::<TaskHandle>()?.0;
+
+                context.add_dependencies(vec![(other, index, "run after".to_string())], None)
             })?
         });
 

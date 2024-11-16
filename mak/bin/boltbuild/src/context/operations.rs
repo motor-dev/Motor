@@ -18,7 +18,7 @@ use crate::node::Node;
 use crate::options::Options;
 use crate::context::TOOLS_DIR;
 
-const ROOT_SCRIPT: &str = "make.lua";
+const ROOT_SCRIPT: &str = "bolt.lua";
 
 lazy_static! {
     pub(crate) static ref INVALID_CHARS: Regex = Regex::new(r"[<>:/\\|\?\*]+").unwrap();
@@ -86,6 +86,8 @@ impl Context {
             commands: HashMap::new(),
             sorted_features: Vec::new(),
             partial_order: Vec::new(),
+            driver_order: Vec::new(),
+            driver_tasks: HashMap::new(),
             in_post: 0,
         })
     }
@@ -146,7 +148,7 @@ impl Context {
                 Ok(())
             })?;
 
-            for &(predecessor, successor) in &self.task_dependencies {
+            for &(predecessor, successor, _) in &self.task_dependencies {
                 self.tasks[predecessor].successors.push(successor);
                 self.tasks[successor].predecessors.push(predecessor);
             }

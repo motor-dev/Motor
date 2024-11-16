@@ -1,12 +1,13 @@
 ---@type Context
 local context = ...
 
+context:load_tool('bolt')
 context:load_tool('internal/compiler_gnu')
 
-Gcc = {}
+Bolt.Gcc = {}
 
 ---@param c_flags (string|Node)[]) The flags to pass to the compiler.
-function Gcc.load_gcc_c(c_flags)
+function Bolt.Gcc.load_gcc_c(c_flags)
     local env = context.env
 
     env.CFLAGS = {'-x', 'c', '-c', '-fPIC'}
@@ -44,7 +45,7 @@ function Gcc.load_gcc_c(c_flags)
 end
 
 ---@param cxx_flags (string|Node)[]) The flags to pass to the compiler.
-function Gcc.load_gcc_cxx(cxx_flags)
+function Bolt.Gcc.load_gcc_cxx(cxx_flags)
     local env = context.env
     -- if a  GCC C compiler is loaded, use that
     if env.CC and env.C_COMPILER_NAME == 'gcc' then
@@ -89,10 +90,10 @@ end
 
 ---Discover as many Gcc compilers as possible, including extra triples where applicable. When gcc compilers are found,
 ---load the compiler in a new environment derived from the current environment.
----@param c_flags (string|Node)[]? Extra flags that the C compiler should support.
----@param cxx_flags (string|Node)[]? Extra flags that the C++ compiler should support.
+---@param c_flags (string|Node)[]|nil Extra flags that the C compiler should support.
+---@param cxx_flags (string|Node)[]|nil Extra flags that the C++ compiler should support.
 ---@return Environment[] A list of environments where a Clang compiler has been loaded.
-function Gcc.discover(c_flags, cxx_flags)
+function Bolt.Gcc.discover(c_flags, cxx_flags)
     if c_flags == nil then
         c_flags = {}
     end
@@ -119,8 +120,8 @@ function Gcc.discover(c_flags, cxx_flags)
                             context:with(context:derive(), function()
                                 context.env.CC = { gcc }
                                 context.env.GCC_VERSION = version
-                                Gcc.load_gcc_c(c_flags)
-                                Gcc.load_gcc_cxx(cxx_flags)
+                                Bolt.Gcc.load_gcc_c(c_flags)
+                                Bolt.Gcc.load_gcc_cxx(cxx_flags)
                                 result[1 + #result] = context.env
                             end)
                         end) then
@@ -140,8 +141,8 @@ function Gcc.discover(c_flags, cxx_flags)
                                     context:with(context:derive(), function()
                                         context.env.CC = { gcc }
                                         context.env.GCC_VERSION = version
-                                        Gcc.load_gcc_c(multilib_c_flags)
-                                        Gcc.load_gcc_cxx(multilib_cxx_flags)
+                                        Bolt.Gcc.load_gcc_c(multilib_c_flags)
+                                        Bolt.Gcc.load_gcc_cxx(multilib_cxx_flags)
                                         result[1 + #result] = context.env
                                     end)
                                 end)

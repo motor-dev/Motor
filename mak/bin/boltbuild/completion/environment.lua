@@ -11,7 +11,7 @@ end
 --- This allows the derived environment to stay updated with changes to the base environment, while also allowing
 --- customizations specific to the derived environment.
 ---
----@param env? Environment The base environment to inherit from. If not provided, defaults to the current environment.
+---@param env Environment|nil The base environment to inherit from. If not provided, defaults to the current environment.
 ---@return Environment A new `Environment` instance with inherited values from `env`.
 function Context:derive(env)
     return env

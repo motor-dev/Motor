@@ -7,7 +7,7 @@ fn try_main() -> Result<()> {
 
 fn main() {
     use colored::Colorize;
-
+    
     try_main().unwrap_or_else(|err| match err.location {
         None => println!("{}: {}", "error".red(), err.message.bold()),
         Some(location) => println!(

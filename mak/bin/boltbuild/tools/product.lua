@@ -15,7 +15,7 @@ local function add_source(generator, path, pattern)
 end
 
 ---@param generator Generator
----@param filter function(Node,Environment)->boolean,boolean
+---@param filter fun(node:Node,env:Environment):boolean,boolean
 ---@return Generator
 local function set_source_filter(generator, filter)
     generator.source_filter = filter
@@ -39,7 +39,7 @@ end
 
 ---@param generator Generator
 ---@param define string
----@param value string?
+---@param value string|nil
 ---@return Generator
 local function add_public_define(generator, define, value)
     generator.public_defines[1 + #generator.public_defines] = { define, value }
@@ -47,7 +47,7 @@ local function add_public_define(generator, define, value)
 end
 ---@param generator Generator
 ---@param define string
----@param value string?
+---@param value string|nil
 ---@return Generator
 local function add_internal_define(generator, define, value)
     generator.defines[1 + #generator.defines] = { define, value }
@@ -77,7 +77,7 @@ local function default_filter(_env, _file)
 end
 
 ---@param name string
----@param link_type string?
+---@param link_type string|nil
 ---@param languages string[]
 ---@return Generator
 local function module(name, link_type, languages)
