@@ -283,6 +283,8 @@ impl CommandLineParser {
                             }
                         }
                     }
+                } else {
+                    env.set(option.name.as_str(), option.default.clone());
                 }
             }
         }

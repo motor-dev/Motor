@@ -84,11 +84,11 @@ local function metagen(name)
     local path = string.split(name, '.')
     path = string.join('/', path)
     path = context.path:make_node(path)
-    local module_name = path:name()
 
     name = name .. '.metagen'
     local generator = context(name, { 'metagen' }, context.env, "metagen")
     generator.source = { path:make_node('api'), path:make_node('include') }
+    generator.out_source = {}
     return generator
 end
 
@@ -105,7 +105,7 @@ function Motor.library(name)
     local meta_generator = metagen(name)
 
     local generator = Bolt.shared_library(name, { 'c', 'cxx' })
-                          :add_source(path, 'src/**/*')
+                          :add_source_pattern(path, 'src/**/*')
                           :set_source_filter(filter_source)
                           :add_internal_define('building_' .. module_name, '1')
                           :add_public_define('motor_dll_' .. module_name, '1')

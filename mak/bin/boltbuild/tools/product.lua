@@ -7,15 +7,24 @@ Bolt = { }
 
 ---@param generator Generator
 ---@param path Node
----@param pattern string
+---@param file Node
 ---@return Generator
-local function add_source(generator, path, pattern)
-    generator.source[1 + #generator.source] = { path, pattern }
+local function add_source(generator, path, file)
+    generator.source[1 + #generator.source] = { path, file }
     return generator
 end
 
 ---@param generator Generator
----@param filter fun(node:Node,env:Environment):boolean,boolean
+---@param path Node
+---@param pattern string
+---@return Generator
+local function add_source_pattern(generator, path, pattern)
+    generator.source_patterns[1 + #generator.source] = { path, pattern }
+    return generator
+end
+
+---@param generator Generator
+---@param filter fun(node:Node,path:Node,env:Environment):boolean,boolean
 ---@return Generator
 local function set_source_filter(generator, filter)
     generator.source_filter = filter
@@ -69,10 +78,11 @@ local function add_internal_dependency(generator, dependency)
     return generator
 end
 
----@param _env Environment
----@param _file Node
+---@param _ Node
+---@param _ Node
+---@param _ Environment
 ---@return boolean,boolean
-local function default_filter(_env, _file)
+local function default_filter(_, _, _)
     return true, false
 end
 
@@ -90,6 +100,7 @@ local function module(name, link_type, languages)
 
     g.objects = { }
     g.source = { }
+    g.source_patterns = { }
     g.source_filter = default_filter
     g.includes = { }
     g.public_includes = { }
@@ -99,6 +110,7 @@ local function module(name, link_type, languages)
     g.public_dependencies = { }
 
     g.add_source = add_source
+    g.add_source_pattern = add_source_pattern
     g.set_source_filter = set_source_filter
     g.add_public_include = add_public_include
     g.add_internal_include = add_internal_include

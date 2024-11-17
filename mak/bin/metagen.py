@@ -329,12 +329,12 @@ class Class(MetaObject):
         out_cc.write(
             '\nnamespace Motor { namespace Meta\n'
             '{\n\n'
-            'template<>\nistring ClassID<::%(cpp_name)s>::name()\n'
+            'istring ClassID<::%(cpp_name)s>::name()\n'
             '{\n'
             '    static istring s_name("%(name)s");\n'
             '    return s_name;\n'
             '}\n\n'
-            'template<>\nconst Class ClassID<::%(cpp_name)s>::s_class = {\n'
+            'const Class ClassID<::%(cpp_name)s>::s_class = {\n'
             '};\n\n'
             '}}\n\n'
             '' % {'cpp_name': '::'.join(namespace), 'name': self._name}
@@ -1139,7 +1139,8 @@ def main() -> None:
                                         '#include <motor/meta/object.meta.hh>\n'
                                         '#include <motor/meta/value.hh>\n'
                                         '' % arguments.out_relative)
-                    out_hh.write('#ifndef MOTOR_COMPUTE\n'
+                    out_hh.write('#pragma once\n'
+                                 '#ifndef MOTOR_COMPUTE\n'
                                  '#include <motor/meta/classinfo.hh>\n'
                                  '#include <%s>\n'
                                  '#include <motor/meta/builtins/numbers.hh>\n'

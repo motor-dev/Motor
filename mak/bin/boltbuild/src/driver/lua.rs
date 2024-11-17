@@ -23,50 +23,53 @@ impl LuaDriverConfiguration {
         let lua = Lua::new();
         let globals = lua.globals();
 
-        if let Err(err) = lua.scope(|scope| {
+        match lua.scope(|scope| {
             let userdata = scope.create_userdata_ref(task).unwrap();
             let chunk = lua.load(self.script.path().as_path());
-            chunk.call::<()>(userdata)
+            chunk.call::<(u32, Option<Vec<Node>>)>(userdata)
         }) {
-            Output {
+            Err(err) => Output {
                 exit_code: 1,
                 command: self.script.to_string(),
                 log: err.to_string(),
                 file_dependencies: Vec::new(),
                 extra_output: Vec::new(),
-            }
-        } else {
-            /* retrieve a list of modules */
-            let mut file_dependencies = Vec::new();
+            },
+            Ok((result, file_dependencies)) => {
+                /* retrieve a list of modules */
+                let file_dependencies = file_dependencies.unwrap_or_else(Vec::new);
+                let mut file_dependencies = file_dependencies.iter().map(|node| node.path().to_path_buf()).collect::<Vec<PathBuf>>();
+                file_dependencies.push(self.script.path().to_path_buf());
 
-            let package: Table = globals.get("package").unwrap();
-            let package_path: String = package.get("path").unwrap();
-            let packages: Table = package.get("loaded").unwrap();
-            if let Err(err) = packages.for_each(|key: String, _: LuaValue| {
-                for path in package_path.split(';') {
-                    let module_path = path.replace("?", key.replace(".", "/").as_str());
+                let package: Table = globals.get("package").unwrap();
+                let package_path: String = package.get("path").unwrap();
+                let packages: Table = package.get("loaded").unwrap();
+                if let Err(err) = packages.for_each(|key: String, _: LuaValue| {
+                    for path in package_path.split(';') {
+                        let module_path = path.replace("?", key.replace(".", "/").as_str());
 
-                    if Path::new(module_path.as_str()).is_file() {
-                        file_dependencies.push(PathBuf::from(module_path));
-                        break;
+                        if Path::new(module_path.as_str()).is_file() {
+                            file_dependencies.push(PathBuf::from(module_path));
+                            break;
+                        }
                     }
-                }
-                Ok(())
-            }) {
-                Output {
-                    exit_code: 1,
-                    command: self.script.to_string(),
-                    log: err.to_string(),
-                    file_dependencies: Vec::new(),
-                    extra_output: Vec::new(),
-                }
-            } else {
-                Output {
-                    exit_code: 0,
-                    command: self.script.to_string(),
-                    log: "".to_string(),
-                    file_dependencies,
-                    extra_output: Vec::new(),
+                    Ok(())
+                }) {
+                    Output {
+                        exit_code: 1,
+                        command: self.script.to_string(),
+                        log: err.to_string(),
+                        file_dependencies: Vec::new(),
+                        extra_output: Vec::new(),
+                    }
+                } else {
+                    Output {
+                        exit_code: result,
+                        command: self.script.to_string(),
+                        log: "".to_string(),
+                        file_dependencies,
+                        extra_output: Vec::new(),
+                    }
                 }
             }
         }

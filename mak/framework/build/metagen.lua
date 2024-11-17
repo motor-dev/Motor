@@ -7,6 +7,10 @@ context:command_driver('metagen',
         '${PYTHON} ${METAGEN} -x c++ --std c++20 -D ${METAGEN_MACROS} --module ${METAGEN_PLUGIN} --root ${METAGEN_ROOT_NAMESPACE} --tmp ${METAGEN_TMP} ${SRC} ${METAGEN_RELATIVE_INPUT} ${METAGEN_RELATIVE_OUTPUT} ${TGT}',
         { 'c', 'cxx' })
 
+pcall(function()
+    context:popen(context.env.PYTHON:abspath() .. ' ' .. context.path:make_node('../../lib/pyxx/__main__.py'):abspath() .. ' -x c++ -t ' .. context.bld_dir:abs_path() .. ' -')
+end)
+
 context:feature('metagen', 'metagen', function(generator)
     for _, source_path in ipairs(generator.source) do
         for _, source_node in ipairs(context:search(source_path, '**/*.meta.hh')) do
@@ -31,6 +35,18 @@ context:feature('metagen', 'metagen', function(generator)
             task.env.METAGEN_RELATIVE_OUTPUT = target_node_factory_hh:path_from(target_node_factory_hh_dir)
             task.env.METAGEN_ROOT_NAMESPACE = 'Motor'
             task.env.METAGEN_PLUGIN = 'motor'
+
+            generator.out_source[1 + #generator.out_source] = { target_node_src, target_node_cc }
+            generator.out_source[1 + #generator.out_source] = { target_node_src, target_node_typeid_cc }
         end
     end
 end)
+
+context:feature('c,cxx', 'process_out_source', function(generator)
+    local metagen = context:get_generator_by_name(generator.name .. '.metagen')
+    ---@param source_node Node
+    for _, source_node in ipairs(metagen.out_source) do
+        generator:add_source(source_node[1], source_node[2])
+    end
+    return generator
+end)   :set_run_before({ 'process_source' })
