@@ -6,31 +6,35 @@
 #include <motor/meta/stdafx.h>
 
 namespace Motor { namespace Meta {
-
 class Class;
 
-template < typename T >
+template <typename T>
 struct ClassID
 {
     constexpr static raw< const Class > klass()
     {
         return {&s_class};
     }
+
     MOTOR_EXPORT static istring     name();
     MOTOR_EXPORT static const Class s_class;
 };
 
 #define MOTOR_DECLARE_CLASS_ID(type)                                                               \
-    template <>                                                                                    \
-    istring ClassID< type >::name();                                                               \
-    template <>                                                                                    \
-    const Class                 ClassID< type >::s_class;                                          \
-    extern template istring     ClassID< type >::name();                                           \
-    extern template const Class ClassID< type >::s_class;
+    template <> \
+    struct ClassID<type> \
+    { \
+        constexpr static raw< const Class > klass() \
+        { \
+            return {&s_class}; \
+        } \
+        MOTOR_EXPORT static istring     name(); \
+        MOTOR_EXPORT static const Class s_class; \
+    }; \
+    extern template struct ClassID<type>;
 
 MOTOR_DECLARE_CLASS_ID(void)
 MOTOR_DECLARE_CLASS_ID(minitl::pointer)
-
-}}  // namespace Motor::Meta
+}} // namespace Motor::Meta
 
 #endif

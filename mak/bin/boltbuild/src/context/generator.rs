@@ -62,7 +62,7 @@ pub(super) fn call(lua: &Lua, (this, name, features, env, group): (AnyUserData, 
 pub(super) fn get_generator_by_name(_lua: &Lua, (this, generator_name): (AnyUserData, String)) -> LuaResult<AnyUserData> {
     let generators = this.named_user_value::<Vec<AnyUserData>>(":generators")?;
     for generator in generators {
-        if generator.borrow::<Generator>()?.name.eq(&generator_name) {
+        if generator.borrow::<Arc<Mutex<Generator>>>()?.lock().unwrap().name.eq(&generator_name) {
             return Ok(generator);
         }
     }

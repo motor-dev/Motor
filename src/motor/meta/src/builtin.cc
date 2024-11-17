@@ -9,11 +9,10 @@
 #include <motor/meta/namespace.hh>
 
 namespace Motor { namespace Meta {
-
 const Object s_objects[] = {{{&s_objects[1]},
                              motor_motor_Namespace(),
                              ClassID< void >::name(),
-                             Value(raw< const Class > {&ClassID< void >::s_class})},
+                             Value(raw< const Class >{&ClassID< void >::s_class})},
 
                             {{&s_objects[2]},
                              motor_motor_Namespace(),
@@ -79,7 +78,7 @@ static void nullconstructor(const void* /*src*/, void* /*dst*/)
 {
 }
 
-template < typename T >
+template <typename T>
 static void copyconstructor(const void* src, void* dst)
 {
     memcpy(dst, src, sizeof(T));
@@ -93,23 +92,23 @@ static InterfaceTable s_emptyTable
     = {{nullptr}, {nullptr}, {nullptr}, {nullptr}, {nullptr}, {nullptr},
        {nullptr}, {nullptr}, {nullptr}, {nullptr}, {nullptr}, nullptr};
 
-template < typename FROM, typename TO >
+template <typename FROM, typename TO>
 static Value construct(FROM t)
 {
     return Value(TO(t));
 }
 
-template < typename FROM, typename TO >
+template <typename FROM, typename TO>
 static FROM get(const Value& value)
 {
     return FROM(value.as< TO >());
 }
 
-template < typename FROM, typename TO >
+template <typename FROM, typename TO>
 static InterfaceTable::TypeInterface< FROM > s_builtinInterfaceType
     = {TypeID< TO >::type(), &construct< FROM, TO >, &get< FROM, TO >};
 
-template < typename TO >
+template <typename TO>
 static InterfaceTable s_builtinInterface = {{&s_builtinInterfaceType< bool, TO >},
                                             {&s_builtinInterfaceType< i64, TO >},
                                             {&s_builtinInterfaceType< u64, TO >},
@@ -125,26 +124,22 @@ static InterfaceTable s_builtinInterface = {{&s_builtinInterfaceType< bool, TO >
 
 };
 
-template <>
 MOTOR_EXPORT istring ClassID< void >::name()
 {
     static const istring s_name("void");
     return s_name;
 }
 
-template <>
 MOTOR_EXPORT const Class ClassID< void >::s_class
-    = {0,         {nullptr}, 0,         {&s_objects[0]}, {nullptr},        {nullptr},
+    = {0, {nullptr}, 0, {&s_objects[0]}, {nullptr}, {nullptr},
        {nullptr}, {nullptr}, {nullptr}, {&s_emptyTable}, &nullconstructor, &nulldestructor};
 
-template <>
 MOTOR_EXPORT istring ClassID< minitl::pointer >::name()
 {
     static const istring s_name("pointer");
     return s_name;
 }
 
-template <>
 MOTOR_EXPORT const Class ClassID< minitl::pointer >::s_class = {0,
                                                                 ClassID< void >::klass(),
                                                                 0,
@@ -158,14 +153,12 @@ MOTOR_EXPORT const Class ClassID< minitl::pointer >::s_class = {0,
                                                                 &nullconstructor,
                                                                 &nulldestructor};
 
-template <>
 MOTOR_EXPORT istring ClassID< bool >::name()
 {
     static const istring s_name("bool");
     return s_name;
 }
 
-template <>
 MOTOR_EXPORT const Class ClassID< bool >::s_class = {sizeof(bool),
                                                      ClassID< void >::klass(),
                                                      0,
@@ -179,14 +172,12 @@ MOTOR_EXPORT const Class ClassID< bool >::s_class = {sizeof(bool),
                                                      &copyconstructor< bool >,
                                                      &nulldestructor};
 
-template <>
 MOTOR_EXPORT istring ClassID< u8 >::name()
 {
     static const istring s_name("u8");
     return s_name;
 }
 
-template <>
 MOTOR_EXPORT const Class ClassID< u8 >::s_class = {sizeof(u8),
                                                    ClassID< void >::klass(),
                                                    0,
@@ -200,14 +191,12 @@ MOTOR_EXPORT const Class ClassID< u8 >::s_class = {sizeof(u8),
                                                    &copyconstructor< u8 >,
                                                    &nulldestructor};
 
-template <>
 MOTOR_EXPORT istring ClassID< i8 >::name()
 {
     static const istring s_name("i8");
     return s_name;
 }
 
-template <>
 MOTOR_EXPORT const Class ClassID< i8 >::s_class = {sizeof(i8),
                                                    ClassID< void >::klass(),
                                                    0,
@@ -221,14 +210,12 @@ MOTOR_EXPORT const Class ClassID< i8 >::s_class = {sizeof(i8),
                                                    &copyconstructor< i8 >,
                                                    &nulldestructor};
 
-template <>
 MOTOR_EXPORT istring ClassID< u16 >::name()
 {
     static const istring s_name("u16");
     return s_name;
 }
 
-template <>
 MOTOR_EXPORT const Class ClassID< u16 >::s_class = {sizeof(u16),
                                                     ClassID< void >::klass(),
                                                     0,
@@ -242,14 +229,12 @@ MOTOR_EXPORT const Class ClassID< u16 >::s_class = {sizeof(u16),
                                                     &copyconstructor< u16 >,
                                                     &nulldestructor};
 
-template <>
 MOTOR_EXPORT istring ClassID< i16 >::name()
 {
     static const istring s_name("i16");
     return s_name;
 }
 
-template <>
 MOTOR_EXPORT const Class ClassID< i16 >::s_class = {sizeof(i16),
                                                     ClassID< void >::klass(),
                                                     0,
@@ -263,14 +248,12 @@ MOTOR_EXPORT const Class ClassID< i16 >::s_class = {sizeof(i16),
                                                     &copyconstructor< i16 >,
                                                     &nulldestructor};
 
-template <>
 MOTOR_EXPORT istring ClassID< u32 >::name()
 {
     static const istring s_name("u32");
     return s_name;
 }
 
-template <>
 MOTOR_EXPORT const Class ClassID< u32 >::s_class = {sizeof(u32),
                                                     ClassID< void >::klass(),
                                                     0,
@@ -284,14 +267,12 @@ MOTOR_EXPORT const Class ClassID< u32 >::s_class = {sizeof(u32),
                                                     &copyconstructor< u32 >,
                                                     &nulldestructor};
 
-template <>
 MOTOR_EXPORT istring ClassID< i32 >::name()
 {
     static const istring s_name("i32");
     return s_name;
 }
 
-template <>
 MOTOR_EXPORT const Class ClassID< i32 >::s_class = {sizeof(i32),
                                                     ClassID< void >::klass(),
                                                     0,
@@ -305,14 +286,12 @@ MOTOR_EXPORT const Class ClassID< i32 >::s_class = {sizeof(i32),
                                                     &copyconstructor< i32 >,
                                                     &nulldestructor};
 
-template <>
 MOTOR_EXPORT istring ClassID< u64 >::name()
 {
     static const istring s_name("u64");
     return s_name;
 }
 
-template <>
 MOTOR_EXPORT const Class ClassID< u64 >::s_class = {sizeof(u64),
                                                     ClassID< void >::klass(),
                                                     0,
@@ -326,14 +305,12 @@ MOTOR_EXPORT const Class ClassID< u64 >::s_class = {sizeof(u64),
                                                     &copyconstructor< u64 >,
                                                     &nulldestructor};
 
-template <>
 MOTOR_EXPORT istring ClassID< i64 >::name()
 {
     static const istring s_name("i64");
     return s_name;
 }
 
-template <>
 MOTOR_EXPORT const Class ClassID< i64 >::s_class = {sizeof(i64),
                                                     ClassID< void >::klass(),
                                                     0,
@@ -347,14 +324,12 @@ MOTOR_EXPORT const Class ClassID< i64 >::s_class = {sizeof(i64),
                                                     &copyconstructor< i64 >,
                                                     &nulldestructor};
 
-template <>
 MOTOR_EXPORT istring ClassID< float >::name()
 {
     static const istring s_name("float");
     return s_name;
 }
 
-template <>
 MOTOR_EXPORT const Class ClassID< float >::s_class = {sizeof(float),
                                                       ClassID< void >::klass(),
                                                       0,
@@ -368,14 +343,12 @@ MOTOR_EXPORT const Class ClassID< float >::s_class = {sizeof(float),
                                                       &copyconstructor< float >,
                                                       &nulldestructor};
 
-template <>
 MOTOR_EXPORT istring ClassID< double >::name()
 {
     static const istring s_name("double");
     return s_name;
 }
 
-template <>
 MOTOR_EXPORT const Class ClassID< double >::s_class = {sizeof(double),
                                                        ClassID< void >::klass(),
                                                        0,
@@ -389,7 +362,6 @@ MOTOR_EXPORT const Class ClassID< double >::s_class = {sizeof(double),
                                                        &copyconstructor< double >,
                                                        &nulldestructor};
 
-const ConversionCost ConversionCost::s_incompatible {0, 0, 0, 0, 1};
-const ConversionCost ConversionCost::s_variant {0, 0, 0, 1, 0};
-
-}}  // namespace Motor::Meta
+const ConversionCost ConversionCost::s_incompatible{0, 0, 0, 0, 1};
+const ConversionCost ConversionCost::s_variant{0, 0, 0, 1, 0};
+}} // namespace Motor::Meta
