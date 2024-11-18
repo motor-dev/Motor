@@ -7,14 +7,16 @@ context:load_tool('internal/product_process')
 ---@param generator Generator
 ---@param node Node
 ---@param path Node
-local function make_build_node(generator, node, path)
-    local target_node = context.bld_dir
-    target_node = target_node:make_node(generator.group)
-    target_node = target_node:make_node(generator.target)
-    target_node = target_node:make_node('obj')
-    target_node = target_node:make_node(node:path_from(path))
+---@param category string|nil
+local function make_build_node(generator, node, path, category)
+    category = category or 'obj'
+    local directory = context.bld_dir
+    directory = directory:make_node(generator.group)
+    directory = directory:make_node(generator.target)
+    directory = directory:make_node(category)
+    local target_node = directory:make_node(node:path_from(path))
     target_node = target_node:change_ext("o")
-    return target_node
+    return target_node, directory
 end
 
 ---@param generator Generator
@@ -93,7 +95,7 @@ local function process_source(generator)
                 local ext = source:extension()
                 local source_processor = context._extensions[ext]
                 if source_processor == nil then
-                    context:fatal("No tool that can handle file " .. tostring(source) .. " with extension " .. ext .. ".")
+                    context:raise_error("No tool that can handle file " .. tostring(source) .. " with extension " .. ext .. ".")
                 end
                 source_processor(generator, source, path)
             end
@@ -106,7 +108,7 @@ local function process_source(generator)
             local ext = source:extension()
             local source_processor = context._extensions[ext]
             if source_processor == nil then
-                context:fatal("No tool that can handle file " .. tostring(source) .. " with extension " .. ext .. ".")
+                context:raise_error("No tool that can handle file " .. tostring(source) .. " with extension " .. ext .. ".")
             end
             source_processor(generator, source, path)
         end
