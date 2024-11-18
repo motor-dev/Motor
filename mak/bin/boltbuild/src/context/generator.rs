@@ -28,7 +28,7 @@ pub(super) fn declare_group(_lua: &Lua, this: &mut Context, (name, enabled): (St
     }
 }
 
-pub(super) fn call(lua: &Lua, (this, name, features, env, group): (AnyUserData, String, LuaValue, Option<AnyUserData>, Option<String>)) -> LuaResult<AnyUserData> {
+pub(super) fn declare_generator(lua: &Lua, (this, name, features, env, group): (AnyUserData, String, LuaValue, Option<AnyUserData>, Option<String>)) -> LuaResult<AnyUserData> {
     let group = this.borrow_mut_scoped::<Context, _>(|context| {
         let group = group.unwrap_or_else(|| context.spec.fs_name.clone());
         if !context.output.groups.iter().any(|x| x.0.eq(&group)) {
@@ -59,12 +59,12 @@ pub(super) fn call(lua: &Lua, (this, name, features, env, group): (AnyUserData, 
     Ok(generator)
 }
 
-pub(super) fn get_generator_by_name(_lua: &Lua, (this, generator_name): (AnyUserData, String)) -> LuaResult<AnyUserData> {
+pub(super) fn get_generator_by_name(_lua: &Lua, (this, generator_name): (AnyUserData, String)) -> LuaResult<Option<AnyUserData>> {
     let generators = this.named_user_value::<Vec<AnyUserData>>(":generators")?;
     for generator in generators {
         if generator.borrow::<Arc<Mutex<Generator>>>()?.lock().unwrap().name.eq(&generator_name) {
-            return Ok(generator);
+            return Ok(Some(generator));
         }
     }
-    Err(LuaError::RuntimeError(format!("no generator named `{}` was declared", &generator_name)))
+    Ok(None)
 }

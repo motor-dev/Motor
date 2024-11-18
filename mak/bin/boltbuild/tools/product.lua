@@ -1,9 +1,8 @@
 ---@type Context
 local context = ...
 
+context:load_tool('bolt')
 context:load_tool('internal/product_process')
-
-Bolt = { }
 
 ---@param generator Generator
 ---@param path Node
@@ -95,8 +94,10 @@ local function module(name, link_type, languages)
     for _, l in ipairs(languages) do
         features[1 + #features] = l
     end
-    features[1 + #features] = link_type
-    local g = context(name, features)
+    if link_type then
+        features[1 + #features] = link_type
+    end
+    local g = context:declare_generator(name, features)
 
     g.objects = { }
     g.source = { }
@@ -108,6 +109,7 @@ local function module(name, link_type, languages)
     g.public_defines = { }
     g.dependencies = { }
     g.public_dependencies = { }
+    g.public_flags = { }
 
     g.add_source = add_source
     g.add_source_pattern = add_source_pattern
@@ -147,4 +149,17 @@ end
 ---@return Generator
 function Bolt.program(name, languages)
     return module(name, 'program', languages)
+end
+
+function Bolt.pkg_config(name, var)
+    if context.env['check_' .. var] then
+        local cflags = context.env['check_' .. var .. '_cflags']
+        local libs = context.env['check_' .. var .. '_libs']
+        local ldflags = context.env['check_' .. var .. '_ldflags']
+        local generator = module(name, nil, { 'c', 'cxx' })
+        generator.public_flags = { { 'CFLAGS', cflags },
+                                   { 'CXXFLAGS', cflags },
+                                   { 'LINKFLAGS', ldflags },
+                                   { 'LIBS', libs } }
+    end
 end

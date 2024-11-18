@@ -7,7 +7,7 @@ context:load_tool('internal/product_core')
 context:extension('cpp,cc,cxx,C', function(generator, node, path)
     local out_node = generator:make_build_node(node, path)
     out_node.parent:mkdir()
-    local task = generator('cxx', { node }, { out_node })
+    local task = generator:declare_task('cxx', { node }, { out_node })
     generator.compiled_tasks[1 + #generator.compiled_tasks] = task
     generator.objects[1 + #generator.objects] = out_node
 end)

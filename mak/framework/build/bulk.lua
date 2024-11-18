@@ -24,7 +24,7 @@ local function make_bulk_task(generator, counter, extension)
     target_node:mkdir()
     target_node = target_node:make_node(extension .. '-bulk-' .. counter .. '.' .. extension)
     generator.source[1 + #generator.source] = { target_node.parent, target_node }
-    return generator('bulk', { }, { target_node })
+    return generator:declare_task('bulk', { }, { target_node })
 end
 
 ---@param generator Generator

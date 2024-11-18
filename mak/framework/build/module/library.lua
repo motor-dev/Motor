@@ -86,7 +86,7 @@ local function metagen(name)
     path = context.path:make_node(path)
 
     name = name .. '.metagen'
-    local generator = context(name, { 'metagen' }, context.env, "metagen")
+    local generator = context:declare_generator(name, { 'metagen' }, context.env, "metagen")
     generator.source = { path:make_node('api'), path:make_node('include') }
     generator.out_source = {}
     return generator

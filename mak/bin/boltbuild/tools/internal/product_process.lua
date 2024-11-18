@@ -37,6 +37,12 @@ local function process_dependency(generator, dependency, seen)
         for _, define in ipairs(dependency.public_defines) do
             generator.defines[1 + #generator.defines] = define
         end
+        for _, flags in ipairs(dependency.public_flags) do
+            local flag_name, values = flags[1], flags[2]
+            if values and #values ~= 0 then
+                generator.env:append(flag_name, table.unpack(values))
+            end
+        end
         for _, dep in ipairs(dependency.public_dependencies) do
             process_dependency(generator, dep, seen)
         end
@@ -46,6 +52,9 @@ end
 ---@param generator Generator
 local function process_dependencies(generator)
     local seen = { }
+    for _, dependency in ipairs(generator.dependencies) do
+        process_dependency(generator, dependency, seen)
+    end
     for _, dependency in ipairs(generator.public_dependencies) do
         process_dependency(generator, dependency, seen)
     end
@@ -111,7 +120,7 @@ local function process_link_program(generator)
         target_node = target_node:make_node(generator.group)
         target_node = target_node:make_node(generator.target)
         target_node = target_node:make_node(string.format(context.env.PROGRAM_PATTERN, generator.target))
-        local link_task = generator("program", {}, { target_node })
+        local link_task = generator:declare_task("program", {}, { target_node })
         for _, task in ipairs(generator.compiled_tasks) do
             link_task:add_input(task.outputs[1])
         end
@@ -126,7 +135,7 @@ local function process_link_shlib(generator)
         target_node = target_node:make_node(generator.group)
         target_node = target_node:make_node(generator.target)
         target_node = target_node:make_node(string.format(context.env.SHLIB_PATTERN, generator.target))
-        local link_task = generator("shlib", {}, { target_node })
+        local link_task = generator:declare_task("shlib", {}, { target_node })
         for _, task in ipairs(generator.compiled_tasks) do
             link_task:add_input(task.outputs[1])
         end
@@ -141,7 +150,7 @@ local function process_link_stlib(generator)
         target_node = target_node:make_node(generator.group)
         target_node = target_node:make_node(generator.target)
         target_node = target_node:make_node(string.format(context.env.STLIB_PATTERN, generator.target))
-        local link_task = generator("stlib", {}, { target_node })
+        local link_task = generator:declare_task("stlib", {}, { target_node })
         for _, task in ipairs(generator.compiled_tasks) do
             link_task:add_input(task.outputs[1])
         end

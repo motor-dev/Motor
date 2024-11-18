@@ -8,21 +8,21 @@ GnuCompiler = {}
 ---@param language string The name of the language (uppercase, C or CXX).
 function GnuCompiler.get_specs(command, language)
     local env = context.env
-    for _, arg in ipairs(env[language..'FLAGS']) do
-        command[1 + #command] = arg
-    end
-    command[1 + #command] = '-v'
-    command[1 + #command] = '-dM'
-    command[1 + #command] = '-E'
-    command[1 + #command] = '-'
 
-    local handle = context:popen(command)
+    local include_command = { table.unpack(command) }
+    for _, arg in ipairs(env[language..'FLAGS']) do
+        include_command[1 + #include_command] = arg
+    end
+    include_command[1 + #include_command] = '-v'
+    include_command[1 + #include_command] = '-dM'
+    include_command[1 + #include_command] = '-E'
+    include_command[1 + #include_command] = '-'
+
+    local handle = context:popen(include_command)
     local success, out, err = handle:communicate()
     if not success then
         error(err)
     end
-
-    env.TARGET = target
 
     ---@type table<string, string>
     local defines = {}
@@ -32,7 +32,6 @@ function GnuCompiler.get_specs(command, language)
     local arch = nil
     local endianness = nil
     local sizeof_pointer = nil
-
     for line in (err + out):lines() do
         if string.starts_with(line, 'Target: ') then
             env.TARGET = line:sub(9, -1)
@@ -141,5 +140,22 @@ function GnuCompiler.get_specs(command, language)
         end
     end
     env.ARCHITECTURE = arch
+
+    local lib_command = { table.unpack(command) }
+    table.insert(lib_command, '-print-search-dirs')
+    handle = context:popen(lib_command)
+    success, out, err = handle:communicate()
+    if not success then
+        error(err)
+    end
+    for line in (err + out):lines() do
+        if string.starts_with(line, 'libraries: =') then
+            local paths = string.split(line:sub(13), ':')
+            for _, path in ipairs(paths) do
+                env:append(language.."_COMPILER_SYSTEM_LIB_DIRS", path)
+            end
+        end
+    end
+
     return defines
 end
