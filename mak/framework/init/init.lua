@@ -57,3 +57,5 @@ function context.add_3rd_party_flag(self, name)
 end
 
 context:load_tool('lang/python')
+context:load_tool('lang/flex')
+context:load_tool('lang/bison')

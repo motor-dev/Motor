@@ -2,6 +2,7 @@ use std::mem::swap;
 use std::ops::Deref;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
+use include_dir::Dir;
 use mlua::{AnyUserData, Lua, FromLua, UserData};
 use mlua::prelude::{LuaError, LuaResult, LuaString, LuaValue};
 use crate::context::{Context, TOOLS_DIR};
@@ -87,12 +88,23 @@ pub(super) fn load_tool(lua: &Lua, (this, tool, again): (AnyUserData, String, Op
         return Ok(());
     }
 
+    let mut builtin_tools = Vec::new();
+    fn walk(dir: &Dir, tools: &mut Vec<String>) {
+        for entry in dir.files() {
+            tools.push(entry.path().with_extension("").to_str().unwrap().to_owned());
+        }
+        for entry in dir.dirs() {
+            walk(entry, tools);
+        }
+    }
+    walk(&TOOLS_DIR, &mut builtin_tools);
 
     this.borrow_mut_scoped::<Context, _>(|this| {
         Err(LuaError::RuntimeError(
-            format!("could not locate tool {}\nsearch paths:\n  {}\ncurrent directory:\n  {}\n",
+            format!("could not locate tool {}\nsearch paths:\n  {}\nbuilt-in tools:\n  {}\ncurrent directory:\n  {}\n",
                     tool,
-                    paths.iter().map(|x| x.to_string()).collect::<Vec<String>>().join(",\n  "),
+                    paths.iter().map(|x| x.to_string()).collect::<Vec<String>>().join("\n  "),
+                    builtin_tools.join("\n  "),
                     this.path
             )))
     })?
@@ -127,3 +139,4 @@ pub(super) fn chain_command(_lua: &Lua, this: &mut Context, args: (AnyUserData, 
         this.declare_chain(path.deref(), args.1.as_str(), args.2.as_str())?;
     Ok(DeclaredCommand { path: sub_path })
 }
+
