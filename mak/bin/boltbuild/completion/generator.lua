@@ -37,7 +37,7 @@ end
 ---@param env Environment|nil The default environment for tasks created by this generator.
 ---@param group string|nil The group this generator belongs to, declared via `declare_group` for conditional control. Defaults to the context’s `fs_name` value if not specified.
 ---@return Generator A new generator object.
-function Context:__call(name, features, env, group)
+function Context:declare_generator(name, features, env, group)
     use(name)
     use(features)
     use(env)
@@ -81,7 +81,7 @@ Generator = {}
 ---@param outputs Node|Node[]|nil Initial outputs produced by the task. Additional outputs can be added with `Task:add_output`.
 ---@param env Environment|nil The environment to use for this task, overriding the generator’s default environment if specified.
 ---@return Task A new task object, ready for configuration and execution.
-function Generator:__call(driver, inputs, outputs, env)
+function Generator:declare_task(driver, inputs, outputs, env)
     use(driver)
     use(inputs)
     use(outputs)

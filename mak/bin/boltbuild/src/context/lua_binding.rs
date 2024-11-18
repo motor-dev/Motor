@@ -60,7 +60,7 @@ impl UserData for Context {
         methods.add_method_mut("find_program", find_program);
         methods.add_method_mut("popen", popen);
         methods.add_function("load_tool", load_tool);
-        methods.add_meta_function(MetaMethod::Call, call);
+        methods.add_function("declare_generator", declare_generator);
         methods.add_function("feature", feature);
         methods.add_function("get_generator_by_name", get_generator_by_name);
         methods.add_function("post", |lua, (this, generator): (AnyUserData, AnyUserData)| post(lua, (&this, &generator)));

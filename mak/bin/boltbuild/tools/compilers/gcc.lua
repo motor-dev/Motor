@@ -13,10 +13,11 @@ function Bolt.Gcc.load_gcc_c(c_flags)
     env.CFLAGS = {'-x', 'c', '-c', '-fPIC'}
     env:append('CFLAGS', c_flags)
     env.C_COMPILER_NAME = 'gcc'
-    env.CC_TGT_F = '-o'
-    env.CC_DEFINE_ST = '-D'
-    env.CC_INCLUDE_ST = '-I'
-    env.CC_SYSTEM_INCLUDE_ST = '-isystem%s'
+    env.C_TGT_F = '-o'
+    env.C_DEFINE_ST = '-D'
+    env.C_INCLUDE_ST = '-I'
+    env.C_SYSTEM_INCLUDE_ST = '-isystem%s'
+    env.C_IDIRAFTER = '-isystem'
     env.LINK = env.CC
     env.LINKFLAGS = {}
     env.LINK_TGT_F = '-o'
@@ -37,9 +38,8 @@ function Bolt.Gcc.load_gcc_c(c_flags)
         end
     end
 
-    env.GCC_C_VERSION = version[1] .. '.' .. version[2] .. '.' .. version[3]
+    env.GCC_C_VERSION = table.concat(version, '.')
 
-    -- load build rules for C
     context:load_tool('internal/c')
     context:load_tool('internal/link')
 end
@@ -47,11 +47,9 @@ end
 ---@param cxx_flags (string|Node)[]) The flags to pass to the compiler.
 function Bolt.Gcc.load_gcc_cxx(cxx_flags)
     local env = context.env
-    -- if a  GCC C compiler is loaded, use that
     if env.CC and env.C_COMPILER_NAME == 'gcc' then
         env.CXX = env.CC
     else
-        -- todo
         context:error('Could not find a valid GCC c++ compiler')
     end
 
@@ -62,6 +60,7 @@ function Bolt.Gcc.load_gcc_cxx(cxx_flags)
     env.CXX_DEFINE_ST = '-D'
     env.CXX_INCLUDE_ST = '-I'
     env.CXX_SYSTEM_INCLUDE_ST = '-isystem%s'
+    env.CXX_IDIRAFTER = '-isystem'
     env.LINK = env.CXX
     env.LINKFLAGS = {}
     env.LINK_TGT_F = '-o'
@@ -81,35 +80,27 @@ function Bolt.Gcc.load_gcc_cxx(cxx_flags)
             version[3] = tonumber(value)
         end
     end
-    env.GCC_CXX_VERSION = version[1] .. '.' .. version[2] .. '.' .. version[3]
+    env.GCC_CXX_VERSION = table.concat(version, '.')
 
-    -- load build rules for C++
-    context:load_tool('internal/cxx')
+    context:load_tool('internal/c++')
     context:load_tool('internal/link')
 end
 
----Discover as many Gcc compilers as possible, including extra triples where applicable. When gcc compilers are found,
----load the compiler in a new environment derived from the current environment.
 ---@param c_flags (string|Node)[]|nil Extra flags that the C compiler should support.
 ---@param cxx_flags (string|Node)[]|nil Extra flags that the C++ compiler should support.
 ---@return Environment[] A list of environments where a Clang compiler has been loaded.
 function Bolt.Gcc.discover(c_flags, cxx_flags)
-    if c_flags == nil then
-        c_flags = {}
-    end
-    if cxx_flags == nil then
-        cxx_flags = {}
-    end
+    c_flags = c_flags or {}
+    cxx_flags = cxx_flags or {}
     local result = {}
     context:try('Looking for Gcc compilers', function()
-        ---@type table<string, Node>
         local seen = {}
         local paths = context.settings.path
 
-        for _, path in ipairs(--[[---@type Node[] ]] paths) do
+        for _, path in ipairs(paths) do
             for _, crtbegin in ipairs(context:search(path.parent, 'lib/gcc*/*/*/crtbegin.o')) do
                 crtbegin = crtbegin:canonicalize()
-                if seen[crtbegin:abs_path()] == nil then
+                if not seen[crtbegin:abs_path()] then
                     local node = crtbegin.parent
                     local version = node:name()
                     node = node.parent
@@ -122,28 +113,29 @@ function Bolt.Gcc.discover(c_flags, cxx_flags)
                                 context.env.GCC_VERSION = version
                                 Bolt.Gcc.load_gcc_c(c_flags)
                                 Bolt.Gcc.load_gcc_cxx(cxx_flags)
-                                result[1 + #result] = context.env
+                                result[#result + 1] = context.env
                             end)
                         end) then
                             for _, multilib in ipairs(context:search(crtbegin.parent, '*/crtbegin.o')) do
-                                multilib = multilib.parent:name()
-                                local multilib_c_flags = {}
-                                local multilib_cxx_flags = {}
-                                for _, flag in ipairs(c_flags) do
-                                    multilib_c_flags[1 + #multilib_c_flags] = flag
+
+                                local multilib_c_flags, multilib_cxx_flags
+                                if #c_flags ~= 0 then
+                                    multilib_c_flags = { table.unpack(c_flags), '-m' .. multilib.parent:name() }
+                                else
+                                    multilib_c_flags = { '-m' .. multilib.parent:name() }
                                 end
-                                for _, flag in ipairs(cxx_flags) do
-                                    multilib_cxx_flags[1 + #multilib_cxx_flags] = flag
+                                if #cxx_flags ~= 0 then
+                                    multilib_cxx_flags = { table.unpack(cxx_flags), '-m' .. multilib.parent:name() }
+                                else
+                                    multilib_cxx_flags = { '-m' .. multilib.parent:name() }
                                 end
-                                multilib_c_flags[1 + #multilib_c_flags] = '-m' .. multilib
-                                multilib_cxx_flags[1 + #multilib_cxx_flags] = '-m' .. multilib
                                 pcall(function()
                                     context:with(context:derive(), function()
                                         context.env.CC = { gcc }
                                         context.env.GCC_VERSION = version
                                         Bolt.Gcc.load_gcc_c(multilib_c_flags)
                                         Bolt.Gcc.load_gcc_cxx(multilib_cxx_flags)
-                                        result[1 + #result] = context.env
+                                        result[#result + 1] = context.env
                                     end)
                                 end)
                             end

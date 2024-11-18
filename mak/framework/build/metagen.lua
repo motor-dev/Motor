@@ -30,7 +30,7 @@ context:feature('metagen', 'metagen', function(generator)
             target_node_factory_hh = target_node_factory_hh:change_ext('factory.hh')
             target_node_factory_hh.parent:mkdir()
 
-            local task = generator('metagen', { source_node }, { target_node_cc, target_node_typeid_cc, target_node_factory_hh, target_node_doc, target_node_ns })
+            local task = generator:declare_task('metagen', { source_node }, { target_node_cc, target_node_typeid_cc, target_node_factory_hh, target_node_doc, target_node_ns })
             task.env.METAGEN_RELATIVE_INPUT = source_node:path_from(source_path)
             task.env.METAGEN_RELATIVE_OUTPUT = target_node_factory_hh:path_from(target_node_factory_hh_dir)
             task.env.METAGEN_ROOT_NAMESPACE = 'Motor'
@@ -44,9 +44,11 @@ end)
 
 context:feature('c,cxx', 'process_out_source', function(generator)
     local metagen = context:get_generator_by_name(generator.name .. '.metagen')
-    ---@param source_node Node
-    for _, source_node in ipairs(metagen.out_source) do
-        generator:add_source(source_node[1], source_node[2])
+    if metagen then
+        ---@param source_node Node
+        for _, source_node in ipairs(metagen.out_source) do
+            generator:add_source(source_node[1], source_node[2])
+        end
+        return generator
     end
-    return generator
 end)   :set_run_before({ 'process_source' })

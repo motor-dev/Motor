@@ -31,7 +31,7 @@ impl UserData for Generator {
             }
         });
 
-        methods.add_meta_function_mut(MetaMethod::Call, |lua, (generator, driver, inputs, outputs, env): (AnyUserData, String, Value, Value, Option<AnyUserData>)| {
+        methods.add_function_mut("declare_task", |lua, (generator, driver, inputs, outputs, env): (AnyUserData, String, Value, Value, Option<AnyUserData>)| {
             let inputs = match &inputs {
                 Value::Nil => Vec::new(),
                 Value::Table(_) => Vec::<Node>::from_lua(inputs, lua)?,

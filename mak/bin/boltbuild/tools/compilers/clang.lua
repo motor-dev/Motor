@@ -7,164 +7,108 @@ context:load_tool('utils/string_ext')
 
 Bolt.Clang = {}
 
----@param c_flags (string|Node)[]) The flags to pass to the compiler.
----@param link_flags (string|Node)[]) The flags to pass to the linker.
+local function get_clang_version(defines)
+    local version = { 0, 0, 0 }
+    for name, value in pairs(defines) do
+        if name == '__clang_major__' then
+            version[1] = tonumber(value)
+        elseif name == '__clang_minor__' then
+            version[2] = tonumber(value)
+        elseif name == '__clang_patchlevel__' then
+            version[3] = tonumber(value)
+        end
+    end
+    return table.concat(version, '.')
+end
+
+local function load_clang(env, compiler, flags, link_flags, lang, var)
+    env[var .. 'FLAGS'] = { '-x', lang, '-c', '-fPIC' }
+    env:append(var .. 'FLAGS', flags)
+    env[var .. '_COMPILER_NAME'] = 'clang'
+    env[var .. '_TGT_F'] = '-o'
+    env[var .. '_DEFINE_ST'] = '-D'
+    env[var .. '_INCLUDE_ST'] = '-I'
+    env[var .. '_SYSTEM_INCLUDE_ST'] = '-isystem%s'
+    env.LINKFLAGS = link_flags
+    env.LINK_TGT_F = '-o'
+    env.LINK_LIB_F = '-l'
+    env.LINK_LIBPATH_F = '-L'
+    env.LINKFLAGS_shlib = '-shared'
+    env['CLANG_' .. var .. '_VERSION'] = get_clang_version(GnuCompiler.get_specs(compiler, var))
+    context:load_tool('internal/' .. lang)
+    context:load_tool('internal/link')
+end
+
 function Bolt.Clang.load_clang_c(c_flags, link_flags)
     local env = context.env
-    env.CFLAGS = {'-x', 'c', '-c', '-fPIC'}
-    env:append('CFLAGS', c_flags)
-    env.C_COMPILER_NAME = 'clang'
-    env.CC_TGT_F = '-o'
-    env.CC_DEFINE_ST = '-D'
-    env.CC_INCLUDE_ST = '-I'
-    env.CC_SYSTEM_INCLUDE_ST = '-isystem%s'
+    env.CC = env.CC or { 'clang' }
     env.LINK = env.CC
-    env.LINKFLAGS = link_flags or {}
-    env.LINK_TGT_F = '-o'
-    env.LINK_LIB_F = '-l'
-    env.LINK_LIBPATH_F = '-L'
-    env.LINKFLAGS_shlib = '-shared'
-
-    local defines = GnuCompiler.get_specs(env.CC, "C")
-    local version = { 0, 0, 0 }
-
-    for name, value in pairs(defines) do
-        if name == '__clang_major__' then
-            version[1] = tonumber(value)
-        elseif name == '__clang_minor__' then
-            version[2] = tonumber(value)
-        elseif name == '__clang_patchlevel__' then
-            version[3] = tonumber(value)
-        end
-    end
-
-    env.CLANG_C_VERSION = version[1] .. '.' .. version[2] .. '.' .. version[3]
-
-    -- load build rules for C
-    context:load_tool('internal/c')
-    context:load_tool('internal/link')
+    load_clang(env, env.CC, c_flags, link_flags, 'c', 'C')
 end
 
----@param cxx_flags (string|Node)[]) The flags to pass to the compiler.
----@param link_flags (string|Node)[]) The flags to pass to the linker.
 function Bolt.Clang.load_clang_cxx(cxx_flags, link_flags)
     local env = context.env
-    -- if a  Clang C compiler is loaded, use that
-    if env.CC and env.C_COMPILER_NAME == 'clang' then
-        env.CXX = env.CC
-    else
-        -- todo
-        context:error('Could not find a valid Clang c++ compiler')
-    end
-
-    env.CXXFLAGS = {'-x', 'c++', '-c', '-fPIC'}
-    env:append('CXXFLAGS', cxx_flags)
-    env.CXX_COMPILER_NAME = 'clang'
-    env.CXX_TGT_F = '-o'
-    env.CXX_DEFINE_ST = '-D'
-    env.CXX_INCLUDE_ST = '-I'
-    env.CXX_SYSTEM_INCLUDE_ST = '-isystem%s'
+    env.CXX = env.CC or { 'clang++' }
     env.LINK = env.CXX
-    env.LINKFLAGS = link_flags or {}
-    env.LINK_TGT_F = '-o'
-    env.LINK_LIB_F = '-l'
-    env.LINK_LIBPATH_F = '-L'
-    env.LINKFLAGS_shlib = '-shared'
-
-    local defines = GnuCompiler.get_specs(env.CXX, "CXX")
-    local version = { 0, 0, 0 }
-
-    for name, value in pairs(defines) do
-        if name == '__clang_major__' then
-            version[1] = tonumber(value)
-        elseif name == '__clang_minor__' then
-            version[2] = tonumber(value)
-        elseif name == '__clang_patchlevel__' then
-            version[3] = tonumber(value)
-        end
-    end
-    env.CLANG_CXX_VERSION = version[1] .. '.' .. version[2] .. '.' .. version[3]
-
-    -- load build rules for C++
-    context:load_tool('internal/cxx')
-    context:load_tool('internal/link')
+    load_clang(env, env.CXX, cxx_flags, link_flags, 'c++', 'CXX')
 end
 
----@param clang Node the path to the Clang executable
----@param c_flags (string|Node)[]|nil Extra flags that the C compiler should support
----@param cxx_flags (string|Node)[]|nil Extra flags that the C++ compiler should support
----@return Environment[] An array to store discovered Clang compilers.
 function Bolt.Clang.detect_clang_targets(clang, c_flags, cxx_flags)
-    if c_flags == nil then
-        c_flags = {}
+    local c_command
+    c_flags = c_flags or {}
+    cxx_flags = cxx_flags or {}
+    if #c_flags == 0 then
+        c_command = { clang, '-x', 'c', '-v', '-E', '-' }
+    else
+        c_command = { clang, table.unpack(c_flags), '-x', 'c', '-v', '-E', '-' }
     end
-    if cxx_flags == nil then
-        cxx_flags = {}
-    end
-    local result = {}
+    local result, seen = {}, {}
+    local _, out, err = context:popen(c_command):communicate()
+    local search_paths, paths = false, {}
 
-    local full_command = { clang }
-    for _, arg in ipairs(c_flags) do
-        full_command[1 + #full_command] = arg
-    end
-    full_command[1 + #full_command] = '-x'
-    full_command[1 + #full_command] = 'c'
-    full_command[1 + #full_command] = '-v'
-    full_command[1 + #full_command] = '-E'
-    full_command[1 + #full_command] = '-'
-    local _, out, err = context:popen(full_command):communicate()
-
-    local search_paths = false
-    local paths = {}
     for line in (err + out):lines() do
         line = string.trim(line)
-        if string.starts_with(line, "#include <...>") then
+        if line:find("#include <...>") then
             search_paths = true
-        elseif string.starts_with(line, "ignoring nonexistent directory \"") then
-            local path = context.path:make_node(line:sub(33, -2))
-            paths[1+#paths] = path
-        elseif search_paths and string.starts_with(line, "End of search list") then
+        elseif line:find("ignoring nonexistent directory") then
+            paths[#paths + 1] = context.path:make_node(line:sub(33, -2))
+        elseif search_paths and line:find("End of search list") then
             break
         elseif search_paths then
-            local path = context.path:make_node(line)
-            paths[1+#paths] = path
+            paths[#paths + 1] = context.path:make_node(line)
         end
     end
 
-    local seen = {}
     for _, path in ipairs(paths) do
-        local component = path:name()
-        local relpath = ''
-        local component_count = 1
+        local component, relpath, component_count = path:name(), '', 1
         while component do
             path = path.parent
             local component_list = string.split(component, '-')
             if #component_list >= 2 then
-                for _, triple in ipairs(context:search(path, '*-*/'..relpath..'/sys', true)) do
+                for _, triple in ipairs(context:search(path, '*-*/' .. relpath .. '/sys', true)) do
                     for i = 1, component_count do
                         triple = triple.parent
                     end
                     triple = triple:name()
-                    if seen[triple] == nil then
-                        seen[triple] = triple
+                    if not seen[triple] then
+                        seen[triple] = true
                         if context:try('running clang ' .. clang:abs_path() .. ' for target ' .. triple, function()
                             context:with(context:derive(), function()
-                                local c_target_flags = {}
-                                local cxx_target_flags = {}
-                                for _, f in ipairs(c_flags) do
-                                    c_target_flags[1 + #c_target_flags] = f
+                                local c_target_flags, cxx_target_flags
+                                if #c_flags ~= 0 then
+                                    c_target_flags = { '-target', triple, table.unpack(c_flags) }
+                                else
+                                    c_target_flags = { '-target', triple }
                                 end
-                                for _, f in ipairs(cxx_flags) do
-                                    cxx_target_flags[1 + #cxx_target_flags] = f
+                                if #cxx_flags ~= 0 then
+                                    cxx_target_flags = { '-target', triple, table.unpack(cxx_flags) }
+                                else
+                                    cxx_target_flags = { '-target', triple }
                                 end
-                                c_target_flags[1+ #c_target_flags] = '-target'
-                                c_target_flags[1+ #c_target_flags] = triple
-                                cxx_target_flags[1+ #cxx_target_flags] = '-target'
-                                cxx_target_flags[1+ #cxx_target_flags] = triple
                                 context.env.CC = { clang }
-                                Bolt.Clang.load_clang_c(c_target_flags, {'-target', triple})
-                                Bolt.Clang.load_clang_cxx(cxx_target_flags, {'-target', triple})
-                                result[1 + #result] = context.env
+                                Bolt.Clang.load_clang_c(c_target_flags, { '-target', triple })
+                                Bolt.Clang.load_clang_cxx(cxx_target_flags, { '-target', triple })
+                                result[#result + 1] = context.env
                             end)
                         end) then
                             break
@@ -172,7 +116,7 @@ function Bolt.Clang.detect_clang_targets(clang, c_flags, cxx_flags)
                     end
                 end
             end
-            relpath = component..'/'..relpath
+            relpath = component .. '/' .. relpath
             component_count = component_count + 1
             component = path:name()
         end
@@ -180,31 +124,20 @@ function Bolt.Clang.detect_clang_targets(clang, c_flags, cxx_flags)
     return result
 end
 
----Discover as many Clang compilers as possible, including extra triples where applicable. When clang compilers are found,
----load the compiler in a new environment derived from the current environment.
----@param c_flags (string|Node)[]|nil Extra flags that the C compiler should support
----@param cxx_flags (string|Node)[]|nil Extra flags that the C++ compiler should support
----@return Environment[] A list of environments where a Clang compiler has been loaded.
 function Bolt.Clang.discover(c_flags, cxx_flags)
-    local result = {}
+    local result, seen = {}, {}
     context:try('Looking for Clang compilers', function()
-        ---@type table<string, Node>
-        local seen = {}
-        local paths = context.settings.path
-
-        for _, path in ipairs(--[[---@type Node[] ]] paths) do
+        for _, path in ipairs(context.settings.path) do
             for _, node in ipairs(context:search(path, 'clang*' .. context.settings.exe_suffix)) do
-                local version = string.match(node:name(), "^clang%-?(%d*)" .. context.settings.exe_suffix .. "$")
-                if version ~= nil then
-                    if node:is_file() then
-                        node = node:read_link()
-                        local absolute_path = node:abs_path()
-                        if seen[absolute_path] == nil then
-                            seen[absolute_path] = node
-                            for _, env in ipairs(Bolt.Clang.detect_clang_targets(node, c_flags, cxx_flags)) do
-                                env.CLANG_VERSION = version
-                                result[1 + #result] = env
-                            end
+                local version = node:name():match("^clang%-?(%d*)" .. context.settings.exe_suffix .. "$")
+                if version and node:is_file() then
+                    node = node:read_link()
+                    local absolute_path = node:abs_path()
+                    if not seen[absolute_path] then
+                        seen[absolute_path] = true
+                        for _, env in ipairs(Bolt.Clang.detect_clang_targets(node, c_flags, cxx_flags)) do
+                            env.CLANG_VERSION = version
+                            result[#result + 1] = env
                         end
                     end
                 end
