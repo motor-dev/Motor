@@ -114,7 +114,7 @@ def datagen(task_gen: waflib.TaskGen.task_gen, node: waflib.Node.Node) -> None:
     generated_paths = [getattr(task_gen, 'generated_include_node'), getattr(task_gen, 'generated_api_node')]
     for include_node in getattr(task_gen, 'includes') + generated_paths:
         if node.is_child_of(include_node):
-            relative_input = node.path_from(include_node)
+            relative_input = node.path_from(include_node).replace('\\', '/')
             category = include_node.name
             break
     else:
@@ -132,7 +132,7 @@ def datagen(task_gen: waflib.TaskGen.task_gen, node: waflib.Node.Node) -> None:
     outs.append(out_node.change_ext('.namespace_exports'))
     for include_node in generated_paths:
         if outs[2].is_child_of(include_node):
-            relative_output = outs[2].path_from(include_node)
+            relative_output = outs[2].path_from(include_node).replace('\\', '/')
             break
     else:
         raise waflib.Errors.WafError('unable to locate include path for %s' % outs[2])

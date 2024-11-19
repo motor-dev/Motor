@@ -362,19 +362,19 @@ def apply_source_filter(
         if node.name.startswith('platform{'):
             had_filter = True
             add_platform = False
-            platforms = node.name[9:-2].split('+')
+            platforms = node.name[9:-1].split('+')
             for p in platforms:
                 add_platform = add_platform or p in env.VALID_PLATFORMS
         elif node.name.startswith('arch{'):
             had_filter = True
             add_arch = False
-            architectures = node.name[5:-2].split('+')
+            architectures = node.name[5:-1].split('+')
             for a in architectures:
                 add_arch = add_arch or a in env.VALID_ARCHITECTURES
         elif node.name.startswith('compiler{'):
             had_filter = True
             add_compiler = False
-            compilers = node.name[9:-2].split('+')
+            compilers = node.name[9:-1].split('+')
             for c in compilers:
                 add_compiler = add_compiler or c == env.COMPILER_NAME
         elif node.parent.name == 'extra' and node.parent.parent == task_gen.bld.motornode:
