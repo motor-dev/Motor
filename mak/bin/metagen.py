@@ -321,7 +321,6 @@ class Class(MetaObject):
         )
 
     def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO, api: str) -> None:
-        print(api)
         out_hh.write(
             '\nnamespace Meta\n'
             '{\n\n'
