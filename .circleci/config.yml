@@ -58,7 +58,7 @@ jobs:
 
   macOS:
     macos:
-      xcode: 12.5.1
+      xcode: 16.2.0
     steps:
       - checkout
       - run:
@@ -66,11 +66,11 @@ jobs:
           command: python3 waf configure
       - run:
           name: Build macOS
-          command: python3 waf build:macos11.3-appleclang-12.0.5:debug --werror
+          command: python3 waf build:macos11.3-appleclang-16.1.0:debug --werror
 
   iOS:
     macos:
-      xcode: 12.5.1
+      xcode: 16.2.0
     steps:
       - checkout
       - run:
@@ -78,10 +78,10 @@ jobs:
           command: python3 waf configure
       - run:
           name: Build iOS
-          command: python3 waf build:iphone14.5-appleclang-12.0.5:debug --werror
+          command: python3 waf build:iphone18.2-appleclang-16.1.0:debug --werror
       - run:
           name: Build iOS Simulator
-          command: python3 waf build:iphonesimulator14.5-appleclang-12.0.5:debug --werror
+          command: python3 waf build:iphonesimulator18.2-appleclang-16.1.0:debug --werror
 
   linux:
     docker:
