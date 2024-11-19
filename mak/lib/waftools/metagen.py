@@ -39,6 +39,8 @@ class metagen(waflib.Task.Task):
                 self.generator.env.PLUGIN,
                 '--root',
                 getattr(self.generator, 'root_namespace'),
+                '--api',
+                self.generator.api,
                 '--tmp',
                 self.generator.bld.bldnode.abspath(),
             ] + extra_options + [
@@ -141,6 +143,7 @@ def datagen(task_gen: waflib.TaskGen.task_gen, node: waflib.Node.Node) -> None:
         'metagen',
         [node],
         outs,
+        api=task_gen.api,
         relative_input=relative_input,
         relative_output=relative_output,
         metagen=task_gen.bld.motornode.make_node('mak/bin/metagen.py'),

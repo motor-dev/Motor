@@ -124,7 +124,7 @@ static InterfaceTable s_builtinInterface = {{&s_builtinInterfaceType< bool, TO >
 
 };
 
-MOTOR_EXPORT istring ClassID< void >::name()
+motor_api(META) istring ClassID< void >::name()
 {
     static const istring s_name("void");
     return s_name;

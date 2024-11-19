@@ -5,4 +5,6 @@
 
 #include <motor/stdafx.h>
 
+#define MOTOR_API_UNITTESTS
+
 #endif

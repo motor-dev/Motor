@@ -176,10 +176,10 @@ class MetaObject(object):
             child.dump_exports(namespace, out_namespace)
             namespace.pop(-1)
 
-    def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> None:
+    def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO, api: str) -> None:
         for name, child in self._children.items():
             namespace.append(name)
-            child.write_declarations(namespace, out_cc, out_hh)
+            child.write_declarations(namespace, out_cc, out_hh, api)
             namespace.pop(-1)
 
     def _write_object_names(self, object_names: List[Tuple[str, str]], owner: str, out: TextIO) -> str:
@@ -260,9 +260,9 @@ class RootNamespace(MetaObject):
     def name(self) -> str:
         return '::Motor::' + self._cpp_name + '()'
 
-    def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> None:
+    def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO, api: str) -> None:
         out_hh.write('namespace Motor\n{\n\nraw<Meta::Class> %s();\n' % self._cpp_name)
-        super().write_declarations(namespace, out_cc, out_hh)
+        super().write_declarations(namespace, out_cc, out_hh, api)
         out_hh.write('\n}\n')
 
 
@@ -285,9 +285,9 @@ class Namespace(MetaObject):
         pickle.dump(namespace, out_namespace)
         super().dump_exports(namespace, out_namespace)
 
-    def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> None:
+    def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO, api: str) -> None:
         out_hh.write('raw<Meta::Class> %s();\n' % self._cpp_name)
-        super().write_declarations(namespace, out_cc, out_hh)
+        super().write_declarations(namespace, out_cc, out_hh, api)
 
     def name(self) -> str:
         return '::Motor::' + self._cpp_name + '()'
@@ -320,26 +320,27 @@ class Class(MetaObject):
             '::Motor::Meta::ClassID< %s >::klass()' % self._name
         )
 
-    def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> None:
+    def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO, api: str) -> None:
+        print(api)
         out_hh.write(
             '\nnamespace Meta\n'
             '{\n\n'
-            'MOTOR_DECLARE_CLASS_ID(::%s)\n\n'
-            '}\n\n' % '::'.join(namespace))
+            'MOTOR_DECLARE_CLASS_ID(%s, ::%s)\n\n'
+            '}\n\n' % (api, '::'.join(namespace)))
         out_cc.write(
             '\nnamespace Motor { namespace Meta\n'
             '{\n\n'
-            'istring ClassID<::%(cpp_name)s>::name()\n'
+            'motor_api(%(api)s) istring ClassID<::%(cpp_name)s>::name()\n'
             '{\n'
             '    static istring s_name("%(name)s");\n'
             '    return s_name;\n'
             '}\n\n'
-            'const Class ClassID<::%(cpp_name)s>::s_class = {\n'
+            'motor_api(%(api)s) const Class ClassID<::%(cpp_name)s>::s_class = {\n'
             '};\n\n'
             '}}\n\n'
-            '' % {'cpp_name': '::'.join(namespace), 'name': self._name}
+            '' % {'api': api, 'cpp_name': '::'.join(namespace), 'name': self._name}
         )
-        super().write_declarations(namespace, out_cc, out_hh)
+        super().write_declarations(namespace, out_cc, out_hh, api)
 
     def write_metaclasses(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> None:
         pass
@@ -1074,6 +1075,7 @@ def main() -> None:
         "-p", "--pch", dest="pch", help="Insert an include for precompiled header at the start of the file"
     )
     argument_context.add_argument("-m", "--module", dest="module", help="Module root")
+    argument_context.add_argument("-a", "--api", dest="api", help="Module API tag")
     argument_context.add_argument("-r", "--root", dest="root", help="Namespace root")
     argument_context.add_argument(
         "in_relative",
@@ -1147,7 +1149,7 @@ def main() -> None:
                                  '#include <motor/meta/builtins/strings.meta.hh>\n'
                                  '#include <motor/meta/builtins/value.meta.hh>\n'
                                  '\n' % (arguments.in_relative))
-                    explorer.namespace.write_declarations([], out_cc, out_hh)
+                    explorer.namespace.write_declarations([], out_cc, out_hh, arguments.api)
                     explorer.namespace.write_metaclasses([], out_typeid_cc, out_hh)
                     out_hh.write('#endif\n')
 
