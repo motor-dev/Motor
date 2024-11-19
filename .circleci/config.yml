@@ -46,15 +46,15 @@ jobs:
       - run:
           name: Build Windows MSVC 2022 x64
           command: |
-            & 'python' waf build:windows_amd64-msvc_x64-14.38:debug --tests --werror
+            & 'python' waf build:windows_amd64-msvc_x64-14.39:debug --tests --werror
       - run:
           name: Build Windows MSVC 2022 ARM64
           command: |
-            & 'python' waf build:windows_arm64-msvc_arm64-14.38:debug --werror
+            & 'python' waf build:windows_arm64-msvc_arm64-14.39:debug --werror
       - run:
           name: Build Windows Clang+MSVC 16.0.5
           command: |
-            & 'python' waf build:windows_msvc_amd64-clang_buildtools2022_amd64-16.0.5:debug --werror
+            & 'python' waf build:windows_msvc_amd64-clang_buildtools2022_amd64-17.0.3:debug --werror
 
   macOS:
     macos:
