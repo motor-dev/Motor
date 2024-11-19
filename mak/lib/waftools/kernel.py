@@ -35,7 +35,7 @@ class kernel(waflib.Task.Task):
                 self.outputs[0].path_from(self.generator.bld.bldnode),
                 self.outputs[1].path_from(self.generator.bld.bldnode),
                 self.outputs[2].path_from(self.generator.bld.bldnode),
-                self.outputs[2].path_from(getattr(self.generator, 'generated_include_node')),
+                self.outputs[2].path_from(getattr(self.generator, 'generated_include_node')).replace('\\', '/'),
             ]
         )
 
