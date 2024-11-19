@@ -18,6 +18,8 @@ pub(crate) struct Output {
     pub(crate) exit_code: u32,
     pub(crate) command: String,
     pub(crate) log: String,
+    pub(crate) hash: blake3::Hash,
+    pub(crate) driver_dependencies: Vec<PathBuf>,
     pub(crate) file_dependencies: Vec<PathBuf>,
     pub(crate) extra_output: Vec<Node>,
 }
@@ -59,6 +61,14 @@ impl Driver {
             DriverConfiguration::Command(cmd) => cmd.execute(task),
             DriverConfiguration::DependencyCommand(cmd) => cmd.execute(task),
             DriverConfiguration::Lua(cmd) => cmd.execute(task),
+        }
+    }
+
+    pub(crate) fn driver_hash(&self, driver_dependencies: &[PathBuf]) -> blake3::Hash {
+        match &self.configuration {
+            DriverConfiguration::Command(cmd) => cmd.hash(driver_dependencies),
+            DriverConfiguration::DependencyCommand(cmd) => cmd.hash(driver_dependencies),
+            DriverConfiguration::Lua(cmd) => cmd.hash(driver_dependencies),
         }
     }
 }

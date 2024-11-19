@@ -28,6 +28,21 @@ pub(super) fn declare_group(_lua: &Lua, this: &mut Context, (name, enabled): (St
     }
 }
 
+pub(super) fn set_group_enabled(_lua: &Lua, this: &mut Context, (name, enabled): (String, LuaValue)) -> LuaResult<()> {
+    if let Some(group) = this.output.groups.iter_mut().find(|x| x.0.eq(&name)) {
+        group.1 = match enabled {
+            LuaValue::Nil => GroupStatus::Default,
+            LuaValue::Integer(i) => if i == 0 { GroupStatus::Disabled } else { GroupStatus::Enabled },
+            LuaValue::Boolean(b) => if b { GroupStatus::Enabled } else { GroupStatus::Disabled },
+            LuaValue::String(s) => GroupStatus::Conditional(s.to_string_lossy().to_string()),
+            _ => return Err(LuaError::RuntimeError("Parameter `enabled` of method `declare_group` should be nil, a boolean, or a string".to_string())),
+        };
+        Ok(())
+    } else {
+        Err(LuaError::RuntimeError(format!("`{}`: build group already registered", &name)))
+    }
+}
+
 pub(super) fn declare_generator(lua: &Lua, (this, name, features, env, group): (AnyUserData, String, LuaValue, Option<AnyUserData>, Option<String>)) -> LuaResult<AnyUserData> {
     let group = this.borrow_mut_scoped::<Context, _>(|context| {
         let group = group.unwrap_or_else(|| context.spec.fs_name.clone());

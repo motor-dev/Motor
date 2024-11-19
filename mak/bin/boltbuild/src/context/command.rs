@@ -41,7 +41,7 @@ pub(super) fn load_tool(lua: &Lua, (this, tool, again): (AnyUserData, String, Op
     let paths = this.borrow_mut_scoped::<Context, _>(|this| {
         let mut nodes = Vec::new();
         for x in match &mut this.options {
-            Options::Environment(e) => e.get_into_list("tools_dir"),
+            Options::Environment(e) => e.lock().unwrap().get_into_list("tools_dir"),
             Options::CommandLineParser(cl) => {
                 let cl = cl.lock().unwrap();
                 cl.get_value_lua("tools_dir")?.into_list()

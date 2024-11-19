@@ -29,10 +29,38 @@ end
 ---@param generator Generator
 ---@param dependency Generator
 ---@param seen table<Generator,boolean>
+---@param add_objects boolean
+local function process_link(generator, dependency, seen, add_objects)
+    local already_seen, already_added_objects = table.unpack(seen[dependency] or { false, false })
+    if not already_seen or (not already_added_objects and add_objects) then
+        seen[dependency] = { true, add_objects }
+        if add_objects then
+            for _, object in ipairs(dependency.objects) do
+                generator.objects[1 + #generator.objects] = object
+            end
+        end
+        if not already_seen then
+            generator.env:append('LIBS', dependency.libs)
+            generator.env:append('LIBPATHS', dependency.libpaths)
+            generator.env:append('LINKFLAGS', dependency.linkflags)
+        end
+        for _, dep in ipairs(dependency.public_dependencies) do
+            process_link(generator, dep, seen, add_objects and not dep:has_property('link_task'))
+        end
+        if add_objects then
+            for _, dep in ipairs(dependency.dependencies) do
+                process_link(generator, dep, seen, not dep:has_property('link_task'))
+            end
+        end
+    end
+end
+
+---@param generator Generator
+---@param dependency Generator
+---@param seen table<Generator,boolean>
 local function process_dependency(generator, dependency, seen)
     if not seen[dependency] then
         seen[dependency] = true
-        context:post(dependency)
         for _, include in ipairs(dependency.public_includes) do
             generator.includes[1 + #generator.includes] = include
         end
@@ -54,11 +82,34 @@ end
 ---@param generator Generator
 local function process_dependencies(generator)
     local seen = { }
+    local add_objects = false
+    for _, feature in ipairs(generator.features) do
+        if feature == 'program' then
+            add_objects = true
+        elseif feature == 'shlib' then
+            add_objects = true
+        elseif feature == 'stlib' then
+            add_objects = true
+        end
+    end
+
     for _, dependency in ipairs(generator.dependencies) do
+        context:post(dependency)
         process_dependency(generator, dependency, seen)
     end
     for _, dependency in ipairs(generator.public_dependencies) do
+        context:post(dependency)
         process_dependency(generator, dependency, seen)
+    end
+
+    if add_objects then
+        seen = { }
+        for _, dependency in ipairs(generator.dependencies) do
+            process_link(generator, dependency, seen, not dependency:has_property('link_task'))
+        end
+        for _, dependency in ipairs(generator.public_dependencies) do
+            process_link(generator, dependency, seen, not dependency:has_property('link_task'))
+        end
     end
 end
 
@@ -126,6 +177,10 @@ local function process_link_program(generator)
         for _, task in ipairs(generator.compiled_tasks) do
             link_task:add_input(task.outputs[1])
         end
+        for _, node in ipairs(generator.env.OBJECTS) do
+            link_task:add_input(node)
+        end
+
         generator.link_task = link_task
     end
 end
@@ -138,8 +193,8 @@ local function process_link_shlib(generator)
         target_node = target_node:make_node(generator.target)
         target_node = target_node:make_node(string.format(context.env.SHLIB_PATTERN, generator.target))
         local link_task = generator:declare_task("shlib", {}, { target_node })
-        for _, task in ipairs(generator.compiled_tasks) do
-            link_task:add_input(task.outputs[1])
+        for _, object in ipairs(generator.objects) do
+            link_task:add_input(object)
         end
         generator.link_task = link_task
     end
@@ -158,6 +213,10 @@ local function process_link_stlib(generator)
         end
         generator.link_task = link_task
     end
+end
+
+---@param generator Generator
+local function process_link_objects(generator)
 end
 
 context

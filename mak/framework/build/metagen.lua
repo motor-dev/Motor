@@ -4,7 +4,7 @@ local context = ...
 context:declare_group('metagen', true)
 context:command_driver('metagen',
         'magenta',
-        '${PYTHON} ${METAGEN} -x c++ --std c++20 -D ${METAGEN_MACROS} --module ${METAGEN_PLUGIN} --root ${METAGEN_ROOT_NAMESPACE} --tmp ${METAGEN_TMP} ${SRC} ${METAGEN_RELATIVE_INPUT} ${METAGEN_RELATIVE_OUTPUT} ${TGT}',
+        '${PYTHON} ${METAGEN} -x c++ --std c++20 -D ${METAGEN_MACROS} --module ${METAGEN_PLUGIN} --root ${METAGEN_ROOT_NAMESPACE} --api ${METAGEN_API} --tmp ${METAGEN_TMP} ${SRC} ${METAGEN_RELATIVE_INPUT} ${METAGEN_RELATIVE_OUTPUT} ${TGT}',
         { 'c', 'cxx' })
 
 pcall(function()
@@ -35,6 +35,7 @@ context:feature('metagen', 'metagen', function(generator)
             task.env.METAGEN_RELATIVE_OUTPUT = target_node_factory_hh:path_from(target_node_factory_hh_dir)
             task.env.METAGEN_ROOT_NAMESPACE = 'Motor'
             task.env.METAGEN_PLUGIN = 'motor'
+            task.env.METAGEN_API = generator.api
 
             generator.out_source[1 + #generator.out_source] = { target_node_src, target_node_cc }
             generator.out_source[1 + #generator.out_source] = { target_node_src, target_node_typeid_cc }

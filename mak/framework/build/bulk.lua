@@ -59,6 +59,13 @@ end
 
 ---@param generator Generator
 context:feature('c,cxx', 'generate_bulk', function(generator)
+    if context.settings.nobulk then
+        return
+    end
+    if generator:has_property('nobulk') then
+        return
+    end
+
     local sources = generator.source
     generator.source = { }
     local bulk_file_c

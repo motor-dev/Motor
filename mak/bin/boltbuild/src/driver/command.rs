@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use super::Output;
 use crate::task::Task;
 
@@ -21,8 +22,14 @@ impl CommandDriverConfiguration {
             exit_code,
             command,
             log,
+            hash: self.hash(&[]),
+            driver_dependencies: Vec::new(),
             file_dependencies: Vec::new(),
             extra_output: Vec::new(),
         }
+    }
+
+    pub(super) fn hash(&self, _: &[PathBuf]) -> blake3::Hash {
+        blake3::Hasher::new().update(self.command.as_bytes()).finalize()
     }
 }

@@ -28,6 +28,8 @@ impl DependencyCommandDriverConfiguration {
                 exit_code,
                 command,
                 log,
+                hash: self.hash(&[]),
+                driver_dependencies: Vec::new(),
                 file_dependencies: parse_makedep(&dep_node),
                 extra_output: vec![dep_node],
             }
@@ -36,10 +38,16 @@ impl DependencyCommandDriverConfiguration {
                 exit_code,
                 command,
                 log,
+                hash: self.hash(&[]),
+                driver_dependencies: Vec::new(),
                 file_dependencies: Vec::new(),
                 extra_output: vec![dep_node],
             }
         }
+    }
+
+    pub(super) fn hash(&self, _: &[PathBuf]) -> blake3::Hash {
+        blake3::Hasher::new().update(self.command.as_bytes()).finalize()
     }
 }
 

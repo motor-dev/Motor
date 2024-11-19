@@ -30,11 +30,11 @@ context.settings:add_flag(
        :set_long('dynamic')
 
 context.settings:add_flag(
-        'bulk',
+        'nobulk',
         'Disable or enable bulk files.\nBulk files help speed up the build, they are enabled by default.',
-        true
+        false
 )      :set_category('Options controlling the build')
-       :set_long('bulk')
+       :set_long('no-bulk')
 
 context.settings:add_flag(
         'werror',
