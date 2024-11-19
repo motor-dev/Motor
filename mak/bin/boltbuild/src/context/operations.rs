@@ -39,7 +39,7 @@ impl Context {
     ) -> crate::error::Result<Context> {
         let current_dir = Node::from(&std::env::current_dir()?);
         let bld_dir = if let Options::Environment(options) = &options_context {
-            options.get_raw("out").as_node(&current_dir)?
+            options.lock().unwrap().get_raw("out").as_node(&current_dir)?
         } else {
             current_dir.clone()
         };
@@ -55,10 +55,7 @@ impl Context {
             spec: spec.clone(),
             output: CommandOutput {
                 environments: run_envs,
-                options: match &options_context {
-                    Options::CommandLineParser(_) => None,
-                    Options::Environment(e) => Some(e.clone()),
-                },
+                options: None,
                 commands: Vec::new(),
                 tools: Vec::new(),
                 stored_hash: CommandHash {
@@ -179,6 +176,7 @@ impl Context {
             })?;
         }
 
+
         for env in envs {
             self.output.stored_hash.variable_dependencies.push(
                 env.lock()
@@ -190,8 +188,11 @@ impl Context {
                     .collect(),
             )
         }
-        if let Some(options_env) = &self.output.options {
-            self.output.stored_hash.option_dependencies = options_env
+        if let Options::Environment(e) = &self.options {
+            self.output.options = Some(e.lock().unwrap().clone());
+            self.output.stored_hash.option_dependencies = e
+                .lock()
+                .unwrap()
                 .used_keys
                 .iter()
                 .cloned()

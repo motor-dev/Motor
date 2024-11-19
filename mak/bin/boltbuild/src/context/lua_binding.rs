@@ -65,6 +65,7 @@ impl UserData for Context {
         methods.add_function("get_generator_by_name", get_generator_by_name);
         methods.add_function("post", |lua, (this, generator): (AnyUserData, AnyUserData)| post(lua, (&this, &generator)));
         methods.add_method_mut("declare_group", declare_group);
+        methods.add_method_mut("set_group_enabled", set_group_enabled);
         methods.add_method_mut("command_driver", command_driver);
         methods.add_method_mut("dependency_driver", dependency_driver);
         methods.add_method_mut("lua_driver", lua_driver);

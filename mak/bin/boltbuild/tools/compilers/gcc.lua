@@ -66,7 +66,8 @@ function Bolt.Gcc.load_gcc_cxx(cxx_flags)
     env.LINK_TGT_F = '-o'
     env.LINK_LIB_F = '-l'
     env.LINK_LIBPATH_F = '-L'
-    env.LINKFLAGS_shlib = '-shared'
+    env.LINKFLAGS_shlib = {'-shared', '-Wl,-z,defs'}
+    env.LIBS = { 'stdc++' }
 
     local defines = GnuCompiler.get_specs(env.CXX, "CXX")
     local version = { 0, 0, 0 }

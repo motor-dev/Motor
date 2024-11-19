@@ -17,6 +17,7 @@ use std::collections::hash_map::Entry;
 use std::fs::File;
 use serde::{Deserialize, Serialize};
 use crossbeam::channel::{Sender, Receiver};
+use crate::node::Node;
 
 impl Command {
     pub(crate) fn run_tasks(
@@ -78,6 +79,9 @@ struct DependencyRequest {
     input_hash: blake3::Hash,
     environment_dependencies: Vec<String>,
     environment_hash: blake3::Hash,
+    driver_dependencies: Vec<PathBuf>,
+    driver_hash: SerializedHash,
+    extra_output: Vec<Node>,
 }
 
 struct TaskResult<'a> {
@@ -103,9 +107,12 @@ enum WorkResult<'a> {
 struct TaskCacheEntry {
     environment_dependencies: Vec<String>,
     file_dependencies: Vec<PathBuf>,
+    driver_dependencies: Vec<PathBuf>,
     environment_hash: SerializedHash,
     input_hash: SerializedHash,
     dependency_hash: SerializedHash,
+    driver_hash: SerializedHash,
+    extra_output: Vec<Node>,
 }
 
 type BuildCache = HashMap<SerializedHash, TaskCacheEntry>;
@@ -220,6 +227,9 @@ impl<'command> Scheduler<'command> {
                 environment_hash: SerializedHash(request.environment_hash),
                 input_hash: SerializedHash(request.input_hash),
                 dependency_hash: SerializedHash(hasher.finalize()),
+                driver_dependencies: request.driver_dependencies,
+                driver_hash: request.driver_hash,
+                extra_output: request.extra_output,
             })).unwrap();
         }
     }
@@ -231,8 +241,11 @@ impl<'command> Scheduler<'command> {
                     let mut result = Vec::with_capacity(path_bufs.len());
                     for &path_buf in path_bufs {
                         let mut hasher = blake3::Hasher::new();
-                        let file = File::open(path_buf).unwrap();
-                        let hash = hasher.update_reader(file).unwrap().finalize();
+                        let file = File::open(path_buf);
+                        if let Ok(file) = file {
+                            hasher.update_reader(file).unwrap();
+                        }
+                        let hash = hasher.finalize();
                         result.push(hash);
                     }
                     result_pipe.send(WorkResult::FileHashResult(start, result)).unwrap();
@@ -241,12 +254,16 @@ impl<'command> Scheduler<'command> {
                     if self.abort.load(Ordering::Acquire) {
                         result_pipe.send(WorkResult::TaskCanceled(task_index)).unwrap();
                     } else {
+                        let task = &self.tasks_pool[task_index];
+                        let driver = self.drivers.get(&task.driver).unwrap();
                         let mut hashes = Vec::new();
                         let (do_run, reason) = if let Some(cache) = &self.tasks_cache[task_index] {
                             if input_hash != cache.input_hash.0 {
                                 (true, "an input file has changed")
                             } else if dependency_hash != cache.dependency_hash.0 {
                                 (true, "a dependency file has changed")
+                            } else if driver.driver_hash(&cache.driver_dependencies) != cache.driver_hash.0 {
+                                (true, "the driver has changed")
                             } else {
                                 let mut hasher = blake3::Hasher::new();
                                 let env = &self.tasks_pool[task_index].env;
@@ -287,8 +304,6 @@ impl<'command> Scheduler<'command> {
                         };
 
                         if do_run {
-                            let task = &self.tasks_pool[task_index];
-                            let driver = self.drivers.get(&task.driver).unwrap();
                             result_pipe.send(WorkResult::TaskStart(task_index, thread_index, reason, driver.get_color())).unwrap();
                             let mut output = driver.execute(task);
 
@@ -333,6 +348,9 @@ impl<'command> Scheduler<'command> {
                                     input_hash,
                                     environment_dependencies,
                                     environment_hash: env_hasher.finalize(),
+                                    driver_dependencies: output.driver_dependencies,
+                                    driver_hash: SerializedHash(output.hash),
+                                    extra_output: output.extra_output,
                                 })).unwrap();
                             }
                         } else {
@@ -651,6 +669,8 @@ fn log_task_end(logger: &mut Logger, result: u32, command: &str, message: &str) 
     } else if !message.is_empty() {
         logger.colored_print(format!("{{bright_white}}{}{{reset}}", command).as_str());
         logger.print(format!("\n{}", message).as_str());
+    } else {
+        logger.info(command);
     }
 }
 

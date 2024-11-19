@@ -76,41 +76,49 @@ local function filter_source(node, directory, env)
             add = add and found
         end
     end
-
     return add, matched
 end
 
-local function metagen(name)
-    local path = string.split(name, '.')
-    path = string.join('/', path)
-    path = context.path:make_node(path)
-
+local function metagen(name, path)
+    local api = string.split(name, '.')
+    api = api[#api]
     name = name .. '.metagen'
     local generator = context:declare_generator(name, { 'metagen' }, context.env, "metagen")
     generator.source = { path:make_node('api'), path:make_node('include') }
     generator.out_source = {}
+    generator.api = api:upper()
     return generator
 end
 
----Generates a C/C++ library object. Libraries can take different form based on the value of the `static` and `dynamic`
----flags: when `static` is used, libraries are linked into an archive. When `dynamic` is used, then libraries are linked
----into a shared object. When neither is used, libraries are reated as a collection of object files.
----@param name string name of the library.
-function Motor.library(name)
-    local path = string.split(name, '.')
-    path = string.join('/', path)
+local function module(name, path, lib_types)
+    path = path or string.join('/', string.split(name, '.'))
     path = context.path:make_node(path)
     local module_name = path:name()
 
-    local meta_generator = metagen(name)
+    local group = context.fs_name
+    local lib_type = lib_types[1]
+    if context.settings.static then
+        lib_type = lib_types[2]
+        group = group .. '.static'
+    elseif context.settings.dynamic then
+        group = group .. '.dynamic'
+        lib_type = lib_types[3]
+    end
 
-    local generator = Bolt.shared_library(name, { 'c', 'cxx' })
+    local meta_generator = metagen(name, path)
+
+    if context.settings.nobulk then
+        group = group .. '.nobulk'
+    end
+
+    local generator = Bolt.module(name, lib_type, { 'c', 'cxx' }, group)
                           :add_source_pattern(path, 'src/**/*')
                           :set_source_filter(filter_source)
                           :add_internal_define('building_' .. module_name, '1')
                           :add_public_define('motor_dll_' .. module_name, '1')
                           :add_public_include(context.bld_dir:make_node(meta_generator.group):make_node(meta_generator.name):make_node('api'))
                           :add_internal_include(context.bld_dir:make_node(meta_generator.group):make_node(meta_generator.name):make_node('include'))
+    generator.bulk = context.settings.bulk
     for _, include in ipairs(context:search(path, 'include', true)) do
         generator = generator:add_internal_include(include)
     end
@@ -119,4 +127,21 @@ function Motor.library(name)
     end
 
     return generator
+end
+
+---Generates a C/C++ library object. Libraries can take different form based on the value of the `static` and `dynamic`
+---flags: when `static` is used, libraries are linked into an archive. When `dynamic` is used, then libraries are linked
+---into a shared object. When neither is used, libraries are a collection of object files that are directly pulled into
+---the link phase of modules depending on them.
+---@param name string name of the library.
+---@param path string|nil qualified path of the library. Defaults to name.
+function Motor.library(name, path)
+    return module(name, path, { 'objects', 'objects', 'shlib' })
+end
+
+---Generates a C/C++ shared library object.
+---@param name string name of the library.
+---@param path string|nil qualified path of the library. Defaults to name.
+function Motor.shared_library(name, path)
+    return module(name, path, { 'shlib', 'objects', 'shlib' })
 end

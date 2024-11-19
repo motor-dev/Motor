@@ -15,6 +15,7 @@ impl UserData for Generator {
         fields.add_field_method_get("name", |_lua, this| Ok(this.name.clone()));
         fields.add_field_method_get("group", |_lua, this| Ok(this.group.clone()));
         fields.add_field_method_get("env", |_lua, this| Ok(this.env.clone()));
+        fields.add_field_method_get("features", |_lua, this| Ok(this.features.clone()));
     }
 
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
@@ -31,6 +32,11 @@ impl UserData for Generator {
             }
         });
 
+        methods.add_function_mut("has_property", |_lua, (generator, name): (AnyUserData, String)| {
+            let result = generator.named_user_value::<LuaValue>(name.as_str())?;
+            Ok(!result.is_nil())
+        });
+        
         methods.add_function_mut("declare_task", |lua, (generator, driver, inputs, outputs, env): (AnyUserData, String, Value, Value, Option<AnyUserData>)| {
             let inputs = match &inputs {
                 Value::Nil => Vec::new(),

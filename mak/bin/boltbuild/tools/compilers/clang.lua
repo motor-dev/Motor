@@ -33,7 +33,7 @@ local function load_clang(env, compiler, flags, link_flags, lang, var)
     env.LINK_TGT_F = '-o'
     env.LINK_LIB_F = '-l'
     env.LINK_LIBPATH_F = '-L'
-    env.LINKFLAGS_shlib = '-shared'
+    env.LINKFLAGS_shlib = { '-shared', '-Wl,-z,defs' }
     env['CLANG_' .. var .. '_VERSION'] = get_clang_version(GnuCompiler.get_specs(compiler, var))
     context:load_tool('internal/' .. lang)
     context:load_tool('internal/link')
@@ -50,6 +50,7 @@ function Bolt.Clang.load_clang_cxx(cxx_flags, link_flags)
     local env = context.env
     env.CXX = env.CC or { 'clang++' }
     env.LINK = env.CXX
+    env.LIBS = { 'stdc++' }
     load_clang(env, env.CXX, cxx_flags, link_flags, 'c++', 'CXX')
 end
 
