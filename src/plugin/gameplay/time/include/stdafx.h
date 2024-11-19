@@ -4,5 +4,6 @@
 #define MOTOR_PLUGIN_GAMEPLAY_TIME_STDAFX_H
 
 #include <motor/stdafx.h>
+#define MOTOR_API_TIME
 
 #endif

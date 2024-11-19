@@ -6,5 +6,6 @@
 #include <motor/stdafx.h>
 
 #include <motor/plugin.scripting.package/stdafx.h>
+#define MOTOR_API_TEST
 
 #endif

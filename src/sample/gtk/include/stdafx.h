@@ -5,5 +5,6 @@
 
 #include <motor/plugin.scripting.package/stdafx.h>
 #include <motor/stdafx.h>
+#define MOTOR_API_GTK
 
 #endif

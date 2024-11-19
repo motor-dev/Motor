@@ -100,7 +100,8 @@ def preprocess(
         generated_include_node=build_context.bldnode.make_node('preprocess').make_node(name + '.preprocess/include'),
         generated_api_node=build_context.bldnode.make_node('preprocess').make_node(name + '.preprocess/api'),
         use=use,
-        masterfiles={}
+        masterfiles={},
+        api=_safe_name(name.split('.')[-1]).upper(),
     )
 
     for _, source_node in source_nodes:

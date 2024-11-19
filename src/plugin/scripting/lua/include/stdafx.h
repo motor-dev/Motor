@@ -5,6 +5,8 @@
 
 #include <motor/stdafx.h>
 
+#define MOTOR_API_LUA
+
 extern "C"
 {
 #include <lauxlib.h>
@@ -13,9 +15,7 @@ extern "C"
 }
 
 namespace Motor { namespace Log {
-
 weak< Logger > lua();
-
-}}  // namespace Motor::Log
+}} // namespace Motor::Log
 
 #endif
