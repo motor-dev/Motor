@@ -48,9 +48,9 @@ impl Command {
                 }
             }
 
-            scheduler.load_cache(logger, out_dir, &output.groups);
+            let cache = scheduler.load_cache(logger, out_dir, &output.groups);
             let result = scheduler.execute(logger, thread_count, self.spec.name.as_str(), progress_mode);
-            scheduler.save_cache(logger, out_dir, &output.groups);
+            scheduler.save_cache(logger, out_dir, &output.groups, cache);
 
             /* save tasks */
             let task_file = out_dir.join(format!("{}.bin", self.spec.fs_name));
@@ -157,27 +157,31 @@ impl<'command> Scheduler<'command> {
         }
     }
 
-    fn load_cache<T>(&mut self, logger: &mut Logger, out_dir: &Path, groups: &[(String, T)]) {
-        let mut build_cache = BuildCache::new();
+    fn load_cache<T>(&mut self, logger: &mut Logger, out_dir: &Path, groups: &[(String, T)]) -> Vec<HashMap<SerializedHash, TaskCacheEntry>> {
+        let mut result = Vec::with_capacity(groups.len());
         for group in groups {
+            let mut build_cache = BuildCache::new();
             let group_cache = out_dir.join(format!("{}.cache", group.0));
             if let Ok(mut file) = File::open(&group_cache) {
                 match bincode::serde::decode_from_std_read(&mut file, bincode::config::standard()) as std::result::Result<BuildCache, _> {
-                    Ok(group_cache) => { build_cache.extend(group_cache); }
+                    Ok(group_cache) => { build_cache = group_cache; }
                     Err(error) => { logger.warning(format!("Unable to deserialize build cache {:?} ({})", group_cache, error).as_str()); }
                 }
             }
+            for (task, data) in zip(self.tasks_pool, &mut self.tasks_cache) {
+                if let Some(cache) = build_cache.remove(&task.signature) {
+                    *data = Some(cache);
+                }
+            }
+            result.push(build_cache);
         }
-
-        for (task, data) in zip(self.tasks_pool, &mut self.tasks_cache) {
-            *data = build_cache.remove(&task.signature);
-        }
+        result
     }
 
-    fn save_cache<T>(&mut self, logger: &mut Logger, out_dir: &Path, groups: &[(String, T)]) {
+    fn save_cache<T>(&mut self, logger: &mut Logger, out_dir: &Path, groups: &[(String, T)], mut cache: Vec<HashMap<SerializedHash, TaskCacheEntry>>) {
         /* save all caches */
         for (group, _) in groups {
-            let mut group_cache = BuildCache::new();
+            let mut group_cache = cache.remove(0);
             for (i, task) in self.tasks_pool.iter().enumerate() {
                 if task.group.eq(group) {
                     let mut entry = None;

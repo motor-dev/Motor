@@ -30,7 +30,7 @@ pub(crate) struct Context {
     pub(crate) tasks: Vec<Task>,
     pub(crate) products: HashMap<PathBuf, usize>,
     pub(crate) signatures: Vec<blake3::Hasher>,
-    task_dependencies: Vec<(usize, usize, String)>,
+    task_dependencies: Vec<Vec<(usize, String)>>,
     path: Node,
     src_dir: Node,
     bld_dir: Node,
