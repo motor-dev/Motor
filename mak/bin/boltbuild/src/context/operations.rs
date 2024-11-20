@@ -145,9 +145,11 @@ impl Context {
                 Ok(())
             })?;
 
-            for &(predecessor, successor, _) in &self.task_dependencies {
-                self.tasks[predecessor].successors.push(successor);
-                self.tasks[successor].predecessors.push(predecessor);
+            for (predecessor, successors) in self.task_dependencies.iter().enumerate() {
+                for &(successor, _) in successors {
+                    self.tasks[predecessor].successors.push(successor);
+                    self.tasks[successor].predecessors.push(predecessor);
+                }
             }
             for (hasher, task) in zip(&self.signatures, &mut self.tasks) {
                 task.signature = SerializedHash(hasher.finalize());

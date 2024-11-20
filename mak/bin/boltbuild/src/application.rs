@@ -260,7 +260,7 @@ impl Application {
                     self.options.clone()
                 };
 
-                if self.force {
+                if self.force && next_item.is_none() {
                     logger.why(
                         format!(
                             "command `{}`: running lua scripts forced by command line option",

@@ -1,16 +1,26 @@
-use std::collections::hash_map::Entry;
-use mlua::prelude::{LuaError, LuaResult};
 use super::Context;
-use mlua::Result;
 use crate::node::Node;
 use crate::task::Task;
+use mlua::prelude::{LuaError, LuaResult};
+use mlua::Result;
+use std::collections::hash_map::Entry;
+use std::collections::HashSet;
 
 impl Context {
-    pub(crate) fn declare_products(&mut self, nodes: &Vec<Node>, mut new_dependencies: Vec<(usize, usize, String)>, task_index: usize, new_task: Option<&Task>) -> LuaResult<()> {
+    pub(crate) fn declare_products(
+        &mut self,
+        nodes: &Vec<Node>,
+        mut new_dependencies: Vec<(usize, usize, String)>,
+        task_index: usize,
+        new_task: Option<&Task>,
+    ) -> LuaResult<()> {
         for node in nodes {
             if self.products.contains_key(node.path()) {
                 let task = &self.tasks[self.products[node.path()]];
-                return Err(LuaError::RuntimeError(format!("cannot declared product {}: already a product of task\n  {}", node, task)));
+                return Err(LuaError::RuntimeError(format!(
+                    "cannot declared product {}: already a product of task\n  {}",
+                    node, task
+                )));
             }
             for (index, task) in self.tasks.iter().enumerate() {
                 if task.inputs.iter().any(|x| x == node) {
@@ -33,52 +43,95 @@ impl Context {
         Ok(())
     }
 
-    pub(crate) fn add_dependencies(&mut self, new_dependencies: Vec<(usize, usize, String)>, new_task: Option<&Task>) -> Result<()> {
+    pub(crate) fn add_dependencies(
+        &mut self,
+        mut new_dependencies: Vec<(usize, usize, String)>,
+        new_task: Option<&Task>,
+    ) -> Result<()> {
         if !new_dependencies.is_empty() {
-            let mut result = Vec::new();
-            let mut edges = self.task_dependencies.clone();
-            edges.extend(new_dependencies.clone());
-
-            let mut roots = Vec::new();
-
-            for i in 0..self.tasks.len() {
-                if !edges.iter().any(|edge| edge.1 == i) {
-                    roots.push(i);
-                }
-            }
-
-
-            if new_task.is_some() {
-                let i = self.tasks.len();
-                if !edges.iter().any(|edge| edge.1 == i) {
-                    roots.push(i);
-                }
-            }
-
-            while let Some(root) = roots.pop() {
-                while let Some(edge_index) = edges.iter().position(|x| x.0.eq(&root)) {
-                    let edge = edges.swap_remove(edge_index);
-                    if !edges.iter().any(|e| e.1.eq(&edge.1)) {
-                        roots.push(edge.1);
+            let mut commit_dependencies = Vec::new();
+            new_dependencies.sort();
+            while !new_dependencies.is_empty() {
+                let (producer, consumer, reason) = new_dependencies.remove(0);
+                let mut set = vec![(producer, consumer, reason)];
+                while !new_dependencies.is_empty() {
+                    if producer == new_dependencies[0].0 {
+                        set.push(new_dependencies.remove(0));
+                    } else {
+                        break;
                     }
                 }
-                result.push(root);
+                self.add_dependency_set(&set, &commit_dependencies, new_task)?;
+                commit_dependencies.extend(set);
+            }
+            if new_task.is_some() {
+                self.task_dependencies.push(Vec::new());
+            }
+            for (producer, consumer, reason) in commit_dependencies {
+                self.task_dependencies[producer].push((consumer, reason));
+            }
+        } else if new_task.is_some() {
+            self.task_dependencies.push(Vec::new());
+        }
+
+        Ok(())
+    }
+
+    fn add_dependency_set(
+        &mut self,
+        new_dependencies: &[(usize, usize, String)],
+        committed_dependencies: &[(usize, usize, String)],
+        new_task: Option<&Task>,
+    ) -> Result<()> {
+        let mut start = HashSet::new();
+        let mut queue = Vec::new();
+        let mut seen = HashSet::new();
+        for (producer, consumer, reason) in new_dependencies {
+            start.insert(*producer);
+            queue.push((*consumer, vec![(*producer, reason)]));
+        }
+
+        while let Some(item) = queue.pop() {
+            let (producer, path) = item;
+            if start.contains(&producer) {
+                return Err(LuaError::RuntimeError(format!(
+                    "Cycle detected in task dependency:\n  {}\n  {}",
+                    path.iter()
+                        .map(|x| format!(
+                            "{}\n    ({})",
+                            self.tasks.get(x.0).or(new_task).unwrap(),
+                            x.1
+                        ))
+                        .collect::<Vec<_>>()
+                        .join("\n  "),
+                    self.tasks.get(producer).or(new_task).unwrap()
+                )));
             }
 
-            if !edges.is_empty() {
-                edges.sort();
-                Err(LuaError::RuntimeError(format!("Cycle detected in task dependency:\n  {}",
-                                                   edges.iter()
-                                                       .map(|x| format!("{}\n  {}\n    ({})",
-                                                                        self.tasks.get(x.0).or(new_task).unwrap(),
-                                                                        self.tasks.get(x.1).or(new_task).unwrap(),
-                                                                        x.2)).collect::<Vec<_>>().join("\n  "))))
-            } else {
-                self.task_dependencies.extend(new_dependencies);
-                Ok(())
+            if producer < self.task_dependencies.len() {
+                for (consumer, reason) in &self.task_dependencies[producer] {
+                    if seen.contains(consumer) {
+                        continue;
+                    }
+                    seen.insert(*consumer);
+                    let mut path = path.clone();
+                    path.push((producer, reason));
+                    queue.push((*consumer, path));
+                }
+                for (p, consumer, reason) in committed_dependencies.iter() {
+                    if *p == producer {
+                        if seen.contains(consumer) {
+                            continue;
+                        }
+                        seen.insert(*consumer);
+                        let mut path = path.clone();
+                        path.push((*p, reason));
+                        queue.push((*consumer, path));
+                    }
+                }
             }
-        } else {
-            Ok(())
         }
+
+        Ok(())
     }
 }
