@@ -7,12 +7,9 @@ struct Calc {
 
 impl Calc {
     grammar! {
-        params {
-            &mut self
-        }
-        variants {
-            mult: [mult],
-        }
+        param &mut self;
+        param count: u32;
+        variant mult: [mult],
 
         start calculator;
 
@@ -31,21 +28,25 @@ impl Calc {
         }
 
         rules {
-            calculator: () => statement calculator;
-            calculator: () => ;
+            calculator: ();
+            calculator => statement calculator;
+            calculator => ;
 
-            statement: () => identifier '=' expression { self.vars.insert($0, $2); }
-            statement: () => expression { println!("{}", $0) }
+            statement: ();
+            statement => identifier '=' expression { self.vars.insert($0, $2); }
+            statement => expression { println!("{}", $0) }
 
-            expression: i64 => number { $0 }
-            expression: i64 => number '+' number { $0 + $2 }
-            expression: i64 => number '-' number { $0 - $2 }
-            expression: i64 => '-' number { - $1 }
-            [[mult]]
+            expression: i64;
+            expression => identifier { self.vars.get($0).unwrap(); }
+            expression => number { $0 }
+            expression => number '+' number { $0 + $2 }
+            expression => number '-' number { $0 - $2 }
+            expression => '-' number { - $1 }
+            [mult]
             {
-                expression: i64 => number '*' number { $0 * $2 }
-                expression: i64 => number '/' number { $0 / $2 }
-                expression: i64 => number '%' number { $0 % $2 }
+                expression => number '*' number { $0 * $2 }
+                expression => number '/' number { $0 / $2 }
+                expression => number '%' number { $0 % $2 }
             }
         }
     }

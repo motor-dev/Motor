@@ -17,7 +17,12 @@ fn raise(error: Error, mut result: proc_macro2::TokenStream) -> proc_macro2::Tok
 #[proc_macro]
 pub fn grammar(rules: TokenStream) -> TokenStream {
     match parser::Grammar::from_dsl(rules) {
-        Ok(grammar) => TokenStream::new(),
+        Ok(grammar) => {
+            let mut result = "fn parse".parse::<TokenStream>().unwrap();
+            result.extend([grammar.parameters]);
+            result.extend(" -> () {}".parse::<TokenStream>().unwrap());
+            result
+        }
         Err(error) => raise(error, proc_macro2::TokenStream::new()).into()
     }
 }
