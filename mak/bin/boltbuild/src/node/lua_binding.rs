@@ -1,10 +1,9 @@
+use super::Node;
+use mlua::prelude::{LuaError, LuaString};
+use mlua::{Error, FromLua, Lua, MetaMethod, UserData, UserDataMethods, UserDataRef, Value};
 use std::io::{Read, Write};
 use std::ops::Deref;
-use super::Node;
-
 use std::path::PathBuf;
-use mlua::{Error, FromLua, Lua, MetaMethod, UserData, UserDataMethods, UserDataRef, Value};
-use mlua::prelude::{LuaError, LuaString};
 
 impl UserData for Node {
     fn add_fields<F: mlua::UserDataFields<Self>>(fields: &mut F) {
@@ -77,21 +76,36 @@ impl UserData for Node {
                 PathBuf::from_iter(comps.iter().map(|c| c.as_os_str())).to_string_lossy(),
             ))
         });
-        methods.add_method("name", |_lua, this: &Node, ()| Ok(this.path.file_name().map(|x| x.to_string_lossy().to_string())));
-        methods.add_method("basename", |_lua, this: &Node, ()| Ok(this.path.with_extension("").file_name().map(|x| x.to_string_lossy().to_string())));
+        methods.add_method("name", |_lua, this: &Node, ()| {
+            Ok(this
+                .path
+                .file_name()
+                .map(|x| x.to_string_lossy().to_string()))
+        });
+        methods.add_method("basename", |_lua, this: &Node, ()| {
+            Ok(this
+                .path
+                .with_extension("")
+                .file_name()
+                .map(|x| x.to_string_lossy().to_string()))
+        });
         methods.add_method("is_dir", |_lua, this: &Node, ()| Ok(this.is_dir()));
         methods.add_method("is_file", |_lua, this: &Node, ()| Ok(this.is_file()));
         methods.add_method("read_link", |_lua, this: &Node, ()| Ok(this.read_link()));
-        methods.add_method("canonicalize", |_lua, this: &Node, ()| Ok(this.canonicalize()));
-        methods.add_method("delete", |_lua, this: &Node, ()|
-            this.delete().map_err(|x| LuaError::RuntimeError(x.to_string())),
-        );
-        methods.add_method("try_delete", |_lua, this: &Node, ()|
-            this.delete().or(Ok(())),
-        );
-        methods.add_method("mkdir", |_lua, this: &Node, ()|
-            this.mkdir().map_err(|x| LuaError::RuntimeError(x.to_string())),
-        );
+        methods.add_method("canonicalize", |_lua, this: &Node, ()| {
+            Ok(this.canonicalize())
+        });
+        methods.add_method("delete", |_lua, this: &Node, ()| {
+            this.delete()
+                .map_err(|x| LuaError::RuntimeError(x.to_string()))
+        });
+        methods.add_method("try_delete", |_lua, this: &Node, ()| {
+            this.delete().or(Ok(()))
+        });
+        methods.add_method("mkdir", |_lua, this: &Node, ()| {
+            this.mkdir()
+                .map_err(|x| LuaError::RuntimeError(x.to_string()))
+        });
         methods.add_method("read", |_lua, this: &Node, ()| {
             let mut content = Vec::new();
             std::fs::File::create(&this.path)?.read_to_end(&mut content)?;

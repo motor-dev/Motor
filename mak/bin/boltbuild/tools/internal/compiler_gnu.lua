@@ -9,10 +9,7 @@ GnuCompiler = {}
 function GnuCompiler.get_specs(command, language)
     local env = context.env
 
-    local include_command = { table.unpack(command) }
-    for _, arg in ipairs(env[language..'FLAGS']) do
-        include_command[1 + #include_command] = arg
-    end
+    local include_command = { table.unpack(command), table.unpack(env[language .. 'FLAGS']) }
     include_command[1 + #include_command] = '-v'
     include_command[1 + #include_command] = '-dM'
     include_command[1 + #include_command] = '-E'
@@ -48,7 +45,7 @@ function GnuCompiler.get_specs(command, language)
             local s, _, name, value = line:find('%s*#%s*define%s+([%w_]+)%s*(.*)')
             if s then
                 defines[name] = value
-                env:append(language.."_COMPILER_SYSTEM_DEFINES", tostring(name)..'='..tostring(value))
+                env:append(language .. "_COMPILER_SYSTEM_DEFINES", tostring(name) .. '=' .. tostring(value))
                 if name == '__MACH__' then
                     env.BINARY_FORMAT = 'mach'
                 elseif name == '__ELF__' then
@@ -101,7 +98,7 @@ function GnuCompiler.get_specs(command, language)
         end
     end
 
-    env[language.."_COMPILER_SYSTEM_INCLUDES"] = includes
+    env[language .. "_COMPILER_SYSTEM_INCLUDES"] = includes
     if env.BINARY_FORMAT == 'mach' then
         env.PROGRAM_PATTERN = '%s'
         env.SHLIB_PATTERN = '%s.dylib'
@@ -142,6 +139,9 @@ function GnuCompiler.get_specs(command, language)
     env.ARCHITECTURE = arch
 
     local lib_command = { table.unpack(command) }
+    for _, flag in ipairs(env[language .. 'FLAGS']) do
+        table.insert(lib_command, flag)
+    end
     table.insert(lib_command, '-print-search-dirs')
     handle = context:popen(lib_command)
     success, out, err = handle:communicate()
@@ -152,7 +152,8 @@ function GnuCompiler.get_specs(command, language)
         if string.starts_with(line, 'libraries: =') then
             local paths = string.split(line:sub(13), ':')
             for _, path in ipairs(paths) do
-                env:append(language.."_COMPILER_SYSTEM_LIB_DIRS", path)
+                path = context.path:make_node(path)
+                env:append(language .. "_COMPILER_SYSTEM_LIB_DIRS", path)
             end
         end
     end

@@ -1,15 +1,15 @@
+use crate::context::operations::DeclaredCommand;
+use crate::context::{Context, TOOLS_DIR};
+use crate::environment::ReadWriteEnvironment;
+use crate::node::Node;
+use crate::options::Options;
+use include_dir::Dir;
+use mlua::prelude::{LuaError, LuaResult, LuaString, LuaValue};
+use mlua::{AnyUserData, FromLua, Lua, UserData};
 use std::mem::swap;
 use std::ops::Deref;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-use include_dir::Dir;
-use mlua::{AnyUserData, Lua, FromLua, UserData};
-use mlua::prelude::{LuaError, LuaResult, LuaString, LuaValue};
-use crate::context::{Context, TOOLS_DIR};
-use crate::context::operations::DeclaredCommand;
-use crate::environment::ReadWriteEnvironment;
-use crate::node::Node;
-use crate::options::Options;
 
 impl UserData for DeclaredCommand {}
 
@@ -37,7 +37,10 @@ pub(super) fn recurse(lua: &Lua, args: (AnyUserData, LuaString)) -> LuaResult<()
     result
 }
 
-pub(super) fn load_tool(lua: &Lua, (this, tool, again): (AnyUserData, String, Option<bool>)) -> LuaResult<()> {
+pub(super) fn load_tool(
+    lua: &Lua,
+    (this, tool, again): (AnyUserData, String, Option<bool>),
+) -> LuaResult<()> {
     let paths = this.borrow_mut_scoped::<Context, _>(|this| {
         let mut nodes = Vec::new();
         for x in match &mut this.options {
@@ -83,7 +86,9 @@ pub(super) fn load_tool(lua: &Lua, (this, tool, again): (AnyUserData, String, Op
             }
         })?;
         if do_run {
-            lua.load(file.contents()).set_name(tool_file).call::<()>(this)?;
+            lua.load(file.contents())
+                .set_name(tool_file)
+                .call::<()>(this)?;
         }
         return Ok(());
     }
@@ -110,7 +115,11 @@ pub(super) fn load_tool(lua: &Lua, (this, tool, again): (AnyUserData, String, Op
     })?
 }
 
-pub(super) fn declare_command(lua: &Lua, this: &mut Context, args: (String, String, LuaValue)) -> LuaResult<DeclaredCommand> {
+pub(super) fn declare_command(
+    lua: &Lua,
+    this: &mut Context,
+    args: (String, String, LuaValue),
+) -> LuaResult<DeclaredCommand> {
     let mut envs = Vec::new();
     if args.2.is_table() {
         for env in Vec::<AnyUserData>::from_lua(args.2, lua)? {
@@ -133,10 +142,12 @@ pub(super) fn declare_command(lua: &Lua, this: &mut Context, args: (String, Stri
     Ok(DeclaredCommand { path })
 }
 
-pub(super) fn chain_command(_lua: &Lua, this: &mut Context, args: (AnyUserData, String, String)) -> LuaResult<DeclaredCommand> {
+pub(super) fn chain_command(
+    _lua: &Lua,
+    this: &mut Context,
+    args: (AnyUserData, String, String),
+) -> LuaResult<DeclaredCommand> {
     let path = args.0.borrow_mut::<DeclaredCommand>()?;
-    let sub_path =
-        this.declare_chain(path.deref(), args.1.as_str(), args.2.as_str())?;
+    let sub_path = this.declare_chain(path.deref(), args.1.as_str(), args.2.as_str())?;
     Ok(DeclaredCommand { path: sub_path })
 }
-

@@ -1,5 +1,5 @@
-use mlua::{IntoLua, Lua, MetaMethod, UserData, UserDataMethods, Value};
 use crate::environment::{Environment, EnvironmentValue, ReadWriteEnvironment};
+use mlua::{IntoLua, Lua, MetaMethod, UserData, UserDataMethods, Value};
 
 impl IntoLua for &EnvironmentValue {
     fn into_lua(self, lua: &Lua) -> mlua::Result<Value> {
@@ -32,20 +32,17 @@ impl UserData for Environment {
 
 impl UserData for ReadWriteEnvironment {
     fn add_methods<'lua, M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method_mut(
-            "append",
-            |_lua, this, (key, value): (String, Value)| {
-                let mut original_value = this.get_into_list(key.as_str());
-                let value = EnvironmentValue::from_lua(&value)?;
-                if value.is_list() {
-                    original_value.extend(value.into_list());
-                } else {
-                    original_value.push(value);
-                }
-                this.set(key.as_str(), EnvironmentValue::Vec(original_value));
-                Ok(())
-            },
-        );
+        methods.add_method_mut("append", |_lua, this, (key, value): (String, Value)| {
+            let mut original_value = this.get_into_list(key.as_str());
+            let value = EnvironmentValue::from_lua(&value)?;
+            if value.is_list() {
+                original_value.extend(value.into_list());
+            } else {
+                original_value.push(value);
+            }
+            this.set(key.as_str(), EnvironmentValue::Vec(original_value));
+            Ok(())
+        });
         methods.add_meta_method_mut(MetaMethod::Index, |lua, this, key: String| {
             this.get_into_lua(lua, key.as_str())
         });
@@ -56,11 +53,8 @@ impl UserData for ReadWriteEnvironment {
                 Ok(())
             },
         );
-        methods.add_meta_method_mut(
-            MetaMethod::ToString,
-            |_lua, this, ()| {
-                Ok(format!("env {}", this.index))
-            },
-        );
+        methods.add_meta_method_mut(MetaMethod::ToString, |_lua, this, ()| {
+            Ok(format!("env {}", this.index))
+        });
     }
 }

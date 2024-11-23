@@ -72,7 +72,6 @@ function Node:abs_path()
     return ''
 end
 
-
 --- Returns the path of the filesystem object relative to a specified starting Node.
 ---@param from Node The node from which to calculate the relative path.
 ---@return string The relative path from the specified starting node.
@@ -84,7 +83,6 @@ end
 ---@param new_extension string The new file extension, without the `.` prefix.
 function Node:change_ext(new_extension)
 end
-
 
 --- Checks if the filesystem object exists and is a directory.
 ---@return boolean `true` if the node represents an existing directory; otherwise, `false`.
@@ -108,10 +106,6 @@ end
 ---@return Node A new node representing the fully resolved target filesystem object.
 function Node:canonicalize()
     return self
-end
-
---- Creates the directory represented by the node, if it doesn’t already exist.
-function Node:mkdir()
 end
 
 --- Deletes the file represented by the node. Raises an error if deletion fails.

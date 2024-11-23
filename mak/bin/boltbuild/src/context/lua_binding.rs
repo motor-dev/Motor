@@ -1,16 +1,15 @@
-use super::Context;
 use super::command::*;
-use super::log::*;
 use super::driver::*;
-use super::generator::*;
-use super::subprocess::*;
 use super::environment::*;
-use super::node::*;
 use super::feature::*;
-
-use mlua::{Lua, IntoLua, AnyUserData, MetaMethod, UserData, UserDataFields, UserDataMethods};
-use mlua::prelude::{LuaError, LuaResult, LuaValue};
+use super::generator::*;
+use super::log::*;
+use super::node::*;
+use super::subprocess::*;
+use super::Context;
 use crate::options::Options;
+use mlua::prelude::{LuaError, LuaResult, LuaValue};
+use mlua::{AnyUserData, IntoLua, Lua, MetaMethod, UserData, UserDataFields, UserDataMethods};
 
 fn set_index(_lua: &Lua, (context, name, value): (AnyUserData, String, LuaValue)) -> LuaResult<()> {
     context.set_named_user_value(name.as_str(), value)
@@ -19,7 +18,10 @@ fn set_index(_lua: &Lua, (context, name, value): (AnyUserData, String, LuaValue)
 fn index(_lua: &Lua, (context, name): (AnyUserData, String)) -> LuaResult<LuaValue> {
     let result = context.named_user_value::<LuaValue>(name.as_str())?;
     if result.is_nil() {
-        Err(LuaError::RuntimeError(format!("Context does not have a user value `{}`", name)))
+        Err(LuaError::RuntimeError(format!(
+            "Context does not have a user value `{}`",
+            name
+        )))
     } else {
         Ok(result)
     }
@@ -63,7 +65,10 @@ impl UserData for Context {
         methods.add_function("declare_generator", declare_generator);
         methods.add_function("feature", feature);
         methods.add_function("get_generator_by_name", get_generator_by_name);
-        methods.add_function("post", |lua, (this, generator): (AnyUserData, AnyUserData)| post(lua, (&this, &generator)));
+        methods.add_function(
+            "post",
+            |lua, (this, generator): (AnyUserData, AnyUserData)| post(lua, (&this, &generator)),
+        );
         methods.add_method_mut("declare_group", declare_group);
         methods.add_method_mut("set_group_enabled", set_group_enabled);
         methods.add_method_mut("command_driver", command_driver);

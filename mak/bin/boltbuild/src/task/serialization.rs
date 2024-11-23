@@ -1,12 +1,12 @@
 use super::{Task, TaskSeed};
-use crate::environment::{ReadWriteEnvironmentVec, SerializedReadWriteEnvironment, ReadWriteEnvironmentSeed};
-
-use std::fmt;
-use serde::de::{DeserializeSeed, Error, MapAccess, SeqAccess, Visitor};
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde::ser::SerializeStruct;
+use crate::environment::{
+    ReadWriteEnvironmentSeed, ReadWriteEnvironmentVec, SerializedReadWriteEnvironment,
+};
 use crate::node::Node;
-
+use serde::de::{DeserializeSeed, Error, MapAccess, SeqAccess, Visitor};
+use serde::ser::SerializeStruct;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt;
 
 impl Serialize for Task {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -77,7 +77,17 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
                             "signature" => Ok(Field::Signature),
                             _ => Err(Error::unknown_field(
                                 value,
-                                &["driver", "generator", "group", "env", "inputs", "outputs", "predecessors", "successors", "signature"],
+                                &[
+                                    "driver",
+                                    "generator",
+                                    "group",
+                                    "env",
+                                    "inputs",
+                                    "outputs",
+                                    "predecessors",
+                                    "successors",
+                                    "signature",
+                                ],
                             )),
                         }
                     }
@@ -110,7 +120,10 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
                     .next_element()?
                     .ok_or_else(|| Error::invalid_length(2, &self))?;
                 let env = seq
-                    .next_element_seed(ReadWriteEnvironmentSeed { current: self.0, parent: &Vec::new() })?
+                    .next_element_seed(ReadWriteEnvironmentSeed {
+                        current: self.0,
+                        parent: &Vec::new(),
+                    })?
                     .ok_or_else(|| Error::invalid_length(3, &self))?;
                 let inputs = seq
                     .next_element()?
@@ -159,8 +172,7 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
                             if driver.is_some() {
                                 return Err(Error::duplicate_field("driver"));
                             }
-                            driver =
-                                Some(map.next_value()?);
+                            driver = Some(map.next_value()?);
                         }
                         Field::Generator => {
                             if generator.is_some() {
@@ -178,7 +190,10 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
                             if env.is_some() {
                                 return Err(Error::duplicate_field("env"));
                             }
-                            env = Some(map.next_value_seed(ReadWriteEnvironmentSeed { current: self.0, parent: &Vec::new() })?);
+                            env = Some(map.next_value_seed(ReadWriteEnvironmentSeed {
+                                current: self.0,
+                                parent: &Vec::new(),
+                            })?);
                         }
                         Field::Inputs => {
                             if inputs.is_some() {
@@ -218,7 +233,8 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
                 let env = env.ok_or_else(|| Error::missing_field("env"))?;
                 let inputs = inputs.ok_or_else(|| Error::missing_field("inputs"))?;
                 let outputs = outputs.ok_or_else(|| Error::missing_field("outputs"))?;
-                let predecessors = predecessors.ok_or_else(|| Error::missing_field("predecessors"))?;
+                let predecessors =
+                    predecessors.ok_or_else(|| Error::missing_field("predecessors"))?;
                 let successors = successors.ok_or_else(|| Error::missing_field("successors"))?;
                 let signature = signature.ok_or_else(|| Error::missing_field("signature"))?;
                 Ok(Task {
@@ -237,7 +253,17 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
 
         deserializer.deserialize_struct(
             "Task",
-            &["driver", "generator", "group", "env", "inputs", "outputs", "predecessors", "successors", "signature"],
+            &[
+                "driver",
+                "generator",
+                "group",
+                "env",
+                "inputs",
+                "outputs",
+                "predecessors",
+                "successors",
+                "signature",
+            ],
             TaskVisitor(self.0),
         )
     }

@@ -1,10 +1,13 @@
-use super::{Task, SPLIT_RE, ENV_RE};
-
+use super::{Task, ENV_RE, SPLIT_RE};
 use regex::Captures;
 use subprocess::ExitStatus;
 
 impl Task {
-    pub(crate) fn run_command(&self, command: &str, extra_args: Vec<String>) -> (u32, String, String) {
+    pub(crate) fn run_command(
+        &self,
+        command: &str,
+        extra_args: Vec<String>,
+    ) -> (u32, String, String) {
         let mut command_line = Vec::new();
 
         for argument in SPLIT_RE.split(command) {
@@ -30,26 +33,18 @@ impl Task {
                 ..subprocess::PopenConfig::default()
             },
         ) {
-            Ok(mut subprocess) => {
-                match subprocess.communicate(None) {
-                    Ok(result) => {
-                        match subprocess.wait() {
-                            Ok(status) => {
-                                match status {
-                                    ExitStatus::Exited(return_code) => (return_code, result.0.unwrap(), command),
-                                    _ => (1, result.0.unwrap(), command),
-                                }
-                            }
-                            Err(error) => {
-                                (1, error.to_string(), command)
-                            }
+            Ok(mut subprocess) => match subprocess.communicate(None) {
+                Ok(result) => match subprocess.wait() {
+                    Ok(status) => match status {
+                        ExitStatus::Exited(return_code) => {
+                            (return_code, result.0.unwrap(), command)
                         }
-                    }
-                    Err(error) => {
-                        (1, error.to_string(), command)
-                    }
-                }
-            }
+                        _ => (1, result.0.unwrap(), command),
+                    },
+                    Err(error) => (1, error.to_string(), command),
+                },
+                Err(error) => (1, error.to_string(), command),
+            },
             Err(error) => (1, error.to_string(), command),
         }
     }
@@ -74,7 +69,12 @@ impl Task {
             if let Some(index) = capture.get(4) {
                 let index = index.as_str().parse::<usize>().unwrap();
                 if index >= result.len() {
-                    return Err(format!("requesting {}[{}] but the list has {} elements.", var_name, index, result.len()));
+                    return Err(format!(
+                        "requesting {}[{}] but the list has {} elements.",
+                        var_name,
+                        index,
+                        result.len()
+                    ));
                 }
                 result = vec![result[index].clone()];
             }
@@ -103,17 +103,33 @@ impl Task {
                         let pattern = pattern.as_string();
                         if !pattern.contains("%s") {
                             for a in &mut result {
-                                *a = format!("{}{}{}{}", &argument[0..start], pattern, a, &argument[end..argument.len()]);
+                                *a = format!(
+                                    "{}{}{}{}",
+                                    &argument[0..start],
+                                    pattern,
+                                    a,
+                                    &argument[end..argument.len()]
+                                );
                             }
                         } else {
                             for a in &mut result {
-                                *a = format!("{}{}{}", &argument[0..start], pattern.replace("%s", a), &argument[end..argument.len()]);
+                                *a = format!(
+                                    "{}{}{}",
+                                    &argument[0..start],
+                                    pattern.replace("%s", a),
+                                    &argument[end..argument.len()]
+                                );
                             }
                         }
                     }
                 } else {
                     for a in &mut result {
-                        *a = format!("{}{}{}", &argument[0..start], a, &argument[end..argument.len()]);
+                        *a = format!(
+                            "{}{}{}",
+                            &argument[0..start],
+                            a,
+                            &argument[end..argument.len()]
+                        );
                     }
                 }
                 Ok(result)
@@ -127,4 +143,3 @@ impl Task {
         }
     }
 }
-

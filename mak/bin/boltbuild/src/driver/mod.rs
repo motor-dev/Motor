@@ -1,11 +1,10 @@
-use std::path::PathBuf;
-use serde::{Deserialize, Serialize};
 use crate::node::Node;
 use crate::task::Task;
+use serde::{Deserialize, Serialize};
 
 mod command;
-mod lua;
 mod dependency;
+mod lua;
 
 #[derive(Serialize, Deserialize)]
 enum DriverConfiguration {
@@ -19,8 +18,8 @@ pub(crate) struct Output {
     pub(crate) command: String,
     pub(crate) log: String,
     pub(crate) hash: blake3::Hash,
-    pub(crate) driver_dependencies: Vec<PathBuf>,
-    pub(crate) file_dependencies: Vec<PathBuf>,
+    pub(crate) driver_dependencies: Vec<Node>,
+    pub(crate) file_dependencies: Vec<Node>,
     pub(crate) extra_output: Vec<Node>,
 }
 
@@ -34,14 +33,18 @@ impl Driver {
     pub(crate) fn from_command(color: String, command: String) -> Self {
         Self {
             color,
-            configuration: DriverConfiguration::Command(command::CommandDriverConfiguration::new(command)),
+            configuration: DriverConfiguration::Command(command::CommandDriverConfiguration::new(
+                command,
+            )),
         }
     }
 
     pub(crate) fn from_dependency_command(color: String, command: String) -> Self {
         Self {
             color,
-            configuration: DriverConfiguration::DependencyCommand(dependency::DependencyCommandDriverConfiguration::new(command)),
+            configuration: DriverConfiguration::DependencyCommand(
+                dependency::DependencyCommandDriverConfiguration::new(command),
+            ),
         }
     }
 
@@ -64,7 +67,7 @@ impl Driver {
         }
     }
 
-    pub(crate) fn driver_hash(&self, driver_dependencies: &[PathBuf]) -> blake3::Hash {
+    pub(crate) fn driver_hash(&self, driver_dependencies: &[Node]) -> blake3::Hash {
         match &self.configuration {
             DriverConfiguration::Command(cmd) => cmd.hash(driver_dependencies),
             DriverConfiguration::DependencyCommand(cmd) => cmd.hash(driver_dependencies),

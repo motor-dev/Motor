@@ -4,84 +4,96 @@ local context = ...
 context:load_tool('bolt')
 context:load_tool('internal/product_process')
 
----@param generator Generator
+---@class Module : Generator
+---@field objects Node[]
+local Module = {}
+
+
+---@class CppProperties
+---@field group string|nil
+---@field public_includes Node[]|nil
+---@field internal_includes Node[]|nil
+---@field public_defines string[]|nil
+---@field internal_defines string[]|nil
+---@field public_dependencies string[]|nil
+---@field internal_dependencies string[]|nil
+---@field source string[]|nil
+---@field source_patterns string[]|nil
+---@field source_filter nil|fun(node:Node, directory:Node, env:Environment):boolean,boolean
+---@field bulk boolean|nil
+---@field public_flags string[]|nil
+
 ---@param path Node
 ---@param file Node
----@return Generator
-local function add_source(generator, path, file)
-    generator.source[1 + #generator.source] = { path, file }
-    return generator
+---@return Module
+function Module:add_source(path, file)
+    table.insert(self.source, { path, file })
+    return self
 end
 
----@param generator Generator
 ---@param path Node
 ---@param pattern string
----@return Generator
-local function add_source_pattern(generator, path, pattern)
-    generator.source_patterns[1 + #generator.source] = { path, pattern }
-    return generator
+---@return Module
+function Module:add_source_pattern(path, pattern)
+    table.insert(self.source_patterns, { path, pattern })
+    return self
 end
 
----@param generator Generator
 ---@param filter fun(node:Node,path:Node,env:Environment):boolean,boolean
----@return Generator
-local function set_source_filter(generator, filter)
-    generator.source_filter = filter
-    return generator
+---@return Module
+function Module:set_source_filter(filter)
+    self.source_filter = filter
+    return self
 end
 
----@param generator Generator
 ---@param path Node
----@return Generator
-local function add_public_include(generator, path)
-    generator.public_includes[1 + #generator.public_includes] = path
-    return generator
+---@return Module
+function Module:add_public_include(path)
+    table.insert(self.public_includes, path)
+    return self
 end
----@param generator Generator
 ---@param path Node
----@return Generator
-local function add_internal_include(generator, path)
-    generator.includes[1 + #generator.includes] = path
-    return generator
+---@return Module
+function Module:add_internal_include(path)
+    table.insert(self.internal_includes, path)
+    return self
 end
 
----@param generator Generator
 ---@param define string
 ---@param value string|nil
----@return Generator
-local function add_public_define(generator, define, value)
-    generator.public_defines[1 + #generator.public_defines] = { define, value }
-    return generator
-end
----@param generator Generator
----@param define string
----@param value string|nil
----@return Generator
-local function add_internal_define(generator, define, value)
-    generator.defines[1 + #generator.defines] = { define, value }
-    return generator
+---@return Module
+function Module:add_public_define(define, value)
+    table.insert(self.public_defines, { define, value })
+    return self
 end
 
----@param generator Generator
----@param dependency Generator
----@return Generator
-local function add_public_dependency(generator, dependency)
-    generator.public_dependencies[1 + #generator.public_dependencies] = dependency
-    return generator
+---@param define string
+---@param value string|nil
+---@return Module
+function Module:add_internal_define(define, value)
+    table.insert(self.internal_defines, { define, value })
+    return self
 end
----@param generator Generator
+
 ---@param dependency Generator
----@return Generator
-local function add_internal_dependency(generator, dependency)
-    generator.dependencies[1 + #generator.dependencies] = dependency
-    return generator
+---@return Module
+function Module:add_public_dependency(dependency)
+    table.insert(self.public_dependencies, dependency)
+    return self
+end
+
+---@param dependency Generator
+---@return Module
+function Module:add_internal_dependency(dependency)
+    table.insert(self.internal_dependencies, dependency)
+    return self
 end
 
 ---@param _ Node
 ---@param _ Node
 ---@param _ Environment
 ---@return boolean,boolean
-local function default_filter(_, _, _)
+function Module.default_filter(_, _, _)
     return true, false
 end
 
@@ -89,7 +101,7 @@ end
 ---@param link_type string|nil
 ---@param languages string[]
 ---@param group string|nil
----@return Generator
+---@return Module
 function Bolt.module(name, link_type, languages, group)
     local features = { }
     for _, l in ipairs(languages) do
@@ -104,26 +116,26 @@ function Bolt.module(name, link_type, languages, group)
     g.source = { }
     g.source_patterns = { }
     g.source_filter = default_filter
-    g.includes = { }
+    g.internal_includes = { }
     g.public_includes = { }
-    g.defines = { }
+    g.internal_defines = { }
     g.public_defines = { }
-    g.dependencies = { }
+    g.internal_dependencies = { }
     g.public_dependencies = { }
     g.public_flags = { }
     g.libs = { }
     g.libpaths = { }
     g.linkflags = { }
 
-    g.add_source = add_source
-    g.add_source_pattern = add_source_pattern
-    g.set_source_filter = set_source_filter
-    g.add_public_include = add_public_include
-    g.add_internal_include = add_internal_include
-    g.add_public_define = add_public_define
-    g.add_internal_define = add_internal_define
-    g.add_public_dependency = add_public_dependency
-    g.add_internal_dependency = add_internal_dependency
+    g.add_source = Module.add_source
+    g.add_source_pattern = Module.add_source_pattern
+    g.set_source_filter = Module.set_source_filter
+    g.add_public_include = Module.add_public_include
+    g.add_internal_include = Module.add_internal_include
+    g.add_public_define = Module.add_public_define
+    g.add_internal_define = Module.add_internal_define
+    g.add_public_dependency = Module.add_public_dependency
+    g.add_internal_dependency = Module.add_internal_dependency
 
     return g
 end

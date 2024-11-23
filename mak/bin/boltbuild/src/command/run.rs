@@ -1,12 +1,12 @@
-use super::{Command, CommandSpec, CommandOutput, CommandStatus, TaskSeq};
 use super::serialization::TaskSequenceSeed;
+use super::{Command, CommandOutput, CommandSpec, CommandStatus, TaskSeq};
+use crate::context::Context;
 use crate::environment::{Environment, ReadWriteEnvironment};
 use crate::error::Result;
 use crate::log::Logger;
 use crate::node::Node;
 use crate::options::Options;
-use crate::context::Context;
-use blake3::{Hasher};
+use blake3::Hasher;
 use std::collections::HashMap;
 use std::mem::swap;
 use std::ops::Deref;
@@ -35,18 +35,26 @@ impl Command {
             let mut tasks = TaskSeq::None;
             if let TaskSeq::Cached(tasks_file) = &output.tasks {
                 if let Ok(buffer) = std::fs::read(tasks_file) {
-                    let task_result = bincode::serde::decode_seed_from_slice(TaskSequenceSeed(&output.environments), buffer.as_slice(), bincode::config::standard());
+                    let task_result = bincode::serde::decode_seed_from_slice(
+                        TaskSequenceSeed(&output.environments),
+                        buffer.as_slice(),
+                        bincode::config::standard(),
+                    );
                     //let tasks = TaskSequenceSeed(&output.environments)
                     //   .deserialize(&mut serde_json::Deserializer::from_slice(buffer.as_slice()));
                     if let Ok(task_list) = task_result {
                         tasks = TaskSeq::List(task_list);
                     } else {
-                        return Err(format!("the tasks cache `{}` could not be deserialized.",
-                                           tasks_file.to_string_lossy()));
+                        return Err(format!(
+                            "the tasks cache `{}` could not be deserialized.",
+                            tasks_file.to_string_lossy()
+                        ));
                     }
                 } else {
-                    return Err(format!("the tasks cache `{}` is missing or can't be opened for read.",
-                                       tasks_file.to_string_lossy()));
+                    return Err(format!(
+                        "the tasks cache `{}` is missing or can't be opened for read.",
+                        tasks_file.to_string_lossy()
+                    ));
                 }
             }
 
@@ -59,13 +67,13 @@ impl Command {
 
                 let hash_result = output.hash(Some(options), envs, &tools);
                 if let Ok(hash) = hash_result {
-                    if !hash.0.0.eq(&stored_hash.0.0) {
+                    if !hash.0 .0.eq(&stored_hash.0 .0) {
                         return Err("files have changed on disc".to_string());
-                    } else if !hash.1.0.eq(&stored_hash.1.0) {
+                    } else if !hash.1 .0.eq(&stored_hash.1 .0) {
                         return Err("tools implementation have changed".to_string());
-                    } else if !hash.2.0.eq(&stored_hash.2.0) {
+                    } else if !hash.2 .0.eq(&stored_hash.2 .0) {
                         return Err("command-line options have changed".to_string());
-                    } else if !hash.3.0.eq(&stored_hash.3.0) {
+                    } else if !hash.3 .0.eq(&stored_hash.3 .0) {
                         return Err("the environment has changed".to_string());
                     } else {
                         for (path, pattern, hash) in &output.stored_hash.glob_dependencies {
@@ -75,15 +83,13 @@ impl Command {
                                     return Err(format!(
                                         "the result of file search `{}/{}` has changed.",
                                         path.path().to_string_lossy(),
-                                        pattern));
+                                        pattern
+                                    ));
                                 }
                             } else {
-                                let paths = glob::glob(
-                                    path.path()
-                                        .join(pattern)
-                                        .to_string_lossy()
-                                        .deref()
-                                ).unwrap();
+                                let paths =
+                                    glob::glob(path.path().join(pattern).to_string_lossy().deref())
+                                        .unwrap();
                                 let mut hasher = Hasher::new();
                                 for path in paths.flatten() {
                                     hasher.update(path.as_os_str().as_encoded_bytes());
@@ -92,7 +98,8 @@ impl Command {
                                     return Err(format!(
                                         "the result of file search `{}/{}` has changed.",
                                         path.path().to_string_lossy(),
-                                        pattern));
+                                        pattern
+                                    ));
                                 }
                             }
                         }
@@ -138,7 +145,11 @@ impl Command {
         Ok(logger)
     }
 
-    pub(super) fn merge_cache(&mut self, cache: Vec<Command>, command_map: &mut HashMap<String, Vec<String>>) {
+    pub(super) fn merge_cache(
+        &mut self,
+        cache: Vec<Command>,
+        command_map: &mut HashMap<String, Vec<String>>,
+    ) {
         let mut path = vec![self.spec.name.clone()];
         for command in cache {
             for declared_command in &mut self.output.as_mut().unwrap().commands {
@@ -162,7 +173,9 @@ impl Command {
         command_map: &mut HashMap<String, Vec<String>>,
         path: &mut Vec<String>,
     ) {
-        if let CommandStatus::ForwardDeclared = &self.status { self.spec = cached_spec; }
+        if let CommandStatus::ForwardDeclared = &self.status {
+            self.spec = cached_spec;
+        }
         path.push(self.spec.name.clone());
         match &mut self.output {
             None => {
@@ -181,11 +194,17 @@ impl Command {
                     output.stored_hash = cached_output.stored_hash;
 
                     for new_cmd in cached_output.commands {
-                        if let Some(index) = output.commands
+                        if let Some(index) = output
+                            .commands
                             .iter()
                             .position(|x| x.spec.name.eq(&new_cmd.spec.name))
                         {
-                            output.commands[index].merge_with(new_cmd.spec, new_cmd.output, command_map, path);
+                            output.commands[index].merge_with(
+                                new_cmd.spec,
+                                new_cmd.output,
+                                command_map,
+                                path,
+                            );
                         } else {
                             new_cmd.register(command_map, path);
                             output.commands.push(new_cmd);

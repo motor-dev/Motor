@@ -1,7 +1,6 @@
-use std::path::PathBuf;
 use super::Output;
+use crate::node::Node;
 use crate::task::Task;
-
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -11,9 +10,7 @@ pub(super) struct CommandDriverConfiguration {
 
 impl CommandDriverConfiguration {
     pub(super) fn new(command: String) -> Self {
-        Self {
-            command
-        }
+        Self { command }
     }
 
     pub(super) fn execute(&self, task: &Task) -> Output {
@@ -29,7 +26,9 @@ impl CommandDriverConfiguration {
         }
     }
 
-    pub(super) fn hash(&self, _: &[PathBuf]) -> blake3::Hash {
-        blake3::Hasher::new().update(self.command.as_bytes()).finalize()
+    pub(super) fn hash(&self, _: &[Node]) -> blake3::Hash {
+        blake3::Hasher::new()
+            .update(self.command.as_bytes())
+            .finalize()
     }
 }

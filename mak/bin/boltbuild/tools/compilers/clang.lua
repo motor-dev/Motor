@@ -29,6 +29,7 @@ local function load_clang(env, compiler, flags, link_flags, lang, var)
     env[var .. '_DEFINE_ST'] = '-D'
     env[var .. '_INCLUDE_ST'] = '-I'
     env[var .. '_SYSTEM_INCLUDE_ST'] = '-isystem%s'
+    env[var .. '_IDIRAFTER'] = '-idirafter'
     env.LINKFLAGS = link_flags
     env.LINK_TGT_F = '-o'
     env.LINK_LIB_F = '-l'
@@ -93,7 +94,7 @@ function Bolt.Clang.detect_clang_targets(clang, c_flags, cxx_flags)
                     triple = triple:name()
                     if not seen[triple] then
                         seen[triple] = true
-                        if context:try('running clang ' .. clang:abs_path() .. ' for target ' .. triple, function()
+                        context:try('running clang ' .. clang:abs_path() .. ' for target ' .. triple, function()
                             context:with(context:derive(), function()
                                 local c_target_flags, cxx_target_flags
                                 if #c_flags ~= 0 then
@@ -111,9 +112,7 @@ function Bolt.Clang.detect_clang_targets(clang, c_flags, cxx_flags)
                                 Bolt.Clang.load_clang_cxx(cxx_target_flags, { '-target', triple })
                                 result[#result + 1] = context.env
                             end)
-                        end) then
-                            break
-                        end
+                        end)
                     end
                 end
             end

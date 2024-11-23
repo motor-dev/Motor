@@ -1,11 +1,10 @@
-use std::collections::hash_map::Entry;
-use mlua::Lua;
-use mlua::prelude::{LuaError, LuaResult};
 use crate::context::Context;
 use crate::driver::Driver;
 use crate::node::Node;
-
-use crate::task::{SPLIT_RE, ENV_RE};
+use crate::task::{ENV_RE, SPLIT_RE};
+use mlua::prelude::{LuaError, LuaResult};
+use mlua::Lua;
+use std::collections::hash_map::Entry;
 
 fn is_command_valid(command: &str) -> bool {
     for argument in SPLIT_RE.split(command) {
@@ -25,7 +24,10 @@ pub(super) fn command_driver(
     if is_command_valid(command.as_str()) {
         insert_driver(this, name, Driver::from_command(color, command), run_before)
     } else {
-        Err(LuaError::RuntimeError(format!("invalid syntax in command {}", command)))
+        Err(LuaError::RuntimeError(format!(
+            "invalid syntax in command {}",
+            command
+        )))
     }
 }
 
@@ -35,9 +37,17 @@ pub(super) fn dependency_driver(
     (name, color, command, run_before): (String, String, String, Option<Vec<String>>),
 ) -> LuaResult<()> {
     if is_command_valid(command.as_str()) {
-        insert_driver(this, name, Driver::from_dependency_command(color, command), run_before)
+        insert_driver(
+            this,
+            name,
+            Driver::from_dependency_command(color, command),
+            run_before,
+        )
     } else {
-        Err(LuaError::RuntimeError(format!("invalid syntax in command {}", command)))
+        Err(LuaError::RuntimeError(format!(
+            "invalid syntax in command {}",
+            command
+        )))
     }
 }
 
@@ -46,7 +56,12 @@ pub(super) fn lua_driver(
     this: &mut Context,
     (name, color, script, run_before): (String, String, Node, Option<Vec<String>>),
 ) -> LuaResult<()> {
-    insert_driver(this, name, Driver::from_lua_script(color, script), run_before)
+    insert_driver(
+        this,
+        name,
+        Driver::from_lua_script(color, script),
+        run_before,
+    )
 }
 
 fn insert_driver(
@@ -56,9 +71,10 @@ fn insert_driver(
     run_before: Option<Vec<String>>,
 ) -> LuaResult<()> {
     match context.output.drivers.entry(name) {
-        Entry::Occupied(entry) => {
-            Err(LuaError::RuntimeError(format!("Overriding tool {}", entry.key())))
-        }
+        Entry::Occupied(entry) => Err(LuaError::RuntimeError(format!(
+            "Overriding tool {}",
+            entry.key()
+        ))),
         Entry::Vacant(entry) => {
             if let Some(run_before_list) = run_before {
                 for dependency in run_before_list {

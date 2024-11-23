@@ -1,17 +1,26 @@
-use std::sync::{Arc, Mutex};
-use mlua::prelude::{LuaError, LuaFunction, LuaResult, LuaValue};
-use mlua::{AnyUserData, Lua, FromLua, UserData, UserDataMethods};
-use crate::context::Context;
 use crate::context::operations::Feature;
+use crate::context::Context;
 use crate::generator::Generator;
+use mlua::prelude::{LuaError, LuaFunction, LuaResult, LuaValue};
+use mlua::{AnyUserData, FromLua, Lua, UserData, UserDataMethods};
+use std::sync::{Arc, Mutex};
 
-fn partial_sort(mut features: Vec<String>, partial_order: &Vec<(String, String)>) -> LuaResult<Vec<String>> {
+fn partial_sort(
+    mut features: Vec<String>,
+    partial_order: &Vec<(String, String)>,
+) -> LuaResult<Vec<String>> {
     for edge in partial_order {
         if !features.iter().any(|x| x.eq(&edge.0)) {
-            return Err(LuaError::RuntimeError(format!("Dependency on unknown feature {}", &edge.0)));
+            return Err(LuaError::RuntimeError(format!(
+                "Dependency on unknown feature {}",
+                &edge.0
+            )));
         }
         if !features.iter().any(|x| x.eq(&edge.1)) {
-            return Err(LuaError::RuntimeError(format!("Dependency on unknown feature {}", &edge.1)));
+            return Err(LuaError::RuntimeError(format!(
+                "Dependency on unknown feature {}",
+                &edge.1
+            )));
         }
     }
 
@@ -20,7 +29,10 @@ fn partial_sort(mut features: Vec<String>, partial_order: &Vec<(String, String)>
 
     let mut roots = Vec::new();
 
-    while let Some(index) = features.iter().position(|x| !edges.iter().any(|edge| edge.1.eq(x))) {
+    while let Some(index) = features
+        .iter()
+        .position(|x| !edges.iter().any(|edge| edge.1.eq(x)))
+    {
         roots.push(features.remove(index));
     }
     roots.reverse();
@@ -38,8 +50,14 @@ fn partial_sort(mut features: Vec<String>, partial_order: &Vec<(String, String)>
     }
 
     if !edges.is_empty() {
-        Err(LuaError::RuntimeError(format!("Cycle detected in feature dependency:\n  {}",
-                                           edges.iter().map(|x| format!("{} -> {}", x.0, x.1)).collect::<Vec<_>>().join("\n  "))))
+        Err(LuaError::RuntimeError(format!(
+            "Cycle detected in feature dependency:\n  {}",
+            edges
+                .iter()
+                .map(|x| format!("{} -> {}", x.0, x.1))
+                .collect::<Vec<_>>()
+                .join("\n  ")
+        )))
     } else {
         Ok(result)
     }
@@ -49,11 +67,13 @@ struct FeatureIndex(usize);
 
 impl UserData for FeatureIndex {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_function("set_run_after", |_lua, (this, predecessors): (AnyUserData, Vec<String>)| {
-            let context = this.user_value::<AnyUserData>()?;
-            let feature_index = this.borrow::<FeatureIndex>()?.0;
-            let features = context.named_user_value::<Vec<AnyUserData>>(":features")?;
-            context.borrow_mut_scoped::<Context, _>(|context| {
+        methods.add_function(
+            "set_run_after",
+            |_lua, (this, predecessors): (AnyUserData, Vec<String>)| {
+                let context = this.user_value::<AnyUserData>()?;
+                let feature_index = this.borrow::<FeatureIndex>()?.0;
+                let features = context.named_user_value::<Vec<AnyUserData>>(":features")?;
+                context.borrow_mut_scoped::<Context, _>(|context| {
                 let mut ordered_features = Vec::new();
                 for f in features.iter() {
                     let feature_name = f.borrow::<Feature>()?.0.clone();
@@ -70,13 +90,16 @@ impl UserData for FeatureIndex {
                 context.partial_order = partial_order;
                 Ok::<_, LuaError>(())
             })??;
-            Ok(this)
-        });
-        methods.add_function("set_run_before", |_lua, (this, successors): (AnyUserData, Vec<String>)| {
-            let context = this.user_value::<AnyUserData>()?;
-            let feature_index = this.borrow::<FeatureIndex>()?.0;
-            let features = context.named_user_value::<Vec<AnyUserData>>(":features")?;
-            context.borrow_mut_scoped::<Context, _>(|context| {
+                Ok(this)
+            },
+        );
+        methods.add_function(
+            "set_run_before",
+            |_lua, (this, successors): (AnyUserData, Vec<String>)| {
+                let context = this.user_value::<AnyUserData>()?;
+                let feature_index = this.borrow::<FeatureIndex>()?.0;
+                let features = context.named_user_value::<Vec<AnyUserData>>(":features")?;
+                context.borrow_mut_scoped::<Context, _>(|context| {
                 let mut ordered_features = Vec::new();
                 for f in features.iter() {
                     let feature_name = f.borrow::<Feature>()?.0.clone();
@@ -93,26 +116,41 @@ impl UserData for FeatureIndex {
                 context.partial_order = partial_order;
                 Ok::<_, LuaError>(())
             })??;
-            Ok(this)
-        });
+                Ok(this)
+            },
+        );
     }
 }
 
 impl UserData for Feature {}
 
-pub(super) fn feature(lua: &Lua, (this, feature_names, name, method): (AnyUserData, LuaValue, String, LuaFunction)) -> LuaResult<AnyUserData> {
+pub(super) fn feature(
+    lua: &Lua,
+    (this, feature_names, name, method): (AnyUserData, LuaValue, String, LuaFunction),
+) -> LuaResult<AnyUserData> {
     let feature_names = match &feature_names {
-        LuaValue::String(s) => s.to_string_lossy().split(',').map(|x| x.trim().to_string()).collect(),
-        LuaValue::Table(_) => { Vec::<String>::from_lua(feature_names, lua)? }
+        LuaValue::String(s) => s
+            .to_string_lossy()
+            .split(',')
+            .map(|x| x.trim().to_string())
+            .collect(),
+        LuaValue::Table(_) => Vec::<String>::from_lua(feature_names, lua)?,
         LuaValue::Nil => Vec::new(),
-        _ => return Err(LuaError::RuntimeError("features should be a list of string or a single string".to_string())),
+        _ => {
+            return Err(LuaError::RuntimeError(
+                "features should be a list of string or a single string".to_string(),
+            ))
+        }
     };
 
     let mut features = this.named_user_value::<Vec<AnyUserData>>(":features")?;
     for f in features.iter() {
         let feature_name = &f.borrow::<Feature>()?.0;
         if feature_name.eq(&name) {
-            return Err(LuaError::RuntimeError(format!("Feature {} already defined.", name)));
+            return Err(LuaError::RuntimeError(format!(
+                "Feature {} already defined.",
+                name
+            )));
         }
     }
 
@@ -143,15 +181,25 @@ pub(super) fn post(_lua: &Lua, (this, generator): (&AnyUserData, &AnyUserData)) 
         }
         generator.posted = true;
         if owner.in_post == 0 {
-            return Err(LuaError::RuntimeError(format!("Posting task generator {} outside of post", &generator.name)));
+            return Err(LuaError::RuntimeError(format!(
+                "Posting task generator {} outside of post",
+                &generator.name
+            )));
         }
         let mut available_features = Vec::new();
         for u in this.named_user_value::<Vec<AnyUserData>>(":features")? {
             let f = u.borrow::<Feature>()?;
-            available_features.push((f.0.clone(), f.1.clone(), u.named_user_value::<LuaFunction>(":call")?));
+            available_features.push((
+                f.0.clone(),
+                f.1.clone(),
+                u.named_user_value::<LuaFunction>(":call")?,
+            ));
         }
         for feature_name in &owner.sorted_features {
-            let feature = available_features.iter().find(|x| x.0.eq(feature_name)).unwrap();
+            let feature = available_features
+                .iter()
+                .find(|x| x.0.eq(feature_name))
+                .unwrap();
             for f in &generator.features {
                 if feature.1.iter().any(|x| x.eq(f)) {
                     result_features.push(feature.clone());
@@ -164,7 +212,9 @@ pub(super) fn post(_lua: &Lua, (this, generator): (&AnyUserData, &AnyUserData)) 
         for (name, _, callback) in features {
             this.borrow_mut_scoped::<Context, _>(|owner| {
                 let depth = owner.in_post - 1;
-                owner.logger.debug(format!("{}posting {}:{}", " ".repeat(depth), generator_name, name).as_str());
+                owner.logger.debug(
+                    format!("{}posting {}:{}", " ".repeat(depth), generator_name, name).as_str(),
+                );
                 owner.in_post += 1;
             })?;
             let result = callback.call::<()>(generator);

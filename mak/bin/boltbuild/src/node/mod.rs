@@ -1,11 +1,11 @@
-mod lua_binding;
-
+use crate::environment::EnvironmentValue;
+use serde::{Deserialize, Serialize};
 use std::ffi::OsStr;
 use std::fmt::Display;
 use std::fs;
-use serde::{Deserialize, Serialize};
 use std::path::{Component, Path, PathBuf};
-use crate::environment::EnvironmentValue;
+
+mod lua_binding;
 
 #[derive(Clone, Serialize, Deserialize, Hash, Eq, PartialEq, Ord, PartialOrd)]
 pub(crate) struct Node {
@@ -21,7 +21,7 @@ impl Node {
 
     fn new() -> Node {
         Node {
-            path: PathBuf::new()
+            path: PathBuf::new(),
         }
     }
 
@@ -85,9 +85,13 @@ impl Node {
     }
 
     pub(crate) fn name(&self) -> String {
-        self.path.file_name().unwrap_or(OsStr::new("")).to_string_lossy().to_string()
+        self.path
+            .file_name()
+            .unwrap_or(OsStr::new(""))
+            .to_string_lossy()
+            .to_string()
     }
-    
+
     pub(crate) fn change_ext(&mut self, extension: &str) {
         self.path.set_extension(extension);
     }
@@ -134,6 +138,11 @@ impl From<&Node> for EnvironmentValue {
 
 impl From<&Vec<Node>> for EnvironmentValue {
     fn from(value: &Vec<Node>) -> Self {
-        EnvironmentValue::Vec(value.iter().map(|x| x.into()).collect::<Vec<EnvironmentValue>>())
+        EnvironmentValue::Vec(
+            value
+                .iter()
+                .map(|x| x.into())
+                .collect::<Vec<EnvironmentValue>>(),
+        )
     }
 }

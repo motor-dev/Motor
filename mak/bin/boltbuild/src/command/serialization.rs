@@ -1,16 +1,18 @@
 use super::{Command, CommandOutput, CommandStatus, SerializedHash, TaskSeq};
-use crate::environment::{Environment, ReadWriteEnvironmentVec, ReadWriteEnvironmentSequenceSeed, SerializedReadWriteEnvironment};
+use crate::environment::{
+    Environment, ReadWriteEnvironmentSequenceSeed, ReadWriteEnvironmentVec,
+    SerializedReadWriteEnvironment,
+};
 use crate::node::Node;
 use crate::task::{Task, TaskSeed};
-
+use blake3::Hash;
+use serde::de::{DeserializeSeed, Error, MapAccess, SeqAccess, Visitor};
+use serde::ser::SerializeStruct;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::collections::HashMap;
 use std::fmt;
 use std::io::Read;
 use std::path::PathBuf;
-use blake3::Hash;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde::de::{DeserializeSeed, Error, MapAccess, SeqAccess, Visitor};
-use serde::ser::SerializeStruct;
 
 impl Command {
     pub(crate) fn load_from_file(
@@ -58,7 +60,11 @@ impl Command {
         let output = self.output.as_ref().unwrap();
         let mut content = Vec::new();
         file.read_to_end(&mut content)?;
-        let commands = bincode::serde::decode_seed_from_slice(CommandCacheSeed(&output.environments), content.as_slice(), bincode::config::standard())?;
+        let commands = bincode::serde::decode_seed_from_slice(
+            CommandCacheSeed(&output.environments),
+            content.as_slice(),
+            bincode::config::standard(),
+        )?;
         //let reader = std::io::BufReader::new(file);
         //let commands = CommandCacheSeed(&output.environments)
         //    .deserialize(&mut serde_json::Deserializer::from_reader(reader))?;
@@ -67,7 +73,11 @@ impl Command {
     }
 
     pub(crate) fn save_to_file(&self, mut file: std::fs::File) -> crate::error::Result<()> {
-        bincode::serde::encode_into_std_write(&self.output.as_ref().unwrap().commands, &mut file, bincode::config::standard())?;
+        bincode::serde::encode_into_std_write(
+            &self.output.as_ref().unwrap().commands,
+            &mut file,
+            bincode::config::standard(),
+        )?;
         Ok(())
         /*Ok(serde_json::to_writer_pretty(
             file,
@@ -75,7 +85,6 @@ impl Command {
         )?)*/
     }
 }
-
 
 pub(crate) struct CommandSeed<'a>(pub &'a ReadWriteEnvironmentVec);
 
@@ -147,7 +156,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
                     .ok_or_else(|| Error::invalid_length(0, &self))?;
                 let status = match status {
                     CommandStatus::UpToDate => CommandStatus::Cached,
-                    other => other
+                    other => other,
                 };
                 Ok(Command {
                     spec,
@@ -190,7 +199,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
                 let status = status.ok_or_else(|| Error::missing_field("status"))?;
                 let status = match status {
                     CommandStatus::UpToDate => CommandStatus::Cached,
-                    other => other
+                    other => other,
                 };
                 Ok(Command {
                     spec,
@@ -200,7 +209,11 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
             }
         }
 
-        deserializer.deserialize_struct("Command", &["spec", "output", "status"], CommandVisitor(self.0))
+        deserializer.deserialize_struct(
+            "Command",
+            &["spec", "output", "status"],
+            CommandVisitor(self.0),
+        )
     }
 }
 
@@ -264,7 +277,11 @@ impl Serialize for CommandOutput {
         let tasks = match &self.tasks {
             TaskSeq::None => None,
             TaskSeq::Cached(cache_file) => Some(cache_file),
-            TaskSeq::List(_) => return Err(serde::ser::Error::custom("Task list should be serialized in a separate cache")),
+            TaskSeq::List(_) => {
+                return Err(serde::ser::Error::custom(
+                    "Task list should be serialized in a separate cache",
+                ))
+            }
         };
         s.serialize_field("tasks", &tasks)?;
         s.serialize_field("drivers", &self.drivers)?;
@@ -322,7 +339,16 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                             "drivers" => Ok(Field::Drivers),
                             _ => Err(Error::unknown_field(
                                 value,
-                                &["environments", "commands", "options", "tools", "stored_hash", "groups", "tasks", "drivers"],
+                                &[
+                                    "environments",
+                                    "commands",
+                                    "options",
+                                    "tools",
+                                    "stored_hash",
+                                    "groups",
+                                    "tasks",
+                                    "drivers",
+                                ],
                             )),
                         }
                     }
@@ -354,7 +380,16 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
             {
                 deserializer.deserialize_struct(
                     "Command",
-                    &["environments", "commands", "options", "tools", "stored_hash", "groups", "tasks", "drivers"],
+                    &[
+                        "environments",
+                        "commands",
+                        "options",
+                        "tools",
+                        "stored_hash",
+                        "groups",
+                        "tasks",
+                        "drivers",
+                    ],
                     self,
                 )
             }
@@ -363,7 +398,8 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
             where
                 V: SeqAccess<'de>,
             {
-                let environments = seq.next_element_seed(ReadWriteEnvironmentSequenceSeed(self.0))?
+                let environments = seq
+                    .next_element_seed(ReadWriteEnvironmentSequenceSeed(self.0))?
                     .ok_or_else(|| Error::invalid_length(0, &self))?;
                 let commands = seq
                     .next_element_seed(CommandSequenceSeed(&environments))?
@@ -395,7 +431,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                     groups,
                     tasks: match tasks {
                         None => TaskSeq::None,
-                        Some(path) => TaskSeq::Cached(path)
+                        Some(path) => TaskSeq::Cached(path),
                     },
                     drivers,
                 }))
@@ -419,7 +455,9 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                             if environments.is_some() {
                                 return Err(Error::duplicate_field("environments"));
                             }
-                            environments = Some(map.next_value_seed(ReadWriteEnvironmentSequenceSeed(self.0))?);
+                            environments = Some(
+                                map.next_value_seed(ReadWriteEnvironmentSequenceSeed(self.0))?,
+                            );
                         }
                         Field::Commands => {
                             if commands.is_some() {
@@ -428,7 +466,9 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                             if environments.is_none() {
                                 return Err(Error::custom("environments must be defined before the commands that use them"));
                             }
-                            commands = Some(map.next_value_seed(CommandSequenceSeed(environments.as_ref().unwrap()))?);
+                            commands = Some(map.next_value_seed(CommandSequenceSeed(
+                                environments.as_ref().unwrap(),
+                            ))?);
                         }
                         Field::Options => {
                             if options.is_some() {
@@ -468,7 +508,8 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                         }
                     }
                 }
-                let environments = environments.ok_or_else(|| Error::missing_field("environments"))?;
+                let environments =
+                    environments.ok_or_else(|| Error::missing_field("environments"))?;
                 let commands = commands.ok_or_else(|| Error::missing_field("commands"))?;
                 let tools = tools.ok_or_else(|| Error::missing_field("tools"))?;
                 let options = options.ok_or_else(|| Error::missing_field("options"))?;
@@ -492,9 +533,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
             }
         }
 
-        deserializer.deserialize_option(
-            CommandOutputVisitor(self.0),
-        )
+        deserializer.deserialize_option(CommandOutputVisitor(self.0))
     }
 }
 
@@ -525,14 +564,18 @@ impl<'de> Deserialize<'de> for SerializedHash {
             where
                 E: Error,
             {
-                Ok(SerializedHash(Hash::from_hex(v).map_err(|x| Error::custom(x))?))
+                Ok(SerializedHash(
+                    Hash::from_hex(v).map_err(|x| Error::custom(x))?,
+                ))
             }
 
             fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
             where
                 E: Error,
             {
-                Ok(SerializedHash(Hash::from_hex(v).map_err(|x| Error::custom(x))?))
+                Ok(SerializedHash(
+                    Hash::from_hex(v).map_err(|x| Error::custom(x))?,
+                ))
             }
         }
 

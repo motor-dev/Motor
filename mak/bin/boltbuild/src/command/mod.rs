@@ -1,17 +1,17 @@
-use std::collections::HashMap;
-use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
-use blake3::Hash;
-use serde::{Deserialize, Serialize};
+use crate::driver::Driver;
 use crate::environment::{Environment, ReadWriteEnvironment};
 use crate::node::Node;
 use crate::task::Task;
-use crate::driver::Driver;
+use blake3::Hash;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
 
+mod output;
 mod run;
 mod scheduler;
 mod serialization;
-mod output;
 mod spec;
 
 #[derive(Serialize)]
@@ -68,7 +68,12 @@ pub(crate) struct CommandHash {
     pub(crate) option_dependencies: Vec<String>,
     pub(crate) variable_dependencies: Vec<Vec<String>>,
     pub(crate) glob_dependencies: Vec<(Node, String, SerializedHash)>,
-    pub(crate) hash: Option<(SerializedHash, SerializedHash, SerializedHash, SerializedHash)>,
+    pub(crate) hash: Option<(
+        SerializedHash,
+        SerializedHash,
+        SerializedHash,
+        SerializedHash,
+    )>,
 }
 
 #[derive(PartialEq, Eq, Hash, Clone)]

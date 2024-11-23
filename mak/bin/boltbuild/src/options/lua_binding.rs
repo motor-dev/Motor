@@ -1,7 +1,7 @@
-use std::sync::{Arc, Mutex};
 use super::CommandLineParser;
 use crate::environment::EnvironmentValue;
-use mlua::{IntoLua, Result, MetaMethod, UserData, UserDataMethods, AnyUserData};
+use mlua::{AnyUserData, IntoLua, MetaMethod, Result, UserData, UserDataMethods};
+use std::sync::{Arc, Mutex};
 
 struct InterfaceIndex(usize);
 
@@ -25,15 +25,18 @@ impl UserData for InterfaceIndex {
             interface.set_short(short);
             Ok(this)
         });
-        methods.add_function("set_category", |_lua, (this, category): (AnyUserData, String)| {
-            let parser = this.user_value::<AnyUserData>()?;
-            let parser = parser.borrow_mut::<Arc<Mutex<CommandLineParser>>>()?;
-            let mut parser = parser.lock().unwrap();
-            let argument = &mut parser.options[this.borrow::<InterfaceIndex>()?.0];
-            let interface = argument.interface.as_mut().unwrap();
-            interface.set_category(category);
-            Ok(this)
-        });
+        methods.add_function(
+            "set_category",
+            |_lua, (this, category): (AnyUserData, String)| {
+                let parser = this.user_value::<AnyUserData>()?;
+                let parser = parser.borrow_mut::<Arc<Mutex<CommandLineParser>>>()?;
+                let mut parser = parser.lock().unwrap();
+                let argument = &mut parser.options[this.borrow::<InterfaceIndex>()?.0];
+                let interface = argument.interface.as_mut().unwrap();
+                interface.set_category(category);
+                Ok(this)
+            },
+        );
         methods.add_function("set_required", |_lua, this: AnyUserData| {
             let parser = this.user_value::<AnyUserData>()?;
             let parser = parser.borrow_mut::<Arc<Mutex<CommandLineParser>>>()?;
@@ -142,7 +145,12 @@ impl UserData for CommandLineParser {
                 let result = {
                     let this = args.0.borrow_mut::<Arc<Mutex<CommandLineParser>>>()?;
                     let mut this = this.lock().unwrap();
-                    this.add_choice(args.1, args.2, args.3.as_slice(), EnvironmentValue::from_lua(&args.4)?)?;
+                    this.add_choice(
+                        args.1,
+                        args.2,
+                        args.3.as_slice(),
+                        EnvironmentValue::from_lua(&args.4)?,
+                    )?;
                     lua.create_userdata(InterfaceIndex(this.options.len() - 1))?
                 };
                 result.set_user_value(args.0)?;
