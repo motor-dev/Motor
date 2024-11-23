@@ -1,10 +1,10 @@
-use std::iter::zip;
-use std::sync::{Arc, Mutex};
-use blake3::Hasher;
 use crate::command::{CommandOutput, SerializedHash};
+use crate::context::TOOLS_DIR;
 use crate::environment::{Environment, ReadWriteEnvironment};
 use crate::node::Node;
-use crate::context::TOOLS_DIR;
+use blake3::Hasher;
+use std::iter::zip;
+use std::sync::{Arc, Mutex};
 
 impl CommandOutput {
     pub(crate) fn hash(
@@ -12,7 +12,12 @@ impl CommandOutput {
         options: Option<&Environment>,
         envs: &[Arc<Mutex<ReadWriteEnvironment>>],
         tools: &Vec<Node>,
-    ) -> std::io::Result<(SerializedHash, SerializedHash, SerializedHash, SerializedHash)> {
+    ) -> std::io::Result<(
+        SerializedHash,
+        SerializedHash,
+        SerializedHash,
+        SerializedHash,
+    )> {
         let hash1 = {
             let mut hasher = Hasher::new();
             for file in &self.stored_hash.file_dependencies {

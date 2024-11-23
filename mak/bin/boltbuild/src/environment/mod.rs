@@ -1,13 +1,12 @@
-mod lua_binding;
-mod serialization;
-mod lua_interop;
-
 use self::lua_interop::EnvironmentParent;
 use crate::node::Node;
-
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex};
+
+mod lua_binding;
+mod lua_interop;
+mod serialization;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct Environment {
@@ -15,7 +14,6 @@ pub(crate) struct Environment {
     #[serde(skip_serializing, skip_deserializing)]
     pub(crate) used_keys: HashSet<String>,
 }
-
 
 pub(crate) struct ReadWriteEnvironment {
     parent: EnvironmentParent,
@@ -35,7 +33,9 @@ pub(crate) enum EnvironmentValue {
 
 pub(crate) type ReadWriteEnvironmentVec = Vec<Arc<Mutex<ReadWriteEnvironment>>>;
 
-pub(crate) struct SerializedReadWriteEnvironment<'a>(pub(crate) &'a Arc<Mutex<ReadWriteEnvironment>>);
+pub(crate) struct SerializedReadWriteEnvironment<'a>(
+    pub(crate) &'a Arc<Mutex<ReadWriteEnvironment>>,
+);
 pub(crate) struct ReadWriteEnvironmentSeed<'a> {
     pub current: &'a ReadWriteEnvironmentVec,
     pub parent: &'a ReadWriteEnvironmentVec,

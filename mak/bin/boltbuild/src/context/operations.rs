@@ -1,22 +1,23 @@
 use super::Context;
-
+use crate::command::{
+    Command, CommandHash, CommandOutput, CommandSpec, CommandStatus, GroupStatus, SerializedHash,
+    TaskSeq,
+};
+use crate::context::TOOLS_DIR;
+use crate::environment::ReadWriteEnvironment;
+use crate::log::Logger;
+use crate::node::Node;
+use crate::options::Options;
+use lazy_static::lazy_static;
+use mlua::prelude::{LuaError, LuaResult, LuaValue};
+use mlua::{AnyUserData, Lua, Table};
+use regex::Regex;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::iter::zip;
 use std::mem::swap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
-use mlua::{AnyUserData, Lua, Table};
-use mlua::prelude::{LuaError, LuaResult, LuaValue};
-use lazy_static::lazy_static;
-use regex::Regex;
-
-use crate::command::{Command, CommandHash, CommandOutput, CommandSpec, CommandStatus, GroupStatus, SerializedHash, TaskSeq};
-use crate::environment::ReadWriteEnvironment;
-use crate::log::Logger;
-use crate::node::Node;
-use crate::options::Options;
-use crate::context::TOOLS_DIR;
 
 const ROOT_SCRIPT: &str = "bolt.lua";
 
@@ -39,7 +40,11 @@ impl Context {
     ) -> crate::error::Result<Context> {
         let current_dir = Node::from(&std::env::current_dir()?);
         let bld_dir = if let Options::Environment(options) = &options_context {
-            options.lock().unwrap().get_raw("out").as_node(&current_dir)?
+            options
+                .lock()
+                .unwrap()
+                .get_raw("out")
+                .as_node(&current_dir)?
         } else {
             current_dir.clone()
         };
@@ -48,7 +53,11 @@ impl Context {
             .envs
             .iter()
             .enumerate()
-            .map(|(i, &x)| Arc::new(Mutex::new(ReadWriteEnvironment::derive_from_parent(&envs[x], i))))
+            .map(|(i, &x)| {
+                Arc::new(Mutex::new(ReadWriteEnvironment::derive_from_parent(
+                    &envs[x], i,
+                )))
+            })
             .collect();
         let start_env = run_envs[0].clone();
         Ok(Context {
@@ -108,11 +117,16 @@ impl Context {
                 chunk.call(userdata.clone())
             };
             let run_content = |userdata: &mut AnyUserData, tool_path: &PathBuf| -> LuaResult<()> {
-                let chunk = lua.load(TOOLS_DIR.get_file(tool_path).unwrap().contents()).set_name(tool_path.to_string_lossy());
+                let chunk = lua
+                    .load(TOOLS_DIR.get_file(tool_path).unwrap().contents())
+                    .set_name(tool_path.to_string_lossy());
                 chunk.call(userdata.clone())
             };
 
-            self.output.stored_hash.file_dependencies.push(ROOT_SCRIPT.into());
+            self.output
+                .stored_hash
+                .file_dependencies
+                .push(ROOT_SCRIPT.into());
             lua.scope(|scope| {
                 let mut userdata = scope.create_userdata_ref_mut::<Context>(self).unwrap();
                 userdata.set_named_user_value(":features", lua.create_table()?)?;
@@ -178,7 +192,6 @@ impl Context {
             })?;
         }
 
-
         for env in envs {
             self.output.stored_hash.variable_dependencies.push(
                 env.lock()
@@ -192,13 +205,8 @@ impl Context {
         }
         if let Options::Environment(e) = &self.options {
             self.output.options = Some(e.lock().unwrap().clone());
-            self.output.stored_hash.option_dependencies = e
-                .lock()
-                .unwrap()
-                .used_keys
-                .iter()
-                .cloned()
-                .collect();
+            self.output.stored_hash.option_dependencies =
+                e.lock().unwrap().used_keys.iter().cloned().collect();
         }
 
         if self.tasks.is_empty() {
@@ -209,7 +217,11 @@ impl Context {
             self.output.tasks = TaskSeq::List(result_tasks);
         }
 
-        self.output.stored_hash.hash = Some(self.output.hash(self.output.options.as_ref(), envs, &self.output.tools)?);
+        self.output.stored_hash.hash = Some(self.output.hash(
+            self.output.options.as_ref(),
+            envs,
+            &self.output.tools,
+        )?);
         swap(commands, &mut self.commands);
         swap(&mut logger, &mut self.logger);
 

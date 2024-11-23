@@ -32,7 +32,6 @@ context:extension('l,ll', function(generator, node, path)
     else
         out_node = out_node:change_ext('c')
     end
-    out_node.parent:mkdir()
     generator:declare_task('flex', { node }, { out_node })
     generator.source[1 + #generator.source] = { directory, out_node }
 end)

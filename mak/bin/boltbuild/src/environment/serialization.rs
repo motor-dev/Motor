@@ -1,17 +1,14 @@
-use super::{
-    Environment, ReadWriteEnvironment, ReadWriteEnvironmentVec,
-    SerializedReadWriteEnvironment,
-    ReadWriteEnvironmentSeed, ReadWriteEnvironmentSequenceSeed};
 use super::lua_interop::EnvironmentParent;
-
+use super::{
+    Environment, ReadWriteEnvironment, ReadWriteEnvironmentSeed, ReadWriteEnvironmentSequenceSeed,
+    ReadWriteEnvironmentVec, SerializedReadWriteEnvironment,
+};
+use serde::de::{DeserializeSeed, Error, MapAccess, SeqAccess, Visitor};
+use serde::ser::SerializeStruct;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::collections::{BTreeMap, HashSet};
 use std::fmt;
 use std::sync::{Arc, Mutex};
-
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde::de::{DeserializeSeed, Error, MapAccess, SeqAccess, Visitor};
-use serde::ser::SerializeStruct;
-
 
 impl<'a> Serialize for SerializedReadWriteEnvironment<'a> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -34,7 +31,17 @@ impl<'a> Serialize for SerializedReadWriteEnvironment<'a> {
                 }
             },
         )?;
-        s.serialize_field("values", &self.0.lock().unwrap().environment.values.iter().collect::<BTreeMap<_, _>>())?;
+        s.serialize_field(
+            "values",
+            &self
+                .0
+                .lock()
+                .unwrap()
+                .environment
+                .values
+                .iter()
+                .collect::<BTreeMap<_, _>>(),
+        )?;
         s.end()
     }
 }
@@ -201,7 +208,10 @@ impl<'de, 'a> DeserializeSeed<'de> for ReadWriteEnvironmentSeed<'a> {
         deserializer.deserialize_struct(
             "Environment",
             &["parent", "values"],
-            ReadWriteEnvironmentVisitor { current: self.current, parent: self.parent },
+            ReadWriteEnvironmentVisitor {
+                current: self.current,
+                parent: self.parent,
+            },
         )
     }
 }

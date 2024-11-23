@@ -1,9 +1,8 @@
-mod lua_binding;
-mod command_line;
-
-
 use crate::environment::{Environment, EnvironmentValue};
 use std::sync::{Arc, Mutex};
+
+mod command_line;
+mod lua_binding;
 
 #[derive(Clone)]
 pub(crate) enum Options {
@@ -14,7 +13,6 @@ pub(crate) enum Options {
 pub(crate) struct CommandLineParser {
     options: Vec<command_line::Argument>,
 }
-
 
 impl Options {
     pub(crate) fn from_parser(context: Arc<Mutex<CommandLineParser>>) -> Self {

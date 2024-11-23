@@ -1,5 +1,5 @@
-use std::sync::{Arc, Mutex};
 use crate::environment::ReadWriteEnvironment;
+use std::sync::{Arc, Mutex};
 
 mod lua_binding;
 
@@ -12,7 +12,18 @@ pub(crate) struct Generator {
 }
 
 impl Generator {
-    pub(crate) fn new(name: String, env: Arc<Mutex<ReadWriteEnvironment>>, group: String, features: Vec<String>) -> Self {
-        Self { name, group, env, features, posted: false }
+    pub(crate) fn new(
+        name: String,
+        env: Arc<Mutex<ReadWriteEnvironment>>,
+        group: String,
+        features: Vec<String>,
+    ) -> Self {
+        Self {
+            name,
+            group,
+            env,
+            features,
+            posted: false,
+        }
     }
 }

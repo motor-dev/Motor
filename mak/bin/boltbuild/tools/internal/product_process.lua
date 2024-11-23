@@ -36,7 +36,7 @@ local function process_link(generator, dependency, seen, add_objects)
         seen[dependency] = { true, add_objects }
         if add_objects then
             for _, object in ipairs(dependency.objects) do
-                generator.objects[1 + #generator.objects] = object
+                table.insert(generator.objects, object)
             end
         end
         if not already_seen then
@@ -48,7 +48,7 @@ local function process_link(generator, dependency, seen, add_objects)
             process_link(generator, dep, seen, add_objects and not dep:has_property('link_task'))
         end
         if add_objects then
-            for _, dep in ipairs(dependency.dependencies) do
+            for _, dep in ipairs(dependency.internal_dependencies) do
                 process_link(generator, dep, seen, not dep:has_property('link_task'))
             end
         end
@@ -62,10 +62,10 @@ local function process_dependency(generator, dependency, seen)
     if not seen[dependency] then
         seen[dependency] = true
         for _, include in ipairs(dependency.public_includes) do
-            generator.includes[1 + #generator.includes] = include
+            table.insert(generator.internal_includes, include)
         end
         for _, define in ipairs(dependency.public_defines) do
-            generator.defines[1 + #generator.defines] = define
+            table.insert(generator.internal_defines, define)
         end
         for _, flags in ipairs(dependency.public_flags) do
             local flag_name, values = flags[1], flags[2]
@@ -93,7 +93,7 @@ local function process_dependencies(generator)
         end
     end
 
-    for _, dependency in ipairs(generator.dependencies) do
+    for _, dependency in ipairs(generator.internal_dependencies) do
         context:post(dependency)
         process_dependency(generator, dependency, seen)
     end
@@ -104,7 +104,7 @@ local function process_dependencies(generator)
 
     if add_objects then
         seen = { }
-        for _, dependency in ipairs(generator.dependencies) do
+        for _, dependency in ipairs(generator.internal_dependencies) do
             process_link(generator, dependency, seen, not dependency:has_property('link_task'))
         end
         for _, dependency in ipairs(generator.public_dependencies) do
@@ -115,13 +115,13 @@ end
 
 ---@param generator Generator
 local function process_flags(generator)
-    for _, include in ipairs(generator.includes) do
+    for _, include in ipairs(generator.internal_includes) do
         generator.env:append('INCLUDES', include:abs_path())
     end
     for _, include in ipairs(generator.public_includes) do
         generator.env:append('INCLUDES', include:abs_path())
     end
-    for _, define in ipairs(generator.defines) do
+    for _, define in ipairs(generator.internal_defines) do
         if define[2] then
             generator.env:append('DEFINES', define[1] .. '=' .. define[2])
         else

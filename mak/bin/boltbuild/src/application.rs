@@ -1,14 +1,14 @@
 use crate::command::{Command, GroupStatus, Targets};
-use crate::environment::{Environment, ReadWriteEnvironment, EnvironmentValue};
+use crate::environment::{Environment, EnvironmentValue, ReadWriteEnvironment};
 use crate::error::Result;
 use crate::log::Logger;
 use crate::node::Node;
 use crate::options::{CommandLineParser, Options};
 use std::collections::HashMap;
-use std::{fmt, fs};
+use std::env;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-use std::env;
+use std::{fmt, fs};
 
 pub struct Application {
     out_dir: PathBuf,
@@ -35,12 +35,27 @@ impl Application {
             .to_string();
         let mut parser = CommandLineParser::new();
         parser.add_setting("name".to_string(), EnvironmentValue::String(root_dir))?;
-        parser.add_setting("author".to_string(), EnvironmentValue::String("".to_string()))?;
-        parser.add_setting("version".to_string(), EnvironmentValue::String("0.1.0".to_string()))?;
-        parser.add_setting("out".to_string(), EnvironmentValue::Node(Node::from(&PathBuf::from("build/.bolt"))))?;
-        let mut paths = vec![EnvironmentValue::Node(Node::from(&env::current_exe()?).parent())];
+        parser.add_setting(
+            "author".to_string(),
+            EnvironmentValue::String("".to_string()),
+        )?;
+        parser.add_setting(
+            "version".to_string(),
+            EnvironmentValue::String("0.1.0".to_string()),
+        )?;
+        parser.add_setting(
+            "out".to_string(),
+            EnvironmentValue::Node(Node::from(&PathBuf::from("build/.bolt"))),
+        )?;
+        let mut paths = vec![EnvironmentValue::Node(
+            Node::from(&env::current_exe()?).parent(),
+        )];
         if let Some(path_env) = env::var_os("PATH") {
-            paths.append(&mut env::split_paths(&path_env).map(|x| EnvironmentValue::Node(Node::from(&x))).collect::<Vec<EnvironmentValue>>());
+            paths.append(
+                &mut env::split_paths(&path_env)
+                    .map(|x| EnvironmentValue::Node(Node::from(&x)))
+                    .collect::<Vec<EnvironmentValue>>(),
+            );
         }
         parser.add_setting("path".to_string(), EnvironmentValue::Vec(paths))?;
         parser.add_setting("tools_dir".to_string(), EnvironmentValue::Vec(Vec::new()))?;
@@ -48,24 +63,39 @@ impl Application {
             "flavors".to_string(),
             EnvironmentValue::Vec(vec![
                 EnvironmentValue::String("debug".to_string()),
-                EnvironmentValue::String("final".to_string())
+                EnvironmentValue::String("final".to_string()),
             ]),
         )?;
-        parser.add_setting("exe_suffix".to_string(), EnvironmentValue::String(if cfg!(target_os="windows") { ".exe" } else { "" }.to_string()))?;
-        parser.add_setting("OS".to_string(), EnvironmentValue::String(env::consts::OS.to_string()))?;
+        parser.add_setting(
+            "exe_suffix".to_string(),
+            EnvironmentValue::String(
+                if cfg!(target_os = "windows") {
+                    ".exe"
+                } else {
+                    ""
+                }
+                .to_string(),
+            ),
+        )?;
+        parser.add_setting(
+            "OS".to_string(),
+            EnvironmentValue::String(env::consts::OS.to_string()),
+        )?;
 
-        parser.add_list(
-            "commands".to_string(),
-            "The command(s) to execute".to_string(),
-            EnvironmentValue::Vec(Vec::new()),
-        )?
+        parser
+            .add_list(
+                "commands".to_string(),
+                "The command(s) to execute".to_string(),
+                EnvironmentValue::Vec(Vec::new()),
+            )?
             .set_required();
 
-        parser.add_flag(
-            "force".to_string(),
-            "Force execution of the commands".to_string(),
-            EnvironmentValue::Bool(false),
-        )?
+        parser
+            .add_flag(
+                "force".to_string(),
+                "Force execution of the commands".to_string(),
+                EnvironmentValue::Bool(false),
+            )?
             .set_long("force")
             .set_short("f");
 
@@ -86,29 +116,34 @@ impl Application {
             .set_long("why")
             .set_short("w");
 
-        parser.add_flag(
-            "color".to_string(),
-            "Whether to use colors in the output. Defaults to automatic.".to_string(),
-            EnvironmentValue::None,
-        )?
+        parser
+            .add_flag(
+                "color".to_string(),
+                "Whether to use colors in the output. Defaults to automatic.".to_string(),
+                EnvironmentValue::None,
+            )?
             .set_category("Options controlling logging")
             .set_long("color")
             .set_short("c");
 
-        parser.add_list(
-            "target".to_string(),
-            "Target to be built.\nUse this option multiple times to build several targets.".to_string(),
-            EnvironmentValue::None,
-        )?
+        parser
+            .add_list(
+                "target".to_string(),
+                "Target to be built.\nUse this option multiple times to build several targets."
+                    .to_string(),
+                EnvironmentValue::None,
+            )?
             .set_category("Options controlling task execution")
             .set_long("target")
             .set_short("t");
 
-        parser.add_list(
-            "files".to_string(),
-            "Files to be built.\nUse this option multiple times to build several files.".to_string(),
-            EnvironmentValue::None,
-        )?
+        parser
+            .add_list(
+                "files".to_string(),
+                "Files to be built.\nUse this option multiple times to build several files."
+                    .to_string(),
+                EnvironmentValue::None,
+            )?
             .set_category("Options controlling task execution")
             .set_long("file");
 
@@ -137,7 +172,6 @@ impl Application {
             .set_long("jobs")
             .set_short("j")
             .set_int_type();
-
 
         let parser_ptr = Arc::new(Mutex::new(parser));
         let options_context = Options::from_parser(parser_ptr.clone());
@@ -199,13 +233,18 @@ impl Application {
         let out_dir = PathBuf::from(&out_dir_string);
         let generators = options.get_raw("target").as_vec();
         let out_node = Node::from(&out_dir);
-        let files = options.get_raw("files").as_vec().into_iter().map(|x| out_node.make_node(&PathBuf::from(x))).collect();
+        let files = options
+            .get_raw("files")
+            .as_vec()
+            .into_iter()
+            .map(|x| out_node.make_node(&PathBuf::from(x)))
+            .collect();
         let thread_count = options.get_raw("job_count").as_int();
         let cpu_count = std::thread::available_parallelism()?.get();
         let thread_count = match thread_count {
             n if n > 0 => n as usize,
             n if (-n) as usize >= cpu_count => 1,
-            n => cpu_count - (-n as usize)
+            n => cpu_count - (-n as usize),
         };
         let progress_mode = options.get_raw("progress").as_int() as u32;
 
@@ -225,7 +264,6 @@ impl Application {
             progress_mode,
         })
     }
-
 
     fn run_with_deps<Iter>(
         &mut self,
@@ -248,14 +286,18 @@ impl Application {
             let next_item = path.next();
             if !current_command.is_up_to_date() {
                 let options = if run_implicit || next_item.is_some() {
-                    current_command.get_run_options().map(|options| {
-                        let mut options = options.clone();
-                        self.command_line
-                            .lock()
-                            .unwrap()
-                            .parse_command_line_into(&mut options);
-                        options
-                    }).or_else(|| Some(self.options.clone())).unwrap()
+                    current_command
+                        .get_run_options()
+                        .map(|options| {
+                            let mut options = options.clone();
+                            self.command_line
+                                .lock()
+                                .unwrap()
+                                .parse_command_line_into(&mut options);
+                            options
+                        })
+                        .or_else(|| Some(self.options.clone()))
+                        .unwrap()
                 } else {
                     self.options.clone()
                 };
@@ -265,7 +307,8 @@ impl Application {
                         format!(
                             "command `{}`: running lua scripts forced by command line option",
                             current_command.spec.name,
-                        ).as_str(),
+                        )
+                        .as_str(),
                     );
 
                     logger = current_command.run(
@@ -283,9 +326,9 @@ impl Application {
                             logger.why(
                                 format!(
                                     "command `{}`: running lua scripts because {}",
-                                    current_command.spec.name,
-                                    reason
-                                ).as_str(),
+                                    current_command.spec.name, reason
+                                )
+                                .as_str(),
                             );
 
                             logger = current_command.run(
@@ -299,7 +342,13 @@ impl Application {
                         }
 
                         Ok(_) => {
-                            logger.why(format!("command `{}`: lua files are up-to-date", current_command.spec.name).as_str());
+                            logger.why(
+                                format!(
+                                    "command `{}`: lua files are up-to-date",
+                                    current_command.spec.name
+                                )
+                                .as_str(),
+                            );
                         }
                     }
                 }
@@ -309,10 +358,12 @@ impl Application {
                 for group in &current_command.output.as_ref().unwrap().groups {
                     match &group.1 {
                         GroupStatus::Enabled => groups.push(group.0.clone()),
-                        GroupStatus::Conditional(condition) => if self.options.get_raw(condition).as_bool() {
-                            use_default = false;
-                            groups.push(group.0.clone())
-                        },
+                        GroupStatus::Conditional(condition) => {
+                            if self.options.get_raw(condition).as_bool() {
+                                use_default = false;
+                                groups.push(group.0.clone())
+                            }
+                        }
                         _ => (),
                     }
                 }
@@ -328,7 +379,13 @@ impl Application {
                     generators: &self.generators,
                     files: &self.files,
                 };
-                current_command.run_tasks(&self.out_dir, targets, self.thread_count, &mut logger, self.progress_mode)?;
+                current_command.run_tasks(
+                    &self.out_dir,
+                    targets,
+                    self.thread_count,
+                    &mut logger,
+                    self.progress_mode,
+                )?;
             }
 
             match next_item {
@@ -345,7 +402,11 @@ impl Application {
                         }
                         Err(format!("command '{}' not defined", cmd_name).into())
                     } else {
-                        Err(format!("command '{}' did not generate any output", current_command.spec.name).into())
+                        Err(format!(
+                            "command '{}' did not generate any output",
+                            current_command.spec.name
+                        )
+                        .into())
                     }
                 }
             }
@@ -367,7 +428,7 @@ impl Application {
             if let Some(ref_path) = self.command_list.get(&command) {
                 assert!(ref_path[0].eq("init"));
                 command_path = ref_path.clone();
-            } else if command.as_str()[0..2].eq("re") {
+            } else if command.len() > 2 && command.as_str()[0..2].eq("re") {
                 if let Some(ref_path) = self.command_list.get(&command[2..]) {
                     assert!(ref_path[0].eq("init"));
                     command_path = ref_path.clone();

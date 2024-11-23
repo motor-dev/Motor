@@ -1,6 +1,6 @@
 use super::CommandLineParser;
-use clap::ArgAction;
 use crate::environment::{Environment, EnvironmentValue};
+use clap::ArgAction;
 
 pub(crate) struct Interface {
     long: Option<String>,
@@ -81,7 +81,7 @@ impl CommandLineParser {
                     "'{}': an option is already registered with this name",
                     &name
                 )
-                    .to_string(),
+                .to_string(),
             ))
         } else {
             self.options.push(Argument {
@@ -106,7 +106,7 @@ impl CommandLineParser {
                     "'{}': an option is already registered with this name",
                     &name
                 )
-                    .to_string(),
+                .to_string(),
             ))
         } else {
             self.options.push(Argument {
@@ -133,12 +133,7 @@ impl CommandLineParser {
         help: String,
         default: EnvironmentValue,
     ) -> mlua::Result<&mut Interface> {
-        self.add_option(
-            name,
-            help,
-            default,
-            ArgAction::SetTrue,
-        )
+        self.add_option(name, help, default, ArgAction::SetTrue)
     }
 
     pub(crate) fn add_value(
@@ -147,12 +142,7 @@ impl CommandLineParser {
         help: String,
         default: EnvironmentValue,
     ) -> mlua::Result<&mut Interface> {
-        self.add_option(
-            name,
-            help,
-            default,
-            ArgAction::Set,
-        )
+        self.add_option(name, help, default, ArgAction::Set)
     }
 
     pub(crate) fn add_count(
@@ -161,12 +151,7 @@ impl CommandLineParser {
         help: String,
         default: EnvironmentValue,
     ) -> mlua::Result<&mut Interface> {
-        self.add_option(
-            name,
-            help,
-            default,
-            ArgAction::Count,
-        )
+        self.add_option(name, help, default, ArgAction::Count)
     }
 
     pub(crate) fn add_choice(
@@ -176,12 +161,9 @@ impl CommandLineParser {
         choice_list: &[String],
         default: EnvironmentValue,
     ) -> mlua::Result<&mut Interface> {
-        Ok(self.add_option(
-            name,
-            help,
-            default,
-            ArgAction::Set,
-        )?.set_choice(choice_list))
+        Ok(self
+            .add_option(name, help, default, ArgAction::Set)?
+            .set_choice(choice_list))
     }
 
     pub(crate) fn add_list(
@@ -190,12 +172,7 @@ impl CommandLineParser {
         help: String,
         default: EnvironmentValue,
     ) -> mlua::Result<&mut Interface> {
-        self.add_option(
-            name,
-            help,
-            default,
-            ArgAction::Append,
-        )
+        self.add_option(name, help, default, ArgAction::Append)
     }
 
     pub(crate) fn parse_command_line(&self) -> Environment {
@@ -208,7 +185,10 @@ impl CommandLineParser {
     }
 
     pub(crate) fn parse_command_line_into(&self, env: &mut Environment) {
-        use clap::{Arg, Command, builder::PossibleValuesParser, builder::PossibleValue, parser::ValueSource};
+        use clap::{
+            builder::PossibleValue, builder::PossibleValuesParser, parser::ValueSource, Arg,
+            Command,
+        };
         let mut cmd = Command::new("boltbuild");
         for option in &self.options {
             if let Some(interface) = &option.interface {
@@ -226,7 +206,12 @@ impl CommandLineParser {
                     arg = arg.value_parser(clap::value_parser!(i64));
                 }
                 if let Some(choice) = &interface.choice_list {
-                    arg = arg.value_parser(PossibleValuesParser::new(choice.iter().map(PossibleValue::new).collect::<Vec<PossibleValue>>()));
+                    arg = arg.value_parser(PossibleValuesParser::new(
+                        choice
+                            .iter()
+                            .map(PossibleValue::new)
+                            .collect::<Vec<PossibleValue>>(),
+                    ));
                 }
                 arg = arg.help(&interface.help);
                 arg = arg.action(interface.action.clone());
@@ -246,26 +231,28 @@ impl CommandLineParser {
                                     option.name.as_str(),
                                     EnvironmentValue::Bool(matches.get_flag(option.name.as_str())),
                                 ),
-                                ArgAction::Set => if interface.int_type {
-                                    env.set(
-                                        option.name.as_str(),
-                                        EnvironmentValue::Integer(
-                                            *matches
-                                                .get_one::<i64>(option.name.as_str())
-                                                .unwrap(),
-                                        ),
-                                    )
-                                } else {
-                                    env.set(
-                                        option.name.as_str(),
-                                        EnvironmentValue::String(
-                                            matches
-                                                .get_one::<String>(option.name.as_str())
-                                                .unwrap()
-                                                .to_string(),
-                                        ),
-                                    )
-                                },
+                                ArgAction::Set => {
+                                    if interface.int_type {
+                                        env.set(
+                                            option.name.as_str(),
+                                            EnvironmentValue::Integer(
+                                                *matches
+                                                    .get_one::<i64>(option.name.as_str())
+                                                    .unwrap(),
+                                            ),
+                                        )
+                                    } else {
+                                        env.set(
+                                            option.name.as_str(),
+                                            EnvironmentValue::String(
+                                                matches
+                                                    .get_one::<String>(option.name.as_str())
+                                                    .unwrap()
+                                                    .to_string(),
+                                            ),
+                                        )
+                                    }
+                                }
                                 ArgAction::Count => env.set(
                                     option.name.as_str(),
                                     EnvironmentValue::Integer(
@@ -274,7 +261,9 @@ impl CommandLineParser {
                                 ),
                                 ArgAction::Append => {
                                     let mut vec = Vec::<EnvironmentValue>::new();
-                                    for m in matches.get_many::<String>(option.name.as_str()).unwrap() {
+                                    for m in
+                                        matches.get_many::<String>(option.name.as_str()).unwrap()
+                                    {
                                         vec.push(EnvironmentValue::String(m.clone()));
                                     }
                                     env.set(option.name.as_str(), EnvironmentValue::Vec(vec))

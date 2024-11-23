@@ -28,7 +28,7 @@ local function _run_pkg_config(pkg_name, lib_paths, seen)
 
     local config_file
     for _, p in ipairs(lib_paths) do
-        config_file = context.path:make_node(p .. '/pkgconfig/' .. pkg_name .. '.pc')
+        config_file = p:make_node('pkgconfig/' .. pkg_name .. '.pc')
         if config_file:is_file() then
             break
         end

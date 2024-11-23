@@ -1,10 +1,9 @@
 use super::{Environment, EnvironmentValue, ReadWriteEnvironment};
 use crate::node::Node;
-
+use mlua::prelude::LuaError;
+use mlua::{IntoLua, Lua, Result, Value};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-use mlua::{Lua, IntoLua, Result, Value};
-use mlua::prelude::LuaError;
 
 pub(super) enum EnvironmentParent {
     None,
@@ -14,18 +13,12 @@ pub(super) enum EnvironmentParent {
 }
 
 impl Environment {
-    pub(crate) fn get(
-        &mut self,
-        key: &str,
-    ) -> Option<EnvironmentValue> {
+    pub(crate) fn get(&mut self, key: &str) -> Option<EnvironmentValue> {
         self.used_keys.insert(key.to_string());
         self.values.get(key).cloned()
     }
 
-    pub(crate) fn get_into_list(
-        &mut self,
-        key: &str,
-    ) -> Vec<EnvironmentValue> {
+    pub(crate) fn get_into_list(&mut self, key: &str) -> Vec<EnvironmentValue> {
         self.used_keys.insert(key.to_string());
         match self.values.get(key) {
             None => Vec::new(),
@@ -33,11 +26,7 @@ impl Environment {
         }
     }
 
-    pub(super) fn get_into_lua(
-        &mut self,
-        lua: &Lua,
-        key: &str,
-    ) -> Result<Value> {
+    pub(super) fn get_into_lua(&mut self, lua: &Lua, key: &str) -> Result<Value> {
         self.used_keys.insert(key.to_string());
         match self.values.get(key) {
             None => Ok(mlua::Nil),
@@ -58,37 +47,27 @@ impl Environment {
 }
 
 impl ReadWriteEnvironment {
-    pub(crate) fn get(
-        &mut self,
-        key: &str,
-    ) -> EnvironmentValue {
+    pub(crate) fn get(&mut self, key: &str) -> EnvironmentValue {
         self.environment.used_keys.insert(key.to_string());
         match self.environment.values.get(key) {
             None => match &self.parent {
                 EnvironmentParent::None => EnvironmentValue::None,
                 EnvironmentParent::Current(e)
                 | EnvironmentParent::Parent(e)
-                | EnvironmentParent::Leaf(e) => {
-                    e.lock().unwrap().get(key)
-                }
+                | EnvironmentParent::Leaf(e) => e.lock().unwrap().get(key),
             },
             Some(v) => v.clone(),
         }
     }
 
-    pub(crate) fn get_into_list(
-        &mut self,
-        key: &str,
-    ) -> Vec<EnvironmentValue> {
+    pub(crate) fn get_into_list(&mut self, key: &str) -> Vec<EnvironmentValue> {
         self.environment.used_keys.insert(key.to_string());
         match self.environment.values.get(key) {
             None => match &self.parent {
                 EnvironmentParent::None => Vec::new(),
                 EnvironmentParent::Current(e)
                 | EnvironmentParent::Parent(e)
-                | EnvironmentParent::Leaf(e) => {
-                    e.lock().unwrap().get_into_list(key)
-                }
+                | EnvironmentParent::Leaf(e) => e.lock().unwrap().get_into_list(key),
             },
             Some(v) => v.clone().into_list(),
         }
@@ -104,7 +83,7 @@ impl ReadWriteEnvironment {
                 let index = env.lock().unwrap().index;
                 self.parent = EnvironmentParent::Leaf(parents[index].clone());
             }
-            _ => ()
+            _ => (),
         }
     }
 
@@ -119,9 +98,7 @@ impl ReadWriteEnvironment {
                 EnvironmentParent::None => Ok(mlua::Nil),
                 EnvironmentParent::Current(e)
                 | EnvironmentParent::Parent(e)
-                | EnvironmentParent::Leaf(e) => {
-                    e.lock().unwrap().get_into_lua(lua, key)
-                }
+                | EnvironmentParent::Leaf(e) => e.lock().unwrap().get_into_lua(lua, key),
             },
             Some(v) => v.into_lua(lua),
         }
@@ -133,9 +110,7 @@ impl ReadWriteEnvironment {
                 EnvironmentParent::None => EnvironmentValue::None,
                 EnvironmentParent::Current(e)
                 | EnvironmentParent::Parent(e)
-                | EnvironmentParent::Leaf(e) => {
-                    e.lock().unwrap().get_raw(key)
-                }
+                | EnvironmentParent::Leaf(e) => e.lock().unwrap().get_raw(key),
             },
             Some(v) => v.clone(),
         }
@@ -143,7 +118,9 @@ impl ReadWriteEnvironment {
 
     pub(crate) fn derive(from: &Arc<Mutex<ReadWriteEnvironment>>, index: usize) -> Result<Self> {
         if let EnvironmentParent::Leaf(_) = &from.lock().unwrap().parent {
-            Err(LuaError::RuntimeError("unable to derive from a task environment".to_string()))
+            Err(LuaError::RuntimeError(
+                "unable to derive from a task environment".to_string(),
+            ))
         } else {
             Ok(Self {
                 parent: EnvironmentParent::Current(from.clone()),
@@ -155,7 +132,9 @@ impl ReadWriteEnvironment {
 
     pub(crate) fn derive_leaf(from: &Arc<Mutex<ReadWriteEnvironment>>) -> Result<Self> {
         if let EnvironmentParent::Leaf(_) = &from.lock().unwrap().parent {
-            Err(LuaError::RuntimeError("unable to derive from a task environment".to_string()))
+            Err(LuaError::RuntimeError(
+                "unable to derive from a task environment".to_string(),
+            ))
         } else {
             Ok(Self {
                 parent: EnvironmentParent::Leaf(from.clone()),
@@ -165,8 +144,14 @@ impl ReadWriteEnvironment {
         }
     }
 
-    pub(crate) fn derive_from_parent(from: &Arc<Mutex<ReadWriteEnvironment>>, index: usize) -> Self {
-        assert!(!matches!(from.lock().unwrap().parent, EnvironmentParent::Leaf(_)));
+    pub(crate) fn derive_from_parent(
+        from: &Arc<Mutex<ReadWriteEnvironment>>,
+        index: usize,
+    ) -> Self {
+        assert!(!matches!(
+            from.lock().unwrap().parent,
+            EnvironmentParent::Leaf(_)
+        ));
         Self {
             parent: EnvironmentParent::Parent(from.clone()),
             index,
@@ -311,7 +296,9 @@ impl EnvironmentValue {
         }
     }
 
-    pub(crate) fn is_none(&self) -> bool { matches!(&self, EnvironmentValue::None) }
+    pub(crate) fn is_none(&self) -> bool {
+        matches!(&self, EnvironmentValue::None)
+    }
     pub(crate) fn is_list(&self) -> bool {
         matches!(&self, EnvironmentValue::Vec(_))
     }

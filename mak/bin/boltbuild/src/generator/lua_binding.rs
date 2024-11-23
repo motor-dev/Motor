@@ -1,14 +1,13 @@
-use std::ops::Deref;
-use std::sync::{Arc, Mutex};
 use super::Generator;
-
-use mlua::{AnyUserData, MetaMethod, UserData, UserDataFields, UserDataMethods, Value, FromLua};
-use mlua::prelude::{LuaError, LuaValue};
 use crate::command::SerializedHash;
 use crate::context::Context;
 use crate::environment::ReadWriteEnvironment;
 use crate::node::Node;
 use crate::task::{Task, TaskHandle};
+use mlua::prelude::{LuaError, LuaValue};
+use mlua::{AnyUserData, FromLua, MetaMethod, UserData, UserDataFields, UserDataMethods, Value};
+use std::ops::Deref;
+use std::sync::{Arc, Mutex};
 
 impl UserData for Generator {
     fn add_fields<F: UserDataFields<Self>>(fields: &mut F) {
@@ -19,24 +18,36 @@ impl UserData for Generator {
     }
 
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_meta_function_mut(MetaMethod::NewIndex, |_lua, (context, name, value): (AnyUserData, String, LuaValue)| {
-            context.set_named_user_value(name.as_str(), value)
-        });
+        methods.add_meta_function_mut(
+            MetaMethod::NewIndex,
+            |_lua, (context, name, value): (AnyUserData, String, LuaValue)| {
+                context.set_named_user_value(name.as_str(), value)
+            },
+        );
 
-        methods.add_meta_function_mut(MetaMethod::Index, |_lua, (generator, name): (AnyUserData, String)| {
-            let result = generator.named_user_value::<LuaValue>(name.as_str())?;
-            if result.is_nil() {
-                Err(LuaError::RuntimeError(format!("Context does not have a user value `{}`", name)))
-            } else {
-                Ok(result)
-            }
-        });
+        methods.add_meta_function_mut(
+            MetaMethod::Index,
+            |_lua, (generator, name): (AnyUserData, String)| {
+                let result = generator.named_user_value::<LuaValue>(name.as_str())?;
+                if result.is_nil() {
+                    Err(LuaError::RuntimeError(format!(
+                        "Context does not have a user value `{}`",
+                        name
+                    )))
+                } else {
+                    Ok(result)
+                }
+            },
+        );
 
-        methods.add_function_mut("has_property", |_lua, (generator, name): (AnyUserData, String)| {
-            let result = generator.named_user_value::<LuaValue>(name.as_str())?;
-            Ok(!result.is_nil())
-        });
-        
+        methods.add_function_mut(
+            "has_property",
+            |_lua, (generator, name): (AnyUserData, String)| {
+                let result = generator.named_user_value::<LuaValue>(name.as_str())?;
+                Ok(!result.is_nil())
+            },
+        );
+
         methods.add_function_mut("declare_task", |lua, (generator, driver, inputs, outputs, env): (AnyUserData, String, Value, Value, Option<AnyUserData>)| {
             let inputs = match &inputs {
                 Value::Nil => Vec::new(),

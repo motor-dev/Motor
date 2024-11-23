@@ -2,16 +2,16 @@
 local context = ...
 
 context:declare_group('metagen', true)
-context:command_driver('metagen',
+context:lua_driver('metagen',
         'magenta',
-        '${PYTHON} ${METAGEN} -x c++ --std c++20 -D ${METAGEN_MACROS} --module ${METAGEN_PLUGIN} --root ${METAGEN_ROOT_NAMESPACE} --api ${METAGEN_API} --tmp ${METAGEN_TMP} ${SRC} ${METAGEN_RELATIVE_INPUT} ${METAGEN_RELATIVE_OUTPUT} ${TGT}',
+        context.path:make_node('drivers/metagen.lua'),
         { 'c', 'cxx' })
 
 pcall(function()
-    context:popen(context.env.PYTHON:abspath() .. ' ' .. context.path:make_node('../../lib/pyxx/__main__.py'):abspath() .. ' -x c++ -t ' .. context.bld_dir:abs_path() .. ' -')
+    context:popen({ context.env.PYTHON, context.path:make_node('../../lib/pyxx/__main__.py'), '-x', 'c++', '--std', 'c++20', '-t', context.bld_dir:abs_path(), '-' })
 end)
 
-context:feature('metagen', 'metagen', function(generator)
+context:feature('metagen ', 'metagen ', function(generator)
     for _, source_path in ipairs(generator.source) do
         for _, source_node in ipairs(context:search(source_path, '**/*.meta.hh')) do
             local target_node = context.bld_dir
@@ -23,12 +23,10 @@ context:feature('metagen', 'metagen', function(generator)
             local target_node_typeid_cc = target_node_cc:change_ext('typeid.cc')
             local target_node_doc = target_node_cc:change_ext('doc')
             local target_node_ns = target_node_cc:change_ext('ns')
-            target_node_cc.parent:mkdir()
 
             local target_node_factory_hh_dir = target_node:make_node(source_path:name())
             local target_node_factory_hh = target_node_factory_hh_dir:make_node(source_node:path_from(source_path))
             target_node_factory_hh = target_node_factory_hh:change_ext('factory.hh')
-            target_node_factory_hh.parent:mkdir()
 
             local task = generator:declare_task('metagen', { source_node }, { target_node_cc, target_node_typeid_cc, target_node_factory_hh, target_node_doc, target_node_ns })
             task.env.METAGEN_RELATIVE_INPUT = source_node:path_from(source_path)
@@ -43,7 +41,7 @@ context:feature('metagen', 'metagen', function(generator)
     end
 end)
 
-context:feature('c,cxx', 'process_out_source', function(generator)
+context:feature('c, cxx', 'process_out_source', function(generator)
     local metagen = context:get_generator_by_name(generator.name .. '.metagen')
     if metagen then
         ---@param source_node Node

@@ -323,12 +323,12 @@ class Class(MetaObject):
     def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO, api: str) -> None:
         out_hh.write(
             '\nnamespace Meta\n'
-            '{\n\n'
-            'MOTOR_DECLARE_CLASS_ID(%s, ::%s)\n\n'
+            '{\n'
+            'MOTOR_DECLARE_CLASS_ID(%s, ::%s)\n'
             '}\n\n' % (api, '::'.join(namespace)))
         out_cc.write(
             '\nnamespace Motor { namespace Meta\n'
-            '{\n\n'
+            '{\n'
             'motor_api(%(api)s) istring ClassID<::%(cpp_name)s>::name()\n'
             '{\n'
             '    static istring s_name("%(name)s");\n'

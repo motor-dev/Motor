@@ -1,25 +1,25 @@
-mod operations;
+mod command;
+mod driver;
+mod environment;
+mod feature;
+mod generator;
+mod log;
 mod lua_binding;
+mod node;
+mod operations;
 mod subprocess;
 mod task;
-mod log;
-mod driver;
-mod generator;
-mod command;
-mod environment;
-mod node;
-mod feature;
 
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
-use std::path::PathBuf;
-use include_dir::{Dir, include_dir};
-use crate::command::{CommandSpec, CommandOutput};
+use crate::command::{CommandOutput, CommandSpec};
 use crate::environment::ReadWriteEnvironment;
 use crate::log::Logger;
 use crate::node::Node;
 use crate::options::Options;
 use crate::task::Task;
+use include_dir::{include_dir, Dir};
+use std::collections::HashMap;
+use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
 
 pub(crate) static TOOLS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/tools");
 

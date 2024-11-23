@@ -1,13 +1,19 @@
-use std::ops::Deref;
-use std::sync::{Arc, Mutex};
-use mlua::{AnyUserData, Lua};
-use mlua::prelude::{LuaError, LuaFunction, LuaResult, LuaValue};
 use crate::context::Context;
 use crate::environment::ReadWriteEnvironment;
+use mlua::prelude::{LuaError, LuaFunction, LuaResult, LuaValue};
+use mlua::{AnyUserData, Lua};
+use std::ops::Deref;
+use std::sync::{Arc, Mutex};
 
-pub(super) fn derive(_lua: &Lua, this: &mut Context, env: Option<AnyUserData>) -> LuaResult<Arc<Mutex<ReadWriteEnvironment>>> {
+pub(super) fn derive(
+    _lua: &Lua,
+    this: &mut Context,
+    env: Option<AnyUserData>,
+) -> LuaResult<Arc<Mutex<ReadWriteEnvironment>>> {
     let from_env = if let Some(env) = env {
-        env.borrow::<Arc<Mutex<ReadWriteEnvironment>>>()?.deref().clone()
+        env.borrow::<Arc<Mutex<ReadWriteEnvironment>>>()?
+            .deref()
+            .clone()
     } else {
         this.environment.clone()
     };
@@ -19,7 +25,10 @@ pub(super) fn derive(_lua: &Lua, this: &mut Context, env: Option<AnyUserData>) -
     Ok(new_env)
 }
 
-pub(super) fn with<'lua>(_lua: &Lua, (context, env, function): (AnyUserData, AnyUserData, LuaFunction)) -> LuaResult<LuaValue> {
+pub(super) fn with<'lua>(
+    _lua: &Lua,
+    (context, env, function): (AnyUserData, AnyUserData, LuaFunction),
+) -> LuaResult<LuaValue> {
     let prev_env = context.borrow_mut_scoped::<Context, _>(|context| {
         let env = env.borrow_mut::<Arc<Mutex<ReadWriteEnvironment>>>()?;
         let prev_env = context.environment.clone();
