@@ -73,11 +73,11 @@ function Bolt.Clang.detect_clang_targets(clang, c_flags, cxx_flags)
         if line:find("#include <...>") then
             search_paths = true
         elseif line:find("ignoring nonexistent directory") then
-            paths[#paths + 1] = context.path:make_node(line:sub(33, -2))
+            table.insert(paths, context.path:make_node(line:sub(33, -2)))
         elseif search_paths and line:find("End of search list") then
             break
         elseif search_paths then
-            paths[#paths + 1] = context.path:make_node(line)
+            table.insert(paths, context.path:make_node(line))
         end
     end
 
@@ -110,7 +110,7 @@ function Bolt.Clang.detect_clang_targets(clang, c_flags, cxx_flags)
                                 context.env.CC = { clang }
                                 Bolt.Clang.load_clang_c(c_target_flags, { '-target', triple })
                                 Bolt.Clang.load_clang_cxx(cxx_target_flags, { '-target', triple })
-                                result[#result + 1] = context.env
+                                table.insert(result, context.env)
                             end)
                         end)
                     end
@@ -137,7 +137,7 @@ function Bolt.Clang.discover(c_flags, cxx_flags)
                         seen[absolute_path] = true
                         for _, env in ipairs(Bolt.Clang.detect_clang_targets(node, c_flags, cxx_flags)) do
                             env.CLANG_VERSION = version
-                            result[#result + 1] = env
+                            table.insert(result, env)
                         end
                     end
                 end

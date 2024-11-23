@@ -11,7 +11,7 @@ Motor = {
 }
 
 function Motor.add_compiler(env)
-    Motor.compilers[1 + #Motor.compilers] = env
+    table.insert(Motor.compilers, env)
 end
 
 function Motor.test_compiler(env, code)
@@ -20,15 +20,15 @@ function Motor.test_compiler(env, code)
     local command = {}
     src:write(code)
     for _, arg in ipairs(env.CXX) do
-        command[1 + #command] = arg
+        table.insert(command, arg)
     end
     for _, arg in ipairs(env.CXXFLAGS) do
-        command[1 + #command] = arg
+        table.insert(command, arg)
     end
-    command[1 + #command] = src:abs_path()
+    table.insert(command, src:abs_path())
     -- TODO: properly parse the output flag
-    command[1 + #command] = '-o'
-    command[1 + #command] = target:abs_path()
+    table.insert(command, '-o')
+    table.insert(command, target:abs_path())
 
     local result = pcall(function()
         return context:popen(command):communicate()
@@ -63,10 +63,10 @@ context:recurse('host/' .. context.settings.OS .. '.lua')
 local compilers = {}
 local platforms = {}
 for _, c in ipairs(context:search(context.path, 'compiler/*.lua')) do
-    compilers[1 + #compilers] = c:basename()
+    table.insert(compilers, c:basename())
 end
 for _, p in ipairs(context:search(context.path, 'target/*.lua')) do
-    platforms[1 + #platforms] = p:basename()
+    table.insert(platforms, p:basename())
 end
 compilers = --[[---@type string[] ]] context.settings.compiler or compilers
 platforms = --[[---@type string[] ]] context.settings.platform or platforms

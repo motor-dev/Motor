@@ -10,10 +10,10 @@ function GnuCompiler.get_specs(command, language)
     local env = context.env
 
     local include_command = { table.unpack(command), table.unpack(env[language .. 'FLAGS']) }
-    include_command[1 + #include_command] = '-v'
-    include_command[1 + #include_command] = '-dM'
-    include_command[1 + #include_command] = '-E'
-    include_command[1 + #include_command] = '-'
+    table.insert(include_command, '-v')
+    table.insert(include_command, '-dM')
+    table.insert(include_command, '-E')
+    table.insert(include_command, '-')
 
     local handle = context:popen(include_command)
     local success, out, err = handle:communicate()
@@ -39,7 +39,7 @@ function GnuCompiler.get_specs(command, language)
                 search_paths = false
             else
                 local path = context.path:make_node(string.trim(line))
-                includes[#includes + 1] = path
+                table.insert(includes, path)
             end
         else
             local s, _, name, value = line:find('%s*#%s*define%s+([%w_]+)%s*(.*)')
