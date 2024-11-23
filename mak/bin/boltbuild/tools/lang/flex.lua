@@ -33,5 +33,5 @@ context:extension('l,ll', function(generator, node, path)
         out_node = out_node:change_ext('c')
     end
     generator:declare_task('flex', { node }, { out_node })
-    generator.source[1 + #generator.source] = { directory, out_node }
+    table.insert(generator.source, { directory, out_node })
 end)

@@ -35,5 +35,5 @@ context:extension('y,yy', function(generator, node, path)
         header = out_node:change_ext('h')
     end
     generator:declare_task('bison', { node }, { out_node, header })
-    generator.source[1 + #generator.source] = { directory, out_node }
+    table.insert(generator.source, { directory, out_node })
 end)

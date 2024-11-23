@@ -4,7 +4,7 @@ local compilers = {}
 
 for _, env in ipairs(Motor.compilers) do
     if env.TARGET:find('linux%-gnu') or env.TARGET:find('linux$') then
-        compilers[1 + #compilers] = env
+        table.insert(compilers, env)
     end
 end
 

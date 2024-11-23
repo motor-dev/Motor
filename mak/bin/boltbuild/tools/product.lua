@@ -105,10 +105,10 @@ end
 function Bolt.module(name, link_type, languages, group)
     local features = { }
     for _, l in ipairs(languages) do
-        features[1 + #features] = l
+        table.insert(features, l)
     end
     if link_type then
-        features[1 + #features] = link_type
+        table.insert(features, link_type)
     end
     local g = context:declare_generator(name, features, context.env, group)
 

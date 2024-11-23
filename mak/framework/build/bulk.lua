@@ -22,7 +22,7 @@ local function make_bulk_task(generator, counter, extension)
     local target_node = master_node:make_node(generator.name)
     target_node = target_node:make_node('src')
     target_node = target_node:make_node(extension .. '-bulk-' .. counter .. '.' .. extension)
-    generator.source[1 + #generator.source] = { target_node.parent, target_node }
+    table.insert(generator.source, { target_node.parent, target_node })
     return generator:declare_task('bulk', { }, { target_node })
 end
 
@@ -50,7 +50,7 @@ local function process_source(generator, source, path, counters, bulk_task_c, bu
         end
         bulk_task_cxx.env:append('FILES', source)
     else
-        generator.source[1 + #generator.source] = { path, source }
+        table.insert(generator.source, { path, source })
     end
 
     return bulk_task_c, bulk_task_cxx

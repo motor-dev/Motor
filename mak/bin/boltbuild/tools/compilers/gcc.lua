@@ -10,7 +10,7 @@ Bolt.Gcc = {}
 function Bolt.Gcc.load_gcc_c(c_flags)
     local env = context.env
 
-    env.CFLAGS = {'-x', 'c', '-c', '-fPIC'}
+    env.CFLAGS = { '-x', 'c', '-c', '-fPIC' }
     env:append('CFLAGS', c_flags)
     env.C_COMPILER_NAME = 'gcc'
     env.C_TGT_F = '-o'
@@ -53,7 +53,7 @@ function Bolt.Gcc.load_gcc_cxx(cxx_flags)
         context:error('Could not find a valid GCC c++ compiler')
     end
 
-    env.CXXFLAGS = {'-x', 'c++', '-c', '-fPIC'}
+    env.CXXFLAGS = { '-x', 'c++', '-c', '-fPIC' }
     env:append('CXXFLAGS', cxx_flags)
     env.CXX_COMPILER_NAME = 'gcc'
     env.CXX_TGT_F = '-o'
@@ -66,7 +66,7 @@ function Bolt.Gcc.load_gcc_cxx(cxx_flags)
     env.LINK_TGT_F = '-o'
     env.LINK_LIB_F = '-l'
     env.LINK_LIBPATH_F = '-L'
-    env.LINKFLAGS_shlib = {'-shared', '-Wl,-z,defs'}
+    env.LINKFLAGS_shlib = { '-shared', '-Wl,-z,defs' }
     env.LIBS = { 'stdc++' }
 
     local defines = GnuCompiler.get_specs(env.CXX, "CXX")
@@ -114,7 +114,7 @@ function Bolt.Gcc.discover(c_flags, cxx_flags)
                                 context.env.GCC_VERSION = version
                                 Bolt.Gcc.load_gcc_c(c_flags)
                                 Bolt.Gcc.load_gcc_cxx(cxx_flags)
-                                result[#result + 1] = context.env
+                                table.insert(result, context.env)
                             end)
                         end) then
                             for _, multilib in ipairs(context:search(crtbegin.parent, '*/crtbegin.o')) do
@@ -136,7 +136,7 @@ function Bolt.Gcc.discover(c_flags, cxx_flags)
                                         context.env.GCC_VERSION = version
                                         Bolt.Gcc.load_gcc_c(multilib_c_flags)
                                         Bolt.Gcc.load_gcc_cxx(multilib_cxx_flags)
-                                        result[#result + 1] = context.env
+                                        table.insert(result, context.env)
                                     end)
                                 end)
                             end

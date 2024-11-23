@@ -35,8 +35,8 @@ context:feature('metagen ', 'metagen ', function(generator)
             task.env.METAGEN_PLUGIN = 'motor'
             task.env.METAGEN_API = generator.api
 
-            generator.out_source[1 + #generator.out_source] = { target_node_src, target_node_cc }
-            generator.out_source[1 + #generator.out_source] = { target_node_src, target_node_typeid_cc }
+            table.insert(generator.out_source, { target_node_src, target_node_cc })
+            table.insert(generator.out_source, { target_node_src, target_node_typeid_cc })
         end
     end
 end)
