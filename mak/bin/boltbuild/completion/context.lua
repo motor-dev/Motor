@@ -12,5 +12,4 @@
 ---@field src_dir Node The source directory for this command or build.
 ---@field bld_dir Node The build directory for storing output.
 ---@field settings Settings Command-line options and settings shared across contexts.
----@field [string] any Used to support dynamic indexing within the context object.
 Context = {}
