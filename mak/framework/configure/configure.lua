@@ -3,8 +3,8 @@ local context = ...
 
 context:recurse('metagen.lua')
 
-Bolt.Flex.find_flex()
-Bolt.Bison.find_bison()
+BoltFlex.find_flex()
+BoltBison.find_bison()
 
 Motor = {
     compilers = {}

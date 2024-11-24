@@ -1,11 +1,10 @@
 ---@type Context
 local context = ...
-context:load_tool('bolt')
-context:load_tool('internal/product_core')
+context:load_tool('internal/module_core')
 
-Bolt.Flex = {}
+BoltFlex = {}
 
-function Bolt.Flex.find_flex()
+function BoltFlex.find_flex()
     if not context.env.FLEX then
         context:try('Looking for flex', function()
             local flex = context:find_program('flex')
@@ -25,7 +24,7 @@ context:command_driver('flex',
         '${FLEX} ${FLEXFLAGS} -o ${TGT[0]} ${SRC[0]}',
         { 'c', 'cxx' })
 
-context:extension('l,ll', function(generator, node, path)
+BoltModule.register_extension('l,ll', function(generator, node, path)
     local out_node, directory = generator:make_build_node(node, path, 'src')
     if node:extension() == 'll' then
         out_node = out_node:change_ext('cc')

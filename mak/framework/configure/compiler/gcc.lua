@@ -1,8 +1,9 @@
 ---@type(Context)
 local context = ...
 
-context:load_tool('compilers/gcc')
-for _, env in ipairs(Bolt.Gcc.discover({}, { '--std=c++20' })) do
+context:load_tool('compiler/gcc')
+
+BoltGcc.discover(function(env)
     local _, _, version = string.find(env.GCC_VERSION, '-(.*)')
     if version == nil then
         version = ''
@@ -12,4 +13,5 @@ for _, env in ipairs(Bolt.Gcc.discover({}, { '--std=c++20' })) do
     env.TOOLCHAIN_ID = env.TARGET_OS .. '-' .. env.ARCHITECTURE .. '-' .. env.CXX_COMPILER_NAME .. '-' .. env.GCC_CXX_VERSION:gsub('-', '_') .. version
     env:append('CXXFLAGS', '-Wno-attributes')
     Motor.add_compiler(env)
-end
+    return true
+end, { ['c'] = {}, ['c++'] = { '--std=c++20' } }, {}, true)

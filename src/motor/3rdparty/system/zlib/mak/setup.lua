@@ -1,11 +1,11 @@
 ---@type Context
 local context = ...
 
-context:load_tool('lang/pkg_config')
+context:load_tool('tool/pkg_config')
 
 local function setup_zlib_pkg_config()
     return pcall(function()
-        Bolt.PkgConfig.pkg_config('zlib', 'zlib')
+        BoltPkgConfig.pkg_config('zlib', 'zlib')
     end)
 end
 
@@ -48,7 +48,7 @@ end)
 
 local function setup_minizip_pkg_config()
     return pcall(function()
-        Bolt.PkgConfig.pkg_config('minizip', 'minizip')
+        BoltPkgConfig.pkg_config('minizip', 'minizip')
     end)
 end
 

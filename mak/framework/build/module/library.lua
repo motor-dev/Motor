@@ -111,13 +111,13 @@ local function module(name, path, lib_types)
         group = group .. '.nobulk'
     end
 
-    local generator = Bolt.module(name, lib_type, { 'c', 'cxx' }, group)
-                          :add_source_pattern(path, 'src/**/*')
-                          :set_source_filter(filter_source)
-                          :add_internal_define('building_' .. module_name, '1')
-                          :add_public_define('motor_dll_' .. module_name, '1')
-                          :add_public_include(context.bld_dir:make_node(meta_generator.group):make_node(meta_generator.name):make_node('api'))
-                          :add_internal_include(context.bld_dir:make_node(meta_generator.group):make_node(meta_generator.name):make_node('include'))
+    local generator = BoltModule.module(name, lib_type, { 'c', 'cxx' }, group)
+                                :add_source_pattern(path, 'src/**/*')
+                                :set_source_filter(filter_source)
+                                :add_internal_define('building_' .. module_name, '1')
+                                :add_public_define('motor_dll_' .. module_name, '1')
+                                :add_public_include(context.bld_dir:make_node(meta_generator.group):make_node(meta_generator.name):make_node('api'))
+                                :add_internal_include(context.bld_dir:make_node(meta_generator.group):make_node(meta_generator.name):make_node('include'))
     generator.bulk = context.settings.bulk
     for _, include in ipairs(context:search(path, 'include', true)) do
         generator = generator:add_internal_include(include)
@@ -135,6 +135,7 @@ end
 ---the link phase of modules depending on them.
 ---@param name string name of the library.
 ---@param path string|nil qualified path of the library. Defaults to name.
+---@return Module a new library module
 function Motor.library(name, path)
     return module(name, path, { 'objects', 'objects', 'shlib' })
 end

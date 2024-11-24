@@ -1,7 +1,7 @@
 ---@type Context
 local context = ...
 
-Bolt.Python.find_python()
+BoltPython.find_python()
 
 context.env.METAGEN = context.path:make_node('../../bin/metagen.py')
 context.env.METAGEN_TMP = context.bld_dir

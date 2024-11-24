@@ -1,10 +1,9 @@
 ---@type Context
 local context = ...
-context:load_tool('bolt')
 
-Bolt.Python = {}
+BoltPython = {}
 
-function Bolt.Python.find_python()
+function BoltPython.find_python()
     if not context.env.PYTHON then
         context:try('Looking for python', function()
             local python = context:find_program('python3')
