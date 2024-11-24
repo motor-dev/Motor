@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 default-run = "boltbuild"
 description = "BoltBuild is a programmable build system."
-license = "BSD-3"
+license = "BSD-3-Clause"
 homepage = "https://github.com/motor-dev/Motor"
 repository = "https://github.com/motor-dev/Motor"
 
