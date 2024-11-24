@@ -1,15 +1,21 @@
 ---@type Context
 local context = ...
 
-GnuCompiler = {}
+BoltGnuCompiler = { }
 
 ---Retrieves some GCC specifications and store them in the current context environment
 ---@param command (string|Node)[]) The command to execute for the compiler.
 ---@param language string The name of the language (uppercase, C or CXX).
-function GnuCompiler.get_specs(command, language)
+function BoltGnuCompiler.get_specs(command, language)
     local env = context.env
 
-    local include_command = { table.unpack(command), table.unpack(env[language .. 'FLAGS']) }
+    local include_command = { }
+    for _, flag in ipairs(command) do
+        table.insert(include_command, flag)
+    end
+    for _, flag in ipairs(env[language .. 'FLAGS']) do
+        table.insert(include_command, flag)
+    end
     table.insert(include_command, '-v')
     table.insert(include_command, '-dM')
     table.insert(include_command, '-E')

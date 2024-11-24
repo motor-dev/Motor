@@ -1,11 +1,11 @@
 ---@type Context
 local context = ...
 
-context:load_tool('lang/pkg_config')
+context:load_tool('tool/module')
 
 if context.env.check_zlib then
-    Bolt.pkg_config('motor.3rdparty.system.zlib', 'zlib')
+    BoltModule.pkg_config('motor.3rdparty.system.zlib', 'zlib')
 end
 if context.env.check_minizip then
-    Bolt.pkg_config('motor.3rdparty.system.minizip', 'minizip')
+    BoltModule.pkg_config('motor.3rdparty.system.minizip', 'minizip')
 end

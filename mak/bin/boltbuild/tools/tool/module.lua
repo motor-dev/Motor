@@ -1,13 +1,12 @@
 ---@type Context
 local context = ...
 
-context:load_tool('bolt')
-context:load_tool('internal/product_process')
+context:load_tool('internal/module_core')
+context:load_tool('internal/module_process')
 
 ---@class Module : Generator
 ---@field objects Node[]
 local Module = {}
-
 
 ---@class CppProperties
 ---@field group string|nil
@@ -102,7 +101,7 @@ end
 ---@param languages string[]
 ---@param group string|nil
 ---@return Module
-function Bolt.module(name, link_type, languages, group)
+function BoltModule.module(name, link_type, languages, group)
     local features = { }
     for _, l in ipairs(languages) do
         table.insert(features, l)
@@ -143,41 +142,41 @@ end
 ---@param name string
 ---@param languages string[]
 ---@param group string|nil
----@return Generator
-function Bolt.shared_library(name, languages, group)
-    return Bolt.module(name, 'shlib', languages, group)
+---@return Module
+function BoltModule.shared_library(name, languages, group)
+    return BoltModule.module(name, 'shlib', languages, group)
 end
 
 ---@param name string
 ---@param languages string[]
 ---@param group string|nil
----@return Generator
-function Bolt.static_library(name, languages, group)
-    return Bolt.module(name, 'stlib', languages, group)
+---@return Module
+function BoltModule.static_library(name, languages, group)
+    return BoltModule.module(name, 'stlib', languages, group)
 end
 
 ---@param name string
 ---@param languages string[]
 ---@param group string|nil
----@return Generator
-function Bolt.object_library(name, languages, group)
-    return Bolt.module(name, 'objects', languages, group)
+---@return Module
+function BoltModule.object_library(name, languages, group)
+    return BoltModule.module(name, 'objects', languages, group)
 end
 
 ---@param name string
 ---@param languages string[]
 ---@param group string|nil
----@return Generator
-function Bolt.program(name, languages, group)
-    return Bolt.module(name, 'program', languages, group)
+---@return Module
+function BoltModule.program(name, languages, group)
+    return BoltModule.module(name, 'program', languages, group)
 end
 
-function Bolt.pkg_config(name, var)
+function BoltModule.pkg_config(name, var)
     if context.env['check_' .. var] then
         local cflags = context.env['check_' .. var .. '_cflags']
         local libs = context.env['check_' .. var .. '_libs']
         local ldflags = context.env['check_' .. var .. '_ldflags']
-        local generator = Bolt.module(name, nil, { 'c', 'cxx' })
+        local generator = BoltModule.module(name, nil, { 'c', 'cxx' })
         generator.public_flags = { { 'CFLAGS', cflags },
                                    { 'CXXFLAGS', cflags } }
         generator.linkflags = ldflags

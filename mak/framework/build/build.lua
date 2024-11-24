@@ -1,6 +1,6 @@
 ---@type Context
 local context = ...
-context:load_tool('product')
+context:load_tool('tool/module')
 
 local static, dynamic, nobulk = context.settings.static, context.settings.dynamic, context.settings.nobulk
 context:declare_group(context.fs_name .. '.static', static and not nobulk)

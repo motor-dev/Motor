@@ -1,8 +1,8 @@
 ---@type Context
 local context = ...
 
-context:load_tool('internal/product_core')
-context:load_tool('internal/product_process')
+context:load_tool('internal/module_core')
+context:load_tool('internal/module_process')
 
 ---@param generator Generator
 ---@param node Node
@@ -144,7 +144,7 @@ local function process_source(generator)
         for _, source in ipairs(context:search(path, pattern)) do
             if generator.source_filter(source, path, generator.env) then
                 local ext = source:extension()
-                local source_processor = context._extensions[ext]
+                local source_processor = BoltModule.extension_registry[ext]
                 if source_processor == nil then
                     context:raise_error("No tool that can handle file " .. tostring(source) .. " with extension " .. ext .. ".")
                 end
@@ -157,7 +157,7 @@ local function process_source(generator)
         local path, source = source_info[1], source_info[2]
         if generator.source_filter(source, path, generator.env) then
             local ext = source:extension()
-            local source_processor = context._extensions[ext]
+            local source_processor = BoltModule.extension_registry[ext]
             if source_processor == nil then
                 context:raise_error("No tool that can handle file " .. tostring(source) .. " with extension " .. ext .. ".")
             end
