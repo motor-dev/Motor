@@ -3,6 +3,10 @@ name = "boltbuild"
 version = "0.1.0"
 edition = "2021"
 default-run = "boltbuild"
+description = "BoltBuild is a programmable build system."
+license = "BSD-3"
+homepage = "https://github.com/motor-dev/Motor"
+repository = "https://github.com/motor-dev/Motor"
 
 [dependencies]
 mlua = { version = "~0.10", features = ["lua54", "vendored", "userdata-wrappers"] }
