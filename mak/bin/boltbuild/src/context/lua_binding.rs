@@ -8,24 +8,7 @@ use super::node::*;
 use super::subprocess::*;
 use super::Context;
 use crate::options::Options;
-use mlua::prelude::{LuaError, LuaResult, LuaValue};
-use mlua::{AnyUserData, IntoLua, Lua, MetaMethod, UserData, UserDataFields, UserDataMethods};
-
-fn set_index(_lua: &Lua, (context, name, value): (AnyUserData, String, LuaValue)) -> LuaResult<()> {
-    context.set_named_user_value(name.as_str(), value)
-}
-
-fn index(_lua: &Lua, (context, name): (AnyUserData, String)) -> LuaResult<LuaValue> {
-    let result = context.named_user_value::<LuaValue>(name.as_str())?;
-    if result.is_nil() {
-        Err(LuaError::RuntimeError(format!(
-            "Context does not have a user value `{}`",
-            name
-        )))
-    } else {
-        Ok(result)
-    }
-}
+use mlua::{AnyUserData, IntoLua, UserData, UserDataFields, UserDataMethods};
 
 impl UserData for Context {
     fn add_fields<F: UserDataFields<Self>>(fields: &mut F) {
@@ -43,8 +26,6 @@ impl UserData for Context {
     }
 
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_meta_function_mut(MetaMethod::NewIndex, set_index);
-        methods.add_meta_function_mut(MetaMethod::Index, index);
         methods.add_function("recurse", recurse);
         methods.add_method_mut("declare_command", declare_command);
         methods.add_method_mut("chain_command", chain_command);
