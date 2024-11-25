@@ -71,7 +71,7 @@ context:try('  minizip', function()
             return 'from pkg-config'
         end
     end
-    if noption == 'best' or option == 'system' then
+    if option == 'best' or option == 'system' then
         if setup_minizip_system() then
             return 'from system'
         end

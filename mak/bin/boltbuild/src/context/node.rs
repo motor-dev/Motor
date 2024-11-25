@@ -5,8 +5,6 @@ use crate::node::Node;
 use blake3::Hasher;
 use mlua::prelude::{LuaError, LuaResult};
 use mlua::Lua;
-use std::fs;
-use std::ops::Deref;
 
 pub(super) fn search(
     _lua: &Lua,
@@ -16,8 +14,10 @@ pub(super) fn search(
     let mut result = Vec::new();
     if path.is_dir() {
         let include_directories = include_directories.unwrap_or(false);
-        let path = Node::from(&fs::canonicalize(path.path())?);
-        let paths = glob::glob(path.path().join(&pattern).to_string_lossy().deref())
+        let node = path.canonicalize();
+        let path = node.path().join(&pattern);
+        let search_string = &*path.to_string_lossy();
+        let paths = glob::glob(&search_string)
             .map_err(|e| LuaError::RuntimeError(format!("pattern error: {}", e)))?;
         let mut hasher = Hasher::new();
         for path in paths.flatten() {
@@ -29,7 +29,7 @@ pub(super) fn search(
         let mut store = true;
         let hash = hasher.finalize();
         for (prev_path, prev_pattern, prev_hash) in &this.output.stored_hash.glob_dependencies {
-            if prev_path.path().eq(path.path()) & prev_pattern.eq(&pattern) {
+            if prev_path.path().eq(node.path()) & prev_pattern.eq(&pattern) {
                 if !hash.eq(&prev_hash.0) {
                     todo!();
                 }
@@ -38,7 +38,7 @@ pub(super) fn search(
         }
         if store {
             this.output.stored_hash.glob_dependencies.push((
-                path.clone(),
+                node.clone(),
                 pattern,
                 SerializedHash(hash),
             ));
@@ -73,28 +73,18 @@ pub(super) fn find_program(
     let pattern = program + suffix.as_str();
 
     for path in paths {
-        let canonical_path = fs::canonicalize(path.path());
-        if let Ok(canonical_path) = canonical_path {
-            let path = Node::from(&canonical_path);
-            let executable = path.path().join(&pattern);
-            let mut hasher = Hasher::new();
-            if executable.is_file() {
-                hasher.update(executable.as_os_str().as_encoded_bytes());
-                this.output.stored_hash.glob_dependencies.push((
-                    path.clone(),
-                    pattern.clone(),
-                    SerializedHash(hasher.finalize()),
-                ));
-                return Ok(Some(Node::from(&executable)));
-            } else {
-                this.output.stored_hash.glob_dependencies.push((
-                    path.clone(),
-                    pattern.clone(),
-                    SerializedHash(hasher.finalize()),
-                ));
-            }
+        let path = path.canonicalize();
+        let executable = path.path().join(&pattern);
+        let mut hasher = Hasher::new();
+        if executable.is_file() {
+            hasher.update(executable.as_os_str().as_encoded_bytes());
+            this.output.stored_hash.glob_dependencies.push((
+                path.clone(),
+                pattern.clone(),
+                SerializedHash(hasher.finalize()),
+            ));
+            return Ok(Some(Node::from(&executable)));
         } else {
-            let hasher = Hasher::new();
             this.output.stored_hash.glob_dependencies.push((
                 path.clone(),
                 pattern.clone(),

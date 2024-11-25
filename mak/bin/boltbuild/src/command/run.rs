@@ -9,7 +9,6 @@ use crate::options::Options;
 use blake3::Hasher;
 use std::collections::HashMap;
 use std::mem::swap;
-use std::ops::Deref;
 use std::sync::{Arc, Mutex};
 
 impl Command {
@@ -87,18 +86,17 @@ impl Command {
                                     ));
                                 }
                             } else {
-                                let paths =
-                                    glob::glob(path.path().join(pattern).to_string_lossy().deref())
-                                        .unwrap();
+                                let search_string = path.path().join(pattern);
+                                let search_string = &*search_string.to_string_lossy();
+                                let paths = glob::glob(search_string).unwrap();
                                 let mut hasher = Hasher::new();
                                 for path in paths.flatten() {
                                     hasher.update(path.as_os_str().as_encoded_bytes());
                                 }
                                 if !hasher.finalize().eq(&hash.0) {
                                     return Err(format!(
-                                        "the result of file search `{}/{}` has changed.",
-                                        path.path().to_string_lossy(),
-                                        pattern
+                                        "the result of file search `{}` has changed.",
+                                        search_string
                                     ));
                                 }
                             }
