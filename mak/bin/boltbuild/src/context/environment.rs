@@ -25,7 +25,7 @@ pub(super) fn derive(
     Ok(new_env)
 }
 
-pub(super) fn with<'lua>(
+pub(super) fn with(
     _lua: &Lua,
     (context, env, function): (AnyUserData, AnyUserData, LuaFunction),
 ) -> LuaResult<LuaValue> {

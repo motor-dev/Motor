@@ -1,4 +1,5 @@
 mod command;
+mod debug;
 mod driver;
 mod environment;
 mod feature;

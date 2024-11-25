@@ -12,16 +12,18 @@ BoltBuild uses Lua as its configuration language, which allows for a high degree
 The core of BoltBuild provides a set of functions that can be used to define build steps.
 The build steps are implemented in Lua
 
-# Description
+# ⋮ Description
 
-A command is a script that is executed by BoltBuild. Each command can:
+At the top level, BoltBuild runs a series of commands, starting with an implicit command called `init` that is always
+run.
+Each command can:
 
-- Define subsequent commands
-- Create tasks that are executed in parallel
-- Set environment variables that are passed to subsequent commands and tasks
-- Define dependencies between tasks
+- define subsequent commands
+- declare tasks that are queued for execution
+- set environment variables that are passed to subsequent commands and tasks
+- define dependencies between tasks
 
-When a command has finished executing, tasks that have been defined by the command are executed in parallel.
+When a command has finished executing, tasks that have been declared by the command are executed in parallel.
 Tasks are responsible for running the actual build steps, such as compiling source files, linking libraries, etc.
 
 Running commands can often be skipped, as BoltBuild will cache the results of each command.
@@ -38,16 +40,18 @@ following are true:
 - If any search on the filesystem would return different results than the previous run.
 - If the user specifies that the command should always be rerun.
 
-If none of the above are true, BoltBuild will load the command from the cache and start to execute tasks.
+If none of the above are true, BoltBuild will load the command results from the cache and start to execute tasks.
 
-Each task is also cached, so if a task has already been run, it will not be run again unless the task has changed.
+Each task result is also cached, so if a task has already been run, it will not be run again unless the task has
+changed.
 The task is considered to have changed if any of the following are true:
 
-- If the task has never been run before,
-- If any of the files that the task explicitely depends on have changed,
-- If any of the files that the task listed as implicit dependencies have changed,
-- If the driver script has changed,
-- If the environment variables used by the task have changed.
+- if the task has never been run before,
+- if any of the files that the task explicitely depends on have changed,
+- if any of the files that the task listed as implicit dependencies have changed,
+- if any of the files that the task generates have been deleted,
+- if the driver script has changed,
+- if the environment variables used by the task have changed.
 
 # 🔩 Features
 

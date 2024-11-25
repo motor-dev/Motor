@@ -6,6 +6,7 @@ use super::generator::*;
 use super::log::*;
 use super::node::*;
 use super::subprocess::*;
+use super::debug::*;
 use super::Context;
 use crate::options::Options;
 use mlua::{AnyUserData, IntoLua, UserData, UserDataFields, UserDataMethods};
@@ -55,5 +56,7 @@ impl UserData for Context {
         methods.add_method_mut("command_driver", command_driver);
         methods.add_method_mut("dependency_driver", dependency_driver);
         methods.add_method_mut("lua_driver", lua_driver);
+        methods.add_method_mut("start_debug_server", start_debug_server);
+        methods.add_method_mut("connect_to_debugger", connect_to_debugger);
     }
 }
