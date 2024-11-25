@@ -114,7 +114,7 @@ function BoltModule.module(name, link_type, languages, group)
     g.objects = { }
     g.source = { }
     g.source_patterns = { }
-    g.source_filter = default_filter
+    g.source_filter = Module.default_filter
     g.internal_includes = { }
     g.public_includes = { }
     g.internal_defines = { }

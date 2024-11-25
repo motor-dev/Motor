@@ -10,14 +10,15 @@ repository = "https://github.com/motor-dev/Motor"
 
 [features]
 default = ["lua_debug"]
-lua_debug = ["dep:cc", "dep:libuv-sys2"]
+lua_debug = ["dep:cc", "dep:pkg-config"]
+skip-pkg-config = []
 
 [build-dependencies]
 cc = { version = "~1", features = ["parallel"], optional = true }
+pkg-config = { version = "0.3.17", optional = true }
 
 [dependencies]
 mlua = { version = "~0.10", features = ["lua54", "vendored", "userdata-wrappers"] }
-libuv-sys2 = { version = "~1.49.2", optional = true }
 colored = "~2"
 clap = { version = "~4", features = ["string"] }
 crossterm = "~0"

@@ -3,9 +3,6 @@ use mlua::prelude::LuaResult;
 use mlua::Lua;
 
 #[cfg(feature = "lua_debug")]
-extern crate libuv_sys2;
-
-#[cfg(feature = "lua_debug")]
 extern "C" {
     pub fn emmy_tcp_listen(state: *mut mlua::lua_State) -> std::os::raw::c_int;
     pub fn emmy_tcp_connect(state: *mut mlua::lua_State) -> std::os::raw::c_int;
@@ -38,10 +35,14 @@ pub(super) fn start_debug_server(
         })
     };
     this.logger.clear_status();
-    unsafe {
-        lua.exec_raw::<()>((), |state| {
-            emmy_break(state);
-        })
+    if result.is_ok() {
+        unsafe {
+            lua.exec_raw::<()>((), |state| {
+                emmy_break(state);
+            })
+        }
+    } else {
+        result
     }
 }
 
