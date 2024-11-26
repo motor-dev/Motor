@@ -6,6 +6,31 @@ context:load_tool('utils/string_ext')
 
 BoltClang = {}
 
+local function vswhere_clang()
+    local compilers = {}
+    context:try('Running vswhere', function()
+        local p = context:popen({
+            'C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe',
+            '-all',
+            '-products',
+            '*',
+            '-find',
+            'VC\\Tools\\Llvm\\bin',
+        })
+        local result, out, err = p:communicate('')
+        if result then
+            for path in out:lines() do
+                path = context.path:make_node(path)
+                clang = context:find_program('clang', { path })
+                if clang then
+                    table.insert(compilers, clang)
+                end
+            end
+        end
+    end)
+    return compilers
+end
+
 local function get_clang_version(defines)
     local version = { 0, 0, 0 }
     for name, value in pairs(defines) do
@@ -131,7 +156,7 @@ local function detect_clang_targets(clang, callback, language_flags, global_flag
     end
 
     local default_triple = nil
-    local triples = { }
+    local triples = {}
     for _, path in ipairs(paths) do
         local component, relpath, component_count = path:name(), '', 1
         while component do
@@ -208,6 +233,9 @@ function BoltClang.discover(callback, language_flags, global_flags, detect_cross
                     end
                 end
             end
+        end
+        for _, clang in ipairs(vswhere_clang()) do
+            table.insert(compilers, { '', clang })
         end
         -- sort by decreasing version. Highest priority is the default compiler (the one with no version number)
         table.sort(compilers, function(a, b)

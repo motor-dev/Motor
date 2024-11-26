@@ -13,7 +13,7 @@ function BoltFlex.find_flex()
                 context.env.FLEXFLAGS = { }
                 return flex
             else
-                error('flex not found')
+                context:raise_error('flex not found')
             end
         end)
     end

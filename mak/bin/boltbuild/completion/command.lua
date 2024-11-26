@@ -20,7 +20,7 @@ end
 --- - The function searches for `tool_name.lua` within directories specified in the `tools_dir` setting.
 ---
 ---@param tool_name string The name of the tool file to load (without the `.lua` extension).
----@param reload boolean|nil Optional. If `true`, reloads the tool even if it has already been loaded. Defaults to `false`.
+---@param reload? boolean|nil Optional. If `true`, reloads the tool even if it has already been loaded. Defaults to `false`.
 function Context:load_tool(tool_name, reload)
     use(tool_name)
     use(reload)

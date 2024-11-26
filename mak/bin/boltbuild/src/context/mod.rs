@@ -23,6 +23,7 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 pub(crate) static TOOLS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/tools");
+pub(crate) static TOOLS_PATH: &'static str = env!("CARGO_MANIFEST_DIR");
 
 pub(crate) struct Context {
     spec: CommandSpec,

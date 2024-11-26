@@ -13,7 +13,7 @@ function BoltBison.find_bison()
                 context.env.BISONFLAGS = { '-d' }
                 return bison
             else
-                error('bison not found')
+                context:raise_error('bison not found')
             end
         end)
     end
