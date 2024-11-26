@@ -20,7 +20,7 @@ pub(super) fn popen(_lua: &Lua, this: &mut Context, command: Vec<LuaValue>) -> L
                 .collect::<Vec<String>>()
                 .join(" ")
         )
-        .as_str(),
+            .as_str(),
     );
     for x in command {
         cmd.push(x.to_string()?);
@@ -124,19 +124,27 @@ impl UserData for Out {
                     Some(index) => {
                         let end = this.0[index..].find('\n');
                         if let Some(end) = end {
-                            let result = this.0[index..index + end].to_string();
-                            this.1 = Some(index + end + 1);
-                            Ok(Some(result))
-                        } else {
+                            if end > 0 && this.0.as_bytes()[index + end - 1] == b'\r' {
+                                let result = this.0[index..index + end - 1].to_string();
+                                this.1 = Some(index + end + 1);
+                                Ok(Some(result))
+                            } else {
+                                let result = this.0[index..index + end].to_string();
+                                this.1 = Some(index + end + 1);
+                                Ok(Some(result))
+                            }
+                        } else if index < this.0.len() {
                             let result = this.0[index..].to_string();
                             this.1 = None;
                             Ok(Some(result))
+                        } else {
+                            Ok(None)
                         }
                     }
                     None => Ok(None),
                 }
             })?
-            .bind(this)
+                .bind(this)
         })
     }
 }

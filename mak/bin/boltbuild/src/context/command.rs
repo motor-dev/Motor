@@ -1,5 +1,5 @@
 use crate::context::operations::DeclaredCommand;
-use crate::context::{Context, TOOLS_DIR};
+use crate::context::{Context, TOOLS_DIR, TOOLS_PATH};
 use crate::environment::ReadWriteEnvironment;
 use crate::node::Node;
 use crate::options::Options;
@@ -87,7 +87,7 @@ pub(super) fn load_tool(
         })?;
         if do_run {
             lua.load(file.contents())
-                .set_name(tool_file)
+                .set_name(PathBuf::from(TOOLS_PATH).join("tools").join(&tool_file).to_string_lossy())
                 .call::<()>(this)?;
         }
         return Ok(());

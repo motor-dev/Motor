@@ -3,7 +3,7 @@ use crate::command::{
     Command, CommandHash, CommandOutput, CommandSpec, CommandStatus, GroupStatus, SerializedHash,
     TaskSeq,
 };
-use crate::context::TOOLS_DIR;
+use crate::context::{TOOLS_DIR, TOOLS_PATH};
 use crate::environment::ReadWriteEnvironment;
 use crate::log::Logger;
 use crate::node::Node;
@@ -119,7 +119,7 @@ impl Context {
             let run_content = |userdata: &mut AnyUserData, tool_path: &PathBuf| -> LuaResult<()> {
                 let chunk = lua
                     .load(TOOLS_DIR.get_file(tool_path).unwrap().contents())
-                    .set_name(tool_path.to_string_lossy());
+                    .set_name(PathBuf::from(TOOLS_PATH).join("tools").join(&tool_path).to_string_lossy());
                 chunk.call(userdata.clone())
             };
 

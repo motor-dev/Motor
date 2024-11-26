@@ -114,7 +114,7 @@ fn normalize_path(path: &Path) -> PathBuf {
 
     for component in components {
         match component {
-            Component::Prefix(..) => unreachable!(),
+            Component::Prefix(_) => ret.push(component),
             Component::RootDir => {
                 ret.push(component.as_os_str());
             }
