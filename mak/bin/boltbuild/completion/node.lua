@@ -1,8 +1,8 @@
----@meta
-
-local function use(var)
-    return var
-end
+--- Represents a filesystem object, either a directory or a file, which may or may not exist yet.
+--- Nodes serve as filesystem object references that can represent either directories or files, providing a range of utilities for path manipulation and file operations.
+---@class Node
+---@field parent Node The parent node of this node, representing the directory containing this filesystem object.
+local Node = {}
 
 --- Search for files on the filesystem. Using `directory` as a starting point, returns all files (as `Node` objects) that
 --- match the given pattern. Search results returned by this function are verified again on every run, and the command will
@@ -10,12 +10,9 @@ end
 ---
 ---@param directory Node The root directory of the search
 ---@param pattern string A glob pattern
----@param include_directories boolean|nil Optional. Wether directories are returned
+---@param include_directories boolean Optional. Wether directories are returned
 ---@return Node[] A list of nodes that matched the pattern.
 function Context:search(directory, pattern, include_directories)
-    use(directory)
-    use(pattern)
-    use(include_directories)
     return {}
 end
 
@@ -26,25 +23,16 @@ end
 --- be reevaluated if the search results change.
 ---
 ---@param name string The name of the program to find.
----@param paths string[]|nil Optional. A list of paths to search for the program. If not specified, the `context.options.path` variable is used.
+---@param paths string[] Optional. A list of paths to search for the program. If not specified, the `context.options.path` variable is used.
 ---@return Node The node representing the found program.
 function Context:find_program(name, paths)
-    use(name)
-    use(paths)
     return Node
 end
-
---- Represents a filesystem object, either a directory or a file, which may or may not exist yet.
---- Nodes serve as filesystem object references that can represent either directories or files, providing a range of utilities for path manipulation and file operations.
----@class Node
----@field parent Node The parent node of this node, representing the directory containing this filesystem object.
-local Node
 
 --- Creates a new Node object representing a filesystem object, either relative to `self` or absolute.
 ---@param path string A filesystem path, either absolute or relative to `self`.
 ---@return Node A new Node representing the specified path.
 function Node:make_node(path)
-    use(path)
     return Node
 end
 
@@ -85,13 +73,13 @@ function Node:change_ext(new_extension)
 end
 
 --- Checks if the filesystem object exists and is a directory.
----@return boolean `true` if the node represents an existing directory; otherwise, `false`.
+---@return boolean the value `true` if the node represents an existing directory; otherwise, `false`.
 function Node:is_dir()
     return false
 end
 
 --- Checks if the filesystem object exists and is a file.
----@return boolean `true` if the node represents an existing file; otherwise, `false`.
+---@return boolean the value `true` if the node represents an existing file; otherwise, `false`.
 function Node:is_file()
     return false
 end

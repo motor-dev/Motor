@@ -1,5 +1,3 @@
----@meta
-
 ---@class Context
 --- The `Context` class provides core functions for managing build commands, environments, tasks, and filesystem access.
 --- It centralizes the configuration and execution settings needed across commands in the build system.
