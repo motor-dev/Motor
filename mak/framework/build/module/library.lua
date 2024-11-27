@@ -1,14 +1,15 @@
 ---@type Context
 local context = ...
 
----@param node Node
----@param directory Node
+---@param source_file SourceFile
 ---@param env Environment
 ---@return boolean,boolean
-local function filter_source(node, directory, env)
+local function filter_source(source_file, env)
     local add = true
     local matched = false
     local found = true
+
+    local directory, node = source_file.base_path, source_file.full_path
 
     local platform_set = {}
     local arch_set = {}
@@ -111,13 +112,26 @@ local function module(name, path, lib_types)
         group = group .. '.nobulk'
     end
 
-    local generator = BoltModule.module(name, lib_type, { 'c', 'cxx' }, group)
-                                :add_source_pattern(path, 'src/**/*')
-                                :set_source_filter(filter_source)
-                                :add_internal_define('building_' .. module_name, '1')
-                                :add_public_define('motor_dll_' .. module_name, '1')
-                                :add_public_include(context.bld_dir:make_node(meta_generator.group):make_node(meta_generator.name):make_node('api'))
-                                :add_internal_include(context.bld_dir:make_node(meta_generator.group):make_node(meta_generator.name):make_node('include'))
+    local generator = BoltModule.module(name, {
+        features = { lib_type },
+        group = group,
+        source_patterns = {
+            { path = path, pattern = 'src/**/*' }
+        },
+        source_filter = filter_source,
+        internal_defines = {
+            { 'building_' .. module_name, '1' }
+        },
+        public_defines = {
+            { 'motor_dll_' .. module_name, '1' }
+        },
+        public_includes = {
+            context.bld_dir:make_node(meta_generator.group):make_node(meta_generator.name):make_node('api')
+        },
+        internal_includes = {
+            context.bld_dir:make_node(meta_generator.group):make_node(meta_generator.name):make_node('include')
+        }
+    })
     generator.bulk = context.settings.bulk
     for _, include in ipairs(context:search(path, 'include', true)) do
         generator = generator:add_internal_include(include)

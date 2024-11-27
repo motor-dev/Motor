@@ -1,9 +1,3 @@
----@meta
-
-local function use(var)
-    return var
-end
-
 --- Declares a new group for organizing task generators, with conditional execution based on a specified condition.
 --- - Groups are collections of task generators that allow for logical task organization and control over task execution.
 --- - Each generator belongs to a group. By default, generators belong to the unnamed group, which is represented by the context's `fs_name` value and doesn’t require explicit declaration.
@@ -22,10 +16,8 @@ end
 --- - For efficient caching, tasks within the group must be declared consistently across commands to avoid cache conflicts and unnecessary recomputation.
 ---
 ---@param name string The unique name of the group.
----@param enabled_if boolean|string|nil A condition for enabling the group. If a boolean, it directly determines group status. If a string, it should refer to an existing command-line option, enabling the group based on the option's value. If no value is provided, the group is enabled unless other groups are enabled by command-line options.
+---@param enabled_if boolean|string? A condition for enabling the group. If a boolean, it directly determines group status. If a string, it should refer to an existing command-line option, enabling the group based on the option's value. If no value is provided, the group is enabled unless other groups are enabled by command-line options.
 function Context:declare_group(name, enabled_if)
-    use(name)
-    use(enabled_if)
 end
 
 --- Changes the enabling condition for an existing group.
@@ -36,8 +28,6 @@ end
 --- @param name string The name of the group to enable or disable.
 --- @param enabled boolean|string|nil A boolean value indicating whether the group should be enabled (`true`) or disabled (`false`).
 function Context:set_group_enabled(name, enabled)
-    use(name)
-    use(enabled)
 end
 
 --- Creates a new task generator, associating it with a specified group for logical organization and caching.
@@ -46,15 +36,11 @@ end
 --- - If no group is specified, the generator will belong to the default group, which is represented by the context’s `fs_name` value.
 ---
 ---@param name string The name of the generator.
----@param features string|string[]|nil Initial list of features for this generator.
----@param env Environment|nil The default environment for tasks created by this generator.
----@param group string|nil The group this generator belongs to, declared via `declare_group` for conditional control. Defaults to the context’s `fs_name` value if not specified.
+---@param features string|string[]? Initial list of features for this generator.
+---@param env Environment? The default environment for tasks created by this generator.
+---@param group string? The group this generator belongs to, declared via `declare_group` for conditional control. Defaults to the context’s `fs_name` value if not specified.
 ---@return Generator A new generator object.
 function Context:declare_generator(name, features, env, group)
-    use(name)
-    use(features)
-    use(env)
-    use(group)
     return Generator
 end
 
@@ -63,7 +49,6 @@ end
 ---@param name string The name of the generator to search for.
 ---@return Generator|nil The generator with the specified name, or `nil` if it is not found.
 function Context:get_generator_by_name(name)
-    use(name)
     return nil
 end
 
@@ -73,7 +58,6 @@ end
 ---
 ---@param generator Generator The generator to post.
 function Context:post(generator)
-    use(generator)
 end
 
 --- Represents a task generator, responsible for creating and managing tasks within the build system.
@@ -83,6 +67,7 @@ end
 ---@field name string The name of the generator.
 ---@field group string The build group this generator belongs to. Groups can be shared across different build commands and must be declared using `context:declare_group`.
 ---@field env Environment The default environment. Tasks generated from this generator will inherit this environment unless another is specified.
+---@field [string] any Additional properties that can be set on the generator.
 Generator = {}
 
 --- Creates a new task to transform specified inputs into outputs, using the given tool.
@@ -90,24 +75,18 @@ Generator = {}
 --- - Inputs and outputs can be further adjusted after task creation.
 ---
 ---@param driver string The name of the driver used for the task (e.g., compiler, linker). The driver must have been declared in the context using one of `lua_driver`, `command_driver` or `dependency_driver`.
----@param inputs Node|Node[]|nil Initial inputs required for the task. Additional inputs can be added with `Task:add_input`.
----@param outputs Node|Node[]|nil Initial outputs produced by the task. Additional outputs can be added with `Task:add_output`.
----@param env Environment|nil The environment to use for this task, overriding the generator’s default environment if specified.
----@return Task A new task object, ready for configuration and execution.
+---@param inputs Node|Node[]? Initial inputs required for the task. Additional inputs can be added with `Task:add_input`.
+---@param outputs Node|Node[]? Initial outputs produced by the task. Additional outputs can be added with `Task:add_output`.
+---@param env Environment? The environment to use for this task, overriding the generator’s default environment if specified.
+---@return Task? A new task object, ready for configuration and execution.
 function Generator:declare_task(driver, inputs, outputs, env)
-    use(driver)
-    use(inputs)
-    use(outputs)
-    use(env)
     return Task
 end
-
 
 --- Checks if the generator has a specific property.
 ---
 ---@param name string The name of the property to check.
 ---@return boolean Returns `true` if the generator has a property with the specified name, otherwise returns `false`.
 function Generator:has_property(name)
-    use(name)
     return false
 end

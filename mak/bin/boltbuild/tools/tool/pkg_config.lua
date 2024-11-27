@@ -3,18 +3,6 @@ local context = ...
 
 BoltPkgConfig = { }
 
-local function extend_path(path, sysroot)
-    if path:sub(1, 1) == '=' then
-        if sysroot and sysroot ~= '' then
-            return sysroot .. path:sub(3)
-        else
-            return path:sub(2)
-        end
-    else
-        return path
-    end
-end
-
 local function _run_pkg_config(pkg_name, lib_paths, seen)
     if seen[pkg_name] then
         return

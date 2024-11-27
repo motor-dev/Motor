@@ -4,11 +4,18 @@ local context = ...
 context:load_tool('internal/module_core')
 context:load_tool('internal/module_process')
 
----@class Module : Generator
----@field objects Node[]
-local Module = {}
+---@class SourcePattern
+---@field path Node
+---@field pattern string
+local _ = {}
 
----@class CppProperties
+---@class SourceFile
+---@field base_path Node
+---@field full_path Node
+local _ = {}
+
+---@class ModuleProperties
+---@field features string[]|nil
 ---@field group string|nil
 ---@field public_includes Node[]|nil
 ---@field internal_includes Node[]|nil
@@ -16,17 +23,33 @@ local Module = {}
 ---@field internal_defines string[]|nil
 ---@field public_dependencies string[]|nil
 ---@field internal_dependencies string[]|nil
----@field source string[]|nil
----@field source_patterns string[]|nil
----@field source_filter nil|fun(node:Node, directory:Node, env:Environment):boolean,boolean
----@field bulk boolean|nil
----@field public_flags string[]|nil
+---@field public_flags table<string,string>[]|nil
+---@field internal_flags table<string,string>[]|nil
+---@field source SourceFile[]|nil
+---@field source_patterns SourcePattern[]|nil
+---@field source_filter nil|fun(source_file:SourceFile,env:Environment):boolean,boolean
+local _ = {}
+
+---@class Module : Generator
+---@field objects Node[]
+---@field source SourceFile[]
+---@field source_patterns SourcePattern[]
+---@field source_filter fun(source_file:SourceFile,env:Environment):boolean,boolean
+---@field internal_includes Node[]
+---@field public_includes Node[]
+---@field internal_defines string[]
+---@field public_defines string[]
+---@field internal_dependencies Generator[]
+---@field public_dependencies Generator[]
+---@field internal_flags table<string,string>[]
+---@field public_flags table<string,string>[]
+local Module = {}
 
 ---@param path Node
 ---@param file Node
 ---@return Module
 function Module:add_source(path, file)
-    table.insert(self.source, { path, file })
+    table.insert(self.source, { base_path = path, full_path = file })
     return self
 end
 
@@ -34,11 +57,11 @@ end
 ---@param pattern string
 ---@return Module
 function Module:add_source_pattern(path, pattern)
-    table.insert(self.source_patterns, { path, pattern })
+    table.insert(self.source_patterns, { path = path, pattern = pattern })
     return self
 end
 
----@param filter fun(node:Node,path:Node,env:Environment):boolean,boolean
+---@param filter fun(source_file:SourceFile,env:Environment):boolean,boolean
 ---@return Module
 function Module:set_source_filter(filter)
     self.source_filter = filter
@@ -88,43 +111,30 @@ function Module:add_internal_dependency(dependency)
     return self
 end
 
----@param _ Node
----@param _ Node
----@param _ Environment
----@return boolean,boolean
-function Module.default_filter(_, _, _)
+local function default_filter(_, _)
     return true, false
 end
 
 ---@param name string
----@param link_type string|nil
----@param languages string[]
----@param group string|nil
+---@param properties ModuleProperties
 ---@return Module
-function BoltModule.module(name, link_type, languages, group)
-    local features = { }
-    for _, l in ipairs(languages) do
-        table.insert(features, l)
-    end
-    if link_type then
-        table.insert(features, link_type)
-    end
-    local g = context:declare_generator(name, features, context.env, group)
+function BoltModule.module(name, properties)
+    local features = { 'module', table.unpack(properties.features or {}) }
+    local g = context:declare_generator(name, features, context.env, properties.group)
 
     g.objects = { }
-    g.source = { }
-    g.source_patterns = { }
-    g.source_filter = Module.default_filter
-    g.internal_includes = { }
-    g.public_includes = { }
-    g.internal_defines = { }
-    g.public_defines = { }
-    g.internal_dependencies = { }
-    g.public_dependencies = { }
-    g.public_flags = { }
-    g.libs = { }
-    g.libpaths = { }
-    g.linkflags = { }
+    g.source = properties.source or { }
+    g.source_patterns = properties.source_patterns or { }
+    g.source_filter = properties.source_filter or default_filter
+    g.internal_includes = properties.internal_includes or { }
+    g.public_includes = properties.public_includes or { }
+    g.internal_defines = properties.internal_defines or { }
+    g.public_defines = properties.public_defines or { }
+    g.internal_dependencies = properties.internal_dependencies or { }
+    g.public_dependencies = properties.public_dependencies or { }
+    g.internal_flags = properties.internal_flags or { }
+    g.public_flags = properties.public_flags or { }
+    g.dep_link_tasks = {}
 
     g.add_source = Module.add_source
     g.add_source_pattern = Module.add_source_pattern
@@ -140,35 +150,51 @@ function BoltModule.module(name, link_type, languages, group)
 end
 
 ---@param name string
----@param languages string[]
----@param group string|nil
+---@param properties ModuleProperties
 ---@return Module
-function BoltModule.shared_library(name, languages, group)
-    return BoltModule.module(name, 'shlib', languages, group)
+function BoltModule.shared_library(name, properties)
+    if properties.features then
+        table.insert(properties.features, 'shlib')
+    else
+        properties.features = { 'shlib' }
+    end
+    return BoltModule.module(name, properties)
 end
 
 ---@param name string
----@param languages string[]
----@param group string|nil
+---@param properties ModuleProperties
 ---@return Module
-function BoltModule.static_library(name, languages, group)
-    return BoltModule.module(name, 'stlib', languages, group)
+function BoltModule.static_library(name, properties)
+    if properties.features then
+        table.insert(properties.features, 'stlib')
+    else
+        properties.features = { 'stlib' }
+    end
+    return BoltModule.module(name, properties)
 end
 
 ---@param name string
----@param languages string[]
----@param group string|nil
+---@param properties ModuleProperties
 ---@return Module
-function BoltModule.object_library(name, languages, group)
-    return BoltModule.module(name, 'objects', languages, group)
+function BoltModule.object_library(name, properties)
+    if properties.features then
+        table.insert(properties.features, 'objects')
+    else
+        properties.features = { 'objects' }
+    end
+    return BoltModule.module(name, properties)
 end
 
 ---@param name string
----@param languages string[]
----@param group string|nil
+---@param properties ModuleProperties
 ---@return Module
-function BoltModule.program(name, languages, group)
-    return BoltModule.module(name, 'program', languages, group)
+function BoltModule.program(name, properties)
+    if properties.features then
+        table.insert(properties.features, 'program')
+    else
+        properties.features = { 'program' }
+    end
+    return BoltModule.module(name, properties)
 end
 
 function BoltModule.pkg_config(name, var)
@@ -176,10 +202,6 @@ function BoltModule.pkg_config(name, var)
         local cflags = context.env['check_' .. var .. '_cflags']
         local libs = context.env['check_' .. var .. '_libs']
         local ldflags = context.env['check_' .. var .. '_ldflags']
-        local generator = BoltModule.module(name, nil, { 'c', 'cxx' })
-        generator.public_flags = { { 'CFLAGS', cflags },
-                                   { 'CXXFLAGS', cflags } }
-        generator.linkflags = ldflags
-        generator.libs = libs
+        return BoltModule.module(name, { public_flags = { CFLAGS = cflags, CXXFLAGS = cflags, LINKFLAGS = ldflags, LIBS = libs } })
     end
 end
