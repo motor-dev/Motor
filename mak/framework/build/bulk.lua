@@ -13,7 +13,7 @@ context:lua_driver('bulk',
         'magenta',
         context.path:make_node('drivers/bulk.lua'))
 
----@param generator Generator
+---@param generator Module
 ---@param counter number
 ---@param extension string
 ---@return Task
@@ -22,11 +22,11 @@ local function make_bulk_task(generator, counter, extension)
     local target_node = master_node:make_node(generator.name)
     target_node = target_node:make_node('src')
     target_node = target_node:make_node(extension .. '-bulk-' .. counter .. '.' .. extension)
-    table.insert(generator.source, { target_node.parent, target_node })
+    generator:add_source(target_node:parent(), target_node)
     return generator:declare_task('bulk', { }, { target_node })
 end
 
----@param generator Generator
+---@param generator Module
 ---@param source Node
 ---@param path Node
 ---@param counters number[]
@@ -50,13 +50,13 @@ local function process_source(generator, source, path, counters, bulk_task_c, bu
         end
         bulk_task_cxx.env:append('FILES', source)
     else
-        table.insert(generator.source, { path, source })
+        generator:add_source(path, source)
     end
 
     return bulk_task_c, bulk_task_cxx
 end
 
----@param generator Generator
+---@param generator Module
 context:feature('c,cxx', 'generate_bulk', function(generator)
     if context.settings.nobulk then
         return
@@ -71,19 +71,19 @@ context:feature('c,cxx', 'generate_bulk', function(generator)
     local bulk_file_cxx
     local indices = { 0, 0 }
     for _, source_spec in ipairs(generator.source_patterns) do
-        local path = source_spec[1]
-        local pattern = source_spec[2]
+        local path = source_spec.path
+        local pattern = source_spec.pattern
         for _, source_node in ipairs(context:search(path, pattern)) do
-            if generator.source_filter(source_node, path, generator.env) then
+            if generator.source_filter({ base_path = path, full_path = source_node }, generator.env) then
                 bulk_file_c, bulk_file_cxx = process_source(generator, source_node, path, indices, bulk_file_c, bulk_file_cxx)
             end
         end
     end
     generator.source_patterns = { }
     for _, source_spec in ipairs(sources) do
-        local path = source_spec[1]
-        local source_node = source_spec[2]
-        if generator.source_filter(source_node, path, generator.env) then
+        local path = source_spec.base_path
+        local source_node = source_spec.full_path
+        if generator.source_filter(source_spec, path, generator.env) then
             bulk_file_c, bulk_file_cxx = process_source(generator, source_node, path, indices, bulk_file_c, bulk_file_cxx)
         end
     end

@@ -1,9 +1,3 @@
----@meta
-
-local function use(var)
-    return var
-end
-
 --- Recursively loads or executes the script at the specified `path`.
 --- - If `path` is a file, it will be executed directly.
 --- - If `path` is a directory, the function will search for a file named after the `context.fun` basename in that directory
@@ -11,7 +5,6 @@ end
 ---
 ---@param path string The path to the file or directory, either absolute or relative to the context's current path.
 function Context:recurse(path)
-    use(path)
 end
 
 --- Loads a tool file to add specific functionality to the build context.
@@ -20,10 +13,8 @@ end
 --- - The function searches for `tool_name.lua` within directories specified in the `tools_dir` setting.
 ---
 ---@param tool_name string The name of the tool file to load (without the `.lua` extension).
----@param reload? boolean|nil Optional. If `true`, reloads the tool even if it has already been loaded. Defaults to `false`.
+---@param reload boolean? Optional. If `true`, reloads the tool even if it has already been loaded. Defaults to `false`.
 function Context:load_tool(tool_name, reload)
-    use(tool_name)
-    use(reload)
 end
 
 --- Represents a command that has been declared within the context.
@@ -42,9 +33,6 @@ local DeclaredCommand = {}
 ---                                      Derived environments will inherit from these environments for use during command execution.
 ---@return DeclaredCommand A `DeclaredCommand` object representing the newly declared command, which can be used for chaining.
 function Context:declare_command(name, fun, envs)
-    use(name)
-    use(fun)
-    use(envs)
     return DeclaredCommand
 end
 
@@ -57,8 +45,5 @@ end
 ---@param fun string The function name associated with the new command, corresponding to `Context.fun`.
 ---@return DeclaredCommand A `DeclaredCommand` object for the newly declared chained command, allowing further declarations if needed.
 function Context:chain_command(depending, name, fun)
-    use(depending)
-    use(name)
-    use(fun)
     return DeclaredCommand
 end

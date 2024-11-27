@@ -4,7 +4,7 @@ local context = ...
 BoltGnuCompiler = { }
 
 ---Retrieves some GCC specifications and store them in the current context environment
----@param command (string|Node)[]) The command to execute for the compiler.
+---@param command (string|Node)[] The command to execute for the compiler.
 ---@param language string The name of the language (uppercase, C or CXX).
 function BoltGnuCompiler.get_specs(command, language)
     local env = context.env
@@ -32,9 +32,7 @@ function BoltGnuCompiler.get_specs(command, language)
     ---@type Node[]
     local includes = {}
     local search_paths = false
-    local arch = nil
-    local endianness = nil
-    local sizeof_pointer = nil
+    local arch, endianness, sizeof_pointer
     for line in (err + out):lines() do
         if string.starts_with(line, 'Target: ') then
             env.TARGET = line:sub(9, -1)
@@ -107,16 +105,16 @@ function BoltGnuCompiler.get_specs(command, language)
     env[language .. "_COMPILER_SYSTEM_INCLUDES"] = includes
     if env.BINARY_FORMAT == 'mach' then
         env.PROGRAM_PATTERN = '%s'
-        env.SHLIB_PATTERN = '%s.dylib'
-        env.STLIB_PATTERN = '%s.a'
+        env.SHLIB_PATTERN = 'lib%s.dylib'
+        env.STLIB_PATTERN = 'lib%s.a'
     elseif env.BINARY_FORMAT == 'elf' then
         env.PROGRAM_PATTERN = '%s'
-        env.SHLIB_PATTERN = '%s.so'
-        env.STLIB_PATTERN = '%s.a'
+        env.SHLIB_PATTERN = 'lib%s.so'
+        env.STLIB_PATTERN = 'lib%s.a'
     elseif env.BINARY_FORMAT == 'pe' then
         env.PROGRAM_PATTERN = '%s.exe'
-        env.SHLIB_PATTERN = '%s.dylib'
-        env.STLIB_PATTERN = '%s.a'
+        env.SHLIB_PATTERN = '%s.dll'
+        env.STLIB_PATTERN = '%s.lib'
     else
         context:warn('unable to determine binary format')
         env.PROGRAM_PATTERN = '%s'
