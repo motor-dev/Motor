@@ -1,7 +1,7 @@
 ---@type Context
 local context = ...
 
-context:dependency_driver('cxx', 'green', '${CXX} ${CXXFLAGS} ${CXX_SYSTEM_INCLUDE_ST:SYSTEM_INCLUDES} ${CXX_INCLUDE_ST:INCLUDES} ${CXX_DEFINE_ST:DEFINES} ${CXX_SRC_FLAG:SRC} ${CXX_TGT_F:TGT[0]}')
+context:dependency_driver('cxx', 'green', '${CXX} ${CXXFLAGS} ${CXX_SYSTEM_INCLUDE_ST:SYSTEM_INCLUDES} ${CXX_INCLUDE_ST:INCLUDES} ${CXX_DEFINE_ST:DEFINES} ${CXX_SRC_F:SRC} ${CXX_TGT_F:TGT[0]}')
 
 context:load_tool('internal/module_core')
 BoltModule.register_extension('cpp,cc,cxx,C', function(generator, source_file)

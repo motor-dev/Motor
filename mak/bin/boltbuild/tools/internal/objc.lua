@@ -1,7 +1,7 @@
 ---@type Context
 local context = ...
 
-context:dependency_driver('objc', 'green', '${OBJC} ${OBJCFLAGS} ${OBJC_SYSTEM_INCLUDE_ST:SYSTEM_INCLUDES} ${OBJC_INCLUDE_ST:INCLUDES} ${OBJC_DEFINE_ST:DEFINES} ${C_SRC_FLAG:SRC} ${C_TGT_F:TGT[0]}')
+context:dependency_driver('objc', 'green', '${OBJC} ${OBJCFLAGS} ${OBJC_SYSTEM_INCLUDE_ST:SYSTEM_INCLUDES} ${OBJC_INCLUDE_ST:INCLUDES} ${OBJC_DEFINE_ST:DEFINES} ${OBJC_SRC_F:SRC} ${OBJC_TGT_F:TGT[0]}')
 
 context:load_tool('internal/module_core')
 BoltModule.register_extension('m', function(generator, source_file)
