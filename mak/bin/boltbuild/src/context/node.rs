@@ -43,8 +43,6 @@ pub(super) fn search(
                 SerializedHash(hash),
             ));
         }
-    } else {
-        println!("{} does not exist", path);
     }
     result.sort();
     Ok(result)

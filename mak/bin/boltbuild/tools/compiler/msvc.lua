@@ -95,15 +95,17 @@ local function vswhere_msvc()
 end
 
 function BoltMsvc.discover(callback, language_flags, global_flags)
-    context:try('Looking for Msvc compilers', function()
-        local seen = {}
-        local compilers = vswhere_msvc()
+    if context.settings.OS == 'windows' then
+        context:try('Looking for Msvc compilers', function()
+            local seen = {}
+            local compilers = vswhere_msvc()
 
-        for _, cl in ipairs(compilers) do
-            context:try('Checking ' .. tostring(cl), function()
-                p = context:popen({ cl, })
-            end)
-        end
-        return 'done'
-    end)
+            for _, cl in ipairs(compilers) do
+                context:try('Checking ' .. tostring(cl), function()
+                    p = context:popen({ cl, })
+                end)
+            end
+            return 'done'
+        end)
+    end
 end

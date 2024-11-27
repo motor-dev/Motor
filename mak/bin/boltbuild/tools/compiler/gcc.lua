@@ -19,7 +19,7 @@ local function load_gcc_compiler(env, compiler, flags, language, var_name)
     env.LINK_TGT_F = '-o'
     env.LINK_LIB_F = '-l'
     env.LINK_LIBPATH_F = '-L'
-    env.LINKFLAGS_shlib = { '-shared', '-Wl,-z,defs' }
+    env.LINKFLAGS_shlib = { '-shared' }
 
     local defines = BoltGnuCompiler.get_specs(compiler, var_name)
     local version = { 0, 0, 0 }
@@ -35,6 +35,10 @@ local function load_gcc_compiler(env, compiler, flags, language, var_name)
     end
 
     env['GCC_' .. var_name .. '_VERSION'] = table.concat(version, '.')
+
+    if env.BINARY_FORMAT == 'elf' then
+        env:append('LINKFLAGS_shlib', '-Wl,-z,defs')
+    end
 
     context:load_tool('internal/' .. language)
     context:load_tool('internal/link')
@@ -133,6 +137,7 @@ function BoltGcc.discover(callback, language_flags, global_flags, detect_multili
                         if pcall(function()
                             local env = context:derive()
                             context:with(env, function()
+                                context.env.TRIPLE = target
                                 context.env.GCC = { gcc }
                                 context.env:append('GCC', global_flags)
                                 context.env.GCC_VERSION = version
@@ -148,6 +153,7 @@ function BoltGcc.discover(callback, language_flags, global_flags, detect_multili
                                 pcall(function()
                                     local env = context:derive()
                                     context:with(env, function()
+                                        context.env.TRIPLE = target
                                         context.env.CC = { gcc }
                                         context.env:append('GCC', global_flags)
                                         context.env:append('GCC', '-m' .. multilib.parent:name())

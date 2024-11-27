@@ -59,8 +59,11 @@ local function load_clang(env, compiler, flags, lang, var)
     env.LINK_TGT_F = '-o'
     env.LINK_LIB_F = '-l'
     env.LINK_LIBPATH_F = '-L'
-    env.LINKFLAGS_shlib = { '-shared', '-Wl,-z,defs' }
+    env.LINKFLAGS_shlib = { '-shared' }
     env['CLANG_' .. var .. '_VERSION'] = get_clang_version(BoltGnuCompiler.get_specs(compiler, var))
+    if env.BINARY_FORMAT == 'elf' then
+        env:append('LINKFLAGS_shlib', '-Wl,-z,defs')
+    end
 
     context:load_tool('internal/' .. lang)
     context:load_tool('internal/link')
@@ -194,6 +197,7 @@ local function detect_clang_targets(clang, callback, language_flags, global_flag
         context:try('running clang ' .. clang:abs_path() .. ' for target ' .. triple, function()
             local env = context:derive()
             context:with(env, function()
+                context.env.TRIPLE = triple
                 context.env.CLANG = { clang, '-target', triple, table.unpack(global_flags) }
                 for lang, flags in pairs(language_flags) do
                     languages[lang](flags)
@@ -261,6 +265,7 @@ function BoltClang.discover(callback, language_flags, global_flags, detect_cross
                         for lang, flags in pairs(language_flags) do
                             languages[lang](flags)
                         end
+                        context.env.TRIPLE = context.env.TARGET
                     end)
                     if callback(env) ~= true then
                         return 'done'
