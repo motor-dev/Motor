@@ -1,9 +1,3 @@
----@meta
-
-local function use(var)
-    return var
-end
-
 --- Registers a callback function associated with a specific build feature or set of features.
 --- - Features represent specific steps or capabilities within the build process, and each feature can have associated callbacks.
 --- - This allows modular steps to be registered for execution when the given feature(s) are triggered.
@@ -13,9 +7,6 @@ end
 ---@param callback fun(generator:Generator):void The function to execute when this feature is triggered.
 ---@return Feature A new Feature object that allows setting dependency order.
 function Context:feature(feature, name, callback)
-    use(feature)
-    use(name)
-    use(callback)
     return Feature
 end
 
@@ -29,7 +20,6 @@ Feature = {}
 ---@param predecessors string[] An optional list of steps that must complete before this step runs.
 ---@return Feature The same Feature object for chaining further configurations.
 function Feature:set_run_after(predecessors)
-    use(predecessors)
     return self
 end
 
@@ -39,7 +29,6 @@ end
 ---@param successors string[] An optional list of steps that must execute after this step completes.
 ---@return Feature The same Feature object for chaining further configurations.
 function Feature:set_run_before(successors)
-    use(successors)
     return self
 end
 
@@ -49,5 +38,4 @@ end
 ---
 ---@param generator Generator The generator to post for execution.
 function Context:post(generator)
-    use(generator)
 end

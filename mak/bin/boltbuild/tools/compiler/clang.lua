@@ -155,8 +155,8 @@ local function detect_clang_targets(clang, callback, language_flags, global_flag
         end
     end
 
-    local default_triple = nil
-    local triples = {}
+    local default_triple
+    local triples = { }
     for _, path in ipairs(paths) do
         local component, relpath, component_count = path:name(), '', 1
         while component do
@@ -165,7 +165,7 @@ local function detect_clang_targets(clang, callback, language_flags, global_flag
             if #component_list >= 2 then
                 for _, triple in ipairs(context:search(path, '*-*/' .. relpath .. '/sys', true)) do
                     default_triple = component
-                    for i = 1, component_count do
+                    for _ = 1, component_count do
                         triple = triple.parent
                     end
                     triple = triple:name()

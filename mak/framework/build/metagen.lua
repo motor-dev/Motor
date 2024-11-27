@@ -41,7 +41,7 @@ context:feature('metagen ', 'metagen ', function(generator)
     end
 end)
 
-context:feature('c, cxx', 'process_out_source', function(generator)
+context:feature('module', 'process_out_source', function(generator)
     local metagen = context:get_generator_by_name(generator.name .. '.metagen')
     if metagen then
         ---@param source_node Node

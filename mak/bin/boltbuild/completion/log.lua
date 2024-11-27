@@ -1,15 +1,8 @@
----@meta
-
-local function use(var)
-    return var
-end
-
 --- Logs a debug-level message.
 --- Debug messages provide detailed information for troubleshooting and are shown in the console only if the verbosity
 --- level is set to 2 or higher, but they are always recorded in the log file.
 ---@param message string The debug message to log.
 function Context:debug(message)
-    use(message)
 end
 
 --- Logs an informational message.
@@ -17,21 +10,18 @@ end
 --- They are always recorded in the log file, regardless of verbosity level.
 ---@param message string The informational message to log.
 function Context:info(message)
-    use(message)
 end
 
 --- Logs a warning message.
 --- Warnings indicate potential issues or non-critical errors. They are shown on the console and recorded in the log file.
 ---@param message string The warning message to log.
 function Context:warn(message)
-    use(message)
 end
 
 --- Logs an error message.
 --- Error messages indicate critical issues in execution. They are displayed on the console and recorded in the log file.
 ---@param message string The error message to log.
 function Context:error(message)
-    use(message)
 end
 
 --- Raises a critical error, logging a message and generating a Lua error.
@@ -41,14 +31,12 @@ end
 ---
 ---@param message string The error message to log and raise.
 function Context:raise_error(message)
-    use(message)
 end
 
 --- Prints a plain message to the console.
 --- This message is only output to the console and not logged to the log file.
 ---@param message string The message to print.
 function Context:print(message)
-    use(message)
 end
 
 --- Prints a formatted message to the console, with support for text and background colors.
@@ -60,7 +48,6 @@ end
 ---
 ---@param message string The message to print, with optional color and background formatting.
 function Context:color_print(message)
-    use(message)
 end
 
 --- Runs a function within a "try" block, logging messages before and after execution, and returning a boolean indicating success.
@@ -77,8 +64,6 @@ end
 ---
 ---@param message string The message to log before the operation begins.
 ---@param func fun():any The function to run within the try block.
----@return boolean `true` if the function completed successfully; `false` if an error occurred.
+---@return boolean true if the function completed successfully; `false` if an error occurred.
 function Context:try(message, func)
-    use(message)
-    use(func)
 end
