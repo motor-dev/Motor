@@ -44,11 +44,11 @@ function Bolt.Winres.find_winres(env)
 end
 
 ---@param generator Module
-Bolt.Module.register_extension('ico', function(generator, source_file)
+Bolt.ModuleCore.register_extension('ico', function(generator, source_file)
 end)
 
 ---@param generator Module
-Bolt.Module.register_extension('rc', function(generator, source_file)
+Bolt.ModuleCore.register_extension('rc', function(generator, source_file)
     if generator.env.RC then
         local out_node = generator:make_build_node(source_file, 'obj')
         local task = generator:declare_task('rc', { source_file.full_path }, { out_node })

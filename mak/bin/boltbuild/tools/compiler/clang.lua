@@ -54,6 +54,8 @@ local function load_clang(env, compiler, flags, lang, var)
     env[var .. '_INCLUDE_ST'] = '-I'
     env[var .. '_SYSTEM_INCLUDE_ST'] = '-isystem%s'
     env[var .. '_IDIRAFTER'] = '-idirafter'
+    env[var .. 'FLAGS.warn.none'] = { '-w'}
+    env[var .. 'FLAGS.warn.all'] = { '-Wall', '-Wextra', '-Wpedantic' }
     env.LINK = env.CLANG
     env.LINKFLAGS = {}
     env.LINK_TGT_F = '-o'

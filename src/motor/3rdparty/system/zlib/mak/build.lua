@@ -17,6 +17,7 @@ elseif context.env.ZLIB_SRC_NODE then
 
         internal_defines = { {'Z_HAVE_UNISTD_H', ''}, {'ZLIB_INTERNAL', ''} },
         public_defines = { {'ZLIB_DLL', ''} },
+        flag_groups = { 'warn.none' },
     })
 else
     context:raise_error('zlib not found')
@@ -40,6 +41,7 @@ elseif context.env.MINIZIP_SRC_NODE then
         public_dependencies = {
             zlib
         },
+        flag_groups = { 'warn.none' },
     })
 else
     context:raise_error('minizip not found')

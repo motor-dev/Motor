@@ -25,7 +25,7 @@ context:command_driver('bison',
         { 'c', 'cxx' })
 
 ---@param generator Module
-Bolt.Module.register_extension('y,yy', function(generator, source_file)
+Bolt.ModuleCore.register_extension('y,yy', function(generator, source_file)
     local out_node, directory = generator:make_build_node(source_file, 'src')
     local header
     if source_file.full_path:extension() == 'yy' then

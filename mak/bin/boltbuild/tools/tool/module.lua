@@ -4,6 +4,8 @@ local context = ...
 context:load_tool('internal/module_core')
 context:load_tool('internal/module_process')
 
+Bolt.Module = {}
+
 ---@class SourcePattern
 ---@field path Node
 ---@field pattern string
@@ -25,6 +27,7 @@ local _ = {}
 ---@field internal_dependencies string[]|nil
 ---@field public_flags table<string,string>[]|nil
 ---@field internal_flags table<string,string>[]|nil
+---@field flag_groups string[]
 ---@field source SourceFile[]|nil
 ---@field source_patterns SourcePattern[]|nil
 ---@field source_filter nil|fun(source_file:SourceFile,env:Environment):boolean,boolean
@@ -43,6 +46,7 @@ local _ = {}
 ---@field public_dependencies Generator[]
 ---@field internal_flags table<string,string>[]
 ---@field public_flags table<string,string>[]
+---@field flag_groups string[]
 local Module = {}
 
 ---@param path Node
@@ -134,6 +138,7 @@ function Bolt.Module.module(name, properties)
     g.public_dependencies = properties.public_dependencies or { }
     g.internal_flags = properties.internal_flags or { }
     g.public_flags = properties.public_flags or { }
+    g.flag_groups = properties.flag_groups or { }
     g.dep_link_tasks = {}
 
     g.add_source = Module.add_source
