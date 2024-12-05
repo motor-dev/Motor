@@ -112,7 +112,7 @@ local function module(name, path, lib_types)
         group = group .. '.nobulk'
     end
 
-    local generator = BoltModule.module(name, {
+    local generator = Bolt.Module.module(name, {
         features = { lib_type },
         group = group,
         source_patterns = {

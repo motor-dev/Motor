@@ -3,21 +3,29 @@ use crate::task::Task;
 use serde::{Deserialize, Serialize};
 
 mod command;
+mod copy;
 mod dependency;
 mod lua;
+mod patch;
+mod untar;
+mod unzip;
 
 #[derive(Serialize, Deserialize)]
 enum DriverConfiguration {
     Command(command::CommandDriverConfiguration),
     DependencyCommand(dependency::DependencyCommandDriverConfiguration),
     Lua(lua::LuaDriverConfiguration),
+    Untar(untar::UntarDriverConfiguration),
+    Unzip(unzip::UnzipDriverConfiguration),
+    Patch(patch::PatchDriverConfiguration),
+    Copy(copy::CopyDriverConfiguration),
 }
 
 pub(crate) struct Output {
     pub(crate) exit_code: u32,
     pub(crate) command: String,
     pub(crate) log: String,
-    pub(crate) hash: blake3::Hash,
+    pub(crate) driver_hash: blake3::Hash,
     pub(crate) driver_dependencies: Vec<Node>,
     pub(crate) file_dependencies: Vec<Node>,
     pub(crate) extra_output: Vec<Node>,
@@ -55,6 +63,34 @@ impl Driver {
         }
     }
 
+    pub(crate) fn untar(color: String) -> Self {
+        Self {
+            color,
+            configuration: DriverConfiguration::Untar(untar::UntarDriverConfiguration::new()),
+        }
+    }
+
+    pub(crate) fn unzip(color: String) -> Self {
+        Self {
+            color,
+            configuration: DriverConfiguration::Unzip(unzip::UnzipDriverConfiguration::new()),
+        }
+    }
+
+    pub(crate) fn patch(color: String) -> Self {
+        Self {
+            color,
+            configuration: DriverConfiguration::Patch(patch::PatchDriverConfiguration::new()),
+        }
+    }
+
+    pub(crate) fn copy(color: String) -> Self {
+        Self {
+            color,
+            configuration: DriverConfiguration::Copy(copy::CopyDriverConfiguration::new()),
+        }
+    }
+
     pub(crate) fn get_color(&self) -> &str {
         self.color.as_str()
     }
@@ -64,6 +100,10 @@ impl Driver {
             DriverConfiguration::Command(cmd) => cmd.execute(task),
             DriverConfiguration::DependencyCommand(cmd) => cmd.execute(task),
             DriverConfiguration::Lua(cmd) => cmd.execute(task),
+            DriverConfiguration::Untar(cmd) => cmd.execute(task),
+            DriverConfiguration::Unzip(cmd) => cmd.execute(task),
+            DriverConfiguration::Patch(cmd) => cmd.execute(task),
+            DriverConfiguration::Copy(cmd) => cmd.execute(task),
         }
     }
 
@@ -72,6 +112,10 @@ impl Driver {
             DriverConfiguration::Command(cmd) => cmd.hash(driver_dependencies),
             DriverConfiguration::DependencyCommand(cmd) => cmd.hash(driver_dependencies),
             DriverConfiguration::Lua(cmd) => cmd.hash(driver_dependencies),
+            DriverConfiguration::Untar(cmd) => cmd.hash(driver_dependencies),
+            DriverConfiguration::Unzip(cmd) => cmd.hash(driver_dependencies),
+            DriverConfiguration::Patch(cmd) => cmd.hash(driver_dependencies),
+            DriverConfiguration::Copy(cmd) => cmd.hash(driver_dependencies),
         }
     }
 }

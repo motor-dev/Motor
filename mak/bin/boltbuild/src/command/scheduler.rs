@@ -53,7 +53,7 @@ impl Command {
 
             let dependency_nodes = inputs
                 .intersection(&outputs)
-                .map(|x| *x)
+                .copied()
                 .collect::<HashSet<_>>();
             let (result, new_cache) = scheduler.execute(
                 dependency_nodes,
@@ -127,7 +127,7 @@ struct TaskResult<'a> {
 enum WorkResult<'a> {
     FileHashResult(usize, Vec<blake3::Hash>),
     TaskSkipped(usize, Vec<(&'a Node, blake3::Hash)>),
-    TaskStart(usize, usize, &'static str, &'a str),
+    TaskStart(usize, usize, String, &'a str),
     TaskResult(TaskResult<'a>),
     DependencyResult(usize, TaskCacheEntry),
     TaskCanceled(usize),
@@ -206,9 +206,8 @@ impl<'command> Scheduler<'command> {
                 match dependency_hashes.entry(dependency.clone()) {
                     Entry::Vacant(entry) => {
                         let mut dep_hasher = blake3::Hasher::new();
-                        if let Ok(file) = File::open(dependency.path()) {
-                            dep_hasher.update_reader(file).unwrap();
-                        }
+                        let file = File::open(dependency.path()).unwrap();
+                        dep_hasher.update_reader(file).unwrap();
                         let hash = dep_hasher.finalize();
                         hasher.update(hash.as_bytes());
                         entry.insert(hash);
@@ -239,7 +238,7 @@ impl<'command> Scheduler<'command> {
     fn execute_thread(
         &self,
         dependency_nodes: &HashSet<&Node>,
-        tasks_cache: &Vec<Option<TaskCacheEntry>>,
+        tasks_cache: &[Option<TaskCacheEntry>],
         thread_index: usize,
         work_pipe: Receiver<WorkRequest>,
         result_pipe: Sender<WorkResult<'command>>,
@@ -251,9 +250,23 @@ impl<'command> Scheduler<'command> {
                     let mut result = Vec::with_capacity(paths.len());
                     for path in paths {
                         let mut hasher = blake3::Hasher::new();
-                        let file = File::open(path.path());
-                        if let Ok(file) = file {
-                            hasher.update_reader(file).unwrap();
+                        if !path.is_dir() {
+                            let file = File::open(path.path());
+                            if let Ok(file) = file {
+                                hasher.update_reader(file).unwrap();
+                            }
+                        } else {
+                            for f in glob::glob(format!("{}/**/*", path).as_str())
+                                .unwrap()
+                                .flatten()
+                            {
+                                if !f.is_dir() {
+                                    let file = File::open(f);
+                                    if let Ok(file) = file {
+                                        hasher.update_reader(file).unwrap();
+                                    }
+                                }
+                            }
                         }
                         let hash = hasher.finalize();
                         result.push(hash);
@@ -271,52 +284,38 @@ impl<'command> Scheduler<'command> {
                         let task = &self.tasks_pool[task_index];
                         let driver = self.drivers.get(&task.driver).unwrap();
                         let mut hashes = Vec::new();
-                        let (do_run, reason) = if let Some(cache) = &tasks_cache[task_index] {
-                            if input_hash != cache.input_hash.0 {
-                                (true, "an input file has changed")
-                            } else if dependency_hash != cache.dependency_hash.0 {
-                                (true, "a dependency file has changed")
-                            } else if driver.driver_hash(&cache.driver_dependencies)
-                                != cache.driver_hash.0
+                        let (do_run, reason) = match &tasks_cache[task_index] {
+                            Some(cache) if input_hash != cache.input_hash.0 => {
+                                (true, "an input file has changed".to_string())
+                            }
+                            Some(cache) if dependency_hash != cache.dependency_hash.0 => {
+                                (true, "a dependency file has changed".to_string())
+                            }
+                            Some(cache)
+                                if driver.driver_hash(&cache.driver_dependencies)
+                                    != cache.driver_hash.0 =>
                             {
-                                (true, "the driver has changed")
-                            } else {
+                                (true, "the driver has changed".to_string())
+                            }
+                            Some(cache) => {
                                 let mut hasher = blake3::Hasher::new();
-                                let env = &self.tasks_pool[task_index].env;
-                                let env = env.lock().unwrap();
+                                let env = task.env.lock().unwrap();
                                 for var in &cache.environment_dependencies {
                                     env.get_raw(var.as_str()).hash(&mut hasher);
                                 }
-                                if !hasher.finalize().eq(&cache.environment_hash.0) {
-                                    (true, "the environment has been modified")
+                                if hasher.finalize() != cache.environment_hash.0 {
+                                    (true, "the environment has been modified".to_string())
                                 } else {
-                                    let mut outputs = self.tasks_pool[task_index].outputs.iter();
-                                    loop {
-                                        if let Some(output) = outputs.next() {
-                                            if dependency_nodes.contains(output) {
-                                                let mut hasher = blake3::Hasher::new();
-                                                if let Ok(file) = File::open(output.path()) {
-                                                    if hasher.update_reader(file).is_ok() {
-                                                        hashes.push((output, hasher.finalize()));
-                                                    } else {
-                                                        hashes.clear();
-                                                        break (true, "an output file could not be opened for read");
-                                                    }
-                                                } else {
-                                                    hashes.clear();
-                                                    break (true, "an output file is missing");
-                                                }
-                                            } else if !output.is_file() {
-                                                break (true, "an output file is missing");
-                                            }
-                                        } else {
-                                            break (false, "the task is up-to-date");
+                                    match hash_output_files(&task.outputs, dependency_nodes) {
+                                        Ok(out_hashes) => {
+                                            hashes = out_hashes;
+                                            (false, "the task is up-to-date".to_string())
                                         }
+                                        Err(error) => (true, error),
                                     }
                                 }
                             }
-                        } else {
-                            (true, "the task has never been run")
+                            None => (true, "the task has never been run".to_string()),
                         };
 
                         if do_run {
@@ -333,37 +332,18 @@ impl<'command> Scheduler<'command> {
                             }
                             let mut output = driver.execute(task);
 
-                            let mut hashes = Vec::new();
-                            if output.exit_code == 0 {
-                                for node in &self.tasks_pool[task_index].outputs {
-                                    if dependency_nodes.contains(node) {
-                                        let mut hasher = blake3::Hasher::new();
-                                        if let Ok(file) = File::open(node.path()) {
-                                            if hasher.update_reader(file).is_ok() {
-                                                hashes.push((node, hasher.finalize()));
-                                            } else {
-                                                output.exit_code = 1;
-                                                output.log.push_str(
-                                                    format!(
-                                                        "output file {:?} could not be read\n",
-                                                        node.path()
-                                                    )
-                                                    .as_str(),
-                                                );
-                                            }
-                                        } else {
-                                            output.exit_code = 1;
-                                            output.log.push_str(
-                                                format!(
-                                                    "output file {:?} is missing\n",
-                                                    node.path()
-                                                )
-                                                .as_str(),
-                                            );
-                                        }
+                            let hashes = if output.exit_code == 0 {
+                                match hash_output_files(&task.outputs, dependency_nodes) {
+                                    Ok(hashes) => hashes,
+                                    Err(error) => {
+                                        output.exit_code = 1;
+                                        output.log = error;
+                                        Vec::new()
                                     }
                                 }
-                            }
+                            } else {
+                                Vec::new()
+                            };
 
                             let mut env_hasher = blake3::Hasher::new();
                             let env = &task.env;
@@ -397,7 +377,7 @@ impl<'command> Scheduler<'command> {
                                             environment_dependencies,
                                             environment_hash: env_hasher.finalize(),
                                             driver_dependencies: output.driver_dependencies,
-                                            driver_hash: SerializedHash(output.hash),
+                                            driver_hash: SerializedHash(output.driver_hash),
                                             extra_output: output.extra_output,
                                         },
                                     ))
@@ -417,7 +397,7 @@ impl<'command> Scheduler<'command> {
     fn execute(
         &mut self,
         dependency_nodes: HashSet<&Node>,
-        tasks_cache: &Vec<Option<TaskCacheEntry>>,
+        tasks_cache: &[Option<TaskCacheEntry>],
         logger: &mut Logger,
         thread_count: usize,
         title: &str,
@@ -609,20 +589,22 @@ impl<'command> Scheduler<'command> {
                             } else {
                                 task.outputs[0].name()
                             };
-                            log_task_start(
-                                logger,
-                                work_index,
-                                task_count_str.as_str(),
-                                format!(
-                                    "{{{}}}{:<width$}{{reset}} {}/{}",
-                                    color,
-                                    task.driver,
-                                    task.generator,
-                                    id,
-                                    width = longest_group
-                                )
-                                .as_str(),
-                            );
+                            if progress_mode < 2 {
+                                log_task_start(
+                                    logger,
+                                    work_index,
+                                    task_count_str.as_str(),
+                                    format!(
+                                        "{{{}}}{:<width$}{{reset}} {}/{}",
+                                        color,
+                                        task.driver,
+                                        task.generator,
+                                        id,
+                                        width = longest_group
+                                    )
+                                    .as_str(),
+                                );
+                            }
                         }
                         WorkResult::DependencyResult(task_index, result) => {
                             processed_tasks += 1;
@@ -652,7 +634,7 @@ impl<'command> Scheduler<'command> {
                                     task_work[successor].0 -= 1;
                                     if task_work[successor].0 == 0 {
                                         self.on_task_ready(
-                                            &tasks_cache,
+                                            tasks_cache,
                                             &send_request,
                                             successor,
                                             &file_hashes,
@@ -697,7 +679,7 @@ impl<'command> Scheduler<'command> {
 
     fn on_task_ready(
         &self,
-        tasks_cache: &Vec<Option<TaskCacheEntry>>,
+        tasks_cache: &[Option<TaskCacheEntry>],
         work_pipe: &Sender<WorkRequest>,
         task_index: usize,
         file_hashes: &HashMap<Node, blake3::Hash>,
@@ -705,7 +687,21 @@ impl<'command> Scheduler<'command> {
         let task = &self.tasks_pool[task_index];
         let mut input_hasher = blake3::Hasher::new();
         for input in &task.inputs {
-            input_hasher.update(file_hashes.get(input).unwrap().as_bytes());
+            if input.is_dir() {
+                for f in glob::glob(format!("{}/**/*", input).as_str())
+                    .unwrap()
+                    .flatten()
+                {
+                    if !f.is_dir() {
+                        let file = File::open(f);
+                        if let Ok(file) = file {
+                            input_hasher.update_reader(file).unwrap();
+                        }
+                    }
+                }
+            } else {
+                input_hasher.update(file_hashes.get(input).unwrap().as_bytes());
+            }
         }
 
         let mut dependency_hasher = blake3::Hasher::new();
@@ -800,7 +796,7 @@ fn log_task_end(logger: &mut Logger, result: u32, command: &str, message: &str) 
             .as_str(),
         );
     } else if !message.is_empty() {
-        logger.colored_print(format!("{{bright_white}}{}{{reset}}", command).as_str());
+        logger.colored_print(format!("{{dim}}{}{{reset}}", command).as_str());
         logger.print(format!("\n{}", message).as_str());
     } else {
         logger.info(command);
@@ -833,7 +829,7 @@ fn log_progress(
     let v2 = (elapsed.as_millis() - f1 * v1) / f2;
 
     let terminal_width = logger.terminal_width();
-    let progress_width = terminal_width - 9 - thread_activity.len();
+    let progress_width = terminal_width - 8 - thread_activity.len();
     let progress_bar = if title.len() > progress_width {
         let mut title = title[..progress_width - 3].to_string();
         title.push('.');
@@ -854,14 +850,14 @@ fn log_progress(
 
     if remainder == 0 {
         logger.set_status(format!(
-            "{{bg:green}}{{black}}{}{{green}}{{bg:black}}{}{{reset}}{{bg:reset}}[{{red}}{}{{reset}}][{{green}}{:2}{}{:02}{{reset}}]",
+            "{{bg:green}}▎{{black}}{}{{green}}{{bg:dark_grey}}{}▕{{reset}}{{bg:reset}}{{red}}{}{{reset}}▏{{green}}{:2}{}{:02}{{reset}}",
             &progress_bar[0..progress],
             &progress_bar[progress..progress_bar.len()],
             thread_activity.iter().collect::<String>(),
             v1, unit, v2).as_str());
     } else {
         logger.set_status(format!(
-            "{{bg:green}}{{black}}{}{{green}}{{bg:black}}{}{}{{reset}}{{bg:reset}}[{{red}}{}{{reset}}][{{green}}{:2}{}{:02}{{reset}}]",
+            "{{bg:green}}▎{{black}}{}{{green}}{{bg:dark_grey}}{}{}▕{{reset}}{{bg:reset}}{{red}}{}{{reset}}▏{{green}}{:2}{}{:02}{{reset}}",
             &progress_bar[0..progress],
             GRAPH_EIGTHS[remainder - 1],
             &progress_bar[progress + 1..progress_bar.len()],
@@ -914,11 +910,11 @@ fn load_cache<T>(
 }
 
 fn save_cache<T>(
-    tasks_pool: &Vec<Task>,
+    tasks_pool: &[Task],
     logger: &mut Logger,
     out_dir: &Path,
     groups: &[(String, T)],
-    tasks_cache: &mut Vec<Option<TaskCacheEntry>>,
+    tasks_cache: &mut [Option<TaskCacheEntry>],
     mut cache: Vec<HashMap<SerializedHash, TaskCacheEntry>>,
 ) {
     /* save all caches */
@@ -961,4 +957,38 @@ fn save_cache<T>(
             }
         }
     }
+}
+
+fn hash_output_files<'task>(
+    outputs: &'task [Node],
+    dependency_nodes: &HashSet<&Node>,
+) -> std::result::Result<Vec<(&'task Node, blake3::Hash)>, String> {
+    let mut hashes = Vec::new();
+    for node in outputs {
+        if dependency_nodes.contains(node) {
+            let mut hasher = blake3::Hasher::new();
+            if node.is_dir() {
+                let paths = glob::glob(format!("{}/**/*", node).as_str()).unwrap();
+                let mut paths = paths.flatten().collect::<Vec<_>>();
+                paths.sort();
+                for path in paths {
+                    let file = File::open(path);
+                    if let Ok(file) = file {
+                        hasher.update_reader(file).unwrap();
+                    } else {
+                        return Err(format!("output file `{}` is missing\n", node));
+                    }
+                }
+            } else if let Ok(file) = File::open(node.path()) {
+                if hasher.update_reader(file).is_ok() {
+                    hashes.push((node, hasher.finalize()));
+                } else {
+                    return Err(format!("output file `{}` could not be read\n", node));
+                }
+            } else {
+                return Err(format!("output file `{}` is missing\n", node));
+            }
+        }
+    }
+    Ok(hashes)
 }

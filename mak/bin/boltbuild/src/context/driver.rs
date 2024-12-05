@@ -1,10 +1,14 @@
+use crate::command::SerializedHash;
 use crate::context::Context;
 use crate::driver::Driver;
+use crate::environment::ReadWriteEnvironment;
 use crate::node::Node;
-use crate::task::{ENV_RE, SPLIT_RE};
-use mlua::prelude::{LuaError, LuaResult};
-use mlua::Lua;
+use crate::task::{Task, ENV_RE, SPLIT_RE};
+use mlua::prelude::{LuaError, LuaResult, LuaValue};
+use mlua::{AnyUserData, FromLua, Lua};
 use std::collections::hash_map::Entry;
+use std::ops::Deref;
+use std::sync::{Arc, Mutex};
 
 fn is_command_valid(command: &str) -> bool {
     for argument in SPLIT_RE.split(command) {
@@ -85,4 +89,54 @@ fn insert_driver(
             Ok(())
         }
     }
+}
+
+pub(super) fn run_driver(
+    lua: &Lua,
+    context: &Context,
+    (name, inputs, outputs, env): (String, LuaValue, LuaValue, Option<AnyUserData>),
+) -> LuaResult<(u32, String)> {
+    let driver = context
+        .output
+        .drivers
+        .get(&name)
+        .ok_or_else(|| LuaError::RuntimeError(format!("Tool {} not found", name)))?;
+    let inputs = match &inputs {
+        LuaValue::Nil => Vec::new(),
+        LuaValue::Table(_) => Vec::<Node>::from_lua(inputs, lua)?,
+        LuaValue::UserData(d) => vec![d.borrow::<Node>()?.clone()],
+        _ => {
+            return Err(LuaError::RuntimeError(
+                "inputs should be a node or a list of nodes".to_string(),
+            ))
+        }
+    };
+    let outputs = match &outputs {
+        LuaValue::Nil => Vec::new(),
+        LuaValue::Table(_) => Vec::<Node>::from_lua(outputs, lua)?,
+        LuaValue::UserData(d) => vec![d.borrow::<Node>()?.clone()],
+        _ => {
+            return Err(LuaError::RuntimeError(
+                "outputs should be a node or a list of nodes".to_string(),
+            ))
+        }
+    };
+    let env = if let Some(env) = env {
+        env.borrow::<Arc<Mutex<ReadWriteEnvironment>>>()?.deref().clone()
+    } else {
+        context.environment.clone()
+    };
+    let task = Task {
+        driver: name,
+        generator: "context".to_string(),
+        group: "context".to_string(),
+        env,
+        inputs,
+        outputs,
+        predecessors: Vec::new(),
+        successors: Vec::new(),
+        signature: SerializedHash(blake3::hash(&[])),
+    };
+    let result = driver.execute(&task);
+    Ok((result.exit_code, result.log))
 }

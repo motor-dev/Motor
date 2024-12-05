@@ -108,6 +108,22 @@ impl Context {
         swap(commands, &mut self.commands);
         swap(&mut logger, &mut self.logger);
 
+        self.output.drivers.insert(
+            "untar".to_string(),
+            crate::driver::Driver::untar("cyan".to_string()),
+        );
+        self.output.drivers.insert(
+            "unzip".to_string(),
+            crate::driver::Driver::unzip("cyan".to_string()),
+        );
+        self.output.drivers.insert(
+            "patch".to_string(),
+            crate::driver::Driver::patch("cyan".to_string()),
+        );
+        self.output.drivers.insert(
+            "copy".to_string(),
+            crate::driver::Driver::copy("cyan".to_string()),
+        );
         {
             let lua = Lua::new();
             let globals = lua.globals();
@@ -119,7 +135,13 @@ impl Context {
             let run_content = |userdata: &mut AnyUserData, tool_path: &PathBuf| -> LuaResult<()> {
                 let chunk = lua
                     .load(TOOLS_DIR.get_file(tool_path).unwrap().contents())
-                    .set_name(PathBuf::from(TOOLS_PATH).join("tools").join(&tool_path).to_string_lossy());
+                    .set_name(format!(
+                        "@{}",
+                        PathBuf::from(TOOLS_PATH)
+                            .join("tools")
+                            .join(tool_path)
+                            .display(),
+                    ));
                 chunk.call(userdata.clone())
             };
 
@@ -127,6 +149,10 @@ impl Context {
                 .stored_hash
                 .file_dependencies
                 .push(ROOT_SCRIPT.into());
+            let root_path = std::env::current_dir()?.join(ROOT_SCRIPT);
+            if !root_path.is_file() {
+                return Err(format!("main script {} not found", ROOT_SCRIPT).into());
+            }
             lua.scope(|scope| {
                 let mut userdata = scope.create_userdata_ref_mut::<Context>(self).unwrap();
                 userdata.set_named_user_value(":features", lua.create_table()?)?;
@@ -147,7 +173,7 @@ impl Context {
                     }
                 }
 
-                run(&mut userdata, Path::new(ROOT_SCRIPT))?;
+                run(&mut userdata, root_path.as_path())?;
 
                 userdata.borrow_mut_scoped::<Context, _>(|this| {
                     this.in_post = 1;
@@ -159,12 +185,6 @@ impl Context {
                 Ok(())
             })?;
 
-            for (predecessor, successors) in self.task_dependencies.iter().enumerate() {
-                for &(successor, _) in successors {
-                    self.tasks[predecessor].successors.push(successor);
-                    self.tasks[successor].predecessors.push(predecessor);
-                }
-            }
             for (hasher, task) in zip(&self.signatures, &mut self.tasks) {
                 task.signature = SerializedHash(hasher.finalize());
                 let mut env = task.env.lock().unwrap();

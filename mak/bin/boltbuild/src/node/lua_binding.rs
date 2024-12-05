@@ -11,7 +11,7 @@ impl UserData for Node {
             let mut result = this.clone();
             result.path.pop();
             Ok(result)
-        })
+        });
     }
 
     fn add_methods<'lua, M: UserDataMethods<Self>>(methods: &mut M) {

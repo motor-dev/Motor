@@ -13,6 +13,8 @@
 ---For example, if `env.PATTERN = '-I'` and `env.SRC = {'/usr/include', '/usr/local/include'}`, the syntax `${PATTERN:SRC}`
 ---would expand to `-I/usr/include -I/usr/local/include`.
 ---
+---BoltBuild has preregistered drivers for utilities like `untar`, `unzip` and `patch`, which can be used directly in tasks.
+---
 ---@param name string The driver’s name.
 ---@param color string Color for logging this driver’s output.
 ---@param command string The command to execute, potentially including variables for expansion.

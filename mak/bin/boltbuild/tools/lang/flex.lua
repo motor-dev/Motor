@@ -2,9 +2,9 @@
 local context = ...
 context:load_tool('internal/module_core')
 
-BoltFlex = {}
+Bolt.Flex = {}
 
-function BoltFlex.find_flex()
+function Bolt.Flex.find_flex()
     if not context.env.FLEX then
         context:try('Looking for flex', function()
             local flex = context:find_program('flex')
@@ -25,7 +25,7 @@ context:command_driver('flex',
         { 'c', 'cxx' })
 
 ---@param generator Module
-BoltModule.register_extension('l,ll', function(generator, source_file)
+Bolt.Module.register_extension('l,ll', function(generator, source_file)
     local out_node, directory = generator:make_build_node(source_file, 'src')
     if source_file.full_path:extension() == 'll' then
         out_node = out_node:change_ext('cc')

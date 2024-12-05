@@ -29,7 +29,7 @@ local DeclaredCommand = {}
 ---
 ---@param name string The unique name of the command to declare. This name is linked to `Context.name`.
 ---@param fun string The function name associated with this command, linked to `Context.fun`.
----@param envs Environment|Environment[] An environment or list of environments that this command will use.
+---@param envs Environment|Environment[]? An environment or list of environments that this command will use.
 ---                                      Derived environments will inherit from these environments for use during command execution.
 ---@return DeclaredCommand A `DeclaredCommand` object representing the newly declared command, which can be used for chaining.
 function Context:declare_command(name, fun, envs)

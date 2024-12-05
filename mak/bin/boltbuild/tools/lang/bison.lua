@@ -2,9 +2,9 @@
 local context = ...
 context:load_tool('internal/module_core')
 
-BoltBison = {}
+Bolt.Bison = {}
 
-function BoltBison.find_bison()
+function Bolt.Bison.find_bison()
     if not context.env.BISON then
         context:try('Looking for bison', function()
             local bison = context:find_program('bison')
@@ -25,7 +25,7 @@ context:command_driver('bison',
         { 'c', 'cxx' })
 
 ---@param generator Module
-BoltModule.register_extension('y,yy', function(generator, source_file)
+Bolt.Module.register_extension('y,yy', function(generator, source_file)
     local out_node, directory = generator:make_build_node(source_file, 'src')
     local header
     if source_file.full_path:extension() == 'yy' then

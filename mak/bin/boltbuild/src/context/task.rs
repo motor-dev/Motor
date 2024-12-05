@@ -12,13 +12,13 @@ impl Context {
         nodes: &Vec<Node>,
         mut new_dependencies: Vec<(usize, usize, String)>,
         task_index: usize,
-        new_task: Option<&Task>,
+        new_task: Option<Task>,
     ) -> LuaResult<()> {
         for node in nodes {
-            if self.products.contains_key(node.path()) {
-                let task = &self.tasks[self.products[node.path()]];
+            if self.products.contains_key(node) {
+                let task = &self.tasks[self.products[node]];
                 return Err(LuaError::RuntimeError(format!(
-                    "cannot declared product {}: already a product of task\n  {}",
+                    "cannot declare product {}: already a product of task\n  {}",
                     node, task
                 )));
             }
@@ -33,7 +33,7 @@ impl Context {
 
         for node in nodes {
             /* in case the same node is added twice */
-            match self.products.entry(node.path().clone()) {
+            match self.products.entry(node.clone()) {
                 Entry::Vacant(vacant_entry) => {
                     vacant_entry.insert(task_index);
                 }
@@ -45,9 +45,10 @@ impl Context {
 
     pub(crate) fn add_dependencies(
         &mut self,
-        mut new_dependencies: Vec<(usize, usize, String)>,
-        new_task: Option<&Task>,
+        dependencies: Vec<(usize, usize, String)>,
+        new_task: Option<Task>,
     ) -> Result<()> {
+        let mut new_dependencies = dependencies.clone();
         if !new_dependencies.is_empty() {
             let mut commit_dependencies = Vec::new();
             new_dependencies.sort();
@@ -61,17 +62,23 @@ impl Context {
                         break;
                     }
                 }
-                self.add_dependency_set(&set, &commit_dependencies, new_task)?;
+                self.add_dependency_set(&set, &commit_dependencies, new_task.as_ref())?;
                 commit_dependencies.extend(set);
             }
-            if new_task.is_some() {
+            if let Some(new_task) = new_task {
                 self.task_dependencies.push(Vec::new());
+                self.tasks.push(new_task);
+            }
+            for (predecessor, successor, _) in dependencies {
+                self.tasks[predecessor].successors.push(successor);
+                self.tasks[successor].predecessors.push(predecessor);
             }
             for (producer, consumer, reason) in commit_dependencies {
                 self.task_dependencies[producer].push((consumer, reason));
             }
-        } else if new_task.is_some() {
+        } else if let Some(new_task) = new_task {
             self.task_dependencies.push(Vec::new());
+            self.tasks.push(new_task);
         }
 
         Ok(())

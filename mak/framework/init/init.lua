@@ -59,3 +59,4 @@ end
 context:load_tool('lang/python')
 context:load_tool('lang/flex')
 context:load_tool('lang/bison')
+context:load_tool('tool/wget')

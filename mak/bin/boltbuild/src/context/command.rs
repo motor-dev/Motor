@@ -87,7 +87,13 @@ pub(super) fn load_tool(
         })?;
         if do_run {
             lua.load(file.contents())
-                .set_name(PathBuf::from(TOOLS_PATH).join("tools").join(&tool_file).to_string_lossy())
+                .set_name(format!(
+                    "@{}",
+                    PathBuf::from(TOOLS_PATH)
+                        .join("tools")
+                        .join(&tool_file)
+                        .display()
+                ))
                 .call::<()>(this)?;
         }
         return Ok(());
@@ -130,13 +136,19 @@ pub(super) fn declare_command(
                     .index,
             );
         }
+    } else if args.2.is_nil() {
+        envs.push(this.environment.lock().unwrap().index);
+    } else if let Some(env) = args.2.as_userdata() {
+        envs.push(
+            env.borrow::<Arc<Mutex<ReadWriteEnvironment>>>()?
+                .lock()
+                .unwrap()
+                .index,
+        );
     } else {
-        let env = args
-            .2
-            .as_userdata()
-            .unwrap()
-            .borrow::<Arc<Mutex<ReadWriteEnvironment>>>()?;
-        envs.push(env.lock().unwrap().index);
+        return Err(LuaError::RuntimeError(
+            "invalid value for environment".to_string(),
+        ));
     }
     let path = this.declare_command(args.0.as_str(), args.1.as_str(), envs)?;
     Ok(DeclaredCommand { path })

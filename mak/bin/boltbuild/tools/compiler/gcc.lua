@@ -3,7 +3,7 @@ local context = ...
 
 context:load_tool('internal/compiler_gnu')
 
-BoltGcc = {}
+Bolt.GCC = {}
 
 local function load_gcc_compiler(env, compiler, flags, language, var_name)
     env[var_name .. 'FLAGS'] = { '-x', language, '-c', '-fPIC' }
@@ -21,7 +21,7 @@ local function load_gcc_compiler(env, compiler, flags, language, var_name)
     env.LINK_LIBPATH_F = '-L'
     env.LINKFLAGS_shlib = { '-shared' }
 
-    local defines = BoltGnuCompiler.get_specs(compiler, var_name)
+    local defines = Bolt.GnuCompiler.get_specs(compiler, var_name)
     local version = { 0, 0, 0 }
 
     for name, value in pairs(defines) do
@@ -52,7 +52,7 @@ end
 --- An error is raised if the compiler command returns an error code.
 ---
 --- @param c_flags string[] A table containing extra flags that the C compiler should support.
-function BoltGcc.load_c(c_flags)
+function Bolt.GCC.load_c(c_flags)
     local env = context.env
     env.CC = env.GCC
     load_gcc_compiler(env, env.CC, c_flags, 'c', 'C')
@@ -66,7 +66,7 @@ end
 --- An error is raised if the compiler command returns an error code.
 ---
 --- @param cxx_flags string[] A table containing extra flags that the C++ compiler should support.
-function BoltGcc.load_cxx(cxx_flags)
+function Bolt.GCC.load_cxx(cxx_flags)
     local env = context.env
     env.CXX = env.GCC
     env.LIBS = { 'stdc++' }
@@ -81,7 +81,7 @@ end
 --- An error is raised if the compiler command returns an error code.
 ---
 --- @param objc_flags string[] A table containing extra flags that the Objective-C compiler should support.
-function BoltGcc.load_objc(objc_flags)
+function Bolt.GCC.load_objc(objc_flags)
     local env = context.env
     env.OBJC = env.GCC
     env.LIBS = { 'objc' }
@@ -96,7 +96,7 @@ end
 --- An error is raised if the compiler command returns an error code.
 ---
 --- @param objcxx_flags string[] A table containing extra flags that the Objective-C++ compiler should support.
-function BoltGcc.load_objcxx(objcxx_flags)
+function Bolt.GCC.load_objcxx(objcxx_flags)
     local env = context.env
     env.OBJCXX = env.GCC
     env.LIBS = { 'stdc++', 'objc' }
@@ -104,10 +104,10 @@ function BoltGcc.load_objcxx(objcxx_flags)
 end
 
 local languages = {
-    ['c'] = BoltGcc.load_c,
-    ['c++'] = BoltGcc.load_cxx,
-    ['objc'] = BoltGcc.load_objc,
-    ['objc++'] = BoltGcc.load_objcxx,
+    ['c'] = Bolt.GCC.load_c,
+    ['c++'] = Bolt.GCC.load_cxx,
+    ['objc'] = Bolt.GCC.load_objc,
+    ['objc++'] = Bolt.GCC.load_objcxx,
 }
 
 --- Discovers available GCC compilers and configures the environment for each found compiler.
@@ -119,7 +119,7 @@ local languages = {
 --- @param language_flags table A table containing flags for each language to pass to the compiler.
 --- @param global_flags table A table containing global flags to pass to the compiler.
 --- @param detect_multilib boolean Whether to detect and configure multilib environments.
-function BoltGcc.discover(callback, language_flags, global_flags, detect_multilib)
+function Bolt.GCC.discover(callback, language_flags, global_flags, detect_multilib)
     context:try('Looking for Gcc compilers', function()
         local seen = {}
         local paths = context.settings.path

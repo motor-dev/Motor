@@ -12,6 +12,7 @@ use std::sync::{Arc, Mutex};
 impl UserData for Generator {
     fn add_fields<F: UserDataFields<Self>>(fields: &mut F) {
         fields.add_field_method_get("name", |_lua, this| Ok(this.name.clone()));
+        fields.add_field_method_get("path", |_lua, this| Ok(this.path.clone()));
         fields.add_field_method_get("group", |_lua, this| Ok(this.group.clone()));
         fields.add_field_method_get("env", |_lua, this| Ok(this.env.clone()));
         fields.add_field_method_get("features", |_lua, this| Ok(this.features.clone()));
@@ -80,12 +81,12 @@ impl UserData for Generator {
 
                 let env = Arc::new(Mutex::new(ReadWriteEnvironment::derive_leaf(&from_env)?));
                 let task = Task {
-                    driver,
+                    driver: driver.clone(),
                     generator: generator.name.clone(),
                     group,
                     env,
                     inputs,
-                    outputs,
+                    outputs: outputs.clone(),
                     predecessors: Vec::new(),
                     successors: Vec::new(),
                     signature: SerializedHash(blake3::hash(&[])),
@@ -93,7 +94,7 @@ impl UserData for Generator {
 
                 let mut dependencies = Vec::new();
                 for node in &task.inputs {
-                    if let Some(&producer) = context.products.get(node.path()) {
+                    if let Some(&producer) = context.products.get(node) {
                         dependencies.push((producer, task_index, format!("dependency on {}", node)));
                     }
                 }
@@ -126,10 +127,8 @@ impl UserData for Generator {
                 }
 
                 /* side effects start here. The function is not allowed to fail if declare_product is successful. */
-                context.declare_products(&task.outputs, dependencies, task_index, Some(&task))?;
-                context.driver_tasks.entry(task.driver.clone()).or_default().push(task_index);
-
-                context.tasks.push(task);
+                context.declare_products(&outputs, dependencies, task_index, Some(task))?;
+                context.driver_tasks.entry(driver).or_default().push(task_index);
                 context.signatures.push(hasher);
                 Ok(task_index)
             })??;

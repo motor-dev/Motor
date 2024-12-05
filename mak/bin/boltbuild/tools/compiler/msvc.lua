@@ -1,7 +1,8 @@
 ---@type Context
 local context = ...
+context:load_tool('internal/bolt')
 
-BoltMsvc = {}
+Bolt.MSVC = {}
 
 local MSVC_PREDEFINED_MACROS = {
     '__cplusplus',
@@ -94,7 +95,7 @@ local function vswhere_msvc()
     return compilers
 end
 
-function BoltMsvc.discover(callback, language_flags, global_flags)
+function Bolt.MSVC.discover(callback, language_flags, global_flags)
     if context.settings.OS == 'windows' then
         context:try('Looking for Msvc compilers', function()
             local seen = {}

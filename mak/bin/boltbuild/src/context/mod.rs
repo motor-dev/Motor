@@ -19,18 +19,17 @@ use crate::options::Options;
 use crate::task::Task;
 use include_dir::{include_dir, Dir};
 use std::collections::HashMap;
-use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 pub(crate) static TOOLS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/tools");
-pub(crate) static TOOLS_PATH: &'static str = env!("CARGO_MANIFEST_DIR");
+pub(crate) static TOOLS_PATH: &str = env!("CARGO_MANIFEST_DIR");
 
 pub(crate) struct Context {
     spec: CommandSpec,
     pub(crate) output: CommandOutput,
     environment: Arc<Mutex<ReadWriteEnvironment>>,
     pub(crate) tasks: Vec<Task>,
-    pub(crate) products: HashMap<PathBuf, usize>,
+    pub(crate) products: HashMap<Node, usize>,
     pub(crate) signatures: Vec<blake3::Hasher>,
     task_dependencies: Vec<Vec<(usize, String)>>,
     path: Node,

@@ -4,7 +4,7 @@ local context = ...
 context:load_tool('internal/compiler_gnu')
 context:load_tool('utils/string_ext')
 
-BoltClang = {}
+Bolt.Clang = {}
 
 local function vswhere_clang()
     local compilers = {}
@@ -60,7 +60,7 @@ local function load_clang(env, compiler, flags, lang, var)
     env.LINK_LIB_F = '-l'
     env.LINK_LIBPATH_F = '-L'
     env.LINKFLAGS_shlib = { '-shared' }
-    env['CLANG_' .. var .. '_VERSION'] = get_clang_version(BoltGnuCompiler.get_specs(compiler, var))
+    env['CLANG_' .. var .. '_VERSION'] = get_clang_version(Bolt.GnuCompiler.get_specs(compiler, var))
     if env.BINARY_FORMAT == 'elf' then
         env:append('LINKFLAGS_shlib', '-Wl,-z,defs')
     end
@@ -77,7 +77,7 @@ end
 --- The function raises an error if the compiler command returns an error code.
 ---
 --- @param c_flags string[] A table containing extra flags that the C compiler should support.
-function BoltClang.load_c(c_flags)
+function Bolt.Clang.load_c(c_flags)
     local env = context.env
     env.CC = env.CLANG
     load_clang(env, env.CC, c_flags, 'c', 'C')
@@ -91,7 +91,7 @@ end
 --- An error is raised if the compiler command returns an error code.
 ---
 --- @param cxx_flags string[] A table containing extra flags that the C++ compiler should support.
-function BoltClang.load_cxx(cxx_flags)
+function Bolt.Clang.load_cxx(cxx_flags)
     local env = context.env
     env.CXX = env.CLANG
     env.LIBS = { 'stdc++' }
@@ -106,7 +106,7 @@ end
 --- An error is raised if the compiler command returns an error code.
 ---
 --- @param objc_flags string[] A table containing extra flags that the Objective-C compiler should support.
-function BoltClang.load_objc(objc_flags)
+function Bolt.Clang.load_objc(objc_flags)
     local env = context.env
     env.OBJC = env.CLANG
     env.LIBS = { 'objc' }
@@ -121,7 +121,7 @@ end
 --- An error is raised if the compiler command returns an error code.
 ---
 --- @param objcxx_flags string[] A table containing extra flags that the Objective-C++ compiler should support.
-function BoltClang.load_objcxx(objcxx_flags)
+function Bolt.Clang.load_objcxx(objcxx_flags)
     local env = context.env
     env.OBJCXX = env.CLANG
     env.LIBS = { 'objc' }
@@ -129,10 +129,10 @@ function BoltClang.load_objcxx(objcxx_flags)
 end
 
 local languages = {
-    ['c'] = BoltClang.load_c,
-    ['c++'] = BoltClang.load_cxx,
-    ['objc'] = BoltClang.load_objc,
-    ['objc++'] = BoltClang.load_objcxx,
+    ['c'] = Bolt.Clang.load_c,
+    ['c++'] = Bolt.Clang.load_cxx,
+    ['objc'] = Bolt.Clang.load_objc,
+    ['objc++'] = Bolt.Clang.load_objcxx,
 }
 
 local function detect_clang_targets(clang, callback, language_flags, global_flags)
@@ -220,7 +220,7 @@ end
 --- @param language_flags table<string, string[]> A table where keys are language names (e.g., 'c', 'c++') and values are arrays of extra flags that the compiler should support for each language.
 --- @param global_flags string[]|nil An optional array of additional language-independent flags to be passed to the compiler.
 --- @param detect_cross_targets boolean|nil An optional boolean value indicating whether to detect cross-compilation targets. If `true`, the function will attempt to detect and include cross-compilation targets.
-function BoltClang.discover(callback, language_flags, global_flags, detect_cross_targets)
+function Bolt.Clang.discover(callback, language_flags, global_flags, detect_cross_targets)
     local seen = {}
     local compilers = {}
     global_flags = global_flags or {}

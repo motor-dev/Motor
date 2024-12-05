@@ -32,3 +32,6 @@ subprocess = "~0"
 bincode = { version = "2.0.0-rc.3", features = ["serde"] }
 include_dir = { version = "~0" }
 lazy_static = "~1"
+flate2 = "1.0.35"
+tar = "0.4.43"
+diffy = "0.4.0"

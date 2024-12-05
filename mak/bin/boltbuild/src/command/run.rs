@@ -90,7 +90,9 @@ impl Command {
                                 let search_string = &*search_string.to_string_lossy();
                                 let paths = glob::glob(search_string).unwrap();
                                 let mut hasher = Hasher::new();
-                                for path in paths.flatten() {
+                                let mut result = paths.flatten().collect::<Vec<_>>();
+                                result.sort();
+                                for path in result {
                                     hasher.update(path.as_os_str().as_encoded_bytes());
                                 }
                                 if !hasher.finalize().eq(&hash.0) {

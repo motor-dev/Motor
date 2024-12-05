@@ -17,10 +17,12 @@ pub(super) fn search(
         let node = path.canonicalize();
         let path = node.path().join(&pattern);
         let search_string = &*path.to_string_lossy();
-        let paths = glob::glob(&search_string)
+        let paths = glob::glob(search_string)
             .map_err(|e| LuaError::RuntimeError(format!("pattern error: {}", e)))?;
         let mut hasher = Hasher::new();
-        for path in paths.flatten() {
+        let mut paths = paths.flatten().collect::<Vec<_>>();
+        paths.sort();
+        for path in paths {
             hasher.update(path.as_os_str().as_encoded_bytes());
             if include_directories || !path.is_dir() {
                 result.push(Node::from(&path));

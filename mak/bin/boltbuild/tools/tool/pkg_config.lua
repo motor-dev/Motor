@@ -1,7 +1,8 @@
 ---@type Context
 local context = ...
+context:load_tool('internal/bolt')
 
-BoltPkgConfig = { }
+Bolt.PkgConfig = { }
 
 local function _run_pkg_config(pkg_name, lib_paths, seen)
     if seen[pkg_name] then
@@ -121,7 +122,7 @@ end
 
 ---@param pkg_name string
 ---@return string[], string[], string[]
-function BoltPkgConfig.run_pkg_config(pkg_name)
+function Bolt.PkgConfig.run_pkg_config(pkg_name)
     local lib_paths = context.env.C_COMPILER_SYSTEM_LIB_DIRS or {}
 
     --for _, t in ipairs(context.env.TARGETS or {}) do
@@ -138,8 +139,8 @@ function BoltPkgConfig.run_pkg_config(pkg_name)
     return _run_pkg_config(pkg_name, lib_paths, seen)
 end
 
-function BoltPkgConfig.pkg_config(name, var)
-    local cflags, libs, ldflags = BoltPkgConfig.run_pkg_config(name)
+function Bolt.PkgConfig.pkg_config(name, var)
+    local cflags, libs, ldflags = Bolt.PkgConfig.run_pkg_config(name)
     context.env['check_' .. var] = true
     context.env['check_' .. var .. '_cflags'] = cflags
     context.env['check_' .. var .. '_cxxflags'] = cflags
