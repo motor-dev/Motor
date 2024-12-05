@@ -240,6 +240,10 @@ impl Logger {
 
 pub(crate) enum StatusCommand {
     Text(String),
+    Bold,
+    Italic,
+    Underlined,
+    Dim,
     FgReset,
     FgDarkGrey,
     FgRed,
@@ -279,7 +283,7 @@ pub(crate) enum StatusCommand {
 impl StatusCommand {
     fn parse(message: &str) -> Vec<StatusCommand> {
         let mut result = Vec::new();
-        let re = regex::Regex::new(r"\{[a-zA-Z:]*}").unwrap();
+        let re = regex::Regex::new(r"\{[a-zA-Z_:]*}").unwrap();
         let mut start = 0_usize;
         for m in re.find_iter(message) {
             let (match_start, match_end) = (m.start(), m.end());
@@ -301,11 +305,25 @@ impl StatusCommand {
         result
     }
 
-    fn write<'a>(&'a self, out: &'a mut Stdout) -> &mut Stdout {
+    fn write<'a>(&self, out: &'a mut Stdout) -> &'a mut Stdout {
         match &self {
             StatusCommand::Text(s) => out.queue(style::Print(s.as_str())).unwrap(),
+            StatusCommand::Bold => out
+                .queue(style::SetAttribute(style::Attribute::Bold))
+                .unwrap(),
+            StatusCommand::Italic => out
+                .queue(style::SetAttribute(style::Attribute::Italic))
+                .unwrap(),
+            StatusCommand::Underlined => out
+                .queue(style::SetAttribute(style::Attribute::Underlined))
+                .unwrap(),
+            StatusCommand::Dim => out
+                .queue(style::SetAttribute(style::Attribute::Dim))
+                .unwrap(),
             StatusCommand::FgReset => out
                 .queue(style::SetForegroundColor(style::Color::Reset))
+                .unwrap()
+                .queue(style::SetAttribute(style::Attribute::Reset))
                 .unwrap(),
             StatusCommand::FgDarkGrey => out
                 .queue(style::SetForegroundColor(style::Color::DarkGrey))
@@ -431,6 +449,10 @@ impl std::str::FromStr for StatusCommand {
             "dark_magenta" => Ok(StatusCommand::FgDarkMagenta),
             "dark_cyan" => Ok(StatusCommand::FgDarkCyan),
             "grey" => Ok(StatusCommand::FgGrey),
+            "bold" => Ok(StatusCommand::Bold),
+            "italic" => Ok(StatusCommand::Italic),
+            "underligned" => Ok(StatusCommand::Underlined),
+            "dim" => Ok(StatusCommand::Dim),
             "bg:reset" => Ok(StatusCommand::BgReset),
             "bg:dark_grey" => Ok(StatusCommand::BgDarkGrey),
             "bg:red" => Ok(StatusCommand::BgRed),

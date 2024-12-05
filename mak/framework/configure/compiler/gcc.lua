@@ -3,7 +3,7 @@ local context = ...
 
 context:load_tool('compiler/gcc')
 
-BoltGcc.discover(function(env)
+Bolt.GCC.discover(function(env)
     local _, _, version = string.find(env.GCC_VERSION, '-(.*)')
     if version == nil then
         version = ''

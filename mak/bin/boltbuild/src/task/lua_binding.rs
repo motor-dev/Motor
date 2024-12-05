@@ -68,7 +68,7 @@ impl UserData for TaskHandle {
 
                 let mut dependencies = Vec::new();
                 for node in &nodes {
-                    if let Some(&producer) = context.products.get(node.path()) {
+                    if let Some(&producer) = context.products.get(node) {
                         dependencies.push((producer, index, format!("dependency on {}", node)));
                     }
                 }
@@ -135,17 +135,6 @@ impl UserData for TaskHandle {
                     let other = other.borrow::<TaskHandle>()?.0;
 
                     context.add_dependencies(vec![(other, index, "run after".to_string())], None)
-                })?
-            },
-        );
-
-        methods.add_function(
-            "run_command",
-            |_lua, (this, command): (AnyUserData, String)| {
-                let context = this.user_value::<AnyUserData>()?;
-                context.borrow_mut_scoped::<Context, _>(|context| {
-                    let index = this.borrow::<TaskHandle>()?.0;
-                    Ok(context.tasks[index].run_command(command.as_str(), Vec::new()))
                 })?
             },
         );

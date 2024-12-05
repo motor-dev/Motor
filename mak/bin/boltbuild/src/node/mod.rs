@@ -99,7 +99,7 @@ impl Node {
 
 impl Display for Node {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.path.to_string_lossy())
+        write!(f, "{}", self.path.display())
     }
 }
 

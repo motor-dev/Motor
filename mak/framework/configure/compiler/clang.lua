@@ -3,7 +3,7 @@ local context = ...
 
 context:load_tool('compiler/clang')
 
-BoltClang.discover(function(env)
+Bolt.Clang.discover(function(env)
     env.TOOLCHAIN_ID = env.TARGET_OS .. '-' .. env.ARCHITECTURE .. '-' .. env.CXX_COMPILER_NAME .. '-' .. env.CLANG_CXX_VERSION:gsub('-', '_')
     env:append('CXXFLAGS', '-Wno-attributes')
     Motor.add_compiler(env)

@@ -118,7 +118,7 @@ end
 ---@param name string
 ---@param properties ModuleProperties
 ---@return Module
-function BoltModule.module(name, properties)
+function Bolt.Module.module(name, properties)
     local features = { 'module', table.unpack(properties.features or {}) }
     local g = context:declare_generator(name, features, context.env, properties.group)
 
@@ -152,56 +152,56 @@ end
 ---@param name string
 ---@param properties ModuleProperties
 ---@return Module
-function BoltModule.shared_library(name, properties)
+function Bolt.Module.shared_library(name, properties)
     if properties.features then
         table.insert(properties.features, 'shlib')
     else
         properties.features = { 'shlib' }
     end
-    return BoltModule.module(name, properties)
+    return Bolt.Module.module(name, properties)
 end
 
 ---@param name string
 ---@param properties ModuleProperties
 ---@return Module
-function BoltModule.static_library(name, properties)
+function Bolt.Module.static_library(name, properties)
     if properties.features then
         table.insert(properties.features, 'stlib')
     else
         properties.features = { 'stlib' }
     end
-    return BoltModule.module(name, properties)
+    return Bolt.Module.module(name, properties)
 end
 
 ---@param name string
 ---@param properties ModuleProperties
 ---@return Module
-function BoltModule.object_library(name, properties)
+function Bolt.Module.object_library(name, properties)
     if properties.features then
         table.insert(properties.features, 'objects')
     else
         properties.features = { 'objects' }
     end
-    return BoltModule.module(name, properties)
+    return Bolt.Module.module(name, properties)
 end
 
 ---@param name string
 ---@param properties ModuleProperties
 ---@return Module
-function BoltModule.program(name, properties)
+function Bolt.Module.program(name, properties)
     if properties.features then
         table.insert(properties.features, 'program')
     else
         properties.features = { 'program' }
     end
-    return BoltModule.module(name, properties)
+    return Bolt.Module.module(name, properties)
 end
 
-function BoltModule.pkg_config(name, var)
+function Bolt.Module.pkg_config(name, var)
     if context.env['check_' .. var] then
         local cflags = context.env['check_' .. var .. '_cflags']
         local libs = context.env['check_' .. var .. '_libs']
         local ldflags = context.env['check_' .. var .. '_ldflags']
-        return BoltModule.module(name, { public_flags = { CFLAGS = cflags, CXXFLAGS = cflags, LINKFLAGS = ldflags, LIBS = libs } })
+        return Bolt.Module.module(name, { public_flags = { CFLAGS = cflags, CXXFLAGS = cflags, LINKFLAGS = ldflags, LIBS = libs } })
     end
 end

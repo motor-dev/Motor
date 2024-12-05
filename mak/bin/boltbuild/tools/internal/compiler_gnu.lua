@@ -1,12 +1,14 @@
 ---@type Context
 local context = ...
 
-BoltGnuCompiler = { }
+context:load_tool('internal/bolt')
+
+Bolt.GnuCompiler = { }
 
 ---Retrieves some GCC specifications and store them in the current context environment
 ---@param command (string|Node)[] The command to execute for the compiler.
 ---@param language string The name of the language (uppercase, C or CXX).
-function BoltGnuCompiler.get_specs(command, language)
+function Bolt.GnuCompiler.get_specs(command, language)
     local env = context.env
 
     local include_command = { }
