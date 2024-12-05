@@ -114,6 +114,11 @@ end
 
 ---@param module Module
 local function process_flags(module)
+    for _, lang in ipairs({'C', 'CXX', 'OBJC', 'OBJCXX'}) do
+        for _, flag_group in ipairs(module.flag_groups) do
+            module.env:append(lang..'FLAGS', module.env[lang..'FLAGS.'..flag_group])
+        end
+    end
     for _, include in ipairs(module.internal_includes) do
         module.env:append('INCLUDES', include:abs_path())
     end
@@ -143,7 +148,7 @@ local function process_source(module)
         for _, source in ipairs(context:search(path, source_info.pattern)) do
             if module.source_filter({ base_path = path, full_path = source }, module.env) then
                 local ext = source:extension()
-                local source_processor = Bolt.Module.extension_registry[ext]
+                local source_processor = Bolt.ModuleCore.extension_registry[ext]
                 if source_processor == nil then
                     context:raise_error("No tool that can handle file " .. tostring(source) .. " with extension " .. ext .. ".")
                 end
@@ -155,7 +160,7 @@ local function process_source(module)
     for _, source_info in ipairs(module.source) do
         if module.source_filter(source_info, module.env) then
             local ext = source_info.full_path:extension()
-            local source_processor = Bolt.Module.extension_registry[ext]
+            local source_processor = Bolt.ModuleCore.extension_registry[ext]
             if source_processor == nil then
                 context:raise_error("No tool that can handle file " .. tostring(source_info.full_path) .. " with extension " .. ext .. ".")
             end

@@ -14,6 +14,8 @@ local function load_gcc_compiler(env, compiler, flags, language, var_name)
     env[var_name .. '_INCLUDE_ST'] = '-I'
     env[var_name .. '_SYSTEM_INCLUDE_ST'] = '-isystem%s'
     env[var_name .. '_IDIRAFTER'] = '-isystem'
+    env[var_name .. 'FLAGS.warn.none'] = { '-w'}
+    env[var_name .. 'FLAGS.warn.all'] = { '-Wall', '-Wextra', '-Wpedantic' }
     env.LINK = env.GCC
     env.LINKFLAGS = {}
     env.LINK_TGT_F = '-o'
