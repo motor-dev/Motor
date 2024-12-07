@@ -20,7 +20,7 @@ end
 --- Represents a command that has been declared within the context.
 --- Commands correspond to distinct build steps (like "configure" or "build") and must be declared before they can be executed.
 --- Command declarations may include chaining, allowing commands to declare additional commands upon execution.
----@class DeclaredCommand
+---@class (exact) DeclaredCommand
 local DeclaredCommand = {}
 
 --- Declares a new build command.

@@ -66,14 +66,7 @@ impl UserData for TaskHandle {
                     }
                 };
 
-                let mut dependencies = Vec::new();
-                for node in &nodes {
-                    if let Some(&producer) = context.products.get(node) {
-                        dependencies.push((producer, index, format!("dependency on {}", node)));
-                    }
-                }
-
-                context.add_dependencies(dependencies, None)?;
+                context.add_inputs(index, &nodes)?;
 
                 let hasher = &mut context.signatures[index];
                 for input in &nodes {
@@ -101,7 +94,7 @@ impl UserData for TaskHandle {
                     }
                 };
 
-                context.declare_products(&nodes, Vec::new(), index, None)?;
+                context.add_outputs(index, &nodes)?;
 
                 let hasher = &mut context.signatures[index];
                 for output in &nodes {
@@ -121,7 +114,7 @@ impl UserData for TaskHandle {
                     let index = this.borrow::<TaskHandle>()?.0;
                     let other = other.borrow::<TaskHandle>()?.0;
 
-                    context.add_dependencies(vec![(index, other, "run before".to_string())], None)
+                    context.add_dependencies(vec![(index, other, "run before".to_string())])
                 })?
             },
         );
@@ -134,7 +127,7 @@ impl UserData for TaskHandle {
                     let index = this.borrow::<TaskHandle>()?.0;
                     let other = other.borrow::<TaskHandle>()?.0;
 
-                    context.add_dependencies(vec![(other, index, "run after".to_string())], None)
+                    context.add_dependencies(vec![(other, index, "run after".to_string())])
                 })?
             },
         );

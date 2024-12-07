@@ -1,3 +1,15 @@
+
+--- Represents a task generator, responsible for creating and managing tasks within the build system.
+--- - Generators group tasks by name, feature, environment, and build group.
+--- - Each generator has a default environment for its tasks, although specific tasks can use their own environments.
+---@class (exact) Generator
+---@field name string The name of the generator.
+---@field path Node The path node associated with the generator. This is the context's current path at the moment the generator is declared.
+---@field group string The build group this generator belongs to. Groups can be shared across different build commands and must be declared using `context:declare_group`.
+---@field env Environment The default environment. Tasks generated from this generator will inherit this environment unless another is specified.
+local Generator
+
+
 --- Declares a new group for organizing task generators, with conditional execution based on a specified condition.
 --- - Groups are collections of task generators that allow for logical task organization and control over task execution.
 --- - Each generator belongs to a group. By default, generators belong to the unnamed group, which is represented by the context's `fs_name` value and doesn’t require explicit declaration.
@@ -59,17 +71,6 @@ end
 ---@param generator Generator The generator to post.
 function Context:post(generator)
 end
-
---- Represents a task generator, responsible for creating and managing tasks within the build system.
---- - Generators group tasks by name, feature, environment, and build group.
---- - Each generator has a default environment for its tasks, although specific tasks can use their own environments.
----@class Generator
----@field name string The name of the generator.
----@field path Node The path node associated with the generator. This is the context's current path at the moment the generator is declared.
----@field group string The build group this generator belongs to. Groups can be shared across different build commands and must be declared using `context:declare_group`.
----@field env Environment The default environment. Tasks generated from this generator will inherit this environment unless another is specified.
----@field [string] any Additional properties that can be set on the generator.
-Generator = {}
 
 --- Creates a new task to transform specified inputs into outputs, using the given tool.
 --- - Tasks represent build actions, with each one typically performing a specific transformation or build step.

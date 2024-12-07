@@ -46,6 +46,22 @@ impl PatchDriverConfiguration {
             };
         }
         let output_path = &task.outputs[0];
+        if let Err(e) = if input_path.is_dir() {
+            output_path.mkdir()
+        } else {
+            output_path.parent().unwrap().mkdir()
+        } {
+            return Output {
+                exit_code: 1,
+                command: format!("patch {} => {}", input_path, output_path),
+                log: e.to_string(),
+                driver_hash,
+                driver_dependencies: Vec::new(),
+                file_dependencies: Vec::new(),
+                extra_output: Vec::new(),
+            };
+        }
+
         let command = format!("patch {} => {}", input_path, output_path);
 
         match patch(input_path, output_path, patches, strip) {
@@ -90,7 +106,7 @@ fn patch(
             .filter_map(|x| {
                 if let Ok(p) = x {
                     if !p.is_dir() {
-                       Some(Node::from(&p))
+                        Some(Node::from(&p))
                     } else {
                         None
                     }
@@ -195,9 +211,13 @@ fn patch(
     }
 
     for (_, node, content) in outputs.iter() {
-        node.parent()
-            .mkdir()
-            .map_err(|e| format!("Failed to create directory `{}`: {}", node.parent(), e))?;
+        node.parent().unwrap().mkdir().map_err(|e| {
+            format!(
+                "Failed to create directory `{}`: {}",
+                node.parent().unwrap(),
+                e
+            )
+        })?;
         let mut file =
             File::create(node.abs_path()).map_err(|e| format!("Failed to create file: {}", e))?;
         file.write_all(content)
@@ -221,10 +241,10 @@ fn patch(
                 .strip_prefix(input_path.path())
                 .map_err(|e| format!("Failed to strip prefix from path: {}", e))?,
         ));
-        output_node.parent().mkdir().map_err(|e| {
+        output_node.parent().unwrap().mkdir().map_err(|e| {
             format!(
                 "Failed to create directory `{}`: {}",
-                output_node.parent(),
+                output_node.parent().unwrap(),
                 e
             )
         })?;

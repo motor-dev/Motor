@@ -43,6 +43,17 @@ impl UntarDriverConfiguration {
             };
         }
         let output_dir = &task.outputs[0];
+        if let Err(e) = output_dir.mkdir() {
+            return Output {
+                exit_code: 1,
+                command: format!("tar xf {} => {}", input_file, output_dir),
+                log: e.to_string(),
+                driver_hash,
+                driver_dependencies: Vec::new(),
+                file_dependencies: Vec::new(),
+                extra_output: Vec::new(),
+            };
+        }
 
         match unpack(input_file, output_dir) {
             Ok(output) => Output {

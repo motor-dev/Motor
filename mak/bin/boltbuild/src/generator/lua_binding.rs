@@ -71,8 +71,6 @@ impl UserData for Generator {
                 if !context.output.drivers.contains_key(&driver) {
                     return Err(LuaError::RuntimeError(format!("Context has no driver for tasks of type `{}`", &driver)));
                 }
-                let task_index = context.tasks.len();
-
                 let from_env = if let Some(env) = env {
                     env.borrow::<Arc<Mutex<ReadWriteEnvironment>>>()?.deref().clone()
                 } else {
@@ -86,34 +84,11 @@ impl UserData for Generator {
                     group,
                     env,
                     inputs,
-                    outputs: outputs.clone(),
+                    outputs,
                     predecessors: Vec::new(),
                     successors: Vec::new(),
                     signature: SerializedHash(blake3::hash(&[])),
                 };
-
-                let mut dependencies = Vec::new();
-                for node in &task.inputs {
-                    if let Some(&producer) = context.products.get(node) {
-                        dependencies.push((producer, task_index, format!("dependency on {}", node)));
-                    }
-                }
-
-                for (predecessor, successor) in &context.driver_order {
-                    if predecessor.eq(&task.driver) {
-                        if let Some(tasks) = context.driver_tasks.get(successor) {
-                            for &task in tasks {
-                                dependencies.push((task_index, task, format!("dependency {} -> {}", predecessor, successor)));
-                            }
-                        }
-                    } else if successor.eq(&task.driver) {
-                        if let Some(tasks) = context.driver_tasks.get(predecessor) {
-                            for &task in tasks {
-                                dependencies.push((task, task_index, format!("dependency {} -> {}", predecessor, successor)));
-                            }
-                        }
-                    }
-                }
 
                 let mut hasher = blake3::Hasher::new();
                 hasher.update(task.driver.as_bytes());
@@ -127,7 +102,7 @@ impl UserData for Generator {
                 }
 
                 /* side effects start here. The function is not allowed to fail if declare_product is successful. */
-                context.declare_products(&outputs, dependencies, task_index, Some(task))?;
+                let task_index = context.declare_task(task)?;
                 context.driver_tasks.entry(driver).or_default().push(task_index);
                 context.signatures.push(hasher);
                 Ok(task_index)
