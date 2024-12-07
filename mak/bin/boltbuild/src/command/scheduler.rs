@@ -51,10 +51,22 @@ impl Command {
                 }
             }
 
-            let dependency_nodes = inputs
+            let mut dependency_nodes = inputs
                 .intersection(&outputs)
-                .copied()
+                .map(|&x| x.clone())
                 .collect::<HashSet<_>>();
+
+            for input in inputs {
+                let mut maybe_parent = input.parent();
+                while let Some(parent) = maybe_parent {
+                    if outputs.contains(&parent) {
+                        dependency_nodes.insert(parent);
+                        break;
+                    }
+                    maybe_parent = parent.parent();
+                }
+            }
+
             let (result, new_cache) = scheduler.execute(
                 dependency_nodes,
                 &tasks_cache,
@@ -115,20 +127,20 @@ struct DependencyRequest {
     extra_output: Vec<Node>,
 }
 
-struct TaskResult<'a> {
+struct TaskResult {
     task_index: usize,
     thread_index: usize,
     exit_code: u32,
     command: String,
     log: String,
-    output_hashes: Vec<(&'a Node, blake3::Hash)>,
+    output_hashes: Vec<(Node, blake3::Hash)>,
 }
 
 enum WorkResult<'a> {
     FileHashResult(usize, Vec<blake3::Hash>),
-    TaskSkipped(usize, Vec<(&'a Node, blake3::Hash)>),
+    TaskSkipped(usize, Vec<(Node, blake3::Hash)>),
     TaskStart(usize, usize, String, &'a str),
-    TaskResult(TaskResult<'a>),
+    TaskResult(TaskResult),
     DependencyResult(usize, TaskCacheEntry),
     TaskCanceled(usize),
     Panic(),
@@ -237,7 +249,7 @@ impl<'command> Scheduler<'command> {
 
     fn execute_thread(
         &self,
-        dependency_nodes: &HashSet<&Node>,
+        dependency_nodes: &HashSet<Node>,
         tasks_cache: &[Option<TaskCacheEntry>],
         thread_index: usize,
         work_pipe: Receiver<WorkRequest>,
@@ -250,23 +262,9 @@ impl<'command> Scheduler<'command> {
                     let mut result = Vec::with_capacity(paths.len());
                     for path in paths {
                         let mut hasher = blake3::Hasher::new();
-                        if !path.is_dir() {
-                            let file = File::open(path.path());
-                            if let Ok(file) = file {
-                                hasher.update_reader(file).unwrap();
-                            }
-                        } else {
-                            for f in glob::glob(format!("{}/**/*", path).as_str())
-                                .unwrap()
-                                .flatten()
-                            {
-                                if !f.is_dir() {
-                                    let file = File::open(f);
-                                    if let Ok(file) = file {
-                                        hasher.update_reader(file).unwrap();
-                                    }
-                                }
-                            }
+                        let file = File::open(path.path());
+                        if let Ok(file) = file {
+                            hasher.update_reader(file).unwrap();
                         }
                         let hash = hasher.finalize();
                         result.push(hash);
@@ -328,7 +326,7 @@ impl<'command> Scheduler<'command> {
                                 ))
                                 .unwrap();
                             for n in &task.outputs {
-                                n.parent().mkdir().unwrap();
+                                n.parent().unwrap().mkdir().unwrap();
                             }
                             let mut output = driver.execute(task);
 
@@ -396,7 +394,7 @@ impl<'command> Scheduler<'command> {
 
     fn execute(
         &mut self,
-        dependency_nodes: HashSet<&Node>,
+        dependency_nodes: HashSet<Node>,
         tasks_cache: &[Option<TaskCacheEntry>],
         logger: &mut Logger,
         thread_count: usize,
@@ -443,18 +441,37 @@ impl<'command> Scheduler<'command> {
 
             let mut file_hashes = HashMap::new();
 
+            fn add_input_dir(
+                dir: &Node,
+                input_hashes: &mut Vec<Node>,
+                dependency_nodes: &HashSet<Node>,
+            ) {
+                for f in std::fs::read_dir(dir.path()).unwrap() {
+                    let f = Node::from(&f.unwrap().path());
+                    if !dependency_nodes.contains(&f) {
+                        if !f.is_dir() {
+                            input_hashes.push(f);
+                        } else {
+                            add_input_dir(&f, input_hashes, dependency_nodes);
+                        }
+                    }
+                }
+            }
+
             for &task in &self.target_tasks {
                 for input in &self.tasks_pool[task].inputs {
                     if !dependency_nodes.contains(input) {
-                        input_hashes.push(input.clone());
+                        if input.is_dir() {
+                            add_input_dir(input, &mut input_hashes, &dependency_nodes);
+                        } else {
+                            input_hashes.push(input.clone());
+                        }
                     }
                 }
                 if let Some(cache) = &tasks_cache[task] {
                     for input in &cache.file_dependencies {
                         if !dependency_nodes.contains(input) {
                             input_hashes.push(input.clone());
-                        } else {
-                            //println!("{:?}", input)
                         }
                     }
                 }
@@ -960,34 +977,30 @@ fn save_cache<T>(
 }
 
 fn hash_output_files<'task>(
-    outputs: &'task [Node],
-    dependency_nodes: &HashSet<&Node>,
-) -> std::result::Result<Vec<(&'task Node, blake3::Hash)>, String> {
+    outputs: &[Node],
+    dependency_nodes: &HashSet<Node>,
+) -> std::result::Result<Vec<(Node, blake3::Hash)>, String> {
     let mut hashes = Vec::new();
     for node in outputs {
-        if dependency_nodes.contains(node) {
-            let mut hasher = blake3::Hasher::new();
-            if node.is_dir() {
-                let paths = glob::glob(format!("{}/**/*", node).as_str()).unwrap();
-                let mut paths = paths.flatten().collect::<Vec<_>>();
-                paths.sort();
-                for path in paths {
-                    let file = File::open(path);
-                    if let Ok(file) = file {
-                        hasher.update_reader(file).unwrap();
-                    } else {
-                        return Err(format!("output file `{}` is missing\n", node));
-                    }
-                }
-            } else if let Ok(file) = File::open(node.path()) {
+        let mut hasher = blake3::Hasher::new();
+        if node.is_dir() {
+            let content = std::fs::read_dir(node.path())
+                .unwrap()
+                .map(|x| Node::from(&x.unwrap().path()))
+                .collect::<Vec<_>>();
+            hashes.extend(hash_output_files(&content, dependency_nodes)?);
+        } else if dependency_nodes.contains(node) {
+            if let Ok(file) = File::open(node.path()) {
                 if hasher.update_reader(file).is_ok() {
-                    hashes.push((node, hasher.finalize()));
+                    hashes.push((node.clone(), hasher.finalize()));
                 } else {
-                    return Err(format!("output file `{}` could not be read\n", node));
+                    return Err(format!("output file `{}` could not be read", node));
                 }
             } else {
-                return Err(format!("output file `{}` is missing\n", node));
+                return Err(format!("output file `{}` is missing", node));
             }
+        } else if !node.path().exists() {
+            return Err(format!("output file `{}` is missing", node));
         }
     }
     Ok(hashes)

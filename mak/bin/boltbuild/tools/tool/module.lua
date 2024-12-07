@@ -6,17 +6,17 @@ context:load_tool('internal/module_process')
 
 Bolt.Module = {}
 
----@class SourcePattern
+---@class (exact) SourcePattern
 ---@field path Node
 ---@field pattern string
 local _ = {}
 
----@class SourceFile
+---@class (exact) SourceFile
 ---@field base_path Node
 ---@field full_path Node
 local _ = {}
 
----@class ModuleProperties
+---@class (exact) ModuleProperties
 ---@field features string[]|nil
 ---@field group string|nil
 ---@field public_includes Node[]|nil
@@ -33,7 +33,7 @@ local _ = {}
 ---@field source_filter nil|fun(source_file:SourceFile,env:Environment):boolean,boolean
 local _ = {}
 
----@class Module : Generator
+---@class Module: Generator
 ---@field objects Node[]
 ---@field source SourceFile[]
 ---@field source_patterns SourcePattern[]

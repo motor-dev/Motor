@@ -42,12 +42,15 @@ impl Node {
         result
     }
 
-    pub(crate) fn parent(&self) -> Node {
+    pub(crate) fn parent(&self) -> Option<Node> {
         let mut result = Node {
             path: self.path.clone(),
         };
-        result.path.pop();
-        result
+        if result.path.pop() {
+            Some(result)
+        } else {
+            None
+        }
     }
 
     pub(crate) fn is_dir(&self) -> bool {

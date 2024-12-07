@@ -48,7 +48,7 @@ impl Application {
             EnvironmentValue::Node(Node::from(&PathBuf::from("build/.bolt"))),
         )?;
         let mut paths = vec![EnvironmentValue::Node(
-            Node::from(&env::current_exe()?).parent(),
+            Node::from(&env::current_exe()?).parent().unwrap(),
         )];
         if let Some(path_env) = env::var_os("PATH") {
             paths.append(
