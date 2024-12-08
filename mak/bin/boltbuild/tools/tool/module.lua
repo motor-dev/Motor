@@ -9,12 +9,12 @@ Bolt.Module = {}
 ---@class (exact) SourcePattern
 ---@field path Node
 ---@field pattern string
-local _ = {}
+local _
 
 ---@class (exact) SourceFile
 ---@field base_path Node
 ---@field full_path Node
-local _ = {}
+local _
 
 ---@class (exact) ModuleProperties
 ---@field features string[]|nil
@@ -31,9 +31,9 @@ local _ = {}
 ---@field source SourceFile[]|nil
 ---@field source_patterns SourcePattern[]|nil
 ---@field source_filter nil|fun(source_file:SourceFile,env:Environment):boolean,boolean
-local _ = {}
+local _
 
----@class Module: Generator
+---@class Module : Generator
 ---@field objects Node[]
 ---@field source SourceFile[]
 ---@field source_patterns SourcePattern[]
@@ -115,6 +115,16 @@ function Module:add_internal_dependency(dependency)
     return self
 end
 
+---@param source_file SourceFile
+---@param category string?
+function Module:make_build_node(source_file, category)
+    category = category or 'obj'
+    local directory = self.bld_dir:make_node(category)
+    local target_node = directory:make_node(source_file.full_path:path_from(source_file.base_path))
+    target_node = target_node:change_ext("o")
+    return target_node, directory
+end
+
 local function default_filter(_, _)
     return true, false
 end
@@ -126,7 +136,11 @@ function Bolt.Module.module(name, properties)
     local features = { 'module', table.unpack(properties.features or {}) }
     local g = context:declare_generator(name, features, context.env, properties.group)
 
+    local name_parts = string.split(name, '/')
+
     g.objects = { }
+    g.compiled_tasks = {}
+    g.target = name_parts[#name_parts]:gsub("%?<>:%*|%\"", "-")
     g.source = properties.source or { }
     g.source_patterns = properties.source_patterns or { }
     g.source_filter = properties.source_filter or default_filter
@@ -150,6 +164,7 @@ function Bolt.Module.module(name, properties)
     g.add_internal_define = Module.add_internal_define
     g.add_public_dependency = Module.add_public_dependency
     g.add_internal_dependency = Module.add_internal_dependency
+    g.make_build_node = Module.make_build_node
 
     return g
 end

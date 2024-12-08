@@ -1,6 +1,6 @@
 --- Represents a filesystem object, either a directory or a file, which may or may not exist yet.
 --- Nodes serve as filesystem object references that can represent either directories or files, providing a range of utilities for path manipulation and file operations.
----@class (exact) Node
+---@class Node
 ---@field parent Node The parent node of this node, representing the directory containing this filesystem object.
 local Node = {}
 

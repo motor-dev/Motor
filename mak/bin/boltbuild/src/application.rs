@@ -147,14 +147,6 @@ impl Application {
             .set_category("Options controlling task execution")
             .set_long("file");
 
-        parser.add_value(
-            "tidy".to_string(),
-            "Keeps build folder tidy.\nFiles in the build folder that do not belong to a task are deleted.".to_string(),
-            EnvironmentValue::Bool(true),
-        )?
-            .set_category("Options controlling task execution")
-            .set_long("tidy");
-
         parser.add_count(
             "progress".to_string(),
             "Controls how progress is reported.\n-p adds a progress bar.\n-pp shows the progress bar and removes the individual task logging.".to_string(),
@@ -353,31 +345,56 @@ impl Application {
                     }
                 }
 
-                let mut use_default = true;
                 let mut groups = Vec::new();
-                for group in &current_command.output.as_ref().unwrap().groups {
-                    match &group.1 {
-                        GroupStatus::Enabled => groups.push(group.0.clone()),
-                        GroupStatus::Conditional(condition) => {
-                            if self.options.get_raw(condition).as_bool() {
-                                use_default = false;
-                                groups.push(group.0.clone())
+                let targets = if run_implicit || next_item.is_some() {
+                    for group in &current_command.output.as_ref().unwrap().groups {
+                        match &group.1 {
+                            GroupStatus::Enabled => groups.push(group.0.clone()),
+                            GroupStatus::Default => groups.push(group.0.clone()),
+                            _ => (),
+                        }
+                    }
+                    Targets {
+                        groups: &groups,
+                        generators: &Vec::new(),
+                        files: &Vec::new(),
+                    }
+                } else {
+                    if self.generators.is_empty() && self.files.is_empty() {
+                        let mut use_default = true;
+                        for group in &current_command.output.as_ref().unwrap().groups {
+                            match &group.1 {
+                                GroupStatus::Enabled => groups.push(group.0.clone()),
+                                GroupStatus::Conditional(condition) => {
+                                    if self.options.get_raw(condition).as_bool() {
+                                        use_default = false;
+                                        groups.push(group.0.clone())
+                                    }
+                                }
+                                _ => (),
                             }
                         }
-                        _ => (),
-                    }
-                }
-                if use_default {
-                    for group in &current_command.output.as_ref().unwrap().groups {
-                        if let GroupStatus::Default = group.1 {
-                            groups.push(group.0.clone());
+                        if use_default {
+                            for group in &current_command.output.as_ref().unwrap().groups {
+                                if let GroupStatus::Default = group.1 {
+                                    groups.push(group.0.clone());
+                                }
+                            }
+                        }
+                    } else {
+                        for group in &current_command.output.as_ref().unwrap().groups {
+                            if let GroupStatus::Conditional(condition) = &group.1 {
+                                if self.options.get_raw(condition).as_bool() {
+                                    groups.push(group.0.clone())
+                                }
+                            }
                         }
                     }
-                }
-                let targets = Targets {
-                    groups: &groups,
-                    generators: &self.generators,
-                    files: &self.files,
+                    Targets {
+                        groups: &groups,
+                        generators: &self.generators,
+                        files: &self.files,
+                    }
                 };
                 current_command.run_tasks(
                     &self.out_dir,

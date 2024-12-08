@@ -13,6 +13,7 @@ impl UserData for Generator {
     fn add_fields<F: UserDataFields<Self>>(fields: &mut F) {
         fields.add_field_method_get("name", |_lua, this| Ok(this.name.clone()));
         fields.add_field_method_get("path", |_lua, this| Ok(this.path.clone()));
+        fields.add_field_method_get("bld_dir", |_lua, this| Ok(this.bld_dir.clone()));
         fields.add_field_method_get("group", |_lua, this| Ok(this.group.clone()));
         fields.add_field_method_get("env", |_lua, this| Ok(this.env.clone()));
         fields.add_field_method_get("features", |_lua, this| Ok(this.features.clone()));

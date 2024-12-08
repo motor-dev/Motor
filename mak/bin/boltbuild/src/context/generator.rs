@@ -107,7 +107,7 @@ pub(super) fn declare_generator(
         )?));
         this.output.environments.push(env.clone());
         lua.create_userdata(Arc::new(Mutex::new(Generator::new(
-            name, this.path.clone(), env, group, features,
+            name, &this.path, &this.bld_dir, env, group, features,
         ))))
     })??;
 
