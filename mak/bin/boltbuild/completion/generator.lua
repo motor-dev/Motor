@@ -2,9 +2,10 @@
 --- Represents a task generator, responsible for creating and managing tasks within the build system.
 --- - Generators group tasks by name, feature, environment, and build group.
 --- - Each generator has a default environment for its tasks, although specific tasks can use their own environments.
----@class (exact) Generator
+---@class Generator
 ---@field name string The name of the generator.
 ---@field path Node The path node associated with the generator. This is the context's current path at the moment the generator is declared.
+---@field bld_dir Node The build directory node associated with the generator. This is a subdirectory of the context's build directory, named after the group and generator.
 ---@field group string The build group this generator belongs to. Groups can be shared across different build commands and must be declared using `context:declare_group`.
 ---@field env Environment The default environment. Tasks generated from this generator will inherit this environment unless another is specified.
 local Generator

@@ -3,12 +3,21 @@ local context = ...
 context:load_tool('tool/module')
 
 local static, dynamic, nobulk = context.settings.static, context.settings.dynamic, context.settings.nobulk
-context:declare_group(context.fs_name .. '.static', static and not nobulk)
-context:declare_group(context.fs_name .. '.dynamic', dynamic and not nobulk)
-context:declare_group(context.fs_name .. '.nobulk', not dynamic and not static and nobulk)
-context:declare_group(context.fs_name .. '.static.nobulk', static and nobulk)
-context:declare_group(context.fs_name .. '.dynamic.nobulk', dynamic and nobulk)
-context:set_group_enabled(context.fs_name, not static and not dynamic and not nobulk)
+
+local group_name = context.fs_name
+if static then
+    group_name = group_name .. '.static'
+elseif dynamic then
+    group_name = group_name .. '.dynamic'
+else
+    group_name = group_name .. '.default'
+end
+
+if nobulk then
+    group_name = group_name .. '.nobulk'
+end
+
+context:declare_group(group_name, true)
 
 Motor = { }
 

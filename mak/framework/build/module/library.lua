@@ -104,6 +104,8 @@ local function module(name, path, lib_types)
     elseif context.settings.dynamic then
         group = group .. '.dynamic'
         lib_type = lib_types[3]
+    else
+        group = group .. '.default'
     end
 
     local meta_generator = metagen(name, path)
@@ -148,7 +150,7 @@ end
 ---into a shared object. When neither is used, libraries are a collection of object files that are directly pulled into
 ---the link phase of modules depending on them.
 ---@param name string name of the library.
----@param path string|nil qualified path of the library. Defaults to name.
+---@param path string? qualified path of the library. Defaults to name.
 ---@return Module a new library module
 function Motor.library(name, path)
     return module(name, path, { 'objects', 'objects', 'shlib' })
@@ -156,7 +158,7 @@ end
 
 ---Generates a C/C++ shared library object.
 ---@param name string name of the library.
----@param path string|nil qualified path of the library. Defaults to name.
+---@param path string? qualified path of the library. Defaults to name.
 function Motor.shared_library(name, path)
     return module(name, path, { 'shlib', 'objects', 'shlib' })
 end

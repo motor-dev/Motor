@@ -5,27 +5,6 @@ context:load_tool('internal/module_core')
 context:load_tool('internal/module_process')
 
 ---@param module Module
----@param source_file SourceFile
----@param category string?
-local function make_build_node(module, source_file, category)
-    category = category or 'obj'
-    local directory = context.bld_dir
-    directory = directory:make_node(module.group)
-    directory = directory:make_node(module.target)
-    directory = directory:make_node(category)
-    local target_node = directory:make_node(source_file.full_path:path_from(source_file.base_path))
-    target_node = target_node:change_ext("o")
-    return target_node, directory
-end
-
----@param module Module
-local function prepare(module)
-    module.target = module.name:gsub("%?<>:%*|%\"", "-")
-    module.compiled_tasks = {}
-    module.make_build_node = make_build_node
-end
-
----@param module Module
 ---@param dependency Module
 ---@param seen table<Module,boolean>
 ---@param add_objects boolean
@@ -232,10 +211,7 @@ local function process_link_stlib(module)
 end
 
 context
-        :feature('module', 'prepare', prepare)
-context
         :feature('module', 'process_dependencies', process_dependencies)
-        :set_run_after({ "prepare" })
 context
         :feature('module', 'process_flags', process_flags)
         :set_run_after({ "process_dependencies" })

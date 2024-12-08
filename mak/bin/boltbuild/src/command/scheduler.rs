@@ -51,9 +51,10 @@ impl Command {
                 }
             }
 
-            let mut dependency_nodes = inputs
-                .intersection(&outputs)
-                .map(|&x| x.clone())
+            let mut dependency_nodes = outputs
+                .iter()
+                .filter(|x| !inputs.contains(x))
+                .cloned()
                 .collect::<HashSet<_>>();
 
             for input in inputs {
@@ -76,9 +77,20 @@ impl Command {
                 progress_mode,
             );
 
+            let mut tidy = HashSet::new();
             for (index, value) in new_cache.into_iter().enumerate() {
                 if let Some(cache) = value {
+                    outputs.extend(cache.all_output.iter().cloned());
+                    if let Some(old_cache) = &tasks_cache[index] {
+                        tidy.extend(old_cache.all_output.iter().cloned());
+                    }
                     tasks_cache[index] = Some(cache);
+                }
+            }
+
+            for group_cache in cache {
+                for (_, cache) in group_cache {
+                    tidy.extend(cache.all_output);
                 }
             }
 
@@ -88,8 +100,31 @@ impl Command {
                 out_dir,
                 &output.groups,
                 &mut tasks_cache,
-                cache,
             );
+
+            for file in tidy {
+                if !outputs.contains(&file) && !file.is_dir() {
+                    if progress_mode < 2 {
+                        logger.colored_print(format!("{{dim}}[rm] {{reset}}{}", file).as_str());
+                    }
+                    std::fs::remove_file(file.path())?;
+
+                    let mut maybe_parent = file.parent();
+                    while let Some(parent) = maybe_parent {
+                        if parent.is_dir() && parent.path().read_dir()?.next().is_none() {
+                            if progress_mode < 2 {
+                                logger.colored_print(
+                                    format!("{{dim}}[rm] {{reset}}{}", parent).as_str(),
+                                );
+                            }
+                            std::fs::remove_dir(parent.path())?;
+                            maybe_parent = parent.parent();
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
 
             /* save tasks */
             let task_file = out_dir.join(format!("{}.bin", self.spec.fs_name));
@@ -155,7 +190,7 @@ struct TaskCacheEntry {
     input_hash: SerializedHash,
     dependency_hash: SerializedHash,
     driver_hash: SerializedHash,
-    extra_output: Vec<Node>,
+    all_output: Vec<Node>,
 }
 
 type BuildCache = HashMap<SerializedHash, TaskCacheEntry>;
@@ -182,7 +217,7 @@ impl<'command> Scheduler<'command> {
         index: usize,
         tasks_cache: &'command Vec<Option<TaskCacheEntry>>,
         inputs: &mut HashSet<&'command Node>,
-        outputs: &mut HashSet<&'command Node>,
+        outputs: &mut HashSet<Node>,
     ) {
         if !self.target_tasks.iter().any(|&x| x == index) {
             for i in self.tasks_pool[index].predecessors.iter() {
@@ -193,11 +228,11 @@ impl<'command> Scheduler<'command> {
                 inputs.insert(node);
             }
             for node in &self.tasks_pool[index].outputs {
-                outputs.insert(node);
+                outputs.insert(node.clone());
             }
             if let Some(cache) = &tasks_cache[index] {
-                for node in &cache.extra_output {
-                    outputs.insert(node);
+                for node in &cache.all_output {
+                    outputs.insert(node.clone());
                 }
                 for path in &cache.file_dependencies {
                     inputs.insert(path);
@@ -212,7 +247,7 @@ impl<'command> Scheduler<'command> {
         result_pipe: Sender<WorkResult<'command>>,
     ) {
         let mut dependency_hashes = HashMap::new();
-        while let Ok((task_index, request)) = work_pipe.recv() {
+        while let Ok((task_index, mut request)) = work_pipe.recv() {
             let mut hasher = blake3::Hasher::new();
             for dependency in &request.file_dependencies {
                 match dependency_hashes.entry(dependency.clone()) {
@@ -229,6 +264,9 @@ impl<'command> Scheduler<'command> {
                     }
                 }
             }
+            request
+                .extra_output
+                .extend(self.tasks_pool[task_index].outputs.iter().cloned());
             result_pipe
                 .send(WorkResult::DependencyResult(
                     task_index,
@@ -240,7 +278,7 @@ impl<'command> Scheduler<'command> {
                         dependency_hash: SerializedHash(hasher.finalize()),
                         driver_dependencies: request.driver_dependencies,
                         driver_hash: request.driver_hash,
-                        extra_output: request.extra_output,
+                        all_output: request.extra_output,
                     },
                 ))
                 .unwrap();
@@ -932,11 +970,10 @@ fn save_cache<T>(
     out_dir: &Path,
     groups: &[(String, T)],
     tasks_cache: &mut [Option<TaskCacheEntry>],
-    mut cache: Vec<HashMap<SerializedHash, TaskCacheEntry>>,
 ) {
     /* save all caches */
     for (group, _) in groups {
-        let mut group_cache = cache.remove(0);
+        let mut group_cache = HashMap::new();
         for (i, task) in tasks_pool.iter().enumerate() {
             if task.group.eq(group) {
                 let mut entry = None;
@@ -976,7 +1013,7 @@ fn save_cache<T>(
     }
 }
 
-fn hash_output_files<'task>(
+fn hash_output_files(
     outputs: &[Node],
     dependency_nodes: &HashSet<Node>,
 ) -> std::result::Result<Vec<(Node, blake3::Hash)>, String> {

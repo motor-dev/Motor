@@ -23,6 +23,7 @@ use std::sync::{Arc, Mutex};
 
 pub(crate) static TOOLS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/tools");
 pub(crate) static TOOLS_PATH: &str = env!("CARGO_MANIFEST_DIR");
+pub(crate) use operations::INVALID_CHARS;
 
 struct NodeData {
     /* the tast producing this node */

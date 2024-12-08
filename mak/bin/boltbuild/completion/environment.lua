@@ -27,7 +27,7 @@ end
 --- Commands may modify their environment and declare sub-commands that utilize these values (e.g., `configure` might set
 --- environment variables that the `build` command then uses).
 --- Additionally, environments track values that are read during execution to check if a stage is up-to-date on subsequent runs.
----@class (exact) Environment
+---@class Environment
 ---@field [string] EnvironmentValue A dynamic key-value storage for environment variables.
 Environment = {}
 

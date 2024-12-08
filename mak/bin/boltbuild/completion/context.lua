@@ -1,7 +1,6 @@
----@class Context
 --- The `Context` class provides core functions for managing build commands, environments, tasks, and filesystem access.
 --- It centralizes the configuration and execution settings needed across commands in the build system.
----
+---@class Context
 ---@field name string The name of the command being executed.
 ---@field fs_name string The filesystem name associated with the command.
 ---@field fun string The function name to run in this context.
