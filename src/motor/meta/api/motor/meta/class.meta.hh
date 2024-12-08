@@ -48,7 +48,7 @@ public:
     Value      getTag(const Type& type) const;
     Value      getTag(raw< const Class > type) const;
 
-    Value get(Value & from, istring name, bool& found) const;
+    Value get(Value& from, istring name, bool& found) const;
     Value get(const Value& from, istring name, bool& found) const;
 
     bool isA(raw< const Class > klass) const;
@@ -56,14 +56,19 @@ public:
     raw< const Property > getProperty(istring propertyName) const;
     raw< const Method >   getMethod(istring methodName) const;
     raw< const Object >   getStaticProperty(istring propertyName) const;
-    static Value          findClass(inamespace name);
 
 public:
     [[motor::meta(export = no)]] typedef void (*EnumerateCallback)(const Value& v);
-    enum [[motor::meta(export = no)]] EnumerateRecursion {EnumerateOwn, EnumerateRecursive};
+
+    enum [[motor::meta(export = no)]] EnumerateRecursion
+    {
+        EnumerateOwn,
+        EnumerateRecursive
+    };
+
     [[motor::meta(export = no)]] void enumerateObjects(EnumerateRecursion recursion,
                                                        EnumerateCallback  callback) const;
-    [[motor::meta(export = no)]] bool distance(raw< const Class > other, u16 & result) const;
+    [[motor::meta(export = no)]] bool distance(raw< const Class > other, u16& result) const;
 
 private:
     static const istring s_anonymousName;
