@@ -12,7 +12,6 @@
 #include <motor/scheduler/task/itask.hh>
 
 namespace Motor { namespace KernelScheduler {
-
 class IProduct;
 class ProducerLoader;
 
@@ -31,8 +30,6 @@ protected:
     ~IProduct() override;
 
 public:
-    static raw< Meta::Class > getNamespace();
-
     weak< const Producer > producer() const
     {
         return m_producer;

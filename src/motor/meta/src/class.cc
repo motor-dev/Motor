@@ -4,7 +4,6 @@
 #include <motor/meta/stdafx.h>
 #include <motor/meta/class.meta.hh>
 #include <motor/meta/method.meta.hh>
-#include <motor/meta/namespace.hh>
 #include <motor/meta/object.meta.hh>
 #include <motor/meta/property.meta.hh>
 #include <motor/meta/tag.meta.hh>
@@ -29,8 +28,8 @@ void Class::destroy(void* src) const
 
 void Class::enumerateObjects(EnumerateRecursion recursion, EnumerateCallback callback) const
 {
-    static raw< const Class > const s_metaClass = motor_class< Class >();
-    raw< const Object >             o           = objects;
+    static raw< const Class > constexpr s_metaClass = motor_class< Class >();
+    raw< const Object > o                           = objects;
     while(o)
     {
         (*callback)(o->value);
@@ -48,7 +47,7 @@ raw< const Property > Class::getProperty(istring propertyName) const
     {
         if(p->name == propertyName)
         {
-            raw< const Property > pptr = {p};
+            const raw< const Property > pptr = {p};
             return pptr;
         }
     }
@@ -61,7 +60,7 @@ raw< const Method > Class::getMethod(istring methodName) const
     {
         if(m->name == methodName)
         {
-            raw< const Method > mptr = {m};
+            const raw< const Method > mptr = {m};
             return mptr;
         }
     }
@@ -84,17 +83,17 @@ raw< const Object > Class::getStaticProperty(istring propertyName) const
 
 Value Class::get(Value& from, istring propname, bool& found) const
 {
-    static raw< const Class > const s_metaClass = motor_class< Class >();
+    static raw< const Class > constexpr s_metaClass = motor_class< Class >();
     if(from.type().metaclass == s_metaClass)
     {
-        auto                cls = from.as< raw< const Class > >();
-        raw< const Object > o   = cls->getStaticProperty(propname);
+        const auto                cls = from.as< raw< const Class > >();
+        const raw< const Object > o   = cls->getStaticProperty(propname);
         if(o)
         {
             found = true;
             return o->value;
         }
-        raw< const Method > m = cls->getMethod(propname);
+        const raw< const Method > m = cls->getMethod(propname);
         if(m)
         {
             found = true;
@@ -102,13 +101,13 @@ Value Class::get(Value& from, istring propname, bool& found) const
         }
     }
 
-    raw< const Property > p = getProperty(propname);
+    const raw< const Property > p = getProperty(propname);
     if(p)
     {
         found = true;
         return p->get(from);
     }
-    raw< const Method > m = getMethod(propname);
+    const raw< const Method > m = getMethod(propname);
     if(m)
     {
         found = true;
@@ -121,17 +120,17 @@ Value Class::get(Value& from, istring propname, bool& found) const
 
 Value Class::get(const Value& from, istring propname, bool& found) const
 {
-    static raw< const Class > const s_metaClass = motor_class< Class >();
+    static raw< const Class > constexpr s_metaClass = motor_class< Class >();
     if(from.type().metaclass == s_metaClass)
     {
-        auto                cls = from.as< raw< const Class > >();
-        raw< const Object > o   = cls->getStaticProperty(propname);
+        const auto                cls = from.as< raw< const Class > >();
+        const raw< const Object > o   = cls->getStaticProperty(propname);
         if(o)
         {
             found = true;
             return o->value;
         }
-        raw< const Method > m = cls->getMethod(propname);
+        const raw< const Method > m = cls->getMethod(propname);
         if(m)
         {
             found = true;
@@ -139,13 +138,13 @@ Value Class::get(const Value& from, istring propname, bool& found) const
         }
     }
 
-    raw< const Property > p = getProperty(propname);
+    const raw< const Property > p = getProperty(propname);
     if(p)
     {
         found = true;
         return p->get(from);
     }
-    raw< const Method > m = getMethod(propname);
+    const raw< const Method > m = getMethod(propname);
     if(m)
     {
         found = true;
@@ -206,27 +205,17 @@ bool Class::distance(raw< const Class > other, u16& result) const
     return false;
 }
 
-Value Class::findClass(inamespace name)
-{
-    Value v = Value(raw< const Meta::Class >(motor_motor_Namespace()));
-    while(v && name.size())
-    {
-        v = v[name.pop_front()];
-    }
-    return v;
-}
-
 }  // namespace Meta
 
 raw< Meta::Class > motor_motor_Namespace()
 {
-    static Meta::Class ci     = {0,         motor_class< void >(),
-                                 0,         {nullptr},
-                                 {nullptr}, {nullptr},
-                                 {nullptr}, {nullptr},
-                                 {nullptr}, motor_class< void >()->interfaces,
-                                 nullptr,   nullptr};
-    raw< Meta::Class > result = {&ci};
+    static Meta::Class       ci     = {0,         motor_class< void >(),
+                                       0,         {nullptr},
+                                       {nullptr}, {nullptr},
+                                       {nullptr}, {nullptr},
+                                       {nullptr}, motor_class< void >()->interfaces,
+                                       nullptr,   nullptr};
+    const raw< Meta::Class > result = {&ci};
     return result;
 }
 

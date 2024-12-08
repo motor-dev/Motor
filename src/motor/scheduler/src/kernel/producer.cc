@@ -6,20 +6,8 @@
 
 #include <motor/scheduler/kernel/producerloader.hh>
 
-namespace Motor {
-
-raw< Meta::Class > motor_motor_Namespace_Motor_KernelScheduler();
-
-}
-
 namespace Motor { namespace KernelScheduler {
-
 IProduct::~IProduct() = default;
-
-raw< Meta::Class > IProduct::getNamespace()
-{
-    return motor_motor_Namespace_Motor_KernelScheduler();
-}
 
 Producer::Runtime::Runtime(const ref< Task::ITask >& task, u32 parameterCount)
     : task(task)
