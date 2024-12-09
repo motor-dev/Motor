@@ -91,10 +91,11 @@ local function metagen(name, path)
     return generator
 end
 
-local function module(name, path, lib_types)
-    path = path or string.join('/', string.split(name, '.'))
+local function module(name, namespace, path, lib_types)
+    local name_components = string.split(name, '.')
+    path = path or string.join('/', name_components)
     path = context.path:make_node(path)
-    local module_name = path:name()
+    local module_name = name_components[#name_components]
 
     local group = context.fs_name
     local lib_type = lib_types[1]
@@ -115,14 +116,15 @@ local function module(name, path, lib_types)
     end
 
     local generator = Bolt.Module.module(name, {
-        features = { lib_type },
+        features = { lib_type, 'motor_module' },
         group = group,
         source_patterns = {
             { path = path, pattern = 'src/**/*' }
         },
         source_filter = filter_source,
         internal_defines = {
-            { 'building_' .. module_name, '1' }
+            { 'building_' .. module_name, '1' },
+            { 'MOTOR_PROJECTID', namespace }
         },
         public_defines = {
             { 'motor_dll_' .. module_name, '1' }
@@ -134,7 +136,6 @@ local function module(name, path, lib_types)
             context.bld_dir:make_node(meta_generator.group):make_node(meta_generator.name):make_node('include')
         }
     })
-    generator.bulk = context.settings.bulk
     for _, include in ipairs(context:search(path, 'include', true)) do
         generator = generator:add_internal_include(include)
     end
@@ -150,15 +151,44 @@ end
 ---into a shared object. When neither is used, libraries are a collection of object files that are directly pulled into
 ---the link phase of modules depending on them.
 ---@param name string name of the library.
+---@param namespace string root namespace of meta objects.
 ---@param path string? qualified path of the library. Defaults to name.
 ---@return Module a new library module
-function Motor.library(name, path)
-    return module(name, path, { 'objects', 'objects', 'shlib' })
+function Motor.library(name, namespace, path)
+    return module(name, namespace,path, { 'objects', 'objects', 'shlib' })
 end
 
 ---Generates a C/C++ shared library object.
 ---@param name string name of the library.
+---@param namespace string root namespace of meta objects.
 ---@param path string? qualified path of the library. Defaults to name.
-function Motor.shared_library(name, path)
-    return module(name, path, { 'shlib', 'objects', 'shlib' })
+function Motor.shared_library(name, namespace, path)
+    return module(name, namespace, path, { 'shlib', 'objects', 'shlib' })
 end
+
+local function propagate_building_macro(module, current, seen)
+    if seen[current] then
+        return
+    end
+    seen[current] = true
+    if current:has_all_features({"objects", "motor_module"}) then
+        local name_components = string.split(current.name, '.')
+        local module_name = name_components[#name_components]
+        module:add_internal_define('building_' .. module_name, '1')
+        for _, dep in ipairs(current.internal_dependencies) do
+            propagate_building_macro(module, dep, seen)
+        end
+        for _, dep in ipairs(current.public_dependencies) do
+            propagate_building_macro(module, dep, seen)
+        end
+    end
+end
+
+context:feature("motor_module", "motor_propagate_building_macro", function (module)
+    for _, dep in ipairs(module.internal_dependencies) do
+        propagate_building_macro(module, dep, {})
+    end
+    for _, dep in ipairs(module.public_dependencies) do
+        propagate_building_macro(module, dep, {})
+    end
+end):set_run_before({'process_flags'})
