@@ -29,7 +29,7 @@ function Bolt.Winres.find_winres(env)
                     env.RC = context:find_program('windres')
                 end
                 if env.RC then
-                    if env.LP64 then
+                    if env.MOTOR_ARCH_LP64 then
                         env:append('RCFLAGS', { '-F', 'pe-x86-64' })
                     else
                         env:append('RCFLAGS', { '-F', 'pe-i386' })
