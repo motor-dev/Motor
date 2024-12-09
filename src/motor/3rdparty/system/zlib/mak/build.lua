@@ -19,6 +19,7 @@ elseif context.env.ZLIB_SRC_NODE then
         public_defines = { {'ZLIB_DLL', ''} },
         flag_groups = { 'warn.none' },
     })
+    zlib.nobulk = true
 else
     context:raise_error('zlib not found')
 end
