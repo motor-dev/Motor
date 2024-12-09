@@ -22,8 +22,8 @@ impl UserData for Generator {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_meta_function_mut(
             MetaMethod::NewIndex,
-            |_lua, (context, name, value): (AnyUserData, String, LuaValue)| {
-                context.set_named_user_value(name.as_str(), value)
+            |_lua, (generator, name, value): (AnyUserData, String, LuaValue)| {
+                generator.set_named_user_value(name.as_str(), value)
             },
         );
 
@@ -49,6 +49,24 @@ impl UserData for Generator {
                 Ok(!result.is_nil())
             },
         );
+
+        methods.add_method("has_all_features", |_lua, generator, names: Vec<String>| {
+            for feature in names {
+                if !generator.features.contains(&feature) {
+                    return Ok(false);
+                }
+            }
+            Ok(true)
+        });
+
+        methods.add_method("has_any_features", |_lua, generator, names: Vec<String>| {
+            for feature in names {
+                if generator.features.contains(&feature) {
+                    return Ok(true);
+                }
+            }
+            Ok(false)
+        });
 
         methods.add_function_mut("declare_task", |lua, (generator, driver, inputs, outputs, env): (AnyUserData, String, Value, Value, Option<AnyUserData>)| {
             let inputs = match &inputs {
