@@ -44,6 +44,46 @@ impl LuaDriverConfiguration {
                 let package: Table = globals.get("package").unwrap();
                 let package_path: String = package.get("path").unwrap();
                 let packages: Table = package.get("loaded").unwrap();
+                let command = if task.inputs.is_empty() {
+                    if task.outputs.is_empty() {
+                        self.script.to_string()
+                    } else {
+                        format!(
+                            "{} => `{}`",
+                            self.script,
+                            task.outputs
+                                .iter()
+                                .map(|x| x.to_string())
+                                .collect::<Vec<_>>()
+                                .join("` `")
+                        )
+                    }
+                } else if task.outputs.is_empty() {
+                    format!(
+                        "{} `{}`",
+                        task.inputs
+                            .iter()
+                            .map(|x| x.to_string())
+                            .collect::<Vec<_>>()
+                            .join("` `"),
+                        self.script
+                    )
+                } else {
+                    format!(
+                        "{} `{}` => `{}`",
+                        self.script,
+                        task.inputs
+                            .iter()
+                            .map(|x| x.to_string())
+                            .collect::<Vec<_>>()
+                            .join("` `"),
+                        task.outputs
+                            .iter()
+                            .map(|x| x.to_string())
+                            .collect::<Vec<_>>()
+                            .join("` `")
+                    )
+                };
                 if let Err(err) = packages.for_each(|key: String, _: LuaValue| {
                     for path in package_path.split(';') {
                         let module_path = path.replace("?", key.replace(".", "/").as_str());
@@ -57,7 +97,7 @@ impl LuaDriverConfiguration {
                 }) {
                     Output {
                         exit_code: 1,
-                        command: self.script.to_string(),
+                        command,
                         log: err.to_string(),
                         driver_hash: self.hash(&[]),
                         driver_dependencies: Vec::new(),
@@ -67,7 +107,7 @@ impl LuaDriverConfiguration {
                 } else {
                     Output {
                         exit_code: result,
-                        command: self.script.to_string(),
+                        command,
                         log: "".to_string(),
                         driver_hash: self.hash(lua_dependencies.as_slice()),
                         driver_dependencies: lua_dependencies,
