@@ -22,7 +22,7 @@ local function make_bulk_task(generator, counter, extension)
     local target_node = master_node:make_node(generator.name)
     target_node = target_node:make_node('src')
     target_node = target_node:make_node(extension .. '-bulk-' .. counter .. '.' .. extension)
-    generator:add_source(target_node:parent(), target_node)
+    generator:add_source(target_node.parent, target_node)
     return generator:declare_task('bulk', { }, { target_node })
 end
 
@@ -57,7 +57,7 @@ local function process_source(generator, source, path, counters, bulk_task_c, bu
 end
 
 ---@param generator Module
-context:feature('c,cxx', 'generate_bulk', function(generator)
+context:feature('module', 'generate_bulk', function(generator)
     if context.settings.nobulk then
         return
     end
@@ -83,7 +83,7 @@ context:feature('c,cxx', 'generate_bulk', function(generator)
     for _, source_spec in ipairs(sources) do
         local path = source_spec.base_path
         local source_node = source_spec.full_path
-        if generator.source_filter(source_spec, path, generator.env) then
+        if generator.source_filter(source_spec, generator.env) then
             bulk_file_c, bulk_file_cxx = process_source(generator, source_node, path, indices, bulk_file_c, bulk_file_cxx)
         end
     end
