@@ -69,6 +69,11 @@ local function load_clang(env, compiler, flags, lang, var)
 
     context:load_tool('internal/' .. lang)
     context:load_tool('internal/link')
+    env.LIB = context:find_program(env.TARGET..'-ar')
+    if not env.LIB then
+        env.LIB = context:find_program('ar')
+    end
+    env.LIBFLAGS = { 'rcs' }
 end
 
 --- Loads the C compiler settings into the environment.
