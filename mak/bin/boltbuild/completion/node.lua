@@ -24,8 +24,8 @@ end
 ---
 ---@param name string The name of the program to find.
 ---@param paths string[] Optional. A list of paths to search for the program. If not specified, the `context.options.path` variable is used.
----@return Node The node representing the found program.
----@overload fun(name: string): Node
+---@return Node? The node representing the found program, or nil if the program could not be found.
+---@overload fun(name: string): Node?
 function Context:find_program(name, paths)
     return Node
 end
