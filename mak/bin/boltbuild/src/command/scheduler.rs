@@ -53,7 +53,7 @@ impl Command {
 
             let mut dependency_nodes = outputs
                 .iter()
-                .filter(|x| !inputs.contains(x))
+                .filter(|x| inputs.contains(x))
                 .cloned()
                 .collect::<HashSet<_>>();
 
@@ -342,7 +342,8 @@ impl<'command> Scheduler<'command> {
                                 if hasher.finalize() != cache.environment_hash.0 {
                                     (true, "the environment has been modified".to_string())
                                 } else {
-                                    match hash_output_files(&task.outputs, dependency_nodes) {
+                                    match hash_output_files(&task.outputs, dependency_nodes, false)
+                                    {
                                         Ok(out_hashes) => {
                                             hashes = out_hashes;
                                             (false, "the task is up-to-date".to_string())
@@ -369,7 +370,7 @@ impl<'command> Scheduler<'command> {
                             let mut output = driver.execute(task);
 
                             let hashes = if output.exit_code == 0 {
-                                match hash_output_files(&task.outputs, dependency_nodes) {
+                                match hash_output_files(&task.outputs, dependency_nodes, false) {
                                     Ok(hashes) => hashes,
                                     Err(error) => {
                                         output.exit_code = 1;
@@ -439,12 +440,10 @@ impl<'command> Scheduler<'command> {
         title: &str,
         progress_mode: u32,
     ) -> (Result<()>, Vec<Option<TaskCacheEntry>>) {
-        let mut result_cache = Vec::new();
+        let mut result_cache = vec![None; self.tasks_pool.len()];
         let mut thread_activity = ThreadActivity::new(thread_count);
         let mut input_hashes = Vec::new();
-        let mut task_work = Vec::new();
-        task_work.resize(self.tasks_pool.len(), (usize::MAX, false));
-        result_cache.resize(self.tasks_pool.len(), None);
+        let mut task_work = vec![(usize::MAX, false); self.tasks_pool.len()];
 
         fn cancel(index: usize, tasks: &[Task], task_work: &mut Vec<(usize, bool)>) -> usize {
             let mut result = 0;
@@ -459,7 +458,6 @@ impl<'command> Scheduler<'command> {
         }
 
         let mut longest_group = 1;
-
         for &task_index in &self.target_tasks {
             let task = &self.tasks_pool[task_index];
             task_work[task_index].0 = task.predecessors.len();
@@ -607,7 +605,7 @@ impl<'command> Scheduler<'command> {
                             work_index += 1;
                             processed_tasks += 1;
                             for (file, hash) in output_hashes {
-                                file_hashes.insert(file.clone(), hash);
+                                file_hashes.insert(file, hash);
                             }
 
                             /* copy cache */
@@ -748,10 +746,7 @@ impl<'command> Scheduler<'command> {
                     .flatten()
                 {
                     if !f.is_dir() {
-                        let file = File::open(f);
-                        if let Ok(file) = file {
-                            input_hasher.update_reader(file).unwrap();
-                        }
+                        input_hasher.update(file_hashes.get(&Node::from(&f)).unwrap().as_bytes());
                     }
                 }
             } else {
@@ -1016,17 +1011,23 @@ fn save_cache<T>(
 fn hash_output_files(
     outputs: &[Node],
     dependency_nodes: &HashSet<Node>,
+    mut is_dependency: bool,
 ) -> std::result::Result<Vec<(Node, blake3::Hash)>, String> {
     let mut hashes = Vec::new();
     for node in outputs {
         let mut hasher = blake3::Hasher::new();
+        is_dependency = is_dependency || dependency_nodes.contains(node);
         if node.is_dir() {
             let content = std::fs::read_dir(node.path())
                 .unwrap()
                 .map(|x| Node::from(&x.unwrap().path()))
                 .collect::<Vec<_>>();
-            hashes.extend(hash_output_files(&content, dependency_nodes)?);
-        } else if dependency_nodes.contains(node) {
+            hashes.extend(hash_output_files(
+                &content,
+                dependency_nodes,
+                is_dependency,
+            )?);
+        } else if is_dependency {
             if let Ok(file) = File::open(node.path()) {
                 if hasher.update_reader(file).is_ok() {
                     hashes.push((node.clone(), hasher.finalize()));
