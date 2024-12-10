@@ -7,20 +7,16 @@ local zlib
 if context.env.check_zlib then
     zlib = Bolt.Module.pkg_config('motor.3rdparty.system.zlib', 'zlib')
 elseif context.env.ZLIB_SRC_NODE then
-    local group = context.fs_name
-    local lib_type = 'stlib'
+    local lib_type
+    local defines = {}
     if context.settings.static then
         lib_type = 'stlib'
-        group = group .. '.static'
     else
-        group = group .. '.default'
-    end
-    if context.settings.nobulk then
-        group = group .. '.nobulk'
+        lib_type = 'shlib'
+        defines[1] = {'ZLIB_DLL', ''}
     end
 
     zlib = Bolt.Module.module('motor.3rdparty.system.zlib', {
-        group = group,
         features = { lib_type },
         source_patterns = {
             {path = context.env.ZLIB_SRC_NODE, pattern = '*.c'},
@@ -30,7 +26,7 @@ elseif context.env.ZLIB_SRC_NODE then
         },
 
         internal_defines = { {'Z_HAVE_UNISTD_H', ''}, {'ZLIB_INTERNAL', ''} },
-        public_defines = { {'ZLIB_DLL', ''} },
+        public_defines = defines,
         flag_groups = { 'warn.none' },
     })
     zlib.nobulk = true
@@ -41,20 +37,16 @@ end
 if context.env.check_minizip then
     Bolt.Module.pkg_config('motor.3rdparty.system.minizip', 'minizip')
 elseif context.env.MINIZIP_SRC_NODE then
-    local group = context.fs_name
-    local lib_type = 'stlib'
+    local lib_type
+    local defines = {}
     if context.settings.static then
         lib_type = 'stlib'
-        group = group .. '.static'
     else
-        group = group .. '.default'
-    end
-    if context.settings.nobulk then
-        group = group .. '.nobulk'
+        lib_type = 'shlib'
+        defines[1] = {'ZLIB_DLL', ''}
     end
 
     Bolt.Module.module('motor.3rdparty.system.minizip', {
-        group = group,
         features = { lib_type },
         source = {
             { base_path = context.env.MINIZIP_SRC_NODE:make_node('contrib/minizip'),
@@ -62,11 +54,11 @@ elseif context.env.MINIZIP_SRC_NODE then
             { base_path = context.env.MINIZIP_SRC_NODE:make_node('contrib/minizip'),
               full_path = context.env.MINIZIP_SRC_NODE:make_node('contrib/minizip/unzip.c') },
         },
+        internal_defines = { {'Z_HAVE_UNISTD_H', ''}, {'ZLIB_INTERNAL', ''} },
         public_includes = {
             context.env.MINIZIP_SRC_NODE:make_node('contrib/minizip'),
         },
-        public_defines = {
-        },
+        public_defines = defines,
         public_dependencies = {
             zlib
         },

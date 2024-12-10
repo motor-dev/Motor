@@ -97,16 +97,11 @@ local function module(name, namespace, path, lib_types)
     path = context.path:make_node(path)
     local module_name = name_components[#name_components]
 
-    local group = context.fs_name
     local lib_type = lib_types[1]
     if context.settings.static then
         lib_type = lib_types[2]
-        group = group .. '.static'
     elseif context.settings.dynamic then
-        group = group .. '.dynamic'
         lib_type = lib_types[3]
-    else
-        group = group .. '.default'
     end
 
     local meta_generator = metagen(name, path)
@@ -117,7 +112,6 @@ local function module(name, namespace, path, lib_types)
 
     local generator = Bolt.Module.module(name, {
         features = { lib_type, 'motor_module' },
-        group = group,
         source_patterns = {
             { path = path, pattern = 'src/**/*' }
         },
