@@ -16,8 +16,8 @@ end
 if nobulk then
     group_name = group_name .. '.nobulk'
 end
-
 context:declare_group(group_name, true)
+context:set_default_group(group_name)
 
 Motor = { }
 
