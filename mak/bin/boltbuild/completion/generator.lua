@@ -43,6 +43,13 @@ end
 function Context:set_group_enabled(name, enabled)
 end
 
+--- Sets the default group for the context.
+--- - The default group is used when no specific group is specified for task generators.
+---
+--- @param name string The name of the group to set as the default.
+function Context:set_default_group(name)
+end
+
 --- Creates a new task generator, associating it with a specified group for logical organization and caching.
 --- - Generators are associated with groups to enable or disable their tasks collectively and to manage task caching.
 --- - Groups can be conditionally enabled via `declare_group`, based on either boolean conditions or command-line options.

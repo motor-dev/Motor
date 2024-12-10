@@ -53,6 +53,7 @@ impl UserData for Context {
         );
         methods.add_method_mut("declare_group", declare_group);
         methods.add_method_mut("set_group_enabled", set_group_enabled);
+        methods.add_method_mut("set_default_group", set_default_group);
         methods.add_method_mut("command_driver", command_driver);
         methods.add_method_mut("dependency_driver", dependency_driver);
         methods.add_method_mut("lua_driver", lua_driver);
