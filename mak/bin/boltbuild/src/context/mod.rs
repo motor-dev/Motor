@@ -49,6 +49,7 @@ pub(crate) struct Context {
     bld_dir: Node,
     options: Options,
     logger: Logger,
+    default_group: String,
     command_path: Vec<String>,
     commands: HashMap<String, Vec<String>>,
     sorted_features: Vec<String>,

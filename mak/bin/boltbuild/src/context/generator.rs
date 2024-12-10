@@ -52,7 +52,23 @@ pub(super) fn set_group_enabled(
         Ok(())
     } else {
         Err(LuaError::RuntimeError(format!(
-            "`{}`: build group already registered",
+            "`{}`: build group does not exist",
+            &name
+        )))
+    }
+}
+
+pub(super) fn set_default_group(
+    _lua: &Lua,
+    this: &mut Context,
+    name: String,
+) -> LuaResult<()> {
+    if this.output.groups.iter_mut().any(|x| x.0.eq(&name)) {
+        this.default_group = name;
+        Ok(())
+    } else {
+        Err(LuaError::RuntimeError(format!(
+            "`{}`: build group does not exist",
             &name
         )))
     }
@@ -69,7 +85,7 @@ pub(super) fn declare_generator(
     ),
 ) -> LuaResult<AnyUserData> {
     let group = this.borrow_mut_scoped::<Context, _>(|context| {
-        let group = group.unwrap_or_else(|| context.spec.fs_name.clone());
+        let group = group.unwrap_or_else(|| context.default_group.clone());
         if !context.output.groups.iter().any(|x| x.0.eq(&group)) {
             return Err(LuaError::RuntimeError(format!(
                 "When creating generator `{}`: `{}`: group was not declared",

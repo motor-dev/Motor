@@ -87,6 +87,7 @@ impl Context {
             src_dir: current_dir,
             bld_dir,
             options: options_context,
+            default_group: spec.fs_name.clone(),
             logger: Logger::new(None, 0, false),
             command_path,
             commands: HashMap::new(),
