@@ -8,7 +8,6 @@
 
 namespace Motor { namespace Meta {
 
-class Tag;
 class Class;
 
 class motor_api(META) Object

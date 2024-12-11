@@ -66,14 +66,21 @@ local function load_clang(env, compiler, flags, lang, var)
     if env.BINARY_FORMAT == 'elf' then
         env:append('LINKFLAGS_shlib', '-Wl,-z,defs')
     end
+    
+    env.LIB = context:find_program(env.TARGET..'-ar')
+    if not env.LIB then
+        paths = { compiler[1].parent, table.unpack(context.settings.path) }
+        if env.TRIPLE then
+            env.LIB = context:find_program(env.TRIPLE..'-ar', paths)
+        end
+        if not env.LIB then
+            env.LIB = context:find_program('ar', paths)
+        end
+    end
+    env.LIBFLAGS = { 'rcs' }
 
     context:load_tool('internal/' .. lang)
     context:load_tool('internal/link')
-    env.LIB = context:find_program(env.TARGET..'-ar')
-    if not env.LIB then
-        env.LIB = context:find_program('ar')
-    end
-    env.LIBFLAGS = { 'rcs' }
 end
 
 --- Loads the C compiler settings into the environment.
@@ -236,8 +243,7 @@ function Bolt.Clang.discover(callback, language_flags, global_flags, detect_cros
             for _, node in ipairs(context:search(path, 'clang*' .. context.settings.exe_suffix)) do
                 local version = node:name():match("^clang%-?(%d*)" .. context.settings.exe_suffix .. "$")
                 if version ~= nil and node:is_file() then
-                    node = node:read_link()
-                    local absolute_path = node:abs_path()
+                    local absolute_path = node:read_link():abs_path()
                     if not seen[absolute_path] then
                         seen[absolute_path] = true
                         table.insert(compilers, { version, node })
