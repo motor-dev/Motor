@@ -65,8 +65,6 @@ impl CopyDriverConfiguration {
     }
 
     pub(super) fn hash(&self, _: &[Node]) -> blake3::Hash {
-        blake3::Hasher::new()
-            .update("version:1.0".as_bytes())
-            .finalize()
+        blake3::Hasher::new().update("version:1.0".as_bytes()).finalize()
     }
 }

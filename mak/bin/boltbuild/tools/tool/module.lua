@@ -108,10 +108,28 @@ function Module:add_public_dependency(dependency)
     return self
 end
 
+---@param dependencies Generator[]
+---@return Module
+function Module:add_public_dependencies(dependencies)
+    for _, dependency in ipairs(dependencies) do
+        table.insert(self.public_dependencies, dependency)
+    end
+    return self
+end
+
 ---@param dependency Generator
 ---@return Module
 function Module:add_internal_dependency(dependency)
     table.insert(self.internal_dependencies, dependency)
+    return self
+end
+
+---@param dependencies Generator[]
+---@return Module
+function Module:add_internal_dependencies(dependencies)
+    for _, dependency in ipairs(dependencies) do
+        table.insert(self.internal_dependencies, dependency)
+    end
     return self
 end
 
@@ -164,6 +182,8 @@ function Bolt.Module.module(name, properties)
     g.add_internal_define = Module.add_internal_define
     g.add_public_dependency = Module.add_public_dependency
     g.add_internal_dependency = Module.add_internal_dependency
+    g.add_public_dependencies = Module.add_public_dependencies
+    g.add_internal_dependencies = Module.add_internal_dependencies
     g.make_build_node = Module.make_build_node
 
     return g

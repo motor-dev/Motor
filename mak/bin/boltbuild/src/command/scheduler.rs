@@ -342,13 +342,31 @@ impl<'command> Scheduler<'command> {
                                 if hasher.finalize() != cache.environment_hash.0 {
                                     (true, "the environment has been modified".to_string())
                                 } else {
-                                    match hash_output_files(&task.outputs, dependency_nodes, false)
-                                    {
-                                        Ok(out_hashes) => {
-                                            hashes = out_hashes;
-                                            (false, "the task is up-to-date".to_string())
+                                    let mut outputs = cache.all_output.iter();
+                                    loop {
+                                        if let Some(output) = outputs.next() {
+                                            if !output.is_file() && !output.is_dir() {
+                                                break (
+                                                    true,
+                                                    format!("output file {} is missing", output),
+                                                );
+                                            }
+                                        } else {
+                                            match hash_output_files(
+                                                &task.outputs,
+                                                dependency_nodes,
+                                                false,
+                                            ) {
+                                                Ok(out_hashes) => {
+                                                    hashes = out_hashes;
+                                                    break (
+                                                        false,
+                                                        "the task is up-to-date".to_string(),
+                                                    );
+                                                }
+                                                Err(error) => break (true, error),
+                                            }
                                         }
-                                        Err(error) => (true, error),
                                     }
                                 }
                             }
