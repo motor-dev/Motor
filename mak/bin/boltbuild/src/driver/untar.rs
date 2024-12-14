@@ -35,7 +35,7 @@ impl UntarDriverConfiguration {
             return Output {
                 exit_code: 1,
                 command: format!("tar xf {}", input_file),
-                log: "Expected exactly one input file".to_string(),
+                log: "Expected exactly one output directory".to_string(),
                 driver_hash,
                 driver_dependencies: Vec::new(),
                 file_dependencies: Vec::new(),
@@ -43,10 +43,11 @@ impl UntarDriverConfiguration {
             };
         }
         let output_dir = &task.outputs[0];
+        let command = format!("tar xf {} => {}", input_file, output_dir);
         if let Err(e) = output_dir.mkdir() {
             return Output {
                 exit_code: 1,
-                command: format!("tar xf {} => {}", input_file, output_dir),
+                command,
                 log: e.to_string(),
                 driver_hash,
                 driver_dependencies: Vec::new(),
@@ -58,7 +59,7 @@ impl UntarDriverConfiguration {
         match unpack(input_file, output_dir) {
             Ok(output) => Output {
                 exit_code: 0,
-                command: format!("tar xf {} => {}", input_file, output_dir),
+                command,
                 log: "".to_string(),
                 driver_hash,
                 driver_dependencies: Vec::new(),
@@ -67,7 +68,7 @@ impl UntarDriverConfiguration {
             },
             Err(x) => Output {
                 exit_code: 1,
-                command: format!("tar xf {} => {}", input_file, output_dir),
+                command,
                 log: x,
                 driver_hash,
                 driver_dependencies: Vec::new(),
@@ -78,7 +79,9 @@ impl UntarDriverConfiguration {
     }
 
     pub(super) fn hash(&self, _: &[Node]) -> blake3::Hash {
-        blake3::Hasher::new().finalize()
+        blake3::Hasher::new()
+            .update("version:1.0".as_bytes())
+            .finalize()
     }
 }
 

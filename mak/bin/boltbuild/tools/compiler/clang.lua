@@ -67,11 +67,13 @@ local function load_clang(env, compiler, flags, lang, var)
         env:append('LINKFLAGS_shlib', '-Wl,-z,defs')
     end
     
-    env.LIB = context:find_program(env.TARGET..'-ar')
     if not env.LIB then
         paths = { compiler[1].parent, table.unpack(context.settings.path) }
         if env.TRIPLE then
             env.LIB = context:find_program(env.TRIPLE..'-ar', paths)
+        end
+        if not env.LIB then
+            env.LIB = context:find_program(env.TARGET..'-ar', paths)
         end
         if not env.LIB then
             env.LIB = context:find_program('ar', paths)
