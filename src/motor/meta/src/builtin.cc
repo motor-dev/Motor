@@ -9,10 +9,11 @@
 #include <motor/meta/namespace.hh>
 
 namespace Motor { namespace Meta {
+
 const Object s_objects[] = {{{&s_objects[1]},
                              motor_motor_Namespace(),
                              ClassID< void >::name(),
-                             Value(raw< const Class >{&ClassID< void >::s_class})},
+                             Value(raw< const Class > {&ClassID< void >::s_class})},
 
                             {{&s_objects[2]},
                              motor_motor_Namespace(),
@@ -78,7 +79,7 @@ static void nullconstructor(const void* /*src*/, void* /*dst*/)
 {
 }
 
-template <typename T>
+template < typename T >
 static void copyconstructor(const void* src, void* dst)
 {
     memcpy(dst, src, sizeof(T));
@@ -92,23 +93,23 @@ static InterfaceTable s_emptyTable
     = {{nullptr}, {nullptr}, {nullptr}, {nullptr}, {nullptr}, {nullptr},
        {nullptr}, {nullptr}, {nullptr}, {nullptr}, {nullptr}, nullptr};
 
-template <typename FROM, typename TO>
+template < typename FROM, typename TO >
 static Value construct(FROM t)
 {
     return Value(TO(t));
 }
 
-template <typename FROM, typename TO>
+template < typename FROM, typename TO >
 static FROM get(const Value& value)
 {
     return FROM(value.as< TO >());
 }
 
-template <typename FROM, typename TO>
+template < typename FROM, typename TO >
 static InterfaceTable::TypeInterface< FROM > s_builtinInterfaceType
     = {TypeID< TO >::type(), &construct< FROM, TO >, &get< FROM, TO >};
 
-template <typename TO>
+template < typename TO >
 static InterfaceTable s_builtinInterface = {{&s_builtinInterfaceType< bool, TO >},
                                             {&s_builtinInterfaceType< i64, TO >},
                                             {&s_builtinInterfaceType< u64, TO >},
@@ -131,7 +132,7 @@ motor_api(META) istring ClassID< void >::name()
 }
 
 MOTOR_EXPORT const Class ClassID< void >::s_class
-    = {0, {nullptr}, 0, {&s_objects[0]}, {nullptr}, {nullptr},
+    = {0,         {nullptr}, 0,         {&s_objects[0]}, {nullptr},        {nullptr},
        {nullptr}, {nullptr}, {nullptr}, {&s_emptyTable}, &nullconstructor, &nulldestructor};
 
 MOTOR_EXPORT istring ClassID< minitl::pointer >::name()
@@ -362,6 +363,7 @@ MOTOR_EXPORT const Class ClassID< double >::s_class = {sizeof(double),
                                                        &copyconstructor< double >,
                                                        &nulldestructor};
 
-const ConversionCost ConversionCost::s_incompatible{0, 0, 0, 0, 1};
-const ConversionCost ConversionCost::s_variant{0, 0, 0, 1, 0};
-}} // namespace Motor::Meta
+const ConversionCost ConversionCost::s_incompatible {0, 0, 0, 0, 1};
+const ConversionCost ConversionCost::s_variant {0, 0, 0, 1, 0};
+
+}}  // namespace Motor::Meta

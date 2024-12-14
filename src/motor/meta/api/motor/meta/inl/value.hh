@@ -6,7 +6,6 @@
 
 #include <motor/meta/value.hh>
 
-#include <motor/meta/class.meta.hh>
 #include <motor/meta/typeinfo.hh>
 #include <motor/minitl/type_traits.hh>
 
@@ -29,7 +28,7 @@ Value::Value(ByRefType< T > t) : m_type(motor_type< T >())
                                , m_buffer()
                                , m_reference(true)
 {
-    m_buffer.m_ref.m_pointer    = const_cast< void* >((const void*)&t.value);
+    m_buffer.m_ref.m_pointer    = const_cast< void* >(static_cast< const void* >(&t.value));
     m_buffer.m_ref.m_deallocate = false;
 }
 
@@ -70,7 +69,7 @@ Value& Value::operator=(const T& t)
     else
     {
         this->~Value();
-        new((void*)this) Value(t);
+        new(static_cast< void* >(this)) Value(t);
         return *this;
     }
 }
@@ -95,7 +94,7 @@ template < typename T >
 T Value::as()
 {
     typedef minitl::remove_reference_t< T > REALTYPE;
-    Type                                    ti = motor_type< T >();
+    const Type                              ti = motor_type< T >();
     ref< minitl::pointer >                  rptr;
     weak< minitl::pointer >                 wptr;
     minitl::pointer*                        obj;
@@ -145,7 +144,7 @@ bool Value::isConst() const
 
 Value::operator const void*() const
 {
-    return (const void*)(m_type.metaclass != motor_class< void >());
+    return reinterpret_cast< const void* >(m_type.metaclass.m_ptr - motor_class< void >().m_ptr);
 }
 
 bool Value::operator!() const

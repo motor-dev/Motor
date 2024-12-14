@@ -81,17 +81,20 @@ local function filter_source(source_file, env)
 end
 
 local function metagen(name, path)
-    local api = string.split(name, '.')
-    api = api[#api]
-    name = name .. '.metagen'
-    local generator = context:declare_generator(name, { 'metagen' }, context.env, "metagen")
-    generator.source = { path:make_node('api'), path:make_node('include') }
-    generator.out_source = {}
-    generator.api = api:upper()
+    local generator = context:get_generator_by_name(name)
+    if not generator then
+        local api = string.split(name, '.')
+        api = api[#api]
+        name = name .. '.metagen'
+        generator = context:declare_generator(name, { 'metagen' }, context.env, "metagen")
+        generator.source = { path:make_node('api'), path:make_node('include') }
+        generator.out_source = {}
+        generator.api = api:upper()
+    end
     return generator
 end
 
-local function module(name, namespace, path, lib_types)
+local function module(name, path, lib_types)
     local name_components = string.split(name, '.')
     path = path or string.join('/', name_components)
     path = context.path:make_node(path)
@@ -104,7 +107,7 @@ local function module(name, namespace, path, lib_types)
         lib_type = lib_types[3]
     end
 
-    local meta_generator = metagen(name, path)
+    local meta_generator, meta_registry = metagen(name, path)
 
     if context.settings.nobulk then
         group = group .. '.nobulk'
@@ -118,7 +121,6 @@ local function module(name, namespace, path, lib_types)
         source_filter = filter_source,
         internal_defines = {
             { 'building_' .. module_name, '1' },
-            { 'MOTOR_PROJECTID', namespace }
         },
         public_defines = {
             { 'motor_dll_' .. module_name, '1' }
@@ -128,8 +130,10 @@ local function module(name, namespace, path, lib_types)
         },
         internal_includes = {
             context.bld_dir:make_node(meta_generator.group):make_node(meta_generator.name):make_node('include')
-        }
+        },
+        internal_dependencies = { meta_registry },
     })
+    generator.meta_generator = meta_generator
     for _, include in ipairs(context:search(path, 'include', true)) do
         generator = generator:add_internal_include(include)
     end
@@ -145,19 +149,19 @@ end
 ---into a shared object. When neither is used, libraries are a collection of object files that are directly pulled into
 ---the link phase of modules depending on them.
 ---@param name string name of the library.
----@param namespace string root namespace of meta objects.
 ---@param path string? qualified path of the library. Defaults to name.
 ---@return Module a new library module
-function Motor.library(name, namespace, path)
-    return module(name, namespace,path, { 'objects', 'objects', 'shlib' })
+function Motor.module(name,  path)
+    return module(name, path, { 'objects', 'objects', 'shlib' })
 end
 
 ---Generates a C/C++ shared library object.
 ---@param name string name of the library.
 ---@param namespace string root namespace of meta objects.
 ---@param path string? qualified path of the library. Defaults to name.
-function Motor.shared_library(name, namespace, path)
-    return module(name, namespace, path, { 'shlib', 'objects', 'shlib' })
+function Motor.package(name, namespace, path)
+    local result = module(name,  path, { 'shlib', 'objects', 'shlib' })
+    return result
 end
 
 local function propagate_building_macro(module, current, seen)
@@ -186,3 +190,11 @@ context:feature("motor_module", "motor_propagate_building_macro", function (modu
         propagate_building_macro(module, dep, {})
     end
 end):set_run_before({'process_flags'})
+
+local function process_registry(module)
+    for _, metagen in ipairs(module.metagen_generators) do
+        context:post(metagen)
+    end
+end
+
+context:feature("motor_registry", "motor_process_registry", process_registry)
