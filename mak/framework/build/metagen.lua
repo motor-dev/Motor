@@ -12,6 +12,7 @@ pcall(function()
 end)
 
 context:feature('metagen ', 'metagen ', function(generator)
+    generator.out_namespace = {}
     for _, source_path in ipairs(generator.source) do
         for _, source_node in ipairs(context:search(source_path, '**/*.meta.hh')) do
             local target_node = context.bld_dir
@@ -37,6 +38,7 @@ context:feature('metagen ', 'metagen ', function(generator)
 
             table.insert(generator.out_source, { target_node_src, target_node_cc })
             table.insert(generator.out_source, { target_node_src, target_node_typeid_cc })
+            table.insert(generator.out_namespace, { target_node_src, target_node_ns })
         end
     end
 end)

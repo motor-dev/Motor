@@ -7,7 +7,6 @@ local ZLIB_SOURCES = 'https://zlib.net/fossils/zlib-1.2.12.tar.gz'
 local ZLIB_BINARIES = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/zlib-1.2.11-%(platform)-%(arch)-%(abi).tgz'
 local MINIZIP_BINARIES = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/minizip-1.2.11-%(platform)-%(arch)-%(abi).tgz'
 
-
 local function unpack_zlib()
     context:declare_group('zlib_src', true)
     g = context:declare_generator('zlib_src', {}, context.env, 'zlib_src')
@@ -18,6 +17,7 @@ local function unpack_zlib()
     local patches = context:search(g.path.parent:make_node('patches'), '*')
     g:declare_task('untar', { out_node }, { unpack_node })
     Bolt.Patch.patch(g, patches, unpack_node:make_node('zlib-1.2.12'), src_node)
+
     return src_node
 end
 
