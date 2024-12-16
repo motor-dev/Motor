@@ -109,10 +109,6 @@ local function module(name, path, lib_types)
 
     local meta_generator, meta_registry = metagen(name, path)
 
-    if context.settings.nobulk then
-        group = group .. '.nobulk'
-    end
-
     local generator = Bolt.Module.module(name, {
         features = { lib_type, 'motor_module' },
         source_patterns = {
