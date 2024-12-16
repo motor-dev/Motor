@@ -57,7 +57,10 @@ fn missing_value(token: &Ident, section: &str) -> Error {
     )
 }
 
-fn consume_parameter(iterator: &mut proc_macro::token_stream::IntoIter) -> Option<TokenStream> {
+fn consume_parameter(
+    iterator: &mut proc_macro::token_stream::IntoIter,
+    append_semi: bool,
+) -> Option<TokenStream> {
     let value = iterator.next()?;
     if let TokenTree::Group(group) = &value {
         if group.delimiter() == Delimiter::Brace {
@@ -70,6 +73,9 @@ fn consume_parameter(iterator: &mut proc_macro::token_stream::IntoIter) -> Optio
     for value in iterator.by_ref() {
         if let TokenTree::Punct(punct) = &value {
             if punct.as_char() == ';' {
+                if append_semi {
+                    result.extend([value]);
+                }
                 break;
             }
         }
@@ -84,7 +90,6 @@ impl Grammar {
         let mut tokens = None;
         let mut rules = None;
         let mut start = None;
-        let mut variants = None;
         let mut parameters: Option<TokenStream> = None;
         while let Some(section) = current.next() {
             match &section {
@@ -93,7 +98,7 @@ impl Grammar {
                         if tokens.is_some() {
                             return Err(duplicate_section(section_name, "tokens"));
                         }
-                        match consume_parameter(&mut current) {
+                        match consume_parameter(&mut current, true) {
                             None => {
                                 return Err(missing_value(section_name, "tokens"));
                             }
@@ -106,7 +111,7 @@ impl Grammar {
                         if rules.is_some() {
                             return Err(duplicate_section(section_name, "rules"));
                         }
-                        match consume_parameter(&mut current) {
+                        match consume_parameter(&mut current, true) {
                             None => {
                                 return Err(missing_value(section_name, "rules"));
                             }
@@ -119,7 +124,7 @@ impl Grammar {
                         if start.is_some() {
                             return Err(duplicate_section(section_name, "start"));
                         }
-                        match consume_parameter(&mut current) {
+                        match consume_parameter(&mut current, true) {
                             None => {
                                 return Err(missing_value(section_name, "start"));
                             }
@@ -128,15 +133,15 @@ impl Grammar {
                             }
                         }
                     }
-                    "variant" => match consume_parameter(&mut current) {
+                    "variant" => match consume_parameter(&mut current, true) {
                         None => {
                             return Err(missing_value(section_name, "variant"));
                         }
                         Some(tree) => {
-                            variants = Some(variants::from_dsl(tree)?);
+                            variants::from_dsl(tree)?;
                         }
                     },
-                    "param" => match consume_parameter(&mut current) {
+                    "param" => match consume_parameter(&mut current, false) {
                         None => {
                             return Err(missing_value(section_name, "param"));
                         }
@@ -168,7 +173,7 @@ impl Grammar {
         Ok(Grammar {
             parameters: TokenTree::Group(Group::new(
                 Delimiter::Parenthesis,
-                parameters.unwrap_or(TokenStream::new()),
+                parameters.unwrap_or_default(),
             )),
         })
     }
