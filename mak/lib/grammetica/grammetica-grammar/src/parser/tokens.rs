@@ -83,6 +83,7 @@ fn parse_token_identifier(identifier: Ident, rule: &mut IntoIter) -> Result<()> 
 fn parse_token_literal(literal: Literal, rule: &mut IntoIter) -> Result<()> {
     match rule.next() {
         Some(TokenTree::Punct(punct)) if punct == ';' => Ok(()),
+        Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::Brace => Ok(()),
         Some(token) => Err(Error::new(
             token.span(),
             format!(
@@ -161,6 +162,10 @@ fn parse_token_value(punct: Punct, rule: &mut IntoIter) -> Result<()> {
 }
 
 fn parse_token_action(literal: Literal, rule: &mut IntoIter) -> Result<()> {
+    let regexp = litrs::StringLit::try_from(&literal)
+        .map_err(|error| Error::new(literal.span(), format!("Invalid token rule: {}", error)))?;
+    let regexp = regexp.value();
+    
     match rule.next() {
         Some(TokenTree::Punct(punct)) if punct.as_char() == ';' => Ok(()),
         Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::Brace => Ok(()),

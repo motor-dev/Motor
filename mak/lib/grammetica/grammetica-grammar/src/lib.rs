@@ -3,7 +3,6 @@ use proc_macro::TokenStream;
 use quote::quote_spanned;
 
 mod error;
-mod glr;
 mod parser;
 
 fn raise(error: Error, mut result: proc_macro2::TokenStream) -> proc_macro2::TokenStream {

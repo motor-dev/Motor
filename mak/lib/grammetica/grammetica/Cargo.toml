@@ -1,0 +1,12 @@
+[package]
+name = "grammetica"
+version = "0.1.0"
+edition = "2021"
+description = "Grammetica is a library that computes GLR parsers from grammar descriptions."
+license = "BSD-3-Clause"
+homepage = "https://github.com/motor-dev/Motor"
+repository = "https://github.com/motor-dev/Motor"
+
+[lib]
+
+[dependencies]

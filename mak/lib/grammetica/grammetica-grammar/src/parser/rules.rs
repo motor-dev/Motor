@@ -113,6 +113,7 @@ fn parse_untyped_rule(identifier: Ident, rule: &mut IntoIter) -> Result<()> {
         )),
     }
 }
+
 fn parse_expansion(rule: &mut IntoIter) -> Result<()> {
     for token in rule {
         match token {
