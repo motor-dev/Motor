@@ -1,3 +1,5 @@
+use rustixx;
+
 fn main() {
-    println!("Hello, world!");
+    rustixx::test();
 }

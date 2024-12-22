@@ -1,4 +1,4 @@
-use grammetica::grammar;
+use grammetica_grammar::grammar;
 //use std::collections::HashMap;
 
 pub struct Calc {
@@ -20,11 +20,12 @@ impl Calc {
         start calculator;
 
         tokens {
-            identifier: String => r"[a-zA-Z_\p{XID_Continue}][a-zA-Z_0-9\p{XID_Continue}]+" { $0.to_str().to_string() }
+            identifier: String => r"\p{XID_Start}\p{XID_Continue}+" { $0.to_str().to_string() }
             number: i64 => r"[0-9]+" { $0.to_str().parse().unwrap() }
-            "+";
-            "-";
-            "=";
+            hop: () => "";
+            '+';
+            '-';
+            '=';
             [mult]
             {
                 '*';

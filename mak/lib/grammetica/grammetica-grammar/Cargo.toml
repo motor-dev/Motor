@@ -1,0 +1,17 @@
+[package]
+name = "grammetica-grammar"
+version = "0.1.0"
+edition = "2021"
+description = "Grammetica-grammar is a library that ."
+license = "BSD-3-Clause"
+homepage = "https://github.com/motor-dev/Motor"
+repository = "https://github.com/motor-dev/Motor"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+grammetica = { path = "../grammetica" }
+quote = "~1.0"
+proc-macro2 = "~1.0"
+litrs = "~0.4"
