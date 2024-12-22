@@ -8,6 +8,7 @@ jobs:
   android:
     executor:
       name: android/android_machine
+      tag: default
     steps:
       - checkout
       - run:
