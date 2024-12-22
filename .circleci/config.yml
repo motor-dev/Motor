@@ -12,6 +12,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install tools
+          command: sudo apt install -y flex bison
+      - run:
           name: Configure
           command: python3 waf configure
       - run:
