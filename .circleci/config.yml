@@ -18,11 +18,17 @@ jobs:
           name: Configure
           command: python3 waf configure
       - run:
-          name: Build Android 13 Clang
-          command: python3 waf build:android_13-clang-12.0.9:debug --werror
+          name: Build Android 10 Clang 17.0.2
+          command: python3 waf build:android_10-clang-17.0.2:debug --werror
       - run:
-          name: Build Android 14 Clang
-          command: python3 waf build:android_14-clang-12.0.9:debug --werror
+          name: Build Android 10 Clang 18.0.3
+          command: python3 waf build:android_10-clang-18.0.3:debug --werror
+      - run:
+          name: Build Android 15 Clang 17.0.2
+          command: python3 waf build:android_15-clang-17.0.2:debug --werror
+      - run:
+          name: Build Android 15 Clang 18.0.3
+          command: python3 waf build:android_15-clang-18.0.3:debug --werror
 
   windows:
     executor:
