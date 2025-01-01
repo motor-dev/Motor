@@ -2,11 +2,16 @@
 name = "grammetica"
 version = "0.1.0"
 edition = "2021"
-description = "Grammetica is a library that computes GLR parsers from grammar descriptions."
+description = "Grammetica is a library that turns a grammar description into a parse function."
 license = "BSD-3-Clause"
 homepage = "https://github.com/motor-dev/Motor"
 repository = "https://github.com/motor-dev/Motor"
 
 [lib]
+proc-macro = true
 
 [dependencies]
+grammetica-lib = { path = "../grammetica-lib" }
+quote = "~1.0"
+proc-macro2 = { version = "~1.0", features = ["span-locations"] }
+litrs = "~0.4"

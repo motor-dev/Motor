@@ -1,6 +1,6 @@
 use super::Result;
 use crate::error::Error;
-use proc_macro::{Delimiter, TokenStream, TokenTree};
+use proc_macro2::{Delimiter, TokenStream, TokenTree};
 
 pub(super) fn from_dsl(grammar: TokenStream) -> Result<()> {
     let mut tokens = grammar.into_iter();

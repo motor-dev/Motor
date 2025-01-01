@@ -1,19 +1,19 @@
-use super::{Error, Result};
-use proc_macro::token_stream::IntoIter;
-use proc_macro::{Delimiter, Ident, Spacing, TokenStream, TokenTree};
+use super::{parse_extended_identifier, Error, Result};
+use proc_macro2::token_stream::IntoIter;
+use proc_macro2::{Delimiter, Spacing, Span, TokenStream, TokenTree};
 
 pub(super) fn from_dsl(grammar: TokenStream) -> Result<()> {
     let mut grammar = grammar.into_iter();
     while let Some(ident) = grammar.next() {
-        match ident {
-            TokenTree::Ident(identifier) => {
-                parse_rule(identifier, &mut grammar)?;
+        match &ident {
+            TokenTree::Ident(_) => {
+                parse_rule(ident, &mut grammar)?;
+            }
+            TokenTree::Punct(_) => {
+                parse_rule(ident, &mut grammar)?;
             }
             TokenTree::Group(group) if group.delimiter() == Delimiter::Bracket => loop {
                 match grammar.next() {
-                    Some(TokenTree::Ident(ident)) => {
-                        parse_rule(ident, &mut grammar)?;
-                    }
                     Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::Bracket => {
                         continue;
                     }
@@ -21,12 +21,20 @@ pub(super) fn from_dsl(grammar: TokenStream) -> Result<()> {
                         from_dsl(group.stream())?;
                         break;
                     }
-                    Some(other) => {
-                        return Err(Error::new(
-                            other.span(),
-                            "Unexpected token after variant tag".to_string(),
-                        ));
-                    }
+                    Some(ident) => match &ident {
+                        TokenTree::Ident(_) => {
+                            parse_rule(ident, &mut grammar)?;
+                        }
+                        TokenTree::Punct(_) => {
+                            parse_rule(ident, &mut grammar)?;
+                        }
+                        _ => {
+                            return Err(Error::new(
+                                ident.span(),
+                                "Unexpected token after variant tag".to_string(),
+                            ));
+                        }
+                    },
                     None => {
                         return Err(Error::new(
                             group.span(),
@@ -46,16 +54,15 @@ pub(super) fn from_dsl(grammar: TokenStream) -> Result<()> {
     Ok(())
 }
 
-fn parse_rule(identifier: Ident, rule: &mut IntoIter) -> Result<()> {
+fn parse_rule(identifier: TokenTree, rule: &mut IntoIter) -> Result<()> {
     //let mut result_type = None;
+    let (_, span) = parse_extended_identifier(&identifier, rule);
     match rule.next() {
-        Some(TokenTree::Punct(punct)) if punct.as_char() == ':' => {
-            parse_typed_rule(identifier, rule)
-        }
+        Some(TokenTree::Punct(punct)) if punct.as_char() == ':' => parse_typed_rule(span, rule),
         Some(TokenTree::Punct(punct))
             if punct.as_char() == '=' && punct.spacing() == Spacing::Joint =>
         {
-            parse_untyped_rule(identifier, rule)
+            parse_untyped_rule(span, rule)
         }
         Some(token) => Err(Error::new(
             token.span(),
@@ -74,11 +81,11 @@ fn parse_rule(identifier: Ident, rule: &mut IntoIter) -> Result<()> {
     }
 }
 
-fn parse_typed_rule(identifier: Ident, rule: &mut IntoIter) -> Result<()> {
+fn parse_typed_rule(location: Span, rule: &mut IntoIter) -> Result<()> {
     let t = rule.next();
     if t.is_none() {
         return Err(Error::new(
-            identifier.span(),
+            location,
             "Unexpected end of input after `:`: expected a type".to_string(),
         ));
     }
@@ -91,7 +98,7 @@ fn parse_typed_rule(identifier: Ident, rule: &mut IntoIter) -> Result<()> {
         )),
         Some(TokenTree::Punct(p)) if p.as_char() == ';' => Ok(()),
         Some(TokenTree::Punct(p)) if p.as_char() == '=' && p.spacing() == Spacing::Joint => {
-            parse_untyped_rule(identifier, rule)
+            parse_untyped_rule(location, rule)
         }
         Some(other) => Err(Error::new(
             other.span(),
@@ -100,10 +107,10 @@ fn parse_typed_rule(identifier: Ident, rule: &mut IntoIter) -> Result<()> {
     }
 }
 
-fn parse_untyped_rule(identifier: Ident, rule: &mut IntoIter) -> Result<()> {
+fn parse_untyped_rule(location: Span, rule: &mut IntoIter) -> Result<()> {
     match rule.next() {
         None => Err(Error::new(
-            identifier.span(),
+            location,
             "Unexpected end of input after `=`: expected `=>`".to_string(),
         )),
         Some(TokenTree::Punct(p)) if p.as_char() == '>' => parse_expansion(rule),

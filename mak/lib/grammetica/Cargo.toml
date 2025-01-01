@@ -1,8 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-    "grammetica",
+    "grammetica-lib",
     #"grammetica-cxx",
-    #"grammetica-rs",
-    "grammetica-grammar",
+    "grammetica",
 ]
