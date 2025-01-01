@@ -1,4 +1,4 @@
-use grammetica_grammar::grammar;
+use grammetica::grammar;
 //use std::collections::HashMap;
 
 pub struct Calc {
@@ -15,27 +15,24 @@ impl Calc {
     grammar! {
         param &mut self;
         variant mult [mult];
-        variant mult [mult];
-
         start calculator;
 
-        tokens {
-            identifier: String => r"\p{XID_Start}\p{XID_Continue}+" { $0.to_str().to_string() }
+        terminals {
+            identifier: String => r"\p{XID_Start}\p{XID_Continue}*" { $0.to_str().to_string() }
             number: i64 => r"[0-9]+" { $0.to_str().parse().unwrap() }
-            hop: () => "";
-            '+';
-            '-';
-            '=';
-            [mult]
+            "+";
+            "-";
+            "=";
+            [feature:mult]
             {
-                '*';
-                '/';
-                '%';
+                "*";
+                "/";
+                "%";
             }
         }
 
         rules {
-            calculator: ();
+            calculator : ();
             calculator => statement calculator;
             calculator => ;
 
@@ -49,7 +46,7 @@ impl Calc {
             expression => number '+' number { $0 + $2 }
             expression => number '-' number { $0 - $2 }
             expression => '-' number { - $1 }
-            [variant:mult]
+            [feature:mult]
             {
                 expression => number '*' number { $0 * $2 }
                 expression => number '/' number { $0 / $2 }
