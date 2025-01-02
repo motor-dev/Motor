@@ -2,8 +2,10 @@
 resolver = "2"
 members = [
     "mak/bin/boltbuild",
-    "mak/bin/rsyacc",
+    "mak/bin/flison",
     "mak/bin/metagen",
-    "mak/lib/grammetica",
+    "mak/lib/grammetica/grammetica-lib",
+    #"mak/lib/grammetica/grammetica-cxx",
+    "mak/lib/grammetica/grammetica",
     "mak/lib/rustixx",
 ]

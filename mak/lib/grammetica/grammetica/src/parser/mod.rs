@@ -1,4 +1,4 @@
-use crate::error::{Error, Result};
+use super::error::{Error, Result};
 use proc_macro2::token_stream::IntoIter;
 use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
 use quote::ToTokens;
@@ -8,11 +8,13 @@ mod start;
 mod terminals;
 mod variants;
 
+use rules::Rule;
 use terminals::Terminal;
 
 pub(super) struct Grammar {
     parameters: TokenTree,
     terminals: Vec<Terminal>,
+    rules: Vec<Rule>,
 }
 
 fn invalid_token(token: TokenTree, expected: &str) -> Error {
@@ -87,7 +89,7 @@ fn consume_parameter(iterator: &mut IntoIter, append_semi: bool) -> Option<Token
 }
 
 pub(super) fn parse_extended_identifier(
-    identifier: &TokenTree,
+    identifier: &Ident,
     iterator: &mut IntoIter,
 ) -> (String, Span) {
     // parses an identifier. Identifier are a sequence of letters or punctuation characters (except ; and :) delimited by spaces.
@@ -216,10 +218,18 @@ impl Grammar {
                 }
             }
         }
+
         if terminals.is_none() {
             return Err(Error::new(
                 Span::call_site(),
                 "Missing required section `terminals`.".to_string(),
+            ));
+        }
+
+        if rules.is_none() {
+            return Err(Error::new(
+                Span::call_site(),
+                "Missing required section `rules`.".to_string(),
             ));
         }
 
@@ -229,6 +239,7 @@ impl Grammar {
                 parameters.unwrap_or_default(),
             )),
             terminals: terminals.unwrap(),
+            rules: rules.unwrap(),
         })
     }
 }
