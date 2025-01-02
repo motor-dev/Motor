@@ -1,10 +1,11 @@
 use super::Result;
-use crate::error::Error;
+use super::{parse_extended_identifier, Error};
 use proc_macro2::token_stream::IntoIter;
 use proc_macro2::{Delimiter, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 
 pub(super) struct Terminal {
     pub(super) name: String,
+    pub(super) location: Span,
     pub(super) ty: Option<TokenTree>,
     pub(super) value: String,
     pub(super) action: Option<TokenStream>,
@@ -71,6 +72,7 @@ fn parse_token_literal(literal: Literal, rule: &mut IntoIter) -> Result<Terminal
     match rule.next() {
         Some(TokenTree::Punct(punct)) if punct.as_char() == ';' => Ok(Terminal {
             name: value.value().to_string(),
+            location: literal.span(),
             ty: None,
             value: value.value().to_string(),
             action: None,
@@ -78,6 +80,7 @@ fn parse_token_literal(literal: Literal, rule: &mut IntoIter) -> Result<Terminal
         }),
         Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::Brace => Ok(Terminal {
             name: value.value().to_string(),
+            location: literal.span(),
             ty: None,
             value: value.value().to_string(),
             action: Some(group.stream()),
@@ -101,13 +104,14 @@ fn parse_token_literal(literal: Literal, rule: &mut IntoIter) -> Result<Terminal
 }
 
 fn parse_token_identifier(identifier: Ident, rule: &mut IntoIter) -> Result<Terminal> {
-    let name = identifier.to_string();
+    let (name, location) = parse_extended_identifier(&identifier, rule);
 
     match rule.next() {
         Some(TokenTree::Punct(punct)) if punct.as_char() == ':' => {
             let (ty, value, action) = parse_typed_token(punct, rule)?;
             Ok(Terminal {
                 name: name.clone(),
+                location,
                 ty: Some(ty),
                 value: value.unwrap_or(name),
                 action,
@@ -120,6 +124,7 @@ fn parse_token_identifier(identifier: Ident, rule: &mut IntoIter) -> Result<Term
             let (value, action) = parse_untyped_token(identifier.span(), rule)?;
             Ok(Terminal {
                 name,
+                location,
                 ty: None,
                 value,
                 action,
@@ -134,7 +139,7 @@ fn parse_token_identifier(identifier: Ident, rule: &mut IntoIter) -> Result<Term
             ),
         )),
         None => Err(Error::new(
-            identifier.span(),
+            location,
             format!(
                 "Unexpected end of input: expected `=>` after token `{}`.",
                 identifier

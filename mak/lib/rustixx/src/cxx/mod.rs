@@ -37,20 +37,20 @@ impl Calc {
             calculator => ;
 
             statement: ();
-            statement => identifier '=' expression ';' { self.vars.insert($0, $2); }
-            statement => expression ';' { println!("{}", $0) }
+            statement => identifier "=" expression ";" { self.vars.insert($0, $2); }
+            statement => expression ";" { println!("{}", $0) }
 
             expression: i64;
             expression => identifier { self.vars.get($0).unwrap(); }
-            expression => number { $0 }
-            expression => number '+' number { $0 + $2 }
-            expression => number '-' number { $0 - $2 }
-            expression => '-' number { - $1 }
+            expression => number;
+            expression => number + number { $0 + $2 }
+            expression => number - number { $0 - $2 }
+            expression => "-" number { - $1 }
             [feature:mult]
             {
-                expression => number '*' number { $0 * $2 }
-                expression => number '/' number { $0 / $2 }
-                expression => number '%' number { $0 % $2 }
+                expression => number * number { $0 * $2 }
+                expression => number / number { $0 / $2 }
+                expression => number % number { $0 % $2 }
             }
         }
     }
