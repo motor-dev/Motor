@@ -356,7 +356,8 @@ def create_cmakelists(task_gen: waflib.TaskGen.task_gen) -> None:
         root_nodes = getattr(task_gen, 'source_nodes')  # type: List[Tuple[str, waflib.Node.Node]]
         for name, root_node in root_nodes:
             if root_node.isdir():
-                all_sub_nodes = root_node.ant_glob('**/*', excl=['kernels/**', 'tests/**', '**/*.pyc'], remove=False)
+                all_sub_nodes = root_node.ant_glob('**/*', excl=['kernels/**', 'tests/**', '**/*.pyc', '**/target/**'],
+                                                   remove=False)
                 all_nodes.append((name, root_node, all_sub_nodes))
             else:
                 all_sub_nodes = [root_node]
