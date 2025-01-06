@@ -18,39 +18,36 @@ pub(super) fn from_dsl(grammar: TokenStream) -> Result<Vec<Terminal>> {
     while let Some(token) = grammar.next() {
         match token {
             TokenTree::Ident(identifier) => {
-                parse_token_identifier(identifier, &mut grammar)?;
+                result.push(parse_token_identifier(identifier, &mut grammar)?);
             }
             TokenTree::Literal(literal) => {
-                parse_token_literal(literal, &mut grammar)?;
+                result.push(parse_token_literal(literal, &mut grammar)?);
             }
             TokenTree::Group(group) if group.delimiter() == Delimiter::Bracket => loop {
                 match grammar.next() {
                     Some(TokenTree::Ident(ident)) => {
-                        result.push(parse_token_identifier(ident, &mut grammar)?);
-                        break;
+                        break result.push(parse_token_identifier(ident, &mut grammar)?);
                     }
                     Some(TokenTree::Literal(literal)) => {
-                        result.push(parse_token_literal(literal, &mut grammar)?);
-                        break;
+                        break result.push(parse_token_literal(literal, &mut grammar)?);
                     }
                     Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::Bracket => {
                         // add more tags
                         continue;
                     }
                     Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::Brace => {
-                        result.extend(from_dsl(group.stream())?);
-                        break;
+                        break result.extend(from_dsl(group.stream())?);
                     }
                     Some(other) => {
                         return Err(Error::new(
                             other.span(),
-                            "Unexpected token after variant tag".to_string(),
+                            "Unexpected token after tag".to_string(),
                         ));
                     }
                     None => {
                         return Err(Error::new(
                             group.span(),
-                            "Unexpected end of input after variant tag".to_string(),
+                            "Unexpected end of input after tag".to_string(),
                         ));
                     }
                 }
@@ -58,7 +55,7 @@ pub(super) fn from_dsl(grammar: TokenStream) -> Result<Vec<Terminal>> {
             _ => {
                 return Err(Error::new(
                     token.span(),
-                    format!("Unexpected token {:?} in token section", token),
+                    format!("Unexpected token {:?} in `literals` section", token),
                 ));
             }
         }
@@ -67,8 +64,9 @@ pub(super) fn from_dsl(grammar: TokenStream) -> Result<Vec<Terminal>> {
 }
 
 fn parse_token_literal(literal: Literal, rule: &mut IntoIter) -> Result<Terminal> {
-    let value = litrs::StringLit::try_from(&literal)
-        .map_err(|error| Error::new(literal.span(), format!("Invalid token name: {}", error)))?;
+    let value = litrs::StringLit::try_from(&literal).map_err(|error| {
+        Error::new(literal.span(), format!("Invalid literal name: `{}`", error))
+    })?;
     match rule.next() {
         Some(TokenTree::Punct(punct)) if punct.as_char() == ';' => Ok(Terminal {
             name: value.value().to_string(),
