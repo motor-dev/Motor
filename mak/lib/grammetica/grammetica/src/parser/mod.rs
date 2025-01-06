@@ -1,8 +1,8 @@
 use super::error::{Error, Result};
 use proc_macro2::token_stream::IntoIter;
-use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
-use quote::ToTokens;
+use proc_macro2::{Delimiter, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
 
+mod parse;
 mod rules;
 mod start;
 mod terminals;
@@ -12,7 +12,7 @@ use rules::Rule;
 use terminals::Terminal;
 
 pub(super) struct Grammar {
-    parameters: TokenTree,
+    parameters: TokenStream,
     terminals: Vec<Terminal>,
     rules: Vec<Rule>,
 }
@@ -124,50 +124,31 @@ pub(super) fn parse_extended_identifier(
 }
 
 impl Grammar {
-    pub(crate) fn write(&self) -> proc_macro::TokenStream {
-        let mut result = "pub fn parse".parse::<proc_macro::TokenStream>().unwrap();
-        result.extend([proc_macro::TokenStream::from(
-            self.parameters.to_token_stream(),
-        )]);
-        result.extend(" -> () {}".parse::<proc_macro::TokenStream>().unwrap());
-        result
-    }
-
     pub(crate) fn from_dsl(grammar: TokenStream) -> Result<Self> {
         let mut current = grammar.into_iter();
-        let mut terminals = None;
-        let mut rules = None;
+        let mut terminals = Vec::new();
+        let mut rules = Vec::new();
         let mut start = None;
-        let mut parameters: Option<TokenStream> = None;
+        let mut parameters = TokenStream::new();
         while let Some(section) = current.next() {
             match &section {
                 TokenTree::Ident(section_name) => match section_name.to_string().as_str() {
-                    "terminals" => {
-                        if terminals.is_some() {
-                            return Err(duplicate_section(section_name, "terminals"));
+                    "terminals" => match consume_parameter(&mut current, true) {
+                        None => {
+                            return Err(missing_value(section_name, "terminals"));
                         }
-                        match consume_parameter(&mut current, true) {
-                            None => {
-                                return Err(missing_value(section_name, "terminals"));
-                            }
-                            Some(tree) => {
-                                terminals = Some(terminals::from_dsl(tree)?);
-                            }
+                        Some(tree) => {
+                            terminals.extend(terminals::from_dsl(tree)?);
                         }
-                    }
-                    "rules" => {
-                        if rules.is_some() {
-                            return Err(duplicate_section(section_name, "rules"));
+                    },
+                    "rules" => match consume_parameter(&mut current, true) {
+                        None => {
+                            return Err(missing_value(section_name, "rules"));
                         }
-                        match consume_parameter(&mut current, true) {
-                            None => {
-                                return Err(missing_value(section_name, "rules"));
-                            }
-                            Some(tree) => {
-                                rules = Some(rules::from_dsl(tree)?);
-                            }
+                        Some(tree) => {
+                            rules.extend(rules::from_dsl(tree)?);
                         }
-                    }
+                    },
                     "start" => {
                         if start.is_some() {
                             return Err(duplicate_section(section_name, "start"));
@@ -194,13 +175,8 @@ impl Grammar {
                             return Err(missing_value(section_name, "param"));
                         }
                         Some(tree) => {
-                            if let Some(param_list) = &mut parameters {
-                                param_list
-                                    .extend([TokenTree::Punct(Punct::new(',', Spacing::Alone))]);
-                                param_list.extend(tree);
-                            } else {
-                                parameters = Some(tree);
-                            }
+                            parameters.extend(tree);
+                            parameters.extend([TokenTree::Punct(Punct::new(',', Spacing::Alone))]);
                         }
                     },
                     _ => {
@@ -219,27 +195,34 @@ impl Grammar {
             }
         }
 
-        if terminals.is_none() {
+        if terminals.is_empty() {
             return Err(Error::new(
                 Span::call_site(),
-                "Missing required section `terminals`.".to_string(),
+                "No terminal defined.".to_string(),
             ));
         }
 
-        if rules.is_none() {
+        if rules.is_empty() {
             return Err(Error::new(
                 Span::call_site(),
-                "Missing required section `rules`.".to_string(),
+                "No rule defined.".to_string(),
             ));
         }
+
+        rules.sort_by(|a, b| {
+            if a.production.is_none() && b.production.is_some() {
+                std::cmp::Ordering::Greater
+            } else if a.production.is_some() && b.production.is_none() {
+                std::cmp::Ordering::Less
+            } else {
+                std::cmp::Ordering::Equal
+            }
+        });
 
         Ok(Grammar {
-            parameters: TokenTree::Group(Group::new(
-                Delimiter::Parenthesis,
-                parameters.unwrap_or_default(),
-            )),
-            terminals: terminals.unwrap(),
-            rules: rules.unwrap(),
+            parameters,
+            terminals,
+            rules,
         })
     }
 }

@@ -32,7 +32,7 @@ impl Calc {
         }
 
         rules {
-            calculator : ();
+            calculator : Option<u32>;
             calculator => statement calculator;
             calculator => ;
 

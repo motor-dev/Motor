@@ -1,5 +1,4 @@
 use proc_macro2::Span;
-use std::result::Result as StdResult;
 
 pub(crate) struct Error {
     pub(crate) message: String,
@@ -12,9 +11,16 @@ impl Error {
         Self {
             message,
             location,
-            note: None
+            note: None,
+        }
+    }
+    pub(crate) fn new_with(location: Span, message: String, next: Error) -> Self {
+        Self {
+            message,
+            location,
+            note: Some(Box::new(next)),
         }
     }
 }
 
-pub(crate) type Result<T> = StdResult<T, Error>;
+pub(crate) type Result<T> = std::result::Result<T, Error>;

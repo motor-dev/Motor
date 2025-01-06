@@ -1,6 +1,7 @@
 use super::{parse_extended_identifier, Error, Result};
 use proc_macro2::token_stream::IntoIter;
 use proc_macro2::{Delimiter, Ident, Spacing, Span, TokenStream, TokenTree};
+use quote::TokenStreamExt;
 
 pub(super) enum Precedence {
     Left(u32),
@@ -23,7 +24,7 @@ pub(super) struct Symbol {
 pub(super) struct Rule {
     pub(super) name: String,
     pub(super) location: Span,
-    pub(super) ty: Option<TokenTree>,
+    pub(super) ty: Option<TokenStream>,
     pub(super) production: Option<Vec<Symbol>>,
     pub(super) action: Option<TokenStream>,
     pub(super) conditions: Vec<(bool, String)>,
@@ -124,7 +125,7 @@ fn parse_rule(identifier: Ident, rule: &mut IntoIter) -> Result<Rule> {
 fn parse_typed_rule(
     location: Span,
     rule: &mut IntoIter,
-) -> Result<(TokenTree, Option<Vec<Symbol>>, Option<TokenStream>)> {
+) -> Result<(TokenStream, Option<Vec<Symbol>>, Option<TokenStream>)> {
     let t = rule.next();
     if t.is_none() {
         return Err(Error::new(
@@ -132,22 +133,29 @@ fn parse_typed_rule(
             "Unexpected end of input after `:`: expected a type".to_string(),
         ));
     }
-    let result_type = t.unwrap();
+    let t = t.unwrap();
+    let mut location = t.span();
+    let mut result_type = TokenStream::new();
+    result_type.append(t);
 
-    match rule.next() {
-        None => Err(Error::new(
-            result_type.span(),
-            "Unexpected end of input after type: expected a rule".to_string(),
-        )),
-        Some(TokenTree::Punct(p)) if p.as_char() == ';' => Ok((result_type, None, None)),
-        Some(TokenTree::Punct(p)) if p.as_char() == '=' && p.spacing() == Spacing::Joint => {
-            let (symbols, action) = parse_expansion(p.span(), rule)?;
-            Ok((result_type, Some(symbols), action))
+    loop {
+        match rule.next() {
+            None => {
+                break Err(Error::new(
+                    location,
+                    "Unexpected end of input after type: expected a rule".to_string(),
+                ))
+            }
+            Some(TokenTree::Punct(p)) if p.as_char() == ';' => break Ok((result_type, None, None)),
+            Some(TokenTree::Punct(p)) if p.as_char() == '=' && p.spacing() == Spacing::Joint => {
+                let (symbols, action) = parse_untyped_rule(p.span(), rule)?;
+                break Ok((result_type, Some(symbols), action));
+            }
+            Some(other) => {
+                location = other.span();
+                result_type.append(other);
+            }
         }
-        Some(other) => Err(Error::new(
-            other.span(),
-            "Unexpected token after type: expected `;` or `=>`".to_string(),
-        )),
     }
 }
 
