@@ -289,6 +289,15 @@ fn main() {
     #[cfg(feature = "lua_debug")]
     {
         let mut debugger_build = cc::Build::new();
+        let compiler = debugger_build.get_compiler();
+        let gnu = compiler.is_like_gnu();
+        let msvc = compiler.is_like_msvc();
+        let clang = compiler.is_like_clang();
+        if gnu || clang {
+            debugger_build.flag("--std=c++17");
+        } else if msvc {
+            debugger_build.flag("/std:c++17");
+        }
         debugger_build
             .cpp(true)
             .define("EMMY_USE_LUA_SOURCE", None)
@@ -319,7 +328,17 @@ fn main() {
             .warnings(false);
         debugger_build.compile("emmy_debugger");
 
-        cc::Build::new()
+        let mut emmy_build = cc::Build::new();
+        let compiler = emmy_build.get_compiler();
+        let gnu = compiler.is_like_gnu();
+        let msvc = compiler.is_like_msvc();
+        let clang = compiler.is_like_clang();
+        if gnu || clang {
+            emmy_build.flag("--std=c++17");
+        } else if msvc {
+            emmy_build.flag("/std:c++17");
+        }
+        emmy_build
             .cpp(true)
             .file("emmy/emmy_core/src/emmy_core.cpp")
             .include("emmy/emmy_debugger/include")
