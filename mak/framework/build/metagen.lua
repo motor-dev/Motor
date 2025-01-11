@@ -3,12 +3,13 @@ local context = ...
 
 context:declare_group('metagen', true)
 context:lua_driver('metagen',
-        'magenta',
-        context.path:make_node('drivers/metagen.lua'),
-        { 'c', 'cxx' })
+    'magenta',
+    context.path:make_node('drivers/metagen.lua'),
+    { 'c', 'cxx' })
 
 pcall(function()
-    context:popen({ context.env.PYTHON, context.path:make_node('../../lib/pyxx/__main__.py'), '-x', 'c++', '--std', 'c++20', '-t', context.bld_dir:abs_path(), '-' })
+    context:popen({ context.env.PYTHON, context.path:make_node('../../lib/pyxx/__main__.py'), '-x', 'c++', '--std',
+        'c++20', '-t', context.bld_dir:abs_path(), '-' })
 end)
 
 context:feature('metagen ', 'metagen ', function(generator)
@@ -29,9 +30,11 @@ context:feature('metagen ', 'metagen ', function(generator)
             local target_node_factory_hh = target_node_factory_hh_dir:make_node(source_node:path_from(source_path))
             target_node_factory_hh = target_node_factory_hh:change_ext('factory.hh')
 
-            local task = generator:declare_task('metagen', { source_node }, { target_node_cc, target_node_typeid_cc, target_node_factory_hh, target_node_doc, target_node_ns })
-            task.env.METAGEN_RELATIVE_INPUT = source_node:path_from(source_path)
-            task.env.METAGEN_RELATIVE_OUTPUT = target_node_factory_hh:path_from(target_node_factory_hh_dir)
+            local task = generator:declare_task('metagen', { source_node },
+                { target_node_cc, target_node_typeid_cc, target_node_factory_hh, target_node_doc, target_node_ns })
+            task.env.METAGEN_RELATIVE_INPUT = string.gsub(source_node:path_from(source_path), '\\', '/')
+            task.env.METAGEN_RELATIVE_OUTPUT = string.gsub(target_node_factory_hh:path_from(target_node_factory_hh_dir),
+                '\\', '/')
             task.env.METAGEN_ROOT_NAMESPACE = 'Motor'
             task.env.METAGEN_PLUGIN = 'motor'
             task.env.METAGEN_API = generator.api
@@ -52,4 +55,4 @@ context:feature('module', 'process_out_source', function(generator)
         end
         return generator
     end
-end)   :set_run_before({ 'process_source' })
+end):set_run_before({ 'process_source' })

@@ -328,11 +328,11 @@ impl<'command> Scheduler<'command> {
                                 (true, "a dependency file has changed".to_string())
                             }
                             Some(cache)
-                                if driver.driver_hash(&cache.driver_dependencies)
-                                    != cache.driver_hash.0 =>
-                            {
-                                (true, "the driver has changed".to_string())
-                            }
+                            if driver.driver_hash(&cache.driver_dependencies)
+                                != cache.driver_hash.0 =>
+                                {
+                                    (true, "the driver has changed".to_string())
+                                }
                             Some(cache) => {
                                 let mut hasher = blake3::Hasher::new();
                                 let env = task.env.lock().unwrap();
@@ -462,7 +462,18 @@ impl<'command> Scheduler<'command> {
         let mut thread_activity = ThreadActivity::new(thread_count);
         let mut input_hashes = Vec::new();
         let mut task_work = vec![(usize::MAX, false); self.tasks_pool.len()];
-
+        
+        let timer = time::Instant::now();
+        if progress_mode >= 1 {
+            log_progress(
+                logger,
+                title,
+                thread_activity.get_graph(),
+                0,
+                self.target_tasks.len(),
+                timer.elapsed(),
+            );
+        }
         fn cancel(index: usize, tasks: &[Task], task_work: &mut Vec<(usize, bool)>) -> usize {
             let mut result = 0;
             if !task_work[index].1 {
@@ -489,7 +500,6 @@ impl<'command> Scheduler<'command> {
             let (send_result, receive_result) = crossbeam::channel::unbounded::<WorkResult>();
             let (send_dep_request, receive_dep_request) =
                 crossbeam::channel::unbounded::<(usize, DependencyRequest)>();
-            let timer = time::Instant::now();
             let task_count: usize = self.target_tasks.len();
             let mut processed_tasks: usize = 0;
 
@@ -675,7 +685,7 @@ impl<'command> Scheduler<'command> {
                                         id,
                                         width = longest_group
                                     )
-                                    .as_str(),
+                                        .as_str(),
                                 );
                             }
                         }
@@ -733,7 +743,7 @@ impl<'command> Scheduler<'command> {
                     /* todo: error */
                     logger.error("");
                 }
-                if progress_mode >= 1 {
+                if progress_mode >= 4 {
                     log_progress(
                         logger,
                         title,
@@ -852,7 +862,7 @@ fn log_task_start(logger: &mut Logger, index: usize, task_count: &str, message: 
             message,
             width = task_count.len()
         )
-        .as_str(),
+            .as_str(),
     );
 }
 
@@ -863,7 +873,7 @@ fn log_task_end(logger: &mut Logger, result: u32, command: &str, message: &str) 
                 "{} returned exit code {} (0x{:08x})\n{}",
                 command, result, result, message
             )
-            .as_str(),
+                .as_str(),
         );
     } else if !message.is_empty() {
         logger.colored_println(format!("{{dim}}{}{{reset}}", command).as_str());
@@ -964,7 +974,7 @@ fn load_cache<T>(
                             "Unable to deserialize build cache {:?} ({})",
                             group_cache, error
                         )
-                        .as_str(),
+                            .as_str(),
                     );
                 }
             }
@@ -1011,7 +1021,7 @@ fn save_cache<T>(
                             "Unable to serialize build cache {:?} ({})",
                             cache_filename, e
                         )
-                        .as_str(),
+                            .as_str(),
                     );
                 }
             }
@@ -1021,7 +1031,7 @@ fn save_cache<T>(
                         "Unable to serialize build cache {:?} ({})",
                         cache_filename, e
                     )
-                    .as_str(),
+                        .as_str(),
                 );
             }
         }

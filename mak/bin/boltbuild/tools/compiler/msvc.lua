@@ -84,7 +84,7 @@ local ARCHS = {
 }
 
 local function test_cl(env, lang, flags)
-    local test_file = context.bld_dir:make_node('main_test.'..lang)
+    local test_file = context.bld_dir:make_node('main_test.' .. lang)
     local test_content
     if lang == 'c' then
         test_content = '#include <stdio.h>\n\n#define show(X) #X X\n'
@@ -108,7 +108,7 @@ local function test_cl(env, lang, flags)
     local p = context:popen(command)
     local result, out, err = p:communicate('')
     if result ~= true then
-        context:raise_error('Failed to compile test file:\n'..tostring(err))
+        context:raise_error('Failed to compile test file:\n' .. tostring(err))
     end
     return result
 end
@@ -172,7 +172,7 @@ local function find_windows_sdk()
             sdk[1] = path
         end
     else
-        context:raise_error('Failed to find Windows SDK path:\n'..tostring(err))
+        context:raise_error('Failed to find Windows SDK path:\n' .. tostring(err))
     end
     local p = context:popen({
         'powershell.exe',
@@ -185,7 +185,7 @@ local function find_windows_sdk()
             sdk[2] = version
         end
     else
-        context:raise_error('Failed to find Windows SDK version:\n'..tostring(err))
+        context:raise_error('Failed to find Windows SDK version:\n' .. tostring(err))
     end
     return sdk
 end
@@ -198,19 +198,21 @@ local function load_msvc(env, flags, language_flag, lang, var, sdk)
     env[var .. '_TGT_F'] = '/Fo:'
     env[var .. '_DEFINE_ST'] = '/D'
     env[var .. '_INCLUDE_ST'] = '/I'
-    env[var .. '_SYSTEM_INCLUDE_ST'] = {'/external:I'}
+    env[var .. '_SYSTEM_INCLUDE_ST'] = { '/external:I' }
     env[var .. '_IDIRAFTER'] = '/I'
-    env[var .. 'FLAGS.warn.none'] = { '/W0'}
+    env[var .. 'FLAGS.warn.none'] = { '/W0' }
     env[var .. 'FLAGS.warn.all'] = { '/W4' }
 
     env.LINK = env.CL[1].parent:make_node('link.exe')
-    env.LINKFLAGS = {'/nologo'}
+    env.LINKFLAGS = { '/nologo' }
     env.LINK_LIB_F = '%s.lib'
     env.LINK_TGT_F = '/out:%s'
     env.LINKFLAGS_shlib = '/dll'
     env.LINK_LIBPATH_F = '/LIBPATH:%s'
 
     env.LIB = env.CL[1].parent:make_node('lib.exe')
+    env.LIBFLAGS = { '/nologo' }
+    env.LIB_TGT_F = '/OUT:%s'
 
     env.SHLIB_PATTERN = '%s.dll'
     env.STLIB_PATTERN = '%s.lib'
@@ -219,15 +221,15 @@ local function load_msvc(env, flags, language_flag, lang, var, sdk)
     local sdk_path, sdk_version = table.unpack(sdk)
 
     local system_includes = {
-        env.CL_PATH..'\\'..env.CL_VERSION..'\\'..'include',
-        sdk_path..'\\Include\\'..sdk_version..'.0\\ucrt',
-        sdk_path..'\\Include\\'..sdk_version..'.0\\um',
-        sdk_path..'\\Include\\'..sdk_version..'.0\\shared',
+        env.CL_PATH .. '\\' .. env.CL_VERSION .. '\\' .. 'include',
+        sdk_path .. '\\Include\\' .. sdk_version .. '.0\\ucrt',
+        sdk_path .. '\\Include\\' .. sdk_version .. '.0\\um',
+        sdk_path .. '\\Include\\' .. sdk_version .. '.0\\shared',
     }
     local system_libs = {
-        env.CL_PATH..'\\'..env.CL_VERSION..'\\lib\\'..env.CL_TARGET_ARCH,
-        sdk_path..'\\Lib\\'..sdk_version..'.0\\ucrt\\'..env.CL_TARGET_ARCH,
-        sdk_path..'\\Lib\\'..sdk_version..'.0\\um\\'..env.CL_TARGET_ARCH,
+        env.CL_PATH .. '\\' .. env.CL_VERSION .. '\\lib\\' .. env.CL_TARGET_ARCH,
+        sdk_path .. '\\Lib\\' .. sdk_version .. '.0\\ucrt\\' .. env.CL_TARGET_ARCH,
+        sdk_path .. '\\Lib\\' .. sdk_version .. '.0\\um\\' .. env.CL_TARGET_ARCH,
     }
     env.SYSTEM_INCLUDES = system_includes
     env.LIBPATHS = system_libs
@@ -240,7 +242,7 @@ end
 function Bolt.MSVC.load_c(flags, sdk)
     local env = context.env
     env.CC = env.CL
-    load_msvc(env, flags, '/TC', 'c','C', sdk)
+    load_msvc(env, flags, '/TC', 'c', 'C', sdk)
 end
 
 function Bolt.MSVC.load_cxx(flags, sdk)
@@ -267,23 +269,23 @@ function Bolt.MSVC.discover(callback, language_flags, global_flags)
                 key = cl[1] .. cl[3]
                 if not seen[key] then
                     --context:try('testing cl ' .. tostring(cl[4]), function()
-                        local env = context:derive()
-                        context:with(env, function()
-                            env.CL = { cl[4] }
-                            env.CL_PATH = cl[5]
-                            env:append('CL', global_flags)
-                            env.CL_VERSION = cl[1]
-                            env.CL_HOST_ARCH = cl[2]
-                            env.CL_TARGET_ARCH = cl[3]
-                            env.TARGET_OS = 'windows'
-                            env.ARCHITECTURE = ARCHS[cl[3]] or cl[3]
-                            for lang, flags in pairs(language_flags) do
-                                languages[lang](flags, sdk)
-                            end
-                        end)
-                        if callback(env) ~= true then
-                            return 'done'
+                    local env = context:derive()
+                    context:with(env, function()
+                        env.CL = { cl[4] }
+                        env.CL_PATH = cl[5]
+                        env:append('CL', global_flags)
+                        env.CL_VERSION = cl[1]
+                        env.CL_HOST_ARCH = cl[2]
+                        env.CL_TARGET_ARCH = cl[3]
+                        env.TARGET_OS = 'windows'
+                        env.ARCHITECTURE = ARCHS[cl[3]] or cl[3]
+                        for lang, flags in pairs(language_flags) do
+                            languages[lang](flags, sdk)
                         end
+                    end)
+                    if callback(env) ~= true then
+                        return 'done'
+                    end
                     --end)
                     seen[key] = true
                 end
