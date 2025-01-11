@@ -126,15 +126,13 @@ impl Logger {
 
     pub(crate) fn warning(&mut self, message: &str) {
         if self.depth == 0 {
-            self.do_log("warning: ", style::Color::Yellow, false);
-            self.do_log(message, style::Color::Reset, true);
+            self.do_log_commands(&vec![StatusCommand::FgYellow, StatusCommand::Text("warning: ".into()), StatusCommand::FgReset, StatusCommand::Text(message.into())]);
         }
     }
 
     pub(crate) fn error(&mut self, message: &str) {
         if self.depth == 0 {
-            self.do_log("error: ", style::Color::Red, false);
-            self.do_log(message, style::Color::Grey, true);
+            self.do_log_commands(&vec![StatusCommand::FgRed, StatusCommand::Text("error: ".into()), StatusCommand::FgReset, StatusCommand::Text(message.into())]);
         }
     }
 
