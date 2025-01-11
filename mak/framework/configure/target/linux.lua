@@ -3,13 +3,13 @@ local context = ...
 local compilers = {}
 
 for _, env in ipairs(Motor.compilers) do
-    if env.TARGET:find('linux%-gnu') or env.TARGET:find('linux$') then
+    if env.TARGET and (env.TARGET:find('linux%-gnu') or env.TARGET:find('linux$')) then
         table.insert(compilers, env)
     end
 end
 
 if #compilers then
-    context:colored_print(' {blue}configuring for platform Linux{reset}')
+    context:colored_println(' {blue}configuring for platform Linux{reset}')
     for _, env in ipairs(compilers) do
         context:with(env, function()
             if pcall(function()

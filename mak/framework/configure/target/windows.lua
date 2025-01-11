@@ -3,13 +3,13 @@ local context = ...
 local compilers = {}
 
 for _, env in ipairs(Motor.compilers) do
-    if env.TARGET:find('mingw') or env.TARGET:find('windows') then
+    if env.TARGET_OS == 'windows' then
         table.insert(compilers, env)
     end
 end
 
 if #compilers then
-    context:colored_print(' {blue}configuring for platform Windows{reset}')
+    context:colored_println(' {blue}configuring for platform Windows{reset}')
     for _, env in ipairs(compilers) do
         context:with(env, function()
             if pcall(function()
@@ -25,7 +25,8 @@ if #compilers then
                         if env.CXX_COMPILER_NAME == 'msvc' then
                             env:append('DEFINES', '_CRT_SECURE_NO_WARNINGS')
                         end
-                        env:append('LIBS', { 'kernel32', 'user32', 'gdi32', 'winspool', 'comdlg32', 'advapi32', 'shell32', 'ole32', 'oleaut32', 'uuid', 'odbc32', 'odbccp32', 'synchronization' })
+                        env:append('SYSTEM_INCLUDES', context.env.motor_node:make_node('src/motor/3rdparty/system/win32/api.windows'):abs_path())
+                        env:append('LIBS', { 'kernel32', 'user32', 'advapi32', 'ole32', 'oleaut32', 'uuid', 'shell32', 'synchronization' })
                         return 'OK'
                     end)
                 end

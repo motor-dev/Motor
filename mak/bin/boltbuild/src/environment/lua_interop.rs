@@ -215,7 +215,7 @@ impl EnvironmentValue {
             EnvironmentValue::Bool(b) => b.to_string(),
             EnvironmentValue::Integer(i) => i.to_string(),
             EnvironmentValue::String(s) => s.clone(),
-            EnvironmentValue::Node(n) => n.abs_path().to_string_lossy().to_string(),
+            EnvironmentValue::Node(n) => n.nice_path().to_string_lossy().to_string(),
             EnvironmentValue::Vec(v) => v
                 .iter()
                 .map(|v| v.as_string())

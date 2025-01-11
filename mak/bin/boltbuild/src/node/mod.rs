@@ -29,6 +29,12 @@ impl Node {
         &self.path
     }
 
+    pub(crate) fn nice_path(&self) -> &Path {
+        let path = self.path.as_path();
+        path.strip_prefix(std::env::current_dir().unwrap())
+            .unwrap_or(path)
+    }
+
     pub(crate) fn abs_path(&self) -> &Path {
         self.path.as_path()
     }
@@ -97,6 +103,37 @@ impl Node {
 
     pub(crate) fn change_ext(&mut self, extension: &str) {
         self.path.set_extension(extension);
+    }
+
+    pub(crate) fn fix_case(&self) -> Node {
+        let mut result = Node {
+            path: PathBuf::new(),
+        };
+        for c in self.path.components() {
+            result.path.push(c);
+            if !result.path.exists() {
+                result.path.pop();
+                let content = result.path.read_dir();
+                if let Ok(content) = content {
+                    let mut found = false;
+                    for entry in content.flatten() {
+                        if entry.file_name().to_string_lossy().to_lowercase()
+                            == c.as_os_str().to_string_lossy().to_lowercase()
+                        {
+                            result.path.push(entry.file_name());
+                            found = true;
+                            break;
+                        }
+                    }
+                    if !found {
+                        result.path.push(c);
+                    }
+                } else {
+                    result.path.push(c);
+                }
+            }
+        }
+        result
     }
 }
 

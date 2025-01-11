@@ -275,12 +275,11 @@ fn build<P: AsRef<Path>>(source_path: &P) {
     build.compile("uv");
 }
 
-
 fn build_uv() {
     let source_path = PathBuf::from("emmy/libuv");
 
     // try pkg-config first
-    if !try_pkgconfig().is_some() {
+    if try_pkgconfig().is_none() {
         build(&source_path);
     }
 }

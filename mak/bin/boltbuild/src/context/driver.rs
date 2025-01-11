@@ -38,13 +38,19 @@ pub(super) fn command_driver(
 pub(super) fn dependency_driver(
     _lua: &Lua,
     this: &mut Context,
-    (name, color, command, run_before): (String, String, String, Option<Vec<String>>),
+    (name, color, command, dep_type, run_before): (
+        String,
+        String,
+        String,
+        String,
+        Option<Vec<String>>,
+    ),
 ) -> LuaResult<()> {
     if is_command_valid(command.as_str()) {
         insert_driver(
             this,
             name,
-            Driver::from_dependency_command(color, command),
+            Driver::from_dependency_command(color, command, dep_type),
             run_before,
         )
     } else {
@@ -122,7 +128,9 @@ pub(super) fn run_driver(
         }
     };
     let env = if let Some(env) = env {
-        env.borrow::<Arc<Mutex<ReadWriteEnvironment>>>()?.deref().clone()
+        env.borrow::<Arc<Mutex<ReadWriteEnvironment>>>()?
+            .deref()
+            .clone()
     } else {
         context.environment.clone()
     };

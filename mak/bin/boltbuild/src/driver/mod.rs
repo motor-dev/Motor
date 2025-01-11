@@ -47,11 +47,15 @@ impl Driver {
         }
     }
 
-    pub(crate) fn from_dependency_command(color: String, command: String) -> Self {
+    pub(crate) fn from_dependency_command(
+        color: String,
+        command: String,
+        dependency_type: String,
+    ) -> Self {
         Self {
             color,
             configuration: DriverConfiguration::DependencyCommand(
-                dependency::DependencyCommandDriverConfiguration::new(command),
+                dependency::DependencyCommandDriverConfiguration::new(command, dependency_type),
             ),
         }
     }

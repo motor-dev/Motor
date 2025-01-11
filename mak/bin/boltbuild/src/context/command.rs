@@ -30,7 +30,7 @@ pub(super) fn recurse(lua: &Lua, args: (AnyUserData, LuaString)) -> LuaResult<()
             .push(script.path().clone());
         (old_path, script)
     })?;
-    let result: LuaResult<()> = lua.load(script.abs_path()).call(&args.0);
+    let result: LuaResult<()> = lua.load(script.nice_path()).call(&args.0);
     args.0.borrow_mut_scoped::<Context, _>(|this| {
         this.path = old_path;
     })?;
@@ -69,7 +69,7 @@ pub(super) fn load_tool(
             })?;
 
             if do_run {
-                lua.load(node.abs_path()).call::<()>(this)?;
+                lua.load(node.nice_path()).call::<()>(this)?;
             }
             return Ok(());
         }

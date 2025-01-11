@@ -49,6 +49,7 @@ local function load_clang(env, compiler, flags, lang, var)
     env[var .. 'FLAGS'] = { '-x', lang, '-c', '-fPIC' }
     env:append(var .. 'FLAGS', flags)
     env[var .. '_COMPILER_NAME'] = 'clang'
+    env[var .. '_DEPENDENCY_TYPE'] = 'gnu'
     env[var .. '_TGT_F'] = '-o'
     env[var .. '_DEFINE_ST'] = '-D'
     env[var .. '_INCLUDE_ST'] = '-I'

@@ -105,7 +105,7 @@ impl Command {
             for file in tidy {
                 if !outputs.contains(&file) && !file.is_dir() {
                     if progress_mode < 2 {
-                        logger.colored_print(format!("{{dim}}[rm] {{reset}}{}", file).as_str());
+                        logger.colored_println(format!("{{dim}}[rm] {{reset}}{}", file).as_str());
                     }
                     std::fs::remove_file(file.path())?;
 
@@ -113,7 +113,7 @@ impl Command {
                     while let Some(parent) = maybe_parent {
                         if parent.is_dir() && parent.path().read_dir()?.next().is_none() {
                             if progress_mode < 2 {
-                                logger.colored_print(
+                                logger.colored_println(
                                     format!("{{dim}}[rm] {{reset}}{}", parent).as_str(),
                                 );
                             }
@@ -593,6 +593,7 @@ impl<'command> Scheduler<'command> {
                     match result {
                         WorkResult::FileHashResult(start, result) => {
                             for i in 0..result.len() {
+                                // println!("~ {}", input_hashes[start + i]);
                                 file_hashes.insert(input_hashes[start + i].clone(), result[i]);
                             }
                         }
@@ -623,6 +624,7 @@ impl<'command> Scheduler<'command> {
                             work_index += 1;
                             processed_tasks += 1;
                             for (file, hash) in output_hashes {
+                                // println!("# {}", file);
                                 file_hashes.insert(file, hash);
                             }
 
@@ -842,7 +844,7 @@ impl ThreadActivity {
 }
 
 fn log_task_start(logger: &mut Logger, index: usize, task_count: &str, message: &str) {
-    logger.colored_print(
+    logger.colored_println(
         format!(
             "[{:width$}/{}] {}",
             index,
@@ -864,8 +866,8 @@ fn log_task_end(logger: &mut Logger, result: u32, command: &str, message: &str) 
             .as_str(),
         );
     } else if !message.is_empty() {
-        logger.colored_print(format!("{{dim}}{}{{reset}}", command).as_str());
-        logger.print(format!("\n{}", message).as_str());
+        logger.colored_println(format!("{{dim}}{}{{reset}}", command).as_str());
+        logger.print(message);
     } else {
         logger.info(command);
     }

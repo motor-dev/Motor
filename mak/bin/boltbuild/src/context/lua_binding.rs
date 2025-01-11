@@ -37,7 +37,7 @@ impl UserData for Context {
         methods.add_method_mut("error", error);
         methods.add_method_mut("raise_error", raise_error);
         methods.add_method_mut("print", print);
-        methods.add_method_mut("colored_print", colored_print);
+        methods.add_method_mut("colored_println", colored_println);
         methods.add_function_mut("with", with);
         methods.add_function("try", lua_try);
         methods.add_method_mut("search", search);

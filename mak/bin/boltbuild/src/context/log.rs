@@ -31,8 +31,8 @@ pub(super) fn print(_lua: &Lua, this: &mut Context, message: String) -> LuaResul
     Ok(())
 }
 
-pub(super) fn colored_print(_lua: &Lua, this: &mut Context, message: String) -> LuaResult<()> {
-    this.logger.colored_print(message.as_str());
+pub(super) fn colored_println(_lua: &Lua, this: &mut Context, message: String) -> LuaResult<()> {
+    this.logger.colored_println(message.as_str());
     Ok(())
 }
 
