@@ -743,7 +743,7 @@ impl<'command> Scheduler<'command> {
                     /* todo: error */
                     logger.error("");
                 }
-                if progress_mode >= 4 {
+                if progress_mode >= 1 {
                     log_progress(
                         logger,
                         title,
