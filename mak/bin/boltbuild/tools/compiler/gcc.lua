@@ -9,6 +9,7 @@ local function load_gcc_compiler(env, compiler, flags, language, var_name)
     env[var_name .. 'FLAGS'] = { '-x', language, '-c', '-fPIC' }
     env:append(var_name .. 'FLAGS', flags)
     env[var_name .. '_COMPILER_NAME'] = 'gcc'
+    env[var_name .. '_DEPENDENCY_TYPE'] = 'gnu'
     env[var_name .. '_TGT_F'] = '-o'
     env[var_name .. '_DEFINE_ST'] = '-D'
     env[var_name .. '_INCLUDE_ST'] = '-I'

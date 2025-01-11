@@ -16,13 +16,16 @@ impl UserData for Node {
 
     fn add_methods<'lua, M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_meta_method(MetaMethod::ToString, |_lua, this: &Node, ()| {
-            Ok(this.abs_path().to_string_lossy().to_string())
+            Ok(this.nice_path().to_string_lossy().to_string())
         });
         methods.add_method("make_node", |_lua, this, lua_path: String| {
             Ok(this.make_node(&PathBuf::from(lua_path)))
         });
         methods.add_method("abs_path", |_lua, this, ()| {
             Ok(this.path.to_string_lossy().to_string())
+        });
+        methods.add_method("nice_path", |_lua, this, ()| {
+            Ok(this.nice_path().to_string_lossy().to_string())
         });
         methods.add_method("extension", |_lua, this, ()| {
             if let Some(ext) = this.path.extension() {

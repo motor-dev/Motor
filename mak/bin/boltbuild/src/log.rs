@@ -114,16 +114,13 @@ impl Logger {
 
     pub(crate) fn print(&mut self, message: &str) {
         if self.depth == 0 {
-            self.do_log(message, style::Color::Reset, true);
+            self.do_log(message, style::Color::Reset, false);
         }
     }
 
-    pub(crate) fn colored_print(&mut self, message: &str) {
+    pub(crate) fn colored_println(&mut self, message: &str) {
         if self.depth == 0 {
-            for command in StatusCommand::parse(message) {
-                command.write(&mut self.output);
-            }
-            self.do_log("", style::Color::Reset, true);
+            self.do_log_commands(&StatusCommand::parse(message));
         }
     }
 
@@ -137,7 +134,7 @@ impl Logger {
     pub(crate) fn error(&mut self, message: &str) {
         if self.depth == 0 {
             self.do_log("error: ", style::Color::Red, false);
-            self.do_log(message, style::Color::Reset, true);
+            self.do_log(message, style::Color::Grey, true);
         }
     }
 
@@ -176,6 +173,66 @@ impl Logger {
         self.status = None;
     }
 
+    fn do_log_commands(&mut self, message: &[StatusCommand]) {
+        if self.use_colors {
+            if self.status.is_some() {
+                self.output
+                    .queue(cursor::SavePosition)
+                    .unwrap()
+                    .queue(cursor::MoveDown(999))
+                    .unwrap()
+                    .queue(terminal::Clear(terminal::ClearType::CurrentLine))
+                    .unwrap()
+                    .queue(cursor::RestorePosition)
+                    .unwrap();
+            }
+            for cmd in message {
+                cmd.write(&mut self.output);
+            }
+            self.output
+                .queue(style::SetForegroundColor(style::Color::Reset))
+                .unwrap()
+                .queue(style::SetBackgroundColor(style::Color::Reset))
+                .unwrap()
+                .queue(style::Print("\n"))
+                .unwrap();
+            if self.status.is_some() {
+                /* creates a new line */
+                self.output
+                    .queue(cursor::SavePosition)
+                    .unwrap()
+                    .queue(style::Print("\n"))
+                    .unwrap()
+                    .queue(cursor::RestorePosition)
+                    .unwrap()
+                    .queue(cursor::MoveDown(1))
+                    .unwrap()
+                    .queue(cursor::MoveUp(1))
+                    .unwrap();
+                self.output
+                    .queue(cursor::SavePosition)
+                    .unwrap()
+                    .queue(cursor::MoveDown(999))
+                    .unwrap()
+                    .queue(cursor::MoveToColumn(0))
+                    .unwrap();
+                for cmd in self.status.as_mut().unwrap() {
+                    cmd.write(&mut self.output);
+                }
+
+                self.output.queue(cursor::RestorePosition).unwrap();
+            }
+        } else {
+            for cmd in message {
+                if let StatusCommand::Text(s) = cmd {
+                    self.output.queue(style::Print(s)).unwrap();
+                }
+            }
+            self.output.queue(style::Print("\n")).unwrap();
+        }
+        self.output.flush().unwrap();
+    }
+
     fn do_log(&mut self, message: &str, color: style::Color, add_newline: bool) {
         if self.use_colors {
             let clear_status =
@@ -198,7 +255,6 @@ impl Logger {
                 .unwrap()
                 .queue(style::SetForegroundColor(style::Color::Reset))
                 .unwrap();
-            self.output.flush().unwrap();
             if add_newline {
                 self.output.queue(style::Print("\n")).unwrap();
             }

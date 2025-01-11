@@ -32,6 +32,7 @@ end
 ---@param name string The name of the driver, used for identification.
 ---@param color string A color identifier for the driver, used for console log display.
 ---@param command string The command string to execute.
+---@param dependency_type string The name of an environment variable that contains the dependency file type, e.g. "C_DEP_TYPE". Supported types are `gnu`, and `msvc`.
 ---@param run_before string[]? Optional. The name of other drivers that this driver runs before. All tasks using this driver will be scheduled before tasks using the specified drivers.
 function Context:dependency_driver(name, color, command, run_before)
 end

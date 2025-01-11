@@ -61,6 +61,12 @@ function Node:abs_path()
     return ''
 end
 
+--- Returns either the absolute path of the filesystem object or the relative path from the current working directory.
+---@return string The full absolute path of the Node.
+function Node:nice_path()
+    return ''
+end
+
 --- Returns the path of the filesystem object relative to a specified starting Node.
 ---@param from Node The node from which to calculate the relative path.
 ---@return string The relative path from the specified starting node.

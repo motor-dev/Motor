@@ -47,7 +47,7 @@ end
 --- - Use `{reset}` to reset text color and `{bg:reset}` to reset the background color to default.
 ---
 ---@param message string The message to print, with optional color and background formatting.
-function Context:color_print(message)
+function Context:color_println(message)
 end
 
 --- Runs a function within a "try" block, logging messages before and after execution, and returning a boolean indicating success.
