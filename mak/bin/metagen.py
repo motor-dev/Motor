@@ -167,69 +167,15 @@ class MetaObject(object):
         self._declared_objects = {}  # type: Dict[str, Tuple[bool, Attributes]]
         self.position = position
 
-    def file_name(self) -> str:
-        return self._parent.file_name()
-
-    def dump_exports(self, namespace: List[str], out_namespace: BinaryIO) -> None:
+    def write_declarations(self, namespace: List[str], out_hh: TextIO, api: str) -> None:
         for name, child in self._children.items():
-            namespace.append(name)
-            child.dump_exports(namespace, out_namespace)
-            namespace.pop(-1)
+            child.write_declarations(namespace, out_hh, api)
 
-    def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO, api: str) -> None:
-        for name, child in self._children.items():
-            namespace.append(name)
-            child.write_declarations(namespace, out_cc, out_hh, api)
-            namespace.pop(-1)
-
-    def _write_object_names(self, object_names: List[Tuple[str, str]], owner: str, out: TextIO) -> str:
-        file_name = self.file_name()
-        out.write('MOTOR_EXPORT ::Motor::Meta::Object s_%s_objects[%d] = {\n' % (file_name, len(object_names)))
-        object_count = len(object_names)
-        i = 0
-        for object_name, object_value in object_names:
-            if i < object_count - 1:
-                next_objects = '{&s_%s_objects[%d]}' % (file_name, i + 1)
-                comma = ','
-            else:
-                next_objects = '{%s->objects.exchange(s_%s_objects)}' % (owner, file_name)
-                comma = ''
-            out.write('    {\n'
-                      '        %s,\n'
-                      '        %s,\n'
-                      '        %s,\n'
-                      '        ::Motor::Meta::Value(%s)\n'
-                      '    }%s\n' % (next_objects, owner, object_name, object_value, comma))
-            i += 1
-        out.write('};\n')
-        return '{s_%s_objects}' % file_name
-
-    def write_metaclasses(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> None:
+    def write_definitions(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> List[Tuple[str, ...]]:
         object_names = []
         for name, child in self._children.items():
-            namespace.append(name)
-            child.write_metaclasses(namespace, out_cc, out_hh)
-            o = child.object_name()
-            if o is not None:
-                object_names.append(o)
-            namespace.pop(-1)
-        if object_names:
-            if namespace:
-                out_cc.write('\nnamespace %s\n'
-                             '{\n'
-                             '\n' % (' { namespace '.join(namespace)))
-            self._write_object_names(object_names, self._parent.name(), out_cc)
-            if namespace:
-                out_cc.write('%s\n' % ('}' * len(namespace)))
-
-    def object_name(self) -> Optional[Tuple[str, str]]:
-        return None
-
-    def name(self) -> str:
-        raise NotImplementedError
-
-    def cpp_name(self) -> str:
-        raise NotImplementedError
+            object_names += child.write_definitions(namespace, out_cc, out_hh)
+        return object_names
 
     def get_child(self, child_name: str) -> "MetaObject":
         return self._children[child_name]
@@ -249,21 +195,6 @@ class RootNamespace(MetaObject):
     def __init__(self, file_name: str, module_name: str):
         super().__init__((0, 0), Attributes(), None)
         self._file_name = file_name
-        self._cpp_name = 'motor_%s_Namespace' % module_name
-
-    def cpp_name(self) -> str:
-        return self._cpp_name
-
-    def file_name(self) -> str:
-        return self._file_name
-
-    def name(self) -> str:
-        return '::Motor::' + self._cpp_name + '()'
-
-    def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO, api: str) -> None:
-        out_hh.write('namespace Motor\n{\n\nraw<Meta::Class> %s();\n' % self._cpp_name)
-        super().write_declarations(namespace, out_cc, out_hh, api)
-        out_hh.write('\n}\n')
 
 
 class Namespace(MetaObject):
@@ -271,26 +202,22 @@ class Namespace(MetaObject):
     def __init__(self, position: Tuple[int, int], attributes: Attributes, name: str, parent: MetaObject):
         super().__init__(position, attributes, parent)
         self._name = name
-        self._cpp_name = parent.cpp_name() + '_' + name
         parent._children[name] = self
         self._namespace[0].append(name)
         assert pyxx.logger is not None
         for position, interface in attributes.interfaces:
             m0007(pyxx.logger, position, 'interface', 'namespace')
 
-    def cpp_name(self) -> str:
-        return self._cpp_name
+    def write_definitions(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> List[Tuple[str, ...]]:
+        namespace.append(self._name)
+        result = super().write_definitions(namespace, out_cc, out_hh)
+        namespace.pop(-1)
+        return result
 
-    def dump_exports(self, namespace: List[str], out_namespace: BinaryIO) -> None:
-        pickle.dump(namespace, out_namespace)
-        super().dump_exports(namespace, out_namespace)
-
-    def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO, api: str) -> None:
-        out_hh.write('raw<Meta::Class> %s();\n' % self._cpp_name)
-        super().write_declarations(namespace, out_cc, out_hh, api)
-
-    def name(self) -> str:
-        return '::Motor::' + self._cpp_name + '()'
+    def write_declarations(self, namespace: List[str], out_hh: TextIO, api: str) -> None:
+        namespace.append(self._name)
+        super().write_declarations(namespace, out_hh, api)
+        namespace.pop(-1)
 
 
 class Class(MetaObject):
@@ -311,38 +238,54 @@ class Class(MetaObject):
         self._namespace[1].append(name)
         self._is_value_type = is_value_type
 
-    def name(self) -> str:
-        return 'motor_class<::%s>()' % '::'.join(self._namespace[0] + self._namespace[1])
-
-    def object_name(self) -> Tuple[str, str]:
-        return (
-            '::Motor::Meta::ClassID< %s >::name()' % self._name,
-            '::Motor::Meta::ClassID< %s >::klass()' % self._name
-        )
-
-    def write_declarations(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO, api: str) -> None:
+    def write_declarations(self, namespace: List[str], out_hh: TextIO, api: str) -> None:
+        namespace.append(self._name)
         out_hh.write(
-            '\nnamespace Meta\n'
+            'namespace Motor { namespace Meta\n'
             '{\n'
             'MOTOR_DECLARE_CLASS_ID(%s, ::%s)\n'
-            '}\n\n' % (api, '::'.join(namespace)))
-        out_cc.write(
-            '\nnamespace Motor { namespace Meta\n'
-            '{\n'
-            'motor_api(%(api)s) istring ClassID<::%(cpp_name)s>::name()\n'
-            '{\n'
-            '    static istring s_name("%(name)s");\n'
-            '    return s_name;\n'
-            '}\n\n'
-            'motor_api(%(api)s) const Class ClassID<::%(cpp_name)s>::s_class = {\n'
-            '};\n\n'
-            '}}\n\n'
-            '' % {'api': api, 'cpp_name': '::'.join(namespace), 'name': self._name}
-        )
-        super().write_declarations(namespace, out_cc, out_hh, api)
+            '}}\n' % (api, '::'.join(namespace)))
+        super().write_declarations(namespace, out_hh, api)
+        namespace.pop(-1)
 
-    def write_metaclasses(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> None:
-        pass
+    def write_definitions(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> List[Tuple[str, ...]]:
+        namespace.append(self._name)
+        super().write_definitions(namespace, out_cc, out_hh)
+        out_cc.write(
+            'namespace Motor { namespace Meta\n'
+            '{\n'
+            '\n'
+            'istring ClassID<%s>::name()\n'
+            '{\n'
+            '    return ::Motor::istring("%s");\n'
+            '}\n'
+            '\n'
+            'const Class ClassID<%s>::s_class = {\n'
+            '    sizeof(%s),\n'
+            '    {nullptr},\n'
+            '    0,\n'
+            '    {nullptr},\n'
+            '    {nullptr},\n'
+            '    {nullptr},\n'
+            '    {nullptr},\n'
+            '    {nullptr},\n'
+            '    {nullptr},\n'
+            '    {nullptr},\n'
+            '    nullptr,\n'
+            '    nullptr,\n'
+            '};\n'
+            '\n'
+            '}}\n' % (
+                '::'.join(namespace),
+                self._name,
+                '::'.join(namespace),
+                '::'.join(namespace),
+            )
+        )
+
+        result = tuple(namespace)
+        namespace.pop(-1)
+        return [result]
 
 
 class Enum(Class):
@@ -1092,11 +1035,6 @@ def main() -> None:
         metavar="OUT_CC",
     )
     argument_context.add_argument(
-        "out_typeid_cc",
-        help="Output typeid.cc file",
-        metavar="OUT_TYPEID_CC",
-    )
-    argument_context.add_argument(
         "out_hh",
         help="Output header file",
         metavar="OUT_HH",
@@ -1130,34 +1068,29 @@ def main() -> None:
         sys.exit(pyxx.logger.error_count)
     else:
         with open(arguments.out_cc, 'w') as out_cc:
-            with open(arguments.out_typeid_cc, 'w') as out_typeid_cc:
-                with open(arguments.out_hh, 'w') as out_hh:
-                    out_cc.write('#include <%s>\n'
-                                 '#include <motor/meta/object.meta.hh>\n'
-                                 '#include <motor/meta/value.hh>\n'
-                                 '' % arguments.out_relative)
-                    out_typeid_cc.write('#include <%s>\n'
-                                        '#include <motor/meta/object.meta.hh>\n'
-                                        '#include <motor/meta/value.hh>\n'
-                                        '' % arguments.out_relative)
-                    out_hh.write('#pragma once\n'
-                                 '#ifndef MOTOR_COMPUTE\n'
-                                 '#include <motor/meta/classinfo.hh>\n'
-                                 '#include <%s>\n'
-                                 '#include <motor/meta/builtins/numbers.hh>\n'
-                                 '#include <motor/meta/builtins/strings.meta.hh>\n'
-                                 '#include <motor/meta/builtins/value.meta.hh>\n'
-                                 '\n' % (arguments.in_relative))
-                    explorer.namespace.write_declarations([], out_cc, out_hh, arguments.api)
-                    explorer.namespace.write_metaclasses([], out_typeid_cc, out_hh)
-                    out_hh.write('#endif\n')
+            with open(arguments.out_hh, 'w') as out_hh:
+                out_cc.write('#include <%s>\n'
+                             '#include <motor/meta/object.meta.hh>\n'
+                             '#include <motor/meta/value.hh>\n'
+                             '' % arguments.out_relative)
+                out_hh.write('#pragma once\n'
+                             '#ifndef MOTOR_COMPUTE\n'
+                             '#include <motor/meta/classinfo.hh>\n'
+                             '#include <%s>\n'
+                             '#include <motor/meta/builtins/numbers.hh>\n'
+                             '#include <motor/meta/builtins/strings.meta.hh>\n'
+                             '#include <motor/meta/builtins/value.meta.hh>\n'
+                             '\n' % (arguments.in_relative))
+                explorer.namespace.write_declarations([], out_hh, arguments.api)
+                exports = explorer.namespace.write_definitions([], out_cc, out_hh)
+                out_hh.write('#endif\n')
 
         with open(arguments.doc, 'w'):
             pass
 
         with open(arguments.namespace_exports, 'wb') as namespace_exports:
-            pickle.dump((arguments.module, arguments.root, arguments.in_relative), namespace_exports)
-            explorer.namespace.dump_exports([], namespace_exports)
+            pickle.dump((arguments.module, tuple(arguments.root.split('::')), arguments.in_relative, exports),
+                        namespace_exports)
 
 
 if __name__ == '__main__':

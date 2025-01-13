@@ -22,7 +22,6 @@ context:feature('metagen ', 'metagen ', function(generator)
             local target_node_src = target_node:make_node('src')
             local target_node_cc = target_node_src:make_node(source_node:path_from(source_path))
             target_node_cc = target_node_cc:change_ext('cc')
-            local target_node_typeid_cc = target_node_cc:change_ext('typeid.cc')
             local target_node_doc = target_node_cc:change_ext('doc')
             local target_node_ns = target_node_cc:change_ext('ns')
 
@@ -31,7 +30,7 @@ context:feature('metagen ', 'metagen ', function(generator)
             target_node_factory_hh = target_node_factory_hh:change_ext('factory.hh')
 
             local task = generator:declare_task('metagen', { source_node },
-                { target_node_cc, target_node_typeid_cc, target_node_factory_hh, target_node_doc, target_node_ns })
+                { target_node_cc, target_node_factory_hh, target_node_doc, target_node_ns })
             task.env.METAGEN_RELATIVE_INPUT = string.gsub(source_node:path_from(source_path), '\\', '/')
             task.env.METAGEN_RELATIVE_OUTPUT = string.gsub(target_node_factory_hh:path_from(target_node_factory_hh_dir),
                 '\\', '/')
@@ -40,7 +39,6 @@ context:feature('metagen ', 'metagen ', function(generator)
             task.env.METAGEN_API = generator.api
 
             table.insert(generator.out_source, { target_node_src, target_node_cc })
-            table.insert(generator.out_source, { target_node_src, target_node_typeid_cc })
             table.insert(generator.out_namespace, { target_node_src, target_node_ns })
         end
     end

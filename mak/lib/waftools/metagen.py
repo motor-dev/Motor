@@ -51,7 +51,6 @@ class metagen(waflib.Task.Task):
                 self.outputs[1].path_from(self.generator.bld.bldnode),
                 self.outputs[2].path_from(self.generator.bld.bldnode),
                 self.outputs[3].path_from(self.generator.bld.bldnode),
-                self.outputs[4].path_from(self.generator.bld.bldnode),
             ]
         )
 
@@ -80,6 +79,23 @@ class ns_export(waflib.Task.Task):
 
     def run(self) -> int:
         seen = set([])
+
+        def export_ns(root_namespace: Tuple[str], namespace: Tuple[str]) -> List[str]:
+            if namespace and namespace not in seen:
+                seen.add(namespace)
+                result = export_ns(root_namespace, namespace[:-1])
+                if namespace == root_namespace:
+                    result.append(namespace_alias % (
+                        plugin,
+                        '_' + '_'.join(root_namespace[:-1]) if len(root_namespace) > 1 else '',
+                        root_namespace[-1]
+                    ))
+                else:
+                    result.append(namespace_register % (len(namespace), plugin, ', '.join(namespace)))
+                return result
+            else:
+                return []
+
         with open(self.outputs[0].abspath(), 'w') as export_file:
             pch = getattr(self, 'pch', '')
             if pch:
@@ -87,24 +103,10 @@ class ns_export(waflib.Task.Task):
             export_file.write('#include <motor/meta/namespace.hh>\n')
             for input_node in self.inputs:
                 with open(input_node.abspath(), 'rb') as in_file:
-                    plugin, root_namespace, include = pickle.load(in_file)
-                    root_namespace = root_namespace.split('::')
-                    while True:
-                        try:
-                            full_name = pickle.load(in_file)
-                            if (plugin, '.'.join(full_name)) not in seen:
-                                seen.add((plugin, '.'.join(full_name)))
-                                if full_name == root_namespace:
-                                    line = namespace_alias % (
-                                        plugin,
-                                        '_' + '_'.join(root_namespace[:-1]) if len(root_namespace) > 1 else '',
-                                        root_namespace[-1]
-                                    )
-                                else:
-                                    line = namespace_register % (len(full_name), plugin, ', '.join(full_name))
-                                export_file.write(line)
-                        except EOFError:
-                            break
+                    plugin, root_namespace, include, exports = pickle.load(in_file)
+                    for export in exports:
+                        for decl in export_ns(root_namespace, export[:-1]):
+                            export_file.write(decl)
         return 0
 
 
@@ -128,13 +130,12 @@ def datagen(task_gen: waflib.TaskGen.task_gen, node: waflib.Node.Node) -> None:
     out_node.parent.mkdir()
     header_node.parent.mkdir()
     outs.append(out_node)
-    outs.append(out_node.change_ext('.typeid.cc'))
     outs.append(header_node)
     outs.append(out_node.change_ext('.doc'))
     outs.append(out_node.change_ext('.namespace_exports'))
     for include_node in generated_paths:
-        if outs[2].is_child_of(include_node):
-            relative_output = outs[2].path_from(include_node).replace('\\', '/')
+        if outs[1].is_child_of(include_node):
+            relative_output = outs[1].path_from(include_node).replace('\\', '/')
             break
     else:
         raise waflib.Errors.WafError('unable to locate include path for %s' % outs[2])
@@ -152,10 +153,9 @@ def datagen(task_gen: waflib.TaskGen.task_gen, node: waflib.Node.Node) -> None:
     tsk.dep_nodes = task_gen.bld.pyxx_nodes + [task_gen.bld.motornode.make_node('mak/bin/metagen.py')]
 
     getattr(task_gen, 'out_sources').append(outs[0])
-    getattr(task_gen, 'out_sources').append(outs[1])
     # getattr(task_gen, 'masterfiles')[outs[1]] = 'typeid'
+    task_gen.source.append(outs[2])
     task_gen.source.append(outs[3])
-    task_gen.source.append(outs[4])
 
 
 @waflib.TaskGen.feature('motor:module')

@@ -97,7 +97,7 @@
     }                                                                                              \
     MOTOR_EXPORT Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_ob                \
         = {{motor_##plugin##_Namespace_##n1##_##n2##_##n3()->objects.exchange(                     \
-               &Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_ob)},              \
+               &s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_ob)},                           \
            motor_##plugin##_Namespace_##n1##_##n2##_##n3(),                                        \
            istring(#n4),                                                                           \
            Meta::Value(motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4())};                   \
@@ -123,7 +123,7 @@
     }                                                                                              \
     MOTOR_EXPORT Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_ob         \
         = {{motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()->objects.exchange(              \
-               &Meta::Object s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_ob)},       \
+               &s_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5##_ob)},                    \
            motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4(),                                 \
            istring(#n5),                                                                           \
            Meta::Value(motor_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4##_##n5())};            \
