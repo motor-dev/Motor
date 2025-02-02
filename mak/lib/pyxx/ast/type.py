@@ -118,8 +118,10 @@ class PrimitiveTypeSpecifiers(object):
 
 class ElaboratedClassTypeSpecifier(TypeSpecifier):
 
-    def __init__(self, class_type: str, attributes: List[Attribute], name: Reference) -> None:
+    def __init__(self, position: Tuple[int, int], class_type: str, attributes: List[Attribute],
+                 name: Reference) -> None:
         TypeSpecifier.__init__(self)
+        self.position = position
         self.attributes = attributes
         self.type = class_type
         self.name = name

@@ -4,7 +4,6 @@ use mlua::Error as LuaError;
 use mlua::Result as LuaResult;
 use mlua::{AnyUserData, Lua, MetaMethod, UserData, UserDataMethods};
 use std::io::{Read, Write};
-use std::mem::swap;
 use std::process::Stdio;
 
 pub(super) struct Process(std::process::Child);
@@ -20,7 +19,7 @@ pub(super) fn popen(_lua: &Lua, this: &mut Context, command: Vec<LuaValue>) -> L
                 .collect::<Vec<String>>()
                 .join(" ")
         )
-            .as_str(),
+        .as_str(),
     );
     for x in command {
         cmd.push(x.to_string()?);
@@ -62,19 +61,17 @@ impl UserData for Process {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method_mut("communicate", |_lua, this, input: Option<String>| {
             std::thread::scope(|scope| {
-                let mut stdout = None;
-                swap(&mut stdout, &mut this.0.stdout);
-                let mut stderr = None;
-                swap(&mut stderr, &mut this.0.stderr);
+                let mut stdout = this.0.stdout.take().unwrap();
+                let mut stderr = this.0.stderr.take().unwrap();
 
                 let stdout_reader = scope.spawn(move || {
                     let mut output = Vec::new();
-                    stdout.as_mut().unwrap().read_to_end(&mut output).unwrap();
+                    stdout.read_to_end(&mut output).unwrap();
                     output
                 });
                 let stderr_reader = scope.spawn(move || {
                     let mut output = Vec::new();
-                    stderr.as_mut().unwrap().read_to_end(&mut output).unwrap();
+                    stderr.read_to_end(&mut output).unwrap();
                     output
                 });
                 if let Some(input) = input {
@@ -123,17 +120,14 @@ impl UserData for Out {
                 match this.1 {
                     Some(index) => {
                         let end = this.0[index..].find('\n');
+                        let len = this.0.len();
                         if let Some(end) = end {
-                            if end > 0 && this.0.as_bytes()[index + end - 1] == b'\r' {
-                                let result = this.0[index..index + end - 1].to_string();
-                                this.1 = Some(index + end + 1);
-                                Ok(Some(result))
-                            } else {
-                                let result = this.0[index..index + end].to_string();
-                                this.1 = Some(index + end + 1);
-                                Ok(Some(result))
-                            }
-                        } else if index < this.0.len() {
+                            let result = this.0[index..index + end]
+                                .trim_end_matches('\r')
+                                .to_string();
+                            this.1 = Some(index + end + '\n'.len_utf8());
+                            Ok(Some(result))
+                        } else if index < len {
                             let result = this.0[index..].to_string();
                             this.1 = None;
                             Ok(Some(result))
@@ -144,7 +138,7 @@ impl UserData for Out {
                     None => Ok(None),
                 }
             })?
-                .bind(this)
+            .bind(this)
         })
     }
 }

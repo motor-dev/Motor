@@ -8,33 +8,28 @@
 namespace Motor { namespace Meta {
 class Class;
 
-template <typename T>
+template < typename T >
 struct ClassID
 {
-    constexpr static raw< const Class > klass()
-    {
-        return {&s_class};
-    }
-
-    MOTOR_EXPORT static istring     name();
-    MOTOR_EXPORT static const Class s_class;
+    constexpr static raw< const Class > klass() = delete;
+    static istring                      name()  = delete;
 };
 
-#define MOTOR_DECLARE_CLASS_ID(module, type)                                                        \
-    template <>                                                                                     \
-    struct ClassID<type>                                                                            \
-    {                                                                                               \
-        constexpr static raw< const Class > klass()                                                 \
-        {                                                                                           \
-            return {&s_class};                                                                      \
-        }                                                                                           \
-        motor_api(module) static istring     name();                                                \
-        motor_api(module) static const Class s_class;                                               \
-    };                                                                                              \
-    extern template struct ClassID<type>;
+#define MOTOR_DECLARE_CLASS_ID(module, template_params, type)                                      \
+    template < template_params >                                                                   \
+    struct ClassID< type >                                                                         \
+    {                                                                                              \
+        constexpr static raw< const Class > klass()                                                \
+        {                                                                                          \
+            return {&s_class};                                                                     \
+        }                                                                                          \
+        motor_api(module) static istring name();                                                   \
+        motor_api(module) static const Class s_class;                                              \
+    };                                                                                             \
+    extern template struct ClassID< type >;
 
-MOTOR_DECLARE_CLASS_ID(META, void)
-MOTOR_DECLARE_CLASS_ID(META, minitl::pointer)
-}} // namespace Motor::Meta
+MOTOR_DECLARE_CLASS_ID(META, /*none*/, void)
+MOTOR_DECLARE_CLASS_ID(META, /*none*/, minitl::pointer)
+}}  // namespace Motor::Meta
 
 #endif

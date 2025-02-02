@@ -13,10 +13,10 @@ class Class;
 class motor_api(META) Object
 {
 public:
-    raw< const Object > const next;
-    raw< const Class > const  owner;
-    istring const             name;
-    mutable Value             value;
+    raw< Object > const      next;
+    raw< const Class > const owner;
+    istring const            name;
+    Value                    value;
 };
 
 }}  // namespace Motor::Meta

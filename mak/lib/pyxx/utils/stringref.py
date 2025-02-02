@@ -544,3 +544,62 @@ class StringRef(ast.Visitor):
 
     def visit_ambiguous_declaration(self, ambiguous_declaration: ast.AmbiguousDeclaration) -> None:
         ambiguous_declaration.accept_first(self)
+
+    def visit_template_parameter_list(self, template_parameter_list: ast.TemplateParameterList) -> None:
+        self.result += '<'
+        if template_parameter_list.parameters:
+            for parameter in template_parameter_list.parameters[:-1]:
+                parameter.accept(self)
+                self.result += ', '
+            template_parameter_list.parameters[-1].accept(self)
+        self.result += '>'
+
+    def visit_ambiguous_template_parameter_list(self,
+                                                ambiguous_template_parameter_list: ast.AmbiguousTemplateParameterList) -> None:
+        ambiguous_template_parameter_list.accept_first(self)
+
+    def visit_ambiguous_template_parameter(self, ambiguous_template_parameter: ast.AmbiguousTemplateParameter) -> None:
+        ambiguous_template_parameter.accept_first(self)
+
+    def visit_template_parameter_type(self, template_parameter_type: ast.TemplateParameterType) -> None:
+        self.result += template_parameter_type.keyword
+        if template_parameter_type.name is not None:
+            self.result += ' '
+            self.result += template_parameter_type.name
+        if template_parameter_type.default_value is not None:
+            self.result += ' = '
+            template_parameter_type.accept_default_value(self)
+        if template_parameter_type.is_pack:
+            self.result += '...'
+
+    def visit_template_parameter_template(self, template_parameter_template: ast.TemplateParameterTemplate) -> None:
+        self.result += 'template<'
+        if template_parameter_template.template_parameter_list is not None:
+            template_parameter_template.template_parameter_list.accept(self)
+        self.result += '> '
+        if template_parameter_template.requires_clause is not None:
+            template_parameter_template.requires_clause.accept(self)
+            self.result += ' '
+        self.result += template_parameter_template.keyword
+        if template_parameter_template.name is not None:
+            self.result += ' '
+            self.result += template_parameter_template.name
+        if template_parameter_template.default_value is not None:
+            self.result += '= '
+            template_parameter_template.accept_default_value(self)
+        if template_parameter_template.is_pack:
+            self.result += '...'
+
+    def visit_template_parameter_constant(self, template_parameter_constant: ast.TemplateParameterConstant) -> None:
+        template_parameter_constant.accept_parameter_declaration(self)
+
+    def visit_template_parameter_constraint(self,
+                                            template_parameter_constraint: ast.TemplateParameterConstraint) -> None:
+        template_parameter_constraint.accept_constraint(self)
+        if template_parameter_constraint.name is not None:
+            self.result += template_parameter_constraint.name
+        if template_parameter_constraint.default_value is not None:
+            self.result += ' = '
+            template_parameter_constraint.accept_default_value(self)
+        if template_parameter_constraint.is_pack:
+            self.result += '...'
