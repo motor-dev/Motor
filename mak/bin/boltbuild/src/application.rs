@@ -28,6 +28,15 @@ pub struct Application {
 
 impl Application {
     pub fn init() -> Result<Self> {
+        #[cfg(target_os = "linux")]
+        {
+            env::set_var("WSL_UTF8", "1");
+            env::set_var(
+                "WSLENV",
+                env::var("WSLENV").unwrap_or_default() + ":WSL_UTF8",
+            );
+        }
+
         let root_dir = env::current_dir()?
             .file_name()
             .unwrap()
