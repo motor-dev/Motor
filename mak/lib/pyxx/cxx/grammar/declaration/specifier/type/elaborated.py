@@ -31,7 +31,9 @@ def invalid_attribute_elaborated_enum_specifier(self: Logger, position: Tuple[in
 @glrp.rule('elaborated-type-specifier : class-key attribute-specifier-seq? class-head-name [split:final_identifier]')
 @cxx98
 def elaborated_type_specifier_class(self: CxxParser, p: glrp.Production) -> Any:
-    return ElaboratedClassTypeSpecifier(p[0], p[1], p[2])
+    position, type = p[0]
+    position = (position[0], p[2].position[1])
+    return ElaboratedClassTypeSpecifier(position, type, p[1], p[2])
 
 
 @glrp.rule('elaborated-type-specifier : elaborated-enum-specifier')

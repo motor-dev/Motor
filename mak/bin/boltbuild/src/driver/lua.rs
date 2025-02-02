@@ -23,7 +23,7 @@ impl LuaDriverConfiguration {
         match lua.scope(|scope| {
             let userdata = scope.create_userdata_ref(task).unwrap();
             let chunk = lua.load(self.script.path().as_path());
-            chunk.call::<(u32, Option<Vec<Node>>)>(userdata)
+            chunk.call::<(u32, Option<Vec<Node>>, Option<String>)>(userdata)
         }) {
             Err(err) => Output {
                 exit_code: 1,
@@ -34,7 +34,7 @@ impl LuaDriverConfiguration {
                 file_dependencies: Vec::new(),
                 extra_output: Vec::new(),
             },
-            Ok((result, file_dependencies)) => {
+            Ok((result, file_dependencies, output)) => {
                 /* retrieve a list of modules */
                 let file_dependencies = file_dependencies.unwrap_or_else(Vec::new);
 
@@ -108,7 +108,7 @@ impl LuaDriverConfiguration {
                     Output {
                         exit_code: result,
                         command,
-                        log: "".to_string(),
+                        log: output.unwrap_or_default(),
                         driver_hash: self.hash(lua_dependencies.as_slice()),
                         driver_dependencies: lua_dependencies,
                         file_dependencies,

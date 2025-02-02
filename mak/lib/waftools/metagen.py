@@ -40,7 +40,7 @@ class metagen(waflib.Task.Task):
                 '--root',
                 getattr(self.generator, 'root_namespace'),
                 '--api',
-                self.generator.api,
+                getattr(self.generator, 'api'),
                 '--tmp',
                 self.generator.bld.bldnode.abspath(),
             ] + extra_options + [
@@ -80,7 +80,7 @@ class ns_export(waflib.Task.Task):
     def run(self) -> int:
         seen = set([])
 
-        def export_ns(root_namespace: Tuple[str], namespace: Tuple[str]) -> List[str]:
+        def export_ns(root_namespace: Tuple[str, ...], namespace: Tuple[str, ...]) -> List[str]:
             if namespace and namespace not in seen:
                 seen.add(namespace)
                 result = export_ns(root_namespace, namespace[:-1])
@@ -144,7 +144,6 @@ def datagen(task_gen: waflib.TaskGen.task_gen, node: waflib.Node.Node) -> None:
         'metagen',
         [node],
         outs,
-        api=task_gen.api,
         relative_input=relative_input,
         relative_output=relative_output,
         metagen=task_gen.bld.motornode.make_node('mak/bin/metagen.py'),

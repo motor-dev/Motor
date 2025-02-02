@@ -30,8 +30,8 @@ public:
     u32 const                   size;
     raw< const Class > const    base;
     i32 const                   baseOffset;
-    raw< const Object >         owner;
-    raw< const Object >         objects;
+    raw< Object >               owner;
+    raw< Object >               objects;
     raw< const Tag > const      tags;
     raw< const Property > const properties;
     raw< const Method > const   methods;
@@ -55,7 +55,7 @@ public:
 
     raw< const Property > getProperty(istring propertyName) const;
     raw< const Method >   getMethod(istring methodName) const;
-    raw< const Object >   getStaticProperty(istring propertyName) const;
+    raw< Object >         getStaticProperty(istring propertyName) const;
 
 public:
     [[motor::meta(export = no)]] typedef void (*EnumerateCallback)(const Value& v);

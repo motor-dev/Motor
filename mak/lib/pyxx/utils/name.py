@@ -16,7 +16,7 @@ class NameExtractor(ast.Visitor):
         declarator_list.accept_element(self)
 
     def visit_abstract_declarator_list(self, abstract_declarator_list: ast.AbstractDeclaratorList) -> None:
-        sr = StrignRef()
+        sr = StringRef()
         abstract_declarator_list.accept_element(sr)
         self.result = sr.result
 

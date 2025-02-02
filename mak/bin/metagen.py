@@ -119,6 +119,18 @@ def m0300(logger: messages.Logger, position: Tuple[int, int]) -> Dict[str, Any]:
     return locals()
 
 
+@messages.error
+def m0301(logger: messages.Logger, position: Tuple[int, int]) -> Dict[str, Any]:
+    """template specialization requires 'template<>'"""
+    return locals()
+
+
+@messages.error
+def m0302(logger: messages.Logger, position: Tuple[int, int], class_name: str) -> Dict[str, Any]:
+    """explicit specialization of non-template class {class_name}"""
+    return locals()
+
+
 class NotFoundException(Exception):
     pass
 
@@ -135,6 +147,14 @@ class IgnoredException(Exception):
     pass
 
 
+class MissingTemplateDeclaration(Exception):
+    pass
+
+
+class NotATemplate(Exception):
+    pass
+
+
 class Attributes(object):
     def __init__(self) -> None:
         self.export = None  # type: Optional[Tuple[Tuple[int, int], bool]]
@@ -148,9 +168,167 @@ class Attributes(object):
         return self.export is None or self.export[1]
 
 
-class Template(object):
+class TemplateVisitor(utils.StringRef):
     def __init__(self) -> None:
-        self._parameters = []
+        utils.StringRef.__init__(self)
+        self._parameters = []  # type: List[str]
+        self._parameter_names = []  # type: List[Tuple[bool, int, int]]
+        self._arguments = []  # type: List[str]
+        self._depth = 0
+
+    def visit_template_parameter_list(self, template_parameter_list: ast.TemplateParameterList) -> None:
+        if self._depth == 0:
+            for parameter in template_parameter_list.parameters:
+                self.result = ''
+                parameter.accept(self)
+                self._parameters.append(self.result)
+                is_pack, b, e = self._parameter_names[-1]
+                assert self._depth == 0
+                assert len(self._parameters) == len(self._parameter_names)
+                self._arguments.append(self.result[b:e])
+        else:
+            utils.StringRef.visit_template_parameter_list(self, template_parameter_list)
+
+    def visit_template_parameter_type(self, template_parameter_type: ast.TemplateParameterType) -> None:
+        self.result += template_parameter_type.keyword
+        self.result += ' '
+        if template_parameter_type.is_pack:
+            self.result += '...'
+        if self._depth > 0:
+            if template_parameter_type.name is not None:
+                self.result += template_parameter_type.name
+        else:
+            param_pack = template_parameter_type.is_pack
+            param_begin = len(self.result)
+            if template_parameter_type.name is not None:
+                self.result += template_parameter_type.name
+                param_end = len(self.result)
+            else:
+                param_end = param_begin
+            self._parameter_names.append((param_pack, param_begin, param_end))
+
+        if template_parameter_type.default_value is not None:
+            self.result += ' = '
+            self._depth += 1
+            template_parameter_type.accept_default_value(self)
+            self._depth -= 1
+
+    def visit_template_parameter_template(self,
+                                          template_parameter_template: ast.TemplateParameterTemplate) -> None:
+        self.result += 'template<'
+        if template_parameter_template.template_parameter_list is not None:
+            self._depth += 1
+            template_parameter_template.template_parameter_list.accept(self)
+            self._depth -= 1
+        self.result += '> '
+        if template_parameter_template.requires_clause is not None:
+            self._depth += 1
+            template_parameter_template.requires_clause.accept(self)
+            self.result += ' '
+            self._depth -= 1
+        self.result += template_parameter_template.keyword
+        self.result += ' '
+        if template_parameter_template.is_pack:
+            self.result += '...'
+        if self._depth > 0:
+            if template_parameter_template.name is not None:
+                self.result += template_parameter_template.name
+        else:
+            param_pack = template_parameter_template.is_pack
+            param_begin = len(self.result)
+            if template_parameter_template.name is not None:
+                self.result += template_parameter_template.name
+                param_end = len(self.result)
+            else:
+                param_end = param_begin
+            self._parameter_names.append((param_pack, param_begin, param_end))
+        if template_parameter_template.default_value is not None:
+            self.result += '= '
+            self._depth += 1
+            template_parameter_template.accept_default_value(self)
+            self._depth -= 1
+
+    def visit_template_parameter_constant(self,
+                                          template_parameter_constant: ast.TemplateParameterConstant) -> None:
+        template_parameter_constant.accept_parameter_declaration(self)
+
+    def visit_template_parameter_constraint(self,
+                                            template_parameter_constraint: ast.TemplateParameterConstraint) -> None:
+        template_parameter_constraint.accept_constraint(self)
+        self.result += ' '
+        if template_parameter_constraint.is_pack:
+            self.result += '...'
+        if self._depth > 0:
+            if template_parameter_constraint.name is not None:
+                self.result += template_parameter_constraint.name
+        else:
+            param_pack = template_parameter_constraint.is_pack
+            param_begin = len(self.result)
+            if template_parameter_constraint.name is not None:
+                self.result += template_parameter_constraint.name
+                param_end = len(self.result)
+            else:
+                param_end = param_begin
+            self._parameter_names.append((param_pack, param_begin, param_end))
+        if template_parameter_constraint.default_value is not None:
+            self.result += ' = '
+            self._depth += 1
+            template_parameter_constraint.accept_default_value(self)
+            self._depth -= 1
+
+    def visit_declarator_element_abstract(self,
+                                          declarator_element_abstract: ast.DeclaratorElementAbstract) -> None:
+        if self._depth > 1:
+            return utils.StringRef.visit_declarator_element_abstract(self, declarator_element_abstract)
+        else:
+            param_begin = len(self.result)
+            self._parameter_names.append((False, param_begin, param_begin))
+
+    def visit_declarator_element_abstract_pack(
+            self, declarator_element_abstract_pack: ast.DeclaratorElementAbstractPack
+    ) -> None:
+        utils.StringRef.visit_declarator_element_abstract_pack(self, declarator_element_abstract_pack)
+        if self._depth == 1:
+            param_begin = len(self.result)
+            self._parameter_names.append((True, param_begin, param_begin))
+
+    def visit_declarator_element_pack_id(self, declarator_element_pack_id: ast.DeclaratorElementPackId) -> None:
+        if self._depth > 1:
+            return utils.StringRef.visit_declarator_element_pack_id(self, declarator_element_pack_id)
+        else:
+            self.result += '...'
+            param_begin = len(self.result)
+            declarator_element_pack_id.accept_name(self)
+            param_end = len(self.result)
+            self._parameter_names.append((True, param_begin, param_end))
+
+    def visit_declarator_element_id(self, declarator_element_id: ast.DeclaratorElementId) -> None:
+        if self._depth > 1:
+            utils.StringRef.visit_declarator_element_id(self, declarator_element_id)
+        else:
+            param_begin = len(self.result)
+            utils.StringRef.visit_declarator_element_id(self, declarator_element_id)
+            param_end = len(self.result)
+            self._parameter_names.append((False, param_begin, param_end))
+
+    def visit_parameter_declaration(self, parameter_declaration: ast.ParameterDeclaration) -> None:
+        self._depth += 1
+        utils.StringRef.visit_parameter_declaration(self, parameter_declaration)
+        self._depth -= 1
+
+
+class TemplateDecl(object):
+    def __init__(self, template_declaration: ast.TemplateDeclaration) -> None:
+        visitor = TemplateVisitor()
+        template_declaration.accept_parameter_list(visitor)
+        self._parameters = visitor._parameters
+        self._arguments = visitor._arguments
+
+    def signature(self) -> str:
+        return '<' + ', '.join(self._parameters) + '>'
+
+    def argument_signature(self) -> str:
+        return ', '.join(self._arguments)
 
 
 class MetaObject(object):
@@ -220,6 +398,22 @@ class Namespace(MetaObject):
         namespace.pop(-1)
 
 
+class Template(MetaObject):
+    def __init__(self, position: Tuple[int, int], attributes: Attributes, name: str, parent: MetaObject,
+                 decl: TemplateDecl):
+        super().__init__(position, attributes, parent)
+        parent._children[name] = self
+        self._name = name
+        self._decls = {}  # type: Dict[Tuple[str, Optional[str]], MetaObject]
+        self._predecls = {}  # type: Dict[Tuple[str, Optional[str]], Tuple[bool, Attributes]]
+
+    def write_declarations(self, namespace: List[str], out_hh: TextIO, api: str) -> None:
+        pass
+
+    def write_definitions(self, namespace: List[str], out_cc: TextIO, out_hh: TextIO) -> List[Tuple[str, ...]]:
+        return []
+
+
 class Class(MetaObject):
 
     def __init__(
@@ -243,7 +437,7 @@ class Class(MetaObject):
         out_hh.write(
             'namespace Motor { namespace Meta\n'
             '{\n'
-            'MOTOR_DECLARE_CLASS_ID(%s, ::%s)\n'
+            'MOTOR_DECLARE_CLASS_ID(%s, /*none*/, ::%s)\n'
             '}}\n' % (api, '::'.join(namespace)))
         super().write_declarations(namespace, out_hh, api)
         namespace.pop(-1)
@@ -495,7 +689,7 @@ class AttributeParser(ast.Visitor):
 
 
 class NameParser(ast.Visitor):
-    def __init__(self, namespace: MetaObject):
+    def __init__(self, namespace: MetaObject, template_stack: List[TemplateDecl]):
         self.position = (0, 0)
         self.namespace = namespace  # type: MetaObject
         self.object = namespace  # type: Optional[MetaObject]
@@ -503,6 +697,11 @@ class NameParser(ast.Visitor):
         self.name = ''
         self.identifier = ''
         self.qualified = False
+        self.exported = None  # type: Optional[bool]
+        self.attributes = None  # type: Optional[Attributes]
+        self.template_decl = None  # type: Optional[TemplateDecl]
+        self.template_args = None  # type: Optional[str]
+        self._template_stack = template_stack
 
     def visit_declarator_list(self, declarator_list: ast.DeclaratorList) -> None:
         declarator_list.accept_element(self)
@@ -555,12 +754,33 @@ class NameParser(ast.Visitor):
                 id.accept(self)
                 self.namespace_name = self.name
                 self.name += '::'
+                self.template_decl = None
+                self.template_args = None
+                self.exported = None
+                self.attributes = None
         if self.object is None:
             sr = utils.StringRef()
             ref.name_list[-1].accept(sr)
             self.name += sr.result
             raise NotDefinedException()
         ref.name_list[-1].accept(self)
+        if self._template_stack and self.template_decl is None:
+            if isinstance(self.object, Template):
+                decl = self._template_stack.pop(0)
+                self.namespace = self.object
+                try:
+                    self.object = self.object._decls[(decl.signature(), decl.argument_signature())]
+                except KeyError:
+                    assert isinstance(self.object, Template)
+                    try:
+                        self.exported, self.attributes = self.object._predecls[
+                            (decl.signature(), decl.argument_signature())]
+                    except KeyError:
+                        pass
+                    self.object = None
+                    self.template_decl = decl
+            elif self.object is not None:
+                raise NotATemplate()
 
     def visit_root_id(self, root_id: ast.RootId) -> None:
         self.name += '::'
@@ -576,13 +796,27 @@ class NameParser(ast.Visitor):
         except KeyError:
             self.object = None
             try:
-                self.namespace.get_exported_object(identifier.name)
+                self.exported, self.attributes = self.namespace.get_exported_object(identifier.name)
             except KeyError:
                 if self.qualified:
                     raise NotFoundException()
 
     def visit_template_id(self, template_id: ast.TemplateId) -> None:
         template_id.accept_id(self)
+        if not self._template_stack:
+            raise MissingTemplateDeclaration()
+        self.template_decl = self._template_stack.pop(0)
+        if not self.object:
+            # declare template on the fly
+            self.object = Template(self.position, Attributes(), self.identifier, self.namespace, self.template_decl)
+        if not isinstance(self.object, Template):
+            raise NotATemplate()
+        sr = utils.StringRef()
+        template_id.accept_template_arguments(sr)
+        self.name += '<' + sr.result + '>'
+        self.template_args = sr.result
+        self.namespace = self.object
+        self.object = self.object._decls.get((self.template_decl.signature(), sr.result))
 
     def visit_destructor_id(self, destructor_id: ast.DestructorId) -> None:
         visitor = pyxx.utils.StringRef()
@@ -614,7 +848,7 @@ class NameParser(ast.Visitor):
 
 
 class DeclarationVisitor(ast.Visitor):
-    def __init__(self, template_stack: List[Template], attributes: Attributes, namespace: MetaObject):
+    def __init__(self, template_stack: List[TemplateDecl], attributes: Attributes, namespace: MetaObject):
         super().__init__()
         self._template_stack = template_stack
         self._attributes = attributes
@@ -635,6 +869,9 @@ class DeclarationVisitor(ast.Visitor):
         for _, init_declarator in init_declarator_list.init_declarators:
             init_declarator.accept(self)
 
+    def visit_ambiguous_init_declarator(self, ambiguous_init_declarator: ast.AmbiguousInitDeclarator) -> None:
+        ambiguous_init_declarator.accept_best(self)
+
     def visit_init_declarator(self, init_declarator: ast.InitDeclarator) -> None:
         init_declarator.accept_declarator(self)
 
@@ -643,7 +880,7 @@ class DeclarationVisitor(ast.Visitor):
 
     def visit_declarator_list(self, declarator_list: ast.DeclaratorList) -> None:
         assert pyxx.logger is not None
-        visitor = NameParser(self._namespace)
+        visitor = NameParser(self._namespace, self._template_stack)
         try:
             declarator_list.accept(visitor)
         except NotExportedException as e:
@@ -658,14 +895,20 @@ class DeclarationVisitor(ast.Visitor):
                 # m0103(pyxx.logger, visitor.position, visitor.name)
                 pass
         except NotFoundException:
-            m0101(pyxx.logger, visitor.position, visitor.name, visitor.namespace_name)
+            # m0101(pyxx.logger, visitor.position, visitor.name, visitor.namespace_name)
+            pass
         except NotDefinedException:
             m0100(pyxx.logger, visitor.position, visitor.name, visitor.namespace_name)
+        except MissingTemplateDeclaration:
+            m0301(pyxx.logger, visitor.position)
+        except NotATemplate:
+            m0302(pyxx.logger, visitor.position, visitor.name)
         else:
             # methods and variables are exported when declared in their namespace/container
             if not visitor.qualified:
                 if self._template_stack:
-                    # cannot eport template methods/variables.
+                    # cannot export template methods/variables.
+                    self._template_stack.pop(0)
                     if self._attributes.exported():
                         pass
                         # m0103(pyxx.logger, visitor.position, visitor.name)
@@ -683,7 +926,7 @@ class Explorer(utils.RecursiveVisitor):
         self.namespace = RootNamespace(file_name, module_name)  # type: MetaObject
         self._access_specifier = []  # type: List[str]
         self._publish = [True]
-        self._template_stack = []  # type: List[Template]
+        self._template_stack = []  # type: List[TemplateDecl]
 
     def visit_attribute_named(self, using_namespace: Optional[str], attribute_named: ast.AttributeNamed) -> None:
         assert pyxx.logger is not None
@@ -770,65 +1013,78 @@ class Explorer(utils.RecursiveVisitor):
                 attributes_parser = AttributeParser()
                 class_specifier.accept_attributes(attributes_parser)
                 if attributes_parser.attributes.exported():
-                    base_clause_visitor = BaseClauseVisitor(class_specifier.class_type != 'class')
-                    class_specifier.accept_base_clause(base_clause_visitor)
-                    namespace = self.namespace
-                    index = 0
-                    partial_name = ''
-                    if class_specifier.name.is_absolute():
-                        index = 1
-                        partial_name = '::'
-                        while self.namespace != self.namespace._parent:
-                            self.namespace = self.namespace._parent
-                    for name in class_specifier.name.name_list[index:-1]:
-                        sr = utils.StringRef()
-                        name.accept(sr)
-                        partial_name += sr.result + '::'
-                        try:
-                            self.namespace = self.namespace.get_child(sr.result)
-                        except KeyError:
-                            sr = utils.StringRef()
-                            class_specifier.name.accept(sr)
-                            m0100(pyxx.logger, class_specifier.name.position, sr.result, partial_name[:-2])
-                            break
-                    else:
-                        sr = utils.StringRef()
-                        class_specifier.name.name_list[-1].accept(sr)
-                        try:
-                            self.namespace = self.namespace.get_child(sr.result)
-                        except KeyError:
-                            try:
-                                exported, attributes = self.namespace.get_exported_object(sr.result)
-                            except KeyError:
-                                if len(class_specifier.name.name_list) > 1:
-                                    m0101(pyxx.logger, class_specifier.name.position, sr.result, partial_name[:-2])
-                                else:
-                                    self.namespace = Class(class_specifier.position, attributes_parser.attributes,
-                                                           sr.result, class_specifier.class_type != 'class',
-                                                           base_clause_visitor.base_clause, self.namespace)
-                            else:
-                                if exported:
-                                    self.namespace = Class(class_specifier.position, attributes_parser.attributes,
-                                                           sr.result, class_specifier.class_type != 'class',
-                                                           base_clause_visitor.base_clause, self.namespace)
-                                else:
-                                    self._publish.append(False)
-                                    class_specifier.accept_name(self)
-                                    self._access_specifier.append(
-                                        class_specifier.class_type in ('struct', 'union') and 'public' or 'private')
-                                    class_specifier.accept_base_clause(self)
-                                    self._access_specifier.pop(-1)
-                                    class_specifier.accept_members(self)
-                                    self._publish.pop(-1)
-
+                    parser = NameParser(self.namespace, self._template_stack)
+                    try:
+                        class_specifier.accept_name(parser)
+                    except NotExportedException as e:
+                        if attributes_parser.attributes.exported():
+                            m0103(pyxx.logger, parser.position, parser.name)
+                            pass
                         else:
-                            m0102(pyxx.logger, class_specifier.position, sr.result)
+                            m0104(pyxx.logger, parser.position, parser.name)
+                            pass
+                    except IgnoredException as e:
+                        if attributes_parser.attributes.exported():
+                            # m0103(pyxx.logger, parser.position, parser.name)
+                            pass
+                    except NotFoundException:
+                        m0101(pyxx.logger, parser.position, parser.name, parser.namespace_name)
+                    except NotDefinedException:
+                        m0100(pyxx.logger, parser.position, parser.name, parser.namespace_name)
+                    except MissingTemplateDeclaration:
+                        m0301(pyxx.logger, parser.position)
+                    except NotATemplate:
+                        m0302(pyxx.logger, parser.position, parser.name)
+                    else:
+                        if parser.object is None:
+                            if parser.exported is not False:
+                                namespace = self.namespace
+                                base_clause_visitor = BaseClauseVisitor(class_specifier.class_type != 'class')
+                                self._access_specifier.append(
+                                    class_specifier.class_type in ('struct', 'union') and 'public' or 'private')
+                                class_specifier.accept_base_clause(base_clause_visitor)
+
+                                if parser.template_decl is not None:
+                                    assert isinstance(parser.namespace, Template)
+                                    klass = Class(class_specifier.position, attributes_parser.attributes,
+                                                  parser.identifier, class_specifier.class_type != 'class',
+                                                  base_clause_visitor.base_clause, parser.namespace)
+                                    parser.namespace._decls[
+                                        (parser.template_decl.signature(),
+                                         parser.template_args or parser.template_decl.argument_signature())] = klass
+                                    self.namespace = klass
+                                elif self._template_stack:
+                                    template_decl = self._template_stack.pop(0)
+                                    self.namespace = Template(class_specifier.position, attributes_parser.attributes,
+                                                              parser.identifier,
+                                                              parser.namespace, template_decl)
+                                    klass = Class(class_specifier.position, attributes_parser.attributes,
+                                                  parser.identifier, class_specifier.class_type != 'class',
+                                                  base_clause_visitor.base_clause, self.namespace)
+                                    self.namespace._decls[
+                                        (template_decl.signature(), template_decl.argument_signature())] = klass
+                                else:
+                                    klass = Class(class_specifier.position, attributes_parser.attributes,
+                                                  parser.identifier, class_specifier.class_type != 'class',
+                                                  base_clause_visitor.base_clause, parser.namespace)
+                                    self.namespace = klass
+
+                                class_specifier.accept_members(self)
+                                self._access_specifier.pop(-1)
+
+                                self.namespace = namespace
+                            else:
+                                self._publish.append(False)
+                                class_specifier.accept_name(self)
+                                self._access_specifier.append(
+                                    class_specifier.class_type in ('struct', 'union') and 'public' or 'private')
+                                class_specifier.accept_base_clause(self)
+                                class_specifier.accept_members(self)
+                                self._access_specifier.pop(-1)
+                                self._publish.pop(-1)
+                        else:
+                            m0102(pyxx.logger, class_specifier.position, parser.name)
                             m0012(pyxx.logger, self.namespace.position)
-                        self._access_specifier.append(
-                            class_specifier.class_type in ('struct', 'union') and 'public' or 'private')
-                        class_specifier.accept_members(self)
-                        self._access_specifier.pop(-1)
-                        self.namespace = namespace
                 else:
                     self._publish.append(False)
                     class_specifier.accept_name(self)
@@ -839,6 +1095,7 @@ class Explorer(utils.RecursiveVisitor):
                 self._publish.append(False)
                 super().visit_class_specifier(class_specifier)
                 self._publish.pop(-1)
+
         else:
             super().visit_class_specifier(class_specifier)
 
@@ -972,14 +1229,54 @@ class Explorer(utils.RecursiveVisitor):
     def visit_elaborated_class_type_specifier(self,
                                               elaborated_class_type_specifier: ast.ElaboratedClassTypeSpecifier) -> None:
         if elaborated_class_type_specifier.name is not None:
-            if len(elaborated_class_type_specifier.name.name_list) == 1:
-                sr = utils.StringRef()
-                elaborated_class_type_specifier.name.name_list[-1].accept(sr)
-                attributes_parser = AttributeParser()
-                elaborated_class_type_specifier.accept_attributes(attributes_parser)
-                self.namespace.add_declared_object(sr.result,
-                                                   self._publish[-1] and attributes_parser.attributes.exported(),
-                                                   attributes_parser.attributes)
+            assert pyxx.logger is not None
+            attributes_parser = AttributeParser()
+            elaborated_class_type_specifier.accept_attributes(attributes_parser)
+            parser = NameParser(self.namespace, self._template_stack)
+            try:
+                elaborated_class_type_specifier.accept_name(parser)
+            except NotExportedException as e:
+                if attributes_parser.attributes.exported():
+                    m0103(pyxx.logger, parser.position, parser.name)
+                else:
+                    m0104(pyxx.logger, parser.position, parser.name)
+            except IgnoredException as e:
+                if attributes_parser.attributes.exported():
+                    m0103(pyxx.logger, parser.position, parser.name)
+            except NotFoundException:
+                # m0101(pyxx.logger, parser.position, parser.name, parser.namespace_name)
+                pass
+            except NotDefinedException:
+                m0100(pyxx.logger, parser.position, parser.name, parser.namespace_name)
+            except MissingTemplateDeclaration:
+                m0301(pyxx.logger, parser.position)
+            except NotATemplate:
+                m0302(pyxx.logger, parser.position, parser.name)
+            else:
+                if parser.object is None:
+                    if parser.template_args is not None:
+                        assert parser.template_decl is not None
+                        assert isinstance(parser.namespace, Template)
+                        parser.namespace._predecls[(parser.template_decl.signature(), parser.template_args)] = (
+                            self._publish[-1] and attributes_parser.attributes.exported(),
+                            attributes_parser.attributes
+                        )
+                    elif self._template_stack:
+                        template_decl = self._template_stack.pop(0)
+                        template = Template(
+                            elaborated_class_type_specifier.position, attributes_parser.attributes, parser.identifier,
+                            parser.namespace,
+                            template_decl
+                        )
+                        template._predecls[(template_decl.signature(), template_decl.argument_signature())] = (
+                            self._publish[-1] and attributes_parser.attributes.exported(),
+                            attributes_parser.attributes
+                        )
+                    else:
+                        parser.namespace.add_declared_object(
+                            parser.identifier, self._publish[-1] and attributes_parser.attributes.exported(),
+                            attributes_parser.attributes
+                        )
         else:
             super().visit_elaborated_class_type_specifier(elaborated_class_type_specifier)
 
@@ -1002,13 +1299,12 @@ class Explorer(utils.RecursiveVisitor):
         super().visit_using_declaration(using_declaration)
 
     def visit_template_declaration(self, template_declaration: ast.TemplateDeclaration) -> None:
-        pass
-        # self._template_stack.append(Template())
-        # template_declaration.accept_declaration(self)
-        # if self._template_stack:
-        #    assert pyxx.logger is not None
-        #    #m0300(pyxx.logger, template_declaration.position)
-        #    # self._template_stack.clear()
+        self._template_stack.append(TemplateDecl(template_declaration))
+        template_declaration.accept_declaration(self)
+        if self._template_stack:
+            assert pyxx.logger is not None
+            m0300(pyxx.logger, template_declaration.position)
+            self._template_stack.clear()
 
 
 def main() -> None:

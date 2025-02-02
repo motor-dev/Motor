@@ -29,7 +29,7 @@ void Class::destroy(void* src) const
 void Class::enumerateObjects(EnumerateRecursion recursion, EnumerateCallback callback) const
 {
     static raw< const Class > constexpr s_metaClass = motor_class< Class >();
-    raw< const Object > o                           = objects;
+    raw< Object > o                                 = objects;
     while(o)
     {
         (*callback)(o->value);
@@ -67,9 +67,9 @@ raw< const Method > Class::getMethod(istring methodName) const
     return {};
 }
 
-raw< const Object > Class::getStaticProperty(istring propertyName) const
+raw< Object > Class::getStaticProperty(istring propertyName) const
 {
-    raw< const Object > o = this->objects;
+    raw< Object > o = this->objects;
     while(o)
     {
         if(o->name == propertyName)
@@ -86,8 +86,8 @@ Value Class::get(Value& from, istring propname, bool& found) const
     static raw< const Class > constexpr s_metaClass = motor_class< Class >();
     if(from.type().metaclass == s_metaClass)
     {
-        const auto                cls = from.as< raw< const Class > >();
-        const raw< const Object > o   = cls->getStaticProperty(propname);
+        const auto          cls = from.as< raw< const Class > >();
+        const raw< Object > o   = cls->getStaticProperty(propname);
         if(o)
         {
             found = true;
@@ -123,8 +123,8 @@ Value Class::get(const Value& from, istring propname, bool& found) const
     static raw< const Class > constexpr s_metaClass = motor_class< Class >();
     if(from.type().metaclass == s_metaClass)
     {
-        const auto                cls = from.as< raw< const Class > >();
-        const raw< const Object > o   = cls->getStaticProperty(propname);
+        const auto          cls = from.as< raw< const Class > >();
+        const raw< Object > o   = cls->getStaticProperty(propname);
         if(o)
         {
             found = true;
