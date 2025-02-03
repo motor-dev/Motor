@@ -15,14 +15,14 @@ private:
     struct Page;
 
 private:
-    SystemAllocator           m_allocator;
-    Page*                     m_firstPage {};
-    GQuark                    m_motorQuark;
-    raw< const Meta::Object > m_objectPtr;
-    weak< Logger >            m_logger;
-    guint                     m_logHandlerDefault;
-    guint                     m_logHandlerGLib;
-    guint                     m_logHandlerGtk;
+    SystemAllocator     m_allocator;
+    Page*               m_firstPage {};
+    GQuark              m_motorQuark;
+    raw< Meta::Object > m_objectPtr;
+    weak< Logger >      m_logger;
+    guint               m_logHandlerDefault;
+    guint               m_logHandlerGLib;
+    guint               m_logHandlerGtk;
 
 private:
     void* allocate(u32 size);
