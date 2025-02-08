@@ -8,13 +8,13 @@ namespace Motor { namespace Meta {
 template < typename T >
 void metaCopy(const void* source, void* dest)
 {
-    new(dest) T(*reinterpret_cast< const T* >(source));
+    new(dest) T(*static_cast< const T* >(source));
 }
 
 template < typename T >
 void metaDestroy(void* source)
 {
-    reinterpret_cast< T* >(source)->~T();
+    static_cast< T* >(source)->~T();
 }
 
 }}  // namespace Motor::Meta

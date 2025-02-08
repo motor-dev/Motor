@@ -16,13 +16,13 @@ template < typename T >
 class vector;
 
 template < typename T >
-void swap(vector< T >& t1, vector< T >& t2);
+void swap(vector< T >& t1, vector< T >& t2) noexcept;
 
 template < typename T >
 class vector
 {
     template < typename U >
-    friend void swap(vector< U >& t1, vector< U >& t2);
+    friend void swap(vector< U >& t1, vector< U >& t2) noexcept;
 
 private:
     template < typename POLICY >

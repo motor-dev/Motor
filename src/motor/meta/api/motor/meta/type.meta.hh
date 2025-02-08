@@ -60,9 +60,10 @@ public:
     [[motor::meta(export = no)]] ConversionCost calculateConversionTo(const Type& other) const;
 
 private:
-    void* rawget(const void*) const;
-    void  copy(const void* source, void* dest) const;
-    void  destroy(void* ptr) const;
+    const void* rawget(const void*) const;
+    void*       rawget(void*) const;
+    void        copy(const void* source, void* dest) const;
+    void        destroy(void* ptr) const;
 };
 
 }}  // namespace Motor::Meta

@@ -18,7 +18,7 @@ void weak< T >::swap(weak& other)
 }
 
 template < typename T >
-weak< T >::weak() : m_ptr(0)
+weak< T >::weak() : m_ptr(nullptr)
 {
 }
 
@@ -150,7 +150,7 @@ weak< T >::operator const void*() const
 template < typename T >
 bool weak< T >::operator!() const
 {
-    return m_ptr == 0;
+    return m_ptr == nullptr;
 }
 
 template < typename T >

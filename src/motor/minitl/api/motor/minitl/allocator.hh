@@ -51,9 +51,10 @@ public:
     block(allocator& allocator, u64 count, u64 block_alignment = 4)
         : m_allocator(&allocator)
         , m_count(count)
-        , m_data(count ? (T*)allocator.alloc(align(sizeof(T), motor_alignof(T)) * count,
-                                             max< u64 >(block_alignment, motor_alignof(T)))
-                       : 0) {};
+        , m_data(count ? static_cast< T* >(
+                             allocator.alloc(align(sizeof(T), motor_alignof(T)) * count,
+                                             max< u64 >(block_alignment, motor_alignof(T))))
+                       : nullptr) {};
     block(block&& other) noexcept
         : m_allocator(other.m_allocator)
         , m_count(other.m_count)
@@ -140,10 +141,10 @@ public:
     {
         if(count > m_count)
         {
-            u64 alignment = max< u64 >(block_alignment, motor_alignof(T));
-            u64 size      = align(sizeof(T), motor_alignof(T)) * count;
-            m_count       = count;
-            m_data        = (T*)m_allocator->realloc(m_data, size, alignment);
+            const u64 alignment = max< u64 >(block_alignment, motor_alignof(T));
+            const u64 size      = align(sizeof(T), motor_alignof(T)) * count;
+            m_count             = count;
+            m_data              = static_cast< T* >(m_allocator->realloc(m_data, size, alignment));
         }
         else
         {
@@ -156,7 +157,7 @@ public:
             }
         }
     }
-    void swap(block< T >& other)
+    void swap(block< T >& other) noexcept
     {
         minitl::swap(m_allocator, other.m_allocator);
         minitl::swap(m_count, other.m_count);
@@ -204,11 +205,11 @@ char* allocator::strdup(const char* begin, const char* end)
 template < typename T >
 T* allocator::alloc()
 {
-    return (T*)alloc(sizeof(T), motor_alignof(T));
+    return static_cast< T* >(alloc(sizeof(T), motor_alignof(T)));
 }
 
 template < typename T >
-void swap(allocator::block< T >& a, allocator::block< T >& b)
+void swap(allocator::block< T >& a, allocator::block< T >& b) noexcept
 {
     a.swap(b);
 }

@@ -69,7 +69,7 @@ const T& span< T >::operator[](u32 index) const
 template < typename T >
 u32 span< T >::size() const
 {
-    return u32(m_end - m_begin);
+    return static_cast< u32 >(m_end - m_begin);
 }
 
 template < typename T >

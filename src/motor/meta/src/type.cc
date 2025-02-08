@@ -22,14 +22,28 @@ u32 Type::size() const
     }
 }
 
-void* Type::rawget(const void* data) const
+const void* Type::rawget(const void* data) const
 {
     switch(indirection)
     {
-    case Indirection::Value: return (void*)data;
-    case Indirection::RawPtr: return *(void**)data;
-    case Indirection::RefPtr: return ((ref< minitl::pointer >*)data)->operator->();
-    case Indirection::WeakPtr: return ((weak< minitl::pointer >*)data)->operator->();
+    case Indirection::Value: return data;
+    case Indirection::RawPtr: return *static_cast< void** >(const_cast< void* >(data));
+    case Indirection::RefPtr:
+        return static_cast< const ref< minitl::pointer >* >(data)->operator->();
+    case Indirection::WeakPtr:
+        return static_cast< const weak< minitl::pointer >* >(data)->operator->();
+    default: motor_notreached(); return nullptr;
+    }
+}
+
+void* Type::rawget(void* data) const
+{
+    switch(indirection)
+    {
+    case Indirection::Value: return data;
+    case Indirection::RawPtr: return *static_cast< void** >(data);
+    case Indirection::RefPtr: return static_cast< ref< minitl::pointer >* >(data)->operator->();
+    case Indirection::WeakPtr: return static_cast< weak< minitl::pointer >* >(data)->operator->();
     default: motor_notreached(); return nullptr;
     }
 }

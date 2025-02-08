@@ -159,7 +159,7 @@ Value Value::operator()(Value params[], u32 paramCount)
     return call.as< const Method* const >()->doCall(params, paramCount);
 }
 
-void Value::swap(Value& other)
+void Value::swap(Value& other) noexcept
 {
     if(&other != this)
     {

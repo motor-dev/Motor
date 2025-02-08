@@ -11,7 +11,7 @@
 namespace minitl {
 
 template < typename T >
-MOTOR_ALWAYS_INLINE void swap(T& a, T& b)
+MOTOR_ALWAYS_INLINE void swap(T& a, T& b) noexcept
 {
     T c = minitl::move(a);
     a   = minitl::move(b);

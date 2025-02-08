@@ -8,7 +8,7 @@
 namespace minitl {
 
 template < typename T >
-MOTOR_ALWAYS_INLINE void swap(T& a, T& b);
+MOTOR_ALWAYS_INLINE void swap(T& a, T& b) noexcept;
 
 }  // namespace minitl
 

@@ -4,8 +4,8 @@
 #define MOTOR_META_METHOD_META_HH
 
 #include <motor/meta/stdafx.h>
-#include <motor/meta/typeinfo.hh>
 
+#include <motor/meta/type.meta.hh>
 #include <motor/minitl/view.hh>
 
 namespace Motor { namespace Meta {
@@ -58,7 +58,7 @@ public:
     minitl::view< Overload > overloads;
 
 public:
-    Value doCall(Value * params, u32 paramCount) const;
+    Value doCall(Value* params, u32 paramCount) const;
 };
 
 }}  // namespace Motor::Meta
