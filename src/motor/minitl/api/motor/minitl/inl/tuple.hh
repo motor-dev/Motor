@@ -171,15 +171,17 @@ struct tuple_helper
     template < typename T1, typename... TAIL1 >
     constexpr tuple_helper(  // NOLINT(google-explicit-constructor)
         const tuple_helper< INDEX, T1, TAIL1... >& tuple)
-        : tuple_field< INDEX, T >(tuple.tuple_field< INDEX, T1 >::get())
-        , tuple_helper< INDEX + 1, TAIL... >((const tuple_helper< INDEX + 1, TAIL1... >&)tuple)
+        : tuple_field< INDEX, T >(tuple.template tuple_field< INDEX, T1 >::get())
+        , tuple_helper< INDEX + 1, TAIL... >(
+              static_cast< const tuple_helper< INDEX + 1, TAIL1... >& >(tuple))
     {
     }
     template < typename T1, typename... TAIL1 >
     constexpr tuple_helper(  // NOLINT(google-explicit-constructor)
         tuple_helper< INDEX, T1, TAIL1... >&& tuple)
-        : tuple_field< INDEX, T >(tuple.tuple_field< INDEX, T1 >::get())
-        , tuple_helper< INDEX + 1, TAIL... >((const tuple_helper< INDEX + 1, TAIL1... >&)tuple)
+        : tuple_field< INDEX, T >(tuple.template tuple_field< INDEX, T1 >::get())
+        , tuple_helper< INDEX + 1, TAIL... >(
+              static_cast< const tuple_helper< INDEX + 1, TAIL1... >& >(tuple))
     {
     }
     ~tuple_helper() = default;
@@ -205,7 +207,7 @@ struct tuple_helper< INDEX, T > : public tuple_field< INDEX, T >
     template < typename T1 >
     constexpr tuple_helper(  // NOLINT(google-explicit-constructor)
         const tuple_helper< INDEX, T1 >& tuple)
-        : tuple_field< INDEX, T >(tuple.tuple_field< INDEX, T1 >::get())
+        : tuple_field< INDEX, T >(tuple.template tuple_field< INDEX, T1 >::get())
     {
     }
     template < typename T1 >
@@ -225,7 +227,7 @@ template < int GET, int INDEX, typename T, typename... TAIL,
            enable_if_t< GET == INDEX, bool > = false >
 const T& get(const tuple_helper< INDEX, T, TAIL... >& t)
 {
-    return t.tuple_field< INDEX, T >::get();
+    return t.template tuple_field< INDEX, T >::get();
 }
 
 template < int GET, int INDEX, typename T, typename... TAIL,
@@ -239,7 +241,7 @@ template < int GET, int INDEX, typename T, typename... TAIL,
            enable_if_t< GET == INDEX, bool > = false >
 T& get(tuple_helper< INDEX, T, TAIL... >& t)
 {
-    return t.tuple_field< INDEX, T >::get();
+    return t.template tuple_field< INDEX, T >::get();
 }
 
 template < int GET, int INDEX, typename T, typename... TAIL,
@@ -260,13 +262,13 @@ constexpr tuple< unwrap_ref_decay_t< T >... > make_tuple(T&&... args)
 template < int INDEX, typename... T >
 auto& get(tuple< T... >& t)
 {
-    return details::get< INDEX >((details::tuple_helper< 0, T... >&)t);
+    return details::get< INDEX >(static_cast< details::tuple_helper< 0, T... >& >(t));
 }
 
 template < int INDEX, typename... T >
 const auto& get(const tuple< T... >& t)
 {
-    return details::get< INDEX >((const details::tuple_helper< 0, T... >&)t);
+    return details::get< INDEX >(static_cast< const details::tuple_helper< 0, T... >& >(t));
 }
 
 template < typename... T >
@@ -284,14 +286,15 @@ constexpr tuple< T... >::tuple(ARGS&&... args)
 template < typename... T >
 template < typename... T1 >
 constexpr tuple< T... >::tuple(const tuple< T1... >& other)
-    : details::tuple_helper< 0, T... >((const details::tuple_helper< 0, T1... >&)other)
+    : details::tuple_helper< 0, T... >(
+          static_cast< const details::tuple_helper< 0, T1... >& >(other))
 {
 }
 
 template < typename... T >
 template < typename... T1 >
 constexpr tuple< T... >::tuple(tuple< T1... >&& other)
-    : details::tuple_helper< 0, T... >((details::tuple_helper< 0, T1... >&&)other)
+    : details::tuple_helper< 0, T... >(static_cast< details::tuple_helper< 0, T1... >&& >(other))
 {
 }
 
@@ -299,7 +302,8 @@ template < typename... T >
 template < typename... T1 >
 tuple< T... >& tuple< T... >::operator=(const tuple< T1... >& other)
 {
-    details::tuple_helper< 0, T... >::operator=((const details::tuple_helper< 0, T1... >&)other);
+    details::tuple_helper< 0, T... >::operator=(
+        static_cast< const details::tuple_helper< 0, T1... >& >(other));
     return *this;
 }
 

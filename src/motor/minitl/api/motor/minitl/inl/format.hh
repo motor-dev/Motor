@@ -700,7 +700,7 @@ namespace string_format {
 static MOTOR_ALWAYS_INLINE u32 format_length(const char* value, const format_options& options)
 {
     motor_forceuse(options);
-    return u32(strlen(value));
+    return static_cast< u32 >(strlen(value));
 }
 
 static MOTOR_ALWAYS_INLINE u32 format_arg(char* destination, const char* value,
@@ -724,7 +724,7 @@ static MOTOR_ALWAYS_INLINE u32 format_arg_partial(char* destination, const char*
 static MOTOR_ALWAYS_INLINE u32 format_length(bool_wrapper value, const format_options& options)
 {
     motor_forceuse(options);
-    return 5 - u32(value);
+    return 5 - static_cast< u32 >(value);
 }
 
 motor_api(MINITL) u32 format_arg(char* destination, bool_wrapper value,
@@ -1400,7 +1400,7 @@ u32 format(char* destination, u32 destination_length, index_sequence< PATTERN_IN
         get_format_info< T, PATTERN_INDICES,
                          decltype(format_as(minitl::forward< ARGS >(arguments)))... >(format)...};
     constexpr bool arg_used[]
-        = {is_index_in_list< ARGUMENT_INDICES, u32(sizeof...(ARGS)),
+        = {is_index_in_list< ARGUMENT_INDICES, static_cast< u32 >(sizeof...(ARGS)),
                              patterns[PATTERN_INDICES].argument_index... >()...};
     motor_forceuse(arg_used);  // no check needed here
     constexpr format_alignment alignments[]

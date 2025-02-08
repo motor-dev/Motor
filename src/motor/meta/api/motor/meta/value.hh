@@ -1,5 +1,5 @@
 /* Motor <motor.devel@gmail.com>
-   see LICENSE for detail */
+  see LICENSE for detail */
 #ifndef MOTOR_META_VALUE_HH
 #define MOTOR_META_VALUE_HH
 
@@ -32,7 +32,8 @@ private:
 
 private:
     inline const void* memory() const;
-    inline void*       rawget() const;
+    inline const void* rawget() const;
+    inline void*       rawget();
 
 private:
     template < typename T >
@@ -86,7 +87,7 @@ public:
     inline T as();
 
     template < typename T >
-    static inline ByRefType< T > ByRef(T & t)
+    static inline ByRefType< T > ByRef(T& t)
     {
         return ByRefType< T >(t);
     }
@@ -96,14 +97,14 @@ public:
     }
     inline bool isConst() const;
 
-    inline operator const void*() const;  // NOLINT(google-explicit-constructor)
+    inline      operator const void*() const;  // NOLINT(google-explicit-constructor)
     inline bool operator!() const;
 
     Value operator[](const istring& name);
     Value operator[](const istring& name) const;
     Value operator()(Value params[], u32 paramCount);
 
-    void swap(Value & other);
+    void swap(Value& other) noexcept;
 
     inline bool isA(const Type& type) const
     {

@@ -23,7 +23,7 @@ raw< T >::operator const void*() const
 template < typename T >
 bool raw< T >::operator!() const
 {
-    return m_ptr == 0;
+    return m_ptr == nullptr;
 }
 
 template < typename T >
@@ -41,7 +41,7 @@ const T& raw< T >::operator*() const
 template < typename T >
 raw< T > raw< T >::null()
 {
-    raw< T > result = {0};
+    raw< T > result = {nullptr};
     return result;
 }
 

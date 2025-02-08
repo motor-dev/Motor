@@ -7,17 +7,13 @@
 #include <motor/minitl/traits.hh>
 #include <string.h>
 
-namespace minitl {
-
 template <>
-struct less< const char* >
+struct minitl::less< const char* >
 {
     bool operator()(const char* str1, const char* str2) const
     {
         return ::strcmp(str1, str2) < 0;
     }
-};
-
-}  // namespace minitl
+};  // namespace minitl
 
 #endif

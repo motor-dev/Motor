@@ -19,7 +19,7 @@ distance(const ITERATOR& t1, const ITERATOR& t2, ITERATOR_TYPE /*type*/)
     typename ITERATOR::difference_t result = 0;
     while(t1 != t2)
     {
-        result++;
+        ++result;
         ++t1;
     }
     return result;

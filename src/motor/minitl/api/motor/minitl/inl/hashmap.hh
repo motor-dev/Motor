@@ -24,7 +24,7 @@ private:
     typename POLICY::iterator          m_current;
 
 public:
-    iterator_base() : m_owner(0), m_current()
+    iterator_base() : m_owner(nullptr), m_current()
     {
     }
     iterator_base(const hashmap< KEY, VALUE, HASH >& owner, iterator l)
@@ -61,8 +61,10 @@ public:
         do
         {
             ++m_current;
-        } while((char*)m_current.operator->() >= (char*)m_owner->m_index.begin()
-                && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
+        } while(reinterpret_cast< const char* >(m_current.operator->())
+                    >= reinterpret_cast< const char* >(m_owner->m_index.begin())
+                && reinterpret_cast< const char* >(m_current.operator->())
+                       < reinterpret_cast< const char* >(m_owner->m_index.end()));
         return *this;
     }
     const iterator_base operator++(int)  // NOLINT(readability-const-return-type)
@@ -71,8 +73,10 @@ public:
         do
         {
             ++m_current;
-        } while((char*)m_current.operator->() >= (char*)m_owner->m_index.begin()
-                && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
+        } while(reinterpret_cast< const char* >(m_current.operator->())
+                    >= reinterpret_cast< const char* >(m_owner->m_index.begin())
+                && reinterpret_cast< const char* >(m_current.operator->())
+                       < reinterpret_cast< const char* >(m_owner->m_index.end()));
         return copy;
     }
     iterator_base& operator--()
@@ -80,8 +84,10 @@ public:
         do
         {
             --m_current;
-        } while((char*)m_current.operator->() >= (char*)m_owner->m_index.begin()
-                && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
+        } while(reinterpret_cast< const char* >(m_current.operator->())
+                    >= reinterpret_cast< const char* >(m_owner->m_index.begin())
+                && reinterpret_cast< const char* >(m_current.operator->())
+                       < reinterpret_cast< const char* >(m_owner->m_index.end()));
         return *this;
     }
     const iterator_base operator--(int)  // NOLINT(readability-const-return-type)
@@ -90,8 +96,10 @@ public:
         do
         {
             --m_current;
-        } while((char*)m_current.operator->() >= (char*)m_owner->m_index.begin()
-                && (char*)m_current.operator->() < (char*)m_owner->m_index.end());
+        } while(reinterpret_cast< const char* >(m_current.operator->())
+                    >= reinterpret_cast< const char* >(m_owner->m_index.begin())
+                && reinterpret_cast< const char* >(m_current.operator->())
+                       < reinterpret_cast< const char* >(m_owner->m_index.end()));
         return copy;
     }
 };
@@ -117,9 +125,9 @@ struct hashmap< KEY, VALUE, HASH >::const_iterator_policy
 
 template < typename KEY, typename VALUE, typename HASH >
 hashmap< KEY, VALUE, HASH >::hashmap(allocator& allocator, u32 reserved)
-    : m_itemPool(allocator, max(next_power_of_2(reserved), u32(8)))
+    : m_itemPool(allocator, max(next_power_of_2(reserved), static_cast< u32 >(8)))
     , m_items()
-    , m_index(allocator, 1 + max(next_power_of_2(reserved), u32(8)))
+    , m_index(allocator, 1 + max(next_power_of_2(reserved), static_cast< u32 >(8)))
     , m_count(0)
 {
     build_index();
@@ -189,7 +197,7 @@ hashmap< KEY, VALUE, HASH >::~hashmap()
         for(index_item_t* it = m_index.begin(); it != m_index.end() - 1; ++it)
         {
             list_iterator object = it->second;
-            object++;
+            ++object;
             while(object != (it + 1)->second)
             {
                 list_iterator item_to_delete = object++;
@@ -233,13 +241,13 @@ void hashmap< KEY, VALUE, HASH >::grow(u32 size)
     for(index_item_t* index = m_index.begin(); index != m_index.end() - 1; ++index)
     {
         list_iterator object = index->second;
-        object++;
+        ++object;
         while(object != (index + 1)->second)
         {
             list_iterator item_to_copy = object++;
             item*         i            = static_cast< item* >(item_to_copy.operator->());
-            u32           hash         = HASH()(i->value.first) % (u32)(new_index.count() - 1);
-            item*         new_item     = new_pool.allocate(minitl::move(i->value));
+            u32           hash = HASH()(i->value.first) % static_cast< u32 >(new_index.count() - 1);
+            item*         new_item = new_pool.allocate(minitl::move(i->value));
             new_list.insert(new_index[hash].second, *new_item);
             m_itemPool.release(i);
         }
@@ -310,7 +318,7 @@ VALUE& hashmap< KEY, VALUE, HASH >::operator[](const KEY& key)
 template < typename KEY, typename VALUE, typename HASH >
 typename hashmap< KEY, VALUE, HASH >::iterator hashmap< KEY, VALUE, HASH >::find(const KEY& key)
 {
-    u32           hash = HASH()(key) % (u32)(m_index.count() - 1);
+    u32           hash = HASH()(key) % static_cast< u32 >(m_index.count() - 1);
     list_iterator it   = m_index[hash].second;
     for(++it; it != m_index[hash + 1].second; ++it)
     {
@@ -326,7 +334,7 @@ template < typename KEY, typename VALUE, typename HASH >
 typename hashmap< KEY, VALUE, HASH >::const_iterator
 hashmap< KEY, VALUE, HASH >::find(const KEY& key) const
 {
-    u32                 hash = HASH()(key) % (u32)(m_index.count() - 1);
+    u32                 hash = HASH()(key) % static_cast< u32 >(m_index.count() - 1);
     const_list_iterator it(const_list_iterator(m_index[hash].second.operator->()));
     const_list_iterator stop(const_list_iterator(m_index[hash + 1].second.operator->()));
     for(++it; it != stop; ++it)

@@ -20,7 +20,7 @@ struct hash< T* >
 {
     u32 operator()(const T* t) const
     {
-        return u32(uintptr_t(t));
+        return static_cast< u32 >(static_cast< uintptr_t >(t));
     }
     bool operator()(const T* t1, const T* t2) const
     {

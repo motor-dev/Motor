@@ -7,7 +7,6 @@
 #include <motor/minitl/scopedptr.hh>
 
 #include <motor/minitl/allocator.hh>
-#include <motor/minitl/features.hh>
 #include <motor/minitl/weakptr.hh>
 
 namespace minitl {

@@ -17,7 +17,8 @@ Value Property::get(const Value& from) const
                         from.type(), owner);
     i32                   offset = from.type().metaclass->baseOffset - owner.metaclass->baseOffset;
     raw< const Property > this_  = {this};
-    return (*getter)(this_, (void*)((char*)from.rawget() + offset));
+    return (*getter)(
+        this_, static_cast< const void* >(static_cast< const char* >(from.rawget()) + offset));
 }
 
 void Property::set(Value& from, const Value& value) const
@@ -27,7 +28,7 @@ void Property::set(Value& from, const Value& value) const
                         from.type(), owner);
     i32                   offset = from.type().metaclass->baseOffset - owner.metaclass->baseOffset;
     raw< const Property > this_  = {this};
-    (*setter)(this_, (void*)((char*)from.rawget() + offset), value);
+    (*setter)(this_, static_cast< void* >(static_cast< char* >(from.rawget()) + offset), value);
 }
 
 Value Property::getTag(const Type& tagType) const

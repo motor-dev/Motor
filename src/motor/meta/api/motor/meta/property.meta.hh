@@ -14,8 +14,8 @@ class Value;
 class motor_api(META) Property
 {
     friend class Value;
-    typedef Value (*Getter)(raw< const Property > property, void* data);
-    typedef void  (*Setter)(raw< const Property > property, void* data, const Value& value);
+    typedef Value (*Getter)(raw< const Property > property, const void* data);
+    typedef void (*Setter)(raw< const Property > property, void* data, const Value& value);
 
 public:
     raw< const Property > next;
@@ -25,7 +25,7 @@ public:
     Type const            type;
 
     Value get(const Value& from) const;
-    void  set(Value & from, const Value& value) const;
+    void  set(Value& from, const Value& value) const;
 
     Value getTag(const Type& tagType) const;
     Value getTag(raw< const Class > tagType) const;

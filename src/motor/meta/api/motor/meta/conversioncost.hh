@@ -28,8 +28,9 @@ public:
 
     u64 value() const
     {
-        return (u64(qualification)) | (u64(promotion) << 16) | (u64(conversion) << 32)
-               | (u64(variant) << 48) | (u64(incompatible) << 56);
+        return static_cast< u64 >(qualification) | (static_cast< u64 >(promotion) << 16)
+               | (static_cast< u64 >(conversion) << 32) | (static_cast< u64 >(variant) << 48)
+               | (static_cast< u64 >(incompatible) << 56);
     }
 
     bool operator==(const ConversionCost& other) const

@@ -38,7 +38,7 @@ private:
     }
 
 public:
-    base_iterator() : m_owner(0), m_iterator(0)
+    base_iterator() : m_owner(nullptr), m_iterator(0)
     {
     }
 
@@ -336,7 +336,7 @@ template < typename T >
 void vector< T >::push_back(const_reference_t r)
 {
     ensure(size() + 1);
-    new((void*)m_end) T(r);
+    new(static_cast< void* >(m_end)) T(r);
     m_end = advance_ptr(m_end, 1);
 }
 
@@ -344,7 +344,7 @@ template < typename T >
 void vector< T >::push_back(rvalue_reference_t r)
 {
     ensure(size() + 1);
-    new((void*)m_end) T(minitl::move(r));
+    new(static_cast< void* >(m_end)) T(minitl::move(r));
     m_end = advance_ptr(m_end, 1);
 }
 
@@ -356,7 +356,7 @@ void vector< T >::push_back(ITERATOR first, ITERATOR last)
     ensure(size() + count);
     while(first != last)
     {
-        new((void*)m_end) T(*first);
+        new(static_cast< void* >(m_end)) T(*first);
         m_end = advance_ptr(m_end, 1);
         ++first;
     }
@@ -415,7 +415,7 @@ template < class... ARGS >
 typename vector< T >::iterator vector< T >::emplace_back(ARGS&&... args)
 {
     ensure(size() + 1);
-    new((void*)m_end) T(minitl::forward< ARGS >(args)...);
+    new(static_cast< void* >(m_end)) T(minitl::forward< ARGS >(args)...);
     iterator result(this, m_end);
     m_end = advance_ptr(m_end, 1);
     return result;
@@ -463,7 +463,7 @@ typename vector< T >::iterator vector< T >::erase(iterator first, iterator last)
     pointer_t t2 = last.m_iterator;
     for(; t2 != m_end; t = advance(t, 1), t2 = advance_ptr(t2, 1))
     {
-        new((void*)t) T(minitl::move(*t2));
+        new(static_cast< void* >(t)) T(minitl::move(*t2));
         t2->~T();
     }
     m_end = t;
@@ -507,7 +507,7 @@ void vector< T >::resize(size_t size)
         ensure(size);
         pointer_t new_end = advance_ptr(m_memory.data(), size);
         for(pointer_t t = m_end; t != new_end; ++t)
-            new((void*)t) T;
+            new(static_cast< void* >(t)) T;
         m_end = new_end;
     }
     else
@@ -563,14 +563,14 @@ typename vector< T >::iterator vector< T >::ensure(const_iterator location, size
         pointer_t             t2 = m_memory;
         for(; t2 != location.m_iterator; t = advance_ptr(t, 1), t2 = advance_ptr(t2, 1))
         {
-            new((void*)t) T(minitl::move(*t2));
+            new(static_cast< void* >(t)) T(minitl::move(*t2));
             t2->~T();
         }
         iterator result(this, t);
         t = advance_ptr(t, object_count);
         for(; t2 != m_end; t = advance_ptr(t, 1), t2 = advance_ptr(t2, 1))
         {
-            new((void*)t) T(minitl::move(*t2));
+            new(static_cast< void* >(t)) T(minitl::move(*t2));
             t2->~T();
         }
 
@@ -584,7 +584,7 @@ typename vector< T >::iterator vector< T >::ensure(const_iterator location, size
         for(pointer_t t = advance_ptr(m_end, object_count - 1), t2 = advance_ptr(m_end, -1);
             t2 != end; t = advance_ptr(t, -1), t2 = advance_ptr(t2, -1))
         {
-            new((void*)t) T(minitl::move(*t2));
+            new(static_cast< void* >(t)) T(minitl::move(*t2));
             t2->~T();
         }
         m_end = advance_ptr(m_end, object_count);
@@ -602,7 +602,7 @@ void vector< T >::reserve(size_t size)
         pointer_t             t = block;
         for(pointer_t t2 = m_memory; t2 != m_end; t = advance_ptr(t, 1), t2 = advance_ptr(t2, 1))
         {
-            new((void*)t) T(minitl::move(*t2));
+            new(static_cast< void* >(t)) T(minitl::move(*t2));
             t2->~T();
         }
         m_memory.swap(block);
@@ -623,7 +623,7 @@ typename vector< T >::const_pointer_t vector< T >::data() const
 }
 
 template < typename T >
-void swap(vector< T >& t1, vector< T >& t2)
+void swap(vector< T >& t1, vector< T >& t2) noexcept
 {
     t1.m_memory.swap(t2.m_memory);
     swap(t1.m_end, t2.m_end);

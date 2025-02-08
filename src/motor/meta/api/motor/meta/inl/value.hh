@@ -152,7 +152,12 @@ bool Value::operator!() const
     return m_type.metaclass == motor_class< void >();
 }
 
-void* Value::rawget() const
+const void* Value::rawget() const
+{
+    return m_type.rawget(memory());
+}
+
+void* Value::rawget()
 {
     return m_type.rawget(memory());
 }

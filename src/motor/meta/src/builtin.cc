@@ -13,7 +13,7 @@ namespace Motor { namespace Meta {
 Object s_objects[] = {{{&s_objects[1]},
                        motor_motor_Namespace(),
                        ClassID< void >::name(),
-                       Value(raw< const Class > {&ClassID< void >::s_class})},
+                       Value(ClassID< void >::klass())},
 
                       {{&s_objects[2]},
                        motor_motor_Namespace(),
