@@ -48,6 +48,8 @@ impl Grammar {
         let parameters = &self.parameters;
         Ok(quote! {
             pub fn parse(#parameters text: &str) -> () {
+
+
             }
         }
         .into())
@@ -67,7 +69,7 @@ impl Grammar {
 
     fn span_from_lib(&self, location: grammetica_lib::Location) -> Span {
         match location {
-            grammetica_lib::Location::LexRule(rule) => self.terminals[rule].location,
+            grammetica_lib::Location::LexRule(rule, _) => self.terminals[rule].location,
             grammetica_lib::Location::ParseRule(rule, symbol) => {
                 if let Some(symbol) = symbol {
                     self.rules[rule].production.as_ref().unwrap()[symbol].location
