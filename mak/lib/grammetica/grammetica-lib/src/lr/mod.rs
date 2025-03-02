@@ -34,6 +34,7 @@ fn build_name_tables<'l>(
                     format!("`{}` is already defined", terminal),
                     Some(Error::new_lex_error(
                         *entry.get(),
+                        None,
                         "terminal declared here".to_string(),
                         None,
                     )),
@@ -51,6 +52,7 @@ fn build_name_tables<'l>(
             Entry::Occupied(entry) => {
                 return Err(Error::new_lex_error(
                     *entry.get(),
+                    None,
                     format!("`{}` is a reserved terminal", reserved),
                     None,
                 ));
@@ -71,6 +73,7 @@ fn build_name_tables<'l>(
                     format!("`{}` is already defined as a terminal", nonterminal),
                     Some(Error::new_lex_error(
                         *entry.get(),
+                        None,
                         "terminal declared here".to_string(),
                         None,
                     )),
@@ -83,6 +86,7 @@ fn build_name_tables<'l>(
                     format!("`{}` is a reserved terminal name", nonterminal),
                     Some(Error::new_lex_error(
                         *entry.get(),
+                        None,
                         "reserved terminal declared here".to_string(),
                         None,
                     )),

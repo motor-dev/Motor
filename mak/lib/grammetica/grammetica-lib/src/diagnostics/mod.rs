@@ -1,5 +1,5 @@
 pub enum Location {
-    LexRule(usize),
+    LexRule(usize, Option<(usize, usize)>),
     ParseRule(usize, Option<usize>),
 }
 
@@ -12,9 +12,14 @@ pub struct Error {
 pub type Result<T> = std::result::Result<T, Error>;
 
 impl Error {
-    pub fn new_lex_error(lex_index: usize, message: String, next: Option<Self>) -> Self {
+    pub fn new_lex_error(
+        lex_index: usize,
+        location: Option<(usize, usize)>,
+        message: String,
+        next: Option<Self>,
+    ) -> Self {
         Self {
-            location: Location::LexRule(lex_index),
+            location: Location::LexRule(lex_index, location),
             message,
             next: next.map(Box::new),
         }

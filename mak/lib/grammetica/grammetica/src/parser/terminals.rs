@@ -6,6 +6,7 @@ use proc_macro2::{Delimiter, Ident, Literal, Punct, Spacing, Span, TokenStream, 
 pub(super) struct Terminal {
     pub(super) name: String,
     pub(super) location: Span,
+    pub(super) value_location: Span,
     pub(super) ty: Option<TokenTree>,
     pub(super) value: String,
     pub(super) action: Option<TokenStream>,
@@ -71,6 +72,7 @@ fn parse_token_literal(literal: Literal, rule: &mut IntoIter) -> Result<Terminal
         Some(TokenTree::Punct(punct)) if punct.as_char() == ';' => Ok(Terminal {
             name: value.value().to_string(),
             location: literal.span(),
+            value_location: literal.span(),
             ty: None,
             value: value.value().to_string(),
             action: None,
@@ -79,6 +81,7 @@ fn parse_token_literal(literal: Literal, rule: &mut IntoIter) -> Result<Terminal
         Some(TokenTree::Group(group)) if group.delimiter() == Delimiter::Brace => Ok(Terminal {
             name: value.value().to_string(),
             location: literal.span(),
+            value_location: literal.span(),
             ty: None,
             value: value.value().to_string(),
             action: Some(group.stream()),
@@ -106,10 +109,11 @@ fn parse_token_identifier(identifier: Ident, rule: &mut IntoIter) -> Result<Term
 
     match rule.next() {
         Some(TokenTree::Punct(punct)) if punct.as_char() == ':' => {
-            let (ty, value, action) = parse_typed_token(punct, rule)?;
+            let (ty, value, value_location, action) = parse_typed_token(punct, rule)?;
             Ok(Terminal {
                 name: name.clone(),
-                location,
+                location: location.clone(),
+                value_location: value_location.unwrap_or(location),
                 ty: Some(ty),
                 value: value.unwrap_or(name),
                 action,
@@ -119,10 +123,11 @@ fn parse_token_identifier(identifier: Ident, rule: &mut IntoIter) -> Result<Term
         Some(TokenTree::Punct(punct))
             if punct.as_char() == '=' && punct.spacing() == Spacing::Joint =>
         {
-            let (value, action) = parse_untyped_token(identifier.span(), rule)?;
+            let (value, value_location, action) = parse_untyped_token(identifier.span(), rule)?;
             Ok(Terminal {
                 name,
                 location,
+                value_location,
                 ty: None,
                 value,
                 action,
@@ -149,7 +154,7 @@ fn parse_token_identifier(identifier: Ident, rule: &mut IntoIter) -> Result<Term
 fn parse_typed_token(
     punct: Punct,
     rule: &mut IntoIter,
-) -> Result<(TokenTree, Option<String>, Option<TokenStream>)> {
+) -> Result<(TokenTree, Option<String>, Option<Span>, Option<TokenStream>)> {
     let t = rule.next();
     if t.is_none() {
         return Err(Error::new(
@@ -164,11 +169,11 @@ fn parse_typed_token(
             result_type.span(),
             "Unexpected end of input after type: expected `;` or `=>`".to_string(),
         )),
-        Some(TokenTree::Punct(p)) if p.as_char() == ';' => Ok((result_type, None, None)),
+        Some(TokenTree::Punct(p)) if p.as_char() == ';' => Ok((result_type, None, None, None)),
         Some(TokenTree::Punct(p)) if p.as_char() == '=' && p.spacing() == Spacing::Joint => {
             print!("punct: {:?}", p);
-            let (value, action) = parse_untyped_token(p.span(), rule)?;
-            Ok((result_type, Some(value), action))
+            let (value, location, action) = parse_untyped_token(p.span(), rule)?;
+            Ok((result_type, Some(value), Some(location), action))
         }
         Some(other) => Err(Error::new(
             other.span(),
@@ -180,7 +185,7 @@ fn parse_typed_token(
 fn parse_untyped_token(
     location: Span,
     rule: &mut IntoIter,
-) -> Result<(String, Option<TokenStream>)> {
+) -> Result<(String, Span, Option<TokenStream>)> {
     match rule.next() {
         Some(TokenTree::Punct(punct)) if punct.as_char() == '>' => parse_token_value(punct, rule),
         Some(token) => Err(Error::new(
@@ -197,7 +202,10 @@ fn parse_untyped_token(
     }
 }
 
-fn parse_token_value(punct: Punct, rule: &mut IntoIter) -> Result<(String, Option<TokenStream>)> {
+fn parse_token_value(
+    punct: Punct,
+    rule: &mut IntoIter,
+) -> Result<(String, Span, Option<TokenStream>)> {
     match rule.next() {
         Some(TokenTree::Literal(literal)) => {
             let regexp = litrs::StringLit::try_from(&literal).map_err(|error| {
@@ -207,6 +215,7 @@ fn parse_token_value(punct: Punct, rule: &mut IntoIter) -> Result<(String, Optio
 
             Ok((
                 regexp.to_string(),
+                literal.span(),
                 parse_token_action(literal.span(), rule)?,
             ))
         }
