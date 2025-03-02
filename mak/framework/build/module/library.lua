@@ -14,7 +14,7 @@ local function filter_source(source_file, env)
     local platform_set = {}
     local arch_set = {}
     ---@type string[]
-    local platforms = env.MOTOR_PLATFORM
+    local platforms = env.MOTOR_PLATFORMS
     for _, platform in ipairs(platforms) do
         platform_set[platform] = true
     end
