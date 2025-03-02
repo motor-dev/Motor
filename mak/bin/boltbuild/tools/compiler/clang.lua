@@ -6,6 +6,9 @@ context:load_tool('utils/string_ext')
 
 Bolt.Clang = {}
 
+--- Detects the available Clang compilers using `vswhere`.
+---
+--- @return Node[]
 local function vswhere_clang()
     local compilers = {}
     context:try('Running vswhere', function()
@@ -17,7 +20,7 @@ local function vswhere_clang()
             '-find',
             'VC\\Tools\\Llvm\\bin',
         })
-        local result, out, err = p:communicate('')
+        local result, out, _err = p:communicate('')
         if result then
             for path in out:lines() do
                 path = context.path:make_node(path)
@@ -32,14 +35,14 @@ local function vswhere_clang()
 end
 
 local function get_clang_version(defines)
-    local version = { 0, 0, 0 }
+    local version = { '0', '0', '0' }
     for name, value in pairs(defines) do
         if name == '__clang_major__' then
-            version[1] = tonumber(value)
+            version[1] = value
         elseif name == '__clang_minor__' then
-            version[2] = tonumber(value)
+            version[2] = value
         elseif name == '__clang_patchlevel__' then
-            version[3] = tonumber(value)
+            version[3] = value
         end
     end
     return table.concat(version, '.')
@@ -55,7 +58,7 @@ local function load_clang(env, compiler, flags, lang, var)
     env[var .. '_INCLUDE_ST'] = '-I'
     env[var .. '_SYSTEM_INCLUDE_ST'] = '-isystem%s'
     env[var .. '_IDIRAFTER'] = '-idirafter'
-    env[var .. 'FLAGS.warn.none'] = { '-w'}
+    env[var .. 'FLAGS.warn.none'] = { '-w' }
     env[var .. 'FLAGS.warn.all'] = { '-Wall', '-Wextra', '-Wpedantic' }
     env.LINK = env.CLANG
     env.LINKFLAGS = {}
@@ -67,14 +70,14 @@ local function load_clang(env, compiler, flags, lang, var)
     if env.BINARY_FORMAT == 'elf' then
         env:append('LINKFLAGS_shlib', '-Wl,-z,defs')
     end
-    
+
     if not env.LIB then
         paths = { compiler[1].parent, table.unpack(context.settings.path) }
         if env.TRIPLE then
-            env.LIB = context:find_program(env.TRIPLE..'-ar', paths)
+            env.LIB = context:find_program(env.TRIPLE .. '-ar', paths)
         end
         if not env.LIB then
-            env.LIB = context:find_program(env.TARGET..'-ar', paths)
+            env.LIB = context:find_program(env.TARGET .. '-ar', paths)
         end
         if not env.LIB then
             env.LIB = context:find_program('ar', paths)
@@ -152,12 +155,25 @@ local languages = {
     ['objc++'] = Bolt.Clang.load_objcxx,
 }
 
+--- Detects the available targets for a Clang compiler.
+--- This function runs the Clang compiler with the `-v` flag to detect the available targets.
+--- It then loads the compiler in a new environment and calls the specified callback. The callback can end the search by
+--- returning `nil` or `false`; otherwise, the discovery resumes.
+---
+--- @param clang Node
+---   The Clang compiler to be used for the detection.
+--- @param callback fun(env:Environment):(boolean|nil)
+---   A callback function to be executed for each discovered target. The function should return `true` to continue the discovery, or `nil`/`false` to stop.
+--- @param language_flags table<string, string[]>
+---   A table where keys are language names (e.g., 'c', 'c++') and values are arrays of extra flags that the compiler should support for each language.
+--- @param global_flags string[]
+---   An array of additional language-independent flags to be passed to the compiler.
+--- @return boolean
+---   true if the discovery was successful, or `false` if an error occurred.
 local function detect_clang_targets(clang, callback, language_flags, global_flags)
-    local command
-    if #global_flags == 0 then
-        command = { clang, '-v', '-E', '-' }
-    else
-        command = { clang, #global_flags, '-v', '-E', '-' }
+    local command = { clang, '-v', '-E', '-' }
+    for _, flag in ipairs(global_flags) do
+        table.insert(command, flag)
     end
     local _, out, err = context:popen(command):communicate()
     local search_paths, paths, seen = false, {}, {}
@@ -176,7 +192,7 @@ local function detect_clang_targets(clang, callback, language_flags, global_flag
     end
 
     local default_triple
-    local triples = { }
+    local triples = {}
     for _, path in ipairs(paths) do
         local component, relpath, component_count = path:name(), '', 1
         while component do
@@ -200,6 +216,7 @@ local function detect_clang_targets(clang, callback, language_flags, global_flag
             component = path:name()
         end
     end
+
     -- sort by triple, keeping the default triple at the top of the list
     table.sort(triples, function(a, b)
         if a == default_triple then
@@ -235,14 +252,15 @@ end
 ---
 --- @param callback fun(env:Environment):(boolean|nil) A callback function to be executed for each discovered compiler. The function should return `true` to continue the discovery, or `nil`/`false` to stop.
 --- @param language_flags table<string, string[]> A table where keys are language names (e.g., 'c', 'c++') and values are arrays of extra flags that the compiler should support for each language.
---- @param global_flags string[]|nil An optional array of additional language-independent flags to be passed to the compiler.
+--- @param global_flags? string[] An optional array of additional language-independent flags to be passed to the compiler.
 --- @param detect_cross_targets boolean|nil An optional boolean value indicating whether to detect cross-compilation targets. If `true`, the function will attempt to detect and include cross-compilation targets.
 function Bolt.Clang.discover(callback, language_flags, global_flags, detect_cross_targets)
     local seen = {}
     local compilers = {}
     global_flags = global_flags or {}
     context:try('Looking for Clang compilers', function()
-        for _, path in ipairs(context.settings.path) do
+        local paths = context.settings.path ---@type Node[]
+        for _, path in ipairs(paths) do
             for _, node in ipairs(context:search(path, 'clang*' .. context.settings.exe_suffix)) do
                 local version = node:name():match("^clang%-?(%d*)" .. context.settings.exe_suffix .. "$")
                 if version ~= nil and node:is_file() then

@@ -1,12 +1,12 @@
 ---@type Context
 local context = ...
 
-Bolt.ModuleCore = {}
+context:load_tool('internal/bolt')
+context:load_tool('utils/string_ext')
 
+Bolt.ModuleCore = {}
 Bolt.ModuleCore.extension_registry = {}
 
-
-context:load_tool('utils/string_ext')
 
 ---Register a function that processes an extension
 ---@param extensions string|string[] an extension, comma-separated extensions or a list of extensions

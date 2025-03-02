@@ -1,4 +1,5 @@
 use super::{Task, ENV_RE, SPLIT_RE};
+use crate::environment::{Lookup, RawLookup};
 use regex::Captures;
 use subprocess::ExitStatus;
 
@@ -53,10 +54,9 @@ impl Task {
         let mut env = self.env.lock().unwrap();
         let var = capture.get(2).unwrap();
         let var_name = var.as_str();
-        let value = env.get(var_name);
         let start = capture.get(0).unwrap().start();
         let end = capture.get(0).unwrap().end();
-        if value.is_none() {
+        if env.is_none(var_name) {
             if start != 0 || end != argument.len() {
                 let mut result = argument[0..start].to_string();
                 result.push_str(&argument[end..argument.len()]);
@@ -65,7 +65,7 @@ impl Task {
                 Ok(Vec::new())
             }
         } else {
-            let mut result = value.as_vec();
+            let mut result = env.get_string_vec(var_name);
             if let Some(index) = capture.get(4) {
                 let index = index.as_str().parse::<usize>().unwrap();
                 if index >= result.len() {
@@ -82,10 +82,9 @@ impl Task {
             if !result.is_empty() {
                 if let Some(pattern) = capture.get(1) {
                     let var_name = &pattern.as_str()[0..pattern.len() - 1];
-                    let pattern = env.get(var_name);
-                    if pattern.is_list() {
+                    if env.is_list(var_name) {
                         let mut flattened_list = Vec::new();
-                        let pattern = pattern.as_vec();
+                        let pattern = env.get_string_vec(var_name);
                         for a in result {
                             if start != 0 {
                                 flattened_list.push(argument[0..start].to_string());
@@ -100,7 +99,7 @@ impl Task {
                         }
                         result = flattened_list;
                     } else {
-                        let pattern = pattern.as_string();
+                        let pattern = env.get_string(var_name);
                         if !pattern.contains("%s") {
                             for a in &mut result {
                                 *a = format!(

@@ -1,5 +1,5 @@
 use crate::driver::Driver;
-use crate::environment::{Environment, ReadWriteEnvironment};
+use crate::environment::{FlatMap, OverlayMap};
 use crate::node::Node;
 use crate::task::Task;
 use blake3::Hash;
@@ -52,9 +52,9 @@ pub(crate) enum TaskSeq {
 }
 
 pub(crate) struct CommandOutput {
-    pub(crate) environments: Vec<Arc<Mutex<ReadWriteEnvironment>>>,
+    pub(crate) environments: Vec<Arc<Mutex<OverlayMap>>>,
     pub(crate) commands: Vec<Command>,
-    pub(crate) options: Option<Environment>,
+    pub(crate) options: Option<FlatMap>,
     pub(crate) tools: Vec<Node>,
     pub(crate) stored_hash: CommandHash,
     pub(crate) groups: Vec<(String, GroupStatus)>,

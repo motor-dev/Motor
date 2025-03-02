@@ -1,6 +1,5 @@
 use crate::command::SerializedHash;
 use crate::context::Context;
-use crate::environment::EnvironmentValue;
 use crate::node::Node;
 use blake3::Hasher;
 use mlua::prelude::{LuaError, LuaResult};
@@ -55,23 +54,8 @@ pub(super) fn find_program(
     this: &mut Context,
     (program, paths): (String, Option<Vec<Node>>),
 ) -> LuaResult<Option<Node>> {
-    let paths = paths.unwrap_or_else(|| {
-        let paths = this.options.get_value("path");
-        if let Some(paths) = paths {
-            paths
-                .into_list()
-                .into_iter()
-                .flat_map(|x| x.as_node(&this.path))
-                .collect()
-        } else {
-            Vec::new()
-        }
-    });
-    let suffix = this
-        .options
-        .get_value("exe_suffix")
-        .unwrap_or(EnvironmentValue::String("".to_string()))
-        .as_string();
+    let paths = paths.unwrap_or_else(|| this.options.get_node_vec("path", &this.path));
+    let suffix = this.options.get_string("exe_suffix");
     let pattern = program + suffix.as_str();
 
     for path in paths {

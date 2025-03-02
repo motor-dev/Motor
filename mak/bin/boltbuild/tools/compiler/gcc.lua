@@ -15,7 +15,7 @@ local function load_gcc_compiler(env, compiler, flags, language, var_name)
     env[var_name .. '_INCLUDE_ST'] = '-I'
     env[var_name .. '_SYSTEM_INCLUDE_ST'] = '-isystem%s'
     env[var_name .. '_IDIRAFTER'] = '-isystem'
-    env[var_name .. 'FLAGS.warn.none'] = { '-w'}
+    env[var_name .. 'FLAGS.warn.none'] = { '-w' }
     env[var_name .. 'FLAGS.warn.all'] = { '-Wall', '-Wextra', '-Wpedantic' }
     env.LINK = env.GCC
     env.LINKFLAGS = {}
@@ -25,15 +25,15 @@ local function load_gcc_compiler(env, compiler, flags, language, var_name)
     env.LINKFLAGS_shlib = { '-shared' }
 
     local defines = Bolt.GnuCompiler.get_specs(compiler, var_name)
-    local version = { 0, 0, 0 }
+    local version = { '0', '0', '0' }
 
     for name, value in pairs(defines) do
         if name == '__GNUC__' then
-            version[1] = tonumber(value)
+            version[1] = value
         elseif name == '__GNUC_MINOR__' then
-            version[2] = tonumber(value)
+            version[2] = value
         elseif name == '__GNUC_PATCHLEVEL__' then
-            version[3] = tonumber(value)
+            version[3] = value
         end
     end
 
@@ -125,7 +125,7 @@ local languages = {
 function Bolt.GCC.discover(callback, language_flags, global_flags, detect_multilib)
     context:try('Looking for Gcc compilers', function()
         local seen = {}
-        local paths = context.settings.path
+        local paths = context.settings.path ---@type Node[]
 
         for _, path in ipairs(paths) do
             for _, crtbegin in ipairs(context:search(path.parent, 'lib/gcc*/*/*/crtbegin.o')) do
@@ -138,20 +138,20 @@ function Bolt.GCC.discover(callback, language_flags, global_flags, detect_multil
                     for _, gcc in ipairs(context:search(path, target .. '-gcc-' .. version .. context.settings.exe_suffix)) do
                         seen[crtbegin:abs_path()] = crtbegin
                         if pcall(function()
-                            local env = context:derive()
-                            context:with(env, function()
-                                context.env.TRIPLE = target
-                                context.env.GCC = { gcc }
-                                context.env:append('GCC', global_flags)
-                                context.env.GCC_VERSION = version
-                                for lang, flags in pairs(language_flags) do
-                                    languages[lang](flags)
+                                local env = context:derive()
+                                context:with(env, function()
+                                    context.env.TRIPLE = target
+                                    context.env.GCC = { gcc }
+                                    context.env:append('GCC', global_flags)
+                                    context.env.GCC_VERSION = version
+                                    for lang, flags in pairs(language_flags) do
+                                        languages[lang](flags)
+                                    end
+                                end)
+                                if callback(env) ~= true then
+                                    return tostring(gcc)
                                 end
-                            end)
-                            if callback(env) ~= true then
-                                return tostring(gcc)
-                            end
-                        end) and detect_multilib then
+                            end) and detect_multilib then
                             for _, multilib in ipairs(context:search(crtbegin.parent, '*/crtbegin.o')) do
                                 pcall(function()
                                     local env = context:derive()

@@ -8,8 +8,10 @@ context:lua_driver('metagen',
     { 'c', 'cxx' })
 
 pcall(function()
-    context:popen({ context.env.PYTHON, context.path:make_node('../../lib/pyxx/__main__.py'), '-x', 'c++', '--std',
-        'c++20', '-t', context.bld_dir:abs_path(), '-' })
+    --- @type Node
+    local python = context.env.PYTHON
+    context:popen({ python, context.path:make_node('../../lib/pyxx/__main__.py'), '-x', 'c++', '--std', 'c++20', '-t',
+        context.bld_dir:abs_path(), '-' })
 end)
 
 context:feature('metagen ', 'metagen ', function(generator)
@@ -31,6 +33,7 @@ context:feature('metagen ', 'metagen ', function(generator)
 
             local task = generator:declare_task('metagen', { source_node },
                 { target_node_cc, target_node_factory_hh, target_node_doc, target_node_ns })
+            ---@cast task -nil
             task.env.METAGEN_RELATIVE_INPUT = string.gsub(source_node:path_from(source_path), '\\', '/')
             task.env.METAGEN_RELATIVE_OUTPUT = string.gsub(target_node_factory_hh:path_from(target_node_factory_hh_dir),
                 '\\', '/')

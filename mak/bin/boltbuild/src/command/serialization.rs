@@ -1,7 +1,6 @@
 use super::{Command, CommandOutput, CommandStatus, SerializedHash, TaskSeq};
-use crate::environment::{
-    Environment, ReadWriteEnvironmentSequenceSeed, ReadWriteEnvironmentVec,
-    SerializedReadWriteEnvironment,
+use crate::environment::serialization::{
+    FlatMapSeed, OverlayMapSequenceSeed, OverlayMapVec, SerializedOverlayMap,
 };
 use crate::node::Node;
 use crate::task::{Task, TaskSeed};
@@ -20,7 +19,7 @@ impl Command {
         mut file: std::fs::File,
         command_map: &mut HashMap<String, Vec<String>>,
     ) -> crate::error::Result<()> {
-        struct CommandCacheSeed<'a>(&'a ReadWriteEnvironmentVec);
+        struct CommandCacheSeed<'a>(&'a OverlayMapVec);
 
         impl<'de, 'a> DeserializeSeed<'de> for CommandCacheSeed<'a> {
             type Value = Vec<Command>;
@@ -29,7 +28,7 @@ impl Command {
             where
                 D: Deserializer<'de>,
             {
-                struct CommandCacheVisitor<'a>(&'a ReadWriteEnvironmentVec);
+                struct CommandCacheVisitor<'a>(&'a OverlayMapVec);
 
                 impl<'de, 'a> Visitor<'de> for CommandCacheVisitor<'a> {
                     type Value = Vec<Command>;
@@ -86,7 +85,7 @@ impl Command {
     }
 }
 
-pub(crate) struct CommandSeed<'a>(pub &'a ReadWriteEnvironmentVec);
+pub(crate) struct CommandSeed<'a>(pub &'a OverlayMapVec);
 
 impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
     type Value = Command;
@@ -132,7 +131,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
             }
         }
 
-        struct CommandVisitor<'a>(&'a ReadWriteEnvironmentVec);
+        struct CommandVisitor<'a>(&'a OverlayMapVec);
 
         impl<'de, 'a> Visitor<'de> for CommandVisitor<'a> {
             type Value = Command;
@@ -217,7 +216,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSeed<'a> {
     }
 }
 
-struct CommandSequenceSeed<'a>(&'a ReadWriteEnvironmentVec);
+struct CommandSequenceSeed<'a>(&'a OverlayMapVec);
 
 impl<'de, 'a> DeserializeSeed<'de> for CommandSequenceSeed<'a> {
     type Value = Vec<Command>;
@@ -226,7 +225,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandSequenceSeed<'a> {
     where
         D: Deserializer<'de>,
     {
-        struct CommandSequenceVisitor<'a>(&'a ReadWriteEnvironmentVec);
+        struct CommandSequenceVisitor<'a>(&'a OverlayMapVec);
 
         impl<'de, 'a> Visitor<'de> for CommandSequenceVisitor<'a> {
             type Value = Vec<Command>;
@@ -265,8 +264,8 @@ impl Serialize for CommandOutput {
             &self
                 .environments
                 .iter()
-                .map(SerializedReadWriteEnvironment)
-                .collect::<Vec<SerializedReadWriteEnvironment>>(),
+                .map(SerializedOverlayMap)
+                .collect::<Vec<SerializedOverlayMap>>(),
         )?;
         s.serialize_field("commands", &self.commands)?;
         s.serialize_field("options", &self.options)?;
@@ -289,7 +288,7 @@ impl Serialize for CommandOutput {
     }
 }
 
-struct CommandOutputSeed<'a>(&'a ReadWriteEnvironmentVec);
+struct CommandOutputSeed<'a>(&'a OverlayMapVec);
 
 impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
     type Value = Option<CommandOutput>;
@@ -358,7 +357,7 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
             }
         }
 
-        struct CommandOutputVisitor<'a>(&'a ReadWriteEnvironmentVec);
+        struct CommandOutputVisitor<'a>(&'a OverlayMapVec);
 
         impl<'de, 'a> Visitor<'de> for CommandOutputVisitor<'a> {
             type Value = Option<CommandOutput>;
@@ -398,14 +397,14 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
             where
                 V: SeqAccess<'de>,
             {
-                let environments = seq
-                    .next_element_seed(ReadWriteEnvironmentSequenceSeed(self.0))?
+                let mut environments = seq
+                    .next_element_seed(OverlayMapSequenceSeed(self.0))?
                     .ok_or_else(|| Error::invalid_length(0, &self))?;
                 let commands = seq
                     .next_element_seed(CommandSequenceSeed(&environments))?
                     .ok_or_else(|| Error::invalid_length(1, &self))?;
                 let options = seq
-                    .next_element::<Option<Environment>>()?
+                    .next_element_seed(FlatMapSeed(&mut environments))?
                     .ok_or_else(|| Error::invalid_length(2, &self))?;
                 let tools = seq
                     .next_element::<Vec<Node>>()?
@@ -455,9 +454,8 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                             if environments.is_some() {
                                 return Err(Error::duplicate_field("environments"));
                             }
-                            environments = Some(
-                                map.next_value_seed(ReadWriteEnvironmentSequenceSeed(self.0))?,
-                            );
+                            environments =
+                                Some(map.next_value_seed(OverlayMapSequenceSeed(self.0))?);
                         }
                         Field::Commands => {
                             if commands.is_some() {
@@ -474,7 +472,12 @@ impl<'de, 'a> DeserializeSeed<'de> for CommandOutputSeed<'a> {
                             if options.is_some() {
                                 return Err(Error::duplicate_field("options"));
                             }
-                            options = Some(map.next_value::<Option<Environment>>()?);
+                            if environments.is_none() {
+                                return Err(Error::custom("environments must be defined before the commands that use them"));
+                            }
+                            options = Some(
+                                map.next_value_seed(FlatMapSeed(environments.as_mut().unwrap()))?,
+                            );
                         }
                         Field::Tools => {
                             if tools.is_some() {
@@ -583,7 +586,7 @@ impl<'de> Deserialize<'de> for SerializedHash {
     }
 }
 
-pub(super) struct TaskSequenceSeed<'a>(pub &'a ReadWriteEnvironmentVec);
+pub(super) struct TaskSequenceSeed<'a>(pub &'a mut OverlayMapVec);
 
 impl<'de, 'a> DeserializeSeed<'de> for TaskSequenceSeed<'a> {
     type Value = Vec<Task>;
@@ -592,7 +595,7 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSequenceSeed<'a> {
     where
         D: Deserializer<'de>,
     {
-        struct TaskSequenceVisitor<'a>(&'a ReadWriteEnvironmentVec);
+        struct TaskSequenceVisitor<'a>(&'a mut OverlayMapVec);
 
         impl<'de, 'a> Visitor<'de> for TaskSequenceVisitor<'a> {
             type Value = Vec<Task>;

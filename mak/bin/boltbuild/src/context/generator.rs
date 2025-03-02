@@ -1,7 +1,7 @@
 use crate::command::GroupStatus;
 use crate::context::operations::INVALID_CHARS;
 use crate::context::Context;
-use crate::environment::ReadWriteEnvironment;
+use crate::environment::OverlayMap;
 use crate::generator::Generator;
 use mlua::prelude::{LuaError, LuaResult, LuaTable, LuaValue};
 use mlua::{AnyUserData, FromLua, Lua};
@@ -58,11 +58,7 @@ pub(super) fn set_group_enabled(
     }
 }
 
-pub(super) fn set_default_group(
-    _lua: &Lua,
-    this: &mut Context,
-    name: String,
-) -> LuaResult<()> {
+pub(super) fn set_default_group(_lua: &Lua, this: &mut Context, name: String) -> LuaResult<()> {
     if this.output.groups.iter_mut().any(|x| x.0.eq(&name)) {
         this.default_group = name;
         Ok(())
@@ -111,19 +107,22 @@ pub(super) fn declare_generator(
 
     let generator = this.borrow_mut_scoped::<Context, _>(|this| {
         let from_env = if let Some(env) = env {
-            env.borrow::<Arc<Mutex<ReadWriteEnvironment>>>()?
-                .deref()
-                .clone()
+            env.borrow::<Arc<Mutex<OverlayMap>>>()?.deref().clone()
         } else {
             this.environment.clone()
         };
-        let env = Arc::new(Mutex::new(ReadWriteEnvironment::derive(
+        let env = Arc::new(Mutex::new(OverlayMap::derive(
             &from_env,
             this.output.environments.len(),
         )?));
         this.output.environments.push(env.clone());
         lua.create_userdata(Arc::new(Mutex::new(Generator::new(
-            name, &this.path, &this.bld_dir, env, group, features,
+            name,
+            &this.path,
+            &this.bld_dir,
+            env,
+            group,
+            features,
         ))))
     })??;
 

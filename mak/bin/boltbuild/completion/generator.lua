@@ -1,3 +1,4 @@
+---@meta
 
 --- Represents a task generator, responsible for creating and managing tasks within the build system.
 --- - Generators group tasks by name, feature, environment, and build group.
@@ -59,17 +60,15 @@ end
 ---@param features string|string[]? Initial list of features for this generator.
 ---@param env Environment? The default environment for tasks created by this generator.
 ---@param group string? The group this generator belongs to, declared via `declare_group` for conditional control. Defaults to the context’s `fs_name` value if not specified.
----@return Generator A new generator object.
+---@return Generator #A new generator object.
 function Context:declare_generator(name, features, env, group)
-    return Generator
 end
 
 --- Retrieves a generator by its name, if it exists.
 ---
 ---@param name string The name of the generator to search for.
----@return Generator|nil The generator with the specified name, or `nil` if it is not found.
+---@return Generator|nil #The generator with the specified name, or `nil` if it is not found.
 function Context:get_generator_by_name(name)
-    return nil
 end
 
 --- Posts a generator to initiate the execution of its associated feature callbacks.
@@ -88,15 +87,13 @@ end
 ---@param inputs Node|Node[]? Initial inputs required for the task. Additional inputs can be added with `Task:add_input`.
 ---@param outputs Node|Node[]? Initial outputs produced by the task. Additional outputs can be added with `Task:add_output`.
 ---@param env Environment? The environment to use for this task, overriding the generator’s default environment if specified.
----@return Task? A new task object, ready for configuration and execution.
+---@return Task? #A new task object, ready for configuration and execution.
 function Generator:declare_task(driver, inputs, outputs, env)
-    return Task
 end
 
 --- Checks if the generator has a specific property.
 ---
 ---@param name string The name of the property to check.
----@return boolean Returns `true` if the generator has a property with the specified name, otherwise returns `false`.
+---@return boolean #`true` if the generator has a property with the specified name, otherwise returns `false`.
 function Generator:has_property(name)
-    return false
 end

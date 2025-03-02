@@ -2,7 +2,7 @@
 local context = ...
 context:load_tool('internal/bolt')
 
-Bolt.PkgConfig = { }
+Bolt.PkgConfig = {}
 
 local function _run_pkg_config(pkg_name, lib_paths, seen)
     if seen[pkg_name] then
@@ -77,14 +77,14 @@ local function _run_pkg_config(pkg_name, lib_paths, seen)
             skip = true
         else
             if not seen[d] then
-                local dep_flags = _run_pkg_config(d)
-                for _, v in ipairs(dep_flags[1]) do
+                local dep_c_flags, dep_libs, dep_ld_flags = Bolt.PkgConfig.run_pkg_config(d)
+                for _, v in ipairs(dep_c_flags) do
                     table.insert(cflags, v)
                 end
-                for _, v in ipairs(dep_flags[2]) do
+                for _, v in ipairs(dep_libs) do
                     table.insert(libs, v)
                 end
-                for _, v in ipairs(dep_flags[3]) do
+                for _, v in ipairs(dep_ld_flags) do
                     table.insert(ldflags, v)
                 end
             end

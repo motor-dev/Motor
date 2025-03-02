@@ -1,5 +1,5 @@
 use super::CommandLineParser;
-use crate::environment::{Environment, EnvironmentValue};
+use crate::environment::{FlatMap, MapValue};
 use clap::ArgAction;
 
 pub(crate) struct Interface {
@@ -16,7 +16,6 @@ pub(crate) struct Interface {
 pub(super) struct Argument {
     pub(super) name: String,
     pub(super) interface: Option<Interface>,
-    pub(super) default: EnvironmentValue,
 }
 
 impl Interface {
@@ -50,31 +49,11 @@ impl CommandLineParser {
     pub(crate) fn new() -> Self {
         Self {
             options: Vec::new(),
+            map: FlatMap::new(),
         }
     }
 
-    pub(crate) fn get_value_lua(&self, name: &str) -> mlua::Result<EnvironmentValue> {
-        if let Some(index) = self.options.iter().position(|x| x.name.eq(name)) {
-            Ok(self.options[index].default.clone())
-        } else {
-            Err(mlua::Error::RuntimeError(
-                format!("'{}': no option registered with this name", name).to_string(),
-            ))
-        }
-    }
-    pub(crate) fn get_value(&self, name: &str) -> Option<EnvironmentValue> {
-        if let Some(index) = self.options.iter().position(|x| x.name.eq(name)) {
-            Some(self.options[index].default.clone())
-        } else {
-            None
-        }
-    }
-
-    pub(crate) fn add_setting(
-        &mut self,
-        name: String,
-        default: EnvironmentValue,
-    ) -> mlua::Result<()> {
+    pub(crate) fn add_setting(&mut self, name: String, default: MapValue) -> mlua::Result<()> {
         if self.options.iter().any(|x| x.name.eq(&name)) {
             Err(mlua::Error::RuntimeError(
                 format!(
@@ -84,10 +63,10 @@ impl CommandLineParser {
                 .to_string(),
             ))
         } else {
+            self.map.set(&name, default);
             self.options.push(Argument {
                 name,
                 interface: None,
-                default,
             });
             Ok(())
         }
@@ -97,7 +76,7 @@ impl CommandLineParser {
         &mut self,
         name: String,
         help: String,
-        default: EnvironmentValue,
+        default: MapValue,
         action: ArgAction,
     ) -> mlua::Result<&mut Interface> {
         if self.options.iter().any(|x| x.name.eq(&name)) {
@@ -109,6 +88,7 @@ impl CommandLineParser {
                 .to_string(),
             ))
         } else {
+            self.map.set(&name, default);
             self.options.push(Argument {
                 name,
                 interface: Some(Interface {
@@ -121,7 +101,6 @@ impl CommandLineParser {
                     action,
                     int_type: false,
                 }),
-                default,
             });
             Ok(self.options.last_mut().unwrap().interface.as_mut().unwrap())
         }
@@ -131,7 +110,7 @@ impl CommandLineParser {
         &mut self,
         name: String,
         help: String,
-        default: EnvironmentValue,
+        default: MapValue,
     ) -> mlua::Result<&mut Interface> {
         self.add_option(name, help, default, ArgAction::SetTrue)
     }
@@ -140,7 +119,7 @@ impl CommandLineParser {
         &mut self,
         name: String,
         help: String,
-        default: EnvironmentValue,
+        default: MapValue,
     ) -> mlua::Result<&mut Interface> {
         self.add_option(name, help, default, ArgAction::Set)
     }
@@ -149,7 +128,7 @@ impl CommandLineParser {
         &mut self,
         name: String,
         help: String,
-        default: EnvironmentValue,
+        default: MapValue,
     ) -> mlua::Result<&mut Interface> {
         self.add_option(name, help, default, ArgAction::Count)
     }
@@ -159,7 +138,7 @@ impl CommandLineParser {
         name: String,
         help: String,
         choice_list: &[String],
-        default: EnvironmentValue,
+        default: MapValue,
     ) -> mlua::Result<&mut Interface> {
         Ok(self
             .add_option(name, help, default, ArgAction::Set)?
@@ -170,21 +149,18 @@ impl CommandLineParser {
         &mut self,
         name: String,
         help: String,
-        default: EnvironmentValue,
+        default: MapValue,
     ) -> mlua::Result<&mut Interface> {
         self.add_option(name, help, default, ArgAction::Append)
     }
 
-    pub(crate) fn parse_command_line(&self) -> Environment {
-        let mut env = Environment::new();
-        for option in &self.options {
-            env.set(option.name.as_str(), option.default.clone());
-        }
-        self.parse_command_line_into(&mut env);
-        env
+    pub(crate) fn parse_command_line(&self) -> FlatMap {
+        let mut result = self.map.clone();
+        self.parse_command_line_into(&mut result);
+        result
     }
 
-    pub(crate) fn parse_command_line_into(&self, env: &mut Environment) {
+    pub(crate) fn parse_command_line_into(&self, env: &mut FlatMap) {
         use clap::{
             builder::PossibleValue, builder::PossibleValuesParser, parser::ValueSource, Arg,
             Command,
@@ -229,13 +205,13 @@ impl CommandLineParser {
                             match interface.action {
                                 ArgAction::SetTrue => env.set(
                                     option.name.as_str(),
-                                    EnvironmentValue::Bool(matches.get_flag(option.name.as_str())),
+                                    MapValue::Bool(matches.get_flag(option.name.as_str())),
                                 ),
                                 ArgAction::Set => {
                                     if interface.int_type {
                                         env.set(
                                             option.name.as_str(),
-                                            EnvironmentValue::Integer(
+                                            MapValue::Integer(
                                                 *matches
                                                     .get_one::<i64>(option.name.as_str())
                                                     .unwrap(),
@@ -244,7 +220,7 @@ impl CommandLineParser {
                                     } else {
                                         env.set(
                                             option.name.as_str(),
-                                            EnvironmentValue::String(
+                                            MapValue::String(
                                                 matches
                                                     .get_one::<String>(option.name.as_str())
                                                     .unwrap()
@@ -255,25 +231,23 @@ impl CommandLineParser {
                                 }
                                 ArgAction::Count => env.set(
                                     option.name.as_str(),
-                                    EnvironmentValue::Integer(
+                                    MapValue::Integer(
                                         matches.get_count(option.name.as_str()).into(),
                                     ),
                                 ),
                                 ArgAction::Append => {
-                                    let mut vec = Vec::<EnvironmentValue>::new();
+                                    let mut vec = Vec::<MapValue>::new();
                                     for m in
                                         matches.get_many::<String>(option.name.as_str()).unwrap()
                                     {
-                                        vec.push(EnvironmentValue::String(m.clone()));
+                                        vec.push(MapValue::String(m.clone()));
                                     }
-                                    env.set(option.name.as_str(), EnvironmentValue::Vec(vec))
+                                    env.set(option.name.as_str(), MapValue::Vec(vec))
                                 }
                                 _ => panic!("unknown option type"),
                             }
                         }
                     }
-                } else {
-                    env.set(option.name.as_str(), option.default.clone());
                 }
             }
         }

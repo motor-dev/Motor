@@ -1,5 +1,5 @@
 use crate::context::Context;
-use crate::environment::ReadWriteEnvironment;
+use crate::environment::OverlayMap;
 use mlua::prelude::{LuaError, LuaFunction, LuaResult, LuaValue};
 use mlua::{AnyUserData, Lua};
 use std::ops::Deref;
@@ -9,15 +9,13 @@ pub(super) fn derive(
     _lua: &Lua,
     this: &mut Context,
     env: Option<AnyUserData>,
-) -> LuaResult<Arc<Mutex<ReadWriteEnvironment>>> {
+) -> LuaResult<Arc<Mutex<OverlayMap>>> {
     let from_env = if let Some(env) = env {
-        env.borrow::<Arc<Mutex<ReadWriteEnvironment>>>()?
-            .deref()
-            .clone()
+        env.borrow::<Arc<Mutex<OverlayMap>>>()?.deref().clone()
     } else {
         this.environment.clone()
     };
-    let new_env = Arc::new(Mutex::new(ReadWriteEnvironment::derive(
+    let new_env = Arc::new(Mutex::new(OverlayMap::derive(
         &from_env,
         this.output.environments.len(),
     )?));
@@ -30,7 +28,7 @@ pub(super) fn with(
     (context, env, function): (AnyUserData, AnyUserData, LuaFunction),
 ) -> LuaResult<LuaValue> {
     let prev_env = context.borrow_mut_scoped::<Context, _>(|context| {
-        let env = env.borrow_mut::<Arc<Mutex<ReadWriteEnvironment>>>()?;
+        let env = env.borrow_mut::<Arc<Mutex<OverlayMap>>>()?;
         let prev_env = context.environment.clone();
         context.environment = env.clone();
         drop(env);

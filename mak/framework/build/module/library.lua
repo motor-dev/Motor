@@ -13,10 +13,14 @@ local function filter_source(source_file, env)
 
     local platform_set = {}
     local arch_set = {}
-    for _, platform in ipairs(env.MOTOR_PLATFORMS) do
+    ---@type string[]
+    local platforms = env.MOTOR_PLATFORM
+    for _, platform in ipairs(platforms) do
         platform_set[platform] = true
     end
-    for _, arch in ipairs(env.MOTOR_ARCHITECTURES) do
+    ---@type string[]
+    local architectures = env.MOTOR_ARCHITECTURES
+    for _, arch in ipairs(architectures) do
         arch_set[arch] = true
     end
 
@@ -94,6 +98,9 @@ local function metagen(name, path)
     return generator
 end
 
+---@param name string
+---@param path string?
+---@param lib_types [string,string,string]
 local function module(name, path, lib_types)
     local name_components = string.split(name, '.')
     path = path or string.join('/', name_components)
@@ -109,7 +116,7 @@ local function module(name, path, lib_types)
 
     local meta_generator, meta_registry = metagen(name, path)
 
-    local generator = Bolt.Module.module(name, {
+    local properties = {
         features = { lib_type, 'motor_module' },
         source_patterns = {
             { path = path, pattern = 'src/**/*' }
@@ -128,7 +135,8 @@ local function module(name, path, lib_types)
             context.bld_dir:make_node(meta_generator.group):make_node(meta_generator.name):make_node('include')
         },
         internal_dependencies = { meta_registry },
-    })
+    }
+    local generator = Bolt.Module.module(name, properties)
     generator.meta_generator = meta_generator
     for _, include in ipairs(context:search(path, 'include', true)) do
         generator = generator:add_internal_include(include)
@@ -147,7 +155,7 @@ end
 ---@param name string name of the library.
 ---@param path string? qualified path of the library. Defaults to name.
 ---@return Module a new library module
-function Motor.module(name,  path)
+function Motor.module(name, path)
     return module(name, path, { 'objects', 'objects', 'shlib' })
 end
 
@@ -155,8 +163,8 @@ end
 ---@param name string name of the library.
 ---@param namespace string root namespace of meta objects.
 ---@param path string? qualified path of the library. Defaults to name.
-function Motor.package(name, namespace, path)
-    local result = module(name,  path, { 'shlib', 'objects', 'shlib' })
+function Motor.package(name, _namespace, path)
+    local result = module(name, path, { 'shlib', 'objects', 'shlib' })
     return result
 end
 
@@ -165,7 +173,7 @@ local function propagate_building_macro(module, current, seen)
         return
     end
     seen[current] = true
-    if current:has_all_features({"objects", "motor_module"}) then
+    if current:has_all_features({ "objects", "motor_module" }) then
         local name_components = string.split(current.name, '.')
         local module_name = name_components[#name_components]
         module:add_internal_define('building_' .. module_name, '1')
@@ -178,14 +186,14 @@ local function propagate_building_macro(module, current, seen)
     end
 end
 
-context:feature("motor_module", "motor_propagate_building_macro", function (module)
+context:feature("motor_module", "motor_propagate_building_macro", function(module)
     for _, dep in ipairs(module.internal_dependencies) do
         propagate_building_macro(module, dep, {})
     end
     for _, dep in ipairs(module.public_dependencies) do
         propagate_building_macro(module, dep, {})
     end
-end):set_run_before({'process_flags'})
+end):set_run_before({ 'process_flags' })
 
 local function process_registry(module)
     for _, metagen in ipairs(module.metagen_generators) do

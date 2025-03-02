@@ -1,3 +1,5 @@
+---@meta
+
 --- Logs a debug-level message.
 --- Debug messages provide detailed information for troubleshooting and are shown in the console only if the verbosity
 --- level is set to 2 or higher, but they are always recorded in the log file.
@@ -64,6 +66,6 @@ end
 ---
 ---@param message string The message to log before the operation begins.
 ---@param func fun():any The function to run within the try block.
----@return boolean true if the function completed successfully; `false` if an error occurred.
+---@return boolean #`true` if the function completed successfully; `false` if an error occurred.
 function Context:try(message, func)
 end

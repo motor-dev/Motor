@@ -1,3 +1,5 @@
+---@meta
+
 --- Starts a debug server.
 --- This function initializes and starts a debug server at the specified address and port.
 ---

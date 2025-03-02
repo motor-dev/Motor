@@ -1,5 +1,5 @@
 use crate::command::SerializedHash;
-use crate::environment::{ReadWriteEnvironment, ReadWriteEnvironmentVec};
+use crate::environment::{OverlayMap, OverlayMapVec};
 use crate::node::Node;
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -20,7 +20,7 @@ pub(crate) struct Task {
     pub(crate) driver: String,
     pub(crate) generator: String,
     pub(crate) group: String,
-    pub(crate) env: Arc<Mutex<ReadWriteEnvironment>>,
+    pub(crate) env: Arc<Mutex<OverlayMap>>,
     pub(crate) inputs: Vec<Node>,
     pub(crate) outputs: Vec<Node>,
     pub(crate) predecessors: Vec<usize>,
@@ -30,7 +30,7 @@ pub(crate) struct Task {
 
 pub(crate) struct TaskHandle(pub(crate) usize);
 
-pub(crate) struct TaskSeed<'a>(pub &'a ReadWriteEnvironmentVec);
+pub(crate) struct TaskSeed<'a>(pub(crate) &'a mut OverlayMapVec);
 
 impl Display for Task {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

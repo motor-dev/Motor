@@ -1,4 +1,5 @@
 use crate::driver::Output;
+use crate::environment::Lookup;
 use crate::node::Node;
 use crate::task::Task;
 use serde::{Deserialize, Serialize};
@@ -17,7 +18,7 @@ impl PatchDriverConfiguration {
 
     pub(super) fn execute(&self, task: &Task) -> Output {
         let driver_hash = self.hash(&[]);
-        let strip = task.env.lock().unwrap().get("PATCH_STRIP").as_int();
+        let strip = task.env.lock().unwrap().get_integer("PATCH_STRIP");
 
         if task.inputs.len() < 2 {
             return Output {

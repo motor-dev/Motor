@@ -1,8 +1,6 @@
-use super::lua_interop::EnvironmentParent;
-use super::{
-    Environment, ReadWriteEnvironment, ReadWriteEnvironmentSeed, ReadWriteEnvironmentSequenceSeed,
-    ReadWriteEnvironmentVec, SerializedReadWriteEnvironment,
-};
+use super::super::{FlatMap, OverlayMap, OverlayParent};
+use super::overlay_map_seq::OverlayMapVec;
+use super::value_map::MapValueMapSeed;
 use serde::de::{DeserializeSeed, Error, MapAccess, SeqAccess, Visitor};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -10,25 +8,25 @@ use std::collections::{BTreeMap, HashSet};
 use std::fmt;
 use std::sync::{Arc, Mutex};
 
-impl<'a> Serialize for SerializedReadWriteEnvironment<'a> {
+pub(crate) struct SerializedOverlayMap<'a>(pub(crate) &'a Arc<Mutex<OverlayMap>>);
+
+impl<'a> Serialize for SerializedOverlayMap<'a> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let mut s = serializer.serialize_struct("Environment", 2)?;
+        let mut s = serializer.serialize_struct("OverlayMap", 2)?;
         s.serialize_field(
             "parent",
             &match &self.0.lock().unwrap().parent {
-                EnvironmentParent::None => SerializedEnvironmentParent::None,
-                EnvironmentParent::Current(p) => {
-                    SerializedEnvironmentParent::Current(p.lock().unwrap().index)
+                OverlayParent::None => SerializedOverlayMapParent::None,
+                OverlayParent::Current(p) => {
+                    SerializedOverlayMapParent::Current(p.lock().unwrap().index)
                 }
-                EnvironmentParent::Parent(p) => {
-                    SerializedEnvironmentParent::Parent(p.lock().unwrap().index)
+                OverlayParent::Parent(p) => {
+                    SerializedOverlayMapParent::Parent(p.lock().unwrap().index)
                 }
-                EnvironmentParent::Leaf(p) => {
-                    SerializedEnvironmentParent::Leaf(p.lock().unwrap().index)
-                }
+                OverlayParent::Leaf(p) => SerializedOverlayMapParent::Leaf(p.lock().unwrap().index),
             },
         )?;
         s.serialize_field(
@@ -47,15 +45,20 @@ impl<'a> Serialize for SerializedReadWriteEnvironment<'a> {
 }
 
 #[derive(Serialize, Deserialize)]
-enum SerializedEnvironmentParent {
+enum SerializedOverlayMapParent {
     None,
     Current(usize),
     Parent(usize),
     Leaf(usize),
 }
 
-impl<'de, 'a> DeserializeSeed<'de> for ReadWriteEnvironmentSeed<'a> {
-    type Value = Arc<Mutex<ReadWriteEnvironment>>;
+pub(crate) struct OverlayMapSeed<'a> {
+    pub current: &'a mut OverlayMapVec,
+    pub parent: &'a OverlayMapVec,
+}
+
+impl<'de, 'a> DeserializeSeed<'de> for OverlayMapSeed<'a> {
+    type Value = Arc<Mutex<OverlayMap>>;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
@@ -96,16 +99,16 @@ impl<'de, 'a> DeserializeSeed<'de> for ReadWriteEnvironmentSeed<'a> {
             }
         }
 
-        struct ReadWriteEnvironmentVisitor<'a> {
-            current: &'a ReadWriteEnvironmentVec,
-            parent: &'a ReadWriteEnvironmentVec,
+        struct OverlayMapVisitor<'a> {
+            current: &'a mut OverlayMapVec,
+            parent: &'a OverlayMapVec,
         }
 
-        impl<'de, 'a> Visitor<'de> for ReadWriteEnvironmentVisitor<'a> {
-            type Value = Arc<Mutex<ReadWriteEnvironment>>;
+        impl<'de, 'a> Visitor<'de> for OverlayMapVisitor<'a> {
+            type Value = Arc<Mutex<OverlayMap>>;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("struct Environment")
+                formatter.write_str("struct OverlayMap")
             }
 
             fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
@@ -113,39 +116,52 @@ impl<'de, 'a> DeserializeSeed<'de> for ReadWriteEnvironmentSeed<'a> {
                 V: SeqAccess<'de>,
             {
                 let parent = seq
-                    .next_element::<SerializedEnvironmentParent>()?
+                    .next_element::<SerializedOverlayMapParent>()?
                     .ok_or_else(|| Error::invalid_length(0, &self))?;
                 let values = seq
-                    .next_element()?
+                    .next_element_seed(MapValueMapSeed(self.current))?
                     .ok_or_else(|| Error::invalid_length(1, &self))?;
                 let parent = match parent {
-                    SerializedEnvironmentParent::None => EnvironmentParent::None,
-                    SerializedEnvironmentParent::Current(index) => {
+                    SerializedOverlayMapParent::None => OverlayParent::None,
+                    SerializedOverlayMapParent::Current(index) => {
                         if self.current.len() <= index {
-                            return Err(Error::custom(format!("invalid environment index {}; expected an index in the range 0..{}", index, self.current.len())));
+                            return Err(Error::custom(format!(
+                                "invalid overlay index {}; expected an index in the range 0..{}",
+                                index,
+                                self.current.len()
+                            )));
                         }
-                        EnvironmentParent::Current(self.current[index].clone())
+                        OverlayParent::Current(self.current[index].clone())
                     }
-                    SerializedEnvironmentParent::Parent(index) => {
+                    SerializedOverlayMapParent::Parent(index) => {
                         if self.parent.len() <= index {
-                            return Err(Error::custom(format!("invalid environment index {}; expected an index in the range 0..{}", index, self.parent.len())));
+                            return Err(Error::custom(format!(
+                                "invalid overlay index {}; expected an index in the range 0..{}",
+                                index,
+                                self.parent.len()
+                            )));
                         }
-                        EnvironmentParent::Parent(self.parent[index].clone())
+                        OverlayParent::Parent(self.parent[index].clone())
                     }
-                    SerializedEnvironmentParent::Leaf(index) => {
+                    SerializedOverlayMapParent::Leaf(index) => {
                         if self.current.len() <= index {
-                            return Err(Error::custom(format!("invalid environment index {}; expected an index in the range 0..{}", index, self.current.len())));
+                            return Err(Error::custom(format!(
+                                "invalid overlay index {}; expected an index in the range 0..{}",
+                                index,
+                                self.current.len()
+                            )));
                         }
-                        EnvironmentParent::Leaf(self.current[index].clone())
+                        OverlayParent::Leaf(self.current[index].clone())
                     }
                 };
-                Ok(Arc::new(Mutex::new(ReadWriteEnvironment {
+                Ok(Arc::new(Mutex::new(OverlayMap {
                     parent,
                     index: self.current.len(),
-                    environment: Environment {
+                    environment: FlatMap {
                         values,
                         used_keys: HashSet::new(),
                     },
+                    sub_envs: Vec::new(),
                 })))
             }
 
@@ -167,40 +183,41 @@ impl<'de, 'a> DeserializeSeed<'de> for ReadWriteEnvironmentSeed<'a> {
                             if values.is_some() {
                                 return Err(Error::duplicate_field("values"));
                             }
-                            values = Some(map.next_value()?);
+                            values = Some(map.next_value_seed(MapValueMapSeed(self.current))?);
                         }
                     }
                 }
                 let parent = parent.ok_or_else(|| Error::missing_field("parent"))?;
                 let parent = match parent {
-                    SerializedEnvironmentParent::None => EnvironmentParent::None,
-                    SerializedEnvironmentParent::Current(index) => {
+                    SerializedOverlayMapParent::None => OverlayParent::None,
+                    SerializedOverlayMapParent::Current(index) => {
                         if self.current.len() <= index {
                             return Err(Error::custom(format!("invalid environment index {}; expected an index in the range 0..{}", index, self.current.len())));
                         }
-                        EnvironmentParent::Current(self.current[index].clone())
+                        OverlayParent::Current(self.current[index].clone())
                     }
-                    SerializedEnvironmentParent::Parent(index) => {
+                    SerializedOverlayMapParent::Parent(index) => {
                         if self.parent.len() <= index {
                             return Err(Error::custom(format!("invalid environment index {}; expected an index in the range 0..{}", index, self.parent.len())));
                         }
-                        EnvironmentParent::Parent(self.parent[index].clone())
+                        OverlayParent::Parent(self.parent[index].clone())
                     }
-                    SerializedEnvironmentParent::Leaf(index) => {
+                    SerializedOverlayMapParent::Leaf(index) => {
                         if self.current.len() <= index {
                             return Err(Error::custom(format!("invalid environment index {}; expected an index in the range 0..{}", index, self.current.len())));
                         }
-                        EnvironmentParent::Leaf(self.current[index].clone())
+                        OverlayParent::Leaf(self.current[index].clone())
                     }
                 };
                 let values = values.ok_or_else(|| Error::missing_field("values"))?;
-                Ok(Arc::new(Mutex::new(ReadWriteEnvironment {
+                Ok(Arc::new(Mutex::new(OverlayMap {
                     parent,
                     index: self.current.len(),
-                    environment: Environment {
+                    environment: FlatMap {
                         values,
                         used_keys: HashSet::new(),
                     },
+                    sub_envs: Vec::new(),
                 })))
             }
         }
@@ -208,48 +225,10 @@ impl<'de, 'a> DeserializeSeed<'de> for ReadWriteEnvironmentSeed<'a> {
         deserializer.deserialize_struct(
             "Environment",
             &["parent", "values"],
-            ReadWriteEnvironmentVisitor {
+            OverlayMapVisitor {
                 current: self.current,
                 parent: self.parent,
             },
         )
-    }
-}
-
-impl<'de, 'a> DeserializeSeed<'de> for ReadWriteEnvironmentSequenceSeed<'a> {
-    type Value = ReadWriteEnvironmentVec;
-
-    fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        struct EnvironmentSequenceVisitor<'a>(&'a ReadWriteEnvironmentVec);
-
-        impl<'de, 'a> Visitor<'de> for EnvironmentSequenceVisitor<'a> {
-            type Value = ReadWriteEnvironmentVec;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("sequence of struct Environment")
-            }
-
-            fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error>
-            where
-                V: SeqAccess<'de>,
-            {
-                let mut result = ReadWriteEnvironmentVec::new();
-                if let Some(size_hint) = seq.size_hint() {
-                    result.reserve(size_hint);
-                }
-                while let Some(elem) = seq.next_element_seed(ReadWriteEnvironmentSeed {
-                    current: &result,
-                    parent: self.0,
-                })? {
-                    result.push(elem);
-                }
-                Ok(result)
-            }
-        }
-
-        deserializer.deserialize_seq(EnvironmentSequenceVisitor(self.0))
     }
 }

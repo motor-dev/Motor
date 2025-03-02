@@ -44,6 +44,7 @@ end
 function Motor.create_toolchain(env)
     local target_name = env.TOOLCHAIN_ID
     local setup = context:declare_command('setup:' .. target_name, 'setup', env)
+    ---@type string[]
     local flavors = context.settings.flavors
     for _, flavor in ipairs(flavors) do
         context:chain_command(setup, 'build:' .. target_name .. ':' .. flavor, 'build')
@@ -72,6 +73,10 @@ end
 
 compilers = context.settings.compiler or compilers
 platforms = context.settings.platform or platforms
+
+---@cast compilers string[]
+---@cast platforms string[]
+
 for _, compiler in ipairs(compilers) do
     context:recurse('compiler/' .. compiler .. '.lua')
 end
