@@ -1,6 +1,6 @@
 use crate::command::{CommandOutput, SerializedHash};
 use crate::context::TOOLS_DIR;
-use crate::environment::{Environment, ReadWriteEnvironment};
+use crate::environment::{FlatMap, Hash, OverlayMap};
 use crate::node::Node;
 use blake3::Hasher;
 use std::iter::zip;
@@ -9,8 +9,8 @@ use std::sync::{Arc, Mutex};
 impl CommandOutput {
     pub(crate) fn hash(
         &self,
-        options: Option<&Environment>,
-        envs: &[Arc<Mutex<ReadWriteEnvironment>>],
+        options: Option<&FlatMap>,
+        envs: &[Arc<Mutex<OverlayMap>>],
         tools: &Vec<Node>,
     ) -> std::io::Result<(
         SerializedHash,
@@ -51,7 +51,7 @@ impl CommandOutput {
             let mut hasher = Hasher::new();
             if let Some(env) = options {
                 for env_var in &self.stored_hash.option_dependencies {
-                    env.get_raw(env_var.as_str()).hash(&mut hasher);
+                    env.hash(env_var.as_str(), &mut hasher);
                 }
             }
             SerializedHash(hasher.finalize())
@@ -62,7 +62,7 @@ impl CommandOutput {
             for (vars, env_arc) in zip(self.stored_hash.variable_dependencies.iter(), envs.iter()) {
                 let env = env_arc.lock().unwrap();
                 for var in vars {
-                    env.get_raw(var.as_str()).hash(&mut hasher);
+                    env.hash(var.as_str(), &mut hasher);
                 }
             }
             SerializedHash(hasher.finalize())

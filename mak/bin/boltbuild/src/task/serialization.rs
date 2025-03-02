@@ -1,7 +1,5 @@
 use super::{Task, TaskSeed};
-use crate::environment::{
-    ReadWriteEnvironmentSeed, ReadWriteEnvironmentVec, SerializedReadWriteEnvironment,
-};
+use crate::environment::serialization::{OverlayMapSeed, OverlayMapVec, SerializedOverlayMap};
 use crate::node::Node;
 use serde::de::{DeserializeSeed, Error, MapAccess, SeqAccess, Visitor};
 use serde::ser::SerializeStruct;
@@ -17,7 +15,7 @@ impl Serialize for Task {
         s.serialize_field("driver", &self.driver)?;
         s.serialize_field("generator", &self.generator)?;
         s.serialize_field("group", &self.group)?;
-        s.serialize_field("env", &SerializedReadWriteEnvironment(&self.env))?;
+        s.serialize_field("env", &SerializedOverlayMap(&self.env))?;
         s.serialize_field("inputs", &self.inputs)?;
         s.serialize_field("outputs", &self.outputs)?;
         s.serialize_field("predecessors", &self.predecessors)?;
@@ -97,7 +95,7 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
             }
         }
 
-        struct TaskVisitor<'a>(&'a ReadWriteEnvironmentVec);
+        struct TaskVisitor<'a>(&'a mut OverlayMapVec);
 
         impl<'de, 'a> Visitor<'de> for TaskVisitor<'a> {
             type Value = Task;
@@ -120,7 +118,7 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
                     .next_element()?
                     .ok_or_else(|| Error::invalid_length(2, &self))?;
                 let env = seq
-                    .next_element_seed(ReadWriteEnvironmentSeed {
+                    .next_element_seed(OverlayMapSeed {
                         current: self.0,
                         parent: &Vec::new(),
                     })?
@@ -190,7 +188,7 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
                             if env.is_some() {
                                 return Err(Error::duplicate_field("env"));
                             }
-                            env = Some(map.next_value_seed(ReadWriteEnvironmentSeed {
+                            env = Some(map.next_value_seed(OverlayMapSeed {
                                 current: self.0,
                                 parent: &Vec::new(),
                             })?);

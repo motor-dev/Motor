@@ -1,4 +1,5 @@
 use super::Output;
+use crate::environment::Lookup;
 use crate::node::Node;
 use crate::task::Task;
 use serde::{Deserialize, Serialize};
@@ -26,8 +27,7 @@ impl DependencyCommandDriverConfiguration {
             .env
             .lock()
             .unwrap()
-            .get(self.dependency_var.as_str())
-            .as_string();
+            .get_string(self.dependency_var.as_str());
         let mut extra_options = Vec::new();
         match dep_type.as_str() {
             "msvc" => {

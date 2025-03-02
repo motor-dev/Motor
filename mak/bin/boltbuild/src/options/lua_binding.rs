@@ -1,6 +1,6 @@
 use super::CommandLineParser;
-use crate::environment::EnvironmentValue;
-use mlua::{AnyUserData, IntoLua, MetaMethod, Result, UserData, UserDataMethods};
+use crate::environment::MapValue;
+use mlua::{AnyUserData, MetaMethod, Result, UserData, UserDataMethods};
 use std::sync::{Arc, Mutex};
 
 struct InterfaceIndex(usize);
@@ -54,8 +54,8 @@ impl UserData for CommandLineParser {
         methods.add_meta_method_mut(
             MetaMethod::NewIndex,
             |_lua, this, (key, value): (String, mlua::Value)| -> Result<()> {
-                if let Some(index) = this.options.iter().position(|x| x.name.eq(&key)) {
-                    this.options[index].default = EnvironmentValue::from_lua(&value)?;
+                if this.options.iter().position(|x| x.name.eq(&key)).is_some() {
+                    this.map.set(&key, MapValue::from_lua(&value)?);
                     Ok(())
                 } else {
                     Err(mlua::Error::RuntimeError(
@@ -68,8 +68,8 @@ impl UserData for CommandLineParser {
         methods.add_meta_method_mut(
             MetaMethod::Index,
             |lua, this, key: String| -> Result<mlua::Value> {
-                if let Some(index) = this.options.iter().position(|x| x.name.eq(&key)) {
-                    this.options[index].default.into_lua(lua)
+                if this.options.iter().position(|x| x.name.eq(&key)).is_some() {
+                    this.map.get_into_lua(lua, &key)
                 } else {
                     Err(mlua::Error::RuntimeError(
                         format!("'{}': no option registered with this name", key).to_string(),
@@ -85,9 +85,9 @@ impl UserData for CommandLineParser {
                     let this = args.0.borrow_mut::<Arc<Mutex<CommandLineParser>>>()?;
                     let mut this = this.lock().unwrap();
                     let default = if let Some(value) = args.3 {
-                        EnvironmentValue::Bool(value)
+                        MapValue::Bool(value)
                     } else {
-                        EnvironmentValue::None
+                        MapValue::None
                     };
                     this.add_flag(args.1, args.2, default)?;
                     lua.create_userdata(InterfaceIndex(this.options.len() - 1))?
@@ -103,7 +103,7 @@ impl UserData for CommandLineParser {
                 let result = {
                     let this = args.0.borrow_mut::<Arc<Mutex<CommandLineParser>>>()?;
                     let mut this = this.lock().unwrap();
-                    this.add_value(args.1, args.2, EnvironmentValue::from_lua(&args.3)?)?;
+                    this.add_value(args.1, args.2, MapValue::from_lua(&args.3)?)?;
                     _lua.create_userdata(InterfaceIndex(this.options.len() - 1))?
                 };
                 result.set_user_value(args.0)?;
@@ -117,7 +117,7 @@ impl UserData for CommandLineParser {
                 let result = {
                     let this = args.0.borrow_mut::<Arc<Mutex<CommandLineParser>>>()?;
                     let mut this = this.lock().unwrap();
-                    this.add_count(args.1, args.2, EnvironmentValue::from_lua(&args.3)?)?;
+                    this.add_count(args.1, args.2, MapValue::from_lua(&args.3)?)?;
                     lua.create_userdata(InterfaceIndex(this.options.len() - 1))?
                 };
                 result.set_user_value(args.0)?;
@@ -131,7 +131,7 @@ impl UserData for CommandLineParser {
                 let result = {
                     let this = args.0.borrow_mut::<Arc<Mutex<CommandLineParser>>>()?;
                     let mut this = this.lock().unwrap();
-                    this.add_list(args.1, args.2, EnvironmentValue::from_lua(&args.3)?)?;
+                    this.add_list(args.1, args.2, MapValue::from_lua(&args.3)?)?;
                     lua.create_userdata(InterfaceIndex(this.options.len() - 1))?
                 };
                 result.set_user_value(args.0)?;
@@ -149,7 +149,7 @@ impl UserData for CommandLineParser {
                         args.1,
                         args.2,
                         args.3.as_slice(),
-                        EnvironmentValue::from_lua(&args.4)?,
+                        MapValue::from_lua(&args.4)?,
                     )?;
                     lua.create_userdata(InterfaceIndex(this.options.len() - 1))?
                 };

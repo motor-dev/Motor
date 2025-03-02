@@ -1,7 +1,7 @@
 use crate::command::SerializedHash;
 use crate::context::Context;
 use crate::driver::Driver;
-use crate::environment::ReadWriteEnvironment;
+use crate::environment::OverlayMap;
 use crate::node::Node;
 use crate::task::{Task, ENV_RE, SPLIT_RE};
 use mlua::prelude::{LuaError, LuaResult, LuaValue};
@@ -128,9 +128,7 @@ pub(super) fn run_driver(
         }
     };
     let env = if let Some(env) = env {
-        env.borrow::<Arc<Mutex<ReadWriteEnvironment>>>()?
-            .deref()
-            .clone()
+        env.borrow::<Arc<Mutex<OverlayMap>>>()?.deref().clone()
     } else {
         context.environment.clone()
     };

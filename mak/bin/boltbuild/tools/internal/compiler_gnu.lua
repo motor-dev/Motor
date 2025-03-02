@@ -3,7 +3,7 @@ local context = ...
 
 context:load_tool('internal/bolt')
 
-Bolt.GnuCompiler = { }
+Bolt.GnuCompiler = {}
 
 ---Retrieves some GCC specifications and store them in the current context environment
 ---@param command (string|Node)[] The command to execute for the compiler.
@@ -11,11 +11,13 @@ Bolt.GnuCompiler = { }
 function Bolt.GnuCompiler.get_specs(command, language)
     local env = context.env
 
-    local include_command = { }
+    local include_command = {}
     for _, flag in ipairs(command) do
         table.insert(include_command, flag)
     end
-    for _, flag in ipairs(env[language .. 'FLAGS']) do
+    ---@type string[]
+    local flags = env[language .. 'FLAGS']
+    for _, flag in ipairs(flags) do
         table.insert(include_command, flag)
     end
     table.insert(include_command, '-v')
@@ -26,7 +28,7 @@ function Bolt.GnuCompiler.get_specs(command, language)
     local handle = context:popen(include_command)
     local success, out, err = handle:communicate()
     if not success then
-        error(err)
+        error(tostring(err))
     end
 
     ---@type table<string, string>
@@ -144,15 +146,20 @@ function Bolt.GnuCompiler.get_specs(command, language)
     end
     env.ARCHITECTURE = arch
 
-    local lib_command = { table.unpack(command) }
-    for _, flag in ipairs(env[language .. 'FLAGS']) do
+    local lib_command = {}
+    for _, flag in ipairs(command) do
+        table.insert(lib_command, flag)
+    end
+    ---@type string[]
+    local flags = env[language .. 'FLAGS']
+    for _, flag in ipairs(flags) do
         table.insert(lib_command, flag)
     end
     table.insert(lib_command, '-print-search-dirs')
     handle = context:popen(lib_command)
     success, out, err = handle:communicate()
     if not success then
-        error(err)
+        error(tostring(err))
     end
     for line in (err + out):lines() do
         if string.starts_with(line, 'libraries: =') then

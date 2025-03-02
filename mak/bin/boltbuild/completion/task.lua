@@ -1,3 +1,5 @@
+---@meta
+
 ---Creates a driver to execute a specified command with arguments and variable expansions, primarily for task management.
 ---The command is a string that may include references to environment variables using `${VAR}` syntax. Variables from the
 ---task’s environment are expanded to strings or lists of strings, allowing flexibility in argument construction.
@@ -18,7 +20,7 @@
 ---@param name string The driver’s name.
 ---@param color string Color for logging this driver’s output.
 ---@param command string The command to execute, potentially including variables for expansion.
----@param run_before string[]? Optional. The name of other drivers that this driver runs before. All tasks using this driver will be scheduled before tasks using the specified drivers.
+---@param run_before (string|string[])? Optional. The name of other drivers that this driver runs before. All tasks using this driver will be scheduled before tasks using the specified drivers.
 function Context:command_driver(name, color, command, run_before)
 end
 
@@ -33,7 +35,7 @@ end
 ---@param color string A color identifier for the driver, used for console log display.
 ---@param command string The command string to execute.
 ---@param dependency_type string The name of an environment variable that contains the dependency file type, e.g. "C_DEP_TYPE". Supported types are `gnu`, and `msvc`.
----@param run_before string[]? Optional. The name of other drivers that this driver runs before. All tasks using this driver will be scheduled before tasks using the specified drivers.
+---@param run_before (string|string[])? Optional. The name of other drivers that this driver runs before. All tasks using this driver will be scheduled before tasks using the specified drivers.
 function Context:dependency_driver(name, color, command, run_before)
 end
 
@@ -104,7 +106,8 @@ end
 ---  - The expanded command string, showing what was actually executed.
 ---
 ---@param command string The command to execute, potentially including variables for expansion.
----@return number, string, string Exit code, combined output and error logs, and expanded command string.
+---@return number #Exit code
+---@return string #Combined output and error logs
+---@return string #Expanded command string.
 function Task:run_command(command)
-    return 0, '', ''
 end

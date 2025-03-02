@@ -12,7 +12,7 @@ mod subprocess;
 mod task;
 
 use crate::command::{CommandOutput, CommandSpec};
-use crate::environment::ReadWriteEnvironment;
+use crate::environment::OverlayMap;
 use crate::log::Logger;
 use crate::node::Node;
 use crate::options::Options;
@@ -39,7 +39,7 @@ struct NodeData {
 pub(crate) struct Context {
     spec: CommandSpec,
     pub(crate) output: CommandOutput,
-    environment: Arc<Mutex<ReadWriteEnvironment>>,
+    environment: Arc<Mutex<OverlayMap>>,
     pub(crate) tasks: Vec<Task>,
     products: HashMap<Node, NodeData>,
     pub(crate) signatures: Vec<blake3::Hasher>,

@@ -3,8 +3,9 @@ local task = ...
 
 local content = ''
 local source_dir = task.outputs[1].parent
----@param source Node
-for _, source in ipairs(task.env.FILES) do
+--- @type Node[]
+local files = task.env.FILES
+for _, source in ipairs(files) do
     content = content .. '#include "' .. source:path_from(source_dir) .. '"\n'
 end
 

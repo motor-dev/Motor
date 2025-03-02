@@ -106,16 +106,19 @@ local function test_cl(env, lang, flags)
     table.insert(command, '/EP')
     test_file:write(test_content)
     local p = context:popen(command)
-    local result, out, err = p:communicate('')
+    local result, _out, err = p:communicate('')
     if result ~= true then
         context:raise_error('Failed to compile test file:\n' .. tostring(err))
     end
     return result
 end
 
+--- Discovers available MSVC compilers.
+---
+--- @return [string,string,string,Node,string][]
 local function vswhere_msvc()
     local compilers = {}
-    local vswhere
+    local vswhere ---@type string
     if context.settings.OS == 'windows' then
         vswhere = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe'
     else
@@ -129,7 +132,7 @@ local function vswhere_msvc()
         '-find',
         'VC\\Tools\\MSVC',
     })
-    local result, out, err = p:communicate('')
+    local result, out, _err = p:communicate('')
     if result then
         for path in out:lines() do
             local vs_path

@@ -10,7 +10,7 @@ function Bolt.Flex.find_flex()
             local flex = context:find_program('flex')
             context.env.FLEX = flex
             if flex then
-                context.env.FLEXFLAGS = { }
+                context.env.FLEXFLAGS = {}
                 return flex
             else
                 context:raise_error('flex not found')
@@ -20,9 +20,9 @@ function Bolt.Flex.find_flex()
 end
 
 context:command_driver('flex',
-        'magenta',
-        '${FLEX} ${FLEXFLAGS} -o ${TGT[0]} ${SRC[0]}',
-        { 'c', 'cxx' })
+    'magenta',
+    '${FLEX} ${FLEXFLAGS} -o ${TGT[0]} ${SRC[0]}',
+    { 'c', 'cxx' })
 
 ---@param generator Module
 Bolt.ModuleCore.register_extension('l,ll', function(generator, source_file)

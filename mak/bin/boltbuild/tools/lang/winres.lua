@@ -3,8 +3,8 @@ local context = ...
 context:load_tool('internal/module_core')
 
 context:command_driver('rc',
-        'magenta',
-        '${RC} ${RCFLAGS} ${RC_SRC_F:SRC[0]} ${RC_TGT_F:TGT[0]}')
+    'magenta',
+    '${RC} ${RCFLAGS} ${RC_SRC_F:SRC[0]} ${RC_TGT_F:TGT[0]}')
 
 Bolt.Winres = {}
 
@@ -15,7 +15,7 @@ function Bolt.Winres.find_winres(env)
                 local rc = context:find_program('rc')
                 env.RC = rc
                 if rc then
-                    env.RCFLAGS = { }
+                    env.RCFLAGS = {}
                     return rc
                 else
                     context:raise_error('rc not found')
@@ -44,7 +44,7 @@ function Bolt.Winres.find_winres(env)
 end
 
 ---@param generator Module
-Bolt.ModuleCore.register_extension('ico', function(generator, source_file)
+Bolt.ModuleCore.register_extension('ico', function(_generator, _source_file)
 end)
 
 ---@param generator Module

@@ -1,8 +1,7 @@
 use crate::context::operations::DeclaredCommand;
 use crate::context::{Context, TOOLS_DIR, TOOLS_PATH};
-use crate::environment::ReadWriteEnvironment;
+use crate::environment::OverlayMap;
 use crate::node::Node;
-use crate::options::Options;
 use include_dir::Dir;
 use mlua::prelude::{LuaError, LuaResult, LuaString, LuaValue};
 use mlua::{AnyUserData, FromLua, Lua, UserData};
@@ -41,18 +40,8 @@ pub(super) fn load_tool(
     lua: &Lua,
     (this, tool, again): (AnyUserData, String, Option<bool>),
 ) -> LuaResult<()> {
-    let paths = this.borrow_mut_scoped::<Context, _>(|this| {
-        let mut nodes = Vec::new();
-        for x in match &mut this.options {
-            Options::Environment(e) => e.lock().unwrap().get_into_list("tools_dir"),
-            Options::CommandLineParser(cl) => {
-                let cl = cl.lock().unwrap();
-                cl.get_value_lua("tools_dir")?.into_list()
-            }
-        } {
-            nodes.push(x.as_node(&this.path)?);
-        }
-        Ok::<_, LuaError>(nodes)
+    let paths = this.borrow_scoped::<Context, _>(|this| {
+        Ok::<_, LuaError>(this.options.get_node_vec("tools_dir", &this.path))
     })??;
     let tool_file = tool.to_owned() + ".lua";
 
@@ -130,7 +119,7 @@ pub(super) fn declare_command(
     if args.2.is_table() {
         for env in Vec::<AnyUserData>::from_lua(args.2, lua)? {
             envs.push(
-                env.borrow::<Arc<Mutex<ReadWriteEnvironment>>>()?
+                env.borrow::<Arc<Mutex<OverlayMap>>>()?
                     .lock()
                     .unwrap()
                     .index,
@@ -140,7 +129,7 @@ pub(super) fn declare_command(
         envs.push(this.environment.lock().unwrap().index);
     } else if let Some(env) = args.2.as_userdata() {
         envs.push(
-            env.borrow::<Arc<Mutex<ReadWriteEnvironment>>>()?
+            env.borrow::<Arc<Mutex<OverlayMap>>>()?
                 .lock()
                 .unwrap()
                 .index,

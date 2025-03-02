@@ -12,17 +12,19 @@ function Bolt.Wget.find_wget()
         local wget
         wget = context:find_program('wget')
         if wget then
+            --- @cast wget -nil
             context.env.WGET = wget
-            context.env.WGET_OPTIONS = { '-q'}
-            context.env.WGET_URL_F = { }
+            context.env.WGET_OPTIONS = { '-q' }
+            context.env.WGET_URL_F = {}
             context.env.WGET_OUT_F = { '-O' }
             context.env.WGET_CHECK_OPTIONS = { '--spider' }
             return wget:abs_path()
         end
         wget = context:find_program('curl')
         if wget then
+            --- @cast wget -nil
             context.env.WGET = wget
-            context.env.WGET_OPTIONS = { }
+            context.env.WGET_OPTIONS = {}
             context.env.WGET_URL_F = { '-s' }
             context.env.WGET_OUT_F = { '-o' }
             context.env.WGET_CHECK_OPTIONS = { '-I' }
@@ -33,6 +35,7 @@ function Bolt.Wget.find_wget()
             wget = context:find_program('powershell')
         end
         if wget then
+            --- @cast wget -nil
             context.env.WGET = wget
             context.env.WGET_OPTIONS = { '-Command', 'Invoke-WebRequest' }
             context.env.WGET_URL_F = { '-Uri' }

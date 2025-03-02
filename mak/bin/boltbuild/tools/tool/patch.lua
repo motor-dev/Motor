@@ -17,9 +17,16 @@ Bolt.Patch = {}
 --- @param strip number? The number of leading directories to strip in the diff file.
 function Bolt.Patch.patch(generator, diff, source, target, strip)
     strip = strip or 1
+    local sources = { source }
+
     if type(diff) ~= 'table' then
-        diff = { diff }
+        table.insert(sources, diff)
+    else
+        ---@cast diff -Node
+        for _, source in ipairs(diff) do
+            table.insert(sources, source)
+        end
     end
-    generator:declare_task('patch', { source, table.unpack(diff) }, { target })
+    generator:declare_task('patch', sources, { target })
     generator.env.PATCH_STRIP = strip
 end

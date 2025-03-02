@@ -1,4 +1,4 @@
-use crate::environment::EnvironmentValue;
+use crate::environment::MapValue;
 use serde::{Deserialize, Serialize};
 use std::ffi::OsStr;
 use std::fmt::Display;
@@ -170,19 +170,14 @@ fn normalize_path(path: &Path) -> PathBuf {
     ret
 }
 
-impl From<&Node> for EnvironmentValue {
+impl From<&Node> for MapValue {
     fn from(value: &Node) -> Self {
-        EnvironmentValue::Node(value.clone())
+        MapValue::Node(value.clone())
     }
 }
 
-impl From<&Vec<Node>> for EnvironmentValue {
+impl From<&Vec<Node>> for MapValue {
     fn from(value: &Vec<Node>) -> Self {
-        EnvironmentValue::Vec(
-            value
-                .iter()
-                .map(|x| x.into())
-                .collect::<Vec<EnvironmentValue>>(),
-        )
+        MapValue::Vec(value.iter().map(|x| x.into()).collect::<Vec<MapValue>>())
     }
 }

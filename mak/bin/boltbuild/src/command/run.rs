@@ -1,7 +1,7 @@
 use super::serialization::TaskSequenceSeed;
 use super::{Command, CommandOutput, CommandSpec, CommandStatus, TaskSeq};
 use crate::context::Context;
-use crate::environment::{Environment, ReadWriteEnvironment};
+use crate::environment::{FlatMap, OverlayMap};
 use crate::error::Result;
 use crate::log::Logger;
 use crate::node::Node;
@@ -16,7 +16,7 @@ impl Command {
         matches!(&self.status, CommandStatus::UpToDate)
     }
 
-    pub(crate) fn get_run_options(&self) -> Option<&Environment> {
+    pub(crate) fn get_run_options(&self) -> Option<&FlatMap> {
         if let Some(output) = &self.output {
             output.options.as_ref()
         } else {
@@ -26,8 +26,8 @@ impl Command {
 
     pub(crate) fn verify_hash(
         &mut self,
-        options: &Environment,
-        envs: &[Arc<Mutex<ReadWriteEnvironment>>],
+        options: &FlatMap,
+        envs: &[Arc<Mutex<OverlayMap>>],
         mut tools: Vec<Node>,
     ) -> std::result::Result<(), String> {
         if let Some(output) = &mut self.output {
@@ -35,7 +35,7 @@ impl Command {
             if let TaskSeq::Cached(tasks_file) = &output.tasks {
                 if let Ok(buffer) = std::fs::read(tasks_file) {
                     let task_result = bincode::serde::decode_seed_from_slice(
-                        TaskSequenceSeed(&output.environments),
+                        TaskSequenceSeed(&mut output.environments),
                         buffer.as_slice(),
                         bincode::config::standard(),
                     );
@@ -124,7 +124,7 @@ impl Command {
     pub(crate) fn run(
         &mut self,
         options_context: Options,
-        envs: &Vec<Arc<Mutex<ReadWriteEnvironment>>>,
+        envs: &Vec<Arc<Mutex<OverlayMap>>>,
         tools: &Vec<Node>,
         command_path: Vec<String>,
         commands: &mut HashMap<String, Vec<String>>,

@@ -1,3 +1,5 @@
+---@meta
+
 --- Recursively loads or executes the script at the specified `path`.
 --- - If `path` is a file, it will be executed directly.
 --- - If `path` is a directory, the function will search for a file named after the `context.fun` basename in that directory
@@ -30,10 +32,9 @@ local DeclaredCommand = {}
 ---@param name string The unique name of the command to declare. This name is linked to `Context.name`.
 ---@param fun string The function name associated with this command, linked to `Context.fun`.
 ---@param envs Environment|Environment[]? An environment or list of environments that this command will use.
----                                      Derived environments will inherit from these environments for use during command execution.
----@return DeclaredCommand A `DeclaredCommand` object representing the newly declared command, which can be used for chaining.
+---   Derived environments will inherit from these environments for use during command execution.
+---@return DeclaredCommand #A `DeclaredCommand` object representing the newly declared command, which can be used for chaining.
 function Context:declare_command(name, fun, envs)
-    return DeclaredCommand
 end
 
 --- Declares a command that will be formally declared by another command upon its execution.
@@ -43,7 +44,6 @@ end
 ---@param depending DeclaredCommand The command that must be executed before this new command is formally declared.
 ---@param name string The unique name of the new command. Each command must have a unique name. Linked to `Context.name`.
 ---@param fun string The function name associated with the new command, corresponding to `Context.fun`.
----@return DeclaredCommand A `DeclaredCommand` object for the newly declared chained command, allowing further declarations if needed.
+---@return DeclaredCommand #A `DeclaredCommand` object for the newly declared chained command, allowing further declarations if needed.
 function Context:chain_command(depending, name, fun)
-    return DeclaredCommand
 end

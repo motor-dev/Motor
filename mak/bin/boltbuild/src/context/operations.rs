@@ -4,7 +4,7 @@ use crate::command::{
     TaskSeq,
 };
 use crate::context::{TOOLS_DIR, TOOLS_PATH};
-use crate::environment::ReadWriteEnvironment;
+use crate::environment::{OverlayMap, RawLookup};
 use crate::log::Logger;
 use crate::node::Node;
 use crate::options::Options;
@@ -35,7 +35,7 @@ impl Context {
     pub(crate) fn new(
         spec: CommandSpec,
         options_context: Options,
-        envs: &[Arc<Mutex<ReadWriteEnvironment>>],
+        envs: &[Arc<Mutex<OverlayMap>>],
         command_path: Vec<String>,
     ) -> crate::error::Result<Context> {
         let current_dir = Node::from(&std::env::current_dir()?);
@@ -43,21 +43,17 @@ impl Context {
             options
                 .lock()
                 .unwrap()
-                .get_raw("out")
-                .as_node(&current_dir)?
+                .get_node("out", &current_dir)
+                .unwrap()
         } else {
             current_dir.clone()
         };
         bld_dir.mkdir()?;
-        let run_envs: Vec<Arc<Mutex<ReadWriteEnvironment>>> = spec
+        let run_envs: Vec<Arc<Mutex<OverlayMap>>> = spec
             .envs
             .iter()
             .enumerate()
-            .map(|(i, &x)| {
-                Arc::new(Mutex::new(ReadWriteEnvironment::derive_from_parent(
-                    &envs[x], i,
-                )))
-            })
+            .map(|(i, &x)| Arc::new(Mutex::new(OverlayMap::derive_from_parent(&envs[x], i))))
             .collect();
         let start_env = run_envs[0].clone();
         Ok(Context {
@@ -101,7 +97,7 @@ impl Context {
 
     pub(crate) fn run(
         &mut self,
-        envs: &Vec<Arc<Mutex<ReadWriteEnvironment>>>,
+        envs: &Vec<Arc<Mutex<OverlayMap>>>,
         tools: &Vec<Node>,
         commands: &mut HashMap<String, Vec<String>>,
         mut logger: Logger,
@@ -214,15 +210,10 @@ impl Context {
         }
 
         for env in envs {
-            self.output.stored_hash.variable_dependencies.push(
-                env.lock()
-                    .unwrap()
-                    .environment
-                    .used_keys
-                    .iter()
-                    .cloned()
-                    .collect(),
-            )
+            self.output
+                .stored_hash
+                .variable_dependencies
+                .push(env.lock().unwrap().get_used_keys())
         }
         if let Options::Environment(e) = &self.options {
             self.output.options = Some(e.lock().unwrap().clone());

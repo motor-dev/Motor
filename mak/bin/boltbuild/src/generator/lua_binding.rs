@@ -1,7 +1,7 @@
 use super::Generator;
 use crate::command::SerializedHash;
 use crate::context::Context;
-use crate::environment::ReadWriteEnvironment;
+use crate::environment::OverlayMap;
 use crate::node::Node;
 use crate::task::{Task, TaskHandle};
 use mlua::prelude::{LuaError, LuaValue};
@@ -91,12 +91,12 @@ impl UserData for Generator {
                     return Err(LuaError::RuntimeError(format!("Context has no driver for tasks of type `{}`", &driver)));
                 }
                 let from_env = if let Some(env) = env {
-                    env.borrow::<Arc<Mutex<ReadWriteEnvironment>>>()?.deref().clone()
+                    env.borrow::<Arc<Mutex<OverlayMap>>>()?.deref().clone()
                 } else {
                     generator.env.clone()
                 };
 
-                let env = Arc::new(Mutex::new(ReadWriteEnvironment::derive_leaf(&from_env)?));
+                let env = Arc::new(Mutex::new(OverlayMap::derive_leaf(&from_env)?));
                 let task = Task {
                     driver: driver.clone(),
                     generator: generator.name.clone(),

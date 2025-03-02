@@ -17,27 +17,27 @@ local _
 local _
 
 ---@class (exact) ModuleProperties
----@field features string[]|nil
----@field group string|nil
----@field public_includes Node[]|nil
----@field internal_includes Node[]|nil
----@field public_defines string[]|nil
----@field internal_defines string[]|nil
----@field public_dependencies string[]|nil
----@field internal_dependencies string[]|nil
----@field public_flags table<string,string>[]|nil
----@field internal_flags table<string,string>[]|nil
----@field flag_groups string[]
----@field source SourceFile[]|nil
----@field source_patterns SourcePattern[]|nil
----@field source_filter nil|fun(source_file:SourceFile,env:Environment):boolean,boolean
+---@field features string[]?
+---@field group string?
+---@field public_includes Node[]?
+---@field internal_includes Node[]?
+---@field public_defines string[]?
+---@field internal_defines string[]?
+---@field public_dependencies string[]?
+---@field internal_dependencies string[]?
+---@field public_flags table<string,string>[]?
+---@field internal_flags table<string,string>[]?
+---@field flag_groups string[]?
+---@field source SourceFile[]?
+---@field source_patterns SourcePattern[]?
+---@field source_filter fun(source_file:SourceFile,env:Environment):[boolean,boolean]?
 local _
 
 ---@class Module : Generator
 ---@field objects Node[]
 ---@field source SourceFile[]
 ---@field source_patterns SourcePattern[]
----@field source_filter fun(source_file:SourceFile,env:Environment):boolean,boolean
+---@field source_filter fun(source_file:SourceFile,env:Environment):[boolean,boolean]
 ---@field internal_includes Node[]
 ---@field public_includes Node[]
 ---@field internal_defines string[]
@@ -78,6 +78,7 @@ function Module:add_public_include(path)
     table.insert(self.public_includes, path)
     return self
 end
+
 ---@param path Node
 ---@return Module
 function Module:add_internal_include(path)
@@ -135,6 +136,7 @@ end
 
 ---@param source_file SourceFile
 ---@param category string?
+---@return Node,Node
 function Module:make_build_node(source_file, category)
     category = category or 'obj'
     local directory = self.bld_dir:make_node(category)
@@ -151,26 +153,27 @@ end
 ---@param properties ModuleProperties
 ---@return Module
 function Bolt.Module.module(name, properties)
-    local features = { 'module', table.unpack(properties.features or {}) }
+    local features = properties.features or {} ---@type string[]
+    table.insert(features, 1, 'module')
     local g = context:declare_generator(name, features, context.env, properties.group)
 
     local name_parts = string.split(name, '/')
 
-    g.objects = { }
+    g.objects = {}
     g.compiled_tasks = {}
     g.target = name_parts[#name_parts]:gsub("%?<>:%*|%\"", "-")
-    g.source = properties.source or { }
-    g.source_patterns = properties.source_patterns or { }
+    g.source = properties.source or {}
+    g.source_patterns = properties.source_patterns or {}
     g.source_filter = properties.source_filter or default_filter
-    g.internal_includes = properties.internal_includes or { }
-    g.public_includes = properties.public_includes or { }
-    g.internal_defines = properties.internal_defines or { }
-    g.public_defines = properties.public_defines or { }
-    g.internal_dependencies = properties.internal_dependencies or { }
-    g.public_dependencies = properties.public_dependencies or { }
-    g.internal_flags = properties.internal_flags or { }
-    g.public_flags = properties.public_flags or { }
-    g.flag_groups = properties.flag_groups or { }
+    g.internal_includes = properties.internal_includes or {}
+    g.public_includes = properties.public_includes or {}
+    g.internal_defines = properties.internal_defines or {}
+    g.public_defines = properties.public_defines or {}
+    g.internal_dependencies = properties.internal_dependencies or {}
+    g.public_dependencies = properties.public_dependencies or {}
+    g.internal_flags = properties.internal_flags or {}
+    g.public_flags = properties.public_flags or {}
+    g.flag_groups = properties.flag_groups or {}
     g.dep_link_tasks = {}
 
     g.add_source = Module.add_source
@@ -239,9 +242,11 @@ end
 
 function Bolt.Module.pkg_config(name, var)
     if context.env['check_' .. var] then
-        local cflags = context.env['check_' .. var .. '_cflags']
-        local libs = context.env['check_' .. var .. '_libs']
-        local ldflags = context.env['check_' .. var .. '_ldflags']
-        return Bolt.Module.module(name, { public_flags = { CFLAGS = cflags, CXXFLAGS = cflags, LINKFLAGS = ldflags, LIBS = libs } })
+        local cflags = context.env['check_' .. var .. '_cflags'] ---@type string[]
+        local libs = context.env['check_' .. var .. '_libs'] ---@type string[]
+        local ldflags = context.env['check_' .. var .. '_ldflags'] ---@type string[]
+        ---@type ModuleProperties
+        local properties = { public_flags = { CFLAGS = cflags, CXXFLAGS = cflags, LINKFLAGS = ldflags, LIBS = libs } }
+        return Bolt.Module.module(name, properties)
     end
 end

@@ -1,5 +1,5 @@
 use crate::command::{Command, GroupStatus, Targets};
-use crate::environment::{Environment, EnvironmentValue, ReadWriteEnvironment};
+use crate::environment::{FlatMap, MapValue, OverlayMap, RawLookup};
 use crate::error::Result;
 use crate::log::Logger;
 use crate::node::Node;
@@ -12,7 +12,7 @@ use std::{fmt, fs};
 
 pub struct Application {
     out_dir: PathBuf,
-    options: Environment,
+    options: FlatMap,
     command_line: Arc<Mutex<CommandLineParser>>,
     init_command: Command,
     command_list: HashMap<String, Vec<String>>,
@@ -43,41 +43,35 @@ impl Application {
             .to_string_lossy()
             .to_string();
         let mut parser = CommandLineParser::new();
-        parser.add_setting("name".to_string(), EnvironmentValue::String(root_dir))?;
-        parser.add_setting(
-            "author".to_string(),
-            EnvironmentValue::String("".to_string()),
-        )?;
-        parser.add_setting(
-            "version".to_string(),
-            EnvironmentValue::String("0.1.0".to_string()),
-        )?;
+        parser.add_setting("name".to_string(), MapValue::String(root_dir))?;
+        parser.add_setting("author".to_string(), MapValue::String("".to_string()))?;
+        parser.add_setting("version".to_string(), MapValue::String("0.1.0".to_string()))?;
         parser.add_setting(
             "out".to_string(),
-            EnvironmentValue::Node(Node::from(&PathBuf::from("build/.bolt"))),
+            MapValue::Node(Node::from(&PathBuf::from("build/.bolt"))),
         )?;
-        let mut paths = vec![EnvironmentValue::Node(
+        let mut paths = vec![MapValue::Node(
             Node::from(&env::current_exe()?).parent().unwrap(),
         )];
         if let Some(path_env) = env::var_os("PATH") {
             paths.append(
                 &mut env::split_paths(&path_env)
-                    .map(|x| EnvironmentValue::Node(Node::from(&x)))
-                    .collect::<Vec<EnvironmentValue>>(),
+                    .map(|x| MapValue::Node(Node::from(&x)))
+                    .collect::<Vec<MapValue>>(),
             );
         }
-        parser.add_setting("path".to_string(), EnvironmentValue::Vec(paths))?;
-        parser.add_setting("tools_dir".to_string(), EnvironmentValue::Vec(Vec::new()))?;
+        parser.add_setting("path".to_string(), MapValue::Vec(paths))?;
+        parser.add_setting("tools_dir".to_string(), MapValue::Vec(Vec::new()))?;
         parser.add_setting(
             "flavors".to_string(),
-            EnvironmentValue::Vec(vec![
-                EnvironmentValue::String("debug".to_string()),
-                EnvironmentValue::String("final".to_string()),
+            MapValue::Vec(vec![
+                MapValue::String("debug".to_string()),
+                MapValue::String("final".to_string()),
             ]),
         )?;
         parser.add_setting(
             "exe_suffix".to_string(),
-            EnvironmentValue::String(
+            MapValue::String(
                 if cfg!(target_os = "windows") {
                     ".exe"
                 } else {
@@ -88,14 +82,14 @@ impl Application {
         )?;
         parser.add_setting(
             "OS".to_string(),
-            EnvironmentValue::String(env::consts::OS.to_string()),
+            MapValue::String(env::consts::OS.to_string()),
         )?;
 
         parser
             .add_list(
                 "commands".to_string(),
                 "The command(s) to execute".to_string(),
-                EnvironmentValue::Vec(Vec::new()),
+                MapValue::Vec(Vec::new()),
             )?
             .set_required();
 
@@ -103,7 +97,7 @@ impl Application {
             .add_flag(
                 "force".to_string(),
                 "Force execution of the commands".to_string(),
-                EnvironmentValue::Bool(false),
+                MapValue::Bool(false),
             )?
             .set_long("force")
             .set_short("f");
@@ -111,7 +105,7 @@ impl Application {
         parser.add_count(
             "verbose".to_string(),
             "Controls how much information is displayed.\nVerbosity increases with each occurrence of the option.".to_string(),
-            EnvironmentValue::Integer(0),
+            MapValue::Integer(0),
         )?
             .set_category("Options controlling logging")
             .set_short("v");
@@ -119,7 +113,7 @@ impl Application {
         parser.add_flag(
             "why".to_string(),
             "Print an explanation for every action.\nFor every command, task generator and task considered, the program will print the reason why it considers it out of date.".to_string(),
-            EnvironmentValue::Bool(false),
+            MapValue::Bool(false),
         )?
             .set_category("Options controlling logging")
             .set_long("why")
@@ -129,7 +123,7 @@ impl Application {
             .add_flag(
                 "color".to_string(),
                 "Whether to use colors in the output. Defaults to automatic.".to_string(),
-                EnvironmentValue::None,
+                MapValue::None,
             )?
             .set_category("Options controlling logging")
             .set_long("color")
@@ -140,7 +134,7 @@ impl Application {
                 "target".to_string(),
                 "Target to be built.\nUse this option multiple times to build several targets."
                     .to_string(),
-                EnvironmentValue::None,
+                MapValue::None,
             )?
             .set_category("Options controlling task execution")
             .set_long("target")
@@ -151,7 +145,7 @@ impl Application {
                 "files".to_string(),
                 "Files to be built.\nUse this option multiple times to build several files."
                     .to_string(),
-                EnvironmentValue::None,
+                MapValue::None,
             )?
             .set_category("Options controlling task execution")
             .set_long("file");
@@ -159,7 +153,7 @@ impl Application {
         parser.add_count(
             "progress".to_string(),
             "Controls how progress is reported.\n-p adds a progress bar.\n-pp shows the progress bar and removes the individual task logging.".to_string(),
-            EnvironmentValue::Integer(0),
+            MapValue::Integer(0),
         )?
             .set_category("Options controlling task execution")
             .set_short("p");
@@ -167,7 +161,7 @@ impl Application {
         parser.add_value(
             "job_count".to_string(),
             "Controls the maximum number of tasks that can run in parallel. Defaults to the number of processors.".to_string(),
-            EnvironmentValue::None,
+            MapValue::None,
         )?
             .set_category("Options controlling task execution")
             .set_long("jobs")
@@ -180,7 +174,7 @@ impl Application {
         let mut all_commands = HashMap::from([("init".to_string(), vec!["init".to_string()])]);
         let mut logger = init_command.run(
             options_context.clone(),
-            &vec![Arc::new(Mutex::new(ReadWriteEnvironment::new()))],
+            &vec![Arc::new(Mutex::new(OverlayMap::new()))],
             &Vec::new(),
             vec!["init".to_string()],
             &mut all_commands,
@@ -191,18 +185,17 @@ impl Application {
         let options = parser.parse_command_line();
 
         /* enumerate all saved commands */
-        let out_value = options.get_raw("out");
-        let out_dir_string = out_value.as_string();
-        let out_dir = std::path::Path::new(&out_dir_string);
+        let out_dir = PathBuf::from(&options.get_string_raw("out"));
+        let out_path = out_dir.as_path();
 
-        let paths = fs::read_dir(out_dir);
+        let paths = fs::read_dir(out_path);
         if paths.is_err() {
-            if out_dir.is_file() || out_dir.is_symlink() {
-                fs::remove_file(out_dir)?;
+            if out_path.is_file() || out_path.is_symlink() {
+                fs::remove_file(out_path)?;
             }
-            fs::create_dir_all(out_dir)?;
+            fs::create_dir_all(out_path)?;
         } else {
-            let commands_file = PathBuf::from(out_dir).join("cache.bin");
+            let commands_file = PathBuf::from(out_path).join("cache.bin");
             let result = fs::File::open(commands_file);
             if let Ok(file) = result {
                 if let Err(err) = init_command.load_from_file(file, &mut all_commands) {
@@ -211,46 +204,30 @@ impl Application {
             }
         }
 
-        let verbosity: u32 = match options.get_raw("verbose") {
-            EnvironmentValue::Integer(v) => v as u32,
-            _ => 0,
-        };
-        let log_colors: Option<bool> = match options.get_raw("color") {
-            EnvironmentValue::Bool(b) => Some(b),
-            _ => None,
-        };
-        let log_why: bool = match options.get_raw("why") {
-            EnvironmentValue::Bool(b) => b,
-            _ => false,
-        };
-        let force: bool = match options.get_raw("force") {
-            EnvironmentValue::Bool(b) => b,
-            _ => false,
-        };
+        let verbosity = options.get_integer_raw("verbose") as u32;
+        let log_colors = options.get_bool_raw("color");
+        let log_why = options.get_bool_raw("why").unwrap_or_default();
+        let force = options.get_bool_raw("force").unwrap_or_default();
         drop(parser);
 
-        let out_value = options.get_raw("out");
-        let out_dir_string = out_value.as_string();
-        let out_dir = PathBuf::from(&out_dir_string);
-        let generators = options.get_raw("target").as_vec();
-        let out_node = Node::from(&out_dir);
+        let generators = options.get_string_vec_raw("target");
+        let out_node = Node::from(&out_path);
         let files = options
-            .get_raw("files")
-            .as_vec()
+            .get_string_vec_raw("files")
             .into_iter()
             .map(|x| out_node.make_node(&PathBuf::from(x)))
             .collect();
-        let thread_count = options.get_raw("job_count").as_int();
+        let thread_count = options.get_integer_raw("job_count");
         let cpu_count = std::thread::available_parallelism()?.get();
         let thread_count = match thread_count {
             n if n > 0 => n as usize,
             n if (-n) as usize >= cpu_count => 1,
             n => cpu_count - (-n as usize),
         };
-        let progress_mode = options.get_raw("progress").as_int() as u32;
+        let progress_mode = options.get_integer_raw("progress") as u32;
 
         Ok(Self {
-            out_dir,
+            out_dir: out_path.to_path_buf(),
             options,
             command_line: parser_ptr,
             init_command,
@@ -375,7 +352,7 @@ impl Application {
                             match &group.1 {
                                 GroupStatus::Enabled => groups.push(group.0.clone()),
                                 GroupStatus::Conditional(condition) => {
-                                    if self.options.get_raw(condition).as_bool() {
+                                    if self.options.get_bool_raw(condition).unwrap_or_default() {
                                         use_default = false;
                                         groups.push(group.0.clone())
                                     }
@@ -393,7 +370,7 @@ impl Application {
                     } else {
                         for group in &current_command.output.as_ref().unwrap().groups {
                             if let GroupStatus::Conditional(condition) = &group.1 {
-                                if self.options.get_raw(condition).as_bool() {
+                                if self.options.get_bool_raw(condition).unwrap_or_default() {
                                     groups.push(group.0.clone())
                                 }
                             }
@@ -443,7 +420,7 @@ impl Application {
 
     pub fn run(&mut self) -> Result<()> {
         let mut logger = Logger::new(self.log_colors, self.verbosity, self.log_why);
-        let commands = self.options.get_raw("commands").as_vec();
+        let commands = self.options.get_string_vec_raw("commands");
 
         let commands_file = self.out_dir.join("cache.bin");
 
