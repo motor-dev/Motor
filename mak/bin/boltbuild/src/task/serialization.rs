@@ -119,8 +119,9 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
                     .ok_or_else(|| Error::invalid_length(2, &self))?;
                 let env = seq
                     .next_element_seed(OverlayMapSeed {
-                        current: self.0,
-                        parent: &Vec::new(),
+                        current: &mut Vec::new(),
+                        parent: self.0,
+                        index: 0,
                     })?
                     .ok_or_else(|| Error::invalid_length(3, &self))?;
                 let inputs = seq
@@ -189,8 +190,9 @@ impl<'de, 'a> DeserializeSeed<'de> for TaskSeed<'a> {
                                 return Err(Error::duplicate_field("env"));
                             }
                             env = Some(map.next_value_seed(OverlayMapSeed {
-                                current: self.0,
-                                parent: &Vec::new(),
+                                current: &mut Vec::new(),
+                                parent: self.0,
+                                index: 0,
                             })?);
                         }
                         Field::Inputs => {

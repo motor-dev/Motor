@@ -1,5 +1,6 @@
 use crate::environment::{FlatMap, MapValue, OverlayMap, OverlayParent};
 use crate::node::Node;
+use std::sync::{Mutex, Weak};
 
 mod private {
     pub(crate) trait RawGet {
@@ -29,9 +30,13 @@ pub(crate) trait Lookup: private::Get {
 }
 
 pub(crate) trait Hash: private::RawGet {
-    fn hash(&self, key: &str, hasher: &mut blake3::Hasher) {
-        self.get_raw(key).hash(&Vec::new(), hasher);
-    }
+    fn hash_key_with_envs(
+        &self,
+        key: &str,
+        hasher: &mut blake3::Hasher,
+        sub_envs: &[(usize, Weak<Mutex<OverlayMap>>)],
+    );
+    fn hash(&self, keys: &[String], hasher: &mut blake3::Hasher);
 }
 
 pub(crate) trait RawLookup: private::RawGet {
@@ -85,7 +90,25 @@ impl RawLookup for FlatMap {}
 
 impl Lookup for FlatMap {}
 
-impl Hash for FlatMap {}
+impl Hash for FlatMap {
+    fn hash_key_with_envs(
+        &self,
+        key: &str,
+        hasher: &mut blake3::Hasher,
+        sub_envs: &[(usize, Weak<Mutex<OverlayMap>>)],
+    ) {
+        match self.values.get(key) {
+            None => MapValue::None.hash(sub_envs, hasher),
+            Some(v) => v.hash(sub_envs, hasher),
+        }
+    }
+
+    fn hash(&self, keys: &[String], hasher: &mut blake3::Hasher) {
+        for key in keys {
+            self.hash_key_with_envs(key, hasher, &[]);
+        }
+    }
+}
 
 impl private::RawGet for OverlayMap {
     fn get_raw(&self, key: &str) -> MapValue {
@@ -123,4 +146,31 @@ impl RawLookup for OverlayMap {
     }
 }
 
-impl Hash for OverlayMap {}
+impl Hash for OverlayMap {
+    fn hash_key_with_envs(
+        &self,
+        key: &str,
+        hasher: &mut blake3::Hasher,
+        sub_envs: &[(usize, Weak<Mutex<OverlayMap>>)],
+    ) {
+        hasher.update(key.as_bytes());
+        match self.environment.values.get(key) {
+            None => match &self.parent {
+                OverlayParent::None => MapValue::None.hash(sub_envs, hasher),
+                OverlayParent::Current(e) | OverlayParent::Parent(e) | OverlayParent::Leaf(e) => {
+                    e.lock().unwrap().hash_key_with_envs(key, hasher, sub_envs)
+                }
+            },
+            Some(v) => v.hash(sub_envs, hasher),
+        }
+    }
+
+    fn hash(&self, keys: &[String], hasher: &mut blake3::Hasher) {
+        for key in keys {
+            self.hash_key_with_envs(key, hasher, &self.sub_envs);
+        }
+        hasher
+            .update("sub_envs".as_bytes())
+            .update(&self.sub_envs.len().to_ne_bytes());
+    }
+}

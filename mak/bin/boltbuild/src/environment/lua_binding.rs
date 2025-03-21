@@ -1,6 +1,6 @@
 use crate::environment::{FlatMap, MapValue, OverlayMap, OverlayParent};
-use mlua::{Lua, MetaMethod, UserData, UserDataMethods, Value};
-use std::sync::{Arc, Mutex};
+use mlua::{AnyUserData, Lua, MetaMethod, UserData, UserDataMethods, Value};
+use std::sync::{Arc, Mutex, Weak};
 
 impl FlatMap {
     pub(crate) fn get_into_lua(&mut self, lua: &Lua, key: &str) -> mlua::Result<Value> {
@@ -40,7 +40,7 @@ impl OverlayMap {
 
     fn get_into_lua_with_envs<'a, 'lua>(
         &'a self,
-        sub_envs: &[Arc<Mutex<OverlayMap>>],
+        sub_envs: &[(usize, Weak<Mutex<OverlayMap>>)],
         lua: &'lua Lua,
         key: &'a str,
     ) -> mlua::Result<Value> {
@@ -70,24 +70,46 @@ impl UserData for FlatMap {
 
 impl UserData for OverlayMap {
     fn add_methods<'lua, M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method_mut("append", |_lua, this, (key, value): (String, Value)| {
-            let mut original_value = this.make_list(key.as_str());
-            let value = MapValue::from_lua(&value)?;
-            if value.is_list() {
-                original_value.extend(value.into_list());
-            } else {
-                original_value.push(value);
-            }
-            this.set(key.as_str(), MapValue::Vec(original_value));
-            Ok(())
-        });
+        methods.add_function(
+            "append",
+            |_lua, (this, key, value): (AnyUserData, String, Value)| {
+                let (mut original_value, mut sub_envs) = {
+                    let value = this.borrow::<Arc<Mutex<OverlayMap>>>()?;
+                    let mut this = value.lock().unwrap();
+                    (this.make_list(key.as_str()), this.sub_envs.clone())
+                };
+                let value = MapValue::from_lua(&value, &mut sub_envs)?;
+                if value.is_list() {
+                    original_value.extend(value.into_list());
+                } else {
+                    original_value.push(value);
+                }
+                this.borrow_mut::<Arc<Mutex<OverlayMap>>>()?
+                    .lock()
+                    .unwrap()
+                    .set(key.as_str(), MapValue::Vec(original_value));
+                Ok(())
+            },
+        );
         methods.add_meta_method_mut(MetaMethod::Index, |lua, this, key: String| {
             this.get_into_lua(lua, key.as_str())
         });
-        methods.add_meta_method_mut(
+        methods.add_meta_function(
             MetaMethod::NewIndex,
-            |_lua, this, (key, value): (String, Value)| {
-                this.set(key.as_str(), MapValue::from_lua(&value)?);
+            |_lua, (this, key, value): (AnyUserData, String, Value)| {
+                let mut sub_envs = this
+                    .borrow_mut::<Arc<Mutex<OverlayMap>>>()?
+                    .lock()
+                    .unwrap()
+                    .sub_envs
+                    .clone();
+                let value = MapValue::from_lua(&value, &mut sub_envs)?;
+                {
+                    let arc = this.borrow::<Arc<Mutex<OverlayMap>>>()?;
+                    let mut this = arc.lock().unwrap();
+                    this.set(key.as_str(), value);
+                    this.sub_envs = sub_envs;
+                }
                 Ok(())
             },
         );

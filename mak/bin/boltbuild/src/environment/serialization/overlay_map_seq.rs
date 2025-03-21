@@ -33,11 +33,17 @@ impl<'de, 'a> DeserializeSeed<'de> for OverlayMapSequenceSeed<'a> {
                 if let Some(size_hint) = seq.size_hint() {
                     result.reserve(size_hint);
                 }
+                let mut index = 0;
                 while let Some(elem) = seq.next_element_seed(OverlayMapSeed {
                     current: &mut result,
                     parent: self.0,
+                    index,
                 })? {
-                    result.push(elem);
+                    assert!(Arc::<Mutex<OverlayMap>>::ptr_eq(&result[index], &elem));
+                    index += 1;
+                }
+                for env in &result {
+                    assert!(env.lock().unwrap().index < result.len());
                 }
                 Ok(result)
             }

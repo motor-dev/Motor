@@ -2,10 +2,13 @@ use crate::environment::{MapValue, OverlayMap};
 use crate::node::Node;
 use mlua::{IntoLua, Lua, Value};
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, Weak};
 
 impl MapValue {
-    pub(crate) fn from_lua(value: &Value) -> mlua::Result<Self> {
+    fn from_lua_generic(
+        value: &Value,
+        owned_envs: &mut Option<&mut Vec<(usize, Weak<Mutex<OverlayMap>>)>>,
+    ) -> mlua::Result<Self> {
         match value {
             Value::Nil => Ok(MapValue::None),
             Value::Boolean(b) => Ok(MapValue::Bool(*b)),
@@ -19,7 +22,7 @@ impl MapValue {
                     if v.is_nil() {
                         break;
                     }
-                    result.push(Self::from_lua(&v)?);
+                    result.push(Self::from_lua_generic(&v, owned_envs)?);
                     index += 1;
                 }
                 if index < t.raw_len() {
@@ -30,12 +33,49 @@ impl MapValue {
                     Ok(MapValue::Vec(result))
                 }
             }
-            Value::UserData(d) => Ok(MapValue::Node((*(d.borrow::<Node>()?)).clone())),
+            Value::UserData(d) => {
+                if let Ok(node) = d.borrow::<Node>() {
+                    Ok(MapValue::Node(node.clone()))
+                } else if let Ok(env) = d.borrow::<Arc<Mutex<OverlayMap>>>() {
+                    if let Some(owned_envs) = owned_envs {
+                        let weak_env = Arc::downgrade(&env);
+                        match owned_envs
+                            .iter()
+                            .position(|x| Weak::ptr_eq(&x.1, &weak_env))
+                        {
+                            Some(index) => Ok(MapValue::Overlay(index)),
+                            None => {
+                                owned_envs.push((env.lock().unwrap().index, weak_env));
+                                Ok(MapValue::Overlay(owned_envs.len() - 1))
+                            }
+                        }
+                    } else {
+                        Err(mlua::Error::RuntimeError(
+                            "cannot convert to OverlayMap value".to_string(),
+                        ))
+                    }
+                } else {
+                    Err(mlua::Error::RuntimeError(
+                        "cannot convert to OverlayMap value".to_string(),
+                    ))
+                }
+            }
             _ => Err(mlua::Error::RuntimeError(format!(
                 "invalid type for environment: {}",
                 value.type_name(),
             ))),
         }
+    }
+
+    pub(crate) fn from_lua(
+        value: &Value,
+        owned_envs: &mut Vec<(usize, Weak<Mutex<OverlayMap>>)>,
+    ) -> mlua::Result<Self> {
+        Self::from_lua_generic(value, &mut Some(owned_envs))
+    }
+
+    pub(crate) fn from_lua_no_envs(value: &Value) -> mlua::Result<Self> {
+        Self::from_lua_generic(value, &mut None)
     }
 
     pub(super) fn as_bool(&self) -> Option<bool> {
@@ -50,7 +90,7 @@ impl MapValue {
         }
     }
 
-    pub(super) fn as_string(&self, sub_envs: &[Arc<Mutex<OverlayMap>>]) -> String {
+    pub(super) fn as_string(&self, sub_envs: &[(usize, Weak<Mutex<OverlayMap>>)]) -> String {
         match self {
             MapValue::None => "".to_string(),
             MapValue::Bool(b) => b.to_string(),
@@ -62,7 +102,13 @@ impl MapValue {
                 .map(|v| v.as_string(sub_envs))
                 .collect::<Vec<_>>()
                 .join(" "),
-            MapValue::Overlay(v) => sub_envs[*v].lock().unwrap().to_string(),
+            MapValue::Overlay(v) => sub_envs[*v]
+                .1
+                .upgrade()
+                .unwrap()
+                .lock()
+                .unwrap()
+                .to_string(),
         }
     }
 
@@ -78,7 +124,10 @@ impl MapValue {
         }
     }
 
-    pub(super) fn as_string_vec(&self, sub_envs: &[Arc<Mutex<OverlayMap>>]) -> Vec<String> {
+    pub(super) fn as_string_vec(
+        &self,
+        sub_envs: &[(usize, Weak<Mutex<OverlayMap>>)],
+    ) -> Vec<String> {
         match self {
             MapValue::None => Vec::new(),
             MapValue::Bool(b) => vec![b.to_string()],
@@ -118,7 +167,11 @@ impl MapValue {
         }
     }
 
-    pub(super) fn hash(&self, sub_envs: &Vec<Arc<Mutex<OverlayMap>>>, hasher: &mut blake3::Hasher) {
+    pub(super) fn hash(
+        &self,
+        sub_envs: &[(usize, Weak<Mutex<OverlayMap>>)],
+        hasher: &mut blake3::Hasher,
+    ) {
         match self {
             MapValue::None => hasher.update(b"nil"),
             MapValue::Bool(b) => {
@@ -140,7 +193,7 @@ impl MapValue {
             }
             MapValue::Overlay(env) => hasher
                 .update(b"env")
-                .update(&sub_envs[*env].lock().unwrap().index.to_ne_bytes()),
+                .update(&env.to_ne_bytes()),
         };
     }
 
@@ -154,7 +207,7 @@ impl MapValue {
 
     pub(super) fn get_into_lua(
         &self,
-        sub_envs: &[Arc<Mutex<OverlayMap>>],
+        sub_envs: &[(usize, Weak<Mutex<OverlayMap>>)],
         lua: &Lua,
     ) -> mlua::Result<Value> {
         match self {
@@ -171,7 +224,7 @@ impl MapValue {
                 Value::Table(table)
             }),
             MapValue::Overlay(value) => Ok(Value::UserData(
-                lua.create_userdata(sub_envs[*value].clone())?,
+                lua.create_userdata(sub_envs[*value].1.upgrade().unwrap())?,
             )),
         }
     }

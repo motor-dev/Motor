@@ -1,5 +1,14 @@
 ---@meta
 
+--- Creates a new, empty `Environment` instance.
+--- This function initializes and returns a new `Environment` object, which can be used to store and manage
+--- environment variables and their values. The new environment is empty and does not inherit any values
+--- from other environments.
+---
+---@return Environment #A new, empty `Environment` instance.
+function Context:new_env()
+end
+
 --- Creates a new environment that inherits values from the specified base environment.
 --- The derived environment maintains a dynamic link to the base environment, so any values set in the base environment
 --- after the derivation will still be accessible in the derived environment, unless they are shadowed by values

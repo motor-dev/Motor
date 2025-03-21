@@ -50,9 +50,7 @@ impl CommandOutput {
         let hash3 = {
             let mut hasher = Hasher::new();
             if let Some(env) = options {
-                for env_var in &self.stored_hash.option_dependencies {
-                    env.hash(env_var.as_str(), &mut hasher);
-                }
+                env.hash(&self.stored_hash.option_dependencies, &mut hasher);
             }
             SerializedHash(hasher.finalize())
         };
@@ -61,9 +59,7 @@ impl CommandOutput {
             let mut hasher = Hasher::new();
             for (vars, env_arc) in zip(self.stored_hash.variable_dependencies.iter(), envs.iter()) {
                 let env = env_arc.lock().unwrap();
-                for var in vars {
-                    env.hash(var.as_str(), &mut hasher);
-                }
+                env.hash(vars, &mut hasher);
             }
             SerializedHash(hasher.finalize())
         };

@@ -62,15 +62,7 @@ impl<'de, 'a> DeserializeSeed<'de> for MapValueSeed<'a> {
                         value.newtype_variant_seed(MapValueVecSeed(self.0))?,
                     )),
                     6 => {
-                        let index = value.newtype_variant::<usize>()?;
-                        if index < self.0.len() {
-                            Ok(MapValue::Overlay(index))
-                        } else {
-                            Err(serde::de::Error::custom(format!(
-                                "Overlay index out of bounds: {}",
-                                index
-                            )))
-                        }
+                        Ok(MapValue::Overlay(value.newtype_variant::<usize>()?))
                     }
                     _ => Err(serde::de::Error::custom("invalid variant")),
                 }

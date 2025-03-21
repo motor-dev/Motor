@@ -55,7 +55,7 @@ impl UserData for CommandLineParser {
             MetaMethod::NewIndex,
             |_lua, this, (key, value): (String, mlua::Value)| -> Result<()> {
                 if this.options.iter().position(|x| x.name.eq(&key)).is_some() {
-                    this.map.set(&key, MapValue::from_lua(&value)?);
+                    this.map.set(&key, MapValue::from_lua_no_envs(&value)?);
                     Ok(())
                 } else {
                     Err(mlua::Error::RuntimeError(
@@ -103,7 +103,7 @@ impl UserData for CommandLineParser {
                 let result = {
                     let this = args.0.borrow_mut::<Arc<Mutex<CommandLineParser>>>()?;
                     let mut this = this.lock().unwrap();
-                    this.add_value(args.1, args.2, MapValue::from_lua(&args.3)?)?;
+                    this.add_value(args.1, args.2, MapValue::from_lua_no_envs(&args.3)?)?;
                     _lua.create_userdata(InterfaceIndex(this.options.len() - 1))?
                 };
                 result.set_user_value(args.0)?;
@@ -117,7 +117,7 @@ impl UserData for CommandLineParser {
                 let result = {
                     let this = args.0.borrow_mut::<Arc<Mutex<CommandLineParser>>>()?;
                     let mut this = this.lock().unwrap();
-                    this.add_count(args.1, args.2, MapValue::from_lua(&args.3)?)?;
+                    this.add_count(args.1, args.2, MapValue::from_lua_no_envs(&args.3)?)?;
                     lua.create_userdata(InterfaceIndex(this.options.len() - 1))?
                 };
                 result.set_user_value(args.0)?;
@@ -131,7 +131,7 @@ impl UserData for CommandLineParser {
                 let result = {
                     let this = args.0.borrow_mut::<Arc<Mutex<CommandLineParser>>>()?;
                     let mut this = this.lock().unwrap();
-                    this.add_list(args.1, args.2, MapValue::from_lua(&args.3)?)?;
+                    this.add_list(args.1, args.2, MapValue::from_lua_no_envs(&args.3)?)?;
                     lua.create_userdata(InterfaceIndex(this.options.len() - 1))?
                 };
                 result.set_user_value(args.0)?;
@@ -149,12 +149,21 @@ impl UserData for CommandLineParser {
                         args.1,
                         args.2,
                         args.3.as_slice(),
-                        MapValue::from_lua(&args.4)?,
+                        MapValue::from_lua_no_envs(&args.4)?,
                     )?;
                     lua.create_userdata(InterfaceIndex(this.options.len() - 1))?
                 };
                 result.set_user_value(args.0)?;
                 Ok(result)
+            },
+        );
+
+        methods.add_function(
+            "add_setting",
+            |_, args: (AnyUserData, String, mlua::Value)| {
+                let this = args.0.borrow_mut::<Arc<Mutex<CommandLineParser>>>()?;
+                let mut this = this.lock().unwrap();
+                this.add_setting(args.1, MapValue::from_lua_no_envs(&args.2)?)
             },
         );
     }

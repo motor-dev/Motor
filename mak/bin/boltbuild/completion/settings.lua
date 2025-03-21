@@ -54,6 +54,12 @@ end
 function Settings:add_choice(name, help, possible_values, default_value)
 end
 
+---Declares a new setting. Settings are not directly configurable from the command line, but can be set programmatically.
+---@param name string The name of the setting, used as a key for retrieval.
+---@param default_value EnvironmentValue The initial value of the setting.
+function Settings:add_setting(name, default_value)
+end
+
 ---Specifies a category for the command-line option, helping to organize options within `--help` output.
 ---@param category string The category name under which this option will appear in help documentation.
 ---@return CommandLineOption #The current `CommandLineOption` object, allowing method chaining.
