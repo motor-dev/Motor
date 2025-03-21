@@ -2,7 +2,7 @@ use crate::node::Node;
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Display;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, Weak};
 
 mod derive;
 mod get;
@@ -29,7 +29,7 @@ pub(crate) enum MapValue {
 pub(crate) struct FlatMap {
     values: HashMap<String, MapValue>,
     #[serde(skip_serializing)]
-    pub(crate) used_keys: HashSet<String>,
+    used_keys: HashSet<String>,
 }
 
 pub(crate) use serialization::OverlayMapVec;
@@ -38,7 +38,7 @@ pub(crate) struct OverlayMap {
     parent: OverlayParent,
     pub(crate) index: usize,
     environment: FlatMap,
-    sub_envs: Vec<Arc<Mutex<OverlayMap>>>,
+    sub_envs: Vec<(usize, Weak<Mutex<OverlayMap>>)>,
 }
 
 impl FlatMap {
@@ -48,13 +48,17 @@ impl FlatMap {
             used_keys: HashSet::new(),
         }
     }
+
+    pub(crate) fn get_used_keys(&self) -> Vec<String> {
+        self.used_keys.iter().cloned().collect()
+    }
 }
 
 impl OverlayMap {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(index: usize) -> Self {
         Self {
             parent: OverlayParent::None,
-            index: 0,
+            index,
             environment: FlatMap::new(),
             sub_envs: Vec::new(),
         }

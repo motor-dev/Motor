@@ -337,9 +337,7 @@ impl<'command> Scheduler<'command> {
                             Some(cache) => {
                                 let mut hasher = blake3::Hasher::new();
                                 let env = task.env.lock().unwrap();
-                                for var in &cache.environment_dependencies {
-                                    env.hash(var.as_str(), &mut hasher);
-                                }
+                                env.hash(&cache.environment_dependencies, &mut hasher);
                                 if hasher.finalize() != cache.environment_hash.0 {
                                     (true, "the environment has been modified".to_string())
                                 } else {
@@ -405,9 +403,7 @@ impl<'command> Scheduler<'command> {
                             let env = &task.env;
                             let env = env.lock().unwrap();
                             let environment_dependencies = env.get_used_keys();
-                            for var in &environment_dependencies {
-                                env.hash(var.as_str(), &mut env_hasher);
-                            }
+                            env.hash(&environment_dependencies, &mut env_hasher);
                             result_pipe
                                 .send(WorkResult::TaskResult(TaskResult {
                                     task_index,

@@ -5,6 +5,16 @@ use mlua::{AnyUserData, Lua};
 use std::ops::Deref;
 use std::sync::{Arc, Mutex};
 
+pub(super) fn new_env(
+    _lua: &Lua,
+    this: &mut Context,
+    _args: (),
+) -> LuaResult<Arc<Mutex<OverlayMap>>> {
+    let new_env = Arc::new(Mutex::new(OverlayMap::new(this.output.environments.len())));
+    this.output.environments.push(new_env.clone());
+    Ok(new_env)
+}
+
 pub(super) fn derive(
     _lua: &Lua,
     this: &mut Context,

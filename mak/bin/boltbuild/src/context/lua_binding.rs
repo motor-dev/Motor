@@ -1,4 +1,5 @@
 use super::command::*;
+use super::debug::*;
 use super::driver::*;
 use super::environment::*;
 use super::feature::*;
@@ -6,7 +7,6 @@ use super::generator::*;
 use super::log::*;
 use super::node::*;
 use super::subprocess::*;
-use super::debug::*;
 use super::Context;
 use crate::options::Options;
 use mlua::{AnyUserData, IntoLua, UserData, UserDataFields, UserDataMethods};
@@ -30,6 +30,7 @@ impl UserData for Context {
         methods.add_function("recurse", recurse);
         methods.add_method_mut("declare_command", declare_command);
         methods.add_method_mut("chain_command", chain_command);
+        methods.add_method_mut("new_env", new_env);
         methods.add_method_mut("derive", derive);
         methods.add_method_mut("debug", debug);
         methods.add_method_mut("info", info);

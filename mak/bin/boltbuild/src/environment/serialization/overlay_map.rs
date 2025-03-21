@@ -4,7 +4,7 @@ use super::value_map::MapValueMapSeed;
 use serde::de::{DeserializeSeed, Error, MapAccess, SeqAccess, Visitor};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt;
 use std::sync::{Arc, Mutex};
 
@@ -40,6 +40,17 @@ impl<'a> Serialize for SerializedOverlayMap<'a> {
                 .iter()
                 .collect::<BTreeMap<_, _>>(),
         )?;
+        s.serialize_field(
+            "sub_envs",
+            &self
+                .0
+                .lock()
+                .unwrap()
+                .sub_envs
+                .iter()
+                .map(|env| env.0)
+                .collect::<Vec<_>>(),
+        )?;
         s.end()
     }
 }
@@ -55,6 +66,7 @@ enum SerializedOverlayMapParent {
 pub(crate) struct OverlayMapSeed<'a> {
     pub current: &'a mut OverlayMapVec,
     pub parent: &'a OverlayMapVec,
+    pub index: usize,
 }
 
 impl<'de, 'a> DeserializeSeed<'de> for OverlayMapSeed<'a> {
@@ -67,6 +79,7 @@ impl<'de, 'a> DeserializeSeed<'de> for OverlayMapSeed<'a> {
         enum Field {
             Parent,
             Values,
+            SubEnvs,
         }
 
         impl<'de> Deserialize<'de> for Field {
@@ -90,7 +103,11 @@ impl<'de, 'a> DeserializeSeed<'de> for OverlayMapSeed<'a> {
                         match value {
                             "parent" => Ok(Field::Parent),
                             "values" => Ok(Field::Values),
-                            _ => Err(Error::unknown_field(value, &["parent", "values"])),
+                            "sub_envs" => Ok(Field::SubEnvs),
+                            _ => Err(Error::unknown_field(
+                                value,
+                                &["parent", "values", "sub_envs"],
+                            )),
                         }
                     }
                 }
@@ -102,6 +119,7 @@ impl<'de, 'a> DeserializeSeed<'de> for OverlayMapSeed<'a> {
         struct OverlayMapVisitor<'a> {
             current: &'a mut OverlayMapVec,
             parent: &'a OverlayMapVec,
+            index: usize,
         }
 
         impl<'de, 'a> Visitor<'de> for OverlayMapVisitor<'a> {
@@ -121,6 +139,28 @@ impl<'de, 'a> DeserializeSeed<'de> for OverlayMapSeed<'a> {
                 let values = seq
                     .next_element_seed(MapValueMapSeed(self.current))?
                     .ok_or_else(|| Error::invalid_length(1, &self))?;
+                let sub_envs = seq
+                    .next_element::<Vec<usize>>()?
+                    .ok_or_else(|| Error::invalid_length(2, &self))?;
+                let sub_envs = sub_envs
+                    .iter()
+                    .map(|x| {
+                        if *x >= self.current.len() {
+                            self.current.resize_with(*x + 1, || {
+                                Arc::new(Mutex::new(OverlayMap {
+                                    parent: OverlayParent::None,
+                                    index: usize::MAX,
+                                    environment: FlatMap {
+                                        values: HashMap::new(),
+                                        used_keys: HashSet::new(),
+                                    },
+                                    sub_envs: Vec::new(),
+                                }))
+                            });
+                        }
+                        (*x, Arc::downgrade(&self.current[*x]))
+                    })
+                    .collect();
                 let parent = match parent {
                     SerializedOverlayMapParent::None => OverlayParent::None,
                     SerializedOverlayMapParent::Current(index) => {
@@ -144,25 +184,34 @@ impl<'de, 'a> DeserializeSeed<'de> for OverlayMapSeed<'a> {
                         OverlayParent::Parent(self.parent[index].clone())
                     }
                     SerializedOverlayMapParent::Leaf(index) => {
-                        if self.current.len() <= index {
+                        if self.parent.len() <= index {
                             return Err(Error::custom(format!(
                                 "invalid overlay index {}; expected an index in the range 0..{}",
                                 index,
-                                self.current.len()
+                                self.parent.len()
                             )));
                         }
-                        OverlayParent::Leaf(self.current[index].clone())
+                        OverlayParent::Leaf(self.parent[index].clone())
                     }
                 };
-                Ok(Arc::new(Mutex::new(OverlayMap {
+
+                let result = OverlayMap {
                     parent,
-                    index: self.current.len(),
+                    index: self.index,
                     environment: FlatMap {
                         values,
                         used_keys: HashSet::new(),
                     },
-                    sub_envs: Vec::new(),
-                })))
+                    sub_envs,
+                };
+                if self.index == self.current.len() {
+                    let result = Arc::new(Mutex::new(result));
+                    self.current.push(result.clone());
+                    Ok(result)
+                } else {
+                    *self.current[self.index].lock().unwrap() = result;
+                    Ok(self.current[self.index].clone())
+                }
             }
 
             fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
@@ -171,6 +220,7 @@ impl<'de, 'a> DeserializeSeed<'de> for OverlayMapSeed<'a> {
             {
                 let mut parent = None;
                 let mut values = None;
+                let mut sub_envs = None;
                 while let Some(key) = map.next_key()? {
                     match key {
                         Field::Parent => {
@@ -184,6 +234,32 @@ impl<'de, 'a> DeserializeSeed<'de> for OverlayMapSeed<'a> {
                                 return Err(Error::duplicate_field("values"));
                             }
                             values = Some(map.next_value_seed(MapValueMapSeed(self.current))?);
+                        }
+                        Field::SubEnvs => {
+                            if sub_envs.is_some() {
+                                return Err(Error::duplicate_field("sub_envs"));
+                            }
+                            sub_envs = Some(
+                                map.next_value::<Vec<usize>>()?
+                                    .iter()
+                                    .map(|x| {
+                                        if *x >= self.current.len() {
+                                            self.current.resize_with(*x + 1, || {
+                                                Arc::new(Mutex::new(OverlayMap {
+                                                    parent: OverlayParent::None,
+                                                    index: usize::MAX,
+                                                    environment: FlatMap {
+                                                        values: HashMap::new(),
+                                                        used_keys: HashSet::new(),
+                                                    },
+                                                    sub_envs: Vec::new(),
+                                                }))
+                                            });
+                                        }
+                                        (*x, Arc::downgrade(&self.current[*x]))
+                                    })
+                                    .collect(),
+                            );
                         }
                     }
                 }
@@ -203,31 +279,42 @@ impl<'de, 'a> DeserializeSeed<'de> for OverlayMapSeed<'a> {
                         OverlayParent::Parent(self.parent[index].clone())
                     }
                     SerializedOverlayMapParent::Leaf(index) => {
-                        if self.current.len() <= index {
-                            return Err(Error::custom(format!("invalid environment index {}; expected an index in the range 0..{}", index, self.current.len())));
+                        if self.parent.len() <= index {
+                            return Err(Error::custom(format!("invalid environment index {}; expected an index in the range 0..{}", index, self.parent.len())));
                         }
-                        OverlayParent::Leaf(self.current[index].clone())
+                        OverlayParent::Leaf(self.parent[index].clone())
                     }
                 };
                 let values = values.ok_or_else(|| Error::missing_field("values"))?;
-                Ok(Arc::new(Mutex::new(OverlayMap {
+                let sub_envs = sub_envs.ok_or_else(|| Error::missing_field("sub_envs"))?;
+
+                let result = OverlayMap {
                     parent,
-                    index: self.current.len(),
+                    index: self.index,
                     environment: FlatMap {
                         values,
                         used_keys: HashSet::new(),
                     },
-                    sub_envs: Vec::new(),
-                })))
+                    sub_envs,
+                };
+                if self.index == self.current.len() {
+                    let result = Arc::new(Mutex::new(result));
+                    self.current.push(result.clone());
+                    Ok(result)
+                } else {
+                    *self.current[self.index].lock().unwrap() = result;
+                    Ok(self.current[self.index].clone())
+                }
             }
         }
 
         deserializer.deserialize_struct(
             "Environment",
-            &["parent", "values"],
+            &["parent", "values", "sub_envs"],
             OverlayMapVisitor {
                 current: self.current,
                 parent: self.parent,
+                index: self.index,
             },
         )
     }

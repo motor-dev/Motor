@@ -49,12 +49,14 @@ impl Context {
             current_dir.clone()
         };
         bld_dir.mkdir()?;
-        let run_envs: Vec<Arc<Mutex<OverlayMap>>> = spec
-            .envs
-            .iter()
-            .enumerate()
-            .map(|(i, &x)| Arc::new(Mutex::new(OverlayMap::derive_from_parent(&envs[x], i))))
-            .collect();
+        let mut run_envs = Vec::new();
+        {
+            let mut done_envs = Vec::new();
+            spec.envs.iter().for_each(|&x| {
+                OverlayMap::derive_from_parent(&envs[x], &mut run_envs, &mut done_envs);
+            });
+        }
+
         let start_env = run_envs[0].clone();
         Ok(Context {
             spec: spec.clone(),
@@ -142,14 +144,24 @@ impl Context {
                 chunk.call(userdata.clone())
             };
 
+            let mut root_path = std::env::current_dir()?.join(ROOT_SCRIPT);
+            if !root_path.is_file() {
+                root_path = std::env::current_dir()?.join(PathBuf::from(&self.spec.fs_name));
+                root_path.set_extension("lua");
+            }
+            if !root_path.is_file() {
+                return Err(format!(
+                    "main script {} or {} not found in {:?}",
+                    ROOT_SCRIPT,
+                    self.spec.fs_name,
+                    std::env::current_dir()?
+                )
+                .into());
+            }
             self.output
                 .stored_hash
                 .file_dependencies
-                .push(ROOT_SCRIPT.into());
-            let root_path = std::env::current_dir()?.join(ROOT_SCRIPT);
-            if !root_path.is_file() {
-                return Err(format!("main script {} not found", ROOT_SCRIPT).into());
-            }
+                .push(root_path.clone());
             lua.scope(|scope| {
                 let mut userdata = scope.create_userdata_ref_mut::<Context>(self).unwrap();
                 userdata.set_named_user_value(":features", lua.create_table()?)?;
@@ -218,7 +230,7 @@ impl Context {
         if let Options::Environment(e) = &self.options {
             self.output.options = Some(e.lock().unwrap().clone());
             self.output.stored_hash.option_dependencies =
-                e.lock().unwrap().used_keys.iter().cloned().collect();
+                e.lock().unwrap().get_used_keys().iter().cloned().collect();
         }
 
         if self.tasks.is_empty() {
@@ -323,7 +335,9 @@ impl Context {
                 });
                 full_path.push(name.to_string());
                 v.insert(full_path);
-                Ok(vec![self.output.commands.len()])
+                let mut result = path.path.clone();
+                result.push(cmd.output.as_ref().unwrap().commands.len() - 1);
+                Ok(result)
             }
         }
     }

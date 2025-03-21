@@ -63,13 +63,6 @@ impl Application {
         parser.add_setting("path".to_string(), MapValue::Vec(paths))?;
         parser.add_setting("tools_dir".to_string(), MapValue::Vec(Vec::new()))?;
         parser.add_setting(
-            "flavors".to_string(),
-            MapValue::Vec(vec![
-                MapValue::String("debug".to_string()),
-                MapValue::String("final".to_string()),
-            ]),
-        )?;
-        parser.add_setting(
             "exe_suffix".to_string(),
             MapValue::String(
                 if cfg!(target_os = "windows") {
@@ -174,7 +167,7 @@ impl Application {
         let mut all_commands = HashMap::from([("init".to_string(), vec!["init".to_string()])]);
         let mut logger = init_command.run(
             options_context.clone(),
-            &vec![Arc::new(Mutex::new(OverlayMap::new()))],
+            &vec![Arc::new(Mutex::new(OverlayMap::new(0)))],
             &Vec::new(),
             vec!["init".to_string()],
             &mut all_commands,
