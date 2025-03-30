@@ -14,12 +14,12 @@ local function filter_source(source_file, env)
     local platform_set = {}
     local arch_set = {}
     ---@type string[]
-    local platforms = env.MOTOR_PLATFORMS
+    local platforms = env.MOTOR_PLATFORMS or {}
     for _, platform in ipairs(platforms) do
         platform_set[platform] = true
     end
     ---@type string[]
-    local architectures = env.MOTOR_ARCHITECTURES
+    local architectures = env.MOTOR_ARCHITECTURES or {}
     for _, arch in ipairs(architectures) do
         arch_set[arch] = true
     end

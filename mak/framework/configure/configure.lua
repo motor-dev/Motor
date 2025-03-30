@@ -87,3 +87,20 @@ end)
 for _, platform in ipairs(platforms) do
     context:recurse('target/' .. platform .. '.lua')
 end
+
+local env = context:derive()
+env.PROJECTS = true
+env.TOOLCHAIN_ID = 'IDEs'
+local setup = context:declare_command("setup:projects", "setup", env)
+context:chain_command(setup, "clion", "build")
+context:chain_command(setup, "vs2017", "build")
+context:chain_command(setup, "vs2019", "build")
+context:chain_command(setup, "vs2022", "build")
+context:chain_command(setup, "visual_studio:cmake", "build")
+context:chain_command(setup, "vscode", "build")
+context:chain_command(setup, "vscode:cpp", "build")
+context:chain_command(setup, "vscode:cmake", "build")
+context:chain_command(setup, "qtcreator", "build")
+context:chain_command(setup, "qtcreator:qbs", "build")
+context:chain_command(setup, "qtcreator:cmake", "build")
+context:chain_command(setup, "xcode", "build")
