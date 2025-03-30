@@ -187,8 +187,17 @@ impl Context {
                 userdata.borrow_mut_scoped::<Context, _>(|this| {
                     this.in_post = 1;
                 })?;
-                for generator in userdata.named_user_value::<Vec<AnyUserData>>(":generators")? {
-                    super::feature::post(&lua, (&userdata, &generator))?;
+                let mut generator_count = 0;
+                loop {
+                    let generators =
+                        userdata.named_user_value::<Vec<AnyUserData>>(":generators")?;
+                    if generators.len() == generator_count {
+                        break;
+                    }
+                    for generator in &generators[generator_count..] {
+                        super::feature::post(&lua, (&userdata, &generator))?;
+                    }
+                    generator_count = generators.len();
                 }
 
                 Ok(())

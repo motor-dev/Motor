@@ -41,7 +41,6 @@ end
 ---@field [string] EnvironmentValue A dynamic key-value storage for environment variables.
 Environment = {}
 
-
 --- Appends a value or an array of values to an environment variable.
 --- - If the variable already exists and is an array, the new element(s) are appended to the existing array.
 --- - If the variable already exists and is not an array, the value is turned into an array with the existing value as the first element, and the new elements are appended.
@@ -53,5 +52,5 @@ function Environment:append(var_name, value)
 end
 
 --- A value type that can be stored within an environment. Supported types include `nil`, `boolean`, `string`, `number`,
---- arrays of `EnvironmentValue`, or `Node` references.
----@alias EnvironmentValue (nil|boolean|string|number|Node|(nil|boolean|string|number|Node)[])
+--- arrays of `EnvironmentValue`, `Node` references and references to other `Environment` instances.
+---@alias EnvironmentValue (nil|boolean|string|number|Node|Environment|(nil|boolean|string|number|Node|Environment)[])

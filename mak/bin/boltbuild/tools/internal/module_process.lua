@@ -59,7 +59,7 @@ end
 
 ---@param module Module
 local function process_dependencies(module)
-    local seen = { }
+    local seen = {}
     local add_objects = false
     for _, feature in ipairs(module.features) do
         if feature == 'program' then
@@ -81,7 +81,7 @@ local function process_dependencies(module)
     end
 
     if add_objects then
-        seen = { }
+        seen = {}
         for _, dependency in ipairs(module.internal_dependencies) do
             process_link(module, dependency, seen, not dependency:has_property('link_task'))
         end
@@ -93,9 +93,9 @@ end
 
 ---@param module Module
 local function process_flags(module)
-    for _, lang in ipairs({'C', 'CXX', 'OBJC', 'OBJCXX'}) do
+    for _, lang in ipairs({ 'C', 'CXX', 'OBJC', 'OBJCXX' }) do
         for _, flag_group in ipairs(module.flag_groups) do
-            module.env:append(lang..'FLAGS', module.env[lang..'FLAGS.'..flag_group])
+            module.env:append(lang .. 'FLAGS', module.env[lang .. 'FLAGS.' .. flag_group])
         end
     end
     for _, include in ipairs(module.internal_includes) do
@@ -129,7 +129,8 @@ local function process_source(module)
                 local ext = source:extension()
                 local source_processor = Bolt.ModuleCore.extension_registry[ext]
                 if source_processor == nil then
-                    context:raise_error("No tool that can handle file " .. tostring(source) .. " with extension " .. ext .. ".")
+                    context:raise_error("No tool that can handle file " ..
+                        tostring(source) .. " with extension " .. ext .. ".")
                 end
                 source_processor(module, { base_path = path, full_path = source })
             end
@@ -141,7 +142,8 @@ local function process_source(module)
             local ext = source_info.full_path:extension()
             local source_processor = Bolt.ModuleCore.extension_registry[ext]
             if source_processor == nil then
-                context:raise_error("No tool that can handle file " .. tostring(source_info.full_path) .. " with extension " .. ext .. ".")
+                context:raise_error("No tool that can handle file " ..
+                    tostring(source_info.full_path) .. " with extension " .. ext .. ".")
             end
             source_processor(module, source_info)
         end
@@ -154,7 +156,7 @@ local function process_link_program(module)
         local target_node = context.bld_dir
         target_node = target_node:make_node(module.group)
         target_node = target_node:make_node(module.target)
-        target_node = target_node:make_node(string.format(context.env.PROGRAM_PATTERN, module.target))
+        target_node = target_node:make_node(module:make_build_target('PROGRAM_PATTERN'))
         local link_task = module:declare_task("program", {}, { target_node })
         for _, task in ipairs(module.compiled_tasks) do
             link_task:add_input(task.outputs[1])
@@ -173,7 +175,7 @@ local function process_link_shlib(module)
         local target_node = context.bld_dir
         target_node = target_node:make_node(module.group)
         target_node = target_node:make_node(module.target)
-        target_node = target_node:make_node(string.format(context.env.SHLIB_PATTERN, module.target))
+        target_node = target_node:make_node(module:make_build_target('SHLIB_PATTERN'))
         local link_task = module:declare_task("shlib", {}, { target_node })
         for _, object in ipairs(module.objects) do
             link_task:add_input(object)
@@ -201,7 +203,7 @@ local function process_link_stlib(module)
         local target_node = context.bld_dir
         target_node = target_node:make_node(module.group)
         target_node = target_node:make_node(module.target)
-        target_node = target_node:make_node(string.format(context.env.STLIB_PATTERN, module.target))
+        target_node = target_node:make_node(module:make_build_target('STLIB_PATTERN'))
         local link_task = module:declare_task("stlib", {}, { target_node })
         for _, task in ipairs(module.compiled_tasks) do
             link_task:add_input(task.outputs[1])
@@ -211,19 +213,19 @@ local function process_link_stlib(module)
 end
 
 context
-        :feature('module', 'process_dependencies', process_dependencies)
+    :feature('module', 'process_dependencies', process_dependencies)
 context
-        :feature('module', 'process_flags', process_flags)
-        :set_run_after({ "process_dependencies" })
+    :feature('module', 'process_flags', process_flags)
+    :set_run_after({ "process_dependencies" })
 context
-        :feature('module', 'process_source', process_source)
-        :set_run_after({ "process_flags" })
+    :feature('module', 'process_source', process_source)
+    :set_run_after({ "process_flags" })
 context
-        :feature('program', 'process_link_program', process_link_program)
-        :set_run_after({ "process_source" })
+    :feature('program', 'process_link_program', process_link_program)
+    :set_run_after({ "process_source" })
 context
-        :feature('shlib', 'process_link_shlib', process_link_shlib)
-        :set_run_after({ "process_source" })
+    :feature('shlib', 'process_link_shlib', process_link_shlib)
+    :set_run_after({ "process_source" })
 context
-        :feature('stlib', 'process_link_stlib', process_link_stlib)
-        :set_run_after({ "process_source" })
+    :feature('stlib', 'process_link_stlib', process_link_stlib)
+    :set_run_after({ "process_source" })
