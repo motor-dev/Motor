@@ -21,14 +21,21 @@ pub(super) fn recurse(lua: &Lua, args: (AnyUserData, LuaString)) -> LuaResult<()
             script_path.set_extension("lua");
             script = script.make_node(&script_path);
         }
-        let mut old_path = script.parent().unwrap();
-        swap(&mut old_path, &mut this.path);
-        this.output
-            .stored_hash
-            .file_dependencies
-            .push(script.path().clone());
-        (old_path, script)
-    })?;
+        if !script.is_file() {
+            Err(LuaError::RuntimeError(format!(
+                "could not locate script `{:?}`",
+                script.nice_path()
+            )))
+        } else {
+            let mut old_path = script.parent().unwrap();
+            swap(&mut old_path, &mut this.path);
+            this.output
+                .stored_hash
+                .file_dependencies
+                .push(script.path().clone());
+            Ok((old_path, script))
+        }
+    })??;
     let result: LuaResult<()> = lua.load(script.nice_path()).call(&args.0);
     args.0.borrow_mut_scoped::<Context, _>(|this| {
         this.path = old_path;

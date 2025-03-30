@@ -145,6 +145,19 @@ function Module:make_build_node(source_file, category)
     return target_node, directory
 end
 
+---@param pattern string
+---@param env? Environment
+---@return string
+function Module:make_build_target(pattern, env)
+    env = env or self.env
+    local pattern = env[pattern]
+    if pattern == nil then
+        return self.target
+    else
+        return string.format(pattern, self.target)
+    end
+end
+
 local function default_filter(_, _)
     return true, false
 end
@@ -188,6 +201,7 @@ function Bolt.Module.module(name, properties)
     g.add_public_dependencies = Module.add_public_dependencies
     g.add_internal_dependencies = Module.add_internal_dependencies
     g.make_build_node = Module.make_build_node
+    g.make_build_target = Module.make_build_target
 
     return g
 end
