@@ -32,6 +32,7 @@ end
 --- a condition that should ideally stop normal operation unless handled by the caller.
 ---
 ---@param message string The error message to log and raise.
+---@noreturn
 function Context:raise_error(message)
 end
 

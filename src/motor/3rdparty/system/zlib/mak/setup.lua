@@ -4,14 +4,16 @@ local context = ...
 context:load_tool('tool/pkg_config')
 context:load_tool('tool/patch')
 local ZLIB_SOURCES = 'https://zlib.net/fossils/zlib-1.2.12.tar.gz'
-local ZLIB_BINARIES = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/zlib-1.2.11-%(platform)-%(arch)-%(abi).tgz'
-local MINIZIP_BINARIES = 'https://github.com/motor-dev/Motor/releases/download/prebuilt/minizip-1.2.11-%(platform)-%(arch)-%(abi).tgz'
+local ZLIB_BINARIES =
+'https://github.com/motor-dev/Motor/releases/download/prebuilt/zlib-1.2.11-%(platform)-%(arch)-%(abi).tgz'
+local MINIZIP_BINARIES =
+'https://github.com/motor-dev/Motor/releases/download/prebuilt/minizip-1.2.11-%(platform)-%(arch)-%(abi).tgz'
 
 local function unpack_zlib()
     context:declare_group('zlib_src', true)
     g = context:declare_generator('zlib_src', {}, context.env, 'zlib_src')
     local out_node = context.bld_dir:make_node('zlib_src/download/zlib-1.2.12.tar.gz')
-    g:declare_task('wget', { }, { out_node }).env.WGET_URL = ZLIB_SOURCES
+    g:declare_task('wget', {}, { out_node }).env.WGET_URL = ZLIB_SOURCES
     local unpack_node = context.bld_dir:make_node('zlib_src/archive')
     local src_node = context.bld_dir:make_node('zlib_src/src')
     local patches = context:search(g.path.parent:make_node('patches'), '*')
@@ -40,7 +42,7 @@ local function setup_zlib_source()
         context.env.ZLIB_SRC_NODE = unpack_zlib()
         return true
     end
-    
+
     return false
 end
 
@@ -95,8 +97,12 @@ local function setup_minizip_source()
     return false
 end
 
+
 context:try('  minizip', function()
     local option = context.settings.with_minizip
+    if context.env.PROJECTS then
+        option = 'source'
+    end
     if option == 'best' or option == 'pkgconfig' then
         if setup_minizip_pkg_config() then
             return 'from pkg-config'

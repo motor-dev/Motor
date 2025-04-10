@@ -161,6 +161,33 @@ impl Application {
             .set_short("j")
             .set_int_type();
 
+        /* settings that export Cargo variables to the scripts.
+        Can be used to determine if the build tool is running in a `Cargo run` environment */
+        parser.add_setting(
+            "CARGO".to_string(),
+            match env::var("CARGO") {
+                Ok(value) => MapValue::String(value),
+                Err(_) => MapValue::None,
+            },
+        )?;
+        parser.add_setting(
+            "CARGO_MANIFEST_DIR".to_string(),
+            match env::var("CARGO_MANIFEST_DIR") {
+                Ok(value) => MapValue::String(value),
+                Err(_) => MapValue::None,
+            },
+        )?;
+        parser.add_setting(
+            "CARGO_PKG_NAME".to_string(),
+            match env::var("CARGO_PKG_NAME") {
+                Ok(value) => MapValue::String(value),
+                Err(_) => MapValue::None,
+            },
+        )?;
+        parser.add_setting(
+            "CARGO_PROFILE_NAME".to_string(),
+            MapValue::String(get_build_profile_name()),
+        )?;
         let parser_ptr = Arc::new(Mutex::new(parser));
         let options_context = Options::from_parser(parser_ptr.clone());
         let mut init_command = Command::init()?;
@@ -443,5 +470,18 @@ impl Application {
             logger = result?;
         }
         Ok(())
+    }
+}
+
+fn get_build_profile_name() -> String {
+    // The profile name is always the 3rd last part of the path (with 1 based indexing).
+    // e.g. .../target/debug/build/.../out
+    match std::env!("OUT_DIR")
+        .split(std::path::MAIN_SEPARATOR)
+        .nth_back(3)
+        .unwrap_or_else(|| "unknown")
+    {
+        "debug" => "dev".to_string(),
+        other => other.to_string(),
     }
 }

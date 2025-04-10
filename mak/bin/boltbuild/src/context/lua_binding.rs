@@ -58,7 +58,7 @@ impl UserData for Context {
         methods.add_method_mut("command_driver", command_driver);
         methods.add_method_mut("dependency_driver", dependency_driver);
         methods.add_method_mut("lua_driver", lua_driver);
-        methods.add_method("run_driver", run_driver);
+        methods.add_method_mut("run_driver", run_driver);
         methods.add_method_mut("start_debug_server", start_debug_server);
         methods.add_method_mut("connect_to_debugger", connect_to_debugger);
     }

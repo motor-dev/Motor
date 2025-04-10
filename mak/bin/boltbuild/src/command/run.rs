@@ -130,13 +130,20 @@ impl Command {
         commands: &mut HashMap<String, Vec<String>>,
         logger: Logger,
     ) -> Result<Logger> {
-        commands.retain(|_, v| !v.starts_with(command_path.as_slice()));
-        let mut context = Context::new(self.spec.clone(), options_context, envs, command_path)?;
+        commands.retain(|_, v| {
+            !(v.len() > command_path.len() && v.starts_with(command_path.as_slice()))
+        });
+        let mut context = Context::new(
+            self.spec.clone(),
+            options_context,
+            envs,
+            command_path.clone(),
+        )?;
         let logger = context.run(envs, tools, commands, logger)?;
 
         if let Some(output) = &mut self.output {
             swap(output, &mut context.output);
-            self.merge_cache(context.output.commands, commands);
+            self.merge_cache(context.output.commands, commands, command_path);
         } else {
             self.output = Some(context.output);
         }
@@ -149,8 +156,8 @@ impl Command {
         &mut self,
         cache: Vec<Command>,
         command_map: &mut HashMap<String, Vec<String>>,
+        mut path: Vec<String>,
     ) {
-        let mut path = vec![self.spec.name.clone()];
         for command in cache {
             for declared_command in &mut self.output.as_mut().unwrap().commands {
                 if declared_command.spec.name.eq(&command.spec.name) {
@@ -192,6 +199,9 @@ impl Command {
                     output.tools = cached_output.tools;
                     output.options = cached_output.options;
                     output.stored_hash = cached_output.stored_hash;
+                    output.groups = cached_output.groups;
+                    output.drivers = cached_output.drivers;
+                    output.tasks = cached_output.tasks;
 
                     for new_cmd in cached_output.commands {
                         if let Some(index) = output
@@ -218,6 +228,8 @@ impl Command {
 
     fn register(&self, command_map: &mut HashMap<String, Vec<String>>, path: &mut Vec<String>) {
         path.push(self.spec.name.clone());
+        assert!(path[0].eq("init"));
+        assert!(!path[1].eq("init"));
         command_map.insert(self.spec.name.clone(), path.clone());
         if let Some(output) = &self.output {
             for command in &output.commands {

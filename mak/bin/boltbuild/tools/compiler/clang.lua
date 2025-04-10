@@ -23,8 +23,7 @@ local function vswhere_clang()
         local result, out, _err = p:communicate('')
         if result then
             for path in out:lines() do
-                path = context.path:make_node(path)
-                clang = context:find_program('clang', { path })
+                clang = context:find_program('clang', { context.path:make_node(path) })
                 if clang then
                     table.insert(compilers, clang)
                 end
@@ -204,10 +203,10 @@ local function detect_clang_targets(clang, callback, language_flags, global_flag
                     for _ = 1, component_count do
                         triple = triple.parent
                     end
-                    triple = triple:name()
-                    if not seen[triple] then
-                        seen[triple] = true
-                        table.insert(triples, triple)
+                    local triple_name = triple:name()
+                    if not seen[triple_name] then
+                        seen[triple_name] = true
+                        table.insert(triples, triple_name)
                     end
                 end
             end
@@ -232,9 +231,14 @@ local function detect_clang_targets(clang, callback, language_flags, global_flag
             local env = context:derive()
             context:with(env, function()
                 context.env.TRIPLE = triple
-                context.env.CLANG = { clang, '-target', triple, table.unpack(global_flags) }
+                context.env.CLANG = { clang, '-target', triple }
+                context.env:append('CLANG', global_flags)
                 for lang, flags in pairs(language_flags) do
-                    languages[lang](flags)
+                    if languages[lang] then
+                        languages[lang](flags)
+                    else
+                        context:raise_error('clang: unsupported language ' .. lang)
+                    end
                 end
             end)
             if callback(env) ~= true then
@@ -297,7 +301,11 @@ function Bolt.Clang.discover(callback, language_flags, global_flags, detect_cros
                         context.env.CLANG = { compiler[2] }
                         context.env:append('CLANG', global_flags)
                         for lang, flags in pairs(language_flags) do
-                            languages[lang](flags)
+                            if languages[lang] then
+                                languages[lang](flags)
+                            else
+                                context:raise_error('clang: unsupported language ' .. lang)
+                            end
                         end
                         context.env.TRIPLE = context.env.TARGET
                     end)
