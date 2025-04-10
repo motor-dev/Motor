@@ -23,8 +23,8 @@ function Bolt.Patch.patch(generator, diff, source, target, strip)
         table.insert(sources, diff)
     else
         ---@cast diff -Node
-        for _, source in ipairs(diff) do
-            table.insert(sources, source)
+        for _, source_diff in ipairs(diff) do
+            table.insert(sources, source_diff)
         end
     end
     generator:declare_task('patch', sources, { target })

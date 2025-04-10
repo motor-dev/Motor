@@ -4,9 +4,12 @@ context:load_tool('internal/bolt')
 
 Bolt.PkgConfig = {}
 
+---@return string[]
+---@return string[]
+---@return string[]
 local function _run_pkg_config(pkg_name, lib_paths, seen)
     if seen[pkg_name] then
-        return
+        return {}, {}, {}
     end
     seen[pkg_name] = true
 
@@ -15,8 +18,9 @@ local function _run_pkg_config(pkg_name, lib_paths, seen)
 
     local config_file
     for _, p in ipairs(lib_paths) do
-        config_file = p:make_node('pkgconfig/' .. pkg_name .. '.pc')
-        if config_file:is_file() then
+        local node = p:make_node('pkgconfig/' .. pkg_name .. '.pc')
+        if node:is_file() then
+            config_file = node
             break
         end
     end
@@ -24,10 +28,17 @@ local function _run_pkg_config(pkg_name, lib_paths, seen)
     if not config_file or not config_file:is_file() then
         context:raise_error('no pkg-config file for library ' .. pkg_name)
     end
+    ---@cast config_file -nil
 
     local file = io.open(config_file:abs_path(), 'r')
+    if not file then
+        context:raise_error('no pkg-config file for library ' .. pkg_name)
+    end
+    ---@cast file -nil
+
     local lines = file:lines()
     for line in lines do
+        ---@cast line string
         line = line:match('^%s*(.-)%s*$')
         if line == '' or line:sub(1, 1) == '#' then
             goto continue
@@ -76,8 +87,9 @@ local function _run_pkg_config(pkg_name, lib_paths, seen)
         elseif d == '=' or d == '<' or d == '<=' or d == '>' or d == '>=' then
             skip = true
         else
+            local dep_c_flags, dep_libs, dep_ld_flags
             if not seen[d] then
-                local dep_c_flags, dep_libs, dep_ld_flags = Bolt.PkgConfig.run_pkg_config(d)
+                dep_c_flags, dep_libs, dep_ld_flags = Bolt.PkgConfig.run_pkg_config(d)
                 for _, v in ipairs(dep_c_flags) do
                     table.insert(cflags, v)
                 end
@@ -120,8 +132,10 @@ local function _run_pkg_config(pkg_name, lib_paths, seen)
     return cflags, libs, ldflags
 end
 
----@param pkg_name string
----@return string[], string[], string[]
+---@param pkg_name string The name of the package to query.
+---@return string[] #The compiler flags for the package.
+---@return string[] #The libraries for the package.
+---@return string[] #The linker flags for the package.
 function Bolt.PkgConfig.run_pkg_config(pkg_name)
     local lib_paths = context.env.C_COMPILER_SYSTEM_LIB_DIRS or {}
 

@@ -99,7 +99,7 @@ fn insert_driver(
 
 pub(super) fn run_driver(
     lua: &Lua,
-    context: &Context,
+    context: &mut Context,
     (name, inputs, outputs, env): (String, LuaValue, LuaValue, Option<AnyUserData>),
 ) -> LuaResult<(u32, String)> {
     let driver = context
@@ -144,5 +144,26 @@ pub(super) fn run_driver(
         signature: SerializedHash(blake3::hash(&[])),
     };
     let result = driver.execute(&task);
+    for input in &task.inputs {
+        context
+            .output
+            .stored_hash
+            .file_dependencies
+            .push(input.path().clone());
+    }
+    for additional_input in &result.driver_dependencies {
+        context
+            .output
+            .stored_hash
+            .file_dependencies
+            .push(additional_input.path().clone());
+    }
+    for additional_input in &result.file_dependencies {
+        context
+            .output
+            .stored_hash
+            .file_dependencies
+            .push(additional_input.path().clone());
+    }
     Ok((result.exit_code, result.log))
 }

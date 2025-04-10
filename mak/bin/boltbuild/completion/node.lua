@@ -24,7 +24,7 @@ end
 --- be reevaluated if the search results change.
 ---
 ---@param name string The name of the program to find.
----@param paths string[] Optional. A list of paths to search for the program. If not specified, the `context.options.path` variable is used.
+---@param paths Node[] Optional. A list of paths to search for the program. If not specified, the `context.options.path` variable is used.
 ---@return Node? #The node representing the found program, or nil if the program could not be found.
 ---@overload fun(name: string): Node?
 function Context:find_program(name, paths)
@@ -67,8 +67,9 @@ end
 function Node:path_from(from)
 end
 
---- Changes the file extension of the filesystem object. If no extension exists, it adds the new extension; otherwise, it replaces the existing extension.
+--- Creates a new Node object with the same path as the current one, but with a different file extension.
 ---@param new_extension string The new file extension, without the `.` prefix.
+---@return Node #A new node with the updated file extension.
 function Node:change_ext(new_extension)
 end
 

@@ -114,8 +114,9 @@ local function module(name, path, lib_types)
         lib_type = lib_types[3]
     end
 
-    local meta_generator, meta_registry = metagen(name, path)
+    local meta_generator = metagen(name, path)
 
+    ---@type ModuleProperties
     local properties = {
         features = { lib_type, 'motor_module' },
         source_patterns = {
@@ -134,7 +135,6 @@ local function module(name, path, lib_types)
         internal_includes = {
             context.bld_dir:make_node(meta_generator.group):make_node(meta_generator.name):make_node('include')
         },
-        internal_dependencies = { meta_registry },
     }
     local generator = Bolt.Module.module(name, properties)
     generator.meta_generator = meta_generator
@@ -154,7 +154,7 @@ end
 ---the link phase of modules depending on them.
 ---@param name string name of the library.
 ---@param path string? qualified path of the library. Defaults to name.
----@return Module a new library module
+---@return Module #a new library module
 function Motor.module(name, path)
     return module(name, path, { 'objects', 'objects', 'shlib' })
 end

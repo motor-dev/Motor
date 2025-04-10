@@ -5,6 +5,27 @@
 ---These `add_*` methods are only available during the `init` stage of the tool's lifecycle.
 ---@class Settings
 ---@field [string] EnvironmentValue Holds environment values mapped to string keys, for storing any program-defined settings.
+---@field name string The name of the program, used for displaying help and error messages.
+---@field author string The author of the program, used for displaying help and error messages.
+---@field version string The version of the program, used for displaying help and error messages.
+---@field out Node The output directory for the program, where generated files will be stored.
+---@field path Node[] The search paths for the program, used to locate files and tools.
+---@field tools_dir Node[] The directories where tools are located, used for searching and executing tools.
+---@field exe_suffix string The suffix for executable files, typically `.exe` on Windows, and empty on other platforms.
+---@field OS string The operating system on which the program is running, used for platform-specific behavior.
+---@field private commands string[] The list of commands to be executed by the program, specified by the user.
+---@field private force boolean Indicates whether to force execution of commands, even if they are up to date.
+---@field private verbose number The verbosity level for logging, controlling how much information is displayed.
+---@field private why boolean Indicates whether to print explanations for every action taken by the program.
+---@field private color boolean Indicates whether to use colors in the output, with automatic detection as the default.
+---@field private target string[] The targets to be built by the program, specified by the user.
+---@field private files string[] The files to be built by the program, specified by the user.
+---@field private progress number The level of progress reporting, controlling how progress is displayed.
+---@field private job_count number The maximum number of tasks that can run in parallel, specified by the user.
+---@field CARGO string? The path to the Cargo executable, if `boltbuild` was started from a Cargo command.
+---@field CARGO_MANIFEST_DIR string? The directory of the Cargo manifest, if `boltbuild` was started from a Cargo command.
+---@field CARGO_PKG_NAME string? The name of the Cargo package, if `boltbuild` was started from a Cargo command.
+---@field CARGO_PROFILE_NAME string? The name of the Cargo profile, if `boltbuild` was started from a Cargo command.
 Settings = {}
 
 ---Represents a command-line option that has been declared within `Settings`.

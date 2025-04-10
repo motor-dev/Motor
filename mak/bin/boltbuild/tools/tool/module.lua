@@ -21,32 +21,36 @@ local _
 ---@field group string?
 ---@field public_includes Node[]?
 ---@field internal_includes Node[]?
----@field public_defines string[]?
----@field internal_defines string[]?
----@field public_dependencies string[]?
----@field internal_dependencies string[]?
----@field public_flags table<string,string>[]?
----@field internal_flags table<string,string>[]?
+---@field public_defines [string,string][]?
+---@field internal_defines [string,string][]?
+---@field public_dependencies Module[]?
+---@field internal_dependencies Module[]?
+---@field public_flags table<string,string[]>?
+---@field internal_flags table<string,string[]>?
 ---@field flag_groups string[]?
 ---@field source SourceFile[]?
 ---@field source_patterns SourcePattern[]?
----@field source_filter fun(source_file:SourceFile,env:Environment):[boolean,boolean]?
+---@field source_filter (fun(source_file:SourceFile,env:Environment):[boolean,boolean]) ?
 local _
 
 ---@class Module : Generator
+---@field target string
 ---@field objects Node[]
 ---@field source SourceFile[]
 ---@field source_patterns SourcePattern[]
 ---@field source_filter fun(source_file:SourceFile,env:Environment):[boolean,boolean]
 ---@field internal_includes Node[]
 ---@field public_includes Node[]
----@field internal_defines string[]
----@field public_defines string[]
----@field internal_dependencies Generator[]
----@field public_dependencies Generator[]
----@field internal_flags table<string,string>[]
----@field public_flags table<string,string>[]
+---@field internal_defines [string,string][]
+---@field public_defines [string,string][]
+---@field internal_dependencies Module[]
+---@field public_dependencies Module[]
+---@field internal_flags table<string,string[]>
+---@field public_flags table<string,string[]>
 ---@field flag_groups string[]
+---@field link_task Task?
+---@field compiled_tasks Task[]
+---@field dep_link_tasks Task[]
 local Module = {}
 
 ---@param path Node
@@ -150,7 +154,8 @@ end
 ---@return string
 function Module:make_build_target(pattern, env)
     env = env or self.env
-    local pattern = env[pattern]
+    ---@type string
+    pattern = env[pattern]
     if pattern == nil then
         return self.target
     else
@@ -169,8 +174,9 @@ function Bolt.Module.module(name, properties)
     local features = properties.features or {} ---@type string[]
     table.insert(features, 1, 'module')
     local g = context:declare_generator(name, features, context.env, properties.group)
+    ---@cast g Module
 
-    local name_parts = string.split(name, '/')
+    local name_parts = name:split('/')
 
     g.objects = {}
     g.compiled_tasks = {}
@@ -187,6 +193,7 @@ function Bolt.Module.module(name, properties)
     g.internal_flags = properties.internal_flags or {}
     g.public_flags = properties.public_flags or {}
     g.flag_groups = properties.flag_groups or {}
+    g.link_task = nil
     g.dep_link_tasks = {}
 
     g.add_source = Module.add_source

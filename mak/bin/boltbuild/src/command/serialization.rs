@@ -67,7 +67,7 @@ impl Command {
         //let reader = std::io::BufReader::new(file);
         //let commands = CommandCacheSeed(&output.environments)
         //    .deserialize(&mut serde_json::Deserializer::from_reader(reader))?;
-        self.merge_cache(commands, command_map);
+        self.merge_cache(commands, command_map, vec!["init".to_string()]);
         Ok(())
     }
 

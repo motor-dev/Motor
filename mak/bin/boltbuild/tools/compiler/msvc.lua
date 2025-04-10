@@ -177,12 +177,13 @@ local function find_windows_sdk()
     else
         context:raise_error('Failed to find Windows SDK path:\n' .. tostring(err))
     end
-    local p = context:popen({
+    p = context:popen({
         'powershell.exe',
         '-Command',
         '(Get-ItemProperty -Path "HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\Microsoft SDKs\\Windows\\v10.0" -Name ProductVersion).ProductVersion',
     })
-    local result, out, err = p:communicate('')
+
+    result, out, err = p:communicate('')
     if result then
         for version in out:lines() do
             sdk[2] = version

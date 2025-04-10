@@ -6,7 +6,7 @@ context:load_tool('internal/module_process')
 
 ---@param module Module
 ---@param dependency Module
----@param seen table<Module,boolean>
+---@param seen table<Module, [boolean,boolean]>
 ---@param add_objects boolean
 local function process_link(module, dependency, seen, add_objects)
     local already_seen, already_added_objects = table.unpack(seen[dependency] or { false, false })
@@ -18,11 +18,11 @@ local function process_link(module, dependency, seen, add_objects)
             end
         end
         if not already_seen then
-            module.env:append('LIBS', dependency.public_flags.LIBS or {})
-            module.env:append('LIBPATHS', dependency.public_flags.LIBPATHS or {})
+            module.env:append('LIBS', dependency.public_flags['LIBS'] or {})
+            module.env:append('LIBPATHS', dependency.public_flags['LIBPATHS'] or {})
             module.env:append('LINKFLAGS', dependency.public_flags.LINKFLAGS or {})
         end
-        if dependency:has_property('link_task') then
+        if dependency:has_property("link_task") then
             table.insert(module.dep_link_tasks, dependency.link_task)
         end
         for _, dep in ipairs(dependency.public_dependencies) do
@@ -38,7 +38,7 @@ end
 
 ---@param module Module
 ---@param dependency Module
----@param seen table<Module,boolean>
+---@param seen table<Module,[boolean,boolean]>
 local function process_dependency(module, dependency, seen)
     if not seen[dependency] then
         seen[dependency] = true
@@ -161,10 +161,6 @@ local function process_link_program(module)
         for _, task in ipairs(module.compiled_tasks) do
             link_task:add_input(task.outputs[1])
         end
-        for _, node in ipairs(module.env.OBJECTS) do
-            link_task:add_input(node)
-        end
-
         module.link_task = link_task
     end
 end
@@ -214,18 +210,26 @@ end
 
 context
     :feature('module', 'process_dependencies', process_dependencies)
+    :set_run_after({ 'start_dependencies' })
 context
     :feature('module', 'process_flags', process_flags)
     :set_run_after({ "process_dependencies" })
+    :set_run_before({ "end_dependencies" })
+
 context
     :feature('module', 'process_source', process_source)
-    :set_run_after({ "process_flags" })
+    :set_run_after({ "start_source" })
+    :set_run_before({ "end_source" })
+
 context
     :feature('program', 'process_link_program', process_link_program)
-    :set_run_after({ "process_source" })
+    :set_run_after({ "start_link" })
+    :set_run_before({ "end_link" })
 context
     :feature('shlib', 'process_link_shlib', process_link_shlib)
-    :set_run_after({ "process_source" })
+    :set_run_after({ "start_link" })
+    :set_run_before({ "end_link" })
 context
     :feature('stlib', 'process_link_stlib', process_link_stlib)
-    :set_run_after({ "process_source" })
+    :set_run_after({ "start_link" })
+    :set_run_before({ "end_link" })
