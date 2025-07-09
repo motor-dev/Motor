@@ -29,7 +29,7 @@ pub struct Application {
 impl Application {
     pub fn init() -> Result<Self> {
         #[cfg(target_os = "linux")]
-        {
+        unsafe {
             env::set_var("WSL_UTF8", "1");
             env::set_var(
                 "WSLENV",
@@ -43,11 +43,11 @@ impl Application {
             .to_string_lossy()
             .to_string();
         let mut parser = CommandLineParser::new();
-        parser.add_setting("name".to_string(), MapValue::String(root_dir))?;
-        parser.add_setting("author".to_string(), MapValue::String("".to_string()))?;
-        parser.add_setting("version".to_string(), MapValue::String("0.1.0".to_string()))?;
+        parser.add_setting("name".into(), MapValue::String(root_dir))?;
+        parser.add_setting("author".into(), MapValue::String("".into()))?;
+        parser.add_setting("version".into(), MapValue::String("0.1.0".into()))?;
         parser.add_setting(
-            "out".to_string(),
+            "out".into(),
             MapValue::Node(Node::from(&PathBuf::from("build/.bolt"))),
         )?;
         let mut paths = vec![MapValue::Node(
@@ -60,52 +60,49 @@ impl Application {
                     .collect::<Vec<MapValue>>(),
             );
         }
-        parser.add_setting("path".to_string(), MapValue::Vec(paths))?;
-        parser.add_setting("tools_dir".to_string(), MapValue::Vec(Vec::new()))?;
+        parser.add_setting("path".into(), MapValue::Vec(paths))?;
+        parser.add_setting("tools_dir".into(), MapValue::Vec(Vec::new()))?;
         parser.add_setting(
-            "exe_suffix".to_string(),
+            "exe_suffix".into(),
             MapValue::String(
                 if cfg!(target_os = "windows") {
                     ".exe"
                 } else {
                     ""
                 }
-                .to_string(),
+                .into(),
             ),
         )?;
-        parser.add_setting(
-            "OS".to_string(),
-            MapValue::String(env::consts::OS.to_string()),
-        )?;
+        parser.add_setting("OS".into(), MapValue::String(env::consts::OS.into()))?;
 
         parser
             .add_list(
-                "commands".to_string(),
-                "The command(s) to execute".to_string(),
+                "commands".into(),
+                "The command(s) to execute".into(),
                 MapValue::Vec(Vec::new()),
             )?
             .set_required();
 
         parser
             .add_flag(
-                "force".to_string(),
-                "Force execution of the commands".to_string(),
+                "force".into(),
+                "Force execution of the commands".into(),
                 MapValue::Bool(false),
             )?
             .set_long("force")
             .set_short("f");
 
         parser.add_count(
-            "verbose".to_string(),
-            "Controls how much information is displayed.\nVerbosity increases with each occurrence of the option.".to_string(),
+            "verbose".into(),
+            "Controls how much information is displayed.\nVerbosity increases with each occurrence of the option.".into(),
             MapValue::Integer(0),
         )?
             .set_category("Options controlling logging")
             .set_short("v");
 
         parser.add_flag(
-            "why".to_string(),
-            "Print an explanation for every action.\nFor every command, task generator and task considered, the program will print the reason why it considers it out of date.".to_string(),
+            "why".into(),
+            "Print an explanation for every action.\nFor every command, task generator and task considered, the program will print the reason why it considers it out of date.".into(),
             MapValue::Bool(false),
         )?
             .set_category("Options controlling logging")
@@ -114,8 +111,8 @@ impl Application {
 
         parser
             .add_flag(
-                "color".to_string(),
-                "Whether to use colors in the output. Defaults to automatic.".to_string(),
+                "color".into(),
+                "Whether to use colors in the output. Defaults to automatic.".into(),
                 MapValue::None,
             )?
             .set_category("Options controlling logging")
@@ -124,9 +121,9 @@ impl Application {
 
         parser
             .add_list(
-                "target".to_string(),
+                "target".into(),
                 "Target to be built.\nUse this option multiple times to build several targets."
-                    .to_string(),
+                    .into(),
                 MapValue::None,
             )?
             .set_category("Options controlling task execution")
@@ -135,25 +132,24 @@ impl Application {
 
         parser
             .add_list(
-                "files".to_string(),
-                "Files to be built.\nUse this option multiple times to build several files."
-                    .to_string(),
+                "files".into(),
+                "Files to be built.\nUse this option multiple times to build several files.".into(),
                 MapValue::None,
             )?
             .set_category("Options controlling task execution")
             .set_long("file");
 
         parser.add_count(
-            "progress".to_string(),
-            "Controls how progress is reported.\n-p adds a progress bar.\n-pp shows the progress bar and removes the individual task logging.".to_string(),
+            "progress".into(),
+            "Controls how progress is reported.\n-p adds a progress bar.\n-pp shows the progress bar and removes the individual task logging.".into(),
             MapValue::Integer(0),
         )?
             .set_category("Options controlling task execution")
             .set_short("p");
 
         parser.add_value(
-            "job_count".to_string(),
-            "Controls the maximum number of tasks that can run in parallel. Defaults to the number of processors.".to_string(),
+            "job_count".into(),
+            "Controls the maximum number of tasks that can run in parallel. Defaults to the number of processors.".into(),
             MapValue::None,
         )?
             .set_category("Options controlling task execution")
@@ -163,40 +159,32 @@ impl Application {
 
         /* settings that export Cargo variables to the scripts.
         Can be used to determine if the build tool is running in a `Cargo run` environment */
+        for (key, env_var) in [
+            ("CARGO", "CARGO"),
+            ("CARGO_MANIFEST_DIR", "CARGO_MANIFEST_DIR"),
+            ("CARGO_PKG_NAME", "CARGO_PKG_NAME"),
+        ] {
+            parser.add_setting(
+                key.into(),
+                env::var(env_var)
+                    .map(MapValue::String)
+                    .unwrap_or(MapValue::None),
+            )?;
+        }
         parser.add_setting(
-            "CARGO".to_string(),
-            match env::var("CARGO") {
-                Ok(value) => MapValue::String(value),
-                Err(_) => MapValue::None,
-            },
-        )?;
-        parser.add_setting(
-            "CARGO_MANIFEST_DIR".to_string(),
-            match env::var("CARGO_MANIFEST_DIR") {
-                Ok(value) => MapValue::String(value),
-                Err(_) => MapValue::None,
-            },
-        )?;
-        parser.add_setting(
-            "CARGO_PKG_NAME".to_string(),
-            match env::var("CARGO_PKG_NAME") {
-                Ok(value) => MapValue::String(value),
-                Err(_) => MapValue::None,
-            },
-        )?;
-        parser.add_setting(
-            "CARGO_PROFILE_NAME".to_string(),
+            "CARGO_PROFILE_NAME".into(),
             MapValue::String(get_build_profile_name()),
         )?;
+
         let parser_ptr = Arc::new(Mutex::new(parser));
         let options_context = Options::from_parser(parser_ptr.clone());
         let mut init_command = Command::init()?;
-        let mut all_commands = HashMap::from([("init".to_string(), vec!["init".to_string()])]);
+        let mut all_commands = HashMap::from([("init".into(), vec!["init".into()])]);
         let mut logger = init_command.run(
             options_context.clone(),
             &vec![Arc::new(Mutex::new(OverlayMap::new(0)))],
             &Vec::new(),
-            vec!["init".to_string()],
+            vec!["init".into()],
             &mut all_commands,
             Logger::new(None, 0, false),
         )?;
@@ -219,7 +207,7 @@ impl Application {
             let result = fs::File::open(commands_file);
             if let Ok(file) = result {
                 if let Err(err) = init_command.load_from_file(file, &mut all_commands) {
-                    logger.error(err.message.as_str());
+                    logger.error(&err.message);
                 }
             }
         }
@@ -237,12 +225,16 @@ impl Application {
             .into_iter()
             .map(|x| out_node.make_node(&PathBuf::from(x)))
             .collect();
-        let thread_count = options.get_integer_raw("job_count");
-        let cpu_count = std::thread::available_parallelism()?.get();
-        let thread_count = match thread_count {
-            n if n > 0 => n as usize,
-            n if (-n) as usize >= cpu_count => 1,
-            n => cpu_count - (-n as usize),
+        let thread_count = {
+            let n = options.get_integer_raw("job_count");
+            let cpu_count = std::thread::available_parallelism()?.get();
+            if n > 0 {
+                n as usize
+            } else if (-n) as usize >= cpu_count {
+                1
+            } else {
+                cpu_count - (-n as usize)
+            }
         };
         let progress_mode = options.get_integer_raw("progress") as u32;
 
@@ -301,13 +293,10 @@ impl Application {
                 };
 
                 if self.force && next_item.is_none() {
-                    logger.why(
-                        format!(
-                            "command `{}`: running lua scripts forced by command line option",
-                            current_command.spec.name,
-                        )
-                        .as_str(),
-                    );
+                    logger.why(&format!(
+                        "command `{}`: running lua scripts forced by command line option",
+                        current_command.spec.name,
+                    ));
 
                     logger = current_command.run(
                         Options::from_env(options),
@@ -321,13 +310,10 @@ impl Application {
                     let result = current_command.verify_hash(&options, envs, tools.clone());
                     match result {
                         Err(reason) => {
-                            logger.why(
-                                format!(
-                                    "command `{}`: running lua scripts because {}",
-                                    current_command.spec.name, reason
-                                )
-                                .as_str(),
-                            );
+                            logger.why(&format!(
+                                "command `{}`: running lua scripts because {}",
+                                current_command.spec.name, reason
+                            ));
 
                             logger = current_command.run(
                                 Options::from_env(options),
@@ -340,13 +326,10 @@ impl Application {
                         }
 
                         Ok(_) => {
-                            logger.why(
-                                format!(
-                                    "command `{}`: lua files are up-to-date",
-                                    current_command.spec.name
-                                )
-                                .as_str(),
-                            );
+                            logger.why(&format!(
+                                "command `{}`: lua files are up-to-date",
+                                current_command.spec.name
+                            ));
                         }
                     }
                 }
@@ -451,7 +434,7 @@ impl Application {
             if let Some(ref_path) = self.command_list.get(&command) {
                 assert!(ref_path[0].eq("init"));
                 command_path = ref_path.clone();
-            } else if command.len() > 2 && command.as_str()[0..2].eq("re") {
+            } else if command.len() > 2 && command[0..2].eq("re") {
                 if let Some(ref_path) = self.command_list.get(&command[2..]) {
                     assert!(ref_path[0].eq("init"));
                     command_path = ref_path.clone();
@@ -481,7 +464,7 @@ fn get_build_profile_name() -> String {
         .nth_back(3)
         .unwrap_or_else(|| "unknown")
     {
-        "debug" => "dev".to_string(),
-        other => other.to_string(),
+        "debug" => "dev".into(),
+        other => other.into(),
     }
 }
