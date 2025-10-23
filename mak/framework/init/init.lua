@@ -69,6 +69,7 @@ context.settings.tools_dir = {
     context.env.motor_node:make_node("mak/framework/tools"),
 }
 
+context:load_tool('internal/sysroot')
 context:load_tool('lang/python')
 context:load_tool('lang/flex')
 context:load_tool('lang/bison')

@@ -1,5 +1,5 @@
----@type Context
 local context = ...
+context:load_tool('internal/sysroot')
 context:load_tool('internal/bolt')
 
 Bolt.MSVC = {}

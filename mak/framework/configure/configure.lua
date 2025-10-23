@@ -17,28 +17,26 @@ end
 
 function Motor.test_compiler(env, code)
     local src = context.bld_dir:make_node('main.cc')
+    local object = context.bld_dir:make_node('out.o')
     local target = context.bld_dir:make_node('out')
-    local command = {}
     src:write(code)
-    for _, arg in ipairs(env.CXX) do
-        table.insert(command, arg)
+    local result, out = context:run_driver('cxx', { src }, { object }, env)
+    if result ~= 0 then
+        src:try_delete()
+        object:try_delete()
+        context:raise_error('Compiler test failed:\n' .. out)
     end
-    for _, arg in ipairs(env.CXXFLAGS) do
-        table.insert(command, arg)
+    result, out = context:run_driver('program', { object }, { target }, env)
+    if result ~= 0 then
+        src:try_delete()
+        object:try_delete()
+        target:try_delete()
+        context:raise_error('Linker test failed:\n' .. out)
     end
-    table.insert(command, src:abs_path())
-    -- TODO: properly parse the output flag
-    table.insert(command, '-o')
-    table.insert(command, target:abs_path())
-
-    local result = pcall(function()
-        return context:popen(command):communicate()
-    end)
 
     src:try_delete()
+    object:try_delete()
     target:try_delete()
-
-    return result
 end
 
 function Motor.create_toolchain(env)

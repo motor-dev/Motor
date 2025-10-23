@@ -1,6 +1,7 @@
 ---@type Context
 local context = ...
 
+context:load_tool('internal/sysroot')
 context:load_tool('internal/compiler_gnu')
 
 Bolt.GCC = {}

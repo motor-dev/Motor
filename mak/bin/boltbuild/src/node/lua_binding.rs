@@ -111,7 +111,7 @@ impl UserData for Node {
         });
         methods.add_method("read", |_lua, this: &Node, ()| {
             let mut content = Vec::new();
-            std::fs::File::create(&this.path)?.read_to_end(&mut content)?;
+            std::fs::File::open(&this.path)?.read_to_end(&mut content)?;
             _lua.create_string(content)
         });
         methods.add_method("write", |_lua, this: &Node, content: LuaString| {

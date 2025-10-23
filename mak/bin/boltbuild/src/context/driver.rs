@@ -132,11 +132,14 @@ pub(super) fn run_driver(
     } else {
         context.environment.clone()
     };
+    let mut env = OverlayMap::derive_leaf(&env)?;
+    env.set("SRC", (&inputs).into());
+    env.set("TGT", (&outputs).into());
     let task = Task {
         driver: name,
         generator: "context".to_string(),
         group: "context".to_string(),
-        env,
+        env: Arc::new(Mutex::new(env)),
         inputs,
         outputs,
         predecessors: Vec::new(),

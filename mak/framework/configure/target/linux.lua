@@ -13,9 +13,12 @@ if #compilers then
     for _, env in ipairs(compilers) do
         context:with(env, function()
             if pcall(function()
-                context:recurse('arch/' .. env.ARCHITECTURE .. '.lua')
-            end) then
-                if Motor.test_compiler(env, '#include <cstdio>\n#include <cfloat>\n#include <new>\nint main() {}\n') then
+                    context:recurse('arch/' .. env.ARCHITECTURE .. '.lua')
+                end) then
+                if pcall(function()
+                        Motor.test_compiler(env,
+                            '#include <cstdio>\n#include <cfloat>\n#include <new>\nint main() {}\n')
+                    end) then
                     context:try(' `- ' .. env.TOOLCHAIN_ID, function()
                         Motor.create_toolchain(env)
                         env:append('MOTOR_PLATFORMS', { 'linux', 'posix', 'pc' })
