@@ -61,6 +61,13 @@ function Bolt.GnuCompiler.get_specs(command, language)
                 elseif name == '_WIN32' then
                     env.BINARY_FORMAT = 'pe'
                     env.TARGET_OS = 'windows'
+                    if env.TARGET_OS_VARIANT == nil then
+                        env.TARGET_OS_VARIANT = 'windows'
+                    end
+                elseif name == '__MINGW32__' then
+                    env.BINARY_FORMAT = 'pe'
+                    env.TARGET_OS = 'windows'
+                    env.TARGET_OS_VARIANT = 'mingw'
                 elseif name == '__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__' then
                     env.TARGET_OS = 'macos'
                 elseif name == '__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__' then
@@ -70,15 +77,14 @@ function Bolt.GnuCompiler.get_specs(command, language)
                 elseif name == '__ENVIRONMENT_TV_OS_VERSION_MIN_REQUIRED__' then
                     env.TARGET_OS = 'tvos'
                 elseif name == '__linux__' then
-                    if env.TARGET_OS == nil then
-                        env.TARGET_OS = 'linux'
-                    end
+                    env.TARGET_OS = 'linux'
                 elseif name == '__FreeBSD__' then
                     env.TARGET_OS = 'freebsd'
                 elseif name == '__sun__' then
                     env.TARGET_OS = 'solaris'
                 elseif name == '__ANDROID__' then
-                    env.TARGET_OS = 'android'
+                    env.TARGET_OS = 'linux'
+                    env.TARGET_OS_VARIANT = 'android'
                 elseif name == '__LITTLE_ENDIAN__' then
                     endianness = 'little'
                 elseif name == '__BIG_ENDIAN__' then

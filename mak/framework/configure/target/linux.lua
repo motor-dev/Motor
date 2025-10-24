@@ -8,7 +8,7 @@ for _, env in ipairs(Motor.compilers) do
     end
 end
 
-if #compilers then
+if #compilers ~= 0 then
     context:colored_println(' {blue}configuring for platform Linux{reset}')
     for _, env in ipairs(compilers) do
         context:with(env, function()

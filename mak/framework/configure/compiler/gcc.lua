@@ -12,8 +12,9 @@ Bolt.GCC.discover(function(env)
     else
         version = '_' .. version
     end
-    env.TOOLCHAIN_ID = env.TARGET_OS ..
-    '-' .. env.ARCHITECTURE .. '-' .. env.CXX_COMPILER_NAME .. '-' .. env.GCC_CXX_VERSION:gsub('-', '_') .. version
+    version = env.GCC_CXX_VERSION:gsub('-', '_') .. version
+    local target_os = env.TARGET_OS_VARIANT or env.TARGET_OS
+    env.TOOLCHAIN_ID = target_os .. '-' .. env.ARCHITECTURE .. '-' .. env.CXX_COMPILER_NAME .. '-' .. version
     env:append('CXXFLAGS', '-Wno-attributes')
     Motor.add_compiler(env)
     return true
