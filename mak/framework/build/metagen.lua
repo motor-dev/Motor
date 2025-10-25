@@ -8,8 +8,8 @@ context:lua_driver('metagen',
     { 'c', 'cxx' })
 
 pcall(function()
-    --- @type Node
     local python = context.env.PYTHON
+    ---@cast python Node
     context:popen({ python, context.path:make_node('../../lib/pyxx/__main__.py'), '-x', 'c++', '--std', 'c++20', '-t',
         context.bld_dir:abs_path(), '-' })
 end)
@@ -31,7 +31,7 @@ context:feature('metagen ', 'metagen ', function(generator)
             local target_node_factory_hh = target_node_factory_hh_dir:make_node(source_node:path_from(source_path))
             target_node_factory_hh = target_node_factory_hh:change_ext('factory.hh')
 
-            local task = generator:declare_task('metagen', { source_node },
+            local task = generator:declare_task('metagen', source_node,
                 { target_node_cc, target_node_factory_hh, target_node_doc, target_node_ns })
             ---@cast task -nil
             task.env.METAGEN_RELATIVE_INPUT = string.gsub(source_node:path_from(source_path), '\\', '/')
@@ -50,10 +50,9 @@ end)
 context:feature('module', 'process_out_source', function(generator)
     local metagen = context:get_generator_by_name(generator.name .. '.metagen')
     if metagen then
-        ---@param source_node Node
+        ---@param source_node [Node, Node]
         for _, source_node in ipairs(metagen.out_source) do
             generator:add_source(source_node[1], source_node[2])
         end
-        return generator
     end
 end):set_run_before({ 'process_source' })

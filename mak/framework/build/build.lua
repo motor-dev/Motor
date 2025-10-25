@@ -3,6 +3,9 @@ local context = ...
 context:load_tool('tool/module')
 
 local static, dynamic, nobulk = context.settings.static, context.settings.dynamic, context.settings.nobulk
+--- @cast static boolean
+--- @cast dynamic boolean
+--- @cast nobulk boolean
 
 local group_name = context.fs_name
 if static then

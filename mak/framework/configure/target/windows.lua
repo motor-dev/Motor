@@ -8,15 +8,18 @@ for _, env in ipairs(Motor.compilers) do
     end
 end
 
-if #compilers then
+if #compilers ~= 0 then
     context:colored_println(' {blue}configuring for platform Windows{reset}')
+    local top_env = context.env
     for _, env in ipairs(compilers) do
         context:with(env, function()
             if pcall(function()
                     context:recurse('arch/' .. env.ARCHITECTURE .. '.lua')
                 end) then
-                if pcall(function() Motor.test_compiler(env,
-                            '#include <cstdio>\n#include <cfloat>\n#include <new>\nint main() {}\n') end) then
+                if pcall(function()
+                        Motor.test_compiler(env,
+                            '#include <cstdio>\n#include <cfloat>\n#include <new>\nint main() {}\n')
+                    end) then
                     context:try(' `- ' .. env.TOOLCHAIN_ID, function()
                         context:load_tool('lang/winres')
                         Bolt.Winres.find_winres(env)
@@ -27,7 +30,9 @@ if #compilers then
                         env:append('SYSTEM_INCLUDES',
                             context.env.motor_node:make_node('src/motor/3rdparty/system/win32/api.windows'):abs_path())
                         env:append('LIBS',
-                            { 'kernel32', 'user32', 'advapi32', 'ole32', 'oleaut32', 'uuid', 'shell32', 'synchronization' })
+                            { 'kernel32', 'user32', 'advapi32', 'ole32', 'oleaut32', 'uuid', 'shell32',
+                                'synchronization' })
+                        top_env:append('TOOLCHAINS', env)
                         return 'OK'
                     end)
                 end

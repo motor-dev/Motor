@@ -10,6 +10,7 @@ end
 
 if #compilers ~= 0 then
     context:colored_println(' {blue}configuring for platform Linux{reset}')
+    local top_env = context.env
     for _, env in ipairs(compilers) do
         context:with(env, function()
             if pcall(function()
@@ -23,6 +24,7 @@ if #compilers ~= 0 then
                         Motor.create_toolchain(env)
                         env:append('MOTOR_PLATFORMS', { 'linux', 'posix', 'pc' })
                         env:append('DEFINES', 'MOTOR_PLATFORM=platform_linux')
+                        top_env:append('TOOLCHAINS', env)
                         return 'OK'
                     end)
                 end

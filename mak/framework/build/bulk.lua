@@ -10,8 +10,8 @@ local CXX_FILE_TYPES = {
 }
 
 context:lua_driver('bulk',
-        'magenta',
-        context.path:make_node('drivers/bulk.lua'))
+    'magenta',
+    context.path:make_node('drivers/bulk.lua'))
 
 ---@param generator Module
 ---@param counter number
@@ -23,16 +23,16 @@ local function make_bulk_task(generator, counter, extension)
     target_node = target_node:make_node('src')
     target_node = target_node:make_node(extension .. '-bulk-' .. counter .. '.' .. extension)
     generator:add_source(target_node.parent, target_node)
-    return generator:declare_task('bulk', { }, { target_node })
+    return generator:declare_task('bulk', nil, target_node)
 end
 
 ---@param generator Module
 ---@param source Node
 ---@param path Node
----@param counters number[]
+---@param counters [number, number]
 ---@param bulk_task_c Task|nil
 ---@param bulk_task_cxx Task|nil
----@return Task, Task
+---@return Task?, Task?
 local function process_source(generator, source, path, counters, bulk_task_c, bulk_task_cxx)
     local source_type = source:extension()
     if source_type == 'c' then
@@ -58,7 +58,7 @@ end
 
 ---@param generator Module
 context:feature('module', 'generate_bulk', function(generator)
-    if context.settings.nobulk then
+    if context.settings.nobulk == true then
         return
     end
     if generator:has_property('nobulk') then
@@ -66,7 +66,7 @@ context:feature('module', 'generate_bulk', function(generator)
     end
 
     local sources = generator.source
-    generator.source = { }
+    generator.source = {}
     local bulk_file_c
     local bulk_file_cxx
     local indices = { 0, 0 }
@@ -75,11 +75,12 @@ context:feature('module', 'generate_bulk', function(generator)
         local pattern = source_spec.pattern
         for _, source_node in ipairs(context:search(path, pattern)) do
             if generator.source_filter({ base_path = path, full_path = source_node }, generator.env) then
-                bulk_file_c, bulk_file_cxx = process_source(generator, source_node, path, indices, bulk_file_c, bulk_file_cxx)
+                bulk_file_c, bulk_file_cxx = process_source(generator, source_node, path, indices, bulk_file_c,
+                    bulk_file_cxx)
             end
         end
     end
-    generator.source_patterns = { }
+    generator.source_patterns = {}
     for _, source_spec in ipairs(sources) do
         local path = source_spec.base_path
         local source_node = source_spec.full_path
@@ -87,5 +88,5 @@ context:feature('module', 'generate_bulk', function(generator)
             bulk_file_c, bulk_file_cxx = process_source(generator, source_node, path, indices, bulk_file_c, bulk_file_cxx)
         end
     end
-end)   :set_run_after({ 'process_out_source' })
-       :set_run_before({ 'process_source' })
+end):set_run_after({ 'process_out_source' })
+    :set_run_before({ 'process_source' })

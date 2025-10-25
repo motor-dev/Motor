@@ -13,23 +13,23 @@ local function filter_source(source_file, env)
 
     local platform_set = {}
     local arch_set = {}
-    ---@type string[]
-    local platforms = env.MOTOR_PLATFORMS or {}
-    for _, platform in ipairs(platforms) do
+    local platform_list = env.MOTOR_PLATFORMS or {}
+    ---@cast platform_list string[]
+    for _, platform in ipairs(platform_list) do
         platform_set[platform] = true
     end
-    ---@type string[]
-    local architectures = env.MOTOR_ARCHITECTURES or {}
-    for _, arch in ipairs(architectures) do
+    local architecture_list = env.MOTOR_ARCHITECTURES or {}
+    ---@cast architecture_list string[]
+    for _, arch in ipairs(architecture_list) do
         arch_set[arch] = true
     end
 
     local platforms = node:name():match("-p{(.*)}")
     if platforms then
-        platforms = platforms:split('+')
+        platform_list = platforms:split('+')
         matched = true
         found = false
-        for _, p in ipairs(platforms) do
+        for _, p in ipairs(platform_list) do
             if platform_set[p] then
                 found = true
                 break
@@ -39,10 +39,10 @@ local function filter_source(source_file, env)
     end
     local archs = node:name():match("-a{(.*)}")
     if archs then
-        archs = archs:split('+')
+        architecture_list = archs:split('+')
         matched = true
         found = false
-        for _, a in ipairs(archs) do
+        for _, a in ipairs(architecture_list) do
             if arch_set[a] then
                 found = true
                 break
@@ -55,10 +55,10 @@ local function filter_source(source_file, env)
         node = node.parent
         platforms = node:name():match("^platform{(.*)}$")
         if platforms then
-            platforms = platforms:split('+')
+            platform_list = platforms:split('+')
             matched = true
             found = false
-            for _, p in ipairs(platforms) do
+            for _, p in ipairs(platform_list) do
                 if platform_set[p] then
                     found = true
                     break
@@ -69,10 +69,10 @@ local function filter_source(source_file, env)
 
         archs = node:name():match("^arch{(.*)}$")
         if archs then
-            archs = archs:split('+')
+            architecture_list = archs:split('+')
             matched = true
             found = false
-            for _, a in ipairs(archs) do
+            for _, a in ipairs(architecture_list) do
                 if arch_set[a] then
                     found = true
                     break
@@ -84,11 +84,15 @@ local function filter_source(source_file, env)
     return add, matched
 end
 
+---@param name string
+---@param path Node
+---@return Generator
 local function metagen(name, path)
     local generator = context:get_generator_by_name(name)
     if not generator then
-        local api = string.split(name, '.')
-        api = api[#api]
+        local apis = string.split(name, '.')
+        local api = apis[#apis]
+        assert(api ~= nil, "Invalid module name: " .. name)
         name = name .. '.metagen'
         generator = context:declare_generator(name, { 'metagen' }, context.env, "metagen")
         generator.source = { path:make_node('api'), path:make_node('include') }
@@ -103,24 +107,24 @@ end
 ---@param lib_types [string,string,string]
 local function module(name, path, lib_types)
     local name_components = string.split(name, '.')
-    path = path or string.join('/', name_components)
-    path = context.path:make_node(path)
+    local path_node = context.path:make_node(path or string.join('/', name_components))
     local module_name = name_components[#name_components]
 
     local lib_type = lib_types[1]
-    if context.settings.static then
+    if context.settings.static == true then
         lib_type = lib_types[2]
-    elseif context.settings.dynamic then
+    elseif context.settings.dynamic == true then
         lib_type = lib_types[3]
     end
 
-    local meta_generator = metagen(name, path)
+
+    local meta_generator = metagen(name, path_node)
 
     ---@type ModuleProperties
     local properties = {
         features = { lib_type, 'motor_module' },
         source_patterns = {
-            { path = path, pattern = 'src/**/*' }
+            { path = path_node, pattern = 'src/**/*' }
         },
         source_filter = filter_source,
         internal_defines = {
@@ -138,10 +142,10 @@ local function module(name, path, lib_types)
     }
     local generator = Bolt.Module.module(name, properties)
     generator.meta_generator = meta_generator
-    for _, include in ipairs(context:search(path, 'include', true)) do
+    for _, include in ipairs(context:search(path_node, 'include', true)) do
         generator = generator:add_internal_include(include)
     end
-    for _, include in ipairs(context:search(path, 'api', true)) do
+    for _, include in ipairs(context:search(path_node, 'api', true)) do
         generator = generator:add_public_include(include)
     end
 
@@ -161,14 +165,14 @@ end
 
 ---Generates a C/C++ shared library object.
 ---@param name string name of the library.
----@param namespace string root namespace of meta objects.
+---@param _namespace string root namespace of meta objects.
 ---@param path string? qualified path of the library. Defaults to name.
 function Motor.package(name, _namespace, path)
     local result = module(name, path, { 'shlib', 'objects', 'shlib' })
     return result
 end
 
-local function propagate_building_macro(module, current, seen)
+local function propagate_building_macro(generator, current, seen)
     if seen[current] then
         return
     end
@@ -176,28 +180,28 @@ local function propagate_building_macro(module, current, seen)
     if current:has_all_features({ "objects", "motor_module" }) then
         local name_components = string.split(current.name, '.')
         local module_name = name_components[#name_components]
-        module:add_internal_define('building_' .. module_name, '1')
+        generator:add_internal_define('building_' .. module_name, '1')
         for _, dep in ipairs(current.internal_dependencies) do
-            propagate_building_macro(module, dep, seen)
+            propagate_building_macro(generator, dep, seen)
         end
         for _, dep in ipairs(current.public_dependencies) do
-            propagate_building_macro(module, dep, seen)
+            propagate_building_macro(generator, dep, seen)
         end
     end
 end
 
-context:feature("motor_module", "motor_propagate_building_macro", function(module)
-    for _, dep in ipairs(module.internal_dependencies) do
-        propagate_building_macro(module, dep, {})
+context:feature("motor_module", "motor_propagate_building_macro", function(generator)
+    for _, dep in ipairs(generator.internal_dependencies) do
+        propagate_building_macro(generator, dep, {})
     end
-    for _, dep in ipairs(module.public_dependencies) do
-        propagate_building_macro(module, dep, {})
+    for _, dep in ipairs(generator.public_dependencies) do
+        propagate_building_macro(generator, dep, {})
     end
 end):set_run_before({ 'process_flags' })
 
-local function process_registry(module)
-    for _, metagen in ipairs(module.metagen_generators) do
-        context:post(metagen)
+local function process_registry(generator)
+    for _, metagen_generator in ipairs(generator.metagen_generators) do
+        context:post(metagen_generator)
     end
 end
 
