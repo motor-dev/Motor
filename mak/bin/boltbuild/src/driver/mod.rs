@@ -35,15 +35,17 @@ pub(crate) struct Output {
 pub(crate) struct Driver {
     color: String,
     configuration: DriverConfiguration,
+    pub always_run: bool,
 }
 
 impl Driver {
-    pub(crate) fn from_command(color: String, command: String) -> Self {
+    pub(crate) fn from_command(color: String, command: String, always_run: bool) -> Self {
         Self {
             color,
             configuration: DriverConfiguration::Command(command::CommandDriverConfiguration::new(
                 command,
             )),
+            always_run,
         }
     }
 
@@ -51,19 +53,22 @@ impl Driver {
         color: String,
         command: String,
         dependency_type: String,
+        always_run: bool,
     ) -> Self {
         Self {
             color,
             configuration: DriverConfiguration::DependencyCommand(
                 dependency::DependencyCommandDriverConfiguration::new(command, dependency_type),
             ),
+            always_run,
         }
     }
 
-    pub(crate) fn from_lua_script(color: String, script: Node) -> Self {
+    pub(crate) fn from_lua_script(color: String, script: Node, always_run: bool) -> Self {
         Self {
             color,
             configuration: DriverConfiguration::Lua(lua::LuaDriverConfiguration::new(script)),
+            always_run,
         }
     }
 
@@ -71,6 +76,7 @@ impl Driver {
         Self {
             color,
             configuration: DriverConfiguration::Untar(untar::UntarDriverConfiguration::new()),
+            always_run: false,
         }
     }
 
@@ -78,6 +84,7 @@ impl Driver {
         Self {
             color,
             configuration: DriverConfiguration::Unzip(unzip::UnzipDriverConfiguration::new()),
+            always_run: false,
         }
     }
 
@@ -85,6 +92,7 @@ impl Driver {
         Self {
             color,
             configuration: DriverConfiguration::Patch(patch::PatchDriverConfiguration::new()),
+            always_run: false,
         }
     }
 
@@ -92,6 +100,7 @@ impl Driver {
         Self {
             color,
             configuration: DriverConfiguration::Copy(copy::CopyDriverConfiguration::new()),
+            always_run: false,
         }
     }
 

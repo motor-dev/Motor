@@ -120,7 +120,7 @@ pub(super) fn load_tool(
 pub(super) fn declare_command(
     lua: &Lua,
     this: &mut Context,
-    args: (String, String, LuaValue),
+    args: (String, String, LuaValue, Option<bool>),
 ) -> LuaResult<DeclaredCommand> {
     let mut envs = Vec::new();
     if args.2.is_table() {
@@ -146,7 +146,7 @@ pub(super) fn declare_command(
             "invalid value for environment".to_string(),
         ));
     }
-    let path = this.declare_command(args.0.as_str(), args.1.as_str(), envs)?;
+    let path = this.declare_command(args.0.as_str(), args.1.as_str(), envs, args.3.unwrap_or(false))?;
     Ok(DeclaredCommand { path })
 }
 

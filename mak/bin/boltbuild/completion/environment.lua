@@ -53,4 +53,4 @@ end
 
 --- A value type that can be stored within an environment. Supported types include `nil`, `boolean`, `string`, `number`,
 --- arrays of `EnvironmentValue`, `Node` references and references to other `Environment` instances.
----@alias EnvironmentValue (nil|boolean|string|number|Node|Environment|(nil|boolean|string|number|Node|Environment)[])
+---@alias EnvironmentValue nil|boolean|string|number|Node|Environment|(nil|boolean|string|number|Node|Environment)[]

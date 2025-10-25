@@ -9,19 +9,19 @@ end
 
 ---Represents a running process that was started using `Context:popen`.
 ---The `Process` object enables interaction with the process, such as sending input, waiting for completion, and capturing output.
----@class Process
+---@class (exact) Process
 Process = {}
 
 ---Represents the buffered output of a process, which can include either the standard output or standard error.
 ---Provides methods for accessing the full output or iterating over each line.
----@class ProcessOutput
+---@class (exact) ProcessOutput
+---@operator add(ProcessOutput):ProcessOutput
 ProcessOutput = {}
 
 ---Concatenates outputs from different sources. This can be used to merge outputs from separate processes
 ---or to combine standard output and standard error from the same process.
 ---@param other ProcessOutput The other `ProcessOutput` object to concatenate.
 ---@return ProcessOutput #A new `ProcessOutput` object containing the combined output.
----@operator add(ProcessOutput):ProcessOutput
 function ProcessOutput:__add(other)
 end
 

@@ -30,6 +30,9 @@ impl Command {
         envs: &[Arc<Mutex<OverlayMap>>],
         mut tools: Vec<Node>,
     ) -> std::result::Result<(), String> {
+        if self.spec.always_run {
+            return Err("the command is marked as always_run".to_string());
+        }
         if let Some(output) = &mut self.output {
             let mut tasks = TaskSeq::None;
             if let TaskSeq::Cached(tasks_file) = &output.tasks {

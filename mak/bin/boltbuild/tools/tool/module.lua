@@ -30,7 +30,7 @@ local _
 ---@field flag_groups string[]?
 ---@field source SourceFile[]?
 ---@field source_patterns SourcePattern[]?
----@field source_filter (fun(source_file:SourceFile,env:Environment):[boolean,boolean]) ?
+---@field source_filter (fun(source_file:SourceFile,env:Environment):boolean,boolean) ?
 local _
 
 ---@class Module : Generator
@@ -38,7 +38,7 @@ local _
 ---@field objects Node[]
 ---@field source SourceFile[]
 ---@field source_patterns SourcePattern[]
----@field source_filter fun(source_file:SourceFile,env:Environment):[boolean,boolean]
+---@field source_filter fun(source_file:SourceFile,env:Environment):boolean,boolean
 ---@field internal_includes Node[]
 ---@field public_includes Node[]
 ---@field internal_defines [string,string][]

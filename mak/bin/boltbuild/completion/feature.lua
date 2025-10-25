@@ -12,7 +12,7 @@ function Context:feature(feature, name, callback)
 end
 
 --- Represents a feature in the build system, allowing configuration of its execution order in relation to other features.
----@class Feature
+---@class (exact) Feature
 Feature = {}
 
 --- Specifies steps that must be completed before this feature can execute.

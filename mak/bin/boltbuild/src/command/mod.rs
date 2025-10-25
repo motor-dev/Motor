@@ -35,6 +35,7 @@ pub(crate) struct CommandSpec {
     pub(crate) fs_name: String,
     pub(crate) function: String,
     pub(crate) envs: Vec<usize>,
+    pub(crate) always_run: bool,
 }
 
 #[derive(Serialize, Deserialize)]

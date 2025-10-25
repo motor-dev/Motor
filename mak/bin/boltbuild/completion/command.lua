@@ -22,7 +22,7 @@ end
 --- Represents a command that has been declared within the context.
 --- Commands correspond to distinct build steps (like "configure" or "build") and must be declared before they can be executed.
 --- Command declarations may include chaining, allowing commands to declare additional commands upon execution.
----@class DeclaredCommand
+---@class (exact) DeclaredCommand
 local DeclaredCommand = {}
 
 --- Declares a new build command.
@@ -33,8 +33,9 @@ local DeclaredCommand = {}
 ---@param fun string The function name associated with this command, linked to `Context.fun`.
 ---@param envs Environment|Environment[]? An environment or list of environments that this command will use.
 ---   Derived environments will inherit from these environments for use during command execution.
+---@param always_run boolean? Optional. If set to `true`, the command will always execute, regardless of up-to-date checks. Defaults to `false`.
 ---@return DeclaredCommand #A `DeclaredCommand` object representing the newly declared command, which can be used for chaining.
-function Context:declare_command(name, fun, envs)
+function Context:declare_command(name, fun, envs, always_run)
 end
 
 --- Declares a command that will be formally declared by another command upon its execution.

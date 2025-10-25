@@ -113,7 +113,6 @@ end
 function Bolt.Clang.load_cxx(cxx_flags)
     local env = context.env
     env.CXX = env.CLANG
-    env.LIBS = { 'stdc++' }
     load_clang(env, env.CXX, cxx_flags, 'c++', 'CXX')
 end
 

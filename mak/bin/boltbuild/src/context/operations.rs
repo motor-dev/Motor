@@ -266,6 +266,7 @@ impl Context {
         name: &str,
         function: &str,
         envs: Vec<usize>,
+        always_run: bool,
     ) -> LuaResult<Vec<usize>> {
         match self.commands.entry(name.to_string()) {
             Entry::Occupied(e) => Err(LuaError::RuntimeError(format!(
@@ -280,6 +281,7 @@ impl Context {
                     fs_name: INVALID_CHARS.replace_all(name, "_").to_string(),
                     function: function.to_string(),
                     envs,
+                    always_run,
                 };
                 self.output.commands.push(Command {
                     spec,
@@ -318,6 +320,7 @@ impl Context {
                     fs_name: INVALID_CHARS.replace_all(name, "_").to_string(),
                     function: function.to_string(),
                     envs: Vec::new(),
+                    always_run: false,
                 };
                 if cmd.output.is_none() {
                     cmd.output = Some(CommandOutput {

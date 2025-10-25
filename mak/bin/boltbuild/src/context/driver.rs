@@ -23,10 +23,21 @@ fn is_command_valid(command: &str) -> bool {
 pub(super) fn command_driver(
     _lua: &Lua,
     this: &mut Context,
-    (name, color, command, run_before): (String, String, String, Option<Vec<String>>),
+    (name, color, command, run_before, always_run): (
+        String,
+        String,
+        String,
+        Option<Vec<String>>,
+        Option<bool>,
+    ),
 ) -> LuaResult<()> {
     if is_command_valid(command.as_str()) {
-        insert_driver(this, name, Driver::from_command(color, command), run_before)
+        insert_driver(
+            this,
+            name,
+            Driver::from_command(color, command, always_run.unwrap_or(false)),
+            run_before,
+        )
     } else {
         Err(LuaError::RuntimeError(format!(
             "invalid syntax in command {}",
@@ -38,19 +49,20 @@ pub(super) fn command_driver(
 pub(super) fn dependency_driver(
     _lua: &Lua,
     this: &mut Context,
-    (name, color, command, dep_type, run_before): (
+    (name, color, command, dep_type, run_before, always_run): (
         String,
         String,
         String,
         String,
         Option<Vec<String>>,
+        Option<bool>,
     ),
 ) -> LuaResult<()> {
     if is_command_valid(command.as_str()) {
         insert_driver(
             this,
             name,
-            Driver::from_dependency_command(color, command, dep_type),
+            Driver::from_dependency_command(color, command, dep_type, always_run.unwrap_or(false)),
             run_before,
         )
     } else {
@@ -64,12 +76,18 @@ pub(super) fn dependency_driver(
 pub(super) fn lua_driver(
     _lua: &Lua,
     this: &mut Context,
-    (name, color, script, run_before): (String, String, Node, Option<Vec<String>>),
+    (name, color, script, run_before, always_run): (
+        String,
+        String,
+        Node,
+        Option<Vec<String>>,
+        Option<bool>,
+    ),
 ) -> LuaResult<()> {
     insert_driver(
         this,
         name,
-        Driver::from_lua_script(color, script),
+        Driver::from_lua_script(color, script, always_run.unwrap_or(false)),
         run_before,
     )
 }

@@ -335,35 +335,42 @@ impl<'command> Scheduler<'command> {
                                 (true, "the driver has changed".to_string())
                             }
                             Some(cache) => {
-                                let mut hasher = blake3::Hasher::new();
-                                let env = task.env.lock().unwrap();
-                                env.hash(&cache.environment_dependencies, &mut hasher);
-                                if hasher.finalize() != cache.environment_hash.0 {
-                                    (true, "the environment has been modified".to_string())
+                                if driver.always_run {
+                                    (true, "the driver is configured to always run".to_string())
                                 } else {
-                                    let mut outputs = cache.all_output.iter();
-                                    loop {
-                                        if let Some(output) = outputs.next() {
-                                            if !output.is_file() && !output.is_dir() {
-                                                break (
-                                                    true,
-                                                    format!("output file {} is missing", output),
-                                                );
-                                            }
-                                        } else {
-                                            match hash_output_files(
-                                                &task.outputs,
-                                                dependency_nodes,
-                                                false,
-                                            ) {
-                                                Ok(out_hashes) => {
-                                                    hashes = out_hashes;
+                                    let mut hasher = blake3::Hasher::new();
+                                    let env = task.env.lock().unwrap();
+                                    env.hash(&cache.environment_dependencies, &mut hasher);
+                                    if hasher.finalize() != cache.environment_hash.0 {
+                                        (true, "the environment has been modified".to_string())
+                                    } else {
+                                        let mut outputs = cache.all_output.iter();
+                                        loop {
+                                            if let Some(output) = outputs.next() {
+                                                if !output.is_file() && !output.is_dir() {
                                                     break (
-                                                        false,
-                                                        "the task is up-to-date".to_string(),
+                                                        true,
+                                                        format!(
+                                                            "output file {} is missing",
+                                                            output
+                                                        ),
                                                     );
                                                 }
-                                                Err(error) => break (true, error),
+                                            } else {
+                                                match hash_output_files(
+                                                    &task.outputs,
+                                                    dependency_nodes,
+                                                    false,
+                                                ) {
+                                                    Ok(out_hashes) => {
+                                                        hashes = out_hashes;
+                                                        break (
+                                                            false,
+                                                            "the task is up-to-date".to_string(),
+                                                        );
+                                                    }
+                                                    Err(error) => break (true, error),
+                                                }
                                             }
                                         }
                                     }

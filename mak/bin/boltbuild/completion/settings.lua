@@ -3,7 +3,7 @@
 ---A container for managing command-line options or general settings for a program.
 ---Settings allow values to be configured via command-line arguments, and each setting type can be declared with methods prefixed by `add_*`.
 ---These `add_*` methods are only available during the `init` stage of the tool's lifecycle.
----@class Settings
+---@class (exact) Settings
 ---@field [string] EnvironmentValue Holds environment values mapped to string keys, for storing any program-defined settings.
 ---@field name string The name of the program, used for displaying help and error messages.
 ---@field author string The author of the program, used for displaying help and error messages.
@@ -30,7 +30,7 @@ Settings = {}
 
 ---Represents a command-line option that has been declared within `Settings`.
 ---The option may be of various types, such as a boolean flag, string, integer count, list, or an enumerated choice.
----@class CommandLineOption
+---@class (exact) CommandLineOption
 CommandLineOption = {}
 
 ---Declares a new boolean setting, representing a flag that can be toggled on or off.

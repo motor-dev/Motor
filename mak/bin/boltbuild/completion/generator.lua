@@ -10,6 +10,7 @@
 ---@field group string The build group this generator belongs to. Groups can be shared across different build commands and must be declared using `context:declare_group`.
 ---@field env Environment The default environment. Tasks generated from this generator will inherit this environment unless another is specified.
 ---@field features string[] The list of features associated with this generator. Features are used to control the behavior of the generator and its tasks during the `post` phase.
+---@field [string] any Additional properties can be added to the generator as needed.
 local Generator
 
 --- Declares a new group for organizing task generators, with conditional execution based on a specified condition.
@@ -84,9 +85,9 @@ end
 --- - Inputs and outputs can be further adjusted after task creation.
 ---
 ---@param driver string The name of the driver used for the task (e.g., compiler, linker). The driver must have been declared in the context using one of `lua_driver`, `command_driver` or `dependency_driver`.
----@param inputs Node|Node[]? Initial inputs required for the task. Additional inputs can be added with `Task:add_input`.
----@param outputs Node|Node[]? Initial outputs produced by the task. Additional outputs can be added with `Task:add_output`.
----@param env Environment? The environment to use for this task, overriding the generator’s default environment if specified.
+---@param inputs? (Node[])|Node Initial inputs required for the task. Additional inputs can be added with `Task:add_input`.
+---@param outputs? Node|(Node[]) Initial outputs produced by the task. Additional outputs can be added with `Task:add_output`.
+---@param env? Environment The environment to use for this task, overriding the generator’s default environment if specified.
 ---@return Task #A new task object, ready for configuration and execution.
 function Generator:declare_task(driver, inputs, outputs, env)
 end

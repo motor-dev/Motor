@@ -7,6 +7,7 @@ impl CommandSpec {
             fs_name: "init".to_string(),
             function: "init".to_string(),
             envs: vec![0],
+            always_run: true,
         }
     }
 }
