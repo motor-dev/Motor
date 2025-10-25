@@ -60,7 +60,7 @@ function MotorOptions.add_3rd_party_flag(name)
         :set_long('with-' .. name)
 end
 
-context.env.motor_node = context.path
+context.env.motor_node = context.path.parent.parent.parent
 context.settings.name = 'motor'
 context.settings.author = 'Motor <motor.devel@gmail.com>'
 context.settings.version = '0.1.0'

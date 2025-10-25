@@ -84,10 +84,12 @@ impl UserData for OverlayMap {
                 } else {
                     original_value.push(value);
                 }
-                this.borrow_mut::<Arc<Mutex<OverlayMap>>>()?
-                    .lock()
-                    .unwrap()
-                    .set(key.as_str(), MapValue::Vec(original_value));
+                {
+                    let arc = this.borrow::<Arc<Mutex<OverlayMap>>>()?;
+                    let mut this = arc.lock().unwrap();
+                    this.set(key.as_str(), MapValue::Vec(original_value));
+                    this.sub_envs = sub_envs;
+                }
                 Ok(())
             },
         );

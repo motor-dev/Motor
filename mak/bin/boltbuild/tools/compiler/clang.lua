@@ -49,7 +49,7 @@ local function get_clang_version(defines)
 end
 
 local function load_clang(env, compiler, flags, lang, var)
-    env[var .. 'FLAGS'] = { '-x', lang, '-c', '-fPIC' }
+    env[var .. 'FLAGS'] = { '-x', lang, '-c' }
     env:append(var .. 'FLAGS', flags)
     env[var .. '_COMPILER_NAME'] = 'clang'
     env[var .. '_DEPENDENCY_TYPE'] = 'gnu'
@@ -70,7 +70,6 @@ local function load_clang(env, compiler, flags, lang, var)
     if env.BINARY_FORMAT == 'elf' then
         env:append('LINKFLAGS_shlib', '-Wl,-z,defs')
     end
-
     if not env.LIB then
         paths = { compiler[1].parent, table.unpack(context.settings.path) }
         if env.TRIPLE then
@@ -250,6 +249,62 @@ local function detect_clang_targets(clang, callback, language_flags, global_flag
     return true
 end
 
+
+--- Detects the available targets for a Clang compiler in a specific sysroot.
+--- This function uses the Sysroot environment to set up Clang compilation environments for all targets discovered in the sysroot.
+--- It then loads the compiler in a new environment and calls the specified callback. The callback can end the search by
+--- returning `nil` or `false`; otherwise, the discovery resumes.
+---
+--- @param clang Node
+---   The Clang compiler to be used for the detection.
+--- @param callback fun(env:Environment):(boolean|nil)
+---   A callback function to be executed for each discovered target. The function should return `true` to continue the discovery, or `nil`/`false` to stop.
+--- @param language_flags table<string, string[]>
+---   A table where keys are language names (e.g., 'c', 'c++') and values are arrays of extra flags that the compiler should support for each language.
+--- @param global_flags string[]
+---   An array of additional language-independent flags to be passed to the compiler.
+--- @param sysroot Environment
+---   An environment containing sysroot information, detected by the sysroot tool.
+--- @return boolean
+---   true if the discovery was successful, or `false` if an error occurred.
+local function detect_clang_targets_sysroot(clang, callback, language_flags, global_flags, sysroot)
+    if sysroot.TARGET == 'windows-msvc' then
+        flags = {}
+        for i, flag in ipairs(global_flags) do
+            flags[i] = flag
+        end
+        local target = sysroot.ARCH .. '-pc-windows-msvc'
+        for _, include in ipairs(sysroot.INCLUDES or {}) do
+            table.insert(flags, '-isystem')
+            table.insert(flags, tostring(include:abs_path()))
+        end
+        context:try('running clang ' .. clang:abs_path() .. ' for target ' .. target, function()
+            local env = context:derive()
+            context:with(env, function()
+                context.env.CLANG_CXX_STDCPP_VERSION = 'msvc' .. sysroot.VERSION
+                context.env.TRIPLE = target
+                context.env.CLANG = { clang, '-target', target }
+                context.env:append('CLANG', flags)
+                for lang, flags in pairs(language_flags) do
+                    if languages[lang] then
+                        languages[lang](flags)
+                    else
+                        context:raise_error('clang: unsupported language ' .. lang)
+                    end
+                end
+                context.env:append('LINKFLAGS', { '-fuse-ld=lld' })
+                for _, libpath in ipairs(sysroot.LIBPATHS or {}) do
+                    context.env:append('LINKFLAGS', '-L' .. tostring(libpath:abs_path()))
+                end
+            end)
+            if callback(env) ~= true then
+                return false
+            end
+        end)
+    end
+    return true
+end
+
 --- Discovers available Clang compilers and their targets.
 --- This function searches for Clang compilers in the environment paths and optionally detects the available targets.
 --- It then loads the compiler in a new environment and calls the specified callback. The callback can end the search by
@@ -294,6 +349,11 @@ function Bolt.Clang.discover(callback, language_flags, global_flags, detect_cros
             if detect_cross_targets then
                 if detect_clang_targets(compiler[2], callback, language_flags, global_flags) ~= true then
                     return tostring(compiler[2])
+                end
+                for _, sysroot in ipairs(context.env.SYSROOTS or {}) do
+                    if detect_clang_targets_sysroot(compiler[2], callback, language_flags, global_flags, sysroot) ~= true then
+                        return tostring(compiler[2])
+                    end
                 end
             else
                 context:try('running clang ' .. compiler[2]:abs_path(), function()

@@ -23,9 +23,7 @@ if #compilers then
                         Motor.create_toolchain(env)
                         env:append('MOTOR_PLATFORMS', { 'windows', 'pc' })
                         env:append('DEFINES', 'MOTOR_PLATFORM=platform_windows')
-                        if env.CXX_COMPILER_NAME == 'msvc' then
-                            env:append('DEFINES', '_CRT_SECURE_NO_WARNINGS')
-                        end
+                        env:append('DEFINES', '_CRT_SECURE_NO_WARNINGS')
                         env:append('SYSTEM_INCLUDES',
                             context.env.motor_node:make_node('src/motor/3rdparty/system/win32/api.windows'):abs_path())
                         env:append('LIBS',
